@@ -17,7 +17,7 @@ enum MultiplierMode_
 class _MultiplierWindow : public _AlienWindow
 {
 public:
-    _MultiplierWindow(EditorModel const& editorModel, SimulationController const& simController);
+    _MultiplierWindow(EditorModel const& editorModel, SimulationFacade const& simulationFacade);
 
 private:
     void processIntern() override;
@@ -30,7 +30,7 @@ private:
     void onUndo();
 
     EditorModel _editorModel; 
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
 
     MultiplierMode _mode = MultiplierMode_Grid;
 

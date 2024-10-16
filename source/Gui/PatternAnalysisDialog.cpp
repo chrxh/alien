@@ -10,13 +10,13 @@
 #include "Base/GlobalSettings.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SerializerService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "MessageDialog.h"
 
 
-_PatternAnalysisDialog::_PatternAnalysisDialog(SimulationController const& simController)
-    : _simController(simController)
+_PatternAnalysisDialog::_PatternAnalysisDialog(SimulationFacade const& simulationFacade)
+    : _simulationFacade(simulationFacade)
 {
     auto path = std::filesystem::current_path();
     if (path.has_parent_path()) {
@@ -100,7 +100,7 @@ void _PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string con
 
 auto _PatternAnalysisDialog::calcPartitionData() const -> std::map<ClusterAnalysisDescription, PartitionClassData>
 {
-    auto data = _simController->getClusteredSimulationData();
+    auto data = _simulationFacade->getClusteredSimulationData();
 
     std::map<ClusterAnalysisDescription, PartitionClassData> result;
 

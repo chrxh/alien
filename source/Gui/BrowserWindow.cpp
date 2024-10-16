@@ -20,7 +20,7 @@
 #include "Base/VersionChecker.h"
 #include "EngineInterface/GenomeDescriptionService.h"
 #include "EngineInterface/SerializerService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "Network/NetworkResourceService.h"
 #include "Network/NetworkService.h"
 #include "Network/NetworkResourceParserService.h"
@@ -61,13 +61,13 @@ namespace
 }
 
 _BrowserWindow::_BrowserWindow(
-    SimulationController const& simController,
+    SimulationFacade const& simulationFacade,
     PersisterFacade const& persisterFacade,
      StatisticsWindow const& statisticsWindow,
     TemporalControlWindow const& temporalControlWindow,
     EditorController const& editorController)
     : _AlienWindow("Browser", "windows.browser", true)
-    , _simController(simController)
+    , _simulationFacade(simulationFacade)
     , _persisterFacade(persisterFacade)
     , _statisticsWindow(statisticsWindow)
     , _temporalControlWindow(temporalControlWindow)

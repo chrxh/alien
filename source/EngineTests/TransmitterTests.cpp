@@ -2,7 +2,7 @@
 
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 #include "EngineInterface/GenomeDescriptionService.h"
 #include "EngineInterface/GenomeDescriptions.h"
@@ -52,10 +52,10 @@ TEST_F(TransmitterTests, distributeToOtherTransmitter)
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
 
     auto origTransmitterCell1 = getCell(data, 1);
     auto actualTransmitterCell1 = getCell(actualData, 1);
@@ -100,10 +100,10 @@ TEST_F(TransmitterTests, distributeToOneOtherTransmitter_forwardActivity)
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
 
     auto origTransmitterCell1 = getCell(data, 1);
     auto actualTransmitterCell1 = getCell(actualData, 1);
@@ -146,10 +146,10 @@ TEST_F(TransmitterTests, distributeToConnectedCells)
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
 
     auto origTransmitterCell1 = getCell(data, 1);
     auto actualTransmitterCell1 = getCell(actualData, 1);
@@ -186,10 +186,10 @@ TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
 
     auto origTransmitterCell = getCell(data, 1);
     auto actualTransmitterCell = getCell(actualData, 1);
@@ -231,10 +231,10 @@ TEST_F(TransmitterTests, distributeOnlyToActiveConstructors)
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
 
     auto origTransmitterCell = getCell(data, 1);
     auto actualTransmitterCell = getCell(actualData, 1);
@@ -269,10 +269,10 @@ TEST_F(TransmitterTests, distributeToTwoTransmittersWithDifferentColor)
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
 
     auto origTransmitterCell = getCell(data, 1);
     auto actualTransmitterCell = getCell(actualData, 1);
@@ -286,5 +286,187 @@ TEST_F(TransmitterTests, distributeToTwoTransmittersWithDifferentColor)
     EXPECT_TRUE(actualTransmitterCell.energy < origTransmitterCell.energy - NEAR_ZERO);
     EXPECT_TRUE(actualOtherTransmitterCell1.energy > origOtherTransmitterCell2.energy + NEAR_ZERO);
     EXPECT_TRUE(actualOtherTransmitterCell2.energy > origOtherTransmitterCell2.energy + NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(TransmitterTests, distributeNotToNotReadyConstructors)
+{
+    _parameters.cellFunctionConstructorCheckCompletenessForSelfReplication = true;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto subgenome = GenomeDescription().setCells({CellGenomeDescription()});
+
+    auto genome = GenomeDescription().setCells({
+        CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()),
+        CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()),
+        CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(GenomeDescriptionService::convertDescriptionToBytes(subgenome))),
+    });
+
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({9.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(ConstructorDescription().setNumInheritedGenomeNodes(4).setGenome(GenomeDescriptionService::convertDescriptionToBytes(genome))),
+        CellDescription()
+            .setId(2)
+            .setPos({10.0f, 10.0f})
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(1)
+            .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
+            .setEnergy(_parameters.cellNormalEnergy[0] * 2),
+        CellDescription()
+            .setId(3)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(ConstructorDescription().setGenome(GenomeDescriptionService::convertDescriptionToBytes(subgenome))),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(2);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto origReplicator = getCell(data, 1);
+    auto actualReplicator = getCell(actualData, 1);
+
+    auto origTransmitter = getCell(data, 2);
+    auto actualTransmitter = getCell(actualData, 2);
+
+    auto origConstructor = getCell(data, 3);
+    auto actualConstructor = getCell(actualData, 3);
+
+    EXPECT_TRUE(actualTransmitter.energy < origTransmitter.energy - NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(actualReplicator.energy, origReplicator.energy));
+    EXPECT_TRUE(actualConstructor.energy > origConstructor.energy + NEAR_ZERO);
+
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(TransmitterTests, distributeToReadyConstructors)
+{
+    _parameters.cellFunctionConstructorCheckCompletenessForSelfReplication = true;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto subgenome = GenomeDescription().setCells({CellGenomeDescription()});
+
+    auto genome = GenomeDescription().setCells({
+        CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()),
+        CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()),
+        CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(GenomeDescriptionService::convertDescriptionToBytes(subgenome))),
+    });
+
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({9.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(ConstructorDescription().setNumInheritedGenomeNodes(4).setGenome(GenomeDescriptionService::convertDescriptionToBytes(genome))),
+        CellDescription()
+            .setId(2)
+            .setPos({10.0f, 10.0f})
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(1)
+            .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
+            .setEnergy(_parameters.cellNormalEnergy[0] * 2),
+        CellDescription()
+            .setId(3)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(ConstructorDescription().setGenome(GenomeDescriptionService::convertDescriptionToBytes(subgenome))),
+        CellDescription()
+            .setId(4)
+            .setPos({12.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(0),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+    data.addConnection(3, 4);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(2);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto origReplicator = getCell(data, 1);
+    auto actualReplicator = getCell(actualData, 1);
+
+    auto origTransmitter = getCell(data, 2);
+    auto actualTransmitter = getCell(actualData, 2);
+
+    auto origConstructor = getCell(data, 3);
+    auto actualConstructor = getCell(actualData, 3);
+
+    EXPECT_TRUE(actualTransmitter.energy < origTransmitter.energy - NEAR_ZERO);
+    EXPECT_TRUE(actualReplicator.energy > origReplicator.energy + NEAR_ZERO);
+    EXPECT_TRUE(actualConstructor.energy > origConstructor.energy + NEAR_ZERO);
+
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(TransmitterTests, distributeFromNotReadyToReadyConstructors)
+{
+    _parameters.cellFunctionConstructorCheckCompletenessForSelfReplication = true;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto subgenome = GenomeDescription().setCells({CellGenomeDescription()});
+
+    auto genome = GenomeDescription().setCells({
+        CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()),
+        CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()),
+        CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(GenomeDescriptionService::convertDescriptionToBytes(subgenome))),
+    });
+
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .setId(1)
+            .setPos({9.0f, 10.0f})
+            .setMaxConnections(1)
+            .setExecutionOrderNumber(0)
+            .setEnergy(_parameters.cellNormalEnergy[0] * 2)
+            .setCellFunction(ConstructorDescription().setNumInheritedGenomeNodes(4).setGenome(GenomeDescriptionService::convertDescriptionToBytes(genome))),
+        CellDescription()
+            .setId(2)
+            .setPos({10.0f, 10.0f})
+            .setMaxConnections(2),
+        CellDescription()
+            .setId(3)
+            .setPos({11.0f, 10.0f})
+            .setMaxConnections(2)
+            .setExecutionOrderNumber(0)
+            .setCellFunction(ConstructorDescription().setGenome(GenomeDescriptionService::convertDescriptionToBytes(subgenome))),
+        CellDescription().setId(4).setPos({12.0f, 10.0f}).setMaxConnections(1).setExecutionOrderNumber(0),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(7);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto origReplicator = getCell(data, 1);
+    auto actualReplicator = getCell(actualData, 1);
+
+    auto origOtherCell = getCell(data, 2);
+    auto actualOtherCell = getCell(actualData, 2);
+
+    auto origConstructor = getCell(data, 3);
+    auto actualConstructor = getCell(actualData, 3);
+
+    EXPECT_TRUE(actualReplicator.energy < origReplicator.energy - NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(actualOtherCell.energy, origOtherCell.energy));
+    EXPECT_TRUE(actualConstructor.energy > origConstructor.energy + NEAR_ZERO);
+
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }

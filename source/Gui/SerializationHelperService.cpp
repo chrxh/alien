@@ -1,19 +1,19 @@
 #include "SerializationHelperService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "Viewport.h"
 
 
-DeserializedSimulation SerializationHelperService::getDeserializedSerialization(SimulationController const& simController)
+DeserializedSimulation SerializationHelperService::getDeserializedSerialization(SimulationFacade const& simulationFacade)
 {
     DeserializedSimulation result;
-    result.auxiliaryData.timestep = static_cast<uint32_t>(simController->getCurrentTimestep());
-    result.auxiliaryData.realTime = simController->getRealTime();
+    result.auxiliaryData.timestep = static_cast<uint32_t>(simulationFacade->getCurrentTimestep());
+    result.auxiliaryData.realTime = simulationFacade->getRealTime();
     result.auxiliaryData.zoom = Viewport::getZoomFactor();
     result.auxiliaryData.center = Viewport::getCenterInWorldPos();
-    result.auxiliaryData.generalSettings = simController->getGeneralSettings();
-    result.auxiliaryData.simulationParameters = simController->getSimulationParameters();
-    result.statistics = simController->getStatisticsHistory().getCopiedData();
-    result.mainData = simController->getClusteredSimulationData();
+    result.auxiliaryData.generalSettings = simulationFacade->getGeneralSettings();
+    result.auxiliaryData.simulationParameters = simulationFacade->getSimulationParameters();
+    result.statistics = simulationFacade->getStatisticsHistory().getCopiedData();
+    result.mainData = simulationFacade->getClusteredSimulationData();
     return result;
 }

@@ -10,7 +10,7 @@
 class _SimulationView
 {
 public:
-    _SimulationView(SimulationController const& simController);
+    _SimulationView(SimulationFacade const& simulationFacade);
     ~_SimulationView();
 
     void resize(IntVector2D const& viewportSize);
@@ -61,5 +61,5 @@ private:
     float _contrast = DefaultContrast;
     float _motionBlur = DefaultMotionBlur;
 
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
 };

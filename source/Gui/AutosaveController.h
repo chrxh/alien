@@ -8,7 +8,7 @@
 class _AutosaveController
 {
 public:
-    _AutosaveController(SimulationController const& simController);
+    _AutosaveController(SimulationFacade const& simulationFacade);
     ~_AutosaveController();
 
     void shutdown();
@@ -21,7 +21,7 @@ public:
 private:
     void onSave();
 
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
 
     bool _on = true;
     std::optional<std::chrono::steady_clock::time_point> _startTimePoint;

@@ -15,7 +15,7 @@
 class _PersisterWorker
 {
 public:
-    _PersisterWorker(SimulationController const& simController);
+    _PersisterWorker(SimulationFacade const& simulationFacade);
 
     void runThreadLoop();
     void shutdown();
@@ -44,7 +44,7 @@ private:
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, GetUserNamesForEmojiRequest const& request);
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, DeleteNetworkResourceRequest const& request);
 
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
 
     std::atomic<bool> _isShutdown{false};
 

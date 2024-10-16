@@ -3,7 +3,7 @@
 
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
 class MuscleTests : public IntegrationTestFramework
@@ -48,10 +48,10 @@ TEST_F(MuscleTests, doNothing)
              .setActivity({0, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
     auto actualNerveCell = getCell(actualData, 2);
 
@@ -67,7 +67,7 @@ TEST_F(MuscleTests, doNothing)
 TEST_F(MuscleTests, moveForward)
 {
     _parameters.cellFunctionMuscleMovementTowardTargetedObject = false;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
 
     DataDescription data;
     data.addCells(
@@ -87,10 +87,10 @@ TEST_F(MuscleTests, moveForward)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
     auto actualNerveCell = getCell(actualData, 2);
 
@@ -106,7 +106,7 @@ TEST_F(MuscleTests, moveForward)
 TEST_F(MuscleTests, moveBackward)
 {
     _parameters.cellFunctionMuscleMovementTowardTargetedObject = false;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
 
     DataDescription data;
     data.addCells(
@@ -126,10 +126,10 @@ TEST_F(MuscleTests, moveBackward)
              .setActivity({-1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
     auto actualNerveCell = getCell(actualData, 2);
 
@@ -144,7 +144,7 @@ TEST_F(MuscleTests, moveBackward)
 TEST_F(MuscleTests, multipleMovementDirections)
 {
     _parameters.cellFunctionMuscleMovementTowardTargetedObject = false;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
 
     DataDescription data;
     data.addCells({
@@ -173,10 +173,10 @@ TEST_F(MuscleTests, multipleMovementDirections)
     data.addConnection(1, 2);
     data.addConnection(1, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(2.0f, actualMuscleCell.activity.channels[0]));
@@ -206,10 +206,10 @@ TEST_F(MuscleTests, expansion)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
     auto actualNerveCell = getCell(actualData, 2);
 
@@ -243,10 +243,10 @@ TEST_F(MuscleTests, expansionNotPossible)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
     auto actualNerveCell = getCell(actualData, 2);
 
@@ -276,10 +276,10 @@ TEST_F(MuscleTests, contraction)
              .setActivity({-1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
     auto actualNerveCell = getCell(actualData, 2);
 
@@ -319,10 +319,10 @@ TEST_F(MuscleTests, multipleContraction)
     data.addConnection(1, 2);
     data.addConnection(1, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
     auto muscleToNerveConnection1 = getConnection(actualData, 1, 2);
     auto muscleToNerveConnection2 = getConnection(actualData, 1, 3);
@@ -354,10 +354,10 @@ TEST_F(MuscleTests, contractionNotPossible)
              .setActivity({-1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
     auto actualNerveCell = getCell(actualData, 2);
 
@@ -388,10 +388,10 @@ TEST_F(MuscleTests, bendClockwise)
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 2);
     auto actualNerveCell = getCell(actualData, 3);
     auto connection1 = getConnection(actualData, 2, 3);
@@ -429,10 +429,10 @@ TEST_F(MuscleTests, bendCounterClockwise)
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 2);
     auto actualNerveCell = getCell(actualData, 3);
     auto connection1 = getConnection(actualData, 2, 3);

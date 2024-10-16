@@ -2,7 +2,7 @@
 
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
 class SensorTests : public IntegrationTestFramework
@@ -45,10 +45,10 @@ TEST_F(SensorTests, scanNeighborhood_noActivity)
              .setActivity({0, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
     EXPECT_EQ(2, actualData.cells.size());
@@ -75,10 +75,10 @@ TEST_F(SensorTests, scanNeighborhood_noOtherCell)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.activity.channels[0]));
@@ -106,10 +106,10 @@ TEST_F(SensorTests, scanNeighborhood_densityTooLow)
 
     data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(10).height(10).cellDistance(2.5f)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.activity.channels[0]));
@@ -137,10 +137,10 @@ TEST_F(SensorTests, scanNeighborhood_wrongColor)
 
     data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(10).height(10).cellDistance(2.5f)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.activity.channels[0]));
@@ -168,10 +168,10 @@ TEST_F(SensorTests, scanNeighborhood_foundAtFront)
 
     data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.activity.channels[0]));
@@ -185,7 +185,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtFront)
 TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
 {
     _parameters.cellFunctionMuscleMovementTowardTargetedObject = false;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
 
     DataDescription data;
     data.addCells(
@@ -207,10 +207,10 @@ TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
 
     data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(0.5f)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
@@ -224,7 +224,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
 TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
 {
     _parameters.cellFunctionMuscleMovementTowardTargetedObject = false;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
 
     DataDescription data;
     data.addCells(
@@ -246,10 +246,10 @@ TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
 
     data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
@@ -263,7 +263,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
 TEST_F(SensorTests, scanNeighborhood_foundAtBack)
 {
     _parameters.cellFunctionMuscleMovementTowardTargetedObject = false;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
 
     DataDescription data;
     data.addCells(
@@ -285,10 +285,10 @@ TEST_F(SensorTests, scanNeighborhood_foundAtBack)
 
     data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({190.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
@@ -302,7 +302,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtBack)
 TEST_F(SensorTests, scanNeighborhood_twoMasses)
 {
     _parameters.cellFunctionMuscleMovementTowardTargetedObject = false;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
 
     DataDescription data;
     data.addCells(
@@ -325,10 +325,10 @@ TEST_F(SensorTests, scanNeighborhood_twoMasses)
     data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(0.8f)));
     data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 200.0f}).width(16).height(16).cellDistance(0.5f)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
@@ -361,10 +361,10 @@ TEST_F(SensorTests, scanByAngle_found)
 
     data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.activity.channels[0]));
@@ -395,10 +395,10 @@ TEST_F(SensorTests, scanByAngle_wrongAngle)
 
     data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.activity.channels[0]));
@@ -408,7 +408,7 @@ TEST_F(SensorTests, scanByAngle_wrongAngle)
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found)
 {
     _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
         {CellDescription()
@@ -432,10 +432,10 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found)
     data.add(DescriptionEditService::createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(7)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.activity.channels[0]));
@@ -449,7 +449,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found)
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found_wallBehind)
 {
     _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
         {CellDescription()
@@ -476,10 +476,10 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found_wallBehi
     data.add(DescriptionEditService::createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(7)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.activity.channels[0]));
@@ -488,7 +488,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found_wallBehi
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound)
 {
     _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
         {CellDescription()
@@ -512,10 +512,10 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound)
     data.add(DescriptionEditService::createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(7)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.activity.channels[0]));
@@ -524,7 +524,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound)
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound_wallInBetween)
 {
     _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
         {CellDescription()
@@ -551,10 +551,10 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound_wallI
     data.add(DescriptionEditService::createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(7)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.activity.channels[0]));
@@ -563,7 +563,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound_wallI
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_found)
 {
     _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
         {CellDescription()
@@ -587,10 +587,10 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_found)
     data.add(DescriptionEditService::createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(6)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.activity.channels[0]));
@@ -599,7 +599,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_found)
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_notFound)
 {
     _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
 
     auto const MutantId = 6;
     for (int otherMutantId = 0; otherMutantId < 100; ++otherMutantId) {
@@ -629,12 +629,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_notFound)
         data.add(DescriptionEditService::createRect(
             DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(otherMutantId)));
 
-        _simController->clear();
-        _simController->setCurrentTimestep(0ull);
-        _simController->setSimulationData(data);
-        _simController->calcTimesteps(1);
+        _simulationFacade->clear();
+        _simulationFacade->setCurrentTimestep(0ull);
+        _simulationFacade->setSimulationData(data);
+        _simulationFacade->calcTimesteps(1);
 
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
         EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.activity.channels[0]));
@@ -644,7 +644,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_notFound)
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_found)
 {
     _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
         {CellDescription()
@@ -668,10 +668,10 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_found)
     data.add(DescriptionEditService::createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(0)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.activity.channels[0]));
@@ -680,7 +680,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_found)
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_notFound)
 {
     _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
         {CellDescription()
@@ -704,10 +704,10 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_notFound)
     data.add(DescriptionEditService::createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(1)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.activity.channels[0]));
@@ -716,7 +716,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_notFound)
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_found)
 {
     _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
         {CellDescription()
@@ -740,10 +740,10 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_found)
     data.add(DescriptionEditService::createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(1)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.activity.channels[0]));
@@ -752,7 +752,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_found)
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_notFound)
 {
     _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
         {CellDescription()
@@ -776,10 +776,10 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_notFound)
     data.add(DescriptionEditService::createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(0)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.activity.channels[0]));
@@ -788,7 +788,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_notFound)
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_found)
 {
     _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
 
     for (int otherGenomeComplexity = 0; otherGenomeComplexity < 500; ++otherGenomeComplexity) {
         DataDescription data;
@@ -820,12 +820,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_found)
                                                         .mutationId(6)
                                                         .genomeComplexity(toFloat(otherGenomeComplexity))));
 
-        _simController->clear();
-        _simController->setCurrentTimestep(0ull);
-        _simController->setSimulationData(data);
-        _simController->calcTimesteps(1);
+        _simulationFacade->clear();
+        _simulationFacade->setCurrentTimestep(0ull);
+        _simulationFacade->setSimulationData(data);
+        _simulationFacade->calcTimesteps(1);
 
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
         EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.activity.channels[0]));
@@ -835,7 +835,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_found)
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound_otherMutant)
 {
     _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
 
     for (int otherGenomeComplexity = 1000; otherGenomeComplexity < 2001; ++otherGenomeComplexity) {
         DataDescription data;
@@ -867,12 +867,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
                                                         .mutationId(6)
                                                         .genomeComplexity(toFloat(otherGenomeComplexity))));
 
-        _simController->clear();
-        _simController->setCurrentTimestep(0ull);
-        _simController->setSimulationData(data);
-        _simController->calcTimesteps(1);
+        _simulationFacade->clear();
+        _simulationFacade->setCurrentTimestep(0ull);
+        _simulationFacade->setSimulationData(data);
+        _simulationFacade->calcTimesteps(1);
 
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
         EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.activity.channels[0]));
@@ -882,7 +882,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound_zeroMutant)
 {
     _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
         {CellDescription()
@@ -907,10 +907,10 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
     data.add(DescriptionEditService::createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(0).genomeComplexity(100.0f)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.activity.channels[0]));
@@ -919,7 +919,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound_respawnedCell)
 {
     _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
         {CellDescription()
@@ -944,10 +944,10 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
     data.add(DescriptionEditService::createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(1).genomeComplexity(100.0f)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.activity.channels[0]));
@@ -956,7 +956,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_found)
 {
     _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
 
     for (int otherGenomeComplexity = 1000; otherGenomeComplexity < 2001; ++otherGenomeComplexity) {
         DataDescription data;
@@ -988,12 +988,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_found)
                                                         .mutationId(6)
                                                         .genomeComplexity(toFloat(otherGenomeComplexity))));
 
-        _simController->clear();
-        _simController->setCurrentTimestep(0ull);
-        _simController->setSimulationData(data);
-        _simController->calcTimesteps(1);
+        _simulationFacade->clear();
+        _simulationFacade->setCurrentTimestep(0ull);
+        _simulationFacade->setSimulationData(data);
+        _simulationFacade->calcTimesteps(1);
 
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
         EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.activity.channels[0]));
@@ -1003,7 +1003,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_found)
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound_otherMutant)
 {
     _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
 
     for (int otherGenomeComplexity = 0; otherGenomeComplexity < 500; ++otherGenomeComplexity) {
         DataDescription data;
@@ -1035,12 +1035,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
                                                         .mutationId(6)
                                                         .genomeComplexity(toFloat(otherGenomeComplexity))));
 
-        _simController->clear();
-        _simController->setCurrentTimestep(0ull);
-        _simController->setSimulationData(data);
-        _simController->calcTimesteps(1);
+        _simulationFacade->clear();
+        _simulationFacade->setCurrentTimestep(0ull);
+        _simulationFacade->setSimulationData(data);
+        _simulationFacade->calcTimesteps(1);
 
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
         EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.activity.channels[0]));
@@ -1050,7 +1050,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound_zeroMutant)
 {
     _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
         {CellDescription()
@@ -1075,10 +1075,10 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
     data.add(DescriptionEditService::createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(0).genomeComplexity(1000.0f)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.activity.channels[0]));
@@ -1087,7 +1087,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound_respawnedCell)
 {
     _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
-    _simController->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
         {CellDescription()
@@ -1112,10 +1112,10 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
     data.add(DescriptionEditService::createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(1).genomeComplexity(1000.0f)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.activity.channels[0]));
@@ -1144,10 +1144,10 @@ TEST_F(SensorTests, scanNeighborhood_minRange_found)
     data.add(
         DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.activity.channels[0]));
@@ -1176,10 +1176,10 @@ TEST_F(SensorTests, scanNeighborhood_minRange_notFound)
     data.add(
         DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.activity.channels[0]));
@@ -1208,10 +1208,10 @@ TEST_F(SensorTests, scanNeighborhood_maxRange_found)
     data.add(
         DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.activity.channels[0]));
@@ -1240,10 +1240,10 @@ TEST_F(SensorTests, scanNeighborhood_maxRange_notFound)
     data.add(
         DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.activity.channels[0]));

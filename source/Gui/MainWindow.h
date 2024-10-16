@@ -9,7 +9,7 @@
 class _MainWindow
 {
 public:
-    _MainWindow(SimulationController const& simController, PersisterFacade const& persisterFacade, GuiLogger const& logger);
+    _MainWindow(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade, GuiLogger const& logger);
     void mainLoop();
     void shutdown();
 
@@ -71,7 +71,7 @@ private:
     ImageToPatternDialog _imageToPatternDialog;
 
     PersisterFacade _persisterFacade;
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
     SimulationInteractionController _simInteractionController;
     StartupController _startupController;
     AutosaveController _autosaveController; 

@@ -8,12 +8,12 @@
 #include "Base/LoggingService.h"
 #include "EngineInterface/GenomeDescriptionService.h"
 #include "EngineInterface/SerializerService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "Gui/SerializationHelperService.h"
 #include "Network/NetworkService.h"
 
-_PersisterWorker::_PersisterWorker(SimulationController const& simController)
-    : _simController(simController)
+_PersisterWorker::_PersisterWorker(SimulationFacade const& simulationFacade)
+    : _simulationFacade(simulationFacade)
 {
 }
 
@@ -197,16 +197,16 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveSi
     std::string simulationName;
     std::chrono::system_clock::time_point timePoint;
     try {
-        simulationName = _simController->getSimulationName();
+        simulationName = _simulationFacade->getSimulationName();
         timePoint = std::chrono::system_clock::now();
-        deserializedData.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
-        deserializedData.auxiliaryData.realTime = _simController->getRealTime();
+        deserializedData.auxiliaryData.timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
+        deserializedData.auxiliaryData.realTime = _simulationFacade->getRealTime();
         deserializedData.auxiliaryData.zoom = requestData.zoom;
         deserializedData.auxiliaryData.center = requestData.center;
-        deserializedData.auxiliaryData.generalSettings = _simController->getGeneralSettings();
-        deserializedData.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
-        deserializedData.statistics = _simController->getStatisticsHistory().getCopiedData();
-        deserializedData.mainData = _simController->getClusteredSimulationData();
+        deserializedData.auxiliaryData.generalSettings = _simulationFacade->getGeneralSettings();
+        deserializedData.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
+        deserializedData.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
+        deserializedData.mainData = _simulationFacade->getClusteredSimulationData();
     } catch (...) {
         return std::make_shared<_PersisterRequestError>(
             request->getRequestId(),
@@ -373,14 +373,14 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     if (resourceType == NetworkResourceType_Simulation) {
         try {
             auto simulationData = std::get<UploadNetworkResourceRequestData::SimulationData>(requestData.data);
-            deserializedSim.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
-            deserializedSim.auxiliaryData.realTime = _simController->getRealTime();
+            deserializedSim.auxiliaryData.timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
+            deserializedSim.auxiliaryData.realTime = _simulationFacade->getRealTime();
             deserializedSim.auxiliaryData.zoom = simulationData.zoom;
             deserializedSim.auxiliaryData.center = simulationData.center;
-            deserializedSim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
-            deserializedSim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
-            deserializedSim.statistics = _simController->getStatisticsHistory().getCopiedData();
-            deserializedSim.mainData = _simController->getClusteredSimulationData();
+            deserializedSim.auxiliaryData.generalSettings = _simulationFacade->getGeneralSettings();
+            deserializedSim.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
+            deserializedSim.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
+            deserializedSim.mainData = _simulationFacade->getClusteredSimulationData();
         } catch (...) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(),
@@ -463,14 +463,14 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     if (resourceType == NetworkResourceType_Simulation) {
         try {
             auto simulationData = std::get<ReplaceNetworkResourceRequestData::SimulationData>(requestData.data);
-            deserializedSim.auxiliaryData.timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
-            deserializedSim.auxiliaryData.realTime = _simController->getRealTime();
+            deserializedSim.auxiliaryData.timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
+            deserializedSim.auxiliaryData.realTime = _simulationFacade->getRealTime();
             deserializedSim.auxiliaryData.zoom = simulationData.zoom;
             deserializedSim.auxiliaryData.center = simulationData.center;
-            deserializedSim.auxiliaryData.generalSettings = _simController->getGeneralSettings();
-            deserializedSim.auxiliaryData.simulationParameters = _simController->getSimulationParameters();
-            deserializedSim.statistics = _simController->getStatisticsHistory().getCopiedData();
-            deserializedSim.mainData = _simController->getClusteredSimulationData();
+            deserializedSim.auxiliaryData.generalSettings = _simulationFacade->getGeneralSettings();
+            deserializedSim.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
+            deserializedSim.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
+            deserializedSim.mainData = _simulationFacade->getClusteredSimulationData();
         } catch (...) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(),

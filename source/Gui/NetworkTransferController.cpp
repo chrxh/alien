@@ -1,7 +1,7 @@
 #include "NetworkTransferController.h"
 
 #include "Base/VersionChecker.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "PersisterInterface/TaskProcessor.h"
 
 #include "MessageDialog.h"
@@ -13,13 +13,13 @@
 #include "OverlayMessageController.h"
 
 void NetworkTransferController::init(
-    SimulationController const& simController,
+    SimulationFacade const& simulationFacade,
     PersisterFacade const& persisterFacade,
     TemporalControlWindow const& temporalControlWindow,
     EditorController const& editorController,
     BrowserWindow const& browserWindow)
 {
-    _simController = simController;
+    _simulationFacade = simulationFacade;
     _persisterFacade = persisterFacade;
     _temporalControlWindow = temporalControlWindow;
     _editorController = editorController;
@@ -44,18 +44,18 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
 
             if (data.resourceType == NetworkResourceType_Simulation) {
                 _persisterFacade->shutdown();
-                _simController->closeSimulation();
+                _simulationFacade->closeSimulation();
                 std::optional<std::string> errorMessage;
                 auto const& deserializedSimulation = std::get<DeserializedSimulation>(data.resourceData);
                 try {
-                    _simController->newSimulation(
+                    _simulationFacade->newSimulation(
                         data.resourceName,
                         deserializedSimulation.auxiliaryData.timestep,
                         deserializedSimulation.auxiliaryData.generalSettings,
                         deserializedSimulation.auxiliaryData.simulationParameters);
-                    _simController->setRealTime(deserializedSimulation.auxiliaryData.realTime);
-                    _simController->setClusteredSimulationData(deserializedSimulation.mainData);
-                    _simController->setStatisticsHistory(deserializedSimulation.statistics);
+                    _simulationFacade->setRealTime(deserializedSimulation.auxiliaryData.realTime);
+                    _simulationFacade->setClusteredSimulationData(deserializedSimulation.mainData);
+                    _simulationFacade->setStatisticsHistory(deserializedSimulation.statistics);
                 } catch (CudaMemoryAllocationException const& exception) {
                     errorMessage = exception.what();
                 } catch (...) {
@@ -63,8 +63,8 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                 }
                 if (errorMessage) {
                     showMessage("Error", *errorMessage);
-                    _simController->closeSimulation();
-                    _simController->newSimulation(
+                    _simulationFacade->closeSimulation();
+                    _simulationFacade->newSimulation(
                         data.resourceName,
                         deserializedSimulation.auxiliaryData.timestep,
                         deserializedSimulation.auxiliaryData.generalSettings,

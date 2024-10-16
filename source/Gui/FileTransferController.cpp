@@ -2,7 +2,7 @@
 
 #include <ImFileDialog.h>
 
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "PersisterInterface/TaskProcessor.h"
 #include "GenericFileDialogs.h"
 #include "MessageDialog.h"
@@ -17,11 +17,11 @@ namespace
 
 void FileTransferController::init(
     PersisterFacade const& persisterFacade,
-    SimulationController const& simController,
+    SimulationFacade const& simulationFacade,
     TemporalControlWindow const& temporalControlWindow)
 {
     _persisterFacade = persisterFacade;
-    _simController = simController;
+    _simulationFacade = simulationFacade;
     _temporalControlWindow = temporalControlWindow;
     _openSimulationProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
 }
@@ -46,18 +46,18 @@ void FileTransferController::onOpenSimulation()
                 auto const& data = _persisterFacade->fetchReadSimulationData(requestId);
                 _persisterFacade->shutdown();
 
-                _simController->closeSimulation();
+                _simulationFacade->closeSimulation();
 
                 std::optional<std::string> errorMessage;
                 try {
-                    _simController->newSimulation(
+                    _simulationFacade->newSimulation(
                         data.simulationName,
                         data.deserializedSimulation.auxiliaryData.timestep,
                         data.deserializedSimulation.auxiliaryData.generalSettings,
                         data.deserializedSimulation.auxiliaryData.simulationParameters);
-                    _simController->setClusteredSimulationData(data.deserializedSimulation.mainData);
-                    _simController->setStatisticsHistory(data.deserializedSimulation.statistics);
-                    _simController->setRealTime(data.deserializedSimulation.auxiliaryData.realTime);
+                    _simulationFacade->setClusteredSimulationData(data.deserializedSimulation.mainData);
+                    _simulationFacade->setStatisticsHistory(data.deserializedSimulation.statistics);
+                    _simulationFacade->setRealTime(data.deserializedSimulation.auxiliaryData.realTime);
                 } catch (CudaMemoryAllocationException const& exception) {
                     errorMessage = exception.what();
                 } catch (...) {
@@ -66,8 +66,8 @@ void FileTransferController::onOpenSimulation()
 
                 if (errorMessage) {
                     showMessage("Error", *errorMessage);
-                    _simController->closeSimulation();
-                    _simController->newSimulation(
+                    _simulationFacade->closeSimulation();
+                    _simulationFacade->newSimulation(
                         std::nullopt,
                         data.deserializedSimulation.auxiliaryData.timestep,
                         data.deserializedSimulation.auxiliaryData.generalSettings,

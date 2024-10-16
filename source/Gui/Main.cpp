@@ -5,7 +5,7 @@
 #include "Base/LoggingService.h"
 #include "Base/FileLogger.h"
 #include "EngineInterface/SerializerService.h"
-#include "EngineImpl/SimulationControllerImpl.h"
+#include "EngineImpl/SimulationFacadeImpl.h"
 #include "PersisterImpl/PersisterFacadeImpl.h"
 
 #include "MainWindow.h"
@@ -32,14 +32,14 @@ int main(int argc, char** argv)
         log(Priority::Important, "DEBUG mode");
     }
 
-    SimulationController simController;
+    SimulationFacade simulationFacade;
     PersisterFacade persisterFacade;
     MainWindow mainWindow;
 
     try {
-        simController = std::make_shared<_SimulationControllerImpl>();
+        simulationFacade = std::make_shared<_SimulationFacadeImpl>();
         persisterFacade = std::make_shared<_PersisterFacadeImpl>();
-        mainWindow = std::make_shared<_MainWindow>(simController, persisterFacade, logger);
+        mainWindow = std::make_shared<_MainWindow>(simulationFacade, persisterFacade, logger);
         mainWindow->mainLoop();
         mainWindow->shutdown();
 

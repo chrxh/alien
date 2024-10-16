@@ -43,7 +43,7 @@ add_library(EngineInterface
     ShapeGenerator.cpp
     ShapeGenerator.h
     SerializedSimulation.h
-    SimulationController.h
+    SimulationFacade.h
     SimulationParameters.cpp
     SimulationParameters.h
     SimulationParametersSpot.h

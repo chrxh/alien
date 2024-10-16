@@ -9,7 +9,7 @@
 class _SpatialControlWindow : public _AlienWindow
 {
 public:
-    _SpatialControlWindow(SimulationController const& simController, TemporalControlWindow const& temporalControlWindow);
+    _SpatialControlWindow(SimulationFacade const& simulationFacade, TemporalControlWindow const& temporalControlWindow);
     ~_SpatialControlWindow();
 
 private:
@@ -23,7 +23,7 @@ private:
 
     void processCenterOnSelection();
 
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
     ResizeWorldDialog _resizeWorldDialog;
 
     bool _centerSelection = false;

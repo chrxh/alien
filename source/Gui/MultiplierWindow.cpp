@@ -5,7 +5,7 @@
 #include "Fonts/IconsFontAwesome5.h"
 #include "Fonts/AlienIconFont.h"
 
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "AlienImGui.h"
 #include "EditorModel.h"
 #include "MessageDialog.h"
@@ -21,10 +21,10 @@ namespace
     auto const RightColumnWidth = 200.0f;
 }
 
-_MultiplierWindow::_MultiplierWindow(EditorModel const& editorModel, SimulationController const& simController)
+_MultiplierWindow::_MultiplierWindow(EditorModel const& editorModel, SimulationFacade const& simulationFacade)
     : _AlienWindow("Multiplier", "editors.multiplier", false)
     , _editorModel(editorModel)
-    , _simController(simController)
+    , _simulationFacade(simulationFacade)
 {}
 
 void _MultiplierWindow::processIntern()
@@ -146,23 +146,23 @@ void _MultiplierWindow::validationAndCorrection()
 
 void _MultiplierWindow::onBuild()
 {
-    _origSelection = _simController->getSelectedSimulationData(true);
+    _origSelection = _simulationFacade->getSelectedSimulationData(true);
     auto multiplicationResult = [&] {
         if (_mode == MultiplierMode_Grid) {
             return DescriptionEditService::gridMultiply(_origSelection, _gridParameters);
         } else {
-            auto data = _simController->getSimulationData();
+            auto data = _simulationFacade->getSimulationData();
             auto overlappingCheckSuccessful = true;
             auto result = DescriptionEditService::randomMultiply(
-                _origSelection, _randomParameters, _simController->getWorldSize(), std::move(data), overlappingCheckSuccessful);
+                _origSelection, _randomParameters, _simulationFacade->getWorldSize(), std::move(data), overlappingCheckSuccessful);
             if (!overlappingCheckSuccessful) {
                 MessageDialog::get().information("Random multiplication", "Non-overlapping copies could not be created.");
             }
             return result;
         }
     }();
-    _simController->removeSelectedObjects(true);
-    _simController->addAndSelectSimulationData(multiplicationResult);
+    _simulationFacade->removeSelectedObjects(true);
+    _simulationFacade->addAndSelectSimulationData(multiplicationResult);
 
     _editorModel->update();
     _selectionDataAfterMultiplication = _editorModel->getSelectionShallowData();
@@ -170,8 +170,8 @@ void _MultiplierWindow::onBuild()
 
 void _MultiplierWindow::onUndo()
 {
-    _simController->removeSelectedObjects(true);
-    _simController->addAndSelectSimulationData(_origSelection);
+    _simulationFacade->removeSelectedObjects(true);
+    _simulationFacade->addAndSelectSimulationData(_origSelection);
     _selectionDataAfterMultiplication = std::nullopt;
 }
 

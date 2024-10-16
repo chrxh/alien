@@ -2,7 +2,7 @@
 
 #include "Base/GlobalSettings.h"
 #include "Network/NetworkService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "PersisterInterface/LoginRequestData.h"
 #include "PersisterInterface/SenderInfo.h"
 
@@ -12,12 +12,12 @@
 #include "PersisterInterface/TaskProcessor.h"
 
 void LoginController::init(
-    SimulationController const& simController,
+    SimulationFacade const& simulationFacade,
     PersisterFacade const& persisterFacade,
     ActivateUserDialog const& activateUserDialog,
     BrowserWindow const& browserWindow)
 {
-    _simController = simController;
+    _simulationFacade = simulationFacade;
     _persisterFacade = persisterFacade;
     _activateUserDialog = activateUserDialog;
     _browserWindow = browserWindow;
@@ -128,7 +128,7 @@ UserInfo LoginController::getUserInfo()
 {
     UserInfo result;
     if (_shareGpuInfo) {
-        result.gpu = _simController->getGpuName();
+        result.gpu = _simulationFacade->getGpuName();
     }
     return result;
 }

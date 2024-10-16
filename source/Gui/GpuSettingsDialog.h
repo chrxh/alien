@@ -8,7 +8,7 @@
 class _GpuSettingsDialog : public _AlienDialog
 {
 public:
-    _GpuSettingsDialog(SimulationController const& simController);
+    _GpuSettingsDialog(SimulationFacade const& simulationFacade);
 
     ~_GpuSettingsDialog();
 
@@ -18,7 +18,7 @@ private:
 
     void validationAndCorrection(GpuSettings& settings) const;
 
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
 
     GpuSettings _gpuSettings;
 };

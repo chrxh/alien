@@ -9,7 +9,7 @@
 class _EditorModel
 {
 public:
-    _EditorModel(SimulationController const& simController);
+    _EditorModel(SimulationFacade const& simulationFacade);
 
     SelectionShallowData const& getSelectionShallowData() const;
     void update();
@@ -36,7 +36,7 @@ public:
     bool isRolloutToClusters() const;
 
 private:
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
     SelectionShallowData _selectionShallowData;
 
     std::unordered_map<uint64_t, CellOrParticleDescription> _inspectedEntityById;

@@ -9,7 +9,7 @@
 class _SimulationInteractionController
 {
 public:
-    _SimulationInteractionController(SimulationController const& simController, EditorController const& editorController, SimulationView const& simulationView);
+    _SimulationInteractionController(SimulationFacade const& simulationFacade, EditorController const& editorController, SimulationView const& simulationView);
 
     void process();
 
@@ -49,7 +49,7 @@ private:
 
     float calcZoomFactor(std::chrono::steady_clock::time_point const& lastTimepoint);
 
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
     EditorController _editorController;
     SimulationView _simulationView;
 

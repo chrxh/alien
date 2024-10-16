@@ -8,7 +8,7 @@
 class _ActivateUserDialog : public _AlienDialog
 {
 public:
-    _ActivateUserDialog(SimulationController const& simController, BrowserWindow const& browserWindow);
+    _ActivateUserDialog(SimulationFacade const& simulationFacade, BrowserWindow const& browserWindow);
     ~_ActivateUserDialog();
 
     void registerCyclicReferences(CreateUserDialogWeakPtr const& createUserDialog);
@@ -19,7 +19,7 @@ private:
     void processIntern() override;
     void onActivateUser();
 
-    SimulationController _simController; 
+    SimulationFacade _simulationFacade; 
     BrowserWindow _browserWindow;
     CreateUserDialogWeakPtr _createUserDialog;
 

@@ -1,8 +1,8 @@
-#include "SimulationControllerImpl.h"
+#include "SimulationFacadeImpl.h"
 
 #include "EngineInterface/Descriptions.h"
 
-void _SimulationControllerImpl::newSimulation(
+void _SimulationFacadeImpl::newSimulation(
     std::optional<std::string> const& simulationName,
     uint64_t timestep,
     GeneralSettings const& generalSettings,
@@ -23,34 +23,34 @@ void _SimulationControllerImpl::newSimulation(
     ++_sessionId;
 }
 
-std::string _SimulationControllerImpl::getSimulationName() const
+std::string _SimulationFacadeImpl::getSimulationName() const
 {
     return _simulationName;
 }
 
-int _SimulationControllerImpl::getSessionId() const
+int _SimulationFacadeImpl::getSessionId() const
 {
     return _sessionId;
 }
 
-void _SimulationControllerImpl::clear()
+void _SimulationFacadeImpl::clear()
 {
     _worker.clear();
 
     _selectionNeedsUpdate = true;
 }
 
-void _SimulationControllerImpl::setImageResource(void* image)
+void _SimulationFacadeImpl::setImageResource(void* image)
 {
     _worker.setImageResource(image);
 }
 
-std::string _SimulationControllerImpl::getGpuName() const
+std::string _SimulationFacadeImpl::getGpuName() const
 {
     return _worker.getGpuName();
 }
 
-void _SimulationControllerImpl::tryDrawVectorGraphics(
+void _SimulationFacadeImpl::tryDrawVectorGraphics(
     RealVector2D const& rectUpperLeft,
     RealVector2D const& rectLowerRight,
     IntVector2D const& imageSize,
@@ -59,7 +59,7 @@ void _SimulationControllerImpl::tryDrawVectorGraphics(
     _worker.tryDrawVectorGraphics(rectUpperLeft, rectLowerRight, imageSize, zoom);
 }
 
-std::optional<OverlayDescription> _SimulationControllerImpl::tryDrawVectorGraphicsAndReturnOverlay(
+std::optional<OverlayDescription> _SimulationFacadeImpl::tryDrawVectorGraphicsAndReturnOverlay(
     RealVector2D const& rectUpperLeft,
     RealVector2D const& rectLowerRight,
     IntVector2D const& imageSize,
@@ -68,141 +68,141 @@ std::optional<OverlayDescription> _SimulationControllerImpl::tryDrawVectorGraphi
     return _worker.tryDrawVectorGraphicsAndReturnOverlay(rectUpperLeft, rectLowerRight, imageSize, zoom);
 }
 
-bool _SimulationControllerImpl::isSyncSimulationWithRendering() const
+bool _SimulationFacadeImpl::isSyncSimulationWithRendering() const
 {
     return _worker.isSyncSimulationWithRendering();
 }
 
-void _SimulationControllerImpl::setSyncSimulationWithRendering(bool value)
+void _SimulationFacadeImpl::setSyncSimulationWithRendering(bool value)
 {
     _worker.setSyncSimulationWithRendering(value);
 }
 
-int _SimulationControllerImpl::getSyncSimulationWithRenderingRatio() const
+int _SimulationFacadeImpl::getSyncSimulationWithRenderingRatio() const
 {
     return _worker.getSyncSimulationWithRenderingRatio();
 }
 
-void _SimulationControllerImpl::setSyncSimulationWithRenderingRatio(int value)
+void _SimulationFacadeImpl::setSyncSimulationWithRenderingRatio(int value)
 {
     _worker.setSyncSimulationWithRenderingRatio(value);
 }
 
-ClusteredDataDescription _SimulationControllerImpl::getClusteredSimulationData()
+ClusteredDataDescription _SimulationFacadeImpl::getClusteredSimulationData()
 {
     auto size = getWorldSize();
     return _worker.getClusteredSimulationData({-10, -10}, {size.x + 10, size.y + 10});
 }
 
-DataDescription _SimulationControllerImpl::getSimulationData()
+DataDescription _SimulationFacadeImpl::getSimulationData()
 {
     auto size = getWorldSize();
     return _worker.getSimulationData({-10, -10}, {size.x + 10, size.y + 10});
 }
 
-ClusteredDataDescription _SimulationControllerImpl::getSelectedClusteredSimulationData(bool includeClusters)
+ClusteredDataDescription _SimulationFacadeImpl::getSelectedClusteredSimulationData(bool includeClusters)
 {
     _worker.updateSelection();
     return _worker.getSelectedClusteredSimulationData(includeClusters);
 }
 
-DataDescription _SimulationControllerImpl::getSelectedSimulationData(bool includeClusters)
+DataDescription _SimulationFacadeImpl::getSelectedSimulationData(bool includeClusters)
 {
     _worker.updateSelection();
     return _worker.getSelectedSimulationData(includeClusters);
 }
 
-DataDescription _SimulationControllerImpl::getInspectedSimulationData(std::vector<uint64_t> objectIds)
+DataDescription _SimulationFacadeImpl::getInspectedSimulationData(std::vector<uint64_t> objectIds)
 {
     return _worker.getInspectedSimulationData(objectIds);
 }
 
-void _SimulationControllerImpl::addAndSelectSimulationData(DataDescription const& dataToAdd)
+void _SimulationFacadeImpl::addAndSelectSimulationData(DataDescription const& dataToAdd)
 {
     _worker.addAndSelectSimulationData(dataToAdd);
 }
 
-void _SimulationControllerImpl::setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate)
+void _SimulationFacadeImpl::setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate)
 {
     _worker.setClusteredSimulationData(dataToUpdate);
     _selectionNeedsUpdate = true;
 }
 
-void _SimulationControllerImpl::setSimulationData(DataDescription const& dataToUpdate)
+void _SimulationFacadeImpl::setSimulationData(DataDescription const& dataToUpdate)
 {
     _worker.setSimulationData(dataToUpdate);
     _selectionNeedsUpdate = true;
 }
 
-void _SimulationControllerImpl::removeSelectedObjects(bool includeClusters)
+void _SimulationFacadeImpl::removeSelectedObjects(bool includeClusters)
 {
     _worker.removeSelectedObjects(includeClusters);
     _selectionNeedsUpdate = true;
 }
 
-void _SimulationControllerImpl::relaxSelectedObjects(bool includeClusters)
+void _SimulationFacadeImpl::relaxSelectedObjects(bool includeClusters)
 {
     _worker.relaxSelectedObjects(includeClusters);
 }
 
-void _SimulationControllerImpl::uniformVelocitiesForSelectedObjects(bool includeClusters)
+void _SimulationFacadeImpl::uniformVelocitiesForSelectedObjects(bool includeClusters)
 {
     _worker.uniformVelocitiesForSelectedObjects(includeClusters);
 }
 
-void _SimulationControllerImpl::makeSticky(bool includeClusters)
+void _SimulationFacadeImpl::makeSticky(bool includeClusters)
 {
     _worker.makeSticky(includeClusters);
 }
 
-void _SimulationControllerImpl::removeStickiness(bool includeClusters)
+void _SimulationFacadeImpl::removeStickiness(bool includeClusters)
 {
     _worker.removeStickiness(includeClusters);
 }
 
-void _SimulationControllerImpl::setBarrier(bool value, bool includeClusters)
+void _SimulationFacadeImpl::setBarrier(bool value, bool includeClusters)
 {
     _worker.setBarrier(value, includeClusters);
 }
 
-void _SimulationControllerImpl::colorSelectedObjects(unsigned char color, bool includeClusters)
+void _SimulationFacadeImpl::colorSelectedObjects(unsigned char color, bool includeClusters)
 {
     _worker.colorSelectedObjects(color, includeClusters);
 }
 
-void _SimulationControllerImpl::reconnectSelectedObjects()
+void _SimulationFacadeImpl::reconnectSelectedObjects()
 {
     _worker.reconnectSelectedObjects();
 }
 
-void _SimulationControllerImpl::setDetached(bool value)
+void _SimulationFacadeImpl::setDetached(bool value)
 {
     _worker.setDetached(value);
 }
 
-void _SimulationControllerImpl::changeCell(CellDescription const& changedCell)
+void _SimulationFacadeImpl::changeCell(CellDescription const& changedCell)
 {
     _worker.changeCell(changedCell);
 }
 
-void _SimulationControllerImpl::changeParticle(ParticleDescription const& changedParticle)
+void _SimulationFacadeImpl::changeParticle(ParticleDescription const& changedParticle)
 {
     _worker.changeParticle(changedParticle);
 }
 
-void _SimulationControllerImpl::calcTimesteps(uint64_t timesteps)
+void _SimulationFacadeImpl::calcTimesteps(uint64_t timesteps)
 {
     _worker.calcTimesteps(timesteps);
     _selectionNeedsUpdate = true;
 }
 
-void _SimulationControllerImpl::runSimulation()
+void _SimulationFacadeImpl::runSimulation()
 {
     _simRunTimePoint = std::chrono::system_clock::now();
     _worker.runSimulation();
 }
 
-void _SimulationControllerImpl::pauseSimulation()
+void _SimulationFacadeImpl::pauseSimulation()
 {
     _worker.pauseSimulation();
     _selectionNeedsUpdate = true;
@@ -211,17 +211,17 @@ void _SimulationControllerImpl::pauseSimulation()
     _simRunTimePoint.reset();
 }
 
-void _SimulationControllerImpl::applyCataclysm(int power)
+void _SimulationFacadeImpl::applyCataclysm(int power)
 {
     _worker.applyCataclysm(power);
 }
 
-bool _SimulationControllerImpl::isSimulationRunning() const
+bool _SimulationFacadeImpl::isSimulationRunning() const
 {
     return _worker.isSimulationRunning();
 }
 
-void _SimulationControllerImpl::closeSimulation()
+void _SimulationFacadeImpl::closeSimulation()
 {
     _worker.beginShutdown();
     _thread->join();
@@ -230,17 +230,17 @@ void _SimulationControllerImpl::closeSimulation()
     _selectionNeedsUpdate = true;
 }
 
-uint64_t _SimulationControllerImpl::getCurrentTimestep() const
+uint64_t _SimulationFacadeImpl::getCurrentTimestep() const
 {
     return _worker.getCurrentTimestep();
 }
 
-void _SimulationControllerImpl::setCurrentTimestep(uint64_t value)
+void _SimulationFacadeImpl::setCurrentTimestep(uint64_t value)
 {
     _worker.setCurrentTimestep(value);
 }
 
-std::chrono::milliseconds _SimulationControllerImpl::getRealTime() const
+std::chrono::milliseconds _SimulationFacadeImpl::getRealTime() const
 {
     if (_simRunTimePoint) {
         return _realTime + std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - *_simRunTimePoint);
@@ -249,7 +249,7 @@ std::chrono::milliseconds _SimulationControllerImpl::getRealTime() const
     }
 }
 
-void _SimulationControllerImpl::setRealTime(std::chrono::milliseconds const& value)
+void _SimulationFacadeImpl::setRealTime(std::chrono::milliseconds const& value)
 {
     _realTime = value;
     if (_simRunTimePoint) {
@@ -257,43 +257,43 @@ void _SimulationControllerImpl::setRealTime(std::chrono::milliseconds const& val
     }
 }
 
-SimulationParameters _SimulationControllerImpl::getSimulationParameters() const
+SimulationParameters _SimulationFacadeImpl::getSimulationParameters() const
 {
     return _worker.getSimulationParameters();
 }
 
-SimulationParameters const& _SimulationControllerImpl::getOriginalSimulationParameters() const
+SimulationParameters const& _SimulationFacadeImpl::getOriginalSimulationParameters() const
 {
     return _origSettings.simulationParameters;
 }
 
-void _SimulationControllerImpl::setSimulationParameters(SimulationParameters const& parameters)
+void _SimulationFacadeImpl::setSimulationParameters(SimulationParameters const& parameters)
 {
     _worker.setSimulationParameters(parameters);
 }
 
-void _SimulationControllerImpl::setOriginalSimulationParameters(SimulationParameters const& parameters)
+void _SimulationFacadeImpl::setOriginalSimulationParameters(SimulationParameters const& parameters)
 {
     _origSettings.simulationParameters = parameters;
 }
 
-GpuSettings _SimulationControllerImpl::getGpuSettings() const
+GpuSettings _SimulationFacadeImpl::getGpuSettings() const
 {
     return _gpuSettings;
 }
 
-GpuSettings _SimulationControllerImpl::getOriginalGpuSettings() const
+GpuSettings _SimulationFacadeImpl::getOriginalGpuSettings() const
 {
     return _origSettings.gpuSettings;
 }
 
-void _SimulationControllerImpl::setGpuSettings_async(GpuSettings const& gpuSettings)
+void _SimulationFacadeImpl::setGpuSettings_async(GpuSettings const& gpuSettings)
 {
     _gpuSettings = gpuSettings;
     _worker.setGpuSettings_async(gpuSettings);
 }
 
-void _SimulationControllerImpl::applyForce_async(
+void _SimulationFacadeImpl::applyForce_async(
     RealVector2D const& start,
     RealVector2D const& end,
     RealVector2D const& force,
@@ -302,37 +302,37 @@ void _SimulationControllerImpl::applyForce_async(
     _worker.applyForce_async(start, end, force, radius);
 }
 
-void _SimulationControllerImpl::switchSelection(RealVector2D const& pos, float radius)
+void _SimulationFacadeImpl::switchSelection(RealVector2D const& pos, float radius)
 {
     _worker.switchSelection(pos, radius);
 }
 
-void _SimulationControllerImpl::swapSelection(RealVector2D const& pos, float radius)
+void _SimulationFacadeImpl::swapSelection(RealVector2D const& pos, float radius)
 {
     _worker.swapSelection(pos, radius);
 }
 
-SelectionShallowData _SimulationControllerImpl::getSelectionShallowData(RealVector2D const& refPos)
+SelectionShallowData _SimulationFacadeImpl::getSelectionShallowData(RealVector2D const& refPos)
 {
     return _worker.getSelectionShallowData(refPos);
 }
 
-void _SimulationControllerImpl::shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData)
+void _SimulationFacadeImpl::shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData)
 {
     _worker.shallowUpdateSelectedObjects(updateData);
 }
 
-void _SimulationControllerImpl::setSelection(RealVector2D const& startPos, RealVector2D const& endPos)
+void _SimulationFacadeImpl::setSelection(RealVector2D const& startPos, RealVector2D const& endPos)
 {
     _worker.setSelection(startPos, endPos);
 }
 
-void _SimulationControllerImpl::removeSelection()
+void _SimulationFacadeImpl::removeSelection()
 {
     _worker.removeSelection();
 }
 
-bool _SimulationControllerImpl::updateSelectionIfNecessary()
+bool _SimulationFacadeImpl::updateSelectionIfNecessary()
 {
     auto result = _selectionNeedsUpdate;
     _selectionNeedsUpdate = false;
@@ -342,48 +342,48 @@ bool _SimulationControllerImpl::updateSelectionIfNecessary()
     return result;
 }
 
-GeneralSettings _SimulationControllerImpl::getGeneralSettings() const
+GeneralSettings _SimulationFacadeImpl::getGeneralSettings() const
 {
     return _generalSettings;
 }
 
-IntVector2D _SimulationControllerImpl::getWorldSize() const
+IntVector2D _SimulationFacadeImpl::getWorldSize() const
 {
     return {_generalSettings.worldSizeX, _generalSettings.worldSizeY};
 }
 
-RawStatisticsData _SimulationControllerImpl::getRawStatistics() const
+RawStatisticsData _SimulationFacadeImpl::getRawStatistics() const
 {
     return _worker.getRawStatistics();
 }
 
-StatisticsHistory const& _SimulationControllerImpl::getStatisticsHistory() const
+StatisticsHistory const& _SimulationFacadeImpl::getStatisticsHistory() const
 {
     return _worker.getStatisticsHistory();
 }
 
-void _SimulationControllerImpl::setStatisticsHistory(StatisticsHistoryData const& data)
+void _SimulationFacadeImpl::setStatisticsHistory(StatisticsHistoryData const& data)
 {
     _worker.setStatisticsHistory(data);
 }
 
-std::optional<int> _SimulationControllerImpl::getTpsRestriction() const
+std::optional<int> _SimulationFacadeImpl::getTpsRestriction() const
 {
     auto result = _worker.getTpsRestriction();
     return 0 != result ? std::optional<int>(result) : std::optional<int>();
 }
 
-void _SimulationControllerImpl::setTpsRestriction(std::optional<int> const& value)
+void _SimulationFacadeImpl::setTpsRestriction(std::optional<int> const& value)
 {
     _worker.setTpsRestriction(value ? *value : 0);
 }
 
-float _SimulationControllerImpl::getTps() const
+float _SimulationFacadeImpl::getTps() const
 {
     return _worker.getTps();
 }
 
-void _SimulationControllerImpl::testOnly_mutate(uint64_t cellId, MutationType mutationType)
+void _SimulationFacadeImpl::testOnly_mutate(uint64_t cellId, MutationType mutationType)
 {
     _worker.testOnly_mutate(cellId, mutationType);
 }

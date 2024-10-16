@@ -12,7 +12,7 @@
 class _TemporalControlWindow : public _AlienWindow
 {
 public:
-    _TemporalControlWindow(SimulationController const& simController, StatisticsWindow const& statisticsWindow);
+    _TemporalControlWindow(SimulationFacade const& simulationFacade, StatisticsWindow const& statisticsWindow);
 
     void onSnapshot();
 
@@ -45,7 +45,7 @@ private:
     template <typename MovedObjectType>
     void restorePosition(MovedObjectType& movedObject, MovedObjectType const& origMovedObject, uint64_t origTimestep);
     
-    SimulationController _simController; 
+    SimulationFacade _simulationFacade; 
     StatisticsWindow _statisticsWindow;
 
     std::optional<Snapshot> _snapshot;

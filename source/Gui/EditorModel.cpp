@@ -1,10 +1,10 @@
 #include "EditorModel.h"
 
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 
-_EditorModel::_EditorModel(SimulationController const& simController)
-    : _simController(simController)
+_EditorModel::_EditorModel(SimulationFacade const& simulationFacade)
+    : _simulationFacade(simulationFacade)
 {
     clear();
 }
@@ -16,7 +16,7 @@ SelectionShallowData const& _EditorModel::getSelectionShallowData() const
 
 void _EditorModel::update()
 {
-    _selectionShallowData = _simController->getSelectionShallowData();
+    _selectionShallowData = _simulationFacade->getSelectionShallowData();
 }
 
 bool _EditorModel::isSelectionEmpty() const

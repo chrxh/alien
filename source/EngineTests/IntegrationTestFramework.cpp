@@ -4,11 +4,11 @@
 
 #include "Base/Math.h"
 #include "EngineInterface/SimulationParameters.h"
-#include "EngineImpl/SimulationControllerImpl.h"
+#include "EngineImpl/SimulationFacadeImpl.h"
 
 IntegrationTestFramework::IntegrationTestFramework(std::optional<SimulationParameters> const& parameters_, IntVector2D const& universeSize)
 {
-    _simController = std::make_shared<_SimulationControllerImpl>();
+    _simulationFacade = std::make_shared<_SimulationFacadeImpl>();
     GeneralSettings generalSettings{universeSize.x, universeSize.y};
     SimulationParameters parameters;
     if (parameters_) {
@@ -18,13 +18,13 @@ IntegrationTestFramework::IntegrationTestFramework(std::optional<SimulationParam
             parameters.baseValues.radiationCellAgeStrength[i] = 0;
         }
     }
-    _simController->newSimulation("", 0, generalSettings, parameters);
-    _parameters = _simController->getSimulationParameters();
+    _simulationFacade->newSimulation("", 0, generalSettings, parameters);
+    _parameters = _simulationFacade->getSimulationParameters();
 }
 
 IntegrationTestFramework::~IntegrationTestFramework()
 {
-    _simController->closeSimulation();
+    _simulationFacade->closeSimulation();
 }
 
 double IntegrationTestFramework::getEnergy(DataDescription const& data) const

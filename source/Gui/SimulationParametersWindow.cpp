@@ -6,7 +6,7 @@
 
 #include "Base/GlobalSettings.h"
 #include "EngineInterface/SerializerService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/LegacyAuxiliaryDataParserService.h"
 
 #include "AlienImGui.h"
@@ -50,11 +50,11 @@ namespace
 }
 
 _SimulationParametersWindow::_SimulationParametersWindow(
-    SimulationController const& simController,
+    SimulationFacade const& simulationFacade,
     RadiationSourcesWindow const& radiationSourcesWindow,
     SimulationInteractionController const& simInteractionController)
     : _AlienWindow("Simulation parameters", "windows.simulation parameters", false)
-    , _simController(simController)
+    , _simulationFacade(simulationFacade)
     , _radiationSourcesWindow(radiationSourcesWindow)
     , _simInteractionController(simInteractionController)
 {
@@ -98,7 +98,7 @@ void _SimulationParametersWindow::processIntern()
 
 SimulationParametersSpot _SimulationParametersWindow::createSpot(SimulationParameters const& simParameters, int index)
 {
-    auto worldSize = _simController->getWorldSize();
+    auto worldSize = _simulationFacade->getWorldSize();
     SimulationParametersSpot spot;
     spot.posX = toFloat(worldSize.x / 2);
     spot.posY = toFloat(worldSize.y / 2);
@@ -115,7 +115,7 @@ SimulationParametersSpot _SimulationParametersWindow::createSpot(SimulationParam
 
 void _SimulationParametersWindow::createDefaultSpotData(SimulationParametersSpot& spot)
 {
-    auto worldSize = _simController->getWorldSize();
+    auto worldSize = _simulationFacade->getWorldSize();
 
     auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
     if (spot.shapeType == SpotShapeType_Circular) {
@@ -144,7 +144,7 @@ void _SimulationParametersWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
-        _copiedParameters = _simController->getSimulationParameters();
+        _copiedParameters = _simulationFacade->getSimulationParameters();
         printOverlayMessage("Simulation parameters copied");
     }
     AlienImGui::Tooltip("Copy simulation parameters");
@@ -152,8 +152,8 @@ void _SimulationParametersWindow::processToolbar()
     ImGui::SameLine();
     ImGui::BeginDisabled(!_copiedParameters);
     if (AlienImGui::ToolbarButton(ICON_FA_PASTE)) {
-        _simController->setSimulationParameters(*_copiedParameters);
-        _simController->setOriginalSimulationParameters(*_copiedParameters);
+        _simulationFacade->setSimulationParameters(*_copiedParameters);
+        _simulationFacade->setOriginalSimulationParameters(*_copiedParameters);
         printOverlayMessage("Simulation parameters pasted");
     }
     ImGui::EndDisabled();
@@ -164,7 +164,7 @@ void _SimulationParametersWindow::processToolbar()
 
 void _SimulationParametersWindow::processTabWidget()
 {
-    auto currentSessionId = _simController->getSessionId();
+    auto currentSessionId = _simulationFacade->getSessionId();
 
     std::optional<bool> scheduleAppendTab;
     std::optional<int> scheduleDeleteTabAtIndex;
@@ -172,7 +172,7 @@ void _SimulationParametersWindow::processTabWidget()
     if (ImGui::BeginChild("##", ImVec2(0, 0), false)) {
 
         if (ImGui::BeginTabBar("##Parameters", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
-            auto parameters = _simController->getSimulationParameters();
+            auto parameters = _simulationFacade->getSimulationParameters();
 
             //add spot
             if (parameters.numSpots < MAX_SPOTS) {
@@ -209,8 +209,8 @@ void _SimulationParametersWindow::processTabWidget()
 void _SimulationParametersWindow::processBase()
 {
     if (ImGui::BeginTabItem("Base", nullptr, _focusBaseTab ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
-        auto parameters = _simController->getSimulationParameters();
-        auto origParameters = _simController->getOriginalSimulationParameters();
+        auto parameters = _simulationFacade->getSimulationParameters();
+        auto origParameters = _simulationFacade->getOriginalSimulationParameters();
         auto lastParameters = parameters;
 
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
@@ -1614,7 +1614,7 @@ void _SimulationParametersWindow::processBase()
         validationAndCorrectionLayout();
 
         if (parameters != lastParameters) {
-            _simController->setSimulationParameters(parameters);
+            _simulationFacade->setSimulationParameters(parameters);
         }
 
         ImGui::EndTabItem();
@@ -1626,8 +1626,8 @@ bool _SimulationParametersWindow::processSpot(int index)
     std::string name = "Zone " + std::to_string(index + 1);
     bool isOpen = true;
     if (ImGui::BeginTabItem(name.c_str(), &isOpen, ImGuiTabItemFlags_None)) {
-        auto parameters = _simController->getSimulationParameters();
-        auto origParameters = _simController->getOriginalSimulationParameters();
+        auto parameters = _simulationFacade->getSimulationParameters();
+        auto origParameters = _simulationFacade->getOriginalSimulationParameters();
         auto lastParameters = parameters;
 
         SimulationParametersSpot& spot = parameters.spots[index];
@@ -1635,7 +1635,7 @@ bool _SimulationParametersWindow::processSpot(int index)
         SimulationParametersSpot const& lastSpot = lastParameters.spots[index];
 
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-            auto worldSize = _simController->getWorldSize();
+            auto worldSize = _simulationFacade->getWorldSize();
 
             /**
              * Colors and location
@@ -2307,7 +2307,7 @@ bool _SimulationParametersWindow::processSpot(int index)
         validationAndCorrection(spot, parameters);
 
         if (spot != lastSpot) {
-            _simController->setSimulationParameters(parameters);
+            _simulationFacade->setSimulationParameters(parameters);
         }
 
         ImGui::EndTabItem();
@@ -2329,8 +2329,8 @@ void _SimulationParametersWindow::processAddonList()
     _featureListOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addons").highlighted(true).defaultOpen(_featureListOpen));
     if (_featureListOpen) {
         if (ImGui::BeginChild("##addons", {scale(0), 0})) {
-            auto parameters = _simController->getSimulationParameters();
-            auto origFeatures = _simController->getOriginalSimulationParameters().features;
+            auto parameters = _simulationFacade->getSimulationParameters();
+            auto origFeatures = _simulationFacade->getOriginalSimulationParameters().features;
             auto lastFeatures= parameters.features;
 
             AlienImGui::Checkbox(
@@ -2395,7 +2395,7 @@ void _SimulationParametersWindow::processAddonList()
                 parameters.features.legacyModes);
 
             if (parameters.features != lastFeatures) {
-                _simController->setSimulationParameters(parameters);
+                _simulationFacade->setSimulationParameters(parameters);
             }
         }
         ImGui::EndChild();
@@ -2405,22 +2405,22 @@ void _SimulationParametersWindow::processAddonList()
 
 void _SimulationParametersWindow::onAppendTab()
 {
-    auto parameters = _simController->getSimulationParameters();
-    auto origParameters = _simController->getOriginalSimulationParameters();
+    auto parameters = _simulationFacade->getSimulationParameters();
+    auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
     int index = parameters.numSpots;
     parameters.spots[index] = createSpot(parameters, index);
     origParameters.spots[index] = createSpot(parameters, index);
     ++parameters.numSpots;
     ++origParameters.numSpots;
-    _simController->setSimulationParameters(parameters);
-    _simController->setOriginalSimulationParameters(origParameters);
+    _simulationFacade->setSimulationParameters(parameters);
+    _simulationFacade->setOriginalSimulationParameters(origParameters);
 }
 
 void _SimulationParametersWindow::onDeleteTab(int index)
 {
-    auto parameters = _simController->getSimulationParameters();
-    auto origParameters = _simController->getOriginalSimulationParameters();
+    auto parameters = _simulationFacade->getSimulationParameters();
+    auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
     for (int i = index; i < parameters.numSpots - 1; ++i) {
         parameters.spots[i] = parameters.spots[i + 1];
@@ -2428,8 +2428,8 @@ void _SimulationParametersWindow::onDeleteTab(int index)
     }
     --parameters.numSpots;
     --origParameters.numSpots;
-    _simController->setSimulationParameters(parameters);
-    _simController->setOriginalSimulationParameters(origParameters);
+    _simulationFacade->setSimulationParameters(parameters);
+    _simulationFacade->setOriginalSimulationParameters(origParameters);
 }
 
 void _SimulationParametersWindow::onOpenParameters()
@@ -2444,7 +2444,7 @@ void _SimulationParametersWindow::onOpenParameters()
         if (!SerializerService::deserializeSimulationParametersFromFile(parameters, firstFilename.string())) {
             MessageDialog::get().information("Open simulation parameters", "The selected file could not be opened.");
         } else {
-            _simController->setSimulationParameters(parameters);
+            _simulationFacade->setSimulationParameters(parameters);
         }
     });
 }
@@ -2457,7 +2457,7 @@ void _SimulationParametersWindow::onSaveParameters()
         auto firstFilenameCopy = firstFilename;
         _startingPath = firstFilenameCopy.remove_filename().string();
 
-        auto parameters = _simController->getSimulationParameters();
+        auto parameters = _simulationFacade->getSimulationParameters();
         if (!SerializerService::serializeSimulationParametersToFile(firstFilename.string(), parameters)) {
             MessageDialog::get().information("Save simulation parameters", "The selected file could not be saved.");
         }

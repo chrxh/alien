@@ -8,13 +8,13 @@ class _ImageToPatternDialog
 {
 public:
 
-	_ImageToPatternDialog(SimulationController const& simController);
+	_ImageToPatternDialog(SimulationFacade const& simulationFacade);
     ~_ImageToPatternDialog();
 
 	void show();
 
 private:
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
 
     std::string _startingPath;
 };

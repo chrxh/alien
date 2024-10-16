@@ -3,7 +3,7 @@
 #include "Base/Definitions.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
 class DescriptionHelperTests 
@@ -39,8 +39,8 @@ protected:
 TEST_F(DescriptionHelperTests, correctConnections)
 {
     auto data = DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().width(10).height(10).center({50.0f, 99.0f}));
-    _simController->setSimulationData(data);
-    auto clusteredData = _simController->getClusteredSimulationData();
+    _simulationFacade->setSimulationData(data);
+    auto clusteredData = _simulationFacade->getClusteredSimulationData();
 
     DescriptionEditService::correctConnections(clusteredData, {100, 100});
 

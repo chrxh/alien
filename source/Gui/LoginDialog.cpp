@@ -3,7 +3,7 @@
 #include <imgui.h>
 
 #include "Base/GlobalSettings.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "Network/NetworkService.h"
 
 #include "AlienImGui.h"
@@ -17,13 +17,13 @@
 #include "LoginController.h"
 
 _LoginDialog::_LoginDialog(
-    SimulationController const& simController,
+    SimulationFacade const& simulationFacade,
     PersisterFacade const& persisterFacade,
     CreateUserDialog const& createUserDialog,
     ActivateUserDialog const& activateUserDialog,
     ResetPasswordDialog const& resetPasswordDialog)
     : _AlienDialog("Login")
-    , _simController(simController)
+    , _simulationFacade(simulationFacade)
     , _persisterFacade(persisterFacade)
     , _createUserDialog(createUserDialog)
     , _activateUserDialog(activateUserDialog)
@@ -69,7 +69,7 @@ void _LoginDialog::processIntern()
     AlienImGui::ToggleButton(
         AlienImGui::ToggleButtonParameters()
             .name("Share GPU model info")
-            .tooltip(Const::LoginShareGpuInfoTooltip1 + _simController->getGpuName() + "\n" + Const::LoginShareGpuInfoTooltip2),
+            .tooltip(Const::LoginShareGpuInfoTooltip1 + _simulationFacade->getGpuName() + "\n" + Const::LoginShareGpuInfoTooltip2),
         shareGpuInfo);
     loginController.setShareGpuInfo(shareGpuInfo);
 

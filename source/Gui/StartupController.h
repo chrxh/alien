@@ -11,7 +11,7 @@ class _StartupController
 {
 public:
     _StartupController(
-        SimulationController const& simController,
+        SimulationFacade const& simulationFacade,
         PersisterFacade const& persisterFacade,
         TemporalControlWindow const& temporalControlWindow);
 
@@ -33,7 +33,7 @@ private:
 
     void drawGrid(float yPos, float alpha);
 
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
     TemporalControlWindow _temporalControlWindow;
     PersisterFacade _persisterFacade;
 

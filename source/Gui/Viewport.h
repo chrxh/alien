@@ -9,7 +9,7 @@ class Viewport
 {
 public:
 
-    static void init(SimulationController const& simController);
+    static void init(SimulationFacade const& simulationFacade);
 
     static float getZoomFactor();
     static void setZoomFactor(float zoomFactor);
@@ -31,7 +31,7 @@ public:
     static bool isVisible(RealVector2D const& viewPos);
 
 private:
-    static SimulationController _simController;
+    static SimulationFacade _simulationFacade;
 
     static float _zoomFactor;
     static float _zoomSensitivity;

@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "Network/NetworkService.h"
 
 #include "AlienImGui.h"
@@ -12,10 +12,10 @@
 #include "StyleRepository.h"
 
 _ActivateUserDialog::_ActivateUserDialog(
-    SimulationController const& simController,
+    SimulationFacade const& simulationFacade,
     BrowserWindow const& browserWindow)
     : _AlienDialog("Activate user")
-    , _simController(simController)
+    , _simulationFacade(simulationFacade)
     , _browserWindow(browserWindow)
 {}
 
