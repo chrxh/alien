@@ -75,6 +75,7 @@ _BrowserWindow::_BrowserWindow(
 {
     _downloadCache = std::make_shared<_DownloadCache>();
     _refreshProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
+    _emojiProcessor = _TaskProcessor::createTaskProcessor(_persisterController);
 
     auto& settings = GlobalSettings::get();
     _currentWorkspace.resourceType = settings.getInt("windows.browser.resource type", _currentWorkspace.resourceType);
@@ -1226,6 +1227,7 @@ void _BrowserWindow::processActivated()
 void _BrowserWindow::processPendingRequestIds()
 {
     _refreshProcessor->process();
+    _emojiProcessor->process();
 }
 
 void _BrowserWindow::createTreeTOs(Workspace& workspace)
@@ -1451,8 +1453,20 @@ std::string _BrowserWindow::getUserNamesToEmojiType(std::string const& resourceI
     if (findResult != _userNamesByEmojiTypeBySimIdCache.end()) {
         userNames = findResult->second;
     } else {
-        NetworkService::getUserNamesForResourceAndEmojiType(userNames, resourceId, emojiType);
-        _userNamesByEmojiTypeBySimIdCache.emplace(std::make_pair(resourceId, emojiType), userNames);
+        if (!_emojiProcessor->pendingTasks()) {
+            _emojiProcessor->executeTask(
+                [&](auto const& senderId) {
+                    return _persisterController->scheduleGetUserNamesForEmoji(
+                        SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = false},
+                        GetUserNamesForEmojiRequestData{.resourceId = resourceId, .emojiType = emojiType});
+                },
+                [&](auto const& requestId) {
+                    auto data = _persisterController->fetchGetUserNamesForEmojiData(requestId);
+                    _userNamesByEmojiTypeBySimIdCache.emplace(std::make_pair(data.resourceId, data.emojiType), data.userNames);
+                },
+                [](auto const& errors) { MessageDialog::get().information("Error", errors); });
+        }
+        return "Loading...";
     }
 
     return boost::algorithm::join(userNames, ", ");

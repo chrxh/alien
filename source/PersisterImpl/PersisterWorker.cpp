@@ -151,6 +151,9 @@ void _PersisterWorker::processRequests(std::unique_lock<std::mutex>& lock)
         if (auto const& concreteRequest = std::dynamic_pointer_cast<_ReplaceNetworkResourceRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
         }
+        if (auto const& concreteRequest = std::dynamic_pointer_cast<_GetUserNamesForEmojiRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        }
         auto inProgressJobsIter = std::ranges::find_if(
             _inProgressRequests, [&](PersisterRequest const& otherRequest) { return otherRequest->getRequestId() == request->getRequestId(); });
         _inProgressRequests.erase(inProgressJobsIter);
@@ -512,4 +515,21 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         requestData.downloadCache->insertOrAssign(requestData.resourceId, deserializedSim);
     }
     return std::make_shared<_ReplaceNetworkResourceRequestResult>(request->getRequestId(), ReplaceNetworkResourceResultData{});
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, GetUserNamesForEmojiRequest const& request)
+{
+    UnlockGuard unlockGuard(lock);
+
+    auto const& requestData = request->getData();
+
+    GetUserNamesForEmojiResultData resultData;
+    resultData.resourceId = requestData.resourceId;
+    resultData.emojiType = requestData.emojiType;
+    if (!NetworkService::getUserNamesForResourceAndEmojiType(resultData.userNames, requestData.resourceId, requestData.emojiType)) {
+        return std::make_shared<_PersisterRequestError>(
+            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Could not load user names."});
+    }
+
+    return std::make_shared<_GetUserNamesForEmojiRequestResult>(request->getRequestId(), resultData);
 }

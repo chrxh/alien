@@ -119,6 +119,7 @@ private:
     void popTextColor();
 
     TaskProcessor _refreshProcessor;
+    TaskProcessor _emojiProcessor;
 
     bool _activateEmojiPopup = false;
     bool _showAllEmojis = false;
