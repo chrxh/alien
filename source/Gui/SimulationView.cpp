@@ -77,7 +77,7 @@ _SimulationView::_SimulationView(SimulationFacade const& simulationFacade)
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    resize(Viewport::getViewSize());
+    resize(Viewport::get().getViewSize());
 
     _shader->use();
     _shader->setInt("texture1", 0);
@@ -143,7 +143,7 @@ void _SimulationView::resize(IntVector2D const& size)
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _textureFramebufferId2, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);  
 
-    Viewport::setViewSize(size);
+    Viewport::get().setViewSize(size);
 }
 
 void _SimulationView::draw(bool renderSimulation)
@@ -271,9 +271,9 @@ void _SimulationView::setMotionBlur(float value)
 
 void _SimulationView::updateImageFromSimulation()
 {
-    auto worldRect = Viewport::getVisibleWorldRect();
-    auto viewSize = Viewport::getViewSize();
-    auto zoomFactor = Viewport::getZoomFactor();
+    auto worldRect = Viewport::get().getVisibleWorldRect();
+    auto viewSize = Viewport::get().getViewSize();
+    auto zoomFactor = Viewport::get().getZoomFactor();
 
     if (zoomFactor >= ZoomFactorForOverlay) {
         auto overlay = _simulationFacade->tryDrawVectorGraphicsAndReturnOverlay(
@@ -298,8 +298,8 @@ void _SimulationView::updateImageFromSimulation()
         for (auto const& overlayElement : _overlay->elements) {
             if (_isCellDetailOverlayActive && overlayElement.cell) {
                 {
-                    auto fontSizeUnit = std::min(40.0f, Viewport::getZoomFactor()) / 2;
-                    auto viewPos = Viewport::mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.3f}, parameters.borderlessRendering);
+                    auto fontSizeUnit = std::min(40.0f, Viewport::get().getZoomFactor()) / 2;
+                    auto viewPos = Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.3f}, parameters.borderlessRendering);
                     if (overlayElement.cellType != CellFunction_None) {
                         auto text = Const::CellFunctionToStringMap.at(overlayElement.cellType);
                         if (overlayElement.executionOrderNumber == toInt((timestep - 1) % parameters.cellNumExecutionOrderNumbers)) {
@@ -322,8 +322,8 @@ void _SimulationView::updateImageFromSimulation()
                 }
                 {
                     auto viewPos =
-                        Viewport::mapWorldToViewPosition({overlayElement.pos.x - 0.12f, overlayElement.pos.y - 0.25f}, parameters.borderlessRendering);
-                    auto fontSize = Viewport::getZoomFactor() / 2;
+                        Viewport::get().mapWorldToViewPosition({overlayElement.pos.x - 0.12f, overlayElement.pos.y - 0.25f}, parameters.borderlessRendering);
+                    auto fontSize = Viewport::get().getZoomFactor() / 2;
                     drawList->AddText(
                         StyleRepository::get().getLargeFont(),
                         fontSize,
@@ -340,9 +340,9 @@ void _SimulationView::updateImageFromSimulation()
             }
 
             if (overlayElement.selected == 1) {
-                auto viewPos = Viewport::mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y}, parameters.borderlessRendering);
-                if (Viewport::isVisible(viewPos)) {
-                    drawList->AddCircle({viewPos.x, viewPos.y}, Viewport::getZoomFactor() * 0.45f, Const::SelectedCellOverlayColor, 0, 2.0f);
+                auto viewPos = Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y}, parameters.borderlessRendering);
+                if (Viewport::get().isVisible(viewPos)) {
+                    drawList->AddCircle({viewPos.x, viewPos.y}, Viewport::get().getZoomFactor() * 0.45f, Const::SelectedCellOverlayColor, 0, 2.0f);
                 }
             }
         }
@@ -359,9 +359,9 @@ void _SimulationView::updateMotionBlur()
 void _SimulationView::markReferenceDomain()
 {
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-    auto p1 = Viewport::mapWorldToViewPosition({0, 0}, false);
+    auto p1 = Viewport::get().mapWorldToViewPosition({0, 0}, false);
     auto worldSize = _simulationFacade->getWorldSize();
-    auto p2 = Viewport::mapWorldToViewPosition(toRealVector2D(worldSize), false);
+    auto p2 = Viewport::get().mapWorldToViewPosition(toRealVector2D(worldSize), false);
     auto color = ImColor::HSV(0.66f, 1.0f, 1.0f, 0.8f);
     drawList->AddLine({p1.x, p1.y}, {p2.x, p1.y}, color);
     drawList->AddLine({p2.x, p1.y}, {p2.x, p2.y}, color);

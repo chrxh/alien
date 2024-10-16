@@ -63,8 +63,8 @@ void _StartupController::process()
             _simulationFacade->setClusteredSimulationData(deserializedSim.mainData);
             _simulationFacade->setStatisticsHistory(deserializedSim.statistics);
             _simulationFacade->setRealTime(deserializedSim.auxiliaryData.realTime);
-            Viewport::setCenterInWorldPos(deserializedSim.auxiliaryData.center);
-            Viewport::setZoomFactor(deserializedSim.auxiliaryData.zoom);
+            Viewport::get().setCenterInWorldPos(deserializedSim.auxiliaryData.center);
+            Viewport::get().setZoomFactor(deserializedSim.auxiliaryData.zoom);
             _temporalControlWindow->onSnapshot();
 
             _lastActivationTimepoint = std::chrono::steady_clock::now();
@@ -89,8 +89,8 @@ void _StartupController::process()
             _simulationFacade->setClusteredSimulationData(deserializedSim.mainData);
             _simulationFacade->setStatisticsHistory(deserializedSim.statistics);
             _simulationFacade->setRealTime(deserializedSim.auxiliaryData.realTime);
-            Viewport::setCenterInWorldPos(deserializedSim.auxiliaryData.center);
-            Viewport::setZoomFactor(deserializedSim.auxiliaryData.zoom);
+            Viewport::get().setCenterInWorldPos(deserializedSim.auxiliaryData.center);
+            Viewport::get().setZoomFactor(deserializedSim.auxiliaryData.zoom);
             _temporalControlWindow->onSnapshot();
 
             _lastActivationTimepoint = std::chrono::steady_clock::now();

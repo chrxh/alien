@@ -334,7 +334,7 @@ void _PatternEditorWindow::onOpenPattern()
             _startingPath = firstFilenameCopy.remove_filename().string();
             ClusteredDataDescription content;
             if (SerializerService::deserializeContentFromFile(content, firstFilename.string())) {
-                auto center = Viewport::getCenterInWorldPos();
+                auto center = Viewport::get().getCenterInWorldPos();
                 content.setCenter(center);
                 _simulationFacade->addAndSelectSimulationData(DataDescription(content));
                 _editorModel->update();
@@ -387,7 +387,7 @@ bool _PatternEditorWindow::isPastingPossible() const
 void _PatternEditorWindow::onPaste()
 {
     auto data = *_copiedSelection;
-    auto center = Viewport::getCenterInWorldPos();
+    auto center = Viewport::get().getCenterInWorldPos();
     data.setCenter(center);
     DescriptionEditService::generateNewCreatureIds(data);
     _simulationFacade->addAndSelectSimulationData(data);

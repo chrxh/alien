@@ -123,7 +123,7 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     NetworkService::init();
 
     //init controllers, windows and dialogs
-    Viewport::init(_simulationFacade);
+    Viewport::get().init(_simulationFacade);
     _persisterFacade->init(_simulationFacade);
     _uiController = std::make_shared<_UiController>();
     _autosaveController = std::make_shared<_AutosaveController>(_simulationFacade);

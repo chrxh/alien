@@ -67,7 +67,7 @@ void OverlayMessageController::processLoadingBar()
 
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
 
-        auto viewSize = toRealVector2D(Viewport::getViewSize());
+        auto viewSize = toRealVector2D(Viewport::get().getViewSize());
         auto width = viewSize.x / 6 + 1.0f;
         auto height = scale(20.0f);
         auto center = ImVec2{viewSize.x / 2, viewSize.y - scale(60.0f)};
@@ -168,7 +168,7 @@ void OverlayMessageController::processMessage()
     if (_withLightning && ++_counter > 2) {
         auto durationAfterSomeTicks = std::chrono::duration_cast<std::chrono::milliseconds>(now - *_ticksLaterTimepoint);
         float lightningAlpha = std::max(0.0f, 0.7f - static_cast<float>(durationAfterSomeTicks.count()) / FadeoutLightningDuration);
-        auto viewSize = toRealVector2D(Viewport::getViewSize());
+        auto viewSize = toRealVector2D(Viewport::get().getViewSize());
         drawList->AddRectFilled({0, 0}, {viewSize.x, viewSize.y}, ImColor::HSV(0.0f, 0.0f, 1.0f, lightningAlpha));
     }
     drawList->AddText(

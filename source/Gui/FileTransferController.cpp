@@ -75,8 +75,8 @@ void FileTransferController::onOpenSimulation()
                 }
                 _persisterFacade->restart();
 
-                Viewport::setCenterInWorldPos(data.deserializedSimulation.auxiliaryData.center);
-                Viewport::setZoomFactor(data.deserializedSimulation.auxiliaryData.zoom);
+                Viewport::get().setCenterInWorldPos(data.deserializedSimulation.auxiliaryData.center);
+                Viewport::get().setZoomFactor(data.deserializedSimulation.auxiliaryData.zoom);
                 _temporalControlWindow->onSnapshot();
                 printOverlayMessage(data.simulationName + ".sim");
             },
@@ -93,7 +93,7 @@ void FileTransferController::onSaveSimulation()
             _referencePath = firstFilenameCopy.remove_filename().string();
             printOverlayMessage("Saving ...");
             auto senderInfo = SenderInfo{.senderId = SenderId{FileTransferSenderId}, .wishResultData = false, .wishErrorInfo = true};
-            auto saveData = SaveSimulationRequestData{firstFilename.string(), Viewport::getZoomFactor(), Viewport::getCenterInWorldPos()};
+            auto saveData = SaveSimulationRequestData{firstFilename.string(), Viewport::get().getZoomFactor(), Viewport::get().getCenterInWorldPos()};
             _persisterFacade->scheduleSaveSimulationToFile(senderInfo, saveData);
         });
 }

@@ -9,8 +9,8 @@ DeserializedSimulation SerializationHelperService::getDeserializedSerialization(
     DeserializedSimulation result;
     result.auxiliaryData.timestep = static_cast<uint32_t>(simulationFacade->getCurrentTimestep());
     result.auxiliaryData.realTime = simulationFacade->getRealTime();
-    result.auxiliaryData.zoom = Viewport::getZoomFactor();
-    result.auxiliaryData.center = Viewport::getCenterInWorldPos();
+    result.auxiliaryData.zoom = Viewport::get().getZoomFactor();
+    result.auxiliaryData.center = Viewport::get().getCenterInWorldPos();
     result.auxiliaryData.generalSettings = simulationFacade->getGeneralSettings();
     result.auxiliaryData.simulationParameters = simulationFacade->getSimulationParameters();
     result.statistics = simulationFacade->getStatisticsHistory().getCopiedData();

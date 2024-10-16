@@ -180,7 +180,7 @@ void _EditorController::onInspectObjects(std::vector<CellOrParticleDescription> 
     RealVector2D center;
     int num = 0;
     for (auto const& entity : entities) {
-        auto entityPos = Viewport::mapWorldToViewPosition(DescriptionEditService::getPos(entity), borderlessRendering);
+        auto entityPos = Viewport::get().mapWorldToViewPosition(DescriptionEditService::getPos(entity), borderlessRendering);
         center += entityPos;
         ++num;
     }
@@ -188,18 +188,18 @@ void _EditorController::onInspectObjects(std::vector<CellOrParticleDescription> 
 
     float maxDistanceFromCenter = 0;
     for (auto const& entity : entities) {
-        auto entityPos = Viewport::mapWorldToViewPosition(DescriptionEditService::getPos(entity), borderlessRendering);
+        auto entityPos = Viewport::get().mapWorldToViewPosition(DescriptionEditService::getPos(entity), borderlessRendering);
         auto distanceFromCenter = toFloat(Math::length(entityPos - center));
         maxDistanceFromCenter = std::max(maxDistanceFromCenter, distanceFromCenter);
     }
-    auto viewSize = Viewport::getViewSize();
+    auto viewSize = Viewport::get().getViewSize();
     auto factorX = maxDistanceFromCenter == 0 ? 1.0f : viewSize.x / maxDistanceFromCenter / 3.8f;
     auto factorY = maxDistanceFromCenter == 0 ? 1.0f : viewSize.y / maxDistanceFromCenter / 3.4f;
 
     for (auto const& entity : newEntities) {
         auto id = DescriptionEditService::getId(entity);
         _editorModel->addInspectedEntity(entity);
-        auto entityPos = Viewport::mapWorldToViewPosition(DescriptionEditService::getPos(entity), borderlessRendering);
+        auto entityPos = Viewport::get().mapWorldToViewPosition(DescriptionEditService::getPos(entity), borderlessRendering);
         auto windowPosX = (entityPos.x - center.x) * factorX + center.x;
         auto windowPosY = (entityPos.y - center.y) * factorY + center.y;
         windowPosX = std::min(std::max(windowPosX, 0.0f), toFloat(viewSize.x) - 300.0f) + 40.0f;
@@ -286,8 +286,8 @@ void _EditorController::processInspectorWindows()
 
 void _EditorController::onSelectObjects(RealVector2D const& viewPos, bool modifierKeyPressed)
 {
-    auto pos = Viewport::mapViewToWorldPosition({viewPos.x, viewPos.y});
-    auto zoom = Viewport::getZoomFactor();
+    auto pos = Viewport::get().mapViewToWorldPosition({viewPos.x, viewPos.y});
+    auto zoom = Viewport::get().getZoomFactor();
     if (!modifierKeyPressed) {
         _simulationFacade->switchSelection(pos, std::max(0.5f, 10.0f / zoom));
     } else {
@@ -302,8 +302,8 @@ void _EditorController::onMoveSelectedObjects(
     RealVector2D const& prevWorldPos)
 {
     auto start = prevWorldPos;
-    auto end = Viewport::mapViewToWorldPosition({viewPos.x, viewPos.y});
-    auto zoom = Viewport::getZoomFactor();
+    auto end = Viewport::get().mapViewToWorldPosition({viewPos.x, viewPos.y});
+    auto zoom = Viewport::get().getZoomFactor();
     auto delta = end - start;
 
     ShallowUpdateSelectionData updateData;
@@ -320,7 +320,7 @@ void _EditorController::onFixateSelectedObjects(RealVector2D const& viewPos, Rea
     auto selectionPosition = RealVector2D{shallowData.centerPosX, shallowData.centerPosY};
     auto selectionDelta = selectionPosition - selectionPositionOnClick;
 
-    auto mouseStart = Viewport::mapViewToWorldPosition(viewPos);
+    auto mouseStart = Viewport::get().mapViewToWorldPosition(viewPos);
     auto mouseEnd = prevWorldPos;
     auto mouseDelta = mouseStart - mouseEnd;
 
@@ -338,7 +338,7 @@ void _EditorController::onFixateSelectedObjects(RealVector2D const& viewPos, Rea
 void _EditorController::onAccelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos)
 {
     auto start = prevWorldPos;
-    auto end = Viewport::mapViewToWorldPosition({viewPos.x, viewPos.y});
+    auto end = Viewport::get().mapViewToWorldPosition({viewPos.x, viewPos.y});
     auto delta = end - start;
 
     ShallowUpdateSelectionData updateData;
@@ -351,15 +351,15 @@ void _EditorController::onAccelerateSelectedObjects(RealVector2D const& viewPos,
 void _EditorController::onApplyForces(RealVector2D const& viewPos, RealVector2D const& prevWorldPos)
 {
     auto start = prevWorldPos;
-    auto end = Viewport::mapViewToWorldPosition({viewPos.x, viewPos.y});
-    auto zoom = Viewport::getZoomFactor();
+    auto end = Viewport::get().mapViewToWorldPosition({viewPos.x, viewPos.y});
+    auto zoom = Viewport::get().getZoomFactor();
     _simulationFacade->applyForce_async(start, end, (end - start) / 50.0 * std::min(5.0f, zoom), 20.0f / zoom);
 }
 
 void _EditorController::onUpdateSelectionRect(RealRect const& rect)
 {
-    auto startPos = Viewport::mapViewToWorldPosition(rect.topLeft);
-    auto endPos = Viewport::mapViewToWorldPosition(rect.bottomRight);
+    auto startPos = Viewport::get().mapViewToWorldPosition(rect.topLeft);
+    auto endPos = Viewport::get().mapViewToWorldPosition(rect.bottomRight);
     auto topLeft = RealVector2D{std::min(startPos.x, endPos.x), std::min(startPos.y, endPos.y)};
     auto bottomRight = RealVector2D{std::max(startPos.x, endPos.x), std::max(startPos.y, endPos.y)};
 
