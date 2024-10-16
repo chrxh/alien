@@ -58,7 +58,6 @@ private:
     DisplaySettingsDialog _displaySettingsDialog;
     PatternAnalysisDialog _patternAnalysisDialog;
     AboutDialog _aboutDialog;
-    LoginDialog _loginDialog;
     CreateUserDialog _createUserDialog;
     UploadSimulationDialog _uploadSimulationDialog;
     EditSimulationDialog _editSimulationDialog;

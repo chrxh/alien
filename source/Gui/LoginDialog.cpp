@@ -16,27 +16,25 @@
 #include "HelpStrings.h"
 #include "LoginController.h"
 
-_LoginDialog::_LoginDialog(
+void LoginDialog::init(
     SimulationFacade const& simulationFacade,
     PersisterFacade const& persisterFacade,
     CreateUserDialog const& createUserDialog,
     ActivateUserDialog const& activateUserDialog,
     ResetPasswordDialog const& resetPasswordDialog)
-    : _AlienDialog("Login")
-    , _simulationFacade(simulationFacade)
-    , _persisterFacade(persisterFacade)
-    , _createUserDialog(createUserDialog)
-    , _activateUserDialog(activateUserDialog)
-    , _resetPasswordDialog(resetPasswordDialog)
-
 {
+    _simulationFacade = simulationFacade;
+    _persisterFacade = persisterFacade;
+    _createUserDialog = createUserDialog;
+    _activateUserDialog = activateUserDialog;
+    _resetPasswordDialog = resetPasswordDialog;
 }
 
-_LoginDialog::~_LoginDialog()
-{
-}
+LoginDialog::LoginDialog()
+    : AlienDialog("Login")
+{}
 
-void _LoginDialog::processIntern()
+void LoginDialog::processIntern()
 {
     AlienImGui::Text("How to create a new user?");
     AlienImGui::HelpMarker(Const::LoginHowToCreateNewUseTooltip);

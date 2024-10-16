@@ -5,7 +5,7 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _NetworkSettingsDialog : public _AlienDialog
+class _NetworkSettingsDialog : public AlienDialog
 {
 public:
     _NetworkSettingsDialog();

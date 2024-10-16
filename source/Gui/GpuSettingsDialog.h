@@ -5,7 +5,7 @@
 #include "EngineInterface/GpuSettings.h"
 #include "Definitions.h"
 
-class _GpuSettingsDialog : public _AlienDialog
+class _GpuSettingsDialog : public AlienDialog
 {
 public:
     _GpuSettingsDialog(SimulationFacade const& simulationFacade);

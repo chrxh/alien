@@ -14,7 +14,7 @@ namespace
 }
 
 _NetworkSettingsDialog::_NetworkSettingsDialog()
-    : _AlienDialog("Network settings")
+    : AlienDialog("Network settings")
 {}
 
 void _NetworkSettingsDialog::processIntern()

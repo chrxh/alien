@@ -10,7 +10,7 @@
 #include "MessageDialog.h"
 
 _DeleteUserDialog::_DeleteUserDialog()
-    : _AlienDialog("Delete user")
+    : AlienDialog("Delete user")
 {}
 
 void _DeleteUserDialog::processIntern()

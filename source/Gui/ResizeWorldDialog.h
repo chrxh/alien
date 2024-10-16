@@ -3,7 +3,7 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _ResizeWorldDialog : public _AlienDialog
+class _ResizeWorldDialog : public AlienDialog
 {
 public:
     _ResizeWorldDialog(SimulationFacade const& simulationFacade, TemporalControlWindow const& temporalControlWindow);

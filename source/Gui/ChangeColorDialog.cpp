@@ -12,7 +12,7 @@
 _ChangeColorDialog::_ChangeColorDialog(
     std::function<GenomeDescription()> const& getGenomeFunc,
     std::function<void(GenomeDescription const&)> const& setGenomeFunc)
-    : _AlienDialog("Change color")
+    : AlienDialog("Change color")
     , _getGenomeFunc(getGenomeFunc)
     , _setGenomeFunc(setGenomeFunc)
 {}

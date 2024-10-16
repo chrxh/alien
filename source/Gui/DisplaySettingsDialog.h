@@ -4,7 +4,7 @@
 #include "EngineInterface/Definitions.h"
 #include "Definitions.h"
 
-class _DisplaySettingsDialog : public _AlienDialog
+class _DisplaySettingsDialog : public AlienDialog
 {
 public:
     _DisplaySettingsDialog();

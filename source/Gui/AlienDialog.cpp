@@ -6,16 +6,16 @@
 #include "DelayedExecutionController.h"
 #include "OverlayMessageController.h"
 
-_AlienDialog::_AlienDialog(std::string const& title)
+AlienDialog::AlienDialog(std::string const& title)
     : _title(title)
 {
 }
 
-_AlienDialog::~_AlienDialog()
+AlienDialog::~AlienDialog()
 {
 }
 
-void _AlienDialog::process()
+void AlienDialog::process()
 {
     if (_state == DialogState::Closed) {
         return;
@@ -42,13 +42,13 @@ void _AlienDialog::process()
     }
 }
 
-void _AlienDialog::open()
+void AlienDialog::open()
 {
     _state = DialogState::JustOpened;
     openIntern();
 }
 
-void _AlienDialog::close()
+void AlienDialog::close()
 {
     delayedExecution([this] {
         ImGui::CloseCurrentPopup();
@@ -56,7 +56,7 @@ void _AlienDialog::close()
     });
 }
 
-void _AlienDialog::changeTitle(std::string const& title)
+void AlienDialog::changeTitle(std::string const& title)
 {
     _title = title;
 }

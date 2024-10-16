@@ -7,7 +7,7 @@
 #include "StyleRepository.h"
 
 _AboutDialog::_AboutDialog()
-    : _AlienDialog("About")
+    : AlienDialog("About")
 {}
 
 void _AboutDialog::processIntern()

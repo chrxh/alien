@@ -5,7 +5,7 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _EditSimulationDialog : public _AlienDialog
+class _EditSimulationDialog : public AlienDialog
 {
 public:
     _EditSimulationDialog();
