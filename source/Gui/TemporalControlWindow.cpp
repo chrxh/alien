@@ -6,7 +6,7 @@
 
 #include "Base/Definitions.h"
 #include "Base/StringHelper.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/SpaceCalculator.h"
 
 #include "StyleRepository.h"
@@ -21,10 +21,10 @@ namespace
 }
 
 _TemporalControlWindow::_TemporalControlWindow(
-    SimulationController const& simController,
+    SimulationFacade const& simulationFacade,
     StatisticsWindow const& statisticsWindow)
     : _AlienWindow("Temporal control", "windows.temporal control", true)
-    , _simController(simController)
+    , _simulationFacade(simulationFacade)
     , _statisticsWindow(statisticsWindow)
 {}
 
@@ -70,7 +70,7 @@ void _TemporalControlWindow::processTpsInfo()
 
     ImGui::PushFont(StyleRepository::get().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor /*0xffa07050*/);
-    ImGui::TextUnformatted(StringHelper::format(_simController->getTps(), 1).c_str());
+    ImGui::TextUnformatted(StringHelper::format(_simulationFacade->getTps(), 1).c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();
 }
@@ -81,7 +81,7 @@ void _TemporalControlWindow::processTotalTimestepsInfo()
 
     ImGui::PushFont(StyleRepository::get().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-    ImGui::TextUnformatted(StringHelper::format(_simController->getCurrentTimestep()).c_str());
+    ImGui::TextUnformatted(StringHelper::format(_simulationFacade->getCurrentTimestep()).c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();
 }
@@ -92,7 +92,7 @@ void _TemporalControlWindow::processRealTimeInfo()
 
     ImGui::PushFont(StyleRepository::get().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-    ImGui::TextUnformatted(StringHelper::format(_simController->getRealTime()).c_str());
+    ImGui::TextUnformatted(StringHelper::format(_simulationFacade->getRealTime()).c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();
 }
@@ -105,35 +105,35 @@ void _TemporalControlWindow::processTpsRestriction()
     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
     ImGui::SliderInt("##TPSRestriction", &_tpsRestriction, 1, 1000, "%d TPS", ImGuiSliderFlags_Logarithmic);
     if (_slowDown) {
-        _simController->setTpsRestriction(_tpsRestriction);
+        _simulationFacade->setTpsRestriction(_tpsRestriction);
     } else {
-        _simController->setTpsRestriction(std::nullopt);
+        _simulationFacade->setTpsRestriction(std::nullopt);
     }
     ImGui::PopItemWidth();
     ImGui::EndDisabled();
 
-    auto syncSimulationWithRendering = _simController->isSyncSimulationWithRendering();
+    auto syncSimulationWithRendering = _simulationFacade->isSyncSimulationWithRendering();
     if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Sync with rendering"), syncSimulationWithRendering)) {
-        _simController->setSyncSimulationWithRendering(syncSimulationWithRendering);
+        _simulationFacade->setSyncSimulationWithRendering(syncSimulationWithRendering);
     }
 
     ImGui::BeginDisabled(!syncSimulationWithRendering);
     ImGui::SameLine(scale(LeftColumnWidth) - (ImGui::GetWindowWidth() - ImGui::GetContentRegionAvail().x));
-    auto syncSimulationWithRenderingRatio = _simController->getSyncSimulationWithRenderingRatio();
+    auto syncSimulationWithRenderingRatio = _simulationFacade->getSyncSimulationWithRenderingRatio();
     if (AlienImGui::SliderInt(AlienImGui::SliderIntParameters().textWidth(0).min(1).max(40).logarithmic(true).format("%d TPS : FPS"), &syncSimulationWithRenderingRatio)) {
-        _simController->setSyncSimulationWithRenderingRatio(syncSimulationWithRenderingRatio);
+        _simulationFacade->setSyncSimulationWithRenderingRatio(syncSimulationWithRenderingRatio);
     }
     ImGui::EndDisabled();
 }
 
 void _TemporalControlWindow::processRunButton()
 {
-    ImGui::BeginDisabled(_simController->isSimulationRunning());
+    ImGui::BeginDisabled(_simulationFacade->isSimulationRunning());
     auto result = AlienImGui::ToolbarButton(ICON_FA_PLAY);
     AlienImGui::Tooltip("Run");
     if (result) {
         _history.clear();
-        _simController->runSimulation();
+        _simulationFacade->runSimulation();
         printOverlayMessage("Run");
     }
     ImGui::EndDisabled();
@@ -141,11 +141,11 @@ void _TemporalControlWindow::processRunButton()
 
 void _TemporalControlWindow::processPauseButton()
 {
-    ImGui::BeginDisabled(!_simController->isSimulationRunning());
+    ImGui::BeginDisabled(!_simulationFacade->isSimulationRunning());
     auto result = AlienImGui::ToolbarButton(ICON_FA_PAUSE);
     AlienImGui::Tooltip("Pause");
     if (result) {
-        _simController->pauseSimulation();
+        _simulationFacade->pauseSimulation();
         printOverlayMessage("Pause");
     }
     ImGui::EndDisabled();
@@ -153,7 +153,7 @@ void _TemporalControlWindow::processPauseButton()
 
 void _TemporalControlWindow::processStepBackwardButton()
 {
-    ImGui::BeginDisabled(_history.empty() || _simController->isSimulationRunning());
+    ImGui::BeginDisabled(_history.empty() || _simulationFacade->isSimulationRunning());
     auto result = AlienImGui::ToolbarButton(ICON_FA_CHEVRON_LEFT);
     AlienImGui::Tooltip("Load previous time step");
     if (result) {
@@ -168,12 +168,12 @@ void _TemporalControlWindow::processStepBackwardButton()
 
 void _TemporalControlWindow::processStepForwardButton()
 {
-    ImGui::BeginDisabled(_simController->isSimulationRunning());
+    ImGui::BeginDisabled(_simulationFacade->isSimulationRunning());
     auto result = AlienImGui::ToolbarButton(ICON_FA_CHEVRON_RIGHT);
     AlienImGui::Tooltip("Process single time step");
     if (result) {
         _history.emplace_back(createSnapshot());
-        _simController->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(1);
     }
     ImGui::EndDisabled();
 }
@@ -197,7 +197,7 @@ void _TemporalControlWindow::processLoadFlashbackButton()
                         "(such as the position of moving zones) will be restored as well.");
     if (result) {
         delayedExecution([this] { applySnapshot(*_snapshot); });
-        _simController->removeSelection();
+        _simulationFacade->removeSelection();
         _history.clear();
 
         printOverlayMessage("Loading flashback ...", true);
@@ -208,17 +208,17 @@ void _TemporalControlWindow::processLoadFlashbackButton()
 _TemporalControlWindow::Snapshot _TemporalControlWindow::createSnapshot()
 {
     Snapshot result;
-    result.timestep = _simController->getCurrentTimestep();
-    result.realTime = _simController->getRealTime();
-    result.data = _simController->getSimulationData();
-    result.parameters = _simController->getSimulationParameters();
+    result.timestep = _simulationFacade->getCurrentTimestep();
+    result.realTime = _simulationFacade->getRealTime();
+    result.data = _simulationFacade->getSimulationData();
+    result.parameters = _simulationFacade->getSimulationParameters();
     return result;
 }
 
 
 void _TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
 {
-    auto parameters = _simController->getSimulationParameters();
+    auto parameters = _simulationFacade->getSimulationParameters();
     auto const& origParameters = snapshot.parameters;
 
     if (origParameters.numRadiationSources == parameters.numRadiationSources) {
@@ -239,11 +239,11 @@ void _TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
             parameters.cellMaxAge[i] = origParameters.cellMaxAge[i];
         }
     }
-    _simController->setCurrentTimestep(snapshot.timestep);
-    _simController->setRealTime(snapshot.realTime);
-    _simController->clear();
-    _simController->setSimulationData(snapshot.data);
-    _simController->setSimulationParameters(parameters);
+    _simulationFacade->setCurrentTimestep(snapshot.timestep);
+    _simulationFacade->setRealTime(snapshot.realTime);
+    _simulationFacade->clear();
+    _simulationFacade->setSimulationData(snapshot.data);
+    _simulationFacade->setSimulationParameters(parameters);
 }
 
 template <typename MovedObjectType>

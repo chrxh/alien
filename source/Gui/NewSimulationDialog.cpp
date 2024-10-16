@@ -3,7 +3,7 @@
 #include <imgui.h>
 
 #include "Base/GlobalSettings.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "Viewport.h"
 #include "StatisticsWindow.h"
@@ -17,11 +17,11 @@ namespace
 }
 
 _NewSimulationDialog::_NewSimulationDialog(
-    SimulationController const& simController,
+    SimulationFacade const& simulationFacade,
     TemporalControlWindow const& temporalControlWindow,
     StatisticsWindow const& statisticsWindow)
     : _AlienDialog("New simulation")
-    , _simController(simController)
+    , _simulationFacade(simulationFacade)
     , _temporalControlWindow(temporalControlWindow)
     , _statisticsWindow(statisticsWindow)
 {
@@ -61,7 +61,7 @@ void _NewSimulationDialog::processIntern()
 
 void _NewSimulationDialog::openIntern()
 {
-    auto worldSize = _simController->getWorldSize();
+    auto worldSize = _simulationFacade->getWorldSize();
     _width = worldSize.x;
     _height = worldSize.y;
 }
@@ -70,14 +70,14 @@ void _NewSimulationDialog::onNewSimulation()
 {
     SimulationParameters parameters;
     if (_adoptSimulationParameters) {
-        parameters = _simController->getSimulationParameters();
+        parameters = _simulationFacade->getSimulationParameters();
     }
-    _simController->closeSimulation();
+    _simulationFacade->closeSimulation();
 
     GeneralSettings generalSettings;
     generalSettings.worldSizeX = _width;
     generalSettings.worldSizeY = _height;
-    _simController->newSimulation(std::nullopt, 0, generalSettings, parameters);
+    _simulationFacade->newSimulation(std::nullopt, 0, generalSettings, parameters);
     Viewport::setCenterInWorldPos({toFloat(_width) / 2, toFloat(_height) / 2});
     Viewport::setZoomFactor(4.0f);
     _temporalControlWindow->onSnapshot();

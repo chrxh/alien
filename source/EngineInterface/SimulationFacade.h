@@ -4,15 +4,15 @@
 #include "SelectionShallowData.h"
 #include "Settings.h"
 #include "ShallowUpdateSelectionData.h"
-#include "SimulationController.h"
+#include "SimulationFacade.h"
 #include "MutationType.h"
 #include "DataPointCollection.h"
 #include "StatisticsHistory.h"
 
-class _SimulationController
+class _SimulationFacade
 {
 public:
-    virtual ~_SimulationController() = default;
+    virtual ~_SimulationFacade() = default;
 
     virtual void newSimulation(
         std::optional<std::string> const& simulationName,

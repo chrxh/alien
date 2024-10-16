@@ -1,10 +1,10 @@
 #pragma once
 
 #include "EngineInterface/DeserializedSimulation.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 
 class SerializationHelperService
 {
 public:
-    static DeserializedSimulation getDeserializedSerialization(SimulationController const& simController);
+    static DeserializedSimulation getDeserializedSerialization(SimulationFacade const& simulationFacade);
 };

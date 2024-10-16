@@ -9,7 +9,7 @@
 #include "Base/StringHelper.h"
 #include "Base/FileLogger.h"
 #include "EngineInterface/SerializerService.h"
-#include "EngineImpl/SimulationControllerImpl.h"
+#include "EngineImpl/SimulationFacadeImpl.h"
 
 int main(int argc, char** argv)
 {
@@ -47,15 +47,15 @@ int main(int argc, char** argv)
         //run simulation
         auto startTimepoint = std::chrono::steady_clock::now();
 
-        auto simController = std::make_shared<_SimulationControllerImpl>();
-        simController->newSimulation("", simData.auxiliaryData.timestep, simData.auxiliaryData.generalSettings, simData.auxiliaryData.simulationParameters);
-        simController->setClusteredSimulationData(simData.mainData);
-        simController->setStatisticsHistory(simData.statistics);
-        simController->setRealTime(simData.auxiliaryData.realTime);
-        std::cout << "Device: " << simController->getGpuName() << std::endl;
+        auto simulationFacade = std::make_shared<_SimulationFacadeImpl>();
+        simulationFacade->newSimulation("", simData.auxiliaryData.timestep, simData.auxiliaryData.generalSettings, simData.auxiliaryData.simulationParameters);
+        simulationFacade->setClusteredSimulationData(simData.mainData);
+        simulationFacade->setStatisticsHistory(simData.statistics);
+        simulationFacade->setRealTime(simData.auxiliaryData.realTime);
+        std::cout << "Device: " << simulationFacade->getGpuName() << std::endl;
         std::cout << "Start simulation" << std::endl;
 
-        simController->calcTimesteps(timesteps);
+        simulationFacade->calcTimesteps(timesteps);
 
         auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTimepoint).count();
         auto tps = ms != 0 ? 1000.0f * toFloat(timesteps) / toFloat(ms) : 0.0f; 
@@ -65,11 +65,11 @@ int main(int argc, char** argv)
 
         //write output simulation file
         std::cout << "Writing output" << std::endl;
-        simData.auxiliaryData.timestep = static_cast<uint32_t>(simController->getCurrentTimestep());
-        simData.mainData = simController->getClusteredSimulationData();
-        simData.auxiliaryData.simulationParameters = simController->getSimulationParameters();
-        simData.statistics = simController->getStatisticsHistory().getCopiedData();
-        simData.auxiliaryData.realTime = simController->getRealTime();
+        simData.auxiliaryData.timestep = static_cast<uint32_t>(simulationFacade->getCurrentTimestep());
+        simData.mainData = simulationFacade->getClusteredSimulationData();
+        simData.auxiliaryData.simulationParameters = simulationFacade->getSimulationParameters();
+        simData.statistics = simulationFacade->getStatisticsHistory().getCopiedData();
+        simData.auxiliaryData.realTime = simulationFacade->getRealTime();
         if (outputFilename.empty()) {
             std::cout << "No output file given." << std::endl;
             return 1;

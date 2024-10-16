@@ -32,6 +32,6 @@ protected:
     bool compare(CellDescription left, CellDescription right) const;
     bool compare(ParticleDescription left, ParticleDescription right) const;
 
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
     SimulationParameters _parameters;
 };

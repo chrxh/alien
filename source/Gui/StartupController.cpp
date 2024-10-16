@@ -7,7 +7,7 @@
 #include "Base/Resources.h"
 #include "Base/LoggingService.h"
 #include "EngineInterface/SerializerService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "PersisterInterface/PersisterFacade.h"
 
 #include "OpenGLHelper.h"
@@ -27,10 +27,10 @@ namespace
 }
 
 _StartupController::_StartupController(
-    SimulationController const& simController,
+    SimulationFacade const& simulationFacade,
     PersisterFacade const& persisterFacade,
     TemporalControlWindow const& temporalControlWindow)
-    : _simController(simController)
+    : _simulationFacade(simulationFacade)
     , _temporalControlWindow(temporalControlWindow)
     , _persisterFacade(persisterFacade)
 {
@@ -55,14 +55,14 @@ void _StartupController::process()
         if (requestedSimState == PersisterRequestState::Finished) {
             auto const& data = _persisterFacade->fetchReadSimulationData(_startupSimRequestId);
             auto const& deserializedSim = data.deserializedSimulation;
-            _simController->newSimulation(
+            _simulationFacade->newSimulation(
                 data.simulationName,
                 deserializedSim.auxiliaryData.timestep,
                 deserializedSim.auxiliaryData.generalSettings,
                 deserializedSim.auxiliaryData.simulationParameters);
-            _simController->setClusteredSimulationData(deserializedSim.mainData);
-            _simController->setStatisticsHistory(deserializedSim.statistics);
-            _simController->setRealTime(deserializedSim.auxiliaryData.realTime);
+            _simulationFacade->setClusteredSimulationData(deserializedSim.mainData);
+            _simulationFacade->setStatisticsHistory(deserializedSim.statistics);
+            _simulationFacade->setRealTime(deserializedSim.auxiliaryData.realTime);
             Viewport::setCenterInWorldPos(deserializedSim.auxiliaryData.center);
             Viewport::setZoomFactor(deserializedSim.auxiliaryData.zoom);
             _temporalControlWindow->onSnapshot();
@@ -81,14 +81,14 @@ void _StartupController::process()
             deserializedSim.auxiliaryData.center = {500.0f, 250.0f};
             deserializedSim.auxiliaryData.realTime = std::chrono::milliseconds(0);
 
-            _simController->newSimulation(
+            _simulationFacade->newSimulation(
                 "autosave",
                 deserializedSim.auxiliaryData.timestep,
                 deserializedSim.auxiliaryData.generalSettings,
                 deserializedSim.auxiliaryData.simulationParameters);
-            _simController->setClusteredSimulationData(deserializedSim.mainData);
-            _simController->setStatisticsHistory(deserializedSim.statistics);
-            _simController->setRealTime(deserializedSim.auxiliaryData.realTime);
+            _simulationFacade->setClusteredSimulationData(deserializedSim.mainData);
+            _simulationFacade->setStatisticsHistory(deserializedSim.statistics);
+            _simulationFacade->setRealTime(deserializedSim.auxiliaryData.realTime);
             Viewport::setCenterInWorldPos(deserializedSim.auxiliaryData.center);
             Viewport::setZoomFactor(deserializedSim.auxiliaryData.zoom);
             _temporalControlWindow->onSnapshot();

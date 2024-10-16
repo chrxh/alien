@@ -3,7 +3,7 @@
 #include "Base/NumberGenerator.h"
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
 class DataTransferTests : public IntegrationTestFramework
@@ -38,8 +38,8 @@ TEST_F(DataTransferTests, singleCell)
                      .setCellFunction(neuron)
                      .setActivity({1, 0, -1, 0, 0, 0, 0, 0}));
 
-    _simController->setSimulationData(data);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    auto actualData = _simulationFacade->getSimulationData();
 
     EXPECT_TRUE(compare(data, actualData));
 }
@@ -52,8 +52,8 @@ TEST_F(DataTransferTests, singleParticle)
     neuron.weights[2][1] = 1.0f;
     data.addParticle(ParticleDescription().setId(1).setPos({2.0f, 4.0f}).setVel({0.5f, 1.0f}).setEnergy(100.0f).setColor(2));
 
-    _simController->setSimulationData(data);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    auto actualData = _simulationFacade->getSimulationData();
 
     EXPECT_TRUE(compare(data, actualData));
 }
@@ -96,8 +96,8 @@ TEST_F(DataTransferTests, cellCluster)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    auto actualData = _simulationFacade->getSimulationData();
 
     EXPECT_TRUE(compare(data, actualData));
 }
@@ -130,8 +130,8 @@ TEST_F(DataTransferTests, largeData)
         addCellAndParticles(data);
     }
     {
-        _simController->setSimulationData(data);
-        auto actualData = _simController->getSimulationData();
+        _simulationFacade->setSimulationData(data);
+        auto actualData = _simulationFacade->getSimulationData();
         EXPECT_TRUE(compare(data, actualData));
     }
 
@@ -140,8 +140,8 @@ TEST_F(DataTransferTests, largeData)
         addCellAndParticles(newData);
     }
     {
-        _simController->addAndSelectSimulationData(newData);
-        auto actualData = _simController->getSimulationData();
+        _simulationFacade->addAndSelectSimulationData(newData);
+        auto actualData = _simulationFacade->getSimulationData();
         EXPECT_EQ(data.cells.size() + newData.cells.size(), actualData.cells.size());
         EXPECT_EQ(data.particles.size() + newData.particles.size(), actualData.particles.size());
     }

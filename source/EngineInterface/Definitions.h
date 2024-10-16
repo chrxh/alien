@@ -21,8 +21,8 @@ struct GpuSettings;
 struct GeneralSettings;
 struct Settings;
 
-class _SimulationController;
-using SimulationController = std::shared_ptr<_SimulationController>;
+class _SimulationFacade;
+using SimulationFacade = std::shared_ptr<_SimulationFacade>;
 
 struct TimelineStatistics;
 struct HistogramData;

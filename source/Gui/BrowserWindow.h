@@ -21,7 +21,7 @@ class _BrowserWindow : public _AlienWindow
 {
 public:
     _BrowserWindow(
-        SimulationController const& simController,
+        SimulationFacade const& simulationFacade,
         PersisterFacade const& persisterFacade,
         StatisticsWindow const& statisticsWindow,
         TemporalControlWindow const& temporalControlWindow,
@@ -142,7 +142,7 @@ private:
 
     DownloadCache _downloadCache;
 
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
     PersisterFacade _persisterFacade;
     StatisticsWindow _statisticsWindow;
     TemporalControlWindow _temporalControlWindow;

@@ -26,7 +26,7 @@ struct SavepointEntry
 class _AutosaveWindow : public _AlienWindow
 {
 public:
-    _AutosaveWindow(SimulationController const& simController, PersisterFacade const& persisterFacade);
+    _AutosaveWindow(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade);
     ~_AutosaveWindow();
 
 private:
@@ -42,7 +42,7 @@ private:
 
     void validationAndCorrection();
 
-    SimulationController _simController; 
+    SimulationFacade _simulationFacade; 
     PersisterFacade _persisterFacade;
 
     bool _settingsOpen = false;

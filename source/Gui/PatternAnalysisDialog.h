@@ -6,7 +6,7 @@
 class _PatternAnalysisDialog
 {
 public:
-    _PatternAnalysisDialog(SimulationController const& simController);
+    _PatternAnalysisDialog(SimulationFacade const& simulationFacade);
     ~_PatternAnalysisDialog();
 
     void process();
@@ -90,7 +90,7 @@ private:
     ClusterAnalysisDescription getAnalysisDescription(ClusterDescription const& cluster) const;
 
 private:
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
 
     std::string _startingPath;
 };

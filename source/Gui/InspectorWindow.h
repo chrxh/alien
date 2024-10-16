@@ -11,7 +11,7 @@ class _InspectorWindow
 {
 public:
     _InspectorWindow(
-        SimulationController const& simController,
+        SimulationFacade const& simulationFacade,
         EditorModel const& editorModel,
         GenomeEditorWindow const& genomeEditorWindow,
         uint64_t entityId,
@@ -54,7 +54,7 @@ private:
 
     void validationAndCorrection(CellDescription& cell) const;
 
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
     EditorModel _editorModel;
     GenomeEditorWindow _genomeEditorWindow;
 

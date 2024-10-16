@@ -7,7 +7,7 @@
 class _MassOperationsDialog
 {
 public:
-    _MassOperationsDialog(SimulationController const& simController);
+    _MassOperationsDialog(SimulationFacade const& simulationFacade);
 
     void process();
 
@@ -20,7 +20,7 @@ private:
     bool isOkEnabled();
     void validationAndCorrection();
 
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
 
     bool _show = false;
 

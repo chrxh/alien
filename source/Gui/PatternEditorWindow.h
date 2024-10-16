@@ -11,7 +11,7 @@ class _PatternEditorWindow : public _AlienWindow
 public:
     _PatternEditorWindow(
         EditorModel const& editorModel,
-        SimulationController const& simController,
+        SimulationFacade const& simulationFacade,
         EditorControllerWeakPtr const& editorController);
     ~_PatternEditorWindow();
 
@@ -38,7 +38,7 @@ private:
     bool hasSelectionChanged(SelectionShallowData const& selection) const;
 
     EditorModel _editorModel;
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
     EditorControllerWeakPtr _editorController;
 
     std::string _startingPath;

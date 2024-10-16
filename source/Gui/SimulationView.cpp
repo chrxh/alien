@@ -7,7 +7,7 @@
 #include "Base/GlobalSettings.h"
 #include "Base/Resources.h"
 #include "EngineInterface/Colors.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/SpaceCalculator.h"
 
 #include "AlienImGui.h"
@@ -24,21 +24,21 @@ namespace
     auto constexpr ZoomFactorForOverlay = 12.0f;
 }
 
-_SimulationView::_SimulationView(SimulationController const& simController)
-    : _simController(simController)
+_SimulationView::_SimulationView(SimulationFacade const& simulationFacade)
+    : _simulationFacade(simulationFacade)
 {
     _isCellDetailOverlayActive = GlobalSettings::get().getBool("settings.simulation view.overlay", _isCellDetailOverlayActive);
     _brightness = GlobalSettings::get().getFloat("windows.simulation view.brightness", _brightness);
     _contrast = GlobalSettings::get().getFloat("windows.simulation view.contrast", _contrast);
     _motionBlur = GlobalSettings::get().getFloat("windows.simulation view.motion blur factor", _motionBlur);
 
-    _simController = simController;
+    _simulationFacade = simulationFacade;
     _shader = std::make_shared<_Shader>(Const::SimulationVertexShader, Const::SimulationFragmentShader);
 
     _scrollbarX = std::make_shared<_SimulationScrollbar>(
-        "SimScrollbarX", _SimulationScrollbar ::Orientation::Horizontal, _simController);
+        "SimScrollbarX", _SimulationScrollbar ::Orientation::Horizontal, _simulationFacade);
     _scrollbarY = std::make_shared<_SimulationScrollbar>(
-        "SimScrollbarY", _SimulationScrollbar::Orientation::Vertical, _simController);
+        "SimScrollbarY", _SimulationScrollbar::Orientation::Vertical, _simulationFacade);
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -115,7 +115,7 @@ void _SimulationView::resize(IntVector2D const& size)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_SHORT, NULL);
-    _simController->setImageResource(reinterpret_cast<void*>(uintptr_t(_textureSimulationId)));
+    _simulationFacade->setImageResource(reinterpret_cast<void*>(uintptr_t(_textureSimulationId)));
 
     glGenTextures(1, &_textureFramebufferId1);
     glBindTexture(GL_TEXTURE_2D, _textureFramebufferId1);
@@ -179,7 +179,7 @@ void _SimulationView::draw(bool renderSimulation)
         glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        if (_simController->getSimulationParameters().markReferenceDomain) {
+        if (_simulationFacade->getSimulationParameters().markReferenceDomain) {
             markReferenceDomain();
         }
 
@@ -276,7 +276,7 @@ void _SimulationView::updateImageFromSimulation()
     auto zoomFactor = Viewport::getZoomFactor();
 
     if (zoomFactor >= ZoomFactorForOverlay) {
-        auto overlay = _simController->tryDrawVectorGraphicsAndReturnOverlay(
+        auto overlay = _simulationFacade->tryDrawVectorGraphicsAndReturnOverlay(
             worldRect.topLeft, worldRect.bottomRight, {viewSize.x, viewSize.y}, zoomFactor);
         if (overlay) {
             std::sort(overlay->elements.begin(), overlay->elements.end(), [](OverlayElementDescription const& left, OverlayElementDescription const& right) {
@@ -285,7 +285,7 @@ void _SimulationView::updateImageFromSimulation()
             _overlay = overlay;
         }
     } else {
-        _simController->tryDrawVectorGraphics(
+        _simulationFacade->tryDrawVectorGraphics(
             worldRect.topLeft, worldRect.bottomRight, {viewSize.x, viewSize.y}, zoomFactor);
         _overlay = std::nullopt;
     }
@@ -293,8 +293,8 @@ void _SimulationView::updateImageFromSimulation()
     //draw overlay
     if (_overlay) {
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        auto parameters = _simController->getSimulationParameters();
-        auto timestep = _simController->getCurrentTimestep();
+        auto parameters = _simulationFacade->getSimulationParameters();
+        auto timestep = _simulationFacade->getCurrentTimestep();
         for (auto const& overlayElement : _overlay->elements) {
             if (_isCellDetailOverlayActive && overlayElement.cell) {
                 {
@@ -360,7 +360,7 @@ void _SimulationView::markReferenceDomain()
 {
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
     auto p1 = Viewport::mapWorldToViewPosition({0, 0}, false);
-    auto worldSize = _simController->getWorldSize();
+    auto worldSize = _simulationFacade->getWorldSize();
     auto p2 = Viewport::mapWorldToViewPosition(toRealVector2D(worldSize), false);
     auto color = ImColor::HSV(0.66f, 1.0f, 1.0f, 0.8f);
     drawList->AddLine({p1.x, p1.y}, {p2.x, p1.y}, color);

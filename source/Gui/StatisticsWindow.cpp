@@ -14,7 +14,7 @@
 #include "Base/GlobalSettings.h"
 #include "Base/StringHelper.h"
 #include "EngineInterface/Colors.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/StatisticsHistory.h"
 #include "EngineInterface/SerializerService.h"
 
@@ -31,9 +31,9 @@ namespace
     auto constexpr LiveStatisticsDeltaTime = 50;  //in millisec
 }
 
-_StatisticsWindow::_StatisticsWindow(SimulationController const& simController)
+_StatisticsWindow::_StatisticsWindow(SimulationFacade const& simulationFacade)
     : _AlienWindow("Statistics", "windows.statistics", false)
-    , _simController(simController)
+    , _simulationFacade(simulationFacade)
 {
     auto path = std::filesystem::current_path();
     if (path.has_parent_path()) {
@@ -492,7 +492,7 @@ void _StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*val
     ImGui::PopID();
     ImGui::SameLine();
 
-    auto const& statisticsHistory = _simController->getStatisticsHistory();
+    auto const& statisticsHistory = _simulationFacade->getStatisticsHistory();
 
     std::lock_guard lock(statisticsHistory.getMutex());
     auto longtermStatistics = &statisticsHistory.getDataRef();
@@ -532,9 +532,9 @@ void _StatisticsWindow::processBackground()
     auto duration = _lastTimepoint.has_value() ? static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(timepoint - *_lastTimepoint).count()) : 0;
     if(!_lastTimepoint || duration > LiveStatisticsDeltaTime) {
         _lastTimepoint = timepoint;
-        auto rawStatistics = _simController->getRawStatistics();
+        auto rawStatistics = _simulationFacade->getRawStatistics();
         _histogramLiveStatistics.update(rawStatistics.histogram);
-        _timelineLiveStatistics.update(rawStatistics.timeline, _simController->getCurrentTimestep());
+        _timelineLiveStatistics.update(rawStatistics.timeline, _simulationFacade->getCurrentTimestep());
         _tableLiveStatistics.update(rawStatistics.timeline);
     }
 }

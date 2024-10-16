@@ -5,7 +5,7 @@
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/GenomeDescriptionService.h"
 #include "EngineInterface/GenomeDescriptions.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
 class DetonatorTests : public IntegrationTestFramework
@@ -41,10 +41,10 @@ TEST_F(DetonatorTests, doNothing)
             .setCellFunction(DetonatorDescription().setCountDown(14)),
     });
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualDetonatorCell = getCell(actualData, 1);
 
     EXPECT_EQ(1, actualData.cells.size());
@@ -74,10 +74,10 @@ TEST_F(DetonatorTests, activateDetonator)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualDetonatorCell = getCell(actualData, 1);
 
     EXPECT_EQ(2, actualData.cells.size());
@@ -95,10 +95,10 @@ TEST_F(DetonatorTests, explosion)
         CellDescription().setId(2).setPos({12.0f, 10.0f}).setExecutionOrderNumber(5),
     });
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(6 * 10 + 1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(6 * 10 + 1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualDetonatorCell = getCell(actualData, 1);
     auto actualOtherCell = getCell(actualData, 2);
 
@@ -124,10 +124,10 @@ TEST_F(DetonatorTests, chainExplosion)
             .setCellFunction(DetonatorDescription().setState(DetonatorState_Ready).setCountDown(10)),
     });
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(6 * 11 + 1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(6 * 11 + 1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualDetonatorCell = getCell(actualData, 1);
     auto actualOtherCell = getCell(actualData, 2);
 
@@ -148,10 +148,10 @@ TEST_F(DetonatorTests, explosionIfDying)
             .setCellFunction(DetonatorDescription().setState(DetonatorState_Activated).setCountDown(10)),
     });
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(6 * 10 + 1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(6 * 10 + 1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualDetonatorCell = getCell(actualData, 1);
 
     EXPECT_EQ(1, actualData.cells.size());

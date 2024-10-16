@@ -2,7 +2,7 @@
 
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/GenomeDescriptionService.h"
 
 #include "IntegrationTestFramework.h"
@@ -51,12 +51,12 @@ TEST_F(InjectorTests, nothingFound)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
+    _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 6 * 4; ++i) {
-        _simController->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(1);
     }
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualCell = getCell(actualData, 1);
     auto actualInjector = std::get<InjectorDescription>(*actualCell.cellFunction);
 
@@ -94,10 +94,10 @@ TEST_F(InjectorTests, matchButNoInjection)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualCell = getCell(actualData, 1);
     auto actualInjector = std::get<InjectorDescription>(*actualCell.cellFunction);
     auto actualTargetCell = getCell(actualData, 3);
@@ -136,12 +136,12 @@ TEST_F(InjectorTests, injection)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
+    _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 1 + 6*3; ++i) {
-        _simController->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(1);
     }
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualCell = getCell(actualData, 1);
     auto actualInjector = std::get<InjectorDescription>(*actualCell.cellFunction);
     auto actualTargetCell = getCell(actualData, 3);
@@ -186,12 +186,12 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_failed)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
+    _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 1 + 6 * 3; ++i) {
-        _simController->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(1);
     }
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualCell = getCell(actualData, 1);
     auto actualInjector = std::get<InjectorDescription>(*actualCell.cellFunction);
     auto actualTargetCell = getCell(actualData, 3);
@@ -244,12 +244,12 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_success)
     data.addConnection(1, 3);
     data.addConnection(3, 4);
 
-    _simController->setSimulationData(data);
+    _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 1; ++i) {
-        _simController->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(1);
     }
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualCell = getCell(actualData, 1);
     auto actualInjector = std::get<InjectorDescription>(*actualCell.cellFunction);
 

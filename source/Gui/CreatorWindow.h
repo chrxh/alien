@@ -20,7 +20,7 @@ enum CreationMode_
 class _CreatorWindow : public _AlienWindow
 {
 public:
-    _CreatorWindow(EditorModel const& editorModel, SimulationController const& simController);
+    _CreatorWindow(EditorModel const& editorModel, SimulationFacade const& simulationFacade);
 
     void registerCyclicReferences(SimulationInteractionControllerWeakPtr const& simulationInteractionController);
 
@@ -69,6 +69,6 @@ private:
     CreationMode _mode = CreationMode_Drawing;
 
     EditorModel _editorModel;
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
     SimulationInteractionControllerWeakPtr _simulationInteractionController;
 };

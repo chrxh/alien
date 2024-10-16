@@ -8,12 +8,12 @@
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/OverlayDescriptions.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "EngineWorker.h"
 
 #include "Definitions.h"
 
-class _SimulationControllerImpl : public _SimulationController
+class _SimulationFacadeImpl : public _SimulationFacade
 {
 public:
     void newSimulation(

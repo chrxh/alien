@@ -1,7 +1,7 @@
 #include "PersisterFacadeImpl.h"
 
 #include "EngineInterface/DeserializedSimulation.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "PersisterRequestResult.h"
 
@@ -10,9 +10,9 @@ _PersisterFacadeImpl::~_PersisterFacadeImpl()
     shutdown();
 }
 
-void _PersisterFacadeImpl::init(SimulationController const& simController)
+void _PersisterFacadeImpl::init(SimulationFacade const& simulationFacade)
 {
-    _worker = std::make_shared<_PersisterWorker>(simController);
+    _worker = std::make_shared<_PersisterWorker>(simulationFacade);
     restart();
 }
 

@@ -12,7 +12,7 @@
 #include "Base/Math.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "StyleRepository.h"
 #include "AlienImGui.h"
@@ -35,9 +35,9 @@ namespace
     auto const RightColumnWidth = 160.0f;
 }
 
-_CreatorWindow::_CreatorWindow(EditorModel const& editorModel, SimulationController const& simController)
+_CreatorWindow::_CreatorWindow(EditorModel const& editorModel, SimulationFacade const& simulationFacade)
     : _AlienWindow("Creator", "editors.creator", false), _editorModel(editorModel)
-    , _simController(simController)
+    , _simulationFacade(simulationFacade)
 {
 }
 
@@ -189,7 +189,7 @@ void _CreatorWindow::onDrawing()
     auto mousePos = ImGui::GetMousePos();
     auto pos = Viewport::mapViewToWorldPosition({mousePos.x, mousePos.y});
     if (!_drawingDataDescription.isEmpty()) {
-        _simController->removeSelectedObjects(false);
+        _simulationFacade->removeSelectedObjects(false);
     }
 
     auto createAlignedCircle = [&](auto pos) {
@@ -209,7 +209,7 @@ void _CreatorWindow::onDrawing()
     };
 
     if (_drawingDataDescription.isEmpty()) {
-        DescriptionEditService::addIfSpaceAvailable(_drawingDataDescription, _drawingOccupancy, createAlignedCircle(pos), 0.5f, _simController->getWorldSize());
+        DescriptionEditService::addIfSpaceAvailable(_drawingDataDescription, _drawingOccupancy, createAlignedCircle(pos), 0.5f, _simulationFacade->getWorldSize());
         _lastDrawPos = pos;
     } else {
         auto posDelta = Math::length(pos - _lastDrawPos);
@@ -218,7 +218,7 @@ void _CreatorWindow::onDrawing()
             for (float interDelta = 0; interDelta < posDelta; interDelta += 1.0f) {
                 auto drawPos = lastDrawPos + (pos - lastDrawPos) * interDelta / posDelta;
                 auto toAdd = createAlignedCircle(drawPos);
-                DescriptionEditService::addIfSpaceAvailable(_drawingDataDescription, _drawingOccupancy, toAdd, 0.5f, _simController->getWorldSize());
+                DescriptionEditService::addIfSpaceAvailable(_drawingDataDescription, _drawingOccupancy, toAdd, 0.5f, _simulationFacade->getWorldSize());
                 _lastDrawPos = drawPos;
             }
         }
@@ -227,13 +227,13 @@ void _CreatorWindow::onDrawing()
     if (!_makeSticky) {
         auto origDrawing = _drawingDataDescription;
         DescriptionEditService::removeStickiness(_drawingDataDescription);
-        _simController->addAndSelectSimulationData(_drawingDataDescription);
+        _simulationFacade->addAndSelectSimulationData(_drawingDataDescription);
         _drawingDataDescription = origDrawing;
     } else {
-        _simController->addAndSelectSimulationData(_drawingDataDescription);
+        _simulationFacade->addAndSelectSimulationData(_drawingDataDescription);
     }
 
-    _simController->reconnectSelectedObjects();
+    _simulationFacade->reconnectSelectedObjects();
     _editorModel->update();
 }
 
@@ -260,7 +260,7 @@ void _CreatorWindow::createCell()
         cell.setInputExecutionOrderNumber((_lastExecutionNumber + 5) % 6);
     }
     auto data = DataDescription().addCell(cell);
-    _simController->addAndSelectSimulationData(data);
+    _simulationFacade->addAndSelectSimulationData(data);
     incExecutionNumber();
 }
 
@@ -268,7 +268,7 @@ void _CreatorWindow::createParticle()
 {
     auto particle = ParticleDescription().setPos(getRandomPos()).setEnergy(_energy);
     auto data = DataDescription().addParticle(particle);
-    _simController->addAndSelectSimulationData(data);
+    _simulationFacade->addAndSelectSimulationData(data);
 }
 
 void _CreatorWindow::createRectangle()
@@ -289,7 +289,7 @@ void _CreatorWindow::createRectangle()
                                                   .center(getRandomPos())
                                                   .barrier(_barrier));
 
-    _simController->addAndSelectSimulationData(data);
+    _simulationFacade->addAndSelectSimulationData(data);
 }
 
 void _CreatorWindow::createHexagon()
@@ -307,7 +307,7 @@ void _CreatorWindow::createHexagon()
                                                             .color(_editorModel->getDefaultColorCode())
                                                             .center(getRandomPos())
                                                             .barrier(_barrier));
-    _simController->addAndSelectSimulationData(data);
+    _simulationFacade->addAndSelectSimulationData(data);
 }
 
 void _CreatorWindow::createDisc()
@@ -347,7 +347,7 @@ void _CreatorWindow::createDisc()
         DescriptionEditService::removeStickiness(data);
     }
     data.setCenter(getRandomPos());
-    _simController->addAndSelectSimulationData(data);
+    _simulationFacade->addAndSelectSimulationData(data);
 }
 
 void _CreatorWindow::validationAndCorrection()
@@ -373,7 +373,7 @@ RealVector2D _CreatorWindow::getRandomPos() const
 void _CreatorWindow::incExecutionNumber()
 {
     if (_ascendingExecutionNumbers) {
-        auto parameters = _simController->getSimulationParameters();
+        auto parameters = _simulationFacade->getSimulationParameters();
         _lastExecutionNumber = (_lastExecutionNumber + 1) % parameters.cellNumExecutionOrderNumbers;
     }
 }

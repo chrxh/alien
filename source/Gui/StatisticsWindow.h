@@ -16,7 +16,7 @@ struct ImPlotPoint;
 class _StatisticsWindow : public _AlienWindow
 {
 public:
-    _StatisticsWindow(SimulationController const& simController);
+    _StatisticsWindow(SimulationFacade const& simulationFacade);
     ~_StatisticsWindow();
 
 private:
@@ -71,7 +71,7 @@ private:
 
     float calcPlotHeight(int row) const;
 
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
 
     std::string _startingPath;
 

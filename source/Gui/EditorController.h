@@ -8,7 +8,7 @@
 class _EditorController
 {
 public:
-    _EditorController(SimulationController const& simController);
+    _EditorController(SimulationFacade const& simulationFacade);
 
     void registerCyclicReferences(
         UploadSimulationDialogWeakPtr const& uploadSimulationDialog,
@@ -60,7 +60,7 @@ private:
     MultiplierWindow _multiplierWindow;
     GenomeEditorWindow _genomeEditorWindow;
 
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
 
     bool _on = false;   //#TODO weg!
 

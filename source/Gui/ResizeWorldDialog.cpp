@@ -3,14 +3,14 @@
 #include "ResizeWorldDialog.h"
 
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "AlienImGui.h"
 #include "TemporalControlWindow.h"
 
-_ResizeWorldDialog::_ResizeWorldDialog(SimulationController const& simController, TemporalControlWindow const& temporalControlWindow)
+_ResizeWorldDialog::_ResizeWorldDialog(SimulationFacade const& simulationFacade, TemporalControlWindow const& temporalControlWindow)
     : _AlienDialog("Resize world")
-    , _simController(simController)
+    , _simulationFacade(simulationFacade)
     , _temporalControlWindow(temporalControlWindow)
 {}
 
@@ -18,7 +18,7 @@ void _ResizeWorldDialog::open()
 {
     _AlienDialog::open();
 
-    auto worldSize = _simController->getWorldSize();
+    auto worldSize = _simulationFacade->getWorldSize();
 
     _width = worldSize.x;
     _height = worldSize.y;
@@ -72,27 +72,27 @@ void _ResizeWorldDialog::processIntern()
 
 void _ResizeWorldDialog::onResizing()
 {
-    auto name = _simController->getSimulationName();
-    auto timestep = _simController->getCurrentTimestep();
-    auto generalSettings = _simController->getGeneralSettings();
-    auto parameters = _simController->getSimulationParameters();
-    auto content = _simController->getClusteredSimulationData();
-    auto realtime = _simController->getRealTime();
-    auto const& statistics = _simController->getStatisticsHistory().getCopiedData();
-    _simController->closeSimulation();
+    auto name = _simulationFacade->getSimulationName();
+    auto timestep = _simulationFacade->getCurrentTimestep();
+    auto generalSettings = _simulationFacade->getGeneralSettings();
+    auto parameters = _simulationFacade->getSimulationParameters();
+    auto content = _simulationFacade->getClusteredSimulationData();
+    auto realtime = _simulationFacade->getRealTime();
+    auto const& statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
+    _simulationFacade->closeSimulation();
 
     IntVector2D origWorldSize{generalSettings.worldSizeX, generalSettings.worldSizeY};
     generalSettings.worldSizeX = _width;
     generalSettings.worldSizeY = _height;
 
-    _simController->newSimulation(name, timestep, generalSettings, parameters);
+    _simulationFacade->newSimulation(name, timestep, generalSettings, parameters);
 
     DescriptionEditService::correctConnections(content, {_width, _height});
     if (_scaleContent) {
         DescriptionEditService::duplicate(content, origWorldSize, {_width, _height});
     }
-    _simController->setClusteredSimulationData(content);
-    _simController->setStatisticsHistory(statistics);
-    _simController->setRealTime(realtime);
+    _simulationFacade->setClusteredSimulationData(content);
+    _simulationFacade->setStatisticsHistory(statistics);
+    _simulationFacade->setRealTime(realtime);
     _temporalControlWindow->onSnapshot();
 }

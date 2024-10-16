@@ -9,7 +9,7 @@ class _NewSimulationDialog : public _AlienDialog
 {
 public:
     _NewSimulationDialog(
-        SimulationController const& simController,
+        SimulationFacade const& simulationFacade,
         TemporalControlWindow const& temporalControlWindow,
         StatisticsWindow const& statisticsWindow);
 
@@ -21,7 +21,7 @@ private:
 
     void onNewSimulation();
 
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
     TemporalControlWindow _temporalControlWindow;
     StatisticsWindow _statisticsWindow;
 

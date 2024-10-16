@@ -3,7 +3,7 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/GenomeDescriptionService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
 class DefenderTests : public IntegrationTestFramework
@@ -65,10 +65,10 @@ TEST_F(DefenderTests, attackerVsAntiAttacker)
     data.addConnection(1, 2);
     data.addConnection(3, 4);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualAttacker = getCell(actualData, 1);
 
     auto origTarget = getCell(data, 3);
@@ -108,10 +108,10 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
     data.addConnection(1, 2);
     data.addConnection(3, 4);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualAttacker = getCell(actualData, 1);
 
     auto origTarget = getCell(data, 3);
@@ -153,12 +153,12 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
     data.addConnection(1, 2);
     data.addConnection(3, 4);
 
-    _simController->setSimulationData(data);
+    _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 1 + 6 * 3; ++i) {
-        _simController->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(1);
     }
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
 
     auto actualInjector = getCell(actualData, 1);
     auto actualInjectorFunc = std::get<InjectorDescription>(*actualInjector.cellFunction);
@@ -205,12 +205,12 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
     data.addConnection(1, 2);
     data.addConnection(3, 4);
 
-    _simController->setSimulationData(data);
+    _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 1 + 6 * 3; ++i) {
-        _simController->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(1);
     }
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
 
     auto actualInjector = getCell(actualData, 1);
     auto actualInjectorFunc = std::get<InjectorDescription>(*actualInjector.cellFunction);

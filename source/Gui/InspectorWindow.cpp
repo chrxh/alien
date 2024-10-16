@@ -7,7 +7,7 @@
 #include <boost/range/adaptor/indexed.hpp>
 
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/GenomeDescriptionService.h"
 #include "EngineInterface/PreviewDescriptionService.h"
 
@@ -38,7 +38,7 @@ namespace
 }
 
 _InspectorWindow::_InspectorWindow(
-    SimulationController const& simController,
+    SimulationFacade const& simulationFacade,
     EditorModel const& editorModel,
     GenomeEditorWindow const& genomeEditorWindow,
     uint64_t entityId,
@@ -47,7 +47,7 @@ _InspectorWindow::_InspectorWindow(
     : _entityId(entityId)
     , _initialPos(initialPos)
     , _editorModel(editorModel)
-    , _simController(simController)
+    , _simulationFacade(simulationFacade)
     , _genomeEditorWindow(genomeEditorWindow)
     , _selectGenomeTab(selectGenomeTab)
 {
@@ -63,7 +63,7 @@ void _InspectorWindow::process()
     auto width = calcWindowWidth();
     auto height = isCell() ? StyleRepository::get().scale(370.0f)
                            : StyleRepository::get().scale(70.0f);
-    auto borderlessRendering = _simController->getSimulationParameters().borderlessRendering;
+    auto borderlessRendering = _simulationFacade->getSimulationParameters().borderlessRendering;
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::SetNextWindowSize({width, height}, ImGuiCond_Appearing);
     ImGui::SetNextWindowPos({_initialPos.x, _initialPos.y}, ImGuiCond_Appearing);
@@ -149,7 +149,7 @@ void _InspectorWindow::processCell(CellDescription cell)
         ImGui::EndTabBar();
 
         if (cell != origCell) {
-            _simController->changeCell(cell);
+            _simulationFacade->changeCell(cell);
         }
     }
 }
@@ -367,7 +367,7 @@ void _InspectorWindow::processCellFunctionPropertiesTab(CellDescription& cell)
 template <typename Description>
 void _InspectorWindow::processCellGenomeTab(Description& desc)
 {
-    auto const& parameters = _simController->getSimulationParameters();
+    auto const& parameters = _simulationFacade->getSimulationParameters();
 
     int flags = ImGuiTabItemFlags_None;
     if (_selectGenomeTab) {
@@ -748,7 +748,7 @@ void _InspectorWindow::processParticle(ParticleDescription particle)
 
     particle.energy = energy;
     if (particle != origParticle) {
-        _simController->changeParticle(particle);
+        _simulationFacade->changeParticle(particle);
     }
 }
 
@@ -763,7 +763,7 @@ float _InspectorWindow::calcWindowWidth() const
 
 void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
 {
-    auto const& parameters = _simController->getSimulationParameters();
+    auto const& parameters = _simulationFacade->getSimulationParameters();
 
     cell.maxConnections = (cell.maxConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
     cell.executionOrderNumber = (cell.executionOrderNumber + parameters.cellNumExecutionOrderNumbers) % parameters.cellNumExecutionOrderNumbers;

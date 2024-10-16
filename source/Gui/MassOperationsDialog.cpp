@@ -6,7 +6,7 @@
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "AlienImGui.h"
 #include "StyleRepository.h"
@@ -15,8 +15,8 @@ namespace
 {
     auto constexpr RightColumnWidth = 120.0f;
 }
-_MassOperationsDialog::_MassOperationsDialog(SimulationController const& simController)
-    : _simController(simController)
+_MassOperationsDialog::_MassOperationsDialog(SimulationFacade const& simulationFacade)
+    : _simulationFacade(simulationFacade)
 {}
 
 void _MassOperationsDialog::process()
@@ -154,14 +154,14 @@ void _MassOperationsDialog::colorCheckbox(std::string id, uint32_t cellColor, bo
 
 void _MassOperationsDialog::onExecute()
 {
-    auto timestep = static_cast<uint32_t>(_simController->getCurrentTimestep());
-    auto parameters = _simController->getSimulationParameters();
-    auto generalSettings = _simController->getGeneralSettings();
+    auto timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
+    auto parameters = _simulationFacade->getSimulationParameters();
+    auto generalSettings = _simulationFacade->getGeneralSettings();
     auto content = [&] {
         if (_restrictToSelectedClusters) {
-            return _simController->getSelectedClusteredSimulationData(true);
+            return _simulationFacade->getSelectedClusteredSimulationData(true);
         } else {
-            return _simController->getClusteredSimulationData();
+            return _simulationFacade->getClusteredSimulationData();
         }
     }();
 
@@ -194,13 +194,13 @@ void _MassOperationsDialog::onExecute()
     }
 
     if (_restrictToSelectedClusters) {
-        _simController->removeSelectedObjects(true);
-        _simController->addAndSelectSimulationData(DataDescription(content));
+        _simulationFacade->removeSelectedObjects(true);
+        _simulationFacade->addAndSelectSimulationData(DataDescription(content));
     } else {
-        auto name = _simController->getSimulationName();
-        _simController->closeSimulation();
-        _simController->newSimulation(name, timestep, generalSettings, parameters);
-        _simController->setClusteredSimulationData(content);       
+        auto name = _simulationFacade->getSimulationName();
+        _simulationFacade->closeSimulation();
+        _simulationFacade->newSimulation(name, timestep, generalSettings, parameters);
+        _simulationFacade->setClusteredSimulationData(content);       
     }
 }
 

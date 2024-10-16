@@ -9,7 +9,7 @@
 
 #include "Base/GlobalSettings.h"
 #include "Base/StringHelper.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/GenomeDescriptionService.h"
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/SimulationParameters.h"
@@ -40,10 +40,10 @@ namespace
     auto const SubWindowRightMargin = 0.0f;
 }
 
-_GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, SimulationController const& simulationController)
+_GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, SimulationFacade const& simulationFacade)
     : _AlienWindow("Genome editor", "windows.genome editor", false)
     , _editorModel(editorModel)
-    , _simController(simulationController)
+    , _simulationFacade(simulationFacade)
 {
     _tabDatas = {TabData()};
 
@@ -940,7 +940,7 @@ void _GenomeEditorWindow::onCreateSpore()
     auto genomeDesc = getCurrentGenome();
     auto genome = GenomeDescriptionService::convertDescriptionToBytes(genomeDesc);
 
-    auto parameter = _simController->getSimulationParameters();
+    auto parameter = _simulationFacade->getSimulationParameters();
     auto numNodes = GenomeDescriptionService::getNumNodesRecursively(genome, true);
     auto energy = parameter.cellNormalEnergy[_editorModel->getDefaultColorCode()] * toFloat(numNodes * 2 + 1);
     auto cell = CellDescription()
@@ -952,7 +952,7 @@ void _GenomeEditorWindow::onCreateSpore()
                     .setColor(_editorModel->getDefaultColorCode())
                     .setCellFunction(ConstructorDescription().setGenome(genome));
     auto data = DataDescription().addCell(cell);
-    _simController->addAndSelectSimulationData(data);
+    _simulationFacade->addAndSelectSimulationData(data);
     _editorModel->update();
 
     printOverlayMessage("Spore created");
@@ -961,7 +961,7 @@ void _GenomeEditorWindow::onCreateSpore()
 void _GenomeEditorWindow::showPreview(TabData& tab)
 {
     auto const& genome = _tabDatas.at(_selectedTabIndex).genome;
-    auto preview = PreviewDescriptionService::convert(genome, tab.selectedNode, _simController->getSimulationParameters());
+    auto preview = PreviewDescriptionService::convert(genome, tab.selectedNode, _simulationFacade->getSimulationParameters());
     if (AlienImGui::ShowPreviewDescription(preview, tab.previewZoom, tab.selectedNode)) {
         _nodeIndexToJump = tab.selectedNode;
     }
@@ -977,7 +977,7 @@ void _GenomeEditorWindow::validationAndCorrection(GenomeHeaderDescription& heade
 
 void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) const
 {
-    auto numExecutionOrderNumbers = _simController->getSimulationParameters().cellNumExecutionOrderNumbers;
+    auto numExecutionOrderNumbers = _simulationFacade->getSimulationParameters().cellNumExecutionOrderNumbers;
     cell.color = (cell.color + MAX_COLORS) % MAX_COLORS;
     cell.executionOrderNumber = (cell.executionOrderNumber + numExecutionOrderNumbers) % numExecutionOrderNumbers;
     if (cell.inputExecutionOrderNumber) {

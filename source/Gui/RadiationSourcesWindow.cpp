@@ -2,7 +2,7 @@
 
 #include "AlienImGui.h"
 #include "Base/Definitions.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "RadiationSourcesWindow.h"
 #include "StyleRepository.h"
@@ -13,15 +13,15 @@ namespace
     auto const RightColumnWidth = 140.0f;
 }
 
-_RadiationSourcesWindow::_RadiationSourcesWindow(SimulationController const& simController, SimulationInteractionController const& simInteractionController)
+_RadiationSourcesWindow::_RadiationSourcesWindow(SimulationFacade const& simulationFacade, SimulationInteractionController const& simInteractionController)
     : _AlienWindow("Radiation sources", "windows.radiation sources", false)
-    , _simController(simController)
+    , _simulationFacade(simulationFacade)
     , _simInteractionController(simInteractionController)
 {}
 
 void _RadiationSourcesWindow::processIntern()
 {
-    auto parameters = _simController->getSimulationParameters();
+    auto parameters = _simulationFacade->getSimulationParameters();
 
     std::optional<bool> scheduleAppendTab;
     std::optional<int> scheduleDeleteTabAtIndex;
@@ -56,11 +56,11 @@ void _RadiationSourcesWindow::processIntern()
 
 bool _RadiationSourcesWindow::processTab(int index)
 {
-    auto parameters = _simController->getSimulationParameters();
+    auto parameters = _simulationFacade->getSimulationParameters();
     auto lastParameters = parameters;
-    auto origParameters = _simController->getOriginalSimulationParameters();
+    auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
-    auto worldSize = _simController->getWorldSize();
+    auto worldSize = _simulationFacade->getWorldSize();
 
     RadiationSource& source = parameters.radiationSources[index];
     RadiationSource& origSource = origParameters.radiationSources[index];
@@ -153,7 +153,7 @@ bool _RadiationSourcesWindow::processTab(int index)
     }
 
     if (parameters != lastParameters) {
-        _simController->setSimulationParameters(parameters);
+        _simulationFacade->setSimulationParameters(parameters);
     }
 
     return isOpen;
@@ -161,8 +161,8 @@ bool _RadiationSourcesWindow::processTab(int index)
 
 void _RadiationSourcesWindow::onAppendTab()
 {
-    auto parameters = _simController->getSimulationParameters();
-    auto origParameters = _simController->getOriginalSimulationParameters();
+    auto parameters = _simulationFacade->getSimulationParameters();
+    auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
     auto index = parameters.numRadiationSources;
     parameters.radiationSources[index] = createParticleSource();
@@ -170,14 +170,14 @@ void _RadiationSourcesWindow::onAppendTab()
     ++parameters.numRadiationSources;
     ++origParameters.numRadiationSources;
 
-    _simController->setSimulationParameters(parameters);
-    _simController->setOriginalSimulationParameters(origParameters);
+    _simulationFacade->setSimulationParameters(parameters);
+    _simulationFacade->setOriginalSimulationParameters(origParameters);
 }
 
 void _RadiationSourcesWindow::onDeleteTab(int index)
 {
-    auto parameters = _simController->getSimulationParameters();
-    auto origParameters = _simController->getOriginalSimulationParameters();
+    auto parameters = _simulationFacade->getSimulationParameters();
+    auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
     for (int i = index; i < parameters.numRadiationSources - 1; ++i) {
         parameters.radiationSources[i] = parameters.radiationSources[i + 1];
@@ -185,14 +185,14 @@ void _RadiationSourcesWindow::onDeleteTab(int index)
     }
     --parameters.numRadiationSources;
     --origParameters.numRadiationSources;
-    _simController->setSimulationParameters(parameters);
-    _simController->setOriginalSimulationParameters(origParameters);
+    _simulationFacade->setSimulationParameters(parameters);
+    _simulationFacade->setOriginalSimulationParameters(origParameters);
 }
 
 RadiationSource _RadiationSourcesWindow::createParticleSource() const
 {
     RadiationSource result;
-    auto worldSize = _simController->getWorldSize();
+    auto worldSize = _simulationFacade->getWorldSize();
     result.posX = toFloat(worldSize.x / 2);
     result.posY = toFloat(worldSize.y / 2);
     return result;

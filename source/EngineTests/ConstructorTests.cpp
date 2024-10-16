@@ -6,7 +6,7 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/GenomeDescriptionService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
 class ConstructorTests : public IntegrationTestFramework
@@ -55,9 +55,9 @@ TEST_F(ConstructorTests, noEnergy)
             .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(1, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
@@ -85,9 +85,9 @@ TEST_F(ConstructorTests, alreadyFinished)
             .setExecutionOrderNumber(0)
             .setCellFunction(constructor));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(1, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
@@ -113,9 +113,9 @@ TEST_F(ConstructorTests, notActivated)
                      .setCellFunction(constructor)
                      .setActivationTime(2));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(1, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
@@ -137,9 +137,9 @@ TEST_F(ConstructorTests, manualConstruction_noInputActivity)
                      .setCellFunction(
                          ConstructorDescription().setActivationMode(0).setGenome(genome)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(1, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
@@ -154,7 +154,7 @@ TEST_F(ConstructorTests, constructFirstCell_correctCycle)
 {
     auto genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
 
-    _simController->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(1);
 
     DataDescription data;
     data.addCell(CellDescription()
@@ -164,11 +164,11 @@ TEST_F(ConstructorTests, constructFirstCell_correctCycle)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setActivationMode(3).setGenome(genome)));
 
-    _simController->setSimulationData(data);
+    _simulationFacade->setSimulationData(data);
     for (int i = 0; i < _parameters.cellNumExecutionOrderNumbers * 3; ++i) {
-        _simController->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(1);
     }
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
 }
@@ -178,7 +178,7 @@ TEST_F(ConstructorTests, constructFirstCell_oneCellGenome_infiniteRepetitions)
     auto genome = GenomeDescriptionService::convertDescriptionToBytes(
         GenomeDescription().setHeader(GenomeHeaderDescription().setInfiniteRepetitions()).setCells({CellGenomeDescription()}));
 
-    _simController->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(1);
 
     DataDescription data;
     data.addCell(CellDescription()
@@ -188,11 +188,11 @@ TEST_F(ConstructorTests, constructFirstCell_oneCellGenome_infiniteRepetitions)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setActivationMode(3).setGenome(genome)));
 
-    _simController->setSimulationData(data);
+    _simulationFacade->setSimulationData(data);
     for (int i = 0; i < _parameters.cellNumExecutionOrderNumbers * 3; ++i) {
-        _simController->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(1);
     }
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(2, actualData.cells.size());
 
     auto actualHostCell = getCell(actualData, 1);
@@ -207,7 +207,7 @@ TEST_F(ConstructorTests, constructFirstCell_twoCellGenome_infiniteRepetitions)
     auto genome = GenomeDescriptionService::convertDescriptionToBytes(
         GenomeDescription().setHeader(GenomeHeaderDescription().setInfiniteRepetitions()).setCells({CellGenomeDescription(), CellGenomeDescription()}));
 
-    _simController->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(1);
 
     DataDescription data;
     data.addCell(CellDescription()
@@ -217,11 +217,11 @@ TEST_F(ConstructorTests, constructFirstCell_twoCellGenome_infiniteRepetitions)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setActivationMode(3).setGenome(genome)));
 
-    _simController->setSimulationData(data);
+    _simulationFacade->setSimulationData(data);
     for (int i = 0; i < _parameters.cellNumExecutionOrderNumbers * 3; ++i) {
-        _simController->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(1);
     }
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(2, actualData.cells.size());
 
     auto actualHostCell = getCell(actualData, 1);
@@ -236,7 +236,7 @@ TEST_F(ConstructorTests, constructFirstCell_wrongCycle)
     auto genome = GenomeDescriptionService::convertDescriptionToBytes(
         GenomeDescription().setCells({CellGenomeDescription()}));
 
-    _simController->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(1);
 
     DataDescription data;
     data.addCell(CellDescription()
@@ -246,11 +246,11 @@ TEST_F(ConstructorTests, constructFirstCell_wrongCycle)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setActivationMode(3).setGenome(genome)));
 
-    _simController->setSimulationData(data);
+    _simulationFacade->setSimulationData(data);
     for (int i = 0; i < _parameters.cellNumExecutionOrderNumbers * 3 - 1; ++i) {
-        _simController->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(1);
     }
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(1, actualData.cells.size());
 }
@@ -284,10 +284,10 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_constructionNotBui
     data.addConnection(2, 3);
 
     _parameters.cellFunctionConstructorCheckCompletenessForSelfReplication = true;
-    _simController->setSimulationParameters(_parameters);
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
 }
@@ -324,10 +324,10 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_repeatedConstructi
     data.addConnection(3, 4);
 
     _parameters.cellFunctionConstructorCheckCompletenessForSelfReplication = true;
-    _simController->setSimulationParameters(_parameters);
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(4, actualData.cells.size());
 }
@@ -365,10 +365,10 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_constructionBuilt)
     data.addConnection(3, 4);
 
     _parameters.cellFunctionConstructorCheckCompletenessForSelfReplication = true;
-    _simController->setSimulationParameters(_parameters);
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(5, actualData.cells.size());
 }
@@ -407,10 +407,10 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_infiniteConstructi
     data.addConnection(3, 4);
 
     _parameters.cellFunctionConstructorCheckCompletenessForSelfReplication = true;
-    _simController->setSimulationParameters(_parameters);
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(5, actualData.cells.size());
 }
@@ -431,10 +431,10 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_largeCluster)
         .setCellFunction(ConstructorDescription().setGenome(genome).setNumInheritedGenomeNodes(RectLength * RectLength));
 
     _parameters.cellFunctionConstructorCheckCompletenessForSelfReplication = true;
-    _simController->setSimulationParameters(_parameters);
-    _simController->setSimulationData(rect);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationData(rect);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(RectLength * RectLength + 1, actualData.cells.size());
 }
@@ -523,10 +523,10 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_thinCluster)
     }
 
     _parameters.cellFunctionConstructorCheckCompletenessForSelfReplication = true;
-    _simController->setSimulationParameters(_parameters);
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(7, actualData.cells.size());
 }
@@ -573,10 +573,10 @@ TEST_F(ConstructorTests, DISABLED_constructFirstCell_completenessCheck_underCons
     data.addConnection(2, 3);
 
     _parameters.cellFunctionConstructorCheckCompletenessForSelfReplication = true;
-    _simController->setSimulationParameters(_parameters);
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
 }
@@ -598,9 +598,9 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
             .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setConstructionActivationTime(123)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
@@ -644,9 +644,9 @@ TEST_F(ConstructorTests, constructFirstCell_notFinished)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
@@ -677,9 +677,9 @@ TEST_F(ConstructorTests, constructFirstCell_separation)
                      .setCellFunction(ConstructorDescription()
                                           .setGenome(genome)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
@@ -723,9 +723,9 @@ TEST_F(ConstructorTests, constructFirstCell_manualConstruction)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
@@ -764,9 +764,9 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle1)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
@@ -800,9 +800,9 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle2)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
@@ -830,9 +830,9 @@ TEST_F(ConstructorTests, constructNeuronCell)
             .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
     auto actualConstructedCell = getOtherCell(actualData, 1);
@@ -866,9 +866,9 @@ TEST_F(ConstructorTests, constructConstructorCell)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
     auto actualConstructedCell = getOtherCell(actualData, 1);
@@ -894,9 +894,9 @@ TEST_F(ConstructorTests, constructNerveCell)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
     auto actualConstructedCell = getOtherCell(actualData, 1);
@@ -920,9 +920,9 @@ TEST_F(ConstructorTests, constructAttackerCell)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
     auto actualConstructedCell = getOtherCell(actualData, 1);
@@ -946,9 +946,9 @@ TEST_F(ConstructorTests, constructDefenderCell)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
     auto actualConstructedCell = getOtherCell(actualData, 1);
@@ -973,9 +973,9 @@ TEST_F(ConstructorTests, constructTransmitterCell)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
     auto actualConstructedCell = getOtherCell(actualData, 1);
@@ -999,9 +999,9 @@ TEST_F(ConstructorTests, constructMuscleCell)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
     auto actualConstructedCell = getOtherCell(actualData, 1);
@@ -1027,9 +1027,9 @@ TEST_F(ConstructorTests, constructSensorCell)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
     auto actualConstructedCell = getOtherCell(actualData, 1);
@@ -1057,9 +1057,9 @@ TEST_F(ConstructorTests, constructInjectorCell)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
     auto actualConstructedCell = getOtherCell(actualData, 1);
@@ -1085,9 +1085,9 @@ TEST_F(ConstructorTests, constructReconnectorCell)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
     auto actualConstructedCell = getOtherCell(actualData, 1);
@@ -1112,9 +1112,9 @@ TEST_F(ConstructorTests, constructDetonatorCell)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
     auto actualConstructedCell = getOtherCell(actualData, 1);
@@ -1141,9 +1141,9 @@ TEST_F(ConstructorTests, constructConstructorCell_nestingGenomeTooLarge)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
     auto actualCell = getOtherCell(actualData, 1);
@@ -1172,9 +1172,9 @@ TEST_F(ConstructorTests, constructConstructorCell_copyGenome)
                      .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
     auto actualConstructedCell = getOtherCell(actualData, 1);
@@ -1210,9 +1210,9 @@ TEST_F(ConstructorTests, constructSecondCell_separation)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
@@ -1256,11 +1256,11 @@ TEST_F(ConstructorTests, constructSecondCell_constructionStateTransitions)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(1);
     {
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
 
         ASSERT_EQ(3, actualData.cells.size());
         auto actualHostCell = getCell(actualData, 1);
@@ -1271,9 +1271,9 @@ TEST_F(ConstructorTests, constructSecondCell_constructionStateTransitions)
         EXPECT_EQ(LivingState_Activating, actualPrevConstructedCell.livingState);
         EXPECT_EQ(LivingState_Ready, actualConstructedCell.livingState);
     }
-    _simController->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(1);
     {
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
 
         ASSERT_EQ(3, actualData.cells.size());
         auto actualHostCell = getCell(actualData, 1);
@@ -1311,9 +1311,9 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
@@ -1365,9 +1365,9 @@ TEST_F(ConstructorTests, constructSecondCell_noSpace)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
@@ -1406,9 +1406,9 @@ TEST_F(ConstructorTests, constructSecondCell_notFinished)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
@@ -1450,9 +1450,9 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle1)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
@@ -1499,9 +1499,9 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
@@ -1541,10 +1541,10 @@ TEST_F(ConstructorTests, constructSecondCell_twoCellGenome_infiniteRepetitions)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
     auto actualHostCell = getCell(actualData, 1);
@@ -1592,9 +1592,9 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_upperPart)
     data.addConnection(1, 4);
     data.addConnection(4, 5);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     EXPECT_EQ(6, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
@@ -1651,9 +1651,9 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_bottomPart)
     data.addConnection(1, 4);
     data.addConnection(4, 5);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     EXPECT_EQ(6, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
@@ -1696,9 +1696,9 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation_singleConstruction)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualHostCell = getCell(actualData, 1);
 
     bool found = false;
@@ -1754,9 +1754,9 @@ TEST_F(ConstructorTests, constructFourthCell_noOverlappingConnection)
     data.addConnection(3, 4);
     data.addConnection(4, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     EXPECT_EQ(5, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
@@ -1804,9 +1804,9 @@ TEST_F(ConstructorTests, constructLastCellFirstRepetition)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
@@ -1848,9 +1848,9 @@ TEST_F(ConstructorTests, constructLastCellLastRepetition)
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(4, actualData.cells.size());
     auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3});
@@ -1885,9 +1885,9 @@ TEST_F(ConstructorTests, restartIfNoLastConstructedCellFound)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
@@ -1924,9 +1924,9 @@ TEST_F(ConstructorTests, restartIfLastConstructedCellHasLowNumConnections)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
@@ -1956,9 +1956,9 @@ TEST_F(ConstructorTests, allowLargeConstructionAngle1)
     data.addConnection(1, 2);
     data.addConnection(1, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(4, actualData.cells.size());
     auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3});
@@ -1987,9 +1987,9 @@ TEST_F(ConstructorTests, allowLargeConstructionAngle2)
     data.addConnection(1, 2);
     data.addConnection(1, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(4, actualData.cells.size());
     auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3});
@@ -2016,9 +2016,9 @@ TEST_F(ConstructorTests, repetitionsAndBranches)
             .setCellFunction(ConstructorDescription().setGenome(genome).setActivationMode(20)),
     });
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(13 * 3 * 4 * 3 * 20);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(13 * 3 * 4 * 3 * 20);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(1 + 3 * 4 * 3, actualData.cells.size());
     auto actualConstructor = getCell(actualData, 1);
@@ -2044,9 +2044,9 @@ TEST_F(ConstructorTests, severalRepetitionsOfSingleCell)
             .setCellFunction(ConstructorDescription().setGenome(genome)),
     });
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(200 * 6);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(200 * 6);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
     auto actualConstructor = getCell(actualData, 1);
@@ -2074,9 +2074,9 @@ TEST_F(ConstructorTests, severalRepetitionsAndBranchesOfSingleCell)
             .setCellFunction(ConstructorDescription().setGenome(genome)),
     });
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(400 * 6);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(400 * 6);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(7, actualData.cells.size());
     auto actualConstructor = getCell(actualData, 1);
@@ -2106,9 +2106,9 @@ TEST_F(ConstructorTests, severalRepetitionsOfSingleCell_ignoreNumRequiredConnect
             .setCellFunction(ConstructorDescription().setGenome(genome).setNumInheritedGenomeNodes(3)),
     });
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(400 * 6);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(400 * 6);
+    auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(4, actualData.cells.size());
     auto actualConstructor = getCell(actualData, 1);

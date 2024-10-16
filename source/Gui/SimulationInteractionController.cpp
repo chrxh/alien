@@ -4,7 +4,7 @@
 #include <cmath>
 
 #include "Base/Resources.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "OpenGLHelper.h"
 #include "EditorController.h"
@@ -21,10 +21,10 @@ namespace
 }
 
 _SimulationInteractionController::_SimulationInteractionController(
-    SimulationController const& simController,
+    SimulationFacade const& simulationFacade,
     EditorController const& editorController,
     SimulationView const& simulationView)
-    : _simController(simController)
+    : _simulationFacade(simulationFacade)
     , _editorController(editorController)
     , _simulationView(simulationView)
 {
@@ -176,11 +176,11 @@ void _SimulationInteractionController::leftMouseButtonPressed(IntVector2D const&
             if (!_modes.drawMode) {
                 _editorController->onSelectObjects(toRealVector2D(mousePos), ImGui::GetIO().KeyCtrl);
                 _worldPosOnClick = Viewport::mapViewToWorldPosition(toRealVector2D(mousePos));
-                if (_simController->isSimulationRunning()) {
-                    _simController->setDetached(true);
+                if (_simulationFacade->isSimulationRunning()) {
+                    _simulationFacade->setDetached(true);
                 }
 
-                auto shallowData = _simController->getSelectionShallowData(*_worldPosOnClick);
+                auto shallowData = _simulationFacade->getSelectionShallowData(*_worldPosOnClick);
                 _selectionPositionOnClick = {shallowData.centerPosX, shallowData.centerPosY};
             } else {
                 _editorController->getCreatorWindow()->onDrawing();
@@ -201,7 +201,7 @@ void _SimulationInteractionController::leftMouseButtonHold(IntVector2D const& mo
         RealVector2D prevWorldPos = Viewport::mapViewToWorldPosition(toRealVector2D(prevMousePos));
 
         if (!_modesAtClick.drawMode) {
-            if (!_simController->isSimulationRunning()) {
+            if (!_simulationFacade->isSimulationRunning()) {
                 _editorController->onMoveSelectedObjects(toRealVector2D(mousePos), prevWorldPos);
             } else {
                 _editorController->onFixateSelectedObjects(toRealVector2D(mousePos), *_worldPosOnClick, *_selectionPositionOnClick);
@@ -230,8 +230,8 @@ void _SimulationInteractionController::leftMouseButtonReleased(IntVector2D const
         if (_modesAtClick.drawMode) {
             _editorController->getCreatorWindow()->finishDrawing();
         } else {
-            if (_simController->isSimulationRunning()) {
-                _simController->setDetached(false);
+            if (_simulationFacade->isSimulationRunning()) {
+                _simulationFacade->setDetached(false);
                 RealVector2D prevWorldPos = Viewport::mapViewToWorldPosition(toRealVector2D(prevMousePos));
                 _editorController->onAccelerateSelectedObjects(toRealVector2D(mousePos), prevWorldPos);
             }
@@ -253,7 +253,7 @@ void _SimulationInteractionController::rightMouseButtonPressed(IntVector2D const
         _simulationView->setMotionBlur(_simulationView->getMotionBlur() * 2);
     } else {
         if (!ImGui::GetIO().KeyAlt) {
-            if (!_simController->isSimulationRunning() && !_modes.drawMode) {
+            if (!_simulationFacade->isSimulationRunning() && !_modes.drawMode) {
                 auto viewPos = toRealVector2D(mousePos);
                 RealRect rect{viewPos, viewPos};
                 _selectionRect = rect;
@@ -272,7 +272,7 @@ void _SimulationInteractionController::rightMouseButtonHold(IntVector2D const& m
         Viewport::zoom(mousePos, 1.0f / calcZoomFactor(_lastZoomTimepoint ? *_lastZoomTimepoint : std::chrono::steady_clock::now()));
     } else {
         if (!ImGui::GetIO().KeyAlt) {
-            auto isSimulationRunning = _simController->isSimulationRunning();
+            auto isSimulationRunning = _simulationFacade->isSimulationRunning();
             if (!isSimulationRunning && !_modesAtClick.drawMode && _selectionRect.has_value()) {
                 _selectionRect->bottomRight = toRealVector2D(mousePos);
                 _editorController->onUpdateSelectionRect(*_selectionRect);
@@ -300,7 +300,7 @@ void _SimulationInteractionController::rightMouseButtonReleased()
     if (!_modesAtClick.editMode) {
         _simulationView->setMotionBlur(_simulationView->getMotionBlur() / 2);
     } else {
-        if (!_simController->isSimulationRunning()) {
+        if (!_simulationFacade->isSimulationRunning()) {
             _selectionRect.reset();
         }
     }
@@ -372,7 +372,7 @@ void _SimulationInteractionController::drawCursor()
 
     // editing cursors
     if (_modes.editMode) {
-        if (!_modes.drawMode || _simController->isSimulationRunning()) {
+        if (!_modes.drawMode || _simulationFacade->isSimulationRunning()) {
             auto cursorSize = scale(CursorRadius);
 
             // shadow

@@ -5,7 +5,7 @@
 
 #include "Base/GlobalSettings.h"
 #include "EngineInterface/SerializerService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/GenomeDescriptionService.h"
 #include "Network/NetworkService.h"
 #include "Network/ValidationService.h"
@@ -38,10 +38,10 @@ namespace
 _UploadSimulationDialog::_UploadSimulationDialog(
     BrowserWindow const& browserWindow,
     LoginDialog const& loginDialog,
-    SimulationController const& simController,
+    SimulationFacade const& simulationFacade,
     GenomeEditorWindow const& genomeEditorWindow)
     : _AlienDialog("")
-    , _simController(simController)
+    , _simulationFacade(simulationFacade)
     , _browserWindow(browserWindow)
     , _loginDialog(loginDialog)
     , _genomeEditorWindow(genomeEditorWindow)

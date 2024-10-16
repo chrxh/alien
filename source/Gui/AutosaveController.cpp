@@ -5,7 +5,7 @@
 #include "Base/Resources.h"
 #include "Base/GlobalSettings.h"
 #include "EngineInterface/SerializerService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "Viewport.h"
 #include "DelayedExecutionController.h"
@@ -17,8 +17,8 @@ namespace
     auto constexpr MinutesForAutosave = 40;
 }
 
-_AutosaveController::_AutosaveController(SimulationController const& simController)
-    : _simController(simController)
+_AutosaveController::_AutosaveController(SimulationFacade const& simulationFacade)
+    : _simulationFacade(simulationFacade)
 {
     _startTimePoint = std::chrono::steady_clock::now();
     _on = GlobalSettings::get().getBool("controllers.auto save.active", true);
@@ -66,6 +66,6 @@ void _AutosaveController::process()
 
 void _AutosaveController::onSave()
 {
-    DeserializedSimulation sim = SerializationHelperService::getDeserializedSerialization(_simController);
+    DeserializedSimulation sim = SerializationHelperService::getDeserializedSerialization(_simulationFacade);
     SerializerService::serializeSimulationToFiles(Const::AutosaveFile, sim);
 }

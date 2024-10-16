@@ -10,7 +10,7 @@
 #include "Base/NumberGenerator.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/Colors.h"
 
 #include "AlienImGui.h"
@@ -18,8 +18,8 @@
 #include "GenericFileDialogs.h"
 
 
-_ImageToPatternDialog::_ImageToPatternDialog(SimulationController const& simController)
-    : _simController(simController)
+_ImageToPatternDialog::_ImageToPatternDialog(SimulationFacade const& simulationFacade)
+    : _simulationFacade(simulationFacade)
 {
     auto path = std::filesystem::current_path();
     if (path.has_parent_path()) {
@@ -114,7 +114,7 @@ void _ImageToPatternDialog::show()
         DescriptionEditService::reconnectCells(dataDesc, 1 * 1.5f);
         dataDesc.setCenter(Viewport::getCenterInWorldPos());
 
-        _simController->addAndSelectSimulationData(dataDesc);
+        _simulationFacade->addAndSelectSimulationData(dataDesc);
         //TODO: update pattern editor
     });
 }

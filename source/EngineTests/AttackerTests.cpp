@@ -2,7 +2,7 @@
 
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/GenomeDescriptionService.h"
 #include "EngineInterface/GenomeDescriptions.h"
 
@@ -48,10 +48,10 @@ TEST_F(AttackerTests, nothingFound)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
     EXPECT_EQ(2, actualData.cells.size());
@@ -83,10 +83,10 @@ TEST_F(AttackerTests, successNoTransmitter)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
 
     auto origAttackCell = getCell(data, 1);
     auto actualAttackCell = getCell(actualData, 1);
@@ -124,10 +124,10 @@ TEST_F(AttackerTests, successDistributeToOneTransmitter)
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
     auto origNerveCell = getCell(data, 2);
@@ -168,10 +168,10 @@ TEST_F(AttackerTests, successDistributeToTwoTransmitters)
     data.addConnection(1, 4);
     data.addConnection(2, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
     auto origTransmitterCell1 = getCell(data, 3);
     auto actualTransmitterCell1 = getCell(actualData, 3);
@@ -210,10 +210,10 @@ TEST_F(AttackerTests, successDistributeToTwoTransmittersWithDifferentColor)
     data.addConnection(1, 4);
     data.addConnection(2, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
     auto origTransmitterCell1 = getCell(data, 3);
     auto actualTransmitterCell1 = getCell(actualData, 3);
@@ -260,10 +260,10 @@ TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
     data.addConnection(1, 4);
     data.addConnection(2, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
     auto origTransmitterCell = getCell(data, 3);
     auto actualTransmitterCell = getCell(actualData, 3);
@@ -300,10 +300,10 @@ TEST_F(AttackerTests, successDistributeToConnectedCells)
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
     auto origNerveCell1 = getCell(data, 2);
@@ -341,10 +341,10 @@ TEST_F(AttackerTests, successTwoTargets)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
 
     auto origAttackCell = getCell(data, 1);
     auto actualAttackCell = getCell(actualData, 1);

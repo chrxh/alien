@@ -4,17 +4,17 @@
 
 #include <imgui.h>
 
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "Viewport.h"
 #include "StyleRepository.h"
 
 _SimulationScrollbar::_SimulationScrollbar(
     std::string const& id,
     Orientation orientation,
-    SimulationController const& simController)
+    SimulationFacade const& simulationFacade)
     : _id(id)
     , _orientation(orientation)
-    , _simController(simController)
+    , _simulationFacade(simulationFacade)
 {}
 
 void _SimulationScrollbar::process(RealRect const& rect)
@@ -55,7 +55,7 @@ void _SimulationScrollbar::processEvents(RealRect const& rect)
     if (ImGui::IsMouseDragging(ImGuiMouseButton_Left) && _worldCenterForDragging) {
         auto dragViewDelta = ImGui::GetMouseDragDelta();
         auto scrollbarSize = rect.bottomRight - rect.topLeft;
-        auto worldSize = _simController->getWorldSize();
+        auto worldSize = _simulationFacade->getWorldSize();
         auto dragWorldDelta = RealVector2D{
             dragViewDelta.x / scrollbarSize.x * worldSize.x, dragViewDelta.y / scrollbarSize.y * worldSize.y};
         auto centerInWorldPos = Viewport::getCenterInWorldPos();
@@ -75,7 +75,7 @@ RealRect _SimulationScrollbar::calcSliderbarRect(RealRect const& scrollbarRect) 
 {
     auto size2d = scrollbarRect.bottomRight - scrollbarRect.topLeft;
     auto worldSize =
-        Orientation::Horizontal == _orientation ? _simController->getWorldSize().x : _simController->getWorldSize().y;
+        Orientation::Horizontal == _orientation ? _simulationFacade->getWorldSize().x : _simulationFacade->getWorldSize().y;
     auto size = Orientation::Horizontal == _orientation ? size2d.x : size2d.y;
 
     auto worldRect = Viewport::getVisibleWorldRect();

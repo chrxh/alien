@@ -3,7 +3,7 @@
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/GenomeDescriptionService.h"
 #include "EngineInterface/GenomeDescriptions.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
 class ReconnectorTests : public IntegrationTestFramework
@@ -46,10 +46,10 @@ TEST_F(ReconnectorTests, establishConnection_noRestriction_nothingFound)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualReconnectorCell = getCell(actualData, 1);
 
     EXPECT_EQ(2, actualData.cells.size());
@@ -81,10 +81,10 @@ TEST_F(ReconnectorTests, establishConnection_noRestriction_success)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
@@ -120,10 +120,10 @@ TEST_F(ReconnectorTests, establishConnection_restrictToColor_failed)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
@@ -157,10 +157,10 @@ TEST_F(ReconnectorTests, establishConnection_restrictToColor_success)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
@@ -197,10 +197,10 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_success)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
@@ -237,10 +237,10 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_failed)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
@@ -274,10 +274,10 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_success)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
@@ -313,10 +313,10 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_zeroM
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
@@ -350,10 +350,10 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_respa
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
@@ -387,10 +387,10 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_sameM
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
@@ -424,10 +424,10 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_success)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
@@ -463,10 +463,10 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_failed)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
@@ -500,10 +500,10 @@ TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_success)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
@@ -539,10 +539,10 @@ TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_failed)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
@@ -577,10 +577,10 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_succes
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     EXPECT_TRUE(hasConnection(actualData, 1, 3));
 }
 
@@ -608,10 +608,10 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_failed
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     EXPECT_FALSE(hasConnection(actualData, 1, 3));
 }
 
@@ -639,10 +639,10 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_succes
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     EXPECT_TRUE(hasConnection(actualData, 1, 3));
 }
 
@@ -670,10 +670,10 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_failed
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     EXPECT_FALSE(hasConnection(actualData, 1, 3));
 }
 
@@ -704,10 +704,10 @@ TEST_F(ReconnectorTests, deleteConnections_success)
     data.addConnection(1, 3);
     data.addConnection(1, 4);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(4, actualData.cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);

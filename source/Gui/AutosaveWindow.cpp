@@ -16,9 +16,9 @@ namespace
     auto constexpr AutosaveSenderId = "Autosave";
 }
 
-_AutosaveWindow::_AutosaveWindow(SimulationController const& simController, PersisterFacade const& persisterFacade)
+_AutosaveWindow::_AutosaveWindow(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade)
     : _AlienWindow("Autosave (work in progress)", "windows.autosave", false)
-    , _simController(simController)
+    , _simulationFacade(simulationFacade)
     , _persisterFacade(persisterFacade)
 {
     _settingsOpen = GlobalSettings::get().getBool("windows.autosave.settings.open", _settingsOpen);

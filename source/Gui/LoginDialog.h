@@ -10,7 +10,7 @@ class _LoginDialog : public _AlienDialog
 {
 public:
     _LoginDialog(
-        SimulationController const& simController,
+        SimulationFacade const& simulationFacade,
         PersisterFacade const& persisterFacade,
         CreateUserDialog const& createUserDialog,
         ActivateUserDialog const& activateUserDialog,
@@ -20,7 +20,7 @@ public:
 private:
     void processIntern();
 
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
     PersisterFacade _persisterFacade; 
     BrowserWindow _browserWindow;
     CreateUserDialog _createUserDialog;

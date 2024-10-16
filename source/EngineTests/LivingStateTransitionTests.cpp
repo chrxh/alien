@@ -6,7 +6,7 @@
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/GenomeConstants.h"
 #include "EngineInterface/GenomeDescriptionService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
 class LivingStateTransitionTests : public IntegrationTestFramework
@@ -41,9 +41,9 @@ TEST_F(LivingStateTransitionTests, staysReady)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
     EXPECT_EQ(LivingState_Ready, getCell(actualData, 1).livingState);
     EXPECT_EQ(LivingState_Ready, getCell(actualData, 2).livingState);
 }
@@ -57,9 +57,9 @@ TEST_F(LivingStateTransitionTests, dyingIfAdjacentDying)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
     EXPECT_EQ(LivingState_Dying, getCell(actualData, 1).livingState);
     EXPECT_EQ(LivingState_Dying, getCell(actualData, 2).livingState);
 }
@@ -73,9 +73,9 @@ TEST_F(LivingStateTransitionTests, activatingUnderConstruction)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
     EXPECT_EQ(LivingState_Activating, getCell(actualData, 1).livingState);
     EXPECT_EQ(LivingState_Ready, getCell(actualData, 2).livingState);
 }
@@ -89,9 +89,9 @@ TEST_F(LivingStateTransitionTests, staysReadyIfAdjacentDying_differentCreatureId
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
     EXPECT_EQ(LivingState_Ready, getCell(actualData, 1).livingState);
     EXPECT_EQ(LivingState_Dying, getCell(actualData, 2).livingState);
 }
@@ -105,9 +105,9 @@ TEST_F(LivingStateTransitionTests, noSelfReplicatingConstructorIsDyingIfAdjacent
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
     EXPECT_EQ(LivingState_Dying, getCell(actualData, 1).livingState);
     EXPECT_EQ(LivingState_Dying, getCell(actualData, 2).livingState);
 }
@@ -129,9 +129,9 @@ TEST_F(LivingStateTransitionTests, separatingSelfReplicatorIsDyingIfAdjacentDyin
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
     EXPECT_EQ(LivingState_Dying, getCell(actualData, 1).livingState);
     EXPECT_EQ(LivingState_Dying, getCell(actualData, 2).livingState);
 }
@@ -158,9 +158,9 @@ TEST_F(LivingStateTransitionTests, noSeparatingSelfReplicatorStaysReadyIfAdjacen
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
-    auto actualData = _simController->getSimulationData();
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualCell1 = getCell(actualData, 1);
     auto actualConstructor = std::get<ConstructorDescription>(*actualCell1.cellFunction);
     EXPECT_EQ(4, actualData.cells.size());

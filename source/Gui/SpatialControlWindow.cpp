@@ -6,18 +6,18 @@
 
 #include "Base/GlobalSettings.h"
 #include "Base/StringHelper.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "StyleRepository.h"
 #include "Viewport.h"
 #include "AlienImGui.h"
 #include "ResizeWorldDialog.h"
 
-_SpatialControlWindow::_SpatialControlWindow(SimulationController const& simController, TemporalControlWindow const& temporalControlWindow)
+_SpatialControlWindow::_SpatialControlWindow(SimulationFacade const& simulationFacade, TemporalControlWindow const& temporalControlWindow)
     : _AlienWindow("Spatial control", "windows.spatial control", true)
-    , _simController(simController)
+    , _simulationFacade(simulationFacade)
 {
-    _resizeWorldDialog = std::make_shared<_ResizeWorldDialog>(simController, temporalControlWindow);
+    _resizeWorldDialog = std::make_shared<_ResizeWorldDialog>(simulationFacade, temporalControlWindow);
 
     auto& settings = GlobalSettings::get();
     Viewport::setZoomSensitivity(settings.getFloat("windows.spatial control.zoom sensitivity factor", Viewport::getZoomSensitivity()));
@@ -52,7 +52,7 @@ void _SpatialControlWindow::processIntern()
         ImGui::Text("World size");
         ImGui::PushFont(StyleRepository::get().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
-        auto worldSize = _simController->getWorldSize();
+        auto worldSize = _simulationFacade->getWorldSize();
         ImGui::TextUnformatted(
             (StringHelper::format(worldSize.x) + " x " + StringHelper::format(worldSize.y)).c_str());
         ImGui::PopStyleColor();
@@ -113,7 +113,7 @@ void _SpatialControlWindow::processCenterButton()
 {
     if (AlienImGui::ToolbarButton(ICON_FA_CROSSHAIRS)) {
         Viewport::setZoomFactor(1.0f);
-        auto worldSize = toRealVector2D(_simController->getWorldSize());
+        auto worldSize = toRealVector2D(_simulationFacade->getWorldSize());
         Viewport::setCenterInWorldPos({worldSize.x / 2, worldSize.y / 2});
     }
     AlienImGui::Tooltip("Center");
@@ -129,8 +129,8 @@ void _SpatialControlWindow::processResizeButton()
 
 void _SpatialControlWindow::processCenterOnSelection()
 {
-    if (_centerSelection && _simController->isSimulationRunning()) {
-        auto shallowData = _simController->getSelectionShallowData();
+    if (_centerSelection && _simulationFacade->isSimulationRunning()) {
+        auto shallowData = _simulationFacade->getSelectionShallowData();
         if (shallowData.numCells > 0 || shallowData.numParticles > 0) {
             Viewport::setCenterInWorldPos({shallowData.centerPosX, shallowData.centerPosY});
         }
