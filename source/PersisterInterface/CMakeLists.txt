@@ -1,15 +1,21 @@
 
 add_library(PersisterInterface
     Definitions.h
+    DeleteNetworkResourceRequestData.h
+    DeleteNetworkResourceResultData.h
     DownloadCache.h
     DownloadNetworkResourceRequestData.h
     DownloadNetworkResourceResultData.h
+    EditNetworkResourceRequestData.h
+    EditNetworkResourceResultData.h
     GetNetworkResourcesRequestData.h
     GetNetworkResourcesResultData.h
     GetUserNamesForEmojiRequestData.h
     GetUserNamesForEmojiResultData.h
     LoginRequestData.h
     LoginResultData.h
+    MoveNetworkResourceRequestData.h
+    MoveNetworkResourceResultData.h
     PersisterController.cpp
     PersisterController.h
     PersisterErrorInfo.h
@@ -25,6 +31,8 @@ add_library(PersisterInterface
     SenderInfo.h
     TaskProcessor.cpp
     TaskProcessor.h
+    ToggleLikeNetworkResourceRequestData.h
+    ToggleLikeNetworkResourceResultData.h
     UploadNetworkResourceRequestData.h
     UploadNetworkResourceResultData.h)
 

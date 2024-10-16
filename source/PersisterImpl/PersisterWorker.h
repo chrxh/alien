@@ -42,6 +42,7 @@ private:
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, UploadNetworkResourceRequest const& request);
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, ReplaceNetworkResourceRequest const& request);
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, GetUserNamesForEmojiRequest const& request);
+    PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, DeleteNetworkResourceRequest const& request);
 
     SimulationController _simController;
 

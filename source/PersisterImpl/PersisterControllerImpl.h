@@ -46,6 +46,18 @@ public:
     PersisterRequestId scheduleGetUserNamesForEmoji(SenderInfo const& senderInfo, GetUserNamesForEmojiRequestData const& data) override;
     GetUserNamesForEmojiResultData fetchGetUserNamesForEmojiData(PersisterRequestId const& id) override;
 
+    PersisterRequestId scheduleDeleteNetworkResource(SenderInfo const& senderInfo, DeleteNetworkResourceRequestData const& data) override;
+    DeleteNetworkResourceResultData fetchDeleteNetworkResourcesData(PersisterRequestId const& id) override;
+
+    PersisterRequestId scheduleEditNetworkResource(SenderInfo const& senderInfo, EditNetworkResourceRequestData const& data) override;
+    EditNetworkResourceResultData fetchEditNetworkResourcesData(PersisterRequestId const& id) override;
+
+    PersisterRequestId scheduleMoveNetworkResource(SenderInfo const& senderInfo, MoveNetworkResourceRequestData const& data) override;
+    MoveNetworkResourceResultData fetchMoveNetworkResourcesData(PersisterRequestId const& id) override;
+
+    PersisterRequestId scheduleToggleLikeNetworkResource(SenderInfo const& senderInfo, ToggleLikeNetworkResourceRequestData const& data) override;
+    ToggleLikeNetworkResourceResultData fetchToggleLikeNetworkResourcesData(PersisterRequestId const& id) override;
+
 private:
     static auto constexpr MaxWorkerThreads = 4;
 

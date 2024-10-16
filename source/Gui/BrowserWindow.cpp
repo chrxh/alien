@@ -1259,7 +1259,6 @@ void _BrowserWindow::sortUserList()
 
 void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
 {
-    printOverlayMessage("Downloading ...");
     ++leaf.rawTO->numDownloads;
 
     NetworkTransferController::get().onDownload(DownloadNetworkResourceRequestData{
@@ -1273,8 +1272,6 @@ void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
 void _BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
 {
     auto func = [&] {
-        printOverlayMessage("Replacing ...");
-
         auto data = [&]() -> std::variant<ReplaceNetworkResourceRequestData::SimulationData, ReplaceNetworkResourceRequestData::GenomeData> {
             if (_currentWorkspace.resourceType == NetworkResourceType_Simulation) {
                 return ReplaceNetworkResourceRequestData::SimulationData{.zoom = Viewport::getZoomFactor(), .center = Viewport::getCenterInWorldPos()};
@@ -1363,16 +1360,9 @@ void _BrowserWindow::onDeleteResource(NetworkResourceTreeTO const& treeTO)
         }
 
         //apply changes to server
-        printOverlayMessage("Deleting ...");
-        delayedExecution([rawTOs = rawTOs, this] {
-            for (auto const& rawTO : rawTOs) {
-                if (!NetworkService::deleteResource(rawTO->id)) {
-                    MessageDialog::get().information("Error", "Failed to delete item. Please try again later.");
-                    refreshIntern(true);
-                    return;
-                }
-            }
-        });
+        for (auto const& rawTO : rawTOs) {
+            NetworkTransferController::get().onDelete({.resourceId = rawTO->id});
+        }
     });
 }
 
