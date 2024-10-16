@@ -10,6 +10,8 @@
 #include "DownloadNetworkResourceResultData.h"
 #include "GetNetworkResourcesRequestData.h"
 #include "GetNetworkResourcesResultData.h"
+#include "GetUserNamesForEmojiRequestData.h"
+#include "GetUserNamesForEmojiResultData.h"
 #include "LoginRequestData.h"
 #include "LoginResultData.h"
 #include "ReadSimulationResultData.h"
@@ -31,6 +33,7 @@ class _PersisterController
 public:
     virtual ~_PersisterController() = default;
 
+    //lifecycle control
     virtual void init(SimulationController const& simController) = 0;
     virtual void shutdown() = 0;
     virtual void restart() = 0;
@@ -62,4 +65,7 @@ public:
 
     virtual PersisterRequestId scheduleReplaceNetworkResource(SenderInfo const& senderInfo, ReplaceNetworkResourceRequestData const& data) = 0;
     virtual ReplaceNetworkResourceResultData fetchReplaceNetworkResourcesData(PersisterRequestId const& id) = 0;
+
+    virtual PersisterRequestId scheduleGetUserNamesForEmoji(SenderInfo const& senderInfo, GetUserNamesForEmojiRequestData const& data) = 0;
+    virtual GetUserNamesForEmojiResultData fetchGetUserNamesForEmojiData(PersisterRequestId const& id) = 0;
 };

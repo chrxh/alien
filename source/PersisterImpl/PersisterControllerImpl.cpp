@@ -126,8 +126,18 @@ ReplaceNetworkResourceResultData _PersisterControllerImpl::fetchReplaceNetworkRe
     return fetchData<_ReplaceNetworkResourceRequestResult, ReplaceNetworkResourceResultData>(id);
 }
 
-PersisterRequestId _PersisterControllerImpl::generateNewJobId()
+PersisterRequestId _PersisterControllerImpl::scheduleGetUserNamesForEmoji(SenderInfo const& senderInfo, GetUserNamesForEmojiRequestData const& data)
 {
-    ++_latestJobId;
-    return PersisterRequestId{std::to_string(_latestJobId)};
+    return scheduleRequest<_GetUserNamesForEmojiRequest>(senderInfo, data);
+}
+
+GetUserNamesForEmojiResultData _PersisterControllerImpl::fetchGetUserNamesForEmojiData(PersisterRequestId const& id)
+{
+    return fetchData<_GetUserNamesForEmojiRequestResult, GetUserNamesForEmojiResultData>(id);
+}
+
+PersisterRequestId _PersisterControllerImpl::generateNewRequestId()
+{
+    ++_latestRequestId;
+    return PersisterRequestId{std::to_string(_latestRequestId)};
 }

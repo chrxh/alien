@@ -43,6 +43,9 @@ public:
     PersisterRequestId scheduleReplaceNetworkResource(SenderInfo const& senderInfo, ReplaceNetworkResourceRequestData const& data) override;
     ReplaceNetworkResourceResultData fetchReplaceNetworkResourcesData(PersisterRequestId const& id) override;
 
+    PersisterRequestId scheduleGetUserNamesForEmoji(SenderInfo const& senderInfo, GetUserNamesForEmojiRequestData const& data) override;
+    GetUserNamesForEmojiResultData fetchGetUserNamesForEmojiData(PersisterRequestId const& id) override;
+
 private:
     static auto constexpr MaxWorkerThreads = 4;
 
@@ -52,11 +55,11 @@ private:
     template <typename RequestResult, typename ResultData>
     ResultData fetchData(PersisterRequestId const& id);
 
-    PersisterRequestId generateNewJobId();
+    PersisterRequestId generateNewRequestId();
 
     PersisterWorker _worker;
     std::thread* _thread[MaxWorkerThreads];
-    int _latestJobId = 0;
+    int _latestRequestId = 0;
 };
 
 
@@ -67,7 +70,7 @@ private:
 template <typename Request, typename RequestData>
 PersisterRequestId _PersisterControllerImpl::scheduleRequest(SenderInfo const& senderInfo, RequestData const& data)
 {
-    auto requestId = generateNewJobId();
+    auto requestId = generateNewRequestId();
     auto request = std::make_shared<Request>(requestId, senderInfo, data);
 
     _worker->addRequest(request);

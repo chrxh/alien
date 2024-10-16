@@ -45,3 +45,4 @@ using _GetNetworkResourcesRequestResult = _ConcreteRequestResult<GetNetworkResou
 using _DownloadNetworkResourceRequestResult = _ConcreteRequestResult<DownloadNetworkResourceResultData>;
 using _UploadNetworkResourceRequestResult = _ConcreteRequestResult<UploadNetworkResourceResultData>;
 using _ReplaceNetworkResourceRequestResult = _ConcreteRequestResult<ReplaceNetworkResourceResultData>;
+using _GetUserNamesForEmojiRequestResult = _ConcreteRequestResult<GetUserNamesForEmojiResultData>;

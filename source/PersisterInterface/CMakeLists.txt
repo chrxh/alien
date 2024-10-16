@@ -6,6 +6,8 @@ add_library(PersisterInterface
     DownloadNetworkResourceResultData.h
     GetNetworkResourcesRequestData.h
     GetNetworkResourcesResultData.h
+    GetUserNamesForEmojiRequestData.h
+    GetUserNamesForEmojiResultData.h
     LoginRequestData.h
     LoginResultData.h
     PersisterController.cpp
