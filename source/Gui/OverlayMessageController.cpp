@@ -74,8 +74,8 @@ void OverlayMessageController::processLoadingBar()
 
         auto constexpr N = 40;
         for (int i = 0; i < N; ++i) {
-            auto amplitude1 = sin(toFloat(i) * 10.0f / toFloat(N) - duration / 240.0f) / 1;
-            auto amplitude2 = sin(toFloat(i) * 14.0f / toFloat(N) - duration / 135.0f) / 1;
+            auto amplitude1 = sinf(toFloat(i) * 10.0f / toFloat(N) - duration / 240.0f);
+            auto amplitude2 = sinf(toFloat(i) * 14.0f / toFloat(N) - duration / 135.0f);
             //auto hue = toFloat((i * 1000 / N + toInt(duration)) % 3000) / 4500.0f;
             //hue = hue < 0.33f ? 0.66f + hue : 0.66f + 0.66f - hue; 
 
