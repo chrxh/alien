@@ -38,11 +38,11 @@ add_library(EngineInterface
     SelectionShallowData.h
     SerializerService.cpp
     SerializerService.h
+    SerializedSimulation.h
     Settings.h
     ShallowUpdateSelectionData.h
     ShapeGenerator.cpp
     ShapeGenerator.h
-    SerializedSimulation.h
     SimulationFacade.h
     SimulationParameters.cpp
     SimulationParameters.h

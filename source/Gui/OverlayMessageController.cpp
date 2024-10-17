@@ -69,70 +69,25 @@ void OverlayMessageController::processLoadingBar()
 
         auto viewSize = toRealVector2D(Viewport::get().getViewSize());
         auto width = viewSize.x / 6 + 1.0f;
-        auto height = scale(20.0f);
+        auto height = scale(10.0f);
         auto center = ImVec2{viewSize.x / 2, viewSize.y - scale(60.0f)};
-        drawList->AddRectFilled(
-            ImVec2{center.x - width / 2, center.y - height / 2}, ImVec2{center.x + width / 2, center.y + height / 2},
-            ImColor::HSV(0.66f, 1.0f, 0.25f, 0.8f));
-        //drawList->AddRectFilledMultiColor(
-        //    ImVec2{center.x - width / 2, center.y - height / 2},
-        //    ImVec2{center.x + width / 2, center.y},
-        //    ImColor::HSV(0.66f, 0.5f, 0.65f, 1.0f),
-        //    ImColor::HSV(0.66f, 0.5f, 0.65f, 1.0f),
-        //    ImColor::HSV(0.66f, 0.5f, 0.65f, 0.0f),
-        //    ImColor::HSV(0.66f, 0.5f, 0.65f, 0.0f));
 
-        //drawList->AddRectFilledMultiColor(
-        //    ImVec2{center.x - width / 2, center.y},
-        //    ImVec2{center.x + width / 2, center.y + height / 2},
-        //    ImColor::HSV(0.66f, 0.5f, 0.65f, 0.0f),
-        //    ImColor::HSV(0.66f, 0.5f, 0.65f, 0.0f),
-        //    ImColor::HSV(0.66f, 0.5f, 0.65f, 1.0f),
-        //    ImColor::HSV(0.66f, 0.5f, 0.65f, 1.0f));
+        auto constexpr N = 40;
+        for (int i = 0; i < N; ++i) {
+            auto amplitude1 = sin(toFloat(i) * 10.0f / toFloat(N) - duration / 240.0f) / 1;
+            auto amplitude2 = sin(toFloat(i) * 14.0f / toFloat(N) - duration / 135.0f) / 1;
+            //auto hue = toFloat((i * 1000 / N + toInt(duration)) % 3000) / 4500.0f;
+            //hue = hue < 0.33f ? 0.66f + hue : 0.66f + 0.66f - hue; 
 
-        auto progressWidth = width * 2 / 5;
-        auto progressStart = (toInt(duration) / 10 + toInt(width - progressWidth)) % toInt(width);
-        auto progressEnd = (toInt(duration) / 10) % toInt(width);
-        if (progressStart < progressEnd) {
-            drawList->AddRectFilledMultiColor(
-                ImVec2{center.x - width / 2 + toFloat(progressStart), center.y - height / 2},
-                ImVec2{center.x - width / 2 + toFloat(progressEnd), center.y + height / 2},
-                ImColor::HSV(0.66f, 0.8f, 1.0f, 1.0f),
-                ImColor::HSV(0.66f, 0.8f, 0.6f, 1.0f),
-                ImColor::HSV(0.66f, 0.8f, 0.2f, 1.0f),
-                ImColor::HSV(0.66f, 0.8f, 0.6f, 1.0f));
-        } else {
-            {
-                auto factor = toFloat(progressEnd) / progressWidth;
-                auto brightness1 = 1.0f * factor + 0.6f * (1.0f - factor);
-                auto brightness2 = 0.6f * factor + 0.2f * (1.0f - factor);
-                drawList->AddRectFilledMultiColor(
-                    ImVec2{center.x - width / 2, center.y - height / 2},
-                    ImVec2{center.x - width / 2 + toFloat(progressEnd), center.y + height / 2},
-                    ImColor::HSV(0.66f, 0.8f, brightness1, 1.0f),
-                    ImColor::HSV(0.66f, 0.8f, 0.6f, 1.0f),
-                    ImColor::HSV(0.66f, 0.8f, 0.2f, 1.0f),
-                    ImColor::HSV(0.66f, 0.8f, brightness2, 1.0f));
-            }
-            {
-                auto factor = (width - toFloat(progressStart)) / progressWidth;
-                auto brightness3 = 1.0f * (1.0f - factor) + 0.6f * factor;
-                auto brightness4 = 0.6f * (1.0f - factor) + 0.2f * factor;
-                drawList->AddRectFilledMultiColor(
-                    ImVec2{center.x - width / 2 + toFloat(progressStart), center.y - height / 2},
-                    ImVec2{center.x + width / 2, center.y + height / 2},
-                    ImColor::HSV(0.66f, 0.8f, 1.0f, 1.0f),
-                    ImColor::HSV(0.66f, 0.8f, brightness3, 1.0f),
-                    ImColor::HSV(0.66f, 0.8f, brightness4, 1.0f),
-                    ImColor::HSV(0.66f, 0.8f, 0.6f, 1.0f));
-            }
+            drawList->AddRectFilled(
+                ImVec2{center.x - width / 2 + toFloat(i) / N * width, center.y + height / 2 - amplitude1 * height},
+                ImVec2{center.x - width / 2 + toFloat(i + 1) / N * width - scale(3), center.y + height / 2 - amplitude2 * height / 2},
+                ImColor::HSV(0, 0.1f, 0.35f, 0.6f));
         }
-        drawList->AddRect(
-            ImVec2{center.x - width / 2, center.y - height / 2}, ImVec2{center.x + width / 2, center.y + height / 2}, ImColor::HSV(0.66f, 0.8f, 0.6f, 1.0f));
         drawList->AddText(
             StyleRepository::get().getReefMediumFont(),
             scale(16.0f),
-            {center.x - scale(25.0f), center.y - scale(10.0f)},
+            {center.x - scale(28.0f), center.y - scale(15.0f)},
             ImColor::HSV(0, 0, 1, 0.7f),
             "Processing");
 
