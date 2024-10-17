@@ -57,6 +57,8 @@ add_library(EngineInterface
     StatisticsHistory.h
     ZoomLevels.h)
 
+target_link_libraries(EngineInterface Base)
+
 target_link_libraries(EngineInterface Boost::boost)
 target_link_libraries(EngineInterface ZLIB::ZLIB)
 
