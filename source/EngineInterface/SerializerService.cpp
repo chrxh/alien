@@ -123,10 +123,9 @@ namespace
     auto constexpr Id_Cell_GenomeComplexity = 17;
     //auto constexpr Id_Cell_AncestorMutationId = 18;
     auto constexpr Id_Cell_DetectedByCreatureId = 19;
-
-    auto constexpr Id_Activity_Origin = 0;
-    auto constexpr Id_Activity_TargetX = 1;
-    auto constexpr Id_Activity_TargetY = 2;
+    auto constexpr Id_Cell_Activity_Origin = 20;
+    auto constexpr Id_Cell_Activity_TargetX = 21;
+    auto constexpr Id_Cell_Activity_TargetY = 22;
 
     auto constexpr Id_Neuron_ActivationFunctions = 0;
 
@@ -538,11 +537,13 @@ namespace cereal
     {
         ar(data.cellId, data.distance, data.angleFromPrevious);
     }
+
     template <class Archive>
-    void serialize(Archive& ar, ActivityDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, ActivityDescription& data)
     {
         ar(data.channels);
     }
+    SPLIT_SERIALIZATION(ActivityDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, NeuronDescription& data)
@@ -802,17 +803,18 @@ namespace cereal
         loadSave<float>(task, auxiliaries, Id_Cell_GenomeComplexity, data.genomeComplexity, defaultObject.genomeComplexity);
         loadSave(task, auxiliaries, Id_Cell_DetectedByCreatureId, data.detectedByCreatureId, defaultObject.detectedByCreatureId);
         loadSave<uint8_t>(task, auxiliaries, Id_Cell_CellFunctionUsed, data.cellFunctionUsed, defaultObject.cellFunctionUsed);
+        loadSave(task, auxiliaries, Id_Cell_Activity_Origin, data.activity.origin, defaultObject.activity.origin);
+        loadSave(task, auxiliaries, Id_Cell_Activity_TargetX, data.activity.targetX, defaultObject.activity.targetX);
+        loadSave(task, auxiliaries, Id_Cell_Activity_TargetY, data.activity.targetY, defaultObject.activity.targetY);
+        auto activityClone = data.activity;
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.id, data.connections, data.pos, data.vel, data.energy, data.maxConnections, data.cellFunction, data.activity, data.metadata);
-
-        //#TODO
-        //ActivityDescription defaultActivity;
-        //auxiliaries = getLoadSaveMap(task, ar);
-        //loadSave<ActivityOrigin>(task, auxiliaries, Id_Activity_Origin, data.activity.origin, defaultObject.activity.origin);
-        //loadSave<float>(task, auxiliaries, Id_Activity_TargetX, data.activity.targetX, defaultObject.activity.targetX);
-        //loadSave<float>(task, auxiliaries, Id_Activity_TargetY, data.activity.targetY, defaultObject.activity.targetY);
-        //processLoadSaveMap(task, ar, auxiliaries);
+        if (task == SerializationTask::Load) {
+            data.activity.origin = activityClone.origin;
+            data.activity.targetX = activityClone.targetX;
+            data.activity.targetY = activityClone.targetY;
+        }
 
         //compatibility with older versions
         //>>>
