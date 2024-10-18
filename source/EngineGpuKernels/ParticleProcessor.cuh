@@ -300,7 +300,8 @@ __inline__ __device__ void ParticleProcessor::radiate(SimulationData& data, floa
 
     data.cellMap.correctPosition(pos);
 
-    auto externalEnergyBackflowFactor = cudaSimulationParameters.features.externalEnergyControl ? cudaSimulationParameters.externalEnergyBackflowFactor[color] : 0.0f;
+    auto externalEnergy = alienAtomicRead(data.externalEnergy);
+    auto externalEnergyBackflowFactor = cudaSimulationParameters.features.externalEnergyControl && externalEnergy < 5000000.0f? cudaSimulationParameters.externalEnergyBackflowFactor[color] : 0.0f;
     auto particleEnergy =
         energy * (1.0f - externalEnergyBackflowFactor);
     if (particleEnergy > NEAR_ZERO) {

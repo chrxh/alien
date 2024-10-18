@@ -74,7 +74,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
         statistics.incNumTransmitterActivities(cell->color);
     }
 
-    if (cell->cellFunctionData.transmitter.mode == EnergyDistributionMode_ConnectedCells) {
+    if (/*cell->cellFunction == CellFunction_Transmitter && */cell->cellFunctionData.transmitter.mode == EnergyDistributionMode_ConnectedCells) {
         int numReceivers = cell->numConnections;
         for (int i = 0; i < cell->numConnections; ++i) {
             numReceivers += cell->connections[i].cell->numConnections;
@@ -100,26 +100,29 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
             }
         }
     }
-
-    if (cell->cellFunctionData.transmitter.mode == EnergyDistributionMode_TransmittersAndConstructors) {
+    if (cell->cellFunctionData.transmitter.mode == EnergyDistributionMode_TransmittersAndConstructors/* || cell->cellFunction == CellFunction_Constructor*/) {
         auto matchActiveConstructorFunc = [&](Cell* const& otherCell) {
             if (otherCell->livingState != LivingState_Ready) {
                 return false;
             }
             if (otherCell->cellFunction == CellFunction_Constructor) {
                 if (!GenomeDecoder::isFinished(otherCell->cellFunctionData.constructor)
-                    && (!cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameCreature || otherCell->creatureId == cell->creatureId)) {
+                    && (!cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameCreature || otherCell->creatureId == cell->creatureId)
+                    && otherCell->cellFunctionData.constructor.isReady) {
                     return true;
                 }
             }
             return false;
         };
-        auto matchTransmitterFunc = [&](Cell* const& otherCell) {
+        auto matchSecondChoiceFunc = [&](Cell* const& otherCell) {
             if (otherCell->livingState != LivingState_Ready) {
                 return false;
             }
-            if (otherCell->cellFunction == CellFunction_Transmitter) {
-                if (!cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameCreature || otherCell->creatureId == cell->creatureId) {
+            if (!cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameCreature || otherCell->creatureId == cell->creatureId) {
+                if (otherCell->cellFunction == CellFunction_Transmitter) {
+                    return true;
+                }
+                if (otherCell->cellFunction == CellFunction_Constructor && !otherCell->cellFunctionData.constructor.isReady) {
                     return true;
                 }
             }
@@ -131,7 +134,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
         auto const& radius = cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionRadius[cell->color];
         data.cellMap.getMatchingCells(receiverCells, 20, numReceivers, cell->pos, radius, cell->detached, matchActiveConstructorFunc);
         if (numReceivers == 0) {
-            data.cellMap.getMatchingCells(receiverCells, 20, numReceivers, cell->pos, radius, cell->detached, matchTransmitterFunc);
+            data.cellMap.getMatchingCells(receiverCells, 20, numReceivers, cell->pos, radius, cell->detached, matchSecondChoiceFunc);
         }
         float energyPerReceiver = energyDelta / (numReceivers + 1);
 
