@@ -271,18 +271,22 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
                 return false;
             }
             if (otherCell->cellFunction == CellFunction_Constructor) {
-                if (!GenomeDecoder::isFinished(otherCell->cellFunctionData.constructor) && otherCell->creatureId == cell->creatureId) {
+                if (!GenomeDecoder::isFinished(otherCell->cellFunctionData.constructor) && otherCell->creatureId == cell->creatureId
+                    && otherCell->cellFunctionData.constructor.isReady) {
                     return true;
                 }
             }
             return false;
         };
-        auto matchTransmitterFunc = [&](Cell* const& otherCell) {
+        auto matchSecondChoiceFunc = [&](Cell* const& otherCell) {
             if (otherCell->livingState != LivingState_Ready) {
                 return false;
             }
-            if (otherCell->cellFunction == CellFunction_Transmitter) {
-                if (otherCell->creatureId == cell->creatureId) {
+            if (otherCell->creatureId == cell->creatureId) {
+                if (otherCell->cellFunction == CellFunction_Transmitter) {
+                    return true;
+                }
+                if (otherCell->cellFunction == CellFunction_Constructor && !otherCell->cellFunctionData.constructor.isReady) {
                     return true;
                 }
             }
@@ -294,7 +298,7 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
         auto radius = cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius[cell->color];
         data.cellMap.getMatchingCells(receiverCells, 20, numReceivers, cell->pos, radius, cell->detached, matchActiveConstructorFunc);
         if (numReceivers == 0) {
-            data.cellMap.getMatchingCells(receiverCells, 20, numReceivers, cell->pos, radius, cell->detached, matchTransmitterFunc);
+            data.cellMap.getMatchingCells(receiverCells, 20, numReceivers, cell->pos, radius, cell->detached, matchSecondChoiceFunc);
         }
         float energyPerReceiver = energyDelta / (numReceivers + 1);
 

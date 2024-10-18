@@ -194,19 +194,15 @@ __inline__ __device__ void MutationProcessor::propertiesMutation(SimulationData&
 
     uint8_t prevExecutionNumber = data.numberGen1.randomByte();
     uint8_t nextExecutionNumber = data.numberGen1.randomByte();
-    uint8_t prevInputExecutionNumber = data.numberGen1.randomByte();
-    uint8_t nextInputExecutionNumber = data.numberGen1.randomByte();
     int nodeAddress = 0;
     GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, false, [&](int depth, int nodeAddressIntern, int repetition) {
         auto origSequenceNumber = sequenceNumber;
         ++sequenceNumber;
         if (origSequenceNumber == node - 1) {
             prevExecutionNumber = GenomeDecoder::getNextExecutionNumber(genome, nodeAddressIntern);
-            prevInputExecutionNumber = GenomeDecoder::getNextInputExecutionNumber(genome, nodeAddressIntern);
         }
         if (origSequenceNumber == node + 1) {
             nextExecutionNumber = GenomeDecoder::getNextExecutionNumber(genome, nodeAddressIntern);
-            nextInputExecutionNumber = GenomeDecoder::getNextInputExecutionNumber(genome, nodeAddressIntern);
         }
         if (origSequenceNumber == node) {
             nodeAddress = nodeAddressIntern;
@@ -821,6 +817,8 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
         //make construction non-self-replicating + insert empty subgenome
         GenomeDecoder::setNextCellSelfReplication(targetGenome, startTargetIndex + nodeAddressForSelfReplication - startSourceIndex, false);
         GenomeDecoder::setNextCellSubgenomeSize(targetGenome, startTargetIndex + nodeAddressForSelfReplication - startSourceIndex, Const::GenomeHeaderSize);
+        GenomeDecoder::setNextConstructorNumBranches(targetGenome, startTargetIndex + nodeAddressForSelfReplication - startSourceIndex, 1);
+        GenomeDecoder::setNextConstructorNumRepetitions(targetGenome, startTargetIndex + nodeAddressForSelfReplication - startSourceIndex, 1);
 
         auto const emptySubgenomeSize = 2 + Const::GenomeHeaderSize;
         for (int i = nodeAddressForSelfReplication - startSourceIndex + nodeSize; i < sizeDelta; ++i) {

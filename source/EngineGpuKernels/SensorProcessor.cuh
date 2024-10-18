@@ -128,6 +128,19 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
     __shared__ bool blockedByWall[NumScanAngles];
     __shared__ int8_t minRange;
 
+    //if (cell->cellFunctionData.sensor.memoryInvalidationCounter > 0) {
+    //    if (threadIdx.x == 0) {
+    //        activity.channels[0] = 1;
+    //        activity.channels[1] = cell->cellFunctionData.sensor.memoryChannel1;
+    //        activity.channels[2] = cell->cellFunctionData.sensor.memoryChannel2;
+    //        activity.channels[3] = cell->cellFunctionData.sensor.memoryChannel3;
+    //        activity.targetX = cell->cellFunctionData.sensor.memoryTargetX;
+    //        activity.targetY = cell->cellFunctionData.sensor.memoryTargetY;
+    //        --cell->cellFunctionData.sensor.memoryInvalidationCounter;
+    //    }
+    //    __syncthreads();
+    //    return;
+    //}
     if (threadIdx.x == 0) {
         refScanAngle = Math::angleOfVector(CellFunctionProcessor::calcSignalDirection(data, cell));
         minDensity = toInt(cell->cellFunctionData.sensor.minDensity * 100);
@@ -207,6 +220,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             activity.targetY = delta.y;
             cell->cellFunctionData.sensor.memoryTargetX = delta.x;
             cell->cellFunctionData.sensor.memoryTargetY = delta.y;
+            //cell->cellFunctionData.sensor.memoryInvalidationCounter = legacyMode_unrestrictedMovements ? 0 : 40;
         } else {
             activity.channels[0] = 0;  //nothing found
             //activity.channels[1] = cell->cellFunctionData.sensor.memoryChannel1;
