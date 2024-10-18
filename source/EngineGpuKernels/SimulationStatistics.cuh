@@ -90,7 +90,7 @@ public:
     {
         auto partition = calcAllThreadsPartition(MutantToColorCountMapSize);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            if (_mutantToMutantStatisticsMap[index].count >= 40) {
+            if (_mutantToMutantStatisticsMap[index].count >= 20) {
                 auto& mutantStatistics = _mutantToMutantStatisticsMap[index];
                 atomicAdd(&_data->timeline.timestep.numColonies[mutantStatistics.color], 1);
                 alienAtomicMax(

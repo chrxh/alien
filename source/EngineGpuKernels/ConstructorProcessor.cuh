@@ -108,7 +108,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
     }
 
     if (constructor.numInheritedGenomeNodes == 0 || GenomeDecoder::isFinished(constructor) || !GenomeDecoder::containsSelfReplication(constructor)) {
-        constructor.isComplete = true;
+        constructor.isReady = true;
         return;
     }
 
@@ -143,7 +143,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
             break;
         }
     } while (true);
-    constructor.isComplete = (actualCells >= constructor.numInheritedGenomeNodes);
+    constructor.isReady = (actualCells >= constructor.numInheritedGenomeNodes);
 }
 
 __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
@@ -353,7 +353,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
         return nullptr;
     }
 
-    if (cudaSimulationParameters.cellFunctionConstructorCheckCompletenessForSelfReplication && !constructor.isComplete) {
+    if (cudaSimulationParameters.cellFunctionConstructorCheckCompletenessForSelfReplication && !constructor.isReady) {
         return nullptr;
     }
 
@@ -379,7 +379,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     if (!constructionData.isLastNodeOfLastRepetition || !constructionData.genomeHeader.separateConstruction) {
         auto distance = constructionData.isLastNodeOfLastRepetition && !constructionData.genomeHeader.separateConstruction
             ? 1.0f
-            : cudaSimulationParameters.cellFunctionConstructorOffspringDistance[hostCell->color];
+            : constructionData.genomeHeader.connectionDistance + 0.6f /*cudaSimulationParameters.cellFunctionConstructorOffspringDistance[hostCell->color]*/;
         if(!CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance)) {
             CellConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
         }
@@ -486,7 +486,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
         //move connection between lastConstructionCell and hostCell to a connection between newCell and hostCell
         auto distance = constructionData.isLastNodeOfLastRepetition && !constructionData.genomeHeader.separateConstruction
             ? 1.0f
-            : cudaSimulationParameters.cellFunctionConstructorOffspringDistance[hostCell->color];
+            : constructionData.genomeHeader.connectionDistance + 0.6f /*cudaSimulationParameters.cellFunctionConstructorOffspringDistance[hostCell->color]*/;
         for (int i = 0; i < hostCell->numConnections; ++i) {
             auto& connectedCell = hostCell->connections[i];
             if (connectedCell.cell == constructionData.lastConstructionCell) {
@@ -648,7 +648,8 @@ ConstructorProcessor::constructCellIntern(
     result->inputExecutionOrderNumber = constructionData.inputExecutionOrderNumber;
     result->outputBlocked = constructionData.outputBlocked;
 
-    result->activationTime = constructionData.containsSelfReplication ? constructor.constructionActivationTime : 0;
+    result->activationTime = 10;
+    //constructionData.containsSelfReplication ? constructor.constructionActivationTime : 0;
     result->genomeComplexity = hostCell->genomeComplexity;
 
     auto genomeCurrentBytePosition = constructionData.genomeCurrentBytePosition;
@@ -688,6 +689,7 @@ ConstructorProcessor::constructCellIntern(
         if (GenomeDecoder::containsSelfReplication(newConstructor)) {
             statistics.incNumCreatedReplicators(hostCell->color);
         }
+        newConstructor.isReady = true;
     } break;
     case CellFunction_Sensor: {
         result->cellFunctionData.sensor.mode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % SensorMode_Count;
@@ -698,6 +700,7 @@ ConstructorProcessor::constructCellIntern(
             GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % SensorRestrictToMutants_Count;
         result->cellFunctionData.sensor.minRange = GenomeDecoder::readOptionalByte(constructor, genomeCurrentBytePosition);
         result->cellFunctionData.sensor.maxRange = GenomeDecoder::readOptionalByte(constructor, genomeCurrentBytePosition);
+        //result->cellFunctionData.sensor.memoryInvalidationCounter = 0;
         result->cellFunctionData.sensor.memoryChannel1 = 0;
         result->cellFunctionData.sensor.memoryChannel2 = 0;
         result->cellFunctionData.sensor.memoryChannel3 = 0;
@@ -746,7 +749,9 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
 {
     if (cudaSimulationParameters.features.externalEnergyControl && hostCell->energy < constructionData.energy + cudaSimulationParameters.cellNormalEnergy[hostCell->color]
         && cudaSimulationParameters.externalEnergyInflowFactor[hostCell->color] > 0) {
-        auto externalEnergyPortion = constructionData.energy * cudaSimulationParameters.externalEnergyInflowFactor[hostCell->color];
+        auto externalEnergyPortion = !constructionData.containsSelfReplication && !GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor)
+            ? constructionData.energy * cudaSimulationParameters.externalEnergyInflowFactor[hostCell->color]
+            : 0.0f;
 
         auto origExternalEnergy = alienAtomicRead(data.externalEnergy);
         if (origExternalEnergy == Infinity<float>::value) {
