@@ -12,8 +12,7 @@ public:
         SimulationFacade const& simulationFacade,
         TemporalControlWindow const& temporalControlWindow,
         StatisticsWindow const& statisticsWindow);
-
-    ~_NewSimulationDialog();
+    ~_NewSimulationDialog() override;
 
 private:
     void processIntern() override;

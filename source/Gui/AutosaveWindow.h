@@ -27,7 +27,7 @@ class _AutosaveWindow : public AlienWindow
 {
 public:
     _AutosaveWindow(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade);
-    ~_AutosaveWindow();
+    ~_AutosaveWindow() override;
 
 private:
     void processIntern() override;

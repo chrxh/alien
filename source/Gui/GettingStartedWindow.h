@@ -9,8 +9,7 @@ class _GettingStartedWindow : public AlienWindow
 {
 public:
     _GettingStartedWindow();
-
-    virtual ~_GettingStartedWindow();
+    ~_GettingStartedWindow() override;
 
 private:
     void processIntern() override;

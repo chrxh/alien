@@ -85,11 +85,10 @@ namespace
         throw std::runtime_error("Glfw error " + std::to_string(error) + ": " + description);
     }
 
-    _SimulationView* simulationViewPtr;
     void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     {
         if (width > 0 && height > 0) {
-            simulationViewPtr->resize({width, height});
+            _SimulationView::get().resize({width, height});
             glViewport(0, 0, width, height);
         }
     }
@@ -122,14 +121,15 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     StyleRepository::get().init();
     NetworkService::get().init();
 
+    //init facades
+    _persisterFacade->init(_simulationFacade);
+
     //init controllers, windows and dialogs
     Viewport::get().init(_simulationFacade);
-    _persisterFacade->init(_simulationFacade);
     AutosaveController::get().init(_simulationFacade);
     EditorController::get().init(_simulationFacade);
-    _simulationView = std::make_shared<_SimulationView>(_simulationFacade);
-    SimulationInteractionController::get().init(_simulationFacade, _simulationView);
-    simulationViewPtr = _simulationView.get();
+    _SimulationView::get().init(_simulationFacade);
+    SimulationInteractionController::get().init(_simulationFacade);
     _statisticsWindow = std::make_shared<_StatisticsWindow>(_simulationFacade);
     _temporalControlWindow = std::make_shared<_TemporalControlWindow>(_simulationFacade, _statisticsWindow);
     _spatialControlWindow = std::make_shared<_SpatialControlWindow>(_simulationFacade, _temporalControlWindow);
@@ -155,7 +155,7 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     _deleteUserDialog = std::make_shared<_DeleteUserDialog>();
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>();
     _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_simulationFacade);
-    _shaderWindow = std::make_shared<_ShaderWindow>(_simulationView);
+    _shaderWindow = std::make_shared<_ShaderWindow>();
     _autosaveWindow = std::make_shared<_AutosaveWindow>(_simulationFacade, _persisterFacade);
     OverlayMessageController::get().init(_persisterFacade);
     FileTransferController::get().init(_persisterFacade, _simulationFacade, _temporalControlWindow);
@@ -239,7 +239,7 @@ void _MainWindow::shutdown()
     glfwDestroyWindow(_window);
     glfwTerminate();
 
-    _simulationView.reset();
+    _SimulationView::get().shutdown();
 
     _persisterFacade->shutdown();
     _simulationFacade->closeSimulation();
@@ -317,7 +317,7 @@ void _MainWindow::processFadeInUI()
     processWindows();
     processControllers();
 
-    _simulationView->processControls(_renderSimulation);
+    _SimulationView::get().processControls(_renderSimulation);
     _startupController->process();
 
     popGlobalStyle();
@@ -338,7 +338,7 @@ void _MainWindow::processReady()
     processWindows();
     processControllers();
 
-    _simulationView->processControls(_renderSimulation);
+    _SimulationView::get().processControls(_renderSimulation);
 
     popGlobalStyle();
 
@@ -352,7 +352,7 @@ void _MainWindow::renderSimulation()
     int display_w, display_h;
     glfwGetFramebufferSize(_window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
-    _simulationView->draw(_renderSimulation);
+    _SimulationView::get().draw(_renderSimulation);
 }
 
 void _MainWindow::processMenubar()
@@ -512,8 +512,8 @@ void _MainWindow::processMenubar()
         }
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_EYE "  View ", _viewMenuToggled, "View")) {
-            if (ImGui::MenuItem("Information overlay", "ALT+O", _simulationView->isOverlayActive())) {
-                _simulationView->setOverlayActive(!_simulationView->isOverlayActive());
+            if (ImGui::MenuItem("Information overlay", "ALT+O", _SimulationView::get().isOverlayActive())) {
+                _SimulationView::get().setOverlayActive(!_SimulationView::get().isOverlayActive());
             }
             if (ImGui::MenuItem("Render UI", "ALT+U", UiController::get().isOn())) {
                 UiController::get().setOn(!UiController::get().isOn());
@@ -690,7 +690,7 @@ void _MainWindow::processMenubar()
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_O)) {
-            _simulationView->setOverlayActive(!_simulationView->isOverlayActive());
+            _SimulationView::get().setOverlayActive(!_SimulationView::get().isOverlayActive());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_U)) {
             UiController::get().setOn(!UiController::get().isOn());
@@ -750,7 +750,7 @@ void _MainWindow::processWindows()
 
 void _MainWindow::processControllers()
 {
-    _autosaveController->process();
+    AutosaveController::get().process();
     EditorController::get().process();
     OverlayMessageController::get().process();
     SimulationInteractionController::get().process();

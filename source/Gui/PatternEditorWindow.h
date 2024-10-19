@@ -10,7 +10,7 @@ class _PatternEditorWindow : public AlienWindow
 {
 public:
     _PatternEditorWindow(EditorModel const& editorModel, SimulationFacade const& simulationFacade);
-    ~_PatternEditorWindow();
+    ~_PatternEditorWindow() override;
 
     bool isObjectInspectionPossible() const;
     bool isGenomeInspectionPossible() const;

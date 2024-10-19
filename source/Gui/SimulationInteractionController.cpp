@@ -20,10 +20,9 @@ namespace
     auto constexpr CursorRadius = 13.0f;
 }
 
-void SimulationInteractionController::init(SimulationFacade const& simulationFacade, SimulationView const& simulationView)
+void SimulationInteractionController::init(SimulationFacade const& simulationFacade)
 {
     _simulationFacade = simulationFacade;
-    _simulationView = simulationView;
     _editorOn = OpenGLHelper::loadTexture(Const::EditorOnFilename);
     _editorOff = OpenGLHelper::loadTexture(Const::EditorOffFilename);
 }
@@ -166,7 +165,7 @@ void SimulationInteractionController::leftMouseButtonPressed(IntVector2D const& 
 
     if (!_modes.editMode) {
         _lastZoomTimepoint.reset();
-        _simulationView->setMotionBlur(_simulationView->getMotionBlur() * 2);
+        _SimulationView::get().setMotionBlur(_SimulationView::get().getMotionBlur() * 2);
     } else {
         if (!ImGui::GetIO().KeyAlt) {
             if (!_modes.drawMode) {
@@ -221,7 +220,7 @@ void SimulationInteractionController::leftMouseButtonReleased(IntVector2D const&
     }
 
     if (!_modesAtClick.editMode) {
-        _simulationView->setMotionBlur(_simulationView->getMotionBlur() / 2);
+        _SimulationView::get().setMotionBlur(_SimulationView::get().getMotionBlur() / 2);
     } else {
         if (_modesAtClick.drawMode) {
             EditorController::get().getCreatorWindow()->finishDrawing();
@@ -246,7 +245,7 @@ void SimulationInteractionController::rightMouseButtonPressed(IntVector2D const&
 
     if (!_modes.editMode) {
         _lastZoomTimepoint.reset();
-        _simulationView->setMotionBlur(_simulationView->getMotionBlur() * 2);
+        _SimulationView::get().setMotionBlur(_SimulationView::get().getMotionBlur() * 2);
     } else {
         if (!ImGui::GetIO().KeyAlt) {
             if (!_simulationFacade->isSimulationRunning() && !_modes.drawMode) {
@@ -294,7 +293,7 @@ void SimulationInteractionController::rightMouseButtonReleased()
     }
 
     if (!_modesAtClick.editMode) {
-        _simulationView->setMotionBlur(_simulationView->getMotionBlur() / 2);
+        _SimulationView::get().setMotionBlur(_SimulationView::get().getMotionBlur() / 2);
     } else {
         if (!_simulationFacade->isSimulationRunning()) {
             _selectionRect.reset();

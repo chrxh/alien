@@ -6,11 +6,9 @@
 class _ShaderWindow : public AlienWindow
 {
 public:
-    _ShaderWindow(SimulationView const& simulationView);
-    ~_ShaderWindow();
+    _ShaderWindow();
+    ~_ShaderWindow() override;
 
 private:
     void processIntern() override;
-
-    SimulationView _simulationView;
 };

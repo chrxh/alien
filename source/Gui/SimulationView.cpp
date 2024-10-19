@@ -24,15 +24,15 @@ namespace
     auto constexpr ZoomFactorForOverlay = 12.0f;
 }
 
-_SimulationView::_SimulationView(SimulationFacade const& simulationFacade)
-    : _simulationFacade(simulationFacade)
+void _SimulationView::init(SimulationFacade const& simulationFacade)
 {
+    _simulationFacade = simulationFacade;
+
     _isCellDetailOverlayActive = GlobalSettings::get().getBool("settings.simulation view.overlay", _isCellDetailOverlayActive);
     _brightness = GlobalSettings::get().getFloat("windows.simulation view.brightness", _brightness);
     _contrast = GlobalSettings::get().getFloat("windows.simulation view.contrast", _contrast);
     _motionBlur = GlobalSettings::get().getFloat("windows.simulation view.motion blur factor", _motionBlur);
 
-    _simulationFacade = simulationFacade;
     _shader = std::make_shared<_Shader>(Const::SimulationVertexShader, Const::SimulationFragmentShader);
 
     _scrollbarX = std::make_shared<_SimulationScrollbar>(
@@ -90,7 +90,7 @@ _SimulationView::_SimulationView(SimulationFacade const& simulationFacade)
     setContrast(1.0f);
 }
 
-_SimulationView::~_SimulationView()
+void _SimulationView::shutdown()
 {
     GlobalSettings::get().setBool("settings.simulation view.overlay", _isCellDetailOverlayActive);
     GlobalSettings::get().setFloat("windows.simulation view.brightness", _brightness);

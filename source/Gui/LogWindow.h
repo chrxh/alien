@@ -7,7 +7,7 @@ class _LogWindow : public AlienWindow
 {
 public:
     _LogWindow(GuiLogger const& logger);
-    ~_LogWindow();
+    ~_LogWindow() override;
 
 private:
     void processIntern();

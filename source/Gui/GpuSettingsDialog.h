@@ -9,8 +9,7 @@ class _GpuSettingsDialog : public AlienDialog
 {
 public:
     _GpuSettingsDialog(SimulationFacade const& simulationFacade);
-
-    ~_GpuSettingsDialog();
+    ~_GpuSettingsDialog() override;
 
 private:
     void processIntern();
