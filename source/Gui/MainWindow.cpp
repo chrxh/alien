@@ -123,8 +123,8 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     StatisticsWindow::get().init(_simulationFacade);
     TemporalControlWindow::get().init(_simulationFacade);
     SpatialControlWindow::get().init(_simulationFacade);
-    _radiationSourcesWindow = std::make_shared<_RadiationSourcesWindow>(_simulationFacade);
-    _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simulationFacade, _radiationSourcesWindow);
+    RadiationSourcesWindow::get().init(_simulationFacade);
+    SimulationParametersWindow::get().init(_simulationFacade);
     _gpuSettingsDialog = std::make_shared<_GpuSettingsDialog>(_simulationFacade);
     _startupController = std::make_shared<_StartupController>(_simulationFacade, _persisterFacade);
     _exitDialog = std::make_shared<_ExitDialog>(_onExit);
@@ -172,15 +172,13 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
         glDeleteTextures(1, &texID);
     };
 
-    auto windowData = WindowController::get().getWindowData();
-    _window = windowData.window;
-
     log(Priority::Important, "main window initialized");
 }
 
 void _MainWindow::mainLoop()
 {
-    while (!glfwWindowShouldClose(_window) && !_onExit)
+    auto window = WindowController::get().getWindowData().window;
+    while (!glfwWindowShouldClose(window) && !_onExit)
     {
         glfwPollEvents();
 
@@ -217,6 +215,7 @@ void _MainWindow::shutdown()
     BrowserWindow::get().shutdown();
     StatisticsWindow::get().shutdown();
     SpatialControlWindow::get().shutdown();
+    SimulationParametersWindow::get().shutdown();
 
     EditorController::get().shutdown();
     LoginController::get().shutdown();
@@ -229,7 +228,7 @@ void _MainWindow::shutdown()
     ImPlot::DestroyContext();
     ImGui::DestroyContext();
 
-    glfwDestroyWindow(_window);
+    glfwDestroyWindow(WindowController::get().getWindowData().window);
     glfwTerminate();
 
     SimulationView::get().shutdown();
@@ -299,16 +298,17 @@ void _MainWindow::processLoadingScreen()
     OverlayMessageController::get().process();
 
     // render mainData
+    auto window = WindowController::get().getWindowData().window;
     ImGui::Render();
     int display_w, display_h;
-    glfwGetFramebufferSize(_window, &display_w, &display_h);
+    glfwGetFramebufferSize(window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
     glClearColor(0, 0, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    glfwSwapBuffers(_window);
+    glfwSwapBuffers(window);
 }
 
 void _MainWindow::processFadeoutLoadingScreen()
@@ -363,7 +363,7 @@ void _MainWindow::processReady()
 void _MainWindow::renderSimulation()
 {
     int display_w, display_h;
-    glfwGetFramebufferSize(_window, &display_w, &display_h);
+    glfwGetFramebufferSize(WindowController::get().getWindowData().window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
     SimulationView::get().draw(_renderSimulation);
 }
@@ -454,11 +454,11 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Statistics", "ALT+3", StatisticsWindow::get().isOn())) {
                 StatisticsWindow::get().setOn(!StatisticsWindow::get().isOn());
             }
-            if (ImGui::MenuItem("Simulation parameters", "ALT+4", _simulationParametersWindow->isOn())) {
-                _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
+            if (ImGui::MenuItem("Simulation parameters", "ALT+4", SimulationParametersWindow::get().isOn())) {
+                SimulationParametersWindow::get().setOn(!SimulationParametersWindow::get().isOn());
             }
-            if (ImGui::MenuItem("Radiation sources", "ALT+5", _radiationSourcesWindow->isOn())) {
-                _radiationSourcesWindow->setOn(!_radiationSourcesWindow->isOn());
+            if (ImGui::MenuItem("Radiation sources", "ALT+5", RadiationSourcesWindow::get().isOn())) {
+                RadiationSourcesWindow::get().setOn(!RadiationSourcesWindow::get().isOn());
             }
             if (ImGui::MenuItem("Shader parameters", "ALT+6", _shaderWindow->isOn())) {
                 _shaderWindow->setOn(!_shaderWindow->isOn());
@@ -633,10 +633,10 @@ void _MainWindow::processMenubar()
             StatisticsWindow::get().setOn(!StatisticsWindow::get().isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_4)) {
-            _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
+            SimulationParametersWindow::get().setOn(!SimulationParametersWindow::get().isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_5)) {
-            _radiationSourcesWindow->setOn(!_radiationSourcesWindow->isOn());
+            RadiationSourcesWindow::get().setOn(!RadiationSourcesWindow::get().isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_6)) {
             _shaderWindow->setOn(!_shaderWindow->isOn());
@@ -752,12 +752,12 @@ void _MainWindow::processWindows()
     TemporalControlWindow::get().process();
     SpatialControlWindow::get().process();
     StatisticsWindow::get().process();
-    _simulationParametersWindow->process();
+    SimulationParametersWindow::get().process();
     _logWindow->process();
     BrowserWindow::get().process();
     _gettingStartedWindow->process();
     _shaderWindow->process();
-    _radiationSourcesWindow->process();
+    RadiationSourcesWindow::get().process();
     _autosaveWindow->process();
 }
 
@@ -795,7 +795,7 @@ void _MainWindow::finishFrame()
 {
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    glfwSwapBuffers(_window);
+    glfwSwapBuffers(WindowController::get().getWindowData().window);
 }
 
 void _MainWindow::pushGlobalStyle()

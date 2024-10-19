@@ -1,15 +1,20 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 
 #include "AlienWindow.h"
 
-class _RadiationSourcesWindow : public AlienWindow
+class RadiationSourcesWindow : public AlienWindow
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(RadiationSourcesWindow);
+
 public:
-    _RadiationSourcesWindow(SimulationFacade const& simulationFacade);
+    void init(SimulationFacade const& simulationFacade);
 
 private:
+    RadiationSourcesWindow();
+
     void processIntern() override;
 
     bool processTab(int index); //returns false if tab should be closed

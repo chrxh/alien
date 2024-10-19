@@ -39,14 +39,11 @@ private:
     void pushGlobalStyle();
     void popGlobalStyle();
 
-    GLFWwindow* _window;
     GuiLogger _logger;
 
-    SimulationParametersWindow _simulationParametersWindow;
     LogWindow _logWindow;
     GettingStartedWindow _gettingStartedWindow;
     ShaderWindow _shaderWindow;
-    RadiationSourcesWindow _radiationSourcesWindow;
     AutosaveWindow _autosaveWindow;
 
     ExitDialog _exitDialog;
