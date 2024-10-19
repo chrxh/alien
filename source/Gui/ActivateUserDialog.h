@@ -5,22 +5,22 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _ActivateUserDialog : public AlienDialog
+class ActivateUserDialog : public AlienDialog
 {
-public:
-    _ActivateUserDialog(SimulationFacade const& simulationFacade);
-    ~_ActivateUserDialog();
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(ActivateUserDialog);
 
-    void registerCyclicReferences(CreateUserDialogWeakPtr const& createUserDialog);
+public:
+    void init(SimulationFacade const& simulationFacade);
 
     void open(std::string const& userName, std::string const& password, UserInfo const& userInfo);
 
 private:
+    ActivateUserDialog();
+
     void processIntern() override;
     void onActivateUser();
 
     SimulationFacade _simulationFacade; 
-    CreateUserDialogWeakPtr _createUserDialog;
 
     std::string _userName;
     std::string _password;

@@ -11,12 +11,7 @@ class LoginDialog : public AlienDialog
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(LoginDialog);
 
 public:
-    void init(
-        SimulationFacade const& simulationFacade,
-        PersisterFacade const& persisterFacade,
-        CreateUserDialog const& createUserDialog,
-        ActivateUserDialog const& activateUserDialog,
-        ResetPasswordDialog const& resetPasswordDialog);
+    void init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade, ResetPasswordDialog const& resetPasswordDialog);
 
 private:
     LoginDialog();
@@ -25,7 +20,5 @@ private:
 
     SimulationFacade _simulationFacade;
     PersisterFacade _persisterFacade; 
-    CreateUserDialog _createUserDialog;
-    ActivateUserDialog _activateUserDialog;
     ResetPasswordDialog _resetPasswordDialog;
 };

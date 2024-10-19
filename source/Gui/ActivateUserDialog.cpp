@@ -11,20 +11,12 @@
 #include "CreateUserDialog.h"
 #include "StyleRepository.h"
 
-_ActivateUserDialog::_ActivateUserDialog(SimulationFacade const& simulationFacade)
-    : AlienDialog("Activate user")
-    , _simulationFacade(simulationFacade)
-{}
-
-_ActivateUserDialog::~_ActivateUserDialog() {}
-
-void _ActivateUserDialog::registerCyclicReferences(CreateUserDialogWeakPtr const& createUserDialog)
+void ActivateUserDialog::init(SimulationFacade const& simulationFacade)
 {
-    _createUserDialog = createUserDialog;
+    _simulationFacade = simulationFacade;
 }
 
-
-void _ActivateUserDialog::open(std::string const& userName, std::string const& password, UserInfo const& userInfo)
+void ActivateUserDialog::open(std::string const& userName, std::string const& password, UserInfo const& userInfo)
 {
     AlienDialog::open();
     _userName = userName;
@@ -32,7 +24,11 @@ void _ActivateUserDialog::open(std::string const& userName, std::string const& p
     _userInfo = userInfo;
 }
 
-void _ActivateUserDialog::processIntern()
+ActivateUserDialog::ActivateUserDialog()
+    : AlienDialog("Activate user")
+{}
+
+void ActivateUserDialog::processIntern()
 {
     AlienImGui::Text("Please enter the confirmation code sent to your email address.");
     AlienImGui::HelpMarker(
@@ -56,13 +52,13 @@ void _ActivateUserDialog::processIntern()
 
     ImGui::SameLine();
     if (AlienImGui::Button("Resend")) {
-        _createUserDialog.lock()->onCreateUser();
+        CreateUserDialog::get().onCreateUser();
     }
 
     ImGui::SameLine();
     if (AlienImGui::Button("Resend to other email address")) {
         close();
-        _createUserDialog.lock()->open(_userName, _password, _userInfo);
+        CreateUserDialog::get().open(_userName, _password, _userInfo);
     }
 
     ImGui::SameLine();
@@ -74,7 +70,7 @@ void _ActivateUserDialog::processIntern()
     }
 }
 
-void _ActivateUserDialog::onActivateUser()
+void ActivateUserDialog::onActivateUser()
 {
     auto result = NetworkService::get().activateUser(_userName, _password, _userInfo, _confirmationCode);
     if (result) {
