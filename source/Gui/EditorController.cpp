@@ -30,7 +30,7 @@ void EditorController::init(SimulationFacade const& simulationFacade)
     _editorModel = std::make_shared<_EditorModel>(_simulationFacade);
     _genomeEditorWindow = std::make_shared<_GenomeEditorWindow>(_editorModel, _simulationFacade);
     _selectionWindow = std::make_shared<_SelectionWindow>(_editorModel);
-    _patternEditorWindow = std::make_shared<_PatternEditorWindow>(_editorModel, _simulationFacade, this);
+    _patternEditorWindow = std::make_shared<_PatternEditorWindow>(_editorModel, _simulationFacade);
     _creatorWindow = std::make_shared<_CreatorWindow>(_editorModel, _simulationFacade);
     _multiplierWindow = std::make_shared<_MultiplierWindow>(_editorModel, _simulationFacade);
 }
