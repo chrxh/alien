@@ -9,10 +9,7 @@
 class _PatternEditorWindow : public AlienWindow
 {
 public:
-    _PatternEditorWindow(
-        EditorModel const& editorModel,
-        SimulationFacade const& simulationFacade,
-        EditorControllerWeakPtr const& editorController);
+    _PatternEditorWindow(EditorModel const& editorModel, SimulationFacade const& simulationFacade);
     ~_PatternEditorWindow();
 
     bool isObjectInspectionPossible() const;
@@ -39,7 +36,6 @@ private:
 
     EditorModel _editorModel;
     SimulationFacade _simulationFacade;
-    EditorControllerWeakPtr _editorController;
 
     std::string _startingPath;
     float _angle = 0;

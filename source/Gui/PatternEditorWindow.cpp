@@ -25,14 +25,10 @@ namespace
     auto const RightColumnWidth = 120.0f;
 }
 
-_PatternEditorWindow::_PatternEditorWindow(
-    EditorModel const& editorModel,
-    SimulationFacade const& simulationFacade,
-    EditorControllerWeakPtr const& editorController)
+_PatternEditorWindow::_PatternEditorWindow(EditorModel const& editorModel, SimulationFacade const& simulationFacade)
     : AlienWindow("Pattern editor", "editors.pattern editor", true)
     , _editorModel(editorModel)
     , _simulationFacade(simulationFacade)
-    , _editorController(editorController)
 {
     auto path = std::filesystem::current_path();
     if (path.has_parent_path()) {
@@ -107,7 +103,7 @@ void _PatternEditorWindow::processIntern()
     ImGui::SameLine();
     ImGui::BeginDisabled(!isObjectInspectionPossible());
     if (AlienImGui::ToolbarButton(ICON_FA_MICROSCOPE)) {
-        _editorController->onInspectSelectedObjects();
+        EditorController::get().onInspectSelectedObjects();
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Inspect Objects");
@@ -116,7 +112,7 @@ void _PatternEditorWindow::processIntern()
     ImGui::SameLine();
     ImGui::BeginDisabled(!isGenomeInspectionPossible());
     if (AlienImGui::ToolbarButton(ICON_FA_DNA)) {
-        _editorController->onInspectSelectedGenomes();
+        EditorController::get().onInspectSelectedGenomes();
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Inspect principal genome");
