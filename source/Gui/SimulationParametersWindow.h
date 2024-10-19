@@ -10,7 +10,7 @@ class _SimulationParametersWindow : public AlienWindow
 {
 public:
     _SimulationParametersWindow(SimulationFacade const& simulationFacade, RadiationSourcesWindow const& radiationSourcesWindow);
-    ~_SimulationParametersWindow();
+    ~_SimulationParametersWindow() override;
 
 private:
     void processIntern() override;

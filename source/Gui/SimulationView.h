@@ -2,16 +2,20 @@
 
 #include <chrono>
 
+#include "Base/Singleton.h"
 #include "Base/Definitions.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/OverlayDescriptions.h"
+
 #include "Definitions.h"
 
 class _SimulationView
 {
+    MAKE_SINGLETON(_SimulationView);
+
 public:
-    _SimulationView(SimulationFacade const& simulationFacade);
-    ~_SimulationView();
+    void init(SimulationFacade const& simulationFacade);
+    void shutdown();
 
     void resize(IntVector2D const& viewportSize);
 

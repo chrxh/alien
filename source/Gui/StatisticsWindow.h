@@ -17,7 +17,7 @@ class _StatisticsWindow : public AlienWindow
 {
 public:
     _StatisticsWindow(SimulationFacade const& simulationFacade);
-    ~_StatisticsWindow();
+    ~_StatisticsWindow() override;
 
 private:
     void processIntern() override;

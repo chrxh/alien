@@ -15,6 +15,7 @@ enum class Priority
 class LoggingCallBack
 {
 public:
+    virtual ~LoggingCallBack() = default;
     virtual void newLogMessage(Priority priority, std::string const& message) = 0;
 };
 

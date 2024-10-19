@@ -7,7 +7,7 @@ class _GuiLogger : public LoggingCallBack
 {
 public:
     _GuiLogger();
-    virtual ~_GuiLogger();
+    ~_GuiLogger() override;
 
     std::vector<std::string> const& getMessages(Priority minPriority) const;
 

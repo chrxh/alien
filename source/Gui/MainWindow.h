@@ -40,7 +40,6 @@ private:
     GLFWwindow* _window;
     GuiLogger _logger;
 
-    SimulationView _simulationView;
     TemporalControlWindow _temporalControlWindow;
     SpatialControlWindow _spatialControlWindow;
     SimulationParametersWindow _simulationParametersWindow;

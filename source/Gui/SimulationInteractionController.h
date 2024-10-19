@@ -12,7 +12,7 @@ class SimulationInteractionController
     MAKE_SINGLETON(SimulationInteractionController);
 
 public:
-    void init(SimulationFacade const& simulationFacade, SimulationView const& simulationView);
+    void init(SimulationFacade const& simulationFacade);
 
     void process();
 
@@ -53,7 +53,6 @@ private:
     float calcZoomFactor(std::chrono::steady_clock::time_point const& lastTimepoint);
 
     SimulationFacade _simulationFacade;
-    SimulationView _simulationView;
 
     TextureData _editorOn;
     TextureData _editorOff;
