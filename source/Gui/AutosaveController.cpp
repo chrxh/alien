@@ -17,37 +17,33 @@ namespace
     auto constexpr MinutesForAutosave = 40;
 }
 
-_AutosaveController::_AutosaveController(SimulationFacade const& simulationFacade)
-    : _simulationFacade(simulationFacade)
+void AutosaveController::init(SimulationFacade const& simulationFacade)
 {
+    _simulationFacade = simulationFacade;
     _startTimePoint = std::chrono::steady_clock::now();
     _on = GlobalSettings::get().getBool("controllers.auto save.active", true);
 }
 
-_AutosaveController::~_AutosaveController()
+void AutosaveController::shutdown()
 {
     GlobalSettings::get().setBool("controllers.auto save.active", _on);
-}
-
-void _AutosaveController::shutdown()
-{
     if (!_on) {
         return;
     }
     onSave();
 }
 
-bool _AutosaveController::isOn() const
+bool AutosaveController::isOn() const
 {
     return _on;
 }
 
-void _AutosaveController::setOn(bool value)
+void AutosaveController::setOn(bool value)
 {
     _on = value;
 }
 
-void _AutosaveController::process()
+void AutosaveController::process()
 {
     if (!_on) {
         return;
@@ -64,7 +60,7 @@ void _AutosaveController::process()
     }
 }
 
-void _AutosaveController::onSave()
+void AutosaveController::onSave()
 {
     DeserializedSimulation sim = SerializationHelperService::getDeserializedSerialization(_simulationFacade);
     SerializerService::serializeSimulationToFiles(Const::AutosaveFile, sim);

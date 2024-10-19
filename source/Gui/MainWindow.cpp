@@ -125,7 +125,7 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     //init controllers, windows and dialogs
     Viewport::get().init(_simulationFacade);
     _persisterFacade->init(_simulationFacade);
-    _autosaveController = std::make_shared<_AutosaveController>(_simulationFacade);
+    AutosaveController::get().init(_simulationFacade);
     EditorController::get().init(_simulationFacade);
     _simulationView = std::make_shared<_SimulationView>(_simulationFacade);
     SimulationInteractionController::get().init(_simulationFacade, _simulationView);
@@ -209,8 +209,8 @@ void _MainWindow::mainLoop()
         case _StartupController::State::FadeOutLoadingScreen:
             processFadeoutLoadingScreen();
             break;
-        case _StartupController::State::FadeInControls:
-            processFadeInControls();
+        case _StartupController::State::FadeInUI:
+            processFadeInUI();
             break;
         case _StartupController::State::Ready:
             processReady();
@@ -228,7 +228,7 @@ void _MainWindow::shutdown()
     EditorController::get().shutdown();
     LoginController::get().shutdown();
     WindowController::get().shutdown();
-    _autosaveController->shutdown();
+    AutosaveController::get().shutdown();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -306,7 +306,7 @@ void _MainWindow::processFadeoutLoadingScreen()
     finishFrame();
 }
 
-void _MainWindow::processFadeInControls()
+void _MainWindow::processFadeInUI()
 {
     renderSimulation();
 
@@ -541,8 +541,8 @@ void _MainWindow::processMenubar()
         }
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_COG "  Settings ", _settingsMenuToggled, "Settings", false)) {
-            if (ImGui::MenuItem("Auto save", "", _autosaveController->isOn())) {
-                _autosaveController->setOn(!_autosaveController->isOn());
+            if (ImGui::MenuItem("Auto save", "", AutosaveController::get().isOn())) {
+                AutosaveController::get().setOn(!AutosaveController::get().isOn());
             }
             if (ImGui::MenuItem("CUDA settings", "ALT+C")) {
                 _gpuSettingsDialog->open();

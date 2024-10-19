@@ -109,12 +109,12 @@ void _StartupController::process()
         processLoadingScreen();
 
         if (alphaFactor == 0.0f) {
-            _state = State::FadeInControls;
+            _state = State::FadeInUI;
         }
         return;
     }
 
-    if (_state == State::FadeInControls) {
+    if (_state == State::FadeInUI) {
         auto now = std::chrono::steady_clock::now();
         auto millisecSinceActivation =
             std::chrono::duration_cast<std::chrono::milliseconds>(now - *_lastActivationTimepoint).count()
