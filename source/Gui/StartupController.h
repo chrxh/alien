@@ -10,10 +10,7 @@
 class _StartupController
 {
 public:
-    _StartupController(
-        SimulationFacade const& simulationFacade,
-        PersisterFacade const& persisterFacade,
-        TemporalControlWindow const& temporalControlWindow);
+    _StartupController(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade);
 
     void process();
     enum class State
@@ -34,7 +31,6 @@ private:
     void drawGrid(float yPos, float alpha);
 
     SimulationFacade _simulationFacade;
-    TemporalControlWindow _temporalControlWindow;
     PersisterFacade _persisterFacade;
 
     PersisterRequestId _startupSimRequestId;

@@ -13,11 +13,11 @@
 #include "AlienImGui.h"
 #include "ResizeWorldDialog.h"
 
-_SpatialControlWindow::_SpatialControlWindow(SimulationFacade const& simulationFacade, TemporalControlWindow const& temporalControlWindow)
+_SpatialControlWindow::_SpatialControlWindow(SimulationFacade const& simulationFacade)
     : AlienWindow("Spatial control", "windows.spatial control", true)
     , _simulationFacade(simulationFacade)
 {
-    _resizeWorldDialog = std::make_shared<_ResizeWorldDialog>(simulationFacade, temporalControlWindow);
+    _resizeWorldDialog = std::make_shared<_ResizeWorldDialog>(simulationFacade);
 
     auto& settings = GlobalSettings::get();
     Viewport::get().setZoomSensitivity(settings.getFloat("windows.spatial control.zoom sensitivity factor", Viewport::get().getZoomSensitivity()));

@@ -2,6 +2,7 @@
 
 #include <chrono>
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationParameters.h"
@@ -9,14 +10,18 @@
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-class _TemporalControlWindow : public AlienWindow
+class TemporalControlWindow : public AlienWindow
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(TemporalControlWindow);
+
 public:
-    _TemporalControlWindow(SimulationFacade const& simulationFacade, StatisticsWindow const& statisticsWindow);
+    void init(SimulationFacade const& simulationFacade, StatisticsWindow const& statisticsWindow);
 
     void onSnapshot();
 
 private:
+    TemporalControlWindow();
+
     struct Snapshot
     {
         uint64_t timestep;

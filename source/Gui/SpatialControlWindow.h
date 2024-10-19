@@ -9,7 +9,7 @@
 class _SpatialControlWindow : public AlienWindow
 {
 public:
-    _SpatialControlWindow(SimulationFacade const& simulationFacade, TemporalControlWindow const& temporalControlWindow);
+    _SpatialControlWindow(SimulationFacade const& simulationFacade);
     ~_SpatialControlWindow() override;
 
 private:

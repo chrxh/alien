@@ -18,11 +18,9 @@ namespace
 
 _NewSimulationDialog::_NewSimulationDialog(
     SimulationFacade const& simulationFacade,
-    TemporalControlWindow const& temporalControlWindow,
     StatisticsWindow const& statisticsWindow)
     : AlienDialog("New simulation")
     , _simulationFacade(simulationFacade)
-    , _temporalControlWindow(temporalControlWindow)
     , _statisticsWindow(statisticsWindow)
 {
     _adoptSimulationParameters = GlobalSettings::get().getBool("dialogs.new simulation.adopt simulation parameters", true);
@@ -80,5 +78,5 @@ void _NewSimulationDialog::onNewSimulation()
     _simulationFacade->newSimulation(std::nullopt, 0, generalSettings, parameters);
     Viewport::get().setCenterInWorldPos({toFloat(_width) / 2, toFloat(_height) / 2});
     Viewport::get().setZoomFactor(4.0f);
-    _temporalControlWindow->onSnapshot();
+    TemporalControlWindow::get().onSnapshot();
 }

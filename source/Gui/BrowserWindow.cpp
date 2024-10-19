@@ -30,8 +30,6 @@
 #include "StyleRepository.h"
 #include "StatisticsWindow.h"
 #include "Viewport.h"
-#include "SerializationHelperService.h"
-#include "TemporalControlWindow.h"
 #include "MessageDialog.h"
 #include "LoginDialog.h"
 #include "UploadSimulationDialog.h"
@@ -75,16 +73,11 @@ namespace
         {WorkspaceType_Private, std::string("private")}};
 }
 
-void BrowserWindow::init(
-    SimulationFacade const& simulationFacade,
-    PersisterFacade const& persisterFacade,
-    StatisticsWindow const& statisticsWindow,
-    TemporalControlWindow const& temporalControlWindow)
+void BrowserWindow::init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade, StatisticsWindow const& statisticsWindow)
 {
     _simulationFacade = simulationFacade;
     _persisterFacade = persisterFacade;
     _statisticsWindow = statisticsWindow;
-    _temporalControlWindow = temporalControlWindow;
     _downloadCache = std::make_shared<_DownloadCache>();
 
     _refreshProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);

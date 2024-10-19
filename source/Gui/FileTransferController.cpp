@@ -15,14 +15,10 @@ namespace
     auto constexpr FileTransferSenderId = "FileTransfer";
 }
 
-void FileTransferController::init(
-    PersisterFacade const& persisterFacade,
-    SimulationFacade const& simulationFacade,
-    TemporalControlWindow const& temporalControlWindow)
+void FileTransferController::init(PersisterFacade const& persisterFacade, SimulationFacade const& simulationFacade)
 {
     _persisterFacade = persisterFacade;
     _simulationFacade = simulationFacade;
-    _temporalControlWindow = temporalControlWindow;
     _openSimulationProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
 }
 
@@ -77,7 +73,7 @@ void FileTransferController::onOpenSimulation()
 
                 Viewport::get().setCenterInWorldPos(data.deserializedSimulation.auxiliaryData.center);
                 Viewport::get().setZoomFactor(data.deserializedSimulation.auxiliaryData.zoom);
-                _temporalControlWindow->onSnapshot();
+                TemporalControlWindow::get().onSnapshot();
                 printOverlayMessage(data.simulationName + ".sim");
             },
             [](auto const& criticalErrors) { MessageDialog::get().information("Error", criticalErrors); });
