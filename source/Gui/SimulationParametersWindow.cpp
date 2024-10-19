@@ -49,11 +49,10 @@ namespace
     }
 }
 
-_SimulationParametersWindow::_SimulationParametersWindow(SimulationFacade const& simulationFacade, RadiationSourcesWindow const& radiationSourcesWindow)
-    : AlienWindow("Simulation parameters", "windows.simulation parameters", false)
-    , _simulationFacade(simulationFacade)
-    , _radiationSourcesWindow(radiationSourcesWindow)
+void SimulationParametersWindow::init(SimulationFacade const& simulationFacade)
 {
+    _simulationFacade = simulationFacade;
+
     for (int n = 0; n < IM_ARRAYSIZE(_savedPalette); n++) {
         ImVec4 color;
         ImGui::ColorConvertHSVtoRGB(n / 31.0f, 0.8f, 0.2f, color.x, color.y, color.z);
@@ -75,14 +74,18 @@ _SimulationParametersWindow::_SimulationParametersWindow(SimulationFacade const&
 
 }
 
-_SimulationParametersWindow::~_SimulationParametersWindow()
+void SimulationParametersWindow::shutdown()
 {
     GlobalSettings::get().setString("windows.simulation parameters.starting path", _startingPath);
     GlobalSettings::get().setBool("windows.simulation parameters.feature list.open", _featureListOpen);
     GlobalSettings::get().setFloat("windows.simulation parameters.feature list.height", _featureListHeight);
 }
 
-void _SimulationParametersWindow::processIntern()
+SimulationParametersWindow::SimulationParametersWindow()
+    : AlienWindow("Simulation parameters", "windows.simulation parameters", false)
+{}
+
+void SimulationParametersWindow::processIntern()
 {
     processToolbar();
     if (ImGui::BeginChild("##Parameter", {0, _featureListOpen ? -scale(_featureListHeight) : -scale(50.0f)})) {
@@ -92,7 +95,7 @@ void _SimulationParametersWindow::processIntern()
     processAddonList();
 }
 
-SimulationParametersSpot _SimulationParametersWindow::createSpot(SimulationParameters const& simParameters, int index)
+SimulationParametersSpot SimulationParametersWindow::createSpot(SimulationParameters const& simParameters, int index)
 {
     auto worldSize = _simulationFacade->getWorldSize();
     SimulationParametersSpot spot;
@@ -109,7 +112,7 @@ SimulationParametersSpot _SimulationParametersWindow::createSpot(SimulationParam
     return spot;
 }
 
-void _SimulationParametersWindow::createDefaultSpotData(SimulationParametersSpot& spot)
+void SimulationParametersWindow::createDefaultSpotData(SimulationParametersSpot& spot)
 {
     auto worldSize = _simulationFacade->getWorldSize();
 
@@ -122,7 +125,7 @@ void _SimulationParametersWindow::createDefaultSpotData(SimulationParametersSpot
     }
 }
 
-void _SimulationParametersWindow::processToolbar()
+void SimulationParametersWindow::processToolbar()
 {
     if (AlienImGui::ToolbarButton(ICON_FA_FOLDER_OPEN)) {
         onOpenParameters();
@@ -158,7 +161,7 @@ void _SimulationParametersWindow::processToolbar()
     AlienImGui::Separator();
 }
 
-void _SimulationParametersWindow::processTabWidget()
+void SimulationParametersWindow::processTabWidget()
 {
     auto currentSessionId = _simulationFacade->getSessionId();
 
@@ -202,7 +205,7 @@ void _SimulationParametersWindow::processTabWidget()
     }
 }
 
-void _SimulationParametersWindow::processBase()
+void SimulationParametersWindow::processBase()
 {
     if (ImGui::BeginTabItem("Base", nullptr, _focusBaseTab ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
         auto parameters = _simulationFacade->getSimulationParameters();
@@ -501,7 +504,7 @@ void _SimulationParametersWindow::processBase()
                                            .showDisabledRevertButton(true)
                             .tooltip("If no radiation source is specified, the cells emit energy particles at their respective positions. If, on the other hand, "
                                      "one or more radiation sources are defined, the energy particles emitted by cells are created at these sources."))) {
-                    _radiationSourcesWindow->setOn(true);
+                    RadiationSourcesWindow::get().setOn(true);
                 }
 
                 AlienImGui::SliderFloat(
@@ -1617,7 +1620,7 @@ void _SimulationParametersWindow::processBase()
     }
 }
 
-bool _SimulationParametersWindow::processSpot(int index)
+bool SimulationParametersWindow::processSpot(int index)
 {
     std::string name = "Zone " + std::to_string(index + 1);
     bool isOpen = true;
@@ -2312,7 +2315,7 @@ bool _SimulationParametersWindow::processSpot(int index)
     return isOpen;
 }
 
-void _SimulationParametersWindow::processAddonList()
+void SimulationParametersWindow::processAddonList()
 {
     if (_featureListOpen) {
         ImGui::Spacing();
@@ -2399,7 +2402,7 @@ void _SimulationParametersWindow::processAddonList()
     }
 }
 
-void _SimulationParametersWindow::onAppendTab()
+void SimulationParametersWindow::onAppendTab()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
@@ -2413,7 +2416,7 @@ void _SimulationParametersWindow::onAppendTab()
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 }
 
-void _SimulationParametersWindow::onDeleteTab(int index)
+void SimulationParametersWindow::onDeleteTab(int index)
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
@@ -2428,7 +2431,7 @@ void _SimulationParametersWindow::onDeleteTab(int index)
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 }
 
-void _SimulationParametersWindow::onOpenParameters()
+void SimulationParametersWindow::onOpenParameters()
 {
     GenericFileDialogs::get().showOpenFileDialog(
         "Open simulation parameters", "Simulation parameters (*.parameters){.parameters},.*", _startingPath, [&](std::filesystem::path const& path) {
@@ -2445,7 +2448,7 @@ void _SimulationParametersWindow::onOpenParameters()
     });
 }
 
-void _SimulationParametersWindow::onSaveParameters()
+void SimulationParametersWindow::onSaveParameters()
 {
     GenericFileDialogs::get().showSaveFileDialog(
         "Save simulation parameters", "Simulation parameters (*.parameters){.parameters},.*", _startingPath, [&](std::filesystem::path const& path) {
@@ -2460,12 +2463,12 @@ void _SimulationParametersWindow::onSaveParameters()
     });
 }
 
-void _SimulationParametersWindow::validationAndCorrectionLayout()
+void SimulationParametersWindow::validationAndCorrectionLayout()
 {
     _featureListHeight = std::max(0.0f, _featureListHeight);
 }
 
-void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& parameters) const
+void SimulationParametersWindow::validationAndCorrection(SimulationParameters& parameters) const
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
@@ -2504,7 +2507,7 @@ void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& 
     parameters.cellGlowStrength = std::max(0.0f, std::min(1.0f, parameters.cellGlowStrength));
 }
 
-void _SimulationParametersWindow::validationAndCorrection(SimulationParametersSpot& spot, SimulationParameters const& parameters) const
+void SimulationParametersWindow::validationAndCorrection(SimulationParametersSpot& spot, SimulationParameters const& parameters) const
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {

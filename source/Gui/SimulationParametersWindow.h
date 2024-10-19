@@ -1,18 +1,23 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/SimulationParametersSpot.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-class _SimulationParametersWindow : public AlienWindow
+class SimulationParametersWindow : public AlienWindow
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(SimulationParametersWindow);
+
 public:
-    _SimulationParametersWindow(SimulationFacade const& simulationFacade, RadiationSourcesWindow const& radiationSourcesWindow);
-    ~_SimulationParametersWindow() override;
+    void init(SimulationFacade const& simulationFacade);
+    void shutdown();
 
 private:
+    SimulationParametersWindow();
+
     void processIntern() override;
 
     SimulationParametersSpot createSpot(SimulationParameters const& simParameters, int index);
@@ -35,10 +40,9 @@ private:
     void validationAndCorrection(SimulationParametersSpot& spot, SimulationParameters const& parameters) const;
 
     SimulationFacade _simulationFacade;
-    RadiationSourcesWindow _radiationSourcesWindow;
 
     uint32_t _savedPalette[32] = {};
-    uint32_t _backupColor;
+    uint32_t _backupColor = 0;
     std::string _startingPath;
     std::optional<SimulationParameters> _copiedParameters;
     std::optional<int> _sessionId;

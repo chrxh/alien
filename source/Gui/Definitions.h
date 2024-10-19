@@ -23,8 +23,7 @@ class TemporalControlWindow;
 
 class SpatialControlWindow;
 
-class _SimulationParametersWindow;
-using SimulationParametersWindow = std::shared_ptr<_SimulationParametersWindow>;
+class SimulationParametersWindow;
 
 class StatisticsWindow;
 
@@ -131,8 +130,7 @@ using ImageToPatternDialog = std::shared_ptr<_ImageToPatternDialog>;
 class _GenomeEditorWindow;
 using GenomeEditorWindow = std::shared_ptr<_GenomeEditorWindow>;
 
-class _RadiationSourcesWindow;
-using RadiationSourcesWindow = std::shared_ptr<_RadiationSourcesWindow>;
+class RadiationSourcesWindow;
 
 class _ChangeColorDialog;
 using ChangeColorDialog = std::shared_ptr<_ChangeColorDialog>;

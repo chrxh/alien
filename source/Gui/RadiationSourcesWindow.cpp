@@ -13,12 +13,16 @@ namespace
     auto const RightColumnWidth = 140.0f;
 }
 
-_RadiationSourcesWindow::_RadiationSourcesWindow(SimulationFacade const& simulationFacade)
+void RadiationSourcesWindow::init(SimulationFacade const& simulationFacade)
+{
+    _simulationFacade = simulationFacade;
+}
+
+RadiationSourcesWindow::RadiationSourcesWindow()
     : AlienWindow("Radiation sources", "windows.radiation sources", false)
-    , _simulationFacade(simulationFacade)
 {}
 
-void _RadiationSourcesWindow::processIntern()
+void RadiationSourcesWindow::processIntern()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
 
@@ -53,7 +57,7 @@ void _RadiationSourcesWindow::processIntern()
     }
 }
 
-bool _RadiationSourcesWindow::processTab(int index)
+bool RadiationSourcesWindow::processTab(int index)
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto lastParameters = parameters;
@@ -158,7 +162,7 @@ bool _RadiationSourcesWindow::processTab(int index)
     return isOpen;
 }
 
-void _RadiationSourcesWindow::onAppendTab()
+void RadiationSourcesWindow::onAppendTab()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
@@ -173,7 +177,7 @@ void _RadiationSourcesWindow::onAppendTab()
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 }
 
-void _RadiationSourcesWindow::onDeleteTab(int index)
+void RadiationSourcesWindow::onDeleteTab(int index)
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
@@ -188,7 +192,7 @@ void _RadiationSourcesWindow::onDeleteTab(int index)
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 }
 
-RadiationSource _RadiationSourcesWindow::createParticleSource() const
+RadiationSource RadiationSourcesWindow::createParticleSource() const
 {
     RadiationSource result;
     auto worldSize = _simulationFacade->getWorldSize();
@@ -197,7 +201,7 @@ RadiationSource _RadiationSourcesWindow::createParticleSource() const
     return result;
 }
 
-void _RadiationSourcesWindow::validationAndCorrection(RadiationSource& source) const
+void RadiationSourcesWindow::validationAndCorrection(RadiationSource& source) const
 {
     if (source.shapeType == RadiationSourceShapeType_Circular) {
         source.shapeData.circularRadiationSource.radius = std::max(1.0f, source.shapeData.circularRadiationSource.radius);
