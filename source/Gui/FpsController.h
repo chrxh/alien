@@ -2,10 +2,14 @@
 
 #include <chrono>
 
+#include "Base/Singleton.h"
+
 #include "Definitions.h"
 
-class _FpsController
+class FpsController
 {
+    MAKE_SINGLETON(FpsController);
+
 public:
     void processForceFps(int fps);
 

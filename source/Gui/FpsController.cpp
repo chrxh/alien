@@ -1,6 +1,6 @@
 #include "FpsController.h"
 
-void _FpsController::processForceFps(int fps)
+void FpsController::processForceFps(int fps)
 {
     auto callTimepoint = std::chrono::steady_clock::now();
     if (_lastCallTimepoint) {

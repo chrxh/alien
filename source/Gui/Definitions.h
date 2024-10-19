@@ -35,8 +35,7 @@ using GpuSettingsDialog = std::shared_ptr<_GpuSettingsDialog>;
 class _NewSimulationDialog;
 using NewSimulationDialog = std::shared_ptr<_NewSimulationDialog>;
 
-class _StartupController;
-using StartupController = std::shared_ptr<_StartupController>;
+class StartupController;
 
 class _ExitDialog;
 using ExitDialog = std::shared_ptr<_ExitDialog>;
@@ -94,8 +93,7 @@ using MultiplierWindow = std::shared_ptr<_MultiplierWindow>;
 class _PatternAnalysisDialog;
 using PatternAnalysisDialog = std::shared_ptr<_PatternAnalysisDialog>;
 
-class _FpsController;
-using FpsController = std::shared_ptr<_FpsController>;
+class FpsController;
 
 class BrowserWindow;
 
