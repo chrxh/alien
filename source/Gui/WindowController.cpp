@@ -44,15 +44,6 @@ namespace
     }
 }
 
-WindowController::WindowData WindowController::_windowData;
-std::shared_ptr<GLFWvidmode> WindowController::_desktopVideoMode;
-IntVector2D WindowController::_startupSize;
-IntVector2D WindowController::_sizeInWindowedMode = {1920 * 3 / 4, 1080 * 3 / 4};
-float WindowController::_contentScaleFactor = 1.0f;
-float WindowController::_lastContentScaleFactor = 1.0f;
-int WindowController::_fps = 33;
-std::string WindowController::_mode;
-
 void WindowController::init()
 {
     auto& settings = GlobalSettings::get();

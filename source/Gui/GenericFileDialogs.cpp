@@ -28,7 +28,7 @@ void GenericFileDialogs::showSaveFileDialog(
 
 void GenericFileDialogs::process()
 {
-    if (!ifd::FileDialog::Instance().IsDone("GenericFileDialog", WindowController::getContentScaleFactor())) {
+    if (!ifd::FileDialog::Instance().IsDone("GenericFileDialog", WindowController::get().getContentScaleFactor())) {
         return;
     }
     if (ifd::FileDialog::Instance().HasResult()) {

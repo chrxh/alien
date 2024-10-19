@@ -104,8 +104,8 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
 
     log(Priority::Important, "initialize GLFW and OpenGL");
     auto glfwVersion = initGlfwAndReturnGlslVersion();
-    WindowController::init();
-    auto windowData = WindowController::getWindowData();
+    WindowController::get().init();
+    auto windowData = WindowController::get().getWindowData();
     glfwSetFramebufferSizeCallback(windowData.window, framebuffer_size_callback);
     glfwSwapInterval(1);  //enable vsync
     ImGui::CreateContext();
@@ -231,7 +231,7 @@ void _MainWindow::shutdown()
 
     EditorController::get().shutdown();
     LoginController::get().shutdown();
-    WindowController::shutdown();
+    WindowController::get().shutdown();
     _autosaveController->shutdown();
 
     ImGui_ImplOpenGL3_Shutdown();
@@ -327,7 +327,7 @@ void _MainWindow::processFadeInControls()
 
     popGlobalStyle();
 
-    _fpsController->processForceFps(WindowController::getFps());
+    _fpsController->processForceFps(WindowController::get().getFps());
 
     finishFrame();
 }
@@ -347,7 +347,7 @@ void _MainWindow::processReady()
 
     popGlobalStyle();
 
-    _fpsController->processForceFps(WindowController::getFps());
+    _fpsController->processForceFps(WindowController::get().getFps());
 
     finishFrame();
 }
@@ -684,10 +684,10 @@ void _MainWindow::processMenubar()
             _displaySettingsDialog->open();
         }
         if (ImGui::IsKeyPressed(ImGuiKey_F7)) {
-            if (WindowController::isDesktopMode()) {
-                WindowController::setWindowedMode();
+            if (WindowController::get().isDesktopMode()) {
+                WindowController::get().setWindowedMode();
             } else {
-                WindowController::setDesktopMode();
+                WindowController::get().setDesktopMode();
             }
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_K)) {
