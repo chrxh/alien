@@ -20,20 +20,25 @@ namespace
     auto constexpr LeftColumnWidth = 180.0f;
 }
 
-_TemporalControlWindow::_TemporalControlWindow(
+void TemporalControlWindow::init(
     SimulationFacade const& simulationFacade,
     StatisticsWindow const& statisticsWindow)
-    : AlienWindow("Temporal control", "windows.temporal control", true)
-    , _simulationFacade(simulationFacade)
-    , _statisticsWindow(statisticsWindow)
-{}
+{
+    _simulationFacade = simulationFacade;
+    _statisticsWindow = statisticsWindow;
+}
 
-void _TemporalControlWindow::onSnapshot()
+void TemporalControlWindow::onSnapshot()
 {
     _snapshot = createSnapshot();
 }
 
-void _TemporalControlWindow::processIntern()
+TemporalControlWindow::TemporalControlWindow()
+    : AlienWindow("Temporal control", "windows.temporal control", true)
+{
+}
+
+void TemporalControlWindow::processIntern()
 {
     processRunButton();
     ImGui::SameLine();
@@ -64,7 +69,7 @@ void _TemporalControlWindow::processIntern()
     ImGui::EndChild();
 }
 
-void _TemporalControlWindow::processTpsInfo()
+void TemporalControlWindow::processTpsInfo()
 {
     ImGui::Text("Time steps per second");
 
@@ -75,7 +80,7 @@ void _TemporalControlWindow::processTpsInfo()
     ImGui::PopFont();
 }
 
-void _TemporalControlWindow::processTotalTimestepsInfo()
+void TemporalControlWindow::processTotalTimestepsInfo()
 {
     ImGui::Text("Total time steps");
 
@@ -86,7 +91,7 @@ void _TemporalControlWindow::processTotalTimestepsInfo()
     ImGui::PopFont();
 }
 
-void _TemporalControlWindow::processRealTimeInfo()
+void TemporalControlWindow::processRealTimeInfo()
 {
     ImGui::Text("Real-time");
 
@@ -97,7 +102,7 @@ void _TemporalControlWindow::processRealTimeInfo()
     ImGui::PopFont();
 }
 
-void _TemporalControlWindow::processTpsRestriction()
+void TemporalControlWindow::processTpsRestriction()
 {
     AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Slow down"), _slowDown);
     ImGui::SameLine(scale(LeftColumnWidth) - (ImGui::GetWindowWidth() - ImGui::GetContentRegionAvail().x));
@@ -126,7 +131,7 @@ void _TemporalControlWindow::processTpsRestriction()
     ImGui::EndDisabled();
 }
 
-void _TemporalControlWindow::processRunButton()
+void TemporalControlWindow::processRunButton()
 {
     ImGui::BeginDisabled(_simulationFacade->isSimulationRunning());
     auto result = AlienImGui::ToolbarButton(ICON_FA_PLAY);
@@ -139,7 +144,7 @@ void _TemporalControlWindow::processRunButton()
     ImGui::EndDisabled();
 }
 
-void _TemporalControlWindow::processPauseButton()
+void TemporalControlWindow::processPauseButton()
 {
     ImGui::BeginDisabled(!_simulationFacade->isSimulationRunning());
     auto result = AlienImGui::ToolbarButton(ICON_FA_PAUSE);
@@ -151,7 +156,7 @@ void _TemporalControlWindow::processPauseButton()
     ImGui::EndDisabled();
 }
 
-void _TemporalControlWindow::processStepBackwardButton()
+void TemporalControlWindow::processStepBackwardButton()
 {
     ImGui::BeginDisabled(_history.empty() || _simulationFacade->isSimulationRunning());
     auto result = AlienImGui::ToolbarButton(ICON_FA_CHEVRON_LEFT);
@@ -166,7 +171,7 @@ void _TemporalControlWindow::processStepBackwardButton()
     ImGui::EndDisabled();
 }
 
-void _TemporalControlWindow::processStepForwardButton()
+void TemporalControlWindow::processStepForwardButton()
 {
     ImGui::BeginDisabled(_simulationFacade->isSimulationRunning());
     auto result = AlienImGui::ToolbarButton(ICON_FA_CHEVRON_RIGHT);
@@ -178,7 +183,7 @@ void _TemporalControlWindow::processStepForwardButton()
     ImGui::EndDisabled();
 }
 
-void _TemporalControlWindow::processCreateFlashbackButton()
+void TemporalControlWindow::processCreateFlashbackButton()
 {
     auto result = AlienImGui::ToolbarButton(ICON_FA_CAMERA);
     AlienImGui::Tooltip("Creating in-memory flashback: It saves the content of the current world to the memory.");
@@ -189,7 +194,7 @@ void _TemporalControlWindow::processCreateFlashbackButton()
     }
 }
 
-void _TemporalControlWindow::processLoadFlashbackButton()
+void TemporalControlWindow::processLoadFlashbackButton()
 {
     ImGui::BeginDisabled(!_snapshot);
     auto result = AlienImGui::ToolbarButton(ICON_FA_UNDO);
@@ -205,7 +210,7 @@ void _TemporalControlWindow::processLoadFlashbackButton()
     ImGui::EndDisabled();
 }
 
-_TemporalControlWindow::Snapshot _TemporalControlWindow::createSnapshot()
+TemporalControlWindow::Snapshot TemporalControlWindow::createSnapshot()
 {
     Snapshot result;
     result.timestep = _simulationFacade->getCurrentTimestep();
@@ -216,7 +221,7 @@ _TemporalControlWindow::Snapshot _TemporalControlWindow::createSnapshot()
 }
 
 
-void _TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
+void TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto const& origParameters = snapshot.parameters;
@@ -247,7 +252,7 @@ void _TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
 }
 
 template <typename MovedObjectType>
-void _TemporalControlWindow::restorePosition(MovedObjectType& movedObject, MovedObjectType const& origMovedObject, uint64_t origTimestep)
+void TemporalControlWindow::restorePosition(MovedObjectType& movedObject, MovedObjectType const& origMovedObject, uint64_t origTimestep)
 {
     auto origMovedObjectClone = origMovedObject;
     auto movedObjectClone = movedObject;

@@ -20,8 +20,7 @@ class Viewport;
 
 class StyleRepository;
 
-class _TemporalControlWindow;
-using TemporalControlWindow = std::shared_ptr<_TemporalControlWindow>;
+class TemporalControlWindow;
 
 class _SpatialControlWindow;
 using SpatialControlWindow = std::shared_ptr<_SpatialControlWindow>;

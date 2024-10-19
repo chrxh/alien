@@ -131,22 +131,22 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     _SimulationView::get().init(_simulationFacade);
     SimulationInteractionController::get().init(_simulationFacade);
     _statisticsWindow = std::make_shared<_StatisticsWindow>(_simulationFacade);
-    _temporalControlWindow = std::make_shared<_TemporalControlWindow>(_simulationFacade, _statisticsWindow);
-    _spatialControlWindow = std::make_shared<_SpatialControlWindow>(_simulationFacade, _temporalControlWindow);
+    TemporalControlWindow::get().init(_simulationFacade, _statisticsWindow);
+    _spatialControlWindow = std::make_shared<_SpatialControlWindow>(_simulationFacade);
     _radiationSourcesWindow = std::make_shared<_RadiationSourcesWindow>(_simulationFacade);
     _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simulationFacade, _radiationSourcesWindow);
     _gpuSettingsDialog = std::make_shared<_GpuSettingsDialog>(_simulationFacade);
-    _startupController = std::make_shared<_StartupController>(_simulationFacade, _persisterFacade, _temporalControlWindow);
+    _startupController = std::make_shared<_StartupController>(_simulationFacade, _persisterFacade);
     _exitDialog = std::make_shared<_ExitDialog>(_onExit);
     _aboutDialog = std::make_shared<_AboutDialog>();
     _massOperationsDialog = std::make_shared<_MassOperationsDialog>(_simulationFacade);
     _logWindow = std::make_shared<_LogWindow>(_logger);
     _gettingStartedWindow = std::make_shared<_GettingStartedWindow>();
-    _newSimulationDialog = std::make_shared<_NewSimulationDialog>(_simulationFacade, _temporalControlWindow, _statisticsWindow);
+    _newSimulationDialog = std::make_shared<_NewSimulationDialog>(_simulationFacade, _statisticsWindow);
     _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>();
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simulationFacade);
     _fpsController = std::make_shared<_FpsController>();
-    BrowserWindow::get().init(_simulationFacade, _persisterFacade, _statisticsWindow, _temporalControlWindow);
+    BrowserWindow::get().init(_simulationFacade, _persisterFacade, _statisticsWindow);
     ActivateUserDialog::get().init(_simulationFacade);
     _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_simulationFacade);
     _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog);
@@ -158,8 +158,8 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     _shaderWindow = std::make_shared<_ShaderWindow>();
     _autosaveWindow = std::make_shared<_AutosaveWindow>(_simulationFacade, _persisterFacade);
     OverlayMessageController::get().init(_persisterFacade);
-    FileTransferController::get().init(_persisterFacade, _simulationFacade, _temporalControlWindow);
-    NetworkTransferController::get().init(_simulationFacade, _persisterFacade, _temporalControlWindow);
+    FileTransferController::get().init(_persisterFacade, _simulationFacade);
+    NetworkTransferController::get().init(_simulationFacade, _persisterFacade);
     LoginController::get().init(_simulationFacade, _persisterFacade);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
@@ -432,8 +432,8 @@ void _MainWindow::processMenubar()
         }
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_WINDOW_RESTORE "  Windows ", _windowMenuToggled, "Windows")) {
-            if (ImGui::MenuItem("Temporal control", "ALT+1", _temporalControlWindow->isOn())) {
-                _temporalControlWindow->setOn(!_temporalControlWindow->isOn());
+            if (ImGui::MenuItem("Temporal control", "ALT+1", TemporalControlWindow::get().isOn())) {
+                TemporalControlWindow::get().setOn(!TemporalControlWindow::get().isOn());
             }
             if (ImGui::MenuItem("Spatial control", "ALT+2", _spatialControlWindow->isOn())) {
                 _spatialControlWindow->setOn(!_spatialControlWindow->isOn());
@@ -611,7 +611,7 @@ void _MainWindow::processMenubar()
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_1)) {
-            _temporalControlWindow->setOn(!_temporalControlWindow->isOn());
+            TemporalControlWindow::get().setOn(!TemporalControlWindow::get().isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_2)) {
             _spatialControlWindow->setOn(!_spatialControlWindow->isOn());
@@ -736,7 +736,7 @@ void _MainWindow::processDialogs()
 
 void _MainWindow::processWindows()
 {
-    _temporalControlWindow->process();
+    TemporalControlWindow::get().process();
     _spatialControlWindow->process();
     _statisticsWindow->process();
     _simulationParametersWindow->process();

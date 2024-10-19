@@ -12,11 +12,10 @@
 #include "BrowserWindow.h"
 #include "OverlayMessageController.h"
 
-void NetworkTransferController::init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade, TemporalControlWindow const& temporalControlWindow)
+void NetworkTransferController::init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade)
 {
     _simulationFacade = simulationFacade;
     _persisterFacade = persisterFacade;
-    _temporalControlWindow = temporalControlWindow;
     _downloadProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
     _uploadProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
     _replaceProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
@@ -67,7 +66,7 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
 
                 Viewport::get().setCenterInWorldPos(deserializedSimulation.auxiliaryData.center);
                 Viewport::get().setZoomFactor(deserializedSimulation.auxiliaryData.zoom);
-                _temporalControlWindow->onSnapshot();
+                TemporalControlWindow::get().onSnapshot();
             } else {
                 EditorController::get().setOn(true);
                 EditorController::get().getGenomeEditorWindow()->openTab(std::get<GenomeDescription>(data.resourceData));

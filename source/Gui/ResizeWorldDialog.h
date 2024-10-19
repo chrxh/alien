@@ -6,7 +6,7 @@
 class _ResizeWorldDialog : public AlienDialog
 {
 public:
-    _ResizeWorldDialog(SimulationFacade const& simulationFacade, TemporalControlWindow const& temporalControlWindow);
+    _ResizeWorldDialog(SimulationFacade const& simulationFacade);
 
     void open();
 
@@ -16,7 +16,6 @@ private:
     void onResizing();
 
     SimulationFacade _simulationFacade;
-    TemporalControlWindow _temporalControlWindow;
 
     bool _scaleContent = false;
     int _width = 0;

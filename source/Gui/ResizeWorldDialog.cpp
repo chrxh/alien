@@ -8,10 +8,9 @@
 #include "AlienImGui.h"
 #include "TemporalControlWindow.h"
 
-_ResizeWorldDialog::_ResizeWorldDialog(SimulationFacade const& simulationFacade, TemporalControlWindow const& temporalControlWindow)
+_ResizeWorldDialog::_ResizeWorldDialog(SimulationFacade const& simulationFacade)
     : AlienDialog("Resize world")
     , _simulationFacade(simulationFacade)
-    , _temporalControlWindow(temporalControlWindow)
 {}
 
 void _ResizeWorldDialog::open()
@@ -94,5 +93,5 @@ void _ResizeWorldDialog::onResizing()
     _simulationFacade->setClusteredSimulationData(content);
     _simulationFacade->setStatisticsHistory(statistics);
     _simulationFacade->setRealTime(realtime);
-    _temporalControlWindow->onSnapshot();
+    TemporalControlWindow::get().onSnapshot();
 }

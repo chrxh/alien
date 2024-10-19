@@ -26,12 +26,8 @@ namespace
     auto const StartupSenderId = "Startup";
 }
 
-_StartupController::_StartupController(
-    SimulationFacade const& simulationFacade,
-    PersisterFacade const& persisterFacade,
-    TemporalControlWindow const& temporalControlWindow)
+_StartupController::_StartupController(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade)
     : _simulationFacade(simulationFacade)
-    , _temporalControlWindow(temporalControlWindow)
     , _persisterFacade(persisterFacade)
 {
     log(Priority::Important, "starting ALIEN v" + Const::ProgramVersion);
@@ -65,7 +61,7 @@ void _StartupController::process()
             _simulationFacade->setRealTime(deserializedSim.auxiliaryData.realTime);
             Viewport::get().setCenterInWorldPos(deserializedSim.auxiliaryData.center);
             Viewport::get().setZoomFactor(deserializedSim.auxiliaryData.zoom);
-            _temporalControlWindow->onSnapshot();
+            TemporalControlWindow::get().onSnapshot();
 
             _lastActivationTimepoint = std::chrono::steady_clock::now();
             _state = State::FadeOutLoadingScreen;
@@ -91,7 +87,7 @@ void _StartupController::process()
             _simulationFacade->setRealTime(deserializedSim.auxiliaryData.realTime);
             Viewport::get().setCenterInWorldPos(deserializedSim.auxiliaryData.center);
             Viewport::get().setZoomFactor(deserializedSim.auxiliaryData.zoom);
-            _temporalControlWindow->onSnapshot();
+            TemporalControlWindow::get().onSnapshot();
 
             _lastActivationTimepoint = std::chrono::steady_clock::now();
             _state = State::FadeOutLoadingScreen;

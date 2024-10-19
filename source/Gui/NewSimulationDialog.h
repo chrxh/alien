@@ -8,10 +8,7 @@
 class _NewSimulationDialog : public AlienDialog
 {
 public:
-    _NewSimulationDialog(
-        SimulationFacade const& simulationFacade,
-        TemporalControlWindow const& temporalControlWindow,
-        StatisticsWindow const& statisticsWindow);
+    _NewSimulationDialog(SimulationFacade const& simulationFacade, StatisticsWindow const& statisticsWindow);
     ~_NewSimulationDialog() override;
 
 private:
@@ -21,7 +18,6 @@ private:
     void onNewSimulation();
 
     SimulationFacade _simulationFacade;
-    TemporalControlWindow _temporalControlWindow;
     StatisticsWindow _statisticsWindow;
 
     bool _adoptSimulationParameters = true;
