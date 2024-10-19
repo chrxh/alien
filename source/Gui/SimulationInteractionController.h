@@ -2,14 +2,14 @@
 
 #include <chrono>
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 
 #include "Definitions.h"
-#include "Base/Singleton.h"
 
-class _SimulationInteractionController
+class SimulationInteractionController
 {
-    MAKE_SINGLETON(_SimulationInteractionController);
+    MAKE_SINGLETON(SimulationInteractionController);
 
 public:
     void init(SimulationFacade const& simulationFacade, SimulationView const& simulationView);

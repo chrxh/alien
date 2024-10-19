@@ -32,7 +32,7 @@ using SimulationParametersWindow = std::shared_ptr<_SimulationParametersWindow>;
 class _StatisticsWindow;
 using StatisticsWindow = std::shared_ptr<_StatisticsWindow>;
 
-class _SimulationInteractionController;
+class SimulationInteractionController;
 
 class _GpuSettingsDialog;
 using GpuSettingsDialog = std::shared_ptr<_GpuSettingsDialog>;
@@ -58,8 +58,7 @@ using LogWindow = std::shared_ptr<_LogWindow>;
 class _GuiLogger;
 using GuiLogger = std::shared_ptr<_GuiLogger>;
 
-class _UiController;
-using UiController = std::shared_ptr<_UiController>;
+class UiController;
 
 class _AutosaveController;
 using AutosaveController = std::shared_ptr<_AutosaveController>;

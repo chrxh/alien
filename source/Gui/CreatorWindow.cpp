@@ -149,7 +149,7 @@ void _CreatorWindow::processIntern()
     ImGui::EndChild();
 
     AlienImGui::Separator();
-    auto& simInteractionController = _SimulationInteractionController::get();
+    auto& simInteractionController = SimulationInteractionController::get();
     if (_mode == CreationMode_Drawing) {
         auto text = simInteractionController.isDrawMode() ? "End drawing" : "Start drawing";
         if (AlienImGui::Button(text)) {
