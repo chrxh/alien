@@ -32,7 +32,7 @@ void EditSimulationDialog::openForFolder(NetworkResourceTreeTO const& treeTO, st
     _treeTO = treeTO;
     _rawTOs = rawTOs;
     
-    _newName = NetworkResourceService::concatenateFolderName(treeTO->folderNames, false);
+    _newName = NetworkResourceService::get().concatenateFolderName(treeTO->folderNames, false);
     _origFolderName = _newName;
 }
 
@@ -108,7 +108,7 @@ void EditSimulationDialog::processForFolder()
             delayedExecution([this] {
                 for (auto const& rawTO : _rawTOs) {
                     auto nameWithoutOldFolder = rawTO->resourceName.substr(_origFolderName.size() + 1);
-                    auto newName = NetworkResourceService::concatenateFolderName({_newName, nameWithoutOldFolder}, false);
+                    auto newName = NetworkResourceService::get().concatenateFolderName({_newName, nameWithoutOldFolder}, false);
                     if (!NetworkService::get().editResource(rawTO->id, newName, rawTO->description)) {
                         showMessage("Error", "Failed to change folder name.");
                         break;

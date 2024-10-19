@@ -62,8 +62,6 @@ namespace
     }
 }
 
-std::unordered_map<NetworkResourceTreeTO, std::vector<NetworkResourceRawTO>> NetworkResourceService::_treeTOtoRawTOcache;
-
 std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
     std::vector<NetworkResourceRawTO> const& rawTOs,
     std::set<std::vector<std::string>> const& collapsedFolderNames)
