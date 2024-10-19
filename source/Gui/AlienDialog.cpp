@@ -29,7 +29,7 @@ void AlienDialog::process()
     if (ImGui::BeginPopupModal(_title.c_str(), NULL, 0)) {
         if (!_sizeInitialized) {
             auto size = ImGui::GetWindowSize();
-            auto factor = WindowController::getContentScaleFactor() / WindowController::getLastContentScaleFactor();
+            auto factor = WindowController::get().getContentScaleFactor() / WindowController::get().getLastContentScaleFactor();
             ImGui::SetWindowSize({size.x * factor, size.y * factor});
             _sizeInitialized = true;
         }

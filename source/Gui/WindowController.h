@@ -1,55 +1,56 @@
 #pragma once
 
 #include "Base/Definitions.h"
+#include "Base/Singleton.h"
 
 #include "Definitions.h"
 
 class WindowController
 {
-public:
-    WindowController() = delete;
+    MAKE_SINGLETON(WindowController);
 
-    static void init();
-    static void shutdown();
+public:
+    void init();
+    void shutdown();
 
     struct WindowData
     {
         GLFWwindow* window;
         GLFWvidmode const* mode;
     };
-    static WindowData getWindowData();
+    WindowData getWindowData();
 
-    static bool isWindowedMode();
-    static void setWindowedMode();
+    bool isWindowedMode();
+    void setWindowedMode();
 
-    static bool isDesktopMode();
-    static void setDesktopMode();
+    bool isDesktopMode();
+    void setDesktopMode();
 
-    static GLFWvidmode getUserDefinedResolution();
-    static void setUserDefinedResolution(GLFWvidmode const& videoMode);
+    GLFWvidmode getUserDefinedResolution();
+    void setUserDefinedResolution(GLFWvidmode const& videoMode);
 
-    static IntVector2D getStartupWindowSize();
+    IntVector2D getStartupWindowSize();
 
-    static std::string getMode();
-    static void setMode(std::string const& mode);
+    std::string getMode();
+    void setMode(std::string const& mode);
 
-    static int getFps();
-    static void setFps(int value);
+    int getFps();
+    void setFps(int value);
 
-    static float getContentScaleFactor();
-    static float getLastContentScaleFactor();
+    float getContentScaleFactor();
+    float getLastContentScaleFactor();
 
 private:
-    static void updateWindowSize();
-    static std::string createLogString(GLFWvidmode const& videoMode);
+    void updateWindowSize();
+    std::string createLogString(GLFWvidmode const& videoMode);
 
-    static WindowData _windowData;
-    static std::shared_ptr<GLFWvidmode> _desktopVideoMode;
-    static IntVector2D _startupSize;
-    static IntVector2D _sizeInWindowedMode;
-    static float _contentScaleFactor;
-    static float _lastContentScaleFactor;
-    static int _fps;
+    WindowData _windowData;
+    std::shared_ptr<GLFWvidmode> _desktopVideoMode;
+    IntVector2D _startupSize;
+    IntVector2D _sizeInWindowedMode = {1920 * 3 / 4, 1080 * 3 / 4};
+    float _contentScaleFactor = 1.0f;
+    float _lastContentScaleFactor = 1.0f;
+    int _fps = 33;
 
-    static std::string _mode;
+    std::string _mode;
 };
