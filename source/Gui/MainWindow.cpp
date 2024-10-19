@@ -155,7 +155,6 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog);
     LoginDialog::get().init(_simulationFacade, _persisterFacade, _createUserDialog, _activateUserDialog, _resetPasswordDialog);
     UploadSimulationDialog::get().init(_simulationFacade, _editorController->getGenomeEditorWindow());
-    _editSimulationDialog = std::make_shared<_EditSimulationDialog>();
     _deleteUserDialog = std::make_shared<_DeleteUserDialog>();
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>();
     _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_simulationFacade);
@@ -167,7 +166,7 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     LoginController::get().init(_simulationFacade, _persisterFacade, _activateUserDialog);
 
     //cyclic references
-    BrowserWindow::get().registerCyclicReferences(_editSimulationDialog, _editorController->getGenomeEditorWindow());
+    BrowserWindow::get().registerCyclicReferences(_editorController->getGenomeEditorWindow());
     _activateUserDialog->registerCyclicReferences(_createUserDialog);
     _editorController->registerCyclicReferences(_simInteractionController);
 
@@ -732,7 +731,7 @@ void _MainWindow::processDialogs()
     _createUserDialog->process();
     _activateUserDialog->process();
     UploadSimulationDialog::get().process();
-    _editSimulationDialog->process();
+    EditSimulationDialog::get().process();
     _deleteUserDialog->process();
     _networkSettingsDialog->process();
     _resetPasswordDialog->process();

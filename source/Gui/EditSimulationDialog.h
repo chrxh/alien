@@ -1,20 +1,22 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "Network/Definitions.h"
 
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _EditSimulationDialog : public AlienDialog
+class EditSimulationDialog : public AlienDialog
 {
-public:
-    _EditSimulationDialog();
-    virtual ~_EditSimulationDialog() override = default;
+    MAKE_SINGLETON_CUSTOMIZED(EditSimulationDialog);
 
+public:
     void openForLeaf(NetworkResourceTreeTO const& treeTO);
     void openForFolder(NetworkResourceTreeTO const& treeTO, std::vector<NetworkResourceRawTO> const& rawTOs);
 
 private:
+    EditSimulationDialog();
+
     void processIntern();
 
     void processForLeaf();

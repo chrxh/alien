@@ -59,7 +59,6 @@ private:
     PatternAnalysisDialog _patternAnalysisDialog;
     AboutDialog _aboutDialog;
     CreateUserDialog _createUserDialog;
-    EditSimulationDialog _editSimulationDialog;
     ActivateUserDialog _activateUserDialog;
     DeleteUserDialog _deleteUserDialog;
     NetworkSettingsDialog _networkSettingsDialog;
