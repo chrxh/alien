@@ -24,7 +24,7 @@ namespace
     auto constexpr ZoomFactorForOverlay = 12.0f;
 }
 
-void _SimulationView::init(SimulationFacade const& simulationFacade)
+void SimulationView::init(SimulationFacade const& simulationFacade)
 {
     _simulationFacade = simulationFacade;
 
@@ -90,7 +90,7 @@ void _SimulationView::init(SimulationFacade const& simulationFacade)
     setContrast(1.0f);
 }
 
-void _SimulationView::shutdown()
+void SimulationView::shutdown()
 {
     GlobalSettings::get().setBool("settings.simulation view.overlay", _isCellDetailOverlayActive);
     GlobalSettings::get().setFloat("windows.simulation view.brightness", _brightness);
@@ -98,7 +98,7 @@ void _SimulationView::shutdown()
     GlobalSettings::get().setFloat("windows.simulation view.motion blur factor", _motionBlur);
 }
 
-void _SimulationView::resize(IntVector2D const& size)
+void SimulationView::resize(IntVector2D const& size)
 {
     if (_areTexturesInitialized) {
         glDeleteFramebuffers(1, &_fbo1);
@@ -146,7 +146,7 @@ void _SimulationView::resize(IntVector2D const& size)
     Viewport::get().setViewSize(size);
 }
 
-void _SimulationView::draw(bool renderSimulation)
+void SimulationView::draw(bool renderSimulation)
 {
     if (renderSimulation) {
         updateImageFromSimulation();
@@ -217,7 +217,7 @@ void _SimulationView::draw(bool renderSimulation)
     }
 }
 
-void _SimulationView::processControls(bool renderSimulation)
+void SimulationView::processControls(bool renderSimulation)
 {
     if (renderSimulation) {
         ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -228,48 +228,48 @@ void _SimulationView::processControls(bool renderSimulation)
     }
 }
 
-bool _SimulationView::isOverlayActive() const
+bool SimulationView::isOverlayActive() const
 {
     return _isCellDetailOverlayActive;
 }
 
-void _SimulationView::setOverlayActive(bool active)
+void SimulationView::setOverlayActive(bool active)
 {
     _isCellDetailOverlayActive = active;
 }
 
-float _SimulationView::getBrightness() const
+float SimulationView::getBrightness() const
 {
     return _brightness;
 }
 
-void _SimulationView::setBrightness(float value)
+void SimulationView::setBrightness(float value)
 {
     _shader->setFloat("brightness", value);
 }
 
-float _SimulationView::getContrast() const
+float SimulationView::getContrast() const
 {
     return _contrast;
 }
 
-void _SimulationView::setContrast(float value)
+void SimulationView::setContrast(float value)
 {
     _shader->setFloat("contrast", value);
 }
 
-float _SimulationView::getMotionBlur() const
+float SimulationView::getMotionBlur() const
 {
     return _motionBlur;
 }
 
-void _SimulationView::setMotionBlur(float value)
+void SimulationView::setMotionBlur(float value)
 {
     _motionBlur = value;
     updateMotionBlur();
 }
 
-void _SimulationView::updateImageFromSimulation()
+void SimulationView::updateImageFromSimulation()
 {
     auto worldRect = Viewport::get().getVisibleWorldRect();
     auto viewSize = Viewport::get().getViewSize();
@@ -349,14 +349,14 @@ void _SimulationView::updateImageFromSimulation()
     }
 }
 
-void _SimulationView::updateMotionBlur()
+void SimulationView::updateMotionBlur()
 {
     //motionBlurFactor = 0: max motion blur
     //motionBlurFactor = 1: no motion blur
     _shader->setFloat("motionBlurFactor", 1.0f / (1.0f + _motionBlur));
 }
 
-void _SimulationView::markReferenceDomain()
+void SimulationView::markReferenceDomain()
 {
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
     auto p1 = Viewport::get().mapWorldToViewPosition({0, 0}, false);

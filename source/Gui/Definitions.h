@@ -7,8 +7,7 @@ using MainWindow = std::shared_ptr<_MainWindow>;
 
 class AlienWindow;
 
-class _SimulationView;
-using SimulationView= std::shared_ptr<_SimulationView>;
+class SimulationView;
 
 class _Shader;
 using Shader = std::shared_ptr<_Shader>;
@@ -28,8 +27,7 @@ using SpatialControlWindow = std::shared_ptr<_SpatialControlWindow>;
 class _SimulationParametersWindow;
 using SimulationParametersWindow = std::shared_ptr<_SimulationParametersWindow>;
 
-class _StatisticsWindow;
-using StatisticsWindow = std::shared_ptr<_StatisticsWindow>;
+class StatisticsWindow;
 
 class SimulationInteractionController;
 

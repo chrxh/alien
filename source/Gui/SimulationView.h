@@ -9,9 +9,9 @@
 
 #include "Definitions.h"
 
-class _SimulationView
+class SimulationView
 {
-    MAKE_SINGLETON(_SimulationView);
+    MAKE_SINGLETON(SimulationView);
 
 public:
     void init(SimulationFacade const& simulationFacade);

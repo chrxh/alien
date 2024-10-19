@@ -31,10 +31,10 @@ namespace
     auto constexpr LiveStatisticsDeltaTime = 50;  //in millisec
 }
 
-_StatisticsWindow::_StatisticsWindow(SimulationFacade const& simulationFacade)
-    : AlienWindow("Statistics", "windows.statistics", false)
-    , _simulationFacade(simulationFacade)
+void StatisticsWindow::init(SimulationFacade const& simulationFacade)
 {
+    _simulationFacade = simulationFacade;
+
     auto path = std::filesystem::current_path();
     if (path.has_parent_path()) {
         path = path.parent_path();
@@ -59,7 +59,7 @@ _StatisticsWindow::_StatisticsWindow(SimulationFacade const& simulationFacade)
     }
 }
 
-_StatisticsWindow::~_StatisticsWindow()
+void StatisticsWindow::shutdown()
 {
     GlobalSettings::get().setString("windows.statistics.starting path", _startingPath);
     GlobalSettings::get().setBool("windows.statistics.settings.open", _settingsOpen);
@@ -78,7 +78,12 @@ _StatisticsWindow::~_StatisticsWindow()
     GlobalSettings::get().setString("windows.statistics.collapsed plot indices", boost::join(collapsedPlotIndexStrings, " "));
 }
 
-void _StatisticsWindow::processIntern()
+StatisticsWindow::StatisticsWindow()
+    : AlienWindow("Statistics", "windows.statistics", false)
+{
+}
+
+void StatisticsWindow::processIntern()
 {
     if (ImGui::BeginChild("##statistics", {0, _settingsOpen ? -scale(_settingsHeight) : -scale(50.0f)})) {
         if (ImGui::BeginTabBar("##Statistics", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
@@ -114,7 +119,7 @@ void _StatisticsWindow::processIntern()
     processSettings();
 }
 
-void _StatisticsWindow::processTimelinesTab()
+void StatisticsWindow::processTimelinesTab()
 {
     ImGui::Spacing();
 
@@ -143,7 +148,7 @@ void _StatisticsWindow::processTimelinesTab()
     ImGui::EndChild();
 }
 
-void _StatisticsWindow::processHistogramsTab()
+void StatisticsWindow::processHistogramsTab()
 {
     if (!_histogramLiveStatistics.isDataAvailable()) {
         return;
@@ -217,7 +222,7 @@ void _StatisticsWindow::processHistogramsTab()
     ImPlot::PopStyleColor(2);
 }
 
-void _StatisticsWindow::processTablesTab()
+void StatisticsWindow::processTablesTab()
 {
     if (!_tableLiveStatistics.isDataAvailable()) {
         return;
@@ -252,7 +257,7 @@ void _StatisticsWindow::processTablesTab()
     ImGui::PopID();
 }
 
-void _StatisticsWindow::processSettings()
+void StatisticsWindow::processSettings()
 {
     if (_settingsOpen) {
         ImGui::Spacing();
@@ -292,7 +297,7 @@ void _StatisticsWindow::processSettings()
     }
 }
 
-void _StatisticsWindow::processTimelineStatistics()
+void StatisticsWindow::processTimelineStatistics()
 {
     ImGui::Spacing();
     AlienImGui::Group("Time step data");
@@ -478,7 +483,7 @@ void _StatisticsWindow::processTimelineStatistics()
     ImGui::PopID();
 }
 
-void _StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*valuesPtr, int fracPartDecimals)
+void StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*valuesPtr, int fracPartDecimals)
 {
     auto isCollapsed = _collapsedPlotIndices.contains(row);
     ImGui::PushID(row);
@@ -526,7 +531,7 @@ void _StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*val
     ImGui::Spacing();
 }
 
-void _StatisticsWindow::processBackground()
+void StatisticsWindow::processBackground()
 {
     auto timepoint = std::chrono::steady_clock::now();
     auto duration = _lastTimepoint.has_value() ? static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(timepoint - *_lastTimepoint).count()) : 0;
@@ -555,7 +560,7 @@ namespace
     }
 }
 
-void _StatisticsWindow::plotSumColorsIntern(
+void StatisticsWindow::plotSumColorsIntern(
     int row,
     DataPoint const* dataPoints,
     double const* timePoints,
@@ -609,7 +614,7 @@ void _StatisticsWindow::plotSumColorsIntern(
     ImGui::PopID();
 }
 
-void _StatisticsWindow::plotByColorIntern(
+void StatisticsWindow::plotByColorIntern(
     int row,
     DataPoint const* values,
     double const* timePoints,
@@ -660,7 +665,7 @@ void _StatisticsWindow::plotByColorIntern(
     ImGui::PopID();
 }
 
-void _StatisticsWindow::plotForColorIntern(
+void StatisticsWindow::plotForColorIntern(
     int row,
     DataPoint const* values,
     int colorIndex,
@@ -723,7 +728,7 @@ void _StatisticsWindow::plotForColorIntern(
     ImGui::PopID();
 }
 
-void _StatisticsWindow::setPlotScale()
+void StatisticsWindow::setPlotScale()
 {
     if (_plotScale == PlotScale_Linear) {
         ImPlot::SetupAxisScale(ImAxis_Y1, ImPlotScale_Linear);
@@ -743,7 +748,7 @@ void _StatisticsWindow::setPlotScale()
     THROW_NOT_IMPLEMENTED();
 }
 
-double _StatisticsWindow::getUpperBound(double maxValue)
+double StatisticsWindow::getUpperBound(double maxValue)
 {
     if (_plotScale == PlotScale_Linear) {
         return maxValue * 1.5;
@@ -771,7 +776,7 @@ namespace
     }
 }
 
-void _StatisticsWindow::drawValuesAtMouseCursor(
+void StatisticsWindow::drawValuesAtMouseCursor(
     double const* dataPoints,
     double const* timePoints,
     double const* systemClock,
@@ -840,13 +845,13 @@ void _StatisticsWindow::drawValuesAtMouseCursor(
     ImPlot::PlotText(label, mousePos.x, upperBound,  {leftSideFactor * (scale(5.0f) + ImGui::CalcTextSize(label).x / 2), scale(28.0f)});
 }
 
-void _StatisticsWindow::validationAndCorrection()
+void StatisticsWindow::validationAndCorrection()
 {
     _timeHorizonForLiveStatistics = std::max(1.0f, std::min(TimelineLiveStatistics::MaxLiveHistory, _timeHorizonForLiveStatistics));
     _timeHorizonForLongtermStatistics = std::max(1.0f, std::min(100.0f, _timeHorizonForLongtermStatistics));
 }
 
-float _StatisticsWindow::calcPlotHeight(int row) const
+float StatisticsWindow::calcPlotHeight(int row) const
 {
     auto isCollapsed = _collapsedPlotIndices.contains(row);
     return isCollapsed ? 25.0f : _plotHeight;

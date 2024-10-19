@@ -73,11 +73,10 @@ namespace
         {WorkspaceType_Private, std::string("private")}};
 }
 
-void BrowserWindow::init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade, StatisticsWindow const& statisticsWindow)
+void BrowserWindow::init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade)
 {
     _simulationFacade = simulationFacade;
     _persisterFacade = persisterFacade;
-    _statisticsWindow = statisticsWindow;
     _downloadCache = std::make_shared<_DownloadCache>();
 
     _refreshProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);

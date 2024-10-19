@@ -165,7 +165,7 @@ void SimulationInteractionController::leftMouseButtonPressed(IntVector2D const& 
 
     if (!_modes.editMode) {
         _lastZoomTimepoint.reset();
-        _SimulationView::get().setMotionBlur(_SimulationView::get().getMotionBlur() * 2);
+        SimulationView::get().setMotionBlur(SimulationView::get().getMotionBlur() * 2);
     } else {
         if (!ImGui::GetIO().KeyAlt) {
             if (!_modes.drawMode) {
@@ -220,7 +220,7 @@ void SimulationInteractionController::leftMouseButtonReleased(IntVector2D const&
     }
 
     if (!_modesAtClick.editMode) {
-        _SimulationView::get().setMotionBlur(_SimulationView::get().getMotionBlur() / 2);
+        SimulationView::get().setMotionBlur(SimulationView::get().getMotionBlur() / 2);
     } else {
         if (_modesAtClick.drawMode) {
             EditorController::get().getCreatorWindow()->finishDrawing();
@@ -245,7 +245,7 @@ void SimulationInteractionController::rightMouseButtonPressed(IntVector2D const&
 
     if (!_modes.editMode) {
         _lastZoomTimepoint.reset();
-        _SimulationView::get().setMotionBlur(_SimulationView::get().getMotionBlur() * 2);
+        SimulationView::get().setMotionBlur(SimulationView::get().getMotionBlur() * 2);
     } else {
         if (!ImGui::GetIO().KeyAlt) {
             if (!_simulationFacade->isSimulationRunning() && !_modes.drawMode) {
@@ -293,7 +293,7 @@ void SimulationInteractionController::rightMouseButtonReleased()
     }
 
     if (!_modesAtClick.editMode) {
-        _SimulationView::get().setMotionBlur(_SimulationView::get().getMotionBlur() / 2);
+        SimulationView::get().setMotionBlur(SimulationView::get().getMotionBlur() / 2);
     } else {
         if (!_simulationFacade->isSimulationRunning()) {
             _selectionRect.reset();
