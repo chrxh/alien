@@ -15,7 +15,7 @@ class TemporalControlWindow : public AlienWindow
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(TemporalControlWindow);
 
 public:
-    void init(SimulationFacade const& simulationFacade, StatisticsWindow const& statisticsWindow);
+    void init(SimulationFacade const& simulationFacade);
 
     void onSnapshot();
 
@@ -51,7 +51,6 @@ private:
     void restorePosition(MovedObjectType& movedObject, MovedObjectType const& origMovedObject, uint64_t origTimestep);
     
     SimulationFacade _simulationFacade; 
-    StatisticsWindow _statisticsWindow;
 
     std::optional<Snapshot> _snapshot;
 

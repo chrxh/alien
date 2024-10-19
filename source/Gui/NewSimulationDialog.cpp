@@ -16,12 +16,9 @@ namespace
     auto const ContentTextInputWidth = 60.0f;
 }
 
-_NewSimulationDialog::_NewSimulationDialog(
-    SimulationFacade const& simulationFacade,
-    StatisticsWindow const& statisticsWindow)
+_NewSimulationDialog::_NewSimulationDialog(SimulationFacade const& simulationFacade)
     : AlienDialog("New simulation")
     , _simulationFacade(simulationFacade)
-    , _statisticsWindow(statisticsWindow)
 {
     _adoptSimulationParameters = GlobalSettings::get().getBool("dialogs.new simulation.adopt simulation parameters", true);
 }

@@ -2,6 +2,7 @@
 
 #include <chrono>
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/RawStatisticsData.h"
 
@@ -13,13 +14,17 @@
 
 struct ImPlotPoint;
 
-class _StatisticsWindow : public AlienWindow
+class StatisticsWindow : public AlienWindow
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(StatisticsWindow);
+
 public:
-    _StatisticsWindow(SimulationFacade const& simulationFacade);
-    ~_StatisticsWindow() override;
+    void init(SimulationFacade const& simulationFacade);
+    void shutdown();
 
 private:
+    StatisticsWindow();
+
     void processIntern() override;
 
     void processTimelinesTab();

@@ -88,7 +88,7 @@ namespace
     void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     {
         if (width > 0 && height > 0) {
-            _SimulationView::get().resize({width, height});
+            SimulationView::get().resize({width, height});
             glViewport(0, 0, width, height);
         }
     }
@@ -128,10 +128,10 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     Viewport::get().init(_simulationFacade);
     AutosaveController::get().init(_simulationFacade);
     EditorController::get().init(_simulationFacade);
-    _SimulationView::get().init(_simulationFacade);
+    SimulationView::get().init(_simulationFacade);
     SimulationInteractionController::get().init(_simulationFacade);
-    _statisticsWindow = std::make_shared<_StatisticsWindow>(_simulationFacade);
-    TemporalControlWindow::get().init(_simulationFacade, _statisticsWindow);
+    StatisticsWindow::get().init(_simulationFacade);
+    TemporalControlWindow::get().init(_simulationFacade);
     _spatialControlWindow = std::make_shared<_SpatialControlWindow>(_simulationFacade);
     _radiationSourcesWindow = std::make_shared<_RadiationSourcesWindow>(_simulationFacade);
     _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simulationFacade, _radiationSourcesWindow);
@@ -142,11 +142,11 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     _massOperationsDialog = std::make_shared<_MassOperationsDialog>(_simulationFacade);
     _logWindow = std::make_shared<_LogWindow>(_logger);
     _gettingStartedWindow = std::make_shared<_GettingStartedWindow>();
-    _newSimulationDialog = std::make_shared<_NewSimulationDialog>(_simulationFacade, _statisticsWindow);
+    _newSimulationDialog = std::make_shared<_NewSimulationDialog>(_simulationFacade);
     _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>();
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simulationFacade);
     _fpsController = std::make_shared<_FpsController>();
-    BrowserWindow::get().init(_simulationFacade, _persisterFacade, _statisticsWindow);
+    BrowserWindow::get().init(_simulationFacade, _persisterFacade);
     ActivateUserDialog::get().init(_simulationFacade);
     _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_simulationFacade);
     _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog);
@@ -224,6 +224,7 @@ void _MainWindow::mainLoop()
 void _MainWindow::shutdown()
 {
     BrowserWindow::get().shutdown();
+    StatisticsWindow::get().shutdown();
 
     EditorController::get().shutdown();
     LoginController::get().shutdown();
@@ -239,7 +240,7 @@ void _MainWindow::shutdown()
     glfwDestroyWindow(_window);
     glfwTerminate();
 
-    _SimulationView::get().shutdown();
+    SimulationView::get().shutdown();
 
     _persisterFacade->shutdown();
     _simulationFacade->closeSimulation();
@@ -317,7 +318,7 @@ void _MainWindow::processFadeInUI()
     processWindows();
     processControllers();
 
-    _SimulationView::get().processControls(_renderSimulation);
+    SimulationView::get().processControls(_renderSimulation);
     _startupController->process();
 
     popGlobalStyle();
@@ -338,7 +339,7 @@ void _MainWindow::processReady()
     processWindows();
     processControllers();
 
-    _SimulationView::get().processControls(_renderSimulation);
+    SimulationView::get().processControls(_renderSimulation);
 
     popGlobalStyle();
 
@@ -352,7 +353,7 @@ void _MainWindow::renderSimulation()
     int display_w, display_h;
     glfwGetFramebufferSize(_window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
-    _SimulationView::get().draw(_renderSimulation);
+    SimulationView::get().draw(_renderSimulation);
 }
 
 void _MainWindow::processMenubar()
@@ -438,8 +439,8 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Spatial control", "ALT+2", _spatialControlWindow->isOn())) {
                 _spatialControlWindow->setOn(!_spatialControlWindow->isOn());
             }
-            if (ImGui::MenuItem("Statistics", "ALT+3", _statisticsWindow->isOn())) {
-                _statisticsWindow->setOn(!_statisticsWindow->isOn());
+            if (ImGui::MenuItem("Statistics", "ALT+3", StatisticsWindow::get().isOn())) {
+                StatisticsWindow::get().setOn(!StatisticsWindow::get().isOn());
             }
             if (ImGui::MenuItem("Simulation parameters", "ALT+4", _simulationParametersWindow->isOn())) {
                 _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
@@ -512,8 +513,8 @@ void _MainWindow::processMenubar()
         }
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_EYE "  View ", _viewMenuToggled, "View")) {
-            if (ImGui::MenuItem("Information overlay", "ALT+O", _SimulationView::get().isOverlayActive())) {
-                _SimulationView::get().setOverlayActive(!_SimulationView::get().isOverlayActive());
+            if (ImGui::MenuItem("Information overlay", "ALT+O", SimulationView::get().isOverlayActive())) {
+                SimulationView::get().setOverlayActive(!SimulationView::get().isOverlayActive());
             }
             if (ImGui::MenuItem("Render UI", "ALT+U", UiController::get().isOn())) {
                 UiController::get().setOn(!UiController::get().isOn());
@@ -617,7 +618,7 @@ void _MainWindow::processMenubar()
             _spatialControlWindow->setOn(!_spatialControlWindow->isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_3)) {
-            _statisticsWindow->setOn(!_statisticsWindow->isOn());
+            StatisticsWindow::get().setOn(!StatisticsWindow::get().isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_4)) {
             _simulationParametersWindow->setOn(!_simulationParametersWindow->isOn());
@@ -690,7 +691,7 @@ void _MainWindow::processMenubar()
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_O)) {
-            _SimulationView::get().setOverlayActive(!_SimulationView::get().isOverlayActive());
+            SimulationView::get().setOverlayActive(!SimulationView::get().isOverlayActive());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_U)) {
             UiController::get().setOn(!UiController::get().isOn());
@@ -738,7 +739,7 @@ void _MainWindow::processWindows()
 {
     TemporalControlWindow::get().process();
     _spatialControlWindow->process();
-    _statisticsWindow->process();
+    StatisticsWindow::get().process();
     _simulationParametersWindow->process();
     _logWindow->process();
     BrowserWindow::get().process();

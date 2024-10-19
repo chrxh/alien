@@ -20,12 +20,9 @@ namespace
     auto constexpr LeftColumnWidth = 180.0f;
 }
 
-void TemporalControlWindow::init(
-    SimulationFacade const& simulationFacade,
-    StatisticsWindow const& statisticsWindow)
+void TemporalControlWindow::init(SimulationFacade const& simulationFacade)
 {
     _simulationFacade = simulationFacade;
-    _statisticsWindow = statisticsWindow;
 }
 
 void TemporalControlWindow::onSnapshot()

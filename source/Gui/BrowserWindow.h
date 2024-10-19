@@ -22,7 +22,7 @@ class BrowserWindow : public AlienWindow
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(BrowserWindow);
 
 public:
-    void init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade, StatisticsWindow const& statisticsWindow);
+    void init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade);
     void shutdown();
 
     void onRefresh();
@@ -137,5 +137,4 @@ private:
 
     SimulationFacade _simulationFacade;
     PersisterFacade _persisterFacade;
-    StatisticsWindow _statisticsWindow;
 };

@@ -42,7 +42,6 @@ private:
 
     SpatialControlWindow _spatialControlWindow;
     SimulationParametersWindow _simulationParametersWindow;
-    StatisticsWindow _statisticsWindow;
     LogWindow _logWindow;
     GettingStartedWindow _gettingStartedWindow;
     ShaderWindow _shaderWindow;
