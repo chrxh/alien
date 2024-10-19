@@ -115,9 +115,7 @@ using ShaderWindow = std::shared_ptr<_ShaderWindow>;
 
 class LoginDialog;
 
-class _UploadSimulationDialog;
-using UploadSimulationDialog = std::shared_ptr<_UploadSimulationDialog>;
-using UploadSimulationDialogWeakPtr = std::weak_ptr<_UploadSimulationDialog>;
+class UploadSimulationDialog;
 
 class _EditSimulationDialog;
 using EditSimulationDialog = std::shared_ptr<_EditSimulationDialog>;

@@ -10,9 +10,7 @@ class _EditorController
 public:
     _EditorController(SimulationFacade const& simulationFacade);
 
-    void registerCyclicReferences(
-        UploadSimulationDialogWeakPtr const& uploadSimulationDialog,
-        SimulationInteractionControllerWeakPtr const& simulationInteractionController);
+    void registerCyclicReferences(SimulationInteractionControllerWeakPtr const& simulationInteractionController);
 
     bool isOn() const;
     void setOn(bool value);

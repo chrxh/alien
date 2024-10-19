@@ -16,7 +16,7 @@ private: \
     ClassName(ClassName&&) = delete; \
     ClassName& operator=(ClassName&&) = delete
 
-#define MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTOR(ClassName) \
+#define MAKE_SINGLETON_CUSTOMIZED(ClassName) \
 public: \
     static ClassName& get() \
     { \

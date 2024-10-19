@@ -29,22 +29,23 @@ namespace
         {NetworkResourceType_Genome, "Genome"}};
 }
 
-_UploadSimulationDialog::_UploadSimulationDialog(SimulationFacade const& simulationFacade, GenomeEditorWindow const& genomeEditorWindow)
-    : AlienDialog("")
-    , _simulationFacade(simulationFacade)
-    , _genomeEditorWindow(genomeEditorWindow)
+void UploadSimulationDialog::init(SimulationFacade const& simulationFacade, GenomeEditorWindow const& genomeEditorWindow)
 {
+    _simulationFacade = simulationFacade;
+    _genomeEditorWindow = genomeEditorWindow;
+
     auto& settings = GlobalSettings::get();
     _share = settings.getBool("dialogs.upload.share", _share);
 }
 
-_UploadSimulationDialog::~_UploadSimulationDialog()
+void UploadSimulationDialog::shutdown()
 {
     auto& settings = GlobalSettings::get();
     settings.setBool("dialogs.upload.share", _share);
 }
 
-void _UploadSimulationDialog::open(NetworkResourceType resourceType, std::string const& folder)
+
+void UploadSimulationDialog::open(NetworkResourceType resourceType, std::string const& folder)
 {
     if (NetworkService::get().getLoggedInUserName()) {
         changeTitle("Upload " + BrowserDataTypeToLowerString.at(resourceType));
@@ -58,7 +59,11 @@ void _UploadSimulationDialog::open(NetworkResourceType resourceType, std::string
     }
 }
 
-void _UploadSimulationDialog::processIntern()
+UploadSimulationDialog::UploadSimulationDialog()
+    : AlienDialog("")
+{}
+
+void UploadSimulationDialog::processIntern()
 {
     auto resourceTypeString = BrowserDataTypeToLowerString.at(_resourceType);
     if (ImGui::BeginChild("##header", ImVec2(0, scale(52.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
@@ -128,7 +133,7 @@ void _UploadSimulationDialog::processIntern()
     }
 }
 
-void _UploadSimulationDialog::onUpload()
+void UploadSimulationDialog::onUpload()
 {
     auto data = [&]() -> std::variant<UploadNetworkResourceRequestData::SimulationData, UploadNetworkResourceRequestData::GenomeData> {
         if (_resourceType == NetworkResourceType_Simulation) {

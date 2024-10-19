@@ -63,11 +63,6 @@ _GenomeEditorWindow::~_GenomeEditorWindow()
     GlobalSettings::get().setFloat("windows.genome editor.preview height", _previewHeight);
 }
 
-void _GenomeEditorWindow::registerCyclicReferences(UploadSimulationDialogWeakPtr const& uploadSimulationDialog)
-{
-    _uploadSimulationDialog = uploadSimulationDialog;
-}
-
 void _GenomeEditorWindow::openTab(GenomeDescription const& genome, bool openGenomeEditorIfClosed)
 {
     if (openGenomeEditorIfClosed) {
@@ -870,7 +865,7 @@ void _GenomeEditorWindow::onSaveGenome()
 
 void _GenomeEditorWindow::onUploadGenome()
 {
-    _uploadSimulationDialog.lock()->open(NetworkResourceType_Genome);
+    UploadSimulationDialog::get().open(NetworkResourceType_Genome);
 }
 
 void _GenomeEditorWindow::onAddNode()
