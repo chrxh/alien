@@ -102,20 +102,10 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     IMGUI_CHECKVERSION();
 
     log(Priority::Important, "initialize GLFW and OpenGL");
-    auto glfwVersion = initGlfwAndReturnGlslVersion();
-    WindowController::get().init();
-    auto windowData = WindowController::get().getWindowData();
-    glfwSetFramebufferSizeCallback(windowData.window, framebuffer_size_callback);
-    glfwSwapInterval(1);  //enable vsync
-    ImGui::CreateContext();
-    ImPlot::CreateContext();
-    ImGui_ImplGlfw_InitForOpenGL(windowData.window, true);  //setup Platform/Renderer back-ends
-    ImGui_ImplOpenGL3_Init(glfwVersion);
+    initGlfwAndOpenGL();
 
     log(Priority::Important, "initialize GLAD");
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        throw std::runtime_error("Failed to initialize GLAD");
-    }
+    initGlad();
 
     //init services
     StyleRepository::get().init();
@@ -132,7 +122,7 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     SimulationInteractionController::get().init(_simulationFacade);
     StatisticsWindow::get().init(_simulationFacade);
     TemporalControlWindow::get().init(_simulationFacade);
-    _spatialControlWindow = std::make_shared<_SpatialControlWindow>(_simulationFacade);
+    SpatialControlWindow::get().init(_simulationFacade);
     _radiationSourcesWindow = std::make_shared<_RadiationSourcesWindow>(_simulationFacade);
     _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simulationFacade, _radiationSourcesWindow);
     _gpuSettingsDialog = std::make_shared<_GpuSettingsDialog>(_simulationFacade);
@@ -182,6 +172,7 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
         glDeleteTextures(1, &texID);
     };
 
+    auto windowData = WindowController::get().getWindowData();
     _window = windowData.window;
 
     log(Priority::Important, "main window initialized");
@@ -225,6 +216,7 @@ void _MainWindow::shutdown()
 {
     BrowserWindow::get().shutdown();
     StatisticsWindow::get().shutdown();
+    SpatialControlWindow::get().shutdown();
 
     EditorController::get().shutdown();
     LoginController::get().shutdown();
@@ -245,6 +237,26 @@ void _MainWindow::shutdown()
     _persisterFacade->shutdown();
     _simulationFacade->closeSimulation();
     NetworkService::get().shutdown();
+}
+
+void _MainWindow::initGlfwAndOpenGL()
+{
+    auto glfwVersion = initGlfwAndReturnGlslVersion();
+    WindowController::get().init();
+    auto windowData = WindowController::get().getWindowData();
+    glfwSetFramebufferSizeCallback(windowData.window, framebuffer_size_callback);
+    glfwSwapInterval(1);  //enable vsync
+    ImGui::CreateContext();
+    ImPlot::CreateContext();
+    ImGui_ImplGlfw_InitForOpenGL(windowData.window, true);  //setup Platform/Renderer back-ends
+    ImGui_ImplOpenGL3_Init(glfwVersion);
+}
+
+void _MainWindow::initGlad()
+{
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        throw std::runtime_error("Failed to initialize GLAD");
+    }
 }
 
 char const* _MainWindow::initGlfwAndReturnGlslVersion()
@@ -436,8 +448,8 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Temporal control", "ALT+1", TemporalControlWindow::get().isOn())) {
                 TemporalControlWindow::get().setOn(!TemporalControlWindow::get().isOn());
             }
-            if (ImGui::MenuItem("Spatial control", "ALT+2", _spatialControlWindow->isOn())) {
-                _spatialControlWindow->setOn(!_spatialControlWindow->isOn());
+            if (ImGui::MenuItem("Spatial control", "ALT+2", SpatialControlWindow::get().isOn())) {
+                SpatialControlWindow::get().setOn(!SpatialControlWindow::get().isOn());
             }
             if (ImGui::MenuItem("Statistics", "ALT+3", StatisticsWindow::get().isOn())) {
                 StatisticsWindow::get().setOn(!StatisticsWindow::get().isOn());
@@ -615,7 +627,7 @@ void _MainWindow::processMenubar()
             TemporalControlWindow::get().setOn(!TemporalControlWindow::get().isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_2)) {
-            _spatialControlWindow->setOn(!_spatialControlWindow->isOn());
+            SpatialControlWindow::get().setOn(!SpatialControlWindow::get().isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_3)) {
             StatisticsWindow::get().setOn(!StatisticsWindow::get().isOn());
@@ -738,7 +750,7 @@ void _MainWindow::processDialogs()
 void _MainWindow::processWindows()
 {
     TemporalControlWindow::get().process();
-    _spatialControlWindow->process();
+    SpatialControlWindow::get().process();
     StatisticsWindow::get().process();
     _simulationParametersWindow->process();
     _logWindow->process();

@@ -1,18 +1,23 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/Descriptions.h"
 
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-class _SpatialControlWindow : public AlienWindow
+class SpatialControlWindow : public AlienWindow
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(SpatialControlWindow);
+
 public:
-    _SpatialControlWindow(SimulationFacade const& simulationFacade);
-    ~_SpatialControlWindow() override;
+    void init(SimulationFacade const& simulationFacade);
+    void shutdown();
 
 private:
+    SpatialControlWindow();
+
     void processIntern() override;
     void processBackground() override;
 

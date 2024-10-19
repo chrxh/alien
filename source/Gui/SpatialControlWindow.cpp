@@ -13,23 +13,26 @@
 #include "AlienImGui.h"
 #include "ResizeWorldDialog.h"
 
-_SpatialControlWindow::_SpatialControlWindow(SimulationFacade const& simulationFacade)
-    : AlienWindow("Spatial control", "windows.spatial control", true)
-    , _simulationFacade(simulationFacade)
+void SpatialControlWindow::init(SimulationFacade const& simulationFacade)
 {
+    _simulationFacade = simulationFacade;
     _resizeWorldDialog = std::make_shared<_ResizeWorldDialog>(simulationFacade);
 
     auto& settings = GlobalSettings::get();
     Viewport::get().setZoomSensitivity(settings.getFloat("windows.spatial control.zoom sensitivity factor", Viewport::get().getZoomSensitivity()));
 }
 
-_SpatialControlWindow::~_SpatialControlWindow()
+void SpatialControlWindow::shutdown()
 {
     auto& settings = GlobalSettings::get();
     settings.setFloat("windows.spatial control.zoom sensitivity", Viewport::get().getZoomSensitivity());
 }
 
-void _SpatialControlWindow::processIntern()
+SpatialControlWindow::SpatialControlWindow()
+    : AlienWindow("Spatial control", "windows.spatial control", true)
+{}
+
+void SpatialControlWindow::processIntern()
 {
     processZoomInButton();
     ImGui::SameLine();
@@ -88,12 +91,12 @@ void _SpatialControlWindow::processIntern()
     _resizeWorldDialog->process();
 }
 
-void _SpatialControlWindow::processBackground()
+void SpatialControlWindow::processBackground()
 {
     processCenterOnSelection();
 }
 
-void _SpatialControlWindow::processZoomInButton()
+void SpatialControlWindow::processZoomInButton()
 {
     if (AlienImGui::ToolbarButton(ICON_FA_SEARCH_PLUS)) {
         Viewport::get().setZoomFactor(Viewport::get().getZoomFactor() * 2);
@@ -101,7 +104,7 @@ void _SpatialControlWindow::processZoomInButton()
     AlienImGui::Tooltip("Zoom in");
 }
 
-void _SpatialControlWindow::processZoomOutButton()
+void SpatialControlWindow::processZoomOutButton()
 {
     if (AlienImGui::ToolbarButton(ICON_FA_SEARCH_MINUS)) {
         Viewport::get().setZoomFactor(Viewport::get().getZoomFactor() / 2);
@@ -109,7 +112,7 @@ void _SpatialControlWindow::processZoomOutButton()
     AlienImGui::Tooltip("Zoom out");
 }
 
-void _SpatialControlWindow::processCenterButton()
+void SpatialControlWindow::processCenterButton()
 {
     if (AlienImGui::ToolbarButton(ICON_FA_CROSSHAIRS)) {
         Viewport::get().setZoomFactor(1.0f);
@@ -119,7 +122,7 @@ void _SpatialControlWindow::processCenterButton()
     AlienImGui::Tooltip("Center");
 }
 
-void _SpatialControlWindow::processResizeButton()
+void SpatialControlWindow::processResizeButton()
 {
     if (AlienImGui::ToolbarButton(ICON_FA_CROP_ALT)) {
         _resizeWorldDialog->open();
@@ -127,7 +130,7 @@ void _SpatialControlWindow::processResizeButton()
     AlienImGui::Tooltip("Resize");
 }
 
-void _SpatialControlWindow::processCenterOnSelection()
+void SpatialControlWindow::processCenterOnSelection()
 {
     if (_centerSelection && _simulationFacade->isSimulationRunning()) {
         auto shallowData = _simulationFacade->getSelectionShallowData();

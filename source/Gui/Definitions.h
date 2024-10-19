@@ -21,8 +21,7 @@ class StyleRepository;
 
 class TemporalControlWindow;
 
-class _SpatialControlWindow;
-using SpatialControlWindow = std::shared_ptr<_SpatialControlWindow>;
+class SpatialControlWindow;
 
 class _SimulationParametersWindow;
 using SimulationParametersWindow = std::shared_ptr<_SimulationParametersWindow>;

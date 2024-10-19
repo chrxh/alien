@@ -14,6 +14,8 @@ public:
     void shutdown();
 
 private:
+    void initGlfwAndOpenGL();
+    void initGlad();
     char const* initGlfwAndReturnGlslVersion();
 
     void processLoadingScreen();
@@ -40,7 +42,6 @@ private:
     GLFWwindow* _window;
     GuiLogger _logger;
 
-    SpatialControlWindow _spatialControlWindow;
     SimulationParametersWindow _simulationParametersWindow;
     LogWindow _logWindow;
     GettingStartedWindow _gettingStartedWindow;
