@@ -35,6 +35,16 @@ void EditorController::init(SimulationFacade const& simulationFacade)
     _multiplierWindow = std::make_shared<_MultiplierWindow>(_editorModel, _simulationFacade);
 }
 
+void EditorController::shutdown()
+{
+    _editorModel.reset();
+    _genomeEditorWindow.reset();
+    _selectionWindow.reset();
+    _patternEditorWindow.reset();
+    _creatorWindow.reset();
+    _multiplierWindow.reset();
+}
+
 void EditorController::registerCyclicReferences(SimulationInteractionControllerWeakPtr const& simulationInteractionController)
 {
     _creatorWindow->registerCyclicReferences(simulationInteractionController);

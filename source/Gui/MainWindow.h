@@ -58,8 +58,6 @@ private:
     DisplaySettingsDialog _displaySettingsDialog;
     PatternAnalysisDialog _patternAnalysisDialog;
     AboutDialog _aboutDialog;
-    CreateUserDialog _createUserDialog;
-    ActivateUserDialog _activateUserDialog;
     DeleteUserDialog _deleteUserDialog;
     NetworkSettingsDialog _networkSettingsDialog;
     ResetPasswordDialog _resetPasswordDialog;

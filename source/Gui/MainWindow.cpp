@@ -148,11 +148,10 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simulationFacade);
     _fpsController = std::make_shared<_FpsController>();
     BrowserWindow::get().init(_simulationFacade, _persisterFacade, _statisticsWindow, _temporalControlWindow);
-    _activateUserDialog = std::make_shared<_ActivateUserDialog>(_simulationFacade);
-    _createUserDialog = std::make_shared<_CreateUserDialog>(_activateUserDialog);
+    ActivateUserDialog::get().init(_simulationFacade);
     _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_simulationFacade);
     _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog);
-    LoginDialog::get().init(_simulationFacade, _persisterFacade, _createUserDialog, _activateUserDialog, _resetPasswordDialog);
+    LoginDialog::get().init(_simulationFacade, _persisterFacade, _resetPasswordDialog);
     UploadSimulationDialog::get().init(_simulationFacade);
     _deleteUserDialog = std::make_shared<_DeleteUserDialog>();
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>();
@@ -162,10 +161,9 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     OverlayMessageController::get().init(_persisterFacade);
     FileTransferController::get().init(_persisterFacade, _simulationFacade, _temporalControlWindow);
     NetworkTransferController::get().init(_simulationFacade, _persisterFacade, _temporalControlWindow);
-    LoginController::get().init(_simulationFacade, _persisterFacade, _activateUserDialog);
+    LoginController::get().init(_simulationFacade, _persisterFacade);
 
     //cyclic references
-    _activateUserDialog->registerCyclicReferences(_createUserDialog);
     EditorController::get().registerCyclicReferences(_simInteractionController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
@@ -231,6 +229,7 @@ void _MainWindow::shutdown()
 {
     BrowserWindow::get().shutdown();
 
+    EditorController::get().shutdown();
     LoginController::get().shutdown();
     WindowController::shutdown();
     _autosaveController->shutdown();
@@ -726,8 +725,8 @@ void _MainWindow::processDialogs()
     _displaySettingsDialog->process(); 
     _patternAnalysisDialog->process();
     LoginDialog::get().process();
-    _createUserDialog->process();
-    _activateUserDialog->process();
+    CreateUserDialog::get().process();
+    ActivateUserDialog::get().process();
     UploadSimulationDialog::get().process();
     EditSimulationDialog::get().process();
     _deleteUserDialog->process();

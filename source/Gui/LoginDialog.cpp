@@ -16,17 +16,10 @@
 #include "HelpStrings.h"
 #include "LoginController.h"
 
-void LoginDialog::init(
-    SimulationFacade const& simulationFacade,
-    PersisterFacade const& persisterFacade,
-    CreateUserDialog const& createUserDialog,
-    ActivateUserDialog const& activateUserDialog,
-    ResetPasswordDialog const& resetPasswordDialog)
+void LoginDialog::init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade, ResetPasswordDialog const& resetPasswordDialog)
 {
     _simulationFacade = simulationFacade;
     _persisterFacade = persisterFacade;
-    _createUserDialog = createUserDialog;
-    _activateUserDialog = activateUserDialog;
     _resetPasswordDialog = resetPasswordDialog;
 }
 
@@ -89,7 +82,7 @@ void LoginDialog::processIntern()
     ImGui::BeginDisabled(userName.empty() || password.empty());
     if (AlienImGui::Button("Create user")) {
         close();
-        _createUserDialog->open(userName, password, LoginController::get().getUserInfo());
+        CreateUserDialog::get().open(userName, password, LoginController::get().getUserInfo());
     }
     ImGui::EndDisabled();
 

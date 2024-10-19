@@ -117,12 +117,9 @@ class UploadSimulationDialog;
 
 class EditSimulationDialog;
 
-class _CreateUserDialog;
-using CreateUserDialog = std::shared_ptr<_CreateUserDialog>;
-using CreateUserDialogWeakPtr = std::weak_ptr<_CreateUserDialog>;
+class CreateUserDialog;
 
-class _ActivateUserDialog;
-using ActivateUserDialog = std::shared_ptr<_ActivateUserDialog>;
+class ActivateUserDialog;
 
 class _DeleteUserDialog;
 using DeleteUserDialog = std::shared_ptr<_DeleteUserDialog>;

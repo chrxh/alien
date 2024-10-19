@@ -12,6 +12,7 @@ class EditorController
 
 public:
     void init(SimulationFacade const& simulationFacade);
+    void shutdown();
 
     void registerCyclicReferences(SimulationInteractionControllerWeakPtr const& simulationInteractionController);
 

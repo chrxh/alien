@@ -9,17 +9,11 @@
 #include "MessageDialog.h"
 #include "ActivateUserDialog.h"
 
-_CreateUserDialog::_CreateUserDialog(ActivateUserDialog const& activateUserDialog)
+CreateUserDialog::CreateUserDialog()
     : AlienDialog("Create user")
-    , _activateUserDialog(activateUserDialog)
-{
-}
+{}
 
-_CreateUserDialog::~_CreateUserDialog()
-{
-}
-
-void _CreateUserDialog::open(std::string const& userName, std::string const& password, UserInfo const& userInfo)
+void CreateUserDialog::open(std::string const& userName, std::string const& password, UserInfo const& userInfo)
 {
     AlienDialog::open();
     _userName = userName;
@@ -28,7 +22,7 @@ void _CreateUserDialog::open(std::string const& userName, std::string const& pas
     _userInfo = userInfo;
 }
 
-void _CreateUserDialog::processIntern()
+void CreateUserDialog::processIntern()
 {
     AlienImGui::Text("Security information");
     AlienImGui::HelpMarker("The data transfer to the server is encrypted via https. On the server side, the email address is not stored in cleartext, but "
@@ -59,10 +53,10 @@ void _CreateUserDialog::processIntern()
     }
 }
 
-void _CreateUserDialog::onCreateUser()
+void CreateUserDialog::onCreateUser()
 {
     if (NetworkService::get().createUser(_userName, _password, _email)) {
-        _activateUserDialog->open(_userName, _password, _userInfo);
+        ActivateUserDialog::get().open(_userName, _password, _userInfo);
     } else {
         MessageDialog::get().information(
             "Error",
