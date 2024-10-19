@@ -112,12 +112,12 @@ void BrowserWindow::init(
     refreshIntern(firstStart);
 
     for (auto& [workspaceId, workspace] : _workspaces) {
-        auto initialCollapsedSimulationFolders = NetworkResourceService::convertFolderNamesToSettings(NetworkResourceService::getFolderNames(workspace.rawTOs));
+        auto initialCollapsedSimulationFolders = NetworkResourceService::get().convertFolderNamesToSettings(NetworkResourceService::get().getFolderNames(workspace.rawTOs));
         auto collapsedSimulationFolders = GlobalSettings::get().getStringVector(
             "windows.browser.collapsed folders." + networkResourceTypeToString.at(workspaceId.resourceType) + "."
                 + workspaceTypeToString.at(workspaceId.workspaceType),
             initialCollapsedSimulationFolders);
-        workspace.collapsedFolderNames = NetworkResourceService::convertSettingsToFolderNames(collapsedSimulationFolders);
+        workspace.collapsedFolderNames = NetworkResourceService::get().convertSettingsToFolderNames(collapsedSimulationFolders);
         createTreeTOs(workspace);
     }
 
@@ -135,7 +135,7 @@ void BrowserWindow::shutdown()
         settings.setStringVector(
             "windows.browser.collapsed folders." + networkResourceTypeToString.at(workspaceId.resourceType) + "."
                 + workspaceTypeToString.at(workspaceId.workspaceType),
-            NetworkResourceService::convertFolderNamesToSettings(workspace.collapsedFolderNames));
+            NetworkResourceService::get().convertFolderNamesToSettings(workspace.collapsedFolderNames));
     }
     _lastSessionData.save();
 }
@@ -267,7 +267,7 @@ void BrowserWindow::processToolbar()
             if (_selectedTreeTO == nullptr || _selectedTreeTO->isLeaf()) {
                 return std::string();
             }
-            return NetworkResourceService::concatenateFolderName(_selectedTreeTO->folderNames, true);
+            return NetworkResourceService::get().concatenateFolderName(_selectedTreeTO->folderNames, true);
         }();
         UploadSimulationDialog::get().open(_currentWorkspace.resourceType, prefix);
     }
@@ -1233,7 +1233,7 @@ void BrowserWindow::createTreeTOs(Workspace& workspace)
     }
 
     //create treeTOs
-    workspace.treeTOs = NetworkResourceService::createTreeTOs(filteredRawTOs, workspace.collapsedFolderNames);
+    workspace.treeTOs = NetworkResourceService::get().createTreeTOs(filteredRawTOs, workspace.collapsedFolderNames);
     _selectedTreeTO = nullptr;
 }
 
@@ -1278,7 +1278,7 @@ void BrowserWindow::onEditResource(NetworkResourceTreeTO const& treeTO)
     if (treeTO->isLeaf()) {
         EditSimulationDialog::get().openForLeaf(treeTO);
     } else {
-        auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, _workspaces.at(_currentWorkspace).rawTOs);
+        auto rawTOs = NetworkResourceService::get().getMatchingRawTOs(treeTO, _workspaces.at(_currentWorkspace).rawTOs);
         EditSimulationDialog::get().openForFolder(treeTO, rawTOs);
     }
 }
@@ -1286,7 +1286,7 @@ void BrowserWindow::onEditResource(NetworkResourceTreeTO const& treeTO)
 void BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO)
 {
     auto& source = _workspaces.at(_currentWorkspace);
-    auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, source.rawTOs);
+    auto rawTOs = NetworkResourceService::get().getMatchingRawTOs(treeTO, source.rawTOs);
 
     for (auto const& rawTO : rawTOs) {
         switch (rawTO->workspaceType) {
@@ -1327,7 +1327,7 @@ void BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO)
 void BrowserWindow::onDeleteResource(NetworkResourceTreeTO const& treeTO)
 {
     auto& currentWorkspace = _workspaces.at(_currentWorkspace);
-    auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, currentWorkspace.rawTOs);
+    auto rawTOs = NetworkResourceService::get().getMatchingRawTOs(treeTO, currentWorkspace.rawTOs);
 
     auto message = treeTO->isLeaf() ? "Do you really want to delete the selected item?" : "Do you really want to delete the selected folder?";
     MessageDialog::get().yesNo("Delete", message, [rawTOs = rawTOs, this]() {
@@ -1397,7 +1397,7 @@ void BrowserWindow::onExpandFolders()
 void BrowserWindow::onCollapseFolders()
 {
     auto& workspace = _workspaces.at(_currentWorkspace);
-    workspace.collapsedFolderNames = NetworkResourceService::getFolderNames(workspace.rawTOs, 1);
+    workspace.collapsedFolderNames = NetworkResourceService::get().getFolderNames(workspace.rawTOs, 1);
     createTreeTOs(workspace);
 }
 
@@ -1415,7 +1415,7 @@ bool BrowserWindow::isOwner(NetworkResourceTreeTO const& treeTO) const
     }
     auto const& workspace = _workspaces.at(_currentWorkspace);
 
-    auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, workspace.rawTOs);
+    auto rawTOs = NetworkResourceService::get().getMatchingRawTOs(treeTO, workspace.rawTOs);
     auto userName = NetworkService::get().getLoggedInUserName().value_or("");
     return std::ranges::all_of(rawTOs, [&](NetworkResourceRawTO const& rawTO) { return rawTO->userName == userName; });
 }
