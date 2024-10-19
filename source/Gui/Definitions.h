@@ -60,8 +60,7 @@ using GuiLogger = std::shared_ptr<_GuiLogger>;
 
 class UiController;
 
-class _AutosaveController;
-using AutosaveController = std::shared_ptr<_AutosaveController>;
+class AutosaveController;
 
 class _GettingStartedWindow;
 using GettingStartedWindow = std::shared_ptr<_GettingStartedWindow>;

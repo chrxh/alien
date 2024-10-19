@@ -2,15 +2,17 @@
 
 #include <chrono>
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
+
 #include "Definitions.h"
 
-class _AutosaveController
+class AutosaveController
 {
-public:
-    _AutosaveController(SimulationFacade const& simulationFacade);
-    ~_AutosaveController();
+    MAKE_SINGLETON(AutosaveController);
 
+public:
+    void init(SimulationFacade const& simulationFacade);
     void shutdown();
 
     bool isOn() const;

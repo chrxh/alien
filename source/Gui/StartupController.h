@@ -21,7 +21,7 @@ public:
         StartLoadSimulation,
         LoadingSimulation,
         FadeOutLoadingScreen,
-        FadeInControls,
+        FadeInUI,
         Ready
     };
     State getState();

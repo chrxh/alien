@@ -18,7 +18,7 @@ private:
 
     void processLoadingScreen();
     void processFadeoutLoadingScreen();
-    void processFadeInControls();
+    void processFadeInUI();
     void processReady();
 
     void renderSimulation();
@@ -67,7 +67,6 @@ private:
     PersisterFacade _persisterFacade;
     SimulationFacade _simulationFacade;
     StartupController _startupController;
-    AutosaveController _autosaveController; 
     FpsController _fpsController;
 
     bool _onExit = false;
