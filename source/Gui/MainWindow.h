@@ -61,8 +61,6 @@ private:
 
     PersisterFacade _persisterFacade;
     SimulationFacade _simulationFacade;
-    StartupController _startupController;
-    FpsController _fpsController;
 
     bool _onExit = false;
     bool _simulationMenuToggled = false;

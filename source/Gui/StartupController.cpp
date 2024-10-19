@@ -26,15 +26,16 @@ namespace
     auto const StartupSenderId = "Startup";
 }
 
-_StartupController::_StartupController(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade)
-    : _simulationFacade(simulationFacade)
-    , _persisterFacade(persisterFacade)
+void StartupController::init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade)
 {
+    _simulationFacade = simulationFacade;
+    _persisterFacade =persisterFacade;
+
     log(Priority::Important, "starting ALIEN v" + Const::ProgramVersion);
     _logo = OpenGLHelper::loadTexture(Const::LogoFilename);
 }
 
-void _StartupController::process()
+void StartupController::process()
 {
     if (_state == State::StartLoadSimulation) {
         auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = true};
@@ -129,17 +130,17 @@ void _StartupController::process()
     }
 }
 
-auto _StartupController::getState() -> State
+auto StartupController::getState() -> State
 {
     return _state;
 }
 
-void _StartupController::activate()
+void StartupController::activate()
 {
     _state = State::StartLoadSimulation;
 }
 
-void _StartupController::processLoadingScreen()
+void StartupController::processLoadingScreen()
 {
     auto& styleRep = StyleRepository::get();
     auto center = ImGui::GetMainViewport()->GetCenter();

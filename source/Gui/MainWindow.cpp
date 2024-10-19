@@ -126,7 +126,7 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     RadiationSourcesWindow::get().init(_simulationFacade);
     SimulationParametersWindow::get().init(_simulationFacade);
     _gpuSettingsDialog = std::make_shared<_GpuSettingsDialog>(_simulationFacade);
-    _startupController = std::make_shared<_StartupController>(_simulationFacade, _persisterFacade);
+    StartupController::get().init(_simulationFacade, _persisterFacade);
     _exitDialog = std::make_shared<_ExitDialog>(_onExit);
     _aboutDialog = std::make_shared<_AboutDialog>();
     _massOperationsDialog = std::make_shared<_MassOperationsDialog>(_simulationFacade);
@@ -135,7 +135,6 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     _newSimulationDialog = std::make_shared<_NewSimulationDialog>(_simulationFacade);
     _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>();
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simulationFacade);
-    _fpsController = std::make_shared<_FpsController>();
     BrowserWindow::get().init(_simulationFacade, _persisterFacade);
     ActivateUserDialog::get().init(_simulationFacade);
     _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_simulationFacade);
@@ -188,20 +187,20 @@ void _MainWindow::mainLoop()
 
      //   ImGui::ShowDemoWindow(NULL);
 
-        switch (_startupController->getState()) {
-        case _StartupController::State::StartLoadSimulation:
+        switch (StartupController::get().getState()) {
+        case StartupController::State::StartLoadSimulation:
             processLoadingScreen();
             break;
-        case _StartupController::State::LoadingSimulation:
+        case StartupController::State::LoadingSimulation:
             processLoadingScreen();
             break;
-        case _StartupController::State::FadeOutLoadingScreen:
+        case StartupController::State::FadeOutLoadingScreen:
             processFadeoutLoadingScreen();
             break;
-        case _StartupController::State::FadeInUI:
+        case StartupController::State::FadeInUI:
             processFadeInUI();
             break;
-        case _StartupController::State::Ready:
+        case StartupController::State::Ready:
             processReady();
             break;
         default:
@@ -294,7 +293,7 @@ char const* _MainWindow::initGlfwAndReturnGlslVersion()
 
 void _MainWindow::processLoadingScreen()
 {
-    _startupController->process();
+    StartupController::get().process();
     OverlayMessageController::get().process();
 
     // render mainData
@@ -313,7 +312,7 @@ void _MainWindow::processLoadingScreen()
 
 void _MainWindow::processFadeoutLoadingScreen()
 {
-    _startupController->process();
+    StartupController::get().process();
     renderSimulation();
 
     finishFrame();
@@ -331,11 +330,11 @@ void _MainWindow::processFadeInUI()
     processControllers();
 
     SimulationView::get().processControls(_renderSimulation);
-    _startupController->process();
+    StartupController::get().process();
 
     popGlobalStyle();
 
-    _fpsController->processForceFps(WindowController::get().getFps());
+    FpsController::get().processForceFps(WindowController::get().getFps());
 
     finishFrame();
 }
@@ -355,7 +354,7 @@ void _MainWindow::processReady()
 
     popGlobalStyle();
 
-    _fpsController->processForceFps(WindowController::get().getFps());
+    FpsController::get().processForceFps(WindowController::get().getFps());
 
     finishFrame();
 }

@@ -2,15 +2,19 @@
 
 #include <chrono>
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "PersisterInterface/Definitions.h"
 #include "PersisterInterface/PersisterRequestId.h"
+
 #include "Definitions.h"
 
-class _StartupController
+class StartupController
 {
+    MAKE_SINGLETON(StartupController);
+
 public:
-    _StartupController(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade);
+    void init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade);
 
     void process();
     enum class State
@@ -27,8 +31,6 @@ public:
 
 private:
     void processLoadingScreen();
-
-    void drawGrid(float yPos, float alpha);
 
     SimulationFacade _simulationFacade;
     PersisterFacade _persisterFacade;
