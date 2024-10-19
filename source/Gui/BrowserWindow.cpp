@@ -127,12 +127,8 @@ void BrowserWindow::shutdown()
     _lastSessionData.save();
 }
 
-void BrowserWindow::registerCyclicReferences(
-    UploadSimulationDialogWeakPtr const& uploadSimulationDialog,
-    EditSimulationDialogWeakPtr const& editSimulationDialog,
-    GenomeEditorWindowWeakPtr const& genomeEditorWindow)
+void BrowserWindow::registerCyclicReferences(EditSimulationDialogWeakPtr const& editSimulationDialog, GenomeEditorWindowWeakPtr const& genomeEditorWindow)
 {
-    _uploadSimulationDialog = uploadSimulationDialog;
     _editSimulationDialog = editSimulationDialog;
     _genomeEditorWindow = genomeEditorWindow;
 
@@ -282,7 +278,7 @@ void BrowserWindow::processToolbar()
             }
             return NetworkResourceService::concatenateFolderName(_selectedTreeTO->folderNames, true);
         }();
-        _uploadSimulationDialog.lock()->open(_currentWorkspace.resourceType, prefix);
+        UploadSimulationDialog::get().open(_currentWorkspace.resourceType, prefix);
     }
     AlienImGui::Tooltip(
         "Upload your current " + resourceTypeString

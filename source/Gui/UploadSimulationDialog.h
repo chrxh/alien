@@ -1,20 +1,26 @@
 #pragma once
 
+#include "Base/Singleton.h"
+
 #include "EngineInterface/Definitions.h"
 #include "Network/Definitions.h"
 
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _UploadSimulationDialog : public AlienDialog
+class UploadSimulationDialog : public AlienDialog
 {
+    MAKE_SINGLETON_CUSTOMIZED(UploadSimulationDialog);
+
 public:
-    _UploadSimulationDialog(SimulationFacade const& simulationFacade, GenomeEditorWindow const& genomeEditorWindow);
-    ~_UploadSimulationDialog();
+    void init(SimulationFacade const& simulationFacade, GenomeEditorWindow const& genomeEditorWindow);
+    void shutdown();
 
     void open(NetworkResourceType resourceType, std::string const& folder = "");
 
 private:
+    UploadSimulationDialog();
+
     void processIntern();
 
     void onUpload();

@@ -154,7 +154,7 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_simulationFacade);
     _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog);
     LoginDialog::get().init(_simulationFacade, _persisterFacade, _createUserDialog, _activateUserDialog, _resetPasswordDialog);
-    _uploadSimulationDialog = std::make_shared<_UploadSimulationDialog>(_simulationFacade, _editorController->getGenomeEditorWindow());
+    UploadSimulationDialog::get().init(_simulationFacade, _editorController->getGenomeEditorWindow());
     _editSimulationDialog = std::make_shared<_EditSimulationDialog>();
     _deleteUserDialog = std::make_shared<_DeleteUserDialog>();
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>();
@@ -167,9 +167,9 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     LoginController::get().init(_simulationFacade, _persisterFacade, _activateUserDialog);
 
     //cyclic references
-    BrowserWindow::get().registerCyclicReferences(_uploadSimulationDialog, _editSimulationDialog, _editorController->getGenomeEditorWindow());
+    BrowserWindow::get().registerCyclicReferences(_editSimulationDialog, _editorController->getGenomeEditorWindow());
     _activateUserDialog->registerCyclicReferences(_createUserDialog);
-    _editorController->registerCyclicReferences(_uploadSimulationDialog, _simInteractionController);
+    _editorController->registerCyclicReferences(_simInteractionController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -422,12 +422,12 @@ void _MainWindow::processMenubar()
             ImGui::EndDisabled();
             ImGui::BeginDisabled(!NetworkService::get().getLoggedInUserName());
             if (ImGui::MenuItem("Upload simulation", "ALT+D")) {
-                _uploadSimulationDialog->open(NetworkResourceType_Simulation);
+                UploadSimulationDialog::get().open(NetworkResourceType_Simulation);
             }
             ImGui::EndDisabled();
             ImGui::BeginDisabled(!NetworkService::get().getLoggedInUserName());
             if (ImGui::MenuItem("Upload genome", "ALT+Q")) {
-                _uploadSimulationDialog->open(NetworkResourceType_Genome);
+                UploadSimulationDialog::get().open(NetworkResourceType_Genome);
             }
             ImGui::EndDisabled();
 
@@ -610,10 +610,10 @@ void _MainWindow::processMenubar()
             BrowserWindow::get().onRefresh();
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_D) && NetworkService::get().getLoggedInUserName()) {
-            _uploadSimulationDialog->open(NetworkResourceType_Simulation);
+            UploadSimulationDialog::get().open(NetworkResourceType_Simulation);
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_Q) && NetworkService::get().getLoggedInUserName()) {
-            _uploadSimulationDialog->open(NetworkResourceType_Genome);
+            UploadSimulationDialog::get().open(NetworkResourceType_Genome);
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_J) && NetworkService::get().getLoggedInUserName()) {
             _deleteUserDialog->open();
@@ -731,7 +731,7 @@ void _MainWindow::processDialogs()
     LoginDialog::get().process();
     _createUserDialog->process();
     _activateUserDialog->process();
-    _uploadSimulationDialog->process();
+    UploadSimulationDialog::get().process();
     _editSimulationDialog->process();
     _deleteUserDialog->process();
     _networkSettingsDialog->process();

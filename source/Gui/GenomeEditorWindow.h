@@ -13,8 +13,6 @@ public:
     _GenomeEditorWindow(EditorModel const& editorModel, SimulationFacade const& simulationFacade);
     ~_GenomeEditorWindow() override;
 
-    void registerCyclicReferences(UploadSimulationDialogWeakPtr const& uploadSimulationDialog);
-
     void openTab(GenomeDescription const& genome, bool openGenomeEditorIfClosed = true);
     GenomeDescription const& getCurrentGenome() const;
 
@@ -72,6 +70,5 @@ private:
 
     EditorModel _editorModel;
     SimulationFacade _simulationFacade;
-    UploadSimulationDialogWeakPtr _uploadSimulationDialog;
     ChangeColorDialog _changeColorDialog;
 };
