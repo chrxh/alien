@@ -19,18 +19,15 @@
 
 class BrowserWindow : public AlienWindow
 {
-    MAKE_SINGLETON_CUSTOMIZED(BrowserWindow);
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(BrowserWindow);
 
 public:
     void init(
         SimulationFacade const& simulationFacade,
         PersisterFacade const& persisterFacade,
         StatisticsWindow const& statisticsWindow,
-        TemporalControlWindow const& temporalControlWindow,
-        EditorController const& editorController);
+        TemporalControlWindow const& temporalControlWindow);
     void shutdown();
-
-    void registerCyclicReferences(GenomeEditorWindowWeakPtr const& genomeEditorWindow);
 
     void onRefresh();
     WorkspaceType getCurrentWorkspaceType() const;
@@ -146,6 +143,4 @@ private:
     PersisterFacade _persisterFacade;
     StatisticsWindow _statisticsWindow;
     TemporalControlWindow _temporalControlWindow;
-    EditorController _editorController;
-    GenomeEditorWindowWeakPtr _genomeEditorWindow;
 };

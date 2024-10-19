@@ -72,7 +72,6 @@ private:
     StartupController _startupController;
     AutosaveController _autosaveController; 
     UiController _uiController; 
-    EditorController _editorController; 
     FpsController _fpsController;
 
     bool _onExit = false;

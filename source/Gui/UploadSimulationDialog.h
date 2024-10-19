@@ -9,10 +9,10 @@
 
 class UploadSimulationDialog : public AlienDialog
 {
-    MAKE_SINGLETON_CUSTOMIZED(UploadSimulationDialog);
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(UploadSimulationDialog);
 
 public:
-    void init(SimulationFacade const& simulationFacade, GenomeEditorWindow const& genomeEditorWindow);
+    void init(SimulationFacade const& simulationFacade);
     void shutdown();
 
     void open(NetworkResourceType resourceType, std::string const& folder = "");
@@ -35,5 +35,4 @@ private:
     bool _share = false;
 
     SimulationFacade _simulationFacade;
-    GenomeEditorWindow _genomeEditorWindow;
 };

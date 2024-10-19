@@ -8,7 +8,7 @@
 
 class EditSimulationDialog : public AlienDialog
 {
-    MAKE_SINGLETON_CUSTOMIZED(EditSimulationDialog);
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(EditSimulationDialog);
 
 public:
     void openForLeaf(NetworkResourceTreeTO const& treeTO);

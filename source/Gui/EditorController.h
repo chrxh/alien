@@ -1,14 +1,17 @@
 #pragma once
 
 #include "Base/Definitions.h"
+#include "Base/Singleton.h"
 #include "EngineInterface/Descriptions.h"
 
 #include "Definitions.h"
 
-class _EditorController
+class EditorController
 {
+    MAKE_SINGLETON(EditorController);
+
 public:
-    _EditorController(SimulationFacade const& simulationFacade);
+    void init(SimulationFacade const& simulationFacade);
 
     void registerCyclicReferences(SimulationInteractionControllerWeakPtr const& simulationInteractionController);
 

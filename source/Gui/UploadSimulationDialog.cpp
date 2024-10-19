@@ -11,6 +11,7 @@
 #include "MessageDialog.h"
 #include "StyleRepository.h"
 #include "BrowserWindow.h"
+#include "EditorController.h"
 #include "Viewport.h"
 #include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
@@ -29,10 +30,9 @@ namespace
         {NetworkResourceType_Genome, "Genome"}};
 }
 
-void UploadSimulationDialog::init(SimulationFacade const& simulationFacade, GenomeEditorWindow const& genomeEditorWindow)
+void UploadSimulationDialog::init(SimulationFacade const& simulationFacade)
 {
     _simulationFacade = simulationFacade;
-    _genomeEditorWindow = genomeEditorWindow;
 
     auto& settings = GlobalSettings::get();
     _share = settings.getBool("dialogs.upload.share", _share);
@@ -139,7 +139,7 @@ void UploadSimulationDialog::onUpload()
         if (_resourceType == NetworkResourceType_Simulation) {
             return UploadNetworkResourceRequestData::SimulationData{.zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos()};
         } else {
-            return UploadNetworkResourceRequestData::GenomeData{.description = _genomeEditorWindow->getCurrentGenome()};
+            return UploadNetworkResourceRequestData::GenomeData{.description = EditorController::get().getGenomeEditorWindow()->getCurrentGenome()};
         }
     }();
     auto workspaceType = _share ? WorkspaceType_Public : WorkspaceType_Private;

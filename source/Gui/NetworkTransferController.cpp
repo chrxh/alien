@@ -12,16 +12,11 @@
 #include "BrowserWindow.h"
 #include "OverlayMessageController.h"
 
-void NetworkTransferController::init(
-    SimulationFacade const& simulationFacade,
-    PersisterFacade const& persisterFacade,
-    TemporalControlWindow const& temporalControlWindow,
-    EditorController const& editorController)
+void NetworkTransferController::init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade, TemporalControlWindow const& temporalControlWindow)
 {
     _simulationFacade = simulationFacade;
     _persisterFacade = persisterFacade;
     _temporalControlWindow = temporalControlWindow;
-    _editorController = editorController;
     _downloadProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
     _uploadProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
     _replaceProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
@@ -74,8 +69,8 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                 Viewport::get().setZoomFactor(deserializedSimulation.auxiliaryData.zoom);
                 _temporalControlWindow->onSnapshot();
             } else {
-                _editorController->setOn(true);
-                _editorController->getGenomeEditorWindow()->openTab(std::get<GenomeDescription>(data.resourceData));
+                EditorController::get().setOn(true);
+                EditorController::get().getGenomeEditorWindow()->openTab(std::get<GenomeDescription>(data.resourceData));
             }
             if (VersionChecker::isVersionNewer(data.resourceVersion)) {
                 std::string dataTypeString = data.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";

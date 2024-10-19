@@ -24,9 +24,9 @@ namespace
     auto const MaxInspectorWindowsToAdd = 10;
 }
 
-_EditorController::_EditorController(SimulationFacade const& simulationFacade)
-    : _simulationFacade(simulationFacade)
+void EditorController::init(SimulationFacade const& simulationFacade)
 {
+    _simulationFacade = simulationFacade;
     _editorModel = std::make_shared<_EditorModel>(_simulationFacade);
     _genomeEditorWindow = std::make_shared<_GenomeEditorWindow>(_editorModel, _simulationFacade);
     _selectionWindow = std::make_shared<_SelectionWindow>(_editorModel);
@@ -35,22 +35,22 @@ _EditorController::_EditorController(SimulationFacade const& simulationFacade)
     _multiplierWindow = std::make_shared<_MultiplierWindow>(_editorModel, _simulationFacade);
 }
 
-void _EditorController::registerCyclicReferences(SimulationInteractionControllerWeakPtr const& simulationInteractionController)
+void EditorController::registerCyclicReferences(SimulationInteractionControllerWeakPtr const& simulationInteractionController)
 {
     _creatorWindow->registerCyclicReferences(simulationInteractionController);
 }
 
-bool _EditorController::isOn() const
+bool EditorController::isOn() const
 {
     return _on;
 }
 
-void _EditorController::setOn(bool value)
+void EditorController::setOn(bool value)
 {
     _on = value;
 }
 
-void _EditorController::process()
+void EditorController::process()
 {
     if (!_on) {
         return;
@@ -72,57 +72,57 @@ void _EditorController::process()
 }
 
 
-SelectionWindow _EditorController::getSelectionWindow() const
+SelectionWindow EditorController::getSelectionWindow() const
 {
     return _selectionWindow;
 }
 
-PatternEditorWindow _EditorController::getPatternEditorWindow() const
+PatternEditorWindow EditorController::getPatternEditorWindow() const
 {
     return _patternEditorWindow;
 }
 
-CreatorWindow _EditorController::getCreatorWindow() const
+CreatorWindow EditorController::getCreatorWindow() const
 {
     return _creatorWindow;
 }
 
-MultiplierWindow _EditorController::getMultiplierWindow() const
+MultiplierWindow EditorController::getMultiplierWindow() const
 {
     return _multiplierWindow;
 }
 
-GenomeEditorWindow _EditorController::getGenomeEditorWindow() const
+GenomeEditorWindow EditorController::getGenomeEditorWindow() const
 {
     return _genomeEditorWindow;
 }
 
-EditorModel _EditorController::getEditorModel() const
+EditorModel EditorController::getEditorModel() const
 {
     return _editorModel;
 }
 
-bool _EditorController::areInspectionWindowsActive() const
+bool EditorController::areInspectionWindowsActive() const
 {
     return !_inspectorWindows.empty();
 }
 
-void _EditorController::onCloseAllInspectorWindows()
+void EditorController::onCloseAllInspectorWindows()
 {
     _inspectorWindows.clear();
 }
 
-bool _EditorController::isObjectInspectionPossible() const
+bool EditorController::isObjectInspectionPossible() const
 {
     return _patternEditorWindow->isObjectInspectionPossible();
 }
 
-bool _EditorController::isGenomeInspectionPossible() const
+bool EditorController::isGenomeInspectionPossible() const
 {
     return _patternEditorWindow->isGenomeInspectionPossible();
 }
 
-void _EditorController::onInspectSelectedObjects()
+void EditorController::onInspectSelectedObjects()
 {
     auto selection = _editorModel->getSelectionShallowData();
     if (selection.numCells + selection.numParticles <= MaxInspectorWindowsToAdd) {
@@ -136,7 +136,7 @@ void _EditorController::onInspectSelectedObjects()
     }
 }
 
-void _EditorController::onInspectSelectedGenomes()
+void EditorController::onInspectSelectedGenomes()
 {
     DataDescription selectedData = _simulationFacade->getSelectedSimulationData(true);
     auto constructors = DescriptionEditService::getConstructorToMainGenomes(selectedData);
@@ -146,7 +146,7 @@ void _EditorController::onInspectSelectedGenomes()
     onInspectObjects(constructors, true);
 }
 
-void _EditorController::onInspectObjects(std::vector<CellOrParticleDescription> const& entities, bool selectGenomeTab)
+void EditorController::onInspectObjects(std::vector<CellOrParticleDescription> const& entities, bool selectGenomeTab)
 {
     if (entities.empty()) {
         return;
@@ -206,40 +206,40 @@ void _EditorController::onInspectObjects(std::vector<CellOrParticleDescription> 
     }
 }
 
-bool _EditorController::isCopyingPossible() const
+bool EditorController::isCopyingPossible() const
 {
     return _patternEditorWindow->isCopyingPossible();
 }
 
-void _EditorController::onCopy()
+void EditorController::onCopy()
 {
     _patternEditorWindow->onCopy();
     printOverlayMessage("Selection copied");
 }
 
-bool _EditorController::isPastingPossible() const
+bool EditorController::isPastingPossible() const
 {
     return _patternEditorWindow->isPastingPossible();
 }
 
-void _EditorController::onPaste()
+void EditorController::onPaste()
 {
     _patternEditorWindow->onPaste();
     printOverlayMessage("Selection pasted");
 }
 
-bool _EditorController::isDeletingPossible() const
+bool EditorController::isDeletingPossible() const
 {
     return _patternEditorWindow->isDeletingPossible();
 }
 
-void _EditorController::onDelete()
+void EditorController::onDelete()
 {
     _patternEditorWindow->onDelete();
     printOverlayMessage("Selection deleted");
 }
 
-void _EditorController::processInspectorWindows()
+void EditorController::processInspectorWindows()
 {
     //process inspector windows
     for (auto const& inspectorWindow : _inspectorWindows) {
@@ -281,7 +281,7 @@ void _EditorController::processInspectorWindows()
     _inspectorWindows = inspectorWindows;
 }
 
-void _EditorController::onSelectObjects(RealVector2D const& viewPos, bool modifierKeyPressed)
+void EditorController::onSelectObjects(RealVector2D const& viewPos, bool modifierKeyPressed)
 {
     auto pos = Viewport::get().mapViewToWorldPosition({viewPos.x, viewPos.y});
     auto zoom = Viewport::get().getZoomFactor();
@@ -294,7 +294,7 @@ void _EditorController::onSelectObjects(RealVector2D const& viewPos, bool modifi
     _editorModel->update();
 }
 
-void _EditorController::onMoveSelectedObjects(
+void EditorController::onMoveSelectedObjects(
     RealVector2D const& viewPos,
     RealVector2D const& prevWorldPos)
 {
@@ -311,7 +311,7 @@ void _EditorController::onMoveSelectedObjects(
     _editorModel->update();
 }
 
-void _EditorController::onFixateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos, RealVector2D const& selectionPositionOnClick)
+void EditorController::onFixateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos, RealVector2D const& selectionPositionOnClick)
 {
     auto shallowData = _simulationFacade->getSelectionShallowData(selectionPositionOnClick);
     auto selectionPosition = RealVector2D{shallowData.centerPosX, shallowData.centerPosY};
@@ -332,7 +332,7 @@ void _EditorController::onFixateSelectedObjects(RealVector2D const& viewPos, Rea
     }
 }
 
-void _EditorController::onAccelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos)
+void EditorController::onAccelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos)
 {
     auto start = prevWorldPos;
     auto end = Viewport::get().mapViewToWorldPosition({viewPos.x, viewPos.y});
@@ -345,7 +345,7 @@ void _EditorController::onAccelerateSelectedObjects(RealVector2D const& viewPos,
     _simulationFacade->shallowUpdateSelectedObjects(updateData);
 }
 
-void _EditorController::onApplyForces(RealVector2D const& viewPos, RealVector2D const& prevWorldPos)
+void EditorController::onApplyForces(RealVector2D const& viewPos, RealVector2D const& prevWorldPos)
 {
     auto start = prevWorldPos;
     auto end = Viewport::get().mapViewToWorldPosition({viewPos.x, viewPos.y});
@@ -353,7 +353,7 @@ void _EditorController::onApplyForces(RealVector2D const& viewPos, RealVector2D 
     _simulationFacade->applyForce_async(start, end, (end - start) / 50.0 * std::min(5.0f, zoom), 20.0f / zoom);
 }
 
-void _EditorController::onUpdateSelectionRect(RealRect const& rect)
+void EditorController::onUpdateSelectionRect(RealRect const& rect)
 {
     auto startPos = Viewport::get().mapViewToWorldPosition(rect.topLeft);
     auto endPos = Viewport::get().mapViewToWorldPosition(rect.bottomRight);
