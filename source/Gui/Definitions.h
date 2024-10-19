@@ -117,9 +117,7 @@ class LoginDialog;
 
 class UploadSimulationDialog;
 
-class _EditSimulationDialog;
-using EditSimulationDialog = std::shared_ptr<_EditSimulationDialog>;
-using EditSimulationDialogWeakPtr = std::weak_ptr<_EditSimulationDialog>;
+class EditSimulationDialog;
 
 class _CreateUserDialog;
 using CreateUserDialog = std::shared_ptr<_CreateUserDialog>;

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Base/Singleton.h"
-
 #include "EngineInterface/Definitions.h"
 #include "Network/Definitions.h"
 

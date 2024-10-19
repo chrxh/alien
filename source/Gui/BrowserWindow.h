@@ -30,7 +30,7 @@ public:
         EditorController const& editorController);
     void shutdown();
 
-    void registerCyclicReferences(EditSimulationDialogWeakPtr const& editSimulationDialog, GenomeEditorWindowWeakPtr const& genomeEditorWindow);
+    void registerCyclicReferences(GenomeEditorWindowWeakPtr const& genomeEditorWindow);
 
     void onRefresh();
     WorkspaceType getCurrentWorkspaceType() const;
@@ -147,6 +147,5 @@ private:
     StatisticsWindow _statisticsWindow;
     TemporalControlWindow _temporalControlWindow;
     EditorController _editorController;
-    EditSimulationDialogWeakPtr _editSimulationDialog;
     GenomeEditorWindowWeakPtr _genomeEditorWindow;
 };

@@ -127,9 +127,8 @@ void BrowserWindow::shutdown()
     _lastSessionData.save();
 }
 
-void BrowserWindow::registerCyclicReferences(EditSimulationDialogWeakPtr const& editSimulationDialog, GenomeEditorWindowWeakPtr const& genomeEditorWindow)
+void BrowserWindow::registerCyclicReferences(GenomeEditorWindowWeakPtr const& genomeEditorWindow)
 {
-    _editSimulationDialog = editSimulationDialog;
     _genomeEditorWindow = genomeEditorWindow;
 
     auto firstStart = GlobalSettings::get().getBool("windows.browser.first start", true);
@@ -1285,10 +1284,10 @@ void BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
 void BrowserWindow::onEditResource(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
-        _editSimulationDialog.lock()->openForLeaf(treeTO);
+        EditSimulationDialog::get().openForLeaf(treeTO);
     } else {
         auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, _workspaces.at(_currentWorkspace).rawTOs);
-        _editSimulationDialog.lock()->openForFolder(treeTO, rawTOs);
+        EditSimulationDialog::get().openForFolder(treeTO, rawTOs);
     }
 }
 

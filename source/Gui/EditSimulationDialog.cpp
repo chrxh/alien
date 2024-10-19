@@ -14,11 +14,7 @@
 #include "MessageDialog.h"
 #include "OverlayMessageController.h"
 
-_EditSimulationDialog::_EditSimulationDialog()
-    : AlienDialog("")
-{}
-
-void _EditSimulationDialog::openForLeaf(NetworkResourceTreeTO const& treeTO)
+void EditSimulationDialog::openForLeaf(NetworkResourceTreeTO const& treeTO)
 {
     changeTitle("Change name or description");
     AlienDialog::open();
@@ -29,7 +25,7 @@ void _EditSimulationDialog::openForLeaf(NetworkResourceTreeTO const& treeTO)
     _newDescription = rawTO->description;
 }
 
-void _EditSimulationDialog::openForFolder(NetworkResourceTreeTO const& treeTO, std::vector<NetworkResourceRawTO> const& rawTOs)
+void EditSimulationDialog::openForFolder(NetworkResourceTreeTO const& treeTO, std::vector<NetworkResourceRawTO> const& rawTOs)
 {
     changeTitle("Change folder name");
     AlienDialog::open();
@@ -40,7 +36,11 @@ void _EditSimulationDialog::openForFolder(NetworkResourceTreeTO const& treeTO, s
     _origFolderName = _newName;
 }
 
-void _EditSimulationDialog::processIntern()
+EditSimulationDialog::EditSimulationDialog()
+    : AlienDialog("")
+{}
+
+void EditSimulationDialog::processIntern()
 {
     if (_treeTO->isLeaf()) {
         processForLeaf();
@@ -49,7 +49,7 @@ void _EditSimulationDialog::processIntern()
     }
 }
 
-void _EditSimulationDialog::processForLeaf()
+void EditSimulationDialog::processForLeaf()
 {
     auto& rawTO = _treeTO->getLeaf().rawTO;
     std::string resourceTypeString = rawTO->resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
@@ -93,7 +93,7 @@ void _EditSimulationDialog::processForLeaf()
     }
 }
 
-void _EditSimulationDialog::processForFolder()
+void EditSimulationDialog::processForFolder()
 {
     if (ImGui::BeginChild("##Folder", {0, -scale(50.0f)})) {
         AlienImGui::InputText(AlienImGui::InputTextParameters().textWidth(0).hint("Folder name"), _newName);
