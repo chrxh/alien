@@ -20,12 +20,8 @@ namespace
     auto constexpr CursorRadius = 13.0f;
 }
 
-_SimulationInteractionController::_SimulationInteractionController(
-    SimulationFacade const& simulationFacade,
-    EditorController const& editorController,
-    SimulationView const& simulationView)
+_SimulationInteractionController::_SimulationInteractionController(SimulationFacade const& simulationFacade, SimulationView const& simulationView)
     : _simulationFacade(simulationFacade)
-    , _editorController(editorController)
     , _simulationView(simulationView)
 {
     _editorOn = OpenGLHelper::loadTexture(Const::EditorOnFilename);
@@ -39,7 +35,7 @@ void _SimulationInteractionController::process()
     if (_modes.editMode) {
         processSelectionRect();
     }
-    if (!_editorController->getCreatorWindow()->isOn()) {
+    if (!EditorController::get().getCreatorWindow()->isOn()) {
         _modes.drawMode = false;
     }
     processEvents();
@@ -53,7 +49,7 @@ bool _SimulationInteractionController::isEditMode() const
 void _SimulationInteractionController::setEditMode(bool value)
 {
     _modes.editMode = value;
-    _editorController->setOn(_modes.editMode);
+    EditorController::get().setOn(_modes.editMode);
 }
 
 bool _SimulationInteractionController::isDrawMode() const
@@ -103,7 +99,7 @@ void _SimulationInteractionController::processEditWidget()
     auto actionTexture = _modes.editMode ? _editorOn.textureId : _editorOff.textureId;
     if (ImGui::ImageButton((void*)(intptr_t)actionTexture, {scale(80.0f), scale(80.0f)}, {0, 0}, {1.0f, 1.0f})) {
         _modes.editMode = !_modes.editMode;
-        _editorController->setOn(!_editorController->isOn());
+        EditorController::get().setOn(!EditorController::get().isOn());
     }
 
     ImGui::PopStyleColor(3);
@@ -174,7 +170,7 @@ void _SimulationInteractionController::leftMouseButtonPressed(IntVector2D const&
     } else {
         if (!ImGui::GetIO().KeyAlt) {
             if (!_modes.drawMode) {
-                _editorController->onSelectObjects(toRealVector2D(mousePos), ImGui::GetIO().KeyCtrl);
+                EditorController::get().onSelectObjects(toRealVector2D(mousePos), ImGui::GetIO().KeyCtrl);
                 _worldPosOnClick = Viewport::get().mapViewToWorldPosition(toRealVector2D(mousePos));
                 if (_simulationFacade->isSimulationRunning()) {
                     _simulationFacade->setDetached(true);
@@ -183,7 +179,7 @@ void _SimulationInteractionController::leftMouseButtonPressed(IntVector2D const&
                 auto shallowData = _simulationFacade->getSelectionShallowData(*_worldPosOnClick);
                 _selectionPositionOnClick = {shallowData.centerPosX, shallowData.centerPosY};
             } else {
-                _editorController->getCreatorWindow()->onDrawing();
+                EditorController::get().getCreatorWindow()->onDrawing();
             }
         }
     }
@@ -202,12 +198,12 @@ void _SimulationInteractionController::leftMouseButtonHold(IntVector2D const& mo
 
         if (!_modesAtClick.drawMode) {
             if (!_simulationFacade->isSimulationRunning()) {
-                _editorController->onMoveSelectedObjects(toRealVector2D(mousePos), prevWorldPos);
+                EditorController::get().onMoveSelectedObjects(toRealVector2D(mousePos), prevWorldPos);
             } else {
-                _editorController->onFixateSelectedObjects(toRealVector2D(mousePos), *_worldPosOnClick, *_selectionPositionOnClick);
+                EditorController::get().onFixateSelectedObjects(toRealVector2D(mousePos), *_worldPosOnClick, *_selectionPositionOnClick);
             }
         } else {
-            _editorController->getCreatorWindow()->onDrawing();
+            EditorController::get().getCreatorWindow()->onDrawing();
         }
     }
 }
@@ -228,12 +224,12 @@ void _SimulationInteractionController::leftMouseButtonReleased(IntVector2D const
         _simulationView->setMotionBlur(_simulationView->getMotionBlur() / 2);
     } else {
         if (_modesAtClick.drawMode) {
-            _editorController->getCreatorWindow()->finishDrawing();
+            EditorController::get().getCreatorWindow()->finishDrawing();
         } else {
             if (_simulationFacade->isSimulationRunning()) {
                 _simulationFacade->setDetached(false);
                 RealVector2D prevWorldPos = Viewport::get().mapViewToWorldPosition(toRealVector2D(prevMousePos));
-                _editorController->onAccelerateSelectedObjects(toRealVector2D(mousePos), prevWorldPos);
+                EditorController::get().onAccelerateSelectedObjects(toRealVector2D(mousePos), prevWorldPos);
             }
         }
     }
@@ -275,11 +271,11 @@ void _SimulationInteractionController::rightMouseButtonHold(IntVector2D const& m
             auto isSimulationRunning = _simulationFacade->isSimulationRunning();
             if (!isSimulationRunning && !_modesAtClick.drawMode && _selectionRect.has_value()) {
                 _selectionRect->bottomRight = toRealVector2D(mousePos);
-                _editorController->onUpdateSelectionRect(*_selectionRect);
+                EditorController::get().onUpdateSelectionRect(*_selectionRect);
             }
             if (isSimulationRunning) {
                 RealVector2D prevWorldPos = Viewport::get().mapViewToWorldPosition(toRealVector2D(prevMousePos));
-                _editorController->onApplyForces(toRealVector2D(mousePos), prevWorldPos);
+                EditorController::get().onApplyForces(toRealVector2D(mousePos), prevWorldPos);
             }
         }
     }
@@ -338,7 +334,7 @@ void _SimulationInteractionController::drawCursor()
 {
     auto mousePos = ImGui::GetMousePos();
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-    auto editorModel = _editorController->getEditorModel();
+    auto editorModel = EditorController::get().getEditorModel();
 
     if (!ImGui::GetIO().WantCaptureMouse) {
         ImGui::SetMouseCursor(ImGuiMouseCursor_None);

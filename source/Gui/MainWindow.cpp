@@ -127,10 +127,9 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     _persisterFacade->init(_simulationFacade);
     _uiController = std::make_shared<_UiController>();
     _autosaveController = std::make_shared<_AutosaveController>(_simulationFacade);
-    _editorController =
-        std::make_shared<_EditorController>(_simulationFacade);
+    EditorController::get().init(_simulationFacade);
     _simulationView = std::make_shared<_SimulationView>(_simulationFacade);
-    _simInteractionController = std::make_shared<_SimulationInteractionController>(_simulationFacade, _editorController, _simulationView);
+    _simInteractionController = std::make_shared<_SimulationInteractionController>(_simulationFacade, _simulationView);
     simulationViewPtr = _simulationView.get();
     _statisticsWindow = std::make_shared<_StatisticsWindow>(_simulationFacade);
     _temporalControlWindow = std::make_shared<_TemporalControlWindow>(_simulationFacade, _statisticsWindow);
@@ -148,13 +147,13 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>();
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simulationFacade);
     _fpsController = std::make_shared<_FpsController>();
-    BrowserWindow::get().init(_simulationFacade, _persisterFacade, _statisticsWindow, _temporalControlWindow, _editorController);
+    BrowserWindow::get().init(_simulationFacade, _persisterFacade, _statisticsWindow, _temporalControlWindow);
     _activateUserDialog = std::make_shared<_ActivateUserDialog>(_simulationFacade);
     _createUserDialog = std::make_shared<_CreateUserDialog>(_activateUserDialog);
     _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_simulationFacade);
     _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog);
     LoginDialog::get().init(_simulationFacade, _persisterFacade, _createUserDialog, _activateUserDialog, _resetPasswordDialog);
-    UploadSimulationDialog::get().init(_simulationFacade, _editorController->getGenomeEditorWindow());
+    UploadSimulationDialog::get().init(_simulationFacade);
     _deleteUserDialog = std::make_shared<_DeleteUserDialog>();
     _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>();
     _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_simulationFacade);
@@ -162,13 +161,12 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     _autosaveWindow = std::make_shared<_AutosaveWindow>(_simulationFacade, _persisterFacade);
     OverlayMessageController::get().init(_persisterFacade);
     FileTransferController::get().init(_persisterFacade, _simulationFacade, _temporalControlWindow);
-    NetworkTransferController::get().init(_simulationFacade, _persisterFacade, _temporalControlWindow, _editorController);
+    NetworkTransferController::get().init(_simulationFacade, _persisterFacade, _temporalControlWindow);
     LoginController::get().init(_simulationFacade, _persisterFacade, _activateUserDialog);
 
     //cyclic references
-    BrowserWindow::get().registerCyclicReferences(_editorController->getGenomeEditorWindow());
     _activateUserDialog->registerCyclicReferences(_createUserDialog);
-    _editorController->registerCyclicReferences(_simInteractionController);
+    EditorController::get().registerCyclicReferences(_simInteractionController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -365,11 +363,11 @@ void _MainWindow::renderSimulation()
 
 void _MainWindow::processMenubar()
 {
-    auto selectionWindow = _editorController->getSelectionWindow();
-    auto patternEditorWindow = _editorController->getPatternEditorWindow();
-    auto creatorWindow = _editorController->getCreatorWindow();
-    auto multiplierWindow = _editorController->getMultiplierWindow();
-    auto genomeEditorWindow = _editorController->getGenomeEditorWindow();
+    auto selectionWindow = EditorController::get().getSelectionWindow();
+    auto patternEditorWindow = EditorController::get().getPatternEditorWindow();
+    auto creatorWindow = EditorController::get().getCreatorWindow();
+    auto multiplierWindow = EditorController::get().getMultiplierWindow();
+    auto genomeEditorWindow = EditorController::get().getGenomeEditorWindow();
 
     if (ImGui::BeginMainMenuBar()) {
         if (AlienImGui::ShutdownButton()) {
@@ -490,30 +488,30 @@ void _MainWindow::processMenubar()
             }
             ImGui::EndDisabled();
             ImGui::Separator();
-            ImGui::BeginDisabled(!_simInteractionController->isEditMode() || !_editorController->isObjectInspectionPossible());
+            ImGui::BeginDisabled(!_simInteractionController->isEditMode() || !EditorController::get().isObjectInspectionPossible());
             if (ImGui::MenuItem("Inspect objects", "ALT+N")) {
-                _editorController->onInspectSelectedObjects();
+                EditorController::get().onInspectSelectedObjects();
             }
             ImGui::EndDisabled();
-            ImGui::BeginDisabled(!_simInteractionController->isEditMode() || !_editorController->isGenomeInspectionPossible());
+            ImGui::BeginDisabled(!_simInteractionController->isEditMode() || !EditorController::get().isGenomeInspectionPossible());
             if (ImGui::MenuItem("Inspect principal genome", "ALT+F")) {
-                _editorController->onInspectSelectedGenomes();
+                EditorController::get().onInspectSelectedGenomes();
             }
             ImGui::EndDisabled();
-            ImGui::BeginDisabled(!_simInteractionController->isEditMode() || !_editorController->areInspectionWindowsActive());
+            ImGui::BeginDisabled(!_simInteractionController->isEditMode() || !EditorController::get().areInspectionWindowsActive());
             if (ImGui::MenuItem("Close inspections", "ESC")) {
-                _editorController->onCloseAllInspectorWindows();
+                EditorController::get().onCloseAllInspectorWindows();
             }
             ImGui::EndDisabled();
             ImGui::Separator();
-            ImGui::BeginDisabled(!_simInteractionController->isEditMode() || !_editorController->isCopyingPossible());
+            ImGui::BeginDisabled(!_simInteractionController->isEditMode() || !EditorController::get().isCopyingPossible());
             if (ImGui::MenuItem("Copy", "CTRL+C")) {
-                _editorController->onCopy();
+                EditorController::get().onCopy();
             }
             ImGui::EndDisabled();
-            ImGui::BeginDisabled(!_simInteractionController->isEditMode() || !_editorController->isPastingPossible());
+            ImGui::BeginDisabled(!_simInteractionController->isEditMode() || !EditorController::get().isPastingPossible());
             if (ImGui::MenuItem("Paste", "CTRL+V")) {
-                _editorController->onPaste();
+                EditorController::get().onPaste();
             }
             ImGui::EndDisabled();
             AlienImGui::EndMenuButton();
@@ -661,23 +659,23 @@ void _MainWindow::processMenubar()
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_A)) {
             multiplierWindow->setOn(!multiplierWindow->isOn());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_N) && _editorController->isObjectInspectionPossible()) {
-            _editorController->onInspectSelectedObjects();
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_N) && EditorController::get().isObjectInspectionPossible()) {
+            EditorController::get().onInspectSelectedObjects();
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_F) && _editorController->isGenomeInspectionPossible()) {
-            _editorController->onInspectSelectedGenomes();
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_F) && EditorController::get().isGenomeInspectionPossible()) {
+            EditorController::get().onInspectSelectedGenomes();
         }
         if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
-            _editorController->onCloseAllInspectorWindows();
+            EditorController::get().onCloseAllInspectorWindows();
         }
-        if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_C) && _editorController->isCopyingPossible()) {
-            _editorController->onCopy();
+        if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_C) && EditorController::get().isCopyingPossible()) {
+            EditorController::get().onCopy();
         }
-        if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_V) && _editorController->isPastingPossible()) {
-            _editorController->onPaste();
+        if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_V) && EditorController::get().isPastingPossible()) {
+            EditorController::get().onPaste();
         }
         if (ImGui::IsKeyPressed(ImGuiKey_Delete) ) {
-            _editorController->onDelete();
+            EditorController::get().onDelete();
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_C)) {
@@ -759,7 +757,7 @@ void _MainWindow::processWindows()
 void _MainWindow::processControllers()
 {
     _autosaveController->process();
-    _editorController->process();
+    EditorController::get().process();
     OverlayMessageController::get().process();
     _simInteractionController->process();
     DelayedExecutionController::get().process();

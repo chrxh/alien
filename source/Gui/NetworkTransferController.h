@@ -17,11 +17,7 @@ class NetworkTransferController
     MAKE_SINGLETON(NetworkTransferController);
 
 public:
-    void init(
-        SimulationFacade const& simulationFacade,
-        PersisterFacade const& persisterFacade,
-        TemporalControlWindow const& temporalControlWindow,
-        EditorController const& editorController);
+    void init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade, TemporalControlWindow const& temporalControlWindow);
 
     void onDownload(DownloadNetworkResourceRequestData const& requestData);
     void onUpload(UploadNetworkResourceRequestData const& requestData);
@@ -34,7 +30,6 @@ private:
     SimulationFacade _simulationFacade;
     PersisterFacade _persisterFacade;
     TemporalControlWindow _temporalControlWindow;
-    EditorController _editorController;
 
     TaskProcessor _downloadProcessor;
     TaskProcessor _uploadProcessor;

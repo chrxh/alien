@@ -75,9 +75,7 @@ using DisplaySettingsDialog = std::shared_ptr<_DisplaySettingsDialog>;
 class _EditorModel;
 using EditorModel = std::shared_ptr<_EditorModel>;
 
-class _EditorController;
-using EditorController = std::shared_ptr<_EditorController>;
-using EditorControllerWeakPtr = _EditorController*;
+class EditorController;
 
 class _SelectionWindow;
 using SelectionWindow = std::shared_ptr<_SelectionWindow>;
@@ -143,7 +141,6 @@ using ImageToPatternDialog = std::shared_ptr<_ImageToPatternDialog>;
 
 class _GenomeEditorWindow;
 using GenomeEditorWindow = std::shared_ptr<_GenomeEditorWindow>;
-using GenomeEditorWindowWeakPtr = std::weak_ptr<_GenomeEditorWindow>;
 
 class _RadiationSourcesWindow;
 using RadiationSourcesWindow = std::shared_ptr<_RadiationSourcesWindow>;

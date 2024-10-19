@@ -64,18 +64,27 @@ BrowserWindow::BrowserWindow()
     : AlienWindow("Browser", "windows.browser", true)
 {}
 
+namespace
+{
+    std::unordered_map<NetworkResourceType, std::string> const networkResourceTypeToString = {
+        {NetworkResourceType_Simulation, std::string("simulations")},
+        {NetworkResourceType_Genome, std::string("genomes")}};
+    std::unordered_map<WorkspaceType, std::string> const workspaceTypeToString = {
+        {WorkspaceType_Public, std::string("public")},
+        {WorkspaceType_AlienProject, std::string("alien-project")},
+        {WorkspaceType_Private, std::string("private")}};
+}
+
 void BrowserWindow::init(
     SimulationFacade const& simulationFacade,
     PersisterFacade const& persisterFacade,
-     StatisticsWindow const& statisticsWindow,
-    TemporalControlWindow const& temporalControlWindow,
-    EditorController const& editorController)
+    StatisticsWindow const& statisticsWindow,
+    TemporalControlWindow const& temporalControlWindow)
 {
     _simulationFacade = simulationFacade;
     _persisterFacade = persisterFacade;
     _statisticsWindow = statisticsWindow;
     _temporalControlWindow = temporalControlWindow;
-    _editorController = editorController;
     _downloadCache = std::make_shared<_DownloadCache>();
 
     _refreshProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
@@ -98,17 +107,21 @@ void BrowserWindow::init(
             _workspaces.emplace(WorkspaceId{resourceType, workspaceType}, Workspace());
         }
     }
-}
 
-namespace
-{
-    std::unordered_map<NetworkResourceType, std::string> const networkResourceTypeToString = {
-        {NetworkResourceType_Simulation, std::string("simulations")},
-        {NetworkResourceType_Genome, std::string("genomes")}};
-    std::unordered_map<WorkspaceType, std::string> const workspaceTypeToString = {
-        {WorkspaceType_Public, std::string("public")},
-        {WorkspaceType_AlienProject, std::string("alien-project")},
-        {WorkspaceType_Private, std::string("private")}};
+    auto firstStart = GlobalSettings::get().getBool("windows.browser.first start", true);
+    refreshIntern(firstStart);
+
+    for (auto& [workspaceId, workspace] : _workspaces) {
+        auto initialCollapsedSimulationFolders = NetworkResourceService::convertFolderNamesToSettings(NetworkResourceService::getFolderNames(workspace.rawTOs));
+        auto collapsedSimulationFolders = GlobalSettings::get().getStringVector(
+            "windows.browser.collapsed folders." + networkResourceTypeToString.at(workspaceId.resourceType) + "."
+                + workspaceTypeToString.at(workspaceId.workspaceType),
+            initialCollapsedSimulationFolders);
+        workspace.collapsedFolderNames = NetworkResourceService::convertSettingsToFolderNames(collapsedSimulationFolders);
+        createTreeTOs(workspace);
+    }
+
+    _lastSessionData.load(getAllRawTOs());
 }
 
 void BrowserWindow::shutdown()
@@ -125,27 +138,6 @@ void BrowserWindow::shutdown()
             NetworkResourceService::convertFolderNamesToSettings(workspace.collapsedFolderNames));
     }
     _lastSessionData.save();
-}
-
-void BrowserWindow::registerCyclicReferences(GenomeEditorWindowWeakPtr const& genomeEditorWindow)
-{
-    _genomeEditorWindow = genomeEditorWindow;
-
-    auto firstStart = GlobalSettings::get().getBool("windows.browser.first start", true);
-    refreshIntern(firstStart);
-
-    for (auto& [workspaceId, workspace] : _workspaces) {
-        auto initialCollapsedSimulationFolders =
-            NetworkResourceService::convertFolderNamesToSettings(NetworkResourceService::getFolderNames(workspace.rawTOs));
-        auto collapsedSimulationFolders = GlobalSettings::get().getStringVector(
-            "windows.browser.collapsed folders." + networkResourceTypeToString.at(workspaceId.resourceType) + "."
-                + workspaceTypeToString.at(workspaceId.workspaceType),
-            initialCollapsedSimulationFolders);
-        workspace.collapsedFolderNames = NetworkResourceService::convertSettingsToFolderNames(collapsedSimulationFolders);
-        createTreeTOs(workspace);
-    }
-
-    _lastSessionData.load(getAllRawTOs());
 }
 
 void BrowserWindow::onRefresh()
@@ -1269,7 +1261,7 @@ void BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
             if (_currentWorkspace.resourceType == NetworkResourceType_Simulation) {
                 return ReplaceNetworkResourceRequestData::SimulationData{.zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos()};
             } else {
-                return ReplaceNetworkResourceRequestData::GenomeData{.description = _genomeEditorWindow.lock()->getCurrentGenome()};
+                return ReplaceNetworkResourceRequestData::GenomeData{.description = EditorController::get().getGenomeEditorWindow()->getCurrentGenome()};
             }
         }();
         NetworkTransferController::get().onReplace(ReplaceNetworkResourceRequestData{

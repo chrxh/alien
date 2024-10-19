@@ -8,7 +8,7 @@
 
 class LoginDialog : public AlienDialog
 {
-    MAKE_SINGLETON_CUSTOMIZED(LoginDialog);
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(LoginDialog);
 
 public:
     void init(

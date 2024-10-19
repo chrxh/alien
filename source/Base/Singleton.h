@@ -23,7 +23,7 @@ private: \
     ClassName& operator=(ClassName const&) = delete; \
     ClassName& operator=(ClassName&&) = delete
 
-#define MAKE_SINGLETON_CUSTOMIZED(ClassName) \
+#define MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(ClassName) \
 public: \
     static ClassName& get() \
     { \
