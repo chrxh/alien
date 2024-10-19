@@ -14,8 +14,6 @@ public:
     void init(SimulationFacade const& simulationFacade);
     void shutdown();
 
-    void registerCyclicReferences(SimulationInteractionControllerWeakPtr const& simulationInteractionController);
-
     bool isOn() const;
     void setOn(bool value);
 

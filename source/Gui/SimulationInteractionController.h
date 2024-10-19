@@ -5,11 +5,14 @@
 #include "EngineInterface/Definitions.h"
 
 #include "Definitions.h"
+#include "Base/Singleton.h"
 
 class _SimulationInteractionController
 {
+    MAKE_SINGLETON(_SimulationInteractionController);
+
 public:
-    _SimulationInteractionController(SimulationFacade const& simulationFacade, SimulationView const& simulationView);
+    void init(SimulationFacade const& simulationFacade, SimulationView const& simulationView);
 
     void process();
 

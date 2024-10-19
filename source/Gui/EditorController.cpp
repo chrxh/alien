@@ -45,11 +45,6 @@ void EditorController::shutdown()
     _multiplierWindow.reset();
 }
 
-void EditorController::registerCyclicReferences(SimulationInteractionControllerWeakPtr const& simulationInteractionController)
-{
-    _creatorWindow->registerCyclicReferences(simulationInteractionController);
-}
-
 bool EditorController::isOn() const
 {
     return _on;

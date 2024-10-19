@@ -20,10 +20,10 @@ namespace
     auto constexpr CursorRadius = 13.0f;
 }
 
-_SimulationInteractionController::_SimulationInteractionController(SimulationFacade const& simulationFacade, SimulationView const& simulationView)
-    : _simulationFacade(simulationFacade)
-    , _simulationView(simulationView)
+void _SimulationInteractionController::init(SimulationFacade const& simulationFacade, SimulationView const& simulationView)
 {
+    _simulationFacade = simulationFacade;
+    _simulationView = simulationView;
     _editorOn = OpenGLHelper::loadTexture(Const::EditorOnFilename);
     _editorOff = OpenGLHelper::loadTexture(Const::EditorOffFilename);
 }
