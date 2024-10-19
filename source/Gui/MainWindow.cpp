@@ -125,11 +125,10 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     //init controllers, windows and dialogs
     Viewport::get().init(_simulationFacade);
     _persisterFacade->init(_simulationFacade);
-    _uiController = std::make_shared<_UiController>();
     _autosaveController = std::make_shared<_AutosaveController>(_simulationFacade);
     EditorController::get().init(_simulationFacade);
     _simulationView = std::make_shared<_SimulationView>(_simulationFacade);
-    _SimulationInteractionController::get().init(_simulationFacade, _simulationView);
+    SimulationInteractionController::get().init(_simulationFacade, _simulationView);
     simulationViewPtr = _simulationView.get();
     _statisticsWindow = std::make_shared<_StatisticsWindow>(_simulationFacade);
     _temporalControlWindow = std::make_shared<_TemporalControlWindow>(_simulationFacade, _statisticsWindow);
@@ -318,7 +317,6 @@ void _MainWindow::processFadeInControls()
     processWindows();
     processControllers();
 
-    _uiController->process();
     _simulationView->processControls(_renderSimulation);
     _startupController->process();
 
@@ -339,7 +337,7 @@ void _MainWindow::processReady()
     processDialogs();
     processWindows();
     processControllers();
-    _uiController->process();
+
     _simulationView->processControls(_renderSimulation);
 
     popGlobalStyle();
@@ -462,11 +460,11 @@ void _MainWindow::processMenubar()
         }
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_PEN_ALT "  Editor ", _editorMenuToggled, "Editor")) {
-            if (ImGui::MenuItem("Activate", "ALT+E", _SimulationInteractionController::get().isEditMode())) {
-                _SimulationInteractionController::get().setEditMode(!_SimulationInteractionController::get().isEditMode());
+            if (ImGui::MenuItem("Activate", "ALT+E", SimulationInteractionController::get().isEditMode())) {
+                SimulationInteractionController::get().setEditMode(!SimulationInteractionController::get().isEditMode());
             }
             ImGui::Separator();
-            ImGui::BeginDisabled(!_SimulationInteractionController::get().isEditMode());
+            ImGui::BeginDisabled(!SimulationInteractionController::get().isEditMode());
             if (ImGui::MenuItem("Selection", "ALT+S", selectionWindow->isOn())) {
                 selectionWindow->setOn(!selectionWindow->isOn());
             }
@@ -484,28 +482,28 @@ void _MainWindow::processMenubar()
             }
             ImGui::EndDisabled();
             ImGui::Separator();
-            ImGui::BeginDisabled(!_SimulationInteractionController::get().isEditMode() || !EditorController::get().isObjectInspectionPossible());
+            ImGui::BeginDisabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isObjectInspectionPossible());
             if (ImGui::MenuItem("Inspect objects", "ALT+N")) {
                 EditorController::get().onInspectSelectedObjects();
             }
             ImGui::EndDisabled();
-            ImGui::BeginDisabled(!_SimulationInteractionController::get().isEditMode() || !EditorController::get().isGenomeInspectionPossible());
+            ImGui::BeginDisabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isGenomeInspectionPossible());
             if (ImGui::MenuItem("Inspect principal genome", "ALT+F")) {
                 EditorController::get().onInspectSelectedGenomes();
             }
             ImGui::EndDisabled();
-            ImGui::BeginDisabled(!_SimulationInteractionController::get().isEditMode() || !EditorController::get().areInspectionWindowsActive());
+            ImGui::BeginDisabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().areInspectionWindowsActive());
             if (ImGui::MenuItem("Close inspections", "ESC")) {
                 EditorController::get().onCloseAllInspectorWindows();
             }
             ImGui::EndDisabled();
             ImGui::Separator();
-            ImGui::BeginDisabled(!_SimulationInteractionController::get().isEditMode() || !EditorController::get().isCopyingPossible());
+            ImGui::BeginDisabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isCopyingPossible());
             if (ImGui::MenuItem("Copy", "CTRL+C")) {
                 EditorController::get().onCopy();
             }
             ImGui::EndDisabled();
-            ImGui::BeginDisabled(!_SimulationInteractionController::get().isEditMode() || !EditorController::get().isPastingPossible());
+            ImGui::BeginDisabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isPastingPossible());
             if (ImGui::MenuItem("Paste", "CTRL+V")) {
                 EditorController::get().onPaste();
             }
@@ -517,8 +515,8 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Information overlay", "ALT+O", _simulationView->isOverlayActive())) {
                 _simulationView->setOverlayActive(!_simulationView->isOverlayActive());
             }
-            if (ImGui::MenuItem("Render UI", "ALT+U", _uiController->isOn())) {
-                _uiController->setOn(!_uiController->isOn());
+            if (ImGui::MenuItem("Render UI", "ALT+U", UiController::get().isOn())) {
+                UiController::get().setOn(!UiController::get().isOn());
             }
             if (ImGui::MenuItem("Render simulation", "ALT+I", _renderSimulation)) {
                 _renderSimulation = !_renderSimulation;
@@ -638,7 +636,7 @@ void _MainWindow::processMenubar()
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_E)) {
-            _SimulationInteractionController::get().setEditMode(!_SimulationInteractionController::get().isEditMode());
+            SimulationInteractionController::get().setEditMode(!SimulationInteractionController::get().isEditMode());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_S)) {
             selectionWindow->setOn(!selectionWindow->isOn());
@@ -695,7 +693,7 @@ void _MainWindow::processMenubar()
             _simulationView->setOverlayActive(!_simulationView->isOverlayActive());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_U)) {
-            _uiController->setOn(!_uiController->isOn());
+            UiController::get().setOn(!UiController::get().isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_I)) {
             _renderSimulation = !_renderSimulation;
@@ -755,11 +753,12 @@ void _MainWindow::processControllers()
     _autosaveController->process();
     EditorController::get().process();
     OverlayMessageController::get().process();
-    _SimulationInteractionController::get().process();
+    SimulationInteractionController::get().process();
     DelayedExecutionController::get().process();
     FileTransferController::get().process();
     NetworkTransferController::get().process();
     LoginController::get().process();
+    UiController::get().process();
 }
 
 void _MainWindow::onRunSimulation()

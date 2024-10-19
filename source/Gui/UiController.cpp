@@ -10,12 +10,12 @@ namespace
     constexpr std::chrono::milliseconds::rep FadeInOutDuration = 1000;
 }
 
-bool _UiController::isOn() const
+bool UiController::isOn() const
 {
     return _on;
 }
 
-void _UiController::setOn(bool value)
+void UiController::setOn(bool value)
 {
     if (!_lastChangeTimePoint) {
         _lastChangeTimePoint = std::chrono::steady_clock::now();
@@ -30,7 +30,7 @@ void _UiController::setOn(bool value)
     OverlayMessageController::get().setOn(value);
 }
 
-void _UiController::process()
+void UiController::process()
 {
     if (_lastChangeTimePoint) {
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(

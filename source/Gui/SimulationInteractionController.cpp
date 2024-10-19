@@ -20,7 +20,7 @@ namespace
     auto constexpr CursorRadius = 13.0f;
 }
 
-void _SimulationInteractionController::init(SimulationFacade const& simulationFacade, SimulationView const& simulationView)
+void SimulationInteractionController::init(SimulationFacade const& simulationFacade, SimulationView const& simulationView)
 {
     _simulationFacade = simulationFacade;
     _simulationView = simulationView;
@@ -28,7 +28,7 @@ void _SimulationInteractionController::init(SimulationFacade const& simulationFa
     _editorOff = OpenGLHelper::loadTexture(Const::EditorOffFilename);
 }
 
-void _SimulationInteractionController::process()
+void SimulationInteractionController::process()
 {
     processEditWidget();
 
@@ -41,38 +41,38 @@ void _SimulationInteractionController::process()
     processEvents();
 }
 
-bool _SimulationInteractionController::isEditMode() const
+bool SimulationInteractionController::isEditMode() const
 {
     return _modes.editMode;
 }
 
-void _SimulationInteractionController::setEditMode(bool value)
+void SimulationInteractionController::setEditMode(bool value)
 {
     _modes.editMode = value;
     EditorController::get().setOn(_modes.editMode);
 }
 
-bool _SimulationInteractionController::isDrawMode() const
+bool SimulationInteractionController::isDrawMode() const
 {
     return _modes.drawMode;
 }
 
-void _SimulationInteractionController::setDrawMode(bool value)
+void SimulationInteractionController::setDrawMode(bool value)
 {
     _modes.drawMode = value;
 }
 
-bool _SimulationInteractionController::isPositionSelectionMode() const
+bool SimulationInteractionController::isPositionSelectionMode() const
 {
     return _modes.positionSelectionMode;
 }
 
-void _SimulationInteractionController::setPositionSelectionMode(bool value)
+void SimulationInteractionController::setPositionSelectionMode(bool value)
 {
     _modes.positionSelectionMode = value;
 }
 
-std::optional<RealVector2D> _SimulationInteractionController::getPositionSelectionData() const
+std::optional<RealVector2D> SimulationInteractionController::getPositionSelectionData() const
 {
     if (ImGui::GetIO().WantCaptureMouse) {
         return std::nullopt;
@@ -82,7 +82,7 @@ std::optional<RealVector2D> _SimulationInteractionController::getPositionSelecti
     return Viewport::get().mapViewToWorldPosition({mousePos.x, mousePos.y});
 }
 
-void _SimulationInteractionController::processEditWidget()
+void SimulationInteractionController::processEditWidget()
 {
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + viewport->Size.y - scale(120.0f)));
@@ -106,7 +106,7 @@ void _SimulationInteractionController::processEditWidget()
     ImGui::End();
 }
 
-void _SimulationInteractionController::processEvents()
+void SimulationInteractionController::processEvents()
 {
     auto mousePos = ImGui::GetMousePos();
     IntVector2D mousePosInt{toInt(mousePos.x), toInt(mousePos.y)};
@@ -155,7 +155,7 @@ void _SimulationInteractionController::processEvents()
     _prevMousePosInt = mousePosInt;
 }
 
-void _SimulationInteractionController::leftMouseButtonPressed(IntVector2D const& mousePos)
+void SimulationInteractionController::leftMouseButtonPressed(IntVector2D const& mousePos)
 {
     _modesAtClick = _modes;
 
@@ -185,7 +185,7 @@ void _SimulationInteractionController::leftMouseButtonPressed(IntVector2D const&
     }
 }
 
-void _SimulationInteractionController::leftMouseButtonHold(IntVector2D const& mousePos, IntVector2D const& prevMousePos)
+void SimulationInteractionController::leftMouseButtonHold(IntVector2D const& mousePos, IntVector2D const& prevMousePos)
 {
     if (_modesAtClick.positionSelectionMode) {
         return;
@@ -208,13 +208,13 @@ void _SimulationInteractionController::leftMouseButtonHold(IntVector2D const& mo
     }
 }
 
-void _SimulationInteractionController::mouseWheelUp(IntVector2D const& mousePos, float strongness)
+void SimulationInteractionController::mouseWheelUp(IntVector2D const& mousePos, float strongness)
 {
     _mouseWheelAction =
         MouseWheelAction{.up = true, .strongness = strongness, .start = std::chrono::steady_clock::now(), .lastTime = std::chrono::steady_clock::now()};
 }
 
-void _SimulationInteractionController::leftMouseButtonReleased(IntVector2D const& mousePos, IntVector2D const& prevMousePos)
+void SimulationInteractionController::leftMouseButtonReleased(IntVector2D const& mousePos, IntVector2D const& prevMousePos)
 {
     if (_modesAtClick.positionSelectionMode) {
         return;
@@ -235,7 +235,7 @@ void _SimulationInteractionController::leftMouseButtonReleased(IntVector2D const
     }
 }
 
-void _SimulationInteractionController::rightMouseButtonPressed(IntVector2D const& mousePos)
+void SimulationInteractionController::rightMouseButtonPressed(IntVector2D const& mousePos)
 {
     _modesAtClick = _modes;
 
@@ -258,7 +258,7 @@ void _SimulationInteractionController::rightMouseButtonPressed(IntVector2D const
     }
 }
 
-void _SimulationInteractionController::rightMouseButtonHold(IntVector2D const& mousePos, IntVector2D const& prevMousePos)
+void SimulationInteractionController::rightMouseButtonHold(IntVector2D const& mousePos, IntVector2D const& prevMousePos)
 {
     if (_modesAtClick.positionSelectionMode) {
         return;
@@ -281,13 +281,13 @@ void _SimulationInteractionController::rightMouseButtonHold(IntVector2D const& m
     }
 }
 
-void _SimulationInteractionController::mouseWheelDown(IntVector2D const& mousePos, float strongness)
+void SimulationInteractionController::mouseWheelDown(IntVector2D const& mousePos, float strongness)
 {
     _mouseWheelAction =
         MouseWheelAction{.up = false, .strongness = strongness, .start = std::chrono::steady_clock::now(), .lastTime = std::chrono::steady_clock::now()};
 }
 
-void _SimulationInteractionController::rightMouseButtonReleased()
+void SimulationInteractionController::rightMouseButtonReleased()
 {
     if (_modesAtClick.positionSelectionMode) {
         return;
@@ -302,7 +302,7 @@ void _SimulationInteractionController::rightMouseButtonReleased()
     }
 }
 
-void _SimulationInteractionController::processMouseWheel(IntVector2D const& mousePos)
+void SimulationInteractionController::processMouseWheel(IntVector2D const& mousePos)
 {
     if (_mouseWheelAction) {
         auto zoomFactor = powf(calcZoomFactor(_mouseWheelAction->lastTime), 2.2f * _mouseWheelAction->strongness);
@@ -315,22 +315,22 @@ void _SimulationInteractionController::processMouseWheel(IntVector2D const& mous
     }
 }
 
-void _SimulationInteractionController::middleMouseButtonPressed(IntVector2D const& mousePos)
+void SimulationInteractionController::middleMouseButtonPressed(IntVector2D const& mousePos)
 {
     _worldPosForMovement = Viewport::get().mapViewToWorldPosition({toFloat(mousePos.x), toFloat(mousePos.y)});
 }
 
-void _SimulationInteractionController::middleMouseButtonHold(IntVector2D const& mousePos)
+void SimulationInteractionController::middleMouseButtonHold(IntVector2D const& mousePos)
 {
     Viewport::get().centerTo(*_worldPosForMovement, mousePos);
 }
 
-void _SimulationInteractionController::middleMouseButtonReleased()
+void SimulationInteractionController::middleMouseButtonReleased()
 {
     _worldPosForMovement = std::nullopt;
 }
 
-void _SimulationInteractionController::drawCursor()
+void SimulationInteractionController::drawCursor()
 {
     auto mousePos = ImGui::GetMousePos();
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
@@ -423,7 +423,7 @@ void _SimulationInteractionController::drawCursor()
     }
 }
 
-void _SimulationInteractionController::processSelectionRect()
+void SimulationInteractionController::processSelectionRect()
 {
     if (_selectionRect) {
         ImDrawList* draw_list = ImGui::GetBackgroundDrawList();
@@ -434,7 +434,7 @@ void _SimulationInteractionController::processSelectionRect()
     }
 }
 
-float _SimulationInteractionController::calcZoomFactor(std::chrono::steady_clock::time_point const& lastTimepoint)
+float SimulationInteractionController::calcZoomFactor(std::chrono::steady_clock::time_point const& lastTimepoint)
 {
     auto now = std::chrono::steady_clock::now();
     auto duration = toFloat(std::chrono::duration_cast<std::chrono::milliseconds>(now - lastTimepoint).count());

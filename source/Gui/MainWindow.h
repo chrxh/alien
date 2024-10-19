@@ -68,7 +68,6 @@ private:
     SimulationFacade _simulationFacade;
     StartupController _startupController;
     AutosaveController _autosaveController; 
-    UiController _uiController; 
     FpsController _fpsController;
 
     bool _onExit = false;

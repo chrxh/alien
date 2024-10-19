@@ -85,9 +85,9 @@ bool _RadiationSourcesWindow::processTab(int index)
             }
         }
 
-        auto getMousePickerEnabledFunc = [&]() { return _SimulationInteractionController::get().isPositionSelectionMode(); };
-        auto setMousePickerEnabledFunc = [&](bool value) { _SimulationInteractionController::get().setPositionSelectionMode(value); };
-        auto getMousePickerPositionFunc = [&]() { return _SimulationInteractionController::get().getPositionSelectionData(); };
+        auto getMousePickerEnabledFunc = [&]() { return SimulationInteractionController::get().isPositionSelectionMode(); };
+        auto setMousePickerEnabledFunc = [&](bool value) { SimulationInteractionController::get().setPositionSelectionMode(value); };
+        auto getMousePickerPositionFunc = [&]() { return SimulationInteractionController::get().getPositionSelectionData(); };
         AlienImGui::SliderFloat2(
             AlienImGui::SliderFloat2Parameters()
                 .name("Position (x,y)")

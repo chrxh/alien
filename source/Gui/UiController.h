@@ -2,10 +2,14 @@
 
 #include <chrono>
 
+#include "Base/Singleton.h"
+
 #include "Definitions.h"
 
-class _UiController
+class UiController
 {
+    MAKE_SINGLETON(UiController);
+
 public:
     bool isOn() const;
     void setOn(bool value);
