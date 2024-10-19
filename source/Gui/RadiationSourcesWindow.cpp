@@ -13,10 +13,9 @@ namespace
     auto const RightColumnWidth = 140.0f;
 }
 
-_RadiationSourcesWindow::_RadiationSourcesWindow(SimulationFacade const& simulationFacade, SimulationInteractionController const& simInteractionController)
+_RadiationSourcesWindow::_RadiationSourcesWindow(SimulationFacade const& simulationFacade)
     : AlienWindow("Radiation sources", "windows.radiation sources", false)
     , _simulationFacade(simulationFacade)
-    , _simInteractionController(simInteractionController)
 {}
 
 void _RadiationSourcesWindow::processIntern()
@@ -86,9 +85,9 @@ bool _RadiationSourcesWindow::processTab(int index)
             }
         }
 
-        auto getMousePickerEnabledFunc = [&]() { return _simInteractionController->isPositionSelectionMode(); };
-        auto setMousePickerEnabledFunc = [&](bool value) { _simInteractionController->setPositionSelectionMode(value); };
-        auto getMousePickerPositionFunc = [&]() { return _simInteractionController->getPositionSelectionData(); };
+        auto getMousePickerEnabledFunc = [&]() { return _SimulationInteractionController::get().isPositionSelectionMode(); };
+        auto setMousePickerEnabledFunc = [&](bool value) { _SimulationInteractionController::get().setPositionSelectionMode(value); };
+        auto getMousePickerPositionFunc = [&]() { return _SimulationInteractionController::get().getPositionSelectionData(); };
         AlienImGui::SliderFloat2(
             AlienImGui::SliderFloat2Parameters()
                 .name("Position (x,y)")

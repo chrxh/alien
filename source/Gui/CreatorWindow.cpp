@@ -41,11 +41,6 @@ _CreatorWindow::_CreatorWindow(EditorModel const& editorModel, SimulationFacade 
 {
 }
 
-void _CreatorWindow::registerCyclicReferences(SimulationInteractionControllerWeakPtr const& simulationInteractionController)
-{
-    _simulationInteractionController = simulationInteractionController;
-}
-
 void _CreatorWindow::processIntern()
 {
     AlienImGui::SelectableToolbarButton(ICON_FA_SUN, _mode, CreationMode_CreateParticle, CreationMode_CreateParticle);
@@ -154,14 +149,14 @@ void _CreatorWindow::processIntern()
     ImGui::EndChild();
 
     AlienImGui::Separator();
-    auto simInteractionController = _simulationInteractionController.lock();
+    auto& simInteractionController = _SimulationInteractionController::get();
     if (_mode == CreationMode_Drawing) {
-        auto text = simInteractionController->isDrawMode() ? "End drawing" : "Start drawing";
+        auto text = simInteractionController.isDrawMode() ? "End drawing" : "Start drawing";
         if (AlienImGui::Button(text)) {
-            simInteractionController->setDrawMode(!simInteractionController->isDrawMode());
+            simInteractionController.setDrawMode(!simInteractionController.isDrawMode());
         }
     } else {
-        simInteractionController->setDrawMode(false);
+        simInteractionController.setDrawMode(false);
         if (AlienImGui::Button("Build")) {
             if (_mode == CreationMode_CreateCell) {
                 createCell();

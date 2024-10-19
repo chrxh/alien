@@ -49,14 +49,10 @@ namespace
     }
 }
 
-_SimulationParametersWindow::_SimulationParametersWindow(
-    SimulationFacade const& simulationFacade,
-    RadiationSourcesWindow const& radiationSourcesWindow,
-    SimulationInteractionController const& simInteractionController)
+_SimulationParametersWindow::_SimulationParametersWindow(SimulationFacade const& simulationFacade, RadiationSourcesWindow const& radiationSourcesWindow)
     : AlienWindow("Simulation parameters", "windows.simulation parameters", false)
     , _simulationFacade(simulationFacade)
     , _radiationSourcesWindow(radiationSourcesWindow)
-    , _simInteractionController(simInteractionController)
 {
     for (int n = 0; n < IM_ARRAYSIZE(_savedPalette); n++) {
         ImVec4 color;
@@ -1660,9 +1656,9 @@ bool _SimulationParametersWindow::processSpot(int index)
                     createDefaultSpotData(spot);
                 }
 
-                auto getMousePickerEnabledFunc = [&]() { return _simInteractionController->isPositionSelectionMode(); };
-                auto setMousePickerEnabledFunc = [&](bool value) { _simInteractionController->setPositionSelectionMode(value); };
-                auto getMousePickerPositionFunc = [&]() { return _simInteractionController->getPositionSelectionData(); };
+                auto getMousePickerEnabledFunc = [&]() { return _SimulationInteractionController::get().isPositionSelectionMode(); };
+                auto setMousePickerEnabledFunc = [&](bool value) { _SimulationInteractionController::get().setPositionSelectionMode(value); };
+                auto getMousePickerPositionFunc = [&]() { return _SimulationInteractionController::get().getPositionSelectionData(); };
 
                 AlienImGui::SliderFloat2(
                     AlienImGui::SliderFloat2Parameters()

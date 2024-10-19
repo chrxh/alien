@@ -22,8 +22,6 @@ class _CreatorWindow : public AlienWindow
 public:
     _CreatorWindow(EditorModel const& editorModel, SimulationFacade const& simulationFacade);
 
-    void registerCyclicReferences(SimulationInteractionControllerWeakPtr const& simulationInteractionController);
-
     void onDrawing();
     void finishDrawing();
 
@@ -70,5 +68,4 @@ private:
 
     EditorModel _editorModel;
     SimulationFacade _simulationFacade;
-    SimulationInteractionControllerWeakPtr _simulationInteractionController;
 };

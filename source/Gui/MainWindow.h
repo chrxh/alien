@@ -66,7 +66,6 @@ private:
 
     PersisterFacade _persisterFacade;
     SimulationFacade _simulationFacade;
-    SimulationInteractionController _simInteractionController;
     StartupController _startupController;
     AutosaveController _autosaveController; 
     UiController _uiController; 

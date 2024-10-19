@@ -129,13 +129,13 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     _autosaveController = std::make_shared<_AutosaveController>(_simulationFacade);
     EditorController::get().init(_simulationFacade);
     _simulationView = std::make_shared<_SimulationView>(_simulationFacade);
-    _simInteractionController = std::make_shared<_SimulationInteractionController>(_simulationFacade, _simulationView);
+    _SimulationInteractionController::get().init(_simulationFacade, _simulationView);
     simulationViewPtr = _simulationView.get();
     _statisticsWindow = std::make_shared<_StatisticsWindow>(_simulationFacade);
     _temporalControlWindow = std::make_shared<_TemporalControlWindow>(_simulationFacade, _statisticsWindow);
     _spatialControlWindow = std::make_shared<_SpatialControlWindow>(_simulationFacade, _temporalControlWindow);
-    _radiationSourcesWindow = std::make_shared<_RadiationSourcesWindow>(_simulationFacade, _simInteractionController);
-    _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simulationFacade, _radiationSourcesWindow, _simInteractionController);
+    _radiationSourcesWindow = std::make_shared<_RadiationSourcesWindow>(_simulationFacade);
+    _simulationParametersWindow = std::make_shared<_SimulationParametersWindow>(_simulationFacade, _radiationSourcesWindow);
     _gpuSettingsDialog = std::make_shared<_GpuSettingsDialog>(_simulationFacade);
     _startupController = std::make_shared<_StartupController>(_simulationFacade, _persisterFacade, _temporalControlWindow);
     _exitDialog = std::make_shared<_ExitDialog>(_onExit);
@@ -162,9 +162,6 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     FileTransferController::get().init(_persisterFacade, _simulationFacade, _temporalControlWindow);
     NetworkTransferController::get().init(_simulationFacade, _persisterFacade, _temporalControlWindow);
     LoginController::get().init(_simulationFacade, _persisterFacade);
-
-    //cyclic references
-    EditorController::get().registerCyclicReferences(_simInteractionController);
 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
@@ -465,11 +462,11 @@ void _MainWindow::processMenubar()
         }
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_PEN_ALT "  Editor ", _editorMenuToggled, "Editor")) {
-            if (ImGui::MenuItem("Activate", "ALT+E", _simInteractionController->isEditMode())) {
-                _simInteractionController->setEditMode(!_simInteractionController->isEditMode());
+            if (ImGui::MenuItem("Activate", "ALT+E", _SimulationInteractionController::get().isEditMode())) {
+                _SimulationInteractionController::get().setEditMode(!_SimulationInteractionController::get().isEditMode());
             }
             ImGui::Separator();
-            ImGui::BeginDisabled(!_simInteractionController->isEditMode());
+            ImGui::BeginDisabled(!_SimulationInteractionController::get().isEditMode());
             if (ImGui::MenuItem("Selection", "ALT+S", selectionWindow->isOn())) {
                 selectionWindow->setOn(!selectionWindow->isOn());
             }
@@ -487,28 +484,28 @@ void _MainWindow::processMenubar()
             }
             ImGui::EndDisabled();
             ImGui::Separator();
-            ImGui::BeginDisabled(!_simInteractionController->isEditMode() || !EditorController::get().isObjectInspectionPossible());
+            ImGui::BeginDisabled(!_SimulationInteractionController::get().isEditMode() || !EditorController::get().isObjectInspectionPossible());
             if (ImGui::MenuItem("Inspect objects", "ALT+N")) {
                 EditorController::get().onInspectSelectedObjects();
             }
             ImGui::EndDisabled();
-            ImGui::BeginDisabled(!_simInteractionController->isEditMode() || !EditorController::get().isGenomeInspectionPossible());
+            ImGui::BeginDisabled(!_SimulationInteractionController::get().isEditMode() || !EditorController::get().isGenomeInspectionPossible());
             if (ImGui::MenuItem("Inspect principal genome", "ALT+F")) {
                 EditorController::get().onInspectSelectedGenomes();
             }
             ImGui::EndDisabled();
-            ImGui::BeginDisabled(!_simInteractionController->isEditMode() || !EditorController::get().areInspectionWindowsActive());
+            ImGui::BeginDisabled(!_SimulationInteractionController::get().isEditMode() || !EditorController::get().areInspectionWindowsActive());
             if (ImGui::MenuItem("Close inspections", "ESC")) {
                 EditorController::get().onCloseAllInspectorWindows();
             }
             ImGui::EndDisabled();
             ImGui::Separator();
-            ImGui::BeginDisabled(!_simInteractionController->isEditMode() || !EditorController::get().isCopyingPossible());
+            ImGui::BeginDisabled(!_SimulationInteractionController::get().isEditMode() || !EditorController::get().isCopyingPossible());
             if (ImGui::MenuItem("Copy", "CTRL+C")) {
                 EditorController::get().onCopy();
             }
             ImGui::EndDisabled();
-            ImGui::BeginDisabled(!_simInteractionController->isEditMode() || !EditorController::get().isPastingPossible());
+            ImGui::BeginDisabled(!_SimulationInteractionController::get().isEditMode() || !EditorController::get().isPastingPossible());
             if (ImGui::MenuItem("Paste", "CTRL+V")) {
                 EditorController::get().onPaste();
             }
@@ -641,7 +638,7 @@ void _MainWindow::processMenubar()
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_E)) {
-            _simInteractionController->setEditMode(!_simInteractionController->isEditMode());
+            _SimulationInteractionController::get().setEditMode(!_SimulationInteractionController::get().isEditMode());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_S)) {
             selectionWindow->setOn(!selectionWindow->isOn());
@@ -758,7 +755,7 @@ void _MainWindow::processControllers()
     _autosaveController->process();
     EditorController::get().process();
     OverlayMessageController::get().process();
-    _simInteractionController->process();
+    _SimulationInteractionController::get().process();
     DelayedExecutionController::get().process();
     FileTransferController::get().process();
     NetworkTransferController::get().process();

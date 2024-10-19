@@ -9,10 +9,7 @@
 class _SimulationParametersWindow : public AlienWindow
 {
 public:
-    _SimulationParametersWindow(
-        SimulationFacade const& simulationFacade,
-        RadiationSourcesWindow const& radiationSourcesWindow,
-        SimulationInteractionController const& simInteractionController);
+    _SimulationParametersWindow(SimulationFacade const& simulationFacade, RadiationSourcesWindow const& radiationSourcesWindow);
     ~_SimulationParametersWindow();
 
 private:
@@ -38,7 +35,6 @@ private:
     void validationAndCorrection(SimulationParametersSpot& spot, SimulationParameters const& parameters) const;
 
     SimulationFacade _simulationFacade;
-    SimulationInteractionController _simInteractionController;
     RadiationSourcesWindow _radiationSourcesWindow;
 
     uint32_t _savedPalette[32] = {};
