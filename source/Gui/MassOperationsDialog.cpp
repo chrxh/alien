@@ -186,9 +186,8 @@ void MassOperationsDialog::onExecute()
         _simulationFacade->removeSelectedObjects(true);
         _simulationFacade->addAndSelectSimulationData(DataDescription(content));
     } else {
-        auto name = _simulationFacade->getSimulationName();
         _simulationFacade->closeSimulation();
-        _simulationFacade->newSimulation(name, timestep, generalSettings, parameters);
+        _simulationFacade->newSimulation(timestep, generalSettings, parameters);
         _simulationFacade->setClusteredSimulationData(content);       
     }
 }

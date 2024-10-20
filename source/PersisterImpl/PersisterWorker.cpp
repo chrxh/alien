@@ -192,10 +192,8 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveSi
     auto const& requestData = request->getData();
 
     DeserializedSimulation deserializedData;
-    std::string simulationName;
     std::chrono::system_clock::time_point timestamp;
     try {
-        simulationName = _simulationFacade->getSimulationName();
         timestamp = std::chrono::system_clock::now();
         deserializedData.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
         deserializedData.auxiliaryData.realTime = _simulationFacade->getRealTime();
@@ -231,7 +229,10 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveSi
         return std::make_shared<_SaveSimulationRequestResult>(
             request->getRequestId(),
             SaveSimulationResultData{
-                .filename = filename, .name = simulationName, .timestep = deserializedData.auxiliaryData.timestep, .timestamp = timestamp});
+                .filename = filename,
+                .projectName = deserializedData.auxiliaryData.simulationParameters.projectName,
+                .timestep = deserializedData.auxiliaryData.timestep,
+                .timestamp = timestamp});
     } catch (...) {
         return std::make_shared<_PersisterRequestError>(
             request->getRequestId(),
@@ -252,8 +253,8 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, ReadSi
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The selected file could not be opened."});
         }
-        auto simulationName = std::filesystem::path(requestData.filename).stem().string();
-        return std::make_shared<_ReadSimulationRequestResult>(request->getRequestId(), ReadSimulationResultData{simulationName, deserializedData});
+        return std::make_shared<_ReadSimulationRequestResult>(
+            request->getRequestId(), ReadSimulationResultData{std::filesystem::path(requestData.filename).filename(), deserializedData});
     } catch (...) {
         return std::make_shared<_PersisterRequestError>(
             request->getRequestId(),

@@ -284,7 +284,7 @@ void AutosaveWindow::updateSavepoint(int row)
                 auto requestResult = _persisterFacade->fetchSaveSimulationData(PersisterRequestId{newEntry.requestId});
                 newEntry.timestep = requestResult.timestep;
                 newEntry.timestamp = StringHelper::format(requestResult.timestamp);
-                newEntry.name = requestResult.name;
+                newEntry.name = requestResult.projectName;
                 newEntry.filename = requestResult.filename;
             }
             if (requestState.value() == PersisterRequestState::Error) {

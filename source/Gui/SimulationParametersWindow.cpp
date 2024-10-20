@@ -216,6 +216,21 @@ void SimulationParametersWindow::processBase()
             /**
              * Rendering
              */
+            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("General"))) {
+                AlienImGui::InputText(
+                    AlienImGui::InputTextParameters()
+                        .name("Project name")
+                        .textWidth(RightColumnWidth)
+                        .defaultValue(origParameters.projectName)
+                        .tooltip(Const::ColoringParameterTooltip),
+                    parameters.projectName,
+                    sizeof(parameters.projectName) / sizeof(char));
+
+                AlienImGui::EndTreeNode();
+            }
+            /**
+             * Rendering
+             */
             if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Visualization"))) {
                 AlienImGui::ColorButtonWithPicker(
                     AlienImGui::ColorButtonWithPickerParameters().name("Background color").textWidth(RightColumnWidth).defaultValue(origParameters.backgroundColor),

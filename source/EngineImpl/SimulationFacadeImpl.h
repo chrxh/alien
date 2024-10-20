@@ -16,13 +16,7 @@
 class _SimulationFacadeImpl : public _SimulationFacade
 {
 public:
-    void newSimulation(
-        std::optional<std::string> const& simulationName,
-        uint64_t timestep,
-        GeneralSettings const& generalSettings,
-        SimulationParameters const& parameters) override;
-
-    std::string getSimulationName() const override;
+    void newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters) override;
     int getSessionId() const override;
 
     void clear() override;
@@ -124,7 +118,6 @@ private:
     bool _selectionNeedsUpdate = false;
     int _sessionId = 0;
 
-    std::string _simulationName;
     Settings _origSettings;
     GeneralSettings _generalSettings;
     GpuSettings _gpuSettings;

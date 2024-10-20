@@ -1,11 +1,11 @@
 #pragma once
 
-#include <string>
+#include <filesystem>
 
 #include "PersisterInterface/DeserializedSimulation.h"
 
 struct ReadSimulationResultData
 {
-    std::string simulationName;
+    std::filesystem::path filename;
     DeserializedSimulation deserializedSimulation;
 };

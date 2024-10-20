@@ -149,10 +149,7 @@ void MainLoopController::processLoadingScreen()
         auto const& data = _persisterFacade->fetchReadSimulationData(_loadSimRequestId);
         auto const& deserializedSim = data.deserializedSimulation;
         _simulationFacade->newSimulation(
-            data.simulationName,
-            deserializedSim.auxiliaryData.timestep,
-            deserializedSim.auxiliaryData.generalSettings,
-            deserializedSim.auxiliaryData.simulationParameters);
+            deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
         _simulationFacade->setClusteredSimulationData(deserializedSim.mainData);
         _simulationFacade->setStatisticsHistory(deserializedSim.statistics);
         _simulationFacade->setRealTime(deserializedSim.auxiliaryData.realTime);
@@ -175,10 +172,7 @@ void MainLoopController::processLoadingScreen()
         deserializedSim.auxiliaryData.realTime = std::chrono::milliseconds(0);
 
         _simulationFacade->newSimulation(
-            "autosave",
-            deserializedSim.auxiliaryData.timestep,
-            deserializedSim.auxiliaryData.generalSettings,
-            deserializedSim.auxiliaryData.simulationParameters);
+            deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
         _simulationFacade->setClusteredSimulationData(deserializedSim.mainData);
         _simulationFacade->setStatisticsHistory(deserializedSim.statistics);
         _simulationFacade->setRealTime(deserializedSim.auxiliaryData.realTime);
@@ -247,7 +241,7 @@ void MainLoopController::processOperatingMode()
 void MainLoopController::processScheduleExit()
 {
     if (_saveOnExit) {
-        printOverlayMessage("Saving ...");
+        printOverlayMessage("Saving on exit ...");
 
         auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = false};
         auto saveData = SaveSimulationRequestData{Const::AutosaveFile, Viewport::get().getZoomFactor(), Viewport::get().getCenterInWorldPos()};

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstring>
 
 #include "CellFunctionConstants.h"
 #include "SimulationParametersSpotValues.h"
@@ -34,8 +35,13 @@ enum CellDeathConsquences_
     CellDeathConsquences_DetachedPartsDie
 };
 
+using Char64 = char[64];
+
 struct SimulationParameters
 {
+    //general
+    Char64 projectName = "<unnamed>";
+
     //feature list
     Features features;
 

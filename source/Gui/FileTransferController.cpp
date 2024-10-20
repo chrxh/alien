@@ -48,7 +48,6 @@ void FileTransferController::onOpenSimulation()
                 std::optional<std::string> errorMessage;
                 try {
                     _simulationFacade->newSimulation(
-                        data.simulationName,
                         data.deserializedSimulation.auxiliaryData.timestep,
                         data.deserializedSimulation.auxiliaryData.generalSettings,
                         data.deserializedSimulation.auxiliaryData.simulationParameters);
@@ -65,7 +64,6 @@ void FileTransferController::onOpenSimulation()
                     showMessage("Error", *errorMessage);
                     _simulationFacade->closeSimulation();
                     _simulationFacade->newSimulation(
-                        std::nullopt,
                         data.deserializedSimulation.auxiliaryData.timestep,
                         data.deserializedSimulation.auxiliaryData.generalSettings,
                         data.deserializedSimulation.auxiliaryData.simulationParameters);
@@ -75,7 +73,7 @@ void FileTransferController::onOpenSimulation()
                 Viewport::get().setCenterInWorldPos(data.deserializedSimulation.auxiliaryData.center);
                 Viewport::get().setZoomFactor(data.deserializedSimulation.auxiliaryData.zoom);
                 TemporalControlWindow::get().onSnapshot();
-                printOverlayMessage(data.simulationName + ".sim");
+                printOverlayMessage(data.filename.string());
             },
             [](auto const& criticalErrors) { GenericMessageDialog::get().information("Error", criticalErrors); });
     });

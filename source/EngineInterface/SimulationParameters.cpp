@@ -16,6 +16,15 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         }
     }
 
+    for (int i = 0, j = sizeof(Char64) / sizeof(char); i < j; ++i) {
+        if (projectName[i] != other.projectName[i]) {
+            return false;
+        }
+        if (projectName[i] == '\0') {
+            break;
+        }
+    }
+
     for (int i = 0; i < MAX_COLORS; ++i) {
         if (cellMaxBindingDistance[i] != other.cellMaxBindingDistance[i]) {
             return false;

@@ -43,7 +43,6 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                 auto const& deserializedSimulation = std::get<DeserializedSimulation>(data.resourceData);
                 try {
                     _simulationFacade->newSimulation(
-                        data.resourceName,
                         deserializedSimulation.auxiliaryData.timestep,
                         deserializedSimulation.auxiliaryData.generalSettings,
                         deserializedSimulation.auxiliaryData.simulationParameters);
@@ -59,7 +58,6 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                     showMessage("Error", *errorMessage);
                     _simulationFacade->closeSimulation();
                     _simulationFacade->newSimulation(
-                        data.resourceName,
                         deserializedSimulation.auxiliaryData.timestep,
                         deserializedSimulation.auxiliaryData.generalSettings,
                         deserializedSimulation.auxiliaryData.simulationParameters);
@@ -69,6 +67,8 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                 Viewport::get().setCenterInWorldPos(deserializedSimulation.auxiliaryData.center);
                 Viewport::get().setZoomFactor(deserializedSimulation.auxiliaryData.zoom);
                 TemporalControlWindow::get().onSnapshot();
+
+                printOverlayMessage(data.resourceName);
             } else {
                 EditorController::get().setOn(true);
                 GenomeEditorWindow::get().openTab(std::get<GenomeDescription>(data.resourceData));

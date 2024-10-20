@@ -17,7 +17,7 @@ namespace
         ParserTask parserTask)
     {
         SimulationParameters defaultParameters;
-
+        ParameterParser::encodeDecode(tree, parameters.projectName, defaultParameters.projectName, "simulation parameters.project name", parserTask);
         ParameterParser::encodeDecode(tree, parameters.backgroundColor, defaultParameters.backgroundColor, "simulation parameters.background color", parserTask);
         ParameterParser::encodeDecode(tree, parameters.cellColoring, defaultParameters.cellColoring, "simulation parameters.cell colorization", parserTask);
         ParameterParser::encodeDecode(
