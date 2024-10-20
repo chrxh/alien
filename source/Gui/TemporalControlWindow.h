@@ -10,26 +10,17 @@
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-class TemporalControlWindow : public AlienWindow
+class TemporalControlWindow : public AlienWindow<SimulationFacade>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(TemporalControlWindow);
 
 public:
-    void init(SimulationFacade const& simulationFacade);
-
     void onSnapshot();
 
 private:
     TemporalControlWindow();
 
-    struct Snapshot
-    {
-        uint64_t timestep;
-        std::chrono::milliseconds realTime;
-        SimulationParameters parameters;
-        DataDescription data;
-    };
-
+    void initIntern(SimulationFacade simulationFacade) override;
     void processIntern();
 
     void processTpsInfo();
@@ -44,6 +35,13 @@ private:
     void processCreateFlashbackButton();
     void processLoadFlashbackButton();
 
+    struct Snapshot
+    {
+        uint64_t timestep;
+        std::chrono::milliseconds realTime;
+        SimulationParameters parameters;
+        DataDescription data;
+    };
     Snapshot createSnapshot();
     void applySnapshot(Snapshot const& snapshot);
 

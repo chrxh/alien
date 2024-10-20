@@ -8,13 +8,11 @@
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-class PatternEditorWindow : public AlienWindow
+class PatternEditorWindow : public AlienWindow<SimulationFacade>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(PatternEditorWindow);
 
 public:
-    void init(SimulationFacade const& simulationFacade);
-
     bool isObjectInspectionPossible() const;
     bool isGenomeInspectionPossible() const;
 
@@ -27,8 +25,9 @@ public:
 
 private:
     PatternEditorWindow();
-    void shutdownIntern() override;
 
+    void initIntern(SimulationFacade simulationFacade) override;
+    void shutdownIntern() override;
     void processIntern() override;
 
     void onOpenPattern();

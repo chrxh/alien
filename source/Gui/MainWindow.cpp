@@ -146,6 +146,7 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     FileTransferController::get().init(_persisterFacade, _simulationFacade);
     NetworkTransferController::get().init(_simulationFacade, _persisterFacade);
     LoginController::get().init(_simulationFacade, _persisterFacade);
+    ShaderWindow::get().init();
 
     log(Priority::Important, "initialize file dialogs");
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {

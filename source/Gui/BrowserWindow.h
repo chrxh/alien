@@ -17,12 +17,11 @@
 #include "Definitions.h"
 #include "LastSessionBrowserData.h"
 
-class BrowserWindow : public AlienWindow
+class BrowserWindow : public AlienWindow<SimulationFacade, PersisterFacade>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(BrowserWindow);
 
 public:
-    void init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade);
 
     void onRefresh();
     WorkspaceType getCurrentWorkspaceType() const;
@@ -32,6 +31,7 @@ public:
 private:
     BrowserWindow();
 
+    void initIntern(SimulationFacade simulationFacade, PersisterFacade persisterFacade) override;
     void shutdownIntern() override;
 
     struct WorkspaceId

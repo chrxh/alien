@@ -8,19 +8,18 @@
 #include "AlienWindow.h"
 #include "Definitions.h"
 
-class GenomeEditorWindow : public AlienWindow
+class GenomeEditorWindow : public AlienWindow<SimulationFacade>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(GenomeEditorWindow);
 
 public:
-    void init(SimulationFacade const& simulationFacade);
-
     void openTab(GenomeDescription const& genome, bool openGenomeEditorIfClosed = true);
     GenomeDescription const& getCurrentGenome() const;
 
 private:
     GenomeEditorWindow();
 
+    void initIntern(SimulationFacade simulationFacade) override;
     void shutdownIntern() override;
 
     void processIntern() override;

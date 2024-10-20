@@ -10,7 +10,7 @@
 #include "GuiLogger.h"
 #include "AlienImGui.h"
 
-void LogWindow::init(GuiLogger const& logger)
+void LogWindow::initIntern(GuiLogger logger)
 {
     _logger = logger;
     _verbose = GlobalSettings::get().getBool("windows.log.verbose", false);

@@ -21,7 +21,7 @@ namespace
     auto const RightColumnWidth = 200.0f;
 }
 
-void MultiplierWindow::init(SimulationFacade const& simulationFacade)
+void MultiplierWindow::initIntern(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
 }

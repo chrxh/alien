@@ -13,7 +13,7 @@
 #include "AlienImGui.h"
 #include "ResizeWorldDialog.h"
 
-void SpatialControlWindow::init(SimulationFacade const& simulationFacade)
+void SpatialControlWindow::initIntern(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
     ResizeWorldDialog::get().init(simulationFacade);

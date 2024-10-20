@@ -5,7 +5,7 @@
 #include "AlienWindow.h"
 #include "Definitions.h"
 
-class ShaderWindow : public AlienWindow
+class ShaderWindow : public AlienWindow<>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(ShaderWindow);
 

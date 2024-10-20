@@ -16,7 +16,11 @@ namespace
     auto constexpr AutosaveSenderId = "Autosave";
 }
 
-void AutosaveWindow::init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade)
+AutosaveWindow::AutosaveWindow()
+    : AlienWindow("Autosave (work in progress)", "windows.autosave", false)
+{}
+
+void AutosaveWindow::initIntern(SimulationFacade simulationFacade, PersisterFacade persisterFacade)
 {
     _simulationFacade = simulationFacade;
     _persisterFacade = persisterFacade;
@@ -29,10 +33,6 @@ void AutosaveWindow::init(SimulationFacade const& simulationFacade, PersisterFac
     _saveMode = _origSaveMode;
     _numberOfFiles = GlobalSettings::get().getInt("windows.autosave.number of files", _origNumberOfFiles);
 }
-
-AutosaveWindow::AutosaveWindow()
-    : AlienWindow("Autosave (work in progress)", "windows.autosave", false)
-{}
 
 void AutosaveWindow::shutdownIntern()
 {

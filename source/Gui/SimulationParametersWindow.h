@@ -7,16 +7,14 @@
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-class SimulationParametersWindow : public AlienWindow
+class SimulationParametersWindow : public AlienWindow<SimulationFacade>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(SimulationParametersWindow);
-
-public:
-    void init(SimulationFacade const& simulationFacade);
 
 private:
     SimulationParametersWindow();
 
+    void initIntern(SimulationFacade simulationFacade) override;
     void shutdownIntern() override;
     void processIntern() override;
 

@@ -7,16 +7,14 @@
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-class SpatialControlWindow : public AlienWindow
+class SpatialControlWindow : public AlienWindow<SimulationFacade>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(SpatialControlWindow);
-
-public:
-    void init(SimulationFacade const& simulationFacade);
 
 private:
     SpatialControlWindow();
 
+    void initIntern(SimulationFacade simulationFacade) override;
     void shutdownIntern() override;
     void processIntern() override;
     void processBackground() override;

@@ -5,7 +5,7 @@
 class _MainWindow;
 using MainWindow = std::shared_ptr<_MainWindow>;
 
-class AlienWindow;
+//class AlienWindow;
 
 class SimulationView;
 
