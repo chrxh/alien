@@ -1,14 +1,16 @@
 #pragma once
 
+#include "Base/Singleton.h"
+
 #include "AlienWindow.h"
 #include "Definitions.h"
 
-class _ShaderWindow : public AlienWindow
+class ShaderWindow : public AlienWindow
 {
-public:
-    _ShaderWindow();
-    ~_ShaderWindow() override;
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(ShaderWindow);
 
 private:
+    ShaderWindow();
+
     void processIntern() override;
 };

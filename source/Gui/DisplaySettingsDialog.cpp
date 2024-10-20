@@ -16,15 +16,18 @@ namespace
     auto const RightColumnWidth = 185.0f;
 }
 
-_DisplaySettingsDialog::_DisplaySettingsDialog()
-    : AlienDialog("Display settings")
+void DisplaySettingsDialog::init()
 {
     auto primaryMonitor = glfwGetPrimaryMonitor();
     _videoModes = glfwGetVideoModes(primaryMonitor, &_videoModesCount);
     _videoModeStrings = createVideoModeStrings();
 }
 
-void _DisplaySettingsDialog::processIntern()
+DisplaySettingsDialog::DisplaySettingsDialog()
+    : AlienDialog("Display settings")
+{}
+
+void DisplaySettingsDialog::processIntern()
 {
     auto isFullscreen = !WindowController::get().isWindowedMode();
 
@@ -77,7 +80,7 @@ void _DisplaySettingsDialog::processIntern()
     }
 }
 
-void _DisplaySettingsDialog::openIntern()
+void DisplaySettingsDialog::openIntern()
 {
     _selectionIndex = getSelectionIndex();
     _origSelectionIndex = _selectionIndex;
@@ -85,7 +88,7 @@ void _DisplaySettingsDialog::openIntern()
     _origFps = WindowController::get().getFps();
 }
 
-void _DisplaySettingsDialog::setFullscreen(int selectionIndex)
+void DisplaySettingsDialog::setFullscreen(int selectionIndex)
 {
     if (0 == selectionIndex) {
         WindowController::get().setDesktopMode();
@@ -103,7 +106,7 @@ namespace
     }
 }
 
-int _DisplaySettingsDialog::getSelectionIndex() const
+int DisplaySettingsDialog::getSelectionIndex() const
 {
     auto result = 0;
     if (!WindowController::get().isWindowedMode() && !WindowController::get().isDesktopMode()) {
@@ -127,7 +130,7 @@ namespace
     }
 }
 
-std::vector<std::string> _DisplaySettingsDialog::createVideoModeStrings() const
+std::vector<std::string> DisplaySettingsDialog::createVideoModeStrings() const
 {
     std::vector<std::string> result;
     result.emplace_back("Desktop");

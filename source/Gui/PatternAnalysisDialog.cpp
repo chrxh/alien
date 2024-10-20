@@ -13,24 +13,28 @@
 #include "EngineInterface/SimulationFacade.h"
 
 #include "MessageDialog.h"
+#include "ShutdownController.h"
 
 
-_PatternAnalysisDialog::_PatternAnalysisDialog(SimulationFacade const& simulationFacade)
-    : _simulationFacade(simulationFacade)
+void PatternAnalysisDialog::init(SimulationFacade const& simulationFacade)
 {
+    _simulationFacade = simulationFacade;
+
     auto path = std::filesystem::current_path();
     if (path.has_parent_path()) {
         path = path.parent_path();
     }
     _startingPath = GlobalSettings::get().getString("dialogs.pattern analysis.starting path", path.string());
+
+    ShutdownController::get().registerObject(this);
 }
 
-_PatternAnalysisDialog::~_PatternAnalysisDialog()
+void PatternAnalysisDialog::shutdown()
 {
     GlobalSettings::get().setString("dialogs.pattern analysis.starting path", _startingPath);
 }
 
-void _PatternAnalysisDialog::process()
+void PatternAnalysisDialog::process()
 {
     if (!ifd::FileDialog::Instance().IsDone("PatternAnalysisDialog")) {
         return;
@@ -45,12 +49,12 @@ void _PatternAnalysisDialog::process()
     ifd::FileDialog::Instance().Close();
 }
 
-void _PatternAnalysisDialog::show()
+void PatternAnalysisDialog::show()
 {
     ifd::FileDialog::Instance().Save("PatternAnalysisDialog", "Save pattern analysis result", "Analysis result (*.txt){.txt},.*", _startingPath);
 }
 
-void _PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string const& filename)
+void PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string const& filename)
 {
     auto const partitionClassDataByDescription = calcPartitionData();
 
@@ -98,7 +102,7 @@ void _PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string con
     MessageDialog::get().information("Analysis result", messageStream.str());
 }
 
-auto _PatternAnalysisDialog::calcPartitionData() const -> std::map<ClusterAnalysisDescription, PartitionClassData>
+auto PatternAnalysisDialog::calcPartitionData() const -> std::map<ClusterAnalysisDescription, PartitionClassData>
 {
     auto data = _simulationFacade->getClusteredSimulationData();
 
@@ -114,7 +118,7 @@ auto _PatternAnalysisDialog::calcPartitionData() const -> std::map<ClusterAnalys
     return result;
 }
 
-auto _PatternAnalysisDialog::getAnalysisDescription(ClusterDescription const& cluster) const -> ClusterAnalysisDescription
+auto PatternAnalysisDialog::getAnalysisDescription(ClusterDescription const& cluster) const -> ClusterAnalysisDescription
 {
     ClusterAnalysisDescription result;
     std::map<uint64_t, CellAnalysisDescription> cellAnalysisDescById;

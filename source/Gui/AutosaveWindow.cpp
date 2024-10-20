@@ -16,11 +16,10 @@ namespace
     auto constexpr AutosaveSenderId = "Autosave";
 }
 
-_AutosaveWindow::_AutosaveWindow(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade)
-    : AlienWindow("Autosave (work in progress)", "windows.autosave", false)
-    , _simulationFacade(simulationFacade)
-    , _persisterFacade(persisterFacade)
+void AutosaveWindow::init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade)
 {
+    _simulationFacade = simulationFacade;
+    _persisterFacade = persisterFacade;
     _settingsOpen = GlobalSettings::get().getBool("windows.autosave.settings.open", _settingsOpen);
     _settingsHeight = GlobalSettings::get().getFloat("windows.autosave.settings.height", _settingsHeight);
     _autosaveEnabled = GlobalSettings::get().getBool("windows.autosave.enabled", _autosaveEnabled);
@@ -31,7 +30,11 @@ _AutosaveWindow::_AutosaveWindow(SimulationFacade const& simulationFacade, Persi
     _numberOfFiles = GlobalSettings::get().getInt("windows.autosave.number of files", _origNumberOfFiles);
 }
 
-_AutosaveWindow::~_AutosaveWindow()
+AutosaveWindow::AutosaveWindow()
+    : AlienWindow("Autosave (work in progress)", "windows.autosave", false)
+{}
+
+void AutosaveWindow::shutdownIntern()
 {
     GlobalSettings::get().setBool("windows.autosave.settings.open", _settingsOpen);
     GlobalSettings::get().setFloat("windows.autosave.settings.height", _settingsHeight);
@@ -41,7 +44,7 @@ _AutosaveWindow::~_AutosaveWindow()
     GlobalSettings::get().setInt("windows.autosave.number of files", _numberOfFiles);
 }
 
-void _AutosaveWindow::processIntern()
+void AutosaveWindow::processIntern()
 {
     processToolbar();
 
@@ -58,7 +61,7 @@ void _AutosaveWindow::processIntern()
     validationAndCorrection();
 }
 
-void _AutosaveWindow::processToolbar()
+void AutosaveWindow::processToolbar()
 {
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
@@ -83,7 +86,7 @@ void _AutosaveWindow::processToolbar()
     AlienImGui::Separator();
 }
 
-void _AutosaveWindow::processHeader()
+void AutosaveWindow::processHeader()
 {
     AlienImGui::InputInt(
         AlienImGui::InputIntParameters().name("Autosave interval (min)").textWidth(RightColumnWidth).defaultValue(_origAutosaveInterval),
@@ -91,7 +94,7 @@ void _AutosaveWindow::processHeader()
         &_autosaveEnabled);
 }
 
-void _AutosaveWindow::processTable()
+void AutosaveWindow::processTable()
 {
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
         | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
@@ -148,7 +151,7 @@ void _AutosaveWindow::processTable()
     }
 }
 
-void _AutosaveWindow::processSettings()
+void AutosaveWindow::processSettings()
 {
     if (_settingsOpen) {
         ImGui::Spacing();
@@ -179,7 +182,7 @@ void _AutosaveWindow::processSettings()
     }
 }
 
-void _AutosaveWindow::createSavepoint()
+void AutosaveWindow::createSavepoint()
 {
     printOverlayMessage("Creating save point ...");
     static int i = 0;
@@ -190,7 +193,7 @@ void _AutosaveWindow::createSavepoint()
     _savePoints.emplace_front(SavepointState::InQueue, jobId.value, "", "", 0);
 }
 
-void _AutosaveWindow::updateSavepoint(SavepointEntry& savepoint)
+void AutosaveWindow::updateSavepoint(SavepointEntry& savepoint)
 {
     if (savepoint.state != SavepointState::Persisted) {
         auto requestState = _persisterFacade->getRequestState(PersisterRequestId(savepoint.id));
@@ -210,7 +213,7 @@ void _AutosaveWindow::updateSavepoint(SavepointEntry& savepoint)
     }
 }
 
-void _AutosaveWindow::validationAndCorrection()
+void AutosaveWindow::validationAndCorrection()
 {
     _numberOfFiles = std::max(1, _numberOfFiles);
 }

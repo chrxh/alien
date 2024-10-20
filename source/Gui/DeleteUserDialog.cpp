@@ -9,11 +9,11 @@
 #include "CreateUserDialog.h"
 #include "MessageDialog.h"
 
-_DeleteUserDialog::_DeleteUserDialog()
+DeleteUserDialog::DeleteUserDialog()
     : AlienDialog("Delete user")
 {}
 
-void _DeleteUserDialog::processIntern()
+void DeleteUserDialog::processIntern()
 {
     AlienImGui::Text(
         "Warning: All the data of the user '" + *NetworkService::get().getLoggedInUserName()
@@ -43,7 +43,7 @@ void _DeleteUserDialog::processIntern()
     }
 }
 
-void _DeleteUserDialog::onDelete()
+void DeleteUserDialog::onDelete()
 {
     auto userName = *NetworkService::get().getLoggedInUserName();
     if (NetworkService::get().deleteUser()) {

@@ -18,9 +18,10 @@
 #include "GenericFileDialogs.h"
 
 
-_ImageToPatternDialog::_ImageToPatternDialog(SimulationFacade const& simulationFacade)
-    : _simulationFacade(simulationFacade)
+void ImageToPatternDialog::init(SimulationFacade const& simulationFacade)
 {
+    _simulationFacade = simulationFacade;
+
     auto path = std::filesystem::current_path();
     if (path.has_parent_path()) {
         path = path.parent_path();
@@ -28,7 +29,7 @@ _ImageToPatternDialog::_ImageToPatternDialog(SimulationFacade const& simulationF
     _startingPath = GlobalSettings::get().getString("dialogs.open image.starting path", path.string());
 }
 
-_ImageToPatternDialog::~_ImageToPatternDialog()
+void ImageToPatternDialog::shutdown()
 {
     GlobalSettings::get().setString("dialogs.open image.starting path", _startingPath);
 }
@@ -76,7 +77,7 @@ namespace
     }
 }
 
-void _ImageToPatternDialog::show()
+void ImageToPatternDialog::show()
 {
     GenericFileDialogs::get().showOpenFileDialog(
         "Open image", "Image (*.png){.png},.*", _startingPath, [&](std::filesystem::path const& path) {

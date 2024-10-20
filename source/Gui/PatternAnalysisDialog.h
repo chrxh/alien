@@ -1,18 +1,23 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Descriptions.h"
-#include "Definitions.h"
 
-class _PatternAnalysisDialog
+#include "Definitions.h"
+#include "ShutdownInterface.h"
+
+class PatternAnalysisDialog : public ShutdownInterface
 {
+    MAKE_SINGLETON(PatternAnalysisDialog);
+
 public:
-    _PatternAnalysisDialog(SimulationFacade const& simulationFacade);
-    ~_PatternAnalysisDialog();
+    void init(SimulationFacade const& simulationFacade);
 
     void process();
     void show();
 
 private:
+    void shutdown() override;
     void saveRepetitiveActiveClustersToFiles(std::string const& filename);
 
     struct CellAnalysisDescription

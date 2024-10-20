@@ -14,7 +14,7 @@ public:
     void setOn(bool value);
 
 protected:
-    virtual void shutdownIntern() {};
+    virtual void shutdownIntern() {}
     virtual void processIntern() = 0;
     virtual void processBackground() {}
     virtual void processActivated() {}

@@ -16,19 +16,23 @@ namespace
     auto const ContentTextInputWidth = 60.0f;
 }
 
-_NewSimulationDialog::_NewSimulationDialog(SimulationFacade const& simulationFacade)
-    : AlienDialog("New simulation")
-    , _simulationFacade(simulationFacade)
+void NewSimulationDialog::init(SimulationFacade const& simulationFacade)
 {
-    _adoptSimulationParameters = GlobalSettings::get().getBool("dialogs.new simulation.adopt simulation parameters", true);
+    _simulationFacade = simulationFacade;
+    _adoptSimulationParameters =
+            GlobalSettings::get().getBool("dialogs.new simulation.adopt simulation parameters", true);
 }
 
-_NewSimulationDialog::~_NewSimulationDialog()
+void NewSimulationDialog::shutdown()
 {
     GlobalSettings::get().setBool("dialogs.new simulation.adopt simulation parameters", _adoptSimulationParameters);
 }
 
-void _NewSimulationDialog::processIntern()
+NewSimulationDialog::NewSimulationDialog()
+    : AlienDialog("New simulation")
+{}
+
+void NewSimulationDialog::processIntern()
 {
     AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Width").textWidth(ContentTextInputWidth), _width);
     AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Height").textWidth(ContentTextInputWidth), _height);
@@ -54,14 +58,14 @@ void _NewSimulationDialog::processIntern()
     _height = std::max(1, _height);
 }
 
-void _NewSimulationDialog::openIntern()
+void NewSimulationDialog::openIntern()
 {
     auto worldSize = _simulationFacade->getWorldSize();
     _width = worldSize.x;
     _height = worldSize.y;
 }
 
-void _NewSimulationDialog::onNewSimulation()
+void NewSimulationDialog::onNewSimulation()
 {
     SimulationParameters parameters;
     if (_adoptSimulationParameters) {

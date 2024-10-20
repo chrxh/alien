@@ -9,12 +9,12 @@
 #include "BrowserWindow.h"
 #include "MessageDialog.h"
 
-_NewPasswordDialog::_NewPasswordDialog(SimulationFacade const& simulationFacade)
-    : AlienDialog("New password")
-    , _simulationFacade(simulationFacade)
-{}
+void NewPasswordDialog::init(SimulationFacade const& simulationFacade)
+{
+    _simulationFacade = simulationFacade;
+}
 
-void _NewPasswordDialog::open(std::string const& userName, UserInfo const& userInfo)
+void NewPasswordDialog::open(std::string const& userName, UserInfo const& userInfo)
 {
     AlienDialog::open();
     _userName = userName;
@@ -23,7 +23,11 @@ void _NewPasswordDialog::open(std::string const& userName, UserInfo const& userI
     _userInfo = userInfo;
 }
 
-void _NewPasswordDialog::processIntern()
+NewPasswordDialog::NewPasswordDialog()
+    : AlienDialog("New password")
+{}
+
+void NewPasswordDialog::processIntern()
 {
     AlienImGui::Text("Security information");
     AlienImGui::HelpMarker(
@@ -53,7 +57,7 @@ void _NewPasswordDialog::processIntern()
     }
 }
 
-void _NewPasswordDialog::onNewPassword()
+void NewPasswordDialog::onNewPassword()
 {
     auto result = NetworkService::get().setNewPassword(_userName, _newPassword, _confirmationCode);
     if (result) {

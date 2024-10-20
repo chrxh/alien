@@ -6,12 +6,11 @@
 #include "MessageDialog.h"
 #include "NewPasswordDialog.h"
 
-_ResetPasswordDialog::_ResetPasswordDialog(NewPasswordDialog const& newPasswordDialog)
+ResetPasswordDialog::ResetPasswordDialog()
     : AlienDialog("Reset password")
-    , _newPasswordDialog(newPasswordDialog)
 {}
 
-void _ResetPasswordDialog::open(std::string const& userName, UserInfo const& userInfo)
+void ResetPasswordDialog::open(std::string const& userName, UserInfo const& userInfo)
 {
     AlienDialog::open();
     _userName = userName;
@@ -19,7 +18,7 @@ void _ResetPasswordDialog::open(std::string const& userName, UserInfo const& use
     _userInfo = userInfo;
 }
 
-void _ResetPasswordDialog::processIntern()
+void ResetPasswordDialog::processIntern()
 {
     AlienImGui::Text("Security information");
     AlienImGui::HelpMarker("The data transfer to the server is encrypted via https. On the server side, the email address is not stored in cleartext, but "
@@ -50,10 +49,10 @@ void _ResetPasswordDialog::processIntern()
     }
 }
 
-void _ResetPasswordDialog::onResetPassword()
+void ResetPasswordDialog::onResetPassword()
 {
     if (NetworkService::get().resetPassword(_userName, _email)) {
-        _newPasswordDialog->open(_userName, _userInfo);
+        NewPasswordDialog::get().open(_userName, _userInfo);
     } else {
         MessageDialog::get().information(
             "Error", "An error occurred on the server. This could be related to the fact that the\nemail address is wrong.");
