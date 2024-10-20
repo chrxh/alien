@@ -132,20 +132,16 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     MassOperationsDialog::get().init(_simulationFacade);
     LogWindow::get().init(_logger);
     GettingStartedWindow::get().init();
-    _newSimulationDialog = std::make_shared<_NewSimulationDialog>(_simulationFacade);
-    _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>();
-    _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simulationFacade);
+    NewSimulationDialog::get().init(_simulationFacade);
+    DisplaySettingsDialog::get().init();
+    PatternAnalysisDialog::get().init(_simulationFacade);
     BrowserWindow::get().init(_simulationFacade, _persisterFacade);
     ActivateUserDialog::get().init(_simulationFacade);
-    _newPasswordDialog = std::make_shared<_NewPasswordDialog>(_simulationFacade);
-    _resetPasswordDialog = std::make_shared<_ResetPasswordDialog>(_newPasswordDialog);
-    LoginDialog::get().init(_simulationFacade, _persisterFacade, _resetPasswordDialog);
+    NewPasswordDialog::get().init(_simulationFacade);
+    LoginDialog::get().init(_simulationFacade, _persisterFacade);
     UploadSimulationDialog::get().init(_simulationFacade);
-    _deleteUserDialog = std::make_shared<_DeleteUserDialog>();
-    _networkSettingsDialog = std::make_shared<_NetworkSettingsDialog>();
-    _imageToPatternDialog = std::make_shared<_ImageToPatternDialog>(_simulationFacade);
-    _shaderWindow = std::make_shared<_ShaderWindow>();
-    _autosaveWindow = std::make_shared<_AutosaveWindow>(_simulationFacade, _persisterFacade);
+    ImageToPatternDialog::get().init(_simulationFacade);
+    AutosaveWindow::get().init(_simulationFacade, _persisterFacade);
     OverlayMessageController::get().init(_persisterFacade);
     FileTransferController::get().init(_persisterFacade, _simulationFacade);
     NetworkTransferController::get().init(_simulationFacade, _persisterFacade);
@@ -215,6 +211,7 @@ void _MainWindow::shutdown()
     ShutdownController::get().shutdown();
 
     GpuSettingsDialog::get().shutdown();
+    NewSimulationDialog::get().shutdown();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -377,7 +374,7 @@ void _MainWindow::processMenubar()
         ImGui::Dummy(ImVec2(10.0f, 0.0f));
         if (AlienImGui::BeginMenuButton(" " ICON_FA_GAMEPAD "  Simulation ", _simulationMenuToggled, "Simulation")) {
             if (ImGui::MenuItem("New", "CTRL+N")) {
-                _newSimulationDialog->open();
+                NewSimulationDialog::get().open();
                 _simulationMenuToggled = false;
             }
             if (ImGui::MenuItem("Open", "CTRL+O")) {
@@ -432,7 +429,7 @@ void _MainWindow::processMenubar()
             ImGui::Separator();
             ImGui::BeginDisabled(!NetworkService::get().getLoggedInUserName());
             if (ImGui::MenuItem("Delete user", "ALT+J")) {
-                _deleteUserDialog->open();
+                DeleteUserDialog::get().open();
             }
             ImGui::EndDisabled();
             AlienImGui::EndMenuButton();
@@ -454,11 +451,11 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Radiation sources", "ALT+5", RadiationSourcesWindow::get().isOn())) {
                 RadiationSourcesWindow::get().setOn(!RadiationSourcesWindow::get().isOn());
             }
-            if (ImGui::MenuItem("Shader parameters", "ALT+6", _shaderWindow->isOn())) {
-                _shaderWindow->setOn(!_shaderWindow->isOn());
+            if (ImGui::MenuItem("Shader parameters", "ALT+6", ShaderWindow::get().isOn())) {
+                ShaderWindow::get().setOn(!ShaderWindow::get().isOn());
             }
-            if (ImGui::MenuItem("Autosave", "ALT+7", _autosaveWindow->isOn())) {
-                _autosaveWindow->setOn(!_autosaveWindow->isOn());
+            if (ImGui::MenuItem("Autosave", "ALT+7", AutosaveWindow::get().isOn())) {
+                AutosaveWindow::get().setOn(!AutosaveWindow::get().isOn());
             }
             if (ImGui::MenuItem("Log", "ALT+8", LogWindow::get().isOn())) {
                 LogWindow::get().setOn(!LogWindow::get().isOn());
@@ -537,11 +534,11 @@ void _MainWindow::processMenubar()
                 _toolsMenuToggled = false;
             }
             if (ImGui::MenuItem("Pattern analysis", "ALT+P")) {
-                _patternAnalysisDialog->show();
+                PatternAnalysisDialog::get().show();
                 _toolsMenuToggled = false;
             }
             if (ImGui::MenuItem("Image converter", "ALT+G")) {
-                _imageToPatternDialog->show();
+                ImageToPatternDialog::get().show();
                 _toolsMenuToggled = false;
             }
             AlienImGui::EndMenuButton();
@@ -555,10 +552,10 @@ void _MainWindow::processMenubar()
                 GpuSettingsDialog::get().open();
             }
             if (ImGui::MenuItem("Display settings", "ALT+V")) {
-                _displaySettingsDialog->open();
+                DisplaySettingsDialog::get().open();
             }
             if (ImGui::MenuItem("Network settings", "ALT+K")) {
-                _networkSettingsDialog->open();
+                NetworkSettingsDialog::get().open();
             }
             AlienImGui::EndMenuButton();
         }
@@ -580,7 +577,7 @@ void _MainWindow::processMenubar()
     auto& io = ImGui::GetIO();
     if (!io.WantCaptureKeyboard) {
         if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_N)) {
-            _newSimulationDialog->open();
+            NewSimulationDialog::get().open();
         }
         if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_O)) {
             FileTransferController::get().onOpenSimulation();
@@ -614,7 +611,7 @@ void _MainWindow::processMenubar()
             UploadSimulationDialog::get().open(NetworkResourceType_Genome);
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_J) && NetworkService::get().getLoggedInUserName()) {
-            _deleteUserDialog->open();
+            DeleteUserDialog::get().open();
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_1)) {
@@ -633,10 +630,10 @@ void _MainWindow::processMenubar()
             RadiationSourcesWindow::get().setOn(!RadiationSourcesWindow::get().isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_6)) {
-            _shaderWindow->setOn(!_shaderWindow->isOn());
+            ShaderWindow::get().setOn(!ShaderWindow::get().isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_7)) {
-            _autosaveWindow->setOn(!_autosaveWindow->isOn());
+            AutosaveWindow::get().setOn(!AutosaveWindow::get().isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_8)) {
             LogWindow::get().setOn(!LogWindow::get().isOn());
@@ -683,7 +680,7 @@ void _MainWindow::processMenubar()
             GpuSettingsDialog::get().open();
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_V)) {
-            _displaySettingsDialog->open();
+            DisplaySettingsDialog::get().open();
         }
         if (ImGui::IsKeyPressed(ImGuiKey_F7)) {
             if (WindowController::get().isDesktopMode()) {
@@ -693,7 +690,7 @@ void _MainWindow::processMenubar()
             }
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_K)) {
-            _networkSettingsDialog->open();
+            NetworkSettingsDialog::get().open();
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_O)) {
@@ -710,31 +707,31 @@ void _MainWindow::processMenubar()
             MassOperationsDialog::get().show();
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_P)) {
-            _patternAnalysisDialog->show();
+            PatternAnalysisDialog::get().show();
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_G)) {
-            _imageToPatternDialog->show();
+            ImageToPatternDialog::get().show();
         }
     }
 }
 
 void _MainWindow::processDialogs()
 {
-    _newSimulationDialog->process();
+    NewSimulationDialog::get().process();
     AboutDialog::get().process();
     MassOperationsDialog::get().process();
     GpuSettingsDialog::get().process();
-    _displaySettingsDialog->process(); 
-    _patternAnalysisDialog->process();
+    DisplaySettingsDialog::get().process(); 
+    PatternAnalysisDialog::get().process();
     LoginDialog::get().process();
     CreateUserDialog::get().process();
     ActivateUserDialog::get().process();
     UploadSimulationDialog::get().process();
     EditSimulationDialog::get().process();
-    _deleteUserDialog->process();
-    _networkSettingsDialog->process();
-    _resetPasswordDialog->process();
-    _newPasswordDialog->process();
+    DeleteUserDialog::get().process();
+    NetworkSettingsDialog::get().process();
+    ResetPasswordDialog::get().process();
+    NewPasswordDialog::get().process();
     ExitDialog::get().process();
 
     MessageDialog::get().process();
@@ -750,9 +747,9 @@ void _MainWindow::processWindows()
     LogWindow::get().process();
     BrowserWindow::get().process();
     GettingStartedWindow::get().process();
-    _shaderWindow->process();
+    ShaderWindow::get().process();
     RadiationSourcesWindow::get().process();
-    _autosaveWindow->process();
+    AutosaveWindow::get().process();
 }
 
 void _MainWindow::processControllers()

@@ -13,11 +13,11 @@ namespace
     auto const RightColumnWidth = 150.0f;
 }
 
-_NetworkSettingsDialog::_NetworkSettingsDialog()
+NetworkSettingsDialog::NetworkSettingsDialog()
     : AlienDialog("Network settings")
 {}
 
-void _NetworkSettingsDialog::processIntern()
+void NetworkSettingsDialog::processIntern()
 {
     AlienImGui::InputText(
         AlienImGui::InputTextParameters().name("Blocks").defaultValue(_origServerAddress).name("Server address").textWidth(RightColumnWidth), _serverAddress);
@@ -37,13 +37,13 @@ void _NetworkSettingsDialog::processIntern()
     }
 }
 
-void _NetworkSettingsDialog::openIntern()
+void NetworkSettingsDialog::openIntern()
 {
     _origServerAddress = NetworkService::get().getServerAddress();
     _serverAddress = _origServerAddress;
 }
 
-void _NetworkSettingsDialog::onChangeSettings()
+void NetworkSettingsDialog::onChangeSettings()
 {
     NetworkService::get().setServerAddress(_serverAddress);
     BrowserWindow::get().onRefresh();

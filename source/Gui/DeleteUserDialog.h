@@ -1,16 +1,18 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "Network/Definitions.h"
 
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _DeleteUserDialog : public AlienDialog
+class DeleteUserDialog : public AlienDialog
 {
-public:
-    _DeleteUserDialog();
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(DeleteUserDialog);
 
 private:
+    DeleteUserDialog();
+
     void processIntern();
     void onDelete();
 

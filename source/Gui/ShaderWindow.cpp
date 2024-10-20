@@ -1,7 +1,5 @@
 #include "ShaderWindow.h"
 
-#include "Base/GlobalSettings.h"
-
 #include "AlienImGui.h"
 #include "SimulationView.h"
 
@@ -10,16 +8,12 @@ namespace
     auto const RightColumnWidth = 140.0f;
 }
 
-_ShaderWindow::_ShaderWindow()
+ShaderWindow::ShaderWindow()
 : AlienWindow("Shader parameters", "windows.shader", false)
 {
 }
 
-_ShaderWindow::~_ShaderWindow()
-{
-}
-
-void _ShaderWindow::processIntern()
+void ShaderWindow::processIntern()
 {
     auto const defaultBrightness = SimulationView::DefaultBrightness;
     auto const defaultContrast = SimulationView::DefaultContrast;

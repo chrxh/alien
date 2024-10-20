@@ -41,18 +41,6 @@ private:
 
     GuiLogger _logger;
 
-    ShaderWindow _shaderWindow;
-    AutosaveWindow _autosaveWindow;
-
-    NewSimulationDialog _newSimulationDialog;
-    DisplaySettingsDialog _displaySettingsDialog;
-    PatternAnalysisDialog _patternAnalysisDialog;
-    DeleteUserDialog _deleteUserDialog;
-    NetworkSettingsDialog _networkSettingsDialog;
-    ResetPasswordDialog _resetPasswordDialog;
-    NewPasswordDialog _newPasswordDialog;
-    ImageToPatternDialog _imageToPatternDialog;
-
     PersisterFacade _persisterFacade;
     SimulationFacade _simulationFacade;
 

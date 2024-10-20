@@ -5,14 +5,17 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _NewPasswordDialog : public AlienDialog
+class NewPasswordDialog : public AlienDialog
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(NewPasswordDialog);
 public:
-    _NewPasswordDialog(SimulationFacade const& simulationFacade);
+    void init(SimulationFacade const& simulationFacade);
 
     void open(std::string const& userName, UserInfo const& userInfo);
 
 private:
+    NewPasswordDialog();
+
     void processIntern();
 
     void onNewPassword();

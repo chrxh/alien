@@ -1,17 +1,21 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/Descriptions.h"
 #include "Definitions.h"
 #include "AlienDialog.h"
 
-class _NewSimulationDialog : public AlienDialog
+class NewSimulationDialog : public AlienDialog
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(NewSimulationDialog);
+
 public:
-    _NewSimulationDialog(SimulationFacade const& simulationFacade);
-    ~_NewSimulationDialog() override;
+    void init(SimulationFacade const& simulationFacade);
+    void shutdown();
 
 private:
+    NewSimulationDialog();
     void processIntern() override;
     void openIntern() override;
 

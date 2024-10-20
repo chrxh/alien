@@ -31,8 +31,7 @@ class SimulationInteractionController;
 
 class GpuSettingsDialog;
 
-class _NewSimulationDialog;
-using NewSimulationDialog = std::shared_ptr<_NewSimulationDialog>;
+class NewSimulationDialog;
 
 class StartupController;
 
@@ -53,8 +52,7 @@ class AutosaveController;
 
 class GettingStartedWindow;
 
-class _DisplaySettingsDialog;
-using DisplaySettingsDialog = std::shared_ptr<_DisplaySettingsDialog>;
+class DisplaySettingsDialog;
 
 class _EditorModel;
 using EditorModel = std::shared_ptr<_EditorModel>;
@@ -84,15 +82,13 @@ using CreatorWindow = std::shared_ptr<_CreatorWindow>;
 class _MultiplierWindow;
 using MultiplierWindow = std::shared_ptr<_MultiplierWindow>;
 
-class _PatternAnalysisDialog;
-using PatternAnalysisDialog = std::shared_ptr<_PatternAnalysisDialog>;
+class PatternAnalysisDialog;
 
 class FpsController;
 
 class BrowserWindow;
 
-class _ShaderWindow;
-using ShaderWindow = std::shared_ptr<_ShaderWindow>;
+class ShaderWindow;
 
 class LoginDialog;
 
@@ -104,20 +100,15 @@ class CreateUserDialog;
 
 class ActivateUserDialog;
 
-class _DeleteUserDialog;
-using DeleteUserDialog = std::shared_ptr<_DeleteUserDialog>;
+class DeleteUserDialog;
 
-class _NetworkSettingsDialog;
-using NetworkSettingsDialog = std::shared_ptr<_NetworkSettingsDialog>;
+class NetworkSettingsDialog;
 
-class _ResetPasswordDialog;
-using ResetPasswordDialog = std::shared_ptr<_ResetPasswordDialog>;
+class ResetPasswordDialog;
 
-class _NewPasswordDialog;
-using NewPasswordDialog = std::shared_ptr<_NewPasswordDialog>;
+class NewPasswordDialog;
 
-class _ImageToPatternDialog;
-using ImageToPatternDialog = std::shared_ptr<_ImageToPatternDialog>;
+class ImageToPatternDialog;
 
 class _GenomeEditorWindow;
 using GenomeEditorWindow = std::shared_ptr<_GenomeEditorWindow>;
@@ -127,8 +118,7 @@ class RadiationSourcesWindow;
 class _ChangeColorDialog;
 using ChangeColorDialog = std::shared_ptr<_ChangeColorDialog>;
 
-class _AutosaveWindow;
-using AutosaveWindow = std::shared_ptr<_AutosaveWindow>;
+class AutosaveWindow;
 
 class FileTransferController;
 

@@ -1,15 +1,21 @@
 #pragma once
 
-#include "AlienDialog.h"
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
-#include "Definitions.h"
 
-class _DisplaySettingsDialog : public AlienDialog
+#include "Definitions.h"
+#include "AlienDialog.h"
+
+class DisplaySettingsDialog : public AlienDialog
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(DisplaySettingsDialog);
+
 public:
-    _DisplaySettingsDialog();
+    void init();
 
 private:
+    DisplaySettingsDialog();
+
     void processIntern();
     void openIntern();
 
@@ -18,9 +24,9 @@ private:
     std::vector<std::string> createVideoModeStrings() const;
 
     std::string _origMode;
-    int _origSelectionIndex;
-    int _selectionIndex;
-    int _origFps;
+    int _origSelectionIndex = 0;
+    int _selectionIndex = 0;
+    int _origFps = 33;
 
     int _videoModesCount = 0;
     GLFWvidmode const* _videoModes;

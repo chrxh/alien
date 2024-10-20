@@ -1,16 +1,18 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "Network/Definitions.h"
 
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _NetworkSettingsDialog : public AlienDialog
+class NetworkSettingsDialog : public AlienDialog
 {
-public:
-    _NetworkSettingsDialog();
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(NetworkSettingsDialog);
 
 private:
+    NetworkSettingsDialog();
+
     void processIntern();
     void openIntern();
 
