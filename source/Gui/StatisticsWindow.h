@@ -14,16 +14,14 @@
 
 struct ImPlotPoint;
 
-class StatisticsWindow : public AlienWindow
+class StatisticsWindow : public AlienWindow<SimulationFacade>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(StatisticsWindow);
-
-public:
-    void init(SimulationFacade const& simulationFacade);
 
 private:
     StatisticsWindow();
 
+    void initIntern(SimulationFacade simulationFacade) override;
     void shutdownIntern() override;
     void processIntern() override;
 

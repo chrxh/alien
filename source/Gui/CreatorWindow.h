@@ -18,20 +18,19 @@ enum CreationMode_
     CreationMode_Drawing
 };
 
-class CreatorWindow : public AlienWindow
+class CreatorWindow : public AlienWindow<SimulationFacade>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(CreatorWindow);
 
 public:
-    void init(SimulationFacade const& simulationFacade);
-
     void onDrawing();
     void finishDrawing();
 
 private:
     CreatorWindow();
 
-    void processIntern();
+    void initIntern(SimulationFacade simulationFacade) override;
+    void processIntern() override;
 
     void createCell();
     void createParticle();

@@ -6,7 +6,6 @@
 
 #include "Base/GlobalSettings.h"
 #include "Base/Resources.h"
-#include "EngineInterface/Colors.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/SpaceCalculator.h"
 
@@ -17,7 +16,6 @@
 #include "SimulationInteractionController.h"
 #include "StyleRepository.h"
 #include "CellFunctionStrings.h"
-#include "EditorModel.h"
 
 namespace
 {

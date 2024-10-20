@@ -23,18 +23,15 @@ struct SavepointEntry
     uint64_t timestep;
 };
 
-class AutosaveWindow : public AlienWindow
+class AutosaveWindow : public AlienWindow<SimulationFacade, PersisterFacade>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(AutosaveWindow);
-
-public:
-    void init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade);
 
 private:
     AutosaveWindow();
 
+    void initIntern(SimulationFacade simulationFacade, PersisterFacade persisterFacade) override;
     void shutdownIntern() override;
-
     void processIntern() override;
 
     void processToolbar();

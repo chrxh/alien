@@ -49,7 +49,7 @@ namespace
     }
 }
 
-void SimulationParametersWindow::init(SimulationFacade const& simulationFacade)
+void SimulationParametersWindow::initIntern(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
 

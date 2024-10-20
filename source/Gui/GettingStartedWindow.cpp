@@ -10,7 +10,7 @@
 #include <windows.h>
 #endif
 
-void GettingStartedWindow::init()
+void GettingStartedWindow::initIntern()
 {
     _showAfterStartup = _on;
 }

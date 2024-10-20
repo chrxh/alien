@@ -9,7 +9,6 @@ PUBLIC
     AlienDialog.h
     AlienImGui.cpp
     AlienImGui.h
-    AlienWindow.cpp
     AlienWindow.h
     AutosaveController.cpp
     AutosaveController.h

@@ -13,7 +13,7 @@ namespace
     auto const RightColumnWidth = 140.0f;
 }
 
-void RadiationSourcesWindow::init(SimulationFacade const& simulationFacade)
+void RadiationSourcesWindow::initIntern(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
 }

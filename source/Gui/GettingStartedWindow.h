@@ -6,16 +6,14 @@
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-class GettingStartedWindow : public AlienWindow
+class GettingStartedWindow : public AlienWindow<>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(GettingStartedWindow);
-
-public:
-    void init();
 
 private:
     GettingStartedWindow();
 
+    void initIntern() override;
     void shutdownIntern() override;
     void processIntern() override;
 

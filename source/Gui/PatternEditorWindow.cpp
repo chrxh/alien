@@ -25,7 +25,7 @@ namespace
     auto const RightColumnWidth = 120.0f;
 }
 
-void PatternEditorWindow::init(SimulationFacade const& simulationFacade)
+void PatternEditorWindow::initIntern(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
     auto path = std::filesystem::current_path();

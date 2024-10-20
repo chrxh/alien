@@ -31,7 +31,7 @@ namespace
     auto constexpr LiveStatisticsDeltaTime = 50;  //in millisec
 }
 
-void StatisticsWindow::init(SimulationFacade const& simulationFacade)
+void StatisticsWindow::initIntern(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
 

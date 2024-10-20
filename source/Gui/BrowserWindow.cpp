@@ -73,7 +73,7 @@ namespace
         {WorkspaceType_Private, std::string("private")}};
 }
 
-void BrowserWindow::init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade)
+void BrowserWindow::initIntern(SimulationFacade simulationFacade, PersisterFacade persisterFacade)
 {
     _simulationFacade = simulationFacade;
     _persisterFacade = persisterFacade;

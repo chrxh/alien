@@ -5,16 +5,14 @@
 
 #include "AlienWindow.h"
 
-class RadiationSourcesWindow : public AlienWindow
+class RadiationSourcesWindow : public AlienWindow<SimulationFacade>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(RadiationSourcesWindow);
-
-public:
-    void init(SimulationFacade const& simulationFacade);
 
 private:
     RadiationSourcesWindow();
 
+    void initIntern(SimulationFacade simulationFacade) override;
     void processIntern() override;
 
     bool processTab(int index); //returns false if tab should be closed

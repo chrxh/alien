@@ -15,15 +15,14 @@ enum MultiplierMode_
     MultiplierMode_Random
 };
 
-class MultiplierWindow : public AlienWindow
+class MultiplierWindow : public AlienWindow<SimulationFacade>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(MultiplierWindow);
-public:
-    void init(SimulationFacade const& simulationFacade);
 
 private:
     MultiplierWindow();
 
+    void initIntern(SimulationFacade simulationFacade) override;
     void processIntern() override;
     void processGridPanel();
     void processRandomPanel();

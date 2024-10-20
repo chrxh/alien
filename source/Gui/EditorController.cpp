@@ -28,6 +28,8 @@ namespace
 void EditorController::init(SimulationFacade const& simulationFacade)
 {
     _simulationFacade = simulationFacade;
+
+    SelectionWindow::get().init();
     EditorModel::get().init(_simulationFacade);
     GenomeEditorWindow::get().init(_simulationFacade);
     PatternEditorWindow::get().init(_simulationFacade);

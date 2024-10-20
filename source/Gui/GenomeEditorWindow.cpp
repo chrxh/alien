@@ -40,7 +40,7 @@ namespace
     auto const SubWindowRightMargin = 0.0f;
 }
 
-void GenomeEditorWindow::init(SimulationFacade const& simulationFacade)
+void GenomeEditorWindow::initIntern(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
 
