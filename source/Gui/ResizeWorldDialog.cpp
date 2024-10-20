@@ -8,12 +8,12 @@
 #include "AlienImGui.h"
 #include "TemporalControlWindow.h"
 
-_ResizeWorldDialog::_ResizeWorldDialog(SimulationFacade const& simulationFacade)
-    : AlienDialog("Resize world")
-    , _simulationFacade(simulationFacade)
-{}
+void ResizeWorldDialog::init(SimulationFacade const& simulationFacade)
+{
+    _simulationFacade = simulationFacade;
+}
 
-void _ResizeWorldDialog::open()
+void ResizeWorldDialog::open()
 {
     AlienDialog::open();
 
@@ -23,7 +23,11 @@ void _ResizeWorldDialog::open()
     _height = worldSize.y;
 }
 
-void _ResizeWorldDialog::processIntern()
+ResizeWorldDialog::ResizeWorldDialog()
+    : AlienDialog("Resize world")
+{}
+
+void ResizeWorldDialog::processIntern()
 {
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_SizingStretchProp)) {
 
@@ -69,7 +73,7 @@ void _ResizeWorldDialog::processIntern()
     _height = std::max(1, _height);
 }
 
-void _ResizeWorldDialog::onResizing()
+void ResizeWorldDialog::onResizing()
 {
     auto name = _simulationFacade->getSimulationName();
     auto timestep = _simulationFacade->getCurrentTimestep();

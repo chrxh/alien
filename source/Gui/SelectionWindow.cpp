@@ -6,14 +6,13 @@
 #include "StyleRepository.h"
 #include "EditorModel.h"
 
-_SelectionWindow::_SelectionWindow(EditorModel const& editorModel)
-    : AlienWindow("Selection", "windows.selection", true), _editorModel(editorModel)
-{
-}
+SelectionWindow::SelectionWindow()
+    : AlienWindow("Selection", "windows.selection", true)
+{}
 
-void _SelectionWindow::processIntern()
+void SelectionWindow::processIntern()
 {
-    auto selection = _editorModel->getSelectionShallowData();
+    auto selection = EditorModel::get().getSelectionShallowData();
     ImGui::Text("Cells");
     ImGui::PushFont(StyleRepository::get().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);

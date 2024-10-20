@@ -54,33 +54,24 @@ class GettingStartedWindow;
 
 class DisplaySettingsDialog;
 
-class _EditorModel;
-using EditorModel = std::shared_ptr<_EditorModel>;
+class EditorModel;
 
 class EditorController;
 
-class _SelectionWindow;
-using SelectionWindow = std::shared_ptr<_SelectionWindow>;
+class SelectionWindow;
 
-class _PatternEditorWindow;
-using PatternEditorWindow = std::shared_ptr<_PatternEditorWindow>;
+class PatternEditorWindow;
 
 class WindowController;
 
-class _ResizeWorldDialog;
-using ResizeWorldDialog = std::shared_ptr<_ResizeWorldDialog>;
-
-class _OpenSymbolsDialog;
-using OpenSymbolsDialog = std::shared_ptr<_OpenSymbolsDialog>;
+class ResizeWorldDialog;
 
 class _InspectorWindow;
 using InspectorWindow = std::shared_ptr<_InspectorWindow>;
 
-class _CreatorWindow;
-using CreatorWindow = std::shared_ptr<_CreatorWindow>;
+class CreatorWindow;
 
-class _MultiplierWindow;
-using MultiplierWindow = std::shared_ptr<_MultiplierWindow>;
+class MultiplierWindow;
 
 class PatternAnalysisDialog;
 
@@ -110,13 +101,11 @@ class NewPasswordDialog;
 
 class ImageToPatternDialog;
 
-class _GenomeEditorWindow;
-using GenomeEditorWindow = std::shared_ptr<_GenomeEditorWindow>;
+class GenomeEditorWindow;
 
 class RadiationSourcesWindow;
 
-class _ChangeColorDialog;
-using ChangeColorDialog = std::shared_ptr<_ChangeColorDialog>;
+class ChangeColorDialog;
 
 class AutosaveWindow;
 

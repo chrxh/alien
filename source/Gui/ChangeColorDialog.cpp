@@ -9,15 +9,17 @@
 #include "AlienImGui.h"
 #include "StyleRepository.h"
 
-_ChangeColorDialog::_ChangeColorDialog(
-    std::function<GenomeDescription()> const& getGenomeFunc,
-    std::function<void(GenomeDescription const&)> const& setGenomeFunc)
+void ChangeColorDialog::init(std::function<GenomeDescription()> const& getGenomeFunc, std::function<void(GenomeDescription const&)> const& setGenomeFunc)
+{
+    _getGenomeFunc = getGenomeFunc;
+    _setGenomeFunc = setGenomeFunc;
+}
+
+ChangeColorDialog::ChangeColorDialog()
     : AlienDialog("Change color")
-    , _getGenomeFunc(getGenomeFunc)
-    , _setGenomeFunc(setGenomeFunc)
 {}
 
-void _ChangeColorDialog::processIntern()
+void ChangeColorDialog::processIntern()
 {
     AlienImGui::Group("Color transition rule");
     if (ImGui::BeginTable("##", 3, ImGuiTableFlags_SizingStretchProp)) {
@@ -62,7 +64,7 @@ void _ChangeColorDialog::processIntern()
     }
 }
 
-void _ChangeColorDialog::onChangeColor(GenomeDescription& genome)
+void ChangeColorDialog::onChangeColor(GenomeDescription& genome)
 {
     for (auto& node : genome.cells) {
         if (node.color == _sourceColor) {

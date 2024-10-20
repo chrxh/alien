@@ -40,11 +40,10 @@ namespace
     auto const SubWindowRightMargin = 0.0f;
 }
 
-_GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, SimulationFacade const& simulationFacade)
-    : AlienWindow("Genome editor", "windows.genome editor", false)
-    , _editorModel(editorModel)
-    , _simulationFacade(simulationFacade)
+void GenomeEditorWindow::init(SimulationFacade const& simulationFacade)
 {
+    _simulationFacade = simulationFacade;
+
     _tabDatas = {TabData()};
 
     auto path = std::filesystem::current_path();
@@ -53,17 +52,16 @@ _GenomeEditorWindow ::_GenomeEditorWindow(EditorModel const& editorModel, Simula
     }
     _startingPath = GlobalSettings::get().getString("windows.genome editor.starting path", path.string());
     _previewHeight = GlobalSettings::get().getFloat("windows.genome editor.preview height", scale(PreviewHeight));
-    _changeColorDialog =
-        std::make_shared<_ChangeColorDialog>([&] { return getCurrentGenome(); }, [&](GenomeDescription const& genome) { setCurrentGenome(genome); });
+    ChangeColorDialog::get().init([&] { return getCurrentGenome(); }, [&](GenomeDescription const& genome) { setCurrentGenome(genome); });
 }
 
-_GenomeEditorWindow::~_GenomeEditorWindow()
+void GenomeEditorWindow::shutdownIntern()
 {
     GlobalSettings::get().setString("windows.genome editor.starting path", _startingPath);
     GlobalSettings::get().setFloat("windows.genome editor.preview height", _previewHeight);
 }
 
-void _GenomeEditorWindow::openTab(GenomeDescription const& genome, bool openGenomeEditorIfClosed)
+void GenomeEditorWindow::openTab(GenomeDescription const& genome, bool openGenomeEditorIfClosed)
 {
     if (openGenomeEditorIfClosed) {
         setOn(false);
@@ -85,10 +83,14 @@ void _GenomeEditorWindow::openTab(GenomeDescription const& genome, bool openGeno
     }
 }
 
-GenomeDescription const& _GenomeEditorWindow::getCurrentGenome() const
+GenomeDescription const& GenomeEditorWindow::getCurrentGenome() const
 {
     return _tabDatas.at(_selectedTabIndex).genome;
 }
+
+GenomeEditorWindow::GenomeEditorWindow()
+    : AlienWindow("Genome editor", "windows.genome editor", false)
+{}
 
 namespace
 {
@@ -106,14 +108,14 @@ namespace
     }
 }
 
-void _GenomeEditorWindow::processIntern()
+void GenomeEditorWindow::processIntern()
 {
     processToolbar();
     processEditor();
-    _changeColorDialog->process();
+    ChangeColorDialog::get().process();
 }
 
-void _GenomeEditorWindow::processToolbar()
+void GenomeEditorWindow::processToolbar()
 {
     if (_tabDatas.empty()) {
         return;
@@ -206,7 +208,7 @@ void _GenomeEditorWindow::processToolbar()
     ImGui::SameLine();
     ImGui::BeginDisabled(selectedTab.genome.cells.empty());
     if (AlienImGui::ToolbarButton(ICON_FA_PALETTE)) {
-        _changeColorDialog->open();
+        ChangeColorDialog::get().open();
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Change the color of all cells with a specific color");
@@ -223,7 +225,7 @@ void _GenomeEditorWindow::processToolbar()
     AlienImGui::Separator();
 }
 
-void _GenomeEditorWindow::processEditor()
+void GenomeEditorWindow::processEditor()
 {
     if (ImGui::BeginTabBar("##", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
 
@@ -275,7 +277,7 @@ void _GenomeEditorWindow::processEditor()
     }
 }
 
-void _GenomeEditorWindow::processTab(TabData& tab)
+void GenomeEditorWindow::processTab(TabData& tab)
 {
     _previewHeight = std::min(ImGui::GetContentRegionAvail().y - 10.0f, std::max(10.0f, _previewHeight));
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - _previewHeight), true)) {
@@ -297,7 +299,7 @@ void _GenomeEditorWindow::processTab(TabData& tab)
     ImGui::EndChild();
 }
 
-void _GenomeEditorWindow::processGenomeHeader(TabData& tab)
+void GenomeEditorWindow::processGenomeHeader(TabData& tab)
 {
     AlienImGui::DynamicTableLayout table(DynamicTableHeaderColumnWidth);
     if (table.begin()) {
@@ -422,7 +424,7 @@ namespace
     }
 }
 
-void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
+void GenomeEditorWindow::processConstructionSequence(TabData& tab)
 {
     int index = 0;
 
@@ -488,7 +490,7 @@ void _GenomeEditorWindow::processConstructionSequence(TabData& tab)
     _expandNodes.reset();
 }
 
-void _GenomeEditorWindow::processNode(
+void GenomeEditorWindow::processNode(
     TabData& tab,
     CellGenomeDescription& cell,
     std::optional<ShapeGeneratorResult> const& shapeGeneratorResult,
@@ -784,7 +786,7 @@ void _GenomeEditorWindow::processNode(
 }
 
 template <typename Description>
-void _GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Description& desc)
+void GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Description& desc)
 {
     std::string content;
     if (desc.isMakeGenomeCopy()) {
@@ -831,7 +833,7 @@ void _GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Descriptio
 }
 
 
-void _GenomeEditorWindow::onOpenGenome()
+void GenomeEditorWindow::onOpenGenome()
 {
     GenericFileDialogs::get().showOpenFileDialog("Open genome", "Genome (*.genome){.genome},.*", _startingPath, [&](std::filesystem::path const& path) {
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
@@ -847,7 +849,7 @@ void _GenomeEditorWindow::onOpenGenome()
     });
 }
 
-void _GenomeEditorWindow::onSaveGenome()
+void GenomeEditorWindow::onSaveGenome()
 {
     GenericFileDialogs::get().showSaveFileDialog(
         "Save genome", "Genome (*.genome){.genome},.*", _startingPath, [&](std::filesystem::path const& path) {
@@ -863,12 +865,12 @@ void _GenomeEditorWindow::onSaveGenome()
         });
 }
 
-void _GenomeEditorWindow::onUploadGenome()
+void GenomeEditorWindow::onUploadGenome()
 {
     UploadSimulationDialog::get().open(NetworkResourceType_Genome);
 }
 
-void _GenomeEditorWindow::onAddNode()
+void GenomeEditorWindow::onAddNode()
 {
     auto& tabData = _tabDatas.at(_selectedTabIndex);
     auto& cells = tabData.genome.cells;
@@ -887,7 +889,7 @@ void _GenomeEditorWindow::onAddNode()
     }
 }
 
-void _GenomeEditorWindow::onDeleteNode()
+void GenomeEditorWindow::onDeleteNode()
 {
     auto& tabData = _tabDatas.at(_selectedTabIndex);
     auto& cells = tabData.genome.cells;
@@ -908,7 +910,7 @@ void _GenomeEditorWindow::onDeleteNode()
     _expandNodes = false;
 }
 
-void _GenomeEditorWindow::onNodeDecreaseSequenceNumber()
+void GenomeEditorWindow::onNodeDecreaseSequenceNumber()
 {
     auto& selectedTab = _tabDatas.at(_selectedTabIndex);
     auto& selectedNode = selectedTab.selectedNode;
@@ -917,7 +919,7 @@ void _GenomeEditorWindow::onNodeDecreaseSequenceNumber()
     _expandNodes = false;
 }
 
-void _GenomeEditorWindow::onNodeIncreaseSequenceNumber()
+void GenomeEditorWindow::onNodeIncreaseSequenceNumber()
 {
     auto& selectedTab = _tabDatas.at(_selectedTabIndex);
     auto& selectedNode = selectedTab.selectedNode;
@@ -926,7 +928,7 @@ void _GenomeEditorWindow::onNodeIncreaseSequenceNumber()
     _expandNodes = false;
 }
 
-void _GenomeEditorWindow::onCreateSpore()
+void GenomeEditorWindow::onCreateSpore()
 {
     auto pos = Viewport::get().getCenterInWorldPos();
     pos.x += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
@@ -937,23 +939,23 @@ void _GenomeEditorWindow::onCreateSpore()
 
     auto parameter = _simulationFacade->getSimulationParameters();
     auto numNodes = GenomeDescriptionService::getNumNodesRecursively(genome, true);
-    auto energy = parameter.cellNormalEnergy[_editorModel->getDefaultColorCode()] * toFloat(numNodes * 2 + 1);
+    auto energy = parameter.cellNormalEnergy[EditorModel::get().getDefaultColorCode()] * toFloat(numNodes * 2 + 1);
     auto cell = CellDescription()
                     .setPos(pos)
                     .setEnergy(energy)
                     .setStiffness(1.0f)
                     .setMaxConnections(6)
                     .setExecutionOrderNumber(0)
-                    .setColor(_editorModel->getDefaultColorCode())
+                    .setColor(EditorModel::get().getDefaultColorCode())
                     .setCellFunction(ConstructorDescription().setGenome(genome));
     auto data = DataDescription().addCell(cell);
     _simulationFacade->addAndSelectSimulationData(data);
-    _editorModel->update();
+    EditorModel::get().update();
 
     printOverlayMessage("Spore created");
 }
 
-void _GenomeEditorWindow::showPreview(TabData& tab)
+void GenomeEditorWindow::showPreview(TabData& tab)
 {
     auto const& genome = _tabDatas.at(_selectedTabIndex).genome;
     auto preview = PreviewDescriptionService::convert(genome, tab.selectedNode, _simulationFacade->getSimulationParameters());
@@ -962,7 +964,7 @@ void _GenomeEditorWindow::showPreview(TabData& tab)
     }
 }
 
-void _GenomeEditorWindow::validationAndCorrection(GenomeHeaderDescription& header) const
+void GenomeEditorWindow::validationAndCorrection(GenomeHeaderDescription& header) const
 {
     header.stiffness = std::max(0.0f, std::min(1.0f, header.stiffness));
     header.connectionDistance = std::max(0.5f, std::min(1.5f, header.connectionDistance));
@@ -970,7 +972,7 @@ void _GenomeEditorWindow::validationAndCorrection(GenomeHeaderDescription& heade
     header.numBranches = header.getNumBranches();
 }
 
-void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) const
+void GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) const
 {
     auto numExecutionOrderNumbers = _simulationFacade->getSimulationParameters().cellNumExecutionOrderNumbers;
     cell.color = (cell.color + MAX_COLORS) % MAX_COLORS;
@@ -1009,7 +1011,7 @@ void _GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) c
     }
 }
 
-void _GenomeEditorWindow::scheduleAddTab(GenomeDescription const& genome)
+void GenomeEditorWindow::scheduleAddTab(GenomeDescription const& genome)
 {
     TabData newTab;
     newTab.id = ++_tabSequenceNumber;
@@ -1017,7 +1019,7 @@ void _GenomeEditorWindow::scheduleAddTab(GenomeDescription const& genome)
     _tabToAdd = newTab;
 }
 
-void _GenomeEditorWindow::updateGeometry(GenomeDescription& genome, ConstructionShape shape)
+void GenomeEditorWindow::updateGeometry(GenomeDescription& genome, ConstructionShape shape)
 {
     auto shapeGenerator = ShapeGeneratorFactory::create(shape);
     if (!shapeGenerator) {
@@ -1031,7 +1033,7 @@ void _GenomeEditorWindow::updateGeometry(GenomeDescription& genome, Construction
     }
 }
 
-void _GenomeEditorWindow::setCurrentGenome(GenomeDescription const& genome)
+void GenomeEditorWindow::setCurrentGenome(GenomeDescription const& genome)
 {
     _tabDatas.at(_selectedTabIndex).genome = genome;
 }

@@ -69,7 +69,7 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                 TemporalControlWindow::get().onSnapshot();
             } else {
                 EditorController::get().setOn(true);
-                EditorController::get().getGenomeEditorWindow()->openTab(std::get<GenomeDescription>(data.resourceData));
+                GenomeEditorWindow::get().openTab(std::get<GenomeDescription>(data.resourceData));
             }
             if (VersionChecker::isVersionNewer(data.resourceVersion)) {
                 std::string dataTypeString = data.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";

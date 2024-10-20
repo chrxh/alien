@@ -1,15 +1,19 @@
 #pragma once
 
 #include "Base/Definitions.h"
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/SelectionShallowData.h"
+
 #include "Definitions.h"
 #include "InspectorWindow.h"
 
-class _EditorModel
+class EditorModel
 {
+    MAKE_SINGLETON(EditorModel);
+
 public:
-    _EditorModel(SimulationFacade const& simulationFacade);
+    void init(SimulationFacade const& simulationFacade);
 
     SelectionShallowData const& getSelectionShallowData() const;
     void update();

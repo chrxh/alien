@@ -16,7 +16,7 @@
 void SpatialControlWindow::init(SimulationFacade const& simulationFacade)
 {
     _simulationFacade = simulationFacade;
-    _resizeWorldDialog = std::make_shared<_ResizeWorldDialog>(simulationFacade);
+    ResizeWorldDialog::get().init(simulationFacade);
 
     auto& settings = GlobalSettings::get();
     Viewport::get().setZoomSensitivity(settings.getFloat("windows.spatial control.zoom sensitivity factor", Viewport::get().getZoomSensitivity()));
@@ -88,7 +88,7 @@ void SpatialControlWindow::processIntern()
     }
     ImGui::EndChild();
 
-    _resizeWorldDialog->process();
+    ResizeWorldDialog::get().process();
 }
 
 void SpatialControlWindow::processBackground()
@@ -125,7 +125,7 @@ void SpatialControlWindow::processCenterButton()
 void SpatialControlWindow::processResizeButton()
 {
     if (AlienImGui::ToolbarButton(ICON_FA_CROP_ALT)) {
-        _resizeWorldDialog->open();
+        ResizeWorldDialog::get().open();
     }
     AlienImGui::Tooltip("Resize");
 }

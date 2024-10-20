@@ -21,13 +21,16 @@ namespace
     auto const RightColumnWidth = 200.0f;
 }
 
-_MultiplierWindow::_MultiplierWindow(EditorModel const& editorModel, SimulationFacade const& simulationFacade)
+void MultiplierWindow::init(SimulationFacade const& simulationFacade)
+{
+    _simulationFacade = simulationFacade;
+}
+
+MultiplierWindow::MultiplierWindow()
     : AlienWindow("Multiplier", "editors.multiplier", false)
-    , _editorModel(editorModel)
-    , _simulationFacade(simulationFacade)
 {}
 
-void _MultiplierWindow::processIntern()
+void MultiplierWindow::processIntern()
 {
     AlienImGui::SelectableToolbarButton(ICON_GRID, _mode, MultiplierMode_Grid, MultiplierMode_Grid);
 
@@ -36,7 +39,7 @@ void _MultiplierWindow::processIntern()
 
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50.0f)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
-        ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
+        ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
 
         AlienImGui::Group(ModeText.at(_mode));
         if (_mode == MultiplierMode_Grid) {
@@ -51,8 +54,8 @@ void _MultiplierWindow::processIntern()
 
         AlienImGui::Separator();
     ImGui::BeginDisabled(
-        _editorModel->isSelectionEmpty()
-        || (_selectionDataAfterMultiplication && _selectionDataAfterMultiplication->compareNumbers(_editorModel->getSelectionShallowData())));
+        EditorModel::get().isSelectionEmpty()
+        || (_selectionDataAfterMultiplication && _selectionDataAfterMultiplication->compareNumbers(EditorModel::get().getSelectionShallowData())));
     if (AlienImGui::Button("Build")) {
         onBuild();
     }
@@ -60,8 +63,8 @@ void _MultiplierWindow::processIntern()
 
     ImGui::SameLine();
     ImGui::BeginDisabled(
-        _editorModel->isSelectionEmpty() || !_selectionDataAfterMultiplication
-        || !_selectionDataAfterMultiplication->compareNumbers(_editorModel->getSelectionShallowData()));
+        EditorModel::get().isSelectionEmpty() || !_selectionDataAfterMultiplication
+        || !_selectionDataAfterMultiplication->compareNumbers(EditorModel::get().getSelectionShallowData()));
     if (AlienImGui::Button("Undo")) {
         onUndo();
     }
@@ -70,7 +73,7 @@ void _MultiplierWindow::processIntern()
     validationAndCorrection();
 }
 
-void _MultiplierWindow::processGridPanel()
+void MultiplierWindow::processGridPanel()
 {
     AlienImGui::InputInt(AlienImGui::InputIntParameters().name(ICON_FA_ARROW_RIGHT " Number of copies").textWidth(RightColumnWidth), _gridParameters._horizontalNumber);
     AlienImGui::InputFloat(
@@ -107,7 +110,7 @@ void _MultiplierWindow::processGridPanel()
         _gridParameters._verticalAngularVelInc);
 }
 
-void _MultiplierWindow::processRandomPanel()
+void MultiplierWindow::processRandomPanel()
 {
     AlienImGui::InputInt(
         AlienImGui::InputIntParameters().name("Number of copies").textWidth(RightColumnWidth), _randomParameters._number);
@@ -130,7 +133,7 @@ void _MultiplierWindow::processRandomPanel()
     AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Overlapping check").textWidth(RightColumnWidth), _randomParameters._overlappingCheck);
 }
 
-void _MultiplierWindow::validationAndCorrection()
+void MultiplierWindow::validationAndCorrection()
 {
     _gridParameters._horizontalNumber = std::max(1, _gridParameters._horizontalNumber);
     _gridParameters._horizontalDistance = std::max(0.0f, _gridParameters._horizontalDistance);
@@ -144,7 +147,7 @@ void _MultiplierWindow::validationAndCorrection()
     _randomParameters._maxAngularVel = std::max(_randomParameters._minAngularVel, _randomParameters._maxAngularVel);
 }
 
-void _MultiplierWindow::onBuild()
+void MultiplierWindow::onBuild()
 {
     _origSelection = _simulationFacade->getSelectedSimulationData(true);
     auto multiplicationResult = [&] {
@@ -164,11 +167,11 @@ void _MultiplierWindow::onBuild()
     _simulationFacade->removeSelectedObjects(true);
     _simulationFacade->addAndSelectSimulationData(multiplicationResult);
 
-    _editorModel->update();
-    _selectionDataAfterMultiplication = _editorModel->getSelectionShallowData();
+    EditorModel::get().update();
+    _selectionDataAfterMultiplication = EditorModel::get().getSelectionShallowData();
 }
 
-void _MultiplierWindow::onUndo()
+void MultiplierWindow::onUndo()
 {
     _simulationFacade->removeSelectedObjects(true);
     _simulationFacade->addAndSelectSimulationData(_origSelection);

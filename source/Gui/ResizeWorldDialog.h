@@ -1,16 +1,22 @@
 #pragma once
 
+#include "Base/Singleton.h"
+
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _ResizeWorldDialog : public AlienDialog
+class ResizeWorldDialog : public AlienDialog
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(ResizeWorldDialog);
+
 public:
-    _ResizeWorldDialog(SimulationFacade const& simulationFacade);
+    void init(SimulationFacade const& simulationFacade);
 
     void open();
 
 private:
+    ResizeWorldDialog();
+
     void processIntern() override;
 
     void onResizing();

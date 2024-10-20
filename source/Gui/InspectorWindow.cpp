@@ -37,18 +37,10 @@ namespace
     auto const TreeNodeFlags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_DefaultOpen;
 }
 
-_InspectorWindow::_InspectorWindow(
-    SimulationFacade const& simulationFacade,
-    EditorModel const& editorModel,
-    GenomeEditorWindow const& genomeEditorWindow,
-    uint64_t entityId,
-    RealVector2D const& initialPos,
-    bool selectGenomeTab)
+_InspectorWindow::_InspectorWindow(SimulationFacade const& simulationFacade, uint64_t entityId, RealVector2D const& initialPos, bool selectGenomeTab)
     : _entityId(entityId)
     , _initialPos(initialPos)
-    , _editorModel(editorModel)
     , _simulationFacade(simulationFacade)
-    , _genomeEditorWindow(genomeEditorWindow)
     , _selectGenomeTab(selectGenomeTab)
 {
 }
@@ -67,7 +59,7 @@ void _InspectorWindow::process()
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::SetNextWindowSize({width, height}, ImGuiCond_Appearing);
     ImGui::SetNextWindowPos({_initialPos.x, _initialPos.y}, ImGuiCond_Appearing);
-    auto entity = _editorModel->getInspectedEntity(_entityId);
+    auto entity = EditorModel::get().getInspectedEntity(_entityId);
     if (ImGui::Begin(generateTitle().c_str(), &_on, ImGuiWindowFlags_HorizontalScrollbar)) {
         auto windowPos = ImGui::GetWindowPos();
         if (isCell()) {
@@ -113,13 +105,13 @@ uint64_t _InspectorWindow::getId() const
 
 bool _InspectorWindow::isCell() const
 {
-    auto entity = _editorModel->getInspectedEntity(_entityId);
+    auto entity = EditorModel::get().getInspectedEntity(_entityId);
     return std::holds_alternative<CellDescription>(entity);
 }
 
 std::string _InspectorWindow::generateTitle() const
 {
-    auto entity = _editorModel->getInspectedEntity(_entityId);
+    auto entity = EditorModel::get().getInspectedEntity(_entityId);
     std::stringstream ss;
     if (isCell()) {
         ss << "Cell #" << std::hex << std::uppercase << _entityId;
@@ -388,13 +380,13 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                 }
                 ImGui::EndChild();
                 if (AlienImGui::Button("Edit")) {
-                    _genomeEditorWindow->openTab(GenomeDescriptionService::convertBytesToDescription(desc.genome));
+                    GenomeEditorWindow::get().openTab(GenomeDescriptionService::convertBytesToDescription(desc.genome));
                 }
 
                 ImGui::SameLine();
                 if (AlienImGui::Button(AlienImGui::ButtonParameters().buttonText("Inject from editor").textWidth(ImGui::GetContentRegionAvail().x))) {
                     printOverlayMessage("Genome injected");
-                    desc.genome = GenomeDescriptionService::convertDescriptionToBytes(_genomeEditorWindow->getCurrentGenome());
+                    desc.genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeEditorWindow::get().getCurrentGenome());
                     if constexpr (std::is_same<Description, ConstructorDescription>()) {
                         desc.genomeCurrentNodeIndex = 0;
                         desc.setNumInheritedGenomeNodes(0);
