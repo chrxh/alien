@@ -10,7 +10,7 @@
 #include "MessageDialog.h"
 #include "ActivateUserDialog.h"
 #include "BrowserWindow.h"
-#include "ShutdownController.h"
+#include "MainLoopEntityController.h"
 
 void LoginController::init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade)
 {
@@ -28,7 +28,7 @@ void LoginController::init(SimulationFacade const& simulationFacade, PersisterFa
         onLogin();
     }
 
-    ShutdownController::get().registerObject(this);
+    MainLoopEntityController::get().registerObject(this);
 }
 
 void LoginController::shutdown()

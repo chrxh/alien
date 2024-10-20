@@ -4,9 +4,9 @@
 #include "PersisterInterface/PersisterFacade.h"
 
 #include "Definitions.h"
-#include "ShutdownInterface.h"
+#include "MainLoopEntity.h"
 
-class LoginController : public ShutdownInterface
+class LoginController : public MainLoopEntity
 {
     MAKE_SINGLETON(LoginController);
 public:
@@ -14,8 +14,6 @@ public:
     void init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade);
 
     void onLogin();
-
-    void process();
 
     void saveSettings();
 
@@ -34,6 +32,7 @@ public:
     UserInfo getUserInfo();
 
 private:
+    void process() override;
     void shutdown() override;
 
     SimulationFacade _simulationFacade; 

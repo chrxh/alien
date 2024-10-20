@@ -4,9 +4,9 @@
 #include "Base/Singleton.h"
 
 #include "Definitions.h"
-#include "ShutdownInterface.h"
+#include "MainLoopEntity.h"
 
-class WindowController : public ShutdownInterface
+class WindowController : public MainLoopEntity
 {
     MAKE_SINGLETON(WindowController);
 
@@ -41,6 +41,7 @@ public:
     float getLastContentScaleFactor();
 
 private:
+    void process() override {}
     void shutdown() override;
 
     void updateWindowSize();

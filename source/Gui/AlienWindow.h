@@ -6,19 +6,17 @@
 
 #include "Definitions.h"
 #include "StyleRepository.h"
-#include "ShutdownInterface.h"
-#include "ShutdownController.h"
+#include "MainLoopEntity.h"
+#include "MainLoopEntityController.h"
 #include "WindowController.h"
 
 template<typename ...Dependencies>
-class AlienWindow : public ShutdownInterface
+class AlienWindow : public MainLoopEntity
 {
 public:
     AlienWindow(std::string const& title, std::string const& settingsNode, bool defaultOn);
 
     void init(Dependencies... dependencies);
-
-    void process();
 
     bool isOn() const;
     void setOn(bool value);
@@ -38,6 +36,7 @@ protected:
     std::string _settingsNode;
 
 private:
+    void process() override;
     void shutdown() override;
 };
 
@@ -56,7 +55,7 @@ template <typename ... Dependencies>
 void AlienWindow<Dependencies...>::init(Dependencies... dependencies)
 {
     _on = GlobalSettings::get().getBool(_settingsNode + ".active", _defaultOn);
-    ShutdownController::get().registerObject(this);
+    MainLoopEntityController::get().registerObject(this);
     initIntern(dependencies...);
 }
 

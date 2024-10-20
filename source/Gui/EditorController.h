@@ -5,9 +5,9 @@
 #include "EngineInterface/Descriptions.h"
 
 #include "Definitions.h"
-#include "ShutdownInterface.h"
+#include "MainLoopEntity.h"
 
-class EditorController : public ShutdownInterface
+class EditorController
 {
     MAKE_SINGLETON(EditorController);
 
@@ -22,8 +22,6 @@ public:
     bool areInspectionWindowsActive() const;
     void onCloseAllInspectorWindows();
 
-    bool isObjectInspectionPossible() const;
-    bool isGenomeInspectionPossible() const;
     void onInspectSelectedObjects();
     void onInspectSelectedGenomes();
     void onInspectObjects(std::vector<CellOrParticleDescription> const& entities, bool selectGenomeTab);
@@ -43,7 +41,6 @@ public:
     void onAccelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
 
 private:
-    void shutdown() override;
     void processInspectorWindows();
 
     SimulationFacade _simulationFacade;

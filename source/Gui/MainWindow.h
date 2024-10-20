@@ -27,7 +27,6 @@ private:
 
     void processMenubar();
     void processDialogs();
-    void processWindows();
     void processControllers();
 
     void onRunSimulation();
