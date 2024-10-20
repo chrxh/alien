@@ -6,7 +6,8 @@
 
 struct SaveSimulationRequestData
 {
-    std::string filename;
+    std::filesystem::path filename;
     float zoom = 1.0f;
     RealVector2D center;
+    bool generateNameFromTimestep = false;
 };

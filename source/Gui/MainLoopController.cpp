@@ -216,7 +216,7 @@ void MainLoopController::processFadeInUI()
 
     increaseAlphaForFadeInUI();
     if (ImGui::GetStyle().Alpha == 1.0f) {
-        printOverlayMessage(Const::AutosaveFileWithoutPath);
+        printOverlayMessage(Const::AutosaveFileWithoutPath.string());
         _programState = ProgramState::OperatingMode;
     }
 }

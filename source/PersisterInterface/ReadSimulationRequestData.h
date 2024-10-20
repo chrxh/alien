@@ -1,8 +1,8 @@
 #pragma once
 
-#include <string>
+#include <filesystem>
 
 struct ReadSimulationRequestData
 {
-    std::string filename;
+    std::filesystem::path filename;
 };

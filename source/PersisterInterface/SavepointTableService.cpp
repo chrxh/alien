@@ -2,43 +2,12 @@
 
 #include <filesystem>
 #include <fstream>
+#include <ranges>
 
 #include <boost/property_tree/json_parser.hpp>
 
 #include "ParameterParser.h"
-
-
-namespace
-{
-    void encodeDecode(boost::property_tree::ptree& tree, SavepointEntry& entry, ParserTask task)
-    {
-        JsonParser::encodeDecode(tree, entry.filename, std::string(), "filename", task);
-        JsonParser::encodeDecode(tree, entry.state, 0, "state", task);
-        JsonParser::encodeDecode(tree, entry.timestamp, std::string(), "timestamp", task);
-        JsonParser::encodeDecode(tree, entry.name, std::string(), "name", task);
-        JsonParser::encodeDecode(tree, entry.timestep, 0ull, "timestep", task);
-    }
-
-    void encodeDecode(boost::property_tree::ptree& tree, std::deque<SavepointEntry>& entries, ParserTask task)
-    {
-        if (ParserTask::Encode == task) {
-            int index = 0;
-            for (auto& entry : entries) {
-                boost::property_tree::ptree subtree;
-                encodeDecode(subtree, entry, task);
-                tree.push_back(std::make_pair(std::to_string(index), subtree));
-                ++index;
-            }
-        } else {
-            entries.clear();
-            for (auto& [key, subtree] : tree) {
-                SavepointEntry entry;
-                encodeDecode(subtree, entry, task);
-                entries.emplace_back(entry);
-            }
-        }
-    }
-}
+#include "SerializerService.h"
 
 namespace
 {
@@ -84,18 +53,36 @@ auto SavepointTableService::loadFromFile(std::string const& filename) -> std::va
 
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
-        std::deque<SavepointEntry> entries;
-        encodeDecode(tree, entries, ParserTask::Decode);
+        SavepointTable result(filename, std::deque<SavepointEntry>());
+        encodeDecode(tree, result, ParserTask::Decode);
 
-        return SavepointTable(filename, entries);
+        return result;
     } catch (...) {
         return Error{};
     }
 }
 
-bool SavepointTableService::insertEntry(SavepointTable& table, SavepointEntry const& entry) const
+bool SavepointTableService::truncate(SavepointTable& table, int newSize) const
 {
-    table._entries.emplace_back(entry);
+    auto& entries = table._entries;
+    if (entries.size() < newSize) {
+        return true;
+    }
+
+    for (auto const& entry : entries | std::views::drop(newSize)) {
+        if (entry.state == SavepointState_Persisted) {
+            SerializerService::get().deleteSimulation(entry.filename);
+        }
+    }
+
+    entries.erase(entries.begin() + newSize, entries.end());
+    return true;
+}
+
+bool SavepointTableService::insertEntryAtFront(SavepointTable& table, SavepointEntry const& entry) const
+{
+    table._entries.emplace_front(entry);
+    ++table._sequenceNumber;
     return writeToFile(table);
 }
 
@@ -113,10 +100,60 @@ bool SavepointTableService::writeToFile(SavepointTable& table) const
             return false;
         }
         boost::property_tree::ptree tree;
-        encodeDecode(tree, table._entries, ParserTask::Encode);
+        encodeDecode(tree, table, ParserTask::Encode);
         boost::property_tree::json_parser::write_json(stream, tree);
         return true;
     } catch (...) {
         return false;
+    }
+}
+
+void SavepointTableService::encodeDecode(boost::property_tree::ptree& tree, SavepointTable& table, ParserTask task) const
+{
+    JsonParser::encodeDecode(tree, table._sequenceNumber, 0, "sequence number", task);
+    encodeDecode(tree, table._entries, task);
+}
+
+void SavepointTableService::encodeDecode(boost::property_tree::ptree& tree, std::deque<SavepointEntry>& entries, ParserTask task) const
+{
+    if (ParserTask::Encode == task) {
+        boost::property_tree::ptree subtree;
+
+        int index = 0;
+        for (auto& entry : entries) {
+            boost::property_tree::ptree subsubtree;
+            encodeDecode(subsubtree, entry, task);
+            tree.push_back(std::make_pair(std::to_string(index), subsubtree));
+            ++index;
+        }
+        tree.push_back(std::make_pair("entries", subtree));
+    } else {
+        entries.clear();
+        for (auto& [key, subtree] : tree.get_child("entries")) {
+            SavepointEntry entry;
+            encodeDecode(subtree, entry, task);
+            entries.emplace_back(entry);
+        }
+    }
+}
+
+void SavepointTableService::encodeDecode(boost::property_tree::ptree& tree, SavepointEntry& entry, ParserTask task) const
+{
+    encodeDecode(tree, entry.filename, "filename", task);
+    JsonParser::encodeDecode(tree, entry.state, 0, "state", task);
+    JsonParser::encodeDecode(tree, entry.timestamp, std::string(), "timestamp", task);
+    JsonParser::encodeDecode(tree, entry.name, std::string(), "name", task);
+    JsonParser::encodeDecode(tree, entry.timestep, 0ull, "timestep", task);
+}
+
+void SavepointTableService::encodeDecode(boost::property_tree::ptree& tree, std::filesystem::path& path, std::string const& node, ParserTask task) const
+{
+    if (task == ParserTask::Encode) {
+        auto pathString = path.string();
+        JsonParser::encodeDecode(tree, pathString, std::string(), node, task);
+    } else {
+        std::string pathString;
+        JsonParser::encodeDecode(tree, pathString, std::string(), node, task);
+        path = pathString;
     }
 }

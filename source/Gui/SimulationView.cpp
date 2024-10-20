@@ -26,7 +26,7 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
 {
     _simulationFacade = simulationFacade;
 
-    _isCellDetailOverlayActive = GlobalSettings::get().getValue("settings.simulation view.overlay", _isCellDetailOverlayActive);
+    _cellDetailOverlayActive = GlobalSettings::get().getValue("settings.simulation view.overlay", _cellDetailOverlayActive);
     _brightness = GlobalSettings::get().getValue("windows.simulation view.brightness", _brightness);
     _contrast = GlobalSettings::get().getValue("windows.simulation view.contrast", _contrast);
     _motionBlur = GlobalSettings::get().getValue("windows.simulation view.motion blur factor", _motionBlur);
@@ -90,7 +90,7 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
 
 void SimulationView::shutdown()
 {
-    GlobalSettings::get().setValue("settings.simulation view.overlay", _isCellDetailOverlayActive);
+    GlobalSettings::get().setValue("settings.simulation view.overlay", _cellDetailOverlayActive);
     GlobalSettings::get().setValue("windows.simulation view.brightness", _brightness);
     GlobalSettings::get().setValue("windows.simulation view.contrast", _contrast);
     GlobalSettings::get().setValue("windows.simulation view.motion blur factor", _motionBlur);
@@ -238,12 +238,12 @@ void SimulationView::setRenderSimulation(bool value)
 
 bool SimulationView::isOverlayActive() const
 {
-    return _isCellDetailOverlayActive;
+    return _cellDetailOverlayActive;
 }
 
 void SimulationView::setOverlayActive(bool active)
 {
-    _isCellDetailOverlayActive = active;
+    _cellDetailOverlayActive = active;
 }
 
 float SimulationView::getBrightness() const
@@ -304,7 +304,7 @@ void SimulationView::updateImageFromSimulation()
         auto parameters = _simulationFacade->getSimulationParameters();
         auto timestep = _simulationFacade->getCurrentTimestep();
         for (auto const& overlayElement : _overlay->elements) {
-            if (_isCellDetailOverlayActive && overlayElement.cell) {
+            if (_cellDetailOverlayActive && overlayElement.cell) {
                 {
                     auto fontSizeUnit = std::min(40.0f, Viewport::get().getZoomFactor()) / 2;
                     auto viewPos = Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.3f}, parameters.borderlessRendering);

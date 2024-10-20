@@ -6,6 +6,7 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/LoggingService.h"
+#include "Base/StringHelper.h"
 #include "PersisterInterface/SerializerService.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/GenomeDescriptionService.h"
@@ -192,17 +193,17 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveSi
 
     DeserializedSimulation deserializedData;
     std::string simulationName;
-    std::chrono::system_clock::time_point timePoint;
+    std::chrono::system_clock::time_point timestamp;
     try {
         simulationName = _simulationFacade->getSimulationName();
-        timePoint = std::chrono::system_clock::now();
-        deserializedData.auxiliaryData.timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
+        timestamp = std::chrono::system_clock::now();
+        deserializedData.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
         deserializedData.auxiliaryData.realTime = _simulationFacade->getRealTime();
         deserializedData.auxiliaryData.zoom = requestData.zoom;
         deserializedData.auxiliaryData.center = requestData.center;
         deserializedData.auxiliaryData.generalSettings = _simulationFacade->getGeneralSettings();
         deserializedData.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
-        deserializedData.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
+        deserializedData.auxiliaryData.timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
         deserializedData.mainData = _simulationFacade->getClusteredSimulationData();
     } catch (...) {
         return std::make_shared<_PersisterRequestError>(
@@ -212,12 +213,25 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveSi
     }
 
     try {
-        if (!SerializerService::get().serializeSimulationToFiles(requestData.filename, deserializedData)) {
+        auto filename = requestData.filename;
+        if (requestData.generateNameFromTimestep) {
+            std::filesystem::path fullFilename;
+            int i = 0;
+            do {
+                auto postfix = i == 0 ? std::string() : "-" + std::to_string(i);
+                fullFilename = filename / ("save_" + StringHelper::format(deserializedData.auxiliaryData.timestep, '_') + postfix + ".sim");
+                ++i;
+            } while (std::filesystem::exists(fullFilename) && i < 100);
+            filename = fullFilename;
+        }
+        if (!SerializerService::get().serializeSimulationToFiles(filename, deserializedData)) {
             throw std::runtime_error("Error");
         }
 
         return std::make_shared<_SaveSimulationRequestResult>(
-            request->getRequestId(), SaveSimulationResultData{simulationName, deserializedData.auxiliaryData.timestep, timePoint});
+            request->getRequestId(),
+            SaveSimulationResultData{
+                .filename = filename, .name = simulationName, .timestep = deserializedData.auxiliaryData.timestep, .timestamp = timestamp});
     } catch (...) {
         return std::make_shared<_PersisterRequestError>(
             request->getRequestId(),

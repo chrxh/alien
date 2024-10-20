@@ -108,7 +108,7 @@ void AutosaveWindow::processHeader()
 void AutosaveWindow::processTable()
 {
     if (!_savepointTable.has_value()) {
-        AlienImGui::Text("Error: No files could be created in the specified directory.");
+        AlienImGui::Text("Error: Savepoint files could not be read or created in the specified directory.");
         return;
     }
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
@@ -122,6 +122,7 @@ void AutosaveWindow::processTable()
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
 
+        auto sequenceNumberAtFrom = _savepointTable->getSequenceNumber();
         ImGuiListClipper clipper;
         clipper.Begin(_savepointTable->getSize());
         while (clipper.Step()) {
@@ -133,7 +134,7 @@ void AutosaveWindow::processTable()
                 ImGui::TableNextRow(0, scale(15.0f));
 
                 ImGui::TableNextColumn();
-                AlienImGui::Text(std::to_string(row + 1));
+                AlienImGui::Text(std::to_string(sequenceNumberAtFrom - row));
 
                 ImGui::TableNextColumn();
                 if (entry.state == SavepointState_InQueue) {
@@ -204,13 +205,28 @@ void AutosaveWindow::processSettings()
 void AutosaveWindow::createSavepoint()
 {
     printOverlayMessage("Creating save point ...");
-    static int i = 0;
-    auto senderInfo = SenderInfo{.senderId = SenderId{AutosaveSenderId}, .wishResultData = true, .wishErrorInfo = true};
-    auto saveData = SaveSimulationRequestData{"d:\\test" + std::to_string(++i) + ".sim", Viewport::get().getZoomFactor(), Viewport::get().getCenterInWorldPos()};
-    auto jobId = _persisterFacade->scheduleSaveSimulationToFile(senderInfo, saveData);
 
-    SavepointTableService::get().insertEntry(
-        _savepointTable.value(), SavepointEntry{.id = jobId.value, .filename = "", .state = SavepointState_InQueue, .timestamp = "", .name = "", .timestep = 0});
+    if (_saveMode == SaveMode_Circular) {
+        SavepointTableService::get().truncate(_savepointTable.value(), _numberOfFiles - 1);
+    }
+    auto senderInfo = SenderInfo{.senderId = SenderId{AutosaveSenderId}, .wishResultData = true, .wishErrorInfo = true};
+    auto saveData = SaveSimulationRequestData{
+        .filename = _directory,
+        .zoom = Viewport::get().getZoomFactor(),
+        .center = Viewport::get().getCenterInWorldPos(),
+        .generateNameFromTimestep = true};
+    auto requestId = _persisterFacade->scheduleSaveSimulationToFile(senderInfo, saveData);
+
+    SavepointTableService::get().insertEntryAtFront(
+        _savepointTable.value(),
+        SavepointEntry{
+            .filename = "",
+            .state = SavepointState_InQueue,
+            .timestamp = "",
+            .name = "",
+            .timestep = 0,
+            .requestId = requestId.value,
+        });
 }
 
 void AutosaveWindow::updateSavepoint(int row)
@@ -218,17 +234,18 @@ void AutosaveWindow::updateSavepoint(int row)
     auto entry = _savepointTable->at(row);
     if (entry.state != SavepointState_Persisted) {
         auto newEntry = _savepointTable->at(row);
-        auto requestState = _persisterFacade->getRequestState(PersisterRequestId{newEntry.id});
+        auto requestState = _persisterFacade->getRequestState(PersisterRequestId{newEntry.requestId});
         if (requestState.has_value()) {
             if (requestState.value() == PersisterRequestState::InProgress) {
                 newEntry.state = SavepointState_InProgress;
             }
             if (requestState.value() == PersisterRequestState::Finished) {
                 newEntry.state = SavepointState_Persisted;
-                auto jobResult = _persisterFacade->fetchSaveSimulationData(PersisterRequestId{newEntry.id});
-                newEntry.timestep = jobResult.timestep;
-                newEntry.timestamp = StringHelper::format(jobResult.timestamp);
-                newEntry.name = jobResult.name;
+                auto requestResult = _persisterFacade->fetchSaveSimulationData(PersisterRequestId{newEntry.requestId});
+                newEntry.timestep = requestResult.timestep;
+                newEntry.timestamp = StringHelper::format(requestResult.timestamp);
+                newEntry.name = requestResult.name;
+                newEntry.filename = requestResult.filename;
             }
             if (requestState.value() == PersisterRequestState::Error) {
                 newEntry.state = SavepointState_Error;
@@ -254,5 +271,5 @@ std::string AutosaveWindow::getSavepointFilename() const
 
 void AutosaveWindow::validationAndCorrection()
 {
-    _numberOfFiles = std::max(1, _numberOfFiles);
+    _numberOfFiles = std::max(2, _numberOfFiles);
 }
