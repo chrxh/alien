@@ -5,9 +5,8 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/GlobalSettings.h"
-#include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/LegacyAuxiliaryDataParserService.h"
+#include "PersisterInterface/SerializerService.h"
 
 #include "AlienImGui.h"
 #include "CellFunctionStrings.h"
@@ -2440,7 +2439,7 @@ void SimulationParametersWindow::onOpenParameters()
         _startingPath = firstFilenameCopy.remove_filename().string();
 
         SimulationParameters parameters;
-        if (!SerializerService::deserializeSimulationParametersFromFile(parameters, firstFilename.string())) {
+        if (!SerializerService::get().deserializeSimulationParametersFromFile(parameters, firstFilename.string())) {
             GenericMessageDialog::get().information("Open simulation parameters", "The selected file could not be opened.");
         } else {
             _simulationFacade->setSimulationParameters(parameters);
@@ -2457,7 +2456,7 @@ void SimulationParametersWindow::onSaveParameters()
         _startingPath = firstFilenameCopy.remove_filename().string();
 
         auto parameters = _simulationFacade->getSimulationParameters();
-        if (!SerializerService::serializeSimulationParametersToFile(firstFilename.string(), parameters)) {
+        if (!SerializerService::get().serializeSimulationParametersToFile(firstFilename.string(), parameters)) {
             GenericMessageDialog::get().information("Save simulation parameters", "The selected file could not be saved.");
         }
     });

@@ -1,10 +1,13 @@
 #pragma once
 
-#include "EngineInterface/DeserializedSimulation.h"
+#include "Base/Singleton.h"
+#include "PersisterInterface/DeserializedSimulation.h"
 #include "EngineInterface/SimulationFacade.h"
 
 class SerializationHelperService
 {
+    MAKE_SINGLETON(SerializationHelperService);
+
 public:
-    static DeserializedSimulation getDeserializedSerialization(SimulationFacade const& simulationFacade);
+    DeserializedSimulation getDeserializedSerialization(SimulationFacade const& simulationFacade);
 };

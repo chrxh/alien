@@ -4,7 +4,7 @@
 
 #include "Base/Resources.h"
 #include "Base/GlobalSettings.h"
-#include "EngineInterface/SerializerService.h"
+#include "PersisterInterface/SerializerService.h"
 #include "EngineInterface/SimulationFacade.h"
 
 #include "Viewport.h"
@@ -63,6 +63,6 @@ void AutosaveController::process()
 
 void AutosaveController::onSave()
 {
-    DeserializedSimulation sim = SerializationHelperService::getDeserializedSerialization(_simulationFacade);
-    SerializerService::serializeSimulationToFiles(Const::AutosaveFile, sim);
+    DeserializedSimulation sim = SerializationHelperService::get().getDeserializedSerialization(_simulationFacade);
+    SerializerService::get().serializeSimulationToFiles(Const::AutosaveFile, sim);
 }

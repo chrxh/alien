@@ -152,11 +152,11 @@ void MultiplierWindow::onBuild()
     _origSelection = _simulationFacade->getSelectedSimulationData(true);
     auto multiplicationResult = [&] {
         if (_mode == MultiplierMode_Grid) {
-            return DescriptionEditService::gridMultiply(_origSelection, _gridParameters);
+            return DescriptionEditService::get().gridMultiply(_origSelection, _gridParameters);
         } else {
             auto data = _simulationFacade->getSimulationData();
             auto overlappingCheckSuccessful = true;
-            auto result = DescriptionEditService::randomMultiply(
+            auto result = DescriptionEditService::get().randomMultiply(
                 _origSelection, _randomParameters, _simulationFacade->getWorldSize(), std::move(data), overlappingCheckSuccessful);
             if (!overlappingCheckSuccessful) {
                 GenericMessageDialog::get().information("Random multiplication", "Non-overlapping copies could not be created.");

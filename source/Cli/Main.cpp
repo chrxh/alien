@@ -8,7 +8,7 @@
 #include "Base/Resources.h"
 #include "Base/StringHelper.h"
 #include "Base/FileLogger.h"
-#include "EngineInterface/SerializerService.h"
+#include "PersisterInterface/SerializerService.h"
 #include "EngineImpl/SimulationFacadeImpl.h"
 
 int main(int argc, char** argv)
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
             return 1;
         }
         DeserializedSimulation simData;
-        if (!SerializerService::deserializeSimulationFromFiles(simData, inputFilename)) {
+        if (!SerializerService::get().deserializeSimulationFromFiles(simData, inputFilename)) {
             std::cout << "Could not read from input files." << std::endl;
             return 1;
         }
@@ -74,7 +74,7 @@ int main(int argc, char** argv)
             std::cout << "No output file given." << std::endl;
             return 1;
         }
-        if (!SerializerService::serializeSimulationToFiles(outputFilename, simData)) {
+        if (!SerializerService::get().serializeSimulationToFiles(outputFilename, simData)) {
             std::cout << "Could not write to output files." << std::endl;
             return 1;
         }

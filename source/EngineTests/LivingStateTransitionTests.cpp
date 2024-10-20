@@ -114,7 +114,7 @@ TEST_F(LivingStateTransitionTests, noSelfReplicatingConstructorIsDyingIfAdjacent
 
 TEST_F(LivingStateTransitionTests, separatingSelfReplicatorIsDyingIfAdjacentDying)
 {
-    auto genome = GenomeDescriptionService::convertDescriptionToBytes(
+    auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(
         GenomeDescription().setHeader(GenomeHeaderDescription().setSeparateConstruction(true)).setCells({CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy())}));
 
     DataDescription data;
@@ -138,7 +138,7 @@ TEST_F(LivingStateTransitionTests, separatingSelfReplicatorIsDyingIfAdjacentDyin
 
 TEST_F(LivingStateTransitionTests, noSeparatingSelfReplicatorStaysReadyIfAdjacentDying)
 {
-    auto genome = GenomeDescriptionService::convertDescriptionToBytes(
+    auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(
         GenomeDescription()
             .setHeader(GenomeHeaderDescription().setSeparateConstruction(false))
             .setCells({CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()), CellGenomeDescription()}));

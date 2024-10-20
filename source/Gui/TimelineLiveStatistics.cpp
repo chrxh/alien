@@ -21,7 +21,7 @@ void TimelineLiveStatistics::update(TimelineStatistics const& data, uint64_t tim
 
     _timeSinceSimStart += toDouble(duration) / 1000;
 
-    auto newDataPoint = StatisticsConverterService::convert(data, timestep, _timeSinceSimStart, _lastData, _lastTimestep);
+    auto newDataPoint = StatisticsConverterService::get().convert(data, timestep, _timeSinceSimStart, _lastData, _lastTimestep);
     _dataPointCollectionHistory.emplace_back(newDataPoint);
     _lastData = data;
     _lastTimestep = timestep;

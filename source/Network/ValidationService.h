@@ -2,8 +2,13 @@
 
 #include <string>
 
+#include "Base/Singleton.h"
+
+
 class ValidationService
 {
+    MAKE_SINGLETON(ValidationService);
+
 public:
-    static bool isStringValidForDatabase(std::string const& s);
+    bool isStringValidForDatabase(std::string const& s);
 };

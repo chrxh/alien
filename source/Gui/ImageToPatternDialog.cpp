@@ -112,7 +112,7 @@ void ImageToPatternDialog::show()
             }
         }
 
-        DescriptionEditService::reconnectCells(dataDesc, 1 * 1.5f);
+        DescriptionEditService::get().reconnectCells(dataDesc, 1 * 1.5f);
         dataDesc.setCenter(Viewport::get().getCenterInWorldPos());
 
         _simulationFacade->addAndSelectSimulationData(dataDesc);

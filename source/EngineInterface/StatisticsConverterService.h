@@ -1,11 +1,14 @@
 #include <optional>
 
+#include "Base/Singleton.h"
 #include "EngineInterface/DataPointCollection.h"
 
 class StatisticsConverterService
 {
+    MAKE_SINGLETON(StatisticsConverterService);
+
 public:
-    static DataPointCollection convert(
+    DataPointCollection convert(
         TimelineStatistics const& newData,
         uint64_t timestep,
         double time,

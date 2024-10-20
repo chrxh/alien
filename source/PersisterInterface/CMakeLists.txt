@@ -1,8 +1,12 @@
 
 add_library(PersisterInterface
+    AuxiliaryData.h
+    AuxiliaryDataParserService.cpp
+    AuxiliaryDataParserService.h
     Definitions.h
     DeleteNetworkResourceRequestData.h
     DeleteNetworkResourceResultData.h
+    DeserializedSimulation.h
     DownloadCache.h
     DownloadNetworkResourceRequestData.h
     DownloadNetworkResourceResultData.h
@@ -12,6 +16,8 @@ add_library(PersisterInterface
     GetNetworkResourcesResultData.h
     GetUserNamesForEmojiRequestData.h
     GetUserNamesForEmojiResultData.h
+    LegacyAuxiliaryDataParserService.cpp
+    LegacyAuxiliaryDataParserService.h
     LoginRequestData.h
     LoginResultData.h
     MoveNetworkResourceRequestData.h
@@ -20,6 +26,7 @@ add_library(PersisterInterface
     PersisterFacade.h
     PersisterRequestId.h
     PersisterRequestState.h
+    PropertyParser.h
     ReadSimulationRequestData.h
     ReadSimulationResultData.h
     ReplaceNetworkResourceRequestData.h
@@ -28,6 +35,9 @@ add_library(PersisterInterface
     SaveSimulationResultData.h
     SenderId.h
     SenderInfo.h
+    SerializerService.cpp
+    SerializerService.h
+    SerializedSimulation.h
     TaskProcessor.cpp
     TaskProcessor.h
     ToggleEmojiNetworkResourceRequestData.h
@@ -38,6 +48,10 @@ add_library(PersisterInterface
 target_link_libraries(PersisterInterface Base)
 
 target_link_libraries(PersisterInterface Boost::boost)
+target_link_libraries(PersisterInterface ZLIB::ZLIB)
+
+find_path(ZSTR_INCLUDE_DIRS "zstr.hpp")
+target_include_directories(PersisterInterface PRIVATE ${ZSTR_INCLUDE_DIRS})
 
 if (MSVC)
     target_compile_options(PersisterInterface PRIVATE "/MP")

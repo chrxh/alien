@@ -104,7 +104,8 @@ TEST_F(SensorTests, scanNeighborhood_densityTooLow)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(10).height(10).cellDistance(2.5f)));
+    data.add(DescriptionEditService::get().get().createRect(
+        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(10).height(10).cellDistance(2.5f)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -135,7 +136,7 @@ TEST_F(SensorTests, scanNeighborhood_wrongColor)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(10).height(10).cellDistance(2.5f)));
+    data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(10).height(10).cellDistance(2.5f)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -166,7 +167,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtFront)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
+    data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -205,7 +206,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(0.5f)));
+    data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -244,7 +245,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
+    data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -283,7 +284,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtBack)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({190.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
+    data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({190.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -322,8 +323,8 @@ TEST_F(SensorTests, scanNeighborhood_twoMasses)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(0.8f)));
-    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 200.0f}).width(16).height(16).cellDistance(0.5f)));
+    data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(0.8f)));
+    data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 200.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -359,7 +360,7 @@ TEST_F(SensorTests, scanByAngle_found)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
+    data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -393,7 +394,7 @@ TEST_F(SensorTests, scanByAngle_wrongAngle)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
+    data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -429,7 +430,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionEditService::createRect(
+    data.add(DescriptionEditService::get().createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(7)));
 
     _simulationFacade->setSimulationData(data);
@@ -470,10 +471,10 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found_wallBehi
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    //data.add(DescriptionEditService::createRect(
+    //data.add(DescriptionEditService::get().createRect(
     //    DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(1).height(16).cellDistance(0.5f).mutationId(0)));
 
-    data.add(DescriptionEditService::createRect(
+    data.add(DescriptionEditService::get().createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(7)));
 
     _simulationFacade->setSimulationData(data);
@@ -509,7 +510,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionEditService::createRect(
+    data.add(DescriptionEditService::get().createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(7)));
 
     _simulationFacade->setSimulationData(data);
@@ -545,10 +546,10 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound_wallI
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionEditService::createRect(
+    data.add(DescriptionEditService::get().createRect(
         DescriptionEditService::CreateRectParameters().center({50.0f, 100.0f}).width(1).height(16).cellDistance(0.5f).mutationId(0)));
 
-    data.add(DescriptionEditService::createRect(
+    data.add(DescriptionEditService::get().createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(7)));
 
     _simulationFacade->setSimulationData(data);
@@ -584,7 +585,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_found)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionEditService::createRect(
+    data.add(DescriptionEditService::get().createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(6)));
 
     _simulationFacade->setSimulationData(data);
@@ -626,7 +627,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_notFound)
                  .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
 
-        data.add(DescriptionEditService::createRect(
+        data.add(DescriptionEditService::get().createRect(
             DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(otherMutantId)));
 
         _simulationFacade->clear();
@@ -665,7 +666,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_found)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionEditService::createRect(
+    data.add(DescriptionEditService::get().createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(0)));
 
     _simulationFacade->setSimulationData(data);
@@ -701,7 +702,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_notFound)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionEditService::createRect(
+    data.add(DescriptionEditService::get().createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(1)));
 
     _simulationFacade->setSimulationData(data);
@@ -737,7 +738,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_found)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionEditService::createRect(
+    data.add(DescriptionEditService::get().createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(1)));
 
     _simulationFacade->setSimulationData(data);
@@ -773,7 +774,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_notFound)
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionEditService::createRect(
+    data.add(DescriptionEditService::get().createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(0)));
 
     _simulationFacade->setSimulationData(data);
@@ -812,7 +813,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_found)
                  .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
 
-        data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters()
+        data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
                                                         .center({10.0f, 100.0f})
                                                         .width(16)
                                                         .height(16)
@@ -859,7 +860,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
                  .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
 
-        data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters()
+        data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
                                                         .center({10.0f, 100.0f})
                                                         .width(16)
                                                         .height(16)
@@ -904,7 +905,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionEditService::createRect(
+    data.add(DescriptionEditService::get().createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(0).genomeComplexity(100.0f)));
 
     _simulationFacade->setSimulationData(data);
@@ -941,7 +942,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionEditService::createRect(
+    data.add(DescriptionEditService::get().createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(1).genomeComplexity(100.0f)));
 
     _simulationFacade->setSimulationData(data);
@@ -980,7 +981,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_found)
                  .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
 
-        data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters()
+        data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
                                                         .center({10.0f, 100.0f})
                                                         .width(16)
                                                         .height(16)
@@ -1027,7 +1028,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
                  .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
 
-        data.add(DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters()
+        data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
                                                         .center({10.0f, 100.0f})
                                                         .width(16)
                                                         .height(16)
@@ -1072,7 +1073,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionEditService::createRect(
+    data.add(DescriptionEditService::get().createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(0).genomeComplexity(1000.0f)));
 
     _simulationFacade->setSimulationData(data);
@@ -1109,7 +1110,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
              .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionEditService::createRect(
+    data.add(DescriptionEditService::get().createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).mutationId(1).genomeComplexity(1000.0f)));
 
     _simulationFacade->setSimulationData(data);
@@ -1142,7 +1143,7 @@ TEST_F(SensorTests, scanNeighborhood_minRange_found)
     data.addConnection(1, 2);
 
     data.add(
-        DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
+        DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -1174,7 +1175,7 @@ TEST_F(SensorTests, scanNeighborhood_minRange_notFound)
     data.addConnection(1, 2);
 
     data.add(
-        DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
+        DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -1206,7 +1207,7 @@ TEST_F(SensorTests, scanNeighborhood_maxRange_found)
     data.addConnection(1, 2);
 
     data.add(
-        DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
+        DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -1238,7 +1239,7 @@ TEST_F(SensorTests, scanNeighborhood_maxRange_notFound)
     data.addConnection(1, 2);
 
     data.add(
-        DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
+        DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);

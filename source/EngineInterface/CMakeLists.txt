@@ -1,9 +1,6 @@
 
 add_library(EngineInterface
     ArraySizes.h
-    AuxiliaryData.h
-    AuxiliaryDataParserService.cpp
-    AuxiliaryDataParserService.h
     CellFunctionConstants.h
     Colors.h
     DataPointCollection.cpp
@@ -13,7 +10,6 @@ add_library(EngineInterface
     DescriptionEditService.h
     Descriptions.cpp
     Descriptions.h
-    DeserializedSimulation.h
     EngineConstants.h
     Features.cpp
     Features.h
@@ -24,21 +20,15 @@ add_library(EngineInterface
     GeneralSettings.h
     GpuSettings.h
     InspectedEntityIds.h
-    LegacyAuxiliaryDataParserService.cpp
-    LegacyAuxiliaryDataParserService.h
     Motion.h
     MutationType.h
     OverlayDescriptions.h
     PreviewDescriptionService.cpp
     PreviewDescriptionService.h
     PreviewDescriptions.h
-    PropertyParser.h
     RadiationSource.h
     RawStatisticsData.h
     SelectionShallowData.h
-    SerializerService.cpp
-    SerializerService.h
-    SerializedSimulation.h
     Settings.h
     ShallowUpdateSelectionData.h
     ShapeGenerator.cpp
@@ -60,10 +50,6 @@ add_library(EngineInterface
 target_link_libraries(EngineInterface Base)
 
 target_link_libraries(EngineInterface Boost::boost)
-target_link_libraries(EngineInterface ZLIB::ZLIB)
-
-find_path(ZSTR_INCLUDE_DIRS "zstr.hpp")
-target_include_directories(EngineInterface PRIVATE ${ZSTR_INCLUDE_DIRS})
 
 if (MSVC)
     target_compile_options(EngineInterface PRIVATE "/MP")

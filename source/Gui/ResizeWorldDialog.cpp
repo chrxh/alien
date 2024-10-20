@@ -90,9 +90,9 @@ void ResizeWorldDialog::onResizing()
 
     _simulationFacade->newSimulation(name, timestep, generalSettings, parameters);
 
-    DescriptionEditService::correctConnections(content, {_width, _height});
+    DescriptionEditService::get().correctConnections(content, {_width, _height});
     if (_scaleContent) {
-        DescriptionEditService::duplicate(content, origWorldSize, {_width, _height});
+        DescriptionEditService::get().duplicate(content, origWorldSize, {_width, _height});
     }
     _simulationFacade->setClusteredSimulationData(content);
     _simulationFacade->setStatisticsHistory(statistics);

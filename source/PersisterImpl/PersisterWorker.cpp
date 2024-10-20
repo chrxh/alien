@@ -7,7 +7,7 @@
 
 #include "Base/LoggingService.h"
 #include "EngineInterface/GenomeDescriptionService.h"
-#include "EngineInterface/SerializerService.h"
+#include "PersisterInterface/SerializerService.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "Gui/SerializationHelperService.h"
 #include "Network/NetworkService.h"
@@ -213,7 +213,7 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveSi
     }
 
     try {
-        if (!SerializerService::serializeSimulationToFiles(requestData.filename, deserializedData)) {
+        if (!SerializerService::get().serializeSimulationToFiles(requestData.filename, deserializedData)) {
             throw std::runtime_error("Error");
         }
 
@@ -235,7 +235,7 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, ReadSi
         auto const& requestData = request->getData();
 
         DeserializedSimulation deserializedData;
-        if (!SerializerService::deserializeSimulationFromFiles(deserializedData, requestData.filename)) {
+        if (!SerializerService::get().deserializeSimulationFromFiles(deserializedData, requestData.filename)) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The selected file could not be opened."});
         }
@@ -325,7 +325,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     if (requestData.resourceType == NetworkResourceType_Simulation) {
         DeserializedSimulation deserializedSimulation;
         if (!cachedSimulation.has_value()) {
-            if (!SerializerService::deserializeSimulationFromStrings(deserializedSimulation, serializedSim)) {
+            if (!SerializerService::get().deserializeSimulationFromStrings(deserializedSimulation, serializedSim)) {
                 return std::make_shared<_PersisterRequestError>(
                     request->getRequestId(),
                     request->getSenderInfo().senderId,
@@ -340,13 +340,13 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         resultData.resourceData.emplace<DeserializedSimulation>(std::move(deserializedSimulation));
     } else {
         std::vector<uint8_t> genome;
-        if (!SerializerService::deserializeGenomeFromString(genome, serializedSim.mainData)) {
+        if (!SerializerService::get().deserializeGenomeFromString(genome, serializedSim.mainData)) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(),
                 request->getSenderInfo().senderId,
                 PersisterErrorInfo{"Failed to load genome. Your program version may not match."});
         }
-        resultData.resourceData = GenomeDescriptionService::convertBytesToDescription(genome);
+        resultData.resourceData = GenomeDescriptionService::get().convertBytesToDescription(genome);
     }
 
     return std::make_shared<_DownloadNetworkResourceRequestResult>(request->getRequestId(), resultData);
@@ -389,7 +389,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         }
 
         SerializedSimulation serializedSim;
-        if (!SerializerService::serializeSimulationToStrings(serializedSim, deserializedSim)) {
+        if (!SerializerService::get().serializeSimulationToStrings(serializedSim, deserializedSim)) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(),
                 request->getSenderInfo().senderId,
@@ -406,10 +406,10 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The is no valid genome for uploading selected."});
         }
-        auto genomeData = GenomeDescriptionService::convertDescriptionToBytes(genome);
-        numObjects = GenomeDescriptionService::getNumNodesRecursively(genomeData, true);
+        auto genomeData = GenomeDescriptionService::get().convertDescriptionToBytes(genome);
+        numObjects = GenomeDescriptionService::get().getNumNodesRecursively(genomeData, true);
 
-        if (!SerializerService::serializeGenomeToString(mainData, genomeData)) {
+        if (!SerializerService::get().serializeGenomeToString(mainData, genomeData)) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The genome could not be serialized for uploading."});
         }
@@ -479,7 +479,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         }
 
         SerializedSimulation serializedSim;
-        if (!SerializerService::serializeSimulationToStrings(serializedSim, deserializedSim)) {
+        if (!SerializerService::get().serializeSimulationToStrings(serializedSim, deserializedSim)) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The simulation could not be serialized for replacing."});
         }
@@ -494,10 +494,10 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The is no valid genome for replacement selected."});
         }
-        auto genomeData = GenomeDescriptionService::convertDescriptionToBytes(genome);
-        numObjects = GenomeDescriptionService::getNumNodesRecursively(genomeData, true);
+        auto genomeData = GenomeDescriptionService::get().convertDescriptionToBytes(genome);
+        numObjects = GenomeDescriptionService::get().getNumNodesRecursively(genomeData, true);
 
-        if (!SerializerService::serializeGenomeToString(mainData, genomeData)) {
+        if (!SerializerService::get().serializeGenomeToString(mainData, genomeData)) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The genome could not be serialized for uploading."});
         }

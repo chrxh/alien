@@ -316,7 +316,7 @@ bool NetworkService::getNetworkResources(std::vector<NetworkResourceRawTO>& resu
         std::stringstream stream(postResult->body);
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
-        result = NetworkResourceParserService::decodeRemoteSimulationData(tree);
+        result = NetworkResourceParserService::get().decodeRemoteSimulationData(tree);
         return true;
     } catch (...) {
         logNetworkError();
@@ -339,7 +339,7 @@ bool NetworkService::getUserList(std::vector<UserTO>& result, bool withRetry)
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
         result.clear();
-        result = NetworkResourceParserService::decodeUserData(tree);
+        result = NetworkResourceParserService::get().decodeUserData(tree);
         for (UserTO& userData : result) {
             userData.timeSpent = userData.timeSpent * RefreshInterval / 60;
         }

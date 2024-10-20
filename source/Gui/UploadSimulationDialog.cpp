@@ -3,7 +3,7 @@
 #include <imgui.h>
 
 #include "Base/GlobalSettings.h"
-#include "EngineInterface/SerializerService.h"
+#include "PersisterInterface/SerializerService.h"
 #include "Network/NetworkService.h"
 #include "Network/ValidationService.h"
 
@@ -115,7 +115,7 @@ void UploadSimulationDialog::processIntern()
 
     ImGui::BeginDisabled(_resourceName.empty());
     if (AlienImGui::Button("OK")) {
-        if (ValidationService::isStringValidForDatabase(_resourceName) && ValidationService::isStringValidForDatabase(_resourceDescription)) {
+        if (ValidationService::get().isStringValidForDatabase(_resourceName) && ValidationService::get().isStringValidForDatabase(_resourceDescription)) {
             close();
             onUpload();
         } else {

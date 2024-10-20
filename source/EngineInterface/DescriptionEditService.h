@@ -1,10 +1,14 @@
 #pragma once
 
 #include "Base/Definitions.h"
+#include "Base/Singleton.h"
+
 #include "Descriptions.h"
 
 class DescriptionEditService
 {
+    MAKE_SINGLETON(DescriptionEditService);
+
 public:
     struct CreateRectParameters
     {
@@ -22,7 +26,7 @@ public:
         MEMBER_DECLARATION(CreateRectParameters, int, mutationId, 0);
         MEMBER_DECLARATION(CreateRectParameters, float, genomeComplexity, 0);
     };
-    static DataDescription createRect(CreateRectParameters const& parameters);
+    DataDescription createRect(CreateRectParameters const& parameters);
 
     struct CreateHexParameters
     {
@@ -37,7 +41,7 @@ public:
         MEMBER_DECLARATION(CreateHexParameters, bool, barrier, false);
         MEMBER_DECLARATION(CreateHexParameters, bool, randomCreatureId, true);
     };
-    static DataDescription createHex(CreateHexParameters const& parameters);
+    DataDescription createHex(CreateHexParameters const& parameters);
 
     struct CreateUnconnectedCircleParameters
     {
@@ -51,9 +55,9 @@ public:
         MEMBER_DECLARATION(CreateUnconnectedCircleParameters, bool, barrier, false);
         MEMBER_DECLARATION(CreateUnconnectedCircleParameters, bool, randomCreatureId, true);
     };
-    static DataDescription createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters);
+    DataDescription createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters);
 
-    static void duplicate(ClusteredDataDescription& data, IntVector2D const& origWorldSize, IntVector2D const& worldSize);
+    void duplicate(ClusteredDataDescription& data, IntVector2D const& origWorldSize, IntVector2D const& worldSize);
 
     struct GridMultiplyParameters
     {
@@ -70,7 +74,7 @@ public:
         MEMBER_DECLARATION(GridMultiplyParameters, float, verticalVelYinc, 0);
         MEMBER_DECLARATION(GridMultiplyParameters, float, verticalAngularVelInc, 0);
     };
-    static DataDescription gridMultiply(DataDescription const& input, GridMultiplyParameters const& parameters);
+    DataDescription gridMultiply(DataDescription const& input, GridMultiplyParameters const& parameters);
 
     struct RandomMultiplyParameters
     {
@@ -85,7 +89,7 @@ public:
         MEMBER_DECLARATION(RandomMultiplyParameters, float, maxAngularVel, 0);
         MEMBER_DECLARATION(RandomMultiplyParameters, bool, overlappingCheck, false);
     };
-    static DataDescription randomMultiply(
+    DataDescription randomMultiply(
         DataDescription const& input,
         RandomMultiplyParameters const& parameters,
         IntVector2D const& worldSize,
@@ -93,34 +97,34 @@ public:
         bool& overlappingCheckSuccessful);
 
     using Occupancy = std::unordered_map<IntVector2D, std::vector<RealVector2D>>;
-    static void
+    void
     addIfSpaceAvailable(DataDescription& result, Occupancy& cellOccupancy, DataDescription const& toAdd, float distance, IntVector2D const& worldSize);
 
-    static void reconnectCells(DataDescription& data, float maxDistance);
-    static void removeStickiness(DataDescription& data);
-    static void correctConnections(ClusteredDataDescription& data, IntVector2D const& worldSize);
+    void reconnectCells(DataDescription& data, float maxDistance);
+    void removeStickiness(DataDescription& data);
+    void correctConnections(ClusteredDataDescription& data, IntVector2D const& worldSize);
 
-    static void randomizeCellColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes);
-    static void randomizeGenomeColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes);
-    static void randomizeEnergies(ClusteredDataDescription& data, float minEnergy, float maxEnergy);
-    static void randomizeAges(ClusteredDataDescription& data, int minAge, int maxAge);
-    static void randomizeCountdowns(ClusteredDataDescription& data, int minValue, int maxValue);
-    static void randomizeMutationIds(ClusteredDataDescription& data);
+    void randomizeCellColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes);
+    void randomizeGenomeColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes);
+    void randomizeEnergies(ClusteredDataDescription& data, float minEnergy, float maxEnergy);
+    void randomizeAges(ClusteredDataDescription& data, int minAge, int maxAge);
+    void randomizeCountdowns(ClusteredDataDescription& data, int minValue, int maxValue);
+    void randomizeMutationIds(ClusteredDataDescription& data);
 
-    static void generateExecutionOrderNumbers(DataDescription& data, std::unordered_set<uint64_t> const& cellIds, int maxBranchNumbers);
+    void generateExecutionOrderNumbers(DataDescription& data, std::unordered_set<uint64_t> const& cellIds, int maxBranchNumbers);
 
-    static uint64_t getId(CellOrParticleDescription const& entity);
-    static RealVector2D getPos(CellOrParticleDescription const& entity);
-    static std::vector<CellOrParticleDescription> getObjects(DataDescription const& data);
-    static std::vector<CellOrParticleDescription> getConstructorToMainGenomes(DataDescription const& data);
+    uint64_t getId(CellOrParticleDescription const& entity);
+    RealVector2D getPos(CellOrParticleDescription const& entity);
+    std::vector<CellOrParticleDescription> getObjects(DataDescription const& data);
+    std::vector<CellOrParticleDescription> getConstructorToMainGenomes(DataDescription const& data);
 
-    static void removeMetadata(DataDescription& data);
-    static void generateNewCreatureIds(DataDescription& data);
-    static void generateNewCreatureIds(ClusteredDataDescription& data);
+    void removeMetadata(DataDescription& data);
+    void generateNewCreatureIds(DataDescription& data);
+    void generateNewCreatureIds(ClusteredDataDescription& data);
 
 private:
-    static void removeMetadata(CellDescription& cell);
-    static bool isCellPresent(
+    void removeMetadata(CellDescription& cell);
+    bool isCellPresent(
         Occupancy const& cellPosBySlot,
         SpaceCalculator const& spaceCalculator,
         RealVector2D const& posToCheck,

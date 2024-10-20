@@ -4,7 +4,8 @@
 
 #include <boost/property_tree/ptree_fwd.hpp>
 
-#include "SimulationParameters.h"
+#include "Base/Singleton.h"
+#include "EngineInterface/SimulationParameters.h"
 
 struct MissingFeatures
 {
@@ -86,9 +87,11 @@ struct LegacyParameters
 
 class LegacyAuxiliaryDataParserService
 {
+    MAKE_SINGLETON(LegacyAuxiliaryDataParserService);
+
 public:
     //Note: missingFeatures and missingParameters are deprecated, use programVersion instead
-    static void searchAndApplyLegacyParameters(
+    void searchAndApplyLegacyParameters(
         std::string const& programVersion,
         boost::property_tree::ptree& tree,
         MissingFeatures const& missingFeatures,
@@ -96,7 +99,7 @@ public:
         SimulationParameters& parameters);
 
 private:
-    static void activateParametersAndFeaturesForLegacyFiles(
+    void activateParametersAndFeaturesForLegacyFiles(
         std::string const& programVersion,
         MissingFeatures const& missingFeatures,
         LegacyFeatures const& legacyFeatures,

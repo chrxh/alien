@@ -313,7 +313,7 @@ namespace
                     }
                     targetAngle += constructor.constructionAngle1;
                     auto direction = Math::unitVectorOfAngle(targetAngle);
-                    auto subGenome = GenomeDescriptionService::convertBytesToDescription(data);
+                    auto subGenome = GenomeDescriptionService::get().convertBytesToDescription(data);
                     auto previewPart = convertToPreviewDescriptionIntern(
                         subGenome, cellIntern.nodeIndex, constructor.constructionAngle2, cellIntern.pos + direction, targetAngle, parameters);
                     insert(result, previewPart);

@@ -2,26 +2,11 @@
 
 #include <deque>
 
-#include "Definitions.h"
-#include "AlienWindow.h"
 #include "PersisterInterface/PersisterFacade.h"
 
-enum class SavepointState
-{
-    InQueue,
-    InProgress,
-    Persisted,
-    Error
-};
-
-struct SavepointEntry
-{
-    SavepointState state = SavepointState::InQueue;
-    std::string id;
-    std::string timestamp;
-    std::string name;
-    uint64_t timestep;
-};
+#include "Definitions.h"
+#include "AlienWindow.h"
+#include "SavepointTableManager.h"
 
 class AutosaveWindow : public AlienWindow<SimulationFacade, PersisterFacade>
 {
@@ -67,5 +52,5 @@ private:
     int _origNumberOfFiles = 20;
     int _numberOfFiles = 20;
 
-    std::deque<SavepointEntry> _savePoints;
+    std::deque<SavepointEntry> _savepoints;
 };

@@ -10,7 +10,7 @@
 #include "Network/NetworkResourceTreeTO.h"
 #include "Network/NetworkResourceRawTO.h"
 #include "Network/UserTO.h"
-#include "EngineInterface/SerializerService.h"
+#include "PersisterInterface/SerializerService.h"
 #include "PersisterInterface/PersisterFacade.h"
 
 #include "AlienWindow.h"

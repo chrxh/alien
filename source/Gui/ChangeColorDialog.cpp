@@ -72,9 +72,9 @@ void ChangeColorDialog::onChangeColor(GenomeDescription& genome)
         }
         if (_includeSubGenomes) {
             if (auto subGenome = node.getGenome()) {
-                auto subGenomeDesc = GenomeDescriptionService::convertBytesToDescription(*subGenome);
+                auto subGenomeDesc = GenomeDescriptionService::get().convertBytesToDescription(*subGenome);
                 onChangeColor(subGenomeDesc);
-                auto newSubGenome = GenomeDescriptionService::convertDescriptionToBytes(subGenomeDesc);
+                auto newSubGenome = GenomeDescriptionService::get().convertDescriptionToBytes(subGenomeDesc);
                 node.setGenome(newSubGenome);
             }
         }

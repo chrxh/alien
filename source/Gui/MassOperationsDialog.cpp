@@ -164,22 +164,22 @@ void MassOperationsDialog::onExecute()
         return result;
     };
     if (_randomizeCellColors) {
-        DescriptionEditService::randomizeCellColors(content, getColorVector(_checkedCellColors));
+        DescriptionEditService::get().randomizeCellColors(content, getColorVector(_checkedCellColors));
     }
     if (_randomizeGenomeColors) {
-        DescriptionEditService::randomizeGenomeColors(content, getColorVector(_checkedGenomeColors));
+        DescriptionEditService::get().randomizeGenomeColors(content, getColorVector(_checkedGenomeColors));
     }
     if (_randomizeEnergies) {
-        DescriptionEditService::randomizeEnergies(content, _minEnergy, _maxEnergy);
+        DescriptionEditService::get().randomizeEnergies(content, _minEnergy, _maxEnergy);
     }
     if (_randomizeAges) {
-        DescriptionEditService::randomizeAges(content, _minAge, _maxAge);
+        DescriptionEditService::get().randomizeAges(content, _minAge, _maxAge);
     }
     if (_randomizeCountdowns) {
-        DescriptionEditService::randomizeCountdowns(content, _minCountdown, _maxCountdown);
+        DescriptionEditService::get().randomizeCountdowns(content, _minCountdown, _maxCountdown);
     }
     if (_randomizeMutationId) {
-        DescriptionEditService::randomizeMutationIds(content);
+        DescriptionEditService::get().randomizeMutationIds(content);
     }
 
     if (_restrictToSelectedClusters) {

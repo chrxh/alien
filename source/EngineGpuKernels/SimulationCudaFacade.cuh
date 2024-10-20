@@ -119,7 +119,6 @@ private:
     mutable std::mutex _mutexForStatistics;
     std::optional<std::chrono::steady_clock::time_point> _lastStatisticsUpdateTime;
     std::optional<RawStatisticsData> _statisticsData;
-    StatisticsService _statisticsService;
     StatisticsHistory _statisticsHistory;
     std::shared_ptr<SimulationStatistics> _cudaSimulationStatistics;
 

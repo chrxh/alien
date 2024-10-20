@@ -168,7 +168,7 @@ TEST_F(TransmitterTests, distributeToConnectedCells)
 
 TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
 {
-    auto genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+    auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -225,7 +225,7 @@ TEST_F(TransmitterTests, distributeOnlyToActiveConstructors)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
-            .setCellFunction(ConstructorDescription().setGenome(GenomeDescriptionService::convertDescriptionToBytes(genome))),
+            .setCellFunction(ConstructorDescription().setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(genome))),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(1).setExecutionOrderNumber(1).setCellFunction(TransmitterDescription()),
     });
     data.addConnection(1, 2);
@@ -299,7 +299,7 @@ TEST_F(TransmitterTests, distributeNotToNotReadyConstructors)
     auto genome = GenomeDescription().setCells({
         CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()),
         CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()),
-        CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(GenomeDescriptionService::convertDescriptionToBytes(subgenome))),
+        CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(subgenome))),
     });
 
     DataDescription data;
@@ -309,7 +309,7 @@ TEST_F(TransmitterTests, distributeNotToNotReadyConstructors)
             .setPos({9.0f, 10.0f})
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(ConstructorDescription().setNumInheritedGenomeNodes(4).setGenome(GenomeDescriptionService::convertDescriptionToBytes(genome))),
+            .setCellFunction(ConstructorDescription().setNumInheritedGenomeNodes(4).setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(genome))),
         CellDescription()
             .setId(2)
             .setPos({10.0f, 10.0f})
@@ -322,7 +322,7 @@ TEST_F(TransmitterTests, distributeNotToNotReadyConstructors)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(ConstructorDescription().setGenome(GenomeDescriptionService::convertDescriptionToBytes(subgenome))),
+            .setCellFunction(ConstructorDescription().setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(subgenome))),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -358,7 +358,7 @@ TEST_F(TransmitterTests, distributeToReadyConstructors)
     auto genome = GenomeDescription().setCells({
         CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()),
         CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()),
-        CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(GenomeDescriptionService::convertDescriptionToBytes(subgenome))),
+        CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(subgenome))),
     });
 
     DataDescription data;
@@ -368,7 +368,7 @@ TEST_F(TransmitterTests, distributeToReadyConstructors)
             .setPos({9.0f, 10.0f})
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(ConstructorDescription().setNumInheritedGenomeNodes(4).setGenome(GenomeDescriptionService::convertDescriptionToBytes(genome))),
+            .setCellFunction(ConstructorDescription().setNumInheritedGenomeNodes(4).setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(genome))),
         CellDescription()
             .setId(2)
             .setPos({10.0f, 10.0f})
@@ -381,7 +381,7 @@ TEST_F(TransmitterTests, distributeToReadyConstructors)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
-            .setCellFunction(ConstructorDescription().setGenome(GenomeDescriptionService::convertDescriptionToBytes(subgenome))),
+            .setCellFunction(ConstructorDescription().setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(subgenome))),
         CellDescription()
             .setId(4)
             .setPos({12.0f, 10.0f})
@@ -423,7 +423,7 @@ TEST_F(TransmitterTests, distributeFromNotReadyToReadyConstructors)
     auto genome = GenomeDescription().setCells({
         CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()),
         CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()),
-        CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(GenomeDescriptionService::convertDescriptionToBytes(subgenome))),
+        CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(subgenome))),
     });
 
     DataDescription data;
@@ -434,7 +434,7 @@ TEST_F(TransmitterTests, distributeFromNotReadyToReadyConstructors)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
             .setEnergy(_parameters.cellNormalEnergy[0] * 2)
-            .setCellFunction(ConstructorDescription().setNumInheritedGenomeNodes(4).setGenome(GenomeDescriptionService::convertDescriptionToBytes(genome))),
+            .setCellFunction(ConstructorDescription().setNumInheritedGenomeNodes(4).setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(genome))),
         CellDescription()
             .setId(2)
             .setPos({10.0f, 10.0f})
@@ -444,7 +444,7 @@ TEST_F(TransmitterTests, distributeFromNotReadyToReadyConstructors)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
-            .setCellFunction(ConstructorDescription().setGenome(GenomeDescriptionService::convertDescriptionToBytes(subgenome))),
+            .setCellFunction(ConstructorDescription().setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(subgenome))),
         CellDescription().setId(4).setPos({12.0f, 10.0f}).setMaxConnections(1).setExecutionOrderNumber(0),
     });
     data.addConnection(1, 2);
