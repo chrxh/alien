@@ -26,10 +26,10 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
 {
     _simulationFacade = simulationFacade;
 
-    _isCellDetailOverlayActive = GlobalSettings::get().getBool("settings.simulation view.overlay", _isCellDetailOverlayActive);
-    _brightness = GlobalSettings::get().getFloat("windows.simulation view.brightness", _brightness);
-    _contrast = GlobalSettings::get().getFloat("windows.simulation view.contrast", _contrast);
-    _motionBlur = GlobalSettings::get().getFloat("windows.simulation view.motion blur factor", _motionBlur);
+    _isCellDetailOverlayActive = GlobalSettings::get().getValue("settings.simulation view.overlay", _isCellDetailOverlayActive);
+    _brightness = GlobalSettings::get().getValue("windows.simulation view.brightness", _brightness);
+    _contrast = GlobalSettings::get().getValue("windows.simulation view.contrast", _contrast);
+    _motionBlur = GlobalSettings::get().getValue("windows.simulation view.motion blur factor", _motionBlur);
 
     _shader = std::make_shared<_Shader>(Const::SimulationVertexShader, Const::SimulationFragmentShader);
 
@@ -90,10 +90,10 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
 
 void SimulationView::shutdown()
 {
-    GlobalSettings::get().setBool("settings.simulation view.overlay", _isCellDetailOverlayActive);
-    GlobalSettings::get().setFloat("windows.simulation view.brightness", _brightness);
-    GlobalSettings::get().setFloat("windows.simulation view.contrast", _contrast);
-    GlobalSettings::get().setFloat("windows.simulation view.motion blur factor", _motionBlur);
+    GlobalSettings::get().setValue("settings.simulation view.overlay", _isCellDetailOverlayActive);
+    GlobalSettings::get().setValue("windows.simulation view.brightness", _brightness);
+    GlobalSettings::get().setValue("windows.simulation view.contrast", _contrast);
+    GlobalSettings::get().setValue("windows.simulation view.motion blur factor", _motionBlur);
 }
 
 void SimulationView::resize(IntVector2D const& size)

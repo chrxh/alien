@@ -13,7 +13,7 @@
 void LogWindow::initIntern(GuiLogger logger)
 {
     _logger = logger;
-    _verbose = GlobalSettings::get().getBool("windows.log.verbose", false);
+    _verbose = GlobalSettings::get().getValue("windows.log.verbose", false);
 }
 
 LogWindow::LogWindow()
@@ -22,7 +22,7 @@ LogWindow::LogWindow()
 
 void LogWindow::shutdownIntern()
 {
-    GlobalSettings::get().setBool("windows.log.verbose", _verbose);
+    GlobalSettings::get().setValue("windows.log.verbose", _verbose);
 }
 
 void LogWindow::processIntern()

@@ -39,16 +39,16 @@ void StatisticsWindow::initIntern(SimulationFacade simulationFacade)
     if (path.has_parent_path()) {
         path = path.parent_path();
     }
-    _startingPath = GlobalSettings::get().getString("windows.statistics.starting path", path.string());
-    _settingsOpen = GlobalSettings::get().getBool("windows.statistics.settings.open", _settingsOpen);
-    _settingsHeight = GlobalSettings::get().getFloat("windows.statistics.settings.height", _settingsHeight);
-    _plotHeight = GlobalSettings::get().getFloat("windows.statistics.plot height", _plotHeight);
-    _plotMode = GlobalSettings::get().getInt("windows.statistics.mode", _plotMode);
-    _timeHorizonForLiveStatistics = GlobalSettings::get().getFloat("windows.statistics.live horizon", _timeHorizonForLiveStatistics);
-    _timeHorizonForLongtermStatistics = GlobalSettings::get().getFloat("windows.statistics.long term horizon", _timeHorizonForLongtermStatistics);
-    _plotType = GlobalSettings::get().getInt("windows.statistics.plot type", _plotType);
-    _plotScale = GlobalSettings::get().getInt("windows.statistics.plot scale", _plotScale);
-    auto collapsedPlotIndexJoinedString = GlobalSettings::get().getString("windows.statistics.collapsed plot indices", "");
+    _startingPath = GlobalSettings::get().getValue("windows.statistics.starting path", path.string());
+    _settingsOpen = GlobalSettings::get().getValue("windows.statistics.settings.open", _settingsOpen);
+    _settingsHeight = GlobalSettings::get().getValue("windows.statistics.settings.height", _settingsHeight);
+    _plotHeight = GlobalSettings::get().getValue("windows.statistics.plot height", _plotHeight);
+    _plotMode = GlobalSettings::get().getValue("windows.statistics.mode", _plotMode);
+    _timeHorizonForLiveStatistics = GlobalSettings::get().getValue("windows.statistics.live horizon", _timeHorizonForLiveStatistics);
+    _timeHorizonForLongtermStatistics = GlobalSettings::get().getValue("windows.statistics.long term horizon", _timeHorizonForLongtermStatistics);
+    _plotType = GlobalSettings::get().getValue("windows.statistics.plot type", _plotType);
+    _plotScale = GlobalSettings::get().getValue("windows.statistics.plot scale", _plotScale);
+    auto collapsedPlotIndexJoinedString = GlobalSettings::get().getValue("windows.statistics.collapsed plot indices", std::string());
     
     if (!collapsedPlotIndexJoinedString.empty()) {
         std::vector<std::string> collapsedPlotIndexStrings;
@@ -66,21 +66,21 @@ StatisticsWindow::StatisticsWindow()
 
 void StatisticsWindow::shutdownIntern()
 {
-    GlobalSettings::get().setString("windows.statistics.starting path", _startingPath);
-    GlobalSettings::get().setBool("windows.statistics.settings.open", _settingsOpen);
-    GlobalSettings::get().setFloat("windows.statistics.settings.height", _settingsHeight);
-    GlobalSettings::get().setFloat("windows.statistics.plot height", _plotHeight);
-    GlobalSettings::get().setInt("windows.statistics.mode", _plotMode);
-    GlobalSettings::get().setFloat("windows.statistics.live horizon", _timeHorizonForLiveStatistics);
-    GlobalSettings::get().setFloat("windows.statistics.long term horizon", _timeHorizonForLongtermStatistics);
-    GlobalSettings::get().setInt("windows.statistics.plot type", _plotType);
-    GlobalSettings::get().setInt("windows.statistics.plot scale", _plotScale);
+    GlobalSettings::get().setValue("windows.statistics.starting path", _startingPath);
+    GlobalSettings::get().setValue("windows.statistics.settings.open", _settingsOpen);
+    GlobalSettings::get().setValue("windows.statistics.settings.height", _settingsHeight);
+    GlobalSettings::get().setValue("windows.statistics.plot height", _plotHeight);
+    GlobalSettings::get().setValue("windows.statistics.mode", _plotMode);
+    GlobalSettings::get().setValue("windows.statistics.live horizon", _timeHorizonForLiveStatistics);
+    GlobalSettings::get().setValue("windows.statistics.long term horizon", _timeHorizonForLongtermStatistics);
+    GlobalSettings::get().setValue("windows.statistics.plot type", _plotType);
+    GlobalSettings::get().setValue("windows.statistics.plot scale", _plotScale);
 
     std::vector<std::string> collapsedPlotIndexStrings;
     for (auto const& index : _collapsedPlotIndices) {
         collapsedPlotIndexStrings.emplace_back(std::to_string(index));
     }
-    GlobalSettings::get().setString("windows.statistics.collapsed plot indices", boost::join(collapsedPlotIndexStrings, " "));
+    GlobalSettings::get().setValue("windows.statistics.collapsed plot indices", boost::join(collapsedPlotIndexStrings, " "));
 }
 
 void StatisticsWindow::processIntern()

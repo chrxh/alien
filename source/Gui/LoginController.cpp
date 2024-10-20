@@ -19,12 +19,12 @@ void LoginController::init(SimulationFacade simulationFacade, PersisterFacade pe
     _taskProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
 
     auto& settings = GlobalSettings::get();
-    _remember = settings.getBool("controller.login.remember", _remember);
-    _shareGpuInfo = settings.getBool("controller.login.share gpu info", _shareGpuInfo);
+    _remember = settings.getValue("controller.login.remember", _remember);
+    _shareGpuInfo = settings.getValue("controller.login.share gpu info", _shareGpuInfo);
 
     if (_remember) {
-        _userName = settings.getString("dialogs.login.user name", "");
-        _password = settings.getString("dialogs.login.password", "");
+        _userName = settings.getValue("dialogs.login.user name", "");
+        _password = settings.getValue("dialogs.login.password", "");
         onLogin();
     }
 }    
@@ -52,8 +52,8 @@ void LoginController::onLogin()
                 auto const& data = _persisterFacade->fetchLoginData(requestId);
                 if (data.unknownUser) {
                     auto& settings = GlobalSettings::get();
-                    auto userName = settings.getString("dialogs.login.user name", "");
-                    auto password = settings.getString("dialogs.login.password", "");
+                    auto userName = settings.getValue("dialogs.login.user name", "");
+                    auto password = settings.getValue("dialogs.login.password", "");
                     ActivateUserDialog::get().open(userName, password, getUserInfo());
                 }
                 saveSettings();
@@ -71,11 +71,11 @@ void LoginController::process()
 void LoginController::saveSettings()
 {
     auto& settings = GlobalSettings::get();
-    settings.setBool("controller.login.remember", _remember);
-    settings.setBool("controller.login.share gpu info", _shareGpuInfo);
+    settings.setValue("controller.login.remember", _remember);
+    settings.setValue("controller.login.share gpu info", _shareGpuInfo);
     if (_remember) {
-        settings.setString("dialogs.login.user name", _userName);
-        settings.setString("dialogs.login.password", _password);
+        settings.setValue("dialogs.login.user name", _userName);
+        settings.setValue("dialogs.login.password", _password);
     }
 }
 

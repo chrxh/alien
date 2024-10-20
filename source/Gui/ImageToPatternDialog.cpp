@@ -26,12 +26,12 @@ void ImageToPatternDialog::init(SimulationFacade simulationFacade)
     if (path.has_parent_path()) {
         path = path.parent_path();
     }
-    _startingPath = GlobalSettings::get().getString("dialogs.open image.starting path", path.string());
+    _startingPath = GlobalSettings::get().getValue("dialogs.open image.starting path", path.string());
 }
 
 void ImageToPatternDialog::shutdown()
 {
-    GlobalSettings::get().setString("dialogs.open image.starting path", _startingPath);
+    GlobalSettings::get().setValue("dialogs.open image.starting path", _startingPath);
 }
 
 namespace

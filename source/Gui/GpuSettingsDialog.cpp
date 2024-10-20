@@ -19,7 +19,7 @@ void GpuSettingsDialog::initIntern(SimulationFacade simulationFacade)
     _simulationFacade = simulationFacade;
 
     GpuSettings gpuSettings;
-    gpuSettings.numBlocks = GlobalSettings::get().getInt("settings.gpu.num blocks", gpuSettings.numBlocks);
+    gpuSettings.numBlocks = GlobalSettings::get().getValue("settings.gpu.num blocks", gpuSettings.numBlocks);
 
     _simulationFacade->setGpuSettings_async(gpuSettings);
 }
@@ -27,7 +27,7 @@ void GpuSettingsDialog::initIntern(SimulationFacade simulationFacade)
 void GpuSettingsDialog::shutdownIntern()
 {
     auto gpuSettings = _simulationFacade->getGpuSettings();
-    GlobalSettings::get().setInt("settings.gpu.num blocks", gpuSettings.numBlocks);
+    GlobalSettings::get().setValue("settings.gpu.num blocks", gpuSettings.numBlocks);
 }
 
 GpuSettingsDialog::GpuSettingsDialog()

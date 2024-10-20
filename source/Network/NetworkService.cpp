@@ -69,12 +69,12 @@ namespace
 
 void NetworkService::setup()
 {
-    _serverAddress = GlobalSettings::get().getString("settings.server", "alien-project.org");
+    _serverAddress = GlobalSettings::get().getValue("settings.server", "alien-project.org");
 }
 
 void NetworkService::shutdown()
 {
-    GlobalSettings::get().setString("settings.server", _serverAddress);
+    GlobalSettings::get().setValue("settings.server", _serverAddress);
     logout();
 }
 

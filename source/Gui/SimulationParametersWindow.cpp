@@ -63,9 +63,9 @@ void SimulationParametersWindow::initIntern(SimulationFacade simulationFacade)
     if (path.has_parent_path()) {
         path = path.parent_path();
     }
-    _startingPath = GlobalSettings::get().getString("windows.simulation parameters.starting path", path.string());
-    _featureListOpen = GlobalSettings::get().getBool("windows.simulation parameters.feature list.open", _featureListOpen);
-    _featureListHeight = GlobalSettings::get().getFloat("windows.simulation parameters.feature list.height", _featureListHeight);
+    _startingPath = GlobalSettings::get().getValue("windows.simulation parameters.starting path", path.string());
+    _featureListOpen = GlobalSettings::get().getValue("windows.simulation parameters.feature list.open", _featureListOpen);
+    _featureListHeight = GlobalSettings::get().getValue("windows.simulation parameters.feature list.height", _featureListHeight);
 
     for (int i = 0; i < CellFunction_Count; ++i) {
         _cellFunctionStrings.emplace_back(Const::CellFunctionToStringMap.at(i));
@@ -79,9 +79,9 @@ SimulationParametersWindow::SimulationParametersWindow()
 
 void SimulationParametersWindow::shutdownIntern()
 {
-    GlobalSettings::get().setString("windows.simulation parameters.starting path", _startingPath);
-    GlobalSettings::get().setBool("windows.simulation parameters.feature list.open", _featureListOpen);
-    GlobalSettings::get().setFloat("windows.simulation parameters.feature list.height", _featureListHeight);
+    GlobalSettings::get().setValue("windows.simulation parameters.starting path", _startingPath);
+    GlobalSettings::get().setValue("windows.simulation parameters.feature list.open", _featureListOpen);
+    GlobalSettings::get().setValue("windows.simulation parameters.feature list.height", _featureListHeight);
 }
 
 void SimulationParametersWindow::processIntern()

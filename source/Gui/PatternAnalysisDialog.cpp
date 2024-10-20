@@ -24,12 +24,12 @@ void PatternAnalysisDialog::init(SimulationFacade simulationFacade)
     if (path.has_parent_path()) {
         path = path.parent_path();
     }
-    _startingPath = GlobalSettings::get().getString("dialogs.pattern analysis.starting path", path.string());
+    _startingPath = GlobalSettings::get().getValue("dialogs.pattern analysis.starting path", path.string());
 }
 
 void PatternAnalysisDialog::shutdown()
 {
-    GlobalSettings::get().setString("dialogs.pattern analysis.starting path", _startingPath);
+    GlobalSettings::get().setValue("dialogs.pattern analysis.starting path", _startingPath);
 }
 
 void PatternAnalysisDialog::process()
