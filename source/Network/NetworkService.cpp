@@ -69,7 +69,7 @@ namespace
 
 void NetworkService::setup()
 {
-    _serverAddress = GlobalSettings::get().getValue("settings.server", "alien-project.org");
+    _serverAddress = GlobalSettings::get().getValue("settings.server", std::string(Const::AlienURL));
 }
 
 void NetworkService::shutdown()

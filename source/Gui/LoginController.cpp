@@ -23,8 +23,8 @@ void LoginController::init(SimulationFacade simulationFacade, PersisterFacade pe
     _shareGpuInfo = settings.getValue("controller.login.share gpu info", _shareGpuInfo);
 
     if (_remember) {
-        _userName = settings.getValue("dialogs.login.user name", "");
-        _password = settings.getValue("dialogs.login.password", "");
+        _userName = settings.getValue("dialogs.login.user name", std::string());
+        _password = settings.getValue("dialogs.login.password", std::string());
         onLogin();
     }
 }    

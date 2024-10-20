@@ -147,7 +147,6 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     LoginController::get().setup(_simulationFacade, _persisterFacade);
     ShaderWindow::get().setup();
     AboutDialog::get().setup();
-    ActivateUserDialog::get().setup(_simulationFacade);
     CreateUserDialog::get().setup();
     DeleteUserDialog::get().setup();
     DisplaySettingsDialog::get().setup(); 
