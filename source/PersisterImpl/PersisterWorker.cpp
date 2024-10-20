@@ -539,7 +539,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
 
     auto const& requestData = request->getData();
 
-    GetUserNamesForEmojiResultData resultData;
+    GetUserNamesForReactionResultData resultData;
     resultData.resourceId = requestData.resourceId;
     resultData.emojiType = requestData.emojiType;
     if (!NetworkService::get().getUserNamesForResourceAndEmojiType(resultData.userNames, requestData.resourceId, requestData.emojiType)) {

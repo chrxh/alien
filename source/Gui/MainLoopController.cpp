@@ -49,7 +49,6 @@
 #include "UploadSimulationDialog.h"
 #include "AboutDialog.h"
 #include "AlienImGui.h"
-#include "AutosaveController.h"
 #include "AutosaveWindow.h"
 #include "BrowserWindow.h"
 #include "CreatorWindow.h"
@@ -70,10 +69,11 @@ namespace
 void MainLoopController::setup(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade)
 {
     _simulationFacade = simulationFacade;
-    _persisterFacade =persisterFacade;
+    _persisterFacade = persisterFacade;
 
     log(Priority::Important, "starting ALIEN v" + Const::ProgramVersion);
     _logo = OpenGLHelper::loadTexture(Const::LogoFilename);
+    _saveOnExit = GlobalSettings::get().getValue("controllers.main loop.save on exit", _saveOnExit);
 }
 
 void MainLoopController::process()
@@ -111,7 +111,12 @@ void MainLoopController::process()
     glfwSwapBuffers(WindowController::get().getWindowData().window);
 }
 
-void MainLoopController::scheduleShutdown()
+void MainLoopController::shutdown()
+{
+    GlobalSettings::get().setValue("controllers.main loop.save on exit", _saveOnExit);
+}
+
+void MainLoopController::scheduleClosing()
 {
     _programState = ProgramState::ScheduleExit;
 }
@@ -235,13 +240,13 @@ void MainLoopController::processOperatingMode()
     FpsController::get().processForceFps(WindowController::get().getFps());
 
     if (glfwWindowShouldClose(WindowController::get().getWindowData().window)) {
-        scheduleShutdown();
+        scheduleClosing();
     }
 }
 
 void MainLoopController::processScheduleExit()
 {
-    if (AutosaveController::get().isOn()) {
+    if (_saveOnExit) {
         printOverlayMessage("Saving ...");
 
         auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = false};
@@ -578,9 +583,8 @@ void MainLoopController::processMenubar()
     AlienImGui::EndMenu();
 
     AlienImGui::BeginMenu(" " ICON_FA_COG "  Settings ", _settingsMenuOpened, false);
-    AlienImGui::MenuItem(AlienImGui::MenuItemParameters().name("Auto save").selected(AutosaveController::get().isOn()).closeMenuWhenItemClicked(false), [&] {
-        AutosaveController::get().setOn(!AutosaveController::get().isOn());
-    });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters().name("Save on exit").selected(_saveOnExit).closeMenuWhenItemClicked(false), [&] { _saveOnExit = !_saveOnExit; });
     AlienImGui::MenuItem(AlienImGui::MenuItemParameters().name("CUDA settings").keyAlt(true).key(ImGuiKey_C), [&] { GpuSettingsDialog::get().open(); });
     AlienImGui::MenuItem(AlienImGui::MenuItemParameters().name("Display settings").keyAlt(true).key(ImGuiKey_V), [&] { DisplaySettingsDialog::get().open(); });
     AlienImGui::MenuItem(AlienImGui::MenuItemParameters().name("Network settings").keyAlt(true).key(ImGuiKey_K), [&] { NetworkSettingsDialog::get().open(); });

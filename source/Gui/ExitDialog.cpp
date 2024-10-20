@@ -16,7 +16,7 @@ void ExitDialog::processIntern()
     AlienImGui::Separator();
 
     if (AlienImGui::Button("OK")) {
-        MainLoopController::get().scheduleShutdown();
+        MainLoopController::get().scheduleClosing();
         close();
     }
     ImGui::SameLine();

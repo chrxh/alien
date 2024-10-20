@@ -2,7 +2,7 @@
 
 #include <string>
 
-struct GetUserNamesForEmojiRequestData
+struct GetUserNamesForReactionRequestData
 {
     std::string resourceId;
     int emojiType = 0;
