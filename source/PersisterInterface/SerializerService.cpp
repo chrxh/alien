@@ -855,17 +855,17 @@ namespace cereal
     }
 }
 
-bool SerializerService::serializeSimulationToFiles(std::string const& filename, DeserializedSimulation const& data)
+bool SerializerService::serializeSimulationToFiles(std::filesystem::path const& filename, DeserializedSimulation const& data)
 {
     try {
-        log(Priority::Important, "save simulation to " + filename);
+        log(Priority::Important, "save simulation to " + filename.string());
         std::filesystem::path settingsFilename(filename);
         settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
         std::filesystem::path statisticsFilename(filename);
         statisticsFilename.replace_extension(std::filesystem::path(".statistics.csv"));
 
         {
-            zstr::ofstream stream(filename, std::ios::binary);
+            zstr::ofstream stream(filename.string(), std::ios::binary);
             if (!stream) {
                 return false;
             }
@@ -891,10 +891,10 @@ bool SerializerService::serializeSimulationToFiles(std::string const& filename, 
     }
 }
 
-bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& data, std::string const& filename)
+bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& data, std::filesystem::path const& filename)
 {
     try {
-        log(Priority::Important, "load simulation from " + filename);
+        log(Priority::Important, "load simulation from " + filename.string());
         std::filesystem::path settingsFilename(filename);
         settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
         std::filesystem::path statisticsFilename(filename);
@@ -916,6 +916,30 @@ bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& d
                 return true;
             }
             deserializeStatistics(data.statistics, stream);
+        }
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+
+bool SerializerService::deleteSimulation(std::filesystem::path const& filename)
+{
+    try {
+        log(Priority::Important, "delete simulation " + filename.string());
+        std::filesystem::path settingsFilename(filename);
+        settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
+        std::filesystem::path statisticsFilename(filename);
+        statisticsFilename.replace_extension(std::filesystem::path(".statistics.csv"));
+
+        if (!std::filesystem::remove(filename)) {
+            return false;
+        }
+        if (!std::filesystem::remove(settingsFilename)) {
+            return false;
+        }
+        if (!std::filesystem::remove(statisticsFilename)) {
+            return false;
         }
         return true;
     } catch (...) {
@@ -977,17 +1001,17 @@ bool SerializerService::deserializeSimulationFromStrings(DeserializedSimulation&
     }
 }
 
-bool SerializerService::serializeGenomeToFile(std::string const& filename, std::vector<uint8_t> const& genome)
+bool SerializerService::serializeGenomeToFile(std::filesystem::path const& filename, std::vector<uint8_t> const& genome)
 {
     try {
-        log(Priority::Important, "save genome to " + filename);
+        log(Priority::Important, "save genome to " + filename.string());
         //wrap constructor cell around genome
         ClusteredDataDescription data;
         if (!wrapGenome(data, genome)) {
             return false;
         }
 
-        zstr::ofstream stream(filename, std::ios::binary);
+        zstr::ofstream stream(filename.string(), std::ios::binary);
         if (!stream) {
             return false;
         }
@@ -999,10 +1023,10 @@ bool SerializerService::serializeGenomeToFile(std::string const& filename, std::
     }
 }
 
-bool SerializerService::deserializeGenomeFromFile(std::vector<uint8_t>& genome, std::string const& filename)
+bool SerializerService::deserializeGenomeFromFile(std::vector<uint8_t>& genome, std::filesystem::path const& filename)
 {
     try {
-        log(Priority::Important, "load genome from " + filename);
+        log(Priority::Important, "load genome from " + filename.string());
         ClusteredDataDescription data;
         if (!deserializeDataDescription(data, filename)) {
             return false;
@@ -1060,10 +1084,10 @@ bool SerializerService::deserializeGenomeFromString(std::vector<uint8_t>& output
     }
 }
 
-bool SerializerService::serializeSimulationParametersToFile(std::string const& filename, SimulationParameters const& parameters)
+bool SerializerService::serializeSimulationParametersToFile(std::filesystem::path const& filename, SimulationParameters const& parameters)
 {
     try {
-        log(Priority::Important, "save simulation parameters to " + filename);
+        log(Priority::Important, "save simulation parameters to " + filename.string());
         std::ofstream stream(filename, std::ios::binary);
         if (!stream) {
             return false;
@@ -1076,10 +1100,10 @@ bool SerializerService::serializeSimulationParametersToFile(std::string const& f
     }
 }
 
-bool SerializerService::deserializeSimulationParametersFromFile(SimulationParameters& parameters, std::string const& filename)
+bool SerializerService::deserializeSimulationParametersFromFile(SimulationParameters& parameters, std::filesystem::path const& filename)
 {
     try {
-        log(Priority::Important, "load simulation parameters from " + filename);
+        log(Priority::Important, "load simulation parameters from " + filename.string());
         std::ifstream stream(filename, std::ios::binary);
         if (!stream) {
             return false;
@@ -1092,10 +1116,10 @@ bool SerializerService::deserializeSimulationParametersFromFile(SimulationParame
     }
 }
 
-bool SerializerService::serializeStatisticsToFile(std::string const& filename, StatisticsHistoryData const& statistics)
+bool SerializerService::serializeStatisticsToFile(std::filesystem::path const& filename, StatisticsHistoryData const& statistics)
 {
     try {
-        log(Priority::Important, "save statistics history to " + filename);
+        log(Priority::Important, "save statistics history to " + filename.string());
         std::ofstream stream(filename, std::ios::binary);
         if (!stream) {
             return false;
@@ -1108,10 +1132,10 @@ bool SerializerService::serializeStatisticsToFile(std::string const& filename, S
     }
 }
 
-bool SerializerService::serializeContentToFile(std::string const& filename, ClusteredDataDescription const& content)
+bool SerializerService::serializeContentToFile(std::filesystem::path const& filename, ClusteredDataDescription const& content)
 {
     try {
-        zstr::ofstream fileStream(filename, std::ios::binary);
+        zstr::ofstream fileStream(filename.string(), std::ios::binary);
         if (!fileStream) {
             return false;
         }
@@ -1123,7 +1147,7 @@ bool SerializerService::serializeContentToFile(std::string const& filename, Clus
     }
 }
 
-bool SerializerService::deserializeContentFromFile(ClusteredDataDescription& content, std::string const& filename)
+bool SerializerService::deserializeContentFromFile(ClusteredDataDescription& content, std::filesystem::path const& filename)
 {
     try {
         if (!deserializeDataDescription(content, filename)) {
@@ -1142,9 +1166,9 @@ void SerializerService::serializeDataDescription(ClusteredDataDescription const&
     archive(data);
 }
 
-bool SerializerService::deserializeDataDescription(ClusteredDataDescription& data, std::string const& filename)
+bool SerializerService::deserializeDataDescription(ClusteredDataDescription& data, std::filesystem::path const& filename)
 {
-    zstr::ifstream stream(filename, std::ios::binary);
+    zstr::ifstream stream(filename.string(), std::ios::binary);
     if (!stream) {
         return false;
     }

@@ -5,10 +5,7 @@
 #include <sstream>
 #include <iostream>
 
-_Shader::_Shader(
-    std::string const& vertexPath,
-    std::string const& fragmentPath,
-    std::string const& geometryPath /*= nullptr*/)
+_Shader::_Shader(std::filesystem::path const& vertexPath, std::filesystem::path const& fragmentPath, std::filesystem::path const& geometryPath)
 {
     // 1. retrieve the vertex/fragment source code from filePath
     std::string vertexCode;

@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <deque>
+#include <filesystem>
 #include <string>
 
 #include "Definitions.h"
@@ -17,12 +18,13 @@ enum SavepointState_
 
 struct SavepointEntry
 {
-    std::string id;
-    std::string filename;
+    std::filesystem::path filename;
     SavepointState state = SavepointState_InQueue;
     std::string timestamp;
     std::string name;
     uint64_t timestep = 0;
+
+    std::string requestId;  // transient
 };
 
 class SavepointTable
@@ -33,6 +35,7 @@ public:
     SavepointEntry const& at(int index) const { return _entries.at(index); }
     int getSize() const { return toInt(_entries.size()); }
     std::string const& getFilename() const { return _filename; }
+    int const& getSequenceNumber() const { return _sequenceNumber; }
 
 private:
     SavepointTable(std::string const& filename, std::deque<SavepointEntry> const& entries)
@@ -41,6 +44,7 @@ private:
     {}
 
     std::string _filename;
+    int _sequenceNumber = 0;
     std::deque<SavepointEntry> _entries;
 };
 

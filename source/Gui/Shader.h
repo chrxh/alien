@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <string>
 
 #include "glad/glad.h"
@@ -11,7 +12,10 @@ class _Shader
 public:
     unsigned int ID;
 
-    _Shader(std::string const& vertexPath, std::string const& fragmentPath, std::string const& geometryPath = std::string());
+    _Shader(
+        std::filesystem::path const& vertexPath,
+        std::filesystem::path const& fragmentPath,
+        std::filesystem::path const& geometryPath = std::filesystem::path());
     
     void use();
     void setBool(const std::string& name, bool value) const;

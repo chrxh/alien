@@ -4,7 +4,7 @@
 #include <sstream>
 #include <iomanip>
 
-std::string StringHelper::format(uint64_t n)
+std::string StringHelper::format(uint64_t n, char separator)
 {
     std::string result;
 
@@ -14,7 +14,7 @@ std::string StringHelper::format(uint64_t n)
         if (result.empty()) {
             result = s.substr(s.length() - len, len);
         } else {
-            result = s.substr(s.length() - len, len) + "," + result;
+            result = s.substr(s.length() - len, len) + separator + result;
         }
         s = s.substr(0, s.length() - len);
     } while (!s.empty());

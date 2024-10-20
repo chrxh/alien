@@ -1,13 +1,13 @@
 #pragma once
 
 #include "Definitions.h"
+#include "Singleton.h"
 
 class NumberGenerator
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(NumberGenerator);
+
 public:
-    static NumberGenerator& get();
-    NumberGenerator(NumberGenerator const&) = delete;
-    void operator=(NumberGenerator const&) = delete;
 
 	uint32_t getRandomInt();
     uint32_t getRandomInt(uint32_t range);
@@ -23,7 +23,6 @@ public:
 
 private:
     NumberGenerator();
-    ~NumberGenerator();
 
 	int _index = 0;
 	std::vector<uint32_t> _arrayOfRandomNumbers;

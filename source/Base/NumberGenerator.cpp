@@ -17,16 +17,6 @@ NumberGenerator::NumberGenerator()
     }
 }
 
-NumberGenerator::~NumberGenerator()
-{
-}
-
-NumberGenerator& NumberGenerator::get()
-{
-    static NumberGenerator instance;
-    return instance;
-}
-
 uint32_t NumberGenerator::getRandomInt()
 {
 	return getNumberFromArray();
