@@ -22,15 +22,18 @@ add_library(PersisterInterface
     LoginResultData.h
     MoveNetworkResourceRequestData.h
     MoveNetworkResourceResultData.h
+    ParameterParser.h
     PersisterErrorInfo.h
     PersisterFacade.h
     PersisterRequestId.h
     PersisterRequestState.h
-    PropertyParser.h
     ReadSimulationRequestData.h
     ReadSimulationResultData.h
     ReplaceNetworkResourceRequestData.h
     ReplaceNetworkResourceResultData.h
+    SavepointTable.h
+    SavepointTableService.cpp
+    SavepointTableService.h
     SaveSimulationRequestData.h
     SaveSimulationResultData.h
     SenderId.h

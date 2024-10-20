@@ -10,7 +10,6 @@
 #include "Viewport.h"
 #include "DelayedExecutionController.h"
 #include "OverlayController.h"
-#include "SerializationHelperService.h"
 #include "MainLoopEntityController.h"
 
 namespace
@@ -63,6 +62,14 @@ void AutosaveController::process()
 
 void AutosaveController::onSave()
 {
-    DeserializedSimulation sim = SerializationHelperService::get().getDeserializedSerialization(_simulationFacade);
+    DeserializedSimulation sim;
+    sim.auxiliaryData.timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
+    sim.auxiliaryData.realTime = _simulationFacade->getRealTime();
+    sim.auxiliaryData.zoom = Viewport::get().getZoomFactor();
+    sim.auxiliaryData.center = Viewport::get().getCenterInWorldPos();
+    sim.auxiliaryData.generalSettings = _simulationFacade->getGeneralSettings();
+    sim.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
+    sim.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
+    sim.mainData = _simulationFacade->getClusteredSimulationData();
     SerializerService::get().serializeSimulationToFiles(Const::AutosaveFile, sim);
 }
