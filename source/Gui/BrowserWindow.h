@@ -114,7 +114,7 @@ private:
 
     TaskProcessor _refreshProcessor;
     TaskProcessor _emojiUserNameProcessor;
-    TaskProcessor _toggleEmojiProcessor;
+    TaskProcessor _reactionProcessor;
 
     bool _activateEmojiPopup = false;
     bool _showAllEmojis = false;
