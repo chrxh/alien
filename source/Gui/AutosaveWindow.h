@@ -26,7 +26,12 @@ private:
     void processSettings();
     void processStatusBar();
 
-    void createSavepoint();
+    void onCreateSavepoint();
+    void onClean();
+
+    void scheduleDeleteNonPersistentSavepoint(std::vector<SavepointEntry> const& entries);
+    void processDeleteNonPersistentSavepoint();
+
     void updateSavepoint(int row);
 
     void updateSavepointTableFromFile();
@@ -57,5 +62,8 @@ private:
     int _numberOfFiles = 20;
 
     std::optional<SavepointTable> _savepointTable;
+    SavepointEntry _selectedEntry;
+    std::vector<SavepointEntry> _savepointsInProgressToDelete;
+
     std::optional<std::chrono::steady_clock::time_point> _autosaveTimepoint;
 };
