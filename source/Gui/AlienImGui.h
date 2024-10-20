@@ -317,6 +317,8 @@ public:
     };
     static void Spinner(SpinnerParameters const& parameters);
 
+    static void StatusBar(std::string const& text);
+
     static void Tooltip(std::string const& text, bool delay = true);
     static void Tooltip(std::function<std::string()> const& textFunc, bool delay = true);
 

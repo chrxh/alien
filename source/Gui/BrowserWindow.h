@@ -58,7 +58,7 @@ private:
     void processWorkspace();
     void processMovableSeparator();
     void processUserList();
-    void processStatus();
+    void processStatusBar();
 
     void processSimulationList();
     void processGenomeList();

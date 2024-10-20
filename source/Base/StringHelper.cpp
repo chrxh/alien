@@ -70,6 +70,35 @@ std::string StringHelper::format(std::chrono::milliseconds duration)
     return oss.str();
 }
 
+std::string StringHelper::format(std::chrono::seconds duration)
+{
+    auto months = std::chrono::duration_cast<std::chrono::months>(duration);
+    duration -= months;
+    auto days = std::chrono::duration_cast<std::chrono::days>(duration);
+    duration -= days;
+    auto hours = std::chrono::duration_cast<std::chrono::hours>(duration);
+    duration -= hours;
+    auto minutes = std::chrono::duration_cast<std::chrono::minutes>(duration);
+    duration -= minutes;
+    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration);
+    duration -= seconds;
+
+    std::ostringstream oss;
+    if (months.count() > 0) {
+        oss << std::setw(2) << std::setfill('0') << months.count() << ":";
+    }
+    if (days.count() > 0 || months.count() > 0) {
+        oss << std::setw(2) << std::setfill('0') << days.count() << ":";
+    }
+    if (hours.count() > 0 || days.count() > 0 || months.count() > 0) {
+        oss << std::setw(2) << std::setfill('0') << hours.count() << ":";
+    }
+    oss << std::setw(2) << std::setfill('0') << minutes.count() << ":";
+    oss << std::setw(2) << std::setfill('0') << seconds.count();
+
+    return oss.str();
+}
+
 std::string StringHelper::format(std::chrono::system_clock::time_point const& timePoint)
 {
     std::time_t timeT = std::chrono::system_clock::to_time_t(timePoint);

@@ -137,8 +137,9 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool
     auto isInfinity = value == std::numeric_limits<int>::max();
     auto showInfinity = parameters._infinity && (!parameters._readOnly || isInfinity);
 
+    auto result = false;
     if (enabled) {
-        ImGui::Checkbox(("##checkbox" + parameters._name).c_str(), enabled);
+        result |= ImGui::Checkbox(("##checkbox" + parameters._name).c_str(), enabled);
         if (!(*enabled) && parameters._disabledValue) {
             value = *parameters._disabledValue;
         }
@@ -151,14 +152,13 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool
         inputWidth -= infinityButtonWidth + ImGui::GetStyle().FramePadding.x;
     }
 
-    auto result = false;
     if (!isInfinity) {
         ImGui::SetNextItemWidth(inputWidth);
         ImGuiInputTextFlags flags = parameters._readOnly ? ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_None;
-        result = ImGui::InputInt(("##" + parameters._name).c_str(), &value, 1, 100, flags);
+        result |= ImGui::InputInt(("##" + parameters._name).c_str(), &value, 1, 100, flags);
     } else {
         std::string text = "infinity";
-        result = InputText(InputTextParameters().readOnly(true).width(inputWidth).textWidth(0), text);
+        result |= InputText(InputTextParameters().readOnly(true).width(inputWidth).textWidth(0), text);
     }
     if (parameters._defaultValue) {
         ImGui::SameLine();
@@ -1204,6 +1204,14 @@ void AlienImGui::Spinner(SpinnerParameters const& parameters)
     auto angle = sinf(duration * Const::DegToRad / 10 - Const::Pi / 2) * 4 + 6.0f;
     spinnerAngle += angle;
     AlienImGui::RotateEnd(spinnerAngle, drawList);
+}
+
+void AlienImGui::StatusBar(std::string const& text)
+{
+    AlienImGui::Separator();
+    ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
+    AlienImGui::Text(text);
+    ImGui::PopStyleColor();
 }
 
 void AlienImGui::Tooltip(std::string const& text, bool delay)

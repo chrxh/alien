@@ -24,6 +24,7 @@ private:
     void processHeader();
     void processTable();
     void processSettings();
+    void processStatusBar();
 
     void createSavepoint();
     void updateSavepoint(int row);
@@ -56,5 +57,5 @@ private:
     int _numberOfFiles = 20;
 
     std::optional<SavepointTable> _savepointTable;
-    std::optional<std::chrono::steady_clock::time_point> _lastAutosaveTimepoint;
+    std::optional<std::chrono::steady_clock::time_point> _autosaveTimepoint;
 };
