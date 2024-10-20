@@ -14,23 +14,27 @@ namespace
     auto const RightColumnWidth = 110.0f;
 }
 
-_GpuSettingsDialog::_GpuSettingsDialog(SimulationFacade const& simulationFacade)
-    : AlienDialog("CUDA settings")
-    , _simulationFacade(simulationFacade)
+void GpuSettingsDialog::init(SimulationFacade const& simulationFacade)
 {
+    _simulationFacade = simulationFacade;
+
     GpuSettings gpuSettings;
     gpuSettings.numBlocks = GlobalSettings::get().getInt("settings.gpu.num blocks", gpuSettings.numBlocks);
 
     _simulationFacade->setGpuSettings_async(gpuSettings);
 }
 
-_GpuSettingsDialog::~_GpuSettingsDialog()
+void GpuSettingsDialog::shutdown()
 {
     auto gpuSettings = _simulationFacade->getGpuSettings();
     GlobalSettings::get().setInt("settings.gpu.num blocks", gpuSettings.numBlocks);
 }
 
-void _GpuSettingsDialog::processIntern()
+GpuSettingsDialog::GpuSettingsDialog()
+    : AlienDialog("CUDA settings")
+{}
+
+void GpuSettingsDialog::processIntern()
 {
     auto gpuSettings = _simulationFacade->getGpuSettings();
     auto origGpuSettings = _simulationFacade->getOriginalGpuSettings();
@@ -66,12 +70,12 @@ void _GpuSettingsDialog::processIntern()
     }
 }
 
-void _GpuSettingsDialog::openIntern()
+void GpuSettingsDialog::openIntern()
 {
     _gpuSettings = _simulationFacade->getGpuSettings();
 }
 
-void _GpuSettingsDialog::validationAndCorrection(GpuSettings& settings) const
+void GpuSettingsDialog::validationAndCorrection(GpuSettings& settings) const
 {
-    settings.numBlocks = std::min(1000000, std::max(8, settings.numBlocks));
+    settings.numBlocks = std::min(1000000, std::max(16, settings.numBlocks));
 }

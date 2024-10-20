@@ -7,11 +7,15 @@
 
 class _GettingStartedWindow : public AlienWindow
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(_GettingStartedWindow);
+
 public:
-    _GettingStartedWindow();
-    ~_GettingStartedWindow() override;
+    void init();
+    void shutdown();
 
 private:
+    _GettingStartedWindow();
+
     void processIntern() override;
 
     void drawTitle();

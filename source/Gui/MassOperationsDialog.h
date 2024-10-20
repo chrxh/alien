@@ -1,13 +1,17 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
-#include "Definitions.h"
 #include "EngineInterface/EngineConstants.h"
 
-class _MassOperationsDialog
+#include "Definitions.h"
+
+class MassOperationsDialog
 {
+    MAKE_SINGLETON(MassOperationsDialog);
+
 public:
-    _MassOperationsDialog(SimulationFacade const& simulationFacade);
+    void init(SimulationFacade const& simulationFacade);
 
     void process();
 

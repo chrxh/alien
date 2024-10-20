@@ -1,15 +1,21 @@
 #pragma once
 
+#include "Base/Singleton.h"
+
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _ExitDialog : public AlienDialog
+class ExitDialog : public AlienDialog
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(ExitDialog);
+
 public:
-    _ExitDialog(bool& onExit);
+    void init(bool& onExit);
 
 private:
+    ExitDialog();
+
     void processIntern() override;
 
-    bool& _onExit;
+    bool* _onExit = nullptr;
 };

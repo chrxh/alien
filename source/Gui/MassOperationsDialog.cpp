@@ -15,11 +15,13 @@ namespace
 {
     auto constexpr RightColumnWidth = 120.0f;
 }
-_MassOperationsDialog::_MassOperationsDialog(SimulationFacade const& simulationFacade)
-    : _simulationFacade(simulationFacade)
-{}
 
-void _MassOperationsDialog::process()
+void MassOperationsDialog::init(SimulationFacade const& simulationFacade)
+{
+    _simulationFacade = simulationFacade;
+}
+
+void MassOperationsDialog::process()
 {
     if (!_show) {
         return;
@@ -135,12 +137,12 @@ void _MassOperationsDialog::process()
     }
 }
 
-void _MassOperationsDialog::show()
+void MassOperationsDialog::show()
 {
     _show = true;
 }
 
-void _MassOperationsDialog::colorCheckbox(std::string id, uint32_t cellColor, bool& check)
+void MassOperationsDialog::colorCheckbox(std::string id, uint32_t cellColor, bool& check)
 {
     float h, s, v;
     AlienImGui::ConvertRGBtoHSV(cellColor, h, s, v);
@@ -152,7 +154,7 @@ void _MassOperationsDialog::colorCheckbox(std::string id, uint32_t cellColor, bo
     ImGui::PopStyleColor(4);
 }
 
-void _MassOperationsDialog::onExecute()
+void MassOperationsDialog::onExecute()
 {
     auto timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
     auto parameters = _simulationFacade->getSimulationParameters();
@@ -204,7 +206,7 @@ void _MassOperationsDialog::onExecute()
     }
 }
 
-bool _MassOperationsDialog::isOkEnabled()
+bool MassOperationsDialog::isOkEnabled()
 {
     bool result = false;
     if (_randomizeCellColors) {
@@ -233,7 +235,7 @@ bool _MassOperationsDialog::isOkEnabled()
     return result;
 }
 
-void _MassOperationsDialog::validationAndCorrection()
+void MassOperationsDialog::validationAndCorrection()
 {
     _minAge = std::max(0, _minAge);
     _maxAge = std::max(0, _maxAge);

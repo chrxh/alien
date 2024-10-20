@@ -10,17 +10,20 @@
 #include <windows.h>
 #endif
 
-_GettingStartedWindow::_GettingStartedWindow()
-    : AlienWindow("Getting started", "windows.getting started", true)
+void _GettingStartedWindow::init()
 {
     _showAfterStartup = _on;
 }
 
 
-_GettingStartedWindow::~_GettingStartedWindow()
+void _GettingStartedWindow::shutdown()
 {
     _on = _showAfterStartup;
 }
+
+_GettingStartedWindow::_GettingStartedWindow()
+    : AlienWindow("Getting started", "windows.getting started", true)
+{}
 
 void _GettingStartedWindow::processIntern()
 {

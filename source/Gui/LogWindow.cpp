@@ -10,19 +10,22 @@
 #include "GuiLogger.h"
 #include "AlienImGui.h"
 
-_LogWindow::_LogWindow(GuiLogger const& logger)
-    : AlienWindow("Log", "windows.log", false)
-    , _logger(logger)
+void LogWindow::init(GuiLogger const& logger)
 {
+    _logger = logger;
     _verbose = GlobalSettings::get().getBool("windows.log.verbose", false);
 }
 
-_LogWindow::~_LogWindow()
+void LogWindow::shutdown()
 {
     GlobalSettings::get().setBool("windows.log.verbose", _verbose);
 }
 
-void _LogWindow::processIntern()
+LogWindow::LogWindow()
+    : AlienWindow("Log", "windows.log", false)
+{}
+
+void LogWindow::processIntern()
 {
     auto& styleRepository = StyleRepository::get();
     if (ImGui::BeginChild(

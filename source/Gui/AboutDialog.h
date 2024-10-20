@@ -1,13 +1,15 @@
 #pragma once
 
+#include "Base/Singleton.h"
+
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _AboutDialog : public AlienDialog
+class AboutDialog : public AlienDialog
 {
-public:
-    _AboutDialog();
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(AboutDialog);
 
 private:
+    AboutDialog();
     void processIntern() override;
 };
