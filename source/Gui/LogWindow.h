@@ -11,12 +11,12 @@ class LogWindow : public AlienWindow
 
 public:
     void init(GuiLogger const& logger);
-    void shutdown();
 
 private:
     LogWindow();
 
-    void processIntern();
+    void shutdownIntern() override;
+    void processIntern() override;
 
     bool _verbose = false;
 

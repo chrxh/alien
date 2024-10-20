@@ -51,8 +51,7 @@ class UiController;
 
 class AutosaveController;
 
-class _GettingStartedWindow;
-using GettingStartedWindow = std::shared_ptr<_GettingStartedWindow>;
+class GettingStartedWindow;
 
 class _DisplaySettingsDialog;
 using DisplaySettingsDialog = std::shared_ptr<_DisplaySettingsDialog>;

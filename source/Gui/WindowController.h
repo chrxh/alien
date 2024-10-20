@@ -4,14 +4,14 @@
 #include "Base/Singleton.h"
 
 #include "Definitions.h"
+#include "ShutdownInterface.h"
 
-class WindowController
+class WindowController : public ShutdownInterface
 {
     MAKE_SINGLETON(WindowController);
 
 public:
     void init();
-    void shutdown();
 
     struct WindowData
     {
@@ -41,6 +41,8 @@ public:
     float getLastContentScaleFactor();
 
 private:
+    void shutdown() override;
+
     void updateWindowSize();
     std::string createLogString(GLFWvidmode const& videoMode);
 

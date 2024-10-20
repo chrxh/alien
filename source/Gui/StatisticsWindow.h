@@ -20,11 +20,11 @@ class StatisticsWindow : public AlienWindow
 
 public:
     void init(SimulationFacade const& simulationFacade);
-    void shutdown();
 
 private:
     StatisticsWindow();
 
+    void shutdownIntern() override;
     void processIntern() override;
 
     void processTimelinesTab();

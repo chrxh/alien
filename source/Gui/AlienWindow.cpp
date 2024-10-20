@@ -6,17 +6,20 @@
 
 #include "StyleRepository.h"
 #include "WindowController.h"
+#include "ShutdownController.h"
 
 AlienWindow::AlienWindow(std::string const& title, std::string const& settingsNode, bool defaultOn)
     : _title(title)
     , _settingsNode(settingsNode)
 {
     _on = GlobalSettings::get().getBool(settingsNode + ".active", defaultOn);
+    ShutdownController::get().registerObject(this);
 }
 
-AlienWindow::~AlienWindow()
+void AlienWindow::shutdown()
 {
     GlobalSettings::get().setBool(_settingsNode + ".active", _on);
+    shutdownIntern();
 }
 
 void AlienWindow::process()

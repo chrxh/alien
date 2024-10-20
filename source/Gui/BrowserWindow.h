@@ -23,7 +23,6 @@ class BrowserWindow : public AlienWindow
 
 public:
     void init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade);
-    void shutdown();
 
     void onRefresh();
     WorkspaceType getCurrentWorkspaceType() const;
@@ -32,6 +31,8 @@ public:
 
 private:
     BrowserWindow();
+
+    void shutdownIntern() override;
 
     struct WorkspaceId
     {

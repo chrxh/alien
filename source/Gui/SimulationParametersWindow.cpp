@@ -74,16 +74,16 @@ void SimulationParametersWindow::init(SimulationFacade const& simulationFacade)
 
 }
 
-void SimulationParametersWindow::shutdown()
+SimulationParametersWindow::SimulationParametersWindow()
+    : AlienWindow("Simulation parameters", "windows.simulation parameters", false)
+{}
+
+void SimulationParametersWindow::shutdownIntern()
 {
     GlobalSettings::get().setString("windows.simulation parameters.starting path", _startingPath);
     GlobalSettings::get().setBool("windows.simulation parameters.feature list.open", _featureListOpen);
     GlobalSettings::get().setFloat("windows.simulation parameters.feature list.height", _featureListHeight);
 }
-
-SimulationParametersWindow::SimulationParametersWindow()
-    : AlienWindow("Simulation parameters", "windows.simulation parameters", false)
-{}
 
 void SimulationParametersWindow::processIntern()
 {

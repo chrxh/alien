@@ -59,7 +59,12 @@ void StatisticsWindow::init(SimulationFacade const& simulationFacade)
     }
 }
 
-void StatisticsWindow::shutdown()
+StatisticsWindow::StatisticsWindow()
+    : AlienWindow("Statistics", "windows.statistics", false)
+{
+}
+
+void StatisticsWindow::shutdownIntern()
 {
     GlobalSettings::get().setString("windows.statistics.starting path", _startingPath);
     GlobalSettings::get().setBool("windows.statistics.settings.open", _settingsOpen);
@@ -76,11 +81,6 @@ void StatisticsWindow::shutdown()
         collapsedPlotIndexStrings.emplace_back(std::to_string(index));
     }
     GlobalSettings::get().setString("windows.statistics.collapsed plot indices", boost::join(collapsedPlotIndexStrings, " "));
-}
-
-StatisticsWindow::StatisticsWindow()
-    : AlienWindow("Statistics", "windows.statistics", false)
-{
 }
 
 void StatisticsWindow::processIntern()

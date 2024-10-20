@@ -5,11 +5,12 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "PersisterInterface/LoginRequestData.h"
 #include "PersisterInterface/SenderInfo.h"
+#include "PersisterInterface/TaskProcessor.h"
 
 #include "MessageDialog.h"
 #include "ActivateUserDialog.h"
 #include "BrowserWindow.h"
-#include "PersisterInterface/TaskProcessor.h"
+#include "ShutdownController.h"
 
 void LoginController::init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade)
 {
@@ -26,6 +27,8 @@ void LoginController::init(SimulationFacade const& simulationFacade, PersisterFa
         _password = settings.getString("dialogs.login.password", "");
         onLogin();
     }
+
+    ShutdownController::get().registerObject(this);
 }
 
 void LoginController::shutdown()

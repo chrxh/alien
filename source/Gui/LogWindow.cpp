@@ -16,14 +16,14 @@ void LogWindow::init(GuiLogger const& logger)
     _verbose = GlobalSettings::get().getBool("windows.log.verbose", false);
 }
 
-void LogWindow::shutdown()
-{
-    GlobalSettings::get().setBool("windows.log.verbose", _verbose);
-}
-
 LogWindow::LogWindow()
     : AlienWindow("Log", "windows.log", false)
 {}
+
+void LogWindow::shutdownIntern()
+{
+    GlobalSettings::get().setBool("windows.log.verbose", _verbose);
+}
 
 void LogWindow::processIntern()
 {

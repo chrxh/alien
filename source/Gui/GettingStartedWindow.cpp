@@ -10,22 +10,22 @@
 #include <windows.h>
 #endif
 
-void _GettingStartedWindow::init()
+void GettingStartedWindow::init()
 {
     _showAfterStartup = _on;
 }
 
 
-void _GettingStartedWindow::shutdown()
+GettingStartedWindow::GettingStartedWindow()
+    : AlienWindow("Getting started", "windows.getting started", true)
+{}
+
+void GettingStartedWindow::shutdownIntern()
 {
     _on = _showAfterStartup;
 }
 
-_GettingStartedWindow::_GettingStartedWindow()
-    : AlienWindow("Getting started", "windows.getting started", true)
-{}
-
-void _GettingStartedWindow::processIntern()
+void GettingStartedWindow::processIntern()
 {
     drawTitle();
 
@@ -405,7 +405,7 @@ void _GettingStartedWindow::processIntern()
     AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Show after startup"), _showAfterStartup);
 }
 
-void _GettingStartedWindow::drawTitle()
+void GettingStartedWindow::drawTitle()
 {
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
 
@@ -456,7 +456,7 @@ void _GettingStartedWindow::drawTitle()
     AlienImGui::Separator();
 }
 
-void _GettingStartedWindow::drawHeading1(std::string const& text)
+void GettingStartedWindow::drawHeading1(std::string const& text)
 {
     AlienImGui::Separator();
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
@@ -465,20 +465,20 @@ void _GettingStartedWindow::drawHeading1(std::string const& text)
     AlienImGui::Separator();
 }
 
-void _GettingStartedWindow::drawHeading2(std::string const& text)
+void GettingStartedWindow::drawHeading2(std::string const& text)
 {
     ImGui::Spacing();
     AlienImGui::BoldText(text);
 }
 
-void _GettingStartedWindow::drawItemText(std::string const& text)
+void GettingStartedWindow::drawItemText(std::string const& text)
 {
     ImGui::Text(ICON_FA_CHEVRON_RIGHT);
     ImGui::SameLine();
     AlienImGui::Text(text);
 }
 
-void _GettingStartedWindow::drawParagraph(std::string const& text)
+void GettingStartedWindow::drawParagraph(std::string const& text)
 {
     AlienImGui::Text(text);
 }

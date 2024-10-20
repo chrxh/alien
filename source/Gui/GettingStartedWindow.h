@@ -1,21 +1,22 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-class _GettingStartedWindow : public AlienWindow
+class GettingStartedWindow : public AlienWindow
 {
-    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(_GettingStartedWindow);
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(GettingStartedWindow);
 
 public:
     void init();
-    void shutdown();
 
 private:
-    _GettingStartedWindow();
+    GettingStartedWindow();
 
+    void shutdownIntern() override;
     void processIntern() override;
 
     void drawTitle();

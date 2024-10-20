@@ -41,7 +41,6 @@ private:
 
     GuiLogger _logger;
 
-    GettingStartedWindow _gettingStartedWindow;
     ShaderWindow _shaderWindow;
     AutosaveWindow _autosaveWindow;
 

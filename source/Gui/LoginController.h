@@ -1,16 +1,17 @@
 #pragma once
 
 #include "Base/Singleton.h"
-#include "Definitions.h"
 #include "PersisterInterface/PersisterFacade.h"
 
-class LoginController
+#include "Definitions.h"
+#include "ShutdownInterface.h"
+
+class LoginController : public ShutdownInterface
 {
     MAKE_SINGLETON(LoginController);
 public:
 
     void init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade);
-    void shutdown();
 
     void onLogin();
 
@@ -33,6 +34,8 @@ public:
     UserInfo getUserInfo();
 
 private:
+    void shutdown() override;
+
     SimulationFacade _simulationFacade; 
     PersisterFacade _persisterFacade;
 

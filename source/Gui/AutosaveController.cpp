@@ -11,6 +11,7 @@
 #include "DelayedExecutionController.h"
 #include "OverlayMessageController.h"
 #include "SerializationHelperService.h"
+#include "ShutdownController.h"
 
 namespace
 {
@@ -22,6 +23,8 @@ void AutosaveController::init(SimulationFacade const& simulationFacade)
     _simulationFacade = simulationFacade;
     _startTimePoint = std::chrono::steady_clock::now();
     _on = GlobalSettings::get().getBool("controllers.auto save.active", true);
+
+    ShutdownController::get().registerObject(this);
 }
 
 void AutosaveController::shutdown()

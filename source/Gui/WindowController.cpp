@@ -8,6 +8,8 @@
 #include "Base/GlobalSettings.h"
 #include "Base/LoggingService.h"
 
+#include "ShutdownController.h"
+
 namespace
 {
     auto const WindowedMode = "window";
@@ -85,6 +87,8 @@ void WindowController::init()
 
     float temp;
     glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &_contentScaleFactor, &temp);  //consider only horizontal content scale
+
+    ShutdownController::get().registerObject(this);
 }
 
 void WindowController::shutdown()
