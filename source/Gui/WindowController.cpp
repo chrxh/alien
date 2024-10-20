@@ -12,8 +12,8 @@
 
 namespace
 {
-    auto const WindowedMode = "window";
-    auto const DesktopMode = "desktop";
+    auto const WindowedMode = std::string("window");
+    auto const DesktopMode = std::string("desktop");
 
     GLFWvidmode convert(std::string const& mode)
     {
