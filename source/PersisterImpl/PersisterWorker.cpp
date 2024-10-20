@@ -151,7 +151,7 @@ void _PersisterWorker::processRequests(std::unique_lock<std::mutex>& lock)
             processingResult = processRequest(lock, concreteRequest);
         } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_MoveNetworkResourceRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
-        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_ToggleEmojiNetworkResourceRequest>(request)) {
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_ToggleReactionNetworkResourceRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
         }
         auto inProgressJobsIter = std::ranges::find_if(
@@ -588,16 +588,16 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
 
 _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(
     std::unique_lock<std::mutex>& lock,
-    ToggleEmojiNetworkResourceRequest const& request)
+    ToggleReactionNetworkResourceRequest const& request)
 {
     UnlockGuard unlockGuard(lock);
 
     auto const& requestData = request->getData();
 
-    if (!NetworkService::get().toggleEmojiToResource(requestData.resourceId, requestData.emojiType)) {
+    if (!NetworkService::get().toggleReactionForResource(requestData.resourceId, requestData.emojiType)) {
         return std::make_shared<_PersisterRequestError>(
-            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to toggle emoji. Please try again later."});
+            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to toggle reaction. Please try again later."});
     }
 
-    return std::make_shared<_ToggleEmojiNetworkResourceRequestResult>(request->getRequestId(), ToggleEmojiNetworkResourceResultData{});
+    return std::make_shared<_ToggleReactionNetworkResourceRequestResult>(request->getRequestId(), ToggleReactionNetworkResourceResultData{});
 }

@@ -2,7 +2,7 @@
 
 #include <string>
 
-struct ToggleEmojiNetworkResourceRequestData
+struct ToggleReactionNetworkResourceRequestData
 {
     std::string resourceId;
     int emojiType = 0;

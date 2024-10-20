@@ -81,11 +81,11 @@ void BrowserWindow::initIntern(SimulationFacade simulationFacade, PersisterFacad
 
     _refreshProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
     _emojiUserNameProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
-    _toggleEmojiProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+    _reactionProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
 
     auto& settings = GlobalSettings::get();
-    _currentWorkspace.resourceType = settings.getInt("windows.browser.resource type", _currentWorkspace.resourceType);
-    _currentWorkspace.workspaceType = settings.getInt("windows.browser.workspace type", _currentWorkspace.workspaceType);
+    _currentWorkspace.resourceType = settings.getValue("windows.browser.resource type", _currentWorkspace.resourceType);
+    _currentWorkspace.workspaceType = settings.getValue("windows.browser.workspace type", _currentWorkspace.workspaceType);
     _userTableWidth = settings.getValue("windows.browser.user table width", scale(UserTableWidth));
 
     int numEmojis = 0;
@@ -1210,7 +1210,7 @@ void BrowserWindow::processPendingRequestIds()
 {
     _refreshProcessor->process();
     _emojiUserNameProcessor->process();
-    _toggleEmojiProcessor->process();
+    _reactionProcessor->process();
 }
 
 void BrowserWindow::createTreeTOs(Workspace& workspace)
@@ -1377,11 +1377,11 @@ void BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType)
 
         _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.rawTO->id, emojiType));  //invalidate cache entry
 
-        _toggleEmojiProcessor->executeTask(
+        _reactionProcessor->executeTask(
             [&](auto const& senderId) {
-                return _persisterFacade->scheduleToggleEmojiNetworkResource(
+                return _persisterFacade->scheduleToggleReactionNetworkResource(
                     SenderInfo{.senderId = senderId, .wishResultData = false, .wishErrorInfo = false},
-                    ToggleEmojiNetworkResourceRequestData{.resourceId = leaf.rawTO->id, .emojiType = emojiType});
+                    ToggleReactionNetworkResourceRequestData{.resourceId = leaf.rawTO->id, .emojiType = emojiType});
             },
             [](auto const&) {},
             [&](auto const& errors) {

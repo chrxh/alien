@@ -52,8 +52,8 @@ void LoginController::onLogin()
                 auto const& data = _persisterFacade->fetchLoginData(requestId);
                 if (data.unknownUser) {
                     auto& settings = GlobalSettings::get();
-                    auto userName = settings.getValue("dialogs.login.user name", "");
-                    auto password = settings.getValue("dialogs.login.password", "");
+                    auto userName = settings.getValue("dialogs.login.user name", std::string());
+                    auto password = settings.getValue("dialogs.login.password", std::string());
                     ActivateUserDialog::get().open(userName, password, getUserInfo());
                 }
                 saveSettings();
