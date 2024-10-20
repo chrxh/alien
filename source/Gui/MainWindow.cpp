@@ -107,14 +107,14 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     log(Priority::Important, "initialize GLAD");
     initGlad();
 
-    //init services
+    log(Priority::Important, "initialize services");
     StyleRepository::get().init();
     NetworkService::get().init();
 
-    //init facades
+    log(Priority::Important, "initialize facades");
     _persisterFacade->init(_simulationFacade);
 
-    //init controllers, windows and dialogs
+    log(Priority::Important, "initialize windows");
     Viewport::get().init(_simulationFacade);
     AutosaveController::get().init(_simulationFacade);
     EditorController::get().init(_simulationFacade);
@@ -125,13 +125,12 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     SpatialControlWindow::get().init(_simulationFacade);
     RadiationSourcesWindow::get().init(_simulationFacade);
     SimulationParametersWindow::get().init(_simulationFacade);
-    _gpuSettingsDialog = std::make_shared<_GpuSettingsDialog>(_simulationFacade);
+    GpuSettingsDialog::get().init(_simulationFacade);
     StartupController::get().init(_simulationFacade, _persisterFacade);
-    _exitDialog = std::make_shared<_ExitDialog>(_onExit);
-    _aboutDialog = std::make_shared<_AboutDialog>();
-    _massOperationsDialog = std::make_shared<_MassOperationsDialog>(_simulationFacade);
-    _logWindow = std::make_shared<_LogWindow>(_logger);
-    _gettingStartedWindow = std::make_shared<_GettingStartedWindow>();
+    ExitDialog::get().init(_onExit);
+    MassOperationsDialog::get().init(_simulationFacade);
+    LogWindow::get().init(_logger);
+    _GettingStartedWindow::get().init();
     _newSimulationDialog = std::make_shared<_NewSimulationDialog>(_simulationFacade);
     _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>();
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simulationFacade);
@@ -151,6 +150,7 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     NetworkTransferController::get().init(_simulationFacade, _persisterFacade);
     LoginController::get().init(_simulationFacade, _persisterFacade);
 
+    log(Priority::Important, "initialize file dialogs");
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
         GLuint tex;
 
@@ -215,11 +215,14 @@ void _MainWindow::shutdown()
     StatisticsWindow::get().shutdown();
     SpatialControlWindow::get().shutdown();
     SimulationParametersWindow::get().shutdown();
+    _GettingStartedWindow::get().shutdown();
 
     EditorController::get().shutdown();
     LoginController::get().shutdown();
     WindowController::get().shutdown();
     AutosaveController::get().shutdown();
+
+    GpuSettingsDialog::get().shutdown();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -465,8 +468,8 @@ void _MainWindow::processMenubar()
             if (ImGui::MenuItem("Autosave", "ALT+7", _autosaveWindow->isOn())) {
                 _autosaveWindow->setOn(!_autosaveWindow->isOn());
             }
-            if (ImGui::MenuItem("Log", "ALT+8", _logWindow->isOn())) {
-                _logWindow->setOn(!_logWindow->isOn());
+            if (ImGui::MenuItem("Log", "ALT+8", LogWindow::get().isOn())) {
+                LogWindow::get().setOn(!LogWindow::get().isOn());
             }
             AlienImGui::EndMenuButton();
         }
@@ -538,7 +541,7 @@ void _MainWindow::processMenubar()
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_TOOLS "  Tools ", _toolsMenuToggled, "Tools")) {
             if (ImGui::MenuItem("Mass operations", "ALT+H")) {
-                _massOperationsDialog->show();
+                MassOperationsDialog::get().show();
                 _toolsMenuToggled = false;
             }
             if (ImGui::MenuItem("Pattern analysis", "ALT+P")) {
@@ -557,7 +560,7 @@ void _MainWindow::processMenubar()
                 AutosaveController::get().setOn(!AutosaveController::get().isOn());
             }
             if (ImGui::MenuItem("CUDA settings", "ALT+C")) {
-                _gpuSettingsDialog->open();
+                GpuSettingsDialog::get().open();
             }
             if (ImGui::MenuItem("Display settings", "ALT+V")) {
                 _displaySettingsDialog->open();
@@ -570,7 +573,7 @@ void _MainWindow::processMenubar()
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_LIFE_RING "  Help ", _helpMenuToggled, "Help")) {
             if (ImGui::MenuItem("About", "")) {
-                _aboutDialog->open();
+                AboutDialog::get().open();
                 _helpMenuToggled = false;
             }
             if (ImGui::MenuItem("Getting started", "", _gettingStartedWindow->isOn())) {
@@ -644,7 +647,7 @@ void _MainWindow::processMenubar()
             _autosaveWindow->setOn(!_autosaveWindow->isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_8)) {
-            _logWindow->setOn(!_logWindow->isOn());
+            LogWindow::get().setOn(!LogWindow::get().isOn());
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_E)) {
@@ -685,7 +688,7 @@ void _MainWindow::processMenubar()
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_C)) {
-            _gpuSettingsDialog->open();
+            GpuSettingsDialog::get().open();
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_V)) {
             _displaySettingsDialog->open();
@@ -712,7 +715,7 @@ void _MainWindow::processMenubar()
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_H)) {
-            _massOperationsDialog->show();
+            MassOperationsDialog::get().show();
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_P)) {
             _patternAnalysisDialog->show();
@@ -726,9 +729,9 @@ void _MainWindow::processMenubar()
 void _MainWindow::processDialogs()
 {
     _newSimulationDialog->process();
-    _aboutDialog->process();
-    _massOperationsDialog->process();
-    _gpuSettingsDialog->process();
+    AboutDialog::get().process();
+    MassOperationsDialog::get().process();
+    GpuSettingsDialog::get().process();
     _displaySettingsDialog->process(); 
     _patternAnalysisDialog->process();
     LoginDialog::get().process();
@@ -740,7 +743,7 @@ void _MainWindow::processDialogs()
     _networkSettingsDialog->process();
     _resetPasswordDialog->process();
     _newPasswordDialog->process();
-    _exitDialog->process();
+    ExitDialog::get().process();
 
     MessageDialog::get().process();
     GenericFileDialogs::get().process();
@@ -752,7 +755,7 @@ void _MainWindow::processWindows()
     SpatialControlWindow::get().process();
     StatisticsWindow::get().process();
     SimulationParametersWindow::get().process();
-    _logWindow->process();
+    LogWindow::get().process();
     BrowserWindow::get().process();
     _gettingStartedWindow->process();
     _shaderWindow->process();
@@ -787,7 +790,7 @@ void _MainWindow::onPauseSimulation()
 
 void _MainWindow::onExit()
 {
-    _exitDialog->open();
+    ExitDialog::get().open();
 }
 
 void _MainWindow::finishFrame()

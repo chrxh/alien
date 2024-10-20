@@ -1,17 +1,23 @@
 #pragma once
 
-#include "AlienDialog.h"
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/GpuSettings.h"
+
+#include "AlienDialog.h"
 #include "Definitions.h"
 
-class _GpuSettingsDialog : public AlienDialog
+class GpuSettingsDialog : public AlienDialog
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(GpuSettingsDialog);
+
 public:
-    _GpuSettingsDialog(SimulationFacade const& simulationFacade);
-    ~_GpuSettingsDialog() override;
+    void init(SimulationFacade const& simulationFacade);
+    void shutdown();
 
 private:
+    GpuSettingsDialog();
+
     void processIntern();
     void openIntern();
 

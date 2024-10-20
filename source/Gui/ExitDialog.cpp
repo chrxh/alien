@@ -3,12 +3,16 @@
 #include "ExitDialog.h"
 #include "AlienImGui.h"
 
-_ExitDialog::_ExitDialog(bool& onExit)
+void ExitDialog::init(bool& onExit)
+{
+    _onExit = &onExit;
+}
+
+ExitDialog::ExitDialog()
     : AlienDialog("Exit")
-    , _onExit(onExit)
 {}
 
-void _ExitDialog::processIntern()
+void ExitDialog::processIntern()
 {
     ImGui::Text("Do you really want to terminate the program?");
 
@@ -19,7 +23,7 @@ void _ExitDialog::processIntern()
     ImGui::Spacing();
 
     if (AlienImGui::Button("OK")) {
-        _onExit = true;
+        *_onExit = true;
         close();
     }
     ImGui::SameLine();

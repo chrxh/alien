@@ -41,18 +41,13 @@ private:
 
     GuiLogger _logger;
 
-    LogWindow _logWindow;
     GettingStartedWindow _gettingStartedWindow;
     ShaderWindow _shaderWindow;
     AutosaveWindow _autosaveWindow;
 
-    ExitDialog _exitDialog;
-    GpuSettingsDialog _gpuSettingsDialog;
-    MassOperationsDialog _massOperationsDialog;
     NewSimulationDialog _newSimulationDialog;
     DisplaySettingsDialog _displaySettingsDialog;
     PatternAnalysisDialog _patternAnalysisDialog;
-    AboutDialog _aboutDialog;
     DeleteUserDialog _deleteUserDialog;
     NetworkSettingsDialog _networkSettingsDialog;
     ResetPasswordDialog _resetPasswordDialog;

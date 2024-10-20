@@ -29,25 +29,20 @@ class StatisticsWindow;
 
 class SimulationInteractionController;
 
-class _GpuSettingsDialog;
-using GpuSettingsDialog = std::shared_ptr<_GpuSettingsDialog>;
+class GpuSettingsDialog;
 
 class _NewSimulationDialog;
 using NewSimulationDialog = std::shared_ptr<_NewSimulationDialog>;
 
 class StartupController;
 
-class _ExitDialog;
-using ExitDialog = std::shared_ptr<_ExitDialog>;
+class ExitDialog;
 
-class _AboutDialog;
-using AboutDialog = std::shared_ptr<_AboutDialog>;
+class AboutDialog;
 
-class _MassOperationsDialog;
-using MassOperationsDialog = std::shared_ptr<_MassOperationsDialog>;
+class MassOperationsDialog;
 
-class _LogWindow;
-using LogWindow = std::shared_ptr<_LogWindow>;
+class LogWindow;
 
 class _GuiLogger;
 using GuiLogger = std::shared_ptr<_GuiLogger>;
