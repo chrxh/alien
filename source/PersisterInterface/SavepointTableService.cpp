@@ -123,7 +123,7 @@ void SavepointTableService::encodeDecode(boost::property_tree::ptree& tree, std:
         for (auto& entry : entries) {
             boost::property_tree::ptree subsubtree;
             encodeDecode(subsubtree, entry, task);
-            tree.push_back(std::make_pair(std::to_string(index), subsubtree));
+            subtree.push_back(std::make_pair(std::to_string(index), subsubtree));
             ++index;
         }
         tree.push_back(std::make_pair("entries", subtree));

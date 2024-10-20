@@ -39,6 +39,9 @@ void AutosaveWindow::initIntern(SimulationFacade simulationFacade, PersisterFaca
     _origDirectory = GlobalSettings::get().getValue("windows.autosave.directory", (std::filesystem::current_path() / Const::BasePath).string());
     _directory = _origDirectory;
 
+    if (_autosaveEnabled) {
+        _lastAutosaveTimepoint = std::chrono::steady_clock::now();
+    }
     updateSavepointTableFromFile();
 }
 
@@ -70,6 +73,19 @@ void AutosaveWindow::processIntern()
     validationAndCorrection();
 }
 
+void AutosaveWindow::processBackground()
+{
+    if (!_lastAutosaveTimepoint.has_value()) {
+        return;
+    }
+
+    auto minSinceLastAutosave = std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - _lastAutosaveTimepoint.value()).count();
+    if (minSinceLastAutosave == _autosaveInterval) {
+        createSavepoint();
+        _lastAutosaveTimepoint = std::chrono::steady_clock::now();
+    }
+}
+
 void AutosaveWindow::processToolbar()
 {
     ImGui::SameLine();
@@ -99,10 +115,16 @@ void AutosaveWindow::processToolbar()
 
 void AutosaveWindow::processHeader()
 {
-    AlienImGui::InputInt(
-        AlienImGui::InputIntParameters().name("Autosave interval (min)").textWidth(RightColumnWidth).defaultValue(_origAutosaveInterval),
-        _autosaveInterval,
-        &_autosaveEnabled);
+    if (AlienImGui::InputInt(
+            AlienImGui::InputIntParameters().name("Autosave interval (min)").textWidth(RightColumnWidth).defaultValue(_origAutosaveInterval),
+            _autosaveInterval,
+            &_autosaveEnabled)) {
+        if (_autosaveEnabled) {
+            _lastAutosaveTimepoint = std::chrono::steady_clock::now();
+        } else {
+            _lastAutosaveTimepoint.reset();
+        }
+    }
 }
 
 void AutosaveWindow::processTable()
@@ -272,4 +294,5 @@ std::string AutosaveWindow::getSavepointFilename() const
 void AutosaveWindow::validationAndCorrection()
 {
     _numberOfFiles = std::max(2, _numberOfFiles);
+    _autosaveInterval = std::max(2, _autosaveInterval);
 }
