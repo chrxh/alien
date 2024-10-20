@@ -50,15 +50,15 @@ void GenomeEditorWindow::initIntern(SimulationFacade simulationFacade)
     if (path.has_parent_path()) {
         path = path.parent_path();
     }
-    _startingPath = GlobalSettings::get().getString("windows.genome editor.starting path", path.string());
-    _previewHeight = GlobalSettings::get().getFloat("windows.genome editor.preview height", scale(PreviewHeight));
+    _startingPath = GlobalSettings::get().getValue("windows.genome editor.starting path", path.string());
+    _previewHeight = GlobalSettings::get().getValue("windows.genome editor.preview height", scale(PreviewHeight));
     ChangeColorDialog::get().setup([&] { return getCurrentGenome(); }, [&](GenomeDescription const& genome) { setCurrentGenome(genome); });
 }
 
 void GenomeEditorWindow::shutdownIntern()
 {
-    GlobalSettings::get().setString("windows.genome editor.starting path", _startingPath);
-    GlobalSettings::get().setFloat("windows.genome editor.preview height", _previewHeight);
+    GlobalSettings::get().setValue("windows.genome editor.starting path", _startingPath);
+    GlobalSettings::get().setValue("windows.genome editor.preview height", _previewHeight);
 }
 
 void GenomeEditorWindow::openTab(GenomeDescription const& genome, bool openGenomeEditorIfClosed)

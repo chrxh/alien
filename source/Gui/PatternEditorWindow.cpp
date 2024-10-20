@@ -32,7 +32,7 @@ void PatternEditorWindow::initIntern(SimulationFacade simulationFacade)
     if (path.has_parent_path()) {
         path = path.parent_path();
     }
-    _startingPath = GlobalSettings::get().getString("editors.pattern editor.starting path", path.string());
+    _startingPath = GlobalSettings::get().getValue("editors.pattern editor.starting path", path.string());
 }
 
 void PatternEditorWindow::processIntern()
@@ -400,7 +400,7 @@ PatternEditorWindow::PatternEditorWindow()
 
 void PatternEditorWindow::shutdownIntern()
 {
-    GlobalSettings::get().setString("editors.pattern editor.starting path", _startingPath);
+    GlobalSettings::get().setValue("editors.pattern editor.starting path", _startingPath);
 }
 
 void PatternEditorWindow::onGenerateExecutionOrderNumbers()

@@ -53,7 +53,7 @@ AlienWindow<Dependencies...>::AlienWindow(std::string const& title, std::string 
 template <typename ... Dependencies>
 void AlienWindow<Dependencies...>::init(Dependencies... dependencies)
 {
-    _on = GlobalSettings::get().getBool(_settingsNode + ".active", _defaultOn);
+    _on = GlobalSettings::get().getValue(_settingsNode + ".active", _defaultOn);
     initIntern(dependencies...);
 }
 
@@ -102,5 +102,5 @@ template <typename ... Dependencies>
 void AlienWindow<Dependencies...>::shutdown()
 {
     shutdownIntern();
-    GlobalSettings::get().setBool(_settingsNode + ".active", _on);
+    GlobalSettings::get().setValue(_settingsNode + ".active", _on);
 }

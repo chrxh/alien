@@ -21,12 +21,12 @@ void AutosaveController::init(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
     _startTimePoint = std::chrono::steady_clock::now();
-    _on = GlobalSettings::get().getBool("controllers.auto save.active", true);
+    _on = GlobalSettings::get().getValue("controllers.auto save.active", true);
 }
 
 void AutosaveController::shutdown()
 {
-    GlobalSettings::get().setBool("controllers.auto save.active", _on);
+    GlobalSettings::get().setValue("controllers.auto save.active", _on);
     if (!_on) {
         return;
     }

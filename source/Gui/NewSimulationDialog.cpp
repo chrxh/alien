@@ -20,12 +20,12 @@ void NewSimulationDialog::initIntern(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
     _adoptSimulationParameters =
-            GlobalSettings::get().getBool("dialogs.new simulation.adopt simulation parameters", true);
+            GlobalSettings::get().getValue("dialogs.new simulation.adopt simulation parameters", true);
 }
 
 void NewSimulationDialog::shutdownIntern()
 {
-    GlobalSettings::get().setBool("dialogs.new simulation.adopt simulation parameters", _adoptSimulationParameters);
+    GlobalSettings::get().setValue("dialogs.new simulation.adopt simulation parameters", _adoptSimulationParameters);
 }
 
 NewSimulationDialog::NewSimulationDialog()

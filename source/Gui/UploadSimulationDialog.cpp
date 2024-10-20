@@ -35,13 +35,13 @@ void UploadSimulationDialog::initIntern(SimulationFacade simulationFacade)
     _simulationFacade = simulationFacade;
 
     auto& settings = GlobalSettings::get();
-    _share = settings.getBool("dialogs.upload.share", _share);
+    _share = settings.getValue("dialogs.upload.share", _share);
 }
 
 void UploadSimulationDialog::shutdownIntern()
 {
     auto& settings = GlobalSettings::get();
-    settings.setBool("dialogs.upload.share", _share);
+    settings.setValue("dialogs.upload.share", _share);
 }
 
 

@@ -86,7 +86,7 @@ void BrowserWindow::initIntern(SimulationFacade simulationFacade, PersisterFacad
     auto& settings = GlobalSettings::get();
     _currentWorkspace.resourceType = settings.getInt("windows.browser.resource type", _currentWorkspace.resourceType);
     _currentWorkspace.workspaceType = settings.getInt("windows.browser.workspace type", _currentWorkspace.workspaceType);
-    _userTableWidth = settings.getFloat("windows.browser.user table width", scale(UserTableWidth));
+    _userTableWidth = settings.getValue("windows.browser.user table width", scale(UserTableWidth));
 
     int numEmojis = 0;
     for (int i = 0; i < NumEmojiBlocks; ++i) {
@@ -101,12 +101,12 @@ void BrowserWindow::initIntern(SimulationFacade simulationFacade, PersisterFacad
         }
     }
 
-    auto firstStart = GlobalSettings::get().getBool("windows.browser.first start", true);
+    auto firstStart = GlobalSettings::get().getValue("windows.browser.first start", true);
     refreshIntern(firstStart);
 
     for (auto& [workspaceId, workspace] : _workspaces) {
         auto initialCollapsedSimulationFolders = NetworkResourceService::get().convertFolderNamesToSettings(NetworkResourceService::get().getFolderNames(workspace.rawTOs));
-        auto collapsedSimulationFolders = GlobalSettings::get().getStringVector(
+        auto collapsedSimulationFolders = GlobalSettings::get().getValue(
             "windows.browser.collapsed folders." + networkResourceTypeToString.at(workspaceId.resourceType) + "."
                 + workspaceTypeToString.at(workspaceId.workspaceType),
             initialCollapsedSimulationFolders);
@@ -122,12 +122,12 @@ void BrowserWindow::initIntern(SimulationFacade simulationFacade, PersisterFacad
 void BrowserWindow::shutdownIntern()
 {
     auto& settings = GlobalSettings::get();
-    settings.setInt("windows.browser.resource type", _currentWorkspace.resourceType);
-    settings.setInt("windows.browser.workspace type", _currentWorkspace.workspaceType);
-    settings.setBool("windows.browser.first start", false);
-    settings.setFloat("windows.browser.user table width", _userTableWidth);
+    settings.setValue("windows.browser.resource type", _currentWorkspace.resourceType);
+    settings.setValue("windows.browser.workspace type", _currentWorkspace.workspaceType);
+    settings.setValue("windows.browser.first start", false);
+    settings.setValue("windows.browser.user table width", _userTableWidth);
     for (auto const& [workspaceId, workspace] : _workspaces) {
-        settings.setStringVector(
+        settings.setValue(
             "windows.browser.collapsed folders." + networkResourceTypeToString.at(workspaceId.resourceType) + "."
                 + workspaceTypeToString.at(workspaceId.workspaceType),
             NetworkResourceService::get().convertFolderNamesToSettings(workspace.collapsedFolderNames));
