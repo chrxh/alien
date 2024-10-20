@@ -27,6 +27,6 @@ private:
     int _origFps = 33;
 
     int _videoModesCount = 0;
-    GLFWvidmode const* _videoModes;
+    GLFWvidmode const* _videoModes = nullptr;
     std::vector<std::string> _videoModeStrings;
 };

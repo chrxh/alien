@@ -4,6 +4,7 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
+#include "Base/Resources.h"
 #include "Base/GlobalSettings.h"
 #include "Base/StringHelper.h"
 #include "PersisterInterface/SavepointTableService.h"
@@ -37,6 +38,8 @@ void AutosaveWindow::initIntern(SimulationFacade simulationFacade, PersisterFaca
     _numberOfFiles = GlobalSettings::get().getValue("windows.autosave.number of files", _origNumberOfFiles);
     _origDirectory = GlobalSettings::get().getValue("windows.autosave.directory", std::filesystem::current_path().string());
     _directory = _origDirectory;
+
+    updateSavepointTableFromFile();
 }
 
 void AutosaveWindow::shutdownIntern()
@@ -105,6 +108,7 @@ void AutosaveWindow::processHeader()
 void AutosaveWindow::processTable()
 {
     if (!_savepointTable.has_value()) {
+        AlienImGui::Text("Error: No files could be created in the specified directory.");
         return;
     }
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
@@ -175,7 +179,10 @@ void AutosaveWindow::processSettings()
     _settingsOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Settings").highlighted(true).defaultOpen(_settingsOpen));
     if (_settingsOpen) {
         if (ImGui::BeginChild("##addons", {scale(0), 0})) {
-            AlienImGui::InputText(AlienImGui::InputTextParameters().name("Directory").textWidth(RightColumnWidth).defaultValue(_origDirectory), _directory);
+            if (AlienImGui::InputText(
+                    AlienImGui::InputTextParameters().name("Directory").textWidth(RightColumnWidth).defaultValue(_origDirectory), _directory)) {
+                updateSavepointTableFromFile();
+            }
             AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Mode")
@@ -228,6 +235,22 @@ void AutosaveWindow::updateSavepoint(int row)
             SavepointTableService::get().updateEntry(_savepointTable.value(), row, newEntry);
         }
     }
+}
+
+void AutosaveWindow::updateSavepointTableFromFile()
+{
+    if (!std::filesystem::exists(std::filesystem::path(_directory))) {
+        _savepointTable.reset();
+        return;
+    }
+    if (auto savepoint = SavepointTableService::get().loadFromFile(getSavepointFilename()); std::holds_alternative<SavepointTable>(savepoint)) {
+        _savepointTable = std::get<SavepointTable>(savepoint);
+    }
+}
+
+std::string AutosaveWindow::getSavepointFilename() const
+{
+    return (std::filesystem::path(_directory) / Const::SavepointTableFilename).string();
 }
 
 void AutosaveWindow::validationAndCorrection()

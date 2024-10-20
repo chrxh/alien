@@ -376,7 +376,7 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, std::string& t
 {
     static char buffer[1024];
     StringHelper::copy(buffer, IM_ARRAYSIZE(buffer), text);
-    auto result = InputText(parameters, buffer, IM_ARRAYSIZE(buffer));
+    auto result = AlienImGui::InputText(parameters, buffer, IM_ARRAYSIZE(buffer));
     text = std::string(buffer);
 
     return result;

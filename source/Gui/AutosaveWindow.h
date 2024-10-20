@@ -27,6 +27,8 @@ private:
     void createSavepoint();
     void updateSavepoint(int row);
 
+    void updateSavepointTableFromFile();
+    std::string getSavepointFilename() const;
     void validationAndCorrection();
 
     SimulationFacade _simulationFacade; 

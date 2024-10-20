@@ -4,6 +4,7 @@ namespace Const
 {
     std::string const ProgramVersion = "4.11.0";
     std::string const DiscordURL = "https://discord.gg/7bjyZdXXQ2";
+    std::string const AlienURL = "alien-project.org";
 
     std::string const BasePath = "resources/";
 
@@ -11,6 +12,7 @@ namespace Const
     std::string const AutosaveFileWithoutPath = "autosave.sim";
     std::string const AutosaveFile = BasePath + AutosaveFileWithoutPath;
     std::string const SettingsFilename = BasePath + "settings.json";
+    std::string const SavepointTableFilename = BasePath + "savepoints.json";
 
     std::string const SimulationFragmentShader = BasePath + "shader.fs";
     std::string const SimulationVertexShader = BasePath + "shader.vs";
