@@ -16,7 +16,7 @@ enum SavepointState_
     SavepointState_Error
 };
 
-struct SavepointEntry
+struct _SavepointEntry
 {
     std::filesystem::path filename;
     SavepointState state = SavepointState_InQueue;
@@ -26,6 +26,7 @@ struct SavepointEntry
 
     std::string requestId;  // transient
 };
+using SavepointEntry = std::shared_ptr<_SavepointEntry>;
 
 class SavepointTable
 {
@@ -33,17 +34,19 @@ class SavepointTable
 
 public:
     SavepointEntry const& at(int index) const { return _entries.at(index); }
+    bool isEmpty() const { return _entries.empty(); }
     int getSize() const { return toInt(_entries.size()); }
-    std::string const& getFilename() const { return _filename; }
+    std::filesystem::path const& getFilename() const { return _filename; }
     int const& getSequenceNumber() const { return _sequenceNumber; }
 
+
 private:
-    SavepointTable(std::string const& filename, std::deque<SavepointEntry> const& entries)
+    SavepointTable(std::filesystem::path const& filename, std::deque<SavepointEntry> const& entries)
         : _filename(filename)
         , _entries(entries)
     {}
 
-    std::string _filename;
+    std::filesystem::path _filename;
     int _sequenceNumber = 0;
     std::deque<SavepointEntry> _entries;
 };

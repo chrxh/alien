@@ -62,49 +62,53 @@ auto SavepointTableService::loadFromFile(std::string const& filename) -> std::va
     }
 }
 
-bool SavepointTableService::truncate(SavepointTable& table, int newSize) const
+std::vector<SavepointEntry> SavepointTableService::truncate(SavepointTable& table, int newSize) const
 {
+    std::vector<SavepointEntry> result;
+
     auto& entries = table._entries;
     if (entries.size() < newSize) {
-        return true;
+        return result;
     }
 
     for (auto const& entry : entries | std::views::drop(newSize)) {
-        if (entry.state == SavepointState_Persisted) {
-            SerializerService::get().deleteSimulation(entry.filename);
+        if (entry->state == SavepointState_Persisted) {
+            SerializerService::get().deleteSimulation(entry->filename);
+        } else {
+            result.emplace_back(entry);
         }
     }
 
     entries.erase(entries.begin() + newSize, entries.end());
-    return true;
+    writeToFile(table);
+    return result;
 }
 
-bool SavepointTableService::insertEntryAtFront(SavepointTable& table, SavepointEntry const& entry) const
+void SavepointTableService::insertEntryAtFront(SavepointTable& table, SavepointEntry const& entry) const
 {
     table._entries.emplace_front(entry);
     ++table._sequenceNumber;
-    return writeToFile(table);
+    writeToFile(table);
 }
 
-bool SavepointTableService::updateEntry(SavepointTable& table, int row, SavepointEntry const& newEntry) const
+void SavepointTableService::updateEntry(SavepointTable& table, int row, SavepointEntry const& newEntry) const
 {
     table._entries.at(row) = newEntry;
-    return writeToFile(table);
+    writeToFile(table);
 }
 
-bool SavepointTableService::writeToFile(SavepointTable& table) const
+void SavepointTableService::writeToFile(SavepointTable& table) const
 {
     try {
         std::ofstream stream(table.getFilename(), std::ios::binary);
         if (!stream) {
-            return false;
+            throw std::runtime_error("Could not access savepoint table file: " + table.getFilename().string());
         }
         boost::property_tree::ptree tree;
         encodeDecode(tree, table, ParserTask::Encode);
         boost::property_tree::json_parser::write_json(stream, tree);
-        return true;
     } catch (...) {
-        return false;
+        throw std::runtime_error("Unknown error.");
     }
 }
 
@@ -130,7 +134,7 @@ void SavepointTableService::encodeDecode(boost::property_tree::ptree& tree, std:
     } else {
         entries.clear();
         for (auto& [key, subtree] : tree.get_child("entries")) {
-            SavepointEntry entry;
+            SavepointEntry entry = std::make_shared<_SavepointEntry>();
             encodeDecode(subtree, entry, task);
             entries.emplace_back(entry);
         }
@@ -139,11 +143,11 @@ void SavepointTableService::encodeDecode(boost::property_tree::ptree& tree, std:
 
 void SavepointTableService::encodeDecode(boost::property_tree::ptree& tree, SavepointEntry& entry, ParserTask task) const
 {
-    encodeDecode(tree, entry.filename, "filename", task);
-    JsonParser::encodeDecode(tree, entry.state, 0, "state", task);
-    JsonParser::encodeDecode(tree, entry.timestamp, std::string(), "timestamp", task);
-    JsonParser::encodeDecode(tree, entry.name, std::string(), "name", task);
-    JsonParser::encodeDecode(tree, entry.timestep, 0ull, "timestep", task);
+    encodeDecode(tree, entry->filename, "filename", task);
+    JsonParser::encodeDecode(tree, entry->state, 0, "state", task);
+    JsonParser::encodeDecode(tree, entry->timestamp, std::string(), "timestamp", task);
+    JsonParser::encodeDecode(tree, entry->name, std::string(), "name", task);
+    JsonParser::encodeDecode(tree, entry->timestep, 0ull, "timestep", task);
 }
 
 void SavepointTableService::encodeDecode(boost::property_tree::ptree& tree, std::filesystem::path& path, std::string const& node, ParserTask task) const
