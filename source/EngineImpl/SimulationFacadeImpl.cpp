@@ -2,13 +2,8 @@
 
 #include "EngineInterface/Descriptions.h"
 
-void _SimulationFacadeImpl::newSimulation(
-    std::optional<std::string> const& simulationName,
-    uint64_t timestep,
-    GeneralSettings const& generalSettings,
-    SimulationParameters const& parameters)
+void _SimulationFacadeImpl::newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters)
 {
-    _simulationName = simulationName.value_or("<unnamed>");
     _generalSettings = generalSettings;
     _origSettings.generalSettings = generalSettings;
     _origSettings.simulationParameters = parameters;
@@ -21,11 +16,6 @@ void _SimulationFacadeImpl::newSimulation(
     _simRunTimePoint.reset();
 
     ++_sessionId;
-}
-
-std::string _SimulationFacadeImpl::getSimulationName() const
-{
-    return _simulationName;
 }
 
 int _SimulationFacadeImpl::getSessionId() const

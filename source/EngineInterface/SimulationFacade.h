@@ -14,13 +14,8 @@ class _SimulationFacade
 public:
     virtual ~_SimulationFacade() = default;
 
-    virtual void newSimulation(
-        std::optional<std::string> const& simulationName,
-        uint64_t timestep,
-        GeneralSettings const& generalSettings,
-        SimulationParameters const& simulationParameters) = 0;
+    virtual void newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& simulationParameters) = 0;
     virtual int getSessionId() const = 0;
-    virtual std::string getSimulationName() const = 0;
 
     virtual void clear() = 0;
 

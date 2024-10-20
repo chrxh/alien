@@ -75,7 +75,6 @@ void ResizeWorldDialog::processIntern()
 
 void ResizeWorldDialog::onResizing()
 {
-    auto name = _simulationFacade->getSimulationName();
     auto timestep = _simulationFacade->getCurrentTimestep();
     auto generalSettings = _simulationFacade->getGeneralSettings();
     auto parameters = _simulationFacade->getSimulationParameters();
@@ -88,7 +87,7 @@ void ResizeWorldDialog::onResizing()
     generalSettings.worldSizeX = _width;
     generalSettings.worldSizeY = _height;
 
-    _simulationFacade->newSimulation(name, timestep, generalSettings, parameters);
+    _simulationFacade->newSimulation(timestep, generalSettings, parameters);
 
     DescriptionEditService::get().correctConnections(content, {_width, _height});
     if (_scaleContent) {

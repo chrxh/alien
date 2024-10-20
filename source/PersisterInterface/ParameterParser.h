@@ -4,6 +4,7 @@
 
 #include "Base/JsonParser.h"
 #include "EngineInterface/Colors.h"
+#include "EngineInterface/SimulationParameters.h"
 
 class ParameterParser
 {
@@ -29,6 +30,25 @@ namespace detail
     static bool encodeDecodeImpl(boost::property_tree::ptree& tree, T& value, T const& defaultValue, std::string const& node, ParserTask task)
     {
         return JsonParser::encodeDecode(tree, value, defaultValue, node, task);
+    }
+
+    template <>
+    inline bool encodeDecodeImpl(boost::property_tree::ptree& tree, Char64& value, Char64 const& defaultValue, std::string const& node, ParserTask task)
+    {
+        bool result;
+        if (task == ParserTask::Encode) {
+            std::string valueAsString(value);
+            std::string defaultValueAsString(defaultValue);
+            result = JsonParser::encodeDecode(tree, valueAsString, defaultValueAsString, node, task);
+        } else {
+            std::string valueAsString;
+            std::string defaultValueAsString(defaultValue);
+            result = JsonParser::encodeDecode(tree, valueAsString, defaultValueAsString, node, task);
+            auto copyLength = std::min(127, toInt(valueAsString.size()));
+            valueAsString.copy(value, copyLength);
+            value[copyLength + 1] = '\0';
+        }
+        return result;
     }
 
     template <>

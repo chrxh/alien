@@ -1245,7 +1245,7 @@ void BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
 
     NetworkTransferController::get().onDownload(DownloadNetworkResourceRequestData{
         .resourceId = leaf.rawTO->id,
-        .resourceName = leaf.leafName,
+        .resourceName = leaf.rawTO->resourceName,
         .resourceVersion = leaf.rawTO->version,
         .resourceType = _currentWorkspace.resourceType,
         .downloadCache = _downloadCache});
