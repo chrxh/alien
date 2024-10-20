@@ -22,15 +22,15 @@ void SpatialControlWindow::init(SimulationFacade const& simulationFacade)
     Viewport::get().setZoomSensitivity(settings.getFloat("windows.spatial control.zoom sensitivity factor", Viewport::get().getZoomSensitivity()));
 }
 
-void SpatialControlWindow::shutdown()
+SpatialControlWindow::SpatialControlWindow()
+    : AlienWindow("Spatial control", "windows.spatial control", true)
+{}
+
+void SpatialControlWindow::shutdownIntern()
 {
     auto& settings = GlobalSettings::get();
     settings.setFloat("windows.spatial control.zoom sensitivity", Viewport::get().getZoomSensitivity());
 }
-
-SpatialControlWindow::SpatialControlWindow()
-    : AlienWindow("Spatial control", "windows.spatial control", true)
-{}
 
 void SpatialControlWindow::processIntern()
 {

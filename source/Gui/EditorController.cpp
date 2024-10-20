@@ -18,6 +18,7 @@
 #include "GenomeEditorWindow.h"
 #include "MessageDialog.h"
 #include "OverlayMessageController.h"
+#include "ShutdownController.h"
 
 namespace
 {
@@ -33,6 +34,8 @@ void EditorController::init(SimulationFacade const& simulationFacade)
     _patternEditorWindow = std::make_shared<_PatternEditorWindow>(_editorModel, _simulationFacade);
     _creatorWindow = std::make_shared<_CreatorWindow>(_editorModel, _simulationFacade);
     _multiplierWindow = std::make_shared<_MultiplierWindow>(_editorModel, _simulationFacade);
+
+    ShutdownController::get().registerObject(this);
 }
 
 void EditorController::shutdown()

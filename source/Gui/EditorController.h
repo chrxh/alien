@@ -5,14 +5,14 @@
 #include "EngineInterface/Descriptions.h"
 
 #include "Definitions.h"
+#include "ShutdownInterface.h"
 
-class EditorController
+class EditorController : public ShutdownInterface
 {
     MAKE_SINGLETON(EditorController);
 
 public:
     void init(SimulationFacade const& simulationFacade);
-    void shutdown();
 
     bool isOn() const;
     void setOn(bool value);
@@ -50,9 +50,9 @@ public:
     void onAccelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
 
 private:
+    void shutdown() override;
     void processInspectorWindows();
 
-private:
     EditorModel _editorModel;
     SelectionWindow _selectionWindow;
     PatternEditorWindow _patternEditorWindow;

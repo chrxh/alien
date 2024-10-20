@@ -101,12 +101,15 @@ PUBLIC
     ResizeWorldDialog.h
     SelectionWindow.cpp
     SelectionWindow.h
+    SerializationHelperService.cpp
+    SerializationHelperService.h
     Shader.cpp
     Shader.h
     ShaderWindow.cpp
     ShaderWindow.h
-    SerializationHelperService.cpp
-    SerializationHelperService.h
+    ShutdownController.cpp
+    ShutdownController.h
+    ShutdownInterface.h
     SimulationInteractionController.cpp
     SimulationInteractionController.h
     SimulationParametersWindow.cpp

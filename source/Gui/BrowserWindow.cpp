@@ -116,7 +116,7 @@ void BrowserWindow::init(SimulationFacade const& simulationFacade, PersisterFaca
     _lastSessionData.load(getAllRawTOs());
 }
 
-void BrowserWindow::shutdown()
+void BrowserWindow::shutdownIntern()
 {
     auto& settings = GlobalSettings::get();
     settings.setInt("windows.browser.resource type", _currentWorkspace.resourceType);

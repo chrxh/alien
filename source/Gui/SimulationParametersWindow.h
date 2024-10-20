@@ -13,11 +13,11 @@ class SimulationParametersWindow : public AlienWindow
 
 public:
     void init(SimulationFacade const& simulationFacade);
-    void shutdown();
 
 private:
     SimulationParametersWindow();
 
+    void shutdownIntern() override;
     void processIntern() override;
 
     SimulationParametersSpot createSpot(SimulationParameters const& simParameters, int index);

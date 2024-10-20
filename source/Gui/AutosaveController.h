@@ -6,14 +6,14 @@
 #include "EngineInterface/Definitions.h"
 
 #include "Definitions.h"
+#include "ShutdownInterface.h"
 
-class AutosaveController
+class AutosaveController : public ShutdownInterface
 {
     MAKE_SINGLETON(AutosaveController);
 
 public:
     void init(SimulationFacade const& simulationFacade);
-    void shutdown();
 
     bool isOn() const;
     void setOn(bool value);
@@ -21,6 +21,8 @@ public:
     void process();
 
 private:
+    void shutdown() override;
+
     void onSave();
 
     SimulationFacade _simulationFacade;

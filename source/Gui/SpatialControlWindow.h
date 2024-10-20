@@ -13,11 +13,11 @@ class SpatialControlWindow : public AlienWindow
 
 public:
     void init(SimulationFacade const& simulationFacade);
-    void shutdown();
 
 private:
     SpatialControlWindow();
 
+    void shutdownIntern() override;
     void processIntern() override;
     void processBackground() override;
 

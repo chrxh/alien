@@ -77,6 +77,7 @@
 #include "FileTransferController.h"
 #include "LoginController.h"
 #include "NetworkTransferController.h"
+#include "ShutdownController.h"
 
 namespace
 {
@@ -130,7 +131,7 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     ExitDialog::get().init(_onExit);
     MassOperationsDialog::get().init(_simulationFacade);
     LogWindow::get().init(_logger);
-    _GettingStartedWindow::get().init();
+    GettingStartedWindow::get().init();
     _newSimulationDialog = std::make_shared<_NewSimulationDialog>(_simulationFacade);
     _displaySettingsDialog = std::make_shared<_DisplaySettingsDialog>();
     _patternAnalysisDialog = std::make_shared<_PatternAnalysisDialog>(_simulationFacade);
@@ -211,16 +212,7 @@ void _MainWindow::mainLoop()
 
 void _MainWindow::shutdown()
 {
-    BrowserWindow::get().shutdown();
-    StatisticsWindow::get().shutdown();
-    SpatialControlWindow::get().shutdown();
-    SimulationParametersWindow::get().shutdown();
-    _GettingStartedWindow::get().shutdown();
-
-    EditorController::get().shutdown();
-    LoginController::get().shutdown();
-    WindowController::get().shutdown();
-    AutosaveController::get().shutdown();
+    ShutdownController::get().shutdown();
 
     GpuSettingsDialog::get().shutdown();
 
@@ -576,8 +568,8 @@ void _MainWindow::processMenubar()
                 AboutDialog::get().open();
                 _helpMenuToggled = false;
             }
-            if (ImGui::MenuItem("Getting started", "", _gettingStartedWindow->isOn())) {
-                _gettingStartedWindow->setOn(!_gettingStartedWindow->isOn());
+            if (ImGui::MenuItem("Getting started", "", GettingStartedWindow::get().isOn())) {
+                GettingStartedWindow::get().setOn(!GettingStartedWindow::get().isOn());
             }
             AlienImGui::EndMenuButton();
         }
@@ -757,7 +749,7 @@ void _MainWindow::processWindows()
     SimulationParametersWindow::get().process();
     LogWindow::get().process();
     BrowserWindow::get().process();
-    _gettingStartedWindow->process();
+    GettingStartedWindow::get().process();
     _shaderWindow->process();
     RadiationSourcesWindow::get().process();
     _autosaveWindow->process();
