@@ -77,7 +77,7 @@
 #include "FileTransferController.h"
 #include "LoginController.h"
 #include "NetworkTransferController.h"
-#include "ShutdownController.h"
+#include "MainLoopEntityController.h"
 
 namespace
 {
@@ -209,7 +209,7 @@ void _MainWindow::mainLoop()
 
 void _MainWindow::shutdown()
 {
-    ShutdownController::get().shutdown();
+    MainLoopEntityController::get().shutdown();
 
     GpuSettingsDialog::get().shutdown();
     NewSimulationDialog::get().shutdown();
@@ -319,8 +319,8 @@ void _MainWindow::processFadeInUI()
 
     processMenubar();
     processDialogs();
-    processWindows();
     processControllers();
+    MainLoopEntityController::get().process();
 
     SimulationView::get().processControls(_renderSimulation);
     StartupController::get().process();
@@ -340,8 +340,8 @@ void _MainWindow::processReady()
 
     processMenubar();
     processDialogs();
-    processWindows();
     processControllers();
+    MainLoopEntityController::get().process();
 
     SimulationView::get().processControls(_renderSimulation);
 
@@ -481,12 +481,12 @@ void _MainWindow::processMenubar()
             }
             ImGui::EndDisabled();
             ImGui::Separator();
-            ImGui::BeginDisabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isObjectInspectionPossible());
+            ImGui::BeginDisabled(!SimulationInteractionController::get().isEditMode() || !PatternEditorWindow::get().isObjectInspectionPossible());
             if (ImGui::MenuItem("Inspect objects", "ALT+N")) {
                 EditorController::get().onInspectSelectedObjects();
             }
             ImGui::EndDisabled();
-            ImGui::BeginDisabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isGenomeInspectionPossible());
+            ImGui::BeginDisabled(!SimulationInteractionController::get().isEditMode() || !PatternEditorWindow::get().isGenomeInspectionPossible());
             if (ImGui::MenuItem("Inspect principal genome", "ALT+F")) {
                 EditorController::get().onInspectSelectedGenomes();
             }
@@ -652,10 +652,10 @@ void _MainWindow::processMenubar()
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_A)) {
             MultiplierWindow::get().setOn(!MultiplierWindow::get().isOn());
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_N) && EditorController::get().isObjectInspectionPossible()) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_N) && PatternEditorWindow::get().isObjectInspectionPossible()) {
             EditorController::get().onInspectSelectedObjects();
         }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_F) && EditorController::get().isGenomeInspectionPossible()) {
+        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_F) && PatternEditorWindow::get().isGenomeInspectionPossible()) {
             EditorController::get().onInspectSelectedGenomes();
         }
         if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
@@ -717,7 +717,6 @@ void _MainWindow::processDialogs()
     MassOperationsDialog::get().process();
     GpuSettingsDialog::get().process();
     DisplaySettingsDialog::get().process(); 
-    PatternAnalysisDialog::get().process();
     LoginDialog::get().process();
     CreateUserDialog::get().process();
     ActivateUserDialog::get().process();
@@ -733,30 +732,14 @@ void _MainWindow::processDialogs()
     GenericFileDialogs::get().process();
 }
 
-void _MainWindow::processWindows()
-{
-    TemporalControlWindow::get().process();
-    SpatialControlWindow::get().process();
-    StatisticsWindow::get().process();
-    SimulationParametersWindow::get().process();
-    LogWindow::get().process();
-    BrowserWindow::get().process();
-    GettingStartedWindow::get().process();
-    ShaderWindow::get().process();
-    RadiationSourcesWindow::get().process();
-    AutosaveWindow::get().process();
-}
-
 void _MainWindow::processControllers()
 {
-    AutosaveController::get().process();
     EditorController::get().process();
     OverlayMessageController::get().process();
     SimulationInteractionController::get().process();
     DelayedExecutionController::get().process();
     FileTransferController::get().process();
     NetworkTransferController::get().process();
-    LoginController::get().process();
     UiController::get().process();
 }
 

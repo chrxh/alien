@@ -4,19 +4,19 @@
 #include "EngineInterface/Descriptions.h"
 
 #include "Definitions.h"
-#include "ShutdownInterface.h"
+#include "MainLoopEntity.h"
 
-class PatternAnalysisDialog : public ShutdownInterface
+class PatternAnalysisDialog : public MainLoopEntity
 {
     MAKE_SINGLETON(PatternAnalysisDialog);
 
 public:
     void init(SimulationFacade const& simulationFacade);
 
-    void process();
     void show();
 
 private:
+    void process() override;
     void shutdown() override;
     void saveRepetitiveActiveClustersToFiles(std::string const& filename);
 

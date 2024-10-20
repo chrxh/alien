@@ -4,9 +4,9 @@
 #include "EngineInterface/Definitions.h"
 
 #include "Definitions.h"
-#include "ShutdownInterface.h"
+#include "MainLoopEntity.h"
 
-class ImageToPatternDialog : public ShutdownInterface
+class ImageToPatternDialog : public MainLoopEntity
 {
     MAKE_SINGLETON(ImageToPatternDialog);
 
@@ -18,6 +18,7 @@ public:
 
 private:
     void shutdown() override;
+    void process() override {}
 
     SimulationFacade _simulationFacade;
 

@@ -13,7 +13,7 @@
 #include "EngineInterface/SimulationFacade.h"
 
 #include "MessageDialog.h"
-#include "ShutdownController.h"
+#include "MainLoopEntityController.h"
 
 
 void PatternAnalysisDialog::init(SimulationFacade const& simulationFacade)
@@ -26,7 +26,7 @@ void PatternAnalysisDialog::init(SimulationFacade const& simulationFacade)
     }
     _startingPath = GlobalSettings::get().getString("dialogs.pattern analysis.starting path", path.string());
 
-    ShutdownController::get().registerObject(this);
+    MainLoopEntityController::get().registerObject(this);
 }
 
 void PatternAnalysisDialog::shutdown()

@@ -106,9 +106,9 @@ PUBLIC
     Shader.h
     ShaderWindow.cpp
     ShaderWindow.h
-    ShutdownController.cpp
-    ShutdownController.h
-    ShutdownInterface.h
+    MainLoopEntityController.cpp
+    MainLoopEntityController.h
+    MainLoopEntity.h
     SimulationInteractionController.cpp
     SimulationInteractionController.h
     SimulationParametersWindow.cpp

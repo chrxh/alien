@@ -6,9 +6,9 @@
 #include "EngineInterface/Definitions.h"
 
 #include "Definitions.h"
-#include "ShutdownInterface.h"
+#include "MainLoopEntity.h"
 
-class AutosaveController : public ShutdownInterface
+class AutosaveController : public MainLoopEntity
 {
     MAKE_SINGLETON(AutosaveController);
 
@@ -18,9 +18,8 @@ public:
     bool isOn() const;
     void setOn(bool value);
 
-    void process();
-
 private:
+    void process() override;
     void shutdown() override;
 
     void onSave();

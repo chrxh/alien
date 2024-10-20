@@ -18,7 +18,7 @@
 #include "GenomeEditorWindow.h"
 #include "MessageDialog.h"
 #include "OverlayMessageController.h"
-#include "ShutdownController.h"
+#include "MainLoopEntityController.h"
 
 namespace
 {
@@ -35,12 +35,6 @@ void EditorController::init(SimulationFacade const& simulationFacade)
     PatternEditorWindow::get().init(_simulationFacade);
     CreatorWindow::get().init(_simulationFacade);
     MultiplierWindow::get().init(_simulationFacade);
-
-    ShutdownController::get().registerObject(this);
-}
-
-void EditorController::shutdown()
-{
 }
 
 bool EditorController::isOn() const
@@ -58,12 +52,6 @@ void EditorController::process()
     if (!_on) {
         return;
     }
-
-    SelectionWindow::get().process();
-    PatternEditorWindow::get().process();
-    CreatorWindow::get().process();
-    MultiplierWindow::get().process();
-    GenomeEditorWindow::get().process();
 
     processInspectorWindows();
 
@@ -83,16 +71,6 @@ bool EditorController::areInspectionWindowsActive() const
 void EditorController::onCloseAllInspectorWindows()
 {
     _inspectorWindows.clear();
-}
-
-bool EditorController::isObjectInspectionPossible() const
-{
-    return PatternEditorWindow::get().isObjectInspectionPossible();
-}
-
-bool EditorController::isGenomeInspectionPossible() const
-{
-    return PatternEditorWindow::get().isGenomeInspectionPossible();
 }
 
 void EditorController::onInspectSelectedObjects()
