@@ -17,20 +17,15 @@ public:
     //returns true if defaultValue has been applied
     template <typename T>
     static bool encodeDecode(boost::property_tree::ptree& tree, T& value, T const& defaultValue, std::string const& node, ParserTask task);
+
+private:
+    template <typename T>
+    static std::string toStringWithPrecision(T const& value, int n = 6);
 };
 
 /**
  * Implementations
  */
-
-template <typename T>
-std::string to_string_with_precision(const T a_value, const int n = 6)
-{
-    std::ostringstream out;
-    out.precision(n);
-    out << std::fixed << a_value;
-    return out.str();
-}
 
 template <typename T>
 bool JsonParser::encodeDecode(
@@ -47,7 +42,7 @@ bool JsonParser::encodeDecode(
             } else if constexpr (std::is_same<T, std::string>::value) {
                 return value;
             } else {
-                return to_string_with_precision(value, 8);
+                return toStringWithPrecision(value, 8);
             }
         }();
         tree.put(node, stringValue);
@@ -71,4 +66,13 @@ bool JsonParser::encodeDecode(
 
         return subtree->find(property) == subtree->not_found();
     }
+}
+
+template <typename T>
+std::string JsonParser::toStringWithPrecision(T const& value, int n)
+{
+    std::ostringstream out;
+    out.precision(n);
+    out << std::fixed << value;
+    return out.str();
 }

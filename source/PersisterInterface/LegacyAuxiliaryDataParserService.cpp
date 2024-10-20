@@ -2,7 +2,7 @@
 
 #include <set>
 
-#include "PropertyParser.h"
+#include "ParameterParser.h"
 
 namespace
 {
@@ -65,14 +65,14 @@ namespace
     void readLegacyParameterForBase(LegacyProperty<T>& result, boost::property_tree::ptree& tree, std::string const& node)
     {
         T defaultDummy;
-        result.existent = !PropertyParser::encodeDecode(tree, result.parameter, defaultDummy, node, ParserTask::Decode);
+        result.existent = !ParameterParser::encodeDecode(tree, result.parameter, defaultDummy, node, ParserTask::Decode);
     }
 
     template <typename T>
     void readLegacyParameterForSpot(LegacySpotProperty<T>& result, boost::property_tree::ptree& tree, std::string const& node)
     {
         T defaultDummy;
-        result.existent = !PropertyParser::encodeDecodeWithEnabled(tree, result.parameter, result.active, defaultDummy, node, ParserTask::Decode);
+        result.existent = !ParameterParser::encodeDecodeWithEnabled(tree, result.parameter, result.active, defaultDummy, node, ParserTask::Decode);
     }
 
     LegacyParametersForBase readLegacyParametersForBase(boost::property_tree::ptree& tree, std::string const& nodeBase)

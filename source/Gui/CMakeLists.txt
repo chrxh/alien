@@ -103,12 +103,8 @@ PUBLIC
     ResetPasswordDialog.h
     ResizeWorldDialog.cpp
     ResizeWorldDialog.h
-    SavepointTableManager.cpp
-    SavepointTableManager.h
     SelectionWindow.cpp
     SelectionWindow.h
-    SerializationHelperService.cpp
-    SerializationHelperService.h
     Shader.cpp
     Shader.h
     ShaderWindow.cpp

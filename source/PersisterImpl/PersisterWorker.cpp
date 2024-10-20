@@ -6,10 +6,9 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/LoggingService.h"
-#include "EngineInterface/GenomeDescriptionService.h"
 #include "PersisterInterface/SerializerService.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "Gui/SerializationHelperService.h"
+#include "EngineInterface/GenomeDescriptionService.h"
 #include "Network/NetworkService.h"
 
 _PersisterWorker::_PersisterWorker(SimulationFacade const& simulationFacade)

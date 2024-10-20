@@ -3,10 +3,10 @@
 #include <deque>
 
 #include "PersisterInterface/PersisterFacade.h"
+#include "PersisterInterface/SavepointTable.h"
 
 #include "Definitions.h"
 #include "AlienWindow.h"
-#include "SavepointTableManager.h"
 
 class AutosaveWindow : public AlienWindow<SimulationFacade, PersisterFacade>
 {
@@ -25,7 +25,7 @@ private:
     void processSettings();
 
     void createSavepoint();
-    void updateSavepoint(SavepointEntry& savepoint);
+    void updateSavepoint(int row);
 
     void validationAndCorrection();
 
@@ -34,8 +34,8 @@ private:
 
     bool _settingsOpen = false;
     float _settingsHeight = 130.0f;
-    std::string _origLocation;
-    std::string _location;
+    std::string _origDirectory;
+    std::string _directory;
 
     bool _autosaveEnabled = false;
     int _origAutosaveInterval = 40;
@@ -52,5 +52,5 @@ private:
     int _origNumberOfFiles = 20;
     int _numberOfFiles = 20;
 
-    std::deque<SavepointEntry> _savepoints;
+    std::optional<SavepointTable> _savepointTable;
 };
