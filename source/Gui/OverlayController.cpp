@@ -68,10 +68,10 @@ void OverlayController::processLoadingBar()
         auto height = scale(15.0f);
         auto center = ImVec2{viewSize.x / 2, viewSize.y - scale(60.0f)};
 
-        auto constexpr N = 12;
+        auto N = 6 + toInt(powf(sinf(duration / 500.0f - Const::Pi / 4) + 1, 3.0f) * 5);
         for (int i = 0; i < N; ++i) {
-            auto amplitude1 = sinf(toFloat(i) * 10.0f / toFloat(N) - powf(duration / 340.0f, 1.3f) /** (1.0f + 0.3f * sin(duration / 2000))*/);
-            auto amplitude2 = sinf(toFloat(i) * 14.0f / toFloat(N) - powf(duration / 235.0f, 1.3f) /** (1.0f + 0.3f * sin(duration / 2000))*/);
+            auto amplitude1 = sinf(toFloat(i) * 10.0f / toFloat(N) - duration / 700.0f * (1.0f + 0.3f * sinf(duration / 1000)));
+            auto amplitude2 = sinf(toFloat(i) * 14.0f / toFloat(N) - duration / 100.0f * (1.0f + 0.3f * cosf(duration / 1000)));
             //auto hue = toFloat((i * 1000 / N + toInt(duration)) % 3000) / 4500.0f;
             //hue = hue < 0.33f ? 0.66f + hue : 0.66f + 0.66f - hue; 
             auto y1 = center.y + height / 2 - amplitude1 * height;
@@ -79,7 +79,7 @@ void OverlayController::processLoadingBar()
             drawList->AddRectFilled(
                 ImVec2{center.x - width / 2 + toFloat(i) / N * width, std::min(y1, y2)},
                 ImVec2{center.x - width / 2 + toFloat(i + 1) / N * width - scale(3), std::max(y1, y2)},
-                ImColor::HSV(0, 0.1f, 0.35f, 0.6f));
+                ImColor::HSV(0.625, 0.8f, 0.55f, 0.6f));
         }
         drawList->AddText(
             StyleRepository::get().getReefMediumFont(),
