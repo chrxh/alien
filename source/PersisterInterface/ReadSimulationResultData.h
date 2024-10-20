@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "EngineInterface/DeserializedSimulation.h"
+#include "PersisterInterface/DeserializedSimulation.h"
 
 struct ReadSimulationResultData
 {

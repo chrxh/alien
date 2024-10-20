@@ -1,8 +1,9 @@
 #pragma once
 
+#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/StatisticsHistory.h"
+
 #include "AuxiliaryData.h"
-#include "Descriptions.h"
-#include "StatisticsHistory.h"
 
 struct DeserializedSimulation
 {

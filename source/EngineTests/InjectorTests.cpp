@@ -67,7 +67,7 @@ TEST_F(InjectorTests, nothingFound)
 
 TEST_F(InjectorTests, matchButNoInjection)
 {
-    auto genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+    auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells(
@@ -114,7 +114,7 @@ TEST_F(InjectorTests, matchButNoInjection)
 
 TEST_F(InjectorTests, injection)
 {
-    auto genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+    auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -158,8 +158,8 @@ TEST_F(InjectorTests, injection)
 
 TEST_F(InjectorTests, injectOnlyEmptyCells_failed)
 {
-    auto genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
-    auto otherGenome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription(), CellGenomeDescription()}));
+    auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+    auto otherGenome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription(), CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -208,8 +208,8 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_failed)
 
 TEST_F(InjectorTests, injectOnlyEmptyCells_success)
 {
-    auto genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
-    auto otherGenome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription(), CellGenomeDescription()}));
+    auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+    auto otherGenome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription(), CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({

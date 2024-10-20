@@ -18,7 +18,7 @@
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
 #include "Viewport.h"
-#include "EngineInterface/SerializerService.h"
+#include "PersisterInterface/SerializerService.h"
 
 namespace
 {
@@ -322,7 +322,7 @@ void PatternEditorWindow::onOpenPattern()
             auto firstFilenameCopy = firstFilename;
             _startingPath = firstFilenameCopy.remove_filename().string();
             ClusteredDataDescription content;
-            if (SerializerService::deserializeContentFromFile(content, firstFilename.string())) {
+            if (SerializerService::get().deserializeContentFromFile(content, firstFilename.string())) {
                 auto center = Viewport::get().getCenterInWorldPos();
                 content.setCenter(center);
                 _simulationFacade->addAndSelectSimulationData(DataDescription(content));
@@ -342,7 +342,7 @@ void PatternEditorWindow::onSavePattern()
             _startingPath = firstFilenameCopy.remove_filename().string();
 
             auto content = _simulationFacade->getSelectedClusteredSimulationData(EditorModel::get().isRolloutToClusters());
-            if (!SerializerService::serializeContentToFile(firstFilename.string(), content)) {
+            if (!SerializerService::get().serializeContentToFile(firstFilename.string(), content)) {
                 GenericMessageDialog::get().information("Save pattern", "The selected pattern could not be saved to the specified file.");
             }
         });
@@ -378,7 +378,7 @@ void PatternEditorWindow::onPaste()
     auto data = *_copiedSelection;
     auto center = Viewport::get().getCenterInWorldPos();
     data.setCenter(center);
-    DescriptionEditService::generateNewCreatureIds(data);
+    DescriptionEditService::get().generateNewCreatureIds(data);
     _simulationFacade->addAndSelectSimulationData(data);
     EditorModel::get().update();
 }
@@ -410,7 +410,7 @@ void PatternEditorWindow::onGenerateExecutionOrderNumbers()
     std::unordered_set<uint64_t> cellIds = dataWithoutClusters.getCellIds();
 
     auto parameters = _simulationFacade->getSimulationParameters();
-    DescriptionEditService::generateExecutionOrderNumbers(dataWithClusters, cellIds, parameters.cellNumExecutionOrderNumbers);
+    DescriptionEditService::get().generateExecutionOrderNumbers(dataWithClusters, cellIds, parameters.cellNumExecutionOrderNumbers);
 
     _simulationFacade->removeSelectedObjects(true);
     _simulationFacade->addAndSelectSimulationData(dataWithClusters);

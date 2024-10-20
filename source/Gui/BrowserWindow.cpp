@@ -19,7 +19,7 @@
 #include "Base/StringHelper.h"
 #include "Base/VersionChecker.h"
 #include "EngineInterface/GenomeDescriptionService.h"
-#include "EngineInterface/SerializerService.h"
+#include "PersisterInterface/SerializerService.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "Network/NetworkResourceService.h"
 #include "Network/NetworkService.h"

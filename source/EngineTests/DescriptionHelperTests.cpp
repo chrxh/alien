@@ -38,11 +38,11 @@ protected:
 
 TEST_F(DescriptionHelperTests, correctConnections)
 {
-    auto data = DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters().width(10).height(10).center({50.0f, 99.0f}));
+    auto data = DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().width(10).height(10).center({50.0f, 99.0f}));
     _simulationFacade->setSimulationData(data);
     auto clusteredData = _simulationFacade->getClusteredSimulationData();
 
-    DescriptionEditService::correctConnections(clusteredData, {100, 100});
+    DescriptionEditService::get().correctConnections(clusteredData, {100, 100});
 
     EXPECT_TRUE(areAngelsCorrect(clusteredData));
 }

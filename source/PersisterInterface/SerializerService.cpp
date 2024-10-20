@@ -22,12 +22,13 @@
 #include "Base/Resources.h"
 #include "Base/VersionChecker.h"
 
-#include "Descriptions.h"
-#include "SimulationParameters.h"
+#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/SimulationParameters.h"
+#include "EngineInterface/GenomeConstants.h"
+#include "EngineInterface/GenomeDescriptions.h"
+#include "EngineInterface/GenomeDescriptionService.h"
+
 #include "AuxiliaryDataParserService.h"
-#include "GenomeConstants.h"
-#include "GenomeDescriptions.h"
-#include "GenomeDescriptionService.h"
 
 #define SPLIT_SERIALIZATION(Classname) \
     template <class Archive> \
@@ -293,7 +294,7 @@ namespace cereal
                 if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
                     data.genome = MakeGenomeCopy();
                 } else {
-                    data.genome = GenomeDescriptionService::convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
+                    data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
                 }
             } else {
                 std::variant<MakeGenomeCopy, std::vector<CellGenomeDescription>> genomeData;
@@ -312,7 +313,7 @@ namespace cereal
                     genomeDesc.header.separateConstruction = std::get<bool>(auxiliaries.at(Id_ConstructorGenome_SeparateConstruction));
                     genomeDesc.header.angleAlignment = std::get<int>(auxiliaries.at(Id_ConstructorGenome_AngleAlignment));
                     genomeDesc.header.stiffness = std::get<float>(auxiliaries.at(Id_ConstructorGenome_Stiffness));
-                    data.genome = GenomeDescriptionService::convertDescriptionToBytes(genomeDesc);
+                    data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(genomeDesc);
                     if (!genomeDesc.cells.empty()) {
                         data.constructionAngle1 = genomeDesc.cells.front().referenceAngle;
                         data.constructionAngle2 = genomeDesc.cells.back().referenceAngle;
@@ -325,7 +326,7 @@ namespace cereal
             if (std::holds_alternative<MakeGenomeCopy>(data.genome)) {
                 genomeData = MakeGenomeCopy();
             } else {
-                genomeData = GenomeDescriptionService::convertBytesToDescription(std::get<std::vector<uint8_t>>(data.genome));
+                genomeData = GenomeDescriptionService::get().convertBytesToDescription(std::get<std::vector<uint8_t>>(data.genome));
             }
             ar(genomeData);
         }
@@ -400,7 +401,7 @@ namespace cereal
                 if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
                     data.genome = MakeGenomeCopy();
                 } else {
-                    data.genome = GenomeDescriptionService::convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
+                    data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
                 }
             } else {
                 std::variant<MakeGenomeCopy, std::vector<CellGenomeDescription>> genomeData;
@@ -410,7 +411,7 @@ namespace cereal
                 } else {
                     GenomeDescription genomeDesc;
                     genomeDesc.cells = std::get<std::vector<CellGenomeDescription>>(genomeData);
-                    data.genome = GenomeDescriptionService::convertDescriptionToBytes(genomeDesc);
+                    data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(genomeDesc);
                 }
             }
         } else {
@@ -418,7 +419,7 @@ namespace cereal
             if (std::holds_alternative<MakeGenomeCopy>(data.genome)) {
                 genomeData = MakeGenomeCopy();
             } else {
-                genomeData = GenomeDescriptionService::convertBytesToDescription(std::get<std::vector<uint8_t>>(data.genome));
+                genomeData = GenomeDescriptionService::get().convertBytesToDescription(std::get<std::vector<uint8_t>>(data.genome));
             }
             ar(genomeData);
         }
@@ -597,7 +598,7 @@ namespace cereal
             if (hasGenomeHeader && useNewGenomeIndex) {
                 GenomeDescription genomeDesc;
                 ar(genomeDesc);
-                data.genome = GenomeDescriptionService::convertDescriptionToBytes(genomeDesc);
+                data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(genomeDesc);
             }
 
             //compatibility with older versions
@@ -610,7 +611,7 @@ namespace cereal
                 genomeDesc.header.separateConstruction = std::get<bool>(auxiliaries.at(Id_Constructor_SeparateConstruction));
                 genomeDesc.header.angleAlignment = std::get<int>(auxiliaries.at(Id_Constructor_AngleAlignment));
                 genomeDesc.header.stiffness = std::get<float>(auxiliaries.at(Id_Constructor_Stiffness));
-                data.genome = GenomeDescriptionService::convertDescriptionToBytes(genomeDesc);
+                data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(genomeDesc);
 
                 data.genomeCurrentNodeIndex = 0;
 
@@ -623,12 +624,12 @@ namespace cereal
             if (hasGenomeHeader && !useNewGenomeIndex) {
                 GenomeDescription genomeDesc;
                 ar(genomeDesc);
-                data.genome = GenomeDescriptionService::convertDescriptionToBytes(genomeDesc);
+                data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(genomeDesc);
 
                 auto oldVersionSpec =
                     GenomeEncodingSpecification().numRepetitions(false).concatenationAngle1(false).concatenationAngle2(false);
-                auto oldGenome = GenomeDescriptionService::convertDescriptionToBytes(genomeDesc, oldVersionSpec);
-                data.genomeCurrentNodeIndex = GenomeDescriptionService::convertNodeAddressToNodeIndex(oldGenome, data.genomeCurrentNodeIndex, oldVersionSpec);
+                auto oldGenome = GenomeDescriptionService::get().convertDescriptionToBytes(genomeDesc, oldVersionSpec);
+                data.genomeCurrentNodeIndex = GenomeDescriptionService::get().convertNodeAddressToNodeIndex(oldGenome, data.genomeCurrentNodeIndex, oldVersionSpec);
                 if (data.genomeCurrentNodeIndex >= toInt(genomeDesc.cells.size())) {
                     data.genomeCurrentNodeIndex = 0;
                 }
@@ -636,7 +637,7 @@ namespace cereal
             //<<<
 
         } else {
-            GenomeDescription genomeDesc = GenomeDescriptionService::convertBytesToDescription(data.genome);
+            GenomeDescription genomeDesc = GenomeDescriptionService::get().convertBytesToDescription(data.genome);
             ar(genomeDesc);
         }
     }
@@ -713,14 +714,14 @@ namespace cereal
             if (hasGenomeHeader) {
                 GenomeDescription genomeDesc;
                 ar(genomeDesc);
-                data.genome = GenomeDescriptionService::convertDescriptionToBytes(genomeDesc);
+                data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(genomeDesc);
             } else {
                 GenomeDescription genomeDesc;
                 ar(genomeDesc.cells);
-                data.genome = GenomeDescriptionService::convertDescriptionToBytes(genomeDesc);
+                data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(genomeDesc);
             }
         } else {
-            GenomeDescription genomeDesc = GenomeDescriptionService::convertBytesToDescription(data.genome);
+            GenomeDescription genomeDesc = GenomeDescriptionService::get().convertBytesToDescription(data.genome);
             ar(genomeDesc);
         }
     }
@@ -1168,26 +1169,26 @@ void SerializerService::deserializeDataDescription(ClusteredDataDescription& dat
 
 void SerializerService::serializeAuxiliaryData(AuxiliaryData const& auxiliaryData, std::ostream& stream)
 {
-    boost::property_tree::json_parser::write_json(stream, AuxiliaryDataParserService::encodeAuxiliaryData(auxiliaryData));
+    boost::property_tree::json_parser::write_json(stream, AuxiliaryDataParserService::get().encodeAuxiliaryData(auxiliaryData));
 }
 
 void SerializerService::deserializeAuxiliaryData(AuxiliaryData& auxiliaryData, std::istream& stream)
 {
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(stream, tree);
-    auxiliaryData = AuxiliaryDataParserService::decodeAuxiliaryData(tree);
+    auxiliaryData = AuxiliaryDataParserService::get().decodeAuxiliaryData(tree);
 }
 
 void SerializerService::serializeSimulationParameters(SimulationParameters const& parameters, std::ostream& stream)
 {
-    boost::property_tree::json_parser::write_json(stream, AuxiliaryDataParserService::encodeSimulationParameters(parameters));
+    boost::property_tree::json_parser::write_json(stream, AuxiliaryDataParserService::get().encodeSimulationParameters(parameters));
 }
 
 void SerializerService::deserializeSimulationParameters(SimulationParameters& parameters, std::istream& stream)
 {
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(stream, tree);
-    parameters = AuxiliaryDataParserService::decodeSimulationParameters(tree);
+    parameters = AuxiliaryDataParserService::get().decodeSimulationParameters(tree);
 }
 
 namespace

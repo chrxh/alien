@@ -229,7 +229,7 @@ TEST_F(AttackerTests, successDistributeToTwoTransmittersWithDifferentColor)
 
 TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
 {
-    auto otherGenome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+    auto otherGenome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({

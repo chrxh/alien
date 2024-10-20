@@ -21,9 +21,9 @@ public:
 
 TEST_F(StatisticsTests, selfReplicatorWithRepetitionsInGenome)
 {
-    auto subGenome = GenomeDescriptionService::convertDescriptionToBytes(
+    auto subGenome = GenomeDescriptionService::get().convertDescriptionToBytes(
         GenomeDescription().setHeader(GenomeHeaderDescription().setNumRepetitions(3)).setCells({CellGenomeDescription()}));
-    auto mainGenome = GenomeDescriptionService::convertDescriptionToBytes(
+    auto mainGenome = GenomeDescriptionService::get().convertDescriptionToBytes(
         GenomeDescription()
             .setHeader(GenomeHeaderDescription().setNumRepetitions(2))
             .setCells({
@@ -46,9 +46,9 @@ TEST_F(StatisticsTests, selfReplicatorWithRepetitionsInGenome)
 
 TEST_F(StatisticsTests, selfReplicatorWithInfiniteRepetitionsInGenome)
 {
-    auto subGenome = GenomeDescriptionService::convertDescriptionToBytes(
+    auto subGenome = GenomeDescriptionService::get().convertDescriptionToBytes(
         GenomeDescription().setHeader(GenomeHeaderDescription().setInfiniteRepetitions()).setCells({CellGenomeDescription()}));
-    auto mainGenome = GenomeDescriptionService::convertDescriptionToBytes(
+    auto mainGenome = GenomeDescriptionService::get().convertDescriptionToBytes(
         GenomeDescription()
             .setHeader(GenomeHeaderDescription().setNumRepetitions(2))
             .setCells({
@@ -71,9 +71,9 @@ TEST_F(StatisticsTests, selfReplicatorWithInfiniteRepetitionsInGenome)
 
 TEST_F(StatisticsTests, nonSelfReplicatorWithRepetitionsInGenome)
 {
-    auto subGenome = GenomeDescriptionService::convertDescriptionToBytes(
+    auto subGenome = GenomeDescriptionService::get().convertDescriptionToBytes(
         GenomeDescription().setHeader(GenomeHeaderDescription().setNumRepetitions(3)).setCells({CellGenomeDescription()}));
-    auto mainGenome = GenomeDescriptionService::convertDescriptionToBytes(
+    auto mainGenome = GenomeDescriptionService::get().convertDescriptionToBytes(
         GenomeDescription()
             .setHeader(GenomeHeaderDescription().setNumRepetitions(2))
             .setCells({

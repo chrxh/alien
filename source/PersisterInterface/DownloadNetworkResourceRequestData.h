@@ -4,7 +4,7 @@
 
 #include "DownloadCache.h"
 #include "Base/Cache.h"
-#include "EngineInterface/DeserializedSimulation.h"
+#include "PersisterInterface/DeserializedSimulation.h"
 #include "Network/Definitions.h"
 
 struct DownloadNetworkResourceRequestData

@@ -1,11 +1,11 @@
 #include "AuxiliaryDataParserService.h"
 
-#include "GeneralSettings.h"
-#include "LegacyAuxiliaryDataParserService.h"
-#include "Settings.h"
+#include "Base/Resources.h"
+#include "EngineInterface/GeneralSettings.h"
+#include "EngineInterface/Settings.h"
 
 #include "PropertyParser.h"
-#include "Base/Resources.h"
+#include "LegacyAuxiliaryDataParserService.h"
 
 namespace
 {
@@ -1019,7 +1019,7 @@ namespace
 
         // Compatibility with legacy parameters
         if (parserTask == ParserTask::Decode) {
-            LegacyAuxiliaryDataParserService::searchAndApplyLegacyParameters(programVersion, tree, missingFeatures, missingParameters, parameters);
+            LegacyAuxiliaryDataParserService::get().searchAndApplyLegacyParameters(programVersion, tree, missingFeatures, missingParameters, parameters);
         }
     }
 

@@ -14,7 +14,7 @@
 #include "Base/GlobalSettings.h"
 #include "Base/Resources.h"
 #include "Base/LoggingService.h"
-#include "EngineInterface/SerializerService.h"
+#include "PersisterInterface/SerializerService.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "PersisterInterface/PersisterFacade.h"
 

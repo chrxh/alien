@@ -432,14 +432,14 @@ namespace
 {
     void colorizeGenomeNodes(std::vector<uint8_t>& genome, int color)
     {
-        auto desc = GenomeDescriptionService::convertBytesToDescription(genome);
+        auto desc = GenomeDescriptionService::get().convertBytesToDescription(genome);
         for (auto& node : desc.cells) {
             node.color = color;
             if (node.hasGenome()) {
                 colorizeGenomeNodes(node.getGenomeRef(), color);
             }
         }
-        genome = GenomeDescriptionService::convertDescriptionToBytes(desc);
+        genome = GenomeDescriptionService::get().convertDescriptionToBytes(desc);
     }
 }
 

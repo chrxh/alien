@@ -62,7 +62,6 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, Settings const& 
     _cudaSelectionResult = std::make_shared<SelectionResult>();
     _cudaAccessTO = std::make_shared<DataTO>();
     _cudaSimulationStatistics = std::make_shared<SimulationStatistics>();
-    _statisticsService = std::make_shared<_StatisticsService>();
 
     _cudaSimulationData->init({settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY}, timestep);
     _cudaRenderingData->init();
@@ -433,7 +432,7 @@ void _SimulationCudaFacade::updateStatistics()
         std::lock_guard lock(_mutexForStatistics);
         _statisticsData = _cudaSimulationStatistics->getStatistics();
     }
-    _statisticsService->addDataPoint(_statisticsHistory, _statisticsData->timeline, getCurrentTimestep());
+    StatisticsService::get().addDataPoint(_statisticsHistory, _statisticsData->timeline, getCurrentTimestep());
 }
 
 StatisticsHistory const& _SimulationCudaFacade::getStatisticsHistory() const
@@ -443,7 +442,7 @@ StatisticsHistory const& _SimulationCudaFacade::getStatisticsHistory() const
 
 void _SimulationCudaFacade::setStatisticsHistory(StatisticsHistoryData const& data)
 {
-    _statisticsService->rewriteHistory(_statisticsHistory, data, getCurrentTimestep());
+    StatisticsService::get().rewriteHistory(_statisticsHistory, data, getCurrentTimestep());
 }
 
 void _SimulationCudaFacade::resetTimeIntervalStatistics()
@@ -463,7 +462,7 @@ void _SimulationCudaFacade::setCurrentTimestep(uint64_t timestep)
         std::lock_guard lock(_mutexForSimulationData);
         _cudaSimulationData->timestep = timestep;
     }
-    _statisticsService->resetTime(_statisticsHistory, timestep);
+    StatisticsService::get().resetTime(_statisticsHistory, timestep);
 }
 
 void _SimulationCudaFacade::clear()

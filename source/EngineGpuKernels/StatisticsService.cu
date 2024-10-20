@@ -9,7 +9,7 @@ namespace
     auto constexpr MaxSamples = 1000;
 }
 
-void _StatisticsService::addDataPoint(StatisticsHistory& history, TimelineStatistics const& newRawStatistics, uint64_t timestep)
+void StatisticsService::addDataPoint(StatisticsHistory& history, TimelineStatistics const& newRawStatistics, uint64_t timestep)
 {
     std::lock_guard lock(history.getMutex());
     auto& historyData = history.getDataRef();
@@ -27,7 +27,7 @@ void _StatisticsService::addDataPoint(StatisticsHistory& history, TimelineStatis
                 result.time = toDouble(timestep);
                 return result;
             } else {
-                return StatisticsConverterService::convert(newRawStatistics, timestep, toDouble(timestep), _lastRawStatistics, _lastTimestep);
+                return StatisticsConverterService::get().convert(newRawStatistics, timestep, toDouble(timestep), _lastRawStatistics, _lastTimestep);
             }
         }();
 
@@ -65,7 +65,7 @@ void _StatisticsService::addDataPoint(StatisticsHistory& history, TimelineStatis
     }
 }
 
-void _StatisticsService::resetTime(StatisticsHistory& history, uint64_t timestep)
+void StatisticsService::resetTime(StatisticsHistory& history, uint64_t timestep)
 {
     std::lock_guard lock(history.getMutex());
     auto& data = history.getDataRef();
@@ -95,7 +95,7 @@ void _StatisticsService::resetTime(StatisticsHistory& history, uint64_t timestep
     _numDataPoints = 0;
 }
 
-void _StatisticsService::rewriteHistory(StatisticsHistory& history, StatisticsHistoryData const& newHistoryData, uint64_t timestep)
+void StatisticsService::rewriteHistory(StatisticsHistory& history, StatisticsHistoryData const& newHistoryData, uint64_t timestep)
 {
     _accumulatedDataPoint.reset();
     _numDataPoints = 0;

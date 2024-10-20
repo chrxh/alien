@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include "Base/Singleton.h"
+
 #include "GenomeDescriptions.h"
 #include "SimulationParameters.h"
 
@@ -14,12 +16,13 @@ struct GenomeEncodingSpecification
 
 class GenomeDescriptionService
 {
+    MAKE_SINGLETON(GenomeDescriptionService);
 public:
-    static std::vector<uint8_t> convertDescriptionToBytes(GenomeDescription const& genome, GenomeEncodingSpecification const& spec = GenomeEncodingSpecification());
-    static GenomeDescription convertBytesToDescription(std::vector<uint8_t> const& data, GenomeEncodingSpecification const& spec = GenomeEncodingSpecification());
+    std::vector<uint8_t> convertDescriptionToBytes(GenomeDescription const& genome, GenomeEncodingSpecification const& spec = GenomeEncodingSpecification());
+    GenomeDescription convertBytesToDescription(std::vector<uint8_t> const& data, GenomeEncodingSpecification const& spec = GenomeEncodingSpecification());
 
-    static int convertNodeAddressToNodeIndex(std::vector<uint8_t> const& data, int nodeAddress, GenomeEncodingSpecification const& spec = GenomeEncodingSpecification());
-    static int convertNodeIndexToNodeAddress(std::vector<uint8_t> const& data, int nodeIndex, GenomeEncodingSpecification const& spec = GenomeEncodingSpecification());
-    static int getNumNodesRecursively(std::vector<uint8_t> const& data, bool includeRepetitions, GenomeEncodingSpecification const& spec = GenomeEncodingSpecification());
-    static int getNumRepetitions(std::vector<uint8_t> const& data);
+    int convertNodeAddressToNodeIndex(std::vector<uint8_t> const& data, int nodeAddress, GenomeEncodingSpecification const& spec = GenomeEncodingSpecification());
+    int convertNodeIndexToNodeAddress(std::vector<uint8_t> const& data, int nodeIndex, GenomeEncodingSpecification const& spec = GenomeEncodingSpecification());
+    int getNumNodesRecursively(std::vector<uint8_t> const& data, bool includeRepetitions, GenomeEncodingSpecification const& spec = GenomeEncodingSpecification());
+    int getNumRepetitions(std::vector<uint8_t> const& data);
 };

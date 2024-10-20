@@ -9,7 +9,7 @@
 
 #include "Base/GlobalSettings.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/SerializerService.h"
+#include "PersisterInterface/SerializerService.h"
 #include "EngineInterface/SimulationFacade.h"
 
 #include "GenericMessageDialog.h"
@@ -87,7 +87,7 @@ void PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string cons
         ClusteredDataDescription pattern;
         pattern.clusters = std::vector<ClusterDescription>{partitionClassData.representant};
 
-        SerializerService::serializeContentToFile(clusterFilename.string(), pattern);
+        SerializerService::get().serializeContentToFile(clusterFilename.string(), pattern);
     }
     file.close();
 

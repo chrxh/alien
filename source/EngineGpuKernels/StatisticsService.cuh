@@ -1,10 +1,14 @@
 #include <optional>
 
+#include "Base/Singleton.h"
 #include "EngineInterface/StatisticsHistory.h"
+
 #include "Definitions.cuh"
 
-class _StatisticsService
+class StatisticsService
 {
+    MAKE_SINGLETON(StatisticsService);
+
 public:
     void addDataPoint(StatisticsHistory& history, TimelineStatistics const& newRawStatistics, uint64_t timestep);
     void resetTime(StatisticsHistory& history, uint64_t timestep);

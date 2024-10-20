@@ -108,10 +108,10 @@ void AutosaveWindow::processTable()
         ImGui::TableHeadersRow();
 
         ImGuiListClipper clipper;
-        clipper.Begin(_savePoints.size());
+        clipper.Begin(_savepoints.size());
         while (clipper.Step()) {
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                auto& entry = _savePoints[row];
+                auto& entry = _savepoints[row];
                 updateSavepoint(entry);
 
                 ImGui::PushID(row);
@@ -190,7 +190,7 @@ void AutosaveWindow::createSavepoint()
     auto saveData = SaveSimulationRequestData{"d:\\test" + std::to_string(++i) + ".sim", Viewport::get().getZoomFactor(), Viewport::get().getCenterInWorldPos()};
     auto jobId = _persisterFacade->scheduleSaveSimulationToFile(senderInfo, saveData);
 
-    _savePoints.emplace_front(SavepointState::InQueue, jobId.value, "", "", 0);
+    _savepoints.emplace_front(jobId.value, "", SavepointState::InQueue, "", "", 0);
 }
 
 void AutosaveWindow::updateSavepoint(SavepointEntry& savepoint)

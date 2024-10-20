@@ -14,7 +14,7 @@
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/PreviewDescriptionService.h"
-#include "EngineInterface/SerializerService.h"
+#include "PersisterInterface/SerializerService.h"
 #include "EngineInterface/ShapeGenerator.h"
 
 #include "AlienImGui.h"
@@ -143,7 +143,7 @@ void GenomeEditorWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
-        _copiedGenome = GenomeDescriptionService::convertDescriptionToBytes(selectedTab.genome);
+        _copiedGenome = GenomeDescriptionService::get().convertDescriptionToBytes(selectedTab.genome);
         printOverlayMessage("Genome copied");
     }
     AlienImGui::Tooltip("Copy genome");
@@ -390,7 +390,7 @@ namespace
             cell.cellFunction = TransmitterGenomeDescription();
         } break;
         case CellFunction_Constructor: {
-            cell.cellFunction = ConstructorGenomeDescription().setGenome(GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription()));
+            cell.cellFunction = ConstructorGenomeDescription().setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription()));
         } break;
         case CellFunction_Sensor: {
             cell.cellFunction = SensorGenomeDescription();
@@ -402,7 +402,7 @@ namespace
             cell.cellFunction = AttackerGenomeDescription();
         } break;
         case CellFunction_Injector: {
-            cell.cellFunction = InjectorGenomeDescription().setGenome(GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription()));
+            cell.cellFunction = InjectorGenomeDescription().setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription()));
         } break;
         case CellFunction_Muscle: {
             cell.cellFunction = MuscleGenomeDescription();
@@ -803,11 +803,11 @@ void GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Description
         AlienImGui::MonospaceText(content);
         AlienImGui::HelpMarker(Const::SubGenomeTooltip);
         if (AlienImGui::Button("Clear")) {
-            desc.setGenome(GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription()));
+            desc.setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription()));
         }
         ImGui::SameLine();
         if (AlienImGui::Button("Copy")) {
-            _copiedGenome = desc.isMakeGenomeCopy() ? GenomeDescriptionService::convertDescriptionToBytes(tab.genome) : desc.getGenomeData();
+            _copiedGenome = desc.isMakeGenomeCopy() ? GenomeDescriptionService::get().convertDescriptionToBytes(tab.genome) : desc.getGenomeData();
         }
         ImGui::SameLine();
         ImGui::BeginDisabled(!_copiedGenome.has_value());
@@ -820,7 +820,7 @@ void GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Description
         if (AlienImGui::Button("Edit")) {
             auto genomeToOpen = desc.isMakeGenomeCopy()
                 ? tab.genome
-                : GenomeDescriptionService::convertBytesToDescription(desc.getGenomeData());
+                : GenomeDescriptionService::get().convertBytesToDescription(desc.getGenomeData());
             openTab(genomeToOpen, false);
         }
         ImGui::SameLine();
@@ -840,10 +840,10 @@ void GenomeEditorWindow::onOpenGenome()
         _startingPath = firstFilenameCopy.remove_filename().string();
 
         std::vector<uint8_t> genomeData;
-        if (!SerializerService::deserializeGenomeFromFile(genomeData, firstFilename.string())) {
+        if (!SerializerService::get().deserializeGenomeFromFile(genomeData, firstFilename.string())) {
             GenericMessageDialog::get().information("Open genome", "The selected file could not be opened.");
         } else {
-            openTab(GenomeDescriptionService::convertBytesToDescription(genomeData), false);
+            openTab(GenomeDescriptionService::get().convertBytesToDescription(genomeData), false);
         }
     });
 }
@@ -857,8 +857,8 @@ void GenomeEditorWindow::onSaveGenome()
             _startingPath = firstFilenameCopy.remove_filename().string();
 
             auto const& selectedTab = _tabDatas.at(_selectedTabIndex);
-            auto genomeData = GenomeDescriptionService::convertDescriptionToBytes(selectedTab.genome);
-            if (!SerializerService::serializeGenomeToFile(firstFilename.string(), genomeData)) {
+            auto genomeData = GenomeDescriptionService::get().convertDescriptionToBytes(selectedTab.genome);
+            if (!SerializerService::get().serializeGenomeToFile(firstFilename.string(), genomeData)) {
                 GenericMessageDialog::get().information("Save genome", "The selected file could not be saved.");
             }
         });
@@ -934,10 +934,10 @@ void GenomeEditorWindow::onCreateSpore()
     pos.y += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
 
     auto genomeDesc = getCurrentGenome();
-    auto genome = GenomeDescriptionService::convertDescriptionToBytes(genomeDesc);
+    auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(genomeDesc);
 
     auto parameter = _simulationFacade->getSimulationParameters();
-    auto numNodes = GenomeDescriptionService::getNumNodesRecursively(genome, true);
+    auto numNodes = GenomeDescriptionService::get().getNumNodesRecursively(genome, true);
     auto energy = parameter.cellNormalEnergy[EditorModel::get().getDefaultColorCode()] * toFloat(numNodes * 2 + 1);
     auto cell = CellDescription()
                     .setPos(pos)
@@ -957,7 +957,7 @@ void GenomeEditorWindow::onCreateSpore()
 void GenomeEditorWindow::showPreview(TabData& tab)
 {
     auto const& genome = _tabDatas.at(_selectedTabIndex).genome;
-    auto preview = PreviewDescriptionService::convert(genome, tab.selectedNode, _simulationFacade->getSimulationParameters());
+    auto preview = PreviewDescriptionService::get().convert(genome, tab.selectedNode, _simulationFacade->getSimulationParameters());
     if (AlienImGui::ShowPreviewDescription(preview, tab.previewZoom, tab.selectedNode)) {
         _nodeIndexToJump = tab.selectedNode;
     }

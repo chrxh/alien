@@ -191,7 +191,7 @@ void CreatorWindow::onDrawing()
             pos.x = toFloat(toInt(pos.x));
             pos.y = toFloat(toInt(pos.y));
         }
-        return DescriptionEditService::createUnconnectedCircle(DescriptionEditService::CreateUnconnectedCircleParameters()
+        return DescriptionEditService::get().createUnconnectedCircle(DescriptionEditService::CreateUnconnectedCircleParameters()
                                                               .center(pos)
                                                               .radius(EditorModel::get().getPencilWidth())
                                                               .energy(_energy)
@@ -203,7 +203,7 @@ void CreatorWindow::onDrawing()
     };
 
     if (_drawingDataDescription.isEmpty()) {
-        DescriptionEditService::addIfSpaceAvailable(_drawingDataDescription, _drawingOccupancy, createAlignedCircle(pos), 0.5f, _simulationFacade->getWorldSize());
+        DescriptionEditService::get().addIfSpaceAvailable(_drawingDataDescription, _drawingOccupancy, createAlignedCircle(pos), 0.5f, _simulationFacade->getWorldSize());
         _lastDrawPos = pos;
     } else {
         auto posDelta = Math::length(pos - _lastDrawPos);
@@ -212,15 +212,15 @@ void CreatorWindow::onDrawing()
             for (float interDelta = 0; interDelta < posDelta; interDelta += 1.0f) {
                 auto drawPos = lastDrawPos + (pos - lastDrawPos) * interDelta / posDelta;
                 auto toAdd = createAlignedCircle(drawPos);
-                DescriptionEditService::addIfSpaceAvailable(_drawingDataDescription, _drawingOccupancy, toAdd, 0.5f, _simulationFacade->getWorldSize());
+                DescriptionEditService::get().addIfSpaceAvailable(_drawingDataDescription, _drawingOccupancy, toAdd, 0.5f, _simulationFacade->getWorldSize());
                 _lastDrawPos = drawPos;
             }
         }
     }
-    DescriptionEditService::reconnectCells(_drawingDataDescription, 1.5f);
+    DescriptionEditService::get().reconnectCells(_drawingDataDescription, 1.5f);
     if (!_makeSticky) {
         auto origDrawing = _drawingDataDescription;
-        DescriptionEditService::removeStickiness(_drawingDataDescription);
+        DescriptionEditService::get().removeStickiness(_drawingDataDescription);
         _simulationFacade->addAndSelectSimulationData(_drawingDataDescription);
         _drawingDataDescription = origDrawing;
     } else {
@@ -275,7 +275,7 @@ void CreatorWindow::createRectangle()
         return;
     }
 
-    auto data = DescriptionEditService::createRect(DescriptionEditService::CreateRectParameters()
+    auto data = DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
                                                   .width(_rectHorizontalCells)
                                                   .height(_rectVerticalCells)
                                                   .cellDistance(_cellDistance)
@@ -295,7 +295,7 @@ void CreatorWindow::createHexagon()
     if (_layers <= 0) {
         return;
     }
-    DataDescription data = DescriptionEditService::createHex(DescriptionEditService::CreateHexParameters()
+    DataDescription data = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters()
                                                             .layers(_layers)
                                                             .cellDistance(_cellDistance)
                                                             .energy(_energy)
@@ -340,9 +340,9 @@ void CreatorWindow::createDisc()
         }
     }
 
-    DescriptionEditService::reconnectCells(data, _cellDistance * 1.7f);
+    DescriptionEditService::get().reconnectCells(data, _cellDistance * 1.7f);
     if (!_makeSticky) {
-        DescriptionEditService::removeStickiness(data);
+        DescriptionEditService::get().removeStickiness(data);
     }
     data.setCenter(getRandomPos());
     _simulationFacade->addAndSelectSimulationData(data);

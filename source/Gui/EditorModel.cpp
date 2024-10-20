@@ -48,14 +48,14 @@ CellOrParticleDescription EditorModel::getInspectedEntity(uint64_t id) const
 
 void EditorModel::addInspectedEntity(CellOrParticleDescription const& entity)
 {
-    _inspectedEntityById.emplace(DescriptionEditService::getId(entity), entity);
+    _inspectedEntityById.emplace(DescriptionEditService::get().getId(entity), entity);
 }
 
 void EditorModel::setInspectedEntities(std::vector<CellOrParticleDescription> const& inspectedEntities)
 {
     _inspectedEntityById.clear();
     for (auto const& entity : inspectedEntities) {
-        _inspectedEntityById.emplace(DescriptionEditService::getId(entity), entity);
+        _inspectedEntityById.emplace(DescriptionEditService::get().getId(entity), entity);
     }
 }
 

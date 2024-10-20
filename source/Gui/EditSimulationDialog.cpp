@@ -72,7 +72,7 @@ void EditSimulationDialog::processForLeaf()
 
     ImGui::BeginDisabled(_newName.empty());
     if (AlienImGui::Button("OK")) {
-        if (ValidationService::isStringValidForDatabase(_newName) && ValidationService::isStringValidForDatabase(_newDescription)) {
+        if (ValidationService::get().isStringValidForDatabase(_newName) && ValidationService::get().isStringValidForDatabase(_newDescription)) {
             EditNetworkResourceRequestData::Entry entry{.resourceId = rawTO->id, .newName = _newName, .newDescription = _newDescription};
             NetworkTransferController::get().onEdit(EditNetworkResourceRequestData{.entries = std::vector{entry}});
             close();
@@ -100,7 +100,7 @@ void EditSimulationDialog::processForFolder()
 
     ImGui::BeginDisabled(_newName.empty());
     if (AlienImGui::Button("OK")) {
-        if (ValidationService::isStringValidForDatabase(_newName)) {
+        if (ValidationService::get().isStringValidForDatabase(_newName)) {
 
             EditNetworkResourceRequestData requestData;
             for (auto const& rawTO : _rawTOs) {
