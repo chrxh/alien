@@ -87,6 +87,7 @@ void AutosaveWindow::processIntern()
 void AutosaveWindow::processBackground()
 {
     processDeleteNonPersistentSavepoint();
+    processCleanup();
 
     if (!_autosaveTimepoint.has_value()) {
         return;
@@ -119,9 +120,7 @@ void AutosaveWindow::processToolbar()
     ImGui::SameLine();
     ImGui::BeginDisabled(_savepointTable->isEmpty());
     if (AlienImGui::ToolbarButton(ICON_FA_BROOM)) {
-        GenericMessageDialog::get().yesNo("Delete", "Do you really want to delete the all savepoints?", [&]() {
-            onClean();
-        });
+        GenericMessageDialog::get().yesNo("Delete", "Do you really want to delete the all savepoints?", [&]() { scheduleCleanup(); });
     }
     AlienImGui::Tooltip("Delete all save points");
     ImGui::EndDisabled();
@@ -145,7 +144,7 @@ void AutosaveWindow::processTable()
     if (ImGui::BeginTable("Save files", 4, flags, ImVec2(0, 0), 0.0f)) {
         ImGui::TableSetupColumn("No", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(30.0f));
         ImGui::TableSetupColumn("Timestamp", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
-        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(200.0f));
+        ImGui::TableSetupColumn("Project name", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(200.0f));
         ImGui::TableSetupColumn("Time step", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
@@ -284,10 +283,13 @@ void AutosaveWindow::onCreateSavepoint()
     SavepointTableService::get().insertEntryAtFront(_savepointTable.value(), entry);
 }
 
-void AutosaveWindow::onClean()
+void AutosaveWindow::processCleanup()
 {
-    auto nonPersistentEntries = SavepointTableService::get().truncate(_savepointTable.value(), 0);
-    scheduleDeleteNonPersistentSavepoint(nonPersistentEntries);
+    if (_scheduleCleanup) {
+        auto nonPersistentEntries = SavepointTableService::get().truncate(_savepointTable.value(), 0);
+        scheduleDeleteNonPersistentSavepoint(nonPersistentEntries);
+        _scheduleCleanup = false;
+    }
 }
 
 void AutosaveWindow::scheduleDeleteNonPersistentSavepoint(std::vector<SavepointEntry> const& entries)
@@ -317,6 +319,11 @@ void AutosaveWindow::processDeleteNonPersistentSavepoint()
         }
     }
     _savepointsInProgressToDelete = newRequestsToDelete;
+}
+
+void AutosaveWindow::scheduleCleanup()
+{
+    _scheduleCleanup = true;
 }
 
 void AutosaveWindow::updateSavepoint(int row)

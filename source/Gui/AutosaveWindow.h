@@ -27,10 +27,12 @@ private:
     void processStatusBar();
 
     void onCreateSavepoint();
-    void onClean();
 
     void scheduleDeleteNonPersistentSavepoint(std::vector<SavepointEntry> const& entries);
     void processDeleteNonPersistentSavepoint();
+
+    void scheduleCleanup();
+    void processCleanup();
 
     void updateSavepoint(int row);
 
@@ -64,6 +66,8 @@ private:
     std::optional<SavepointTable> _savepointTable;
     SavepointEntry _selectedEntry;
     std::vector<SavepointEntry> _savepointsInProgressToDelete;
+
+    bool _scheduleCleanup = false;
 
     std::optional<std::chrono::steady_clock::time_point> _autosaveTimepoint;
 };
