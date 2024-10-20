@@ -48,8 +48,6 @@ using GuiLogger = std::shared_ptr<_GuiLogger>;
 
 class UiController;
 
-class AutosaveController;
-
 class GettingStartedWindow;
 
 class DisplaySettingsDialog;

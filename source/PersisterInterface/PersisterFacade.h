@@ -14,8 +14,8 @@
 #include "EditNetworkResourceResultData.h"
 #include "GetNetworkResourcesRequestData.h"
 #include "GetNetworkResourcesResultData.h"
-#include "GetUserNamesForEmojiRequestData.h"
-#include "GetUserNamesForEmojiResultData.h"
+#include "GetUserNamesForReactionRequestData.h"
+#include "GetUserNamesForReactionResultData.h"
 #include "LoginRequestData.h"
 #include "LoginResultData.h"
 #include "MoveNetworkResourceRequestData.h"
@@ -74,8 +74,8 @@ public:
     virtual PersisterRequestId scheduleReplaceNetworkResource(SenderInfo const& senderInfo, ReplaceNetworkResourceRequestData const& data) = 0;
     virtual ReplaceNetworkResourceResultData fetchReplaceNetworkResourcesData(PersisterRequestId const& id) = 0;
 
-    virtual PersisterRequestId scheduleGetUserNamesForEmoji(SenderInfo const& senderInfo, GetUserNamesForEmojiRequestData const& data) = 0;
-    virtual GetUserNamesForEmojiResultData fetchGetUserNamesForEmojiData(PersisterRequestId const& id) = 0;
+    virtual PersisterRequestId scheduleGetUserNamesForReaction(SenderInfo const& senderInfo, GetUserNamesForReactionRequestData const& data) = 0;
+    virtual GetUserNamesForReactionResultData fetchGetUserNamesForReactionData(PersisterRequestId const& id) = 0;
 
     virtual PersisterRequestId scheduleDeleteNetworkResource(SenderInfo const& senderInfo, DeleteNetworkResourceRequestData const& data) = 0;
     virtual DeleteNetworkResourceResultData fetchDeleteNetworkResourcesData(PersisterRequestId const& id) = 0;

@@ -1438,12 +1438,12 @@ std::string BrowserWindow::getUserNamesToEmojiType(std::string const& resourceId
         if (!_emojiUserNameProcessor->pendingTasks()) {
             _emojiUserNameProcessor->executeTask(
                 [&](auto const& senderId) {
-                    return _persisterFacade->scheduleGetUserNamesForEmoji(
+                    return _persisterFacade->scheduleGetUserNamesForReaction(
                         SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = false},
-                        GetUserNamesForEmojiRequestData{.resourceId = resourceId, .emojiType = emojiType});
+                        GetUserNamesForReactionRequestData{.resourceId = resourceId, .emojiType = emojiType});
                 },
                 [&](auto const& requestId) {
-                    auto data = _persisterFacade->fetchGetUserNamesForEmojiData(requestId);
+                    auto data = _persisterFacade->fetchGetUserNamesForReactionData(requestId);
                     _userNamesByEmojiTypeBySimIdCache.emplace(std::make_pair(data.resourceId, data.emojiType), data.userNames);
                 },
                 [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });

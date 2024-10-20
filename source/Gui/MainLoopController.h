@@ -16,8 +16,9 @@ class MainLoopController
 public:
     void setup(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade);
     void process();
-    void scheduleShutdown();
+    void shutdown();
 
+    void scheduleClosing();
     bool shouldClose() const;
 
 private:
@@ -52,6 +53,7 @@ private:
         Finished
     };
     ProgramState _programState = ProgramState::FirstTick;
+    bool _saveOnExit = true;
 
     PersisterRequestId _loadSimRequestId;
     PersisterRequestId _saveSimRequestId;

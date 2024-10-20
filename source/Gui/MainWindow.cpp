@@ -43,7 +43,6 @@
 #include "LogWindow.h"
 #include "GuiLogger.h"
 #include "UiController.h"
-#include "AutosaveController.h"
 #include "GettingStartedWindow.h"
 #include "DisplaySettingsDialog.h"
 #include "EditorController.h"
@@ -117,7 +116,6 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
 
     log(Priority::Important, "initialize main loop elements");
     Viewport::get().setup(_simulationFacade);
-    AutosaveController::get().setup(_simulationFacade);
     EditorController::get().setup(_simulationFacade);
     SimulationView::get().setup(_simulationFacade);
     SimulationInteractionController::get().setup(_simulationFacade);
@@ -174,6 +172,7 @@ void _MainWindow::mainLoop()
 
 void _MainWindow::shutdown()
 {
+    MainLoopController::get().shutdown();
     MainLoopEntityController::get().shutdown();
     SimulationView::get().shutdown();
 

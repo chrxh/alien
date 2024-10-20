@@ -9,8 +9,6 @@ PUBLIC
     AlienImGui.cpp
     AlienImGui.h
     AlienWindow.h
-    AutosaveController.cpp
-    AutosaveController.h
     AutosaveWindow.cpp
     AutosaveWindow.h
     BrowserWindow.cpp

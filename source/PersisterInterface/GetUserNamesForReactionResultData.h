@@ -3,7 +3,7 @@
 #include <string>
 #include <set>
 
-struct GetUserNamesForEmojiResultData
+struct GetUserNamesForReactionResultData
 {
     std::string resourceId;
     int emojiType = 0;

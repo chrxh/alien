@@ -14,8 +14,8 @@ add_library(PersisterInterface
     EditNetworkResourceResultData.h
     GetNetworkResourcesRequestData.h
     GetNetworkResourcesResultData.h
-    GetUserNamesForEmojiRequestData.h
-    GetUserNamesForEmojiResultData.h
+    GetUserNamesForReactionRequestData.h
+    GetUserNamesForReactionResultData.h
     LegacyAuxiliaryDataParserService.cpp
     LegacyAuxiliaryDataParserService.h
     LoginRequestData.h
@@ -43,8 +43,8 @@ add_library(PersisterInterface
     SerializedSimulation.h
     TaskProcessor.cpp
     TaskProcessor.h
-    ToggleEmojiNetworkResourceRequestData.h
-    ToggleEmojiNetworkResourceResultData.h
+    ToggleReactionNetworkResourceRequestData.h
+    ToggleReactionNetworkResourceResultData.h
     UploadNetworkResourceRequestData.h
     UploadNetworkResourceResultData.h)
 

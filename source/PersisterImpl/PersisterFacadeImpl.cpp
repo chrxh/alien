@@ -126,14 +126,14 @@ ReplaceNetworkResourceResultData _PersisterFacadeImpl::fetchReplaceNetworkResour
     return fetchData<_ReplaceNetworkResourceRequestResult, ReplaceNetworkResourceResultData>(id);
 }
 
-PersisterRequestId _PersisterFacadeImpl::scheduleGetUserNamesForEmoji(SenderInfo const& senderInfo, GetUserNamesForEmojiRequestData const& data)
+PersisterRequestId _PersisterFacadeImpl::scheduleGetUserNamesForReaction(SenderInfo const& senderInfo, GetUserNamesForReactionRequestData const& data)
 {
     return scheduleRequest<_GetUserNamesForEmojiRequest>(senderInfo, data);
 }
 
-GetUserNamesForEmojiResultData _PersisterFacadeImpl::fetchGetUserNamesForEmojiData(PersisterRequestId const& id)
+GetUserNamesForReactionResultData _PersisterFacadeImpl::fetchGetUserNamesForReactionData(PersisterRequestId const& id)
 {
-    return fetchData<_GetUserNamesForEmojiRequestResult, GetUserNamesForEmojiResultData>(id);
+    return fetchData<_GetUserNamesForEmojiRequestResult, GetUserNamesForReactionResultData>(id);
 }
 
 PersisterRequestId _PersisterFacadeImpl::scheduleDeleteNetworkResource(SenderInfo const& senderInfo, DeleteNetworkResourceRequestData const& data)

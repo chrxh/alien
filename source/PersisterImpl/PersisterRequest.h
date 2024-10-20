@@ -4,7 +4,7 @@
 #include "PersisterInterface/DownloadNetworkResourceRequestData.h"
 #include "PersisterInterface/EditNetworkResourceRequestData.h"
 #include "PersisterInterface/GetNetworkResourcesRequestData.h"
-#include "PersisterInterface/GetUserNamesForEmojiRequestData.h"
+#include "PersisterInterface/GetUserNamesForReactionRequestData.h"
 #include "PersisterInterface/LoginRequestData.h"
 #include "PersisterInterface/MoveNetworkResourceRequestData.h"
 #include "PersisterInterface/ReadSimulationRequestData.h"
@@ -77,7 +77,7 @@ using UploadNetworkResourceRequest = std::shared_ptr<_UploadNetworkResourceReque
 using _ReplaceNetworkResourceRequest = _ConcreteRequest<ReplaceNetworkResourceRequestData>;
 using ReplaceNetworkResourceRequest = std::shared_ptr<_ReplaceNetworkResourceRequest>;
 
-using _GetUserNamesForEmojiRequest = _ConcreteRequest<GetUserNamesForEmojiRequestData>;
+using _GetUserNamesForEmojiRequest = _ConcreteRequest<GetUserNamesForReactionRequestData>;
 using GetUserNamesForEmojiRequest = std::shared_ptr<_GetUserNamesForEmojiRequest>;
 
 using _DeleteNetworkResourceRequest = _ConcreteRequest<DeleteNetworkResourceRequestData>;
