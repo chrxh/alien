@@ -1331,7 +1331,10 @@ namespace ifd {
 
 
 		/***** CONTENT *****/
-		float bottomBarHeight = (GImGui->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f + ImGui::GetStyle().ItemSpacing.y * 2.0f) * 2;
+		float bottomBarHeight = GImGui->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f + ImGui::GetStyle().ItemSpacing.y * 2.0f;
+		if (m_type != IFD_DIALOG_DIRECTORY) {
+			bottomBarHeight *= 2;
+		}
 		if (ImGui::BeginTable("##table", 2, ImGuiTableFlags_Resizable, ImVec2(0, -bottomBarHeight))) {
 			ImGui::TableSetupColumn("##tree", ImGuiTableColumnFlags_WidthFixed, 125.0f);
 			ImGui::TableSetupColumn("##content", ImGuiTableColumnFlags_WidthStretch);
@@ -1363,16 +1366,16 @@ namespace ifd {
 
 		
 		/***** BOTTOM BAR *****/
-		ImGui::Text("File name:");
-		ImGui::SameLine();
-		if (ImGui::InputTextEx("##file_input", "Filename", reinterpret_cast<char*>(m_inputTextbox), 1024, ImVec2((m_type != IFD_DIALOG_DIRECTORY) ? -250.0f : -FLT_MIN, 0), ImGuiInputTextFlags_EnterReturnsTrue)) {
-			bool success = m_finalize(std::u8string(m_inputTextbox));
-#ifdef _WIN32
-			if (!success)
-				MessageBeep(MB_ICONERROR);
-#endif
-		}
 		if (m_type != IFD_DIALOG_DIRECTORY) {
+			ImGui::Text("File name:");
+			ImGui::SameLine();
+			if (ImGui::InputTextEx("##file_input", "Filename", reinterpret_cast<char*>(m_inputTextbox), 1024, ImVec2((m_type != IFD_DIALOG_DIRECTORY) ? -250.0f : -FLT_MIN, 0), ImGuiInputTextFlags_EnterReturnsTrue)) {
+				bool success = m_finalize(std::u8string(m_inputTextbox));
+#ifdef _WIN32
+				if (!success)
+					MessageBeep(MB_ICONERROR);
+#endif
+			}
 			ImGui::SameLine();
 			ImGui::SetNextItemWidth(-FLT_MIN);
 			if (ImGui::Combo("##ext_combo", &m_filterSelection, m_filter.c_str()))
@@ -1380,6 +1383,7 @@ namespace ifd {
 		}
 
 		// buttons
+
 		ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 250);
 		if (ImGui::Button(m_type == IFD_DIALOG_SAVE ? "Save" : "Open", ImVec2(250 / 2 - ImGui::GetStyle().ItemSpacing.x, 0.0f))) {
 			std::u8string filename(m_inputTextbox);
