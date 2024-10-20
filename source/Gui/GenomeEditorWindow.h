@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "EngineInterface/GenomeDescriptions.h"
 #include "EngineInterface/PreviewDescriptions.h"
 #include "EngineInterface/SimulationFacade.h"
@@ -7,16 +8,21 @@
 #include "AlienWindow.h"
 #include "Definitions.h"
 
-class _GenomeEditorWindow : public AlienWindow
+class GenomeEditorWindow : public AlienWindow
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(GenomeEditorWindow);
+
 public:
-    _GenomeEditorWindow(EditorModel const& editorModel, SimulationFacade const& simulationFacade);
-    ~_GenomeEditorWindow() override;
+    void init(SimulationFacade const& simulationFacade);
 
     void openTab(GenomeDescription const& genome, bool openGenomeEditorIfClosed = true);
     GenomeDescription const& getCurrentGenome() const;
 
 private:
+    GenomeEditorWindow();
+
+    void shutdownIntern() override;
+
     void processIntern() override;
     void processToolbar();
     void processEditor();
@@ -68,7 +74,5 @@ private:
     std::optional<TabData> _tabToAdd;
     std::optional<bool> _expandNodes;
 
-    EditorModel _editorModel;
     SimulationFacade _simulationFacade;
-    ChangeColorDialog _changeColorDialog;
 };

@@ -34,7 +34,7 @@ void SimulationInteractionController::process()
     if (_modes.editMode) {
         processSelectionRect();
     }
-    if (!EditorController::get().getCreatorWindow()->isOn()) {
+    if (!CreatorWindow::get().isOn()) {
         _modes.drawMode = false;
     }
     processEvents();
@@ -178,7 +178,7 @@ void SimulationInteractionController::leftMouseButtonPressed(IntVector2D const& 
                 auto shallowData = _simulationFacade->getSelectionShallowData(*_worldPosOnClick);
                 _selectionPositionOnClick = {shallowData.centerPosX, shallowData.centerPosY};
             } else {
-                EditorController::get().getCreatorWindow()->onDrawing();
+                CreatorWindow::get().onDrawing();
             }
         }
     }
@@ -202,7 +202,7 @@ void SimulationInteractionController::leftMouseButtonHold(IntVector2D const& mou
                 EditorController::get().onFixateSelectedObjects(toRealVector2D(mousePos), *_worldPosOnClick, *_selectionPositionOnClick);
             }
         } else {
-            EditorController::get().getCreatorWindow()->onDrawing();
+            CreatorWindow::get().onDrawing();
         }
     }
 }
@@ -223,7 +223,7 @@ void SimulationInteractionController::leftMouseButtonReleased(IntVector2D const&
         SimulationView::get().setMotionBlur(SimulationView::get().getMotionBlur() / 2);
     } else {
         if (_modesAtClick.drawMode) {
-            EditorController::get().getCreatorWindow()->finishDrawing();
+            CreatorWindow::get().finishDrawing();
         } else {
             if (_simulationFacade->isSimulationRunning()) {
                 _simulationFacade->setDetached(false);
@@ -333,7 +333,6 @@ void SimulationInteractionController::drawCursor()
 {
     auto mousePos = ImGui::GetMousePos();
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-    auto editorModel = EditorController::get().getEditorModel();
 
     if (!ImGui::GetIO().WantCaptureMouse) {
         ImGui::SetMouseCursor(ImGuiMouseCursor_None);
@@ -391,8 +390,8 @@ void SimulationInteractionController::drawCursor()
                 {mousePos.x + cursorSize / 2, mousePos.y - scale(1.0f)}, {mousePos.x + cursorSize, mousePos.y + scale(1.0f)}, Const::CursorColor);
         } else {
             auto zoom = Viewport::get().getZoomFactor();
-            auto radius = editorModel->getPencilWidth() * zoom;
-            auto color = Const::IndividualCellColors[editorModel->getDefaultColorCode()];
+            auto radius = EditorModel::get().getPencilWidth() * zoom;
+            auto color = Const::IndividualCellColors[EditorModel::get().getDefaultColorCode()];
             float h, s, v;
             AlienImGui::ConvertRGBtoHSV(color, h, s, v);
             drawList->AddCircleFilled(mousePos, radius, ImColor::HSV(h, s, v, 0.6f));

@@ -29,7 +29,6 @@ private:
     void processCenterOnSelection();
 
     SimulationFacade _simulationFacade;
-    ResizeWorldDialog _resizeWorldDialog;
 
     bool _centerSelection = false;
 };

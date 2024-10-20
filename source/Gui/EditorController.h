@@ -19,13 +19,6 @@ public:
 
     void process();
 
-    SelectionWindow getSelectionWindow() const;
-    PatternEditorWindow getPatternEditorWindow() const;
-    CreatorWindow getCreatorWindow() const;
-    MultiplierWindow getMultiplierWindow() const;
-    GenomeEditorWindow getGenomeEditorWindow() const;
-    EditorModel getEditorModel() const;
-
     bool areInspectionWindowsActive() const;
     void onCloseAllInspectorWindows();
 
@@ -52,13 +45,6 @@ public:
 private:
     void shutdown() override;
     void processInspectorWindows();
-
-    EditorModel _editorModel;
-    SelectionWindow _selectionWindow;
-    PatternEditorWindow _patternEditorWindow;
-    CreatorWindow _creatorWindow; 
-    MultiplierWindow _multiplierWindow;
-    GenomeEditorWindow _genomeEditorWindow;
 
     SimulationFacade _simulationFacade;
 

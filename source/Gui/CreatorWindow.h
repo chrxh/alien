@@ -5,6 +5,7 @@
 
 #include "Definitions.h"
 #include "AlienWindow.h"
+#include "Base/Singleton.h"
 
 using CreationMode = int;
 enum CreationMode_
@@ -17,15 +18,19 @@ enum CreationMode_
     CreationMode_Drawing
 };
 
-class _CreatorWindow : public AlienWindow
+class CreatorWindow : public AlienWindow
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(CreatorWindow);
+
 public:
-    _CreatorWindow(EditorModel const& editorModel, SimulationFacade const& simulationFacade);
+    void init(SimulationFacade const& simulationFacade);
 
     void onDrawing();
     void finishDrawing();
 
 private:
+    CreatorWindow();
+
     void processIntern();
 
     void createCell();
@@ -66,6 +71,5 @@ private:
 
     CreationMode _mode = CreationMode_Drawing;
 
-    EditorModel _editorModel;
     SimulationFacade _simulationFacade;
 };

@@ -361,12 +361,6 @@ void _MainWindow::renderSimulation()
 
 void _MainWindow::processMenubar()
 {
-    auto selectionWindow = EditorController::get().getSelectionWindow();
-    auto patternEditorWindow = EditorController::get().getPatternEditorWindow();
-    auto creatorWindow = EditorController::get().getCreatorWindow();
-    auto multiplierWindow = EditorController::get().getMultiplierWindow();
-    auto genomeEditorWindow = EditorController::get().getGenomeEditorWindow();
-
     if (ImGui::BeginMainMenuBar()) {
         if (AlienImGui::ShutdownButton()) {
             onExit();
@@ -469,20 +463,20 @@ void _MainWindow::processMenubar()
             }
             ImGui::Separator();
             ImGui::BeginDisabled(!SimulationInteractionController::get().isEditMode());
-            if (ImGui::MenuItem("Selection", "ALT+S", selectionWindow->isOn())) {
-                selectionWindow->setOn(!selectionWindow->isOn());
+            if (ImGui::MenuItem("Selection", "ALT+S", SelectionWindow::get().isOn())) {
+                SelectionWindow::get().setOn(!SelectionWindow::get().isOn());
             }
-            if (ImGui::MenuItem("Creator", "ALT+R", creatorWindow->isOn())) {
-                creatorWindow->setOn(!creatorWindow->isOn());
+            if (ImGui::MenuItem("Creator", "ALT+R", CreatorWindow::get().isOn())) {
+                CreatorWindow::get().setOn(!CreatorWindow::get().isOn());
             }
-            if (ImGui::MenuItem("Pattern editor", "ALT+M", patternEditorWindow->isOn())) {
-                patternEditorWindow->setOn(!patternEditorWindow->isOn());
+            if (ImGui::MenuItem("Pattern editor", "ALT+M", PatternEditorWindow::get().isOn())) {
+                PatternEditorWindow::get().setOn(!PatternEditorWindow::get().isOn());
             }
-            if (ImGui::MenuItem("Genome editor", "ALT+B", genomeEditorWindow->isOn())) {
-                genomeEditorWindow->setOn(!genomeEditorWindow->isOn());
+            if (ImGui::MenuItem("Genome editor", "ALT+B", GenomeEditorWindow::get().isOn())) {
+                GenomeEditorWindow::get().setOn(!GenomeEditorWindow::get().isOn());
             }
-            if (ImGui::MenuItem("Multiplier", "ALT+A", multiplierWindow->isOn())) {
-                multiplierWindow->setOn(!multiplierWindow->isOn());
+            if (ImGui::MenuItem("Multiplier", "ALT+A", MultiplierWindow::get().isOn())) {
+                MultiplierWindow::get().setOn(!MultiplierWindow::get().isOn());
             }
             ImGui::EndDisabled();
             ImGui::Separator();
@@ -643,19 +637,19 @@ void _MainWindow::processMenubar()
             SimulationInteractionController::get().setEditMode(!SimulationInteractionController::get().isEditMode());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_S)) {
-            selectionWindow->setOn(!selectionWindow->isOn());
+            SelectionWindow::get().setOn(!SelectionWindow::get().isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_M)) {
-            patternEditorWindow->setOn(!patternEditorWindow->isOn());
+            PatternEditorWindow::get().setOn(!PatternEditorWindow::get().isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_B)) {
-            genomeEditorWindow->setOn(!genomeEditorWindow->isOn());
+            GenomeEditorWindow::get().setOn(!GenomeEditorWindow::get().isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_R)) {
-            creatorWindow->setOn(!creatorWindow->isOn());
+            CreatorWindow::get().setOn(!CreatorWindow::get().isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_A)) {
-            multiplierWindow->setOn(!multiplierWindow->isOn());
+            MultiplierWindow::get().setOn(!MultiplierWindow::get().isOn());
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_N) && EditorController::get().isObjectInspectionPossible()) {
             EditorController::get().onInspectSelectedObjects();

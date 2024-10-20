@@ -28,24 +28,17 @@ namespace
 void EditorController::init(SimulationFacade const& simulationFacade)
 {
     _simulationFacade = simulationFacade;
-    _editorModel = std::make_shared<_EditorModel>(_simulationFacade);
-    _genomeEditorWindow = std::make_shared<_GenomeEditorWindow>(_editorModel, _simulationFacade);
-    _selectionWindow = std::make_shared<_SelectionWindow>(_editorModel);
-    _patternEditorWindow = std::make_shared<_PatternEditorWindow>(_editorModel, _simulationFacade);
-    _creatorWindow = std::make_shared<_CreatorWindow>(_editorModel, _simulationFacade);
-    _multiplierWindow = std::make_shared<_MultiplierWindow>(_editorModel, _simulationFacade);
+    EditorModel::get().init(_simulationFacade);
+    GenomeEditorWindow::get().init(_simulationFacade);
+    PatternEditorWindow::get().init(_simulationFacade);
+    CreatorWindow::get().init(_simulationFacade);
+    MultiplierWindow::get().init(_simulationFacade);
 
     ShutdownController::get().registerObject(this);
 }
 
 void EditorController::shutdown()
 {
-    _editorModel.reset();
-    _genomeEditorWindow.reset();
-    _selectionWindow.reset();
-    _patternEditorWindow.reset();
-    _creatorWindow.reset();
-    _multiplierWindow.reset();
 }
 
 bool EditorController::isOn() const
@@ -64,51 +57,21 @@ void EditorController::process()
         return;
     }
 
-    _selectionWindow->process();
-    _patternEditorWindow->process();
-    _creatorWindow->process();
-    _multiplierWindow->process();
-    _genomeEditorWindow->process();
+    SelectionWindow::get().process();
+    PatternEditorWindow::get().process();
+    CreatorWindow::get().process();
+    MultiplierWindow::get().process();
+    GenomeEditorWindow::get().process();
 
     processInspectorWindows();
 
-    _editorModel->setForceNoRollout(ImGui::GetIO().KeyShift);
+    EditorModel::get().setForceNoRollout(ImGui::GetIO().KeyShift);
 
     if (_simulationFacade->updateSelectionIfNecessary()) {
-        _editorModel->update();
+        EditorModel::get().update();
     }
 }
 
-
-SelectionWindow EditorController::getSelectionWindow() const
-{
-    return _selectionWindow;
-}
-
-PatternEditorWindow EditorController::getPatternEditorWindow() const
-{
-    return _patternEditorWindow;
-}
-
-CreatorWindow EditorController::getCreatorWindow() const
-{
-    return _creatorWindow;
-}
-
-MultiplierWindow EditorController::getMultiplierWindow() const
-{
-    return _multiplierWindow;
-}
-
-GenomeEditorWindow EditorController::getGenomeEditorWindow() const
-{
-    return _genomeEditorWindow;
-}
-
-EditorModel EditorController::getEditorModel() const
-{
-    return _editorModel;
-}
 
 bool EditorController::areInspectionWindowsActive() const
 {
@@ -122,17 +85,17 @@ void EditorController::onCloseAllInspectorWindows()
 
 bool EditorController::isObjectInspectionPossible() const
 {
-    return _patternEditorWindow->isObjectInspectionPossible();
+    return PatternEditorWindow::get().isObjectInspectionPossible();
 }
 
 bool EditorController::isGenomeInspectionPossible() const
 {
-    return _patternEditorWindow->isGenomeInspectionPossible();
+    return PatternEditorWindow::get().isGenomeInspectionPossible();
 }
 
 void EditorController::onInspectSelectedObjects()
 {
-    auto selection = _editorModel->getSelectionShallowData();
+    auto selection = EditorModel::get().getSelectionShallowData();
     if (selection.numCells + selection.numParticles <= MaxInspectorWindowsToAdd) {
         DataDescription selectedData = _simulationFacade->getSelectedSimulationData(false);
         onInspectObjects(DescriptionEditService::getObjects(selectedData), false);
@@ -203,47 +166,47 @@ void EditorController::onInspectObjects(std::vector<CellOrParticleDescription> c
 
     for (auto const& entity : newEntities) {
         auto id = DescriptionEditService::getId(entity);
-        _editorModel->addInspectedEntity(entity);
+        EditorModel::get().addInspectedEntity(entity);
         auto entityPos = Viewport::get().mapWorldToViewPosition(DescriptionEditService::getPos(entity), borderlessRendering);
         auto windowPosX = (entityPos.x - center.x) * factorX + center.x;
         auto windowPosY = (entityPos.y - center.y) * factorY + center.y;
         windowPosX = std::min(std::max(windowPosX, 0.0f), toFloat(viewSize.x) - 300.0f) + 40.0f;
         windowPosY = std::min(std::max(windowPosY, 0.0f), toFloat(viewSize.y) - 500.0f) + 40.0f;
         _inspectorWindows.emplace_back(
-            std::make_shared<_InspectorWindow>(_simulationFacade, _editorModel, _genomeEditorWindow, id, RealVector2D{windowPosX, windowPosY}, selectGenomeTab));
+            std::make_shared<_InspectorWindow>(_simulationFacade, id, RealVector2D{windowPosX, windowPosY}, selectGenomeTab));
     }
 }
 
 bool EditorController::isCopyingPossible() const
 {
-    return _patternEditorWindow->isCopyingPossible();
+    return PatternEditorWindow::get().isCopyingPossible();
 }
 
 void EditorController::onCopy()
 {
-    _patternEditorWindow->onCopy();
+    PatternEditorWindow::get().onCopy();
     printOverlayMessage("Selection copied");
 }
 
 bool EditorController::isPastingPossible() const
 {
-    return _patternEditorWindow->isPastingPossible();
+    return PatternEditorWindow::get().isPastingPossible();
 }
 
 void EditorController::onPaste()
 {
-    _patternEditorWindow->onPaste();
+    PatternEditorWindow::get().onPaste();
     printOverlayMessage("Selection pasted");
 }
 
 bool EditorController::isDeletingPossible() const
 {
-    return _patternEditorWindow->isDeletingPossible();
+    return PatternEditorWindow::get().isDeletingPossible();
 }
 
 void EditorController::onDelete()
 {
-    _patternEditorWindow->onDelete();
+    PatternEditorWindow::get().onDelete();
     printOverlayMessage("Selection deleted");
 }
 
@@ -262,11 +225,11 @@ void EditorController::processInspectorWindows()
             inspectorWindows.emplace_back(inspectorWindow);
 
             auto id = inspectorWindow->getId();
-            inspectedEntities.emplace_back(_editorModel->getInspectedEntity(id));
+            inspectedEntities.emplace_back(EditorModel::get().getInspectedEntity(id));
         }
     }
     _inspectorWindows = inspectorWindows;
-    _editorModel->setInspectedEntities(inspectedEntities);
+    EditorModel::get().setInspectedEntities(inspectedEntities);
 
     //update inspected entities from simulation
     if (inspectedEntities.empty()) {
@@ -278,11 +241,11 @@ void EditorController::processInspectorWindows()
     }
     auto inspectedData = _simulationFacade->getInspectedSimulationData(entityIds);
     auto newInspectedEntities = DescriptionEditService::getObjects(inspectedData);
-    _editorModel->setInspectedEntities(newInspectedEntities);
+    EditorModel::get().setInspectedEntities(newInspectedEntities);
 
     inspectorWindows.clear();
     for (auto const& inspectorWindow : _inspectorWindows) {
-        if (_editorModel->existsInspectedEntity(inspectorWindow->getId())) {
+        if (EditorModel::get().existsInspectedEntity(inspectorWindow->getId())) {
             inspectorWindows.emplace_back(inspectorWindow);
         }
     }
@@ -299,7 +262,7 @@ void EditorController::onSelectObjects(RealVector2D const& viewPos, bool modifie
         _simulationFacade->swapSelection(pos, std::max(0.5f, 10.0f / zoom));
     }
 
-    _editorModel->update();
+    EditorModel::get().update();
 }
 
 void EditorController::onMoveSelectedObjects(
@@ -312,11 +275,11 @@ void EditorController::onMoveSelectedObjects(
     auto delta = end - start;
 
     ShallowUpdateSelectionData updateData;
-    updateData.considerClusters = _editorModel->isRolloutToClusters();
+    updateData.considerClusters = EditorModel::get().isRolloutToClusters();
     updateData.posDeltaX = delta.x;
     updateData.posDeltaY = delta.y;
     _simulationFacade->shallowUpdateSelectedObjects(updateData);
-    _editorModel->update();
+    EditorModel::get().update();
 }
 
 void EditorController::onFixateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos, RealVector2D const& selectionPositionOnClick)
@@ -369,5 +332,5 @@ void EditorController::onUpdateSelectionRect(RealRect const& rect)
     auto bottomRight = RealVector2D{std::max(startPos.x, endPos.x), std::max(startPos.y, endPos.y)};
 
     _simulationFacade->setSelection(topLeft, bottomRight);
-    _editorModel->update();
+    EditorModel::get().update();
 }

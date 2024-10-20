@@ -1,15 +1,20 @@
 #pragma once
 
 #include "EngineInterface/GenomeDescriptions.h"
+#include "Base/Singleton.h"
 
 #include "AlienDialog.h"
 
-class _ChangeColorDialog : public AlienDialog
+class ChangeColorDialog : public AlienDialog
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(ChangeColorDialog);
+
 public:
-    _ChangeColorDialog(std::function<GenomeDescription()> const& getGenomeFunc, std::function<void(GenomeDescription const&)> const& setGenomeFunc);
+    void init(std::function<GenomeDescription()> const& getGenomeFunc, std::function<void(GenomeDescription const&)> const& setGenomeFunc);
 
 private:
+    ChangeColorDialog();
+
     void processIntern() override;
 
     void onChangeColor(GenomeDescription& genome);
