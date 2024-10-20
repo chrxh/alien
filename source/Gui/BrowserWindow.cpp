@@ -199,7 +199,7 @@ void BrowserWindow::processIntern()
         ImGui::SameLine();
         processUserList();
 
-        processStatus();
+        processStatusBar();
     }
     ImGui::EndChild();
 
@@ -508,9 +508,8 @@ void BrowserWindow::processUserList()
     ImGui::EndChild();
 }
 
-void BrowserWindow::processStatus()
+void BrowserWindow::processStatusBar()
 {
-    AlienImGui::Separator();
     std::unordered_set<NetworkResourceRawTO> simulations;
     std::unordered_set<NetworkResourceRawTO> genomes;
     for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
@@ -522,7 +521,6 @@ void BrowserWindow::processStatus()
 
     auto numSimulations = toInt(simulations.size());
     auto numGenomes = toInt(genomes.size());
-    ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
     std::string statusText;
     statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
     statusText += std::to_string(numSimulations) + " simulations found";
@@ -544,8 +542,8 @@ void BrowserWindow::processStatus()
         statusText += std::string("   " ICON_FA_INFO_CIRCLE " ");
         statusText += "In order to share and upvote simulations you need to log in.";
     }
-    AlienImGui::Text(statusText);
-    ImGui::PopStyleColor();
+
+    AlienImGui::StatusBar(statusText);
 }
 
 void BrowserWindow::processSimulationList()

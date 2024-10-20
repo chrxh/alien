@@ -21,7 +21,7 @@ namespace
 }
 
 AutosaveWindow::AutosaveWindow()
-    : AlienWindow("Autosave (work in progress)", "windows.autosave", false)
+    : AlienWindow("Autosave", "windows.autosave", false)
 {}
 
 void AutosaveWindow::initIntern(SimulationFacade simulationFacade, PersisterFacade persisterFacade)
@@ -40,7 +40,7 @@ void AutosaveWindow::initIntern(SimulationFacade simulationFacade, PersisterFaca
     _directory = _origDirectory;
 
     if (_autosaveEnabled) {
-        _lastAutosaveTimepoint = std::chrono::steady_clock::now();
+        _autosaveTimepoint = std::chrono::steady_clock::now();
     }
     updateSavepointTableFromFile();
 }
@@ -60,29 +60,34 @@ void AutosaveWindow::processIntern()
 {
     processToolbar();
 
-    processHeader();
+    if (ImGui::BeginChild("##child1", {0, -scale(44.0f)})) {
+        processHeader();
 
-    AlienImGui::Separator();
-    if (ImGui::BeginChild("##autosave", {0, _settingsOpen ? -scale(_settingsHeight) : -scale(50.0f)})) {
-        processTable();
+        AlienImGui::Separator();
+        if (ImGui::BeginChild("##child2", {0, _settingsOpen ? -scale(_settingsHeight) : -scale(50.0f)})) {
+            processTable();
+        }
+        ImGui::EndChild();
+
+        processSettings();
     }
     ImGui::EndChild();
 
-    processSettings();
+    processStatusBar();
 
     validationAndCorrection();
 }
 
 void AutosaveWindow::processBackground()
 {
-    if (!_lastAutosaveTimepoint.has_value()) {
+    if (!_autosaveTimepoint.has_value()) {
         return;
     }
 
-    auto minSinceLastAutosave = std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - _lastAutosaveTimepoint.value()).count();
+    auto minSinceLastAutosave = std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - _autosaveTimepoint.value()).count();
     if (minSinceLastAutosave == _autosaveInterval) {
         createSavepoint();
-        _lastAutosaveTimepoint = std::chrono::steady_clock::now();
+        _autosaveTimepoint = std::chrono::steady_clock::now();
     }
 }
 
@@ -120,9 +125,9 @@ void AutosaveWindow::processHeader()
             _autosaveInterval,
             &_autosaveEnabled)) {
         if (_autosaveEnabled) {
-            _lastAutosaveTimepoint = std::chrono::steady_clock::now();
+            _autosaveTimepoint = std::chrono::steady_clock::now();
         } else {
-            _lastAutosaveTimepoint.reset();
+            _autosaveTimepoint.reset();
         }
     }
 }
@@ -224,6 +229,19 @@ void AutosaveWindow::processSettings()
     }
 }
 
+void AutosaveWindow::processStatusBar()
+{
+    std::string statusText = " " ICON_FA_INFO_CIRCLE " ";
+    statusText += [&] {
+        if (!_autosaveTimepoint.has_value()) {
+            return std::string("No autosave scheduled");
+        }
+        auto secondsSinceLastAutosave = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - _autosaveTimepoint.value());
+        return "Next autosave in " + StringHelper::format(std::chrono::seconds(_autosaveInterval * 60) - secondsSinceLastAutosave);
+    }();
+    AlienImGui::StatusBar(statusText);
+}
+
 void AutosaveWindow::createSavepoint()
 {
     printOverlayMessage("Creating save point ...");
@@ -293,6 +311,6 @@ std::string AutosaveWindow::getSavepointFilename() const
 
 void AutosaveWindow::validationAndCorrection()
 {
-    _numberOfFiles = std::max(2, _numberOfFiles);
-    _autosaveInterval = std::max(2, _autosaveInterval);
+    _numberOfFiles = std::max(1, _numberOfFiles);
+    _autosaveInterval = std::max(1, _autosaveInterval);
 }
