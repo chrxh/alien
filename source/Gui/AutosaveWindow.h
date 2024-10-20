@@ -18,6 +18,7 @@ private:
     void initIntern(SimulationFacade simulationFacade, PersisterFacade persisterFacade) override;
     void shutdownIntern() override;
     void processIntern() override;
+    void processBackground() override;
 
     void processToolbar();
     void processHeader();
@@ -55,4 +56,5 @@ private:
     int _numberOfFiles = 20;
 
     std::optional<SavepointTable> _savepointTable;
+    std::optional<std::chrono::steady_clock::time_point> _lastAutosaveTimepoint;
 };
