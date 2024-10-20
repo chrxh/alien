@@ -1,5 +1,6 @@
 #include "SavepointTableService.h"
 
+#include <filesystem>
 #include <fstream>
 
 #include <boost/property_tree/json_parser.hpp>
@@ -39,12 +40,46 @@ namespace
     }
 }
 
+namespace
+{
+    bool hasWriteAccess(std::filesystem::path const& path)
+    {
+        std::filesystem::path tempFilePath = path / "temp_test_file.tmp";
+
+        std::ofstream testFile(tempFilePath);
+        if (testFile) {
+            testFile.close();
+            std::filesystem::remove(tempFilePath);
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
 auto SavepointTableService::loadFromFile(std::string const& filename) -> std::variant<SavepointTable, Error>
 {
     try {
+        auto directory = std::filesystem::path(filename).parent_path();
+
+        // directory does not exist
+        if (!std::filesystem::exists(directory)) {
+            return Error{};
+        }
+
+        // no write access
+        if (!hasWriteAccess(directory)) {
+            return Error{};
+        }
+
+        // savepoint file does not exist
+        if (!std::filesystem::exists(filename)) {
+            return SavepointTable(filename, {});
+        }
+
         std::ifstream stream(filename, std::ios::binary);
         if (!stream) {
-            return SavepointTable(filename, {});
+            return Error{};
         }
 
         boost::property_tree::ptree tree;

@@ -36,7 +36,7 @@ void AutosaveWindow::initIntern(SimulationFacade simulationFacade, PersisterFaca
     _origSaveMode = GlobalSettings::get().getValue("windows.autosave.mode", _origSaveMode);
     _saveMode = _origSaveMode;
     _numberOfFiles = GlobalSettings::get().getValue("windows.autosave.number of files", _origNumberOfFiles);
-    _origDirectory = GlobalSettings::get().getValue("windows.autosave.directory", std::filesystem::current_path().string());
+    _origDirectory = GlobalSettings::get().getValue("windows.autosave.directory", (std::filesystem::current_path() / Const::BasePath).string());
     _directory = _origDirectory;
 
     updateSavepointTableFromFile();
@@ -180,7 +180,8 @@ void AutosaveWindow::processSettings()
     if (_settingsOpen) {
         if (ImGui::BeginChild("##addons", {scale(0), 0})) {
             if (AlienImGui::InputText(
-                    AlienImGui::InputTextParameters().name("Directory").textWidth(RightColumnWidth).defaultValue(_origDirectory), _directory)) {
+                    AlienImGui::InputTextParameters().name("Directory").textWidth(RightColumnWidth).defaultValue(_origDirectory).folderButton(true),
+                    _directory)) {
                 updateSavepointTableFromFile();
             }
             AlienImGui::Combo(
@@ -239,12 +240,10 @@ void AutosaveWindow::updateSavepoint(int row)
 
 void AutosaveWindow::updateSavepointTableFromFile()
 {
-    if (!std::filesystem::exists(std::filesystem::path(_directory))) {
-        _savepointTable.reset();
-        return;
-    }
     if (auto savepoint = SavepointTableService::get().loadFromFile(getSavepointFilename()); std::holds_alternative<SavepointTable>(savepoint)) {
         _savepointTable = std::get<SavepointTable>(savepoint);
+    } else {
+        _savepointTable.reset();
     }
 }
 

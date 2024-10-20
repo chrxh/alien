@@ -159,6 +159,7 @@ public:
         MEMBER_DECLARATION(InputTextParameters, bool, monospaceFont, false);
         MEMBER_DECLARATION(InputTextParameters, bool, readOnly, false);
         MEMBER_DECLARATION(InputTextParameters, bool, password, false);
+        MEMBER_DECLARATION(InputTextParameters, bool, folderButton, false);
         MEMBER_DECLARATION(InputTextParameters, std::optional<std::string>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(InputTextParameters, std::optional<std::string>, tooltip, std::nullopt);
     };

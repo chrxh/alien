@@ -8,16 +8,17 @@
 
 #include "Fonts/IconsFontAwesome5.h"
 
-#include "Base/StringHelper.h"
 #include "Base/Math.h"
+#include "Base/NumberGenerator.h"
+#include "Base/StringHelper.h"
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/SimulationParameters.h"
 
 #include "CellFunctionStrings.h"
+#include "GenericFileDialog.h"
 #include "StyleRepository.h"
 #include "HelpStrings.h"
-#include "Base/NumberGenerator.h"
 
 namespace
 {
@@ -333,7 +334,8 @@ void AlienImGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& pa
 bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)
 {
     auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
-    ImGui::SetNextItemWidth(width - scale(parameters._textWidth));
+    auto folderButtonWidth = parameters._folderButton ? scale(30.0f) + ImGui::GetStyle().FramePadding.x * 2 : 0;
+    ImGui::SetNextItemWidth(width - scale(parameters._textWidth) - folderButtonWidth);
     if (parameters._monospaceFont) {
         ImGui::PushFont(StyleRepository::get().getMonospaceMediumFont());
     }
@@ -352,6 +354,25 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
     }();
     if (parameters._monospaceFont) {
         ImGui::PopFont();
+    }
+    if (parameters._folderButton) {
+        ImGui::SameLine();
+        static std::string selectedFolder;
+        if (ImGui::Button(ICON_FA_FOLDER_OPEN, {scale(30.0f), 0})) {
+            GenericFileDialog::get().showOpenFileDialog(
+                "Select directory", "", std::string(buffer), [&](std::filesystem::path const& path) {
+                    selectedFolder = path.string();
+                });
+        }
+        if (!selectedFolder.empty()) {
+            auto folderLength = std::min(toInt(selectedFolder.size()), bufferSize);
+            selectedFolder.copy(buffer, folderLength);
+            if (folderLength < bufferSize) {
+                buffer[folderLength] = '\0';
+            }
+            selectedFolder.clear();
+            result = true;
+        }
     }
     if (parameters._defaultValue) {
         ImGui::SameLine();

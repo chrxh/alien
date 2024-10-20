@@ -12,7 +12,7 @@ namespace Const
     std::string const AutosaveFileWithoutPath = "autosave.sim";
     std::string const AutosaveFile = BasePath + AutosaveFileWithoutPath;
     std::string const SettingsFilename = BasePath + "settings.json";
-    std::string const SavepointTableFilename = BasePath + "savepoints.json";
+    std::string const SavepointTableFilename = "savepoints.json";
 
     std::string const SimulationFragmentShader = BasePath + "shader.fs";
     std::string const SimulationVertexShader = BasePath + "shader.vs";
