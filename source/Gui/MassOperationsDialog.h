@@ -1,23 +1,22 @@
 #pragma once
 
+#include "AlienDialog.h"
 #include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/EngineConstants.h"
 
 #include "Definitions.h"
 
-class MassOperationsDialog
+class MassOperationsDialog : public AlienDialog<SimulationFacade>
 {
-    MAKE_SINGLETON(MassOperationsDialog);
-
-public:
-    void init(SimulationFacade const& simulationFacade);
-
-    void process();
-
-    void show();
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(MassOperationsDialog);
 
 private:
+    MassOperationsDialog();
+
+    void initIntern(SimulationFacade simulationFacade) override;
+    void processIntern() override;
+
     void colorCheckbox(std::string id, uint32_t cellColor, bool& check);
 
     void onExecute();
@@ -25,8 +24,6 @@ private:
     void validationAndCorrection();
 
     SimulationFacade _simulationFacade;
-
-    bool _show = false;
 
     bool _randomizeCellColors = false;
     bool _checkedCellColors[MAX_COLORS] = {false, false, false, false, false, false, false};

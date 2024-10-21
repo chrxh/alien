@@ -535,7 +535,7 @@ void _MainWindow::processMenubar()
 
         if (AlienImGui::BeginMenuButton(" " ICON_FA_TOOLS "  Tools ", _toolsMenuToggled, "Tools")) {
             if (ImGui::MenuItem("Mass operations", "ALT+H")) {
-                MassOperationsDialog::get().show();
+                MassOperationsDialog::get().open();
                 _toolsMenuToggled = false;
             }
             if (ImGui::MenuItem("Pattern analysis", "ALT+P")) {
@@ -709,7 +709,7 @@ void _MainWindow::processMenubar()
         }
 
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_H)) {
-            MassOperationsDialog::get().show();
+            MassOperationsDialog::get().open();
         }
         if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_P)) {
             PatternAnalysisDialog::get().show();
@@ -722,8 +722,6 @@ void _MainWindow::processMenubar()
 
 void _MainWindow::processDialogs()
 {
-    MassOperationsDialog::get().process();
-
     MessageDialog::get().process();
     GenericFileDialogs::get().process();
 }
