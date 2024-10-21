@@ -8,7 +8,7 @@
 #include "AlienImGui.h"
 #include "TemporalControlWindow.h"
 
-void ResizeWorldDialog::init(SimulationFacade const& simulationFacade)
+void ResizeWorldDialog::initIntern(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
 }

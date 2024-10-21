@@ -14,7 +14,7 @@ namespace
     auto const RightColumnWidth = 110.0f;
 }
 
-void GpuSettingsDialog::init(SimulationFacade const& simulationFacade)
+void GpuSettingsDialog::initIntern(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
 
@@ -24,7 +24,7 @@ void GpuSettingsDialog::init(SimulationFacade const& simulationFacade)
     _simulationFacade->setGpuSettings_async(gpuSettings);
 }
 
-void GpuSettingsDialog::shutdown()
+void GpuSettingsDialog::shutdownIntern()
 {
     auto gpuSettings = _simulationFacade->getGpuSettings();
     GlobalSettings::get().setInt("settings.gpu.num blocks", gpuSettings.numBlocks);

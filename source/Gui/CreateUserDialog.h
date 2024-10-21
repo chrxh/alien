@@ -6,7 +6,7 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class CreateUserDialog : public AlienDialog
+class CreateUserDialog : public AlienDialog<>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(CreateUserDialog);
 

@@ -147,27 +147,17 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     NetworkTransferController::get().init(_simulationFacade, _persisterFacade);
     LoginController::get().init(_simulationFacade, _persisterFacade);
     ShaderWindow::get().init();
+    AboutDialog::get().init();
+    ActivateUserDialog::get().init(_simulationFacade);
+    CreateUserDialog::get().init();
+    DeleteUserDialog::get().init();
+    DisplaySettingsDialog::get().init(); 
+    NetworkSettingsDialog::get().init();
+    NewPasswordDialog::get().init(_simulationFacade);
+    ResetPasswordDialog::get().init();
 
     log(Priority::Important, "initialize file dialogs");
-    ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
-        GLuint tex;
-
-        glGenTextures(1, &tex);
-        glBindTexture(GL_TEXTURE_2D, tex);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, (fmt == 0) ? GL_BGRA : GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        return reinterpret_cast<void*>(uintptr_t(tex));
-    };
-    ifd::FileDialog::Instance().DeleteTexture = [](void* tex) {
-        GLuint texID = reinterpret_cast<uintptr_t>(tex);
-        glDeleteTextures(1, &texID);
-    };
+    initFileDialogs();
 
     log(Priority::Important, "main window initialized");
 }
@@ -187,19 +177,19 @@ void _MainWindow::mainLoop()
 
         switch (StartupController::get().getState()) {
         case StartupController::State::StartLoadSimulation:
-            processLoadingScreen();
+            mainLoopForLoadingScreen();
             break;
         case StartupController::State::LoadingSimulation:
-            processLoadingScreen();
+            mainLoopForLoadingScreen();
             break;
         case StartupController::State::FadeOutLoadingScreen:
-            processFadeoutLoadingScreen();
+            mainLoopForFadeoutLoadingScreen();
             break;
         case StartupController::State::FadeInUI:
-            processFadeInUI();
+            mainLoopForFadeInUI();
             break;
         case StartupController::State::Ready:
-            processReady();
+            mainLoopForUI();
             break;
         default:
             THROW_NOT_IMPLEMENTED();
@@ -210,9 +200,6 @@ void _MainWindow::mainLoop()
 void _MainWindow::shutdown()
 {
     MainLoopEntityController::get().shutdown();
-
-    GpuSettingsDialog::get().shutdown();
-    NewSimulationDialog::get().shutdown();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -284,7 +271,30 @@ char const* _MainWindow::initGlfwAndReturnGlslVersion()
     return glslVersion;
 }
 
-void _MainWindow::processLoadingScreen()
+void _MainWindow::initFileDialogs()
+{
+    ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
+        GLuint tex;
+
+        glGenTextures(1, &tex);
+        glBindTexture(GL_TEXTURE_2D, tex);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, (fmt == 0) ? GL_BGRA : GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        return reinterpret_cast<void*>(uintptr_t(tex));
+    };
+    ifd::FileDialog::Instance().DeleteTexture = [](void* tex) {
+        GLuint texID = reinterpret_cast<uintptr_t>(tex);
+        glDeleteTextures(1, &texID);
+    };
+}
+
+void _MainWindow::mainLoopForLoadingScreen()
 {
     StartupController::get().process();
     OverlayMessageController::get().process();
@@ -303,7 +313,7 @@ void _MainWindow::processLoadingScreen()
     glfwSwapBuffers(window);
 }
 
-void _MainWindow::processFadeoutLoadingScreen()
+void _MainWindow::mainLoopForFadeoutLoadingScreen()
 {
     StartupController::get().process();
     renderSimulation();
@@ -311,7 +321,7 @@ void _MainWindow::processFadeoutLoadingScreen()
     finishFrame();
 }
 
-void _MainWindow::processFadeInUI()
+void _MainWindow::mainLoopForFadeInUI()
 {
     renderSimulation();
 
@@ -332,7 +342,7 @@ void _MainWindow::processFadeInUI()
     finishFrame();
 }
 
-void _MainWindow::processReady()
+void _MainWindow::mainLoopForUI()
 {
     renderSimulation();
 
@@ -712,21 +722,7 @@ void _MainWindow::processMenubar()
 
 void _MainWindow::processDialogs()
 {
-    NewSimulationDialog::get().process();
-    AboutDialog::get().process();
     MassOperationsDialog::get().process();
-    GpuSettingsDialog::get().process();
-    DisplaySettingsDialog::get().process(); 
-    LoginDialog::get().process();
-    CreateUserDialog::get().process();
-    ActivateUserDialog::get().process();
-    UploadSimulationDialog::get().process();
-    EditSimulationDialog::get().process();
-    DeleteUserDialog::get().process();
-    NetworkSettingsDialog::get().process();
-    ResetPasswordDialog::get().process();
-    NewPasswordDialog::get().process();
-    ExitDialog::get().process();
 
     MessageDialog::get().process();
     GenericFileDialogs::get().process();

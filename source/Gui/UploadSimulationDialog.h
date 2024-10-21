@@ -7,20 +7,19 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class UploadSimulationDialog : public AlienDialog
+class UploadSimulationDialog : public AlienDialog<SimulationFacade>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(UploadSimulationDialog);
 
 public:
-    void init(SimulationFacade const& simulationFacade);
-    void shutdown();
-
     void open(NetworkResourceType resourceType, std::string const& folder = "");
 
 private:
     UploadSimulationDialog();
 
-    void processIntern();
+    void initIntern(SimulationFacade simulationFacade) override;
+    void shutdownIntern() override;
+    void processIntern() override;
 
     void onUpload();
 

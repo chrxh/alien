@@ -87,8 +87,6 @@ void SpatialControlWindow::processIntern()
         }
     }
     ImGui::EndChild();
-
-    ResizeWorldDialog::get().process();
 }
 
 void SpatialControlWindow::processBackground()

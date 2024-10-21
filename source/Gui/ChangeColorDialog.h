@@ -5,16 +5,15 @@
 
 #include "AlienDialog.h"
 
-class ChangeColorDialog : public AlienDialog
+class ChangeColorDialog
+    : public AlienDialog<std::function<GenomeDescription()>, std::function<void(GenomeDescription const&)>>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(ChangeColorDialog);
-
-public:
-    void init(std::function<GenomeDescription()> const& getGenomeFunc, std::function<void(GenomeDescription const&)> const& setGenomeFunc);
 
 private:
     ChangeColorDialog();
 
+    void initIntern(std::function<GenomeDescription()> getGenomeFunc, std::function<void(GenomeDescription const&)> setGenomeFunc) override;
     void processIntern() override;
 
     void onChangeColor(GenomeDescription& genome);

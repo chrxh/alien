@@ -7,18 +7,16 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class GpuSettingsDialog : public AlienDialog
+class GpuSettingsDialog : public AlienDialog<SimulationFacade>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(GpuSettingsDialog);
-
-public:
-    void init(SimulationFacade const& simulationFacade);
-    void shutdown();
 
 private:
     GpuSettingsDialog();
 
-    void processIntern();
+    void initIntern(SimulationFacade simulationFacade) override;
+    void shutdownIntern() override;
+    void processIntern() override;
     void openIntern();
 
     void validationAndCorrection(GpuSettings& settings) const;

@@ -16,7 +16,7 @@
 #include "HelpStrings.h"
 #include "LoginController.h"
 
-void LoginDialog::init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade)
+void LoginDialog::initIntern(SimulationFacade simulationFacade, PersisterFacade persisterFacade)
 {
     _simulationFacade = simulationFacade;
     _persisterFacade = persisterFacade;

@@ -9,7 +9,7 @@
 #include "BrowserWindow.h"
 #include "MessageDialog.h"
 
-void NewPasswordDialog::init(SimulationFacade const& simulationFacade)
+void NewPasswordDialog::initIntern(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
 }

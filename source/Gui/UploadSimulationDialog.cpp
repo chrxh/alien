@@ -30,7 +30,7 @@ namespace
         {NetworkResourceType_Genome, "Genome"}};
 }
 
-void UploadSimulationDialog::init(SimulationFacade const& simulationFacade)
+void UploadSimulationDialog::initIntern(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
 
@@ -38,7 +38,7 @@ void UploadSimulationDialog::init(SimulationFacade const& simulationFacade)
     _share = settings.getBool("dialogs.upload.share", _share);
 }
 
-void UploadSimulationDialog::shutdown()
+void UploadSimulationDialog::shutdownIntern()
 {
     auto& settings = GlobalSettings::get();
     settings.setBool("dialogs.upload.share", _share);
