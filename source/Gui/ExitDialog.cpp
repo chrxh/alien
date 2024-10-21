@@ -3,7 +3,7 @@
 #include "ExitDialog.h"
 #include "AlienImGui.h"
 
-void ExitDialog::init(bool& onExit)
+void ExitDialog::initIntern(bool& onExit)
 {
     _onExit = &onExit;
 }

@@ -6,17 +6,15 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class LoginDialog : public AlienDialog
+class LoginDialog : public AlienDialog<SimulationFacade, PersisterFacade>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(LoginDialog);
-
-public:
-    void init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade);
 
 private:
     LoginDialog();
 
-    void processIntern();
+    void initIntern(SimulationFacade simulationFacade, PersisterFacade persisterFacade) override;
+    void processIntern() override;
 
     SimulationFacade _simulationFacade;
     PersisterFacade _persisterFacade; 

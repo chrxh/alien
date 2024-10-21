@@ -16,14 +16,14 @@ namespace
     auto const ContentTextInputWidth = 60.0f;
 }
 
-void NewSimulationDialog::init(SimulationFacade const& simulationFacade)
+void NewSimulationDialog::initIntern(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
     _adoptSimulationParameters =
             GlobalSettings::get().getBool("dialogs.new simulation.adopt simulation parameters", true);
 }
 
-void NewSimulationDialog::shutdown()
+void NewSimulationDialog::shutdownIntern()
 {
     GlobalSettings::get().setBool("dialogs.new simulation.adopt simulation parameters", _adoptSimulationParameters);
 }

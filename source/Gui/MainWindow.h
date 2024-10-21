@@ -17,11 +17,12 @@ private:
     void initGlfwAndOpenGL();
     void initGlad();
     char const* initGlfwAndReturnGlslVersion();
+    void initFileDialogs();
 
-    void processLoadingScreen();
-    void processFadeoutLoadingScreen();
-    void processFadeInUI();
-    void processReady();
+    void mainLoopForLoadingScreen();
+    void mainLoopForFadeoutLoadingScreen();
+    void mainLoopForFadeInUI();
+    void mainLoopForUI();
 
     void renderSimulation();
 

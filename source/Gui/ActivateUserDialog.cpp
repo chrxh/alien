@@ -11,7 +11,7 @@
 #include "CreateUserDialog.h"
 #include "StyleRepository.h"
 
-void ActivateUserDialog::init(SimulationFacade const& simulationFacade)
+void ActivateUserDialog::initIntern(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
 }

@@ -6,16 +6,15 @@
 #include "Definitions.h"
 #include "AlienDialog.h"
 
-class NewSimulationDialog : public AlienDialog
+class NewSimulationDialog : public AlienDialog<SimulationFacade>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(NewSimulationDialog);
 
-public:
-    void init(SimulationFacade const& simulationFacade);
-    void shutdown();
-
 private:
     NewSimulationDialog();
+
+    void initIntern(SimulationFacade simulationFacade) override;
+    void shutdownIntern() override;
     void processIntern() override;
     void openIntern() override;
 

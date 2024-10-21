@@ -25,6 +25,7 @@
 #include "Network/NetworkService.h"
 #include "Network/NetworkResourceParserService.h"
 #include "Network/NetworkResourceTreeTO.h"
+#include "PersisterInterface/TaskProcessor.h"
 
 #include "AlienImGui.h"
 #include "StyleRepository.h"
@@ -42,7 +43,6 @@
 #include "HelpStrings.h"
 #include "LoginController.h"
 #include "NetworkTransferController.h"
-#include "PersisterInterface/TaskProcessor.h"
 
 namespace
 {
@@ -114,6 +114,8 @@ void BrowserWindow::initIntern(SimulationFacade simulationFacade, PersisterFacad
     }
 
     _lastSessionData.load(getAllRawTOs());
+
+    EditSimulationDialog::get().init();
 }
 
 void BrowserWindow::shutdownIntern()

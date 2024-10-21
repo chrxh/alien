@@ -112,7 +112,6 @@ void GenomeEditorWindow::processIntern()
 {
     processToolbar();
     processEditor();
-    ChangeColorDialog::get().process();
 }
 
 void GenomeEditorWindow::processToolbar()

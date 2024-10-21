@@ -9,7 +9,7 @@
 #include "AlienImGui.h"
 #include "StyleRepository.h"
 
-void ChangeColorDialog::init(std::function<GenomeDescription()> const& getGenomeFunc, std::function<void(GenomeDescription const&)> const& setGenomeFunc)
+void ChangeColorDialog::initIntern(std::function<GenomeDescription()> getGenomeFunc, std::function<void(GenomeDescription const&)> setGenomeFunc)
 {
     _getGenomeFunc = getGenomeFunc;
     _setGenomeFunc = setGenomeFunc;

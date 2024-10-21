@@ -6,18 +6,16 @@
 #include "Definitions.h"
 #include "AlienDialog.h"
 
-class DisplaySettingsDialog : public AlienDialog
+class DisplaySettingsDialog : public AlienDialog<>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(DisplaySettingsDialog);
-
-public:
-    void init();
 
 private:
     DisplaySettingsDialog();
 
-    void processIntern();
-    void openIntern();
+    void initIntern() override;
+    void processIntern() override;
+    void openIntern() override;
 
     void setFullscreen(int selectionIndex);
     int getSelectionIndex() const;

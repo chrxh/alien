@@ -16,7 +16,7 @@ namespace
     auto const RightColumnWidth = 185.0f;
 }
 
-void DisplaySettingsDialog::init()
+void DisplaySettingsDialog::initIntern()
 {
     auto primaryMonitor = glfwGetPrimaryMonitor();
     _videoModes = glfwGetVideoModes(primaryMonitor, &_videoModesCount);

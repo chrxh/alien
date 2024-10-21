@@ -5,7 +5,6 @@ PUBLIC
     AboutDialog.h
     ActivateUserDialog.cpp
     ActivateUserDialog.h
-    AlienDialog.cpp
     AlienDialog.h
     AlienImGui.cpp
     AlienImGui.h
