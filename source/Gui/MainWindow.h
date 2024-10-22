@@ -16,7 +16,6 @@ public:
 private:
     void initGlfwAndOpenGL();
     void initGlad();
-    char const* initGlfwAndReturnGlslVersion();
     void initFileDialogs();
 
     void mainLoopForLoadingScreen();
