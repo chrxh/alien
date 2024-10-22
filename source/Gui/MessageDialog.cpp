@@ -9,11 +9,8 @@
 #include "AlienImGui.h"
 #include "WindowController.h"
 
-void MessageDialog::process()
+void MessageDialog::processIntern()
 {
-    if (!_show) {
-        return;
-    }
     switch (_dialogType) {
     case DialogType::Information:
         processInformation();
@@ -26,11 +23,13 @@ void MessageDialog::process()
 
 void MessageDialog::information(std::string const& title, std::string const& message)
 {
-    _show = true;
     _title = title;
     _message = message;
     _dialogType = DialogType::Information;
     log(Priority::Important, "message dialog showing: '" + message + "'");
+
+    AlienDialog::open();
+    changeTitle(title + "##msg");
 }
 
 void MessageDialog::information(std::string const& title, std::vector<PersisterErrorInfo> const& errors)
@@ -44,11 +43,18 @@ void MessageDialog::information(std::string const& title, std::vector<PersisterE
 
 void MessageDialog::yesNo(std::string const& title, std::string const& message, std::function<void()> const& yesFunction)
 {
-    _show = true;
     _title = title;
     _message = message;
     _dialogType = DialogType::YesNo;
     _execFunction = yesFunction;
+
+    AlienDialog::open();
+    changeTitle(title + "##msg");
+}
+
+MessageDialog::MessageDialog()
+    : AlienDialog("Message")
+{
 }
 
 void MessageDialog::processInformation()
@@ -67,8 +73,7 @@ void MessageDialog::processInformation()
         AlienImGui::Separator();
 
         if (AlienImGui::Button("OK")) {
-            ImGui::CloseCurrentPopup();
-            _show = false;
+            close();
         }
         ImGui::EndPopup();
     }
@@ -90,14 +95,12 @@ void MessageDialog::processYesNo()
         AlienImGui::Separator();
 
         if (AlienImGui::Button("Yes")) {
-            ImGui::CloseCurrentPopup();
-            _show = false;
+            close();
             _execFunction();
         }
         ImGui::SameLine();
         if (AlienImGui::Button("No")) {
-            ImGui::CloseCurrentPopup();
-            _show = false;
+            close();
         }
         ImGui::EndPopup();
     }
