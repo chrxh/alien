@@ -2,14 +2,15 @@
 #include <cmath>
 
 #include "AlienImGui.h"
-#include "OverlayMessageController.h"
+#include "OverlayController.h"
 
 #include <Fonts/IconsFontAwesome5.h>
+
+#include "Base/Math.h"
 
 #include "MainLoopEntityController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
-#include "Base/Math.h"
 
 namespace
 {
@@ -19,12 +20,12 @@ namespace
     auto constexpr FadeoutLightningDuration = 1200;
 }
 
-void OverlayMessageController::setup(PersisterFacade const& persisterFacade)
+void OverlayController::setup(PersisterFacade const& persisterFacade)
 {
     _persisterFacade = persisterFacade;
 }
 
-void OverlayMessageController::process()
+void OverlayController::process()
 {
     if (!_on) {
         return;
@@ -37,7 +38,7 @@ void OverlayMessageController::process()
     processMessage();
 }
 
-void OverlayMessageController::show(std::string const& message, bool withLightning /*= false*/)
+void OverlayController::showMessage(std::string const& message, bool withLightning /*= false*/)
 {
     _show = true;
     _message = message;
@@ -46,12 +47,12 @@ void OverlayMessageController::show(std::string const& message, bool withLightni
     _counter = 0;
 }
 
-void OverlayMessageController::setOn(bool value)
+void OverlayController::setOn(bool value)
 {
     _on = value;
 }
 
-void OverlayMessageController::processLoadingBar()
+void OverlayController::processLoadingBar()
 {
     if (_persisterFacade->isBusy()) {
         if (!_progressBarRefTimepoint.has_value()) {
@@ -64,10 +65,10 @@ void OverlayMessageController::processLoadingBar()
 
         auto viewSize = toRealVector2D(Viewport::get().getViewSize());
         auto width = viewSize.x / 6 + 1.0f;
-        auto height = scale(10.0f);
+        auto height = scale(20.0f);
         auto center = ImVec2{viewSize.x / 2, viewSize.y - scale(60.0f)};
 
-        auto constexpr N = 40;
+        auto constexpr N = 20;
         for (int i = 0; i < N; ++i) {
             auto amplitude1 = sinf(toFloat(i) * 10.0f / toFloat(N) - duration / 240.0f);
             auto amplitude2 = sinf(toFloat(i) * 14.0f / toFloat(N) - duration / 135.0f);
@@ -92,7 +93,7 @@ void OverlayMessageController::processLoadingBar()
     }
 }
 
-void OverlayMessageController::processMessage()
+void OverlayController::processMessage()
 {
     auto now = std::chrono::steady_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - *_messageStartTimepoint);

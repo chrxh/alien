@@ -17,7 +17,7 @@
 #include "MultiplierWindow.h"
 #include "GenomeEditorWindow.h"
 #include "GenericMessageDialog.h"
-#include "OverlayMessageController.h"
+#include "OverlayController.h"
 #include "MainLoopEntityController.h"
 
 namespace

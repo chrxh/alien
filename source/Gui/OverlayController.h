@@ -6,15 +6,15 @@
 
 #include "Definitions.h"
 
-class OverlayMessageController
+class OverlayController
 {
-    MAKE_SINGLETON(OverlayMessageController);
+    MAKE_SINGLETON(OverlayController);
 
 public:
     void setup(PersisterFacade const& persisterFacade);
     void process();
 
-    void show(std::string const& message, bool withLightning = false);
+    void showMessage(std::string const& message, bool withLightning = false);
 
     void setOn(bool value);
 
@@ -37,5 +37,5 @@ private:
 
 inline void printOverlayMessage(std::string const& message, bool withLightning = false)
 {
-    OverlayMessageController::get().show(message, withLightning);
+    OverlayController::get().showMessage(message, withLightning);
 }

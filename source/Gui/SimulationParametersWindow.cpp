@@ -16,7 +16,7 @@
 #include "GenericMessageDialog.h"
 #include "SimulationInteractionController.h"
 #include "RadiationSourcesWindow.h"
-#include "OverlayMessageController.h"
+#include "OverlayController.h"
 #include "SimulationView.h"
 #include "StyleRepository.h"
 

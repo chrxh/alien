@@ -4,7 +4,7 @@
 
 #include "Base/Definitions.h"
 
-#include "OverlayMessageController.h"
+#include "OverlayController.h"
 #include "MainLoopEntityController.h"
 
 namespace
@@ -29,7 +29,7 @@ void UiController::setOn(bool value)
         _lastChangeTimePoint = std::chrono::steady_clock::now() - std::chrono::milliseconds(FadeInOutDuration - duration);
     }
     _on = value;
-    OverlayMessageController::get().setOn(value);
+    OverlayController::get().setOn(value);
 }
 
 void UiController::process()

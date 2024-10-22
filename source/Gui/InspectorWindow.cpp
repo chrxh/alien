@@ -18,7 +18,7 @@
 #include "CellFunctionStrings.h"
 #include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
-#include "OverlayMessageController.h"
+#include "OverlayController.h"
 
 using namespace std::string_literals;
 

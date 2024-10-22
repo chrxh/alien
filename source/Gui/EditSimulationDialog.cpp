@@ -12,7 +12,7 @@
 #include "HelpStrings.h"
 #include "StyleRepository.h"
 #include "GenericMessageDialog.h"
-#include "OverlayMessageController.h"
+#include "OverlayController.h"
 
 void EditSimulationDialog::openForLeaf(NetworkResourceTreeTO const& treeTO)
 {

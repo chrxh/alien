@@ -71,13 +71,13 @@
 #include "ShaderWindow.h"
 #include "GenomeEditorWindow.h"
 #include "RadiationSourcesWindow.h"
-#include "OverlayMessageController.h"
 #include "ExitDialog.h"
 #include "AutosaveWindow.h"
 #include "FileTransferController.h"
 #include "LoginController.h"
 #include "NetworkTransferController.h"
 #include "MainLoopEntityController.h"
+#include "OverlayController.h"
 
 namespace
 {
@@ -115,7 +115,7 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     log(Priority::Important, "initialize facades");
     _persisterFacade->setup(_simulationFacade);
 
-    log(Priority::Important, "initialize gui elements");
+    log(Priority::Important, "initialize main loop elements");
     Viewport::get().setup(_simulationFacade);
     AutosaveController::get().setup(_simulationFacade);
     EditorController::get().setup(_simulationFacade);
@@ -141,7 +141,7 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     UploadSimulationDialog::get().setup(_simulationFacade);
     ImageToPatternDialog::get().setup(_simulationFacade);
     AutosaveWindow::get().setup(_simulationFacade, _persisterFacade);
-    OverlayMessageController::get().setup(_persisterFacade);
+    OverlayController::get().setup(_persisterFacade);
     FileTransferController::get().setup(_persisterFacade, _simulationFacade);
     NetworkTransferController::get().setup(_simulationFacade, _persisterFacade);
     LoginController::get().setup(_simulationFacade, _persisterFacade);
@@ -162,7 +162,7 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     log(Priority::Important, "initialize file dialogs");
     initFileDialogs();
 
-    log(Priority::Important, "main window initialized");
+    log(Priority::Important, "user interface initialized");
 }
 
 void _MainWindow::mainLoop()
@@ -238,7 +238,7 @@ void _MainWindow::initGlfwAndOpenGL()
 void _MainWindow::initGlad()
 {
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        throw std::runtime_error("Failed to initialize GLAD");
+        throw std::runtime_error("Failed to initialize GLAD.");
     }
 }
 

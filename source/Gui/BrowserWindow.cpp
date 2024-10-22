@@ -38,7 +38,7 @@
 #include "EditorController.h"
 #include "EditSimulationDialog.h"
 #include "OpenGLHelper.h"
-#include "OverlayMessageController.h"
+#include "OverlayController.h"
 #include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
 #include "LoginController.h"

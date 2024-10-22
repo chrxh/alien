@@ -23,7 +23,7 @@
 #include "EditorModel.h"
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
-#include "OverlayMessageController.h"
+#include "OverlayController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
 #include "HelpStrings.h"
