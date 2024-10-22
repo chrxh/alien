@@ -17,7 +17,6 @@ public:
     void init(Dependencies... dependencies);
 
     virtual void open();
-    virtual void close();
 
 protected:
     virtual void processIntern() {}
@@ -27,6 +26,7 @@ protected:
     virtual void openIntern() {}
 
     void changeTitle(std::string const& title);
+    virtual void close();
 
 private:
     void process() override;
@@ -42,6 +42,10 @@ private:
     DialogState _state = DialogState::Closed;
     std::string _title;
 };
+
+/************************************************************************/
+/* Implementation                                                       */
+/************************************************************************/
 
 template <typename ... Dependencies>
 AlienDialog<Dependencies...>::AlienDialog(std::string const& title)

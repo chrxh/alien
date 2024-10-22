@@ -155,6 +155,7 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     NetworkSettingsDialog::get().init();
     NewPasswordDialog::get().init(_simulationFacade);
     ResetPasswordDialog::get().init();
+    MessageDialog::get().init();
 
     log(Priority::Important, "initialize file dialogs");
     initFileDialogs();
@@ -722,7 +723,6 @@ void _MainWindow::processMenubar()
 
 void _MainWindow::processDialogs()
 {
-    MessageDialog::get().process();
     GenericFileDialogs::get().process();
 }
 

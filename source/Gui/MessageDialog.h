@@ -5,24 +5,28 @@
 #include "PersisterInterface/PersisterErrorInfo.h"
 
 #include "Definitions.h"
+#include "MainLoopEntity.h"
+#include "AlienDialog.h"
 
-class MessageDialog
+class MessageDialog : public AlienDialog<>
 {
-    MAKE_SINGLETON(MessageDialog);
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(MessageDialog);
 
 public:
-    void process();
-
     void information(std::string const& title, std::string const& message);
     void information(std::string const& title, std::vector<PersisterErrorInfo> const& errors);
     void yesNo(std::string const& title, std::string const& message, std::function<void()> const& yesFunction);
 
 private:
+    MessageDialog();
+
+    void open() override {}
+    void processIntern() override;
+
     void processInformation();
     void processYesNo();
 
     bool _sizeInitialized = false;
-    bool _show = false;
 
     enum class DialogType
     {
