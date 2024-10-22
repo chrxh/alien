@@ -33,7 +33,7 @@ class GpuSettingsDialog;
 
 class NewSimulationDialog;
 
-class StartupController;
+class MainLoopController;
 
 class ExitDialog;
 

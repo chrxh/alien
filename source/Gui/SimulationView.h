@@ -19,8 +19,11 @@ public:
 
     void resize(IntVector2D const& viewportSize);
 
-    void draw(bool renderSimulation);
-    void processControls(bool renderSimulation);
+    void draw();
+    void processSimulationScrollbars();
+
+    bool isRenderSimulation() const;
+    void setRenderSimulation(bool value);
 
     bool isOverlayActive() const;
     void setOverlayActive(bool active);
@@ -43,6 +46,8 @@ private:
 
     void markReferenceDomain();
 
+    SimulationFacade _simulationFacade;
+
     //widgets
     SimulationScrollbar _scrollbarX;
     SimulationScrollbar _scrollbarY;
@@ -50,7 +55,7 @@ private:
     //overlay
     bool _isCellDetailOverlayActive = false;
     std::optional<OverlayDescription> _overlay;
-    
+
     //shader data
     unsigned int _vao, _vbo, _ebo;
     unsigned int _fbo1, _fbo2;
@@ -65,5 +70,6 @@ private:
     float _contrast = DefaultContrast;
     float _motionBlur = DefaultMotionBlur;
 
-    SimulationFacade _simulationFacade;
+    //settings
+    bool _renderSimulation = true;
 };

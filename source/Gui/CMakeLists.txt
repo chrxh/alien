@@ -69,6 +69,8 @@ PUBLIC
     LogWindow.cpp
     LogWindow.h
     Main.cpp
+    MainLoopController.cpp
+    MainLoopController.h
     MainLoopEntity.cpp
     MainLoopEntity.h
     MainLoopEntityController.cpp
@@ -119,8 +121,6 @@ PUBLIC
     SimulationView.h
     SpatialControlWindow.cpp
     SpatialControlWindow.h
-    StartupController.cpp
-    StartupController.h
     StatisticsWindow.cpp
     StatisticsWindow.h
     StyleRepository.cpp
