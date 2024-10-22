@@ -16,6 +16,9 @@ class MainLoopController
 public:
     void setup(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade);
     void process();
+    void scheduleShutdown();
+
+    bool shouldClose() const;
 
 private:
     void processFirstTick();
@@ -23,6 +26,8 @@ private:
     void processFadeOutLoadingScreen();
     void processFadeInUI();
     void processOperatingMode();
+    void processScheduleExit();
+    void processExiting();
 
     void drawLoadingScreen();
     void decreaseAlphaForFadeOutLoadingScreen();
@@ -41,11 +46,15 @@ private:
         LoadingScreen,
         FadeOutLoadingScreen,
         FadeInUI,
-        OperatingMode
+        OperatingMode,
+        ScheduleExit,
+        Exiting,
+        Finished
     };
     ProgramState _programState = ProgramState::FirstTick;
 
-    PersisterRequestId _startupSimRequestId;
+    PersisterRequestId _loadSimRequestId;
+    PersisterRequestId _saveSimRequestId;
 
     TextureData _logo;
     std::optional<std::chrono::steady_clock::time_point> _simulationLoadedTimepoint;

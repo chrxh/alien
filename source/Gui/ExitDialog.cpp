@@ -2,11 +2,7 @@
 
 #include "ExitDialog.h"
 #include "AlienImGui.h"
-
-void ExitDialog::initIntern(bool& onExit)
-{
-    _onExit = &onExit;
-}
+#include "MainLoopController.h"
 
 ExitDialog::ExitDialog()
     : AlienDialog("Exit")
@@ -16,14 +12,11 @@ void ExitDialog::processIntern()
 {
     ImGui::Text("Do you really want to terminate the program?");
 
-    ImGui::Spacing();
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Spacing();
-    ImGui::Spacing();
+    ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
+    AlienImGui::Separator();
 
     if (AlienImGui::Button("OK")) {
-        *_onExit = true;
+        MainLoopController::get().scheduleShutdown();
         close();
     }
     ImGui::SameLine();

@@ -5,15 +5,12 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class ExitDialog : public AlienDialog<bool&>
+class ExitDialog : public AlienDialog<>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(ExitDialog);
 
 private:
     ExitDialog();
 
-    void initIntern(bool& onExit) override;
     void processIntern() override;
-
-    bool* _onExit = nullptr;
 };

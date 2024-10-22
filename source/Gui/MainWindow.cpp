@@ -128,7 +128,7 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     SimulationParametersWindow::get().setup(_simulationFacade);
     GpuSettingsDialog::get().setup(_simulationFacade);
     MainLoopController::get().setup(_simulationFacade, _persisterFacade);
-    ExitDialog::get().setup(_onExit);
+    ExitDialog::get().setup();
     MassOperationsDialog::get().setup(_simulationFacade);
     LogWindow::get().setup(_logger);
     GettingStartedWindow::get().setup();
@@ -167,8 +167,7 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
 
 void _MainWindow::mainLoop()
 {
-    auto window = WindowController::get().getWindowData().window;
-    while (!glfwWindowShouldClose(window) && !_onExit)
+    while (!MainLoopController::get().shouldClose())
     {
         MainLoopController::get().process();
     }

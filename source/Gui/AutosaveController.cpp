@@ -31,7 +31,7 @@ void AutosaveController::shutdown()
     if (!_on) {
         return;
     }
-    onSave();
+    //onSave();
 }
 
 bool AutosaveController::isOn() const
