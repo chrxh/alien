@@ -7,7 +7,7 @@
 
 #include "AlienImGui.h"
 #include "BrowserWindow.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 
 void NewPasswordDialog::initIntern(SimulationFacade simulationFacade)
 {
@@ -65,9 +65,9 @@ void NewPasswordDialog::onNewPassword()
         result |= NetworkService::get().login(errorCode, _userName, _newPassword, _userInfo);
     }
     if (!result) {
-        MessageDialog::get().information("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to reset the password again.");
+        GenericMessageDialog::get().information("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to reset the password again.");
         return;
     }
-    MessageDialog::get().information("Information", "The password has been successfully set.\nYou are logged in.");
+    GenericMessageDialog::get().information("Information", "The password has been successfully set.\nYou are logged in.");
     BrowserWindow::get().onRefresh();
 }

@@ -7,7 +7,7 @@
 #include "Network/NetworkService.h"
 
 #include "AlienImGui.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "CreateUserDialog.h"
 #include "BrowserWindow.h"
 #include "ResetPasswordDialog.h"

@@ -7,7 +7,7 @@
 #include "PersisterInterface/SenderInfo.h"
 #include "PersisterInterface/TaskProcessor.h"
 
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "ActivateUserDialog.h"
 #include "BrowserWindow.h"
 #include "MainLoopEntityController.h"
@@ -61,7 +61,7 @@ void LoginController::onLogin()
                 saveSettings();
                 BrowserWindow::get().onRefresh();
             },
-            [&](auto const& criticalErrors) { MessageDialog::get().information("Error", criticalErrors); });
+            [&](auto const& criticalErrors) { GenericMessageDialog::get().information("Error", criticalErrors); });
     }
 }
 

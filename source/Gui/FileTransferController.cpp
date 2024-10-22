@@ -5,7 +5,7 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "PersisterInterface/TaskProcessor.h"
 #include "GenericFileDialogs.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "OverlayMessageController.h"
 #include "TemporalControlWindow.h"
 #include "Viewport.h"
@@ -76,7 +76,7 @@ void FileTransferController::onOpenSimulation()
                 TemporalControlWindow::get().onSnapshot();
                 printOverlayMessage(data.simulationName + ".sim");
             },
-            [](auto const& criticalErrors) { MessageDialog::get().information("Error", criticalErrors); });
+            [](auto const& criticalErrors) { GenericMessageDialog::get().information("Error", criticalErrors); });
     });
 }
 

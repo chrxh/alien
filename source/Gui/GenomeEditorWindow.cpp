@@ -22,7 +22,7 @@
 #include "DelayedExecutionController.h"
 #include "EditorModel.h"
 #include "GenericFileDialogs.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "OverlayMessageController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
@@ -841,7 +841,7 @@ void GenomeEditorWindow::onOpenGenome()
 
         std::vector<uint8_t> genomeData;
         if (!SerializerService::deserializeGenomeFromFile(genomeData, firstFilename.string())) {
-            MessageDialog::get().information("Open genome", "The selected file could not be opened.");
+            GenericMessageDialog::get().information("Open genome", "The selected file could not be opened.");
         } else {
             openTab(GenomeDescriptionService::convertBytesToDescription(genomeData), false);
         }
@@ -859,7 +859,7 @@ void GenomeEditorWindow::onSaveGenome()
             auto const& selectedTab = _tabDatas.at(_selectedTabIndex);
             auto genomeData = GenomeDescriptionService::convertDescriptionToBytes(selectedTab.genome);
             if (!SerializerService::serializeGenomeToFile(firstFilename.string(), genomeData)) {
-                MessageDialog::get().information("Save genome", "The selected file could not be saved.");
+                GenericMessageDialog::get().information("Save genome", "The selected file could not be saved.");
             }
         });
 }

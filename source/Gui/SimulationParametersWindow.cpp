@@ -13,7 +13,7 @@
 #include "CellFunctionStrings.h"
 #include "GenericFileDialogs.h"
 #include "HelpStrings.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "SimulationInteractionController.h"
 #include "RadiationSourcesWindow.h"
 #include "OverlayMessageController.h"
@@ -2441,7 +2441,7 @@ void SimulationParametersWindow::onOpenParameters()
 
         SimulationParameters parameters;
         if (!SerializerService::deserializeSimulationParametersFromFile(parameters, firstFilename.string())) {
-            MessageDialog::get().information("Open simulation parameters", "The selected file could not be opened.");
+            GenericMessageDialog::get().information("Open simulation parameters", "The selected file could not be opened.");
         } else {
             _simulationFacade->setSimulationParameters(parameters);
         }
@@ -2458,7 +2458,7 @@ void SimulationParametersWindow::onSaveParameters()
 
         auto parameters = _simulationFacade->getSimulationParameters();
         if (!SerializerService::serializeSimulationParametersToFile(firstFilename.string(), parameters)) {
-            MessageDialog::get().information("Save simulation parameters", "The selected file could not be saved.");
+            GenericMessageDialog::get().information("Save simulation parameters", "The selected file could not be saved.");
         }
     });
 }

@@ -16,7 +16,7 @@
 #include "AlienImGui.h"
 #include "EditorController.h"
 #include "GenericFileDialogs.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "Viewport.h"
 #include "EngineInterface/SerializerService.h"
 
@@ -328,7 +328,7 @@ void PatternEditorWindow::onOpenPattern()
                 _simulationFacade->addAndSelectSimulationData(DataDescription(content));
                 EditorModel::get().update();
             } else {
-                MessageDialog::get().information("Open pattern", "The selected file could not be opened.");
+                GenericMessageDialog::get().information("Open pattern", "The selected file could not be opened.");
             }
         });
 }
@@ -343,7 +343,7 @@ void PatternEditorWindow::onSavePattern()
 
             auto content = _simulationFacade->getSelectedClusteredSimulationData(EditorModel::get().isRolloutToClusters());
             if (!SerializerService::serializeContentToFile(firstFilename.string(), content)) {
-                MessageDialog::get().information("Save pattern", "The selected pattern could not be saved to the specified file.");
+                GenericMessageDialog::get().information("Save pattern", "The selected pattern could not be saved to the specified file.");
             }
         });
 }

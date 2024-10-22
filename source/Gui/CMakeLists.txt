@@ -43,6 +43,8 @@ PUBLIC
     FpsController.h
     GenericFileDialogs.cpp
     GenericFileDialogs.h
+    GenericMessageDialog.cpp
+    GenericMessageDialog.h
     GenomeEditorWindow.cpp
     GenomeEditorWindow.h
     GettingStartedWindow.cpp
@@ -71,8 +73,6 @@ PUBLIC
     MainWindow.h
     MassOperationsDialog.cpp
     MassOperationsDialog.h
-    MessageDialog.cpp
-    MessageDialog.h
     MultiplierWindow.cpp
     MultiplierWindow.h
     NetworkSettingsDialog.cpp

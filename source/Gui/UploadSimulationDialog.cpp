@@ -8,7 +8,7 @@
 #include "Network/ValidationService.h"
 
 #include "AlienImGui.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "StyleRepository.h"
 #include "BrowserWindow.h"
 #include "EditorController.h"

@@ -7,7 +7,7 @@
 #include "AlienImGui.h"
 #include "BrowserWindow.h"
 #include "CreateUserDialog.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 
 DeleteUserDialog::DeleteUserDialog()
     : AlienDialog("Delete user")
@@ -29,7 +29,7 @@ void DeleteUserDialog::processIntern()
         if (_reenteredPassword == *NetworkService::get().getPassword()) {
             onDelete();
         } else {
-            MessageDialog::get().information("Error", "The password does not match.");
+            GenericMessageDialog::get().information("Error", "The password does not match.");
         }
         _reenteredPassword.clear();
     }
@@ -48,8 +48,8 @@ void DeleteUserDialog::onDelete()
     auto userName = *NetworkService::get().getLoggedInUserName();
     if (NetworkService::get().deleteUser()) {
         BrowserWindow::get().onRefresh();
-        MessageDialog::get().information("Information", "The user '" + userName + "' has been deleted.\nYou are logged out.");
+        GenericMessageDialog::get().information("Information", "The user '" + userName + "' has been deleted.\nYou are logged out.");
     } else {
-        MessageDialog::get().information("Error", "An error occurred on the server.");
+        GenericMessageDialog::get().information("Error", "An error occurred on the server.");
     }
 }

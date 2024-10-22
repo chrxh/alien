@@ -16,7 +16,7 @@
 #include "CreatorWindow.h"
 #include "MultiplierWindow.h"
 #include "GenomeEditorWindow.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "OverlayMessageController.h"
 #include "MainLoopEntityController.h"
 
