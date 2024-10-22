@@ -21,6 +21,7 @@ void NetworkTransferController::init(SimulationFacade simulationFacade, Persiste
     _replaceProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
     _deleteProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
     _editProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+    _moveProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
 }
 
 void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData const& requestData)
@@ -151,6 +152,21 @@ void NetworkTransferController::onEdit(EditNetworkResourceRequestData const& req
         [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
 }
 
+void NetworkTransferController::onMove(MoveNetworkResourceRequestData const& requestData)
+{
+    printOverlayMessage("Changing visibility ...");
+
+    _moveProcessor->executeTask(
+        [&](auto const& senderId) {
+            return _persisterFacade->scheduleMoveNetworkResource(SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
+        },
+        [&](auto const& requestId) {
+            _persisterFacade->fetchMoveNetworkResourcesData(requestId);
+            BrowserWindow::get().onRefresh();
+        },
+        [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
+}
+
 void NetworkTransferController::process()
 {
     _downloadProcessor->process();
@@ -158,4 +174,5 @@ void NetworkTransferController::process()
     _replaceProcessor->process();
     _deleteProcessor->process();
     _editProcessor->process();
+    _moveProcessor->process();
 }
