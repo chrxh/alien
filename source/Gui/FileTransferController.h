@@ -24,6 +24,7 @@ private:
     SimulationFacade _simulationFacade;
 
     TaskProcessor _openSimulationProcessor;
+    TaskProcessor _saveSimulationProcessor;
 
     std::string _referencePath;
 };

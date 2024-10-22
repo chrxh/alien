@@ -54,7 +54,7 @@ public:
 
     //specific request
     virtual PersisterRequestId scheduleSaveSimulationToFile(SenderInfo const& senderInfo, SaveSimulationRequestData const& data) = 0;
-    virtual SaveSimulationResultData fetchSavedSimulationData(PersisterRequestId const& id) = 0;
+    virtual SaveSimulationResultData fetchSaveSimulationData(PersisterRequestId const& id) = 0;
 
     virtual PersisterRequestId scheduleReadSimulationFromFile(SenderInfo const& senderInfo, ReadSimulationRequestData const& data) = 0;
     virtual ReadSimulationResultData fetchReadSimulationData(PersisterRequestId const& id) = 0;

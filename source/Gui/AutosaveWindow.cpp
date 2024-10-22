@@ -202,7 +202,7 @@ void AutosaveWindow::updateSavepoint(SavepointEntry& savepoint)
         }
         if (requestState == PersisterRequestState::Finished) {
             savepoint.state = SavepointState::Persisted;
-            auto jobResult = _persisterFacade->fetchSavedSimulationData(PersisterRequestId{savepoint.id});
+            auto jobResult = _persisterFacade->fetchSaveSimulationData(PersisterRequestId{savepoint.id});
             savepoint.timestep = jobResult.timestep;
             savepoint.timestamp = StringHelper::format(jobResult.timestamp);
             savepoint.name = jobResult.name;

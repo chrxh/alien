@@ -215,7 +215,9 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveSi
     }
 
     try {
-        SerializerService::serializeSimulationToFiles(requestData.filename, deserializedData);
+        if (!SerializerService::serializeSimulationToFiles(requestData.filename, deserializedData)) {
+            throw std::runtime_error("Error");
+        }
 
         return std::make_shared<_SaveSimulationRequestResult>(
             request->getRequestId(), SaveSimulationResultData{simulationName, deserializedData.auxiliaryData.timestep, timePoint});
@@ -223,7 +225,7 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveSi
         return std::make_shared<_PersisterRequestError>(
             request->getRequestId(),
             request->getSenderInfo().senderId,
-            PersisterErrorInfo{"The simulation could not be saved because an error occurred when serializing the data to the file."});
+            PersisterErrorInfo{"The simulation could not be saved because an error occurred when writing the data to the specified file."});
     }
 }
 
