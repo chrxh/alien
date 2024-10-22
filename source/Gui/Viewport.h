@@ -11,7 +11,7 @@ class Viewport
     MAKE_SINGLETON(Viewport);
 
 public:
-    void init(SimulationFacade const& simulationFacade);
+    void setup(SimulationFacade const& simulationFacade);
 
     float getZoomFactor();
     void setZoomFactor(float zoomFactor);

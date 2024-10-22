@@ -1,22 +1,20 @@
 #pragma once
 
 #include "Base/Singleton.h"
-#include "EngineInterface/Definitions.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class ImageToPatternDialog : public MainLoopEntity
+class ImageToPatternDialog : public MainLoopEntity<SimulationFacade>
 {
     MAKE_SINGLETON(ImageToPatternDialog);
 
 public:
-
-	void init(SimulationFacade const& simulationFacade);
-    
 	void show();
 
 private:
+    void init(SimulationFacade simulationFacade) override;
     void shutdown() override;
     void process() override {}
 

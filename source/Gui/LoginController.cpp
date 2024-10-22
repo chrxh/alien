@@ -12,7 +12,7 @@
 #include "BrowserWindow.h"
 #include "MainLoopEntityController.h"
 
-void LoginController::init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade)
+void LoginController::init(SimulationFacade simulationFacade, PersisterFacade persisterFacade)
 {
     _simulationFacade = simulationFacade;
     _persisterFacade = persisterFacade;
@@ -27,9 +27,7 @@ void LoginController::init(SimulationFacade const& simulationFacade, PersisterFa
         _password = settings.getString("dialogs.login.password", "");
         onLogin();
     }
-
-    MainLoopEntityController::get().registerObject(this);
-}
+}    
 
 void LoginController::shutdown()
 {

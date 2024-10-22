@@ -1,24 +1,22 @@
 #pragma once
 
 #include "Base/Singleton.h"
-#include "EngineInterface/Definitions.h"
-#include "PersisterInterface/Definitions.h"
-#include "PersisterInterface/PersisterRequestId.h"
+#include "EngineInterface/SimulationFacade.h"
+#include "PersisterInterface/PersisterFacade.h"
 
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class FileTransferController : public MainLoopEntity
+class FileTransferController : public MainLoopEntity<PersisterFacade, SimulationFacade>
 {
     MAKE_SINGLETON(FileTransferController);
 
 public:
-    void init(PersisterFacade const& persisterFacade, SimulationFacade const& simulationFacade);
-    
     void onOpenSimulation();
     void onSaveSimulation();
 
 private:
+    void init(PersisterFacade persisterFacade, SimulationFacade simulationFacade) override;
     void process() override;
     void shutdown() override {}
 

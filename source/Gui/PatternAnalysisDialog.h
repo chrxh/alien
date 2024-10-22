@@ -2,20 +2,20 @@
 
 #include "Base/Singleton.h"
 #include "EngineInterface/Descriptions.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class PatternAnalysisDialog : public MainLoopEntity
+class PatternAnalysisDialog : public MainLoopEntity<SimulationFacade>
 {
     MAKE_SINGLETON(PatternAnalysisDialog);
 
 public:
-    void init(SimulationFacade const& simulationFacade);
-
     void show();
 
 private:
+    void init(SimulationFacade simulationFacade) override;
     void process() override;
     void shutdown() override;
     void saveRepetitiveActiveClustersToFiles(std::string const& filename);

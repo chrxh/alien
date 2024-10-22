@@ -14,7 +14,7 @@ class SimulationView
     MAKE_SINGLETON(SimulationView);
 
 public:
-    void init(SimulationFacade const& simulationFacade);
+    void setup(SimulationFacade const& simulationFacade);
     void shutdown();
 
     void resize(IntVector2D const& viewportSize);

@@ -12,11 +12,6 @@ namespace
     constexpr std::chrono::milliseconds::rep FadeInOutDuration = 1000;
 }
 
-void UiController::init()
-{
-    MainLoopEntityController::get().registerObject(this);
-}
-
 bool UiController::isOn() const
 {
     return _on;

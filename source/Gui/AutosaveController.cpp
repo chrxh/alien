@@ -18,13 +18,11 @@ namespace
     auto constexpr MinutesForAutosave = 40;
 }
 
-void AutosaveController::init(SimulationFacade const& simulationFacade)
+void AutosaveController::init(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
     _startTimePoint = std::chrono::steady_clock::now();
     _on = GlobalSettings::get().getBool("controllers.auto save.active", true);
-
-    MainLoopEntityController::get().registerObject(this);
 }
 
 void AutosaveController::shutdown()

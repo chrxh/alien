@@ -22,11 +22,6 @@ void DelayedExecutionController::process()
     }
 }
 
-void DelayedExecutionController::init()
-{
-    MainLoopEntityController::get().registerObject(this);
-}
-
 void DelayedExecutionController::executeLater(std::function<void()> const& execFunc)
 {
     _execDatas.emplace_back(execFunc, 2);

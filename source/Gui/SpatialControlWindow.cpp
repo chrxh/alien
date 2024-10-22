@@ -16,7 +16,7 @@
 void SpatialControlWindow::initIntern(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
-    ResizeWorldDialog::get().init(simulationFacade);
+    ResizeWorldDialog::get().setup(simulationFacade);
 
     auto& settings = GlobalSettings::get();
     Viewport::get().setZoomSensitivity(settings.getFloat("windows.spatial control.zoom sensitivity factor", Viewport::get().getZoomSensitivity()));

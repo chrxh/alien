@@ -87,8 +87,6 @@ void WindowController::init()
 
     float temp;
     glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &_contentScaleFactor, &temp);  //consider only horizontal content scale
-
-    MainLoopEntityController::get().registerObject(this);
 }
 
 void WindowController::shutdown()

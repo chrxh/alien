@@ -115,7 +115,7 @@ void BrowserWindow::initIntern(SimulationFacade simulationFacade, PersisterFacad
 
     _lastSessionData.load(getAllRawTOs());
 
-    EditSimulationDialog::get().init();
+    EditSimulationDialog::get().setup();
 }
 
 void BrowserWindow::shutdownIntern()

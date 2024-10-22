@@ -3,22 +3,21 @@
 #include <chrono>
 
 #include "Base/Singleton.h"
-#include "EngineInterface/Definitions.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class AutosaveController : public MainLoopEntity
+class AutosaveController : public MainLoopEntity<SimulationFacade>
 {
     MAKE_SINGLETON(AutosaveController);
 
 public:
-    void init(SimulationFacade const& simulationFacade);
-
     bool isOn() const;
     void setOn(bool value);
 
 private:
+    void init(SimulationFacade simulationFacade) override;
     void process() override;
     void shutdown() override;
 

@@ -25,18 +25,16 @@ namespace
     auto const MaxInspectorWindowsToAdd = 10;
 }
 
-void EditorController::init(SimulationFacade const& simulationFacade)
+void EditorController::init(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
 
-    SelectionWindow::get().init();
-    EditorModel::get().init(_simulationFacade);
-    GenomeEditorWindow::get().init(_simulationFacade);
-    PatternEditorWindow::get().init(_simulationFacade);
-    CreatorWindow::get().init(_simulationFacade);
-    MultiplierWindow::get().init(_simulationFacade);
-
-    MainLoopEntityController::get().registerObject(this);
+    SelectionWindow::get().setup();
+    EditorModel::get().setup(_simulationFacade);
+    GenomeEditorWindow::get().setup(_simulationFacade);
+    PatternEditorWindow::get().setup(_simulationFacade);
+    CreatorWindow::get().setup(_simulationFacade);
+    MultiplierWindow::get().setup(_simulationFacade);
 }
 
 bool EditorController::isOn() const

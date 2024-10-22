@@ -9,12 +9,10 @@
 #include "DelayedExecutionController.h"
 
 template <typename... Dependencies>
-class AlienDialog : public MainLoopEntity
+    class AlienDialog : public MainLoopEntity<Dependencies...>
 {
 public:
     AlienDialog(std::string const& title);
-
-    void init(Dependencies... dependencies);
 
     virtual void open();
 
@@ -29,6 +27,7 @@ protected:
     virtual void close();
 
 private:
+    void init(Dependencies... dependencies) override;
     void process() override;
     void shutdown() override;
 
@@ -55,7 +54,6 @@ AlienDialog<Dependencies...>::AlienDialog(std::string const& title)
 template <typename ... Dependencies>
 void AlienDialog<Dependencies...>::init(Dependencies... dependencies)
 {
-    MainLoopEntityController::get().registerObject(this);
     initIntern(dependencies...);
 }
 

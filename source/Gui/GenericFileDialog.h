@@ -8,12 +8,10 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class GenericFileDialog : public MainLoopEntity
+class GenericFileDialog : public MainLoopEntity<>
 {
     MAKE_SINGLETON(GenericFileDialog);
 public:
-    void init();
-
     void showOpenFileDialog(
         std::string const& title,
         std::string const& filter,
@@ -27,6 +25,7 @@ public:
         std::function<void(std::filesystem::path const&)> const& actionFunc);
 
 private:
+    void init() override {}
     void process() override;
     void shutdown() override {}
 

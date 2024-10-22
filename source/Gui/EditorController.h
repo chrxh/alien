@@ -2,18 +2,17 @@
 
 #include "Base/Definitions.h"
 #include "Base/Singleton.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/Descriptions.h"
 
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class EditorController : public MainLoopEntity
+class EditorController : public MainLoopEntity<SimulationFacade>
 {
     MAKE_SINGLETON(EditorController);
 
 public:
-    void init(SimulationFacade const& simulationFacade);
-
     bool isOn() const;
     void setOn(bool value);
 
@@ -39,6 +38,7 @@ public:
     void onAccelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
 
 private:
+    void init(SimulationFacade simulationFacade) override;
     void process() override;
     void shutdown() override {}
 

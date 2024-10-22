@@ -12,7 +12,7 @@
 #include "BrowserWindow.h"
 #include "OverlayMessageController.h"
 
-void NetworkTransferController::init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade)
+void NetworkTransferController::init(SimulationFacade simulationFacade, PersisterFacade persisterFacade)
 {
     _simulationFacade = simulationFacade;
     _persisterFacade = persisterFacade;
@@ -20,8 +20,6 @@ void NetworkTransferController::init(SimulationFacade const& simulationFacade, P
     _uploadProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
     _replaceProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
     _deleteProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
-
-    MainLoopEntityController::get().registerObject(this);
 }
 
 void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData const& requestData)

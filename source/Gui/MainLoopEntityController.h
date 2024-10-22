@@ -11,11 +11,11 @@ class MainLoopEntityController
     MAKE_SINGLETON(MainLoopEntityController);
 
 public:
-    void registerObject(MainLoopEntity* object);
+    void registerObject(AbstractMainLoopEntity* object);
 
     void shutdown();
     void process();
 
 private:
-    std::vector<MainLoopEntity*> _objects;
+    std::vector<AbstractMainLoopEntity*> _objects;
 };

@@ -19,7 +19,7 @@ namespace
     auto constexpr FadeoutLightningDuration = 1200;
 }
 
-void OverlayMessageController::init(PersisterFacade const& persisterFacade)
+void OverlayMessageController::setup(PersisterFacade const& persisterFacade)
 {
     _persisterFacade = persisterFacade;
 }

@@ -14,7 +14,7 @@ class StartupController
     MAKE_SINGLETON(StartupController);
 
 public:
-    void init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade);
+    void setup(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade);
 
     void process();
     enum class State

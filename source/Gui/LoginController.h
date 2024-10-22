@@ -2,17 +2,15 @@
 
 #include "Base/Singleton.h"
 #include "PersisterInterface/PersisterFacade.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class LoginController : public MainLoopEntity
+class LoginController : public MainLoopEntity<SimulationFacade, PersisterFacade>
 {
     MAKE_SINGLETON(LoginController);
 public:
-
-    void init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade);
-
     void onLogin();
 
     void saveSettings();
@@ -32,6 +30,7 @@ public:
     UserInfo getUserInfo();
 
 private:
+    void init(SimulationFacade simulationFacade, PersisterFacade persisterFacade) override;
     void process() override;
     void shutdown() override;
 
