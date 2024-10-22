@@ -6,7 +6,7 @@
 #include "Network/NetworkService.h"
 
 #include "AlienImGui.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "BrowserWindow.h"
 #include "CreateUserDialog.h"
 #include "StyleRepository.h"
@@ -78,9 +78,9 @@ void ActivateUserDialog::onActivateUser()
         result |= NetworkService::get().login(errorCode, _userName, _password, _userInfo);
     }
     if (!result) {
-        MessageDialog::get().information("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to register again.");
+        GenericMessageDialog::get().information("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to register again.");
     } else {
-        MessageDialog::get().information(
+        GenericMessageDialog::get().information(
             "Information",
             "The user '" + _userName
                 + "' has been successfully created.\nYou are logged in and are now able to upload your own simulations\nor upvote others by likes.");

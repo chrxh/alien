@@ -1,4 +1,4 @@
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -9,7 +9,7 @@
 #include "AlienImGui.h"
 #include "WindowController.h"
 
-void MessageDialog::processIntern()
+void GenericMessageDialog::processIntern()
 {
     switch (_dialogType) {
     case DialogType::Information:
@@ -21,7 +21,7 @@ void MessageDialog::processIntern()
     }
 }
 
-void MessageDialog::information(std::string const& title, std::string const& message)
+void GenericMessageDialog::information(std::string const& title, std::string const& message)
 {
     _title = title;
     _message = message;
@@ -32,16 +32,16 @@ void MessageDialog::information(std::string const& title, std::string const& mes
     changeTitle(title + "##msg");
 }
 
-void MessageDialog::information(std::string const& title, std::vector<PersisterErrorInfo> const& errors)
+void GenericMessageDialog::information(std::string const& title, std::vector<PersisterErrorInfo> const& errors)
 {
     std::vector<std::string> errorMessages;
     for (auto const& error : errors) {
         errorMessages.emplace_back(error.message);
     }
-    MessageDialog::get().information(title, boost::join(errorMessages, "\n\n"));
+    GenericMessageDialog::get().information(title, boost::join(errorMessages, "\n\n"));
 }
 
-void MessageDialog::yesNo(std::string const& title, std::string const& message, std::function<void()> const& yesFunction)
+void GenericMessageDialog::yesNo(std::string const& title, std::string const& message, std::function<void()> const& yesFunction)
 {
     _title = title;
     _message = message;
@@ -52,12 +52,12 @@ void MessageDialog::yesNo(std::string const& title, std::string const& message, 
     changeTitle(title + "##msg");
 }
 
-MessageDialog::MessageDialog()
+GenericMessageDialog::GenericMessageDialog()
     : AlienDialog("Message")
 {
 }
 
-void MessageDialog::processInformation()
+void GenericMessageDialog::processInformation()
 {
     ImGui::OpenPopup((_title + "##msg").c_str());
     ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
@@ -79,7 +79,7 @@ void MessageDialog::processInformation()
     }
 }
 
-void MessageDialog::processYesNo()
+void GenericMessageDialog::processYesNo()
 {
     ImGui::OpenPopup(_title.c_str());
     ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));

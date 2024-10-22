@@ -31,7 +31,7 @@
 #include "StyleRepository.h"
 #include "StatisticsWindow.h"
 #include "Viewport.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "LoginDialog.h"
 #include "UploadSimulationDialog.h"
 #include "DelayedExecutionController.h"
@@ -179,7 +179,7 @@ void BrowserWindow::refreshIntern(bool withRetry)
             }
             sortUserList();
         },
-        [](auto const& errors) { MessageDialog::get().information("Error", errors); });
+        [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
 }
 
 void BrowserWindow::processIntern()
@@ -1264,7 +1264,7 @@ void BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
             .downloadCache = getSimulationCache(),
             .data = data});
     };
-    MessageDialog::get().yesNo("Delete", "Do you really want to replace the content of the selected item?", func);
+    GenericMessageDialog::get().yesNo("Delete", "Do you really want to replace the content of the selected item?", func);
 }
 
 void BrowserWindow::onEditResource(NetworkResourceTreeTO const& treeTO)
@@ -1309,7 +1309,7 @@ void BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO)
     delayedExecution([rawTOs = rawTOs, this] {
         for (auto const& rawTO : rawTOs) {
             if (!NetworkService::get().moveResource(rawTO->id, rawTO->workspaceType)) {
-                MessageDialog::get().information("Error", "Failed to move item.");
+                GenericMessageDialog::get().information("Error", "Failed to move item.");
                 refreshIntern(true);
                 return;
             }
@@ -1324,7 +1324,7 @@ void BrowserWindow::onDeleteResource(NetworkResourceTreeTO const& treeTO)
     auto rawTOs = NetworkResourceService::get().getMatchingRawTOs(treeTO, currentWorkspace.rawTOs);
 
     auto message = treeTO->isLeaf() ? "Do you really want to delete the selected item?" : "Do you really want to delete the selected folder?";
-    MessageDialog::get().yesNo("Delete", message, [rawTOs = rawTOs, this]() {
+    GenericMessageDialog::get().yesNo("Delete", message, [rawTOs = rawTOs, this]() {
 
         //remove resources form workspace
         for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
@@ -1433,7 +1433,7 @@ std::string BrowserWindow::getUserNamesToEmojiType(std::string const& resourceId
                     auto data = _persisterFacade->fetchGetUserNamesForEmojiData(requestId);
                     _userNamesByEmojiTypeBySimIdCache.emplace(std::make_pair(data.resourceId, data.emojiType), data.userNames);
                 },
-                [](auto const& errors) { MessageDialog::get().information("Error", errors); });
+                [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
         }
         return "Loading...";
     }

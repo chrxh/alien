@@ -12,7 +12,7 @@
 #include "EngineInterface/SerializerService.h"
 #include "EngineInterface/SimulationFacade.h"
 
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "MainLoopEntityController.h"
 
 
@@ -61,7 +61,7 @@ void PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string cons
     std::ofstream file;
     file.open(filename, std::ios_base::out);
     if (!file) {
-        MessageDialog::get().information("Pattern analysis", "The analysis result could not be saved to the specified file.");
+        GenericMessageDialog::get().information("Pattern analysis", "The analysis result could not be saved to the specified file.");
         return;
     }
 
@@ -99,7 +99,7 @@ void PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string cons
         messageStream << "Representative cell networks are save from `cluster" << std::setfill('0') << std::setw(6) << 0 << ".sim` to `cluster" << std::setfill('0')
                       << std::setw(6) << partitionData.size() - 1 << ".sim`.";
     }
-    MessageDialog::get().information("Analysis result", messageStream.str());
+    GenericMessageDialog::get().information("Analysis result", messageStream.str());
 }
 
 auto PatternAnalysisDialog::calcPartitionData() const -> std::map<ClusterAnalysisDescription, PartitionClassData>

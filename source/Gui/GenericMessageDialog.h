@@ -8,9 +8,9 @@
 #include "MainLoopEntity.h"
 #include "AlienDialog.h"
 
-class MessageDialog : public AlienDialog<>
+class GenericMessageDialog : public AlienDialog<>
 {
-    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(MessageDialog);
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(GenericMessageDialog);
 
 public:
     void information(std::string const& title, std::string const& message);
@@ -18,7 +18,7 @@ public:
     void yesNo(std::string const& title, std::string const& message, std::function<void()> const& yesFunction);
 
 private:
-    MessageDialog();
+    GenericMessageDialog();
 
     void open() override {}
     void processIntern() override;
@@ -40,5 +40,5 @@ private:
 
 inline void showMessage(std::string const& title, std::string const& message)
 {
-    MessageDialog::get().information(title, message);
+    GenericMessageDialog::get().information(title, message);
 }

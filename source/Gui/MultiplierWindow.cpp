@@ -8,7 +8,7 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "AlienImGui.h"
 #include "EditorModel.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "StyleRepository.h"
 
 namespace
@@ -159,7 +159,7 @@ void MultiplierWindow::onBuild()
             auto result = DescriptionEditService::randomMultiply(
                 _origSelection, _randomParameters, _simulationFacade->getWorldSize(), std::move(data), overlappingCheckSuccessful);
             if (!overlappingCheckSuccessful) {
-                MessageDialog::get().information("Random multiplication", "Non-overlapping copies could not be created.");
+                GenericMessageDialog::get().information("Random multiplication", "Non-overlapping copies could not be created.");
             }
             return result;
         }

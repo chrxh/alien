@@ -11,7 +11,7 @@
 #include "DelayedExecutionController.h"
 #include "HelpStrings.h"
 #include "StyleRepository.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "OverlayMessageController.h"
 
 void EditSimulationDialog::openForLeaf(NetworkResourceTreeTO const& treeTO)

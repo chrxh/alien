@@ -6,7 +6,7 @@
 #include "Network/NetworkService.h"
 
 #include "AlienImGui.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "ActivateUserDialog.h"
 
 CreateUserDialog::CreateUserDialog()
@@ -58,7 +58,7 @@ void CreateUserDialog::onCreateUser()
     if (NetworkService::get().createUser(_userName, _password, _email)) {
         ActivateUserDialog::get().open(_userName, _password, _userInfo);
     } else {
-        MessageDialog::get().information(
+        GenericMessageDialog::get().information(
             "Error",
             "An error occurred on the server. This could be related to the fact that\n" ICON_FA_CARET_RIGHT
             " your user name or email address is already in use,\n" ICON_FA_CARET_RIGHT " or your user "

@@ -3,7 +3,7 @@
 #include <imgui.h>
 
 #include "AlienImGui.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "NewPasswordDialog.h"
 
 ResetPasswordDialog::ResetPasswordDialog()
@@ -54,7 +54,7 @@ void ResetPasswordDialog::onResetPassword()
     if (NetworkService::get().resetPassword(_userName, _email)) {
         NewPasswordDialog::get().open(_userName, _userInfo);
     } else {
-        MessageDialog::get().information(
+        GenericMessageDialog::get().information(
             "Error", "An error occurred on the server. This could be related to the fact that the\nemail address is wrong.");
     }
 }

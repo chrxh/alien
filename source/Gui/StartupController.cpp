@@ -14,7 +14,7 @@
 #include "Viewport.h"
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "OverlayMessageController.h"
 
 namespace
@@ -68,7 +68,7 @@ void StartupController::process()
             _state = State::FadeOutLoadingScreen;
         }
         if (requestedSimState == PersisterRequestState::Error) {
-            MessageDialog::get().information("Error", "The default simulation file could not be read.\nAn empty simulation will be created.");
+            GenericMessageDialog::get().information("Error", "The default simulation file could not be read.\nAn empty simulation will be created.");
 
             DeserializedSimulation deserializedSim;
             deserializedSim.auxiliaryData.generalSettings.worldSizeX = 1000;

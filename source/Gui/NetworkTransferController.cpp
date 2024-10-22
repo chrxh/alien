@@ -4,7 +4,7 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "PersisterInterface/TaskProcessor.h"
 
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "TemporalControlWindow.h"
 #include "Viewport.h"
 #include "EditorController.h"
@@ -73,7 +73,7 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
             }
             if (VersionChecker::isVersionNewer(data.resourceVersion)) {
                 std::string dataTypeString = data.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
-                MessageDialog::get().information(
+                GenericMessageDialog::get().information(
                     "Warning",
                     "The download was successful but the " + dataTypeString
                         + " was generated using a more recent\n"
@@ -83,7 +83,7 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                           "Please visit\n\nhttps://github.com/chrxh/alien\n\nto obtain the latest version.");
             }
         },
-        [](auto const& errors) { MessageDialog::get().information("Error", errors); });
+        [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
 }
 
 void NetworkTransferController::onUpload(UploadNetworkResourceRequestData const& requestData)
@@ -99,7 +99,7 @@ void NetworkTransferController::onUpload(UploadNetworkResourceRequestData const&
             _persisterFacade->fetchUploadNetworkResourcesData(requestId);
             BrowserWindow::get().onRefresh();
         },
-        [](auto const& errors) { MessageDialog::get().information("Error", errors); });
+        [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
 }
 
 void NetworkTransferController::onReplace(ReplaceNetworkResourceRequestData const& requestData)
@@ -115,7 +115,7 @@ void NetworkTransferController::onReplace(ReplaceNetworkResourceRequestData cons
             _persisterFacade->fetchReplaceNetworkResourcesData(requestId);
             BrowserWindow::get().onRefresh();
         },
-        [](auto const& errors) { MessageDialog::get().information("Error", errors); });
+        [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
 }
 
 void NetworkTransferController::onDelete(DeleteNetworkResourceRequestData const& requestData)
@@ -131,7 +131,7 @@ void NetworkTransferController::onDelete(DeleteNetworkResourceRequestData const&
             _persisterFacade->fetchDeleteNetworkResourcesData(requestId);
             BrowserWindow::get().onRefresh();
         },
-        [](auto const& errors) { MessageDialog::get().information("Error", errors); });
+        [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
 }
 
 void NetworkTransferController::process()
