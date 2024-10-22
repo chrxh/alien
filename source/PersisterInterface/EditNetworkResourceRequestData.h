@@ -3,7 +3,11 @@
 
 struct EditNetworkResourceRequestData
 {
-    std::string resourceId;
-    std::string newName;
-    std::string newDescription;
+    struct Entry
+    {
+        std::string resourceId;
+        std::string newName;
+        std::string newDescription;
+    };
+    std::vector<Entry> entries;
 };

@@ -2,6 +2,10 @@
 
 struct MoveNetworkResourceRequestData
 {
-    std::string resourceId;
-    WorkspaceType workspaceType;
+    struct Entry
+    {
+        std::string resourceId;
+        WorkspaceType workspaceType;
+    };
+    std::vector<Entry> entries;
 };
