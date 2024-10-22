@@ -20,6 +20,7 @@ void FileTransferController::init(PersisterFacade persisterFacade, SimulationFac
     _persisterFacade = persisterFacade;
     _simulationFacade = simulationFacade;
     _openSimulationProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+    _saveSimulationProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
 }
 
 void FileTransferController::onOpenSimulation()
@@ -88,13 +89,19 @@ void FileTransferController::onSaveSimulation()
             auto firstFilenameCopy = firstFilename;
             _referencePath = firstFilenameCopy.remove_filename().string();
             printOverlayMessage("Saving ...");
-            auto senderInfo = SenderInfo{.senderId = SenderId{FileTransferSenderId}, .wishResultData = false, .wishErrorInfo = true};
-            auto saveData = SaveSimulationRequestData{firstFilename.string(), Viewport::get().getZoomFactor(), Viewport::get().getCenterInWorldPos()};
-            _persisterFacade->scheduleSaveSimulationToFile(senderInfo, saveData);
+            _saveSimulationProcessor->executeTask(
+                [&, firstFilename = firstFilename](auto const& senderId) {
+                    auto senderInfo = SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true};
+                    auto readData = SaveSimulationRequestData{firstFilename.string(), Viewport::get().getZoomFactor(), Viewport::get().getCenterInWorldPos()};
+                    return _persisterFacade->scheduleSaveSimulationToFile(senderInfo, readData);
+                },
+                [&](auto const& requestId) { _persisterFacade->fetchSaveSimulationData(requestId); },
+                [](auto const& criticalErrors) { GenericMessageDialog::get().information("Error", criticalErrors); });
         });
 }
 
 void FileTransferController::process()
 {
     _openSimulationProcessor->process();
+    _saveSimulationProcessor->process();
 }

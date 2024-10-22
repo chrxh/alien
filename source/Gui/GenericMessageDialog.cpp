@@ -8,6 +8,7 @@
 
 #include "AlienImGui.h"
 #include "WindowController.h"
+#include "StyleRepository.h"
 
 void GenericMessageDialog::processIntern()
 {
@@ -49,7 +50,7 @@ void GenericMessageDialog::yesNo(std::string const& title, std::string const& me
     _execFunction = yesFunction;
 
     AlienDialog::open();
-    changeTitle(title + "##msg");
+    changeTitle(title + "##yesNo");
 }
 
 GenericMessageDialog::GenericMessageDialog()
@@ -59,49 +60,43 @@ GenericMessageDialog::GenericMessageDialog()
 
 void GenericMessageDialog::processInformation()
 {
-    ImGui::OpenPopup((_title + "##msg").c_str());
-    ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    if (ImGui::BeginPopupModal((_title + "##msg").c_str(), NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-        if (!_sizeInitialized) {
-            auto size = ImGui::GetWindowSize();
-            auto factor = WindowController::get().getContentScaleFactor() / WindowController::get().getLastContentScaleFactor();
-            ImGui::SetWindowSize({size.x * factor, size.y * factor});
-            _sizeInitialized = true;
-        }
+    if (!_sizeInitialized) {
+        auto size = ImGui::GetWindowSize();
+        auto factor = WindowController::get().getContentScaleFactor() / WindowController::get().getLastContentScaleFactor();
+        ImGui::SetWindowSize({size.x * factor, size.y * factor});
+        _sizeInitialized = true;
+    }
 
-        AlienImGui::Text(_message);
-        AlienImGui::Separator();
+    AlienImGui::Text(_message);
 
-        if (AlienImGui::Button("OK")) {
-            close();
-        }
-        ImGui::EndPopup();
+    ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
+    AlienImGui::Separator();
+
+    if (AlienImGui::Button("OK")) {
+        close();
     }
 }
 
 void GenericMessageDialog::processYesNo()
 {
-    ImGui::OpenPopup(_title.c_str());
-    ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    if (ImGui::BeginPopupModal(_title.c_str(), NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-        if (!_sizeInitialized) {
-            auto size = ImGui::GetWindowSize();
-            auto factor = WindowController::get().getContentScaleFactor() / WindowController::get().getLastContentScaleFactor();
-            ImGui::SetWindowSize({size.x * factor, size.y * factor});
-            _sizeInitialized = true;
-        }
+    if (!_sizeInitialized) {
+        auto size = ImGui::GetWindowSize();
+        auto factor = WindowController::get().getContentScaleFactor() / WindowController::get().getLastContentScaleFactor();
+        ImGui::SetWindowSize({size.x * factor, size.y * factor});
+        _sizeInitialized = true;
+    }
 
-        AlienImGui::Text(_message);
-        AlienImGui::Separator();
+    AlienImGui::Text(_message);
 
-        if (AlienImGui::Button("Yes")) {
-            close();
-            _execFunction();
-        }
-        ImGui::SameLine();
-        if (AlienImGui::Button("No")) {
-            close();
-        }
-        ImGui::EndPopup();
+    ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
+    AlienImGui::Separator();
+
+    if (AlienImGui::Button("Yes")) {
+        close();
+        _execFunction();
+    }
+    ImGui::SameLine();
+    if (AlienImGui::Button("No")) {
+        close();
     }
 }

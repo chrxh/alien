@@ -23,7 +23,7 @@ public:
     PersisterErrorInfo fetchError(PersisterRequestId const& id) override;
 
     PersisterRequestId scheduleSaveSimulationToFile(SenderInfo const& senderInfo, SaveSimulationRequestData const& data) override;
-    SaveSimulationResultData fetchSavedSimulationData(PersisterRequestId const& id) override;
+    SaveSimulationResultData fetchSaveSimulationData(PersisterRequestId const& id) override;
 
     PersisterRequestId scheduleReadSimulationFromFile(SenderInfo const& senderInfo, ReadSimulationRequestData const& data) override;
     ReadSimulationResultData fetchReadSimulationData(PersisterRequestId const& id) override;

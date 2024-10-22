@@ -61,7 +61,7 @@ PersisterRequestId _PersisterFacadeImpl::scheduleSaveSimulationToFile(SenderInfo
     return scheduleRequest<_SaveSimulationRequest>(senderInfo, data);
 }
 
-SaveSimulationResultData _PersisterFacadeImpl::fetchSavedSimulationData(PersisterRequestId const& id)
+SaveSimulationResultData _PersisterFacadeImpl::fetchSaveSimulationData(PersisterRequestId const& id)
 {
     return fetchData<_SaveSimulationRequestResult, SaveSimulationResultData>(id);
 }
