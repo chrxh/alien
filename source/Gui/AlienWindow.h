@@ -68,6 +68,7 @@ void AlienWindow<Dependencies...>::process()
     ImGui::PushID(_title.c_str());
 
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
+    ImGui::SetNextWindowSize({scale(650.0f), scale(350.0f)}, ImGuiCond_FirstUseEver);
     if (ImGui::Begin(_title.c_str(), &_on)) {
         if (!_sizeInitialized) {
             auto size = ImGui::GetWindowSize();

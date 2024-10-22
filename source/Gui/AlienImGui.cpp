@@ -391,7 +391,7 @@ void AlienImGui::InputTextMultiline(InputTextMultilineParameters const& paramete
     auto height = parameters._height == 0
         ? ImGui::GetContentRegionAvail().y
         : StyleRepository::get().scale(parameters._height);
-    auto id = parameters._hint.empty() ? ("##" + parameters._name).c_str() : ("##" + parameters._hint).c_str();
+
     ImGui::InputTextEx(
         ("##" + parameters._name).c_str(),
         parameters._hint.c_str(),

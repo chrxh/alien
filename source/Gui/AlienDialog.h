@@ -7,6 +7,7 @@
 #include "MainLoopEntityController.h"
 #include "WindowController.h"
 #include "DelayedExecutionController.h"
+#include "StyleRepository.h"
 
 template <typename... Dependencies>
     class AlienDialog : public MainLoopEntity<Dependencies...>
@@ -86,11 +87,12 @@ void AlienDialog<Dependencies...>::process()
         return;
     }
     if (_state == DialogState::JustOpened) {
+        ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
+        ImGui::SetNextWindowSize({scale(450.0f), scale(150.0f)}, ImGuiCond_FirstUseEver);
         ImGui::OpenPopup(_title.c_str());
         _state = DialogState::Open;
     }
 
-    ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     if (ImGui::BeginPopupModal(_title.c_str(), NULL, 0)) {
         if (!_sizeInitialized) {
             auto size = ImGui::GetWindowSize();
