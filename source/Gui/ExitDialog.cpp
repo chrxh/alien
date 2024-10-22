@@ -10,7 +10,7 @@ ExitDialog::ExitDialog()
 
 void ExitDialog::processIntern()
 {
-    ImGui::Text("Do you really want to terminate the program?");
+    ImGui::TextWrapped("%s", "Do you really want to terminate the program?");
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienImGui::Separator();

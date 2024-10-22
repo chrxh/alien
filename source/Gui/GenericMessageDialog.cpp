@@ -67,7 +67,7 @@ void GenericMessageDialog::processInformation()
         _sizeInitialized = true;
     }
 
-    ImGui::TextWrapped(_message.c_str());
+    ImGui::TextWrapped("%s", _message.c_str());
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienImGui::Separator();
@@ -86,7 +86,7 @@ void GenericMessageDialog::processYesNo()
         _sizeInitialized = true;
     }
 
-    ImGui::TextWrapped(_message.c_str());
+    ImGui::TextWrapped("%s", _message.c_str());
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienImGui::Separator();
