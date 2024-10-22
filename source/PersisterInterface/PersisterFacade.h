@@ -42,7 +42,7 @@ public:
     virtual ~_PersisterFacade() = default;
 
     //lifecycle control
-    virtual void init(SimulationFacade const& simulationFacade) = 0;
+    virtual void setup(SimulationFacade const& simulationFacade) = 0;
     virtual void shutdown() = 0;
     virtual void restart() = 0;
 

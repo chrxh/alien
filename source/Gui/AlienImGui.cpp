@@ -27,8 +27,10 @@ namespace
 std::unordered_set<unsigned int> AlienImGui::_basicSilderExpanded;
 std::unordered_map<unsigned int, int> AlienImGui::_neuronSelectedInput;
 std::unordered_map<unsigned int, int> AlienImGui::_neuronSelectedOutput;
-int AlienImGui::_rotationStartIndex;
-
+int AlienImGui::_rotationStartIndex = 0;
+bool* AlienImGui::_menuButtonToggled = nullptr;
+bool AlienImGui::_menuButtonToToggle = false;
+bool AlienImGui::_menuBarVisible = false;
 
 void AlienImGui::HelpMarker(std::string const& text)
 {
@@ -724,11 +726,22 @@ void AlienImGui::MonospaceText(std::string const& text)
     ImGui::PopFont();
 }
 
-bool AlienImGui::BeginMenuButton(std::string const& text, bool& toggle, std::string const& popup, float focus)
+void AlienImGui::BeginMenuBar()
 {
+    _menuBarVisible = ImGui::BeginMainMenuBar();
+}
+
+void AlienImGui::BeginMenu(std::string const& text, bool& toggled, float focus)
+{
+    if (!_menuBarVisible) {
+        return ;
+    }
+    _menuButtonToggled = &toggled;
+    _menuButtonToToggle = false;
+
     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 7);
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2);
-    const auto active = toggle;
+    const auto active = toggled;
     if (active) {
         ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::MenuButtonActiveColor);
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::MenuButtonHoveredColor);
@@ -741,19 +754,19 @@ bool AlienImGui::BeginMenuButton(std::string const& text, bool& toggle, std::str
 
     auto pos = ImGui::GetCursorPos();
     if (AlienImGui::Button(text.c_str())) {
-        toggle = !toggle;
+        toggled = !toggled;
     }
     if (ImGui::IsItemHovered()) {
-        toggle = true;
+        toggled = true;
     }
     ImGui::PopStyleColor(3);
     ImGui::PopStyleVar(2);
 
     if (!ImGui::GetIO().WantCaptureMouse && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-        toggle = false;
+        toggled = false;
     }
 
-    if (toggle) {
+    if (toggled) {
         bool open = true;
         ImVec2 buttonPos{pos.x, pos.y};
         ImVec2 buttonSize = ImGui::GetItemRectSize();
@@ -764,10 +777,7 @@ bool AlienImGui::BeginMenuButton(std::string const& text, bool& toggle, std::str
         if (focus) {
             ImGui::SetNextWindowFocus();
         }
-        if (ImGui::Begin(
-                popup.c_str(),
-                &open,
-                ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
+        if (ImGui::Begin((text + "##1").c_str(), &open, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_AlwaysAutoResize)) {
 
             auto mousePos = ImGui::GetMousePos();
             auto windowSize = ImGui::GetWindowSize();
@@ -776,33 +786,109 @@ bool AlienImGui::BeginMenuButton(std::string const& text, bool& toggle, std::str
                     || mousePos.y > windowPos.y + windowSize.y)
                 && (mousePos.x < buttonPos.x || mousePos.y < buttonPos.y || mousePos.x > buttonPos.x + buttonSize.x
                     || mousePos.y > buttonPos.y + buttonSize.y))) {
-                toggle = false;
-                EndMenuButton();
+                EndMenu();
+                toggled = false;
             }
         } else {
-            toggle = false;
+            toggled = false;
         }
     }
-    return toggle;
 }
 
-void AlienImGui::EndMenuButton()
+void AlienImGui::MenuItem(MenuItemParameters const& parameters, std::function<void()> const& action)
 {
-    ImGui::End();
+    if (_menuBarVisible) {
+        std::vector<std::string> keyStringParts;
+        if (parameters._keyCtrl) {
+            keyStringParts.emplace_back("CTRL");
+        }
+        if (parameters._keyAlt) {
+            keyStringParts.emplace_back("ALT");
+        }
+        if (*_menuButtonToggled) {
+            if (parameters._disabled) {
+                ImGui::BeginDisabled();
+            }
+            if (parameters._key.has_value()) {
+                if (*parameters._key >= ImGuiKey_0 && *parameters._key <= ImGuiKey_Z) {
+                    static std::vector<std::string> const keyMap = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "G", "H",
+                                                                    "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
+                    keyStringParts.emplace_back(keyMap.at(*parameters._key - ImGuiKey_0));
+                }
+                if (*parameters._key == ImGuiKey_Space) {
+                    keyStringParts.emplace_back("Space");
+                }
+                if (*parameters._key == ImGuiKey_Escape) {
+                    keyStringParts.emplace_back("Esc");
+                }
+                if (*parameters._key == ImGuiKey_Delete) {
+                    keyStringParts.emplace_back("Delete");
+                }
+            }
+            auto keyString = boost::join(keyStringParts, "+");
+            if (ImGui::MenuItem(parameters._name.c_str(), keyString.c_str(), parameters._selected)) {
+                action();
+                if (parameters._closeMenuWhenItemClicked) {
+                    _menuButtonToToggle = true;
+                }
+            }
+            if (parameters._disabled) {
+                ImGui::EndDisabled();
+            }
+        }
+    }
+    if (!parameters._keyAlt && !parameters._keyCtrl && parameters._key == ImGuiKey_0) {
+        return;
+    }
+    auto const& io = ImGui::GetIO();
+    if (parameters._key.has_value() && !parameters._disabled && !io.WantCaptureKeyboard && io.KeyCtrl == parameters._keyCtrl && io.KeyAlt == parameters._keyAlt
+        && ImGui::IsKeyPressed(*parameters._key)) {
+        action();
+    }
 }
 
-bool AlienImGui::ShutdownButton()
+void AlienImGui::MenuSeparator()
 {
+    if (_menuBarVisible && * _menuButtonToggled) {
+        ImGui::Separator();
+    }
+}
+
+void AlienImGui::EndMenu()
+{
+    if (!_menuBarVisible) {
+        return;
+    }
+    if (*_menuButtonToggled) {
+        ImGui::End();
+    }
+    if (_menuButtonToToggle) {
+        *_menuButtonToggled = !*_menuButtonToggled;
+    }
+}
+
+void AlienImGui::MenuShutdownButton(std::function<void()> const& action)
+{
+    if (!_menuBarVisible) {
+        return;
+    }
     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 7);
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2);
     ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)Const::ImportantButtonColor);
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)Const::ImportantButtonHoveredColor);
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)Const::ImportantButtonActiveColor);
-    auto result = ImGui::Button(ICON_FA_POWER_OFF);
+    if (ImGui::Button(ICON_FA_POWER_OFF)) {
+        action();
+    }
     ImGui::PopStyleColor(3);
     ImGui::PopStyleVar(2);
+}
 
-    return result;
+void AlienImGui::EndMenuBar()
+{
+    if (_menuBarVisible) {
+        ImGui::EndMainMenuBar();
+    }
 }
 
 void AlienImGui::ColorButtonWithPicker(ColorButtonWithPickerParameters const& parameters, uint32_t& color, uint32_t& backupColor, uint32_t(& savedPalette)[32])

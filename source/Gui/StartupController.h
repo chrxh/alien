@@ -38,6 +38,5 @@ private:
     PersisterRequestId _startupSimRequestId;
     State _state = State::StartLoadSimulation;
     TextureData _logo;
-    std::optional<std::chrono::steady_clock::time_point> _startupTimepoint;
     std::optional<std::chrono::steady_clock::time_point> _lastActivationTimepoint;
 };

@@ -24,15 +24,11 @@ private:
     void mainLoopForFadeInUI();
     void mainLoopForUI();
 
-    void renderSimulation();
-
     void processMenubar();
 
     void onRunSimulation();
     void onPauseSimulation();
     void onExit();
-
-    void finishFrame();
 
     void pushGlobalStyle();
     void popGlobalStyle();
