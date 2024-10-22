@@ -55,8 +55,8 @@ public:
     PersisterRequestId scheduleMoveNetworkResource(SenderInfo const& senderInfo, MoveNetworkResourceRequestData const& data) override;
     MoveNetworkResourceResultData fetchMoveNetworkResourcesData(PersisterRequestId const& id) override;
 
-    PersisterRequestId scheduleToggleLikeNetworkResource(SenderInfo const& senderInfo, ToggleLikeNetworkResourceRequestData const& data) override;
-    ToggleLikeNetworkResourceResultData fetchToggleLikeNetworkResourcesData(PersisterRequestId const& id) override;
+    PersisterRequestId scheduleToggleEmojiNetworkResource(SenderInfo const& senderInfo, ToggleEmojiNetworkResourceRequestData const& data) override;
+    ToggleEmojiNetworkResourceResultData fetchToggleEmojiNetworkResourcesData(PersisterRequestId const& id) override;
 
 private:
     static auto constexpr MaxWorkerThreads = 4;

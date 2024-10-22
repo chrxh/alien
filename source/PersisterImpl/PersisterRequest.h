@@ -12,7 +12,7 @@
 #include "PersisterInterface/ReplaceNetworkResourceRequestData.h"
 #include "PersisterInterface/SenderInfo.h"
 #include "PersisterInterface/SaveSimulationRequestData.h"
-#include "PersisterInterface/ToggleLikeNetworkResourceRequestData.h"
+#include "PersisterInterface/ToggleEmojiNetworkResourceRequestData.h"
 #include "PersisterInterface/UploadNetworkResourceRequestData.h"
 
 class _PersisterRequest
@@ -89,5 +89,5 @@ using EditNetworkResourceRequest = std::shared_ptr<_EditNetworkResourceRequest>;
 using _MoveNetworkResourceRequest = _ConcreteRequest<MoveNetworkResourceRequestData>;
 using MoveNetworkResourceRequest = std::shared_ptr<_MoveNetworkResourceRequest>;
 
-using _ToggleLikeNetworkResourceRequest = _ConcreteRequest<ToggleLikeNetworkResourceRequestData>;
-using ToggleLikeNetworkResourceRequest = std::shared_ptr<_ToggleLikeNetworkResourceRequest>;
+using _ToggleEmojiNetworkResourceRequest = _ConcreteRequest<ToggleEmojiNetworkResourceRequestData>;
+using ToggleEmojiNetworkResourceRequest = std::shared_ptr<_ToggleEmojiNetworkResourceRequest>;
