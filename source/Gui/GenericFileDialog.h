@@ -6,11 +6,14 @@
 #include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "Definitions.h"
+#include "MainLoopEntity.h"
 
-class GenericFileDialogs
+class GenericFileDialog : public MainLoopEntity
 {
-    MAKE_SINGLETON(GenericFileDialogs);
+    MAKE_SINGLETON(GenericFileDialog);
 public:
+    void init();
+
     void showOpenFileDialog(
         std::string const& title,
         std::string const& filter,
@@ -23,8 +26,9 @@ public:
         std::string startingPath,
         std::function<void(std::filesystem::path const&)> const& actionFunc);
 
-    void process();
-
 private:
+    void process() override;
+    void shutdown() override {}
+
     std::function<void(std::filesystem::path)> _actionFunc;
 };

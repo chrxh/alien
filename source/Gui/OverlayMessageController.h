@@ -2,15 +2,15 @@
 
 #include <chrono>
 
-#include "Definitions.h"
-#include "EngineInterface/Definitions.h"
 #include "PersisterInterface/PersisterFacade.h"
+
+#include "Definitions.h"
 
 class OverlayMessageController
 {
-public:
-    static OverlayMessageController& get();
+    MAKE_SINGLETON(OverlayMessageController);
 
+public:
     void init(PersisterFacade const& persisterFacade);
     void process();
 

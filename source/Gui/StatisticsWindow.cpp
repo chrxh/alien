@@ -20,7 +20,7 @@
 
 #include "StyleRepository.h"
 #include "AlienImGui.h"
-#include "GenericFileDialogs.h"
+#include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
 
 namespace

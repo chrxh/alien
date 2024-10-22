@@ -2,6 +2,7 @@
 
 #include "AlienImGui.h"
 #include "DelayedExecutionController.h"
+#include "MainLoopEntityController.h"
 
 void DelayedExecutionController::process()
 {
@@ -19,6 +20,11 @@ void DelayedExecutionController::process()
     for (auto& execData : toExecute) {
         execData.func();
     }
+}
+
+void DelayedExecutionController::init()
+{
+    MainLoopEntityController::get().registerObject(this);
 }
 
 void DelayedExecutionController::executeLater(std::function<void()> const& execFunc)

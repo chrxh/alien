@@ -15,7 +15,7 @@
 
 #include "AlienImGui.h"
 #include "Viewport.h"
-#include "GenericFileDialogs.h"
+#include "GenericFileDialog.h"
 
 
 void ImageToPatternDialog::init(SimulationFacade const& simulationFacade)
@@ -79,7 +79,7 @@ namespace
 
 void ImageToPatternDialog::show()
 {
-    GenericFileDialogs::get().showOpenFileDialog(
+    GenericFileDialog::get().showOpenFileDialog(
         "Open image", "Image (*.png){.png},.*", _startingPath, [&](std::filesystem::path const& path) {
 
         auto firstFilename = ifd::FileDialog::Instance().GetResult();

@@ -11,7 +11,7 @@
 
 #include "AlienImGui.h"
 #include "CellFunctionStrings.h"
-#include "GenericFileDialogs.h"
+#include "GenericFileDialog.h"
 #include "HelpStrings.h"
 #include "GenericMessageDialog.h"
 #include "SimulationInteractionController.h"
@@ -2433,7 +2433,7 @@ void SimulationParametersWindow::onDeleteTab(int index)
 
 void SimulationParametersWindow::onOpenParameters()
 {
-    GenericFileDialogs::get().showOpenFileDialog(
+    GenericFileDialog::get().showOpenFileDialog(
         "Open simulation parameters", "Simulation parameters (*.parameters){.parameters},.*", _startingPath, [&](std::filesystem::path const& path) {
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
         auto firstFilenameCopy = firstFilename;
@@ -2450,7 +2450,7 @@ void SimulationParametersWindow::onOpenParameters()
 
 void SimulationParametersWindow::onSaveParameters()
 {
-    GenericFileDialogs::get().showSaveFileDialog(
+    GenericFileDialog::get().showSaveFileDialog(
         "Save simulation parameters", "Simulation parameters (*.parameters){.parameters},.*", _startingPath, [&](std::filesystem::path const& path) {
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
         auto firstFilenameCopy = firstFilename;

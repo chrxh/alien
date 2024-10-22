@@ -67,7 +67,7 @@
 #include "ResetPasswordDialog.h"
 #include "NewPasswordDialog.h"
 #include "ImageToPatternDialog.h"
-#include "GenericFileDialogs.h"
+#include "GenericFileDialog.h"
 #include "ShaderWindow.h"
 #include "GenomeEditorWindow.h"
 #include "RadiationSourcesWindow.h"
@@ -156,6 +156,9 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     NewPasswordDialog::get().init(_simulationFacade);
     ResetPasswordDialog::get().init();
     GenericMessageDialog::get().init();
+    GenericFileDialog::get().init();
+    DelayedExecutionController::get().init();
+    UiController::get().init();
 
     log(Priority::Important, "initialize file dialogs");
     initFileDialogs();
@@ -329,9 +332,8 @@ void _MainWindow::mainLoopForFadeInUI()
     pushGlobalStyle();
 
     processMenubar();
-    processDialogs();
-    processControllers();
     MainLoopEntityController::get().process();
+    OverlayMessageController::get().process();
 
     SimulationView::get().processControls(_renderSimulation);
     StartupController::get().process();
@@ -350,9 +352,8 @@ void _MainWindow::mainLoopForUI()
     pushGlobalStyle();
 
     processMenubar();
-    processDialogs();
-    processControllers();
     MainLoopEntityController::get().process();
+    OverlayMessageController::get().process();
 
     SimulationView::get().processControls(_renderSimulation);
 
@@ -719,22 +720,6 @@ void _MainWindow::processMenubar()
             ImageToPatternDialog::get().show();
         }
     }
-}
-
-void _MainWindow::processDialogs()
-{
-    GenericFileDialogs::get().process();
-}
-
-void _MainWindow::processControllers()
-{
-    EditorController::get().process();
-    OverlayMessageController::get().process();
-    SimulationInteractionController::get().process();
-    DelayedExecutionController::get().process();
-    FileTransferController::get().process();
-    NetworkTransferController::get().process();
-    UiController::get().process();
 }
 
 void _MainWindow::onRunSimulation()

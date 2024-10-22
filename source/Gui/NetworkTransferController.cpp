@@ -20,6 +20,8 @@ void NetworkTransferController::init(SimulationFacade const& simulationFacade, P
     _uploadProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
     _replaceProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
     _deleteProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+
+    MainLoopEntityController::get().registerObject(this);
 }
 
 void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData const& requestData)

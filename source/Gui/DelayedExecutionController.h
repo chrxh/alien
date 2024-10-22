@@ -1,18 +1,23 @@
 #pragma once
 
 #include "Base/Singleton.h"
-#include "Definitions.h"
 
-class DelayedExecutionController
+#include "Definitions.h"
+#include "MainLoopEntity.h"
+
+class DelayedExecutionController : public MainLoopEntity
 {
     MAKE_SINGLETON(DelayedExecutionController);
 
 public:
-    void process();
+    void init();
 
     void executeLater(std::function<void(void)> const& execFunc);
 
 private:
+    void process() override;
+    void shutdown() override {}
+
     struct ExecutionData
     {
         std::function<void(void)> func;

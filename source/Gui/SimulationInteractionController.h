@@ -6,15 +6,14 @@
 #include "EngineInterface/Definitions.h"
 
 #include "Definitions.h"
+#include "MainLoopEntity.h"
 
-class SimulationInteractionController
+class SimulationInteractionController : public MainLoopEntity
 {
     MAKE_SINGLETON(SimulationInteractionController);
 
 public:
     void init(SimulationFacade const& simulationFacade);
-
-    void process();
 
     bool isEditMode() const;
     void setEditMode(bool value);
@@ -27,6 +26,9 @@ public:
     std::optional<RealVector2D> getPositionSelectionData() const;
 
 private:
+    void process() override;
+    void shutdown() override {}
+
     void processEditWidget();
     void processEvents();
 

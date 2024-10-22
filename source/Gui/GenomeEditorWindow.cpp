@@ -21,7 +21,7 @@
 #include "CellFunctionStrings.h"
 #include "DelayedExecutionController.h"
 #include "EditorModel.h"
-#include "GenericFileDialogs.h"
+#include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
 #include "OverlayMessageController.h"
 #include "StyleRepository.h"
@@ -834,7 +834,7 @@ void GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Description
 
 void GenomeEditorWindow::onOpenGenome()
 {
-    GenericFileDialogs::get().showOpenFileDialog("Open genome", "Genome (*.genome){.genome},.*", _startingPath, [&](std::filesystem::path const& path) {
+    GenericFileDialog::get().showOpenFileDialog("Open genome", "Genome (*.genome){.genome},.*", _startingPath, [&](std::filesystem::path const& path) {
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
         auto firstFilenameCopy = firstFilename;
         _startingPath = firstFilenameCopy.remove_filename().string();
@@ -850,7 +850,7 @@ void GenomeEditorWindow::onOpenGenome()
 
 void GenomeEditorWindow::onSaveGenome()
 {
-    GenericFileDialogs::get().showSaveFileDialog(
+    GenericFileDialog::get().showSaveFileDialog(
         "Save genome", "Genome (*.genome){.genome},.*", _startingPath, [&](std::filesystem::path const& path) {
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;

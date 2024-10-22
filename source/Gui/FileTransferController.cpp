@@ -4,7 +4,7 @@
 
 #include "EngineInterface/SimulationFacade.h"
 #include "PersisterInterface/TaskProcessor.h"
-#include "GenericFileDialogs.h"
+#include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
 #include "OverlayMessageController.h"
 #include "TemporalControlWindow.h"
@@ -20,11 +20,13 @@ void FileTransferController::init(PersisterFacade const& persisterFacade, Simula
     _persisterFacade = persisterFacade;
     _simulationFacade = simulationFacade;
     _openSimulationProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+
+    MainLoopEntityController::get().registerObject(this);
 }
 
 void FileTransferController::onOpenSimulation()
 {
-    GenericFileDialogs::get().showOpenFileDialog(
+    GenericFileDialog::get().showOpenFileDialog(
         "Open simulation", "Simulation file (*.sim){.sim},.*", _referencePath, [&](std::filesystem::path const& path) {
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;
@@ -82,7 +84,7 @@ void FileTransferController::onOpenSimulation()
 
 void FileTransferController::onSaveSimulation()
 {
-    GenericFileDialogs::get().showSaveFileDialog(
+    GenericFileDialog::get().showSaveFileDialog(
         "Save simulation", "Simulation file (*.sim){.sim},.*", _referencePath, [&](std::filesystem::path const& path) {
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;

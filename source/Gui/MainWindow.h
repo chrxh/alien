@@ -27,8 +27,6 @@ private:
     void renderSimulation();
 
     void processMenubar();
-    void processDialogs();
-    void processControllers();
 
     void onRunSimulation();
     void onPauseSimulation();
