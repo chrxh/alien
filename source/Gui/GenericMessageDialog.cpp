@@ -30,7 +30,7 @@ void GenericMessageDialog::information(std::string const& title, std::string con
     log(Priority::Important, "message dialog showing: '" + message + "'");
 
     AlienDialog::open();
-    changeTitle(title + "##msg");
+    changeTitle(title);
 }
 
 void GenericMessageDialog::information(std::string const& title, std::vector<PersisterErrorInfo> const& errors)
@@ -50,7 +50,7 @@ void GenericMessageDialog::yesNo(std::string const& title, std::string const& me
     _execFunction = yesFunction;
 
     AlienDialog::open();
-    changeTitle(title + "##yesNo");
+    changeTitle(title);
 }
 
 GenericMessageDialog::GenericMessageDialog()
@@ -67,7 +67,7 @@ void GenericMessageDialog::processInformation()
         _sizeInitialized = true;
     }
 
-    AlienImGui::Text(_message);
+    ImGui::TextWrapped(_message.c_str());
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienImGui::Separator();
@@ -86,7 +86,7 @@ void GenericMessageDialog::processYesNo()
         _sizeInitialized = true;
     }
 
-    AlienImGui::Text(_message);
+    ImGui::TextWrapped(_message.c_str());
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienImGui::Separator();
