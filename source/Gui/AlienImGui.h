@@ -250,9 +250,23 @@ public:
     static void BoldText(std::string const& text);
     static void MonospaceText(std::string const& text);
 
-    static bool BeginMenuButton(std::string const& text, bool& toggle, std::string const& popup, float focus = true);  //return toggle
-    static void EndMenuButton();
-    static bool ShutdownButton();
+    static void BeginMenuBar();
+    static void BeginMenu(std::string const& text, bool& toggled, float focus = true);
+    struct MenuItemParameters
+    {
+        MEMBER_DECLARATION(MenuItemParameters, std::string, name, "");
+        MEMBER_DECLARATION(MenuItemParameters, bool, keyCtrl, false);
+        MEMBER_DECLARATION(MenuItemParameters, bool, keyAlt, false);
+        MEMBER_DECLARATION(MenuItemParameters, std::optional<ImGuiKey>, key, std::nullopt);
+        MEMBER_DECLARATION(MenuItemParameters, bool, disabled, false);
+        MEMBER_DECLARATION(MenuItemParameters, bool, selected, false);
+        MEMBER_DECLARATION(MenuItemParameters, bool, closeMenuWhenItemClicked, true);
+    };
+    static void MenuItem(MenuItemParameters const& parameters, std::function<void()> const& action);
+    static void MenuSeparator();
+    static void EndMenu();
+    static void MenuShutdownButton(std::function<void()> const& action);
+    static void EndMenuBar();
 
     struct ColorButtonWithPickerParameters
     {
@@ -386,8 +400,15 @@ private:
 
     static bool revertButton(std::string const& id);
 
+private:
     static std::unordered_set<unsigned int> _basicSilderExpanded;
+
     static int _rotationStartIndex;
+
     static std::unordered_map<unsigned int, int> _neuronSelectedInput;
     static std::unordered_map<unsigned int, int> _neuronSelectedOutput;
+
+    static bool _menuBarVisible;
+    static bool* _menuButtonToggled;
+    static bool _menuButtonToToggle;
 };

@@ -67,7 +67,7 @@ namespace
     }
 }
 
-void NetworkService::init()
+void NetworkService::setup()
 {
     _serverAddress = GlobalSettings::get().getString("settings.server", "alien-project.org");
 }
@@ -87,6 +87,11 @@ void NetworkService::setServerAddress(std::string const& value)
 {
     _serverAddress = value;
     logout();
+}
+
+bool NetworkService::isLoggedIn()
+{
+    return static_cast<bool>(_loggedInUserName);
 }
 
 std::optional<std::string> NetworkService::getLoggedInUserName()

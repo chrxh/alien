@@ -19,7 +19,7 @@
 
 #include "WindowController.h"
 
-void StyleRepository::init()
+void StyleRepository::setup()
 {
     auto scaleFactor = WindowController::get().getContentScaleFactor();
 

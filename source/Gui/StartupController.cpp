@@ -38,10 +38,10 @@ void StartupController::setup(SimulationFacade const& simulationFacade, Persiste
 void StartupController::process()
 {
     if (_state == State::StartLoadSimulation) {
+        processLoadingScreen();
         auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = true};
         auto readData = ReadSimulationRequestData{Const::AutosaveFile};
         _startupSimRequestId = _persisterFacade->scheduleReadSimulationFromFile(senderInfo, readData);
-        _startupTimepoint = std::chrono::steady_clock::now();
         _state = State::LoadingSimulation;
         return;
     }

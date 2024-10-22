@@ -13,7 +13,7 @@ class _PersisterFacadeImpl : public _PersisterFacade
 public:
     ~_PersisterFacadeImpl() override;
 
-    void init(SimulationFacade const& simulationFacade) override;
+    void setup(SimulationFacade const& simulationFacade) override;
     void shutdown() override;
     void restart() override;
 

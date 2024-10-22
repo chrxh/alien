@@ -109,7 +109,7 @@ class StyleRepository
     MAKE_SINGLETON(StyleRepository);
 
 public :
-    void init();
+    void setup();
 
     ImFont* getIconFont() const;
 

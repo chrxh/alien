@@ -86,7 +86,7 @@ namespace
         throw std::runtime_error("Glfw error " + std::to_string(error) + ": " + description);
     }
 
-    void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+    void framebufferSizeCallback(GLFWwindow* window, int width, int height)
     {
         if (width > 0 && height > 0) {
             SimulationView::get().resize({width, height});
@@ -109,13 +109,13 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     initGlad();
 
     log(Priority::Important, "initialize services");
-    StyleRepository::get().init();
-    NetworkService::get().init();
+    StyleRepository::get().setup();
+    NetworkService::get().setup();
 
     log(Priority::Important, "initialize facades");
-    _persisterFacade->init(_simulationFacade);
+    _persisterFacade->setup(_simulationFacade);
 
-    log(Priority::Important, "initialize windows");
+    log(Priority::Important, "initialize gui elements");
     Viewport::get().setup(_simulationFacade);
     AutosaveController::get().setup(_simulationFacade);
     EditorController::get().setup(_simulationFacade);
@@ -133,7 +133,6 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     LogWindow::get().setup(_logger);
     GettingStartedWindow::get().setup();
     NewSimulationDialog::get().setup(_simulationFacade);
-    DisplaySettingsDialog::get().setup();
     PatternAnalysisDialog::get().setup(_simulationFacade);
     BrowserWindow::get().setup(_simulationFacade, _persisterFacade);
     ActivateUserDialog::get().setup(_simulationFacade);
@@ -179,6 +178,10 @@ void _MainWindow::mainLoop()
 
      //   ImGui::ShowDemoWindow(NULL);
 
+        int display_w, display_h;
+        glfwGetFramebufferSize(WindowController::get().getWindowData().window, &display_w, &display_h);
+        glViewport(0, 0, display_w, display_h);
+
         switch (StartupController::get().getState()) {
         case StartupController::State::StartLoadSimulation:
             mainLoopForLoadingScreen();
@@ -198,6 +201,10 @@ void _MainWindow::mainLoop()
         default:
             THROW_NOT_IMPLEMENTED();
         }
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        glfwSwapBuffers(WindowController::get().getWindowData().window);
     }
 }
 
@@ -226,7 +233,7 @@ void _MainWindow::initGlfwAndOpenGL()
     auto glfwVersion = initGlfwAndReturnGlslVersion();
     WindowController::get().setup();
     auto windowData = WindowController::get().getWindowData();
-    glfwSetFramebufferSizeCallback(windowData.window, framebuffer_size_callback);
+    glfwSetFramebufferSizeCallback(windowData.window, framebufferSizeCallback);
     glfwSwapInterval(1);  //enable vsync
     ImGui::CreateContext();
     ImPlot::CreateContext();
@@ -303,31 +310,22 @@ void _MainWindow::mainLoopForLoadingScreen()
     StartupController::get().process();
     OverlayMessageController::get().process();
 
-    // render mainData
-    auto window = WindowController::get().getWindowData().window;
-    ImGui::Render();
-    int display_w, display_h;
-    glfwGetFramebufferSize(window, &display_w, &display_h);
-    glViewport(0, 0, display_w, display_h);
+    //background color
     glClearColor(0, 0, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    glfwSwapBuffers(window);
 }
 
 void _MainWindow::mainLoopForFadeoutLoadingScreen()
 {
     StartupController::get().process();
-    renderSimulation();
-
-    finishFrame();
+    SimulationView::get().draw(_renderSimulation);
 }
 
 void _MainWindow::mainLoopForFadeInUI()
 {
-    renderSimulation();
+    SimulationView::get().draw(_renderSimulation);
 
     pushGlobalStyle();
 
@@ -341,13 +339,11 @@ void _MainWindow::mainLoopForFadeInUI()
     popGlobalStyle();
 
     FpsController::get().processForceFps(WindowController::get().getFps());
-
-    finishFrame();
 }
 
 void _MainWindow::mainLoopForUI()
 {
-    renderSimulation();
+    SimulationView::get().draw(_renderSimulation);
 
     pushGlobalStyle();
 
@@ -360,364 +356,282 @@ void _MainWindow::mainLoopForUI()
     popGlobalStyle();
 
     FpsController::get().processForceFps(WindowController::get().getFps());
-
-    finishFrame();
-}
-
-void _MainWindow::renderSimulation()
-{
-    int display_w, display_h;
-    glfwGetFramebufferSize(WindowController::get().getWindowData().window, &display_w, &display_h);
-    glViewport(0, 0, display_w, display_h);
-    SimulationView::get().draw(_renderSimulation);
 }
 
 void _MainWindow::processMenubar()
 {
-    if (ImGui::BeginMainMenuBar()) {
-        if (AlienImGui::ShutdownButton()) {
-            onExit();
-        }
-        ImGui::Dummy(ImVec2(10.0f, 0.0f));
-        if (AlienImGui::BeginMenuButton(" " ICON_FA_GAMEPAD "  Simulation ", _simulationMenuToggled, "Simulation")) {
-            if (ImGui::MenuItem("New", "CTRL+N")) {
-                NewSimulationDialog::get().open();
-                _simulationMenuToggled = false;
-            }
-            if (ImGui::MenuItem("Open", "CTRL+O")) {
-                FileTransferController::get().onOpenSimulation();
-                _simulationMenuToggled = false;
-            }
-            if (ImGui::MenuItem("Save", "CTRL+S")) {
-                FileTransferController::get().onSaveSimulation();
-                _simulationMenuToggled = false;
-            }
-            ImGui::Separator();
-            ImGui::BeginDisabled(_simulationFacade->isSimulationRunning());
-            if (ImGui::MenuItem("Run", "SPACE")) {
-                onRunSimulation();
-            }
-            ImGui::EndDisabled();
-            ImGui::BeginDisabled(!_simulationFacade->isSimulationRunning());
-            if (ImGui::MenuItem("Pause", "SPACE")) {
-                onPauseSimulation();
-            }
-            ImGui::EndDisabled();
-            AlienImGui::EndMenuButton();
-        }
-
-        if (AlienImGui::BeginMenuButton(" " ICON_FA_GLOBE "  Network ", _networkMenuToggled, "Network", false)) {
-            if (ImGui::MenuItem("Browser", "ALT+W", BrowserWindow::get().isOn())) {
-                BrowserWindow::get().setOn(!BrowserWindow::get().isOn());
-            }
-            ImGui::Separator();
-            ImGui::BeginDisabled((bool)NetworkService::get().getLoggedInUserName());
-            if (ImGui::MenuItem("Login", "ALT+L")) {
-                LoginDialog::get().open();
-            }
-            ImGui::EndDisabled();
-            ImGui::BeginDisabled(!NetworkService::get().getLoggedInUserName());
-            if (ImGui::MenuItem("Logout", "ALT+T")) {
-                NetworkService::get().logout();
-                BrowserWindow::get().onRefresh();
-            }
-            ImGui::EndDisabled();
-            ImGui::BeginDisabled(!NetworkService::get().getLoggedInUserName());
-            if (ImGui::MenuItem("Upload simulation", "ALT+D")) {
-                UploadSimulationDialog::get().open(NetworkResourceType_Simulation);
-            }
-            ImGui::EndDisabled();
-            ImGui::BeginDisabled(!NetworkService::get().getLoggedInUserName());
-            if (ImGui::MenuItem("Upload genome", "ALT+Q")) {
-                UploadSimulationDialog::get().open(NetworkResourceType_Genome);
-            }
-            ImGui::EndDisabled();
-
-            ImGui::Separator();
-            ImGui::BeginDisabled(!NetworkService::get().getLoggedInUserName());
-            if (ImGui::MenuItem("Delete user", "ALT+J")) {
-                DeleteUserDialog::get().open();
-            }
-            ImGui::EndDisabled();
-            AlienImGui::EndMenuButton();
-        }
-
-        if (AlienImGui::BeginMenuButton(" " ICON_FA_WINDOW_RESTORE "  Windows ", _windowMenuToggled, "Windows")) {
-            if (ImGui::MenuItem("Temporal control", "ALT+1", TemporalControlWindow::get().isOn())) {
-                TemporalControlWindow::get().setOn(!TemporalControlWindow::get().isOn());
-            }
-            if (ImGui::MenuItem("Spatial control", "ALT+2", SpatialControlWindow::get().isOn())) {
-                SpatialControlWindow::get().setOn(!SpatialControlWindow::get().isOn());
-            }
-            if (ImGui::MenuItem("Statistics", "ALT+3", StatisticsWindow::get().isOn())) {
-                StatisticsWindow::get().setOn(!StatisticsWindow::get().isOn());
-            }
-            if (ImGui::MenuItem("Simulation parameters", "ALT+4", SimulationParametersWindow::get().isOn())) {
-                SimulationParametersWindow::get().setOn(!SimulationParametersWindow::get().isOn());
-            }
-            if (ImGui::MenuItem("Radiation sources", "ALT+5", RadiationSourcesWindow::get().isOn())) {
-                RadiationSourcesWindow::get().setOn(!RadiationSourcesWindow::get().isOn());
-            }
-            if (ImGui::MenuItem("Shader parameters", "ALT+6", ShaderWindow::get().isOn())) {
-                ShaderWindow::get().setOn(!ShaderWindow::get().isOn());
-            }
-            if (ImGui::MenuItem("Autosave", "ALT+7", AutosaveWindow::get().isOn())) {
-                AutosaveWindow::get().setOn(!AutosaveWindow::get().isOn());
-            }
-            if (ImGui::MenuItem("Log", "ALT+8", LogWindow::get().isOn())) {
-                LogWindow::get().setOn(!LogWindow::get().isOn());
-            }
-            AlienImGui::EndMenuButton();
-        }
-
-        if (AlienImGui::BeginMenuButton(" " ICON_FA_PEN_ALT "  Editor ", _editorMenuToggled, "Editor")) {
-            if (ImGui::MenuItem("Activate", "ALT+E", SimulationInteractionController::get().isEditMode())) {
-                SimulationInteractionController::get().setEditMode(!SimulationInteractionController::get().isEditMode());
-            }
-            ImGui::Separator();
-            ImGui::BeginDisabled(!SimulationInteractionController::get().isEditMode());
-            if (ImGui::MenuItem("Selection", "ALT+S", SelectionWindow::get().isOn())) {
-                SelectionWindow::get().setOn(!SelectionWindow::get().isOn());
-            }
-            if (ImGui::MenuItem("Creator", "ALT+R", CreatorWindow::get().isOn())) {
-                CreatorWindow::get().setOn(!CreatorWindow::get().isOn());
-            }
-            if (ImGui::MenuItem("Pattern editor", "ALT+M", PatternEditorWindow::get().isOn())) {
-                PatternEditorWindow::get().setOn(!PatternEditorWindow::get().isOn());
-            }
-            if (ImGui::MenuItem("Genome editor", "ALT+B", GenomeEditorWindow::get().isOn())) {
-                GenomeEditorWindow::get().setOn(!GenomeEditorWindow::get().isOn());
-            }
-            if (ImGui::MenuItem("Multiplier", "ALT+A", MultiplierWindow::get().isOn())) {
-                MultiplierWindow::get().setOn(!MultiplierWindow::get().isOn());
-            }
-            ImGui::EndDisabled();
-            ImGui::Separator();
-            ImGui::BeginDisabled(!SimulationInteractionController::get().isEditMode() || !PatternEditorWindow::get().isObjectInspectionPossible());
-            if (ImGui::MenuItem("Inspect objects", "ALT+N")) {
-                EditorController::get().onInspectSelectedObjects();
-            }
-            ImGui::EndDisabled();
-            ImGui::BeginDisabled(!SimulationInteractionController::get().isEditMode() || !PatternEditorWindow::get().isGenomeInspectionPossible());
-            if (ImGui::MenuItem("Inspect principal genome", "ALT+F")) {
-                EditorController::get().onInspectSelectedGenomes();
-            }
-            ImGui::EndDisabled();
-            ImGui::BeginDisabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().areInspectionWindowsActive());
-            if (ImGui::MenuItem("Close inspections", "ESC")) {
-                EditorController::get().onCloseAllInspectorWindows();
-            }
-            ImGui::EndDisabled();
-            ImGui::Separator();
-            ImGui::BeginDisabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isCopyingPossible());
-            if (ImGui::MenuItem("Copy", "CTRL+C")) {
-                EditorController::get().onCopy();
-            }
-            ImGui::EndDisabled();
-            ImGui::BeginDisabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isPastingPossible());
-            if (ImGui::MenuItem("Paste", "CTRL+V")) {
-                EditorController::get().onPaste();
-            }
-            ImGui::EndDisabled();
-            AlienImGui::EndMenuButton();
-        }
-
-        if (AlienImGui::BeginMenuButton(" " ICON_FA_EYE "  View ", _viewMenuToggled, "View")) {
-            if (ImGui::MenuItem("Information overlay", "ALT+O", SimulationView::get().isOverlayActive())) {
-                SimulationView::get().setOverlayActive(!SimulationView::get().isOverlayActive());
-            }
-            if (ImGui::MenuItem("Render UI", "ALT+U", UiController::get().isOn())) {
-                UiController::get().setOn(!UiController::get().isOn());
-            }
-            if (ImGui::MenuItem("Render simulation", "ALT+I", _renderSimulation)) {
-                _renderSimulation = !_renderSimulation;
-            }
-            AlienImGui::EndMenuButton();
-        }
-
-        if (AlienImGui::BeginMenuButton(" " ICON_FA_TOOLS "  Tools ", _toolsMenuToggled, "Tools")) {
-            if (ImGui::MenuItem("Mass operations", "ALT+H")) {
-                MassOperationsDialog::get().open();
-                _toolsMenuToggled = false;
-            }
-            if (ImGui::MenuItem("Pattern analysis", "ALT+P")) {
-                PatternAnalysisDialog::get().show();
-                _toolsMenuToggled = false;
-            }
-            if (ImGui::MenuItem("Image converter", "ALT+G")) {
-                ImageToPatternDialog::get().show();
-                _toolsMenuToggled = false;
-            }
-            AlienImGui::EndMenuButton();
-        }
-
-        if (AlienImGui::BeginMenuButton(" " ICON_FA_COG "  Settings ", _settingsMenuToggled, "Settings", false)) {
-            if (ImGui::MenuItem("Auto save", "", AutosaveController::get().isOn())) {
-                AutosaveController::get().setOn(!AutosaveController::get().isOn());
-            }
-            if (ImGui::MenuItem("CUDA settings", "ALT+C")) {
-                GpuSettingsDialog::get().open();
-            }
-            if (ImGui::MenuItem("Display settings", "ALT+V")) {
-                DisplaySettingsDialog::get().open();
-            }
-            if (ImGui::MenuItem("Network settings", "ALT+K")) {
-                NetworkSettingsDialog::get().open();
-            }
-            AlienImGui::EndMenuButton();
-        }
-
-        if (AlienImGui::BeginMenuButton(" " ICON_FA_LIFE_RING "  Help ", _helpMenuToggled, "Help")) {
-            if (ImGui::MenuItem("About", "")) {
-                AboutDialog::get().open();
-                _helpMenuToggled = false;
-            }
-            if (ImGui::MenuItem("Getting started", "", GettingStartedWindow::get().isOn())) {
-                GettingStartedWindow::get().setOn(!GettingStartedWindow::get().isOn());
-            }
-            AlienImGui::EndMenuButton();
-        }
-        ImGui::EndMainMenuBar();
-    }
-
-    //hotkeys
     auto& io = ImGui::GetIO();
-    if (!io.WantCaptureKeyboard) {
-        if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_N)) {
-            NewSimulationDialog::get().open();
-        }
-        if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_O)) {
-            FileTransferController::get().onOpenSimulation();
-        }
-        if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_S)) {
-            FileTransferController::get().onSaveSimulation();
-        }
-        if (ImGui::IsKeyPressed(ImGuiKey_Space)) {
-            if (_simulationFacade->isSimulationRunning()) {
-                onPauseSimulation();
-            } else {
-                onRunSimulation();
-            }
-            
-        }
 
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_W)) {
-            BrowserWindow::get().setOn(!BrowserWindow::get().isOn());
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_L) && !NetworkService::get().getLoggedInUserName()) {
-            LoginDialog::get().open();
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_T)) {
+    AlienImGui::BeginMenuBar();
+    AlienImGui::MenuShutdownButton([&] { onExit(); });
+    ImGui::Dummy(ImVec2(scale(10.0f), 0.0f));
+
+    AlienImGui::BeginMenu(" " ICON_FA_GAMEPAD "  Simulation ", _simulationMenuToggled);
+    AlienImGui::MenuItem(AlienImGui::MenuItemParameters().name("New").keyCtrl(true).key(ImGuiKey_N), [&] { NewSimulationDialog::get().open(); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters().name("Open").keyCtrl(true).key(ImGuiKey_O), [&] { FileTransferController::get().onOpenSimulation(); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters().name("Save").keyCtrl(true).key(ImGuiKey_S), [&] { FileTransferController::get().onSaveSimulation(); });
+    AlienImGui::MenuSeparator();
+    auto running = _simulationFacade->isSimulationRunning();
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters().name("Run").key(ImGuiKey_Space).disabled(running).closeMenuWhenItemClicked(false), [&] { onRunSimulation(); });
+    AlienImGui::MenuItem(AlienImGui::MenuItemParameters().name("Pause").key(ImGuiKey_Space).disabled(!running).closeMenuWhenItemClicked(false), [&] {
+        onPauseSimulation();
+    });
+    AlienImGui::EndMenu();
+
+    AlienImGui::BeginMenu(" " ICON_FA_GLOBE "  Network ", _networkMenuToggled);
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters().name("Browser").keyAlt(true).key(ImGuiKey_W).closeMenuWhenItemClicked(false).selected(BrowserWindow::get().isOn()),
+        [&] { BrowserWindow::get().setOn(!BrowserWindow::get().isOn()); });
+    AlienImGui::MenuSeparator();
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Login")
+            .keyAlt(true)
+            .key(ImGuiKey_L)
+            .disabled(NetworkService::get().isLoggedIn()),
+        [&] { LoginDialog::get().open(); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Logout")
+            .keyAlt(true)
+            .key(ImGuiKey_T)
+            .closeMenuWhenItemClicked(false)
+            .disabled(!NetworkService::get().isLoggedIn()),
+        [&] {
             NetworkService::get().logout();
             BrowserWindow::get().onRefresh();
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_D) && NetworkService::get().getLoggedInUserName()) {
-            UploadSimulationDialog::get().open(NetworkResourceType_Simulation);
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_Q) && NetworkService::get().getLoggedInUserName()) {
-            UploadSimulationDialog::get().open(NetworkResourceType_Genome);
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_J) && NetworkService::get().getLoggedInUserName()) {
-            DeleteUserDialog::get().open();
-        }
+        });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters().name("Upload simulation").keyAlt(true).key(ImGuiKey_D).disabled(!NetworkService::get().isLoggedIn()),
+        [&] { UploadSimulationDialog::get().open(NetworkResourceType_Simulation); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters().name("Upload genome").keyAlt(true).key(ImGuiKey_Q).disabled(!NetworkService::get().isLoggedIn()),
+        [&] { UploadSimulationDialog::get().open(NetworkResourceType_Genome); });
+    AlienImGui::MenuSeparator();
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters().name("Delete user").keyAlt(true).key(ImGuiKey_J).disabled(!NetworkService::get().isLoggedIn()),
+        [&] { DeleteUserDialog::get().open(); });
+    AlienImGui::EndMenu();
 
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_1)) {
-            TemporalControlWindow::get().setOn(!TemporalControlWindow::get().isOn());
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_2)) {
-            SpatialControlWindow::get().setOn(!SpatialControlWindow::get().isOn());
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_3)) {
-            StatisticsWindow::get().setOn(!StatisticsWindow::get().isOn());
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_4)) {
-            SimulationParametersWindow::get().setOn(!SimulationParametersWindow::get().isOn());
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_5)) {
-            RadiationSourcesWindow::get().setOn(!RadiationSourcesWindow::get().isOn());
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_6)) {
-            ShaderWindow::get().setOn(!ShaderWindow::get().isOn());
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_7)) {
-            AutosaveWindow::get().setOn(!AutosaveWindow::get().isOn());
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_8)) {
-            LogWindow::get().setOn(!LogWindow::get().isOn());
-        }
+    AlienImGui::BeginMenu(" " ICON_FA_WINDOW_RESTORE "  Windows ", _windowMenuToggled);
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Temporal control")
+            .keyAlt(true)
+            .key(ImGuiKey_1)
+            .selected(TemporalControlWindow::get().isOn())
+            .closeMenuWhenItemClicked(false),
+        [&] { TemporalControlWindow::get().setOn(!TemporalControlWindow::get().isOn()); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Spatial control")
+            .keyAlt(true)
+            .key(ImGuiKey_2)
+            .selected(SpatialControlWindow::get().isOn())
+            .closeMenuWhenItemClicked(false),
+        [&] { SpatialControlWindow::get().setOn(!SpatialControlWindow::get().isOn()); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Statistics")
+            .keyAlt(true)
+            .key(ImGuiKey_3)
+            .selected(StatisticsWindow::get().isOn())
+            .closeMenuWhenItemClicked(false),
+        [&] { StatisticsWindow::get().setOn(!StatisticsWindow::get().isOn()); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Simulation parameters")
+            .keyAlt(true)
+            .key(ImGuiKey_4)
+            .selected(SimulationParametersWindow::get().isOn())
+            .closeMenuWhenItemClicked(false),
+        [&] { SimulationParametersWindow::get().setOn(!SimulationParametersWindow::get().isOn()); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Radiation sources")
+            .keyAlt(true)
+            .key(ImGuiKey_5)
+            .selected(RadiationSourcesWindow::get().isOn())
+            .closeMenuWhenItemClicked(false),
+        [&] { RadiationSourcesWindow::get().setOn(!RadiationSourcesWindow::get().isOn()); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Shader parameters")
+            .keyAlt(true)
+            .key(ImGuiKey_6)
+            .selected(ShaderWindow::get().isOn())
+            .closeMenuWhenItemClicked(false),
+        [&] { ShaderWindow::get().setOn(!ShaderWindow::get().isOn()); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Autosave")
+            .keyAlt(true)
+            .key(ImGuiKey_7)
+            .selected(AutosaveWindow::get().isOn())
+            .closeMenuWhenItemClicked(false),
+        [&] { AutosaveWindow::get().setOn(!AutosaveWindow::get().isOn()); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Log")
+            .keyAlt(true)
+            .key(ImGuiKey_8).selected(LogWindow::get().isOn())
+            .closeMenuWhenItemClicked(false),
+        [&] { LogWindow::get().setOn(!LogWindow::get().isOn()); });
+    AlienImGui::EndMenu();
 
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_E)) {
-            SimulationInteractionController::get().setEditMode(!SimulationInteractionController::get().isEditMode());
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_S)) {
-            SelectionWindow::get().setOn(!SelectionWindow::get().isOn());
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_M)) {
-            PatternEditorWindow::get().setOn(!PatternEditorWindow::get().isOn());
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_B)) {
-            GenomeEditorWindow::get().setOn(!GenomeEditorWindow::get().isOn());
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_R)) {
-            CreatorWindow::get().setOn(!CreatorWindow::get().isOn());
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_A)) {
-            MultiplierWindow::get().setOn(!MultiplierWindow::get().isOn());
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_N) && PatternEditorWindow::get().isObjectInspectionPossible()) {
-            EditorController::get().onInspectSelectedObjects();
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_F) && PatternEditorWindow::get().isGenomeInspectionPossible()) {
-            EditorController::get().onInspectSelectedGenomes();
-        }
-        if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
-            EditorController::get().onCloseAllInspectorWindows();
-        }
-        if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_C) && EditorController::get().isCopyingPossible()) {
-            EditorController::get().onCopy();
-        }
-        if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_V) && EditorController::get().isPastingPossible()) {
-            EditorController::get().onPaste();
-        }
-        if (ImGui::IsKeyPressed(ImGuiKey_Delete) ) {
-            EditorController::get().onDelete();
-        }
+    AlienImGui::BeginMenu(" " ICON_FA_PEN_ALT "  Editor ", _editorMenuToggled);
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Activate")
+            .keyAlt(true)
+            .key(ImGuiKey_E)
+            .selected(SimulationInteractionController::get().isEditMode())
+            .closeMenuWhenItemClicked(false),
+        [&] { SimulationInteractionController::get().setEditMode(!SimulationInteractionController::get().isEditMode()); });
+    AlienImGui::MenuSeparator();
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Selection")
+            .keyAlt(true)
+            .key(ImGuiKey_S)
+            .selected(SelectionWindow::get().isOn())
+            .disabled(!SimulationInteractionController::get().isEditMode())
+            .closeMenuWhenItemClicked(false),
+        [&] { SelectionWindow::get().setOn(!SelectionWindow::get().isOn()); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Creator")
+            .keyAlt(true)
+            .key(ImGuiKey_R)
+            .selected(CreatorWindow::get().isOn())
+            .disabled(!SimulationInteractionController::get().isEditMode())
+            .closeMenuWhenItemClicked(false),
+        [&] { CreatorWindow::get().setOn(!CreatorWindow::get().isOn()); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Pattern editor")
+            .keyAlt(true)
+            .key(ImGuiKey_M)
+            .selected(PatternEditorWindow::get().isOn())
+            .disabled(!SimulationInteractionController::get().isEditMode())
+            .closeMenuWhenItemClicked(false),
+        [&] { PatternEditorWindow::get().setOn(!PatternEditorWindow::get().isOn()); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Genome editor")
+            .keyAlt(true)
+            .key(ImGuiKey_B)
+            .selected(GenomeEditorWindow::get().isOn())
+            .disabled(!SimulationInteractionController::get().isEditMode())
+            .closeMenuWhenItemClicked(false),
+        [&] { GenomeEditorWindow::get().setOn(!GenomeEditorWindow::get().isOn()); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Multiplier")
+            .keyAlt(true)
+            .key(ImGuiKey_A)
+            .selected(MultiplierWindow::get().isOn())
+            .disabled(!SimulationInteractionController::get().isEditMode())
+            .closeMenuWhenItemClicked(false),
+        [&] { MultiplierWindow::get().setOn(!MultiplierWindow::get().isOn()); });
+    AlienImGui::MenuSeparator();
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Inspect objects")
+            .keyAlt(true)
+            .key(ImGuiKey_N)
+            .disabled(!SimulationInteractionController::get().isEditMode() || !PatternEditorWindow::get().isObjectInspectionPossible()),
+        [&] { EditorController::get().onInspectSelectedObjects(); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Inspect principal genome")
+            .keyAlt(true)
+            .key(ImGuiKey_F)
+            .disabled(!SimulationInteractionController::get().isEditMode() || !PatternEditorWindow::get().isGenomeInspectionPossible()),
+        [&] { EditorController::get().onInspectSelectedGenomes(); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Close inspections")
+            .key(ImGuiKey_Escape)
+            .disabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().areInspectionWindowsActive()),
+        [&] { EditorController::get().onCloseAllInspectorWindows(); });
+    AlienImGui::MenuSeparator();
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Copy")
+            .keyCtrl(true)
+            .key(ImGuiKey_C)
+            .disabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isCopyingPossible()),
+        [&] { EditorController::get().onCopy(); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Paste")
+            .keyCtrl(true)
+            .key(ImGuiKey_V)
+            .disabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isPastingPossible()),
+        [&] { EditorController::get().onPaste(); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Delete")
+            .key(ImGuiKey_Delete)
+            .disabled(!SimulationInteractionController::get().isEditMode() || !EditorController::get().isCopyingPossible()),
+        [&] { EditorController::get().onDelete(); });
+    AlienImGui::EndMenu();
 
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_C)) {
-            GpuSettingsDialog::get().open();
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_V)) {
-            DisplaySettingsDialog::get().open();
-        }
+    AlienImGui::BeginMenu(" " ICON_FA_EYE "  View ", _viewMenuToggled);
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Information overlay")
+            .keyAlt(true)
+            .key(ImGuiKey_O)
+            .selected(SimulationView::get().isOverlayActive())
+            .closeMenuWhenItemClicked(false),
+        [&] { SimulationView::get().setOverlayActive(!SimulationView::get().isOverlayActive()); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters().name("Render UI").keyAlt(true).key(ImGuiKey_U).selected(UiController::get().isOn()).closeMenuWhenItemClicked(false),
+        [&] { UiController::get().setOn(!UiController::get().isOn()); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters().name("Render simulation").keyAlt(true).key(ImGuiKey_I).selected(_renderSimulation).closeMenuWhenItemClicked(false),
+        [&] { _renderSimulation = !_renderSimulation; });
+    AlienImGui::EndMenu();
+
+    AlienImGui::BeginMenu(" " ICON_FA_TOOLS "  Tools ", _toolsMenuToggled);
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters().name("Mass operations").keyAlt(true).key(ImGuiKey_H), [&] { MassOperationsDialog::get().open(); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters().name("Pattern analysis").keyAlt(true).key(ImGuiKey_P), [&] { PatternAnalysisDialog::get().show(); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters().name("Image converter").keyAlt(true).key(ImGuiKey_G), [&] { ImageToPatternDialog::get().show(); });
+    AlienImGui::EndMenu();
+
+    AlienImGui::BeginMenu(" " ICON_FA_COG "  Settings ", _settingsMenuToggled, false);
+    AlienImGui::MenuItem(AlienImGui::MenuItemParameters().name("Auto save").selected(AutosaveController::get().isOn()).closeMenuWhenItemClicked(false), [&] {
+        AutosaveController::get().setOn(!AutosaveController::get().isOn());
+    });
+    AlienImGui::MenuItem(AlienImGui::MenuItemParameters().name("CUDA settings").keyAlt(true).key(ImGuiKey_C), [&] { GpuSettingsDialog::get().open(); });
+    AlienImGui::MenuItem(AlienImGui::MenuItemParameters().name("Display settings").keyAlt(true).key(ImGuiKey_V), [&] { DisplaySettingsDialog::get().open(); });
+    AlienImGui::MenuItem(AlienImGui::MenuItemParameters().name("Network settings").keyAlt(true).key(ImGuiKey_K), [&] { NetworkSettingsDialog::get().open(); });
+    AlienImGui::EndMenu();
+
+    AlienImGui::BeginMenu(" " ICON_FA_LIFE_RING "  Help ", _helpMenuToggled);
+    AlienImGui::MenuItem(AlienImGui::MenuItemParameters().name("About"), [&] { AboutDialog::get().open(); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters().name("Getting started").selected(GettingStartedWindow::get().isOn()).closeMenuWhenItemClicked(false),
+        [&] { GettingStartedWindow::get().setOn(!GettingStartedWindow::get().isOn()); });
+    AlienImGui::EndMenu();
+    AlienImGui::EndMenuBar();
+
+    //further hotkeys
+    if (!io.WantCaptureKeyboard) {
         if (ImGui::IsKeyPressed(ImGuiKey_F7)) {
             if (WindowController::get().isDesktopMode()) {
                 WindowController::get().setWindowedMode();
             } else {
                 WindowController::get().setDesktopMode();
             }
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_K)) {
-            NetworkSettingsDialog::get().open();
-        }
-
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_O)) {
-            SimulationView::get().setOverlayActive(!SimulationView::get().isOverlayActive());
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_U)) {
-            UiController::get().setOn(!UiController::get().isOn());
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_I)) {
-            _renderSimulation = !_renderSimulation;
-        }
-
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_H)) {
-            MassOperationsDialog::get().open();
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_P)) {
-            PatternAnalysisDialog::get().show();
-        }
-        if (io.KeyAlt && ImGui::IsKeyPressed(ImGuiKey_G)) {
-            ImageToPatternDialog::get().show();
         }
     }
 }
@@ -737,13 +651,6 @@ void _MainWindow::onPauseSimulation()
 void _MainWindow::onExit()
 {
     ExitDialog::get().open();
-}
-
-void _MainWindow::finishFrame()
-{
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    glfwSwapBuffers(WindowController::get().getWindowData().window);
 }
 
 void _MainWindow::pushGlobalStyle()

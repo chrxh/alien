@@ -25,11 +25,12 @@ class NetworkService
     MAKE_SINGLETON(NetworkService);
 
 public:
-    void init();
+    void setup();
     void shutdown();
 
     std::string getServerAddress();
     void setServerAddress(std::string const& value);
+    bool isLoggedIn();
     std::optional<std::string> getLoggedInUserName();
     std::optional<std::string> getPassword();
 
