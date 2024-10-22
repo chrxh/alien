@@ -13,7 +13,7 @@
 #include "StatisticsWindow.h"
 #include "AlienImGui.h"
 #include "DelayedExecutionController.h"
-#include "OverlayMessageController.h"
+#include "OverlayController.h"
 
 namespace
 {

@@ -25,7 +25,7 @@ private:
     void processOperatingMode();
 
     void drawLoadingScreen();
-    void decreasesAlphaForFadeOutLoadingScreen();
+    void decreaseAlphaForFadeOutLoadingScreen();
     void increaseAlphaForFadeInUI();
     void processMenubar();
 

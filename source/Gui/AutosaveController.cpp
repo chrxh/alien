@@ -9,7 +9,7 @@
 
 #include "Viewport.h"
 #include "DelayedExecutionController.h"
-#include "OverlayMessageController.h"
+#include "OverlayController.h"
 #include "SerializationHelperService.h"
 #include "MainLoopEntityController.h"
 
@@ -53,7 +53,7 @@ void AutosaveController::process()
     auto durationSinceStart = std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - *_startTimePoint).count();
     if (durationSinceStart > 0 && durationSinceStart % MinutesForAutosave == 0 && !_alreadySaved) {
         printOverlayMessage("Auto saving ...");
-        delayedExecution([=, this] { onSave(); });
+        delayedExecution([&] { onSave(); });
         _alreadySaved = true;
     }
     if (durationSinceStart > 0 && durationSinceStart % MinutesForAutosave == 1 && _alreadySaved) {

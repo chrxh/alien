@@ -8,17 +8,6 @@
 #include <imgui_impl_opengl3.h>
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "AboutDialog.h"
-#include "AlienImGui.h"
-#include "AutosaveController.h"
-#include "AutosaveWindow.h"
-#include "BrowserWindow.h"
-#include "CreatorWindow.h"
-#include "DeleteUserDialog.h"
-#include "DisplaySettingsDialog.h"
-#include "EditorController.h"
-#include "ExitDialog.h"
-#include "FileTransferController.h"
 #include "Base/Definitions.h"
 #include "Base/GlobalSettings.h"
 #include "Base/Resources.h"
@@ -32,7 +21,7 @@
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"
 #include "GenericMessageDialog.h"
-#include "OverlayMessageController.h"
+#include "OverlayController.h"
 #include "SimulationView.h"
 #include "FpsController.h"
 #include "GenomeEditorWindow.h"
@@ -56,10 +45,21 @@
 #include "StatisticsWindow.h"
 #include "UiController.h"
 #include "UploadSimulationDialog.h"
+#include "AboutDialog.h"
+#include "AlienImGui.h"
+#include "AutosaveController.h"
+#include "AutosaveWindow.h"
+#include "BrowserWindow.h"
+#include "CreatorWindow.h"
+#include "DeleteUserDialog.h"
+#include "DisplaySettingsDialog.h"
+#include "EditorController.h"
+#include "ExitDialog.h"
+#include "FileTransferController.h"
 
 namespace
 {
-    std::chrono::milliseconds::rep const FadeOutDuration = 1500;
+    std::chrono::milliseconds::rep const FadeOutDuration = 500;
     std::chrono::milliseconds::rep const FadeInDuration = 500;
 
     auto const StartupSenderId = "Startup";
@@ -114,7 +114,7 @@ void MainLoopController::processFirstTick()
     _startupSimRequestId = _persisterFacade->scheduleReadSimulationFromFile(senderInfo, readData);
     _programState = ProgramState::LoadingScreen;
 
-    OverlayMessageController::get().process();
+    OverlayController::get().process();
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 }
@@ -169,7 +169,7 @@ void MainLoopController::processLoadingScreen()
         _programState = ProgramState::FadeOutLoadingScreen;
     }
 
-    OverlayMessageController::get().process();
+    OverlayController::get().process();
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 }
@@ -180,7 +180,7 @@ void MainLoopController::processFadeOutLoadingScreen()
 
     SimulationView::get().draw();
 
-    decreasesAlphaForFadeOutLoadingScreen();
+    decreaseAlphaForFadeOutLoadingScreen();
     if (ImGui::GetStyle().Alpha == 0.0f) {
         _programState = ProgramState::FadeInUI;
         _fadedOutTimepoint = std::chrono::steady_clock::now();
@@ -194,7 +194,7 @@ void MainLoopController::processFadeInUI()
     pushGlobalStyle();
     processMenubar();
     MainLoopEntityController::get().process();
-    OverlayMessageController::get().process();
+    OverlayController::get().process();
     SimulationView::get().processSimulationScrollbars();
     popGlobalStyle();
 
@@ -212,7 +212,7 @@ void MainLoopController::processOperatingMode()
     pushGlobalStyle();
     processMenubar();
     MainLoopEntityController::get().process();
-    OverlayMessageController::get().process();
+    OverlayController::get().process();
     SimulationView::get().processSimulationScrollbars();
     popGlobalStyle();
 
@@ -262,7 +262,7 @@ void MainLoopController::drawLoadingScreen()
     }
 }
 
-void MainLoopController::decreasesAlphaForFadeOutLoadingScreen()
+void MainLoopController::decreaseAlphaForFadeOutLoadingScreen()
 {
     auto now = std::chrono::steady_clock::now();
     auto millisecSinceActivation = std::chrono::duration_cast<std::chrono::milliseconds>(now - *_simulationLoadedTimepoint).count();

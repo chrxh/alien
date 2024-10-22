@@ -6,7 +6,7 @@
 #include "PersisterInterface/TaskProcessor.h"
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
-#include "OverlayMessageController.h"
+#include "OverlayController.h"
 #include "TemporalControlWindow.h"
 #include "Viewport.h"
 

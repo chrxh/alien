@@ -10,7 +10,7 @@
 #include "EditorController.h"
 #include "GenomeEditorWindow.h"
 #include "BrowserWindow.h"
-#include "OverlayMessageController.h"
+#include "OverlayController.h"
 
 void NetworkTransferController::init(SimulationFacade simulationFacade, PersisterFacade persisterFacade)
 {

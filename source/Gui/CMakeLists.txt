@@ -91,8 +91,8 @@ PUBLIC
     NewPasswordDialog.h
     OpenGLHelper.cpp
     OpenGLHelper.h
-    OverlayMessageController.cpp
-    OverlayMessageController.h
+    OverlayController.cpp
+    OverlayController.h
     PatternAnalysisDialog.cpp
     PatternAnalysisDialog.h
     PatternEditorWindow.cpp
