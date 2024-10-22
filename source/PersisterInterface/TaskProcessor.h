@@ -14,8 +14,9 @@ public:
 
     void executeTask(
         std::function<PersisterRequestId(SenderId const&)> const& requestFunc,
-        std::function<void(PersisterRequestId const&)> const& finishFunc,
-        std::function<void(std::vector<PersisterErrorInfo> const&)> const& errorFunc);
+        std::function<void(PersisterRequestId const&)> const& finishFunc = [] (auto const&){},
+        std::function<void(std::vector<PersisterErrorInfo> const&)> const& errorFunc =
+            [](auto const&) {});
 
     bool pendingTasks() const;
 

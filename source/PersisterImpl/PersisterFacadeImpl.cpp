@@ -41,7 +41,7 @@ bool _PersisterFacadeImpl::isBusy() const
     return _worker->isBusy();
 }
 
-PersisterRequestState _PersisterFacadeImpl::getRequestState(PersisterRequestId const& id) const
+std::optional<PersisterRequestState> _PersisterFacadeImpl::getRequestState(PersisterRequestId const& id) const
 {
     return _worker->getRequestState(id);
 }

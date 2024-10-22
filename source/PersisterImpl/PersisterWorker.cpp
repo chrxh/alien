@@ -44,7 +44,7 @@ bool _PersisterWorker::isBusy() const
     return !_openRequests.empty() || !_inProgressRequests.empty();
 }
 
-PersisterRequestState _PersisterWorker::getRequestState(PersisterRequestId const& id) const
+std::optional<PersisterRequestState> _PersisterWorker::getRequestState(PersisterRequestId const& id) const
 {
     std::unique_lock uniqueLock(_requestMutex);
 
@@ -60,7 +60,7 @@ PersisterRequestState _PersisterWorker::getRequestState(PersisterRequestId const
     if (std::ranges::find_if(_requestErrors, [&](PersisterRequestError const& request) { return request->getRequestId() == id; }) != _requestErrors.end()) {
         return PersisterRequestState::Error;
     }
-    THROW_NOT_IMPLEMENTED();
+    return std::nullopt;
 }
 
 void _PersisterWorker::addRequest(PersisterRequest const& job)

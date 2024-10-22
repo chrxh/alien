@@ -139,7 +139,7 @@ void MainLoopController::processLoadingScreen()
 {
     drawLoadingScreen();
 
-    auto requestedSimState = _persisterFacade->getRequestState(_loadSimRequestId);
+    auto requestedSimState = _persisterFacade->getRequestState(_loadSimRequestId).value();
     if (requestedSimState == PersisterRequestState::Finished) {
         auto const& data = _persisterFacade->fetchReadSimulationData(_loadSimRequestId);
         auto const& deserializedSim = data.deserializedSimulation;
@@ -266,7 +266,7 @@ void MainLoopController::processExiting()
 
     FpsController::get().processForceFps(WindowController::get().getFps());
 
-    auto requestedSimState = _persisterFacade->getRequestState(_saveSimRequestId);
+    auto requestedSimState = _persisterFacade->getRequestState(_saveSimRequestId).value();
     if (requestedSimState == PersisterRequestState::Finished) {
         _persisterFacade->fetchSaveSimulationData(_saveSimRequestId);
         _programState = ProgramState::Finished;

@@ -29,12 +29,13 @@ void _TaskProcessor::process()
     }
     std::vector<PersisterRequestId> newRequestIds;
     for (auto const& requestId : _pendingRequestIds) {
-        auto state = _persisterFacade->getRequestState(requestId);
-        if (state == PersisterRequestState::Finished) {
-            _finishFunc(requestId);
-        }
-        if (state == PersisterRequestState::InQueue || state == PersisterRequestState::InProgress) {
-            newRequestIds.emplace_back(requestId);
+        if (auto state = _persisterFacade->getRequestState(requestId)) {
+            if (state.value() == PersisterRequestState::Finished) {
+                _finishFunc(requestId);
+            }
+            if (state.value() == PersisterRequestState::InQueue || state.value() == PersisterRequestState::InProgress) {
+                newRequestIds.emplace_back(requestId);
+            }
         }
     }
     _pendingRequestIds = newRequestIds;
