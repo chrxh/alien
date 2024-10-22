@@ -1306,16 +1306,9 @@ void BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO)
     }
 
     //apply changes to server
-    delayedExecution([rawTOs = rawTOs, this] {
-        for (auto const& rawTO : rawTOs) {
-            if (!NetworkService::get().moveResource(rawTO->id, rawTO->workspaceType)) {
-                GenericMessageDialog::get().information("Error", "Failed to move item.");
-                refreshIntern(true);
-                return;
-            }
-        }
-    });
-    printOverlayMessage("Changing visibility ...");
+    for (auto const& rawTO : rawTOs) {
+        NetworkTransferController::get().onMove(MoveNetworkResourceRequestData{.resourceId = rawTO->id, .workspaceType = rawTO->workspaceType});
+    }
 }
 
 void BrowserWindow::onDeleteResource(NetworkResourceTreeTO const& treeTO)

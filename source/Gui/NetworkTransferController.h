@@ -25,6 +25,7 @@ public:
     void onReplace(ReplaceNetworkResourceRequestData const& requestData);
     void onDelete(DeleteNetworkResourceRequestData const& requestData);
     void onEdit(EditNetworkResourceRequestData const& requestData);
+    void onMove(MoveNetworkResourceRequestData const& requestData);
 
 private:
     void init(SimulationFacade simulationFacade, PersisterFacade persisterFacade) override;
@@ -39,4 +40,5 @@ private:
     TaskProcessor _replaceProcessor;
     TaskProcessor _deleteProcessor;
     TaskProcessor _editProcessor;
+    TaskProcessor _moveProcessor;
 };

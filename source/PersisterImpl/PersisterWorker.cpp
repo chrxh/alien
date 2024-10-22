@@ -160,6 +160,9 @@ void _PersisterWorker::processRequests(std::unique_lock<std::mutex>& lock)
         if (auto const& concreteRequest = std::dynamic_pointer_cast<_EditNetworkResourceRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
         }
+        if (auto const& concreteRequest = std::dynamic_pointer_cast<_MoveNetworkResourceRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        }
         auto inProgressJobsIter = std::ranges::find_if(
             _inProgressRequests, [&](PersisterRequest const& otherRequest) { return otherRequest->getRequestId() == request->getRequestId(); });
         _inProgressRequests.erase(inProgressJobsIter);
@@ -570,4 +573,18 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     }
 
     return std::make_shared<_EditNetworkResourceRequestResult>(request->getRequestId(), EditNetworkResourceResultData{});
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, MoveNetworkResourceRequest const& request)
+{
+    UnlockGuard unlockGuard(lock);
+
+    auto const& requestData = request->getData();
+
+    if (!NetworkService::get().moveResource(requestData.resourceId, requestData.workspaceType)) {
+        return std::make_shared<_PersisterRequestError>(
+            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to change visibility of item. Please try again later."});
+    }
+
+    return std::make_shared<_MoveNetworkResourceRequestResult>(request->getRequestId(), MoveNetworkResourceResultData{});
 }

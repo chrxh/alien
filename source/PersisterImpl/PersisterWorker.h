@@ -44,6 +44,7 @@ private:
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, GetUserNamesForEmojiRequest const& request);
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, DeleteNetworkResourceRequest const& request);
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, EditNetworkResourceRequest const& request);
+    PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, MoveNetworkResourceRequest const& request);
 
     SimulationFacade _simulationFacade;
 
