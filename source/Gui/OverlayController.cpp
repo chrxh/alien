@@ -65,19 +65,20 @@ void OverlayController::processLoadingBar()
 
         auto viewSize = toRealVector2D(Viewport::get().getViewSize());
         auto width = viewSize.x / 6 + 1.0f;
-        auto height = scale(20.0f);
+        auto height = scale(15.0f);
         auto center = ImVec2{viewSize.x / 2, viewSize.y - scale(60.0f)};
 
-        auto constexpr N = 20;
+        auto constexpr N = 12;
         for (int i = 0; i < N; ++i) {
-            auto amplitude1 = sinf(toFloat(i) * 10.0f / toFloat(N) - duration / 240.0f);
-            auto amplitude2 = sinf(toFloat(i) * 14.0f / toFloat(N) - duration / 135.0f);
+            auto amplitude1 = sinf(toFloat(i) * 10.0f / toFloat(N) - powf(duration / 340.0f, 1.3f) /** (1.0f + 0.3f * sin(duration / 2000))*/);
+            auto amplitude2 = sinf(toFloat(i) * 14.0f / toFloat(N) - powf(duration / 235.0f, 1.3f) /** (1.0f + 0.3f * sin(duration / 2000))*/);
             //auto hue = toFloat((i * 1000 / N + toInt(duration)) % 3000) / 4500.0f;
             //hue = hue < 0.33f ? 0.66f + hue : 0.66f + 0.66f - hue; 
-
+            auto y1 = center.y + height / 2 - amplitude1 * height;
+            auto y2 = center.y + height / 2 - amplitude2 * height;
             drawList->AddRectFilled(
-                ImVec2{center.x - width / 2 + toFloat(i) / N * width, center.y + height / 2 - amplitude1 * height},
-                ImVec2{center.x - width / 2 + toFloat(i + 1) / N * width - scale(3), center.y + height / 2 - amplitude2 * height / 2},
+                ImVec2{center.x - width / 2 + toFloat(i) / N * width, std::min(y1, y2)},
+                ImVec2{center.x - width / 2 + toFloat(i + 1) / N * width - scale(3), std::max(y1, y2)},
                 ImColor::HSV(0, 0.1f, 0.35f, 0.6f));
         }
         drawList->AddText(

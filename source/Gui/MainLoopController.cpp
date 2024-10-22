@@ -98,11 +98,25 @@ void MainLoopController::process()
         processFadeInUI();
     } else if (_programState == ProgramState::OperatingMode) {
         processOperatingMode();
+    } else if (_programState == ProgramState::ScheduleExit) {
+        processScheduleExit();
+    } else if (_programState == ProgramState::Exiting) {
+        processExiting();
     }
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(WindowController::get().getWindowData().window);
+}
+
+void MainLoopController::scheduleShutdown()
+{
+    _programState = ProgramState::ScheduleExit;
+}
+
+bool MainLoopController::shouldClose() const
+{
+    return _programState == ProgramState::Finished;
 }
 
 void MainLoopController::processFirstTick()
@@ -111,7 +125,7 @@ void MainLoopController::processFirstTick()
 
     auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = true};
     auto readData = ReadSimulationRequestData{Const::AutosaveFile};
-    _startupSimRequestId = _persisterFacade->scheduleReadSimulationFromFile(senderInfo, readData);
+    _loadSimRequestId = _persisterFacade->scheduleReadSimulationFromFile(senderInfo, readData);
     _programState = ProgramState::LoadingScreen;
 
     OverlayController::get().process();
@@ -123,9 +137,9 @@ void MainLoopController::processLoadingScreen()
 {
     drawLoadingScreen();
 
-    auto requestedSimState = _persisterFacade->getRequestState(_startupSimRequestId);
+    auto requestedSimState = _persisterFacade->getRequestState(_loadSimRequestId);
     if (requestedSimState == PersisterRequestState::Finished) {
-        auto const& data = _persisterFacade->fetchReadSimulationData(_startupSimRequestId);
+        auto const& data = _persisterFacade->fetchReadSimulationData(_loadSimRequestId);
         auto const& deserializedSim = data.deserializedSimulation;
         _simulationFacade->newSimulation(
             data.simulationName,
@@ -217,6 +231,46 @@ void MainLoopController::processOperatingMode()
     popGlobalStyle();
 
     FpsController::get().processForceFps(WindowController::get().getFps());
+
+    if (glfwWindowShouldClose(WindowController::get().getWindowData().window)) {
+        scheduleShutdown();
+    }
+}
+
+void MainLoopController::processScheduleExit()
+{
+    if (AutosaveController::get().isOn()) {
+        printOverlayMessage("Saving ...");
+
+        auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = false};
+        auto saveData = SaveSimulationRequestData{Const::AutosaveFile, Viewport::get().getZoomFactor(), Viewport::get().getCenterInWorldPos()};
+        _saveSimRequestId = _persisterFacade->scheduleSaveSimulationToFile(senderInfo, saveData);
+        _programState = ProgramState::Exiting;
+    } else {
+        _programState = ProgramState::Finished;
+    }
+}
+
+void MainLoopController::processExiting()
+{
+    SimulationView::get().draw();
+
+    pushGlobalStyle();
+    processMenubar();
+    MainLoopEntityController::get().process();
+    OverlayController::get().process();
+    SimulationView::get().processSimulationScrollbars();
+    popGlobalStyle();
+
+    FpsController::get().processForceFps(WindowController::get().getFps());
+
+    auto requestedSimState = _persisterFacade->getRequestState(_saveSimRequestId);
+    if (requestedSimState == PersisterRequestState::Finished) {
+        _persisterFacade->fetchSaveSimulationData(_saveSimRequestId);
+        _programState = ProgramState::Finished;
+    } else if (requestedSimState == PersisterRequestState::Error) {
+        _programState = ProgramState::Finished;
+    }
 }
 
 void MainLoopController::drawLoadingScreen()

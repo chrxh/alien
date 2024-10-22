@@ -22,6 +22,4 @@ private:
 
     PersisterFacade _persisterFacade;
     SimulationFacade _simulationFacade;
-
-    bool _onExit = false;
 };
