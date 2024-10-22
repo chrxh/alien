@@ -157,6 +157,9 @@ void _PersisterWorker::processRequests(std::unique_lock<std::mutex>& lock)
         if (auto const& concreteRequest = std::dynamic_pointer_cast<_DeleteNetworkResourceRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
         }
+        if (auto const& concreteRequest = std::dynamic_pointer_cast<_EditNetworkResourceRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        }
         auto inProgressJobsIter = std::ranges::find_if(
             _inProgressRequests, [&](PersisterRequest const& otherRequest) { return otherRequest->getRequestId() == request->getRequestId(); });
         _inProgressRequests.erase(inProgressJobsIter);
@@ -553,4 +556,18 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     }
 
     return std::make_shared<_DeleteNetworkResourceRequestResult>(request->getRequestId(), DeleteNetworkResourceResultData{});
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, EditNetworkResourceRequest const& request)
+{
+    UnlockGuard unlockGuard(lock);
+
+    auto const& requestData = request->getData();
+
+    if (!NetworkService::get().editResource(requestData.resourceId, requestData.newName, requestData.newDescription)) {
+        return std::make_shared<_PersisterRequestError>(
+            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to edit item. Please try again later."});
+    }
+
+    return std::make_shared<_EditNetworkResourceRequestResult>(request->getRequestId(), EditNetworkResourceResultData{});
 }

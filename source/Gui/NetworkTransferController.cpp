@@ -20,6 +20,7 @@ void NetworkTransferController::init(SimulationFacade simulationFacade, Persiste
     _uploadProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
     _replaceProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
     _deleteProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+    _editProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
 }
 
 void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData const& requestData)
@@ -134,10 +135,27 @@ void NetworkTransferController::onDelete(DeleteNetworkResourceRequestData const&
         [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
 }
 
+void NetworkTransferController::onEdit(EditNetworkResourceRequestData const& requestData)
+{
+    printOverlayMessage("Applying changes ...");
+
+    _editProcessor->executeTask(
+        [&](auto const& senderId) {
+            return _persisterFacade->scheduleEditNetworkResource(
+                SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
+        },
+        [&](auto const& requestId) {
+            _persisterFacade->fetchEditNetworkResourcesData(requestId);
+            BrowserWindow::get().onRefresh();
+        },
+        [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
+}
+
 void NetworkTransferController::process()
 {
     _downloadProcessor->process();
     _uploadProcessor->process();
     _replaceProcessor->process();
     _deleteProcessor->process();
+    _editProcessor->process();
 }
