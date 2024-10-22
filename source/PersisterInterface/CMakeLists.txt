@@ -30,8 +30,8 @@ add_library(PersisterInterface
     SenderInfo.h
     TaskProcessor.cpp
     TaskProcessor.h
-    ToggleLikeNetworkResourceRequestData.h
-    ToggleLikeNetworkResourceResultData.h
+    ToggleEmojiNetworkResourceRequestData.h
+    ToggleEmojiNetworkResourceResultData.h
     UploadNetworkResourceRequestData.h
     UploadNetworkResourceResultData.h)
 

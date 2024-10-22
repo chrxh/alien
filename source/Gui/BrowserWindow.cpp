@@ -80,7 +80,8 @@ void BrowserWindow::initIntern(SimulationFacade simulationFacade, PersisterFacad
     _downloadCache = std::make_shared<_DownloadCache>();
 
     _refreshProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
-    _emojiProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+    _emojiUserNameProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+    _toggleEmojiProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
 
     auto& settings = GlobalSettings::get();
     _currentWorkspace.resourceType = settings.getInt("windows.browser.resource type", _currentWorkspace.resourceType);
@@ -226,9 +227,11 @@ void BrowserWindow::processToolbar()
     auto isOwnerForSelectedItem = isOwner(_selectedTreeTO);
 
     //refresh button
+    ImGui::BeginDisabled(_refreshProcessor->pendingTasks());
     if (AlienImGui::ToolbarButton(ICON_FA_SYNC)) {
         onRefresh();
     }
+    ImGui::EndDisabled();
     AlienImGui::Tooltip("Refresh");
 
     //login button
@@ -1206,7 +1209,8 @@ void BrowserWindow::processActivated()
 void BrowserWindow::processPendingRequestIds()
 {
     _refreshProcessor->process();
-    _emojiProcessor->process();
+    _emojiUserNameProcessor->process();
+    _toggleEmojiProcessor->process();
 }
 
 void BrowserWindow::createTreeTOs(Workspace& workspace)
@@ -1372,7 +1376,18 @@ void BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType)
         }
 
         _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.rawTO->id, emojiType));  //invalidate cache entry
-        NetworkService::get().toggleReactToResource(leaf.rawTO->id, emojiType);
+
+        _toggleEmojiProcessor->executeTask(
+            [&](auto const& senderId) {
+                return _persisterFacade->scheduleToggleEmojiNetworkResource(
+                    SenderInfo{.senderId = senderId, .wishResultData = false, .wishErrorInfo = false},
+                    ToggleEmojiNetworkResourceRequestData{.resourceId = leaf.rawTO->id, .emojiType = emojiType});
+            },
+            [](auto const&) {},
+            [&](auto const& errors) {
+                onRefresh();
+                GenericMessageDialog::get().information("Error", errors);
+            });
     } else {
         LoginDialog::get().open();
     }
@@ -1419,8 +1434,8 @@ std::string BrowserWindow::getUserNamesToEmojiType(std::string const& resourceId
     if (findResult != _userNamesByEmojiTypeBySimIdCache.end()) {
         userNames = findResult->second;
     } else {
-        if (!_emojiProcessor->pendingTasks()) {
-            _emojiProcessor->executeTask(
+        if (!_emojiUserNameProcessor->pendingTasks()) {
+            _emojiUserNameProcessor->executeTask(
                 [&](auto const& senderId) {
                     return _persisterFacade->scheduleGetUserNamesForEmoji(
                         SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = false},

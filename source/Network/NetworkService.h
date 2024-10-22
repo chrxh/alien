@@ -48,7 +48,7 @@ public:
     bool getUserList(std::vector<UserTO>& result, bool withRetry);
     bool getEmojiTypeByResourceId(std::unordered_map<std::string, int>& result);
     bool getUserNamesForResourceAndEmojiType(std::set<std::string>& result, std::string const& simId, int likeType);
-    bool toggleReactToResource(std::string const& simId, int likeType);
+    bool toggleEmojiToResource(std::string const& simId, int likeType);
 
     bool uploadResource(
         std::string& resourceId,

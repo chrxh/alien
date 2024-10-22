@@ -132,35 +132,27 @@ void _PersisterWorker::processRequests(std::unique_lock<std::mutex>& lock)
         std::variant<PersisterRequestResult, PersisterRequestError> processingResult;
         if (auto const& concreteRequest = std::dynamic_pointer_cast<_SaveSimulationRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
-        }
-        if (auto const& concreteRequest = std::dynamic_pointer_cast<_ReadSimulationRequest>(request)) {
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_ReadSimulationRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
-        }
-        if (auto const& concreteRequest = std::dynamic_pointer_cast<_LoginRequest>(request)) {
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_LoginRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
-        }
-        if (auto const& concreteRequest = std::dynamic_pointer_cast<_GetNetworkResourcesRequest>(request)) {
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_GetNetworkResourcesRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
-        }
-        if (auto const& concreteRequest = std::dynamic_pointer_cast<_DownloadNetworkResourceRequest>(request)) {
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_DownloadNetworkResourceRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
-        }
-        if (auto const& concreteRequest = std::dynamic_pointer_cast<_UploadNetworkResourceRequest>(request)) {
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_UploadNetworkResourceRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
-        }
-        if (auto const& concreteRequest = std::dynamic_pointer_cast<_ReplaceNetworkResourceRequest>(request)) {
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_ReplaceNetworkResourceRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
-        }
-        if (auto const& concreteRequest = std::dynamic_pointer_cast<_GetUserNamesForEmojiRequest>(request)) {
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_GetUserNamesForEmojiRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
-        }
-        if (auto const& concreteRequest = std::dynamic_pointer_cast<_DeleteNetworkResourceRequest>(request)) {
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_DeleteNetworkResourceRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
-        }
-        if (auto const& concreteRequest = std::dynamic_pointer_cast<_EditNetworkResourceRequest>(request)) {
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_EditNetworkResourceRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
-        }
-        if (auto const& concreteRequest = std::dynamic_pointer_cast<_MoveNetworkResourceRequest>(request)) {
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_MoveNetworkResourceRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_ToggleEmojiNetworkResourceRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
         }
         auto inProgressJobsIter = std::ranges::find_if(
@@ -593,4 +585,20 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     }
 
     return std::make_shared<_MoveNetworkResourceRequestResult>(request->getRequestId(), MoveNetworkResourceResultData{});
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(
+    std::unique_lock<std::mutex>& lock,
+    ToggleEmojiNetworkResourceRequest const& request)
+{
+    UnlockGuard unlockGuard(lock);
+
+    auto const& requestData = request->getData();
+
+    if (!NetworkService::get().toggleEmojiToResource(requestData.resourceId, requestData.emojiType)) {
+        return std::make_shared<_PersisterRequestError>(
+            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to toggle emoji. Please try again later."});
+    }
+
+    return std::make_shared<_ToggleEmojiNetworkResourceRequestResult>(request->getRequestId(), ToggleEmojiNetworkResourceResultData{});
 }

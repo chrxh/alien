@@ -49,4 +49,4 @@ using _GetUserNamesForEmojiRequestResult = _ConcreteRequestResult<GetUserNamesFo
 using _DeleteNetworkResourceRequestResult = _ConcreteRequestResult<DeleteNetworkResourceResultData>;
 using _EditNetworkResourceRequestResult = _ConcreteRequestResult<EditNetworkResourceResultData>;
 using _MoveNetworkResourceRequestResult = _ConcreteRequestResult<MoveNetworkResourceResultData>;
-using _ToggleLikeNetworkResourceRequestResult = _ConcreteRequestResult<ToggleLikeNetworkResourceResultData>;
+using _ToggleEmojiNetworkResourceRequestResult = _ConcreteRequestResult<ToggleEmojiNetworkResourceResultData>;

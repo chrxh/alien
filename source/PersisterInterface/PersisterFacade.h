@@ -31,8 +31,8 @@
 #include "SaveSimulationRequestData.h"
 #include "SenderId.h"
 #include "SenderInfo.h"
-#include "ToggleLikeNetworkResourceRequestData.h"
-#include "ToggleLikeNetworkResourceResultData.h"
+#include "ToggleEmojiNetworkResourceRequestData.h"
+#include "ToggleEmojiNetworkResourceResultData.h"
 #include "UploadNetworkResourceRequestData.h"
 #include "UploadNetworkResourceResultData.h"
 
@@ -86,6 +86,6 @@ public:
     virtual PersisterRequestId scheduleMoveNetworkResource(SenderInfo const& senderInfo, MoveNetworkResourceRequestData const& data) = 0;
     virtual MoveNetworkResourceResultData fetchMoveNetworkResourcesData(PersisterRequestId const& id) = 0;
 
-    virtual PersisterRequestId scheduleToggleLikeNetworkResource(SenderInfo const& senderInfo, ToggleLikeNetworkResourceRequestData const& data) = 0;
-    virtual ToggleLikeNetworkResourceResultData fetchToggleLikeNetworkResourcesData(PersisterRequestId const& id) = 0;
+    virtual PersisterRequestId scheduleToggleEmojiNetworkResource(SenderInfo const& senderInfo, ToggleEmojiNetworkResourceRequestData const& data) = 0;
+    virtual ToggleEmojiNetworkResourceResultData fetchToggleEmojiNetworkResourcesData(PersisterRequestId const& id) = 0;
 };

@@ -166,14 +166,14 @@ MoveNetworkResourceResultData _PersisterFacadeImpl::fetchMoveNetworkResourcesDat
     return fetchData<_MoveNetworkResourceRequestResult, MoveNetworkResourceResultData>(id);
 }
 
-PersisterRequestId _PersisterFacadeImpl::scheduleToggleLikeNetworkResource(SenderInfo const& senderInfo, ToggleLikeNetworkResourceRequestData const& data)
+PersisterRequestId _PersisterFacadeImpl::scheduleToggleEmojiNetworkResource(SenderInfo const& senderInfo, ToggleEmojiNetworkResourceRequestData const& data)
 {
-    return scheduleRequest<_ToggleLikeNetworkResourceRequest>(senderInfo, data);
+    return scheduleRequest<_ToggleEmojiNetworkResourceRequest>(senderInfo, data);
 }
 
-ToggleLikeNetworkResourceResultData _PersisterFacadeImpl::fetchToggleLikeNetworkResourcesData(PersisterRequestId const& id)
+ToggleEmojiNetworkResourceResultData _PersisterFacadeImpl::fetchToggleEmojiNetworkResourcesData(PersisterRequestId const& id)
 {
-    return fetchData<_ToggleLikeNetworkResourceRequestResult, ToggleLikeNetworkResourceResultData>(id);
+    return fetchData<_ToggleEmojiNetworkResourceRequestResult, ToggleEmojiNetworkResourceResultData>(id);
 }
 
 PersisterRequestId _PersisterFacadeImpl::generateNewRequestId()

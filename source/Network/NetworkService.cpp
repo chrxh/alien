@@ -408,7 +408,7 @@ bool NetworkService::getUserNamesForResourceAndEmojiType(std::set<std::string>& 
     }
 }
 
-bool NetworkService::toggleReactToResource(std::string const& simId, int likeType)
+bool NetworkService::toggleEmojiToResource(std::string const& simId, int likeType)
 {
     log(Priority::Important, "network: toggle like for resource with id=" + simId);
 
