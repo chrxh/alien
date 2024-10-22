@@ -3,5 +3,9 @@
 
 struct DeleteNetworkResourceRequestData
 {
-    std::string resourceId;
+    struct Entry
+    {
+        std::string resourceId;
+    };
+    std::vector<Entry> entries;
 };

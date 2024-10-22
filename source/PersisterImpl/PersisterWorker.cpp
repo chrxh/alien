@@ -553,9 +553,11 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
 
     auto const& requestData = request->getData();
 
-    if (!NetworkService::get().deleteResource(requestData.resourceId)) {
-        return std::make_shared<_PersisterRequestError>(
-            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to delete item. Please try again later."});
+    for (auto const& entry : requestData.entries) {
+        if (!NetworkService::get().deleteResource(entry.resourceId)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to delete item. Please try again later."});
+        }
     }
 
     return std::make_shared<_DeleteNetworkResourceRequestResult>(request->getRequestId(), DeleteNetworkResourceResultData{});
@@ -567,9 +569,11 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
 
     auto const& requestData = request->getData();
 
-    if (!NetworkService::get().editResource(requestData.resourceId, requestData.newName, requestData.newDescription)) {
-        return std::make_shared<_PersisterRequestError>(
-            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to edit item. Please try again later."});
+    for (auto const& entry : requestData.entries) {
+        if (!NetworkService::get().editResource(entry.resourceId, entry.newName, entry.newDescription)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to edit item. Please try again later."});
+        }
     }
 
     return std::make_shared<_EditNetworkResourceRequestResult>(request->getRequestId(), EditNetworkResourceResultData{});
@@ -581,9 +585,11 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
 
     auto const& requestData = request->getData();
 
-    if (!NetworkService::get().moveResource(requestData.resourceId, requestData.workspaceType)) {
-        return std::make_shared<_PersisterRequestError>(
-            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to change visibility of item. Please try again later."});
+    for (auto const& entry : requestData.entries) {
+        if (!NetworkService::get().moveResource(entry.resourceId, entry.workspaceType)) {
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to change visibility of item. Please try again later."});
+        }
     }
 
     return std::make_shared<_MoveNetworkResourceRequestResult>(request->getRequestId(), MoveNetworkResourceResultData{});

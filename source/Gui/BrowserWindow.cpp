@@ -1306,9 +1306,11 @@ void BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO)
     }
 
     //apply changes to server
+    MoveNetworkResourceRequestData requestData;
     for (auto const& rawTO : rawTOs) {
-        NetworkTransferController::get().onMove(MoveNetworkResourceRequestData{.resourceId = rawTO->id, .workspaceType = rawTO->workspaceType});
+        requestData.entries.emplace_back(rawTO->id, rawTO->workspaceType);
     }
+    NetworkTransferController::get().onMove(requestData);
 }
 
 void BrowserWindow::onDeleteResource(NetworkResourceTreeTO const& treeTO)
@@ -1332,9 +1334,11 @@ void BrowserWindow::onDeleteResource(NetworkResourceTreeTO const& treeTO)
         }
 
         //apply changes to server
+        DeleteNetworkResourceRequestData requestData;
         for (auto const& rawTO : rawTOs) {
-            NetworkTransferController::get().onDelete({.resourceId = rawTO->id});
+            requestData.entries.emplace_back(rawTO->id);
         }
+        NetworkTransferController::get().onDelete(requestData);
     });
 }
 

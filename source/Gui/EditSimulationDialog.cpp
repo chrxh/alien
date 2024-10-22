@@ -73,8 +73,8 @@ void EditSimulationDialog::processForLeaf()
     ImGui::BeginDisabled(_newName.empty());
     if (AlienImGui::Button("OK")) {
         if (ValidationService::isStringValidForDatabase(_newName) && ValidationService::isStringValidForDatabase(_newDescription)) {
-            NetworkTransferController::get().onEdit(
-                EditNetworkResourceRequestData{.resourceId = rawTO->id, .newName = _newName, .newDescription = _newDescription});
+            EditNetworkResourceRequestData::Entry entry{.resourceId = rawTO->id, .newName = _newName, .newDescription = _newDescription};
+            NetworkTransferController::get().onEdit(EditNetworkResourceRequestData{.entries = std::vector{entry}});
             close();
         } else {
             showMessage("Error", Const::NotAllowedCharacters);
@@ -101,12 +101,14 @@ void EditSimulationDialog::processForFolder()
     ImGui::BeginDisabled(_newName.empty());
     if (AlienImGui::Button("OK")) {
         if (ValidationService::isStringValidForDatabase(_newName)) {
+
+            EditNetworkResourceRequestData requestData;
             for (auto const& rawTO : _rawTOs) {
                 auto nameWithoutOldFolder = rawTO->resourceName.substr(_origFolderName.size() + 1);
                 auto newName = NetworkResourceService::get().concatenateFolderName({_newName, nameWithoutOldFolder}, false);
-                NetworkTransferController::get().onEdit(
-                    EditNetworkResourceRequestData{.resourceId = rawTO->id, .newName = newName, .newDescription = rawTO->description});
-            }
+                requestData.entries.emplace_back(rawTO->id, newName, rawTO->description);
+            }            
+            NetworkTransferController::get().onEdit(requestData);
             close();
         } else {
             showMessage("Error", Const::NotAllowedCharacters);
