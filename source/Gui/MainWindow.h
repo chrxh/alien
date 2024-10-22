@@ -18,33 +18,10 @@ private:
     void initGlad();
     void initFileDialogs();
 
-    void mainLoopForLoadingScreen();
-    void mainLoopForFadeoutLoadingScreen();
-    void mainLoopForFadeInUI();
-    void mainLoopForUI();
-
-    void processMenubar();
-
-    void onRunSimulation();
-    void onPauseSimulation();
-    void onExit();
-
-    void pushGlobalStyle();
-    void popGlobalStyle();
-
     GuiLogger _logger;
 
     PersisterFacade _persisterFacade;
     SimulationFacade _simulationFacade;
 
     bool _onExit = false;
-    bool _simulationMenuToggled = false;
-    bool _networkMenuToggled = false;
-    bool _windowMenuToggled = false;
-    bool _settingsMenuToggled = false;
-    bool _viewMenuToggled = false;
-    bool _editorMenuToggled = false;
-    bool _toolsMenuToggled = false;
-    bool _helpMenuToggled = false;
-    bool _renderSimulation = true;
 };

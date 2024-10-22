@@ -144,9 +144,9 @@ void SimulationView::resize(IntVector2D const& size)
     Viewport::get().setViewSize(size);
 }
 
-void SimulationView::draw(bool renderSimulation)
+void SimulationView::draw()
 {
-    if (renderSimulation) {
+    if (_renderSimulation) {
         updateImageFromSimulation();
 
         _shader->use();
@@ -215,15 +215,25 @@ void SimulationView::draw(bool renderSimulation)
     }
 }
 
-void SimulationView::processControls(bool renderSimulation)
+void SimulationView::processSimulationScrollbars()
 {
-    if (renderSimulation) {
+    if (_renderSimulation) {
         ImGuiViewport* viewport = ImGui::GetMainViewport();
         auto mainMenubarHeight = scale(22);
         auto scrollbarThickness = 17;  //fixed
         _scrollbarX->process({{viewport->Pos.x, viewport->Size.y - scrollbarThickness}, {viewport->Size.x - 1 - scrollbarThickness, 1}});
         _scrollbarY->process({{viewport->Size.x - scrollbarThickness, viewport->Pos.y + mainMenubarHeight}, {1, viewport->Size.y - 1 - scrollbarThickness}});
     }
+}
+
+bool SimulationView::isRenderSimulation() const
+{
+    return _renderSimulation;
+}
+
+void SimulationView::setRenderSimulation(bool value)
+{
+    _renderSimulation = value;
 }
 
 bool SimulationView::isOverlayActive() const
