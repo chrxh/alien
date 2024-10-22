@@ -26,7 +26,7 @@ namespace
     auto const StartupSenderId = "Startup";
 }
 
-void StartupController::init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade)
+void StartupController::setup(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade)
 {
     _simulationFacade = simulationFacade;
     _persisterFacade =persisterFacade;

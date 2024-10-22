@@ -7,17 +7,16 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class UiController : public MainLoopEntity
+class UiController : public MainLoopEntity<>
 {
     MAKE_SINGLETON(UiController);
 
 public:
-    void init();
-
     bool isOn() const;
     void setOn(bool value);
 
 private:
+    void init() override {}
     void process() override;
     void shutdown() override {}
 

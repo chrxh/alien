@@ -11,12 +11,10 @@
 #include "WindowController.h"
 
 template<typename ...Dependencies>
-class AlienWindow : public MainLoopEntity
+class AlienWindow : public MainLoopEntity<Dependencies...>
 {
 public:
     AlienWindow(std::string const& title, std::string const& settingsNode, bool defaultOn);
-
-    void init(Dependencies... dependencies);
 
     bool isOn() const;
     void setOn(bool value);
@@ -36,6 +34,7 @@ protected:
     std::string _settingsNode;
 
 private:
+    void init(Dependencies... dependencies) override;
     void process() override;
     void shutdown() override;
 };
@@ -55,7 +54,6 @@ template <typename ... Dependencies>
 void AlienWindow<Dependencies...>::init(Dependencies... dependencies)
 {
     _on = GlobalSettings::get().getBool(_settingsNode + ".active", _defaultOn);
-    MainLoopEntityController::get().registerObject(this);
     initIntern(dependencies...);
 }
 

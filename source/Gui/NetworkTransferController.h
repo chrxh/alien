@@ -9,23 +9,24 @@
 #include "PersisterInterface/UploadNetworkResourceRequestData.h"
 #include "PersisterInterface/ReplaceNetworkResourceRequestData.h"
 #include "PersisterInterface/DeleteNetworkResourceRequestData.h"
+#include "PersisterInterface/PersisterFacade.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class NetworkTransferController : public MainLoopEntity
+class NetworkTransferController : public MainLoopEntity<SimulationFacade, PersisterFacade>
 {
     MAKE_SINGLETON(NetworkTransferController);
 
 public:
-    void init(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade);
-
     void onDownload(DownloadNetworkResourceRequestData const& requestData);
     void onUpload(UploadNetworkResourceRequestData const& requestData);
     void onReplace(ReplaceNetworkResourceRequestData const& requestData);
     void onDelete(DeleteNetworkResourceRequestData const& requestData);
 
 private:
+    void init(SimulationFacade simulationFacade, PersisterFacade persisterFacade) override;
     void process() override;
     void shutdown() override {}
 

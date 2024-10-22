@@ -11,7 +11,7 @@ class OverlayMessageController
     MAKE_SINGLETON(OverlayMessageController);
 
 public:
-    void init(PersisterFacade const& persisterFacade);
+    void setup(PersisterFacade const& persisterFacade);
     void process();
 
     void show(std::string const& message, bool withLightning = false);

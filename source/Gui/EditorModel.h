@@ -13,7 +13,7 @@ class EditorModel
     MAKE_SINGLETON(EditorModel);
 
 public:
-    void init(SimulationFacade const& simulationFacade);
+    void setup(SimulationFacade const& simulationFacade);
 
     SelectionShallowData const& getSelectionShallowData() const;
     void update();

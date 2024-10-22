@@ -6,13 +6,11 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class WindowController : public MainLoopEntity
+class WindowController : public MainLoopEntity<>
 {
     MAKE_SINGLETON(WindowController);
 
 public:
-    void init();
-
     struct WindowData
     {
         GLFWwindow* window;
@@ -41,6 +39,7 @@ public:
     float getLastContentScaleFactor();
 
 private:
+    void init() override;
     void process() override {}
     void shutdown() override;
 

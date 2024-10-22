@@ -7,7 +7,7 @@
 
 #include "WindowController.h"
 
-void Viewport::init(SimulationFacade const& simulationFacade)
+void Viewport::setup(SimulationFacade const& simulationFacade)
 {
     _viewSize = WindowController::get().getStartupWindowSize();
     _simulationFacade = simulationFacade;

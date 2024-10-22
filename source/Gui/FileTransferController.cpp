@@ -15,13 +15,11 @@ namespace
     auto constexpr FileTransferSenderId = "FileTransfer";
 }
 
-void FileTransferController::init(PersisterFacade const& persisterFacade, SimulationFacade const& simulationFacade)
+void FileTransferController::init(PersisterFacade persisterFacade, SimulationFacade simulationFacade)
 {
     _persisterFacade = persisterFacade;
     _simulationFacade = simulationFacade;
     _openSimulationProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
-
-    MainLoopEntityController::get().registerObject(this);
 }
 
 void FileTransferController::onOpenSimulation()

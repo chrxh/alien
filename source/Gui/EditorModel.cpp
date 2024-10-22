@@ -3,7 +3,7 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/SimulationFacade.h"
 
-void EditorModel::init(SimulationFacade const& simulationFacade)
+void EditorModel::setup(SimulationFacade const& simulationFacade)
 {
     _simulationFacade = simulationFacade;
 

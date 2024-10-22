@@ -18,7 +18,7 @@
 #include "GenericFileDialog.h"
 
 
-void ImageToPatternDialog::init(SimulationFacade const& simulationFacade)
+void ImageToPatternDialog::init(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
 

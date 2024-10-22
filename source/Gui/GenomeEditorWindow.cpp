@@ -52,7 +52,7 @@ void GenomeEditorWindow::initIntern(SimulationFacade simulationFacade)
     }
     _startingPath = GlobalSettings::get().getString("windows.genome editor.starting path", path.string());
     _previewHeight = GlobalSettings::get().getFloat("windows.genome editor.preview height", scale(PreviewHeight));
-    ChangeColorDialog::get().init([&] { return getCurrentGenome(); }, [&](GenomeDescription const& genome) { setCurrentGenome(genome); });
+    ChangeColorDialog::get().setup([&] { return getCurrentGenome(); }, [&](GenomeDescription const& genome) { setCurrentGenome(genome); });
 }
 
 void GenomeEditorWindow::shutdownIntern()

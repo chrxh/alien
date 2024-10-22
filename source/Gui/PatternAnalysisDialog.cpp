@@ -16,7 +16,7 @@
 #include "MainLoopEntityController.h"
 
 
-void PatternAnalysisDialog::init(SimulationFacade const& simulationFacade)
+void PatternAnalysisDialog::init(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
 
@@ -25,8 +25,6 @@ void PatternAnalysisDialog::init(SimulationFacade const& simulationFacade)
         path = path.parent_path();
     }
     _startingPath = GlobalSettings::get().getString("dialogs.pattern analysis.starting path", path.string());
-
-    MainLoopEntityController::get().registerObject(this);
 }
 
 void PatternAnalysisDialog::shutdown()

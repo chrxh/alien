@@ -5,16 +5,16 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class DelayedExecutionController : public MainLoopEntity
+class DelayedExecutionController : public MainLoopEntity<>
 {
     MAKE_SINGLETON(DelayedExecutionController);
 
 public:
-    void init();
 
     void executeLater(std::function<void(void)> const& execFunc);
 
 private:
+    void init() override {}
     void process() override;
     void shutdown() override {}
 

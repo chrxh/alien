@@ -69,6 +69,10 @@ PUBLIC
     LogWindow.cpp
     LogWindow.h
     Main.cpp
+    MainLoopEntity.cpp
+    MainLoopEntity.h
+    MainLoopEntityController.cpp
+    MainLoopEntityController.h
     MainWindow.cpp
     MainWindow.h
     MassOperationsDialog.cpp
@@ -105,9 +109,6 @@ PUBLIC
     Shader.h
     ShaderWindow.cpp
     ShaderWindow.h
-    MainLoopEntityController.cpp
-    MainLoopEntityController.h
-    MainLoopEntity.h
     SimulationInteractionController.cpp
     SimulationInteractionController.h
     SimulationParametersWindow.cpp

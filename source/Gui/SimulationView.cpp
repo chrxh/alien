@@ -22,7 +22,7 @@ namespace
     auto constexpr ZoomFactorForOverlay = 12.0f;
 }
 
-void SimulationView::init(SimulationFacade const& simulationFacade)
+void SimulationView::setup(SimulationFacade const& simulationFacade)
 {
     _simulationFacade = simulationFacade;
 

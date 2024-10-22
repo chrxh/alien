@@ -8,13 +8,11 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class SimulationInteractionController : public MainLoopEntity
+class SimulationInteractionController : public MainLoopEntity<SimulationFacade>
 {
     MAKE_SINGLETON(SimulationInteractionController);
 
 public:
-    void init(SimulationFacade const& simulationFacade);
-
     bool isEditMode() const;
     void setEditMode(bool value);
 
@@ -26,6 +24,7 @@ public:
     std::optional<RealVector2D> getPositionSelectionData() const;
 
 private:
+    void init(SimulationFacade simulationFacade) override;
     void process() override;
     void shutdown() override {}
 

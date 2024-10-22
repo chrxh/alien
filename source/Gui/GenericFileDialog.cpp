@@ -5,11 +5,6 @@
 #include "MainLoopEntityController.h"
 #include "WindowController.h"
 
-void GenericFileDialog::init()
-{
-    MainLoopEntityController::get().registerObject(this);
-}
-
 void GenericFileDialog::showOpenFileDialog(
     std::string const& title,
     std::string const& filter,
