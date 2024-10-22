@@ -1,5 +1,7 @@
 #include "MainLoopController.h"
 
+#include <thread>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 

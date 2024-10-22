@@ -12,6 +12,7 @@
 #include "HelpStrings.h"
 #include "StyleRepository.h"
 #include "GenericMessageDialog.h"
+#include "NetworkTransferController.h"
 #include "OverlayController.h"
 
 void EditSimulationDialog::openForLeaf(NetworkResourceTreeTO const& treeTO)
@@ -72,13 +73,8 @@ void EditSimulationDialog::processForLeaf()
     ImGui::BeginDisabled(_newName.empty());
     if (AlienImGui::Button("OK")) {
         if (ValidationService::isStringValidForDatabase(_newName) && ValidationService::isStringValidForDatabase(_newDescription)) {
-            delayedExecution([rawTO = rawTO, resourceTypeString = resourceTypeString, this] {
-                if (!NetworkService::get().editResource(rawTO->id, _newName, _newDescription)) {
-                    showMessage("Error", "Failed to edit " + resourceTypeString + ".");
-                }
-                BrowserWindow::get().onRefresh();
-            });
-            printOverlayMessage("Applying changes ...");
+            NetworkTransferController::get().onEdit(
+                EditNetworkResourceRequestData{.resourceId = rawTO->id, .newName = _newName, .newDescription = _newDescription});
             close();
         } else {
             showMessage("Error", Const::NotAllowedCharacters);
@@ -105,18 +101,12 @@ void EditSimulationDialog::processForFolder()
     ImGui::BeginDisabled(_newName.empty());
     if (AlienImGui::Button("OK")) {
         if (ValidationService::isStringValidForDatabase(_newName)) {
-            delayedExecution([this] {
-                for (auto const& rawTO : _rawTOs) {
-                    auto nameWithoutOldFolder = rawTO->resourceName.substr(_origFolderName.size() + 1);
-                    auto newName = NetworkResourceService::get().concatenateFolderName({_newName, nameWithoutOldFolder}, false);
-                    if (!NetworkService::get().editResource(rawTO->id, newName, rawTO->description)) {
-                        showMessage("Error", "Failed to change folder name.");
-                        break;
-                    }
-                }
-                BrowserWindow::get().onRefresh();
-            });
-            printOverlayMessage("Applying changes ...");
+            for (auto const& rawTO : _rawTOs) {
+                auto nameWithoutOldFolder = rawTO->resourceName.substr(_origFolderName.size() + 1);
+                auto newName = NetworkResourceService::get().concatenateFolderName({_newName, nameWithoutOldFolder}, false);
+                NetworkTransferController::get().onEdit(
+                    EditNetworkResourceRequestData{.resourceId = rawTO->id, .newName = newName, .newDescription = rawTO->description});
+            }
             close();
         } else {
             showMessage("Error", Const::NotAllowedCharacters);
