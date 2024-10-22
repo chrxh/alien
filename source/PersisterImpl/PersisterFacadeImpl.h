@@ -18,7 +18,7 @@ public:
     void restart() override;
 
     bool isBusy() const override;
-    PersisterRequestState getRequestState(PersisterRequestId const& id) const override;
+    std::optional<PersisterRequestState> getRequestState(PersisterRequestId const& id) const override;
     std::vector<PersisterErrorInfo> fetchAllErrorInfos(SenderId const& senderId) override;
     PersisterErrorInfo fetchError(PersisterRequestId const& id) override;
 

@@ -48,7 +48,7 @@ public:
 
     //generic logic
     virtual bool isBusy() const = 0;
-    virtual PersisterRequestState getRequestState(PersisterRequestId const& id) const = 0;
+    virtual std::optional<PersisterRequestState> getRequestState(PersisterRequestId const& id) const = 0;
     virtual std::vector<PersisterErrorInfo> fetchAllErrorInfos(SenderId const& senderId) = 0;
     virtual PersisterErrorInfo fetchError(PersisterRequestId const& id) = 0;
 

@@ -196,7 +196,7 @@ void AutosaveWindow::createSavepoint()
 void AutosaveWindow::updateSavepoint(SavepointEntry& savepoint)
 {
     if (savepoint.state != SavepointState::Persisted) {
-        auto requestState = _persisterFacade->getRequestState(PersisterRequestId(savepoint.id));
+        auto requestState = _persisterFacade->getRequestState(PersisterRequestId{savepoint.id}).value();
         if (requestState == PersisterRequestState::InProgress) {
             savepoint.state = SavepointState::InProgress;
         }

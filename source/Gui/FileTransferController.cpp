@@ -91,11 +91,11 @@ void FileTransferController::onSaveSimulation()
             printOverlayMessage("Saving ...");
             _saveSimulationProcessor->executeTask(
                 [&, firstFilename = firstFilename](auto const& senderId) {
-                    auto senderInfo = SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true};
+                    auto senderInfo = SenderInfo{.senderId = senderId, .wishResultData = false, .wishErrorInfo = true};
                     auto readData = SaveSimulationRequestData{firstFilename.string(), Viewport::get().getZoomFactor(), Viewport::get().getCenterInWorldPos()};
                     return _persisterFacade->scheduleSaveSimulationToFile(senderInfo, readData);
                 },
-                [&](auto const& requestId) { _persisterFacade->fetchSaveSimulationData(requestId); },
+                [](auto const&) { },
                 [](auto const& criticalErrors) { GenericMessageDialog::get().information("Error", criticalErrors); });
         });
 }

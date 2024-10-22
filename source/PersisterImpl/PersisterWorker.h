@@ -22,7 +22,7 @@ public:
     void restart();
 
     bool isBusy() const;
-    PersisterRequestState getRequestState(PersisterRequestId const& id) const;
+    std::optional<PersisterRequestState> getRequestState(PersisterRequestId const& id) const;
 
     void addRequest(PersisterRequest const& job);
     PersisterRequestResult fetchRequestResult(PersisterRequestId const& id);   
