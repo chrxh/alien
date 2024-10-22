@@ -41,8 +41,8 @@ PUBLIC
     FileTransferController.h
     FpsController.cpp
     FpsController.h
-    GenericFileDialogs.cpp
-    GenericFileDialogs.h
+    GenericFileDialog.cpp
+    GenericFileDialog.h
     GenericMessageDialog.cpp
     GenericMessageDialog.h
     GenomeEditorWindow.cpp

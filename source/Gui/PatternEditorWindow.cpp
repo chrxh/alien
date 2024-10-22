@@ -15,7 +15,7 @@
 #include "StyleRepository.h"
 #include "AlienImGui.h"
 #include "EditorController.h"
-#include "GenericFileDialogs.h"
+#include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
 #include "Viewport.h"
 #include "EngineInterface/SerializerService.h"
@@ -316,7 +316,7 @@ void PatternEditorWindow::processIntern()
 
 void PatternEditorWindow::onOpenPattern()
 {
-    GenericFileDialogs::get().showOpenFileDialog(
+    GenericFileDialog::get().showOpenFileDialog(
         "Open pattern", "Pattern file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;
@@ -335,7 +335,7 @@ void PatternEditorWindow::onOpenPattern()
 
 void PatternEditorWindow::onSavePattern()
 {
-    GenericFileDialogs::get().showSaveFileDialog(
+    GenericFileDialog::get().showSaveFileDialog(
         "Save pattern", "Pattern file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;

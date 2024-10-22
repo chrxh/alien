@@ -11,8 +11,9 @@
 #include "PersisterInterface/DeleteNetworkResourceRequestData.h"
 
 #include "Definitions.h"
+#include "MainLoopEntity.h"
 
-class NetworkTransferController
+class NetworkTransferController : public MainLoopEntity
 {
     MAKE_SINGLETON(NetworkTransferController);
 
@@ -24,9 +25,10 @@ public:
     void onReplace(ReplaceNetworkResourceRequestData const& requestData);
     void onDelete(DeleteNetworkResourceRequestData const& requestData);
 
-    void process();
-
 private:
+    void process() override;
+    void shutdown() override {}
+
     SimulationFacade _simulationFacade;
     PersisterFacade _persisterFacade;
 

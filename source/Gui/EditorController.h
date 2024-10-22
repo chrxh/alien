@@ -7,7 +7,7 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class EditorController
+class EditorController : public MainLoopEntity
 {
     MAKE_SINGLETON(EditorController);
 
@@ -16,8 +16,6 @@ public:
 
     bool isOn() const;
     void setOn(bool value);
-
-    void process();
 
     bool areInspectionWindowsActive() const;
     void onCloseAllInspectorWindows();
@@ -41,6 +39,9 @@ public:
     void onAccelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
 
 private:
+    void process() override;
+    void shutdown() override {}
+
     void processInspectorWindows();
 
     SimulationFacade _simulationFacade;

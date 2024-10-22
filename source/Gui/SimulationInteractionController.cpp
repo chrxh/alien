@@ -25,6 +25,8 @@ void SimulationInteractionController::init(SimulationFacade const& simulationFac
     _simulationFacade = simulationFacade;
     _editorOn = OpenGLHelper::loadTexture(Const::EditorOnFilename);
     _editorOff = OpenGLHelper::loadTexture(Const::EditorOffFilename);
+
+    MainLoopEntityController::get().registerObject(this);
 }
 
 void SimulationInteractionController::process()

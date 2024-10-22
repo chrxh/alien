@@ -1,12 +1,16 @@
-#include "GenericFileDialogs.h"
+#include "GenericFileDialog.h"
 
-#include <imgui.h>
 #include <ImFileDialog.h>
 
-#include "AlienImGui.h"
+#include "MainLoopEntityController.h"
 #include "WindowController.h"
 
-void GenericFileDialogs::showOpenFileDialog(
+void GenericFileDialog::init()
+{
+    MainLoopEntityController::get().registerObject(this);
+}
+
+void GenericFileDialog::showOpenFileDialog(
     std::string const& title,
     std::string const& filter,
     std::string startingPath,
@@ -16,7 +20,7 @@ void GenericFileDialogs::showOpenFileDialog(
     ifd::FileDialog::Instance().Open("GenericFileDialog", title, filter, false, startingPath);
 }
 
-void GenericFileDialogs::showSaveFileDialog(
+void GenericFileDialog::showSaveFileDialog(
     std::string const& title,
     std::string const& filter,
     std::string startingPath,
@@ -26,7 +30,7 @@ void GenericFileDialogs::showSaveFileDialog(
     ifd::FileDialog::Instance().Save("GenericFileDialog", title, filter, startingPath);
 }
 
-void GenericFileDialogs::process()
+void GenericFileDialog::process()
 {
     if (!ifd::FileDialog::Instance().IsDone("GenericFileDialog", WindowController::get().getContentScaleFactor())) {
         return;

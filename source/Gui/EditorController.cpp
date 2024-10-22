@@ -35,6 +35,8 @@ void EditorController::init(SimulationFacade const& simulationFacade)
     PatternEditorWindow::get().init(_simulationFacade);
     CreatorWindow::get().init(_simulationFacade);
     MultiplierWindow::get().init(_simulationFacade);
+
+    MainLoopEntityController::get().registerObject(this);
 }
 
 bool EditorController::isOn() const

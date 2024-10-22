@@ -6,6 +6,7 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
+#include "MainLoopEntityController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
 #include "Base/Math.h"
@@ -16,12 +17,6 @@ namespace
     auto constexpr ShowDuration = 800;
     auto constexpr FadeoutTextDuration = 800;
     auto constexpr FadeoutLightningDuration = 1200;
-}
-
-OverlayMessageController& OverlayMessageController::get()
-{
-    static OverlayMessageController instance;
-    return instance;
 }
 
 void OverlayMessageController::init(PersisterFacade const& persisterFacade)

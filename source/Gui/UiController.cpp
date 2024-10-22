@@ -3,11 +3,18 @@
 #include <imgui.h>
 
 #include "Base/Definitions.h"
+
 #include "OverlayMessageController.h"
+#include "MainLoopEntityController.h"
 
 namespace
 {
     constexpr std::chrono::milliseconds::rep FadeInOutDuration = 1000;
+}
+
+void UiController::init()
+{
+    MainLoopEntityController::get().registerObject(this);
 }
 
 bool UiController::isOn() const
