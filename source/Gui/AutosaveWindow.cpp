@@ -113,6 +113,7 @@ void AutosaveWindow::processToolbar()
     ImGui::SameLine();
     ImGui::BeginDisabled(!static_cast<bool>(_selectedEntry) || _selectedEntry->state != SavepointState_Persisted);
     if (AlienImGui::ToolbarButton(ICON_FA_TRASH)) {
+        onDeleteSavepoint(_selectedEntry);
     }
     AlienImGui::Tooltip("Delete save point");
     ImGui::EndDisabled();
@@ -283,9 +284,23 @@ void AutosaveWindow::onCreateSavepoint()
     SavepointTableService::get().insertEntryAtFront(_savepointTable.value(), entry);
 }
 
+void AutosaveWindow::onDeleteSavepoint(SavepointEntry const& entry)
+{
+    printOverlayMessage("Deleting save point ...");
+
+    SavepointTableService::get().deleteEntry(_savepointTable.value(), entry);
+
+    if (entry->state != SavepointState_Persisted) {
+        scheduleDeleteNonPersistentSavepoint({entry});
+    }
+    _selectedEntry.reset();
+}
+
 void AutosaveWindow::processCleanup()
 {
     if (_scheduleCleanup) {
+        printOverlayMessage("Cleaning up save points ...");
+
         auto nonPersistentEntries = SavepointTableService::get().truncate(_savepointTable.value(), 0);
         scheduleDeleteNonPersistentSavepoint(nonPersistentEntries);
         _scheduleCleanup = false;
@@ -359,6 +374,7 @@ void AutosaveWindow::updateSavepointTableFromFile()
     } else {
         _savepointTable.reset();
     }
+    _selectedEntry.reset();
 }
 
 std::string AutosaveWindow::getSavepointFilename() const

@@ -80,7 +80,7 @@ std::vector<SavepointEntry> SavepointTableService::truncate(SavepointTable& tabl
     }
 
     entries.erase(entries.begin() + newSize, entries.end());
-    writeToFile(table);
+    updateFile(table);
     return result;
 }
 
@@ -88,21 +88,31 @@ void SavepointTableService::insertEntryAtFront(SavepointTable& table, SavepointE
 {
     table._entries.emplace_front(entry);
     ++table._sequenceNumber;
-    writeToFile(table);
+    updateFile(table);
 }
 
 void SavepointTableService::updateEntry(SavepointTable& table, int row, SavepointEntry const& newEntry) const
 {
     table._entries.at(row) = newEntry;
-    writeToFile(table);
+    updateFile(table);
 }
 
-void SavepointTableService::writeToFile(SavepointTable& table) const
+void SavepointTableService::deleteEntry(SavepointTable& table, SavepointEntry const& entry) const
+{
+    if (entry->state == SavepointState_Persisted) {
+        SerializerService::get().deleteSimulation(entry->filename);
+    }
+
+    table._entries.erase(std::remove(table._entries.begin(), table._entries.end(), entry), table._entries.end());
+    updateFile(table);
+}
+
+void SavepointTableService::updateFile(SavepointTable& table) const
 {
     try {
         std::ofstream stream(table.getFilename(), std::ios::binary);
         if (!stream) {
-            throw std::runtime_error("Could not access savepoint table file: " + table.getFilename().string());
+            throw std::runtime_error("Could not access save point table file: " + table.getFilename().string());
         }
         boost::property_tree::ptree tree;
         encodeDecode(tree, table, ParserTask::Encode);
@@ -147,7 +157,7 @@ void SavepointTableService::encodeDecode(boost::property_tree::ptree& tree, Save
     JsonParser::encodeDecode(tree, entry->state, 0, "state", task);
     JsonParser::encodeDecode(tree, entry->timestamp, std::string(), "timestamp", task);
     JsonParser::encodeDecode(tree, entry->name, std::string(), "name", task);
-    JsonParser::encodeDecode(tree, entry->timestep, 0ull, "timestep", task);
+    JsonParser::encodeDecode(tree, entry->timestep, uint64_t(0), "timestep", task);
 }
 
 void SavepointTableService::encodeDecode(boost::property_tree::ptree& tree, std::filesystem::path& path, std::string const& node, ParserTask task) const

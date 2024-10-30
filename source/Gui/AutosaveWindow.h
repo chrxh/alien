@@ -27,6 +27,7 @@ private:
     void processStatusBar();
 
     void onCreateSavepoint();
+    void onDeleteSavepoint(SavepointEntry const& entry);
 
     void scheduleDeleteNonPersistentSavepoint(std::vector<SavepointEntry> const& entries);
     void processDeleteNonPersistentSavepoint();
