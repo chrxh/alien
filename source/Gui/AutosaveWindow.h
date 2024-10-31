@@ -72,7 +72,7 @@ private:
 
     bool _scheduleCleanup = false;
 
-    std::optional<std::chrono::steady_clock::time_point> _lastAutosaveTimepoint;
+    std::chrono::steady_clock::time_point _lastAutosaveTimepoint;
 
     using CatchPeak = int;
     enum CatchPeak_

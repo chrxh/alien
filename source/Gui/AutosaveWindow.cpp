@@ -49,9 +49,8 @@ void AutosaveWindow::initIntern(SimulationFacade simulationFacade, PersisterFaca
     _origCatchPeak = GlobalSettings::get().getValue("windows.autosave.catch peak", _origCatchPeak);
     _catchPeak = _origCatchPeak;
 
-    if (_autosaveEnabled) {
-        _lastAutosaveTimepoint = std::chrono::steady_clock::now();
-    }
+    _lastAutosaveTimepoint = std::chrono::steady_clock::now();
+
     _catchPeakProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
     updateSavepointTableFromFile();
 }
@@ -225,8 +224,6 @@ void AutosaveWindow::processSettings()
                     &_autosaveEnabled)) {
                 if (_autosaveEnabled) {
                     _lastAutosaveTimepoint = std::chrono::steady_clock::now();
-                } else {
-                    _lastAutosaveTimepoint.reset();
                 }
             }
             AlienImGui::Switcher(
@@ -266,10 +263,10 @@ void AutosaveWindow::processStatusBar()
 {
     std::string statusText = " " ICON_FA_INFO_CIRCLE " ";
     statusText += [&] {
-        if (!_lastAutosaveTimepoint.has_value()) {
+        if (!_autosaveEnabled) {
             return std::string("No autosave scheduled");
         }
-        auto secondsSinceLastAutosave = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - _lastAutosaveTimepoint.value());
+        auto secondsSinceLastAutosave = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - _lastAutosaveTimepoint);
         return "Next autosave in " + StringHelper::format(std::chrono::seconds(_autosaveInterval * 60) - secondsSinceLastAutosave);
     }();
     AlienImGui::StatusBar(statusText);
@@ -321,11 +318,11 @@ void AutosaveWindow::processCleanup()
 
 void AutosaveWindow::processAutomaticSavepoints()
 {
-    if (!_lastAutosaveTimepoint.has_value()) {
+    if (!_autosaveEnabled) {
         return;
     }
 
-    auto minSinceLastAutosave = std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - _lastAutosaveTimepoint.value()).count();
+    auto minSinceLastAutosave = std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - _lastAutosaveTimepoint).count();
     if (minSinceLastAutosave >= _autosaveInterval) {
         onCreateSavepoint();
         _lastAutosaveTimepoint = std::chrono::steady_clock::now();
@@ -336,7 +333,7 @@ void AutosaveWindow::processAutomaticSavepoints()
     }
     auto minSinceLastCatchPeak = std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - _lastCatchPeakTimepoint.value()).count();
     if (minSinceLastCatchPeak >= 1) {
-        _persisterFacade->
+        //_persisterFacade->
     }
 }
 
