@@ -176,6 +176,16 @@ ToggleReactionNetworkResourceResultData _PersisterFacadeImpl::fetchToggleReactio
     return fetchData<_ToggleReactionNetworkResourceRequestResult, ToggleReactionNetworkResourceResultData>(id);
 }
 
+PersisterRequestId _PersisterFacadeImpl::scheduleGetSimulationFromFile(SenderInfo const& senderInfo, GetSimulationRequestData const& data)
+{
+    return scheduleRequest<_GetSimulationRequest>(senderInfo, data);
+}
+
+GetSimulationResultData _PersisterFacadeImpl::fetchGetSimulationData(PersisterRequestId const& id)
+{
+    return fetchData<_GetSimulationRequestResult, GetSimulationResultData>(id);
+}
+
 PersisterRequestId _PersisterFacadeImpl::generateNewRequestId()
 {
     ++_latestRequestId;

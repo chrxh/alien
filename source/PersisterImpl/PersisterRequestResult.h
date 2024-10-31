@@ -3,6 +3,7 @@
 #include "PersisterInterface/ReadSimulationResultData.h"
 #include "PersisterInterface/PersisterRequestId.h"
 #include "PersisterInterface/SaveSimulationResultData.h"
+#include "PersisterInterface/GetSimulationResultData.h"
 
 class _PersisterRequestResult
 {
@@ -50,3 +51,4 @@ using _DeleteNetworkResourceRequestResult = _ConcreteRequestResult<DeleteNetwork
 using _EditNetworkResourceRequestResult = _ConcreteRequestResult<EditNetworkResourceResultData>;
 using _MoveNetworkResourceRequestResult = _ConcreteRequestResult<MoveNetworkResourceResultData>;
 using _ToggleReactionNetworkResourceRequestResult = _ConcreteRequestResult<ToggleReactionNetworkResourceResultData>;
+using _GetSimulationRequestResult = _ConcreteRequestResult<GetSimulationResultData>;

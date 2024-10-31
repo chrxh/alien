@@ -14,6 +14,8 @@
 #include "EditNetworkResourceResultData.h"
 #include "GetNetworkResourcesRequestData.h"
 #include "GetNetworkResourcesResultData.h"
+#include "GetSimulationRequestData.h"
+#include "GetSimulationResultData.h"
 #include "GetUserNamesForReactionRequestData.h"
 #include "GetUserNamesForReactionResultData.h"
 #include "LoginRequestData.h"
@@ -88,4 +90,7 @@ public:
 
     virtual PersisterRequestId scheduleToggleReactionNetworkResource(SenderInfo const& senderInfo, ToggleReactionNetworkResourceRequestData const& data) = 0;
     virtual ToggleReactionNetworkResourceResultData fetchToggleReactionNetworkResourcesData(PersisterRequestId const& id) = 0;
+
+    virtual PersisterRequestId scheduleGetSimulationFromFile(SenderInfo const& senderInfo, GetSimulationRequestData const& data) = 0;
+    virtual GetSimulationResultData fetchGetSimulationData(PersisterRequestId const& id) = 0;
 };

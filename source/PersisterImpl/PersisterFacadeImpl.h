@@ -58,6 +58,9 @@ public:
     PersisterRequestId scheduleToggleReactionNetworkResource(SenderInfo const& senderInfo, ToggleReactionNetworkResourceRequestData const& data) override;
     ToggleReactionNetworkResourceResultData fetchToggleReactionNetworkResourcesData(PersisterRequestId const& id) override;
 
+    PersisterRequestId scheduleGetSimulationFromFile(SenderInfo const& senderInfo, GetSimulationRequestData const& data) override;
+    GetSimulationResultData fetchGetSimulationData(PersisterRequestId const& id) override;
+
 private:
     static auto constexpr MaxWorkerThreads = 4;
 

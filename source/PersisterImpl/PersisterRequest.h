@@ -4,6 +4,7 @@
 #include "PersisterInterface/DownloadNetworkResourceRequestData.h"
 #include "PersisterInterface/EditNetworkResourceRequestData.h"
 #include "PersisterInterface/GetNetworkResourcesRequestData.h"
+#include "PersisterInterface/GetSimulationRequestData.h"
 #include "PersisterInterface/GetUserNamesForReactionRequestData.h"
 #include "PersisterInterface/LoginRequestData.h"
 #include "PersisterInterface/MoveNetworkResourceRequestData.h"
@@ -91,3 +92,6 @@ using MoveNetworkResourceRequest = std::shared_ptr<_MoveNetworkResourceRequest>;
 
 using _ToggleReactionNetworkResourceRequest = _ConcreteRequest<ToggleReactionNetworkResourceRequestData>;
 using ToggleReactionNetworkResourceRequest = std::shared_ptr<_ToggleReactionNetworkResourceRequest>;
+
+using _GetSimulationRequest = _ConcreteRequest<GetSimulationRequestData>;
+using GetSimulationRequest = std::shared_ptr<_GetSimulationRequest>;

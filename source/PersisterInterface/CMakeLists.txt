@@ -14,6 +14,8 @@ add_library(PersisterInterface
     EditNetworkResourceResultData.h
     GetNetworkResourcesRequestData.h
     GetNetworkResourcesResultData.h
+    GetSimulationRequestData.h
+    GetSimulationResultData.h
     GetUserNamesForReactionRequestData.h
     GetUserNamesForReactionResultData.h
     LegacyAuxiliaryDataParserService.cpp
