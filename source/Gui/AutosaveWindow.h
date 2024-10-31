@@ -35,6 +35,8 @@ private:
     void scheduleCleanup();
     void processCleanup();
 
+    void processAutomaticSavepoints();
+
     void updateSavepoint(int row);
 
     void updateSavepointTableFromFile();
@@ -51,7 +53,7 @@ private:
 
     bool _autosaveEnabled = false;
     int _origAutosaveInterval = 40;
-    int _autosaveInterval = 40;
+    int _autosaveInterval = _origAutosaveInterval;
 
     using SaveMode = int;
     enum SaveMode_
@@ -60,9 +62,9 @@ private:
         SaveMode_Unlimited
     };
     SaveMode _origSaveMode = SaveMode_Circular;
-    SaveMode _saveMode = SaveMode_Circular;
+    SaveMode _saveMode = _origSaveMode;
     int _origNumberOfFiles = 20;
-    int _numberOfFiles = 20;
+    int _numberOfFiles = _origNumberOfFiles;
 
     std::optional<SavepointTable> _savepointTable;
     SavepointEntry _selectedEntry;
@@ -70,5 +72,16 @@ private:
 
     bool _scheduleCleanup = false;
 
-    std::optional<std::chrono::steady_clock::time_point> _autosaveTimepoint;
+    std::optional<std::chrono::steady_clock::time_point> _lastAutosaveTimepoint;
+
+    using CatchPeak = int;
+    enum CatchPeak_
+    {
+        CatchPeak_None,
+        CatchPeak_Variance
+    };
+    CatchPeak _origCatchPeak = CatchPeak_None;
+    CatchPeak _catchPeak = _origCatchPeak;
+    std::optional<std::chrono::steady_clock::time_point> _lastCatchPeakTimepoint;
+    TaskProcessor _catchPeakProcessor;
 };

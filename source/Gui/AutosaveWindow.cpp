@@ -15,6 +15,7 @@
 #include "OverlayController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
+#include "PersisterInterface/TaskProcessor.h"
 
 namespace
 {
@@ -35,15 +36,23 @@ void AutosaveWindow::initIntern(SimulationFacade simulationFacade, PersisterFaca
     _autosaveEnabled = GlobalSettings::get().getValue("windows.autosave.enabled", _autosaveEnabled);
     _origAutosaveInterval = GlobalSettings::get().getValue("windows.autosave.interval", _origAutosaveInterval);
     _autosaveInterval = _origAutosaveInterval;
+
     _origSaveMode = GlobalSettings::get().getValue("windows.autosave.mode", _origSaveMode);
     _saveMode = _origSaveMode;
-    _numberOfFiles = GlobalSettings::get().getValue("windows.autosave.number of files", _origNumberOfFiles);
+
+    _origNumberOfFiles = GlobalSettings::get().getValue("windows.autosave.number of files", _origNumberOfFiles);
+    _numberOfFiles = _origNumberOfFiles;
+
     _origDirectory = GlobalSettings::get().getValue("windows.autosave.directory", (std::filesystem::current_path() / Const::BasePath).string());
     _directory = _origDirectory;
 
+    _origCatchPeak = GlobalSettings::get().getValue("windows.autosave.catch peak", _origCatchPeak);
+    _catchPeak = _origCatchPeak;
+
     if (_autosaveEnabled) {
-        _autosaveTimepoint = std::chrono::steady_clock::now();
+        _lastAutosaveTimepoint = std::chrono::steady_clock::now();
     }
+    _catchPeakProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
     updateSavepointTableFromFile();
 }
 
@@ -56,6 +65,7 @@ void AutosaveWindow::shutdownIntern()
     GlobalSettings::get().setValue("windows.autosave.mode", _saveMode);
     GlobalSettings::get().setValue("windows.autosave.number of files", _numberOfFiles);
     GlobalSettings::get().setValue("windows.autosave.directory", _directory);
+    GlobalSettings::get().setValue("windows.autosave.catch peak", _origCatchPeak);
 }
 
 void AutosaveWindow::processIntern()
@@ -88,16 +98,7 @@ void AutosaveWindow::processBackground()
 {
     processDeleteNonPersistentSavepoint();
     processCleanup();
-
-    if (!_autosaveTimepoint.has_value()) {
-        return;
-    }
-
-    auto minSinceLastAutosave = std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - _autosaveTimepoint.value()).count();
-    if (minSinceLastAutosave >= _autosaveInterval) {
-        onCreateSavepoint();
-        _autosaveTimepoint = std::chrono::steady_clock::now();
-    }
+    processAutomaticSavepoints();
 }
 
 void AutosaveWindow::processToolbar()
@@ -223,11 +224,22 @@ void AutosaveWindow::processSettings()
                     _autosaveInterval,
                     &_autosaveEnabled)) {
                 if (_autosaveEnabled) {
-                    _autosaveTimepoint = std::chrono::steady_clock::now();
+                    _lastAutosaveTimepoint = std::chrono::steady_clock::now();
                 } else {
-                    _autosaveTimepoint.reset();
+                    _lastAutosaveTimepoint.reset();
                 }
             }
+            AlienImGui::Switcher(
+                AlienImGui::SwitcherParameters()
+                    .name("Catch peak")
+                    .textWidth(RightColumnWidth)
+                    .defaultValue(_origCatchPeak)
+                    .values({
+                        "None",
+                        "Genome complexity variance",
+                    }),
+                _catchPeak);
+
             if (AlienImGui::InputText(
                     AlienImGui::InputTextParameters().name("Directory").textWidth(RightColumnWidth).defaultValue(_origDirectory).folderButton(true),
                     _directory)) {
@@ -254,10 +266,10 @@ void AutosaveWindow::processStatusBar()
 {
     std::string statusText = " " ICON_FA_INFO_CIRCLE " ";
     statusText += [&] {
-        if (!_autosaveTimepoint.has_value()) {
+        if (!_lastAutosaveTimepoint.has_value()) {
             return std::string("No autosave scheduled");
         }
-        auto secondsSinceLastAutosave = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - _autosaveTimepoint.value());
+        auto secondsSinceLastAutosave = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - _lastAutosaveTimepoint.value());
         return "Next autosave in " + StringHelper::format(std::chrono::seconds(_autosaveInterval * 60) - secondsSinceLastAutosave);
     }();
     AlienImGui::StatusBar(statusText);
@@ -304,6 +316,27 @@ void AutosaveWindow::processCleanup()
         auto nonPersistentEntries = SavepointTableService::get().truncate(_savepointTable.value(), 0);
         scheduleDeleteNonPersistentSavepoint(nonPersistentEntries);
         _scheduleCleanup = false;
+    }
+}
+
+void AutosaveWindow::processAutomaticSavepoints()
+{
+    if (!_lastAutosaveTimepoint.has_value()) {
+        return;
+    }
+
+    auto minSinceLastAutosave = std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - _lastAutosaveTimepoint.value()).count();
+    if (minSinceLastAutosave >= _autosaveInterval) {
+        onCreateSavepoint();
+        _lastAutosaveTimepoint = std::chrono::steady_clock::now();
+    }
+
+    if (!_lastCatchPeakTimepoint.has_value()) {
+        _lastCatchPeakTimepoint = std::chrono::steady_clock::now();
+    }
+    auto minSinceLastCatchPeak = std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - _lastCatchPeakTimepoint.value()).count();
+    if (minSinceLastCatchPeak >= 1) {
+        _persisterFacade->
     }
 }
 
