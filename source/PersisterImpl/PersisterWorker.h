@@ -46,7 +46,7 @@ private:
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, EditNetworkResourceRequest const& request);
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, MoveNetworkResourceRequest const& request);
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, ToggleReactionNetworkResourceRequest const& request);
-    PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, GetSimulationRequest const& request);
+    PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, GetPeakSimulationRequest const& request);
 
     SimulationFacade _simulationFacade;
 

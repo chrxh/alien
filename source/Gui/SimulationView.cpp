@@ -253,6 +253,7 @@ float SimulationView::getBrightness() const
 
 void SimulationView::setBrightness(float value)
 {
+    _brightness = value;
     _shader->setFloat("brightness", value);
 }
 
@@ -263,6 +264,7 @@ float SimulationView::getContrast() const
 
 void SimulationView::setContrast(float value)
 {
+    _contrast = value;
     _shader->setFloat("contrast", value);
 }
 

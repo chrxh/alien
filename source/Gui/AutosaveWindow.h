@@ -82,6 +82,7 @@ private:
     };
     CatchPeak _origCatchPeak = CatchPeak_None;
     CatchPeak _catchPeak = _origCatchPeak;
-    std::optional<std::chrono::steady_clock::time_point> _lastCatchPeakTimepoint;
-    TaskProcessor _catchPeakProcessor;
+    std::chrono::steady_clock::time_point _lastPeakTimepoint;
+    TaskProcessor _peakProcessor;
+    SharedDeserializedSimulation _peakDeserializedSimulation;
 };

@@ -22,10 +22,10 @@ public:
     std::vector<PersisterErrorInfo> fetchAllErrorInfos(SenderId const& senderId) override;
     PersisterErrorInfo fetchError(PersisterRequestId const& id) override;
 
-    PersisterRequestId scheduleSaveSimulationToFile(SenderInfo const& senderInfo, SaveSimulationRequestData const& data) override;
+    PersisterRequestId scheduleSaveSimulation(SenderInfo const& senderInfo, SaveSimulationRequestData const& data) override;
     SaveSimulationResultData fetchSaveSimulationData(PersisterRequestId const& id) override;
 
-    PersisterRequestId scheduleReadSimulationFromFile(SenderInfo const& senderInfo, ReadSimulationRequestData const& data) override;
+    PersisterRequestId scheduleReadSimulation(SenderInfo const& senderInfo, ReadSimulationRequestData const& data) override;
     ReadSimulationResultData fetchReadSimulationData(PersisterRequestId const& id) override;
 
     PersisterRequestId scheduleLogin(SenderInfo const& senderInfo, LoginRequestData const& data) override;
@@ -58,8 +58,8 @@ public:
     PersisterRequestId scheduleToggleReactionNetworkResource(SenderInfo const& senderInfo, ToggleReactionNetworkResourceRequestData const& data) override;
     ToggleReactionNetworkResourceResultData fetchToggleReactionNetworkResourcesData(PersisterRequestId const& id) override;
 
-    PersisterRequestId scheduleGetSimulationFromFile(SenderInfo const& senderInfo, GetSimulationRequestData const& data) override;
-    GetSimulationResultData fetchGetSimulationData(PersisterRequestId const& id) override;
+    PersisterRequestId scheduleGetPeakSimulation(SenderInfo const& senderInfo, GetPeakSimulationRequestData const& data) override;
+    GetPeakSimulationResultData fetchGetPeakSimulationData(PersisterRequestId const& id) override;
 
 private:
     static auto constexpr MaxWorkerThreads = 4;

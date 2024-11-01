@@ -132,7 +132,7 @@ void MainLoopController::processFirstTick()
 
     auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = true};
     auto readData = ReadSimulationRequestData{Const::AutosaveFile};
-    _loadSimRequestId = _persisterFacade->scheduleReadSimulationFromFile(senderInfo, readData);
+    _loadSimRequestId = _persisterFacade->scheduleReadSimulation(senderInfo, readData);
     _programState = ProgramState::LoadingScreen;
 
     OverlayController::get().process();
@@ -245,7 +245,7 @@ void MainLoopController::processScheduleExit()
 
         auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = false};
         auto saveData = SaveSimulationRequestData{Const::AutosaveFile, Viewport::get().getZoomFactor(), Viewport::get().getCenterInWorldPos()};
-        _saveSimRequestId = _persisterFacade->scheduleSaveSimulationToFile(senderInfo, saveData);
+        _saveSimRequestId = _persisterFacade->scheduleSaveSimulation(senderInfo, saveData);
         _programState = ProgramState::Exiting;
     } else {
         _programState = ProgramState::Finished;
