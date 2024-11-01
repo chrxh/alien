@@ -50,8 +50,10 @@ void AutosaveWindow::initIntern(SimulationFacade simulationFacade, PersisterFaca
     _catchPeak = _origCatchPeak;
 
     _lastAutosaveTimepoint = std::chrono::steady_clock::now();
+    _lastPeakTimepoint = std::chrono::steady_clock::now();
 
-    _catchPeakProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+    _peakProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+    _peakDeserializedSimulation = std::make_shared<_SharedDeserializedSimulation>();
     updateSavepointTableFromFile();
 }
 
@@ -98,13 +100,14 @@ void AutosaveWindow::processBackground()
     processDeleteNonPersistentSavepoint();
     processCleanup();
     processAutomaticSavepoints();
+    _peakProcessor->process();
 }
 
 void AutosaveWindow::processToolbar()
 {
     ImGui::SameLine();
     ImGui::BeginDisabled(!_savepointTable.has_value());
-    if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_PLUS)) {
         onCreateSavepoint();
     }
     ImGui::EndDisabled();
@@ -112,7 +115,7 @@ void AutosaveWindow::processToolbar()
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!static_cast<bool>(_selectedEntry) || _selectedEntry->state != SavepointState_Persisted);
-    if (AlienImGui::ToolbarButton(ICON_FA_TRASH)) {
+    if (AlienImGui::ToolbarButton(ICON_FA_MINUS)) {
         onDeleteSavepoint(_selectedEntry);
     }
     AlienImGui::Tooltip("Delete save point");
@@ -286,7 +289,7 @@ void AutosaveWindow::onCreateSavepoint()
         .zoom = Viewport::get().getZoomFactor(),
         .center = Viewport::get().getCenterInWorldPos(),
         .generateNameFromTimestep = true};
-    auto requestId = _persisterFacade->scheduleSaveSimulationToFile(senderInfo, saveData);
+    auto requestId = _persisterFacade->scheduleSaveSimulation(senderInfo, saveData);
 
     auto entry = std::make_shared<_SavepointEntry>(
         _SavepointEntry{.filename = "", .state = SavepointState_InQueue, .timestamp = "", .name = "", .timestep = 0, .requestId = requestId.value});
@@ -328,12 +331,20 @@ void AutosaveWindow::processAutomaticSavepoints()
         _lastAutosaveTimepoint = std::chrono::steady_clock::now();
     }
 
-    if (!_lastCatchPeakTimepoint.has_value()) {
-        _lastCatchPeakTimepoint = std::chrono::steady_clock::now();
-    }
-    auto minSinceLastCatchPeak = std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - _lastCatchPeakTimepoint.value()).count();
-    if (minSinceLastCatchPeak >= 1) {
-        //_persisterFacade->
+    auto minSinceLastCatchPeak = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - _lastPeakTimepoint).count();
+    if (minSinceLastCatchPeak >= 10) {
+        _peakProcessor->executeTask(
+            [&](auto const& senderId) {
+                return _persisterFacade->scheduleGetPeakSimulation(
+                    SenderInfo{.senderId = senderId, .wishResultData = false, .wishErrorInfo = true},
+                    GetPeakSimulationRequestData{
+                        .peakDeserializedSimulation = _peakDeserializedSimulation,
+                        .zoom = Viewport::get().getZoomFactor(),
+                        .center = Viewport::get().getCenterInWorldPos()});
+            },
+            [&](auto const& requestId) {},
+            [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
+        _lastPeakTimepoint = std::chrono::steady_clock::now();
     }
 }
 

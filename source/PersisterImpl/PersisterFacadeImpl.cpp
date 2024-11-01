@@ -56,7 +56,7 @@ PersisterErrorInfo _PersisterFacadeImpl::fetchError(PersisterRequestId const& id
     return _worker->fetchJobError(id)->getErrorInfo();
 }
 
-PersisterRequestId _PersisterFacadeImpl::scheduleSaveSimulationToFile(SenderInfo const& senderInfo, SaveSimulationRequestData const& data)
+PersisterRequestId _PersisterFacadeImpl::scheduleSaveSimulation(SenderInfo const& senderInfo, SaveSimulationRequestData const& data)
 {
     return scheduleRequest<_SaveSimulationRequest>(senderInfo, data);
 }
@@ -66,7 +66,7 @@ SaveSimulationResultData _PersisterFacadeImpl::fetchSaveSimulationData(Persister
     return fetchData<_SaveSimulationRequestResult, SaveSimulationResultData>(id);
 }
 
-PersisterRequestId _PersisterFacadeImpl::scheduleReadSimulationFromFile(SenderInfo const& senderInfo, ReadSimulationRequestData const& data)
+PersisterRequestId _PersisterFacadeImpl::scheduleReadSimulation(SenderInfo const& senderInfo, ReadSimulationRequestData const& data)
 {
     return scheduleRequest<_ReadSimulationRequest>(senderInfo, data);
 }
@@ -176,14 +176,14 @@ ToggleReactionNetworkResourceResultData _PersisterFacadeImpl::fetchToggleReactio
     return fetchData<_ToggleReactionNetworkResourceRequestResult, ToggleReactionNetworkResourceResultData>(id);
 }
 
-PersisterRequestId _PersisterFacadeImpl::scheduleGetSimulationFromFile(SenderInfo const& senderInfo, GetSimulationRequestData const& data)
+PersisterRequestId _PersisterFacadeImpl::scheduleGetPeakSimulation(SenderInfo const& senderInfo, GetPeakSimulationRequestData const& data)
 {
-    return scheduleRequest<_GetSimulationRequest>(senderInfo, data);
+    return scheduleRequest<_GetPeakSimulationRequest>(senderInfo, data);
 }
 
-GetSimulationResultData _PersisterFacadeImpl::fetchGetSimulationData(PersisterRequestId const& id)
+GetPeakSimulationResultData _PersisterFacadeImpl::fetchGetPeakSimulationData(PersisterRequestId const& id)
 {
-    return fetchData<_GetSimulationRequestResult, GetSimulationResultData>(id);
+    return fetchData<_GetPeakSimulationRequestResult, GetPeakSimulationResultData>(id);
 }
 
 PersisterRequestId _PersisterFacadeImpl::generateNewRequestId()

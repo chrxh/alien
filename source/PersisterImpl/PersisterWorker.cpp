@@ -154,7 +154,7 @@ void _PersisterWorker::processRequests(std::unique_lock<std::mutex>& lock)
             processingResult = processRequest(lock, concreteRequest);
         } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_ToggleReactionNetworkResourceRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
-        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_GetSimulationRequest>(request)) {
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_GetPeakSimulationRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
         }
         auto inProgressJobsIter = std::ranges::find_if(
@@ -619,27 +619,32 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     return std::make_shared<_ToggleReactionNetworkResourceRequestResult>(request->getRequestId(), ToggleReactionNetworkResourceResultData{});
 }
 
-_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, GetSimulationRequest const& request)
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, GetPeakSimulationRequest const& request)
 {
-    UnlockGuard unlockGuard(lock);
-
-    auto const& requestData = request->getData();
-
-    GetSimulationResultData resultData;
     try {
-        resultData.deserializedSimulation.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
-        resultData.deserializedSimulation.auxiliaryData.realTime = _simulationFacade->getRealTime();
-        resultData.deserializedSimulation.auxiliaryData.zoom = requestData.zoom;
-        resultData.deserializedSimulation.auxiliaryData.center = requestData.center;
-        resultData.deserializedSimulation.auxiliaryData.generalSettings = _simulationFacade->getGeneralSettings();
-        resultData.deserializedSimulation.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
-        resultData.deserializedSimulation.auxiliaryData.timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
-        resultData.deserializedSimulation.mainData = _simulationFacade->getClusteredSimulationData();
-        return std::make_shared<_GetSimulationRequestResult>(request->getRequestId(), resultData);
+        UnlockGuard unlockGuard(lock);
+
+        auto const& requestData = request->getData();
+
+        auto peakStatistics = requestData.peakDeserializedSimulation->getLastStatisticsData();
+
+        DeserializedSimulation deserializedSimulation;
+        deserializedSimulation.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
+        if (!deserializedSimulation.statistics.empty() && deserializedSimulation.statistics.back().varianceGenomeComplexity.summedValues
+            >= peakStatistics.varianceGenomeComplexity.summedValues) {
+
+            deserializedSimulation.auxiliaryData.realTime = _simulationFacade->getRealTime();
+            deserializedSimulation.auxiliaryData.zoom = requestData.zoom;
+            deserializedSimulation.auxiliaryData.center = requestData.center;
+            deserializedSimulation.auxiliaryData.generalSettings = _simulationFacade->getGeneralSettings();
+            deserializedSimulation.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
+            deserializedSimulation.auxiliaryData.timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
+            deserializedSimulation.mainData = _simulationFacade->getClusteredSimulationData();
+            requestData.peakDeserializedSimulation->setDeserializedSimulation(std::move(deserializedSimulation));
+        }
+        return std::make_shared<_GetPeakSimulationRequestResult>(request->getRequestId(), GetPeakSimulationResultData());
     } catch (...) {
         return std::make_shared<_PersisterRequestError>(
-            request->getRequestId(),
-            request->getSenderInfo().senderId,
-            PersisterErrorInfo{"No valid data could be obtained from the GPU."});
+            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"No valid data could be obtained from the GPU."});
     }
 }

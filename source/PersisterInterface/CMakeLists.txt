@@ -14,8 +14,8 @@ add_library(PersisterInterface
     EditNetworkResourceResultData.h
     GetNetworkResourcesRequestData.h
     GetNetworkResourcesResultData.h
-    GetSimulationRequestData.h
-    GetSimulationResultData.h
+    GetPeakSimulationRequestData.h
+    GetPeakSimulationResultData.h
     GetUserNamesForReactionRequestData.h
     GetUserNamesForReactionResultData.h
     LegacyAuxiliaryDataParserService.cpp
@@ -36,6 +36,8 @@ add_library(PersisterInterface
     SavepointTable.h
     SavepointTableService.cpp
     SavepointTableService.h
+    SaveDeserializedSimulationRequestData.h
+    SaveDeserializedSimulationResultData.h
     SaveSimulationRequestData.h
     SaveSimulationResultData.h
     SenderId.h
@@ -43,6 +45,7 @@ add_library(PersisterInterface
     SerializerService.cpp
     SerializerService.h
     SerializedSimulation.h
+    SharedDeserializedSimulation.h
     TaskProcessor.cpp
     TaskProcessor.h
     ToggleReactionNetworkResourceRequestData.h

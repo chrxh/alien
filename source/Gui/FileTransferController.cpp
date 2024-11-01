@@ -37,7 +37,7 @@ void FileTransferController::onOpenSimulation()
             [&](auto const& senderId) {
                 auto senderInfo = SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true};
                 auto readData = ReadSimulationRequestData{firstFilename.string()};
-                return _persisterFacade->scheduleReadSimulationFromFile(senderInfo, readData);
+                return _persisterFacade->scheduleReadSimulation(senderInfo, readData);
             },
             [&](auto const& requestId) {
                 auto const& data = _persisterFacade->fetchReadSimulationData(requestId);
@@ -91,7 +91,7 @@ void FileTransferController::onSaveSimulation()
                 [&, firstFilename = firstFilename](auto const& senderId) {
                     auto senderInfo = SenderInfo{.senderId = senderId, .wishResultData = false, .wishErrorInfo = true};
                     auto readData = SaveSimulationRequestData{firstFilename.string(), Viewport::get().getZoomFactor(), Viewport::get().getCenterInWorldPos()};
-                    return _persisterFacade->scheduleSaveSimulationToFile(senderInfo, readData);
+                    return _persisterFacade->scheduleSaveSimulation(senderInfo, readData);
                 },
                 [](auto const&) { },
                 [](auto const& criticalErrors) { GenericMessageDialog::get().information("Error", criticalErrors); });

@@ -14,8 +14,8 @@
 #include "EditNetworkResourceResultData.h"
 #include "GetNetworkResourcesRequestData.h"
 #include "GetNetworkResourcesResultData.h"
-#include "GetSimulationRequestData.h"
-#include "GetSimulationResultData.h"
+#include "GetPeakSimulationRequestData.h"
+#include "GetPeakSimulationResultData.h"
 #include "GetUserNamesForReactionRequestData.h"
 #include "GetUserNamesForReactionResultData.h"
 #include "LoginRequestData.h"
@@ -55,10 +55,10 @@ public:
     virtual PersisterErrorInfo fetchError(PersisterRequestId const& id) = 0;
 
     //specific request
-    virtual PersisterRequestId scheduleSaveSimulationToFile(SenderInfo const& senderInfo, SaveSimulationRequestData const& data) = 0;
+    virtual PersisterRequestId scheduleSaveSimulation(SenderInfo const& senderInfo, SaveSimulationRequestData const& data) = 0;
     virtual SaveSimulationResultData fetchSaveSimulationData(PersisterRequestId const& id) = 0;
 
-    virtual PersisterRequestId scheduleReadSimulationFromFile(SenderInfo const& senderInfo, ReadSimulationRequestData const& data) = 0;
+    virtual PersisterRequestId scheduleReadSimulation(SenderInfo const& senderInfo, ReadSimulationRequestData const& data) = 0;
     virtual ReadSimulationResultData fetchReadSimulationData(PersisterRequestId const& id) = 0;
 
     virtual PersisterRequestId scheduleLogin(SenderInfo const& senderInfo, LoginRequestData const& data) = 0;
@@ -91,6 +91,6 @@ public:
     virtual PersisterRequestId scheduleToggleReactionNetworkResource(SenderInfo const& senderInfo, ToggleReactionNetworkResourceRequestData const& data) = 0;
     virtual ToggleReactionNetworkResourceResultData fetchToggleReactionNetworkResourcesData(PersisterRequestId const& id) = 0;
 
-    virtual PersisterRequestId scheduleGetSimulationFromFile(SenderInfo const& senderInfo, GetSimulationRequestData const& data) = 0;
-    virtual GetSimulationResultData fetchGetSimulationData(PersisterRequestId const& id) = 0;
+    virtual PersisterRequestId scheduleGetPeakSimulation(SenderInfo const& senderInfo, GetPeakSimulationRequestData const& data) = 0;
+    virtual GetPeakSimulationResultData fetchGetPeakSimulationData(PersisterRequestId const& id) = 0;
 };
