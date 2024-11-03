@@ -229,7 +229,7 @@ void AutosaveWindow::processSettings()
                     _lastAutosaveTimepoint = std::chrono::steady_clock::now();
                 }
             }
-            AlienImGui::Switcher(
+            if (AlienImGui::Switcher(
                 AlienImGui::SwitcherParameters()
                     .name("Catch peak")
                     .textWidth(RightColumnWidth)
@@ -238,7 +238,9 @@ void AutosaveWindow::processSettings()
                         "None",
                         "Genome complexity variance",
                     }),
-                _catchPeak);
+                _catchPeak)) {
+                _peakDeserializedSimulation->setDeserializedSimulation(DeserializedSimulation());
+            }
 
             if (AlienImGui::InputText(
                     AlienImGui::InputTextParameters().name("Directory").textWidth(RightColumnWidth).defaultValue(_origDirectory).folderButton(true),
@@ -285,7 +287,7 @@ void AutosaveWindow::onCreateSavepoint(bool usePeakSimulation)
     }
 
     PersisterRequestId requestId;
-    if (usePeakSimulation) {
+    if (usePeakSimulation && !_peakDeserializedSimulation->isEmpty()) {
         auto senderInfo = SenderInfo{.senderId = SenderId{AutosaveSenderId}, .wishResultData = true, .wishErrorInfo = true};
         auto saveData = SaveDeserializedSimulationRequestData{
             .filename = _directory, .sharedDeserializedSimulation = _peakDeserializedSimulation, .generateNameFromTimestep = true};
@@ -337,20 +339,22 @@ void AutosaveWindow::processAutomaticSavepoints()
         _lastAutosaveTimepoint = std::chrono::steady_clock::now();
     }
 
-    auto minSinceLastCatchPeak = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - _lastPeakTimepoint).count();
-    if (minSinceLastCatchPeak >= 60) {
-        _peakProcessor->executeTask(
-            [&](auto const& senderId) {
-                return _persisterFacade->scheduleGetPeakSimulation(
-                    SenderInfo{.senderId = senderId, .wishResultData = false, .wishErrorInfo = true},
-                    GetPeakSimulationRequestData{
-                        .peakDeserializedSimulation = _peakDeserializedSimulation,
-                        .zoom = Viewport::get().getZoomFactor(),
-                        .center = Viewport::get().getCenterInWorldPos()});
-            },
-            [&](auto const& requestId) {},
-            [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
-        _lastPeakTimepoint = std::chrono::steady_clock::now();
+    if (_catchPeak != CatchPeak_None) {
+        auto minSinceLastCatchPeak = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - _lastPeakTimepoint).count();
+        if (minSinceLastCatchPeak >= 30) {
+            _peakProcessor->executeTask(
+                [&](auto const& senderId) {
+                    return _persisterFacade->scheduleGetPeakSimulation(
+                        SenderInfo{.senderId = senderId, .wishResultData = false, .wishErrorInfo = true},
+                        GetPeakSimulationRequestData{
+                            .peakDeserializedSimulation = _peakDeserializedSimulation,
+                            .zoom = Viewport::get().getZoomFactor(),
+                            .center = Viewport::get().getCenterInWorldPos()});
+                },
+                [&](auto const& requestId) {},
+                [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
+            _lastPeakTimepoint = std::chrono::steady_clock::now();
+        }
     }
 }
 
@@ -414,6 +418,7 @@ void AutosaveWindow::updateSavepoint(int row)
                     newEntry->timestamp = StringHelper::format(data.timestamp);
                     newEntry->name = data.projectName;
                     newEntry->filename = data.filename;
+                    _peakDeserializedSimulation->setDeserializedSimulation(DeserializedSimulation());
                 }
             }
             if (requestState.value() == PersisterRequestState::Error) {
