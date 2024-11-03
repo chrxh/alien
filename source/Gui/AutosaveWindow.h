@@ -26,7 +26,7 @@ private:
     void processSettings();
     void processStatusBar();
 
-    void onCreateSavepoint();
+    void onCreateSavepoint(bool usePeakSimulation);
     void onDeleteSavepoint(SavepointEntry const& entry);
 
     void scheduleDeleteNonPersistentSavepoint(std::vector<SavepointEntry> const& entries);
