@@ -1,9 +1,8 @@
 #include "PersisterFacadeImpl.h"
 
-#include "PersisterInterface/DeserializedSimulation.h"
 #include "EngineInterface/SimulationFacade.h"
-
-#include "PersisterRequestResult.h"
+#include "PersisterInterface/DeserializedSimulation.h"
+#include "PersisterInterface/PersisterRequestResult.h"
 
 _PersisterFacadeImpl::~_PersisterFacadeImpl()
 {
@@ -44,6 +43,11 @@ bool _PersisterFacadeImpl::isBusy() const
 std::optional<PersisterRequestState> _PersisterFacadeImpl::getRequestState(PersisterRequestId const& id) const
 {
     return _worker->getRequestState(id);
+}
+
+PersisterRequestResult _PersisterFacadeImpl::fetchPersisterRequestResult(PersisterRequestId const& id)
+{
+    return _worker->fetchRequestResult(id);
 }
 
 std::vector<PersisterErrorInfo> _PersisterFacadeImpl::fetchAllErrorInfos(SenderId const& senderId)
@@ -184,6 +188,16 @@ PersisterRequestId _PersisterFacadeImpl::scheduleGetPeakSimulation(SenderInfo co
 GetPeakSimulationResultData _PersisterFacadeImpl::fetchGetPeakSimulationData(PersisterRequestId const& id)
 {
     return fetchData<_GetPeakSimulationRequestResult, GetPeakSimulationResultData>(id);
+}
+
+PersisterRequestId _PersisterFacadeImpl::scheduleSaveDeserializedSimulation(SenderInfo const& senderInfo, SaveDeserializedSimulationRequestData const& data)
+{
+    return scheduleRequest<_SaveDeserializedSimulationRequest>(senderInfo, data);
+}
+
+SaveDeserializedSimulationResultData _PersisterFacadeImpl::fetchSaveDeserializedSimulationData(PersisterRequestId const& id)
+{
+    return fetchData<_SaveDeserializedSimulationRequestResult, SaveDeserializedSimulationResultData>(id);
 }
 
 PersisterRequestId _PersisterFacadeImpl::generateNewRequestId()

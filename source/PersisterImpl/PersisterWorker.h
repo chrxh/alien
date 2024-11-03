@@ -6,11 +6,11 @@
 #include <condition_variable>
 
 #include "PersisterInterface/PersisterRequestState.h"
+#include "PersisterInterface/PersisterRequestResult.h"
 
 #include "Definitions.h"
 #include "PersisterRequest.h"
 #include "PersisterRequestError.h"
-#include "PersisterRequestResult.h"
 
 class _PersisterWorker
 {
@@ -47,6 +47,7 @@ private:
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, MoveNetworkResourceRequest const& request);
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, ToggleReactionNetworkResourceRequest const& request);
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, GetPeakSimulationRequest const& request);
+    PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, SaveDeserializedSimulationRequest const& request);
 
     SimulationFacade _simulationFacade;
 

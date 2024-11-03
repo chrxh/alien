@@ -7,7 +7,9 @@
 
 #include "Base/LoggingService.h"
 #include "Base/StringHelper.h"
+#include "Base/UnlockGuard.h"
 #include "PersisterInterface/SerializerService.h"
+#include "PersisterInterface/PersisterRequestResult.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/GenomeDescriptionService.h"
 #include "Network/NetworkService.h"
@@ -156,6 +158,8 @@ void _PersisterWorker::processRequests(std::unique_lock<std::mutex>& lock)
             processingResult = processRequest(lock, concreteRequest);
         } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_GetPeakSimulationRequest>(request)) {
             processingResult = processRequest(lock, concreteRequest);
+        } else if (auto const& concreteRequest = std::dynamic_pointer_cast<_SaveDeserializedSimulationRequest>(request)) {
+            processingResult = processRequest(lock, concreteRequest);
         }
         auto inProgressJobsIter = std::ranges::find_if(
             _inProgressRequests, [&](PersisterRequest const& otherRequest) { return otherRequest->getRequestId() == request->getRequestId(); });
@@ -176,15 +180,17 @@ void _PersisterWorker::processRequests(std::unique_lock<std::mutex>& lock)
 
 namespace
 {
-    class UnlockGuard
+    std::filesystem::path generateFilename(std::filesystem::path const& directory, uint64_t timestep)
     {
-    public:
-        UnlockGuard(std::unique_lock<std::mutex>& lock) : _lock(lock) { _lock.unlock(); }
-        ~UnlockGuard() { _lock.lock(); }
-
-    private:
-        std::unique_lock<std::mutex>& _lock;
-    };
+        std::filesystem::path result;
+        int i = 0;
+        do {
+            auto postfix = i == 0 ? std::string() : "-" + std::to_string(i);
+            result = directory / ("save_" + StringHelper::format(timestep, '_') + postfix + ".sim");
+            ++i;
+        } while (std::filesystem::exists(result) && i < 100);
+        return result;
+    }
 }
 
 auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveSimulationRequest const& request) -> PersisterRequestResultOrError
@@ -215,14 +221,7 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveSi
     try {
         auto filename = requestData.filename;
         if (requestData.generateNameFromTimestep) {
-            std::filesystem::path fullFilename;
-            int i = 0;
-            do {
-                auto postfix = i == 0 ? std::string() : "-" + std::to_string(i);
-                fullFilename = filename / ("save_" + StringHelper::format(deserializedData.auxiliaryData.timestep, '_') + postfix + ".sim");
-                ++i;
-            } while (std::filesystem::exists(fullFilename) && i < 100);
-            filename = fullFilename;
+            filename = generateFilename(filename, deserializedData.auxiliaryData.timestep);
         }
         if (!SerializerService::get().serializeSimulationToFiles(filename, deserializedData)) {
             throw std::runtime_error("Error");
@@ -640,11 +639,46 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             deserializedSimulation.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
             deserializedSimulation.auxiliaryData.timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
             deserializedSimulation.mainData = _simulationFacade->getClusteredSimulationData();
-            requestData.peakDeserializedSimulation->setDeserializedSimulation(std::move(deserializedSimulation));
+            requestData.peakDeserializedSimulation->set(std::move(deserializedSimulation));
         }
         return std::make_shared<_GetPeakSimulationRequestResult>(request->getRequestId(), GetPeakSimulationResultData());
     } catch (...) {
         return std::make_shared<_PersisterRequestError>(
             request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"No valid data could be obtained from the GPU."});
+    }
+}
+
+_PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest(
+    std::unique_lock<std::mutex>& lock,
+    SaveDeserializedSimulationRequest const& request)
+{
+    try {
+        UnlockGuard unlockGuard(lock);
+
+        auto const& requestData = request->getData();
+
+        auto timestamp = std::chrono::system_clock::now();
+        auto deserializedData = requestData.sharedDeserializedSimulation->get();
+
+        auto filename = requestData.filename;
+        if (requestData.generateNameFromTimestep) {
+            filename = generateFilename(filename, deserializedData.auxiliaryData.timestep);
+        }
+        if (!SerializerService::get().serializeSimulationToFiles(filename, deserializedData)) {
+            throw std::runtime_error("Error");
+        }
+
+        return std::make_shared<_SaveDeserializedSimulationRequestResult>(
+            request->getRequestId(),
+            SaveDeserializedSimulationResultData{
+                .filename = filename,
+                .projectName = deserializedData.auxiliaryData.simulationParameters.projectName,
+                .timestep = deserializedData.auxiliaryData.timestep,
+                .timestamp = timestamp});
+    } catch (...) {
+        return std::make_shared<_PersisterRequestError>(
+            request->getRequestId(),
+            request->getSenderInfo().senderId,
+            PersisterErrorInfo{"The simulation could not be saved because an error occurred when writing the data to the specified file."});
     }
 }
