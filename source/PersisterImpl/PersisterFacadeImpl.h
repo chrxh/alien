@@ -19,6 +19,7 @@ public:
 
     bool isBusy() const override;
     std::optional<PersisterRequestState> getRequestState(PersisterRequestId const& id) const override;
+    PersisterRequestResult fetchPersisterRequestResult(PersisterRequestId const& id) override;
     std::vector<PersisterErrorInfo> fetchAllErrorInfos(SenderId const& senderId) override;
     PersisterErrorInfo fetchError(PersisterRequestId const& id) override;
 
@@ -60,6 +61,9 @@ public:
 
     PersisterRequestId scheduleGetPeakSimulation(SenderInfo const& senderInfo, GetPeakSimulationRequestData const& data) override;
     GetPeakSimulationResultData fetchGetPeakSimulationData(PersisterRequestId const& id) override;
+
+    PersisterRequestId scheduleSaveDeserializedSimulation(SenderInfo const& senderInfo, SaveDeserializedSimulationRequestData const& data) override;
+    SaveDeserializedSimulationResultData fetchSaveDeserializedSimulationData(PersisterRequestId const& id) override;
 
 private:
     static auto constexpr MaxWorkerThreads = 4;

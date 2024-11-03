@@ -16,10 +16,16 @@ public:
         return _deserializedSimulation.statistics.back();
     }
 
-    void setDeserializedSimulation(DeserializedSimulation&& value)
+    void set(DeserializedSimulation&& value)
     {
         std::lock_guard lock(_mutex);
         _deserializedSimulation = std::move(value);
+    }
+
+    DeserializedSimulation get() const
+    {
+        std::lock_guard lock(_mutex);
+        return _deserializedSimulation;
     }
 
 private:

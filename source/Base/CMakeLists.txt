@@ -22,6 +22,7 @@ add_library(Base
     Singleton.h
     StringHelper.cpp
     StringHelper.h
+    UnlockGuard.h
     Vector2D.cpp
     Vector2D.h
     VersionChecker.cpp

@@ -28,6 +28,7 @@ add_library(PersisterInterface
     PersisterErrorInfo.h
     PersisterFacade.h
     PersisterRequestId.h
+    PersisterRequestResult.h
     PersisterRequestState.h
     ReadSimulationRequestData.h
     ReadSimulationResultData.h

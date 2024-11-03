@@ -6,7 +6,6 @@ add_library(PersisterImpl
     PersisterRequest.h
     PersisterRequestError.cpp
     PersisterRequestError.h
-    PersisterRequestResult.h
     PersisterWorker.cpp
     PersisterWorker.h)
 

@@ -11,8 +11,9 @@
 #include "PersisterInterface/ReadSimulationRequestData.h"
 #include "PersisterInterface/PersisterRequestId.h"
 #include "PersisterInterface/ReplaceNetworkResourceRequestData.h"
-#include "PersisterInterface/SenderInfo.h"
+#include "PersisterInterface/SaveDeserializedSimulationRequestData.h"
 #include "PersisterInterface/SaveSimulationRequestData.h"
+#include "PersisterInterface/SenderInfo.h"
 #include "PersisterInterface/ToggleReactionNetworkResourceRequestData.h"
 #include "PersisterInterface/UploadNetworkResourceRequestData.h"
 
@@ -95,3 +96,6 @@ using ToggleReactionNetworkResourceRequest = std::shared_ptr<_ToggleReactionNetw
 
 using _GetPeakSimulationRequest = _ConcreteRequest<GetPeakSimulationRequestData>;
 using GetPeakSimulationRequest = std::shared_ptr<_GetPeakSimulationRequest>;
+
+using _SaveDeserializedSimulationRequest = _ConcreteRequest<SaveDeserializedSimulationRequestData>;
+using SaveDeserializedSimulationRequest = std::shared_ptr<_SaveDeserializedSimulationRequest>;

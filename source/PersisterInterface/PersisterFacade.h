@@ -29,6 +29,8 @@
 #include "PersisterRequestState.h"
 #include "ReplaceNetworkResourceRequestData.h"
 #include "ReplaceNetworkResourceResultData.h"
+#include "SaveDeserializedSimulationRequestData.h"
+#include "SaveDeserializedSimulationResultData.h"
 #include "SaveSimulationResultData.h"
 #include "SaveSimulationRequestData.h"
 #include "SenderId.h"
@@ -37,6 +39,7 @@
 #include "ToggleReactionNetworkResourceResultData.h"
 #include "UploadNetworkResourceRequestData.h"
 #include "UploadNetworkResourceResultData.h"
+#include "PersisterRequestResult.h"
 
 class _PersisterFacade
 {
@@ -51,6 +54,7 @@ public:
     //generic logic
     virtual bool isBusy() const = 0;
     virtual std::optional<PersisterRequestState> getRequestState(PersisterRequestId const& id) const = 0;
+    virtual PersisterRequestResult fetchPersisterRequestResult(PersisterRequestId const& id) = 0;
     virtual std::vector<PersisterErrorInfo> fetchAllErrorInfos(SenderId const& senderId) = 0;
     virtual PersisterErrorInfo fetchError(PersisterRequestId const& id) = 0;
 
@@ -93,4 +97,7 @@ public:
 
     virtual PersisterRequestId scheduleGetPeakSimulation(SenderInfo const& senderInfo, GetPeakSimulationRequestData const& data) = 0;
     virtual GetPeakSimulationResultData fetchGetPeakSimulationData(PersisterRequestId const& id) = 0;
+
+    virtual PersisterRequestId scheduleSaveDeserializedSimulation(SenderInfo const& senderInfo, SaveDeserializedSimulationRequestData const& data) = 0;
+    virtual SaveDeserializedSimulationResultData fetchSaveDeserializedSimulationData(PersisterRequestId const& id) = 0;
 };
