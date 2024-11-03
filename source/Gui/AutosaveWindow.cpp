@@ -108,7 +108,7 @@ void AutosaveWindow::processToolbar()
     ImGui::SameLine();
     ImGui::BeginDisabled(!_savepointTable.has_value());
     if (AlienImGui::ToolbarButton(ICON_FA_PLUS)) {
-        onCreateSavepoint();
+        onCreateSavepoint(false);
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Create save point");
@@ -275,7 +275,7 @@ void AutosaveWindow::processStatusBar()
     AlienImGui::StatusBar(statusText);
 }
 
-void AutosaveWindow::onCreateSavepoint()
+void AutosaveWindow::onCreateSavepoint(bool usePeakSimulation)
 {
     printOverlayMessage("Creating save point ...");
 
@@ -283,13 +283,19 @@ void AutosaveWindow::onCreateSavepoint()
         auto nonPersistentEntries = SavepointTableService::get().truncate(_savepointTable.value(), _numberOfFiles - 1);
         scheduleDeleteNonPersistentSavepoint(nonPersistentEntries);
     }
-    auto senderInfo = SenderInfo{.senderId = SenderId{AutosaveSenderId}, .wishResultData = true, .wishErrorInfo = true};
-    auto saveData = SaveSimulationRequestData{
-        .filename = _directory,
-        .zoom = Viewport::get().getZoomFactor(),
-        .center = Viewport::get().getCenterInWorldPos(),
-        .generateNameFromTimestep = true};
-    auto requestId = _persisterFacade->scheduleSaveSimulation(senderInfo, saveData);
+
+    PersisterRequestId requestId;
+    if (usePeakSimulation) {
+        auto senderInfo = SenderInfo{.senderId = SenderId{AutosaveSenderId}, .wishResultData = true, .wishErrorInfo = true};
+        auto saveData = SaveDeserializedSimulationRequestData{
+            .filename = _directory, .sharedDeserializedSimulation = _peakDeserializedSimulation, .generateNameFromTimestep = true};
+        requestId = _persisterFacade->scheduleSaveDeserializedSimulation(senderInfo, saveData);
+    } else {
+        auto senderInfo = SenderInfo{.senderId = SenderId{AutosaveSenderId}, .wishResultData = true, .wishErrorInfo = true};
+        auto saveData = SaveSimulationRequestData{
+            .filename = _directory, .zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos(), .generateNameFromTimestep = true};
+        requestId = _persisterFacade->scheduleSaveSimulation(senderInfo, saveData);
+    }
 
     auto entry = std::make_shared<_SavepointEntry>(
         _SavepointEntry{.filename = "", .state = SavepointState_InQueue, .timestamp = "", .name = "", .timestep = 0, .requestId = requestId.value});
@@ -327,12 +333,12 @@ void AutosaveWindow::processAutomaticSavepoints()
 
     auto minSinceLastAutosave = std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - _lastAutosaveTimepoint).count();
     if (minSinceLastAutosave >= _autosaveInterval) {
-        onCreateSavepoint();
+        onCreateSavepoint(_catchPeak != CatchPeak_None);
         _lastAutosaveTimepoint = std::chrono::steady_clock::now();
     }
 
     auto minSinceLastCatchPeak = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - _lastPeakTimepoint).count();
-    if (minSinceLastCatchPeak >= 10) {
+    if (minSinceLastCatchPeak >= 60) {
         _peakProcessor->executeTask(
             [&](auto const& senderId) {
                 return _persisterFacade->scheduleGetPeakSimulation(
@@ -394,11 +400,21 @@ void AutosaveWindow::updateSavepoint(int row)
             }
             if (requestState.value() == PersisterRequestState::Finished) {
                 newEntry->state = SavepointState_Persisted;
-                auto requestResult = _persisterFacade->fetchSaveSimulationData(PersisterRequestId{newEntry->requestId});
-                newEntry->timestep = requestResult.timestep;
-                newEntry->timestamp = StringHelper::format(requestResult.timestamp);
-                newEntry->name = requestResult.projectName;
-                newEntry->filename = requestResult.filename;
+                auto requestResult = _persisterFacade->fetchPersisterRequestResult(PersisterRequestId{newEntry->requestId});
+
+                if (auto saveResult = std::dynamic_pointer_cast<_SaveSimulationRequestResult>(requestResult)) {
+                    auto const& data = saveResult->getData();
+                    newEntry->timestep = data.timestep;
+                    newEntry->timestamp = StringHelper::format(data.timestamp);
+                    newEntry->name = data.projectName;
+                    newEntry->filename = data.filename;
+                } else if (auto saveResult = std::dynamic_pointer_cast<_SaveDeserializedSimulationRequestResult>(requestResult)) {
+                    auto const& data = saveResult->getData();
+                    newEntry->timestep = data.timestep;
+                    newEntry->timestamp = StringHelper::format(data.timestamp);
+                    newEntry->name = data.projectName;
+                    newEntry->filename = data.filename;
+                }
             }
             if (requestState.value() == PersisterRequestState::Error) {
                 newEntry->state = SavepointState_Error;
