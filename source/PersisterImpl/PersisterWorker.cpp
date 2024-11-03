@@ -639,7 +639,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             deserializedSimulation.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
             deserializedSimulation.auxiliaryData.timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
             deserializedSimulation.mainData = _simulationFacade->getClusteredSimulationData();
-            requestData.peakDeserializedSimulation->set(std::move(deserializedSimulation));
+            requestData.peakDeserializedSimulation->setDeserializedSimulation(std::move(deserializedSimulation));
         }
         return std::make_shared<_GetPeakSimulationRequestResult>(request->getRequestId(), GetPeakSimulationResultData());
     } catch (...) {
@@ -657,8 +657,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
 
         auto const& requestData = request->getData();
 
-        auto timestamp = std::chrono::system_clock::now();
-        auto deserializedData = requestData.sharedDeserializedSimulation->get();
+        auto deserializedData = requestData.sharedDeserializedSimulation->getDeserializedSimulation();
 
         auto filename = requestData.filename;
         if (requestData.generateNameFromTimestep) {
@@ -674,7 +673,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
                 .filename = filename,
                 .projectName = deserializedData.auxiliaryData.simulationParameters.projectName,
                 .timestep = deserializedData.auxiliaryData.timestep,
-                .timestamp = timestamp});
+                .timestamp = requestData.sharedDeserializedSimulation->getTimestamp()});
     } catch (...) {
         return std::make_shared<_PersisterRequestError>(
             request->getRequestId(),

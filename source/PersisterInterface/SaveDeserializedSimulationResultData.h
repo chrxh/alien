@@ -1,5 +1,8 @@
 #pragma once
 
+#include <filesystem>
+#include <chrono>
+
 struct SaveDeserializedSimulationResultData
 {
     std::filesystem::path filename;
