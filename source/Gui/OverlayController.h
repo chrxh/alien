@@ -19,7 +19,7 @@ public:
     void setOn(bool value);
 
 private:
-    void processLoadingBar();
+    void processProgressAnimation();
     void processMessage();
 
     PersisterFacade _persisterFacade;
