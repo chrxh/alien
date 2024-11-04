@@ -60,7 +60,7 @@ public:
     void switchSelection(PointSelectionData const& switchData);
     void swapSelection(PointSelectionData const& selectionData);
     void setSelection(AreaSelectionData const& selectionData);
-    SelectionShallowData getSelectionShallowData(float2 const& refPos);
+    SelectionShallowData getSelectionShallowData();
     void shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& shallowUpdateData);
     void removeSelection();
     void updateSelection();

@@ -29,7 +29,7 @@ __global__ void cudaScheduleConnectSelection(SimulationData data, bool considerW
 __global__ void cudaPrepareMapForReconnection(SimulationData data);
 __global__ void cudaUpdateMapForReconnection(SimulationData data);
 __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data, float2 center);
-__global__ void cudaCalcAccumulatedCenterAndVel(SimulationData data, float2* center, float2* velocity, int* numEntities, bool includeClusters);
+__global__ void cudaCalcAccumulatedCenterAndVel(SimulationData data, int refCellIndex, float2* center, float2* velocity, int* numEntities, bool includeClusters);
 __global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data);
 __global__ void cudaSetVelocityForSelection(SimulationData data, float2 velocity, bool includeClusters);
 __global__ void cudaMakeSticky(SimulationData data, bool includeClusters);
@@ -47,7 +47,8 @@ __global__ void cudaSwapSelection(float2 pos, float radius, SimulationData data)
 __global__ void cudaRolloutSelectionStep(SimulationData data, int* result);
 __global__ void cudaApplyForce(SimulationData data, ApplyForceData applyData);
 __global__ void cudaResetSelectionResult(SelectionResult result);
-__global__ void cudaGetSelectionShallowData(SimulationData data, float2 refPos, SelectionResult result);
+__global__ void cudaCalcCellWithMinimalPosY(SimulationData data, unsigned long long int* minCellPosYAndIndex);
+__global__ void cudaGetSelectionShallowData(SimulationData data, int refCellIndex, SelectionResult result);
 __global__ void cudaFinalizeSelectionResult(SelectionResult result, BaseMap map);
 __global__ void cudaSetDetached(SimulationData data, bool value);
 __global__ void cudaApplyCataclysm(SimulationData data);

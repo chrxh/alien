@@ -175,7 +175,7 @@ void SimulationInteractionController::leftMouseButtonPressed(IntVector2D const& 
                     _simulationFacade->setDetached(true);
                 }
 
-                auto shallowData = _simulationFacade->getSelectionShallowData(*_worldPosOnClick);
+                auto shallowData = _simulationFacade->getSelectionShallowData();
                 _selectionPositionOnClick = {shallowData.centerPosX, shallowData.centerPosY};
             } else {
                 CreatorWindow::get().onDrawing();

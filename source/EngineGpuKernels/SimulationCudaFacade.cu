@@ -335,9 +335,9 @@ void _SimulationCudaFacade::setSelection(AreaSelectionData const& selectionData)
     _editKernels->setSelection(_settings.gpuSettings, getSimulationDataIntern(), selectionData);
 }
 
- SelectionShallowData _SimulationCudaFacade::getSelectionShallowData(float2 const& refPos)
+ SelectionShallowData _SimulationCudaFacade::getSelectionShallowData()
 {
-    _editKernels->getSelectionShallowData(_settings.gpuSettings, getSimulationDataIntern(), refPos, * _cudaSelectionResult);
+    _editKernels->getSelectionShallowData(_settings.gpuSettings, getSimulationDataIntern(), *_cudaSelectionResult);
     syncAndCheck();
     return _cudaSelectionResult->getSelectionShallowData();
 }

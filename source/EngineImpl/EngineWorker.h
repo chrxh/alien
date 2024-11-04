@@ -95,7 +95,7 @@ public:
 
     void switchSelection(RealVector2D const& pos, float radius);
     void swapSelection(RealVector2D const& pos, float radius);
-    SelectionShallowData getSelectionShallowData(RealVector2D const& refPos);
+    SelectionShallowData getSelectionShallowData();
     void setSelection(RealVector2D const& startPos, RealVector2D const& endPos);
     void removeSelection();
     void updateSelection();
