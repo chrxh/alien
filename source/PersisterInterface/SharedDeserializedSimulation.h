@@ -39,6 +39,12 @@ public:
         return _timestamp;
     }
 
+    void reset()
+    {
+        setDeserializedSimulation(DeserializedSimulation());
+        setLastStatisticsData(RawStatisticsData());
+    }
+
     bool isEmpty() const
     {
         std::lock_guard lock(_mutex);

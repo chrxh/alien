@@ -115,7 +115,7 @@ void AutosaveWindow::processToolbar()
     AlienImGui::Tooltip("Create save point");
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(!static_cast<bool>(_selectedEntry) || _selectedEntry->state != SavepointState_Persisted);
+    ImGui::BeginDisabled(!static_cast<bool>(_selectedEntry) || (_selectedEntry->state != SavepointState_Persisted && !_selectedEntry->requestId.empty()));
     if (AlienImGui::ToolbarButton(ICON_FA_MINUS)) {
         onDeleteSavepoint(_selectedEntry);
     }
@@ -166,6 +166,12 @@ void AutosaveWindow::processTable()
 
                 // project name
                 ImGui::TableNextColumn();
+                if (entry->state == SavepointState_InQueue) {
+                    AlienImGui::Text("In queue");
+                }
+                if (entry->state == SavepointState_InProgress) {
+                    AlienImGui::Text("In progress");
+                }
                 if (entry->state == SavepointState_Persisted) {
                     auto triggerLoadSavepoint = AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_DOWNLOAD));
                     AlienImGui::Tooltip("Load savepoint", false);
@@ -175,6 +181,9 @@ void AutosaveWindow::processTable()
 
                     ImGui::SameLine();
                     AlienImGui::Text(entry->name);
+                }
+                if (entry->state == SavepointState_Error) {
+                    AlienImGui::Text("Error");
                 }
 
                 ImGui::SameLine();
@@ -189,17 +198,8 @@ void AutosaveWindow::processTable()
 
                 // timestamp
                 ImGui::TableNextColumn();
-                if (entry->state == SavepointState_InQueue) {
-                    AlienImGui::Text("In queue");
-                }
-                if (entry->state == SavepointState_InProgress) {
-                    AlienImGui::Text("In progress");
-                }
                 if (entry->state == SavepointState_Persisted) {
                     AlienImGui::Text(entry->timestamp);
-                }
-                if (entry->state == SavepointState_Error) {
-                    AlienImGui::Text("Error");
                 }
 
                 // timestep
@@ -247,8 +247,8 @@ void AutosaveWindow::processSettings()
                     _lastAutosaveTimepoint = std::chrono::steady_clock::now();
                 }
             }
-            if (AlienImGui::Combo(
-                AlienImGui::ComboParameters()
+            if (AlienImGui::Switcher(
+                    AlienImGui::SwitcherParameters()
                     .name("Catch peaks")
                     .textWidth(RightColumnWidth)
                     .defaultValue(_origCatchPeaks)
@@ -266,8 +266,8 @@ void AutosaveWindow::processSettings()
                     _directory)) {
                 updateSavepointTableFromFile();
             }
-            AlienImGui::Combo(
-                AlienImGui::ComboParameters()
+            AlienImGui::Switcher(
+                AlienImGui::SwitcherParameters()
                     .name("Mode")
                     .values({"Circular save files", "Unlimited save files"})
                     .textWidth(RightColumnWidth)
@@ -444,7 +444,7 @@ void AutosaveWindow::updateSavepoint(int row)
                     newEntry->filename = data.filename;
                     newEntry->peak = StringHelper::format(toFloat(sumColorVector(data.rawStatisticsData.timeline.timestep.genomeComplexityVariance)), 2);
                     newEntry->peakType = "genome complexity variance";
-                    _peakDeserializedSimulation->setDeserializedSimulation(DeserializedSimulation());
+                    _peakDeserializedSimulation->reset();
                 }
             }
             if (requestState.value() == PersisterRequestState::Error) {

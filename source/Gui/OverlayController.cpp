@@ -18,6 +18,7 @@ namespace
     auto constexpr ShowDuration = 800;
     auto constexpr FadeoutTextDuration = 800;
     auto constexpr FadeoutLightningDuration = 1200;
+    auto constexpr FadeoutProgressAnimationDuration = 1000;
 }
 
 void OverlayController::setup(PersisterFacade const& persisterFacade)
@@ -55,11 +56,20 @@ void OverlayController::setOn(bool value)
 void OverlayController::processProgressAnimation()
 {
     if (_persisterFacade->isBusy()) {
+        _busyTimepoint = std::chrono::steady_clock::now();
+    }
+    if (!_busyTimepoint.has_value()) {
+        return;
+    }
+    auto now = std::chrono::steady_clock::now();
+    auto millisecSinceBusy = std::chrono::duration_cast<std::chrono::milliseconds>(now - *_busyTimepoint).count();
+
+    if (millisecSinceBusy < FadeoutProgressAnimationDuration) {
         if (!_progressBarRefTimepoint.has_value()) {
             _progressBarRefTimepoint = std::chrono::steady_clock::now();
         }
-        auto now = std::chrono::steady_clock::now();
         auto duration = toFloat(std::chrono::duration_cast<std::chrono::milliseconds>(now - *_progressBarRefTimepoint).count());
+        auto alpha = 1.0f - toFloat(millisecSinceBusy) / FadeoutProgressAnimationDuration;
 
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
 
@@ -73,7 +83,7 @@ void OverlayController::processProgressAnimation()
             ImVec2{center.x, center.y + height},
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f),
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f),
-            ImColor::HSV(0.66f, 1.0f, 0.1f, 1.0f),
+            ImColor::HSV(0.66f, 1.0f, 0.1f, 1.0f * alpha),
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f));
         drawList->AddRectFilledMultiColor(
             ImVec2{center.x, center.y - height * 5},
@@ -81,11 +91,11 @@ void OverlayController::processProgressAnimation()
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f),
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f),
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f),
-            ImColor::HSV(0.66f, 1.0f, 0.1f, 1.0f));
+            ImColor::HSV(0.66f, 1.0f, 0.1f, 1.0f * alpha));
         drawList->AddRectFilledMultiColor(
             ImVec2{center.x, center.y + height},
             ImVec2{center.x + width, center.y + height * 6},
-            ImColor::HSV(0.66f, 1.0f, 0.1f, 1.0f),
+            ImColor::HSV(0.66f, 1.0f, 0.1f, 1.0f * alpha),
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f),
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f),
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f));
@@ -93,7 +103,7 @@ void OverlayController::processProgressAnimation()
             ImVec2{center.x - width, center.y + height},
             ImVec2{center.x, center.y + height * 6},
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f),
-            ImColor::HSV(0.66f, 1.0f, 0.1f, 1.0f),
+            ImColor::HSV(0.66f, 1.0f, 0.1f, 1.0f * alpha),
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f),
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f));
         auto N = 8 + toInt(powf(sinf(duration / 500.0f - Const::Pi / 4) + 1, 3.0f) * 5);
@@ -107,18 +117,19 @@ void OverlayController::processProgressAnimation()
             drawList->AddRectFilled(
                 ImVec2{center.x - width / 2 + toFloat(i) / N * width, std::min(y1, y2)},
                 ImVec2{center.x - width / 2 + toFloat(i + 1) / N * width - scale(3), std::max(y1, y2)},
-                ImColor::HSV(0.625f, 0.8f, 0.55f, 0.6f));
+                ImColor::HSV(0.625f, 0.8f, 0.45f, 0.7f * alpha));
         }
         drawList->AddText(
             StyleRepository::get().getReefMediumFont(),
             scale(16.0f),
             {center.x - scale(28.0f), center.y - scale(15.0f)},
-            ImColor::HSV(0, 0, 1, 0.7f),
+            ImColor::HSV(0, 0, 1, 0.7f * alpha),
             "Processing");
 
 
     } else {
         _progressBarRefTimepoint.reset();
+        _busyTimepoint.reset();
     }
 }
 
