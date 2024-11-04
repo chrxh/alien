@@ -13,6 +13,7 @@ _EditKernelsLauncher::_EditKernelsLauncher()
     CudaMemoryManager::getInstance().acquireMemory<float2>(1, _cudaCenter);
     CudaMemoryManager::getInstance().acquireMemory<float2>(1, _cudaVelocity);
     CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaNumEntities);
+    CudaMemoryManager::getInstance().acquireMemory<unsigned long long int>(1, _cudaMinCellPosYAndIndex);
     _garbageCollector = std::make_shared<_GarbageCollectorKernelsLauncher>();
 }
 
@@ -25,6 +26,7 @@ _EditKernelsLauncher::~_EditKernelsLauncher()
     CudaMemoryManager::getInstance().freeMemory(_cudaCenter);
     CudaMemoryManager::getInstance().freeMemory(_cudaVelocity);
     CudaMemoryManager::getInstance().freeMemory(_cudaNumEntities);
+    CudaMemoryManager::getInstance().freeMemory(_cudaMinCellPosYAndIndex);
 }
 
 void _EditKernelsLauncher::removeSelection(GpuSettings const& gpuSettings, SimulationData const& data)
@@ -64,14 +66,14 @@ void _EditKernelsLauncher::updateSelection(GpuSettings const& gpuSettings, Simul
     rolloutSelection(gpuSettings, data);
 }
 
-void _EditKernelsLauncher::getSelectionShallowData(
-    GpuSettings const& gpuSettings,
-    SimulationData const& data,
-    float2 const& refPos,
-    SelectionResult const& selectionResult)
+void _EditKernelsLauncher::getSelectionShallowData(GpuSettings const& gpuSettings, SimulationData const& data, SelectionResult const& selectionResult)
 {
     KERNEL_CALL_1_1(cudaResetSelectionResult, selectionResult);
-    KERNEL_CALL(cudaGetSelectionShallowData, data, refPos, selectionResult);
+    setValueToDevice(_cudaMinCellPosYAndIndex, 0xffffffffffffffff);
+    KERNEL_CALL(cudaCalcCellWithMinimalPosY, data, _cudaMinCellPosYAndIndex);
+    cudaDeviceSynchronize();
+    auto refCellIndex = static_cast<int>(copyToHost(_cudaMinCellPosYAndIndex) & 0xffffffff);
+    KERNEL_CALL(cudaGetSelectionShallowData, data, refCellIndex, selectionResult);
     KERNEL_CALL_1_1(cudaFinalizeSelectionResult, selectionResult, data.cellMap);
 }
 
@@ -103,7 +105,13 @@ void _EditKernelsLauncher::shallowUpdateSelectedObjects(
     if (updateData.angleDelta != 0 || updateData.angularVelDelta != 0) {
         setValueToDevice(_cudaCenter, float2{0, 0});
         setValueToDevice(_cudaNumEntities, 0);
-        KERNEL_CALL(cudaCalcAccumulatedCenterAndVel, data, _cudaCenter, nullptr, _cudaNumEntities, updateData.considerClusters);
+
+        setValueToDevice(_cudaMinCellPosYAndIndex, 0xffffffff00000000);
+        KERNEL_CALL(cudaCalcCellWithMinimalPosY, data, _cudaMinCellPosYAndIndex);
+        cudaDeviceSynchronize();
+        auto refCellIndex = static_cast<int>(copyToHost(_cudaMinCellPosYAndIndex) & 0xffffffff);
+
+        KERNEL_CALL(cudaCalcAccumulatedCenterAndVel, data, refCellIndex, _cudaCenter, nullptr, _cudaNumEntities, updateData.considerClusters);
         cudaDeviceSynchronize();
 
         auto numEntities = copyToHost(_cudaNumEntities);
@@ -158,7 +166,7 @@ void _EditKernelsLauncher::uniformVelocities(GpuSettings const& gpuSettings, Sim
 {
     setValueToDevice(_cudaVelocity, float2{0, 0});
     setValueToDevice(_cudaNumEntities, 0);
-    KERNEL_CALL(cudaCalcAccumulatedCenterAndVel, data, nullptr, _cudaVelocity, _cudaNumEntities, includeClusters);
+    KERNEL_CALL(cudaCalcAccumulatedCenterAndVel, data, -1, nullptr, _cudaVelocity, _cudaNumEntities, includeClusters);
     cudaDeviceSynchronize();
 
     auto numEntities = copyToHost(_cudaNumEntities);

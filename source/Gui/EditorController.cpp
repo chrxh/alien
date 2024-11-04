@@ -264,7 +264,7 @@ void EditorController::onMoveSelectedObjects(
 
 void EditorController::onFixateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos, RealVector2D const& selectionPositionOnClick)
 {
-    auto shallowData = _simulationFacade->getSelectionShallowData(selectionPositionOnClick);
+    auto shallowData = _simulationFacade->getSelectionShallowData();
     auto selectionPosition = RealVector2D{shallowData.centerPosX, shallowData.centerPosY};
     auto selectionDelta = selectionPosition - selectionPositionOnClick;
 

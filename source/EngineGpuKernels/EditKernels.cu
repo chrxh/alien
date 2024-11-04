@@ -239,17 +239,20 @@ __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionD
     }
 }
 
-__global__ void cudaCalcAccumulatedCenterAndVel(SimulationData data, float2* center, float2* velocity, int* numEntities, bool includeClusters)
+__global__ void cudaCalcAccumulatedCenterAndVel(SimulationData data, int refCellIndex, float2* center, float2* velocity, int* numEntities, bool includeClusters)
 {
     {
+        float2 refPos = refCellIndex != -1 ? data.objects.cellPointers.at(refCellIndex)->pos : float2{0, 0};
+
         auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& cell = data.objects.cellPointers.at(index);
             if (isSelected(cell, includeClusters)) {
                 if (center) {
-                    atomicAdd(&center->x, cell->pos.x);
-                    atomicAdd(&center->y, cell->pos.y);
+                    auto pos = cell->pos + data.cellMap.getCorrectionIncrement(refPos, cell->pos);
+                    atomicAdd(&center->x, pos.x);
+                    atomicAdd(&center->y, pos.y);
                 }
                 if (velocity) {
                     atomicAdd(&velocity->x, cell->vel.x);
@@ -574,8 +577,22 @@ __global__ void cudaResetSelectionResult(SelectionResult result)
     result.reset();
 }
 
-__global__ void cudaGetSelectionShallowData(SimulationData data, float2 refPos, SelectionResult result)
+__global__ void cudaCalcCellWithMinimalPosY(SimulationData data, unsigned long long int* minCellPosYAndIndex)
 {
+    auto const cellBlock = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
+
+    for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+        auto const& cell = data.objects.cellPointers.at(index);
+        if (0 != cell->selected) {
+            atomicMin(minCellPosYAndIndex, (static_cast<unsigned long long int>(abs(cell->pos.y)) << 32) | static_cast<unsigned long long int>(index));
+        }
+    }
+}
+
+__global__ void cudaGetSelectionShallowData(SimulationData data, int refCellIndex, SelectionResult result)
+{
+    float2 refPos = refCellIndex != 0xffffffff ? data.objects.cellPointers.at(refCellIndex)->pos : float2{0, 0};
+
     auto const cellBlock = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
 
     for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {

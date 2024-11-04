@@ -302,9 +302,9 @@ void _SimulationFacadeImpl::swapSelection(RealVector2D const& pos, float radius)
     _worker.swapSelection(pos, radius);
 }
 
-SelectionShallowData _SimulationFacadeImpl::getSelectionShallowData(RealVector2D const& refPos)
+SelectionShallowData _SimulationFacadeImpl::getSelectionShallowData()
 {
-    return _worker.getSelectionShallowData(refPos);
+    return _worker.getSelectionShallowData();
 }
 
 void _SimulationFacadeImpl::shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& updateData)
