@@ -448,6 +448,10 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value, bool* enabled)
         items[i] = parameters._values[i].c_str();
     }
 
+    if (parameters._disabled) {
+        ImGui::BeginDisabled();
+    }
+
     if (enabled) {
         ImGui::Checkbox(("##checkbox" + parameters._name).c_str(), enabled);
         ImGui::BeginDisabled(!(*enabled));
@@ -479,6 +483,10 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value, bool* enabled)
         ImGui::EndDisabled();
     }
 
+    if (parameters._disabled) {
+        ImGui::EndDisabled();
+    }
+
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
@@ -490,6 +498,10 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value, bool* enabled)
 bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value, bool* enabled /*= nullptr*/)
 {
     ImGui::PushID(parameters._name.c_str());
+
+    if (parameters._disabled) {
+        ImGui::BeginDisabled();
+    }
 
     //enable button
     if (enabled) {
@@ -540,6 +552,9 @@ bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value, bool* enab
     ImGui::TextUnformatted(parameters._name.c_str());
 
     if (enabled) {
+        ImGui::EndDisabled();
+    }
+    if (parameters._disabled) {
         ImGui::EndDisabled();
     }
 
@@ -1171,6 +1186,21 @@ bool AlienImGui::Button(ButtonParameters const& parameters)
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
+    return result;
+}
+
+bool AlienImGui::ActionButton(ActionButtonParameters const& parameters)
+{
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::ActionButtonTextColor.Value);
+    ImGui::PushStyleColor(ImGuiCol_Button, Const::ActionButtonBackgroundColor.Value);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Const::ActionButtonHoveredColor.Value);
+    auto result = ImGui::Button(parameters._buttonText.c_str());
+    ImGui::PopStyleColor(3);
+
+    if (parameters._tooltip) {
+        AlienImGui::HelpMarker(*parameters._tooltip);
+    }
+
     return result;
 }
 

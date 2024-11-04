@@ -625,12 +625,13 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
 
         auto const& requestData = request->getData();
 
-        auto peakStatistics = requestData.peakDeserializedSimulation->getLastStatisticsData();
+        auto peakStatistics = requestData.peakDeserializedSimulation->getRawStatisticsData();
 
         DeserializedSimulation deserializedSimulation;
         deserializedSimulation.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
-        if (!deserializedSimulation.statistics.empty() && deserializedSimulation.statistics.back().varianceGenomeComplexity.summedValues
-            >= peakStatistics.varianceGenomeComplexity.summedValues) {
+        auto currentRawStatistics = _simulationFacade->getRawStatistics();
+        if (sumColorVector(currentRawStatistics.timeline.timestep.genomeComplexityVariance)
+            >= sumColorVector(peakStatistics.timeline.timestep.genomeComplexityVariance)) {
 
             deserializedSimulation.auxiliaryData.realTime = _simulationFacade->getRealTime();
             deserializedSimulation.auxiliaryData.zoom = requestData.zoom;
@@ -640,6 +641,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             deserializedSimulation.auxiliaryData.timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
             deserializedSimulation.mainData = _simulationFacade->getClusteredSimulationData();
             requestData.peakDeserializedSimulation->setDeserializedSimulation(std::move(deserializedSimulation));
+            requestData.peakDeserializedSimulation->setLastStatisticsData(currentRawStatistics);
         }
         return std::make_shared<_GetPeakSimulationRequestResult>(request->getRequestId(), GetPeakSimulationResultData());
     } catch (...) {
@@ -673,7 +675,8 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
                 .filename = filename,
                 .projectName = deserializedData.auxiliaryData.simulationParameters.projectName,
                 .timestep = deserializedData.auxiliaryData.timestep,
-                .timestamp = requestData.sharedDeserializedSimulation->getTimestamp()});
+                .timestamp = requestData.sharedDeserializedSimulation->getTimestamp(),
+                .rawStatisticsData = requestData.sharedDeserializedSimulation->getRawStatisticsData()});
     } catch (...) {
         return std::make_shared<_PersisterRequestError>(
             request->getRequestId(),

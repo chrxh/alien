@@ -28,6 +28,7 @@ private:
 
     void onCreateSavepoint(bool usePeakSimulation);
     void onDeleteSavepoint(SavepointEntry const& entry);
+    void onLoadSavepoint(SavepointEntry const& entry);
 
     void scheduleDeleteNonPersistentSavepoint(std::vector<SavepointEntry> const& entries);
     void processDeleteNonPersistentSavepoint();
@@ -74,14 +75,14 @@ private:
 
     std::chrono::steady_clock::time_point _lastAutosaveTimepoint;
 
-    using CatchPeak = int;
-    enum CatchPeak_
+    using CatchPeaks = int;
+    enum CatchPeaks_
     {
-        CatchPeak_None,
-        CatchPeak_Variance
+        CatchPeaks_None,
+        CatchPeaks_Variance
     };
-    CatchPeak _origCatchPeak = CatchPeak_None;
-    CatchPeak _catchPeak = _origCatchPeak;
+    CatchPeaks _origCatchPeaks = CatchPeaks_None;
+    CatchPeaks _catchPeaks = _origCatchPeaks;
     std::chrono::steady_clock::time_point _lastPeakTimepoint;
     TaskProcessor _peakProcessor;
     SharedDeserializedSimulation _peakDeserializedSimulation;

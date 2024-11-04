@@ -12,8 +12,10 @@ class FileTransferController : public MainLoopEntity<PersisterFacade, Simulation
     MAKE_SINGLETON(FileTransferController);
 
 public:
-    void onOpenSimulation();
-    void onSaveSimulation();
+    void onOpenSimulationDialog();
+    void onOpenSimulation(std::filesystem::path const& filename);
+
+    void onSaveSimulationDialog();
 
 private:
     void init(PersisterFacade persisterFacade, SimulationFacade simulationFacade) override;

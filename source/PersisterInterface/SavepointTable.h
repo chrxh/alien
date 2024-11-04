@@ -23,6 +23,8 @@ struct _SavepointEntry
     std::string timestamp;
     std::string name;
     uint64_t timestep = 0;
+    std::string peak;
+    std::string peakType;
 
     std::string requestId;  // transient
 };

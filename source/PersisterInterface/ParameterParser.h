@@ -44,9 +44,9 @@ namespace detail
             std::string valueAsString;
             std::string defaultValueAsString(defaultValue);
             result = JsonParser::encodeDecode(tree, valueAsString, defaultValueAsString, node, task);
-            auto copyLength = std::min(127, toInt(valueAsString.size()));
+            auto copyLength = std::min(63, toInt(valueAsString.size()));
             valueAsString.copy(value, copyLength);
-            value[copyLength + 1] = '\0';
+            value[copyLength] = '\0';
         }
         return result;
     }

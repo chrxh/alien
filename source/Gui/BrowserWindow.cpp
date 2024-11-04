@@ -817,9 +817,8 @@ void BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserDownloadButtonTextColor);
-        auto isAddReaction = processActionButton(ICON_FA_PLUS);
-        ImGui::PopStyleColor();
+
+        auto isAddReaction = AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_PLUS));
         AlienImGui::Tooltip("Add a reaction", false);
         if (isAddReaction) {
             _activateEmojiPopup = true;
@@ -1115,11 +1114,9 @@ void BrowserWindow::processEmojiButton(int emojiType)
 
 void BrowserWindow::processDownloadButton(BrowserLeaf const& leaf)
 {
-    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserDownloadButtonTextColor);
-    auto downloadButtonResult = processActionButton(ICON_FA_DOWNLOAD);
+    auto isDownload = AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_DOWNLOAD));
     AlienImGui::Tooltip("Download", false);
-    ImGui::PopStyleColor();
-    if (downloadButtonResult) {
+    if (isDownload) {
         onDownloadResource(leaf);
     }
 }
