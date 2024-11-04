@@ -158,6 +158,8 @@ void SavepointTableService::encodeDecode(boost::property_tree::ptree& tree, Save
     JsonParser::encodeDecode(tree, entry->timestamp, std::string(), "timestamp", task);
     JsonParser::encodeDecode(tree, entry->name, std::string(), "name", task);
     JsonParser::encodeDecode(tree, entry->timestep, uint64_t(0), "timestep", task);
+    JsonParser::encodeDecode(tree, entry->peak, std::string(), "peak", task);
+    JsonParser::encodeDecode(tree, entry->peakType, std::string(), "peak type", task);
 }
 
 void SavepointTableService::encodeDecode(boost::property_tree::ptree& tree, std::filesystem::path& path, std::string const& node, ParserTask task) const

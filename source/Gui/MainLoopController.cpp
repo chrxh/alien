@@ -346,9 +346,9 @@ void MainLoopController::processMenubar()
     AlienImGui::BeginMenu(" " ICON_FA_GAMEPAD "  Simulation ", _simulationMenuOpened);
     AlienImGui::MenuItem(AlienImGui::MenuItemParameters().name("New").keyCtrl(true).key(ImGuiKey_N), [&] { NewSimulationDialog::get().open(); });
     AlienImGui::MenuItem(
-        AlienImGui::MenuItemParameters().name("Open").keyCtrl(true).key(ImGuiKey_O), [&] { FileTransferController::get().onOpenSimulation(); });
+        AlienImGui::MenuItemParameters().name("Open").keyCtrl(true).key(ImGuiKey_O), [&] { FileTransferController::get().onOpenSimulationDialog(); });
     AlienImGui::MenuItem(
-        AlienImGui::MenuItemParameters().name("Save").keyCtrl(true).key(ImGuiKey_S), [&] { FileTransferController::get().onSaveSimulation(); });
+        AlienImGui::MenuItemParameters().name("Save").keyCtrl(true).key(ImGuiKey_S), [&] { FileTransferController::get().onSaveSimulationDialog(); });
     AlienImGui::MenuSeparator();
     auto running = _simulationFacade->isSimulationRunning();
     AlienImGui::MenuItem(AlienImGui::MenuItemParameters().name("Run").key(ImGuiKey_Space).disabled(running).closeMenuWhenItemClicked(false), [&] {

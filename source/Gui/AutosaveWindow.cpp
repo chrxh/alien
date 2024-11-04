@@ -9,13 +9,14 @@
 #include "Base/StringHelper.h"
 #include "PersisterInterface/SavepointTableService.h"
 #include "PersisterInterface/SerializerService.h"
+#include "PersisterInterface/TaskProcessor.h"
 
 #include "AlienImGui.h"
+#include "FileTransferController.h"
 #include "GenericMessageDialog.h"
 #include "OverlayController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
-#include "PersisterInterface/TaskProcessor.h"
 
 namespace
 {
@@ -46,8 +47,8 @@ void AutosaveWindow::initIntern(SimulationFacade simulationFacade, PersisterFaca
     _origDirectory = GlobalSettings::get().getValue("windows.autosave.directory", (std::filesystem::current_path() / Const::BasePath).string());
     _directory = _origDirectory;
 
-    _origCatchPeak = GlobalSettings::get().getValue("windows.autosave.catch peak", _origCatchPeak);
-    _catchPeak = _origCatchPeak;
+    _origCatchPeaks = GlobalSettings::get().getValue("windows.autosave.catch peaks", _origCatchPeaks);
+    _catchPeaks = _origCatchPeaks;
 
     _lastAutosaveTimepoint = std::chrono::steady_clock::now();
     _lastPeakTimepoint = std::chrono::steady_clock::now();
@@ -66,7 +67,7 @@ void AutosaveWindow::shutdownIntern()
     GlobalSettings::get().setValue("windows.autosave.mode", _saveMode);
     GlobalSettings::get().setValue("windows.autosave.number of files", _numberOfFiles);
     GlobalSettings::get().setValue("windows.autosave.directory", _directory);
-    GlobalSettings::get().setValue("windows.autosave.catch peak", _origCatchPeak);
+    GlobalSettings::get().setValue("windows.autosave.catch peaks", _catchPeaks);
 }
 
 void AutosaveWindow::processIntern()
@@ -122,7 +123,7 @@ void AutosaveWindow::processToolbar()
     ImGui::EndDisabled();
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(_savepointTable->isEmpty());
+    ImGui::BeginDisabled(!_savepointTable.has_value() || _savepointTable->isEmpty());
     if (AlienImGui::ToolbarButton(ICON_FA_BROOM)) {
         GenericMessageDialog::get().yesNo("Delete", "Do you really want to delete the all savepoints?", [&]() { scheduleCleanup(); });
     }
@@ -146,14 +147,13 @@ void AutosaveWindow::processTable()
         | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
     if (ImGui::BeginTable("Save files", 4, flags, ImVec2(0, 0), 0.0f)) {
-        ImGui::TableSetupColumn("No", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(30.0f));
+        ImGui::TableSetupColumn("Simulation", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
         ImGui::TableSetupColumn("Timestamp", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
-        ImGui::TableSetupColumn("Project name", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(200.0f));
         ImGui::TableSetupColumn("Time step", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
+        ImGui::TableSetupColumn("Peak value", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(200.0f));
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
 
-        auto sequenceNumberAtFrom = _savepointTable->getSequenceNumber();
         ImGuiListClipper clipper;
         clipper.Begin(_savepointTable->getSize());
         while (clipper.Step()) {
@@ -164,8 +164,18 @@ void AutosaveWindow::processTable()
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(ImGui::GetTextLineHeightWithSpacing()));
 
+                // project name
                 ImGui::TableNextColumn();
-                AlienImGui::Text(std::to_string(sequenceNumberAtFrom - row));
+                if (entry->state == SavepointState_Persisted) {
+                    auto triggerLoadSavepoint = AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_DOWNLOAD));
+                    AlienImGui::Tooltip("Load savepoint", false);
+                    if (triggerLoadSavepoint) {
+                        onLoadSavepoint(entry);
+                    }
+
+                    ImGui::SameLine();
+                    AlienImGui::Text(entry->name);
+                }
 
                 ImGui::SameLine();
                 auto selected = _selectedEntry == entry;
@@ -177,6 +187,7 @@ void AutosaveWindow::processTable()
                     _selectedEntry = selected ? entry : nullptr;
                 }
 
+                // timestamp
                 ImGui::TableNextColumn();
                 if (entry->state == SavepointState_InQueue) {
                     AlienImGui::Text("In queue");
@@ -191,14 +202,21 @@ void AutosaveWindow::processTable()
                     AlienImGui::Text("Error");
                 }
 
-                ImGui::TableNextColumn();
-                if (entry->state == SavepointState_Persisted) {
-                    AlienImGui::Text(entry->name);
-                }
-
+                // timestep
                 ImGui::TableNextColumn();
                 if (entry->state == SavepointState_Persisted) {
                     AlienImGui::Text(StringHelper::format(entry->timestep));
+                }
+
+                // peak
+                ImGui::TableNextColumn();
+                AlienImGui::Text(entry->peak);
+
+                if (!entry->peakType.empty()) {
+                    ImGui::SameLine();
+                    ImGui::PushStyleColor(ImGuiCol_Text, Const::BrowserResourcePropertiesTextColor.Value);
+                    AlienImGui::Text(" (" + entry->peakType + ")");
+                    ImGui::PopStyleColor();
                 }
 
                 ImGui::PopID();
@@ -229,16 +247,17 @@ void AutosaveWindow::processSettings()
                     _lastAutosaveTimepoint = std::chrono::steady_clock::now();
                 }
             }
-            if (AlienImGui::Switcher(
-                AlienImGui::SwitcherParameters()
-                    .name("Catch peak")
+            if (AlienImGui::Combo(
+                AlienImGui::ComboParameters()
+                    .name("Catch peaks")
                     .textWidth(RightColumnWidth)
-                    .defaultValue(_origCatchPeak)
+                    .defaultValue(_origCatchPeaks)
+                    .disabled(!_autosaveEnabled)
                     .values({
                         "None",
                         "Genome complexity variance",
                     }),
-                _catchPeak)) {
+                _catchPeaks)) {
                 _peakDeserializedSimulation->setDeserializedSimulation(DeserializedSimulation());
             }
 
@@ -316,6 +335,11 @@ void AutosaveWindow::onDeleteSavepoint(SavepointEntry const& entry)
     _selectedEntry.reset();
 }
 
+void AutosaveWindow::onLoadSavepoint(SavepointEntry const& entry)
+{
+    FileTransferController::get().onOpenSimulation(entry->filename);
+}
+
 void AutosaveWindow::processCleanup()
 {
     if (_scheduleCleanup) {
@@ -335,11 +359,11 @@ void AutosaveWindow::processAutomaticSavepoints()
 
     auto minSinceLastAutosave = std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - _lastAutosaveTimepoint).count();
     if (minSinceLastAutosave >= _autosaveInterval) {
-        onCreateSavepoint(_catchPeak != CatchPeak_None);
+        onCreateSavepoint(_catchPeaks != CatchPeaks_None);
         _lastAutosaveTimepoint = std::chrono::steady_clock::now();
     }
 
-    if (_catchPeak != CatchPeak_None) {
+    if (_catchPeaks != CatchPeaks_None) {
         auto minSinceLastCatchPeak = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - _lastPeakTimepoint).count();
         if (minSinceLastCatchPeak >= 30) {
             _peakProcessor->executeTask(
@@ -418,6 +442,8 @@ void AutosaveWindow::updateSavepoint(int row)
                     newEntry->timestamp = StringHelper::format(data.timestamp);
                     newEntry->name = data.projectName;
                     newEntry->filename = data.filename;
+                    newEntry->peak = StringHelper::format(toFloat(sumColorVector(data.rawStatisticsData.timeline.timestep.genomeComplexityVariance)), 2);
+                    newEntry->peakType = "genome complexity variance";
                     _peakDeserializedSimulation->setDeserializedSimulation(DeserializedSimulation());
                 }
             }

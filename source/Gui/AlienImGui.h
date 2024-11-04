@@ -179,6 +179,7 @@ public:
     {
         MEMBER_DECLARATION(ComboParameters, std::string, name, "");
         MEMBER_DECLARATION(ComboParameters, float, textWidth, 100);
+        MEMBER_DECLARATION(ComboParameters, bool, disabled, false);
         MEMBER_DECLARATION(ComboParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(ComboParameters, std::vector<std::string>, values, std::vector<std::string>());
         MEMBER_DECLARATION(ComboParameters, std::optional<std::string>, tooltip, std::nullopt);
@@ -190,6 +191,7 @@ public:
         MEMBER_DECLARATION(SwitcherParameters, std::string, name, "");
         MEMBER_DECLARATION(SwitcherParameters, float, width, 0);
         MEMBER_DECLARATION(SwitcherParameters, float, textWidth, 100);
+        MEMBER_DECLARATION(SwitcherParameters, bool, disabled, false);
         MEMBER_DECLARATION(SwitcherParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(SwitcherParameters, std::vector<std::string>, values, std::vector<std::string>());
         MEMBER_DECLARATION(SwitcherParameters, std::optional<std::string>, tooltip, std::nullopt);
@@ -310,6 +312,13 @@ public:
         MEMBER_DECLARATION(ButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool Button(ButtonParameters const& parameters);
+
+    struct ActionButtonParameters
+    {
+        MEMBER_DECLARATION(ActionButtonParameters, std::string, buttonText, "");
+        MEMBER_DECLARATION(ActionButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
+    };
+    static bool ActionButton(ActionButtonParameters const& parameters);
 
     struct SpinnerParameters
     {
