@@ -69,7 +69,7 @@ void _EditKernelsLauncher::updateSelection(GpuSettings const& gpuSettings, Simul
 void _EditKernelsLauncher::getSelectionShallowData(GpuSettings const& gpuSettings, SimulationData const& data, SelectionResult const& selectionResult)
 {
     KERNEL_CALL_1_1(cudaResetSelectionResult, selectionResult);
-    setValueToDevice(_cudaMinCellPosYAndIndex, 0xffffffffffffffff);
+    setValueToDevice(_cudaMinCellPosYAndIndex, 0xffffffffffffffffull);
     KERNEL_CALL(cudaCalcCellWithMinimalPosY, data, _cudaMinCellPosYAndIndex);
     cudaDeviceSynchronize();
     auto refCellIndex = static_cast<int>(copyToHost(_cudaMinCellPosYAndIndex) & 0xffffffff);

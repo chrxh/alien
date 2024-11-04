@@ -33,6 +33,7 @@ private:
     std::optional<std::chrono::steady_clock::time_point> _progressBarRefTimepoint;
     std::optional<std::chrono::steady_clock::time_point> _messageStartTimepoint;
     std::optional<std::chrono::steady_clock::time_point> _ticksLaterTimepoint;
+    std::optional<std::chrono::steady_clock::time_point> _busyTimepoint;
 };
 
 inline void printOverlayMessage(std::string const& message, bool withLightning = false)
