@@ -106,7 +106,7 @@ void _EditKernelsLauncher::shallowUpdateSelectedObjects(
         setValueToDevice(_cudaCenter, float2{0, 0});
         setValueToDevice(_cudaNumEntities, 0);
 
-        setValueToDevice(_cudaMinCellPosYAndIndex, 0xffffffff00000000);
+        setValueToDevice(_cudaMinCellPosYAndIndex, 0xffffffff00000000ull);
         KERNEL_CALL(cudaCalcCellWithMinimalPosY, data, _cudaMinCellPosYAndIndex);
         cudaDeviceSynchronize();
         auto refCellIndex = static_cast<int>(copyToHost(_cudaMinCellPosYAndIndex) & 0xffffffff);

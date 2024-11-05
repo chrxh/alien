@@ -57,6 +57,7 @@ __inline__ __device__ void MutationProcessor::applyRandomMutationsForCell(Simula
 {
     auto& constructor = cell->cellFunctionData.constructor;
     auto numNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, true));
+    auto numNonSeparatedNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, false));
     auto cellCopyMutationNeuronData = SpotCalculator::calcParameter(
         &SimulationParametersSpotValues::cellCopyMutationNeuronData,
         &SimulationParametersSpotActivatedValues::cellCopyMutationNeuronData,
@@ -132,22 +133,26 @@ __inline__ __device__ void MutationProcessor::applyRandomMutationsForCell(Simula
 
     executeMultipleEvents(data, cellCopyMutationCellProperties, [&]() { propertiesMutation(data, cell); });
     executeMultipleEvents(data, cellCopyMutationNeuronData, [&]() { neuronDataMutation(data, cell); });
-    executeEvent(data, cellCopyMutationGeometry, [&]() { geometryMutation(data, cell); });
+    executeEvent(data, cellCopyMutationGeometry, [&]() {
+        if (numNodes < 2 * numNonSeparatedNodes) {
+            geometryMutation(data, cell);
+        }
+    });
     executeEvent(data, cellCopyMutationCustomGeometry, [&]() { customGeometryMutation(data, cell); });
     executeMultipleEvents(data, cellCopyMutationCellFunction, [&]() { cellFunctionMutation(data, cell); });
     executeEvent(data, cellCopyMutationInsertion, [&]() {
-        auto numNonSeparatedNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, false));
         if (numNodes < 2 * numNonSeparatedNodes) {
             insertMutation(data, cell);
         }
     });
     executeEvent(data, cellCopyMutationDeletion, [&]() { deleteMutation(data, cell); });
     executeEvent(data, cellCopyMutationCellColor, [&]() { cellColorMutation(data, cell); });
-    executeEvent(data, cellCopyMutationTranslation, [&]() { translateMutation(data, cell); });
+    executeEvent(data, cellCopyMutationTranslation, [&]() {
+        if (numNodes < 2 * numNonSeparatedNodes) {
+            translateMutation(data, cell);
+        }
+    });
     executeEvent(data, cellCopyMutationDuplication, [&]() {
-        auto& constructor = cell->cellFunctionData.constructor;
-        auto numNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, true));
-        auto numNonSeparatedNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, false));
         if (numNodes < 2 * numNonSeparatedNodes) {
             duplicateMutation(data, cell);
         }

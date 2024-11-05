@@ -117,6 +117,8 @@ void SavepointTableService::updateFile(SavepointTable& table) const
         boost::property_tree::ptree tree;
         encodeDecode(tree, table, ParserTask::Encode);
         boost::property_tree::json_parser::write_json(stream, tree);
+    } catch (std::exception const& e) {
+        throw std::runtime_error(std::string("The following error occurred: ") + e.what());
     } catch (...) {
         throw std::runtime_error("Unknown error.");
     }

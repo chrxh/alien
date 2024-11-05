@@ -630,6 +630,10 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         DeserializedSimulation deserializedSimulation;
         deserializedSimulation.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
         auto currentRawStatistics = _simulationFacade->getRawStatistics();
+        printf(
+            "current: %f, peak: %f\n",
+            sumColorVector(currentRawStatistics.timeline.timestep.genomeComplexityVariance),
+            sumColorVector(peakStatistics.timeline.timestep.genomeComplexityVariance));
         if (sumColorVector(currentRawStatistics.timeline.timestep.genomeComplexityVariance)
             >= sumColorVector(peakStatistics.timeline.timestep.genomeComplexityVariance)) {
 
@@ -668,8 +672,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         if (!SerializerService::get().serializeSimulationToFiles(filename, deserializedData)) {
             throw std::runtime_error("Error");
         }
-
-        return std::make_shared<_SaveDeserializedSimulationRequestResult>(
+        auto result = std::make_shared<_SaveDeserializedSimulationRequestResult>(
             request->getRequestId(),
             SaveDeserializedSimulationResultData{
                 .filename = filename,
@@ -677,6 +680,11 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
                 .timestep = deserializedData.auxiliaryData.timestep,
                 .timestamp = requestData.sharedDeserializedSimulation->getTimestamp(),
                 .rawStatisticsData = requestData.sharedDeserializedSimulation->getRawStatisticsData()});
+
+        if (requestData.resetDeserializedSimulation) {
+            requestData.sharedDeserializedSimulation->reset();
+        }
+        return result;
     } catch (...) {
         return std::make_shared<_PersisterRequestError>(
             request->getRequestId(),

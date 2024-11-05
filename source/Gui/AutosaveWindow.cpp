@@ -174,7 +174,7 @@ void AutosaveWindow::processTable()
                 }
                 if (entry->state == SavepointState_Persisted) {
                     auto triggerLoadSavepoint = AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_DOWNLOAD));
-                    AlienImGui::Tooltip("Load savepoint", false);
+                    AlienImGui::Tooltip("Load save point", false);
                     if (triggerLoadSavepoint) {
                         onLoadSavepoint(entry);
                     }
@@ -269,7 +269,7 @@ void AutosaveWindow::processSettings()
             AlienImGui::Switcher(
                 AlienImGui::SwitcherParameters()
                     .name("Mode")
-                    .values({"Circular save files", "Unlimited save files"})
+                    .values({"Limited save files", "Unlimited save files"})
                     .textWidth(RightColumnWidth)
                     .defaultValue(_origSaveMode),
                 _saveMode);
@@ -309,7 +309,7 @@ void AutosaveWindow::onCreateSavepoint(bool usePeakSimulation)
     if (usePeakSimulation && !_peakDeserializedSimulation->isEmpty()) {
         auto senderInfo = SenderInfo{.senderId = SenderId{AutosaveSenderId}, .wishResultData = true, .wishErrorInfo = true};
         auto saveData = SaveDeserializedSimulationRequestData{
-            .filename = _directory, .sharedDeserializedSimulation = _peakDeserializedSimulation, .generateNameFromTimestep = true};
+            .filename = _directory, .sharedDeserializedSimulation = _peakDeserializedSimulation, .generateNameFromTimestep = true, .resetDeserializedSimulation = true};
         requestId = _persisterFacade->scheduleSaveDeserializedSimulation(senderInfo, saveData);
     } else {
         auto senderInfo = SenderInfo{.senderId = SenderId{AutosaveSenderId}, .wishResultData = true, .wishErrorInfo = true};
@@ -365,7 +365,7 @@ void AutosaveWindow::processAutomaticSavepoints()
 
     if (_catchPeaks != CatchPeaks_None) {
         auto minSinceLastCatchPeak = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - _lastPeakTimepoint).count();
-        if (minSinceLastCatchPeak >= 30) {
+        if (minSinceLastCatchPeak >= 10) {
             _peakProcessor->executeTask(
                 [&](auto const& senderId) {
                     return _persisterFacade->scheduleGetPeakSimulation(
@@ -444,7 +444,6 @@ void AutosaveWindow::updateSavepoint(int row)
                     newEntry->filename = data.filename;
                     newEntry->peak = StringHelper::format(toFloat(sumColorVector(data.rawStatisticsData.timeline.timestep.genomeComplexityVariance)), 2);
                     newEntry->peakType = "genome complexity variance";
-                    _peakDeserializedSimulation->reset();
                 }
             }
             if (requestState.value() == PersisterRequestState::Error) {

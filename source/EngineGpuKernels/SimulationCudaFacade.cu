@@ -38,6 +38,7 @@
 #include "StatisticsKernelsLauncher.cuh"
 #include "SelectionResult.cuh"
 #include "RenderingData.cuh"
+#include "SimulationParameterService.cuh"
 #include "TestKernelsLauncher.cuh"
 #include "StatisticsService.cuh"
 
@@ -639,8 +640,9 @@ void _SimulationCudaFacade::checkAndProcessSimulationParameterChanges()
 {
     std::lock_guard lock(_mutexForSimulationParameters);
     if (_newSimulationParameters) {
-        _settings.simulationParameters = *_newSimulationParameters;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(cudaSimulationParameters, &*_newSimulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+        _settings.simulationParameters = SimulationParameterService::get().integrateChanges(_settings.simulationParameters, *_newSimulationParameters);
+        CHECK_FOR_CUDA_ERROR(
+            cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
         _newSimulationParameters.reset();
 
         if (_cudaSimulationData) {
