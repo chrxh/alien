@@ -9,4 +9,5 @@ struct SaveDeserializedSimulationRequestData
     std::filesystem::path filename;
     SharedDeserializedSimulation sharedDeserializedSimulation;
     bool generateNameFromTimestep = false;
+    bool resetDeserializedSimulation = false;
 };

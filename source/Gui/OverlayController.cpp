@@ -108,8 +108,8 @@ void OverlayController::processProgressAnimation()
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f));
         auto N = 8 + toInt(powf(sinf(duration / 500.0f - Const::Pi / 4) + 1, 3.0f) * 5);
         for (int i = 0; i < N; ++i) {
-            auto amplitude1 = sinf(toFloat(i) * 10.0f / toFloat(N) - duration / 700.0f * (1.0f + 0.3f * sinf(duration / 1000)));
-            auto amplitude2 = sinf(toFloat(i) * 14.0f / toFloat(N) - duration / 100.0f * (1.0f + 0.3f * cosf(duration / 1000)));
+            auto amplitude1 = sinf(toFloat(i) * 10.0f / toFloat(N) - duration / 700.0f * (1.0f + 0.3f * sinf(std::min(5000.0f, duration) / 1000)));
+            auto amplitude2 = sinf(toFloat(i) * 14.0f / toFloat(N) - duration / 100.0f * (1.0f + 0.3f * cosf(std::min(5000.0f, duration) / 1000)));
             //auto hue = toFloat((i * 1000 / N + toInt(duration)) % 3000) / 4500.0f;
             //hue = hue < 0.33f ? 0.66f + hue : 0.66f + 0.66f - hue; 
             auto y1 = center.y + height / 2 - amplitude1 * height;
