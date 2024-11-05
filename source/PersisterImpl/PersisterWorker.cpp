@@ -630,10 +630,6 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         DeserializedSimulation deserializedSimulation;
         deserializedSimulation.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
         auto currentRawStatistics = _simulationFacade->getRawStatistics();
-        printf(
-            "current: %f, peak: %f\n",
-            sumColorVector(currentRawStatistics.timeline.timestep.genomeComplexityVariance),
-            sumColorVector(peakStatistics.timeline.timestep.genomeComplexityVariance));
         if (sumColorVector(currentRawStatistics.timeline.timestep.genomeComplexityVariance)
             >= sumColorVector(peakStatistics.timeline.timestep.genomeComplexityVariance)) {
 

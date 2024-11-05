@@ -22,6 +22,7 @@ namespace
 {
     auto constexpr RightColumnWidth = 200.0f;
     auto constexpr AutosaveSenderId = "Autosave";
+    auto constexpr PeakDetectionInterval = 30;  //in seconds
 }
 
 AutosaveWindow::AutosaveWindow()
@@ -365,7 +366,7 @@ void AutosaveWindow::processAutomaticSavepoints()
 
     if (_catchPeaks != CatchPeaks_None) {
         auto minSinceLastCatchPeak = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - _lastPeakTimepoint).count();
-        if (minSinceLastCatchPeak >= 10) {
+        if (minSinceLastCatchPeak >= PeakDetectionInterval) {
             _peakProcessor->executeTask(
                 [&](auto const& senderId) {
                     return _persisterFacade->scheduleGetPeakSimulation(
