@@ -99,10 +99,10 @@ void _EditKernelsLauncher::shallowUpdateSelectedObjects(
         } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  //due to locking not all affecting connections may be removed at first => repeat
     }
 
-    if (updateData.posDeltaX != 0 || updateData.posDeltaY != 0 || updateData.velDeltaX != 0 || updateData.velDeltaY != 0) {
+    if (updateData.posDeltaX != 0 || updateData.posDeltaY != 0 || updateData.velX != 0 || updateData.velY != 0) {
         KERNEL_CALL(cudaIncrementPosAndVelForSelection, updateData, data);
     }
-    if (updateData.angleDelta != 0 || updateData.angularVelDelta != 0) {
+    if (updateData.angleDelta != 0 || updateData.angularVel != 0) {
         setValueToDevice(_cudaCenter, float2{0, 0});
         setValueToDevice(_cudaNumEntities, 0);
 

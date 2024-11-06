@@ -214,11 +214,11 @@ __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionD
                     data.cellMap.correctPosition(cell->pos);
                 }
 
-                if (updateData.angularVelDelta != 0) {
-                    auto velDelta = relPos;
-                    Math::rotateQuarterClockwise(velDelta);
-                    velDelta = velDelta * updateData.angularVelDelta * Const::DEG_TO_RAD;
-                    cell->vel = cell->vel + velDelta;
+                if (updateData.angularVel != 0) {
+                    auto newVel = relPos;
+                    Math::rotateQuarterClockwise(newVel);
+                    newVel = newVel * updateData.angularVel * Const::DEG_TO_RAD;
+                    cell->vel = newVel;
                 }
             }
         }
@@ -290,7 +290,7 @@ __global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData up
         if (isSelected(cell, updateData.considerClusters)) {
             cell->pos = cell->pos + float2{updateData.posDeltaX, updateData.posDeltaY};
             data.cellMap.correctPosition(cell->pos);
-            cell->vel = cell->vel + float2{updateData.velDeltaX, updateData.velDeltaY};
+            cell->vel = float2{updateData.velX, updateData.velY};
         }
     }
 
@@ -300,7 +300,7 @@ __global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData up
         if (0 != particle->selected) {
             particle->absPos = particle->absPos + float2{updateData.posDeltaX, updateData.posDeltaY};
             data.particleMap.correctPosition(particle->absPos);
-            particle->vel = particle->vel + float2{updateData.velDeltaX, updateData.velDeltaY};
+            particle->vel = float2{updateData.velX, updateData.velY};
         }
     }
 }

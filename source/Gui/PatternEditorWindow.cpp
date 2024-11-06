@@ -192,8 +192,8 @@ void PatternEditorWindow::processIntern()
         if (centerVelX != origCenterVelX || centerVelY != origCenterVelY) {
             ShallowUpdateSelectionData updateData;
             updateData.considerClusters = EditorModel::get().isRolloutToClusters();
-            updateData.velDeltaX = centerVelX - origCenterVelX;
-            updateData.velDeltaY = centerVelY - origCenterVelY;
+            updateData.velX = centerVelX;
+            updateData.velY = centerVelY;
             _simulationFacade->shallowUpdateSelectedObjects(updateData);
             EditorModel::get().update();
         }
@@ -209,7 +209,7 @@ void PatternEditorWindow::processIntern()
         if (_angularVel != origAngularVel) {
             ShallowUpdateSelectionData updateData;
             updateData.considerClusters = EditorModel::get().isRolloutToClusters();
-            updateData.angularVelDelta = _angularVel - origAngularVel;
+            updateData.angularVel = _angularVel;
             _simulationFacade->shallowUpdateSelectedObjects(updateData);
             EditorModel::get().update();
         }
