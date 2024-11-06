@@ -749,9 +749,15 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
 {
     if (cudaSimulationParameters.features.externalEnergyControl && hostCell->energy < constructionData.energy + cudaSimulationParameters.cellNormalEnergy[hostCell->color]
         && cudaSimulationParameters.externalEnergyInflowFactor[hostCell->color] > 0) {
-        auto externalEnergyPortion = !constructionData.containsSelfReplication && !GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor)
-            ? constructionData.energy * cudaSimulationParameters.externalEnergyInflowFactor[hostCell->color]
-            : 0.0f;
+        auto externalEnergyPortion = [&] {
+            if (cudaSimulationParameters.externalEnergyInflowOnlyForNonSelfReplicators) {
+                return !constructionData.containsSelfReplication && !GenomeDecoder::isFinished(hostCell->cellFunctionData.constructor)
+                    ? constructionData.energy * cudaSimulationParameters.externalEnergyInflowFactor[hostCell->color]
+                    : 0.0f;
+            } else {
+                return constructionData.energy * cudaSimulationParameters.externalEnergyInflowFactor[hostCell->color];
+            }
+        }();
 
         auto origExternalEnergy = alienAtomicRead(data.externalEnergy);
         if (origExternalEnergy == Infinity<float>::value) {

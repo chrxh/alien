@@ -214,5 +214,6 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && muscleMovementVisualization == other.muscleMovementVisualization
         && legacyCellFunctionMuscleNoActivityReset == other.legacyCellFunctionMuscleNoActivityReset
         && legacyCellDirectionalConnections == other.legacyCellDirectionalConnections
+        && externalEnergyInflowOnlyForNonSelfReplicators == other.externalEnergyInflowOnlyForNonSelfReplicators
         ;
 }
