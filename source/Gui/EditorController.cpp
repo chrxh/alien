@@ -291,8 +291,8 @@ void EditorController::onAccelerateSelectedObjects(RealVector2D const& viewPos, 
 
     ShallowUpdateSelectionData updateData;
     updateData.considerClusters = true;
-    updateData.velDeltaX = delta.x / 10;
-    updateData.velDeltaY = delta.y / 10;
+    updateData.velX = delta.x / 10;
+    updateData.velY = delta.y / 10;
     _simulationFacade->shallowUpdateSelectedObjects(updateData);
 }
 
