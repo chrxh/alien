@@ -2,7 +2,6 @@
 
 #include "TOs.cuh"
 #include "Base.cuh"
-#include "GenomeDecoder.cuh"
 #include "Map.cuh"
 #include "ObjectFactory.cuh"
 #include "SpotCalculator.cuh"
@@ -46,8 +45,6 @@ __inline__ __device__ void CellFunctionProcessor::collectCellFunctionOperations(
         if (cell->cellFunction != CellFunction_None && cell->executionOrderNumber == executionOrderNumber) {
             if (cell->cellFunction == CellFunction_Detonator && cell->cellFunctionData.detonator.state == DetonatorState_Activated) {
                 data.cellFunctionOperations[cell->cellFunction].tryAddEntry(CellFunctionOperation{cell});
-            //} else if (cell->cellFunction == CellFunction_Constructor && !cell->cellFunctionData.constructor.isReady) {
-            //    data.cellFunctionOperations[CellFunction_Transmitter].tryAddEntry(CellFunctionOperation{cell});
             } else if (cell->livingState == LivingState_Ready && cell->activationTime == 0) {
                 data.cellFunctionOperations[cell->cellFunction].tryAddEntry(CellFunctionOperation{cell});
             }

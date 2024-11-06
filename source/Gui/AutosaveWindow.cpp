@@ -239,7 +239,7 @@ void AutosaveWindow::processSettings()
 
     _settingsOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Settings").highlighted(true).defaultOpen(_settingsOpen));
     if (_settingsOpen) {
-        if (ImGui::BeginChild("##addons", {scale(0), 0})) {
+        if (ImGui::BeginChild("##autosaveSettings", {scale(0), 0})) {
             if (AlienImGui::InputInt(
                     AlienImGui::InputIntParameters().name("Autosave interval (min)").textWidth(RightColumnWidth).defaultValue(_origAutosaveInterval),
                     _autosaveInterval,

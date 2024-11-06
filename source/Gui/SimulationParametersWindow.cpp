@@ -1529,6 +1529,14 @@ void SimulationParametersWindow::processBase()
                                 "build the new cell for free from the external energy source. However, it must provide 40% of the energy required by itself. "
                                 "Otherwise, no energy will be transferred."),
                         parameters.externalEnergyConditionalInflowFactor);
+                    AlienImGui::Checkbox(
+                        AlienImGui::CheckboxParameters()
+                            .name("Inflow only for non-replicators")
+                            .textWidth(RightColumnWidth)
+                            .defaultValue(origParameters.externalEnergyInflowOnlyForNonSelfReplicators)
+                            .tooltip("If activated, activated, external energy can only be transferred to constructor cells that are not self-replicators. "
+                                     "This option can be used to foster the evolution of additional body parts."),
+                        parameters.externalEnergyInflowOnlyForNonSelfReplicators);
                     AlienImGui::SliderFloat(
                         AlienImGui::SliderFloatParameters()
                             .name("Backflow")
