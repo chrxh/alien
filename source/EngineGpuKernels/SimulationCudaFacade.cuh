@@ -18,6 +18,7 @@
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/MutationType.h"
 #include "EngineInterface/StatisticsHistory.h"
+#include "EngineInterface/SimulationParametersUpdateConfig.h"
 
 #include "Definitions.cuh"
 
@@ -70,7 +71,9 @@ public:
 
     void setGpuConstants(GpuSettings const& cudaConstants);
     SimulationParameters getSimulationParameters() const;
-    void setSimulationParameters(SimulationParameters const& parameters);
+    void setSimulationParameters(
+        SimulationParameters const& parameters,
+        SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All);
 
     ArraySizes getArraySizes() const;
 
@@ -107,6 +110,8 @@ private:
 
     mutable std::mutex _mutexForSimulationParameters;
     std::optional<SimulationParameters> _newSimulationParameters;
+    SimulationParametersUpdateConfig _simulationParametersUpdateConfig = SimulationParametersUpdateConfig::All;
+
     Settings _settings;
 
     mutable std::mutex _mutexForSimulationData;
@@ -121,6 +126,7 @@ private:
     std::optional<RawStatisticsData> _statisticsData;
     StatisticsHistory _statisticsHistory;
     std::shared_ptr<SimulationStatistics> _cudaSimulationStatistics;
+    MaxAgeBalancer _maxAgeBalancer;
 
     SimulationKernelsLauncher _simulationKernels;
     DataAccessKernelsLauncher _dataAccessKernels;

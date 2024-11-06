@@ -21,6 +21,7 @@
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/MutationType.h"
 #include "EngineInterface/StatisticsHistory.h"
+#include "EngineInterface/SimulationParametersUpdateConfig.h"
 
 #include "EngineGpuKernels/Definitions.h"
 
@@ -88,7 +89,9 @@ public:
     void setCurrentTimestep(uint64_t value);
 
     SimulationParameters getSimulationParameters() const;
-    void setSimulationParameters(SimulationParameters const& parameters);
+    void setSimulationParameters(
+        SimulationParameters const& parameters,
+        SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All);
     void setGpuSettings_async(GpuSettings const& gpuSettings);
 
     void applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);

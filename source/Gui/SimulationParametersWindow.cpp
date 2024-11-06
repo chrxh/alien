@@ -1627,7 +1627,7 @@ void SimulationParametersWindow::processBase()
         validationAndCorrectionLayout();
 
         if (parameters != lastParameters) {
-            _simulationFacade->setSimulationParameters(parameters);
+            _simulationFacade->setSimulationParameters(parameters, SimulationParametersUpdateConfig::AllExceptChangingPositions);
         }
 
         ImGui::EndTabItem();

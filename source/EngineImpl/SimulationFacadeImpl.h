@@ -83,7 +83,9 @@ public:
 
     SimulationParameters getSimulationParameters() const override;
     SimulationParameters const& getOriginalSimulationParameters() const override;
-    void setSimulationParameters(SimulationParameters const& parameters) override;
+    void setSimulationParameters(
+        SimulationParameters const& parameters,
+        SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All) override;
     void setOriginalSimulationParameters(SimulationParameters const& parameters) override;
 
     GpuSettings getGpuSettings() const override;
