@@ -366,9 +366,9 @@ SimulationParameters EngineWorker::getSimulationParameters() const
     return _simulationCudaFacade->getSimulationParameters();
 }
 
-void EngineWorker::setSimulationParameters(SimulationParameters const& parameters)
+void EngineWorker::setSimulationParameters(SimulationParameters const& parameters, SimulationParametersUpdateConfig const& updateConfig)
 {
-    _simulationCudaFacade->setSimulationParameters(parameters);
+    _simulationCudaFacade->setSimulationParameters(parameters, updateConfig);
 }
 
 void EngineWorker::setGpuSettings_async(GpuSettings const& gpuSettings)

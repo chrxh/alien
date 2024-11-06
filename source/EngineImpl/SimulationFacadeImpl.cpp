@@ -257,9 +257,9 @@ SimulationParameters const& _SimulationFacadeImpl::getOriginalSimulationParamete
     return _origSettings.simulationParameters;
 }
 
-void _SimulationFacadeImpl::setSimulationParameters(SimulationParameters const& parameters)
+void _SimulationFacadeImpl::setSimulationParameters(SimulationParameters const& parameters, SimulationParametersUpdateConfig const& updateConfig)
 {
-    _worker.setSimulationParameters(parameters);
+    _worker.setSimulationParameters(parameters, updateConfig);
 }
 
 void _SimulationFacadeImpl::setOriginalSimulationParameters(SimulationParameters const& parameters)

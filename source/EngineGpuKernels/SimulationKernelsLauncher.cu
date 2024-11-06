@@ -6,13 +6,11 @@
 #include "FlowFieldKernels.cuh"
 #include "GarbageCollectorKernelsLauncher.cuh"
 #include "DebugKernels.cuh"
-#include "MaxAgeBalancer.cuh"
 #include "SimulationStatistics.cuh"
 
 _SimulationKernelsLauncher::_SimulationKernelsLauncher()
 {
     _garbageCollector = std::make_shared<_GarbageCollectorKernelsLauncher>();
-    _maxAgeBalancer = std::make_shared<_MaxAgeBalancer>();
 }
 
 namespace 
@@ -90,66 +88,6 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     KERNEL_CALL(cudaNextTimestep_structuralOperations_substep5, data);
 
     _garbageCollector->cleanupAfterTimestep(settings.gpuSettings, data);
-}
-
-bool _SimulationKernelsLauncher::updateSimulationParametersAfterTimestep(
-    Settings& settings,
-    SimulationData const& simulationData,
-    RawStatisticsData const& statistics)
-{
-    auto result = false;
-
-    auto const& worldSizeX = settings.generalSettings.worldSizeX;
-    auto const& worldSizeY = settings.generalSettings.worldSizeY;
-    SpaceCalculator space({worldSizeX, worldSizeY});
-    for (int i = 0; i < settings.simulationParameters.numRadiationSources; ++i) {
-        auto& source = settings.simulationParameters.radiationSources[i];
-        if (source.velX != 0) {
-            source.posX += source.velX * settings.simulationParameters.timestepSize;
-            result = true;
-        }
-        if (source.velY != 0) {
-            source.posY += source.velY * settings.simulationParameters.timestepSize;
-            result = true;
-        }
-        auto correctedPosition = space.getCorrectedPosition({source.posX, source.posY});
-        source.posX = correctedPosition.x;
-        source.posY = correctedPosition.y;
-    }
-    for (int i = 0; i < settings.simulationParameters.numSpots; ++i) {
-        auto& spot = settings.simulationParameters.spots[i];
-        if (spot.velX != 0) {
-            spot.posX += spot.velX * settings.simulationParameters.timestepSize;
-            result = true;
-        }
-        if (spot.velY != 0) {
-            spot.posY += spot.velY * settings.simulationParameters.timestepSize;
-            result = true;
-        }
-        auto correctedPosition = space.getCorrectedPosition({spot.posX, spot.posY});
-        spot.posX = correctedPosition.x;
-        spot.posY = correctedPosition.y;
-    }
-
-    auto externalEnergyPresent = settings.simulationParameters.externalEnergy > 0;
-    for (int i = 0; i < MAX_COLORS; ++i) {
-        externalEnergyPresent |= settings.simulationParameters.externalEnergyBackflowFactor[i] > 0;
-    }
-    externalEnergyPresent &= settings.simulationParameters.features.externalEnergyControl;
-    if (externalEnergyPresent) {
-        double temp;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-            &temp,
-            simulationData.externalEnergy,
-            sizeof(double),
-            cudaMemcpyDeviceToHost));
-            settings.simulationParameters.externalEnergy = toFloat(temp);
-        result = true;
-    }
-
-    result |= _maxAgeBalancer->balance(settings.simulationParameters, statistics, simulationData.timestep);
-
-    return result;
 }
 
 void _SimulationKernelsLauncher::prepareForSimulationParametersChanges(Settings const& settings, SimulationData const& data)

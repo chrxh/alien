@@ -8,6 +8,7 @@
 #include "MutationType.h"
 #include "DataPointCollection.h"
 #include "StatisticsHistory.h"
+#include "SimulationParametersUpdateConfig.h"
 
 class _SimulationFacade
 {
@@ -73,7 +74,9 @@ public:
 
     virtual SimulationParameters getSimulationParameters() const = 0;
     virtual SimulationParameters const& getOriginalSimulationParameters() const = 0;
-    virtual void setSimulationParameters(SimulationParameters const& parameters) = 0;
+    virtual void setSimulationParameters(
+        SimulationParameters const& parameters,
+        SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All) = 0;
     virtual void setOriginalSimulationParameters(SimulationParameters const& parameters) = 0;
 
     virtual GpuSettings getGpuSettings() const = 0;
