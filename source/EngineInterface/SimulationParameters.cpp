@@ -110,9 +110,6 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         if (cellFunctionConstructorConnectingCellMaxDistance[i] != other.cellFunctionConstructorConnectingCellMaxDistance[i]) {
             return false;
         }
-        if (cellFunctionConstructorOffspringDistance[i] != other.cellFunctionConstructorOffspringDistance[i]) {
-            return false;
-        }
         if (cellDeathProbability[i] != other.cellDeathProbability[i]) {
             return false;
         }

@@ -299,12 +299,6 @@ namespace
 
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellFunctionConstructorOffspringDistance,
-            defaultParameters.cellFunctionConstructorOffspringDistance,
-            "simulation parameters.cell.function.constructor.offspring distance",
-            parserTask);
-        ParameterParser::encodeDecode(
-            tree,
             parameters.cellFunctionConstructorConnectingCellMaxDistance,
             defaultParameters.cellFunctionConstructorConnectingCellMaxDistance,
             "simulation parameters.cell.function.constructor.connecting cell max distance",
