@@ -939,16 +939,6 @@ void SimulationParametersWindow::processBase()
             if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Cell function: Constructor"))) {
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
-                        .name("Offspring distance")
-                        .textWidth(RightColumnWidth)
-                        .colorDependence(true)
-                        .min(0.1f)
-                        .max(3.0f)
-                        .defaultValue(origParameters.cellFunctionConstructorOffspringDistance)
-                        .tooltip("The distance of the constructed cell from the constructor cell."),
-                    parameters.cellFunctionConstructorOffspringDistance);
-                AlienImGui::SliderFloat(
-                    AlienImGui::SliderFloatParameters()
                         .name("Connection distance")
                         .textWidth(RightColumnWidth)
                         .colorDependence(true)
