@@ -53,6 +53,7 @@ struct SimulationParameters
     ColorVector<float> externalEnergyConditionalInflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> externalEnergyBackflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     bool externalEnergyInflowOnlyForNonSelfReplicators = false;
+    float externalEnergyBackflowLimit = Infinity<float>::value;
 
     //spots
     int numSpots = 0;
