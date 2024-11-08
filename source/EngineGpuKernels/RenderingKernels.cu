@@ -573,9 +573,7 @@ __global__ void cudaDrawCells(
             if (inputExecutionOrderNumber != -1 && inputExecutionOrderNumber != cell->executionOrderNumber) {
                 for (int i = 0; i < cell->numConnections; ++i) {
                     auto const& otherCell = cell->connections[i].cell;
-                    auto flowToOtherCell =
-                        otherCell->inputExecutionOrderNumber == cell->executionOrderNumber && cell->executionOrderNumber < otherCell->executionOrderNumber && !cell->outputBlocked;
-                    if (otherCell->executionOrderNumber == inputExecutionOrderNumber && !otherCell->outputBlocked && !flowToOtherCell) {
+                    if (otherCell->executionOrderNumber == inputExecutionOrderNumber && !otherCell->outputBlocked) {
                         auto otherCellPos = otherCell->pos;
                         auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
                         otherCellPos += topologyCorrection;
