@@ -291,6 +291,12 @@ namespace
             defaultParameters.externalEnergyInflowOnlyForNonSelfReplicators,
             "simulation parameters.cell.function.constructor.external energy inflow only for non-self-replicators",
             parserTask);
+        ParameterParser::encodeDecode(
+            tree,
+            parameters.externalEnergyBackflowLimit,
+            defaultParameters.externalEnergyBackflowLimit,
+            "simulation parameters.cell.function.constructor.external energy backflow limit",
+            parserTask);
 
         missingParameters.cellDeathConsequences = ParameterParser::encodeDecode(
             tree, parameters.cellDeathConsequences, defaultParameters.cellDeathConsequences, "simulation parameters.cell.death consequences", parserTask);

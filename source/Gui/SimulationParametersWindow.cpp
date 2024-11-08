@@ -1482,12 +1482,10 @@ void SimulationParametersWindow::processBase()
                             .logarithmic(true)
                             .infinity(true)
                             .defaultValue(&origParameters.externalEnergy)
-                            .tooltip("This parameter can be used to set the amount of energy of an external energy source. This type of energy can be "
+                            .tooltip("This parameter can be used to set the amount of energy of an external energy pool. This type of energy can be "
                                      "transferred to all constructor cells at a certain rate (see inflow settings).\n\nTip: You can explicitly enter a "
-                                     "numerical value by clicking on the "
-                                     "slider while holding CTRL.\n\nWarning: Too much external energy can result in a massive production of cells and slow "
-                                     "down or "
-                                     "even crash the simulation."),
+                                     "numerical value by clicking on the slider while holding CTRL.\n\nWarning: Too much external energy can result in a "
+                                     "massive production of cells and slow down or even crash the simulation."),
                         &parameters.externalEnergy);
                     AlienImGui::SliderFloat(
                         AlienImGui::SliderFloatParameters()
@@ -1535,9 +1533,21 @@ void SimulationParametersWindow::processBase()
                             .min(0.0f)
                             .max(1.0f)
                             .defaultValue(origParameters.externalEnergyBackflowFactor)
-                            .tooltip("The proportion of energy that flows back to the external energy source when a cell loses energy or dies. The remaining "
-                                     "fraction of the energy is used to create a new energy particle."),
+                            .tooltip("The proportion of energy that flows back from the simulation to the external energy pool. Each time a cell loses energy or dies a fraction of its energy will be taken. The remaining "
+                                     "fraction of the energy stays in the simulation and will be used to create a new energy particle."),
                         parameters.externalEnergyBackflowFactor);
+                    AlienImGui::SliderFloat(
+                        AlienImGui::SliderFloatParameters()
+                            .name("Backflow limit")
+                            .textWidth(RightColumnWidth)
+                            .min(0.0f)
+                            .max(100000000.0f)
+                            .format("%.0f")
+                            .logarithmic(true)
+                            .infinity(true)
+                            .defaultValue(&origParameters.externalEnergyBackflowLimit)
+                            .tooltip("Energy from the simulation only flows back into the external energy pool as long as the external energy amount is below this value."),
+                        &parameters.externalEnergyBackflowLimit);
                     AlienImGui::EndTreeNode();
                 }
             }
