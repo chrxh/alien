@@ -311,7 +311,7 @@ void MainLoopController::drawLoadingScreen()
         drawList->AddText(
             styleRep.getReefMediumFont(),
             scale(24.0f),
-            {center.x - scale(12.0f),  bottom - scale(100)},
+            {center.x - scale(24.0f),  bottom - scale(100)},
             textColor,
             "DEBUG");
     }

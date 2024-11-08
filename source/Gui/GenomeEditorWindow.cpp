@@ -586,13 +586,6 @@ void GenomeEditorWindow::processNode(
                 }
             }
             table.next();
-            AlienImGui::InputInt(
-                AlienImGui::InputIntParameters()
-                    .name("Offspring activation time")
-                    .textWidth(ContentTextWidth)
-                    .tooltip(Const::GenomeConstructorOffspringActivationTime),
-                constructor.constructionActivationTime);
-            table.next();
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters()
                     .name("Construction angle #1")
@@ -990,7 +983,6 @@ void GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) co
         if (constructor.mode < 0) {
             constructor.mode = 0;
         }
-        constructor.constructionActivationTime = ((constructor.constructionActivationTime % MaxActivationTime) + MaxActivationTime) % MaxActivationTime;
     } break;
     case CellFunction_Sensor: {
         auto& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);

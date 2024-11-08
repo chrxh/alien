@@ -2,8 +2,6 @@
 
 namespace Const
 {
-    auto constexpr CellFunctionMutationMaxGenomeSize = 200;
-
     auto constexpr GenomeHeaderSize = 9;
     auto constexpr GenomeHeaderShapePos = 0;
     auto constexpr GenomeHeaderNumBranchesPos = 1;
@@ -22,13 +20,13 @@ namespace Const
     auto constexpr CellInputExecutionNumberPos = 6;
     auto constexpr CellOutputBlockedPos = 7;
 
-    auto constexpr ConstructorConstructionAngle1Pos = 3;
-    auto constexpr ConstructorConstructionAngle2Pos = 4;
+    auto constexpr ConstructorConstructionAngle1Pos = 1;
+    auto constexpr ConstructorConstructionAngle2Pos = 2;
 
     auto constexpr CellBasicBytes = 8;
     auto constexpr NeuronBytes = 64 + 8 + 8;
     auto constexpr TransmitterBytes = 1;
-    auto constexpr ConstructorFixedBytes = 5;
+    auto constexpr ConstructorFixedBytes = 3;
     auto constexpr SensorBytes = 7;
     auto constexpr NerveBytes = 2;
     auto constexpr AttackerBytes = 1;
