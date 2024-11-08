@@ -8,7 +8,7 @@ namespace Const
     std::string const DiscordURL = "https://discord.gg/7bjyZdXXQ2";
     std::string const AlienURL = "alien-project.org";
 
-    std::filesystem::path const BasePath = "resources/";
+    std::filesystem::path const BasePath = "resources";
 
     std::filesystem::path const LogFilename = "log.txt";
     std::filesystem::path const AutosaveFileWithoutPath = "autosave.sim";
