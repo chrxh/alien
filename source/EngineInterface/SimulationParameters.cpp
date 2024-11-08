@@ -209,7 +209,6 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && cellFunctionMuscleMovementTowardTargetedObject == other.cellFunctionMuscleMovementTowardTargetedObject
         && legacyCellFunctionMuscleMovementAngleFromSensor == other.legacyCellFunctionMuscleMovementAngleFromSensor
         && muscleMovementVisualization == other.muscleMovementVisualization
-        && legacyCellFunctionMuscleNoActivityReset == other.legacyCellFunctionMuscleNoActivityReset
         && externalEnergyInflowOnlyForNonSelfReplicators == other.externalEnergyInflowOnlyForNonSelfReplicators
         && externalEnergyBackflowLimit == other.externalEnergyBackflowLimit
         ;

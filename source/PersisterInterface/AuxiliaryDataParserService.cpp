@@ -658,12 +658,6 @@ namespace
             defaultParameters.legacyCellFunctionMuscleMovementAngleFromSensor,
             "simulation parameters.legacy.cell.function.muscle.movement angle from sensor",
             parserTask);
-        ParameterParser::encodeDecode(
-            tree,
-            parameters.legacyCellFunctionMuscleNoActivityReset,
-            defaultParameters.legacyCellFunctionMuscleNoActivityReset,
-            "simulation parameters.legacy.cell.function.muscle.no activity reset",
-            parserTask);
 
         //particle sources
         ParameterParser::encodeDecode(

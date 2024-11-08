@@ -172,7 +172,6 @@ void LegacyAuxiliaryDataParserService::activateParametersAndFeaturesForLegacyFil
     //parameter conversion for v4.10.2 and below
     if (programVersion.empty()) {
         parameters.features.legacyModes = true;
-        parameters.legacyCellFunctionMuscleNoActivityReset = true;
     }
 
     //*******************
