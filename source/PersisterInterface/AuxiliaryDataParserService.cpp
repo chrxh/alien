@@ -664,12 +664,6 @@ namespace
             defaultParameters.legacyCellFunctionMuscleNoActivityReset,
             "simulation parameters.legacy.cell.function.muscle.no activity reset",
             parserTask);
-        ParameterParser::encodeDecode(
-            tree,
-            parameters.legacyCellDirectionalConnections,
-            defaultParameters.legacyCellDirectionalConnections,
-            "simulation parameters.legacy.cell.bidirectional connections",
-            parserTask);
 
         //particle sources
         ParameterParser::encodeDecode(

@@ -1618,13 +1618,6 @@ void SimulationParametersWindow::processBase()
                             .tooltip("If activated, the activity in channel #0 is not set to 0 in muscle cells which are in movement mode. Thus the output of this type "
                                      "of muscles can be reused for other muscle cells."),
                         parameters.legacyCellFunctionMuscleNoActivityReset);
-                    AlienImGui::Checkbox(
-                        AlienImGui::CheckboxParameters()
-                            .name("Allow bidirectional connections")
-                            .textWidth(RightColumnWidth)
-                            .defaultValue(origParameters.legacyCellDirectionalConnections)
-                            .tooltip("If activated, two connected cells can receive each other's input if the 'input execution number' matches."),
-                        parameters.legacyCellDirectionalConnections);
                     AlienImGui::EndTreeNode();
                 }
             }

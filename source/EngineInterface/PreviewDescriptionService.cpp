@@ -370,18 +370,14 @@ namespace
                     ConnectionPreviewDescription connection;
                     connection.cell1 = cell.pos;
                     connection.cell2 = otherCell.pos;
-                    auto flowToOtherCell = otherCell.inputExecutionOrderNumber.value_or(-1) == cell.executionOrderNumber && !cell.outputBlocked && otherCell.executionOrderNumber > cell.executionOrderNumber;
                     connection.arrowToCell1 = inputExecutionOrderNumber == otherCell.executionOrderNumber && !otherCell.outputBlocked
-                        && inputExecutionOrderNumber != cell.executionOrderNumber && !flowToOtherCell;
-
+                        && inputExecutionOrderNumber != cell.executionOrderNumber;
                     result.connections.emplace_back(connection);
                     cellIndicesToCreatedConnectionIndex.emplace(std::pair(connectionIndex, index), toInt(result.connections.size() - 1));
                 } else {
                     auto connectionIndex = findResult->second;
-                    auto flowToOtherCell = otherCell.inputExecutionOrderNumber.value_or(-1) == cell.executionOrderNumber && !cell.outputBlocked
-                        && otherCell.executionOrderNumber > cell.executionOrderNumber;
                     result.connections.at(connectionIndex).arrowToCell2 = inputExecutionOrderNumber == otherCell.executionOrderNumber
-                        && !otherCell.outputBlocked && inputExecutionOrderNumber != cell.executionOrderNumber && !flowToOtherCell;
+                        && !otherCell.outputBlocked && inputExecutionOrderNumber != cell.executionOrderNumber;
                 }
             }
             ++index;
