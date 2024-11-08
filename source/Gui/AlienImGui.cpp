@@ -379,6 +379,7 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
         ImGui::BeginDisabled(std::string(buffer) == *parameters._defaultValue);
         if (revertButton(parameters._name)) {
             StringHelper::copy(buffer, bufferSize, *parameters._defaultValue);
+            result = true;
         }
         ImGui::EndDisabled();
     }
