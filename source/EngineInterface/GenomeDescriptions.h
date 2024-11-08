@@ -46,7 +46,6 @@ struct TransmitterGenomeDescription
 struct ConstructorGenomeDescription
 {
     int mode = 13;   //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
-    int constructionActivationTime = 100;
 
     std::variant<MakeGenomeCopy, std::vector<uint8_t>> genome = std::vector<uint8_t>();
     float constructionAngle1 = 0;
@@ -57,11 +56,6 @@ struct ConstructorGenomeDescription
     ConstructorGenomeDescription& setMode(int value)
     {
         mode = value;
-        return *this;
-    }
-    ConstructorGenomeDescription& setConstructionActivationTime(int value)
-    {
-        constructionActivationTime = value;
         return *this;
     }
     ConstructorGenomeDescription& setGenome(std::vector<uint8_t> const& value)
