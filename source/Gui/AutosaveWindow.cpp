@@ -291,6 +291,9 @@ void AutosaveWindow::processStatusBar()
         if (!_autosaveEnabled) {
             return std::string("No autosave scheduled");
         }
+        if (!_savepointTable.has_value()) {
+            return std::string("No valid directory");
+        }
         auto secondsSinceLastAutosave = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - _lastAutosaveTimepoint);
         return "Next autosave in " + StringHelper::format(std::chrono::seconds(_autosaveInterval * 60) - secondsSinceLastAutosave);
     }();
@@ -359,7 +362,7 @@ void AutosaveWindow::processAutomaticSavepoints()
     }
 
     auto minSinceLastAutosave = std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - _lastAutosaveTimepoint).count();
-    if (minSinceLastAutosave >= _autosaveInterval) {
+    if (minSinceLastAutosave >= _autosaveInterval && _savepointTable.has_value()) {
         onCreateSavepoint(_catchPeaks != CatchPeaks_None);
         _lastAutosaveTimepoint = std::chrono::steady_clock::now();
     }
