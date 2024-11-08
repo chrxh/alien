@@ -210,7 +210,6 @@ struct SimulationParameters
     float cellFunctionDetonatorActivityThreshold = 0.1f;
 
     bool legacyCellFunctionMuscleMovementAngleFromSensor = false;
-    bool legacyCellFunctionMuscleNoActivityReset = false;
 
     bool operator==(SimulationParameters const& other) const;
     bool operator!=(SimulationParameters const& other) const { return !operator==(other); }
