@@ -1482,7 +1482,7 @@ void SimulationParametersWindow::processBase()
                             .logarithmic(true)
                             .infinity(true)
                             .defaultValue(&origParameters.externalEnergy)
-                            .tooltip("This parameter can be used to set the amount of energy of an external energy pool. This type of energy can be "
+                            .tooltip("This parameter can be used to set the amount of energy of an external energy pool. This type of energy can then be "
                                      "transferred to all constructor cells at a certain rate (see inflow settings).\n\nTip: You can explicitly enter a "
                                      "numerical value by clicking on the slider while holding CTRL.\n\nWarning: Too much external energy can result in a "
                                      "massive production of cells and slow down or even crash the simulation."),
@@ -1546,7 +1546,7 @@ void SimulationParametersWindow::processBase()
                             .logarithmic(true)
                             .infinity(true)
                             .defaultValue(&origParameters.externalEnergyBackflowLimit)
-                            .tooltip("Energy from the simulation only flows back into the external energy pool as long as the external energy amount is below this value."),
+                            .tooltip("Energy from the simulation can only flow back into the external energy pool as long as the amount of external energy is below this value."),
                         &parameters.externalEnergyBackflowLimit);
                     AlienImGui::EndTreeNode();
                 }
