@@ -130,7 +130,6 @@ struct SensorFunction
     SensorRestrictToMutants restrictToMutants;
 
     //process data
-    //int memoryInvalidationCounter;
     float memoryChannel1;
     float memoryChannel2;
     float memoryChannel3;

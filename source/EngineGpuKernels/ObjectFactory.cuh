@@ -169,7 +169,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.sensor.maxRange = cellTO.cellFunctionData.sensor.maxRange;
         cell->cellFunctionData.sensor.restrictToColor = cellTO.cellFunctionData.sensor.restrictToColor;
         cell->cellFunctionData.sensor.restrictToMutants = cellTO.cellFunctionData.sensor.restrictToMutants;
-        //cell->cellFunctionData.sensor.memoryInvalidationCounter = 0;
         cell->cellFunctionData.sensor.memoryChannel1 = cellTO.cellFunctionData.sensor.memoryChannel1;
         cell->cellFunctionData.sensor.memoryChannel2 = cellTO.cellFunctionData.sensor.memoryChannel2;
         cell->cellFunctionData.sensor.memoryChannel3 = cellTO.cellFunctionData.sensor.memoryChannel3;
@@ -346,7 +345,6 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             cell->cellFunctionData.sensor.maxRange = -1;
             cell->cellFunctionData.sensor.restrictToColor = _data->numberGen1.randomBool() ? _data->numberGen1.random(MAX_COLORS - 1) : 255;
             cell->cellFunctionData.sensor.restrictToMutants = static_cast<uint8_t>(_data->numberGen1.random(SensorRestrictToMutants_Count - 1));
-            //cell->cellFunctionData.sensor.memoryInvalidationCounter = 0;
             cell->cellFunctionData.sensor.memoryChannel1 = 0;
             cell->cellFunctionData.sensor.memoryChannel2 = 0;
             cell->cellFunctionData.sensor.memoryChannel3 = 0;
