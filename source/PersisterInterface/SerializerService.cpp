@@ -807,15 +807,9 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_Activity_Origin, data.activity.origin, defaultObject.activity.origin);
         loadSave(task, auxiliaries, Id_Cell_Activity_TargetX, data.activity.targetX, defaultObject.activity.targetX);
         loadSave(task, auxiliaries, Id_Cell_Activity_TargetY, data.activity.targetY, defaultObject.activity.targetY);
-        auto activityClone = data.activity;
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.id, data.connections, data.pos, data.vel, data.energy, data.maxConnections, data.cellFunction, data.activity, data.metadata);
-        if (task == SerializationTask::Load) {
-            data.activity.origin = activityClone.origin;
-            data.activity.targetX = activityClone.targetX;
-            data.activity.targetY = activityClone.targetY;
-        }
 
         //compatibility with older versions
         //>>>
