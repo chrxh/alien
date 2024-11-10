@@ -551,12 +551,20 @@ void MainLoopController::processMenubar()
     AlienImGui::BeginMenu(" " ICON_FA_EYE "  View ", _viewMenuOpened);
     AlienImGui::MenuItem(
         AlienImGui::MenuItemParameters()
-            .name("Information overlay")
+            .name("Cell info overlay")
             .keyAlt(true)
             .key(ImGuiKey_O)
             .selected(SimulationView::get().isOverlayActive())
             .closeMenuWhenItemClicked(false),
         [&] { SimulationView::get().setOverlayActive(!SimulationView::get().isOverlayActive()); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Message overlay")
+            .keyAlt(true)
+            .key(ImGuiKey_X)
+            .selected(OverlayController::get().isOn())
+            .closeMenuWhenItemClicked(false),
+        [&] { OverlayController::get().setOn(!OverlayController::get().isOn()); });
     AlienImGui::MenuItem(
         AlienImGui::MenuItemParameters().name("Render UI").keyAlt(true).key(ImGuiKey_U).selected(UiController::get().isOn()).closeMenuWhenItemClicked(false),
         [&] { UiController::get().setOn(!UiController::get().isOn()); });

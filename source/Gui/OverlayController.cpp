@@ -10,6 +10,7 @@
 
 #include "MainLoopEntityController.h"
 #include "StyleRepository.h"
+#include "UiController.h"
 #include "Viewport.h"
 
 namespace
@@ -28,12 +29,15 @@ void OverlayController::setup(PersisterFacade const& persisterFacade)
 
 void OverlayController::process()
 {
+    if (!UiController::get().isOn()) {
+        return;
+    }
     if (!_on) {
         return;
     }
     processProgressAnimation();
 
-    if (!_show) {
+    if (!_messageStartTimepoint.has_value()) {
         return;
     }
     processMessage();
@@ -41,16 +45,24 @@ void OverlayController::process()
 
 void OverlayController::showMessage(std::string const& message, bool withLightning /*= false*/)
 {
-    _show = true;
     _message = message;
     _messageStartTimepoint = std::chrono::steady_clock::now();
     _withLightning = withLightning;
     _counter = 0;
 }
 
+bool OverlayController::isOn() const
+{
+    return _on;
+}
+
 void OverlayController::setOn(bool value)
 {
     _on = value;
+}
+
+void OverlayController::activateProgressAnimation(bool value)
+{
 }
 
 void OverlayController::processProgressAnimation()
@@ -138,7 +150,7 @@ void OverlayController::processMessage()
     auto now = std::chrono::steady_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - *_messageStartTimepoint);
     if (duration.count() > ShowDuration + FadeoutTextDuration) {
-        _show = false;
+        _messageStartTimepoint.reset();
     }
     if (_counter == 2) {
         _ticksLaterTimepoint = std::chrono::steady_clock::now();

@@ -16,7 +16,9 @@ public:
 
     void showMessage(std::string const& message, bool withLightning = false);
 
+    bool isOn() const;
     void setOn(bool value);
+    void activateProgressAnimation(bool value);
 
 private:
     void processProgressAnimation();
