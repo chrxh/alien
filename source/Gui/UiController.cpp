@@ -29,7 +29,6 @@ void UiController::setOn(bool value)
         _lastChangeTimePoint = std::chrono::steady_clock::now() - std::chrono::milliseconds(FadeInOutDuration - duration);
     }
     _on = value;
-    OverlayController::get().setOn(value);
 }
 
 void UiController::process()

@@ -345,6 +345,9 @@ void AutosaveWindow::onDeleteSavepoint(SavepointEntry const& entry)
 void AutosaveWindow::onLoadSavepoint(SavepointEntry const& entry)
 {
     FileTransferController::get().onOpenSimulation(entry->filename);
+    if (_autosaveEnabled) {
+        _lastAutosaveTimepoint = std::chrono::steady_clock::now();
+    }
 }
 
 void AutosaveWindow::processCleanup()

@@ -774,10 +774,16 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
     }
 
     auto externalEnergyConditionalInflowFactor =
-        cudaSimulationParameters.features.externalEnergyControl ? cudaSimulationParameters.externalEnergyConditionalInflowFactor[hostCell->color] : 0.0f;
-    //if (isSelfReplicator(hostCell)) {
-    //    externalEnergyConditionalInflowFactor = 0;
-    //}
+        [&] {
+        if (!cudaSimulationParameters.features.externalEnergyControl) {
+            return 0.0f;
+        }
+        if (cudaSimulationParameters.externalEnergyInflowOnlyForNonSelfReplicators) {
+            return !constructionData.containsSelfReplication ? cudaSimulationParameters.externalEnergyConditionalInflowFactor[hostCell->color] : 0.0f;
+        } else {
+            return cudaSimulationParameters.externalEnergyConditionalInflowFactor[hostCell->color];
+        }
+    }();
 
     auto energyNeededFromHost = max(0.0f, constructionData.energy - cudaSimulationParameters.cellNormalEnergy[hostCell->color])
         + min(constructionData.energy, cudaSimulationParameters.cellNormalEnergy[hostCell->color]) * (1.0f - externalEnergyConditionalInflowFactor);
