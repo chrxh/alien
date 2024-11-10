@@ -86,4 +86,5 @@ private:
     std::chrono::steady_clock::time_point _lastPeakTimepoint;
     TaskProcessor _peakProcessor;
     SharedDeserializedSimulation _peakDeserializedSimulation;
+    std::optional<int> _lastSessionId;
 };

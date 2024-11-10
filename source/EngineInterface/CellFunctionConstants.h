@@ -177,5 +177,3 @@ enum ActivityOrigin_
     ActivityOrigin_Unknown,
     ActivityOrigin_Sensor
 };
-
-auto constexpr OffspringActivationTime = 5;
