@@ -651,7 +651,7 @@ ConstructorProcessor::constructCellIntern(
     result->inputExecutionOrderNumber = constructionData.inputExecutionOrderNumber;
     result->outputBlocked = constructionData.outputBlocked;
 
-    result->activationTime = OffspringActivationTime;
+    result->activationTime = 0;
     result->genomeComplexity = hostCell->genomeComplexity;
 
     auto genomeCurrentBytePosition = constructionData.genomeCurrentBytePosition;
