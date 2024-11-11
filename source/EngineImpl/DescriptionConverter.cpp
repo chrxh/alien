@@ -431,6 +431,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     case CellFunction_Constructor: {
         ConstructorDescription constructor;
         constructor.activationMode = cellTO.cellFunctionData.constructor.activationMode;
+        constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         convert(dataTO, cellTO.cellFunctionData.constructor.genomeSize, cellTO.cellFunctionData.constructor.genomeDataIndex, constructor.genome);
         constructor.numInheritedGenomeNodes = cellTO.cellFunctionData.constructor.numInheritedGenomeNodes;
         constructor.lastConstructedCellId = cellTO.cellFunctionData.constructor.lastConstructedCellId;
@@ -589,6 +590,7 @@ void DescriptionConverter::addCell(
         auto const& constructorDesc = std::get<ConstructorDescription>(*cellDesc.cellFunction);
         ConstructorTO constructorTO;
         constructorTO.activationMode = constructorDesc.activationMode;
+        constructorTO.constructionActivationTime = constructorDesc.constructionActivationTime;
         CHECK(constructorDesc.genome.size() >= Const::GenomeHeaderSize)
         convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
         constructorTO.numInheritedGenomeNodes = static_cast<uint16_t>(constructorDesc.numInheritedGenomeNodes);

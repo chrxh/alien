@@ -14,6 +14,7 @@ public:
     void shutdown();
 
 private:
+    void checkDirectory();
     void initGlfwAndOpenGL();
     void initGlad();
     void initFileDialogs();

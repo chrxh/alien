@@ -143,6 +143,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     } break;
     case CellFunction_Constructor: {
         cell->cellFunctionData.constructor.activationMode = cellTO.cellFunctionData.constructor.activationMode;
+        cell->cellFunctionData.constructor.constructionActivationTime = cellTO.cellFunctionData.constructor.constructionActivationTime;
         createAuxiliaryData(
             cellTO.cellFunctionData.constructor.genomeSize,
             cellTO.cellFunctionData.constructor.genomeDataIndex,
@@ -321,6 +322,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             } else {
                 cell->cellFunctionData.constructor.activationMode = _data->numberGen1.random(50);
             }
+            cell->cellFunctionData.constructor.constructionActivationTime = _data->numberGen1.random(10000);
             cell->cellFunctionData.constructor.genomeSize = Const::GenomeHeaderSize;
             cell->cellFunctionData.constructor.numInheritedGenomeNodes = 0;
             cell->cellFunctionData.constructor.genome = _data->objects.auxiliaryData.getAlignedSubArray(cell->cellFunctionData.constructor.genomeSize);

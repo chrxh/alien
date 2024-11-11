@@ -4,6 +4,14 @@
 #include <stdexcept>
 #include <string>
 
+class InitialCheckException : public std::runtime_error
+{
+public:
+    InitialCheckException(std::string const& what)
+        : std::runtime_error(what.c_str())
+    {}
+};
+
 class CudaException : public std::runtime_error
 {
 public:

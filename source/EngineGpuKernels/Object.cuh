@@ -98,6 +98,7 @@ struct ConstructorFunction
 {
     //settings
     uint32_t activationMode;  //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
+    uint32_t constructionActivationTime;
 
     //genome
     uint16_t genomeSize;

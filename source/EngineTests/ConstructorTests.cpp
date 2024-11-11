@@ -262,7 +262,7 @@ TEST_F(ConstructorTests, constructFirstCell_wrongCycle)
 
 TEST_F(ConstructorTests, constructFirstCell_completenessCheck_constructionNotBuilt)
 {
-    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setMakeSelfCopy();
+    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setMakeSelfCopy();
     auto genome =
         GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setCellFunction(constructorGenome)}));
     auto otherGenome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
@@ -299,7 +299,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_constructionNotBui
 
 TEST_F(ConstructorTests, constructFirstCell_completenessCheck_repeatedConstructionNotBuilt)
 {
-    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setMakeSelfCopy();
+    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setMakeSelfCopy();
     auto genome =
         GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setCellFunction(constructorGenome)}));
     auto otherGenome = GenomeDescriptionService::get().convertDescriptionToBytes(
@@ -340,9 +340,9 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_repeatedConstructi
 TEST_F(ConstructorTests, constructFirstCell_completenessCheck_constructionBuilt)
 {
     auto otherGenome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
-    auto otherConstructorGenome = ConstructorGenomeDescription().setMode(0).setGenome(otherGenome);
+    auto otherConstructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setGenome(otherGenome);
 
-    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setMakeSelfCopy();
+    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setMakeSelfCopy();
     auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells(
         {CellGenomeDescription().setCellFunction(constructorGenome), CellGenomeDescription(), CellGenomeDescription().setCellFunction(otherConstructorGenome)}));
 
@@ -382,9 +382,9 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_infiniteConstructi
 {
     auto otherGenome = GenomeDescriptionService::get().convertDescriptionToBytes(
         GenomeDescription().setHeader(GenomeHeaderDescription().setInfiniteRepetitions()).setCells({CellGenomeDescription()}));
-    auto otherConstructorGenome = ConstructorGenomeDescription().setMode(0).setGenome(otherGenome);
+    auto otherConstructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setGenome(otherGenome);
 
-    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setMakeSelfCopy();
+    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setMakeSelfCopy();
     auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells(
         {CellGenomeDescription().setCellFunction(constructorGenome), CellGenomeDescription(), CellGenomeDescription().setCellFunction(otherConstructorGenome)}));
 
@@ -425,7 +425,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_largeCluster)
     auto constexpr RectLength = 50;
     auto rect = DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().height(RectLength).width(RectLength));
 
-    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setMakeSelfCopy();
+    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setMakeSelfCopy();
     auto genome =
         GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setCellFunction(constructorGenome)}));
     auto otherGenome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
@@ -446,7 +446,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_largeCluster)
 
 TEST_F(ConstructorTests, constructFirstCell_completenessCheck_thinCluster)
 {
-    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setMakeSelfCopy();
+    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setMakeSelfCopy();
     auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription()
                                                                           .setHeader(GenomeHeaderDescription().setNumBranches(2))
                                                                           .setCells(
@@ -544,7 +544,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_thinCluster)
  */
 TEST_F(ConstructorTests, DISABLED_constructFirstCell_completenessCheck_underConstruction)
 {
-    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setMakeSelfCopy();
+    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setMakeSelfCopy();
     auto genome =
         GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setCellFunction(constructorGenome)}));
     auto otherGenome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
@@ -601,7 +601,7 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
             .setExecutionOrderNumber(0)
-            .setCellFunction(ConstructorDescription().setGenome(genome)));
+            .setCellFunction(ConstructorDescription().setGenome(genome).setConstructionActivationTime(123)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -857,7 +857,7 @@ TEST_F(ConstructorTests, constructNeuronCell)
 
 TEST_F(ConstructorTests, constructConstructorCell)
 {
-    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setGenome(createRandomGenome(MAX_GENOME_BYTES / 2));
+    auto constructorGenome = ConstructorGenomeDescription().setMode(0).setConstructionActivationTime(123).setGenome(createRandomGenome(MAX_GENOME_BYTES / 2));
 
     auto genome =
         GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setCellFunction(constructorGenome)}));
@@ -882,6 +882,7 @@ TEST_F(ConstructorTests, constructConstructorCell)
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualConstructedCell.cellFunction);
     EXPECT_EQ(constructorGenome.mode, actualConstructor.activationMode);
+    EXPECT_EQ(constructorGenome.constructionActivationTime, actualConstructor.constructionActivationTime);
     EXPECT_EQ(constructorGenome.getGenomeData(), actualConstructor.genome);
 }
 
