@@ -48,7 +48,7 @@ void checkAndThrowError(T result, char const *const func, const char *const file
         if (cudaError::cudaErrorMemoryAllocation == result) {
             throw CudaMemoryAllocationException(text);
         } else {
-            throw CudaException(text);
+            throw std::runtime_error(text);
         }
     }
 }

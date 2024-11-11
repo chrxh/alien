@@ -94,7 +94,7 @@ void BrowserWindow::initIntern(SimulationFacade simulationFacade, PersisterFacad
     }
     for (int i = 1; i <= numEmojis; ++i) {
         auto reactionName = "emoji" + std::to_string(i) + ".png";
-        _emojis.emplace_back(OpenGLHelper::loadTexture(Const::BasePath / std::filesystem::path(reactionName)));
+        _emojis.emplace_back(OpenGLHelper::loadTexture(Const::ResourcePath / std::filesystem::path(reactionName)));
     }
     for (NetworkResourceType resourceType = 0; resourceType < NetworkResourceType_Count; ++resourceType) {
         for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {

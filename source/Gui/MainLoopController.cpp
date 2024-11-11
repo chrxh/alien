@@ -71,7 +71,6 @@ void MainLoopController::setup(SimulationFacade const& simulationFacade, Persist
     _simulationFacade = simulationFacade;
     _persisterFacade = persisterFacade;
 
-    log(Priority::Important, "starting ALIEN v" + Const::ProgramVersion);
     _logo = OpenGLHelper::loadTexture(Const::LogoFilename);
     _saveOnExit = GlobalSettings::get().getValue("controllers.main loop.save on exit", _saveOnExit);
 }

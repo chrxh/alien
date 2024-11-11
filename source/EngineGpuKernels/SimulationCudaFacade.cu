@@ -506,7 +506,7 @@ void _SimulationCudaFacade::initCuda()
 
     auto result = cudaSetDevice(_gpuInfo.deviceNumber);
     if (result != cudaSuccess) {
-        throw SystemRequirementNotMetException("CUDA device could not be initialized.");
+        throw std::runtime_error("CUDA device could not be initialized.");
     }
 
     cudaGetLastError(); //reset error code
@@ -525,7 +525,7 @@ auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
     int numberOfDevices;
     CHECK_FOR_CUDA_ERROR(cudaGetDeviceCount(&numberOfDevices));
     if (numberOfDevices < 1) {
-        throw SystemRequirementNotMetException("No CUDA device found.");
+        throw std::runtime_error("No CUDA device found.");
     }
     {
         std::stringstream stream;
@@ -554,7 +554,7 @@ auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
         }
     }
     if (highestComputeCapability < 600) {
-        throw SystemRequirementNotMetException("No CUDA device with compute capability of 6.0 or higher found.");
+        throw std::runtime_error("No CUDA device with compute capability of 6.0 or higher found.");
     }
 
     return *cachedResult;

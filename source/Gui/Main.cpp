@@ -5,6 +5,7 @@
 #include "Base/LoggingService.h"
 #include "Base/FileLogger.h"
 #include "Base/Exceptions.h"
+#include "Base/Resources.h"
 #include "PersisterInterface/SerializerService.h"
 #include "EngineImpl/SimulationFacadeImpl.h"
 #include "PersisterImpl/PersisterFacadeImpl.h"
@@ -12,6 +13,7 @@
 #include "MainWindow.h"
 #include "GuiLogger.h"
 #include "HelpStrings.h"
+#include "StartupCheckService.h"
 
 namespace
 {
@@ -38,8 +40,12 @@ int main(int argc, char** argv)
     MainWindow mainWindow;
 
     try {
+        log(Priority::Important, "starting ALIEN v" + Const::ProgramVersion);
+
         simulationFacade = std::make_shared<_SimulationFacadeImpl>();
         persisterFacade = std::make_shared<_PersisterFacadeImpl>();
+        StartupCheckService::get().check(simulationFacade);
+
         mainWindow = std::make_shared<_MainWindow>(simulationFacade, persisterFacade, logger);
         mainWindow->mainLoop();
         mainWindow->shutdown();
