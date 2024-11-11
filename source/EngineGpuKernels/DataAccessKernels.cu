@@ -91,6 +91,7 @@ namespace
         } break;
         case CellFunction_Constructor: {
             cellTO.cellFunctionData.constructor.activationMode = cell->cellFunctionData.constructor.activationMode;
+            cellTO.cellFunctionData.constructor.constructionActivationTime = cell->cellFunctionData.constructor.constructionActivationTime;
             copyAuxiliaryData(
                 cell->cellFunctionData.constructor.genomeSize,
                 cell->cellFunctionData.constructor.genome,

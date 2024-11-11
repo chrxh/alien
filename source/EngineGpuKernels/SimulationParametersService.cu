@@ -32,7 +32,7 @@ SimulationParameters SimulationParametersService::integrateChanges(
             if (currentParameters.radiationSources[i].velX != 0) {
                 result.radiationSources[i].posX = currentParameters.radiationSources[i].posX;
             }
-            if (currentParameters.spots[i].velY != 0) {
+            if (currentParameters.radiationSources[i].velY != 0) {
                 result.radiationSources[i].posY = currentParameters.radiationSources[i].posY;
             }
         }

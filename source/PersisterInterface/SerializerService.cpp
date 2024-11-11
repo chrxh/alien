@@ -71,7 +71,7 @@ namespace
     auto constexpr Id_ConstructorGenome_SeparateConstruction = 2;
     auto constexpr Id_ConstructorGenome_AngleAlignment = 4;
     auto constexpr Id_ConstructorGenome_Stiffness = 5;
-    //auto constexpr Id_ConstructorGenome_ConstructionActivationTime = 6;
+    auto constexpr Id_ConstructorGenome_ConstructionActivationTime = 6;
     auto constexpr Id_ConstructorGenome_GenomeHeader = 8;
     auto constexpr Id_ConstructorGenome_ConstructionAngle1 = 9;
     auto constexpr Id_ConstructorGenome_ConstructionAngle2 = 10;
@@ -135,7 +135,7 @@ namespace
     auto constexpr Id_Constructor_SeparateConstruction = 2;
     auto constexpr Id_Constructor_AngleAlignment = 4;
     auto constexpr Id_Constructor_Stiffness = 5;
-    //auto constexpr Id_Constructor_ConstructionActivationTime = 6;
+    auto constexpr Id_Constructor_ConstructionActivationTime = 6;
     auto constexpr Id_Constructor_GenomeCurrentNodeIndex = 7;
     auto constexpr Id_Constructor_GenomeGeneration = 9;
     auto constexpr Id_Constructor_GenomeHeader = 10;
@@ -278,6 +278,7 @@ namespace cereal
         ConstructorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave<int>(task, auxiliaries, Id_ConstructorGenome_Mode, data.mode, defaultObject.mode);
+        loadSave<int>(task, auxiliaries, Id_ConstructorGenome_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
         loadSave<float>(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle1, data.constructionAngle1, defaultObject.constructionAngle1);
         loadSave<float>(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle2, data.constructionAngle2, defaultObject.constructionAngle2);
         if (task == SerializationTask::Save) {
@@ -573,6 +574,7 @@ namespace cereal
         ConstructorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave<int>(task, auxiliaries, Id_Constructor_ActivationMode, data.activationMode, defaultObject.activationMode);
+        loadSave<int>(task, auxiliaries, Id_Constructor_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
         loadSave<uint64_t>(task, auxiliaries, Id_Constructor_LastConstructedCellId, data.lastConstructedCellId, defaultObject.lastConstructedCellId);
         loadSave<int>(task, auxiliaries, Id_Constructor_GenomeCurrentNodeIndex, data.genomeCurrentNodeIndex, defaultObject.genomeCurrentNodeIndex);
         loadSave<int>(task, auxiliaries, Id_Constructor_GenomeCurrentRepetition, data.genomeCurrentRepetition, defaultObject.genomeCurrentRepetition);

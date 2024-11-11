@@ -4,6 +4,7 @@
 #include "Base/GlobalSettings.h"
 #include "Base/LoggingService.h"
 #include "Base/FileLogger.h"
+#include "Base/Exceptions.h"
 #include "PersisterInterface/SerializerService.h"
 #include "EngineImpl/SimulationFacadeImpl.h"
 #include "PersisterImpl/PersisterFacadeImpl.h"
@@ -43,6 +44,8 @@ int main(int argc, char** argv)
         mainWindow->mainLoop();
         mainWindow->shutdown();
 
+    } catch (InitialCheckException const& e) {
+        std::cerr << "Initial checks failed: " << std::endl << e.what() << std::endl;
     } catch (std::exception const& e) {
         std::cerr << "An uncaught exception occurred: "
                   << e.what()

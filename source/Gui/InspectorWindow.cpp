@@ -541,6 +541,12 @@ void _InspectorWindow::processConstructorContent(ConstructorDescription& constru
                 AlienImGui::InputIntParameters().name("Interval").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip),
                 constructor.activationMode);
         }
+        AlienImGui::InputInt(
+            AlienImGui::InputIntParameters()
+                .name("Offspring activation time")
+                .textWidth(CellFunctionTextWidth)
+                .tooltip(Const::GenomeConstructorOffspringActivationTime),
+            constructor.constructionActivationTime);
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
                 .name("Construction angle #1")
@@ -771,6 +777,10 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
             constructor.genomeCurrentRepetition = 0;
         }
 
+        constructor.constructionActivationTime = ((constructor.constructionActivationTime % MaxActivationTime) + MaxActivationTime) % MaxActivationTime;
+        if (constructor.constructionActivationTime < 0) {
+            constructor.constructionActivationTime = 0;
+        }
         if (constructor.activationMode < 0) {
             constructor.activationMode = 0;
         }

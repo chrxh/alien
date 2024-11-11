@@ -208,6 +208,7 @@ std::vector<uint8_t> GenomeDescriptionService::convertDescriptionToBytes(GenomeD
         case CellFunction_Constructor: {
             auto const& constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);
             writeByte(result, constructor.mode);
+            writeWord(result, constructor.constructionActivationTime);
             writeAngle(result, constructor.constructionAngle1);
             writeAngle(result, constructor.constructionAngle2);
             writeGenome(result, constructor.genome);
@@ -330,6 +331,7 @@ namespace
             case CellFunction_Constructor: {
                 ConstructorGenomeDescription constructor;
                 constructor.mode = readByte(data, bytePosition);
+                constructor.constructionActivationTime = readWord(data, bytePosition);
                 constructor.constructionAngle1 = readAngle(data, bytePosition);
                 constructor.constructionAngle2 = readAngle(data, bytePosition);
                 constructor.genome = readGenome(data, bytePosition);
