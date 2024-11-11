@@ -117,6 +117,8 @@ PUBLIC
     SimulationView.h
     SpatialControlWindow.cpp
     SpatialControlWindow.h
+    StartupCheckService.cpp
+    StartupCheckService.h
     StatisticsWindow.cpp
     StatisticsWindow.h
     StyleRepository.cpp

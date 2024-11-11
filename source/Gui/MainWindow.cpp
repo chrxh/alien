@@ -103,9 +103,6 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
 {
     IMGUI_CHECKVERSION();
 
-    log(Priority::Important, "check directory");
-    checkDirectory();
-
     log(Priority::Important, "initialize GLFW and OpenGL");
     initGlfwAndOpenGL();
 
@@ -194,13 +191,6 @@ void _MainWindow::shutdown()
     _simulationFacade->closeSimulation();
 
     NetworkService::get().shutdown();
-}
-
-void _MainWindow::checkDirectory()
-{
-    if (!std::filesystem::exists(Const::BasePath)) {
-        throw InitialCheckException("The resource folder has not been found. Please start ALIEN from the directory in which the folder `resource` is located.");
-    }
 }
 
 void _MainWindow::initGlfwAndOpenGL()
