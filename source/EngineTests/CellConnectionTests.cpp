@@ -20,7 +20,7 @@ TEST_F(CellConnectionTests, decay)
 {
     _parameters.baseValues.radiationAbsorption[0] = 0;
     _parameters.cellDeathConsequences = CellDeathConsquences_CreatureDies;
-    _parameters.cellDeathProbability[0] = 0.5f;
+    _parameters.baseValues.cellDeathProbability[0] = 0.5f;
 
     _simulationFacade->setSimulationParameters(_parameters);
     auto origData =

@@ -300,11 +300,11 @@ void LegacyAuxiliaryDataParserService::activateParametersAndFeaturesForLegacyFil
         parameters.cellDeathConsequences = legacyParameters.base.clusterDecay.parameter ? CellDeathConsquences_CreatureDies : CellDeathConsquences_None;
         if (parameters.cellDeathConsequences == CellDeathConsquences_None) {
             for (int i = 0; i < MAX_COLORS; ++i) {
-                parameters.cellDeathProbability[i] = 0.01f;
+                parameters.baseValues.cellDeathProbability[i] = 0.01f;
             }
         } else {
             for (int i = 0; i < MAX_COLORS; ++i) {
-                parameters.cellDeathProbability[i] = legacyParameters.base.clusterDecayProb.parameter[i];
+                parameters.baseValues.cellDeathProbability[i] = legacyParameters.base.clusterDecayProb.parameter[i];
             }
         }
     }
