@@ -18,6 +18,8 @@ struct SimulationParametersSpotValues
     bool radiationDisableSources = false;
     ColorVector<float> cellMaxForce = {0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f};
     ColorVector<float> cellMinEnergy = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f};
+    ColorVector<float> cellDeathProbability = {0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f};
+
     float cellFusionVelocity = 0.6f;
     float cellMaxBindingEnergy = Infinity<float>::value;
     ColorVector<float> cellInactiveMaxAge = {
@@ -95,6 +97,9 @@ struct SimulationParametersSpotValues
             }
         }
         for (int i = 0; i < MAX_COLORS; ++i) {
+            if (cellDeathProbability[i] != other.cellDeathProbability[i]) {
+                return false;
+            }
             if (cellMaxForce[i] != other.cellMaxForce[i]) {
                 return false;
             }

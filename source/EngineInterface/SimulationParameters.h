@@ -104,7 +104,6 @@ struct SimulationParameters
     ColorVector<float> highRadiationFactor = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> highRadiationMinCellEnergy = {500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f};
     CellDeathConsquences cellDeathConsequences = CellDeathConsquences_DetachedPartsDie;
-    ColorVector<float> cellDeathProbability = {0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f};
     ColorVector<int> cellMaxAge = {
         Infinity<int>::value,
         Infinity<int>::value,

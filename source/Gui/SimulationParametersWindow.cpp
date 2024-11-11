@@ -659,12 +659,12 @@ void SimulationParametersWindow::processBase()
                         .max(0.1f)
                         .format("%.6f")
                         .logarithmic(true)
-                        .defaultValue(origParameters.cellDeathProbability)
+                        .defaultValue(origParameters.baseValues.cellDeathProbability)
                         .tooltip("The probability per time step with which a cell will disintegrate (i.e. transform into an energy particle) when it is in the "
                                     "state 'Dying'. This can occur when one of the following conditions is satisfied:\n\n"
                                     ICON_FA_CHEVRON_RIGHT " The cell has too low energy.\n\n"
                                     ICON_FA_CHEVRON_RIGHT " The cell has exceeded its maximum age."),
-                    parameters.cellDeathProbability);
+                    parameters.baseValues.cellDeathProbability);
                 AlienImGui::Switcher(
                     AlienImGui::SwitcherParameters()
                         .name("Cell death consequences")
@@ -1969,6 +1969,18 @@ bool SimulationParametersWindow::processSpot(int index)
                         .disabledValue(parameters.baseValues.cellMinEnergy),
                     spot.values.cellMinEnergy,
                     &spot.activatedValues.cellMinEnergy);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Decay rate of dying cells")
+                        .colorDependence(true)
+                        .textWidth(RightColumnWidth)
+                        .min(1e-6f)
+                        .max(0.1f)
+                        .format("%.6f")
+                        .logarithmic(true)
+                    .defaultValue(origSpot.values.cellDeathProbability).disabledValue(parameters.baseValues.cellDeathProbability),
+                    spot.values.cellDeathProbability,
+                    &spot.activatedValues.cellDeathProbability);
                 AlienImGui::EndTreeNode();
             }
 

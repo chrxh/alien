@@ -301,7 +301,11 @@ namespace
         missingParameters.cellDeathConsequences = ParameterParser::encodeDecode(
             tree, parameters.cellDeathConsequences, defaultParameters.cellDeathConsequences, "simulation parameters.cell.death consequences", parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.cellDeathProbability, defaultParameters.cellDeathProbability, "simulation parameters.cell.death probability", parserTask);
+            tree,
+            parameters.baseValues.cellDeathProbability,
+            defaultParameters.baseValues.cellDeathProbability,
+            "simulation parameters.cell.death probability",
+            parserTask);
 
         ParameterParser::encodeDecode(
             tree,
@@ -789,6 +793,13 @@ namespace
                 tree, spot.values.cellMaxForce, spot.activatedValues.cellMaxForce, defaultSpot.values.cellMaxForce, base + "cell.max force", parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree, spot.values.cellMinEnergy, spot.activatedValues.cellMinEnergy, defaultSpot.values.cellMinEnergy, base + "cell.min energy", parserTask);
+            ParameterParser::encodeDecodeWithEnabled(
+                tree,
+                spot.values.cellDeathProbability,
+                spot.activatedValues.cellDeathProbability,
+                defaultSpot.values.cellDeathProbability,
+                base + "cell.death probability",
+                parserTask);
 
             ParameterParser::encodeDecodeWithEnabled(
                 tree,

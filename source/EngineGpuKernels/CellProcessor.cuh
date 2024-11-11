@@ -766,7 +766,13 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             &SimulationParametersSpotValues::cellMinEnergy, &SimulationParametersSpotActivatedValues::cellMinEnergy, data, cell->pos, cell->color);
 
         if (cell->livingState == LivingState_Dying || cell->livingState == LivingState_Detaching) {
-            if (data.numberGen1.random() < cudaSimulationParameters.cellDeathProbability[cell->color]) {
+            auto cellDeathProbability = SpotCalculator::calcParameter(
+                &SimulationParametersSpotValues::cellDeathProbability,
+                &SimulationParametersSpotActivatedValues::cellDeathProbability,
+                data,
+                cell->pos,
+                cell->color);
+            if (data.numberGen1.random() < cellDeathProbability) {
                 CellConnectionProcessor::scheduleDeleteCell(data, index);
             }
         }
