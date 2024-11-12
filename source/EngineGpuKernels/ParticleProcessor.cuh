@@ -300,10 +300,17 @@ __inline__ __device__ void ParticleProcessor::radiate(SimulationData& data, floa
 
     data.cellMap.correctPosition(pos);
 
-    auto externalEnergy = alienAtomicRead(data.externalEnergy);
-    auto externalEnergyBackflowFactor = cudaSimulationParameters.features.externalEnergyControl && externalEnergy < cudaSimulationParameters.externalEnergyBackflowLimit
-    ? cudaSimulationParameters.externalEnergyBackflowFactor[color]
-        : 0.0f;
+    auto externalEnergyBackflowFactor = 0.0f;
+    if (cudaSimulationParameters.features.externalEnergyControl && cudaSimulationParameters.externalEnergyBackflowFactor[color] > 0) {
+        auto energyToAdd = toDouble(energy * cudaSimulationParameters.externalEnergyBackflowFactor[color]);
+        auto origExternalEnergy = atomicAdd(data.externalEnergy, energyToAdd);
+        if (origExternalEnergy + energyToAdd > cudaSimulationParameters.externalEnergyBackflowLimit) {
+            atomicAdd(data.externalEnergy, -energyToAdd);
+        } else {
+            externalEnergyBackflowFactor = cudaSimulationParameters.externalEnergyBackflowFactor[color];
+        }
+    }
+
     auto particleEnergy =
         energy * (1.0f - externalEnergyBackflowFactor);
     if (particleEnergy > NEAR_ZERO) {
@@ -312,5 +319,4 @@ __inline__ __device__ void ParticleProcessor::radiate(SimulationData& data, floa
         data.cellMap.correctPosition(pos);
         factory.createParticle(particleEnergy, pos, vel, color);
     }
-    atomicAdd(data.externalEnergy, toDouble(energy * externalEnergyBackflowFactor));
 }
