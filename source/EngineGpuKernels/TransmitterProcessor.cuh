@@ -34,12 +34,12 @@ __device__ __inline__ void TransmitterProcessor::process(SimulationData& data, S
 
 __device__ __inline__ void TransmitterProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto activity = CellFunctionProcessor::calcInputActivity(cell);
-    CellFunctionProcessor::updateInvocationState(cell, activity);
+    auto signal = CellFunctionProcessor::calcInputSignal(cell);
+    CellFunctionProcessor::updateInvocationState(cell, signal);
 
     distributeEnergy(data, statistics, cell);
 
-    CellFunctionProcessor::setActivity(cell, activity);
+    CellFunctionProcessor::setSignal(cell, signal);
 }
 
 __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData& data, SimulationStatistics& statistics, Cell* cell)

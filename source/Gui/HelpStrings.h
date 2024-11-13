@@ -35,8 +35,8 @@ namespace Const
         "Transmitter cells are designed to transport energy. This is important, for example, to supply constructor cells with energy or to "
         "support attacked cells. The energy transport works as follows: A part of the excess energy of the own cell and the directly connected "
         "cells is collected and transferred to other cells in the vicinity. A cell has excess energy when it exceeds a defined normal value (see "
-        "simulation parameter 'Normal energy' in 'Cell life cycle'). Transmitter cells do not need an activation but they also transport the "
-        "activity states from input.";
+        "simulation parameter 'Normal energy' in 'Cell life cycle'). Transmitter cells do not need an activation but they can transport "
+        "signals received from their input.";
 
     std::string const ConstructorTooltip =
         "A constructor cell builds a cell network according to a contained genome. The construction process takes place cell by "
@@ -52,9 +52,9 @@ namespace Const
         "of the last match (0 = far away, 1 = close)\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #3: angle of the last match";
 
     std::string const NerveTooltip =
-        "By default, a nerve cell forwards activity states by receiving activity as input from connected cells (and summing it if "
-        "there are multiple cells) and directly providing it as output to other cells. Independently of this, one can specify "
-        "that it also generates an activity pulse in channel #0 at regular intervals. This can be used to trigger other sensor cells, "
+        "By default, a nerve cell forwards signals from connected cells (and summing it up if "
+        "there are multiple such cells) and thus directly providing it as input to other cells. Independently of this, one can specify "
+        "that it also generates a signal in channel #0 at regular intervals. This can be used to trigger other sensor cells, "
         "attacker cells, etc.";
 
     std::string const AttackerTooltip =
@@ -94,7 +94,7 @@ namespace Const
         "Cells can possess a specific function that enables them to, for example, perceive their environment, process information, or "
         "take action. All cell functions have in common that they obtain the input from connected cells whose execution number matches the input "
         "execution number of the current cell. For this purpose, each channel from #0 to #7 of those cells is summed and the result is written "
-        "to the channel from #0 to #7 of the current cell. In particular, if there is only one input cell, its activity is simply forwarded. After "
+        "to the channel from #0 to #7 of the current cell. In particular, if there is only one input cell, its signal is simply forwarded. After "
         "the execution of a cell function, some channels will be then overriden by the output of the corresponding cell function.\n\nIMPORTANT: If "
         "you choose a cell function, this tooltip will be updated to provide more specific information. ";
 
@@ -121,13 +121,12 @@ namespace Const
 
     std::string const GenomeInputExecutionNumberTooltip =
         "A functioning organism requires cells to collaborate. This can involve sensor cells that perceive the environment, neuron cells that "
-        "process information, muscle cells that perform movements, and so on. These various cell functions often require input and produce an "
-        "output. Both input and output are based on the cell's activity states. The process for updating is performed in two steps:\n\n1) When a "
-        "cell function is executed, the activity states are first updated. This involves reading the activity states of all connected cells "
-        "whose 'execution number' matches the specified 'input execution number', summing them up, and then setting the result to the "
-        "activity states for the considered cell.\n\n2) The cell function is executed and can use the cell's activity states as input. "
-        "The output is used to update the activity states again.\n\nSetting an 'input execution number' is optional. If none is set, the cell can "
-        "receive no input.";
+        "process information, muscle cells that perform movements, and so on. These various cell functions often require input signals and produce "
+        "output signals. The process for updating a cell signal is performed in two steps:\n\n1) When a "
+        "cell function is executed, an input signal will firstly be calculated. This involves reading the signals of all connected cells "
+        "whose 'execution number' matches the specified 'input execution number' and summing their values up.\n\n2) The cell function is executed and can use "
+        "the calculated signal as input. The cell then provides an output in form of an output signal.\n\nSetting an 'input execution number' is optional. If "
+        "none is set, the cell can receive no input signals.";
 
     std::string const GenomeBlockOutputTooltip =
         "Activating this toggle, the cell's output can be locked, preventing any other cell from utilizing it as input.";
@@ -164,8 +163,8 @@ namespace Const
 
     std::string const GenomeConstructorActivationModeTooltip =
         "There are 2 modes available for controlling constructor cells:\n\n" ICON_FA_CHEVRON_RIGHT " Manual: The construction process is only triggered when "
-        "there is activity in channel #0.\n\n" ICON_FA_CHEVRON_RIGHT " Automatic: The construction process is automatically triggered at regular intervals. "
-        "Activity in channel #0 is not necessary.\n\n In both cases, if there is not enough energy available for the cell being "
+        "there is signal in channel #0.\n\n" ICON_FA_CHEVRON_RIGHT " Automatic: The construction process is automatically triggered at regular intervals. "
+        "Signal in channel #0 is not necessary.\n\n In both cases, if there is not enough energy available for the cell being "
         "created, the construction process will pause until the next triggering.";
 
     std::string const GenomeConstructorIntervalTooltip =
@@ -194,7 +193,7 @@ namespace Const
 
     std::string const GenomeSensorScanAngleTooltip =
         "The angle in which direction the scanning process should take place can be determined here. An angle of 0 means that the "
-        "scan will be performed in the direction derived from the input cell (the cell from which the activity input originates) "
+        "scan will be performed in the direction derived from the input cell (the cell from which the input signal originates) "
         "towards the sensor cell.";
 
     std::string const GenomeSensorScanColorTooltip = "Restricts the sensor so that it only scans cells with a certain color.";
@@ -216,15 +215,15 @@ namespace Const
     std::string const GenomeSensorMinRangeTooltip = "If activated, the sensor detects only objects with a distance equal or greater than the specified value.";
     std::string const GenomeSensorMaxRangeTooltip = "If activated, the sensor detects only objects with a distance equal or less than the specified value.";
 
-    std::string const GenomeNerveGeneratePulsesTooltip = "If enabled, an activity pulse in channel #0 will be generated at regular time intervals.";
+    std::string const GenomeNerveGeneratePulsesTooltip = "If enabled, a signal in channel #0 will be generated at regular time intervals.";
 
     std::string const GenomeNervePulseIntervalTooltip =
         "The intervals between two pulses can be set here. It is specified in cycles, which corresponds to 6 time steps each.";
 
     std::string const GenomeNerveAlternatingPulsesTooltip =
         "By default, the generated pulses consist of a positive value in channel #0. When 'Alternating pulses' is enabled, the "
-        "sign of this value alternates at specific time intervals. This can be used, for example, to easily create activity "
-        "signals for back-and-forth movements or bending in muscle cells.";
+        "sign of this value alternates at specific time intervals. This can be used, for example, to easily create signals for back-and-forth movements or "
+        "bending in muscle cells.";
 
     std::string const GenomeNervePulsesPerPhaseTooltip = "This value indicates the number of pulses until the sign will be changed in channel #0.";
 

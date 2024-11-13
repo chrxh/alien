@@ -315,8 +315,8 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellFunctionConstructorActivityThreshold,
-            defaultParameters.cellFunctionConstructorActivityThreshold,
+            parameters.cellFunctionConstructorSignalThreshold,
+            defaultParameters.cellFunctionConstructorSignalThreshold,
             "simulation parameters.cell.function.constructor.activity threshold",
             parserTask);
         ParameterParser::encodeDecode(
@@ -462,8 +462,8 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellFunctionAttackerActivityThreshold,
-            defaultParameters.cellFunctionAttackerActivityThreshold,
+            parameters.cellFunctionAttackerSignalThreshold,
+            defaultParameters.cellFunctionAttackerSignalThreshold,
             "simulation parameters.cell.function.attacker.activity threshold",
             parserTask);
         ParameterParser::encodeDecode(
@@ -619,8 +619,8 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellFunctionSensorActivityThreshold,
-            defaultParameters.cellFunctionSensorActivityThreshold,
+            parameters.cellFunctionSensorSignalThreshold,
+            defaultParameters.cellFunctionSensorSignalThreshold,
             "simulation parameters.cell.function.sensor.activity threshold",
             parserTask);
 
@@ -632,8 +632,8 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellFunctionReconnectorActivityThreshold,
-            defaultParameters.cellFunctionReconnectorActivityThreshold,
+            parameters.cellFunctionReconnectorSignalThreshold,
+            defaultParameters.cellFunctionReconnectorSignalThreshold,
             "simulation parameters.cell.function.reconnector.activity threshold",
             parserTask);
 
@@ -651,8 +651,8 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellFunctionDetonatorActivityThreshold,
-            defaultParameters.cellFunctionDetonatorActivityThreshold,
+            parameters.cellFunctionDetonatorSignalThreshold,
+            defaultParameters.cellFunctionDetonatorSignalThreshold,
             "simulation parameters.cell.function.detonator.activity threshold",
             parserTask);
 

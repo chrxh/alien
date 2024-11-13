@@ -69,10 +69,10 @@ struct CellConnection
     float angleFromPrevious;
 };
 
-struct Activity
+struct Signal
 {
     float channels[MAX_CHANNELS];
-    ActivityOrigin origin;
+    SignalOrigin origin;
     float targetX;
     float targetY;
 };
@@ -229,7 +229,7 @@ struct Cell
     bool outputBlocked;
     CellFunction cellFunction;
     CellFunctionData cellFunctionData;
-    Activity activity;
+    Signal signal;
     uint32_t activationTime;
     CellFunctionUsed cellFunctionUsed;
 
@@ -269,7 +269,7 @@ struct Cell
     __device__ __inline__ bool isActive()
     {
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            if (abs(activity.channels[i]) > NEAR_ZERO) {
+            if (abs(signal.channels[i]) > NEAR_ZERO) {
                 return true;
             }
         }

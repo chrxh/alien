@@ -34,10 +34,10 @@ struct ConnectionTO
     float angleFromPrevious;
 };
 
-struct ActivityTO
+struct SignalTO
 {
     float channels[MAX_CHANNELS];
-    ActivityOrigin origin;
+    SignalOrigin origin;
     float targetX;
     float targetY;
 };
@@ -184,7 +184,7 @@ struct CellTO
     bool outputBlocked;
     CellFunction cellFunction;
     CellFunctionTO cellFunctionData;
-    ActivityTO activity;
+    SignalTO signal;
     uint32_t activationTime;
     uint16_t detectedByCreatureId;  //only the first 16 bits from the creature id
     CellFunctionUsed cellFunctionUsed;

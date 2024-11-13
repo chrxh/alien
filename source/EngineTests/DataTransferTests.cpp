@@ -36,7 +36,7 @@ TEST_F(DataTransferTests, singleCell)
                      .setConstructionId(3534)
                      .setOutputBlocked(false)
                      .setCellFunction(neuron)
-                     .setActivity({1, 0, -1, 0, 0, 0, 0, 0}));
+                     .setSignal({1, 0, -1, 0, 0, 0, 0, 0}));
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();

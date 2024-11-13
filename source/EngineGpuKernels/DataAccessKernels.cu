@@ -40,11 +40,11 @@ namespace
         cellTO.color = cell->color;
         cellTO.age = cell->age;
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            cellTO.activity.channels[i] = cell->activity.channels[i];
+            cellTO.signal.channels[i] = cell->signal.channels[i];
         }
-        cellTO.activity.origin = cell->activity.origin;
-        cellTO.activity.targetX = cell->activity.targetX;
-        cellTO.activity.targetY = cell->activity.targetY;
+        cellTO.signal.origin = cell->signal.origin;
+        cellTO.signal.targetX = cell->signal.targetX;
+        cellTO.signal.targetY = cell->signal.targetY;
         cellTO.activationTime = cell->activationTime;
         cellTO.detectedByCreatureId = cell->detectedByCreatureId;
         cellTO.cellFunctionUsed = cell->cellFunctionUsed;

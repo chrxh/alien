@@ -70,7 +70,7 @@ TEST_F(ConstructorTests, noEnergy)
     EXPECT_EQ(0, actualHostCell.connections.size());
     EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).genomeCurrentNodeIndex);
     EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy[0] * 2 - 1.0f, actualHostCell.energy));
-    EXPECT_TRUE(approxCompare(0.0f, actualHostCell.activity.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualHostCell.signal.channels[0]));
 }
 
 TEST_F(ConstructorTests, alreadyFinished)
@@ -99,7 +99,7 @@ TEST_F(ConstructorTests, alreadyFinished)
     auto actualConstructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
     EXPECT_EQ(0, actualHostCell.connections.size());
     EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
-    EXPECT_TRUE(approxCompare(0.0f, actualHostCell.activity.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualHostCell.signal.channels[0]));
 }
 
 TEST_F(ConstructorTests, notActivated)
@@ -125,10 +125,10 @@ TEST_F(ConstructorTests, notActivated)
     ASSERT_EQ(1, actualData.cells.size());
     auto actualHostCell = getCell(actualData, 1);
     auto actualConstructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
-    EXPECT_TRUE(approxCompare(0.0f, actualHostCell.activity.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualHostCell.signal.channels[0]));
 }
 
-TEST_F(ConstructorTests, manualConstruction_noInputActivity)
+TEST_F(ConstructorTests, manualConstruction_noInputSignal)
 {
     auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
 
@@ -152,7 +152,7 @@ TEST_F(ConstructorTests, manualConstruction_noInputActivity)
     EXPECT_EQ(0, actualHostCell.connections.size());
     EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).genomeCurrentNodeIndex);
     EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy[0] * 3, actualHostCell.energy));
-    EXPECT_TRUE(approxCompare(0.0f, actualHostCell.activity.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualHostCell.signal.channels[0]));
 }
 
 TEST_F(ConstructorTests, constructFirstCell_correctCycle)
@@ -618,7 +618,7 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
     EXPECT_EQ(0, actualConstructor.genomeCurrentRepetition);
     EXPECT_EQ(1, actualConstructor.currentBranch);
     EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy[0] * 2, actualHostCell.energy));
-    EXPECT_TRUE(approxCompare(1.0f, actualHostCell.activity.channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualHostCell.signal.channels[0]));
     EXPECT_EQ(LivingState_Activating, actualConstructedCell.livingState);
 
     EXPECT_EQ(1, actualConstructedCell.connections.size());
@@ -724,7 +724,7 @@ TEST_F(ConstructorTests, constructFirstCell_manualConstruction)
              .setMaxConnections(1)
              .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
-             .setActivity({1, 0, 0, 0, 0, 0, 0, 0})
+             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})
     });
     data.addConnection(1, 2);
 
@@ -766,7 +766,7 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle1)
              .setMaxConnections(1)
              .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
-             .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
+             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -802,7 +802,7 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle2)
              .setMaxConnections(1)
              .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
-             .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
+             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -1379,7 +1379,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSpace)
     auto actualPrevConstructedCell = getCell(actualData, 2);
 
     EXPECT_EQ(1, actualHostCell.connections.size());
-    EXPECT_TRUE(approxCompare(0.0f, actualHostCell.activity.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualHostCell.signal.channels[0]));
     ASSERT_EQ(1, actualPrevConstructedCell.connections.size());
     auto actualConstructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
     EXPECT_EQ(1, actualConstructor.genomeCurrentNodeIndex);
@@ -1886,7 +1886,7 @@ TEST_F(ConstructorTests, restartIfNoLastConstructedCellFound)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
-            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
     });
     data.addConnection(1, 2);
 

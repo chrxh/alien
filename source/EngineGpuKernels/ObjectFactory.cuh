@@ -120,11 +120,11 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->metadata.description);
 
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        cell->activity.channels[i] = cellTO.activity.channels[i];
+        cell->signal.channels[i] = cellTO.signal.channels[i];
     }
-    cell->activity.origin = cellTO.activity.origin;
-    cell->activity.targetX = cellTO.activity.targetX;
-    cell->activity.targetY = cellTO.activity.targetY;
+    cell->signal.origin = cellTO.signal.origin;
+    cell->signal.targetX = cellTO.signal.targetX;
+    cell->signal.targetY = cellTO.signal.targetY;
 
     cell->cellFunction = cellTO.cellFunction;
     switch (cellTO.cellFunction) {
@@ -286,11 +286,11 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->inputExecutionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellNumExecutionOrderNumbers - 1);
     cell->outputBlocked = _data->numberGen1.randomBool();
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        cell->activity.channels[i] = 0;
+        cell->signal.channels[i] = 0;
     }
-    cell->activity.origin = ActivityOrigin_Unknown;
-    cell->activity.targetX = 0;
-    cell->activity.targetY = 0;
+    cell->signal.origin = SignalOrigin_Unknown;
+    cell->signal.targetX = 0;
+    cell->signal.targetY = 0;
     cell->density = 1.0f;
     cell->creatureId = 0;
     cell->mutationId = 1;
@@ -416,11 +416,11 @@ __inline__ __device__ Cell* ObjectFactory::createCell(uint64_t& cellPointerIndex
     cell->vel = {0, 0};
     cell->activationTime = 0;
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        cell->activity.channels[i] = 0;
+        cell->signal.channels[i] = 0;
     }
-    cell->activity.origin = ActivityOrigin_Unknown;
-    cell->activity.targetX = 0;
-    cell->activity.targetY = 0;
+    cell->signal.origin = SignalOrigin_Unknown;
+    cell->signal.targetX = 0;
+    cell->signal.targetY = 0;
     cell->density = 1.0f;
     cell->detectedByCreatureId = 0;
     cell->event = CellEvent_No;
