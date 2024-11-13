@@ -48,7 +48,7 @@ TEST_F(InjectorTests, nothingFound)
              .setMaxConnections(1)
              .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription().setPulseMode(1))
-             .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
+             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -61,7 +61,7 @@ TEST_F(InjectorTests, nothingFound)
     auto actualInjector = std::get<InjectorDescription>(*actualCell.cellFunction);
 
     EXPECT_EQ(2, actualData.cells.size());
-    EXPECT_TRUE(approxCompare(0.0f, actualCell.activity.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualCell.signal.channels[0]));
     EXPECT_EQ(0, actualInjector.counter);
 }
 
@@ -84,7 +84,7 @@ TEST_F(InjectorTests, matchButNoInjection)
              .setMaxConnections(1)
              .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription().setPulseMode(1))
-             .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
             .setPos({9.0f, 10.0f})
@@ -106,7 +106,7 @@ TEST_F(InjectorTests, matchButNoInjection)
     auto origTargetConstructor = std::get<ConstructorDescription>(*origTargetCell.cellFunction);
 
     EXPECT_EQ(3, actualData.cells.size());
-    EXPECT_TRUE(approxCompare(1.0f, actualCell.activity.channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualCell.signal.channels[0]));
     EXPECT_EQ(1, actualInjector.counter);
     EXPECT_EQ(origTargetConstructor.genome, actualTargetConstructor.genome);
     EXPECT_TRUE(actualTargetConstructor.isGenomeInherited());
@@ -131,7 +131,7 @@ TEST_F(InjectorTests, injection)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription().setPulseMode(1))
-            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(ConstructorDescription().setNumInheritedGenomeNodes(1)),
     });
     data.addConnection(1, 2);
@@ -150,7 +150,7 @@ TEST_F(InjectorTests, injection)
     auto origInjector = std::get<InjectorDescription>(*origCell.cellFunction);
 
     EXPECT_EQ(3, actualData.cells.size());
-    EXPECT_TRUE(approxCompare(1.0f, actualCell.activity.channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualCell.signal.channels[0]));
     EXPECT_EQ(0, actualInjector.counter);
     EXPECT_EQ(origInjector.genome, actualTargetConstructor.genome);
     EXPECT_FALSE(actualTargetConstructor.isGenomeInherited());
@@ -176,7 +176,7 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_failed)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription().setPulseMode(1))
-            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
             .setPos({9.0f, 10.0f})
@@ -200,7 +200,7 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_failed)
     auto origTargetConstructor = std::get<ConstructorDescription>(*origTargetCell.cellFunction);
 
     EXPECT_EQ(3, actualData.cells.size());
-    EXPECT_TRUE(approxCompare(0.0f, actualCell.activity.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualCell.signal.channels[0]));
     EXPECT_EQ(0, actualInjector.counter);
     EXPECT_EQ(origTargetConstructor.genome, actualTargetConstructor.genome);
     EXPECT_TRUE(actualTargetConstructor.isGenomeInherited());
@@ -226,7 +226,7 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_success)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription().setPulseMode(1))
-            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
             .setPos({9.0f, 10.0f})
@@ -260,7 +260,7 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_success)
 
 
     EXPECT_EQ(4, actualData.cells.size());
-    EXPECT_TRUE(approxCompare(1.0f, actualCell.activity.channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualCell.signal.channels[0]));
     EXPECT_EQ(0, actualInjector.counter);
     EXPECT_EQ(actualInjector.genome, actualTargetConstructor.genome);
     EXPECT_EQ(origOtherConstructor.genome, actualOtherConstructor.genome);

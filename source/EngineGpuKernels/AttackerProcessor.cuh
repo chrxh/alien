@@ -42,10 +42,10 @@ __device__ __inline__ void AttackerProcessor::process(SimulationData& data, Simu
 
 __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto activity = CellFunctionProcessor::calcInputActivity(cell);
-    CellFunctionProcessor::updateInvocationState(cell, activity);
+    auto signal = CellFunctionProcessor::calcInputSignal(cell);
+    CellFunctionProcessor::updateInvocationState(cell, signal);
 
-    if (abs(activity.channels[0]) >= cudaSimulationParameters.cellFunctionAttackerActivityThreshold) {
+    if (abs(signal.channels[0]) >= cudaSimulationParameters.cellFunctionAttackerSignalThreshold) {
         float energyDelta = 0;
         auto cellMinEnergy = SpotCalculator::calcParameter(
             &SimulationParametersSpotValues::cellMinEnergy, &SimulationParametersSpotActivatedValues::cellMinEnergy, data, cell->pos, cell->color);
@@ -161,7 +161,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (energyToTransfer > NEAR_ZERO) {
 
                 //notify attacked cell
-                atomicAdd(&otherCell->activity.channels[7], 1.0f);
+                atomicAdd(&otherCell->signal.channels[7], 1.0f);
                 otherCell->event = CellEvent_Attacked;
                 otherCell->eventCounter = 6;
                 otherCell->eventPos = cell->pos;
@@ -194,7 +194,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         radiate(data, cell);
 
         //output
-        activity.channels[0] = energyDelta / 10;
+        signal.channels[0] = energyDelta / 10;
 
         if (energyDelta > NEAR_ZERO) {
             cell->event = CellEvent_Attacking;
@@ -203,7 +203,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         }
     }
 
-    CellFunctionProcessor::setActivity(cell, activity);
+    CellFunctionProcessor::setSignal(cell, signal);
 }
 
 __device__ __inline__ void AttackerProcessor::radiate(SimulationData& data, Cell* cell)

@@ -66,17 +66,17 @@ TEST_F(TransmitterTests, distributeToOtherTransmitter)
     auto origNerveCell = getCell(data, 2);
     auto actualNerveCell = getCell(actualData, 2);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualTransmitterCell1.activity.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualTransmitterCell1.signal.channels[0]));
     EXPECT_TRUE(actualTransmitterCell1.energy < origTransmitterCell1.energy - NEAR_ZERO);
     EXPECT_TRUE(actualTransmitterCell2.energy > origTransmitterCell2.energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(origNerveCell.energy, actualNerveCell.energy));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(TransmitterTests, distributeToOneOtherTransmitter_forwardActivity)
+TEST_F(TransmitterTests, distributeToOneOtherTransmitter_forwardSignal)
 {
-    ActivityDescription activity;
-    activity.setChannels({0.5f, -0.7f, 0, 0, 0, 0, 0, 0});
+    SignalDescription signal;
+    signal.setChannels({0.5f, -0.7f, 0, 0, 0, 0, 0, 0});
 
     DataDescription data;
     data.addCells({
@@ -94,7 +94,7 @@ TEST_F(TransmitterTests, distributeToOneOtherTransmitter_forwardActivity)
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
-            .setActivity(activity),
+            .setSignal(signal),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(1).setExecutionOrderNumber(1).setCellFunction(TransmitterDescription()),
     });
     data.addConnection(1, 2);
@@ -115,7 +115,7 @@ TEST_F(TransmitterTests, distributeToOneOtherTransmitter_forwardActivity)
     auto actualNerveCell = getCell(actualData, 2);
 
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        EXPECT_TRUE(approxCompare(activity.channels[i], actualTransmitterCell1.activity.channels[i]));
+        EXPECT_TRUE(approxCompare(signal.channels[i], actualTransmitterCell1.signal.channels[i]));
     }
     EXPECT_TRUE(actualTransmitterCell1.energy < origTransmitterCell1.energy - NEAR_ZERO);
     EXPECT_TRUE(actualTransmitterCell2.energy > origTransmitterCell2.energy + NEAR_ZERO);

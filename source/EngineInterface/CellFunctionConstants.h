@@ -171,11 +171,11 @@ enum CellFunctionUsed_
     CellFunctionUsed_Yes,
 };
 
-using ActivityOrigin = uint8_t;
-enum ActivityOrigin_
+using SignalOrigin = uint8_t;
+enum SignalOrigin_
 {
-    ActivityOrigin_Unknown,
-    ActivityOrigin_Sensor
+    SignalOrigin_Unknown,
+    SignalOrigin_Sensor
 };
 
 auto constexpr MaxActivationTime = 256 * 4;

@@ -49,7 +49,7 @@ TEST_F(DetonatorTests, doNothing)
 
     EXPECT_EQ(1, actualData.cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(approxCompare(0.0f, actualDetonatorCell.activity.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualDetonatorCell.signal.channels[0]));
     EXPECT_EQ(14, std::get<DetonatorDescription>(*actualDetonatorCell.cellFunction).countdown);
     EXPECT_EQ(DetonatorState_Ready, std::get<DetonatorDescription>(*actualDetonatorCell.cellFunction).state);
 }
@@ -71,7 +71,7 @@ TEST_F(DetonatorTests, activateDetonator)
              .setMaxConnections(1)
              .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
-             .setActivity({1, 0, 0, 0, 0, 0, 0, 0})});
+             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -82,7 +82,7 @@ TEST_F(DetonatorTests, activateDetonator)
 
     EXPECT_EQ(2, actualData.cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(approxCompare(1.0f, actualDetonatorCell.activity.channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualDetonatorCell.signal.channels[0]));
     EXPECT_EQ(9, std::get<DetonatorDescription>(*actualDetonatorCell.cellFunction).countdown);
     EXPECT_EQ(DetonatorState_Activated, std::get<DetonatorDescription>(*actualDetonatorCell.cellFunction).state);
 }
@@ -104,7 +104,7 @@ TEST_F(DetonatorTests, explosion)
 
     EXPECT_EQ(2, actualData.cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(approxCompare(0.0f, actualDetonatorCell.activity.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualDetonatorCell.signal.channels[0]));
     EXPECT_EQ(0, std::get<DetonatorDescription>(*actualDetonatorCell.cellFunction).countdown);
     EXPECT_EQ(DetonatorState_Exploded, std::get<DetonatorDescription>(*actualDetonatorCell.cellFunction).state);
     EXPECT_TRUE(Math::length(actualOtherCell.vel) > NEAR_ZERO);

@@ -48,7 +48,7 @@ TEST_F(DefenderTests, attackerVsAntiAttacker)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription().setPulseMode(1))
-            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
             .setPos({9.0f, 10.0f})
@@ -75,7 +75,7 @@ TEST_F(DefenderTests, attackerVsAntiAttacker)
     auto actualTarget = getCell(actualData, 3);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(actualAttacker.activity.channels[0] > NEAR_ZERO);
+    EXPECT_TRUE(actualAttacker.signal.channels[0] > NEAR_ZERO);
     EXPECT_LT(origTarget.energy, actualTarget.energy + 0.1f);
 }
 
@@ -96,7 +96,7 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription().setPulseMode(1))
-            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(NerveDescription()),
         CellDescription()
             .setId(4)
@@ -118,7 +118,7 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
     auto actualTarget = getCell(actualData, 3);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(actualAttacker.activity.channels[0] > NEAR_ZERO);
+    EXPECT_TRUE(actualAttacker.signal.channels[0] > NEAR_ZERO);
     EXPECT_GT(origTarget.energy, actualTarget.energy + 0.1f);
 }
 
@@ -141,7 +141,7 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription().setPulseMode(1))
-            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(ConstructorDescription()),
         CellDescription()
             .setId(4)
@@ -169,7 +169,7 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
     auto origInjector = getCell(data, 1);
     auto origInjectorFunc = std::get<InjectorDescription>(*origInjector.cellFunction);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualInjector.activity.channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualInjector.signal.channels[0]));
     EXPECT_EQ(0, actualInjectorFunc.counter);
     EXPECT_EQ(origInjectorFunc.genome, actualTargetFunc.genome);
 }
@@ -193,7 +193,7 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
             .setMaxConnections(1)
             .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription().setPulseMode(1))
-            .setActivity({1, 0, 0, 0, 0, 0, 0, 0}),
+            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(ConstructorDescription()),
         CellDescription()
             .setId(4)
@@ -224,7 +224,7 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
     auto origInjector = getCell(data, 1);
     auto origInjectorFunc = std::get<InjectorDescription>(*origInjector.cellFunction);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualInjector.activity.channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualInjector.signal.channels[0]));
     EXPECT_EQ(4, actualInjectorFunc.counter);
     EXPECT_EQ(origTargetFunc.genome, actualTargetFunc.genome);
 }

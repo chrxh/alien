@@ -30,7 +30,7 @@ namespace
     auto const CellFunctionTextWidth = 195.0f;
     auto const CellFunctionDefenderWidth = 100.0f;
     auto const CellFunctionBaseTabTextWidth = 150.0f;
-    auto const ActivityTextWidth = 130.0f;
+    auto const SignalTextWidth = 130.0f;
     auto const GenomeTabTextWidth = 195.0f;
     auto const ParticleContentTextWidth = 80.0f;
 
@@ -290,11 +290,11 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                 ImGui::TreePop();
             }
         }
-        if (ImGui::TreeNodeEx("Activity states", TreeNodeFlags)) {
+        if (ImGui::TreeNodeEx("Signals", TreeNodeFlags)) {
             int index = 0;
-            for (auto& channel : cell.activity.channels) {
+            for (auto& channel : cell.signal.channels) {
                 AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters().name("Channel #" + std::to_string(index)).format("%.3f").step(0.1f).textWidth(ActivityTextWidth),
+                    AlienImGui::InputFloatParameters().name("Channel #" + std::to_string(index)).format("%.3f").step(0.1f).textWidth(SignalTextWidth),
                     channel);
                 ++index;
             }

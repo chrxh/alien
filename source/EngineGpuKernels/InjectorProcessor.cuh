@@ -28,10 +28,10 @@ __device__ __inline__ void InjectorProcessor::process(SimulationData& data, Simu
 
 __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto activity = CellFunctionProcessor::calcInputActivity(cell);
-    CellFunctionProcessor::updateInvocationState(cell, activity);
+    auto signal = CellFunctionProcessor::calcInputSignal(cell);
+    CellFunctionProcessor::updateInvocationState(cell, signal);
 
-    if (abs(activity.channels[0]) >= cudaSimulationParameters.cellFunctionInjectorActivityThreshold) {
+    if (abs(signal.channels[0]) >= cudaSimulationParameters.cellFunctionInjectorSignalThreshold) {
 
         auto& injector = cell->cellFunctionData.injector;
 
@@ -133,13 +133,13 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             } else {
                 ++injector.counter;
             }
-            activity.channels[0] = 1;
+            signal.channels[0] = 1;
         } else {
             injector.counter = 0;
-            activity.channels[0] = 0;
+            signal.channels[0] = 0;
         }
     }
-    CellFunctionProcessor::setActivity(cell, activity);
+    CellFunctionProcessor::setSignal(cell, signal);
 }
 
 __inline__ __device__ int InjectorProcessor::countAndTrackDefenderCells(SimulationStatistics& statistics, Cell* cell)

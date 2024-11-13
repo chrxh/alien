@@ -11,11 +11,11 @@ class CellFunctionProcessor
 public:
     __inline__ __device__ static void collectCellFunctionOperations(SimulationData& data);
     __inline__ __device__ static void updateRenderingData(SimulationData& data);
-    __inline__ __device__ static void resetFetchedActivities(SimulationData& data);
+    __inline__ __device__ static void resetFetchedSignals(SimulationData& data);
 
-    __inline__ __device__ static Activity calcInputActivity(Cell* cell);
-    __inline__ __device__ static void setActivity(Cell* cell, Activity const& newActivity);
-    __inline__ __device__ static void updateInvocationState(Cell* cell, Activity const& activity);
+    __inline__ __device__ static Signal calcInputSignal(Cell* cell);
+    __inline__ __device__ static void setSignal(Cell* cell, Signal const& newSignal);
+    __inline__ __device__ static void updateInvocationState(Cell* cell, Signal const& signal);
 
     struct ReferenceAndActualAngle
     {
@@ -66,7 +66,7 @@ __inline__ __device__ void CellFunctionProcessor::updateRenderingData(Simulation
     }
 }
 
-__inline__ __device__ void CellFunctionProcessor::resetFetchedActivities(SimulationData& data)
+__inline__ __device__ void CellFunctionProcessor::resetFetchedSignals(SimulationData& data)
 {
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -75,7 +75,7 @@ __inline__ __device__ void CellFunctionProcessor::resetFetchedActivities(Simulat
         auto& cell = cells.at(index);
         if (cell->cellFunction == CellFunction_None) {
             for (int i = 0; i < MAX_CHANNELS; ++i) {
-                cell->activity.channels[i] = 0;
+                cell->signal.channels[i] = 0;
             }
             continue;
         }
@@ -104,16 +104,16 @@ __inline__ __device__ void CellFunctionProcessor::resetFetchedActivities(Simulat
              && executionOrderNumber == (cell->executionOrderNumber + 1) % cudaSimulationParameters.cellNumExecutionOrderNumbers)
             || (maxOtherExecutionOrderNumber != -1 && maxOtherExecutionOrderNumber == executionOrderNumber)) {
             for (int i = 0; i < MAX_CHANNELS; ++i) {
-                cell->activity.channels[i] = 0;
+                cell->signal.channels[i] = 0;
             }
         }
     }
 }
 
-__inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* cell)
+__inline__ __device__ Signal CellFunctionProcessor::calcInputSignal(Cell* cell)
 {
-    Activity result;
-    result.origin = ActivityOrigin_Unknown;
+    Signal result;
+    result.origin = SignalOrigin_Unknown;
     result.targetX = 0;
     result.targetY = 0;
 
@@ -125,7 +125,7 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
         return result;
     }
 
-    int numSensorActivities = 0;
+    int numSensorSignals = 0;
     for (int i = 0, j = cell->numConnections; i < j; ++i) {
         auto connectedCell = cell->connections[i].cell;
         if (connectedCell->outputBlocked || connectedCell->livingState != LivingState_Ready ) {
@@ -133,39 +133,39 @@ __inline__ __device__ Activity CellFunctionProcessor::calcInputActivity(Cell* ce
         }
         if (connectedCell->executionOrderNumber == cell->inputExecutionOrderNumber) {
             for (int i = 0; i < MAX_CHANNELS; ++i) {
-                result.channels[i] += connectedCell->activity.channels[i];
+                result.channels[i] += connectedCell->signal.channels[i];
                 result.channels[i] = max(-10.0f, min(10.0f, result.channels[i])); //truncate value to avoid overflow
             }
-            if (connectedCell->activity.origin == ActivityOrigin_Sensor) {
-                result.origin = ActivityOrigin_Sensor;
-                result.targetX += connectedCell->activity.targetX;
-                result.targetY += connectedCell->activity.targetY;
-                ++numSensorActivities;
+            if (connectedCell->signal.origin == SignalOrigin_Sensor) {
+                result.origin = SignalOrigin_Sensor;
+                result.targetX += connectedCell->signal.targetX;
+                result.targetY += connectedCell->signal.targetY;
+                ++numSensorSignals;
             }
         }
     }
-    if (numSensorActivities > 0) {
-        result.targetX /= numSensorActivities;
-        result.targetY /= numSensorActivities;
+    if (numSensorSignals > 0) {
+        result.targetX /= numSensorSignals;
+        result.targetY /= numSensorSignals;
     }
     return result;
 }
 
-__inline__ __device__ void CellFunctionProcessor::setActivity(Cell* cell, Activity const& newActivity)
+__inline__ __device__ void CellFunctionProcessor::setSignal(Cell* cell, Signal const& newSignal)
 {
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        cell->activity.channels[i] = newActivity.channels[i];
+        cell->signal.channels[i] = newSignal.channels[i];
     }
-    cell->activity.origin = newActivity.origin;
-    cell->activity.targetX = newActivity.targetX;
-    cell->activity.targetY = newActivity.targetY;
+    cell->signal.origin = newSignal.origin;
+    cell->signal.targetX = newSignal.targetX;
+    cell->signal.targetY = newSignal.targetY;
 }
 
-__inline__ __device__ void CellFunctionProcessor::updateInvocationState(Cell* cell, Activity const& activity)
+__inline__ __device__ void CellFunctionProcessor::updateInvocationState(Cell* cell, Signal const& signal)
 {
     if (cell->cellFunctionUsed == CellFunctionUsed_No) {
         for (int i = 0; i < MAX_CHANNELS - 1; ++i) {
-            if (activity.channels[i] != 0) {
+            if (signal.channels[i] != 0) {
                 cell->cellFunctionUsed = CellFunctionUsed_Yes;
                 break;
             }

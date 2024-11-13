@@ -124,9 +124,9 @@ namespace
     auto constexpr Id_Cell_GenomeComplexity = 17;
     //auto constexpr Id_Cell_AncestorMutationId = 18;
     auto constexpr Id_Cell_DetectedByCreatureId = 19;
-    auto constexpr Id_Cell_Activity_Origin = 20;
-    auto constexpr Id_Cell_Activity_TargetX = 21;
-    auto constexpr Id_Cell_Activity_TargetY = 22;
+    auto constexpr Id_Cell_Signal_Origin = 20;
+    auto constexpr Id_Cell_Signal_TargetX = 21;
+    auto constexpr Id_Cell_Signal_TargetY = 22;
 
     auto constexpr Id_Neuron_ActivationFunctions = 0;
 
@@ -540,11 +540,11 @@ namespace cereal
     }
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, ActivityDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, SignalDescription& data)
     {
         ar(data.channels);
     }
-    SPLIT_SERIALIZATION(ActivityDescription)
+    SPLIT_SERIALIZATION(SignalDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, NeuronDescription& data)
@@ -804,12 +804,12 @@ namespace cereal
         loadSave<float>(task, auxiliaries, Id_Cell_GenomeComplexity, data.genomeComplexity, defaultObject.genomeComplexity);
         loadSave(task, auxiliaries, Id_Cell_DetectedByCreatureId, data.detectedByCreatureId, defaultObject.detectedByCreatureId);
         loadSave<uint8_t>(task, auxiliaries, Id_Cell_CellFunctionUsed, data.cellFunctionUsed, defaultObject.cellFunctionUsed);
-        loadSave(task, auxiliaries, Id_Cell_Activity_Origin, data.activity.origin, defaultObject.activity.origin);
-        loadSave(task, auxiliaries, Id_Cell_Activity_TargetX, data.activity.targetX, defaultObject.activity.targetX);
-        loadSave(task, auxiliaries, Id_Cell_Activity_TargetY, data.activity.targetY, defaultObject.activity.targetY);
+        loadSave(task, auxiliaries, Id_Cell_Signal_Origin, data.signal.origin, defaultObject.signal.origin);
+        loadSave(task, auxiliaries, Id_Cell_Signal_TargetX, data.signal.targetX, defaultObject.signal.targetX);
+        loadSave(task, auxiliaries, Id_Cell_Signal_TargetY, data.signal.targetY, defaultObject.signal.targetY);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data.id, data.connections, data.pos, data.vel, data.energy, data.maxConnections, data.cellFunction, data.activity, data.metadata);
+        ar(data.id, data.connections, data.pos, data.vel, data.energy, data.maxConnections, data.cellFunction, data.signal, data.metadata);
 
         //compatibility with older versions
         //>>>

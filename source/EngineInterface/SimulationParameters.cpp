@@ -104,7 +104,7 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         if (cellFunctionAttackerColorInhomogeneityFactor[i] != other.cellFunctionAttackerColorInhomogeneityFactor[i]) {
             return false;
         }
-        if (cellFunctionConstructorActivityThreshold[i] != other.cellFunctionConstructorActivityThreshold[i]) {
+        if (cellFunctionConstructorSignalThreshold[i] != other.cellFunctionConstructorSignalThreshold[i]) {
             return false;
         }
         if (cellFunctionConstructorConnectingCellMaxDistance[i] != other.cellFunctionConstructorConnectingCellMaxDistance[i]) {
@@ -182,21 +182,21 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && cellMaxVelocity == other.cellMaxVelocity && cellMinDistance == other.cellMinDistance && cellMaxForceDecayProb == other.cellMaxForceDecayProb
         && cellNumExecutionOrderNumbers == other.cellNumExecutionOrderNumbers && radiationProb == other.radiationProb
         && radiationVelocityMultiplier == other.radiationVelocityMultiplier && radiationVelocityPerturbation == other.radiationVelocityPerturbation
-        && cellFunctionAttackerActivityThreshold == other.cellFunctionAttackerActivityThreshold
+        && cellFunctionAttackerSignalThreshold == other.cellFunctionAttackerSignalThreshold
         && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize
         && cellFunctionTransmitterEnergyDistributionSameCreature == other.cellFunctionTransmitterEnergyDistributionSameCreature
         && particleTransformationAllowed == other.particleTransformationAllowed
         && particleTransformationRandomCellFunction == other.particleTransformationRandomCellFunction
         && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize && cellDeathConsequences == other.cellDeathConsequences
-        && cellFunctionSensorActivityThreshold == other.cellFunctionSensorActivityThreshold
+        && cellFunctionSensorSignalThreshold == other.cellFunctionSensorSignalThreshold
         && cellFunctionMuscleBendingAccelerationThreshold == other.cellFunctionMuscleBendingAccelerationThreshold
         && cellFunctionConstructorMutationSelfReplication == other.cellFunctionConstructorMutationSelfReplication
         && cellMaxAgeBalancer == other.cellMaxAgeBalancer && cellMaxAgeBalancerInterval == other.cellMaxAgeBalancerInterval
         && cellFunctionConstructorMutationPreventDepthIncrease == other.cellFunctionConstructorMutationPreventDepthIncrease
         && cellFunctionConstructorCheckCompletenessForSelfReplication == other.cellFunctionConstructorCheckCompletenessForSelfReplication
         && cellFunctionAttackerDestroyCells == other.cellFunctionAttackerDestroyCells
-        && cellFunctionReconnectorActivityThreshold == other.cellFunctionReconnectorActivityThreshold
-        && cellFunctionDetonatorActivityThreshold == other.cellFunctionDetonatorActivityThreshold && features == other.features
+        && cellFunctionReconnectorSignalThreshold == other.cellFunctionReconnectorSignalThreshold
+        && cellFunctionDetonatorSignalThreshold == other.cellFunctionDetonatorSignalThreshold && features == other.features
         && highlightedCellFunction == other.highlightedCellFunction && borderlessRendering == other.borderlessRendering
         && markReferenceDomain == other.markReferenceDomain && gridLines == other.gridLines && externalEnergy == other.externalEnergy
         && attackVisualization == other.attackVisualization && cellInactiveMaxAgeActivated == other.cellInactiveMaxAgeActivated
