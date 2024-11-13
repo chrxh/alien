@@ -3,6 +3,7 @@
 #include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/Descriptions.h"
+#include "EngineInterface/SimulationParameters.h"
 #include "Definitions.h"
 #include "AlienDialog.h"
 
@@ -23,6 +24,7 @@ private:
     SimulationFacade _simulationFacade;
 
     bool _adoptSimulationParameters = true;
+    Char64 _projectName = "<unnamed>";
     int _width = 0;
     int _height = 0;
 };

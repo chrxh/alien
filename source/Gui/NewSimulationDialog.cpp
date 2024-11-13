@@ -13,7 +13,8 @@
 
 namespace
 {
-    auto const ContentTextInputWidth = 60.0f;
+    auto const ContentTextInputWidth = 100.0f;
+    auto const ProjectNameSize = sizeof(Char64) / sizeof(char);
 }
 
 void NewSimulationDialog::initIntern(SimulationFacade simulationFacade)
@@ -34,6 +35,7 @@ NewSimulationDialog::NewSimulationDialog()
 
 void NewSimulationDialog::processIntern()
 {
+    AlienImGui::InputText(AlienImGui::InputTextParameters().name("Project name").textWidth(ContentTextInputWidth), _projectName, ProjectNameSize);
     AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Width").textWidth(ContentTextInputWidth), _width);
     AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Height").textWidth(ContentTextInputWidth), _height);
     AlienImGui::Checkbox(
@@ -70,6 +72,9 @@ void NewSimulationDialog::onNewSimulation()
     SimulationParameters parameters;
     if (_adoptSimulationParameters) {
         parameters = _simulationFacade->getSimulationParameters();
+    }
+    for (int i = 0; i < ProjectNameSize; ++i) {
+        parameters.projectName[i] = _projectName[i];
     }
     _simulationFacade->closeSimulation();
 
