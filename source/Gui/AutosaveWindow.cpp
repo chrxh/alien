@@ -298,7 +298,7 @@ void AutosaveWindow::processStatusBar()
         return "Next autosave in " + StringHelper::format(std::chrono::seconds(_autosaveInterval * 60) - secondsSinceLastAutosave);
     }();
     if (_savepointTable.has_value()) {
-        statusText += " " ICON_FA_INFO_CIRCLE " " + std::to_string(_savepointTable->getSize()) + " savepoints";
+        statusText += " " ICON_FA_INFO_CIRCLE " " + std::to_string(_savepointTable->getSize()) + " save points";
     }
     AlienImGui::StatusBar(statusText);
 }

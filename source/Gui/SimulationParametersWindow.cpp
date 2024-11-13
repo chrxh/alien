@@ -221,10 +221,9 @@ void SimulationParametersWindow::processBase()
                     AlienImGui::InputTextParameters()
                         .name("Project name")
                         .textWidth(RightColumnWidth)
-                        .defaultValue(origParameters.projectName)
-                        .tooltip(Const::ColoringParameterTooltip),
+                        .defaultValue(origParameters.projectName),
                     parameters.projectName,
-                    sizeof(parameters.projectName) / sizeof(char));
+                    sizeof(Char64) / sizeof(char));
 
                 AlienImGui::EndTreeNode();
             }
