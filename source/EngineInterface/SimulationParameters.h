@@ -48,7 +48,7 @@ struct SimulationParameters
     //particle sources
     int numRadiationSources = 0;
     RadiationSource radiationSources[MAX_RADIATION_SOURCES];
-    bool strengthRatioPinned = false;
+    bool baseStrengthRatioPinned = false;
 
     float externalEnergy = 0.0f;
     ColorVector<float> externalEnergyInflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};

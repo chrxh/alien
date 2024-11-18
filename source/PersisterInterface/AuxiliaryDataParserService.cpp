@@ -668,9 +668,9 @@ namespace
             tree, parameters.numRadiationSources, defaultParameters.numRadiationSources, "simulation parameters.particle sources.num sources", parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.strengthRatioPinned,
-            defaultParameters.strengthRatioPinned,
-            "simulation parameters.particle sources.strength ratio pinned",
+            parameters.baseStrengthRatioPinned,
+            defaultParameters.baseStrengthRatioPinned,
+            "simulation parameters.particle sources.base strength ratio pinned",
             parserTask);
         for (int index = 0; index < parameters.numRadiationSources; ++index) {
             std::string base = "simulation parameters.particle sources." + std::to_string(index) + ".";
