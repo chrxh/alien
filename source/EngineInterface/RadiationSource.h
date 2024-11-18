@@ -45,7 +45,6 @@ struct RadiationSource
     bool useAngle = false;
     float angle = 0;
 
-
     RadiationSourceShapeType shapeType = RadiationSourceShapeType_Circular;
     RadiationSourceShapeData shapeData = {CircularRadiationSource()};
 

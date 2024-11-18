@@ -24,16 +24,14 @@ RadiationSourcesWindow::RadiationSourcesWindow()
 
 void RadiationSourcesWindow::processIntern()
 {
-    auto parameters = _simulationFacade->getSimulationParameters();
-
     std::optional<bool> scheduleAppendTab;
     std::optional<int> scheduleDeleteTabAtIndex;
 
     if (ImGui::BeginTabBar("##ParticleSources", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
+        auto parameters = _simulationFacade->getSimulationParameters();
 
+        //add source
         if (parameters.numRadiationSources < MAX_RADIATION_SOURCES) {
-
-            //add source
             if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
                 scheduleAppendTab = true;
             }
@@ -57,6 +55,44 @@ void RadiationSourcesWindow::processIntern()
     if (scheduleDeleteTabAtIndex.has_value()) {
         onDeleteTab(scheduleDeleteTabAtIndex.value());
     }
+
+    auto currentSessionId = _simulationFacade->getSessionId();
+    _focusBaseTab = !_sessionId.has_value() || currentSessionId != *_sessionId;
+    _sessionId = currentSessionId;
+}
+
+void RadiationSourcesWindow::processBaseTab()
+{
+    if (ImGui::BeginTabItem("Base", nullptr, _focusBaseTab ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
+        auto parameters = _simulationFacade->getSimulationParameters();
+        auto lastParameters = parameters;
+        auto origParameters = _simulationFacade->getOriginalSimulationParameters();
+
+        auto ratios = getStrengthRatios(parameters);
+        auto newRatios = ratios;
+        auto origRatios = getStrengthRatios(origParameters);
+        if (AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Strength ratio")
+                    .textWidth(RightColumnWidth)
+                    .min(0.0f)
+                    .max(1.0f)
+                    .format("%.3f")
+                    .defaultValue(&origRatios.values.front())
+                    .disabled(ratios.values.size() == ratios.pinned.size()),
+                &newRatios.values.front(),
+                nullptr,
+                &parameters.strengthRatioPinned)) {
+            newRatios.pinned.insert(0);
+            adaptStrengthRatios(newRatios, ratios);
+            applyStrengthRatios(parameters, newRatios);
+        }
+
+        if (parameters != lastParameters) {
+            _simulationFacade->setSimulationParameters(parameters, SimulationParametersUpdateConfig::AllExceptChangingPositions);
+        }
+        ImGui::EndTabItem();
+    }
 }
 
 bool RadiationSourcesWindow::processSourceTab(int index)
@@ -71,7 +107,7 @@ bool RadiationSourcesWindow::processSourceTab(int index)
     RadiationSource& origSource = origParameters.radiationSources[index];
 
     bool isOpen = true;
-    char name[20] = {};
+    static char name[20] = {};
 
     snprintf(name, IM_ARRAYSIZE(name), "Source %01d", index + 1);
     if (ImGui::BeginTabItem(name, &isOpen, ImGuiTabItemFlags_None)) {
@@ -90,7 +126,7 @@ bool RadiationSourcesWindow::processSourceTab(int index)
             }
         }
 
-        auto origRatios = getStrengthRatios(parameters);
+        auto ratios = getStrengthRatios(parameters);
         if (AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Strength ratio")
@@ -99,15 +135,15 @@ bool RadiationSourcesWindow::processSourceTab(int index)
                     .max(1.0f)
                     .format("%.3f")
                     .defaultValue(&origSource.strengthRatio)
-                    .disabled(origRatios.values.size() == origRatios.pinned.size()),
+                    .disabled(ratios.values.size() == ratios.pinned.size()),
                 &source.strengthRatio,
                 nullptr,
                 &source.strengthRatioPinned)) {
-            auto ratios = origRatios;
-            ratios.values.at(index + 1) = source.strengthRatio;
-            ratios.pinned.insert(index + 1);
-            adaptStrengthRatios(ratios, origRatios);
-            applyStrengthRatios(parameters, ratios);
+            auto newRatios = ratios;
+            newRatios.values.at(index + 1) = source.strengthRatio;
+            newRatios.pinned.insert(index + 1);
+            adaptStrengthRatios(newRatios, ratios);
+            applyStrengthRatios(parameters, newRatios);
         }
 
         auto getMousePickerEnabledFunc = [&]() { return SimulationInteractionController::get().isPositionSelectionMode(); };
