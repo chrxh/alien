@@ -62,7 +62,7 @@ bool AlienImGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& v
 {
     ImGui::PushID(parameters._name.c_str());
 
-    auto constexpr MousePickerButtonWidth = 23.0f;
+    auto constexpr MousePickerButtonWidth = 21.0f;
 
     auto mousePickerButtonTotalWidth = parameters._getMousePickerEnabledFunc ? scale(MousePickerButtonWidth) + ImGui::GetStyle().FramePadding.x * 2 : 0.0f;
     auto sliderWidth = (ImGui::GetContentRegionAvail().x - scale(parameters._textWidth) - mousePickerButtonTotalWidth);
@@ -512,7 +512,7 @@ bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value, bool* enab
         ImGui::SameLine();
     }
 
-    static auto constexpr buttonWidth = 20;
+    static auto constexpr buttonWidth = 21.0f;
     auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
     auto textAndButtonWidth = scale(parameters._textWidth + buttonWidth * 2) + ImGui::GetStyle().FramePadding.x * 4;
     auto switcherWidth = width - textAndButtonWidth;
@@ -1819,7 +1819,7 @@ namespace
 template <typename Parameter, typename T>
 bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled, bool* pinned)
 {
-    auto constexpr PinnedButtonWidth = 23.0f;
+    auto constexpr PinnedButtonWidth = 21.0f;
 
     ImGui::PushID(parameters._name.c_str());
     ImGui::BeginDisabled(parameters._disabled);

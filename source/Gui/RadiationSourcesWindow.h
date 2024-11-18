@@ -37,4 +37,7 @@ private:
     StrengthRatios calcStrengthRatiosForAddingSpot(StrengthRatios const& ratios) const;
 
     SimulationFacade _simulationFacade;
+
+    std::optional<int> _sessionId;
+    bool _focusBaseTab = false;
 };
