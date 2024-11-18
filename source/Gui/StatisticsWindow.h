@@ -70,7 +70,7 @@ private:
         double upperBound,
         int fracPartDecimals);
 
-    void validationAndCorrection();
+    void validateAndCorrect();
 
     float calcPlotHeight(int row) const;
 

@@ -51,8 +51,8 @@ private:
 
     void showPreview(TabData& tab);
 
-    void validationAndCorrection(GenomeHeaderDescription& header) const;
-    void validationAndCorrection(CellGenomeDescription& cell) const;
+    void validateAndCorrect(GenomeHeaderDescription& header) const;
+    void validateAndCorrect(CellGenomeDescription& cell) const;
 
     void scheduleAddTab(GenomeDescription const& genome);
 

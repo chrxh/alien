@@ -21,7 +21,7 @@ private:
 
     void onExecute();
     bool isOkEnabled();
-    void validationAndCorrection();
+    void validateAndCorrect();
 
     SimulationFacade _simulationFacade;
 

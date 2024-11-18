@@ -845,7 +845,7 @@ void StatisticsWindow::drawValuesAtMouseCursor(
     ImPlot::PlotText(label, mousePos.x, upperBound,  {leftSideFactor * (scale(5.0f) + ImGui::CalcTextSize(label).x / 2), scale(28.0f)});
 }
 
-void StatisticsWindow::validationAndCorrection()
+void StatisticsWindow::validateAndCorrect()
 {
     _timeHorizonForLiveStatistics = std::max(1.0f, std::min(TimelineLiveStatistics::MaxLiveHistory, _timeHorizonForLiveStatistics));
     _timeHorizonForLongtermStatistics = std::max(1.0f, std::min(100.0f, _timeHorizonForLongtermStatistics));

@@ -33,9 +33,7 @@ private:
     void onOpenParameters();
     void onSaveParameters();
 
-    void validationAndCorrectionLayout();
-    void validationAndCorrection(SimulationParameters& parameters) const;
-    void validationAndCorrection(SimulationParametersSpot& spot, SimulationParameters const& parameters) const;
+    void validateAndCorrectLayout();
 
     SimulationFacade _simulationFacade;
 

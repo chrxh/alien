@@ -70,7 +70,7 @@ void MultiplierWindow::processIntern()
     }
     ImGui::EndDisabled();
 
-    validationAndCorrection();
+    validateAndCorrect();
 }
 
 void MultiplierWindow::processGridPanel()
@@ -133,7 +133,7 @@ void MultiplierWindow::processRandomPanel()
     AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Overlapping check").textWidth(RightColumnWidth), _randomParameters._overlappingCheck);
 }
 
-void MultiplierWindow::validationAndCorrection()
+void MultiplierWindow::validateAndCorrect()
 {
     _gridParameters._horizontalNumber = std::max(1, _gridParameters._horizontalNumber);
     _gridParameters._horizontalDistance = std::max(0.0f, _gridParameters._horizontalDistance);

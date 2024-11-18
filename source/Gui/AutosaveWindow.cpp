@@ -91,7 +91,7 @@ void AutosaveWindow::processIntern()
 
         processStatusBar();
 
-        validationAndCorrection();
+        validateAndCorrect();
     } catch (std::runtime_error const& error) {
         GenericMessageDialog::get().information("Error", error.what());
     }
@@ -481,7 +481,7 @@ std::string AutosaveWindow::getSavepointFilename() const
     return (std::filesystem::path(_directory) / Const::SavepointTableFilename).string();
 }
 
-void AutosaveWindow::validationAndCorrection()
+void AutosaveWindow::validateAndCorrect()
 {
     _numberOfFiles = std::max(1, _numberOfFiles);
     _autosaveInterval = std::max(1, _autosaveInterval);

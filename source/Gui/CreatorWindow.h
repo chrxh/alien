@@ -38,7 +38,7 @@ private:
     void createHexagon();
     void createDisc();
 
-    void validationAndCorrection();
+    void validateAndCorrect();
 
     RealVector2D getRandomPos() const;
     void incExecutionNumber();

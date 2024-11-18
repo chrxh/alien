@@ -19,7 +19,7 @@ private:
     void processIntern() override;
     void openIntern();
 
-    void validationAndCorrection(GpuSettings& settings) const;
+    void validateAndCorrect(GpuSettings& settings) const;
 
     SimulationFacade _simulationFacade;
 

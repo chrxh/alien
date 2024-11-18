@@ -375,7 +375,7 @@ void GenomeEditorWindow::processGenomeHeader(TabData& tab)
         }
         table.end();
     }
-    validationAndCorrection(tab.genome.header);
+    validateAndCorrect(tab.genome.header);
 }
 
 namespace 
@@ -781,7 +781,7 @@ void GenomeEditorWindow::processNode(
         } break;
         }
     }
-    validationAndCorrection(cell);
+    validateAndCorrect(cell);
 }
 
 template <typename Description>
@@ -963,7 +963,7 @@ void GenomeEditorWindow::showPreview(TabData& tab)
     }
 }
 
-void GenomeEditorWindow::validationAndCorrection(GenomeHeaderDescription& header) const
+void GenomeEditorWindow::validateAndCorrect(GenomeHeaderDescription& header) const
 {
     header.stiffness = std::max(0.0f, std::min(1.0f, header.stiffness));
     header.connectionDistance = std::max(0.5f, std::min(1.5f, header.connectionDistance));
@@ -971,7 +971,7 @@ void GenomeEditorWindow::validationAndCorrection(GenomeHeaderDescription& header
     header.numBranches = header.getNumBranches();
 }
 
-void GenomeEditorWindow::validationAndCorrection(CellGenomeDescription& cell) const
+void GenomeEditorWindow::validateAndCorrect(CellGenomeDescription& cell) const
 {
     auto numExecutionOrderNumbers = _simulationFacade->getSimulationParameters().cellNumExecutionOrderNumbers;
     cell.color = (cell.color + MAX_COLORS) % MAX_COLORS;

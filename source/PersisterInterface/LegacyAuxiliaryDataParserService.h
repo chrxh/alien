@@ -99,7 +99,7 @@ public:
         SimulationParameters& parameters);
 
 private:
-    void activateParametersAndFeaturesForLegacyFiles(
+    void updateParametersAndFeaturesForLegacyFiles(
         std::string const& programVersion,
         MissingFeatures const& missingFeatures,
         LegacyFeatures const& legacyFeatures,

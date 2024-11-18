@@ -1,4 +1,4 @@
-#include "SimulationParametersService.cuh"
+#include "SimulationParametersUpdateService.cuh"
 
 #include <vector>
 
@@ -9,7 +9,7 @@
 #include "SimulationData.cuh"
 #include "MaxAgeBalancer.cuh"
 
-SimulationParameters SimulationParametersService::integrateChanges(
+SimulationParameters SimulationParametersUpdateService::integrateChanges(
     SimulationParameters const& currentParameters,
     SimulationParameters const& changedParameters,
     SimulationParametersUpdateConfig const& updateConfig) const
@@ -40,7 +40,7 @@ SimulationParameters SimulationParametersService::integrateChanges(
     return result;
 }
 
-bool SimulationParametersService::updateSimulationParametersAfterTimestep(
+bool SimulationParametersUpdateService::updateSimulationParametersAfterTimestep(
     Settings& settings,
     MaxAgeBalancer const& maxAgeBalancer,
     SimulationData const& simulationData,

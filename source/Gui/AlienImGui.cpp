@@ -48,33 +48,32 @@ void AlienImGui::HelpMarker(std::string const& text)
     }
 }
 
-bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float* value, bool* enabled)
+bool AlienImGui::SliderFloat(SliderFloatParameters const& parameters, float* value, bool* enabled, bool* pinned)
 {
-    return BasicSlider(parameters, value, enabled);
+    return BasicSlider(parameters, value, enabled, pinned);
 }
 
-bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int* value, bool* enabled)
+bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int* value, bool* enabled, bool* pinned)
 {
-    return BasicSlider(parameters, value, enabled);
+    return BasicSlider(parameters, value, enabled, pinned);
 }
 
 bool AlienImGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& valueX, float& valueY)
 {
     ImGui::PushID(parameters._name.c_str());
 
-    auto mousePickerButtonSize = parameters._getMousePickerEnabledFunc ? scale(20.0f) + ImGui::GetStyle().FramePadding.x * 2 : 0.0f;
-    auto sliderWidth = (ImGui::GetContentRegionAvail().x - scale(parameters._textWidth) - mousePickerButtonSize) / 2 - ImGui::GetStyle().FramePadding.x;
+    auto constexpr MousePickerButtonWidth = 23.0f;
+
+    auto mousePickerButtonTotalWidth = parameters._getMousePickerEnabledFunc ? scale(MousePickerButtonWidth) + ImGui::GetStyle().FramePadding.x * 2 : 0.0f;
+    auto sliderWidth = (ImGui::GetContentRegionAvail().x - scale(parameters._textWidth) - mousePickerButtonTotalWidth);
     ImGui::SetNextItemWidth(sliderWidth);
     bool result = ImGui::SliderFloat("##sliderX", &valueX, parameters._min.x, parameters._max.x, parameters._format.c_str(), 0);
-    ImGui::SameLine();
-    ImGui::SetNextItemWidth(sliderWidth);
-    result |= ImGui::SliderFloat("##sliderY", &valueY, parameters._min.y, parameters._max.y, parameters._format.c_str(), 0);
 
     //mouse picker
     if (parameters._getMousePickerEnabledFunc) {
         ImGui::SameLine();
         auto mousePickerEnabled = parameters._getMousePickerEnabledFunc.value()();
-        if (AlienImGui::SelectableButton(AlienImGui::SelectableButtonParameters().name(ICON_FA_CROSSHAIRS), mousePickerEnabled)) {
+        if (AlienImGui::SelectableButton(AlienImGui::SelectableButtonParameters().name(ICON_FA_CROSSHAIRS).width(MousePickerButtonWidth), mousePickerEnabled)) {
             parameters._setMousePickerEnabledFunc.value()(mousePickerEnabled);
         }
         AlienImGui::Tooltip("Select a position with the mouse");
@@ -108,6 +107,8 @@ bool AlienImGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& v
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
+    ImGui::SetNextItemWidth(sliderWidth);
+    result |= ImGui::SliderFloat("##sliderY", &valueY, parameters._min.y, parameters._max.y, parameters._format.c_str(), 0);
 
     ImGui::PopID();
     return result;
@@ -133,7 +134,7 @@ void AlienImGui::SliderInputFloat(SliderInputFloatParameters const& parameters, 
 bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool* enabled)
 {
     auto textWidth = scale(parameters._textWidth);
-    auto infinityButtonWidth = scale(30);
+    auto infinityButtonWidth = 30;
     auto isInfinity = value == std::numeric_limits<int>::max();
     auto showInfinity = parameters._infinity && (!parameters._readOnly || isInfinity);
 
@@ -149,7 +150,7 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool
 
     auto inputWidth = ImGui::GetContentRegionAvail().x - textWidth;
     if (showInfinity) {
-        inputWidth -= infinityButtonWidth + ImGui::GetStyle().FramePadding.x;
+        inputWidth -= scale(infinityButtonWidth) + ImGui::GetStyle().FramePadding.x;
     }
 
     if (!isInfinity) {
@@ -731,9 +732,7 @@ bool AlienImGui::SelectableButton(SelectableButtonParameters const& parameters, 
     ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)buttonColor);
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)buttonColorHovered);
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)buttonColorActive);
-    ImVec2 pos = ImGui::GetCursorScreenPos();
-    ImGui::SetCursorScreenPos(ImVec2(pos.x - ImGui::GetStyle().FramePadding.x, pos.y));
-    auto result = ImGui::Button(parameters._name.c_str(), {parameters._width, 0});
+    auto result = ImGui::Button(parameters._name.c_str(), {scale(parameters._width), 0});
     if (result) {
         value = !value;
     }
@@ -1818,9 +1817,12 @@ namespace
 }
 
 template <typename Parameter, typename T>
-bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled)
+bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled, bool* pinned)
 {
+    auto constexpr PinnedButtonWidth = 23.0f;
+
     ImGui::PushID(parameters._name.c_str());
+    ImGui::BeginDisabled(parameters._disabled);
 
     //enable button
     if (enabled) {
@@ -1869,7 +1871,8 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
 
         //color field
         ImGui::PushID(color);
-        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - scale(parameters._textWidth));
+        auto pinnedButtonWidth = pinned ? scale(PinnedButtonWidth) + ImGui::GetStyle().FramePadding.x * 2 : 0.0f;
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - scale(parameters._textWidth) - pinnedButtonWidth);
         if (parameters._colorDependence && isExpanded) {
             AlienImGui::ColorField(Const::IndividualCellColors[color], 0);
             ImGui::SameLine();
@@ -1933,6 +1936,12 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
 
         if (color == 0) {
 
+            //pin button
+            if (pinned) {
+                ImGui::SameLine();
+                AlienImGui::SelectableButton(AlienImGui::SelectableButtonParameters().name(ICON_FA_THUMBTACK).width(PinnedButtonWidth), *pinned);
+            }
+
             //revert button
             if (parameters._defaultValue) {
                 ImGui::SameLine();
@@ -1974,7 +1983,13 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
                 if (enabled) {
                     ImGui::EndDisabled();
                 }
+                if (parameters._disabled) {
+                    ImGui::EndDisabled();
+                }
                 AlienImGui::HelpMarker(*parameters._tooltip);
+                if (parameters._disabled) {
+                    ImGui::BeginDisabled();
+                }
                 if (enabled) {
                     ImGui::BeginDisabled(!(*enabled));
                 }
@@ -1984,6 +1999,7 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
     if (enabled) {
         ImGui::EndDisabled();
     }
+    ImGui::EndDisabled();
     ImGui::PopID();
     return result;
 }
