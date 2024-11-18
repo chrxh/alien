@@ -82,7 +82,7 @@ void RadiationSourcesWindow::processBaseTab()
                     .disabled(ratios.values.size() == ratios.pinned.size()),
                 &newRatios.values.front(),
                 nullptr,
-                &parameters.strengthRatioPinned)) {
+                &parameters.baseStrengthRatioPinned)) {
             newRatios.pinned.insert(0);
             adaptStrengthRatios(newRatios, ratios);
             applyStrengthRatios(parameters, newRatios);
@@ -294,7 +294,9 @@ auto RadiationSourcesWindow::getStrengthRatios(SimulationParameters const& param
             result.pinned.insert(i + 1);
         }
     }
-
+    if (parameters.baseStrengthRatioPinned) {
+        result.pinned.insert(0);
+    }
     return result;
 }
 
@@ -310,6 +312,7 @@ void RadiationSourcesWindow::applyStrengthRatios(SimulationParameters& parameter
 void RadiationSourcesWindow::adaptStrengthRatios(StrengthRatios& ratios, StrengthRatios& origRatios) const
 {
     if (ratios.values.size() == ratios.pinned.size()) {
+        ratios = origRatios;
         return;
     }
 
