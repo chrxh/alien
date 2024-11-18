@@ -40,6 +40,8 @@ add_library(EngineInterface
     SimulationParametersSpotActivatedValues.h
     SimulationParametersSpotValues.h
     SimulationParametersUpdateConfig.h
+    SimulationParametersValidationService.cpp
+    SimulationParametersValidationService.h
     SpaceCalculator.cpp
     SpaceCalculator.h
     StatisticsConverterService.cpp

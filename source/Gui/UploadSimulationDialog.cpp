@@ -5,7 +5,7 @@
 #include "Base/GlobalSettings.h"
 #include "PersisterInterface/SerializerService.h"
 #include "Network/NetworkService.h"
-#include "Network/ValidationService.h"
+#include "Network/NetworkValidationService.h"
 
 #include "AlienImGui.h"
 #include "GenericMessageDialog.h"
@@ -115,7 +115,7 @@ void UploadSimulationDialog::processIntern()
 
     ImGui::BeginDisabled(_resourceName.empty());
     if (AlienImGui::Button("OK")) {
-        if (ValidationService::get().isStringValidForDatabase(_resourceName) && ValidationService::get().isStringValidForDatabase(_resourceDescription)) {
+        if (NetworkValidationService::get().isStringValidForDatabase(_resourceName) && NetworkValidationService::get().isStringValidForDatabase(_resourceDescription)) {
             close();
             onUpload();
         } else {

@@ -75,8 +75,8 @@ add_library(EngineGpuKernels
     SimulationKernels.cuh
     SimulationKernelsLauncher.cu
     SimulationKernelsLauncher.cuh
-    SimulationParametersService.cu
-    SimulationParametersService.cuh
+    SimulationParametersUpdateService.cu
+    SimulationParametersUpdateService.cuh
     SimulationStatistics.cuh
     SpotCalculator.cuh
     StatisticsService.cu

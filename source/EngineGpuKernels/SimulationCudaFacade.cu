@@ -38,7 +38,7 @@
 #include "StatisticsKernelsLauncher.cuh"
 #include "SelectionResult.cuh"
 #include "RenderingData.cuh"
-#include "SimulationParametersService.cuh"
+#include "SimulationParametersUpdateService.cuh"
 #include "TestKernelsLauncher.cuh"
 #include "StatisticsService.cuh"
 #include "MaxAgeBalancer.cuh"
@@ -143,7 +143,7 @@ void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateSta
         auto statistics = getRawStatistics();
         {
             std::lock_guard lock(_mutexForSimulationParameters);
-            if (SimulationParametersService::get().updateSimulationParametersAfterTimestep(_settings, _maxAgeBalancer, simulationData, statistics)) {
+            if (SimulationParametersUpdateService::get().updateSimulationParametersAfterTimestep(_settings, _maxAgeBalancer, simulationData, statistics)) {
                 CHECK_FOR_CUDA_ERROR(
                     cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
             }
@@ -644,7 +644,7 @@ void _SimulationCudaFacade::checkAndProcessSimulationParameterChanges()
     std::lock_guard lock(_mutexForSimulationParameters);
     if (_newSimulationParameters) {
         _settings.simulationParameters =
-            SimulationParametersService::get().integrateChanges(_settings.simulationParameters, *_newSimulationParameters, _simulationParametersUpdateConfig);
+            SimulationParametersUpdateService::get().integrateChanges(_settings.simulationParameters, *_newSimulationParameters, _simulationParametersUpdateConfig);
         CHECK_FOR_CUDA_ERROR(
             cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
         _newSimulationParameters.reset();

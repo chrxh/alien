@@ -158,10 +158,10 @@ void LegacyAuxiliaryDataParserService::searchAndApplyLegacyParameters(
     for (int i = 0; i < parameters.numSpots; ++i) {
         legacyParameters.spots[i] = readLegacyParametersForSpot(tree, "simulation parameters.spots." + std::to_string(i) + ".");
     }
-    activateParametersAndFeaturesForLegacyFiles(programVersion, missingFeatures, legacyFeatures, missingParameters, legacyParameters, parameters);
+    updateParametersAndFeaturesForLegacyFiles(programVersion, missingFeatures, legacyFeatures, missingParameters, legacyParameters, parameters);
 }
 
-void LegacyAuxiliaryDataParserService::activateParametersAndFeaturesForLegacyFiles(
+void LegacyAuxiliaryDataParserService::updateParametersAndFeaturesForLegacyFiles(
     std::string const& programVersion,
     MissingFeatures const& missingFeatures,
     LegacyFeatures const& legacyFeatures,
@@ -172,6 +172,12 @@ void LegacyAuxiliaryDataParserService::activateParametersAndFeaturesForLegacyFil
     //parameter conversion for v4.10.2 and below
     if (programVersion.empty()) {
         parameters.features.legacyModes = true;
+        if (parameters.numRadiationSources > 0) {
+            auto strengthRatio = 1.0f / parameters.numRadiationSources;
+            for (int i = 0; i < parameters.numRadiationSources; ++i) {
+                parameters.radiationSources[i].strengthRatio = strengthRatio;
+            }
+        }
     }
 
     //*******************

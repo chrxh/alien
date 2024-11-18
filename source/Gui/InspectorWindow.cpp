@@ -136,7 +136,7 @@ void _InspectorWindow::processCell(CellDescription cell)
             processCellGenomeTab(std::get<InjectorDescription>(*cell.cellFunction));
         }
         processCellMetadataTab(cell);
-        validationAndCorrection(cell);
+        validateAndCorrect(cell);
 
         ImGui::EndTabBar();
 
@@ -749,7 +749,7 @@ float _InspectorWindow::calcWindowWidth() const
     }
 }
 
-void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
+void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
 {
     auto const& parameters = _simulationFacade->getSimulationParameters();
 

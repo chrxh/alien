@@ -36,12 +36,15 @@ enum RadiationSourceShapeType_
 
 struct RadiationSource
 {
+    float strengthRatio = 0.0f;
+    bool strengthRatioPinned = false;
     float posX = 0;
     float posY = 0;
     float velX = 0;
     float velY = 0;
     bool useAngle = false;
     float angle = 0;
+
 
     RadiationSourceShapeType shapeType = RadiationSourceShapeType_Circular;
     RadiationSourceShapeData shapeData = {CircularRadiationSource()};
@@ -61,7 +64,8 @@ struct RadiationSource
                 return false;
             }
         }
-        return posX == other.posX && posY == other.posY && velX == other.velX && velY == other.velY && useAngle == other.useAngle && angle == other.angle;
+        return posX == other.posX && posY == other.posY && velX == other.velX && velY == other.velY && useAngle == other.useAngle && angle == other.angle
+            && strengthRatio == other.strengthRatio && strengthRatioPinned == other.strengthRatioPinned;
     }
     bool operator!=(RadiationSource const& other) const { return !operator==(other); }
 };

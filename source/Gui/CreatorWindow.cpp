@@ -175,7 +175,7 @@ void CreatorWindow::processIntern()
             EditorModel::get().update();
         }
     }
-    validationAndCorrection();
+    validateAndCorrect();
 }
 
 void CreatorWindow::onDrawing()
@@ -348,7 +348,7 @@ void CreatorWindow::createDisc()
     _simulationFacade->addAndSelectSimulationData(data);
 }
 
-void CreatorWindow::validationAndCorrection()
+void CreatorWindow::validateAndCorrect()
 {
     _energy = std::max(0.0f, _energy);
     _stiffness = std::min(1.0f, std::max(0.0f, _stiffness));

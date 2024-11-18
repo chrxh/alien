@@ -42,7 +42,7 @@ private:
 
     void updateSavepointTableFromFile();
     std::string getSavepointFilename() const;
-    void validationAndCorrection();
+    void validateAndCorrect();
 
     SimulationFacade _simulationFacade; 
     PersisterFacade _persisterFacade;

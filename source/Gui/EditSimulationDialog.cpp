@@ -4,7 +4,7 @@
 
 #include "Network/NetworkService.h"
 #include "Network/NetworkResourceService.h"
-#include "Network/ValidationService.h"
+#include "Network/NetworkValidationService.h"
 
 #include "AlienImGui.h"
 #include "BrowserWindow.h"
@@ -72,7 +72,7 @@ void EditSimulationDialog::processForLeaf()
 
     ImGui::BeginDisabled(_newName.empty());
     if (AlienImGui::Button("OK")) {
-        if (ValidationService::get().isStringValidForDatabase(_newName) && ValidationService::get().isStringValidForDatabase(_newDescription)) {
+        if (NetworkValidationService::get().isStringValidForDatabase(_newName) && NetworkValidationService::get().isStringValidForDatabase(_newDescription)) {
             EditNetworkResourceRequestData::Entry entry{.resourceId = rawTO->id, .newName = _newName, .newDescription = _newDescription};
             NetworkTransferController::get().onEdit(EditNetworkResourceRequestData{.entries = std::vector{entry}});
             close();
@@ -100,7 +100,7 @@ void EditSimulationDialog::processForFolder()
 
     ImGui::BeginDisabled(_newName.empty());
     if (AlienImGui::Button("OK")) {
-        if (ValidationService::get().isStringValidForDatabase(_newName)) {
+        if (NetworkValidationService::get().isStringValidForDatabase(_newName)) {
 
             EditNetworkResourceRequestData requestData;
             for (auto const& rawTO : _rawTOs) {

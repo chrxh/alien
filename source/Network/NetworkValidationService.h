@@ -5,9 +5,9 @@
 #include "Base/Singleton.h"
 
 
-class ValidationService
+class NetworkValidationService
 {
-    MAKE_SINGLETON(ValidationService);
+    MAKE_SINGLETON(NetworkValidationService);
 
 public:
     bool isStringValidForDatabase(std::string const& s);

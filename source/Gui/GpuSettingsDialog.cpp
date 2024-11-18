@@ -63,7 +63,7 @@ void GpuSettingsDialog::processIntern()
         gpuSettings = _gpuSettings;
     }
 
-    validationAndCorrection(gpuSettings);
+    validateAndCorrect(gpuSettings);
 
     if (gpuSettings != lastGpuSettings) {
         _simulationFacade->setGpuSettings_async(gpuSettings);
@@ -75,7 +75,7 @@ void GpuSettingsDialog::openIntern()
     _gpuSettings = _simulationFacade->getGpuSettings();
 }
 
-void GpuSettingsDialog::validationAndCorrection(GpuSettings& settings) const
+void GpuSettingsDialog::validateAndCorrect(GpuSettings& settings) const
 {
     settings.numBlocks = std::min(1000000, std::max(16, settings.numBlocks));
 }

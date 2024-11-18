@@ -40,8 +40,10 @@ void RadiationSourcesWindow::processIntern()
             AlienImGui::Tooltip("Add source");
         }
 
+        processBaseTab();
+
         for (int tab = 0; tab < parameters.numRadiationSources; ++tab) {
-            if (!processTab(tab)) {
+            if (!processSourceTab(tab)) {
                 scheduleDeleteTabAtIndex = tab;
             }
         }
@@ -57,7 +59,7 @@ void RadiationSourcesWindow::processIntern()
     }
 }
 
-bool RadiationSourcesWindow::processTab(int index)
+bool RadiationSourcesWindow::processSourceTab(int index)
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto lastParameters = parameters;
@@ -73,7 +75,6 @@ bool RadiationSourcesWindow::processTab(int index)
 
     snprintf(name, IM_ARRAYSIZE(name), "Source %01d", index + 1);
     if (ImGui::BeginTabItem(name, &isOpen, ImGuiTabItemFlags_None)) {
-
         if (AlienImGui::Switcher(
                 AlienImGui::SwitcherParameters()
                     .name("Shape")
@@ -87,6 +88,26 @@ bool RadiationSourcesWindow::processTab(int index)
                 source.shapeData.rectangularRadiationSource.width = 40;
                 source.shapeData.rectangularRadiationSource.height = 10;
             }
+        }
+
+        auto origRatios = getStrengthRatios(parameters);
+        if (AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Strength ratio")
+                    .textWidth(RightColumnWidth)
+                    .min(0.0f)
+                    .max(1.0f)
+                    .format("%.3f")
+                    .defaultValue(&origSource.strengthRatio)
+                    .disabled(origRatios.values.size() == origRatios.pinned.size()),
+                &source.strengthRatio,
+                nullptr,
+                &source.strengthRatioPinned)) {
+            auto ratios = origRatios;
+            ratios.values.at(index + 1) = source.strengthRatio;
+            ratios.pinned.insert(index + 1);
+            adaptStrengthRatios(ratios, origRatios);
+            applyStrengthRatios(parameters, ratios);
         }
 
         auto getMousePickerEnabledFunc = [&]() { return SimulationInteractionController::get().isPositionSelectionMode(); };
@@ -152,7 +173,7 @@ bool RadiationSourcesWindow::processTab(int index)
             &source.angle,
             &source.useAngle);
         ImGui::EndTabItem();
-        validationAndCorrection(source);
+        validateAndCorrect(source);
     }
 
     if (parameters != lastParameters) {
@@ -167,11 +188,16 @@ void RadiationSourcesWindow::onAppendTab()
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
+    auto newStrengthRatios = calcStrengthRatiosForAddingSpot(getStrengthRatios(parameters));
+
     auto index = parameters.numRadiationSources;
     parameters.radiationSources[index] = createParticleSource();
     origParameters.radiationSources[index] = createParticleSource();
     ++parameters.numRadiationSources;
     ++origParameters.numRadiationSources;
+
+    applyStrengthRatios(parameters, newStrengthRatios);
+    applyStrengthRatios(origParameters, newStrengthRatios);
 
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
@@ -201,7 +227,7 @@ RadiationSource RadiationSourcesWindow::createParticleSource() const
     return result;
 }
 
-void RadiationSourcesWindow::validationAndCorrection(RadiationSource& source) const
+void RadiationSourcesWindow::validateAndCorrect(RadiationSource& source) const
 {
     if (source.shapeType == RadiationSourceShapeType_Circular) {
         source.shapeData.circularRadiationSource.radius = std::max(1.0f, source.shapeData.circularRadiationSource.radius);
@@ -210,4 +236,93 @@ void RadiationSourcesWindow::validationAndCorrection(RadiationSource& source) co
         source.shapeData.rectangularRadiationSource.width = std::max(1.0f, source.shapeData.rectangularRadiationSource.width);
         source.shapeData.rectangularRadiationSource.height = std::max(1.0f, source.shapeData.rectangularRadiationSource.height);
     }
+}
+
+auto RadiationSourcesWindow::getStrengthRatios(SimulationParameters const& parameters) const -> StrengthRatios
+{
+    StrengthRatios result;
+    result.values.reserve(parameters.numRadiationSources + 1);
+
+    auto baseStrengthRatio = 1.0f;
+    for (int i = 0; i < parameters.numRadiationSources; ++i) {
+        baseStrengthRatio -= parameters.radiationSources[i].strengthRatio;
+    }
+    if (baseStrengthRatio < 0) {
+        baseStrengthRatio = 0;
+    }
+
+    result.values.emplace_back(baseStrengthRatio);
+    for (int i = 0; i < parameters.numRadiationSources; ++i) {
+        result.values.emplace_back(parameters.radiationSources[i].strengthRatio);
+        if (parameters.radiationSources[i].strengthRatioPinned) {
+            result.pinned.insert(i + 1);
+        }
+    }
+
+    return result;
+}
+
+void RadiationSourcesWindow::applyStrengthRatios(SimulationParameters& parameters, StrengthRatios const& ratios)
+{
+    CHECK(parameters.numRadiationSources + 1 == ratios.values.size());
+
+    for (int i = 0; i < parameters.numRadiationSources; ++i) {
+        parameters.radiationSources[i].strengthRatio = ratios.values.at(i + 1);
+    }
+}
+
+void RadiationSourcesWindow::adaptStrengthRatios(StrengthRatios& ratios, StrengthRatios& origRatios) const
+{
+    if (ratios.values.size() == ratios.pinned.size()) {
+        return;
+    }
+
+    auto sum = 0.0f;
+    for (auto const& ratio : ratios.values) {
+        sum += ratio;
+    }
+    auto diff = sum - 1;
+    auto sumWithoutFixed = 0.0f;
+    for (int i = 0; i < ratios.values.size(); ++i) {
+        if (!ratios.pinned.contains(i)) {
+            sumWithoutFixed += ratios.values.at(i);
+        }
+    }
+
+    if (sumWithoutFixed < diff) {
+        ratios = origRatios;
+        return;
+    }
+    if (sumWithoutFixed != 0) {
+        auto reduction = 1.0f - diff / sumWithoutFixed;
+
+        for (int i = 0; i < ratios.values.size(); ++i) {
+            if (!ratios.pinned.contains(i)) {
+                ratios.values.at(i) *= reduction;
+            }
+        }
+    } else {
+        for (int i = 0; i < ratios.values.size(); ++i) {
+            if (!ratios.pinned.contains(i)) {
+                ratios.values.at(i) = -diff / toFloat(ratios.values.size() - ratios.pinned.size());
+            }
+        }
+    }
+    for (auto& ratio : ratios.values) {
+        ratio = std::min(1.0f, std::max(0.0f, ratio));
+    }
+}
+
+auto RadiationSourcesWindow::calcStrengthRatiosForAddingSpot(StrengthRatios const& ratios) const -> StrengthRatios
+{
+    auto reductionFactor = 1.0f / toFloat(ratios.values.size());
+    auto newRatio = 0.0f;
+
+    auto result = ratios;
+    for (int i = 0; i < ratios.values.size(); ++i) {
+        newRatio += ratios.values.at(i) * reductionFactor;
+        result.values.at(i) = ratios.values.at(i) * (1.0f - reductionFactor);
+    }
+    result.values.emplace_back(newRatio);
+    return result;
 }

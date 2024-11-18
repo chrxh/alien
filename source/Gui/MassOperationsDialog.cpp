@@ -121,7 +121,7 @@ void MassOperationsDialog::processIntern()
         close();
     }
 
-    validationAndCorrection();
+    validateAndCorrect();
 }
 
 MassOperationsDialog::MassOperationsDialog()
@@ -221,7 +221,7 @@ bool MassOperationsDialog::isOkEnabled()
     return result;
 }
 
-void MassOperationsDialog::validationAndCorrection()
+void MassOperationsDialog::validateAndCorrect()
 {
     _minAge = std::max(0, _minAge);
     _maxAge = std::max(0, _maxAge);

@@ -8,9 +8,9 @@
 
 #include "Definitions.cuh"
 
-class SimulationParametersService
+class SimulationParametersUpdateService
 {
-    MAKE_SINGLETON(SimulationParametersService);
+    MAKE_SINGLETON(SimulationParametersUpdateService);
 
 public:
     SimulationParameters integrateChanges(

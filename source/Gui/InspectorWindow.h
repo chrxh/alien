@@ -46,7 +46,7 @@ private:
 
     float calcWindowWidth() const;
 
-    void validationAndCorrection(CellDescription& cell) const;
+    void validateAndCorrect(CellDescription& cell) const;
 
     SimulationFacade _simulationFacade;
 
