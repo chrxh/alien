@@ -1822,7 +1822,10 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
     auto constexpr PinnedButtonWidth = 21.0f;
 
     ImGui::PushID(parameters._name.c_str());
-    ImGui::BeginDisabled(parameters._disabled);
+
+    if (parameters._sliderDisabled) {
+        ImGui::BeginDisabled();
+    }
 
     //enable button
     if (enabled) {
@@ -1939,7 +1942,13 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
             //pin button
             if (pinned) {
                 ImGui::SameLine();
+                if (parameters._sliderDisabled) {
+                    ImGui::EndDisabled();
+                }
                 AlienImGui::SelectableButton(AlienImGui::SelectableButtonParameters().name(ICON_FA_THUMBTACK).width(PinnedButtonWidth), *pinned);
+                if (parameters._sliderDisabled) {
+                    ImGui::BeginDisabled();
+                }
             }
 
             //revert button
@@ -1983,11 +1992,11 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
                 if (enabled) {
                     ImGui::EndDisabled();
                 }
-                if (parameters._disabled) {
+                if (parameters._sliderDisabled) {
                     ImGui::EndDisabled();
                 }
                 AlienImGui::HelpMarker(*parameters._tooltip);
-                if (parameters._disabled) {
+                if (parameters._sliderDisabled) {
                     ImGui::BeginDisabled();
                 }
                 if (enabled) {
@@ -1999,7 +2008,9 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
     if (enabled) {
         ImGui::EndDisabled();
     }
-    ImGui::EndDisabled();
+    if (parameters._sliderDisabled) {
+        ImGui::EndDisabled();
+    }
     ImGui::PopID();
     return result;
 }
