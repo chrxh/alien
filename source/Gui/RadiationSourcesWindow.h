@@ -33,7 +33,7 @@ private:
     StrengthRatios getStrengthRatios(SimulationParameters const& parameters) const;
     void applyStrengthRatios(SimulationParameters& parameters, StrengthRatios const& ratios);
 
-    void adaptStrengthRatios(StrengthRatios& ratios, StrengthRatios& origRatios) const;
+    void adaptStrengthRatios(StrengthRatios& ratios, StrengthRatios& origRatios, int changeIndex) const;
     StrengthRatios calcStrengthRatiosForAddingSpot(StrengthRatios const& ratios) const;
 
     SimulationFacade _simulationFacade;

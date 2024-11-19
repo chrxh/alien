@@ -28,7 +28,7 @@ public:
         MEMBER_DECLARATION(SliderFloatParameters, float const*, defaultValue, nullptr);
         MEMBER_DECLARATION(SliderFloatParameters, float const*, disabledValue, nullptr);
         MEMBER_DECLARATION(SliderFloatParameters, bool const*, defaultEnabledValue, nullptr);
-        MEMBER_DECLARATION(SliderFloatParameters, bool, disabled, false);
+        MEMBER_DECLARATION(SliderFloatParameters, bool, sliderDisabled, false);
         MEMBER_DECLARATION(SliderFloatParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool SliderFloat(SliderFloatParameters const& parameters, float* value, bool* enabled = nullptr, bool* pinned = nullptr);
@@ -46,7 +46,7 @@ public:
         MEMBER_DECLARATION(SliderIntParameters, int const*, defaultValue, nullptr);
         MEMBER_DECLARATION(SliderIntParameters, int const*, disabledValue, nullptr);
         MEMBER_DECLARATION(SliderIntParameters, bool const*, defaultEnabledValue, nullptr);
-        MEMBER_DECLARATION(SliderIntParameters, bool, disabled, false);
+        MEMBER_DECLARATION(SliderIntParameters, bool, sliderDisabled, false);
         MEMBER_DECLARATION(SliderIntParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool SliderInt(SliderIntParameters const& parameters, int* value, bool* enabled = nullptr, bool* pinned = nullptr);

@@ -79,12 +79,12 @@ void RadiationSourcesWindow::processBaseTab()
                     .max(1.0f)
                     .format("%.3f")
                     .defaultValue(&origRatios.values.front())
-                    .disabled(ratios.values.size() == ratios.pinned.size()),
+                    .sliderDisabled(ratios.values.size() == ratios.pinned.size()),
                 &newRatios.values.front(),
                 nullptr,
                 &parameters.baseStrengthRatioPinned)) {
             newRatios.pinned.insert(0);
-            adaptStrengthRatios(newRatios, ratios);
+            adaptStrengthRatios(newRatios, ratios, 0);
             applyStrengthRatios(parameters, newRatios);
         }
 
@@ -135,14 +135,14 @@ bool RadiationSourcesWindow::processSourceTab(int index)
                     .max(1.0f)
                     .format("%.3f")
                     .defaultValue(&origSource.strengthRatio)
-                    .disabled(ratios.values.size() == ratios.pinned.size()),
+                    .sliderDisabled(ratios.values.size() == ratios.pinned.size()),
                 &source.strengthRatio,
                 nullptr,
                 &source.strengthRatioPinned)) {
             auto newRatios = ratios;
             newRatios.values.at(index + 1) = source.strengthRatio;
             newRatios.pinned.insert(index + 1);
-            adaptStrengthRatios(newRatios, ratios);
+            adaptStrengthRatios(newRatios, ratios, index + 1);
             applyStrengthRatios(parameters, newRatios);
         }
 
@@ -309,7 +309,7 @@ void RadiationSourcesWindow::applyStrengthRatios(SimulationParameters& parameter
     }
 }
 
-void RadiationSourcesWindow::adaptStrengthRatios(StrengthRatios& ratios, StrengthRatios& origRatios) const
+void RadiationSourcesWindow::adaptStrengthRatios(StrengthRatios& ratios, StrengthRatios& origRatios, int changeIndex) const
 {
     if (ratios.values.size() == ratios.pinned.size()) {
         ratios = origRatios;
@@ -329,8 +329,10 @@ void RadiationSourcesWindow::adaptStrengthRatios(StrengthRatios& ratios, Strengt
     }
 
     if (sumWithoutFixed < diff) {
-        ratios = origRatios;
-        return;
+        ratios.values.at(changeIndex) -= diff - sumWithoutFixed;
+        diff = sumWithoutFixed;
+        //ratios = origRatios;
+        //return;
     }
     if (sumWithoutFixed != 0) {
         auto reduction = 1.0f - diff / sumWithoutFixed;
@@ -354,13 +356,20 @@ void RadiationSourcesWindow::adaptStrengthRatios(StrengthRatios& ratios, Strengt
 
 auto RadiationSourcesWindow::calcStrengthRatiosForAddingSpot(StrengthRatios const& ratios) const -> StrengthRatios
 {
-    auto reductionFactor = 1.0f / toFloat(ratios.values.size());
+    auto result = ratios;
+    if (ratios.values.size() == ratios.pinned.size()) {
+        result.values.emplace_back(0.0f);
+        return result;
+    }
+
+    auto reductionFactor = 1.0f / toFloat(ratios.values.size() - ratios.pinned.size() + 1);
     auto newRatio = 0.0f;
 
-    auto result = ratios;
     for (int i = 0; i < ratios.values.size(); ++i) {
-        newRatio += ratios.values.at(i) * reductionFactor;
-        result.values.at(i) = ratios.values.at(i) * (1.0f - reductionFactor);
+        if (!ratios.pinned.contains(i)) {
+            newRatio += ratios.values.at(i) * reductionFactor;
+            result.values.at(i) = ratios.values.at(i) * (1.0f - reductionFactor);
+        }
     }
     result.values.emplace_back(newRatio);
     return result;
