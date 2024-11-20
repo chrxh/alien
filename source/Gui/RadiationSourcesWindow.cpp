@@ -87,7 +87,7 @@ void RadiationSourcesWindow::processBaseTab()
                 &parameters.baseStrengthRatioPinned)) {
             newRatios.pinned.insert(0);
             editService.adaptRadiationStrengths(newRatios, ratios, 0);
-            editService.applyRadiationStrengths(parameters, newRatios);
+            editService.applyRadiationStrengthValues(parameters, newRatios);
         }
 
         if (parameters != lastParameters) {
@@ -146,7 +146,7 @@ bool RadiationSourcesWindow::processSourceTab(int index)
             newRatios.values.at(index + 1) = source.strengthRatio;
             newRatios.pinned.insert(index + 1);
             editService.adaptRadiationStrengths(newRatios, ratios, index + 1);
-            editService.applyRadiationStrengths(parameters, newRatios);
+            editService.applyRadiationStrengthValues(parameters, newRatios);
         }
 
         auto getMousePickerEnabledFunc = [&]() { return SimulationInteractionController::get().isPositionSelectionMode(); };
@@ -238,8 +238,8 @@ void RadiationSourcesWindow::onAppendTab()
     ++parameters.numRadiationSources;
     ++origParameters.numRadiationSources;
 
-    editService.applyRadiationStrengths(parameters, newStrengths);
-    editService.applyRadiationStrengths(origParameters, newStrengths);
+    editService.applyRadiationStrengthValues(parameters, newStrengths);
+    editService.applyRadiationStrengthValues(origParameters, newStrengths);
 
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
@@ -261,8 +261,8 @@ void RadiationSourcesWindow::onDeleteTab(int index)
     --parameters.numRadiationSources;
     --origParameters.numRadiationSources;
 
-    editService.applyRadiationStrengths(parameters, newStrengths);
-    editService.applyRadiationStrengths(origParameters, newStrengths);
+    editService.applyRadiationStrengthValues(parameters, newStrengths);
+    editService.applyRadiationStrengthValues(origParameters, newStrengths);
 
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);

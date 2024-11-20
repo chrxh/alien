@@ -7,19 +7,19 @@
 #include "Base/Singleton.h"
 #include "SimulationParameters.h"
 
+struct RadiationStrengths
+{
+    std::vector<float> values;
+    std::set<int> pinned;
+};
 
 class SimulationParametersEditService
 {
     MAKE_SINGLETON(SimulationParametersEditService);
 
 public:
-    struct RadiationStrengths
-    {
-        std::vector<float> values;
-        std::set<int> pinned;
-    };
     RadiationStrengths getRadiationStrengths(SimulationParameters const& parameters) const;
-    void applyRadiationStrengths(SimulationParameters& parameters, RadiationStrengths const& ratios);
+    void applyRadiationStrengthValues(SimulationParameters& parameters, RadiationStrengths const& strengths);
 
     void adaptRadiationStrengths(RadiationStrengths& strengths, RadiationStrengths& origStrengths, int changeIndex) const;
     RadiationStrengths calcRadiationStrengthsForAddingSpot(RadiationStrengths const& strengths) const;

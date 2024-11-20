@@ -28,12 +28,12 @@ auto SimulationParametersEditService::getRadiationStrengths(SimulationParameters
     return result;
 }
 
-void SimulationParametersEditService::applyRadiationStrengths(SimulationParameters& parameters, RadiationStrengths const& ratios)
+void SimulationParametersEditService::applyRadiationStrengthValues(SimulationParameters& parameters, RadiationStrengths const& strengths)
 {
-    CHECK(parameters.numRadiationSources + 1 == ratios.values.size());
+    CHECK(parameters.numRadiationSources + 1 == strengths.values.size());
 
     for (int i = 0; i < parameters.numRadiationSources; ++i) {
-        parameters.radiationSources[i].strengthRatio = ratios.values.at(i + 1);
+        parameters.radiationSources[i].strengthRatio = strengths.values.at(i + 1);
     }
 }
 
