@@ -12,7 +12,7 @@
 #include "Physics.cuh"
 #include "CellConnectionProcessor.cuh"
 #include "GenomeDecoder.cuh"
-#include "ParticleProcessor.cuh"
+#include "RadiationProcessor.cuh"
 #include "SpotCalculator.cuh"
 #include "Gui/HelpStrings.h"
 
@@ -737,7 +737,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
                     if (energyLoss > cellEnergy - 1) {
                         energyLoss = cellEnergy - 1;
                     }
-                    ParticleProcessor::radiate(data, particlePos, particleVel, cell->color, energyLoss);
+                    RadiationProcessor::radiate(data, particlePos, particleVel, cell->color, energyLoss);
                     cell->energy -= energyLoss;
                 }
             }

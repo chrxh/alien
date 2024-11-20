@@ -6,7 +6,7 @@
 #include "ConstantMemory.cuh"
 #include "EngineInterface/CellFunctionConstants.h"
 #include "Object.cuh"
-#include "ParticleProcessor.cuh"
+#include "RadiationProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
 

@@ -177,6 +177,7 @@ void LegacyAuxiliaryDataParserService::updateParametersAndFeaturesForLegacyFiles
             for (int i = 0; i < parameters.numRadiationSources; ++i) {
                 parameters.radiationSources[i].strengthRatio = strengthRatio;
             }
+            parameters.baseStrengthRatioPinned = true;
         }
     }
 

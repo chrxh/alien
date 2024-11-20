@@ -55,9 +55,9 @@ add_library(EngineGpuKernels
     Objects.cuh
     ObjectFactory.cuh
     Operations.cuh
-    ParticleProcessor.cuh
     Physics.cuh
     PreprocessedSimulationData.cuh
+    RadiationProcessor.cuh
     ReconnectorProcessor.cuh
     RenderingData.cu
     RenderingData.cuh
