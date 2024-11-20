@@ -233,7 +233,7 @@ __inline__ __device__ void RadiationProcessor::radiate(SimulationData& data, flo
             sumActiveRatios += cudaSimulationParameters.radiationSources[index].strengthRatio;
         }
         if (sumActiveRatios > 0) {
-            auto randomRatioValue = data.numberGen1.random(/*sumActiveRatios*/1.0f);
+            auto randomRatioValue = data.numberGen1.random(1.0f);
             sumActiveRatios = 0.0f;
             auto sourceIndex = 0;
             auto matchSource = false;

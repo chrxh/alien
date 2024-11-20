@@ -229,7 +229,8 @@ void RadiationSourcesWindow::onAppendTab()
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
-    auto newStrengthRatios = editService.calcRadiationStrengthsForAddingSpot(editService.getRadiationStrengths(parameters));
+    auto strengths = editService.getRadiationStrengths(parameters);
+    auto newStrengths = editService.calcRadiationStrengthsForAddingSpot(strengths);
 
     auto index = parameters.numRadiationSources;
     parameters.radiationSources[index] = createParticleSource();
@@ -237,8 +238,8 @@ void RadiationSourcesWindow::onAppendTab()
     ++parameters.numRadiationSources;
     ++origParameters.numRadiationSources;
 
-    editService.applyRadiationStrengths(parameters, newStrengthRatios);
-    editService.applyRadiationStrengths(origParameters, newStrengthRatios);
+    editService.applyRadiationStrengths(parameters, newStrengths);
+    editService.applyRadiationStrengths(origParameters, newStrengths);
 
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
@@ -246,8 +247,12 @@ void RadiationSourcesWindow::onAppendTab()
 
 void RadiationSourcesWindow::onDeleteTab(int index)
 {
+    auto& editService = SimulationParametersEditService::get();
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
+
+    auto strengths = editService.getRadiationStrengths(parameters);
+    auto newStrengths = editService.calcRadiationStrengthsForDeletingSpot(strengths, index + 1);
 
     for (int i = index; i < parameters.numRadiationSources - 1; ++i) {
         parameters.radiationSources[i] = parameters.radiationSources[i + 1];
@@ -255,6 +260,10 @@ void RadiationSourcesWindow::onDeleteTab(int index)
     }
     --parameters.numRadiationSources;
     --origParameters.numRadiationSources;
+
+    editService.applyRadiationStrengths(parameters, newStrengths);
+    editService.applyRadiationStrengths(origParameters, newStrengths);
+
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 }
