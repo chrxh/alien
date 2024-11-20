@@ -10,7 +10,7 @@
 #include "SpotCalculator.cuh"
 #include "SimulationStatistics.cuh"
 #include "ObjectFactory.cuh"
-#include "ParticleProcessor.cuh"
+#include "RadiationProcessor.cuh"
 
 class AttackerProcessor
 {
@@ -231,7 +231,7 @@ __device__ __inline__ void AttackerProcessor::radiate(SimulationData& data, Cell
         float2 particlePos = cell->pos + Math::normalized(particleVel) * 1.5f - particleVel;
         data.cellMap.correctPosition(particlePos);
 
-        ParticleProcessor::radiate(data, particlePos, particleVel, cell->color, radiationEnergy);
+        RadiationProcessor::radiate(data, particlePos, particleVel, cell->color, radiationEnergy);
     }
 }
 

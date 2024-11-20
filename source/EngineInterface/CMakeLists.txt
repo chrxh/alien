@@ -36,6 +36,8 @@ add_library(EngineInterface
     SimulationFacade.h
     SimulationParameters.cpp
     SimulationParameters.h
+    SimulationParametersEditService.cpp
+    SimulationParametersEditService.h
     SimulationParametersSpot.h
     SimulationParametersSpotActivatedValues.h
     SimulationParametersSpotValues.h

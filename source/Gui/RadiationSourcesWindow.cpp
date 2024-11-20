@@ -3,6 +3,7 @@
 #include "AlienImGui.h"
 #include "Base/Definitions.h"
 #include "EngineInterface/SimulationFacade.h"
+#include "EngineInterface/SimulationParametersEditService.h"
 
 #include "RadiationSourcesWindow.h"
 #include "StyleRepository.h"
@@ -68,9 +69,11 @@ void RadiationSourcesWindow::processBaseTab()
         auto lastParameters = parameters;
         auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
-        auto ratios = getStrengthRatios(parameters);
+        auto& editService = SimulationParametersEditService::get();
+
+        auto ratios = editService.getRadiationStrengths(parameters);
+        auto origRatios = editService.getRadiationStrengths(origParameters);
         auto newRatios = ratios;
-        auto origRatios = getStrengthRatios(origParameters);
         if (AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Strength ratio")
@@ -78,14 +81,13 @@ void RadiationSourcesWindow::processBaseTab()
                     .min(0.0f)
                     .max(1.0f)
                     .format("%.3f")
-                    .defaultValue(&origRatios.values.front())
-                    .sliderDisabled(ratios.values.size() == ratios.pinned.size()),
+                    .defaultValue(&origRatios.values.front()),
                 &newRatios.values.front(),
                 nullptr,
                 &parameters.baseStrengthRatioPinned)) {
             newRatios.pinned.insert(0);
-            adaptStrengthRatios(newRatios, ratios, 0);
-            applyStrengthRatios(parameters, newRatios);
+            editService.adaptRadiationStrengths(newRatios, ratios, 0);
+            editService.applyRadiationStrengths(parameters, newRatios);
         }
 
         if (parameters != lastParameters) {
@@ -97,6 +99,8 @@ void RadiationSourcesWindow::processBaseTab()
 
 bool RadiationSourcesWindow::processSourceTab(int index)
 {
+    auto& editService = SimulationParametersEditService::get();
+
     auto parameters = _simulationFacade->getSimulationParameters();
     auto lastParameters = parameters;
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
@@ -126,7 +130,7 @@ bool RadiationSourcesWindow::processSourceTab(int index)
             }
         }
 
-        auto ratios = getStrengthRatios(parameters);
+        auto ratios = editService.getRadiationStrengths(parameters);
         if (AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Strength ratio")
@@ -134,16 +138,15 @@ bool RadiationSourcesWindow::processSourceTab(int index)
                     .min(0.0f)
                     .max(1.0f)
                     .format("%.3f")
-                    .defaultValue(&origSource.strengthRatio)
-                    .sliderDisabled(ratios.values.size() == ratios.pinned.size()),
+                    .defaultValue(&origSource.strengthRatio),
                 &source.strengthRatio,
                 nullptr,
                 &source.strengthRatioPinned)) {
             auto newRatios = ratios;
             newRatios.values.at(index + 1) = source.strengthRatio;
             newRatios.pinned.insert(index + 1);
-            adaptStrengthRatios(newRatios, ratios, index + 1);
-            applyStrengthRatios(parameters, newRatios);
+            editService.adaptRadiationStrengths(newRatios, ratios, index + 1);
+            editService.applyRadiationStrengths(parameters, newRatios);
         }
 
         auto getMousePickerEnabledFunc = [&]() { return SimulationInteractionController::get().isPositionSelectionMode(); };
@@ -221,10 +224,12 @@ bool RadiationSourcesWindow::processSourceTab(int index)
 
 void RadiationSourcesWindow::onAppendTab()
 {
+    auto& editService = SimulationParametersEditService::get();
+
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
-    auto newStrengthRatios = calcStrengthRatiosForAddingSpot(getStrengthRatios(parameters));
+    auto newStrengthRatios = editService.calcRadiationStrengthsForAddingSpot(editService.getRadiationStrengths(parameters));
 
     auto index = parameters.numRadiationSources;
     parameters.radiationSources[index] = createParticleSource();
@@ -232,8 +237,8 @@ void RadiationSourcesWindow::onAppendTab()
     ++parameters.numRadiationSources;
     ++origParameters.numRadiationSources;
 
-    applyStrengthRatios(parameters, newStrengthRatios);
-    applyStrengthRatios(origParameters, newStrengthRatios);
+    editService.applyRadiationStrengths(parameters, newStrengthRatios);
+    editService.applyRadiationStrengths(origParameters, newStrengthRatios);
 
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
@@ -272,105 +277,4 @@ void RadiationSourcesWindow::validateAndCorrect(RadiationSource& source) const
         source.shapeData.rectangularRadiationSource.width = std::max(1.0f, source.shapeData.rectangularRadiationSource.width);
         source.shapeData.rectangularRadiationSource.height = std::max(1.0f, source.shapeData.rectangularRadiationSource.height);
     }
-}
-
-auto RadiationSourcesWindow::getStrengthRatios(SimulationParameters const& parameters) const -> StrengthRatios
-{
-    StrengthRatios result;
-    result.values.reserve(parameters.numRadiationSources + 1);
-
-    auto baseStrengthRatio = 1.0f;
-    for (int i = 0; i < parameters.numRadiationSources; ++i) {
-        baseStrengthRatio -= parameters.radiationSources[i].strengthRatio;
-    }
-    if (baseStrengthRatio < 0) {
-        baseStrengthRatio = 0;
-    }
-
-    result.values.emplace_back(baseStrengthRatio);
-    for (int i = 0; i < parameters.numRadiationSources; ++i) {
-        result.values.emplace_back(parameters.radiationSources[i].strengthRatio);
-        if (parameters.radiationSources[i].strengthRatioPinned) {
-            result.pinned.insert(i + 1);
-        }
-    }
-    if (parameters.baseStrengthRatioPinned) {
-        result.pinned.insert(0);
-    }
-    return result;
-}
-
-void RadiationSourcesWindow::applyStrengthRatios(SimulationParameters& parameters, StrengthRatios const& ratios)
-{
-    CHECK(parameters.numRadiationSources + 1 == ratios.values.size());
-
-    for (int i = 0; i < parameters.numRadiationSources; ++i) {
-        parameters.radiationSources[i].strengthRatio = ratios.values.at(i + 1);
-    }
-}
-
-void RadiationSourcesWindow::adaptStrengthRatios(StrengthRatios& ratios, StrengthRatios& origRatios, int changeIndex) const
-{
-    if (ratios.values.size() == ratios.pinned.size()) {
-        ratios = origRatios;
-        return;
-    }
-
-    auto sum = 0.0f;
-    for (auto const& ratio : ratios.values) {
-        sum += ratio;
-    }
-    auto diff = sum - 1;
-    auto sumWithoutFixed = 0.0f;
-    for (int i = 0; i < ratios.values.size(); ++i) {
-        if (!ratios.pinned.contains(i)) {
-            sumWithoutFixed += ratios.values.at(i);
-        }
-    }
-
-    if (sumWithoutFixed < diff) {
-        ratios.values.at(changeIndex) -= diff - sumWithoutFixed;
-        diff = sumWithoutFixed;
-        //ratios = origRatios;
-        //return;
-    }
-    if (sumWithoutFixed != 0) {
-        auto reduction = 1.0f - diff / sumWithoutFixed;
-
-        for (int i = 0; i < ratios.values.size(); ++i) {
-            if (!ratios.pinned.contains(i)) {
-                ratios.values.at(i) *= reduction;
-            }
-        }
-    } else {
-        for (int i = 0; i < ratios.values.size(); ++i) {
-            if (!ratios.pinned.contains(i)) {
-                ratios.values.at(i) = -diff / toFloat(ratios.values.size() - ratios.pinned.size());
-            }
-        }
-    }
-    for (auto& ratio : ratios.values) {
-        ratio = std::min(1.0f, std::max(0.0f, ratio));
-    }
-}
-
-auto RadiationSourcesWindow::calcStrengthRatiosForAddingSpot(StrengthRatios const& ratios) const -> StrengthRatios
-{
-    auto result = ratios;
-    if (ratios.values.size() == ratios.pinned.size()) {
-        result.values.emplace_back(0.0f);
-        return result;
-    }
-
-    auto reductionFactor = 1.0f / toFloat(ratios.values.size() - ratios.pinned.size() + 1);
-    auto newRatio = 0.0f;
-
-    for (int i = 0; i < ratios.values.size(); ++i) {
-        if (!ratios.pinned.contains(i)) {
-            newRatio += ratios.values.at(i) * reductionFactor;
-            result.values.at(i) = ratios.values.at(i) * (1.0f - reductionFactor);
-        }
-    }
-    result.values.emplace_back(newRatio);
-    return result;
 }
