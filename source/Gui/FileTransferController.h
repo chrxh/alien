@@ -20,7 +20,7 @@ public:
 private:
     void init(PersisterFacade persisterFacade, SimulationFacade simulationFacade) override;
     void process() override;
-    void shutdown() override {}
+    void shutdown() override;
 
     PersisterFacade _persisterFacade;
     SimulationFacade _simulationFacade;

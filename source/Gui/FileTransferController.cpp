@@ -10,19 +10,6 @@
 #include "TemporalControlWindow.h"
 #include "Viewport.h"
 
-namespace
-{
-    auto constexpr FileTransferSenderId = "FileTransfer";
-}
-
-void FileTransferController::init(PersisterFacade persisterFacade, SimulationFacade simulationFacade)
-{
-    _persisterFacade = persisterFacade;
-    _simulationFacade = simulationFacade;
-    _openSimulationProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
-    _saveSimulationProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
-}
-
 void FileTransferController::onOpenSimulationDialog()
 {
     GenericFileDialog::get().showOpenFileDialog(
@@ -102,8 +89,23 @@ void FileTransferController::onSaveSimulationDialog()
         });
 }
 
+void FileTransferController::init(PersisterFacade persisterFacade, SimulationFacade simulationFacade)
+{
+    _persisterFacade = persisterFacade;
+    _simulationFacade = simulationFacade;
+    _openSimulationProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+    _saveSimulationProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+
+    _referencePath = GlobalSettings::get().getValue("dialogs.directory.reference path", _referencePath);
+}
+
 void FileTransferController::process()
 {
     _openSimulationProcessor->process();
     _saveSimulationProcessor->process();
+}
+
+void FileTransferController::shutdown()
+{
+    GlobalSettings::get().setValue("dialogs.directory.reference path", _referencePath);
 }
