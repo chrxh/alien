@@ -670,7 +670,7 @@ namespace
             tree,
             parameters.baseStrengthRatioPinned,
             defaultParameters.baseStrengthRatioPinned,
-            "simulation parameters.particle sources.base strength ratio pinned",
+            "simulation parameters.particle sources.base strength pinned",
             parserTask);
         for (int index = 0; index < parameters.numRadiationSources; ++index) {
             std::string base = "simulation parameters.particle sources." + std::to_string(index) + ".";
@@ -681,8 +681,8 @@ namespace
             ParameterParser::encodeDecode(tree, source.velX, defaultSource.velX, base + "vel.x", parserTask);
             ParameterParser::encodeDecode(tree, source.velY, defaultSource.velY, base + "vel.y", parserTask);
             ParameterParser::encodeDecode(tree, source.useAngle, defaultSource.useAngle, base + "use angle", parserTask);
-            ParameterParser::encodeDecode(tree, source.strengthRatio, defaultSource.strengthRatio, base + "strength ratio", parserTask);
-            ParameterParser::encodeDecode(tree, source.strengthRatioPinned, defaultSource.strengthRatioPinned, base + "strength ratio pinned", parserTask);
+            ParameterParser::encodeDecode(tree, source.strength, defaultSource.strength, base + "strength", parserTask);
+            ParameterParser::encodeDecode(tree, source.strengthPinned, defaultSource.strengthPinned, base + "strength pinned", parserTask);
             ParameterParser::encodeDecode(tree, source.angle, defaultSource.angle, base + "angle", parserTask);
             ParameterParser::encodeDecode(tree, source.shapeType, defaultSource.shapeType, base + "shape.type", parserTask);
             if (source.shapeType == SpotShapeType_Circular) {

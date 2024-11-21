@@ -591,7 +591,12 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
     auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(
         GenomeDescription()
             .setHeader(GenomeHeaderDescription().setSeparateConstruction(false).setStiffness(0.35f))
-            .setCells({CellGenomeDescription().setColor(2).setExecutionOrderNumber(4).setInputExecutionOrderNumber(5).setOutputBlocked(true)}));
+                                                                      .setCells({CellGenomeDescription()
+                                                                                     .setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy())
+                                                                                     .setColor(2)
+                                                                                     .setExecutionOrderNumber(4)
+                                                                                     .setInputExecutionOrderNumber(5)
+                                                                                     .setOutputBlocked(true)}));
 
     DataDescription data;
     data.addCell(
@@ -627,7 +632,7 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
     EXPECT_EQ(4, actualConstructedCell.executionOrderNumber);
     EXPECT_EQ(5, actualConstructedCell.inputExecutionOrderNumber);
     EXPECT_TRUE(actualConstructedCell.outputBlocked);
-    EXPECT_EQ(CellFunction_None, actualConstructedCell.getCellFunctionType());
+    EXPECT_EQ(CellFunction_Constructor, actualConstructedCell.getCellFunctionType());
     EXPECT_EQ(123, actualConstructedCell.activationTime);
     EXPECT_TRUE(approxCompare(0.35f, actualConstructedCell.stiffness, 0.01f));
     EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy[0], actualConstructedCell.energy));

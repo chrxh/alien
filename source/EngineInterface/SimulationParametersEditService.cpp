@@ -9,7 +9,7 @@ auto SimulationParametersEditService::getRadiationStrengths(SimulationParameters
 
     auto baseStrength = 1.0f;
     for (int i = 0; i < parameters.numRadiationSources; ++i) {
-        baseStrength -= parameters.radiationSources[i].strengthRatio;
+        baseStrength -= parameters.radiationSources[i].strength;
     }
     if (baseStrength < 0) {
         baseStrength = 0;
@@ -17,8 +17,8 @@ auto SimulationParametersEditService::getRadiationStrengths(SimulationParameters
 
     result.values.emplace_back(baseStrength);
     for (int i = 0; i < parameters.numRadiationSources; ++i) {
-        result.values.emplace_back(parameters.radiationSources[i].strengthRatio);
-        if (parameters.radiationSources[i].strengthRatioPinned) {
+        result.values.emplace_back(parameters.radiationSources[i].strength);
+        if (parameters.radiationSources[i].strengthPinned) {
             result.pinned.insert(i + 1);
         }
     }
@@ -28,30 +28,41 @@ auto SimulationParametersEditService::getRadiationStrengths(SimulationParameters
     return result;
 }
 
-void SimulationParametersEditService::applyRadiationStrengthValues(SimulationParameters& parameters, RadiationStrengths const& strengths)
+void SimulationParametersEditService::applyRadiationStrengths(SimulationParameters& parameters, RadiationStrengths const& strengths)
 {
     CHECK(parameters.numRadiationSources + 1 == strengths.values.size());
 
+    parameters.baseStrengthRatioPinned = strengths.pinned.contains(0);
     for (int i = 0; i < parameters.numRadiationSources; ++i) {
-        parameters.radiationSources[i].strengthRatio = strengths.values.at(i + 1);
+        parameters.radiationSources[i].strength = strengths.values.at(i + 1);
+        parameters.radiationSources[i].strengthPinned = strengths.pinned.contains(i + 1);
     }
 }
 
 void SimulationParametersEditService::adaptRadiationStrengths(RadiationStrengths& strengths, RadiationStrengths& origStrengths, int changeIndex) const
 {
-    if (strengths.values.size() == strengths.pinned.size()) {
+    auto pinnedValues = strengths.pinned;
+    pinnedValues.insert(changeIndex);
+
+    if (strengths.values.size() == pinnedValues.size()) {
         strengths = origStrengths;
         return;
     }
+    for (auto const& strength : strengths.values) {
+        if (strength < 0) {
+            strengths = origStrengths;
+            return;
+        }
+    }
 
     auto sum = 0.0f;
-    for (auto const& ratio : strengths.values) {
-        sum += ratio;
+    for (auto const& strength : strengths.values) {
+        sum += strength;
     }
     auto diff = sum - 1;
     auto sumWithoutFixed = 0.0f;
     for (int i = 0; i < strengths.values.size(); ++i) {
-        if (!strengths.pinned.contains(i)) {
+        if (!pinnedValues.contains(i)) {
             sumWithoutFixed += strengths.values.at(i);
         }
     }
@@ -64,14 +75,14 @@ void SimulationParametersEditService::adaptRadiationStrengths(RadiationStrengths
         auto reduction = 1.0f - diff / sumWithoutFixed;
 
         for (int i = 0; i < strengths.values.size(); ++i) {
-            if (!strengths.pinned.contains(i)) {
+            if (!pinnedValues.contains(i)) {
                 strengths.values.at(i) *= reduction;
             }
         }
     } else {
         for (int i = 0; i < strengths.values.size(); ++i) {
-            if (!strengths.pinned.contains(i)) {
-                strengths.values.at(i) = -diff / toFloat(strengths.values.size() - strengths.pinned.size());
+            if (!pinnedValues.contains(i)) {
+                strengths.values.at(i) = -diff / toFloat(strengths.values.size() - pinnedValues.size());
             }
         }
     }
@@ -104,11 +115,11 @@ auto SimulationParametersEditService::calcRadiationStrengthsForAddingSpot(Radiat
 auto SimulationParametersEditService::calcRadiationStrengthsForDeletingSpot(
     RadiationStrengths const& strengths, int deleteIndex) const -> RadiationStrengths
 {
-    auto numRemainingUnpinned = 0;
+    auto existsUnpinned = false;
     auto sumRemainingUnpinnedStrengths = 0.0f;
     for (int i = 0; i < strengths.values.size(); ++i) {
         if (!strengths.pinned.contains(i) && i != deleteIndex) {
-            ++numRemainingUnpinned;
+            existsUnpinned = true;
             sumRemainingUnpinnedStrengths += strengths.values.at(i);
         }
     }
@@ -128,6 +139,9 @@ auto SimulationParametersEditService::calcRadiationStrengthsForDeletingSpot(
                 }
             }
         }
+    }
+    if (!existsUnpinned) {
+        result.pinned.erase(0);
     }
 
     return result;

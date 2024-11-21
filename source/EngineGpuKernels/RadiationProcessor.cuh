@@ -230,7 +230,7 @@ __inline__ __device__ void RadiationProcessor::radiate(SimulationData& data, flo
         auto sumActiveRatios = 0.0f;
         for (int i = 0; i < numActiveSources; ++i) {
             auto index = data.preprocessedSimulationData.activeRadiationSources.getActiveSource(i);
-            sumActiveRatios += cudaSimulationParameters.radiationSources[index].strengthRatio;
+            sumActiveRatios += cudaSimulationParameters.radiationSources[index].strength;
         }
         if (sumActiveRatios > 0) {
             auto randomRatioValue = data.numberGen1.random(1.0f);
@@ -239,7 +239,7 @@ __inline__ __device__ void RadiationProcessor::radiate(SimulationData& data, flo
             auto matchSource = false;
             for (int i = 0; i < numActiveSources; ++i) {
                 sourceIndex = data.preprocessedSimulationData.activeRadiationSources.getActiveSource(i);
-                sumActiveRatios += cudaSimulationParameters.radiationSources[sourceIndex].strengthRatio;
+                sumActiveRatios += cudaSimulationParameters.radiationSources[sourceIndex].strength;
                 if (randomRatioValue <= sumActiveRatios) {
                     matchSource = true;
                     break;
