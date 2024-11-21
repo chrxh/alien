@@ -84,7 +84,8 @@ __global__ void cudaNextTimestep_cellFunction_prepare_substep1(SimulationData da
 
 __global__ void cudaNextTimestep_cellFunction_prepare_substep2(SimulationData data)
 {
-    CellProcessor::livingStateTransition(data);
+    CellProcessor::livingStateTransition_calcNextState(data);
+    CellProcessor::livingStateTransition_applyNextState(data);
     CellFunctionProcessor::collectCellFunctionOperations(data);
     CellFunctionProcessor::updateRenderingData(data);
 }

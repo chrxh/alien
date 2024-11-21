@@ -35,7 +35,8 @@ public:
     __inline__ __device__ static void verletVelocityUpdate(SimulationData& data);
 
     __inline__ __device__ static void aging(SimulationData& data);
-    __inline__ __device__ static void livingStateTransition(SimulationData& data);
+    __inline__ __device__ static void livingStateTransition_calcNextState(SimulationData& data);
+    __inline__ __device__ static void livingStateTransition_applyNextState(SimulationData& data);
 
     __inline__ __device__ static void applyInnerFriction(SimulationData& data);
     __inline__ __device__ static void applyFriction(SimulationData& data);
@@ -593,58 +594,83 @@ __inline__ __device__ void CellProcessor::aging(SimulationData& data)
 }
 
 
-__inline__ __device__ void CellProcessor::livingStateTransition(SimulationData& data)
+__inline__ __device__ void CellProcessor::livingStateTransition_calcNextState(SimulationData& data)
 {
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        auto origLivingState = atomicCAS(&cell->livingState, LivingState_Activating, LivingState_Ready);
+
+        bool isSameCreatureNeighborDetaching = false;
+        bool isOtherCreatureNeighborDetaching = false;
+        bool isSameCreatureNeighborReviving= false;
+        bool isNeighborActivating = false;
+        for (int i = 0; i < cell->numConnections; ++i) {
+            auto const& connectedCell = cell->connections[i].cell;
+            if (connectedCell->creatureId == cell->creatureId) {
+                auto connectedLivingState = connectedCell->livingState;
+                if (connectedLivingState == LivingState_Detaching) {
+                    isSameCreatureNeighborDetaching = true;
+                } else if (connectedLivingState == LivingState_Reviving) {
+                    isSameCreatureNeighborReviving = true;
+                } else if (connectedLivingState == LivingState_Activating) {
+                    isNeighborActivating = true;
+                }
+            } else {
+                if (connectedCell->livingState == LivingState_Detaching) {
+                    isOtherCreatureNeighborDetaching = true;
+                }
+            }
+        }
+
+        auto origLivingState = cell->livingState;
+        auto livingState = origLivingState;
+
         if (origLivingState == LivingState_Activating) {
+            livingState = LivingState_Ready;
             if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellResetAgeAfterActivation) {
                 atomicExch(&cell->age, 0);
             }
-            for (int i = 0; i < cell->numConnections; ++i) {
-                auto const& connectedCell = cell->connections[i].cell;
-                auto origLivingStateConnectedCell = atomicCAS(&connectedCell->livingState, LivingState_UnderConstruction, LivingState_Activating);
-                if (origLivingStateConnectedCell == LivingState_UnderConstruction) {
-                    if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellResetAgeAfterActivation) {
-                        atomicExch(&connectedCell->age, 0);
-                    }
+        } else if (origLivingState == LivingState_Reviving) {
+            livingState = LivingState_Ready;
+        } else if (origLivingState == LivingState_UnderConstruction) {
+            if (isNeighborActivating) {
+                livingState = LivingState_Activating;
+            }
+            if (isOtherCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences != CellDeathConsquences_None) {
+                livingState = LivingState_Detaching;
+            }
+        } else if (origLivingState == LivingState_Detaching) {
+            if (isSameCreatureNeighborReviving && cudaSimulationParameters.cellDeathConsequences == CellDeathConsquences_DetachedPartsDie) {
+                livingState = LivingState_Reviving;
+            }
+            if (cudaSimulationParameters.cellDeathConsequences == CellDeathConsquences_None) {
+                livingState = LivingState_Ready;
+            }
+        } else if (origLivingState == LivingState_Ready) {
+            if (isSameCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences != CellDeathConsquences_None) {
+                if (cudaSimulationParameters.cellDeathConsequences == CellDeathConsquences_DetachedPartsDie && cell->cellFunction == CellFunction_Constructor
+                    && GenomeDecoder::containsSelfReplication(cell->cellFunctionData.constructor)) {
+                    livingState = LivingState_Reviving;
+                } else {
+                    livingState = LivingState_Detaching;
                 }
             }
         }
-        if (origLivingState == LivingState_Reviving) {
-            atomicExch(&cell->livingState, LivingState_Ready);
-            for (int i = 0; i < cell->numConnections; ++i) {
-                auto const& connectedCell = cell->connections[i].cell;
-                if (connectedCell->creatureId == cell->creatureId) {
-                    atomicCAS(&connectedCell->livingState, LivingState_Detaching, LivingState_Reviving);
-                }
-            }
-        }
-        if (origLivingState == LivingState_Detaching) {
-            if (cudaSimulationParameters.cellDeathConsequences == CellDeathConsquences_DetachedPartsDie
-                || cudaSimulationParameters.cellDeathConsequences == CellDeathConsquences_CreatureDies) {
-                for (int i = 0; i < cell->numConnections; ++i) {
-                    auto const& connectedCell = cell->connections[i].cell;
-                    if (connectedCell->creatureId == cell->creatureId) {
-                        if (cudaSimulationParameters.cellDeathConsequences == CellDeathConsquences_DetachedPartsDie
-                            && connectedCell->cellFunction == CellFunction_Constructor
-                            && GenomeDecoder::containsSelfReplication(connectedCell->cellFunctionData.constructor)) {
-                            atomicExch(&connectedCell->livingState, LivingState_Reviving);
-                        } else {
-                            atomicCAS(&connectedCell->livingState, LivingState_Ready, LivingState_Detaching);
-                        }
-                    } else {
-                        atomicCAS(&connectedCell->livingState, LivingState_UnderConstruction, LivingState_Detaching);
-                    }
-                }
-            } else {
-                atomicExch(&cell->livingState, LivingState_Ready);
-            }
-        }
+        cell->tag = livingState;
+    }
+}
+
+__inline__ __device__ void CellProcessor::livingStateTransition_applyNextState(SimulationData& data)
+{
+    auto& cells = data.objects.cellPointers;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        cell->livingState = cell->tag;
+        cell->tag = 0;
     }
 }
 
