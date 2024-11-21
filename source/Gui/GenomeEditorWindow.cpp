@@ -448,9 +448,13 @@ void GenomeEditorWindow::processConstructionSequence(TabData& tab)
         } else {
             ImGui::PushStyleColor(ImGuiCol_Header, static_cast<ImVec4>(ImColor::HSV(0, 0, 0, 0)));
         }
-        if (_nodeIndexToJump && *_nodeIndexToJump == index) {
-            ImGui::SetScrollHereY();
-            _nodeIndexToJump = std::nullopt;
+        if (_nodeIndexToJump) {
+            if (_nodeIndexToJump == index) {
+                ImGui::SetScrollHereY();
+                ImGui::SetNextItemOpen(true);
+            } else {
+                ImGui::SetNextItemOpen(false);
+            }
         }
 
         if (_expandNodes) {
@@ -487,6 +491,7 @@ void GenomeEditorWindow::processConstructionSequence(TabData& tab)
         ++index;
     }
     _expandNodes.reset();
+    _nodeIndexToJump.reset();
 }
 
 void GenomeEditorWindow::processNode(
