@@ -19,7 +19,7 @@ class SimulationParametersEditService
 
 public:
     RadiationStrengths getRadiationStrengths(SimulationParameters const& parameters) const;
-    void applyRadiationStrengthValues(SimulationParameters& parameters, RadiationStrengths const& strengths);
+    void applyRadiationStrengths(SimulationParameters& parameters, RadiationStrengths const& strengths);
 
     void adaptRadiationStrengths(RadiationStrengths& strengths, RadiationStrengths& origStrengths, int changeIndex) const;
     RadiationStrengths calcRadiationStrengthsForAddingSpot(RadiationStrengths const& strengths) const;

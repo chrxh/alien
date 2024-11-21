@@ -71,9 +71,9 @@ void RadiationSourcesWindow::processBaseTab()
 
         auto& editService = SimulationParametersEditService::get();
 
-        auto ratios = editService.getRadiationStrengths(parameters);
-        auto origRatios = editService.getRadiationStrengths(origParameters);
-        auto newRatios = ratios;
+        auto strength = editService.getRadiationStrengths(parameters);
+        auto origStrengths = editService.getRadiationStrengths(origParameters);
+        auto editedStrength = strength;
         if (AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Strength ratio")
@@ -81,13 +81,12 @@ void RadiationSourcesWindow::processBaseTab()
                     .min(0.0f)
                     .max(1.0f)
                     .format("%.3f")
-                    .defaultValue(&origRatios.values.front()),
-                &newRatios.values.front(),
+                    .defaultValue(&origStrengths.values.front()),
+                &editedStrength.values.front(),
                 nullptr,
                 &parameters.baseStrengthRatioPinned)) {
-            newRatios.pinned.insert(0);
-            editService.adaptRadiationStrengths(newRatios, ratios, 0);
-            editService.applyRadiationStrengthValues(parameters, newRatios);
+            editService.adaptRadiationStrengths(editedStrength, strength, 0);
+            editService.applyRadiationStrengths(parameters, editedStrength);
         }
 
         if (parameters != lastParameters) {
@@ -130,7 +129,7 @@ bool RadiationSourcesWindow::processSourceTab(int index)
             }
         }
 
-        auto ratios = editService.getRadiationStrengths(parameters);
+        auto origStrengths = editService.getRadiationStrengths(parameters);
         if (AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Strength ratio")
@@ -138,15 +137,14 @@ bool RadiationSourcesWindow::processSourceTab(int index)
                     .min(0.0f)
                     .max(1.0f)
                     .format("%.3f")
-                    .defaultValue(&origSource.strengthRatio),
-                &source.strengthRatio,
+                    .defaultValue(&origSource.strength),
+                &source.strength,
                 nullptr,
-                &source.strengthRatioPinned)) {
-            auto newRatios = ratios;
-            newRatios.values.at(index + 1) = source.strengthRatio;
-            newRatios.pinned.insert(index + 1);
-            editService.adaptRadiationStrengths(newRatios, ratios, index + 1);
-            editService.applyRadiationStrengthValues(parameters, newRatios);
+                &source.strengthPinned)) {
+            auto editedStrengths = origStrengths;
+            editedStrengths.values.at(index + 1) = source.strength;   // Set new strength
+            editService.adaptRadiationStrengths(editedStrengths, origStrengths, index + 1);
+            editService.applyRadiationStrengths(parameters, editedStrengths);
         }
 
         auto getMousePickerEnabledFunc = [&]() { return SimulationInteractionController::get().isPositionSelectionMode(); };
@@ -238,8 +236,8 @@ void RadiationSourcesWindow::onAppendTab()
     ++parameters.numRadiationSources;
     ++origParameters.numRadiationSources;
 
-    editService.applyRadiationStrengthValues(parameters, newStrengths);
-    editService.applyRadiationStrengthValues(origParameters, newStrengths);
+    editService.applyRadiationStrengths(parameters, newStrengths);
+    editService.applyRadiationStrengths(origParameters, newStrengths);
 
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
@@ -261,8 +259,8 @@ void RadiationSourcesWindow::onDeleteTab(int index)
     --parameters.numRadiationSources;
     --origParameters.numRadiationSources;
 
-    editService.applyRadiationStrengthValues(parameters, newStrengths);
-    editService.applyRadiationStrengthValues(origParameters, newStrengths);
+    editService.applyRadiationStrengths(parameters, newStrengths);
+    editService.applyRadiationStrengths(origParameters, newStrengths);
 
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
