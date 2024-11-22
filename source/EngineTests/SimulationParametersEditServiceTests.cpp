@@ -351,3 +351,64 @@ TEST_F(SimulationParametersEditServiceTests, calcRadiationStrengthsForAddingSpot
     checkApproxEqual(0.0f, strengths.values[3]);
     EXPECT_EQ(origStrengths.pinned, strengths.pinned);
 }
+
+TEST_F(SimulationParametersEditServiceTests, calcRadiationStrengthsForDeletingSpot_allUnpinned)
+{
+    RadiationStrengths origStrengths;
+    origStrengths.values = {0.1f, 0.3f, 0.6f};
+    origStrengths.pinned = {};
+
+    auto strengths = SimulationParametersEditService::get().calcRadiationStrengthsForDeletingSpot(origStrengths, 1);
+
+    ASSERT_EQ(2, strengths.values.size());
+
+    auto factor = 1.0f + 0.3f / 0.7f;
+    checkApproxEqual(0.1f * factor, strengths.values[0]);
+    checkApproxEqual(0.6f * factor, strengths.values[1]);
+    EXPECT_EQ(std::set<int>{}, strengths.pinned);
+}
+
+TEST_F(SimulationParametersEditServiceTests, calcRadiationStrengthsForDeletingSpot_basePinned)
+{
+    RadiationStrengths origStrengths;
+    origStrengths.values = {0.1f, 0.3f, 0.6f};
+    origStrengths.pinned = {0};
+
+    auto strengths = SimulationParametersEditService::get().calcRadiationStrengthsForDeletingSpot(origStrengths, 1);
+
+    ASSERT_EQ(2, strengths.values.size());
+
+    checkApproxEqual(0.1f, strengths.values[0]);
+    checkApproxEqual(0.9f, strengths.values[1]);
+    EXPECT_EQ(std::set<int>{0}, strengths.pinned);
+}
+
+TEST_F(SimulationParametersEditServiceTests, calcRadiationStrengthsForDeletingSpot_spotPinned)
+{
+    RadiationStrengths origStrengths;
+    origStrengths.values = {0.1f, 0.3f, 0.6f};
+    origStrengths.pinned = {2};
+
+    auto strengths = SimulationParametersEditService::get().calcRadiationStrengthsForDeletingSpot(origStrengths, 1);
+
+    ASSERT_EQ(2, strengths.values.size());
+
+    checkApproxEqual(0.4f, strengths.values[0]);
+    checkApproxEqual(0.6f, strengths.values[1]);
+    EXPECT_EQ(std::set<int>{1}, strengths.pinned);
+}
+
+TEST_F(SimulationParametersEditServiceTests, calcRadiationStrengthsForDeletingSpot_allPinned)
+{
+    RadiationStrengths origStrengths;
+    origStrengths.values = {0.1f, 0.3f, 0.6f};
+    origStrengths.pinned = {0, 1, 2};
+
+    auto strengths = SimulationParametersEditService::get().calcRadiationStrengthsForDeletingSpot(origStrengths, 1);
+
+    ASSERT_EQ(2, strengths.values.size());
+
+    checkApproxEqual(0.4f, strengths.values[0]);
+    checkApproxEqual(0.6f, strengths.values[1]);
+    EXPECT_EQ(std::set<int>{1}, strengths.pinned);
+}
