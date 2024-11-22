@@ -367,7 +367,7 @@ namespace Const
         " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or duplications are taken into "
         "account).\n\n" ICON_FA_CHEVRON_RIGHT " Mutants and cell functions: Combination of mutants and cell function coloring.\n\n" ICON_FA_CHEVRON_RIGHT
         " Cell states: green = under construction, blue = ready, red = dying\n\n" ICON_FA_CHEVRON_RIGHT
-        " Genome complexities: This property can be utilized by attacker cells when the parameter 'Complex genome protection' is "
+        " Genome complexities: This property can be utilized by attacker cells when the parameter 'Complex creature protection' is "
         "activated (see tooltip there). The coloring is as follows: blue = creature with low bonus (usually small or simple genome structure), red = large "
         "bonus\n\n" ICON_FA_CHEVRON_RIGHT
         " Single cell function: A specific type of cell function can be highlighted, which is selected in the next parameter.\n\n" ICON_FA_CHEVRON_RIGHT
