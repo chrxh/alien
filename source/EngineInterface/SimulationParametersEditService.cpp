@@ -141,6 +141,7 @@ auto SimulationParametersEditService::calcRadiationStrengthsForDeletingSpot(
         }
     }
     if (!existsUnpinned) {
+        result.values.at(0) += strengths.values.at(deleteIndex);
         result.pinned.erase(0);
     }
 
