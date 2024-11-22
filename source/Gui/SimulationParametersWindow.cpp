@@ -888,18 +888,6 @@ void SimulationParametersWindow::processBase()
                     parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
-                        .name("Energy cost")
-                        .textWidth(RightColumnWidth)
-                        .colorDependence(true)
-                        .min(0)
-                        .max(1.0f)
-                        .format("%.5f")
-                        .logarithmic(true)
-                        .defaultValue(origParameters.baseValues.cellFunctionAttackerEnergyCost)
-                        .tooltip("Amount of energy lost by an attempted attack of a cell in form of emitted energy particles."),
-                    parameters.baseValues.cellFunctionAttackerEnergyCost);
-                AlienImGui::SliderFloat(
-                    AlienImGui::SliderFloatParameters()
                         .name("Attack strength")
                         .textWidth(RightColumnWidth)
                         .colorDependence(true)
@@ -920,6 +908,27 @@ void SimulationParametersWindow::processBase()
                         .defaultValue(origParameters.cellFunctionAttackerRadius)
                         .tooltip("The maximum distance over which an attacker cell can attack another cell."),
                     parameters.cellFunctionAttackerRadius);
+                AlienImGui::InputFloatColorMatrix(
+                    AlienImGui::InputFloatColorMatrixParameters()
+                        .name("Complex creature protection")
+                        .textWidth(RightColumnWidth)
+                        .min(0)
+                        .max(20.0f)
+                        .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.baseValues.cellFunctionAttackerGenomeComplexityBonus))
+                        .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with more complex genomes."),
+                    parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Energy cost")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0)
+                        .max(1.0f)
+                        .format("%.5f")
+                        .logarithmic(true)
+                        .defaultValue(origParameters.baseValues.cellFunctionAttackerEnergyCost)
+                        .tooltip("Amount of energy lost by an attempted attack of a cell in form of emitted energy particles."),
+                    parameters.baseValues.cellFunctionAttackerEnergyCost);
                 AlienImGui::Checkbox(
                     AlienImGui::CheckboxParameters()
                         .name("Destroy cells")
@@ -1227,15 +1236,6 @@ void SimulationParametersWindow::processBase()
              */
             if (parameters.features.advancedAttackerControl) {
                 if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Advanced attacker control"))) {
-                    AlienImGui::InputFloatColorMatrix(
-                        AlienImGui::InputFloatColorMatrixParameters()
-                            .name("Complex genome protection")
-                            .textWidth(RightColumnWidth)
-                            .min(0)
-                            .max(20.0f)
-                            .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.baseValues.cellFunctionAttackerGenomeComplexityBonus))
-                            .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with more complex genomes."),
-                        parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus);
                     AlienImGui::InputFloatColorMatrix(
                         AlienImGui::InputFloatColorMatrixParameters()
                             .name("Same mutant protection")
@@ -2159,6 +2159,16 @@ bool SimulationParametersWindow::processSpot(int index)
                         .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix)),
                     spot.values.cellFunctionAttackerFoodChainColorMatrix,
                     &spot.activatedValues.cellFunctionAttackerFoodChainColorMatrix);
+                AlienImGui::InputFloatColorMatrix(
+                    AlienImGui::InputFloatColorMatrixParameters()
+                        .name("Complex creature protection")
+                        .textWidth(RightColumnWidth)
+                        .min(0)
+                        .max(20.0f)
+                        .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSpot.values.cellFunctionAttackerGenomeComplexityBonus))
+                        .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus)),
+                    spot.values.cellFunctionAttackerGenomeComplexityBonus,
+                    &spot.activatedValues.cellFunctionAttackerGenomeComplexityBonus);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Energy cost")
@@ -2213,16 +2223,6 @@ bool SimulationParametersWindow::processSpot(int index)
              */
             if (parameters.features.advancedAttackerControl) {
                 if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Advanced attacker control"))) {
-                    AlienImGui::InputFloatColorMatrix(
-                        AlienImGui::InputFloatColorMatrixParameters()
-                            .name("Complex genome protection")
-                            .textWidth(RightColumnWidth)
-                            .min(0)
-                            .max(20.0f)
-                            .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSpot.values.cellFunctionAttackerGenomeComplexityBonus))
-                            .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus)),
-                        spot.values.cellFunctionAttackerGenomeComplexityBonus,
-                        &spot.activatedValues.cellFunctionAttackerGenomeComplexityBonus);
                     AlienImGui::InputFloatColorMatrix(
                         AlienImGui::InputFloatColorMatrixParameters()
                             .name("New complex mutant protection")
