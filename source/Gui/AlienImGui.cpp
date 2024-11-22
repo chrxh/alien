@@ -19,6 +19,7 @@
 #include "GenericFileDialog.h"
 #include "StyleRepository.h"
 #include "HelpStrings.h"
+#include "OverlayController.h"
 
 namespace
 {
@@ -75,6 +76,9 @@ bool AlienImGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& v
         auto mousePickerEnabled = parameters._getMousePickerEnabledFunc.value()();
         if (AlienImGui::SelectableButton(AlienImGui::SelectableButtonParameters().name(ICON_FA_CROSSHAIRS).width(MousePickerButtonWidth), mousePickerEnabled)) {
             parameters._setMousePickerEnabledFunc.value()(mousePickerEnabled);
+            if (mousePickerEnabled) {
+                OverlayController::get().showMessage("Select a position in the simulation view");
+            }
         }
         AlienImGui::Tooltip("Select a position with the mouse");
         if (parameters._getMousePickerEnabledFunc.value()()) {
