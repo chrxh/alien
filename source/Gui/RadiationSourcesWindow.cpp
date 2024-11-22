@@ -11,7 +11,7 @@
 
 namespace
 {
-    auto const RightColumnWidth = 140.0f;
+    auto const RightColumnWidth = 150.0f;
 }
 
 void RadiationSourcesWindow::initIntern(SimulationFacade simulationFacade)
@@ -76,7 +76,7 @@ void RadiationSourcesWindow::processBaseTab()
         auto editedStrength = strength;
         if (AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Strength")
+                    .name("Relative strength")
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(1.0f)
@@ -132,7 +132,7 @@ bool RadiationSourcesWindow::processSourceTab(int index)
         auto origStrengths = editService.getRadiationStrengths(parameters);
         if (AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
-                    .name("Strength")
+                    .name("Relative strength")
                     .textWidth(RightColumnWidth)
                     .min(0.0f)
                     .max(1.0f)

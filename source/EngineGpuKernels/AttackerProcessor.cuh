@@ -75,7 +75,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 energyToTransfer *= (1.0f - cudaSimulationParameters.cellFunctionAttackerSensorDetectionFactor[color]);
             }
 
-            if (cudaSimulationParameters.features.advancedAttackerControl && otherCell->genomeComplexity > cell->genomeComplexity) {
+            if (otherCell->genomeComplexity > cell->genomeComplexity) {
                 auto cellFunctionAttackerGenomeComplexityBonus = SpotCalculator::calcParameter(
                     &SimulationParametersSpotValues::cellFunctionAttackerGenomeComplexityBonus,
                     &SimulationParametersSpotActivatedValues::cellFunctionAttackerGenomeComplexityBonus,
