@@ -1974,7 +1974,13 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
             //text
             if (!parameters._name.empty()) {
                 ImGui::SameLine();
+                if (enabled) {
+                    ImGui::EndDisabled();
+                }
                 ImGui::TextUnformatted(parameters._name.c_str());
+                if (enabled) {
+                    ImGui::BeginDisabled(!(*enabled));
+                }
             }
 
             //tooltip
@@ -2149,12 +2155,12 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
         ImGui::EndDisabled();
     }
 
-    ImGui::SameLine();
-    ImGui::TextUnformatted(parameters._name.c_str());
-
     if (enabled) {
         ImGui::EndDisabled();
     }
+
+    ImGui::SameLine();
+    ImGui::TextUnformatted(parameters._name.c_str());
 
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
