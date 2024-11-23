@@ -11,7 +11,7 @@
 
 namespace
 {
-    auto const RightColumnWidth = 150.0f;
+    auto const RightColumnWidth = 170.0f;
 }
 
 void RadiationSourcesWindow::initIntern(SimulationFacade simulationFacade)
@@ -36,7 +36,7 @@ void RadiationSourcesWindow::processIntern()
             if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
                 scheduleAppendTab = true;
             }
-            AlienImGui::Tooltip("Add source");
+            AlienImGui::Tooltip("Add radiation source");
         }
 
         processBaseTab();
@@ -81,7 +81,10 @@ void RadiationSourcesWindow::processBaseTab()
                     .min(0.0f)
                     .max(1.0f)
                     .format("%.3f")
-                    .defaultValue(&origStrengths.values.front()),
+                    .defaultValue(&origStrengths.values.front())
+                    .tooltip("Cells can emit energy particles over time. A portion of this energy can be released directly near the cell, while the rest is "
+                             "utilized by one of the available radiation sources. This parameter determines the fraction of energy assigned to the emitted "
+                             "energy particle in the vicinity of the cell. Values between 0 and 1 are permitted."),
                 &editedStrength.values.front(),
                 nullptr,
                 &parameters.baseStrengthRatioPinned)) {
@@ -137,7 +140,10 @@ bool RadiationSourcesWindow::processSourceTab(int index)
                     .min(0.0f)
                     .max(1.0f)
                     .format("%.3f")
-                    .defaultValue(&origSource.strength),
+                    .defaultValue(&origSource.strength)
+                    .tooltip("Cells can emit energy particles over time. A portion of this energy can be released directly near the cell, while the rest is "
+                             "utilized by one of the available radiation sources. This parameter determines the fraction of energy assigned to the emitted "
+                             "energy particle for the selected radiation source. Values between 0 and 1 are permitted."),
                 &source.strength,
                 nullptr,
                 &source.strengthPinned)) {
