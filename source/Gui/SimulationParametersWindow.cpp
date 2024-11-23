@@ -87,11 +87,17 @@ void SimulationParametersWindow::shutdownIntern()
 void SimulationParametersWindow::processIntern()
 {
     processToolbar();
-    if (ImGui::BeginChild("##Parameter", {0, _featureListOpen ? -scale(_featureListHeight) : -scale(50.0f)})) {
-        processTabWidget();
+
+    if (ImGui::BeginChild("##parameterchild1", {0, -scale(44.0f)})) {
+        if (ImGui::BeginChild("##parameterchild2", {0, _featureListOpen ? -scale(_featureListHeight) : -scale(50.0f)})) {
+            processTabWidget();
+        }
+        ImGui::EndChild();
+        processAddonList();
     }
     ImGui::EndChild();
-    processAddonList();
+
+    processStatusBar();
 }
 
 SimulationParametersSpot SimulationParametersWindow::createSpot(SimulationParameters const& simParameters, int index)
@@ -2418,6 +2424,14 @@ void SimulationParametersWindow::processAddonList()
         ImGui::EndChild();
         AlienImGui::EndTreeNode();
     }
+}
+
+void SimulationParametersWindow::processStatusBar()
+{
+    std::vector<std::string> statusItems;
+    statusItems.emplace_back("CTRL + click on a slider to type in a precise value");
+
+    AlienImGui::StatusBar(statusItems);
 }
 
 void SimulationParametersWindow::onAppendTab()
