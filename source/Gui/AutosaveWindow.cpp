@@ -250,20 +250,28 @@ void AutosaveWindow::processSettings()
             }
             if (AlienImGui::Switcher(
                     AlienImGui::SwitcherParameters()
-                    .name("Catch peaks")
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(_origCatchPeaks)
-                    .disabled(!_autosaveEnabled)
-                    .values({
-                        "None",
-                        "Genome complexity variance",
-                    }),
-                _catchPeaks)) {
+                        .name("Catch peaks")
+                        .textWidth(RightColumnWidth)
+                        .defaultValue(_origCatchPeaks)
+                        .disabled(!_autosaveEnabled)
+                        .values({
+                            "None",
+                            "Genome complexity variance",
+                        })
+                        .tooltip("If activated, the simulation is monitored continuously. When the autosave interval expires, the time at which the selected "
+                                 "measured value was particularly high is saved."),
+                    _catchPeaks)) {
                 _peakDeserializedSimulation->setDeserializedSimulation(DeserializedSimulation());
             }
 
             if (AlienImGui::InputText(
-                    AlienImGui::InputTextParameters().name("Directory").textWidth(RightColumnWidth).defaultValue(_origDirectory).folderButton(true),
+                    AlienImGui::InputTextParameters()
+                        .name("Directory")
+                        .textWidth(RightColumnWidth)
+                        .defaultValue(_origDirectory)
+                        .folderButton(true)
+                        .tooltip("The directory where the savepoints are stored can be chosen here. This allows the savepoints to be created in a separate "
+                                 "directory for a simulation run. The savepoints are named using the current time step."),
                     _directory)) {
                 updateSavepointTableFromFile();
             }
