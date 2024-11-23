@@ -45,14 +45,6 @@ enum NeuronActivationFunction_
     NeuronActivationFunction_Count
 };
 
-using SensorMode = int;
-enum SensorMode_
-{
-    SensorMode_Neighborhood,
-    SensorMode_FixedAngle,
-    SensorMode_Count
-};
-
 using SensorRestrictToMutants = int;
 enum SensorRestrictToMutants_
 {

@@ -163,8 +163,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.constructor.isReady = true;
     } break;
     case CellFunction_Sensor: {
-        cell->cellFunctionData.sensor.mode = cellTO.cellFunctionData.sensor.mode;
-        cell->cellFunctionData.sensor.angle = cellTO.cellFunctionData.sensor.angle;
         cell->cellFunctionData.sensor.minDensity = cellTO.cellFunctionData.sensor.minDensity;
         cell->cellFunctionData.sensor.minRange = cellTO.cellFunctionData.sensor.minRange;
         cell->cellFunctionData.sensor.maxRange = cellTO.cellFunctionData.sensor.maxRange;
@@ -340,8 +338,6 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             cell->cellFunctionData.constructor.isReady = true;
         } break;
         case CellFunction_Sensor: {
-            cell->cellFunctionData.sensor.mode = _data->numberGen1.random(SensorMode_Count - 1);
-            cell->cellFunctionData.sensor.angle = _data->numberGen1.random(360.0f) - 180.0f;
             cell->cellFunctionData.sensor.minDensity = _data->numberGen1.random(1.0f);
             cell->cellFunctionData.sensor.minRange = -1;
             cell->cellFunctionData.sensor.maxRange = -1;

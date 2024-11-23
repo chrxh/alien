@@ -1026,7 +1026,7 @@ TEST_F(ConstructorTests, constructMuscleCell)
 
 TEST_F(ConstructorTests, constructSensorCell)
 {
-    auto sensorDesc = SensorGenomeDescription().setFixedAngle(90.0f).setColor(2).setMinDensity(0.5f).setRestrictToMutants(SensorRestrictToMutants_RestrictToFreeCells);
+    auto sensorDesc = SensorGenomeDescription().setColor(2).setMinDensity(0.5f).setRestrictToMutants(SensorRestrictToMutants_RestrictToFreeCells);
     auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setCellFunction(sensorDesc)}));
 
     DataDescription data;
@@ -1047,8 +1047,6 @@ TEST_F(ConstructorTests, constructSensorCell)
     EXPECT_EQ(CellFunction_Sensor, actualConstructedCell.getCellFunctionType());
 
     auto actualSensor = std::get<SensorDescription>(*actualConstructedCell.cellFunction);
-    EXPECT_EQ(sensorDesc.fixedAngle.has_value(), actualSensor.fixedAngle.has_value());
-    EXPECT_TRUE(lowPrecisionCompare(*sensorDesc.fixedAngle, *actualSensor.fixedAngle));
     EXPECT_TRUE(lowPrecisionCompare(sensorDesc.minDensity, actualSensor.minDensity));
     EXPECT_EQ(sensorDesc.restrictToColor, actualSensor.restrictToColor);
     EXPECT_EQ(sensorDesc.restrictToMutants, actualSensor.restrictToMutants);

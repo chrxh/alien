@@ -447,9 +447,6 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     } break;
     case CellFunction_Sensor: {
         SensorDescription sensor;
-        if (cellTO.cellFunctionData.sensor.mode == SensorMode_FixedAngle) {
-            sensor.fixedAngle = cellTO.cellFunctionData.sensor.angle;
-        }
         sensor.minDensity = cellTO.cellFunctionData.sensor.minDensity;
         sensor.minRange = cellTO.cellFunctionData.sensor.minRange >= 0 ? std::make_optional(cellTO.cellFunctionData.sensor.minRange) : std::nullopt;
         sensor.maxRange = cellTO.cellFunctionData.sensor.maxRange >= 0 ? std::make_optional(cellTO.cellFunctionData.sensor.maxRange) : std::nullopt;
@@ -608,13 +605,11 @@ void DescriptionConverter::addCell(
     case CellFunction_Sensor: {
         auto const& sensorDesc = std::get<SensorDescription>(*cellDesc.cellFunction);
         SensorTO sensorTO;
-        sensorTO.mode = sensorDesc.getSensorMode();
         sensorTO.restrictToColor = sensorDesc.restrictToColor.value_or(255);
         sensorTO.restrictToMutants = sensorDesc.restrictToMutants;
         sensorTO.minDensity = sensorDesc.minDensity;
         sensorTO.minRange = static_cast<int8_t>(sensorDesc.minRange.value_or(-1));
         sensorTO.maxRange = static_cast<int8_t>(sensorDesc.maxRange.value_or(-1));
-        sensorTO.angle = sensorDesc.fixedAngle.value_or(0);
         sensorTO.memoryChannel1 = sensorDesc.memoryChannel1;
         sensorTO.memoryChannel2 = sensorDesc.memoryChannel2;
         sensorTO.memoryChannel3 = sensorDesc.memoryChannel3;

@@ -643,29 +643,6 @@ void _InspectorWindow::processMuscleContent(MuscleDescription& muscle)
 void _InspectorWindow::processSensorContent(SensorDescription& sensor)
 {
     if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
-        int mode = sensor.getSensorMode();
-        if (AlienImGui::Combo(
-                AlienImGui::ComboParameters()
-                    .name("Mode")
-                    .values({"Scan vicinity", "Scan specific direction"})
-                    .textWidth(CellFunctionTextWidth)
-                    .tooltip(Const::GenomeSensorModeTooltip),
-                mode)) {
-            if (mode == SensorMode_Neighborhood) {
-                sensor.fixedAngle.reset();
-            } else {
-                sensor.fixedAngle = 0.0f;
-            }
-        }
-        if (sensor.fixedAngle) {
-            AlienImGui::InputFloat(
-                AlienImGui::InputFloatParameters()
-                    .name("Scan angle")
-                    .format("%.1f")
-                    .textWidth(CellFunctionTextWidth)
-                    .tooltip(Const::GenomeSensorScanAngleTooltip),
-                *sensor.fixedAngle);
-        }
         AlienImGui::ComboOptionalColor(
             AlienImGui::ComboColorParameters().name("Scan color").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeSensorScanColorTooltip), sensor.restrictToColor);
 

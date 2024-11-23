@@ -616,28 +616,7 @@ void GenomeEditorWindow::processNode(
         } break;
         case CellFunction_Sensor: {
             auto& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);
-            auto sensorMode = sensor.getSensorMode();
 
-            table.next();
-            if (AlienImGui::Combo(
-                    AlienImGui::ComboParameters()
-                        .name("Mode")
-                        .textWidth(ContentTextWidth)
-                        .values({"Scan vicinity", "Scan specific direction"})
-                        .tooltip(Const::GenomeSensorModeTooltip),
-                    sensorMode)) {
-                if (sensorMode == SensorMode_Neighborhood) {
-                    sensor.fixedAngle.reset();
-                } else {
-                    sensor.fixedAngle = 0.0f;
-                }
-            }
-            if (sensorMode == SensorMode_FixedAngle) {
-                table.next();
-                AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters().name("Scan angle").textWidth(ContentTextWidth).format("%.1f").tooltip(Const::GenomeSensorScanAngleTooltip),
-                    *sensor.fixedAngle);
-            }
             table.next();
             AlienImGui::ComboOptionalColor(
                 AlienImGui::ComboColorParameters().name("Scan color").textWidth(ContentTextWidth).tooltip(Const::GenomeSensorScanColorTooltip), sensor.restrictToColor);

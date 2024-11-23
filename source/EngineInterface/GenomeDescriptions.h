@@ -80,7 +80,6 @@ struct ConstructorGenomeDescription
 
 struct SensorGenomeDescription
 {
-    std::optional<float> fixedAngle;   //nullopt = entire neighborhood
     float minDensity = 0.05f;
     std::optional<int> minRange;
     std::optional<int> maxRange;
@@ -88,14 +87,6 @@ struct SensorGenomeDescription
     SensorRestrictToMutants restrictToMutants = SensorRestrictToMutants_NoRestriction;
 
     auto operator<=>(SensorGenomeDescription const&) const = default;
-
-    SensorMode getSensorMode() const { return fixedAngle.has_value() ? SensorMode_FixedAngle : SensorMode_Neighborhood; }
-
-    SensorGenomeDescription& setFixedAngle(float const& value)
-    {
-        fixedAngle = value;
-        return *this;
-    }
 
     SensorGenomeDescription& setMinDensity(float const& value)
     {

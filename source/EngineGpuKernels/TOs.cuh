@@ -77,8 +77,6 @@ struct ConstructorTO
 
 struct SensorTO
 {
-    SensorMode mode;
-    float angle;
     float minDensity;
     int8_t minRange;          //< 0 = no restriction
     int8_t maxRange;          //< 0 = no restriction
