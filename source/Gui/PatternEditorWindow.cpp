@@ -9,47 +9,36 @@
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "EditorModel.h"
 #include "StyleRepository.h"
 #include "AlienImGui.h"
 #include "EditorController.h"
-#include "GenericFileDialogs.h"
-#include "MessageDialog.h"
+#include "GenericFileDialog.h"
+#include "GenericMessageDialog.h"
 #include "Viewport.h"
-#include "EngineInterface/SerializerService.h"
+#include "PersisterInterface/SerializerService.h"
 
 namespace
 {
     auto const RightColumnWidth = 120.0f;
 }
 
-_PatternEditorWindow::_PatternEditorWindow(
-    EditorModel const& editorModel,
-    SimulationController const& simController,
-    EditorControllerWeakPtr const& editorController)
-    : _AlienWindow("Pattern editor", "editors.pattern editor", true)
-    , _editorModel(editorModel)
-    , _simController(simController)
-    , _editorController(editorController)
+void PatternEditorWindow::initIntern(SimulationFacade simulationFacade)
 {
+    _simulationFacade = simulationFacade;
     auto path = std::filesystem::current_path();
     if (path.has_parent_path()) {
         path = path.parent_path();
     }
-    _startingPath = GlobalSettings::getInstance().getString("editors.pattern editor.starting path", path.string());
+    _startingPath = GlobalSettings::get().getValue("editors.pattern editor.starting path", path.string());
 }
 
-_PatternEditorWindow::~_PatternEditorWindow()
-{
-    GlobalSettings::getInstance().setString("editors.pattern editor.starting path", _startingPath);
-}
-
-void _PatternEditorWindow::processIntern()
+void PatternEditorWindow::processIntern()
 {
 
-    auto selection = _editorModel->getSelectionShallowData();
+    auto selection = EditorModel::get().getSelectionShallowData();
     if (hasSelectionChanged(selection)) {
         _angle = 0;
         _angularVel = 0;
@@ -62,7 +51,7 @@ void _PatternEditorWindow::processIntern()
     AlienImGui::Tooltip("Open pattern");
 
     //save button
-    ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
+    ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
         onSavePattern();
@@ -75,7 +64,7 @@ void _PatternEditorWindow::processIntern()
 
     //copy button
     ImGui::SameLine();
-    ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
+    ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
     if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
         onCopy();
     }
@@ -93,7 +82,7 @@ void _PatternEditorWindow::processIntern()
 
     //delete button
     ImGui::SameLine();
-    ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
+    ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
     if (AlienImGui::ToolbarButton(ICON_FA_TRASH)) {
         onDelete();
     }
@@ -107,7 +96,7 @@ void _PatternEditorWindow::processIntern()
     ImGui::SameLine();
     ImGui::BeginDisabled(!isObjectInspectionPossible());
     if (AlienImGui::ToolbarButton(ICON_FA_MICROSCOPE)) {
-        _editorController->onInspectSelectedObjects();
+        EditorController::get().onInspectSelectedObjects();
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Inspect Objects");
@@ -116,7 +105,7 @@ void _PatternEditorWindow::processIntern()
     ImGui::SameLine();
     ImGui::BeginDisabled(!isGenomeInspectionPossible());
     if (AlienImGui::ToolbarButton(ICON_FA_DNA)) {
-        _editorController->onInspectSelectedGenomes();
+        EditorController::get().onInspectSelectedGenomes();
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Inspect principal genome");
@@ -127,12 +116,12 @@ void _PatternEditorWindow::processIntern()
         false,
         ImGuiWindowFlags_HorizontalScrollbar)) {
 
-        ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
+        ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
         AlienImGui::Group("Center position and velocity");
 
-        auto const& selectionData = _editorModel->getSelectionShallowData();
+        auto const& selectionData = EditorModel::get().getSelectionShallowData();
 
-        auto centerPosX = _editorModel->isRolloutToClusters() ? selectionData.clusterCenterPosX : selectionData.centerPosX;
+        auto centerPosX = EditorModel::get().isRolloutToClusters() ? selectionData.clusterCenterPosX : selectionData.centerPosX;
         auto origCenterPosX = centerPosX;
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
@@ -141,7 +130,7 @@ void _PatternEditorWindow::processIntern()
                 .format("%.3f"),
             centerPosX);
 
-        auto centerPosY = _editorModel->isRolloutToClusters() ? selectionData.clusterCenterPosY : selectionData.centerPosY;
+        auto centerPosY = EditorModel::get().isRolloutToClusters() ? selectionData.clusterCenterPosY : selectionData.centerPosY;
         auto origCenterPosY = centerPosY;
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
@@ -150,7 +139,7 @@ void _PatternEditorWindow::processIntern()
                 .format("%.3f"),
             centerPosY);
 
-        auto centerVelX = _editorModel->isRolloutToClusters() ? selectionData.clusterCenterVelX : selectionData.centerVelX;
+        auto centerVelX = EditorModel::get().isRolloutToClusters() ? selectionData.clusterCenterVelX : selectionData.centerVelX;
         auto origCenterVelX = centerVelX;
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
@@ -160,7 +149,7 @@ void _PatternEditorWindow::processIntern()
                 .format("%.3f"),
             centerVelX);
 
-        auto centerVelY = _editorModel->isRolloutToClusters() ? selectionData.clusterCenterVelY : selectionData.centerVelY;
+        auto centerVelY = EditorModel::get().isRolloutToClusters() ? selectionData.clusterCenterVelY : selectionData.centerVelY;
         auto origCenterVelY = centerVelY;
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
@@ -176,7 +165,7 @@ void _PatternEditorWindow::processIntern()
             AlienImGui::SliderInputFloatParameters()
                 .name("Angle")
                 .textWidth(RightColumnWidth)
-                .inputWidth(StyleRepository::getInstance().scale(50.0f))
+                .inputWidth(StyleRepository::get().scale(50.0f))
                 .min(-180.0f)
                 .max(180.0f)
                 .format("%.1f"),
@@ -193,87 +182,87 @@ void _PatternEditorWindow::processIntern()
 
         if (centerPosX != origCenterPosX || centerPosY != origCenterPosY) {
             ShallowUpdateSelectionData updateData;
-            updateData.considerClusters = _editorModel->isRolloutToClusters();
+            updateData.considerClusters = EditorModel::get().isRolloutToClusters();
             updateData.posDeltaX = centerPosX - origCenterPosX;
             updateData.posDeltaY = centerPosY - origCenterPosY;
-            _simController->shallowUpdateSelectedObjects(updateData);
-            _editorModel->update();
+            _simulationFacade->shallowUpdateSelectedObjects(updateData);
+            EditorModel::get().update();
         }
 
         if (centerVelX != origCenterVelX || centerVelY != origCenterVelY) {
             ShallowUpdateSelectionData updateData;
-            updateData.considerClusters = _editorModel->isRolloutToClusters();
-            updateData.velDeltaX = centerVelX - origCenterVelX;
-            updateData.velDeltaY = centerVelY - origCenterVelY;
-            _simController->shallowUpdateSelectedObjects(updateData);
-            _editorModel->update();
+            updateData.considerClusters = EditorModel::get().isRolloutToClusters();
+            updateData.velX = centerVelX;
+            updateData.velY = centerVelY;
+            _simulationFacade->shallowUpdateSelectedObjects(updateData);
+            EditorModel::get().update();
         }
 
         if (_angle != origAngle) {
             ShallowUpdateSelectionData updateData;
-            updateData.considerClusters = _editorModel->isRolloutToClusters();
+            updateData.considerClusters = EditorModel::get().isRolloutToClusters();
             updateData.angleDelta = _angle - origAngle;
-            _simController->shallowUpdateSelectedObjects(updateData);
-            _editorModel->update();
+            _simulationFacade->shallowUpdateSelectedObjects(updateData);
+            EditorModel::get().update();
         }
 
         if (_angularVel != origAngularVel) {
             ShallowUpdateSelectionData updateData;
-            updateData.considerClusters = _editorModel->isRolloutToClusters();
-            updateData.angularVelDelta = _angularVel - origAngularVel;
-            _simController->shallowUpdateSelectedObjects(updateData);
-            _editorModel->update();
+            updateData.considerClusters = EditorModel::get().isRolloutToClusters();
+            updateData.angularVel = _angularVel;
+            _simulationFacade->shallowUpdateSelectedObjects(updateData);
+            EditorModel::get().update();
         }
         ImGui::EndDisabled();
 
 
         AlienImGui::Group("Color");
         if (colorButton("    ##color1", Const::IndividualCellColor1)) {
-            _simController->colorSelectedObjects(0, _editorModel->isRolloutToClusters());
-            _editorModel->setDefaultColorCode(0);
+            _simulationFacade->colorSelectedObjects(0, EditorModel::get().isRolloutToClusters());
+            EditorModel::get().setDefaultColorCode(0);
         }
         ImGui::SameLine();
         if (colorButton("    ##color2", Const::IndividualCellColor2)) {
-            _simController->colorSelectedObjects(1, _editorModel->isRolloutToClusters());
-            _editorModel->setDefaultColorCode(1);
+            _simulationFacade->colorSelectedObjects(1, EditorModel::get().isRolloutToClusters());
+            EditorModel::get().setDefaultColorCode(1);
         }
         ImGui::SameLine();
         if (colorButton("    ##color3", Const::IndividualCellColor3)) {
-            _simController->colorSelectedObjects(2, _editorModel->isRolloutToClusters());
-            _editorModel->setDefaultColorCode(2);
+            _simulationFacade->colorSelectedObjects(2, EditorModel::get().isRolloutToClusters());
+            EditorModel::get().setDefaultColorCode(2);
         }
         ImGui::SameLine();
         if (colorButton("    ##color4", Const::IndividualCellColor4)) {
-            _simController->colorSelectedObjects(3, _editorModel->isRolloutToClusters());
-            _editorModel->setDefaultColorCode(3);
+            _simulationFacade->colorSelectedObjects(3, EditorModel::get().isRolloutToClusters());
+            EditorModel::get().setDefaultColorCode(3);
         }
         ImGui::SameLine();
         if (colorButton("    ##color5", Const::IndividualCellColor5)) {
-            _simController->colorSelectedObjects(4, _editorModel->isRolloutToClusters());
-            _editorModel->setDefaultColorCode(4);
+            _simulationFacade->colorSelectedObjects(4, EditorModel::get().isRolloutToClusters());
+            EditorModel::get().setDefaultColorCode(4);
         }
         ImGui::SameLine();
         if (colorButton("    ##color6", Const::IndividualCellColor6)) {
-            _simController->colorSelectedObjects(5, _editorModel->isRolloutToClusters());
-            _editorModel->setDefaultColorCode(5);
+            _simulationFacade->colorSelectedObjects(5, EditorModel::get().isRolloutToClusters());
+            EditorModel::get().setDefaultColorCode(5);
         }
         ImGui::SameLine();
         if (colorButton("    ##color7", Const::IndividualCellColor7)) {
-            _simController->colorSelectedObjects(6, _editorModel->isRolloutToClusters());
-            _editorModel->setDefaultColorCode(6);
+            _simulationFacade->colorSelectedObjects(6, EditorModel::get().isRolloutToClusters());
+            EditorModel::get().setDefaultColorCode(6);
         }
         AlienImGui::Group("Tools");
-        ImGui::BeginDisabled(_editorModel->isSelectionEmpty());
+        ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
         if (ImGui::Button(ICON_FA_WIND)) {
-            _simController->uniformVelocitiesForSelectedObjects(_editorModel->isRolloutToClusters());
+            _simulationFacade->uniformVelocitiesForSelectedObjects(EditorModel::get().isRolloutToClusters());
         }
         ImGui::EndDisabled();
         AlienImGui::Tooltip("Make uniform velocities");
 
         ImGui::SameLine();
-        ImGui::BeginDisabled(_editorModel->isCellSelectionEmpty());
+        ImGui::BeginDisabled(EditorModel::get().isCellSelectionEmpty());
         if (ImGui::Button(ICON_FA_BALANCE_SCALE)) {
-            _simController->relaxSelectedObjects(_editorModel->isRolloutToClusters());
+            _simulationFacade->relaxSelectedObjects(EditorModel::get().isRolloutToClusters());
         }
         AlienImGui::Tooltip("Release stresses");
 
@@ -313,9 +302,9 @@ void _PatternEditorWindow::processIntern()
     ImGui::EndChild();
 
     AlienImGui::Separator();
-    auto rolloutToClusters = _editorModel->isRolloutToClusters();
+    auto rolloutToClusters = EditorModel::get().isRolloutToClusters();
     if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Roll out changes to cell networks"), rolloutToClusters)) {
-        _editorModel->setRolloutToClusters(rolloutToClusters);
+        EditorModel::get().setRolloutToClusters(rolloutToClusters);
         _angle = 0;
         _angularVel = 0;
     }
@@ -325,115 +314,124 @@ void _PatternEditorWindow::processIntern()
                            "If you hold down the SHIFT key, this toggle button is temporarily turned off.");
 }
 
-void _PatternEditorWindow::onOpenPattern()
+void PatternEditorWindow::onOpenPattern()
 {
-    GenericFileDialogs::getInstance().showOpenFileDialog(
+    GenericFileDialog::get().showOpenFileDialog(
         "Open pattern", "Pattern file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;
             _startingPath = firstFilenameCopy.remove_filename().string();
             ClusteredDataDescription content;
-            if (SerializerService::deserializeContentFromFile(content, firstFilename.string())) {
-                auto center = Viewport::getCenterInWorldPos();
+            if (SerializerService::get().deserializeContentFromFile(content, firstFilename.string())) {
+                auto center = Viewport::get().getCenterInWorldPos();
                 content.setCenter(center);
-                _simController->addAndSelectSimulationData(DataDescription(content));
-                _editorModel->update();
+                _simulationFacade->addAndSelectSimulationData(DataDescription(content));
+                EditorModel::get().update();
             } else {
-                MessageDialog::getInstance().information("Open pattern", "The selected file could not be opened.");
+                GenericMessageDialog::get().information("Open pattern", "The selected file could not be opened.");
             }
         });
 }
 
-void _PatternEditorWindow::onSavePattern()
+void PatternEditorWindow::onSavePattern()
 {
-    GenericFileDialogs::getInstance().showSaveFileDialog(
+    GenericFileDialog::get().showSaveFileDialog(
         "Save pattern", "Pattern file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;
             _startingPath = firstFilenameCopy.remove_filename().string();
 
-            auto content = _simController->getSelectedClusteredSimulationData(_editorModel->isRolloutToClusters());
-            if (!SerializerService::serializeContentToFile(firstFilename.string(), content)) {
-                MessageDialog::getInstance().information("Save pattern", "The selected pattern could not be saved to the specified file.");
+            auto content = _simulationFacade->getSelectedClusteredSimulationData(EditorModel::get().isRolloutToClusters());
+            if (!SerializerService::get().serializeContentToFile(firstFilename.string(), content)) {
+                GenericMessageDialog::get().information("Save pattern", "The selected pattern could not be saved to the specified file.");
             }
         });
 }
 
-bool _PatternEditorWindow::isObjectInspectionPossible() const
+bool PatternEditorWindow::isObjectInspectionPossible() const
 {
-    return !_editorModel->isSelectionEmpty();
+    return !EditorModel::get().isSelectionEmpty();
 }
 
-bool _PatternEditorWindow::isGenomeInspectionPossible() const
+bool PatternEditorWindow::isGenomeInspectionPossible() const
 {
-    return !_editorModel->isSelectionEmpty();
+    return !EditorModel::get().isSelectionEmpty();
 }
 
-bool _PatternEditorWindow::isCopyingPossible() const
+bool PatternEditorWindow::isCopyingPossible() const
 {
-    return !_editorModel->isSelectionEmpty();
+    return !EditorModel::get().isSelectionEmpty();
 }
 
-void _PatternEditorWindow::onCopy()
+void PatternEditorWindow::onCopy()
 {
-    _copiedSelection = _simController->getSelectedSimulationData(_editorModel->isRolloutToClusters());
+    _copiedSelection = _simulationFacade->getSelectedSimulationData(EditorModel::get().isRolloutToClusters());
 }
 
-bool _PatternEditorWindow::isPastingPossible() const
+bool PatternEditorWindow::isPastingPossible() const
 {
     return _copiedSelection.has_value();
 }
 
-void _PatternEditorWindow::onPaste()
+void PatternEditorWindow::onPaste()
 {
     auto data = *_copiedSelection;
-    auto center = Viewport::getCenterInWorldPos();
+    auto center = Viewport::get().getCenterInWorldPos();
     data.setCenter(center);
-    DescriptionEditService::generateNewCreatureIds(data);
-    _simController->addAndSelectSimulationData(data);
-    _editorModel->update();
+    DescriptionEditService::get().generateNewCreatureIds(data);
+    _simulationFacade->addAndSelectSimulationData(data);
+    EditorModel::get().update();
 }
 
-bool _PatternEditorWindow::isDeletingPossible() const
+bool PatternEditorWindow::isDeletingPossible() const
 {
-    return !_editorModel->isSelectionEmpty() && !_editorModel->areEntitiesInspected();
+    return !EditorModel::get().isSelectionEmpty() && !EditorModel::get().areEntitiesInspected();
 }
 
-void _PatternEditorWindow::onDelete()
+void PatternEditorWindow::onDelete()
 {
-    _simController->removeSelectedObjects(_editorModel->isRolloutToClusters());
-    _editorModel->update();
+    _simulationFacade->removeSelectedObjects(EditorModel::get().isRolloutToClusters());
+    EditorModel::get().update();
 }
 
-void _PatternEditorWindow::onGenerateExecutionOrderNumbers()
+PatternEditorWindow::PatternEditorWindow()
+    : AlienWindow("Pattern editor", "editors.pattern editor", true)
+{}
+
+void PatternEditorWindow::shutdownIntern()
 {
-    auto dataWithClusters = _simController->getSelectedSimulationData(true);
-    auto dataWithoutClusters = _simController->getSelectedSimulationData(false);
+    GlobalSettings::get().setValue("editors.pattern editor.starting path", _startingPath);
+}
+
+void PatternEditorWindow::onGenerateExecutionOrderNumbers()
+{
+    auto dataWithClusters = _simulationFacade->getSelectedSimulationData(true);
+    auto dataWithoutClusters = _simulationFacade->getSelectedSimulationData(false);
     std::unordered_set<uint64_t> cellIds = dataWithoutClusters.getCellIds();
 
-    auto parameters = _simController->getSimulationParameters();
-    DescriptionEditService::generateExecutionOrderNumbers(dataWithClusters, cellIds, parameters.cellNumExecutionOrderNumbers);
+    auto parameters = _simulationFacade->getSimulationParameters();
+    DescriptionEditService::get().generateExecutionOrderNumbers(dataWithClusters, cellIds, parameters.cellNumExecutionOrderNumbers);
 
-    _simController->removeSelectedObjects(true);
-    _simController->addAndSelectSimulationData(dataWithClusters);
+    _simulationFacade->removeSelectedObjects(true);
+    _simulationFacade->addAndSelectSimulationData(dataWithClusters);
 }
 
-void _PatternEditorWindow::onMakeSticky()
+void PatternEditorWindow::onMakeSticky()
 {
-    _simController->makeSticky(_editorModel->isRolloutToClusters());
+    _simulationFacade->makeSticky(EditorModel::get().isRolloutToClusters());
 }
 
-void _PatternEditorWindow::onRemoveStickiness()
+void PatternEditorWindow::onRemoveStickiness()
 {
-    _simController->removeStickiness(_editorModel->isRolloutToClusters());
+    _simulationFacade->removeStickiness(EditorModel::get().isRolloutToClusters());
 }
 
-void _PatternEditorWindow::onSetBarrier(bool value)
+void PatternEditorWindow::onSetBarrier(bool value)
 {
-    _simController->setBarrier(value, _editorModel->isRolloutToClusters());
+    _simulationFacade->setBarrier(value, EditorModel::get().isRolloutToClusters());
 }
 
-bool _PatternEditorWindow::colorButton(std::string id, uint32_t cellColor)
+bool PatternEditorWindow::colorButton(std::string id, uint32_t cellColor)
 {
     ImGui::PushID(id.c_str());
     auto result = AlienImGui::ColorField(cellColor);
@@ -441,7 +439,7 @@ bool _PatternEditorWindow::colorButton(std::string id, uint32_t cellColor)
     return result;
 }
 
-bool _PatternEditorWindow::hasSelectionChanged(SelectionShallowData const& selection) const
+bool PatternEditorWindow::hasSelectionChanged(SelectionShallowData const& selection) const
 {
     if(!_lastSelection) {
         return false;

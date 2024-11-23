@@ -1,20 +1,18 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/Descriptions.h"
+
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-class _PatternEditorWindow : public _AlienWindow
+class PatternEditorWindow : public AlienWindow<SimulationFacade>
 {
-public:
-    _PatternEditorWindow(
-        EditorModel const& editorModel,
-        SimulationController const& simController,
-        EditorControllerWeakPtr const& editorController);
-    ~_PatternEditorWindow();
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(PatternEditorWindow);
 
+public:
     bool isObjectInspectionPossible() const;
     bool isGenomeInspectionPossible() const;
 
@@ -26,6 +24,10 @@ public:
     void onDelete();
 
 private:
+    PatternEditorWindow();
+
+    void initIntern(SimulationFacade simulationFacade) override;
+    void shutdownIntern() override;
     void processIntern() override;
 
     void onOpenPattern();
@@ -37,9 +39,7 @@ private:
     bool colorButton(std::string id, uint32_t cellColor);
     bool hasSelectionChanged(SelectionShallowData const& selection) const;
 
-    EditorModel _editorModel;
-    SimulationController _simController;
-    EditorControllerWeakPtr _editorController;
+    SimulationFacade _simulationFacade;
 
     std::string _startingPath;
     float _angle = 0;

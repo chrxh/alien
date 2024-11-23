@@ -215,8 +215,6 @@ std::vector<uint8_t> GenomeDescriptionService::convertDescriptionToBytes(GenomeD
         } break;
         case CellFunction_Sensor: {
             auto const& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);
-            writeByte(result, sensor.fixedAngle.has_value() ? SensorMode_FixedAngle : SensorMode_Neighborhood);
-            writeAngle(result, sensor.fixedAngle.has_value() ? *sensor.fixedAngle : 0.0f);
             writeDensity(result, sensor.minDensity);
             writeOptionalByte(result, sensor.restrictToColor);
             writeByte(result, sensor.restrictToMutants);
@@ -339,11 +337,6 @@ namespace
             } break;
             case CellFunction_Sensor: {
                 SensorGenomeDescription sensor;
-                auto mode = readByte(data, bytePosition) % SensorMode_Count;
-                auto angle = readAngle(data, bytePosition);
-                if (mode == SensorMode_FixedAngle) {
-                    sensor.fixedAngle = angle;
-                }
                 sensor.minDensity = readDensity(data, bytePosition);
                 sensor.restrictToColor = readOptionalByte(data, bytePosition, MAX_COLORS);
                 sensor.restrictToMutants = readByte(data, bytePosition) % SensorRestrictToMutants_Count;

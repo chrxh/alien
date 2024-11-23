@@ -6,7 +6,7 @@
 #include "ConstantMemory.cuh"
 #include "EngineInterface/CellFunctionConstants.h"
 #include "Object.cuh"
-#include "ParticleProcessor.cuh"
+#include "RadiationProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
 
@@ -34,11 +34,11 @@ __device__ __inline__ void DetonatorProcessor::process(SimulationData& data, Sim
 
 __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto activity = CellFunctionProcessor::calcInputActivity(cell);
-    CellFunctionProcessor::updateInvocationState(cell, activity);
+    auto signal = CellFunctionProcessor::calcInputSignal(cell);
+    CellFunctionProcessor::updateInvocationState(cell, signal);
 
     auto& detonator = cell->cellFunctionData.detonator;
-    if (activity.channels[0] >= abs(cudaSimulationParameters.cellFunctionDetonatorActivityThreshold) && detonator.state == DetonatorState_Ready) {
+    if (signal.channels[0] >= abs(cudaSimulationParameters.cellFunctionDetonatorSignalThreshold) && detonator.state == DetonatorState_Ready) {
         detonator.state = DetonatorState_Activated;
     }
     if (detonator.state == DetonatorState_Activated) {
@@ -72,5 +72,5 @@ __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data,
             detonator.state = DetonatorState_Exploded;
         }
     }
-    CellFunctionProcessor::setActivity(cell, activity);
+    CellFunctionProcessor::setSignal(cell, signal);
 }

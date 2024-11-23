@@ -19,29 +19,30 @@
 #include "Base/StringHelper.h"
 #include "Base/VersionChecker.h"
 #include "EngineInterface/GenomeDescriptionService.h"
-#include "EngineInterface/SerializerService.h"
-#include "EngineInterface/SimulationController.h"
+#include "PersisterInterface/SerializerService.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "Network/NetworkResourceService.h"
 #include "Network/NetworkService.h"
 #include "Network/NetworkResourceParserService.h"
 #include "Network/NetworkResourceTreeTO.h"
+#include "PersisterInterface/TaskProcessor.h"
 
 #include "AlienImGui.h"
 #include "StyleRepository.h"
 #include "StatisticsWindow.h"
 #include "Viewport.h"
-#include "TemporalControlWindow.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "LoginDialog.h"
 #include "UploadSimulationDialog.h"
 #include "DelayedExecutionController.h"
 #include "EditorController.h"
 #include "EditSimulationDialog.h"
 #include "OpenGLHelper.h"
-#include "OverlayMessageController.h"
+#include "OverlayController.h"
 #include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
-#include "SerializationHelperService.h"
+#include "LoginController.h"
+#include "NetworkTransferController.h"
 
 namespace
 {
@@ -57,35 +58,9 @@ namespace
     auto constexpr NumEmojisPerRow = 5;
 }
 
-_BrowserWindow::_BrowserWindow(
-    SimulationController const& simController,
-    StatisticsWindow const& statisticsWindow,
-    TemporalControlWindow const& temporalControlWindow,
-    EditorController const& editorController)
-    : _AlienWindow("Browser", "windows.browser", true)
-    , _simController(simController)
-    , _statisticsWindow(statisticsWindow)
-    , _temporalControlWindow(temporalControlWindow)
-    , _editorController(editorController)
-{
-    auto& settings = GlobalSettings::getInstance();
-    _currentWorkspace.resourceType = settings.getInt("windows.browser.resource type", _currentWorkspace.resourceType);
-    _currentWorkspace.workspaceType = settings.getInt("windows.browser.workspace type", _currentWorkspace.workspaceType);
-    _userTableWidth = settings.getFloat("windows.browser.user table width", scale(UserTableWidth));
-
-    int numEmojis = 0;
-    for (int i = 0; i < NumEmojiBlocks; ++i) {
-        numEmojis += NumEmojisPerBlock[i];
-    }
-    for (int i = 1; i <= numEmojis; ++i) {
-        _emojis.emplace_back(OpenGLHelper::loadTexture(Const::BasePath + "emoji" + std::to_string(i) + ".png"));
-    }
-    for (NetworkResourceType resourceType = 0; resourceType < NetworkResourceType_Count; ++resourceType) {
-        for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
-            _workspaces.emplace(WorkspaceId{resourceType, workspaceType}, Workspace());
-        }
-    }
-}
+BrowserWindow::BrowserWindow()
+    : AlienWindow("Browser", "windows.browser", true)
+{}
 
 namespace
 {
@@ -98,83 +73,100 @@ namespace
         {WorkspaceType_Private, std::string("private")}};
 }
 
-_BrowserWindow::~_BrowserWindow()
+void BrowserWindow::initIntern(SimulationFacade simulationFacade, PersisterFacade persisterFacade)
 {
-    auto& settings = GlobalSettings::getInstance();
-    settings.setInt("windows.browser.resource type", _currentWorkspace.resourceType);
-    settings.setInt("windows.browser.workspace type", _currentWorkspace.workspaceType);
-    settings.setBool("windows.browser.first start", false);
-    settings.setFloat("windows.browser.user table width", _userTableWidth);
-    for (auto const& [workspaceId, workspace] : _workspaces) {
-        settings.setStringVector(
-            "windows.browser.collapsed folders." + networkResourceTypeToString.at(workspaceId.resourceType) + "."
-                + workspaceTypeToString.at(workspaceId.workspaceType),
-            NetworkResourceService::convertFolderNamesToSettings(workspace.collapsedFolderNames));
+    _simulationFacade = simulationFacade;
+    _persisterFacade = persisterFacade;
+    _downloadCache = std::make_shared<_DownloadCache>();
+
+    _refreshProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+    _emojiUserNameProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+    _reactionProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+
+    auto& settings = GlobalSettings::get();
+    _currentWorkspace.resourceType = settings.getValue("windows.browser.resource type", _currentWorkspace.resourceType);
+    _currentWorkspace.workspaceType = settings.getValue("windows.browser.workspace type", _currentWorkspace.workspaceType);
+    _userTableWidth = settings.getValue("windows.browser.user table width", scale(UserTableWidth));
+
+    int numEmojis = 0;
+    for (int i = 0; i < NumEmojiBlocks; ++i) {
+        numEmojis += NumEmojisPerBlock[i];
     }
-    _lastSessionData.save();
-}
+    for (int i = 1; i <= numEmojis; ++i) {
+        auto reactionName = "emoji" + std::to_string(i) + ".png";
+        _emojis.emplace_back(OpenGLHelper::loadTexture(Const::ResourcePath / std::filesystem::path(reactionName)));
+    }
+    for (NetworkResourceType resourceType = 0; resourceType < NetworkResourceType_Count; ++resourceType) {
+        for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
+            _workspaces.emplace(WorkspaceId{resourceType, workspaceType}, Workspace());
+        }
+    }
 
-void _BrowserWindow::registerCyclicReferences(
-    LoginDialogWeakPtr const& loginDialog,
-    UploadSimulationDialogWeakPtr const& uploadSimulationDialog,
-    EditSimulationDialogWeakPtr const& editSimulationDialog,
-    GenomeEditorWindowWeakPtr const& genomeEditorWindow)
-{
-    _loginDialog = loginDialog;
-    _uploadSimulationDialog = uploadSimulationDialog;
-    _editSimulationDialog = editSimulationDialog;
-    _genomeEditorWindow = genomeEditorWindow;
-
-    auto firstStart = GlobalSettings::getInstance().getBool("windows.browser.first start", true);
+    auto firstStart = GlobalSettings::get().getValue("windows.browser.first start", true);
     refreshIntern(firstStart);
 
     for (auto& [workspaceId, workspace] : _workspaces) {
-        auto initialCollapsedSimulationFolders =
-            NetworkResourceService::convertFolderNamesToSettings(NetworkResourceService::getFolderNames(workspace.rawTOs));
-        auto collapsedSimulationFolders = GlobalSettings::getInstance().getStringVector(
+        auto initialCollapsedSimulationFolders = NetworkResourceService::get().convertFolderNamesToSettings(NetworkResourceService::get().getFolderNames(workspace.rawTOs));
+        auto collapsedSimulationFolders = GlobalSettings::get().getValue(
             "windows.browser.collapsed folders." + networkResourceTypeToString.at(workspaceId.resourceType) + "."
                 + workspaceTypeToString.at(workspaceId.workspaceType),
             initialCollapsedSimulationFolders);
-        workspace.collapsedFolderNames = NetworkResourceService::convertSettingsToFolderNames(collapsedSimulationFolders);
+        workspace.collapsedFolderNames = NetworkResourceService::get().convertSettingsToFolderNames(collapsedSimulationFolders);
         createTreeTOs(workspace);
     }
 
     _lastSessionData.load(getAllRawTOs());
+
+    EditSimulationDialog::get().setup();
 }
 
-void _BrowserWindow::onRefresh()
+void BrowserWindow::shutdownIntern()
+{
+    auto& settings = GlobalSettings::get();
+    settings.setValue("windows.browser.resource type", _currentWorkspace.resourceType);
+    settings.setValue("windows.browser.workspace type", _currentWorkspace.workspaceType);
+    settings.setValue("windows.browser.first start", false);
+    settings.setValue("windows.browser.user table width", _userTableWidth);
+    for (auto const& [workspaceId, workspace] : _workspaces) {
+        settings.setValue(
+            "windows.browser.collapsed folders." + networkResourceTypeToString.at(workspaceId.resourceType) + "."
+                + workspaceTypeToString.at(workspaceId.workspaceType),
+            NetworkResourceService::get().convertFolderNamesToSettings(workspace.collapsedFolderNames));
+    }
+    _lastSessionData.save();
+}
+
+void BrowserWindow::onRefresh()
 {
     refreshIntern(true);
 }
 
-WorkspaceType _BrowserWindow::getCurrentWorkspaceType() const
+WorkspaceType BrowserWindow::getCurrentWorkspaceType() const
 {
     return _currentWorkspace.workspaceType;
 }
 
-BrowserCache& _BrowserWindow::getSimulationCache()
+DownloadCache& BrowserWindow::getSimulationCache()
 {
-    return _simulationCache;
+    return _downloadCache;
 }
 
-void _BrowserWindow::refreshIntern(bool withRetry)
+void BrowserWindow::refreshIntern(bool withRetry)
 {
-    try {
-        NetworkService::refreshLogin();
+    _refreshProcessor->executeTask(
+        [&](auto const& senderId) {
+            return _persisterFacade->scheduleGetNetworkResources(
+                SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = withRetry}, GetNetworkResourcesRequestData());
+        },
+        [&](auto const& requestId) {
+            auto data = _persisterFacade->fetchGetNetworkResourcesData(requestId);
+            _userTOs = data.userTOs;
+            _ownEmojiTypeBySimId = data.emojiTypeByResourceId;
 
-        std::vector<NetworkResourceRawTO> rawTOs;
-        bool success = NetworkService::getNetworkResources(rawTOs, withRetry);
-        success &= NetworkService::getUserList(_userTOs, withRetry);
-
-        if (!success) {
-            if (withRetry) {
-                MessageDialog::getInstance().information("Error", "Failed to retrieve browser data. Please try again.");
-            }
-        } else {
             for (auto& [workspaceId, workspace] : _workspaces) {
                 workspace.rawTOs.clear();
-                auto userName = NetworkService::getLoggedInUserName().value_or("");
-                for (auto const& rawTO : rawTOs) {
+                auto userName = NetworkService::get().getLoggedInUserName().value_or("");
+                for (auto const& rawTO : data.resourceTOs) {
                     if (rawTO->resourceType == workspaceId.resourceType) {
                         //public user items should also be visible in private workspace
                         if ((workspaceId.workspaceType == WorkspaceType_Private && rawTO->userName == userName
@@ -187,41 +179,36 @@ void _BrowserWindow::refreshIntern(bool withRetry)
                 }
                 createTreeTOs(workspace);
             }
-        }
-
-        if (NetworkService::getLoggedInUserName()) {
-            if (!NetworkService::getEmojiTypeByResourceId(_ownEmojiTypeBySimId)) {
-                MessageDialog::getInstance().information("Error", "Failed to retrieve browser data. Please try again.");
-            }
-        } else {
-            _ownEmojiTypeBySimId.clear();
-        }
-        sortUserList();
-    } catch (std::exception const& e) {
-        if (withRetry) {
-            MessageDialog::getInstance().information("Error", e.what());
-        }
-    }
+            sortUserList();
+        },
+        [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
 }
 
-void _BrowserWindow::processIntern()
+void BrowserWindow::processIntern()
 {
     processToolbar();
 
-    processWorkspace();
+    auto startPos = ImGui::GetCursorScreenPos();
 
-    ImGui::SameLine();
-    processMovableSeparator();
+    if (ImGui::BeginChild("##workspaceAndUserList", {0, -scale(5.0f)}, 0, ImGuiWindowFlags_NoScrollbar)) {
+        processWorkspace();
 
-    ImGui::SameLine();
-    processUserList();
+        ImGui::SameLine();
+        processMovableSeparator();
 
-    processStatus();
+        ImGui::SameLine();
+        processUserList();
+
+        processStatusBar();
+    }
+    ImGui::EndChild();
+
+    processRefreshingScreen({startPos.x, startPos.y});
 
     processEmojiWindow();
-}
+}    
 
-void _BrowserWindow::processBackground()
+void BrowserWindow::processBackground()
 {
     auto now = std::chrono::steady_clock::now();
     if (!_lastRefreshTime) {
@@ -231,39 +218,38 @@ void _BrowserWindow::processBackground()
         _lastRefreshTime = now;
         refreshIntern(false);
     }
+
+    processPendingRequestIds();
 }
 
-void _BrowserWindow::processToolbar()
+void BrowserWindow::processToolbar()
 {
     std::string resourceTypeString = _currentWorkspace.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
     auto isOwnerForSelectedItem = isOwner(_selectedTreeTO);
 
     //refresh button
+    ImGui::BeginDisabled(_refreshProcessor->pendingTasks());
     if (AlienImGui::ToolbarButton(ICON_FA_SYNC)) {
-        delayedExecution([this] { onRefresh(); });
-        printOverlayMessage("Refreshing ...");
+        onRefresh();
     }
+    ImGui::EndDisabled();
     AlienImGui::Tooltip("Refresh");
 
     //login button
     ImGui::SameLine();
-    ImGui::BeginDisabled(NetworkService::getLoggedInUserName().has_value());
+    ImGui::BeginDisabled(NetworkService::get().getLoggedInUserName().has_value());
     if (AlienImGui::ToolbarButton(ICON_FA_SIGN_IN_ALT)) {
-        if (auto loginDialog = _loginDialog.lock()) {
-            loginDialog->open();
-        }
+        LoginDialog::get().open();
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Login or register");
 
     //logout button
     ImGui::SameLine();
-    ImGui::BeginDisabled(!NetworkService::getLoggedInUserName());
+    ImGui::BeginDisabled(!NetworkService::get().getLoggedInUserName());
     if (AlienImGui::ToolbarButton(ICON_FA_SIGN_OUT_ALT)) {
-        if (auto loginDialog = _loginDialog.lock()) {
-            NetworkService::logout();
-            onRefresh();
-        }
+        NetworkService::get().logout();
+        onRefresh();
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Logout");
@@ -279,9 +265,9 @@ void _BrowserWindow::processToolbar()
             if (_selectedTreeTO == nullptr || _selectedTreeTO->isLeaf()) {
                 return std::string();
             }
-            return NetworkResourceService::concatenateFolderName(_selectedTreeTO->folderNames, true);
+            return NetworkResourceService::get().concatenateFolderName(_selectedTreeTO->folderNames, true);
         }();
-        _uploadSimulationDialog.lock()->open(_currentWorkspace.resourceType, prefix);
+        UploadSimulationDialog::get().open(_currentWorkspace.resourceType, prefix);
     }
     AlienImGui::Tooltip(
         "Upload your current " + resourceTypeString
@@ -358,7 +344,7 @@ void _BrowserWindow::processToolbar()
     AlienImGui::Separator();
 }
 
-void _BrowserWindow::processWorkspace()
+void BrowserWindow::processWorkspace()
 {
     auto sizeAvailable = ImGui::GetContentRegionAvail();
     if (ImGui::BeginChild(
@@ -390,7 +376,7 @@ void _BrowserWindow::processWorkspace()
     ImGui::EndChild();
 }
 
-void _BrowserWindow::processWorkspaceSelectionAndFilter()
+void BrowserWindow::processWorkspaceSelectionAndFilter()
 {
     ImGui::Spacing();
     if (ImGui::BeginTable("##", 2, 0, ImVec2(-1, 0))) {
@@ -399,7 +385,7 @@ void _BrowserWindow::processWorkspaceSelectionAndFilter()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        auto userName = NetworkService::getLoggedInUserName();
+        auto userName = NetworkService::get().getLoggedInUserName();
         auto privateWorkspaceString = userName.has_value() ? *userName + "'s private workspace" : "Private workspace (need to login)";
         auto workspaceType_reordered = 2 - _currentWorkspace.workspaceType;  //change the order for display
         if (AlienImGui::Switcher(
@@ -427,10 +413,10 @@ void _BrowserWindow::processWorkspaceSelectionAndFilter()
     }
 }
 
-void _BrowserWindow::processMovableSeparator()
+void BrowserWindow::processMovableSeparator()
 {
     auto sizeAvailable = ImGui::GetContentRegionAvail();
-    ImGui::Button("", ImVec2(scale(5.0f), sizeAvailable.y - scale(BrowserBottomSpace)));
+    ImGui::Button("##MovableSeparator", ImVec2(scale(5.0f), sizeAvailable.y - scale(BrowserBottomSpace)));
     if (ImGui::IsItemActive()) {
         _userTableWidth -= ImGui::GetIO().MouseDelta.x;
     }
@@ -447,21 +433,21 @@ namespace
     }
 }
 
-void _BrowserWindow::processUserList()
+void BrowserWindow::processUserList()
 {
     auto sizeAvailable = ImGui::GetContentRegionAvail();
     if (ImGui::BeginChild("##2", ImVec2(sizeAvailable.x, sizeAvailable.y - scale(BrowserBottomSpace)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
 
         ImGui::PushID("User list");
-        auto& styleRepository = StyleRepository::getInstance();
+        auto& styleRepository = StyleRepository::get();
         static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
         AlienImGui::Group("Simulators");
         if (ImGui::BeginTable("Browser", 5, flags, ImVec2(0, 0), 0.0f)) {
             ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
-            auto isLoggedIn = NetworkService::getLoggedInUserName().has_value();
+            auto isLoggedIn = NetworkService::get().getLoggedInUserName().has_value();
             ImGui::TableSetupColumn(
                 isLoggedIn ? "GPU model" : "GPU (visible if logged in)",
                 ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed,
@@ -485,7 +471,7 @@ void _BrowserWindow::processUserList()
                     ImGui::TableNextRow(0, scale(RowHeight));
 
                     ImGui::TableNextColumn();
-                    auto isBoldFont = isLoggedIn && *NetworkService::getLoggedInUserName() == item->userName;
+                    auto isBoldFont = isLoggedIn && *NetworkService::get().getLoggedInUserName() == item->userName;
 
                     if (item->online) {
                         AlienImGui::OnlineSymbol();
@@ -497,7 +483,7 @@ void _BrowserWindow::processUserList()
                     processShortenedText(item->userName, isBoldFont);
 
                     ImGui::TableNextColumn();
-                    if (isLoggedIn && _loginDialog.lock()->isShareGpuInfo()) {
+                    if (isLoggedIn && LoginController::get().shareGpuInfo()) {
                         processShortenedText(getGpuString(item->gpu), isBoldFont);
                     }
 
@@ -522,9 +508,10 @@ void _BrowserWindow::processUserList()
     ImGui::EndChild();
 }
 
-void _BrowserWindow::processStatus()
+void BrowserWindow::processStatusBar()
 {
-    AlienImGui::Separator();
+    std::vector<std::string> statusItems;
+
     std::unordered_set<NetworkResourceRawTO> simulations;
     std::unordered_set<NetworkResourceRawTO> genomes;
     for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
@@ -536,33 +523,25 @@ void _BrowserWindow::processStatus()
 
     auto numSimulations = toInt(simulations.size());
     auto numGenomes = toInt(genomes.size());
-    ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
-    std::string statusText;
-    statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
-    statusText += std::to_string(numSimulations) + " simulations found";
 
-    statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
-    statusText += std::to_string(numGenomes) + " genomes found";
+    statusItems.emplace_back(std::to_string(numSimulations) + " simulations found");
+    statusItems.emplace_back(std::to_string(numGenomes) + " genomes found");
+    statusItems.emplace_back(std::to_string(_userTOs.size()) + " simulators found");
 
-    statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
-    statusText += std::to_string(_userTOs.size()) + " simulators found";
-
-    statusText += std::string("  " ICON_FA_INFO_CIRCLE " ");
-    if (auto userName = NetworkService::getLoggedInUserName()) {
-        statusText += "Logged in as " + *userName + " @ " + NetworkService::getServerAddress();  // + ": ";
+    if (auto userName = NetworkService::get().getLoggedInUserName()) {
+        statusItems.emplace_back("Logged in as " + *userName + " @ " + NetworkService::get().getServerAddress());
     } else {
-        statusText += "Not logged in to " + NetworkService::getServerAddress();  // + ": ";
+        statusItems.emplace_back("Not logged in to " + NetworkService::get().getServerAddress());
     }
 
-    if (!NetworkService::getLoggedInUserName()) {
-        statusText += std::string("   " ICON_FA_INFO_CIRCLE " ");
-        statusText += "In order to share and upvote simulations you need to log in.";
+    if (!NetworkService::get().getLoggedInUserName()) {
+        statusItems.emplace_back("In order to share and upvote simulations you need to log in.");
     }
-    AlienImGui::Text(statusText);
-    ImGui::PopStyleColor();
+
+    AlienImGui::StatusBar(statusItems);
 }
 
-void _BrowserWindow::processSimulationList()
+void BrowserWindow::processSimulationList()
 {
     ImGui::PushID("SimulationList");
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
@@ -606,6 +585,7 @@ void _BrowserWindow::processSimulationList()
         //process treeTOs
         auto& workspace = _workspaces.at(_currentWorkspace);
         auto scheduleRecreateTreeTOs = false;
+
         ImGuiListClipper clipper;
         clipper.Begin(workspace.treeTOs.size());
         while (clipper.Step())
@@ -668,7 +648,7 @@ void _BrowserWindow::processSimulationList()
     ImGui::PopID();
 }
 
-void _BrowserWindow::processGenomeList()
+void BrowserWindow::processGenomeList()
 {
     ImGui::PushID("GenomeList");
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
@@ -769,7 +749,7 @@ void _BrowserWindow::processGenomeList()
     ImGui::PopID();
 }
 
-bool _BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames)
+bool BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames)
 {
     auto result = false;
 
@@ -786,7 +766,7 @@ bool _BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeT
         ImGui::SameLine();
 
         if (!isOwner(treeTO) && _lastSessionData.isNew(leaf.rawTO)) {
-            auto font = StyleRepository::getInstance().getSmallBoldFont();
+            auto font = StyleRepository::get().getSmallBoldFont();
             auto origSize = font->Scale;
             font->Scale *= 0.65f;
             ImGui::PushFont(font);
@@ -820,7 +800,7 @@ bool _BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeT
     return result;
 }
 
-void _BrowserWindow::processDescriptionField(NetworkResourceTreeTO const& treeTO)
+void BrowserWindow::processDescriptionField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
@@ -828,13 +808,12 @@ void _BrowserWindow::processDescriptionField(NetworkResourceTreeTO const& treeTO
     }
 }
 
-void _BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
+void BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserDownloadButtonTextColor);
-        auto isAddReaction = processActionButton(ICON_FA_PLUS);
-        ImGui::PopStyleColor();
+
+        auto isAddReaction = AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_PLUS));
         AlienImGui::Tooltip("Add a reaction", false);
         if (isAddReaction) {
             _activateEmojiPopup = true;
@@ -911,7 +890,7 @@ void _BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
     }
 }
 
-void _BrowserWindow::processTimestampField(NetworkResourceTreeTO const& treeTO)
+void BrowserWindow::processTimestampField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
@@ -919,7 +898,7 @@ void _BrowserWindow::processTimestampField(NetworkResourceTreeTO const& treeTO)
     }
 }
 
-void _BrowserWindow::processUserNameField(NetworkResourceTreeTO const& treeTO)
+void BrowserWindow::processUserNameField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
@@ -927,7 +906,7 @@ void _BrowserWindow::processUserNameField(NetworkResourceTreeTO const& treeTO)
     }
 }
 
-void _BrowserWindow::processNumDownloadsField(NetworkResourceTreeTO const& treeTO)
+void BrowserWindow::processNumDownloadsField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
@@ -935,7 +914,7 @@ void _BrowserWindow::processNumDownloadsField(NetworkResourceTreeTO const& treeT
     }
 }
 
-void _BrowserWindow::processWidthField(NetworkResourceTreeTO const& treeTO)
+void BrowserWindow::processWidthField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
@@ -943,7 +922,7 @@ void _BrowserWindow::processWidthField(NetworkResourceTreeTO const& treeTO)
     }
 }
 
-void _BrowserWindow::processHeightField(NetworkResourceTreeTO const& treeTO)
+void BrowserWindow::processHeightField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
@@ -951,7 +930,7 @@ void _BrowserWindow::processHeightField(NetworkResourceTreeTO const& treeTO)
     }
 }
 
-void _BrowserWindow::processNumObjectsField(NetworkResourceTreeTO const& treeTO, bool kobjects)
+void BrowserWindow::processNumObjectsField(NetworkResourceTreeTO const& treeTO, bool kobjects)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
@@ -963,7 +942,7 @@ void _BrowserWindow::processNumObjectsField(NetworkResourceTreeTO const& treeTO,
     }
 }
 
-void _BrowserWindow::processSizeField(NetworkResourceTreeTO const& treeTO, bool kbyte)
+void BrowserWindow::processSizeField(NetworkResourceTreeTO const& treeTO, bool kbyte)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
@@ -975,7 +954,7 @@ void _BrowserWindow::processSizeField(NetworkResourceTreeTO const& treeTO, bool 
     }
 }
 
-void _BrowserWindow::processVersionField(NetworkResourceTreeTO const& treeTO)
+void BrowserWindow::processVersionField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
@@ -983,7 +962,7 @@ void _BrowserWindow::processVersionField(NetworkResourceTreeTO const& treeTO)
     }
 }
 
-bool _BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames)
+bool BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames)
 {
     auto result = false;
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserResourceSymbolColor);
@@ -1054,7 +1033,7 @@ bool _BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO const& treeT
     return result;
 }
 
-void _BrowserWindow::processEmojiWindow()
+void BrowserWindow::processEmojiWindow()
 {
     if (_activateEmojiPopup) {
         ImGui::OpenPopup("emoji");
@@ -1089,7 +1068,7 @@ void _BrowserWindow::processEmojiWindow()
                 }
                 ImGui::SetCursorPosY(ImGui::GetCursorPosY() + scale(8.0f));
 
-                if (AlienImGui::Button("More", ImGui::GetContentRegionAvailWidth())) {
+                if (AlienImGui::Button("More", ImGui::GetContentRegionAvail().x)) {
                     _showAllEmojis = true;
                 }
             }
@@ -1101,7 +1080,7 @@ void _BrowserWindow::processEmojiWindow()
     }
 }
 
-void _BrowserWindow::processEmojiButton(int emojiType)
+void BrowserWindow::processEmojiButton(int emojiType)
 {
     auto const& emoji = _emojis.at(emojiType);
     ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(Const::ToolbarButtonBackgroundColor));
@@ -1128,13 +1107,11 @@ void _BrowserWindow::processEmojiButton(int emojiType)
     }
 }
 
-void _BrowserWindow::processDownloadButton(BrowserLeaf const& leaf)
+void BrowserWindow::processDownloadButton(BrowserLeaf const& leaf)
 {
-    ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserDownloadButtonTextColor);
-    auto downloadButtonResult = processActionButton(ICON_FA_DOWNLOAD);
+    auto isDownload = AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_DOWNLOAD));
     AlienImGui::Tooltip("Download", false);
-    ImGui::PopStyleColor();
-    if (downloadButtonResult) {
+    if (isDownload) {
         onDownloadResource(leaf);
     }
 }
@@ -1149,15 +1126,15 @@ namespace
     }
 }
 
-void _BrowserWindow::processShortenedText(std::string const& text, bool bold) {
+void BrowserWindow::processShortenedText(std::string const& text, bool bold) {
     auto substrings = splitString(text);
     if (substrings.empty()) {
         return;
     }
-    auto& styleRepository = StyleRepository::getInstance();
+    auto& styleRepository = StyleRepository::get();
     auto textSize = ImGui::CalcTextSize(substrings.at(0).c_str());
-    auto needDetailButton = textSize.x > ImGui::GetContentRegionAvailWidth() || substrings.size() > 1;
-    auto cursorPos = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() - styleRepository.scale(15.0f);
+    auto needDetailButton = textSize.x > ImGui::GetContentRegionAvail().x || substrings.size() > 1;
+    auto cursorPos = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - styleRepository.scale(15.0f);
     if (bold) {
         ImGui::PushFont(styleRepository.getSmallBoldFont());
     }
@@ -1174,7 +1151,7 @@ void _BrowserWindow::processShortenedText(std::string const& text, bool bold) {
     }
 }
 
-bool _BrowserWindow::processActionButton(std::string const& text)
+bool BrowserWindow::processActionButton(std::string const& text)
 {
     ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(Const::ToolbarButtonBackgroundColor));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImU32)Const::ToolbarButtonHoveredColor);
@@ -1184,7 +1161,7 @@ bool _BrowserWindow::processActionButton(std::string const& text)
     return result;
 }
 
-bool _BrowserWindow::processDetailButton()
+bool BrowserWindow::processDetailButton()
 {
     auto color = Const::DetailButtonColor;
     float h, s, v;
@@ -1196,12 +1173,38 @@ bool _BrowserWindow::processDetailButton()
     return detailClicked;
 }
 
-void _BrowserWindow::processActivated()
+void BrowserWindow::processRefreshingScreen(RealVector2D const& startPos)
+{
+    if (_refreshProcessor->pendingTasks()) {
+        auto color = ImColor(ImGui::GetStyleColorVec4(ImGuiCol_WindowBg));
+        color.Value.w = 0.5f;
+        auto size = ImGui::GetItemRectSize();
+        auto afterTablePos = ImGui::GetCursorScreenPos();
+
+        ImGui::SetCursorScreenPos({startPos.x, startPos.y});
+        if (ImGui::BeginChild("##overlay", {size.x, size.y}, 0, ImGuiWindowFlags_NoScrollbar)) {
+            ImDrawList* drawList = ImGui::GetWindowDrawList();
+            drawList->AddRectFilled({startPos.x, startPos.y}, {startPos.x + size.x, startPos.y + size.y}, color);
+            AlienImGui::Spinner(AlienImGui::SpinnerParameters().pos({startPos.x + size.x / 2, startPos.y + size.y / 2}));
+        }
+        ImGui::EndChild();
+        ImGui::SetCursorScreenPos(afterTablePos);
+    }
+}
+
+void BrowserWindow::processActivated()
 {
     onRefresh();
 }
 
-void _BrowserWindow::createTreeTOs(Workspace& workspace)
+void BrowserWindow::processPendingRequestIds()
+{
+    _refreshProcessor->process();
+    _emojiUserNameProcessor->process();
+    _reactionProcessor->process();
+}
+
+void BrowserWindow::createTreeTOs(Workspace& workspace)
 {
     //sorting
     if (workspace.rawTOs.size() > 1) {
@@ -1219,167 +1222,60 @@ void _BrowserWindow::createTreeTOs(Workspace& workspace)
     }
 
     //create treeTOs
-    workspace.treeTOs = NetworkResourceService::createTreeTOs(filteredRawTOs, workspace.collapsedFolderNames);
+    workspace.treeTOs = NetworkResourceService::get().createTreeTOs(filteredRawTOs, workspace.collapsedFolderNames);
     _selectedTreeTO = nullptr;
 }
 
-void _BrowserWindow::sortUserList()
+void BrowserWindow::sortUserList()
 {
     std::sort(_userTOs.begin(), _userTOs.end(), [&](auto const& left, auto const& right) { return UserTO::compareOnlineAndTimestamp(left, right) > 0; });
 }
 
-void _BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
+void BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
 {
-    printOverlayMessage("Downloading ...");
     ++leaf.rawTO->numDownloads;
 
-    delayedExecution([=, this] {
-        std::string dataTypeString = _currentWorkspace.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
-        std::optional<DeserializedSimulation> cachedSimulation;
-        if (_currentWorkspace.resourceType == NetworkResourceType_Simulation) {
-            cachedSimulation = _simulationCache.find(leaf.rawTO->id);
-        }
-        SerializedSimulation serializedSim;
-        if (!cachedSimulation.has_value()) {
-            if (!NetworkService::downloadResource(serializedSim.mainData, serializedSim.auxiliaryData, serializedSim.statistics, leaf.rawTO->id)) {
-                MessageDialog::getInstance().information("Error", "Failed to download " + dataTypeString + ".");
-                return;
-            }
-        }
-
-        if (_currentWorkspace.resourceType == NetworkResourceType_Simulation) {
-            DeserializedSimulation deserializedSim;
-            if (!cachedSimulation.has_value()) {
-                if (!SerializerService::deserializeSimulationFromStrings(deserializedSim, serializedSim)) {
-                    MessageDialog::getInstance().information("Error", "Failed to load simulation. Your program version may not match.");
-                    return;
-                }
-                _simulationCache.insertOrAssign(leaf.rawTO->id, deserializedSim);
-            } else {
-                log(Priority::Important, "browser: get resource with id=" + leaf.rawTO->id + " from simulation cache");
-                std::swap(deserializedSim, *cachedSimulation);
-                NetworkService::incDownloadCounter(leaf.rawTO->id);
-            }
-
-            _simController->closeSimulation();
-
-            std::optional<std::string> errorMessage;
-            try {
-                _simController->newSimulation(
-                    deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
-                _simController->setRealTime(deserializedSim.auxiliaryData.realTime);
-                _simController->setClusteredSimulationData(deserializedSim.mainData);
-                _simController->setStatisticsHistory(deserializedSim.statistics);
-            } catch (CudaMemoryAllocationException const& exception) {
-                errorMessage = exception.what();
-            } catch (...) {
-                errorMessage = "Failed to load simulation.";
-            }
-
-            if (errorMessage) {
-                showMessage("Error", *errorMessage);
-                _simController->closeSimulation();
-                _simController->newSimulation(
-                    deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.generalSettings, deserializedSim.auxiliaryData.simulationParameters);
-            }
-
-            Viewport::setCenterInWorldPos(deserializedSim.auxiliaryData.center);
-            Viewport::setZoomFactor(deserializedSim.auxiliaryData.zoom);
-            _temporalControlWindow->onSnapshot();
-
-        } else {
-            std::vector<uint8_t> genome;
-            if (!SerializerService::deserializeGenomeFromString(genome, serializedSim.mainData)) {
-                MessageDialog::getInstance().information("Error", "Failed to load genome. Your program version may not match.");
-                return;
-            }
-            _editorController->setOn(true);
-            _editorController->getGenomeEditorWindow()->openTab(GenomeDescriptionService::convertBytesToDescription(genome));
-        }
-        if (VersionChecker::isVersionNewer(leaf.rawTO->version)) {
-            MessageDialog::getInstance().information(
-                "Warning",
-                "The download was successful but the " + dataTypeString +" was generated using a more recent\n"
-                "version of ALIEN. Consequently, the " + dataTypeString + "might not function as expected.\n"
-                "Please visit\n\nhttps://github.com/chrxh/alien\n\nto obtain the latest version.");
-        }
-    });
+    NetworkTransferController::get().onDownload(DownloadNetworkResourceRequestData{
+        .resourceId = leaf.rawTO->id,
+        .resourceName = leaf.rawTO->resourceName,
+        .resourceVersion = leaf.rawTO->version,
+        .resourceType = _currentWorkspace.resourceType,
+        .downloadCache = _downloadCache});
 }
 
-void _BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
+void BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
 {
     auto func = [&] {
-        printOverlayMessage("Replacing ...");
-
-        delayedExecution([=, this] {
-            std::string mainData;
-            std::string settings;
-            std::string statistics;
-            IntVector2D worldSize;
-            int numObjects = 0;
-
-            DeserializedSimulation deserializedSim;
-            if (leaf.rawTO->resourceType == NetworkResourceType_Simulation) {
-                deserializedSim = SerializationHelperService::getDeserializedSerialization(_simController);
-
-                SerializedSimulation serializedSim;
-                if (!SerializerService::serializeSimulationToStrings(serializedSim, deserializedSim)) {
-                    MessageDialog::getInstance().information("Replace simulation", "The simulation could not be serialized for replacing.");
-                    return;
-                }
-                mainData = serializedSim.mainData;
-                settings = serializedSim.auxiliaryData;
-                statistics = serializedSim.statistics;
-                worldSize = {deserializedSim.auxiliaryData.generalSettings.worldSizeX, deserializedSim.auxiliaryData.generalSettings.worldSizeY};
-                numObjects = deserializedSim.mainData.getNumberOfCellAndParticles();
+        auto data = [&]() -> std::variant<ReplaceNetworkResourceRequestData::SimulationData, ReplaceNetworkResourceRequestData::GenomeData> {
+            if (_currentWorkspace.resourceType == NetworkResourceType_Simulation) {
+                return ReplaceNetworkResourceRequestData::SimulationData{.zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos()};
             } else {
-                auto genome = _genomeEditorWindow.lock()->getCurrentGenome();
-                if (genome.cells.empty()) {
-                    showMessage("Replace genome", "The is no valid genome in the genome editor selected.");
-                    return;
-                }
-                auto genomeData = GenomeDescriptionService::convertDescriptionToBytes(genome);
-                numObjects = GenomeDescriptionService::getNumNodesRecursively(genomeData, true);
-
-                if (!SerializerService::serializeGenomeToString(mainData, genomeData)) {
-                    showMessage("Replace genome", "The genome could not be serialized for replacing.");
-                    return;
-                }
+                return ReplaceNetworkResourceRequestData::GenomeData{.description = GenomeEditorWindow::get().getCurrentGenome()};
             }
-
-            if (!NetworkService::replaceResource(leaf.rawTO->id, worldSize, numObjects, mainData, settings, statistics)) {
-                std::string type = leaf.rawTO->resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
-                showMessage(
-                    "Error",
-                    "Failed to replace " + type
-                        + ".\n\n"
-                          "Possible reasons:\n\n" ICON_FA_CHEVRON_RIGHT " The server is not reachable.\n\n" ICON_FA_CHEVRON_RIGHT
-                          " The total size of your uploads exceeds the allowed storage limit.");
-                return;
-            }
-            if (leaf.rawTO->resourceType == NetworkResourceType_Simulation) {
-                getSimulationCache().insertOrAssign(leaf.rawTO->id, deserializedSim);
-            }
-            onRefresh();
-        });
+        }();
+        NetworkTransferController::get().onReplace(ReplaceNetworkResourceRequestData{
+            .resourceId = leaf.rawTO->id,
+            .workspaceType = leaf.rawTO->workspaceType,
+            .downloadCache = getSimulationCache(),
+            .data = data});
     };
-    MessageDialog::getInstance().yesNo("Delete", "Do you really want to replace the content of the selected item?", func);
+    GenericMessageDialog::get().yesNo("Delete", "Do you really want to replace the content of the selected item?", func);
 }
 
-void _BrowserWindow::onEditResource(NetworkResourceTreeTO const& treeTO)
+void BrowserWindow::onEditResource(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
-        _editSimulationDialog.lock()->openForLeaf(treeTO);
+        EditSimulationDialog::get().openForLeaf(treeTO);
     } else {
-        auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, _workspaces.at(_currentWorkspace).rawTOs);
-        _editSimulationDialog.lock()->openForFolder(treeTO, rawTOs);
+        auto rawTOs = NetworkResourceService::get().getMatchingRawTOs(treeTO, _workspaces.at(_currentWorkspace).rawTOs);
+        EditSimulationDialog::get().openForFolder(treeTO, rawTOs);
     }
 }
 
-void _BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO)
+void BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO)
 {
     auto& source = _workspaces.at(_currentWorkspace);
-    auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, source.rawTOs);
+    auto rawTOs = NetworkResourceService::get().getMatchingRawTOs(treeTO, source.rawTOs);
 
     for (auto const& rawTO : rawTOs) {
         switch (rawTO->workspaceType) {
@@ -1405,25 +1301,20 @@ void _BrowserWindow::onMoveResource(NetworkResourceTreeTO const& treeTO)
     }
 
     //apply changes to server
-    delayedExecution([rawTOs = rawTOs, this] {
-        for (auto const& rawTO : rawTOs) {
-            if (!NetworkService::moveResource(rawTO->id, rawTO->workspaceType)) {
-                MessageDialog::getInstance().information("Error", "Failed to move item.");
-                refreshIntern(true);
-                return;
-            }
-        }
-    });
-    printOverlayMessage("Changing visibility ...");
+    MoveNetworkResourceRequestData requestData;
+    for (auto const& rawTO : rawTOs) {
+        requestData.entries.emplace_back(rawTO->id, rawTO->workspaceType);
+    }
+    NetworkTransferController::get().onMove(requestData);
 }
 
-void _BrowserWindow::onDeleteResource(NetworkResourceTreeTO const& treeTO)
+void BrowserWindow::onDeleteResource(NetworkResourceTreeTO const& treeTO)
 {
     auto& currentWorkspace = _workspaces.at(_currentWorkspace);
-    auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, currentWorkspace.rawTOs);
+    auto rawTOs = NetworkResourceService::get().getMatchingRawTOs(treeTO, currentWorkspace.rawTOs);
 
     auto message = treeTO->isLeaf() ? "Do you really want to delete the selected item?" : "Do you really want to delete the selected folder?";
-    MessageDialog::getInstance().yesNo("Delete", message, [rawTOs = rawTOs, this]() {
+    GenericMessageDialog::get().yesNo("Delete", message, [rawTOs = rawTOs, this]() {
 
         //remove resources form workspace
         for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
@@ -1438,24 +1329,19 @@ void _BrowserWindow::onDeleteResource(NetworkResourceTreeTO const& treeTO)
         }
 
         //apply changes to server
-        printOverlayMessage("Deleting ...");
-        delayedExecution([rawTOs = rawTOs, this] {
-            for (auto const& rawTO : rawTOs) {
-                if (!NetworkService::deleteResource(rawTO->id)) {
-                    MessageDialog::getInstance().information("Error", "Failed to delete item. Please try again later.");
-                    refreshIntern(true);
-                    return;
-                }
-            }
-        });
+        DeleteNetworkResourceRequestData requestData;
+        for (auto const& rawTO : rawTOs) {
+            requestData.entries.emplace_back(rawTO->id);
+        }
+        NetworkTransferController::get().onDelete(requestData);
     });
 }
 
-void _BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType)
+void BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType)
 {
     CHECK(to->isLeaf());
     auto& leaf = to->getLeaf();
-    if (NetworkService::getLoggedInUserName()) {
+    if (NetworkService::get().getLoggedInUserName()) {
 
         //remove existing like
         auto findResult = _ownEmojiTypeBySimId.find(leaf.rawTO->id);
@@ -1481,46 +1367,57 @@ void _BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType
         }
 
         _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.rawTO->id, emojiType));  //invalidate cache entry
-        NetworkService::toggleReactToResource(leaf.rawTO->id, emojiType);
+
+        _reactionProcessor->executeTask(
+            [&](auto const& senderId) {
+                return _persisterFacade->scheduleToggleReactionNetworkResource(
+                    SenderInfo{.senderId = senderId, .wishResultData = false, .wishErrorInfo = false},
+                    ToggleReactionNetworkResourceRequestData{.resourceId = leaf.rawTO->id, .emojiType = emojiType});
+            },
+            [](auto const&) {},
+            [&](auto const& errors) {
+                onRefresh();
+                GenericMessageDialog::get().information("Error", errors);
+            });
     } else {
-        _loginDialog.lock()->open();
+        LoginDialog::get().open();
     }
 }
 
-void _BrowserWindow::onExpandFolders()
+void BrowserWindow::onExpandFolders()
 {
     auto& workspace = _workspaces.at(_currentWorkspace);
     workspace.collapsedFolderNames.clear();
     createTreeTOs(workspace);
 }
 
-void _BrowserWindow::onCollapseFolders()
+void BrowserWindow::onCollapseFolders()
 {
     auto& workspace = _workspaces.at(_currentWorkspace);
-    workspace.collapsedFolderNames = NetworkResourceService::getFolderNames(workspace.rawTOs, 1);
+    workspace.collapsedFolderNames = NetworkResourceService::get().getFolderNames(workspace.rawTOs, 1);
     createTreeTOs(workspace);
 }
 
-void _BrowserWindow::openWeblink(std::string const& link)
+void BrowserWindow::openWeblink(std::string const& link)
 {
 #ifdef _WIN32
     ShellExecute(NULL, "open", link.c_str(), NULL, NULL, SW_SHOWNORMAL);
 #endif
 }
 
-bool _BrowserWindow::isOwner(NetworkResourceTreeTO const& treeTO) const
+bool BrowserWindow::isOwner(NetworkResourceTreeTO const& treeTO) const
 {
     if (treeTO == nullptr) {
         return false;
     }
     auto const& workspace = _workspaces.at(_currentWorkspace);
 
-    auto rawTOs = NetworkResourceService::getMatchingRawTOs(treeTO, workspace.rawTOs);
-    auto userName = NetworkService::getLoggedInUserName().value_or("");
+    auto rawTOs = NetworkResourceService::get().getMatchingRawTOs(treeTO, workspace.rawTOs);
+    auto userName = NetworkService::get().getLoggedInUserName().value_or("");
     return std::ranges::all_of(rawTOs, [&](NetworkResourceRawTO const& rawTO) { return rawTO->userName == userName; });
 }
 
-std::string _BrowserWindow::getUserNamesToEmojiType(std::string const& resourceId, int emojiType)
+std::string BrowserWindow::getUserNamesToEmojiType(std::string const& resourceId, int emojiType)
 {
     std::set<std::string> userNames;
 
@@ -1528,14 +1425,26 @@ std::string _BrowserWindow::getUserNamesToEmojiType(std::string const& resourceI
     if (findResult != _userNamesByEmojiTypeBySimIdCache.end()) {
         userNames = findResult->second;
     } else {
-        NetworkService::getUserNamesForResourceAndEmojiType(userNames, resourceId, emojiType);
-        _userNamesByEmojiTypeBySimIdCache.emplace(std::make_pair(resourceId, emojiType), userNames);
+        if (!_emojiUserNameProcessor->pendingTasks()) {
+            _emojiUserNameProcessor->executeTask(
+                [&](auto const& senderId) {
+                    return _persisterFacade->scheduleGetUserNamesForReaction(
+                        SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = false},
+                        GetUserNamesForReactionRequestData{.resourceId = resourceId, .emojiType = emojiType});
+                },
+                [&](auto const& requestId) {
+                    auto data = _persisterFacade->fetchGetUserNamesForReactionData(requestId);
+                    _userNamesByEmojiTypeBySimIdCache.emplace(std::make_pair(data.resourceId, data.emojiType), data.userNames);
+                },
+                [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
+        }
+        return "Loading...";
     }
 
     return boost::algorithm::join(userNames, ", ");
 }
 
-std::unordered_set<NetworkResourceRawTO> _BrowserWindow::getAllRawTOs() const
+std::unordered_set<NetworkResourceRawTO> BrowserWindow::getAllRawTOs() const
 {
     std::unordered_set<NetworkResourceRawTO> result;
     for (auto const& workspace : _workspaces | std::views::values) {
@@ -1544,7 +1453,7 @@ std::unordered_set<NetworkResourceRawTO> _BrowserWindow::getAllRawTOs() const
     return result;
 }
 
-void _BrowserWindow::pushTextColor(NetworkResourceTreeTO const& to)
+void BrowserWindow::pushTextColor(NetworkResourceTreeTO const& to)
 {
     if (to->isLeaf()) {
         auto const& leaf = to->getLeaf();
@@ -1560,7 +1469,7 @@ void _BrowserWindow::pushTextColor(NetworkResourceTreeTO const& to)
     }
 }
 
-void _BrowserWindow::popTextColor()
+void BrowserWindow::popTextColor()
 {
     ImGui::PopStyleColor();
 }

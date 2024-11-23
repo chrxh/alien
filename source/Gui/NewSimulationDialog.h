@@ -1,31 +1,30 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/Descriptions.h"
+#include "EngineInterface/SimulationParameters.h"
 #include "Definitions.h"
 #include "AlienDialog.h"
 
-class _NewSimulationDialog : public _AlienDialog
+class NewSimulationDialog : public AlienDialog<SimulationFacade>
 {
-public:
-    _NewSimulationDialog(
-        SimulationController const& simController,
-        TemporalControlWindow const& temporalControlWindow,
-        StatisticsWindow const& statisticsWindow);
-
-    ~_NewSimulationDialog();
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(NewSimulationDialog);
 
 private:
+    NewSimulationDialog();
+
+    void initIntern(SimulationFacade simulationFacade) override;
+    void shutdownIntern() override;
     void processIntern() override;
     void openIntern() override;
 
     void onNewSimulation();
 
-    SimulationController _simController;
-    TemporalControlWindow _temporalControlWindow;
-    StatisticsWindow _statisticsWindow;
+    SimulationFacade _simulationFacade;
 
     bool _adoptSimulationParameters = true;
+    Char64 _projectName = "<unnamed>";
     int _width = 0;
     int _height = 0;
 };

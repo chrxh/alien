@@ -1,23 +1,23 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "Network/NetworkService.h"
 
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _CreateUserDialog : public _AlienDialog
+class CreateUserDialog : public AlienDialog<>
 {
-public:
-    _CreateUserDialog(ActivateUserDialog const& activateUserDialog);
-    ~_CreateUserDialog();
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(CreateUserDialog);
 
+public:
     void open(std::string const& userName, std::string const& password, UserInfo const& userInfo);
 
     void onCreateUser();
 private:
-    void processIntern();
+    CreateUserDialog();
 
-    ActivateUserDialog _activateUserDialog; 
+    void processIntern();
 
     std::string _userName;
     std::string _password;

@@ -5,6 +5,7 @@
 
 #include "Definitions.h"
 #include "AlienWindow.h"
+#include "Base/Singleton.h"
 
 using CreationMode = int;
 enum CreationMode_
@@ -17,16 +18,19 @@ enum CreationMode_
     CreationMode_Drawing
 };
 
-class _CreatorWindow : public _AlienWindow
+class CreatorWindow : public AlienWindow<SimulationFacade>
 {
-public:
-    _CreatorWindow(EditorModel const& editorModel, SimulationController const& simController);
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(CreatorWindow);
 
+public:
     void onDrawing();
     void finishDrawing();
 
 private:
-    void processIntern();
+    CreatorWindow();
+
+    void initIntern(SimulationFacade simulationFacade) override;
+    void processIntern() override;
 
     void createCell();
     void createParticle();
@@ -34,7 +38,7 @@ private:
     void createHexagon();
     void createDisc();
 
-    void validationAndCorrection();
+    void validateAndCorrect();
 
     RealVector2D getRandomPos() const;
     void incExecutionNumber();
@@ -66,6 +70,5 @@ private:
 
     CreationMode _mode = CreationMode_Drawing;
 
-    EditorModel _editorModel;
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
 };

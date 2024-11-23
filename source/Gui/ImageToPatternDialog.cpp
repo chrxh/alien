@@ -10,27 +10,28 @@
 #include "Base/NumberGenerator.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/Colors.h"
 
 #include "AlienImGui.h"
 #include "Viewport.h"
-#include "GenericFileDialogs.h"
+#include "GenericFileDialog.h"
 
 
-_ImageToPatternDialog::_ImageToPatternDialog(SimulationController const& simController)
-    : _simController(simController)
+void ImageToPatternDialog::init(SimulationFacade simulationFacade)
 {
+    _simulationFacade = simulationFacade;
+
     auto path = std::filesystem::current_path();
     if (path.has_parent_path()) {
         path = path.parent_path();
     }
-    _startingPath = GlobalSettings::getInstance().getString("dialogs.open image.starting path", path.string());
+    _startingPath = GlobalSettings::get().getValue("dialogs.open image.starting path", path.string());
 }
 
-_ImageToPatternDialog::~_ImageToPatternDialog()
+void ImageToPatternDialog::shutdown()
 {
-    GlobalSettings::getInstance().setString("dialogs.open image.starting path", _startingPath);
+    GlobalSettings::get().setValue("dialogs.open image.starting path", _startingPath);
 }
 
 namespace
@@ -76,9 +77,9 @@ namespace
     }
 }
 
-void _ImageToPatternDialog::show()
+void ImageToPatternDialog::show()
 {
-    GenericFileDialogs::getInstance().showOpenFileDialog(
+    GenericFileDialog::get().showOpenFileDialog(
         "Open image", "Image (*.png){.png},.*", _startingPath, [&](std::filesystem::path const& path) {
 
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
@@ -101,7 +102,7 @@ void _ImageToPatternDialog::show()
                     float matchedCellIntensity;
                     getMatchedCellColor(ImColor(r, g, b, 255), matchedCellColor, matchedCellIntensity);
                     dataDesc.addCell(CellDescription()
-                                         .setId(NumberGenerator::getInstance().getId())
+                                         .setId(NumberGenerator::get().getId())
                                          .setEnergy(matchedCellIntensity * 200)
                                          .setPos({toFloat(x) + xOffset, toFloat(y)})
                                          .setMaxConnections(MAX_CELL_BONDS)
@@ -111,10 +112,10 @@ void _ImageToPatternDialog::show()
             }
         }
 
-        DescriptionEditService::reconnectCells(dataDesc, 1 * 1.5f);
-        dataDesc.setCenter(Viewport::getCenterInWorldPos());
+        DescriptionEditService::get().reconnectCells(dataDesc, 1 * 1.5f);
+        dataDesc.setCenter(Viewport::get().getCenterInWorldPos());
 
-        _simController->addAndSelectSimulationData(dataDesc);
+        _simulationFacade->addAndSelectSimulationData(dataDesc);
         //TODO: update pattern editor
     });
 }

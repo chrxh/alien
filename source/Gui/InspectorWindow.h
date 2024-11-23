@@ -10,13 +10,7 @@ struct CompilationResult;
 class _InspectorWindow
 {
 public:
-    _InspectorWindow(
-        SimulationController const& simController,
-        EditorModel const& editorModel,
-        GenomeEditorWindow const& genomeEditorWindow,
-        uint64_t entityId,
-        RealVector2D const& initialPos,
-        bool selectGenomeTab);
+    _InspectorWindow(SimulationFacade const& simulationFacade, uint64_t entityId, RealVector2D const& initialPos, bool selectGenomeTab);
     ~_InspectorWindow();
 
     void process();
@@ -52,11 +46,9 @@ private:
 
     float calcWindowWidth() const;
 
-    void validationAndCorrection(CellDescription& cell) const;
+    void validateAndCorrect(CellDescription& cell) const;
 
-    SimulationController _simController;
-    EditorModel _editorModel;
-    GenomeEditorWindow _genomeEditorWindow;
+    SimulationFacade _simulationFacade;
 
     RealVector2D _initialPos;
 

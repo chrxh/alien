@@ -31,11 +31,11 @@ __device__ __inline__ void NeuronProcessor::process(SimulationData& data, Simula
 
 __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    __shared__ Activity outputActivity;
-    __shared__ Activity inputActivity;
+    __shared__ Signal outputSignal;
+    __shared__ Signal inputSignal;
     if (0 == threadIdx.x) {
-        inputActivity = CellFunctionProcessor::calcInputActivity(cell);
-        CellFunctionProcessor::updateInvocationState(cell, inputActivity);
+        inputSignal = CellFunctionProcessor::calcInputSignal(cell);
+        CellFunctionProcessor::updateInvocationState(cell, inputSignal);
     }
     __syncthreads();
 
@@ -52,21 +52,21 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
 
         auto row = entry / MAX_CHANNELS;
         auto col = entry % MAX_CHANNELS;
-        atomicAdd(&sumInput[row], neuronsState->weights[entry] * inputActivity.channels[col]);
+        atomicAdd(&sumInput[row], neuronsState->weights[entry] * inputSignal.channels[col]);
     }
     __syncthreads();
 
     for (int i = channelPartition.startIndex; i <= channelPartition.endIndex; ++i) {
-        outputActivity.channels[i] = applyActivationFunction(cell->cellFunctionData.neuron.activationFunctions[i], sumInput[i]);  
+        outputSignal.channels[i] = applyActivationFunction(cell->cellFunctionData.neuron.activationFunctions[i], sumInput[i]);  
     }
     __syncthreads();
     
 
     if (0 == threadIdx.x) {
-        outputActivity.origin = inputActivity.origin;
-        outputActivity.targetX = inputActivity.targetX;
-        outputActivity.targetY = inputActivity.targetY;
-        CellFunctionProcessor::setActivity(cell, outputActivity);
+        outputSignal.origin = inputSignal.origin;
+        outputSignal.targetX = inputSignal.targetX;
+        outputSignal.targetY = inputSignal.targetY;
+        CellFunctionProcessor::setSignal(cell, outputSignal);
         statistics.incNumNeuronActivities(cell->color);
     }
     __syncthreads();
@@ -80,9 +80,9 @@ __inline__ __device__ float NeuronProcessor::applyActivationFunction(NeuronActiv
     case NeuronActivationFunction_BinaryStep:
         return x >= NEAR_ZERO ? 1.0f : 0.0f;
     case NeuronActivationFunction_Identity:
-        return x;
+        return max(-1.0f, min(1.0f, x));
     case NeuronActivationFunction_Abs:
-        return abs(x);
+        return min(1.0f, abs(x));
     case NeuronActivationFunction_Gaussian:
         return __expf(-2 * x * x);
     }

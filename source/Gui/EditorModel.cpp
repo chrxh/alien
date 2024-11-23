@@ -1,111 +1,102 @@
 #include "EditorModel.h"
 
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 
-_EditorModel::_EditorModel(SimulationController const& simController)
-    : _simController(simController)
+void EditorModel::setup(SimulationFacade const& simulationFacade)
 {
+    _simulationFacade = simulationFacade;
+
     clear();
 }
 
-SelectionShallowData const& _EditorModel::getSelectionShallowData() const
+SelectionShallowData const& EditorModel::getSelectionShallowData() const
 {
     return _selectionShallowData;
 }
 
-void _EditorModel::update()
+void EditorModel::update()
 {
-    _selectionShallowData = _simController->getSelectionShallowData();
+    _selectionShallowData = _simulationFacade->getSelectionShallowData();
 }
 
-bool _EditorModel::isSelectionEmpty() const
+bool EditorModel::isSelectionEmpty() const
 {
     return 0 == _selectionShallowData.numCells && 0 == _selectionShallowData.numClusterCells
         && 0 == _selectionShallowData.numParticles;
 }
 
-bool _EditorModel::isCellSelectionEmpty() const
+bool EditorModel::isCellSelectionEmpty() const
 {
     return 0 == _selectionShallowData.numCells;
 }
 
-void _EditorModel::clear()
+void EditorModel::clear()
 {
     _selectionShallowData = SelectionShallowData();
 }
 
-bool _EditorModel::existsInspectedEntity(uint64_t id) const
+bool EditorModel::existsInspectedEntity(uint64_t id) const
 {
     return _inspectedEntityById.find(id) != _inspectedEntityById.end();
 }
 
-CellOrParticleDescription _EditorModel::getInspectedEntity(uint64_t id) const
+CellOrParticleDescription EditorModel::getInspectedEntity(uint64_t id) const
 {
     return _inspectedEntityById.at(id);
 }
 
-void _EditorModel::addInspectedEntity(CellOrParticleDescription const& entity)
+void EditorModel::addInspectedEntity(CellOrParticleDescription const& entity)
 {
-    _inspectedEntityById.emplace(DescriptionEditService::getId(entity), entity);
+    _inspectedEntityById.emplace(DescriptionEditService::get().getId(entity), entity);
 }
 
-void _EditorModel::setInspectedEntities(std::vector<CellOrParticleDescription> const& inspectedEntities)
+void EditorModel::setInspectedEntities(std::vector<CellOrParticleDescription> const& inspectedEntities)
 {
     _inspectedEntityById.clear();
     for (auto const& entity : inspectedEntities) {
-        _inspectedEntityById.emplace(DescriptionEditService::getId(entity), entity);
+        _inspectedEntityById.emplace(DescriptionEditService::get().getId(entity), entity);
     }
 }
 
-bool _EditorModel::areEntitiesInspected() const
+bool EditorModel::areEntitiesInspected() const
 {
     return !_inspectedEntityById.empty();
 }
 
-void _EditorModel::setDrawMode(bool value)
-{
-    _drawMode = value;
-}
-
-bool _EditorModel::isDrawMode() const
-{
-    return _drawMode;
-}
-
-void _EditorModel::setPencilWidth(float value)
+void EditorModel::setPencilWidth(float value)
 {
     _pencilWidth = value;
 }
 
-float _EditorModel::getPencilWidth() const
+float EditorModel::getPencilWidth() const
 {
     return _pencilWidth;
 }
 
-void _EditorModel::setDefaultColorCode(int value)
+void EditorModel::setDefaultColorCode(int value)
 {
     _defaultColorCode = value;
 }
 
-int _EditorModel::getDefaultColorCode() const
+int EditorModel::getDefaultColorCode() const
 {
     return _defaultColorCode;
 }
 
-void _EditorModel::setForceNoRollout(bool value)
+void EditorModel::setForceNoRollout(bool value)
 {
     _forceNoRollout = value;
 }
 
-void _EditorModel::setRolloutToClusters(bool value)
+void EditorModel::setRolloutToClusters(bool value)
 {
     if (!_forceNoRollout) {
         _rolloutToClusters = value;
     }
 }
 
-bool _EditorModel::isRolloutToClusters() const
+bool EditorModel::isRolloutToClusters() const
 {
     return _rolloutToClusters && !_forceNoRollout;
 }

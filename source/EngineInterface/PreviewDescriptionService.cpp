@@ -313,7 +313,7 @@ namespace
                     }
                     targetAngle += constructor.constructionAngle1;
                     auto direction = Math::unitVectorOfAngle(targetAngle);
-                    auto subGenome = GenomeDescriptionService::convertBytesToDescription(data);
+                    auto subGenome = GenomeDescriptionService::get().convertBytesToDescription(data);
                     auto previewPart = convertToPreviewDescriptionIntern(
                         subGenome, cellIntern.nodeIndex, constructor.constructionAngle2, cellIntern.pos + direction, targetAngle, parameters);
                     insert(result, previewPart);
@@ -370,8 +370,8 @@ namespace
                     ConnectionPreviewDescription connection;
                     connection.cell1 = cell.pos;
                     connection.cell2 = otherCell.pos;
-                    connection.arrowToCell1 =
-                        inputExecutionOrderNumber == otherCell.executionOrderNumber && !otherCell.outputBlocked && inputExecutionOrderNumber != cell.executionOrderNumber;
+                    connection.arrowToCell1 = inputExecutionOrderNumber == otherCell.executionOrderNumber && !otherCell.outputBlocked
+                        && inputExecutionOrderNumber != cell.executionOrderNumber;
                     result.connections.emplace_back(connection);
                     cellIndicesToCreatedConnectionIndex.emplace(std::pair(connectionIndex, index), toInt(result.connections.size() - 1));
                 } else {

@@ -4,6 +4,8 @@
 #include <vector>
 #include <mutex>
 
+#include "Singleton.h"
+
 enum class Priority
 {
     Unimportant,
@@ -13,27 +15,26 @@ enum class Priority
 class LoggingCallBack
 {
 public:
+    virtual ~LoggingCallBack() = default;
     virtual void newLogMessage(Priority priority, std::string const& message) = 0;
 };
 
 class LoggingService
 {
-public:
-    static LoggingService& getInstance();
+    MAKE_SINGLETON(LoggingService);
 
+public:
     void log(Priority priority, std::string const& message);
 
     void registerCallBack(LoggingCallBack* callback);
     void unregisterCallBack(LoggingCallBack* callback);
 
 private:
-    LoggingService() = default;
-
     std::vector<LoggingCallBack*> _callbacks;
     std::mutex _mutex;
 };
 
 inline void log(Priority priority, std::string const& message)
 {
-    LoggingService::getInstance().log(priority, message);
+    LoggingService::get().log(priority, message);
 }

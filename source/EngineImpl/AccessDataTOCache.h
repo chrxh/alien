@@ -3,7 +3,6 @@
 #include "Base/Definitions.h"
 
 #include "EngineInterface/ArraySizes.h"
-#include "EngineInterface/GpuSettings.h"
 #include "EngineGpuKernels/TOs.cuh"
 
 #include "Definitions.h"
@@ -19,7 +18,6 @@ public:
 private:
     bool fits(ArraySizes const& left, ArraySizes const& right) const;
     ArraySizes getArraySizes(DataTO const& dataTO) const;
-    void deleteDataTO(DataTO const& dataTO);
 
     std::optional<DataTO> _dataTO;
 };

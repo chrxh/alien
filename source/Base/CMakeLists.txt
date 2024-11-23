@@ -19,8 +19,10 @@ add_library(Base
     Physics.cpp
     Physics.h
     Resources.h
+    Singleton.h
     StringHelper.cpp
     StringHelper.h
+    UnlockGuard.h
     Vector2D.cpp
     Vector2D.h
     VersionChecker.cpp

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Base/Singleton.h"
+
 #include "Definitions.h"
 
 #include <cstdint>
@@ -36,17 +38,17 @@ namespace Const
     ImColor const ImportantButtonActiveColor = ImColor::HSV(0.0f, 0.6f, 1.0f);
 
     ImColor const ToggleButtonColor = ImColor::HSV(0.0f, 0.0f, 0.2f);
-    ImColor const ToggleButtonHoveredColor = ImColor::HSV(0.14, 0.8, 0.5);
-    ImColor const ToggleButtonActiveColor = ImColor::HSV(0.14, 0.8, 0.7);
-    ImColor const ToggleButtonActiveHoveredColor = ImColor::HSV(0.14, 0.8, 0.8);
+    ImColor const ToggleButtonHoveredColor = ImColor::HSV(0.14f, 0.8f, 0.5f);
+    ImColor const ToggleButtonActiveColor = ImColor::HSV(0.14f, 0.8f, 0.7f);
+    ImColor const ToggleButtonActiveHoveredColor = ImColor::HSV(0.14f, 0.8f, 0.8f);
 
     ImColor const TreeNodeColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
     ImColor const TreeNodeHoveredColor = ImColor::HSV(0.6f, 0.6f, 0.55f);
     ImColor const TreeNodeActiveColor = ImColor::HSV(0.6f, 0.6f, 0.65f);
-    ImColor const TreeNodeHighlightedColor = ImColor::HSV(0.3f, 0.4f, 0.45f);
-    ImColor const TreeNodeHighlightedHoveredColor = ImColor::HSV(0.3f, 0.4f, 0.55f);
-    ImColor const TreeNodeHighlightedActiveColor = ImColor::HSV(0.3f, 0.4f, 0.65f);
-
+    ImColor const TreeNodeHighlightedColor = ImColor::HSV(0.0, 0.0f, 0.15f);
+    ImColor const TreeNodeHighlightedHoveredColor = ImColor::HSV(0.0f, 0.0f, 0.25f);
+    ImColor const TreeNodeHighlightedActiveColor = ImColor::HSV(0.0f, 0.0f, 0.35f);
+    
     ImColor const MonospaceColor = ImColor::HSV(0.3f, 1.0f, 1.0f);
 
     ImColor const HeadlineColor = ImColor::HSV(0.4f, 0.4f, 0.8f);
@@ -64,6 +66,10 @@ namespace Const
     ImColor const ToolbarButtonTextColor = ImColor::HSV(0.54f, 0.33f, 1.0f, 1.0f);
     ImColor const ToolbarButtonBackgroundColor = ImColor::HSV(0, 0, 0.06f, 0);
     ImColor const ToolbarButtonHoveredColor = ImColor::HSV(0, 0, 1, 0.35f);
+
+    ImColor const ActionButtonTextColor = ImColor::HSV(0.55f, 0.6f, 1.0f, 1.0f);
+    ImColor const ActionButtonBackgroundColor = ImColor::HSV(0, 0, 0.06f, 0);
+    ImColor const ActionButtonHoveredColor = ImColor::HSV(0, 0, 1, 0.35f);
 
     ImColor const ButtonColor = ImColor::HSV(0.54f, 0.33f, 1.0f, 1.0f);
     ImColor const ToggleColor = ImColor::HSV(0.58f, 0.83f, 1.0f, 1.0f);
@@ -104,11 +110,10 @@ namespace Const
 
 class StyleRepository
 {
-public:
-    static StyleRepository& getInstance();
-    StyleRepository(StyleRepository const&) = delete;
+    MAKE_SINGLETON(StyleRepository);
 
-    void init();
+public :
+    void setup();
 
     ImFont* getIconFont() const;
 
@@ -128,8 +133,6 @@ public:
     float scaleInverse(float value) const;
 
 private:
-    StyleRepository() = default;
-
     ImFont* _iconFont = nullptr;
     ImFont* _smallBoldFont = nullptr;
     ImFont* _mediumBoldFont = nullptr;
@@ -143,5 +146,5 @@ private:
 
 inline float scale(float value)
 {
-    return StyleRepository::getInstance().scale(value);
+    return StyleRepository::get().scale(value);
 }

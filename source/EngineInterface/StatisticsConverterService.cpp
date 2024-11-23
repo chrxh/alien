@@ -1,11 +1,13 @@
 #include "StatisticsConverterService.h"
 
+#include <chrono>
+
 #include "Base/Definitions.h"
 
 namespace
 {
     template <typename T>
-    DataPoint getDataPointForTimestepProperty(ColorVector<T> const& values)
+    DataPoint getDataPointBySummation(ColorVector<T> const& values)
     {
         DataPoint result;
         result.summedValues = 0;
@@ -16,8 +18,20 @@ namespace
         return result;
     }
 
+    template <typename T>
+    DataPoint getDataPointByMaximation(ColorVector<T> const& values)
+    {
+        DataPoint result;
+        result.summedValues = 0;
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            result.values[i] = toDouble(values[i]);
+            result.summedValues = std::max(result.summedValues, result.values[i]);
+        }
+        return result;
+    }
+
     template<typename T>
-    DataPoint getDataPointForAverageSelfReplicator(ColorVector<T> const& summedValue, ColorVector<int> const& numSelfReplicators)
+    DataPoint getDataPointByAveraging(ColorVector<T> const& summedValue, ColorVector<int> const& numSelfReplicators)
     {
         DataPoint result;
         auto sumSummedValue = 0.0;
@@ -68,15 +82,22 @@ DataPointCollection StatisticsConverterService::convert(
 {
     DataPointCollection result;
     result.time = time;
-    result.numCells = getDataPointForTimestepProperty(data.timestep.numCells);
-    result.numSelfReplicators = getDataPointForTimestepProperty(data.timestep.numSelfReplicators);
-    result.numColonies = getDataPointForTimestepProperty(data.timestep.numColonies);
-    result.numViruses = getDataPointForTimestepProperty(data.timestep.numViruses);
-    result.numConnections = getDataPointForTimestepProperty(data.timestep.numConnections);
-    result.numParticles = getDataPointForTimestepProperty(data.timestep.numParticles);
-    result.averageGenomeCells = getDataPointForAverageSelfReplicator(data.timestep.numGenomeCells, data.timestep.numSelfReplicators);
-    result.averageGenomeComplexity = getDataPointForAverageSelfReplicator(data.timestep.genomeComplexity, data.timestep.numSelfReplicators);
-    result.totalEnergy = getDataPointForTimestepProperty(data.timestep.totalEnergy);
+
+    auto now = std::chrono::system_clock::now();
+    auto unixEpoch = std::chrono::time_point<std::chrono::system_clock>();
+    result.systemClock = toDouble(std::chrono::duration_cast<std::chrono::seconds>(now - unixEpoch).count());
+
+    result.numCells = getDataPointBySummation(data.timestep.numCells);
+    result.numSelfReplicators = getDataPointBySummation(data.timestep.numSelfReplicators);
+    result.numColonies = getDataPointBySummation(data.timestep.numColonies);
+    result.numViruses = getDataPointBySummation(data.timestep.numViruses);
+    result.numConnections = getDataPointBySummation(data.timestep.numConnections);
+    result.numParticles = getDataPointBySummation(data.timestep.numParticles);
+    result.averageGenomeCells = getDataPointByAveraging(data.timestep.numGenomeCells, data.timestep.numSelfReplicators);
+    result.averageGenomeComplexity = getDataPointByAveraging(data.timestep.genomeComplexity, data.timestep.numSelfReplicators);
+    result.varianceGenomeComplexity = getDataPointBySummation(data.timestep.genomeComplexityVariance);
+    result.maxGenomeComplexityOfColonies = getDataPointByMaximation(data.timestep.maxGenomeComplexityOfColonies);
+    result.totalEnergy = getDataPointBySummation(data.timestep.totalEnergy);
 
     auto deltaTimesteps = lastTimestep ? toDouble(timestep) - toDouble(*lastTimestep) : 1.0;
     if (deltaTimesteps < NEAR_ZERO) {

@@ -1,27 +1,26 @@
 #pragma once
 
 #include "Network/NetworkService.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _ActivateUserDialog : public _AlienDialog
+class ActivateUserDialog : public AlienDialog<SimulationFacade>
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(ActivateUserDialog);
+
 public:
-    _ActivateUserDialog(SimulationController const& simController, BrowserWindow const& browserWindow);
-    ~_ActivateUserDialog();
-
-    void registerCyclicReferences(CreateUserDialogWeakPtr const& createUserDialog);
-
     void open(std::string const& userName, std::string const& password, UserInfo const& userInfo);
 
 private:
+    ActivateUserDialog();
+
+    void initIntern(SimulationFacade simulationFacade) override;
     void processIntern() override;
     void onActivateUser();
 
-    SimulationController _simController; 
-    BrowserWindow _browserWindow;
-    CreateUserDialogWeakPtr _createUserDialog;
+    SimulationFacade _simulationFacade; 
 
     std::string _userName;
     std::string _password;

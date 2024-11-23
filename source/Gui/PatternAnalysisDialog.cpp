@@ -9,28 +9,30 @@
 
 #include "Base/GlobalSettings.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/SerializerService.h"
-#include "EngineInterface/SimulationController.h"
+#include "PersisterInterface/SerializerService.h"
+#include "EngineInterface/SimulationFacade.h"
 
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
+#include "MainLoopEntityController.h"
 
 
-_PatternAnalysisDialog::_PatternAnalysisDialog(SimulationController const& simController)
-    : _simController(simController)
+void PatternAnalysisDialog::init(SimulationFacade simulationFacade)
 {
+    _simulationFacade = simulationFacade;
+
     auto path = std::filesystem::current_path();
     if (path.has_parent_path()) {
         path = path.parent_path();
     }
-    _startingPath = GlobalSettings::getInstance().getString("dialogs.pattern analysis.starting path", path.string());
+    _startingPath = GlobalSettings::get().getValue("dialogs.pattern analysis.starting path", path.string());
 }
 
-_PatternAnalysisDialog::~_PatternAnalysisDialog()
+void PatternAnalysisDialog::shutdown()
 {
-    GlobalSettings::getInstance().setString("dialogs.pattern analysis.starting path", _startingPath);
+    GlobalSettings::get().setValue("dialogs.pattern analysis.starting path", _startingPath);
 }
 
-void _PatternAnalysisDialog::process()
+void PatternAnalysisDialog::process()
 {
     if (!ifd::FileDialog::Instance().IsDone("PatternAnalysisDialog")) {
         return;
@@ -45,19 +47,19 @@ void _PatternAnalysisDialog::process()
     ifd::FileDialog::Instance().Close();
 }
 
-void _PatternAnalysisDialog::show()
+void PatternAnalysisDialog::show()
 {
     ifd::FileDialog::Instance().Save("PatternAnalysisDialog", "Save pattern analysis result", "Analysis result (*.txt){.txt},.*", _startingPath);
 }
 
-void _PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string const& filename)
+void PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string const& filename)
 {
     auto const partitionClassDataByDescription = calcPartitionData();
 
     std::ofstream file;
     file.open(filename, std::ios_base::out);
     if (!file) {
-        MessageDialog::getInstance().information("Pattern analysis", "The analysis result could not be saved to the specified file.");
+        GenericMessageDialog::get().information("Pattern analysis", "The analysis result could not be saved to the specified file.");
         return;
     }
 
@@ -85,7 +87,7 @@ void _PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string con
         ClusteredDataDescription pattern;
         pattern.clusters = std::vector<ClusterDescription>{partitionClassData.representant};
 
-        SerializerService::serializeContentToFile(clusterFilename.string(), pattern);
+        SerializerService::get().serializeContentToFile(clusterFilename.string(), pattern);
     }
     file.close();
 
@@ -95,12 +97,12 @@ void _PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string con
         messageStream << "Representative cell networks are save from `cluster" << std::setfill('0') << std::setw(6) << 0 << ".sim` to `cluster" << std::setfill('0')
                       << std::setw(6) << partitionData.size() - 1 << ".sim`.";
     }
-    MessageDialog::getInstance().information("Analysis result", messageStream.str());
+    GenericMessageDialog::get().information("Analysis result", messageStream.str());
 }
 
-auto _PatternAnalysisDialog::calcPartitionData() const -> std::map<ClusterAnalysisDescription, PartitionClassData>
+auto PatternAnalysisDialog::calcPartitionData() const -> std::map<ClusterAnalysisDescription, PartitionClassData>
 {
-    auto data = _simController->getClusteredSimulationData();
+    auto data = _simulationFacade->getClusteredSimulationData();
 
     std::map<ClusterAnalysisDescription, PartitionClassData> result;
 
@@ -114,7 +116,7 @@ auto _PatternAnalysisDialog::calcPartitionData() const -> std::map<ClusterAnalys
     return result;
 }
 
-auto _PatternAnalysisDialog::getAnalysisDescription(ClusterDescription const& cluster) const -> ClusterAnalysisDescription
+auto PatternAnalysisDialog::getAnalysisDescription(ClusterDescription const& cluster) const -> ClusterAnalysisDescription
 {
     ClusterAnalysisDescription result;
     std::map<uint64_t, CellAnalysisDescription> cellAnalysisDescById;

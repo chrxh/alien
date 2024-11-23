@@ -447,9 +447,6 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     } break;
     case CellFunction_Sensor: {
         SensorDescription sensor;
-        if (cellTO.cellFunctionData.sensor.mode == SensorMode_FixedAngle) {
-            sensor.fixedAngle = cellTO.cellFunctionData.sensor.angle;
-        }
         sensor.minDensity = cellTO.cellFunctionData.sensor.minDensity;
         sensor.minRange = cellTO.cellFunctionData.sensor.minRange >= 0 ? std::make_optional(cellTO.cellFunctionData.sensor.minRange) : std::nullopt;
         sensor.maxRange = cellTO.cellFunctionData.sensor.maxRange >= 0 ? std::make_optional(cellTO.cellFunctionData.sensor.maxRange) : std::nullopt;
@@ -459,8 +456,8 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         sensor.memoryChannel1 = cellTO.cellFunctionData.sensor.memoryChannel1;
         sensor.memoryChannel2 = cellTO.cellFunctionData.sensor.memoryChannel2;
         sensor.memoryChannel3 = cellTO.cellFunctionData.sensor.memoryChannel3;
-        sensor.targetX = cellTO.cellFunctionData.sensor.targetX;
-        sensor.targetY = cellTO.cellFunctionData.sensor.targetY;
+        sensor.memoryTargetX = cellTO.cellFunctionData.sensor.memoryTargetX;
+        sensor.memoryTargetY = cellTO.cellFunctionData.sensor.memoryTargetY;
         result.cellFunction = sensor;
     } break;
     case CellFunction_Nerve: {
@@ -488,6 +485,8 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         muscle.lastBendingDirection = cellTO.cellFunctionData.muscle.lastBendingDirection;
         muscle.lastBendingSourceIndex = cellTO.cellFunctionData.muscle.lastBendingSourceIndex;
         muscle.consecutiveBendingAngle = cellTO.cellFunctionData.muscle.consecutiveBendingAngle;
+        muscle.lastMovementX = cellTO.cellFunctionData.muscle.lastMovementX;
+        muscle.lastMovementY = cellTO.cellFunctionData.muscle.lastMovementY;
         result.cellFunction = muscle;
     } break;
     case CellFunction_Defender: {
@@ -511,11 +510,11 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     }
 
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        result.activity.channels[i] = cellTO.activity.channels[i];
+        result.signal.channels[i] = cellTO.signal.channels[i];
     }
-    result.activity.origin = cellTO.activity.origin;
-    result.activity.targetX = cellTO.activity.targetX;
-    result.activity.targetY = cellTO.activity.targetY;
+    result.signal.origin = cellTO.signal.origin;
+    result.signal.targetX = cellTO.signal.targetX;
+    result.signal.targetY = cellTO.signal.targetY;
     result.activationTime = cellTO.activationTime;
     return result;
 }
@@ -535,7 +534,7 @@ void DescriptionConverter::addParticle(DataTO const& dataTO, ParticleDescription
     auto particleIndex = (*dataTO.numParticles)++;
 
 	ParticleTO& particleTO = dataTO.particles[particleIndex];
-	particleTO.id = particleDesc.id == 0 ? NumberGenerator::getInstance().getId() : particleDesc.id;
+	particleTO.id = particleDesc.id == 0 ? NumberGenerator::get().getId() : particleDesc.id;
     particleTO.pos = {particleDesc.pos.x, particleDesc.pos.y};
     particleTO.vel = {particleDesc.vel.x, particleDesc.vel.y};
     particleTO.energy = particleDesc.energy;
@@ -548,7 +547,7 @@ void DescriptionConverter::addCell(
 {
     int cellIndex = (*dataTO.numCells)++;
     CellTO& cellTO = dataTO.cells[cellIndex];
-    cellTO.id = cellDesc.id == 0 ? NumberGenerator::getInstance().getId() : cellDesc.id;
+    cellTO.id = cellDesc.id == 0 ? NumberGenerator::get().getId() : cellDesc.id;
 	cellTO.pos= { cellDesc.pos.x, cellDesc.pos.y };
     cellTO.vel = {cellDesc.vel.x, cellDesc.vel.y};
     cellTO.energy = cellDesc.energy;
@@ -606,18 +605,16 @@ void DescriptionConverter::addCell(
     case CellFunction_Sensor: {
         auto const& sensorDesc = std::get<SensorDescription>(*cellDesc.cellFunction);
         SensorTO sensorTO;
-        sensorTO.mode = sensorDesc.getSensorMode();
         sensorTO.restrictToColor = sensorDesc.restrictToColor.value_or(255);
         sensorTO.restrictToMutants = sensorDesc.restrictToMutants;
         sensorTO.minDensity = sensorDesc.minDensity;
         sensorTO.minRange = static_cast<int8_t>(sensorDesc.minRange.value_or(-1));
         sensorTO.maxRange = static_cast<int8_t>(sensorDesc.maxRange.value_or(-1));
-        sensorTO.angle = sensorDesc.fixedAngle.value_or(0);
         sensorTO.memoryChannel1 = sensorDesc.memoryChannel1;
         sensorTO.memoryChannel2 = sensorDesc.memoryChannel2;
         sensorTO.memoryChannel3 = sensorDesc.memoryChannel3;
-        sensorTO.targetX = sensorDesc.targetX;
-        sensorTO.targetY = sensorDesc.targetY;
+        sensorTO.memoryTargetX = sensorDesc.memoryTargetX;
+        sensorTO.memoryTargetY = sensorDesc.memoryTargetY;
         cellTO.cellFunctionData.sensor = sensorTO;
     } break;
     case CellFunction_Nerve: {
@@ -650,6 +647,8 @@ void DescriptionConverter::addCell(
         muscleTO.lastBendingDirection = muscleDesc.lastBendingDirection;
         muscleTO.lastBendingSourceIndex = muscleDesc.lastBendingSourceIndex;
         muscleTO.consecutiveBendingAngle = muscleDesc.consecutiveBendingAngle;
+        muscleTO.lastMovementX = muscleDesc.lastMovementX;
+        muscleTO.lastMovementY = muscleDesc.lastMovementY;
         cellTO.cellFunctionData.muscle = muscleTO;
     } break;
     case CellFunction_Defender: {
@@ -674,11 +673,11 @@ void DescriptionConverter::addCell(
     } break;
     }
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        cellTO.activity.channels[i] = cellDesc.activity.channels[i];
+        cellTO.signal.channels[i] = cellDesc.signal.channels[i];
     }
-    cellTO.activity.origin = cellDesc.activity.origin;
-    cellTO.activity.targetX = cellDesc.activity.targetX;
-    cellTO.activity.targetY = cellDesc.activity.targetY;
+    cellTO.signal.origin = cellDesc.signal.origin;
+    cellTO.signal.targetX = cellDesc.signal.targetX;
+    cellTO.signal.targetY = cellDesc.signal.targetY;
     cellTO.activationTime = cellDesc.activationTime;
     cellTO.numConnections = 0;
     cellTO.barrier = cellDesc.barrier;

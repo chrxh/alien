@@ -3,23 +3,22 @@
 #include <imgui.h>
 
 #include "AlienImGui.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "NewPasswordDialog.h"
 
-_ResetPasswordDialog::_ResetPasswordDialog(NewPasswordDialog const& newPasswordDialog)
-    : _AlienDialog("Reset password")
-    , _newPasswordDialog(newPasswordDialog)
+ResetPasswordDialog::ResetPasswordDialog()
+    : AlienDialog("Reset password")
 {}
 
-void _ResetPasswordDialog::open(std::string const& userName, UserInfo const& userInfo)
+void ResetPasswordDialog::open(std::string const& userName, UserInfo const& userInfo)
 {
-    _AlienDialog::open();
+    AlienDialog::open();
     _userName = userName;
     _email.clear();
     _userInfo = userInfo;
 }
 
-void _ResetPasswordDialog::processIntern()
+void ResetPasswordDialog::processIntern()
 {
     AlienImGui::Text("Security information");
     AlienImGui::HelpMarker("The data transfer to the server is encrypted via https. On the server side, the email address is not stored in cleartext, but "
@@ -50,12 +49,12 @@ void _ResetPasswordDialog::processIntern()
     }
 }
 
-void _ResetPasswordDialog::onResetPassword()
+void ResetPasswordDialog::onResetPassword()
 {
-    if (NetworkService::resetPassword(_userName, _email)) {
-        _newPasswordDialog->open(_userName, _userInfo);
+    if (NetworkService::get().resetPassword(_userName, _email)) {
+        NewPasswordDialog::get().open(_userName, _userInfo);
     } else {
-        MessageDialog::getInstance().information(
+        GenericMessageDialog::get().information(
             "Error", "An error occurred on the server. This could be related to the fact that the\nemail address is wrong.");
     }
 }

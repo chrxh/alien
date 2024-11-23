@@ -3,14 +3,14 @@
 #include "EngineInterface/Definitions.h"
 #include "Definitions.h"
 #include "AlienWindow.h"
+#include "Base/Singleton.h"
 
-class _SelectionWindow : public _AlienWindow
+class SelectionWindow : public AlienWindow<>
 {
-public:
-    _SelectionWindow(EditorModel const& editorModel);
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(SelectionWindow);
 
 private:
-    void processIntern();
+    SelectionWindow();
 
-    EditorModel _editorModel; 
+    void processIntern();
 };

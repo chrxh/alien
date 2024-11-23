@@ -137,7 +137,7 @@ struct GlobalSettingsImpl
 };
 
 
-GlobalSettings& GlobalSettings::getInstance()
+GlobalSettings& GlobalSettings::get()
 {
     static GlobalSettings instance;
     return instance;
@@ -153,7 +153,7 @@ void GlobalSettings::setDebugMode(bool value) const
     _impl->_debugMode = value;
 }
 
-bool GlobalSettings::getBool(std::string const& key, bool defaultValue)
+bool GlobalSettings::getValue(std::string const& key, bool defaultValue)
 {
     bool result;
 #ifdef _WIN32
@@ -164,7 +164,7 @@ bool GlobalSettings::getBool(std::string const& key, bool defaultValue)
     return result;
 }
 
-void GlobalSettings::setBool(std::string const& key, bool value)
+void GlobalSettings::setValue(std::string const& key, bool value)
 {
 #ifdef _WIN32
     setBoolToWinReg(key, value);
@@ -173,7 +173,7 @@ void GlobalSettings::setBool(std::string const& key, bool value)
 #endif
 }
 
-int GlobalSettings::getInt(std::string const& key, int defaultValue)
+int GlobalSettings::getValue(std::string const& key, int defaultValue)
 {
     int result;
 #ifdef _WIN32
@@ -184,7 +184,7 @@ int GlobalSettings::getInt(std::string const& key, int defaultValue)
     return result;
 }
 
-void GlobalSettings::setInt(std::string const& key, int value)
+void GlobalSettings::setValue(std::string const& key, int value)
 {
 #ifdef _WIN32
     setIntToWinReg(key, value);
@@ -193,7 +193,7 @@ void GlobalSettings::setInt(std::string const& key, int value)
 #endif
 }
 
-float GlobalSettings::getFloat(std::string const& key, float defaultValue)
+float GlobalSettings::getValue(std::string const& key, float defaultValue)
 {
     float result;
 #ifdef _WIN32
@@ -204,7 +204,7 @@ float GlobalSettings::getFloat(std::string const& key, float defaultValue)
     return result;
 }
 
-void GlobalSettings::setFloat(std::string const& key, float value)
+void GlobalSettings::setValue(std::string const& key, float value)
 {
 #ifdef _WIN32
     setFloatToWinReg(key, value);
@@ -213,7 +213,7 @@ void GlobalSettings::setFloat(std::string const& key, float value)
 #endif
 }
 
-std::string GlobalSettings::getString(std::string const& key, std::string const& defaultValue)
+std::string GlobalSettings::getValue(std::string const& key, std::string const& defaultValue)
 {
     std::string result;
 #ifdef _WIN32
@@ -224,7 +224,7 @@ std::string GlobalSettings::getString(std::string const& key, std::string const&
     return result;
 }
 
-void GlobalSettings::setString(std::string const& key, std::string value)
+void GlobalSettings::setValue(std::string const& key, std::string value)
 {
 #ifdef _WIN32
     setStringToWinReg(key, value);
@@ -233,17 +233,17 @@ void GlobalSettings::setString(std::string const& key, std::string value)
 #endif
 }
 
-std::vector<std::string> GlobalSettings::getStringVector(std::string const& key, std::vector<std::string> const& defaultValue)
+std::vector<std::string> GlobalSettings::getValue(std::string const& key, std::vector<std::string> const& defaultValue)
 {
-    auto joinedString = getString(key, boost::join(defaultValue, "\\"));
+    auto joinedString = getValue(key, boost::join(defaultValue, "\\"));
     std::vector<std::string> result;
     boost::split(result, joinedString, boost::is_any_of("\\"));
     return result;
 }
 
-void GlobalSettings::setStringVector(std::string const& key, std::vector<std::string> value)
+void GlobalSettings::setValue(std::string const& key, std::vector<std::string> value)
 {
-    setString(key, boost::join(value, "\\"));
+    setValue(key, boost::join(value, "\\"));
 }
 
 GlobalSettings::GlobalSettings()

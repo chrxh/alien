@@ -5,19 +5,19 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _ResetPasswordDialog : public _AlienDialog
+class ResetPasswordDialog : public AlienDialog<>
 {
-public:
-    _ResetPasswordDialog(NewPasswordDialog const& newPasswordDialog);
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(ResetPasswordDialog);
 
+public:
     void open(std::string const& userName, UserInfo const& userInfo);
 
 private:
-    void processIntern();
+    ResetPasswordDialog();
+
+    void processIntern() override;
 
     void onResetPassword();
-
-    NewPasswordDialog _newPasswordDialog; 
 
     std::string _userName;
     std::string _email;

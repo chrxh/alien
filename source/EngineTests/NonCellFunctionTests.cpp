@@ -4,7 +4,7 @@
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/GenomeDescriptionService.h"
 #include "EngineInterface/GenomeDescriptions.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
 class NonCellFunctionTests : public IntegrationTestFramework
@@ -43,10 +43,10 @@ TEST_F(NonCellFunctionTests, distributeToOtherTransmitter)
             .setEnergy(_parameters.cellNormalEnergy[0]),
     });
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
 
     auto actualCell = getCell(actualData, 1);
 

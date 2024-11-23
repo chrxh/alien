@@ -67,20 +67,14 @@ namespace
     }
 }
 
-std::string NetworkService::_serverAddress;
-std::optional<std::string> NetworkService::_loggedInUserName;
-std::optional<std::string> NetworkService::_password;
-std::optional<std::chrono::steady_clock::time_point> NetworkService::_lastRefreshTime;
-Cache<std::string, NetworkService::ResourceData, 20> NetworkService::_downloadCache;
-
-void NetworkService::init()
+void NetworkService::setup()
 {
-    _serverAddress = GlobalSettings::getInstance().getString("settings.server", "alien-project.org");
+    _serverAddress = GlobalSettings::get().getValue("settings.server", std::string(Const::AlienURL));
 }
 
 void NetworkService::shutdown()
 {
-    GlobalSettings::getInstance().setString("settings.server", _serverAddress);
+    GlobalSettings::get().setValue("settings.server", _serverAddress);
     logout();
 }
 
@@ -93,6 +87,11 @@ void NetworkService::setServerAddress(std::string const& value)
 {
     _serverAddress = value;
     logout();
+}
+
+bool NetworkService::isLoggedIn()
+{
+    return static_cast<bool>(_loggedInUserName);
 }
 
 std::optional<std::string> NetworkService::getLoggedInUserName()
@@ -173,7 +172,7 @@ bool NetworkService::login(LoginErrorCode& errorCode, std::string const& userNam
             _password = password;
         }
 
-        errorCode = false;
+        errorCode = 0;
         std::stringstream stream(result->body);
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
@@ -317,7 +316,7 @@ bool NetworkService::getNetworkResources(std::vector<NetworkResourceRawTO>& resu
         std::stringstream stream(postResult->body);
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
-        result = NetworkResourceParserService::decodeRemoteSimulationData(tree);
+        result = NetworkResourceParserService::get().decodeRemoteSimulationData(tree);
         return true;
     } catch (...) {
         logNetworkError();
@@ -340,7 +339,7 @@ bool NetworkService::getUserList(std::vector<UserTO>& result, bool withRetry)
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
         result.clear();
-        result = NetworkResourceParserService::decodeUserData(tree);
+        result = NetworkResourceParserService::get().decodeUserData(tree);
         for (UserTO& userData : result) {
             userData.timeSpent = userData.timeSpent * RefreshInterval / 60;
         }
@@ -409,7 +408,7 @@ bool NetworkService::getUserNamesForResourceAndEmojiType(std::set<std::string>& 
     }
 }
 
-bool NetworkService::toggleReactToResource(std::string const& simId, int likeType)
+bool NetworkService::toggleReactionForResource(std::string const& simId, int likeType)
 {
     log(Priority::Important, "network: toggle like for resource with id=" + simId);
 

@@ -1,5 +1,36 @@
 # Release notes
 
+## [4.11.0] - 2024-11-23
+### Added
+- gui: autosave window for managing savepoints and keeping track of interesting moments (e.g. high 'Genome complexity variance') added 
+- gui: prevent blocking gui during saving, loading, download and uploading data
+- engine, gui/simulation parameters: introduce relative strength of radiation sources and allow to pin their values
+- engine, gui/simulation parameters: parameter for cell death consequences introduced (such as 'Detached creature parts die')
+- engine, gui/simulation parameters: parameter for external energy inflow for non-self-replicators only
+- engine, gui/simulation parameters: parameter for limit of external energy backflow
+- engine, gui/simulation parameters: parameter for switching off red cross at radiation sources 
+- gui: project name introduced (shown in simulation parameters window)
+- gui/statistics: plots for 'Genome complexity variance' and 'Genome complexity maximum'
+- gui/statistics: adjustable time horizon for long-term plots
+- gui/statistics: show plot value, timestamp, time step at mouse cursor
+- gui/simulation parameters: allow position selection via mouse (e.g. for zones and radiation sources)
+- gui/simulation view: render movement direction of muscle cells
+- engine, gui/simulation view: allow drawing during running simulations
+
+### Changed
+- engine: duplication mutation extended: allow copying segments containing self-replicating parts
+- engine, gui/simulation parameters: make cell death probability zone-dependent
+- gui: new progress animation for asynchronous processes
+- gui/genome editor: expand cell item after clicking on preview, collapse all others
+
+### Fixed
+- gui: prevent windows from having zero size
+- gui: remember reference path in open/save dialogs
+- gui/statistics: performance for real-time plot improved
+- engine, gui/pattern editor: calculation of mass center corrected
+- engine, gui/simulation parameters: prevent incorrect position calculation of zones when changing parameters in running simulations
+- engine: prevent deviation of positions of zones and moving barriers in long-running simulations
+
 ## [4.10.2] - 2024-08-31
 ### Added
 - engine, gui/simulation parameters: number of neurons can be taken into account for the genome complexity calculation

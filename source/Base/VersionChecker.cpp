@@ -76,6 +76,7 @@ namespace
         return result;
     }
 }
+
 bool VersionChecker::isVersionOutdated(std::string const& otherVersionString)
 {
     auto otherParts = getVersionParts(otherVersionString);

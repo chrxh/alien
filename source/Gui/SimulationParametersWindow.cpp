@@ -5,17 +5,18 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/GlobalSettings.h"
-#include "EngineInterface/SerializerService.h"
-#include "EngineInterface/SimulationController.h"
-#include "EngineInterface/LegacyAuxiliaryDataParserService.h"
+#include "EngineInterface/SimulationFacade.h"
+#include "EngineInterface/SimulationParametersValidationService.h"
+#include "PersisterInterface/SerializerService.h"
 
 #include "AlienImGui.h"
 #include "CellFunctionStrings.h"
-#include "GenericFileDialogs.h"
+#include "GenericFileDialog.h"
 #include "HelpStrings.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
+#include "SimulationInteractionController.h"
 #include "RadiationSourcesWindow.h"
-#include "OverlayMessageController.h"
+#include "OverlayController.h"
 #include "StyleRepository.h"
 
 namespace
@@ -47,13 +48,10 @@ namespace
     }
 }
 
-_SimulationParametersWindow::_SimulationParametersWindow(
-    SimulationController const& simController,
-    RadiationSourcesWindow const& radiationSourcesWindow)
-    : _AlienWindow("Simulation parameters", "windows.simulation parameters", false)
-    , _simController(simController)
-    , _radiationSourcesWindow(radiationSourcesWindow)
+void SimulationParametersWindow::initIntern(SimulationFacade simulationFacade)
 {
+    _simulationFacade = simulationFacade;
+
     for (int n = 0; n < IM_ARRAYSIZE(_savedPalette); n++) {
         ImVec4 color;
         ImGui::ColorConvertHSVtoRGB(n / 31.0f, 0.8f, 0.2f, color.x, color.y, color.z);
@@ -65,35 +63,46 @@ _SimulationParametersWindow::_SimulationParametersWindow(
     if (path.has_parent_path()) {
         path = path.parent_path();
     }
-    _startingPath = GlobalSettings::getInstance().getString("windows.simulation parameters.starting path", path.string());
-    _featureListOpen = GlobalSettings::getInstance().getBool("windows.simulation parameters.feature list.open", _featureListOpen);
-    _featureListHeight = GlobalSettings::getInstance().getFloat("windows.simulation parameters.feature list.height", _featureListHeight);
+    _startingPath = GlobalSettings::get().getValue("windows.simulation parameters.starting path", path.string());
+    _featureListOpen = GlobalSettings::get().getValue("windows.simulation parameters.feature list.open", _featureListOpen);
+    _featureListHeight = GlobalSettings::get().getValue("windows.simulation parameters.feature list.height", _featureListHeight);
 
     for (int i = 0; i < CellFunction_Count; ++i) {
         _cellFunctionStrings.emplace_back(Const::CellFunctionToStringMap.at(i));
     }
+
 }
 
-_SimulationParametersWindow::~_SimulationParametersWindow()
+SimulationParametersWindow::SimulationParametersWindow()
+    : AlienWindow("Simulation parameters", "windows.simulation parameters", false)
+{}
+
+void SimulationParametersWindow::shutdownIntern()
 {
-    GlobalSettings::getInstance().setString("windows.simulation parameters.starting path", _startingPath);
-    GlobalSettings::getInstance().setBool("windows.simulation parameters.feature list.open", _featureListOpen);
-    GlobalSettings::getInstance().setFloat("windows.simulation parameters.feature list.height", _featureListHeight);
+    GlobalSettings::get().setValue("windows.simulation parameters.starting path", _startingPath);
+    GlobalSettings::get().setValue("windows.simulation parameters.feature list.open", _featureListOpen);
+    GlobalSettings::get().setValue("windows.simulation parameters.feature list.height", _featureListHeight);
 }
 
-void _SimulationParametersWindow::processIntern()
+void SimulationParametersWindow::processIntern()
 {
     processToolbar();
-    if (ImGui::BeginChild("", {0, _featureListOpen ? -scale(_featureListHeight) : -scale(50.0f)})) {
-        processTabWidget();
+
+    if (ImGui::BeginChild("##parameterchild1", {0, -scale(44.0f)})) {
+        if (ImGui::BeginChild("##parameterchild2", {0, _featureListOpen ? -scale(_featureListHeight) : -scale(50.0f)})) {
+            processTabWidget();
+        }
+        ImGui::EndChild();
+        processAddonList();
     }
     ImGui::EndChild();
-    processAddonList();
+
+    processStatusBar();
 }
 
-SimulationParametersSpot _SimulationParametersWindow::createSpot(SimulationParameters const& simParameters, int index)
+SimulationParametersSpot SimulationParametersWindow::createSpot(SimulationParameters const& simParameters, int index)
 {
-    auto worldSize = _simController->getWorldSize();
+    auto worldSize = _simulationFacade->getWorldSize();
     SimulationParametersSpot spot;
     spot.posX = toFloat(worldSize.x / 2);
     spot.posY = toFloat(worldSize.y / 2);
@@ -108,9 +117,9 @@ SimulationParametersSpot _SimulationParametersWindow::createSpot(SimulationParam
     return spot;
 }
 
-void _SimulationParametersWindow::createDefaultSpotData(SimulationParametersSpot& spot)
+void SimulationParametersWindow::createDefaultSpotData(SimulationParametersSpot& spot)
 {
-    auto worldSize = _simController->getWorldSize();
+    auto worldSize = _simulationFacade->getWorldSize();
 
     auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
     if (spot.shapeType == SpotShapeType_Circular) {
@@ -121,7 +130,7 @@ void _SimulationParametersWindow::createDefaultSpotData(SimulationParametersSpot
     }
 }
 
-void _SimulationParametersWindow::processToolbar()
+void SimulationParametersWindow::processToolbar()
 {
     if (AlienImGui::ToolbarButton(ICON_FA_FOLDER_OPEN)) {
         onOpenParameters();
@@ -139,7 +148,7 @@ void _SimulationParametersWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
-        _copiedParameters = _simController->getSimulationParameters();
+        _copiedParameters = _simulationFacade->getSimulationParameters();
         printOverlayMessage("Simulation parameters copied");
     }
     AlienImGui::Tooltip("Copy simulation parameters");
@@ -147,8 +156,8 @@ void _SimulationParametersWindow::processToolbar()
     ImGui::SameLine();
     ImGui::BeginDisabled(!_copiedParameters);
     if (AlienImGui::ToolbarButton(ICON_FA_PASTE)) {
-        _simController->setSimulationParameters(*_copiedParameters);
-        _simController->setOriginalSimulationParameters(*_copiedParameters);
+        _simulationFacade->setSimulationParameters(*_copiedParameters);
+        _simulationFacade->setOriginalSimulationParameters(*_copiedParameters);
         printOverlayMessage("Simulation parameters pasted");
     }
     ImGui::EndDisabled();
@@ -157,9 +166,9 @@ void _SimulationParametersWindow::processToolbar()
     AlienImGui::Separator();
 }
 
-void _SimulationParametersWindow::processTabWidget()
+void SimulationParametersWindow::processTabWidget()
 {
-    auto currentSessionId = _simController->getSessionId();
+    auto currentSessionId = _simulationFacade->getSessionId();
 
     std::optional<bool> scheduleAppendTab;
     std::optional<int> scheduleDeleteTabAtIndex;
@@ -167,7 +176,7 @@ void _SimulationParametersWindow::processTabWidget()
     if (ImGui::BeginChild("##", ImVec2(0, 0), false)) {
 
         if (ImGui::BeginTabBar("##Parameters", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
-            auto parameters = _simController->getSimulationParameters();
+            auto parameters = _simulationFacade->getSimulationParameters();
 
             //add spot
             if (parameters.numSpots < MAX_SPOTS) {
@@ -201,15 +210,29 @@ void _SimulationParametersWindow::processTabWidget()
     }
 }
 
-void _SimulationParametersWindow::processBase()
+void SimulationParametersWindow::processBase()
 {
     if (ImGui::BeginTabItem("Base", nullptr, _focusBaseTab ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None)) {
-        auto parameters = _simController->getSimulationParameters();
-        auto origParameters = _simController->getOriginalSimulationParameters();
+        auto parameters = _simulationFacade->getSimulationParameters();
+        auto origParameters = _simulationFacade->getOriginalSimulationParameters();
         auto lastParameters = parameters;
 
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
+            /**
+             * General
+             */
+            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("General"))) {
+                AlienImGui::InputText(
+                    AlienImGui::InputTextParameters()
+                        .name("Project name")
+                        .textWidth(RightColumnWidth)
+                        .defaultValue(origParameters.projectName),
+                    parameters.projectName,
+                    sizeof(Char64) / sizeof(char));
+
+                AlienImGui::EndTreeNode();
+            }
             /**
              * Rendering
              */
@@ -273,6 +296,13 @@ void _SimulationParametersWindow::processBase()
                     parameters.attackVisualization);
                 AlienImGui::Checkbox(
                     AlienImGui::CheckboxParameters()
+                        .name("Muscle movement visualization")
+                        .textWidth(RightColumnWidth)
+                        .defaultValue(origParameters.muscleMovementVisualization)
+                        .tooltip("If activated, the direction in which muscle cells are moving are visualized."),
+                    parameters.muscleMovementVisualization);
+                AlienImGui::Checkbox(
+                    AlienImGui::CheckboxParameters()
                         .name("Borderless rendering")
                         .textWidth(RightColumnWidth)
                         .defaultValue(origParameters.borderlessRendering)
@@ -292,6 +322,13 @@ void _SimulationParametersWindow::processBase()
                         .defaultValue(origParameters.markReferenceDomain)
                         .tooltip("Draws borders along the world before it repeats itself."),
                     parameters.markReferenceDomain);
+                AlienImGui::Checkbox(
+                    AlienImGui::CheckboxParameters()
+                        .name("Show radiation sources")
+                        .textWidth(RightColumnWidth)
+                        .defaultValue(origParameters.showRadiationSources)
+                        .tooltip("Draws red crosses in the center of radiation sources."),
+                    parameters.showRadiationSources);
                 AlienImGui::EndTreeNode();
             }
 
@@ -493,7 +530,7 @@ void _SimulationParametersWindow::processBase()
                                            .showDisabledRevertButton(true)
                             .tooltip("If no radiation source is specified, the cells emit energy particles at their respective positions. If, on the other hand, "
                                      "one or more radiation sources are defined, the energy particles emitted by cells are created at these sources."))) {
-                    _radiationSourcesWindow->setOn(true);
+                    RadiationSourcesWindow::get().setOn(true);
                 }
 
                 AlienImGui::SliderFloat(
@@ -617,12 +654,12 @@ void _SimulationParametersWindow::processBase()
                         .min(10.0f)
                         .max(200.0f)
                         .defaultValue(origParameters.cellNormalEnergy)
-                        .tooltip("The normal energy value of a cell is defined here. This is used as a reference value in various contexts: \n"
-                                 ICON_FA_CARET_RIGHT" Attacker and Transmitter cells: When the energy of these cells is above the normal value, some of their energy is distributed to "
-                                 "surrounding cells.\n"
-                                 ICON_FA_CARET_RIGHT" Constructor cells: Creating new cells costs energy. The creation of new cells is executed only when the "
-                                 "residual energy of the constructor cell does not fall below the normal value.\n"
-                                 ICON_FA_CARET_RIGHT" If the transformation of energy particles to "
+                        .tooltip("The normal energy value of a cell is defined here. This is used as a reference value in various contexts: \n\n" ICON_FA_CHEVRON_RIGHT
+                            " Attacker and Transmitter cells: When the energy of these cells is above the normal value, some of their energy is distributed to "
+                                 "surrounding cells.\n\n" ICON_FA_CHEVRON_RIGHT
+                            " Constructor cells: Creating new cells costs energy. The creation of new cells is executed only when the "
+                                 "residual energy of the constructor cell does not fall below the normal value.\n\n" ICON_FA_CHEVRON_RIGHT
+                            " If the transformation of energy particles to "
                                  "cells is activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal value."),
                     parameters.cellNormalEnergy);
                 AlienImGui::SliderFloat(
@@ -631,22 +668,26 @@ void _SimulationParametersWindow::processBase()
                         .colorDependence(true)
                         .textWidth(RightColumnWidth)
                         .min(1e-6f)
-                        .max(0.05f)
+                        .max(0.1f)
                         .format("%.6f")
                         .logarithmic(true)
-                        .defaultValue(origParameters.clusterDecayProb)
-                        .tooltip(
-                            "The probability per time step with which a cell will disintegrate (i.e. transform into an energy particle) provided that one of the following conditions is satisfied:\n" ICON_FA_CARET_RIGHT
-                            " the cell has too low energy,\n" ICON_FA_CARET_RIGHT " the cell is in 'Dying' state\n" ICON_FA_CARET_RIGHT " the cell has exceeded the maximum age.")
-                    , parameters.clusterDecayProb);
-                AlienImGui::Checkbox(
-                    AlienImGui::CheckboxParameters()
-                        .name("Cell network decay")
+                        .defaultValue(origParameters.baseValues.cellDeathProbability)
+                        .tooltip("The probability per time step with which a cell will disintegrate (i.e. transform into an energy particle) when it is in the "
+                                    "state 'Dying'. This can occur when one of the following conditions is satisfied:\n\n"
+                                    ICON_FA_CHEVRON_RIGHT " The cell has too low energy.\n\n"
+                                    ICON_FA_CHEVRON_RIGHT " The cell has exceeded its maximum age."),
+                    parameters.baseValues.cellDeathProbability);
+                AlienImGui::Switcher(
+                    AlienImGui::SwitcherParameters()
+                        .name("Cell death consequences")
                         .textWidth(RightColumnWidth)
-                        .defaultValue(origParameters.clusterDecay)
-                        .tooltip("If enabled, entire cell networks will disintegrate when one of their cells is dying because of insufficient energy or exceeding "
-                                 "the max. age. This option is useful to minimize the presence of damaged cell networks."),
-                    parameters.clusterDecay);
+                        .defaultValue(origParameters.cellDeathConsequences)
+                        .values({"None", "Entire creature dies", "Detached creature parts die"})
+                        .tooltip("Here one can define what happens to the organism when one of its cells is in the 'Dying' state.\n\n" ICON_FA_CHEVRON_RIGHT
+                                 " None: Only the cell dies.\n\n" ICON_FA_CHEVRON_RIGHT " Entire creature dies: All the cells of the organism will also die.\n\n" ICON_FA_CHEVRON_RIGHT
+                                 " Detached creature parts die: Only the parts of the organism that are no longer connected to a "
+                                 "constructor cell for self-replication die."),
+                    parameters.cellDeathConsequences);
                 AlienImGui::EndTreeNode();
             }
             ImGui::PopID();
@@ -860,18 +901,6 @@ void _SimulationParametersWindow::processBase()
                     parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
-                        .name("Energy cost")
-                        .textWidth(RightColumnWidth)
-                        .colorDependence(true)
-                        .min(0)
-                        .max(1.0f)
-                        .format("%.5f")
-                        .logarithmic(true)
-                        .defaultValue(origParameters.baseValues.cellFunctionAttackerEnergyCost)
-                        .tooltip("Amount of energy lost by an attempted attack of a cell in form of emitted energy particles."),
-                    parameters.baseValues.cellFunctionAttackerEnergyCost);
-                AlienImGui::SliderFloat(
-                    AlienImGui::SliderFloatParameters()
                         .name("Attack strength")
                         .textWidth(RightColumnWidth)
                         .colorDependence(true)
@@ -892,6 +921,27 @@ void _SimulationParametersWindow::processBase()
                         .defaultValue(origParameters.cellFunctionAttackerRadius)
                         .tooltip("The maximum distance over which an attacker cell can attack another cell."),
                     parameters.cellFunctionAttackerRadius);
+                AlienImGui::InputFloatColorMatrix(
+                    AlienImGui::InputFloatColorMatrixParameters()
+                        .name("Complex creature protection")
+                        .textWidth(RightColumnWidth)
+                        .min(0)
+                        .max(20.0f)
+                        .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.baseValues.cellFunctionAttackerGenomeComplexityBonus))
+                        .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with more complex genomes."),
+                    parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Energy cost")
+                        .textWidth(RightColumnWidth)
+                        .colorDependence(true)
+                        .min(0)
+                        .max(1.0f)
+                        .format("%.5f")
+                        .logarithmic(true)
+                        .defaultValue(origParameters.baseValues.cellFunctionAttackerEnergyCost)
+                        .tooltip("Amount of energy lost by an attempted attack of a cell in form of emitted energy particles."),
+                    parameters.baseValues.cellFunctionAttackerEnergyCost);
                 AlienImGui::Checkbox(
                     AlienImGui::CheckboxParameters()
                         .name("Destroy cells")
@@ -908,16 +958,6 @@ void _SimulationParametersWindow::processBase()
              * Constructor
              */
             if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Cell function: Constructor"))) {
-                AlienImGui::SliderFloat(
-                    AlienImGui::SliderFloatParameters()
-                        .name("Offspring distance")
-                        .textWidth(RightColumnWidth)
-                        .colorDependence(true)
-                        .min(0.1f)
-                        .max(3.0f)
-                        .defaultValue(origParameters.cellFunctionConstructorOffspringDistance)
-                        .tooltip("The distance of the constructed cell from the constructor cell."),
-                    parameters.cellFunctionConstructorOffspringDistance);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Connection distance")
@@ -1211,15 +1251,6 @@ void _SimulationParametersWindow::processBase()
                 if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Advanced attacker control"))) {
                     AlienImGui::InputFloatColorMatrix(
                         AlienImGui::InputFloatColorMatrixParameters()
-                            .name("Complex genome protection")
-                            .textWidth(RightColumnWidth)
-                            .min(0)
-                            .max(20.0f)
-                            .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.baseValues.cellFunctionAttackerGenomeComplexityBonus))
-                            .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with more complex genomes."),
-                        parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus);
-                    AlienImGui::InputFloatColorMatrix(
-                        AlienImGui::InputFloatColorMatrixParameters()
                             .name("Same mutant protection")
                             .textWidth(RightColumnWidth)
                             .min(0)
@@ -1463,12 +1494,10 @@ void _SimulationParametersWindow::processBase()
                             .logarithmic(true)
                             .infinity(true)
                             .defaultValue(&origParameters.externalEnergy)
-                            .tooltip("This parameter can be used to set the amount of energy of an external energy source. This type of energy can be "
+                            .tooltip("This parameter can be used to set the amount of energy of an external energy pool. This type of energy can then be "
                                      "transferred to all constructor cells at a certain rate (see inflow settings).\n\nTip: You can explicitly enter a "
-                                     "numerical value by clicking on the "
-                                     "slider while holding CTRL.\n\nWarning: Too much external energy can result in a massive production of cells and slow "
-                                     "down or "
-                                     "even crash the simulation."),
+                                     "numerical value by clicking on the slider while holding CTRL.\n\nWarning: Too much external energy can result in a "
+                                     "massive production of cells and slow down or even crash the simulation."),
                         &parameters.externalEnergy);
                     AlienImGui::SliderFloat(
                         AlienImGui::SliderFloatParameters()
@@ -1500,6 +1529,14 @@ void _SimulationParametersWindow::processBase()
                                 "build the new cell for free from the external energy source. However, it must provide 40% of the energy required by itself. "
                                 "Otherwise, no energy will be transferred."),
                         parameters.externalEnergyConditionalInflowFactor);
+                    AlienImGui::Checkbox(
+                        AlienImGui::CheckboxParameters()
+                            .name("Inflow only for non-replicators")
+                            .textWidth(RightColumnWidth)
+                            .defaultValue(origParameters.externalEnergyInflowOnlyForNonSelfReplicators)
+                            .tooltip("If activated, external energy can only be transferred to constructor cells that are not self-replicators. "
+                                     "This option can be used to foster the evolution of additional body parts."),
+                        parameters.externalEnergyInflowOnlyForNonSelfReplicators);
                     AlienImGui::SliderFloat(
                         AlienImGui::SliderFloatParameters()
                             .name("Backflow")
@@ -1508,9 +1545,21 @@ void _SimulationParametersWindow::processBase()
                             .min(0.0f)
                             .max(1.0f)
                             .defaultValue(origParameters.externalEnergyBackflowFactor)
-                            .tooltip("The proportion of energy that flows back to the external energy source when a cell loses energy or dies. The remaining "
-                                     "fraction of the energy is used to create a new energy particle."),
+                            .tooltip("The proportion of energy that flows back from the simulation to the external energy pool. Each time a cell loses energy or dies a fraction of its energy will be taken. The remaining "
+                                     "fraction of the energy stays in the simulation and will be used to create a new energy particle."),
                         parameters.externalEnergyBackflowFactor);
+                    AlienImGui::SliderFloat(
+                        AlienImGui::SliderFloatParameters()
+                            .name("Backflow limit")
+                            .textWidth(RightColumnWidth)
+                            .min(0.0f)
+                            .max(100000000.0f)
+                            .format("%.0f")
+                            .logarithmic(true)
+                            .infinity(true)
+                            .defaultValue(&origParameters.externalEnergyBackflowLimit)
+                            .tooltip("Energy from the simulation can only flow back into the external energy pool as long as the amount of external energy is below this value."),
+                        &parameters.externalEnergyBackflowLimit);
                     AlienImGui::EndTreeNode();
                 }
             }
@@ -1538,7 +1587,7 @@ void _SimulationParametersWindow::processBase()
                             .colorDependence(true)
                             .min(0.0f)
                             .max(20.0f)
-                            .format("%.1f")
+                            .format("%.2f")
                             .defaultValue(origParameters.genomeComplexityRamificationFactor)
                             .tooltip("With this parameter, the number of ramifications of the cell structure to the genome is taken into account for the "
                                      "calculation of the genome complexity. For instance, genomes that contain many sub-genomes or many construction branches will "
@@ -1550,8 +1599,8 @@ void _SimulationParametersWindow::processBase()
                             .textWidth(RightColumnWidth)
                             .colorDependence(true)
                             .min(0.0f)
-                            .max(20.0f)
-                            .format("%.1f")
+                            .max(4.0f)
+                            .format("%.2f")
                             .defaultValue(origParameters.genomeComplexityNeuronFactor)
                             .tooltip("This parameter takes into account the number of encoded neurons in the genome for the complexity value."),
                         parameters.genomeComplexityNeuronFactor);
@@ -1560,10 +1609,10 @@ void _SimulationParametersWindow::processBase()
             }
 
             /**
-             * Addon: Legacy modes
+             * Addon: Legacy behavior
              */
             if (parameters.features.legacyModes) {
-                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Legacy features"))) {
+                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Legacy behavior"))) {
                     AlienImGui::Checkbox(
                         AlienImGui::CheckboxParameters()
                             .name("Fetch angle from adjacent sensor")
@@ -1579,24 +1628,24 @@ void _SimulationParametersWindow::processBase()
         }
         ImGui::EndChild();
 
-        validationAndCorrection(parameters);
-        validationAndCorrectionLayout();
+        SimulationParametersValidationService::get().validateAndCorrect(parameters);
+        validateAndCorrectLayout();
 
         if (parameters != lastParameters) {
-            _simController->setSimulationParameters(parameters);
+            _simulationFacade->setSimulationParameters(parameters, SimulationParametersUpdateConfig::AllExceptChangingPositions);
         }
 
         ImGui::EndTabItem();
     }
 }
 
-bool _SimulationParametersWindow::processSpot(int index)
+bool SimulationParametersWindow::processSpot(int index)
 {
     std::string name = "Zone " + std::to_string(index + 1);
     bool isOpen = true;
     if (ImGui::BeginTabItem(name.c_str(), &isOpen, ImGuiTabItemFlags_None)) {
-        auto parameters = _simController->getSimulationParameters();
-        auto origParameters = _simController->getOriginalSimulationParameters();
+        auto parameters = _simulationFacade->getSimulationParameters();
+        auto origParameters = _simulationFacade->getOriginalSimulationParameters();
         auto lastParameters = parameters;
 
         SimulationParametersSpot& spot = parameters.spots[index];
@@ -1604,7 +1653,7 @@ bool _SimulationParametersWindow::processSpot(int index)
         SimulationParametersSpot const& lastSpot = lastParameters.spots[index];
 
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-            auto worldSize = _simController->getWorldSize();
+            auto worldSize = _simulationFacade->getWorldSize();
 
             /**
              * Colors and location
@@ -1619,8 +1668,8 @@ bool _SimulationParametersWindow::processSpot(int index)
             }
 
             if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Location"))) {
-                if (AlienImGui::Combo(
-                        AlienImGui::ComboParameters()
+                if (AlienImGui::Switcher(
+                        AlienImGui::SwitcherParameters()
                             .name("Shape")
                             .values({"Circular", "Rectangular"})
                             .textWidth(RightColumnWidth)
@@ -1628,42 +1677,34 @@ bool _SimulationParametersWindow::processSpot(int index)
                         spot.shapeType)) {
                     createDefaultSpotData(spot);
                 }
-                AlienImGui::SliderFloat(
-                    AlienImGui::SliderFloatParameters()
-                        .name("Position X")
+
+                auto getMousePickerEnabledFunc = [&]() { return SimulationInteractionController::get().isPositionSelectionMode(); };
+                auto setMousePickerEnabledFunc = [&](bool value) { SimulationInteractionController::get().setPositionSelectionMode(value); };
+                auto getMousePickerPositionFunc = [&]() { return SimulationInteractionController::get().getPositionSelectionData(); };
+
+                AlienImGui::SliderFloat2(
+                    AlienImGui::SliderFloat2Parameters()
+                        .name("Position (x,y)")
                         .textWidth(RightColumnWidth)
-                        .min(0)
-                        .max(toFloat(worldSize.x))
-                        .defaultValue(&origSpot.posX)
+                        .min({0, 0})
+                        .max(toRealVector2D(worldSize))
+                        .defaultValue(RealVector2D{origSpot.posX, origSpot.posY})
+                        .format("%.2f")
+                        .getMousePickerEnabledFunc(getMousePickerEnabledFunc)
+                        .setMousePickerEnabledFunc(setMousePickerEnabledFunc)
+                        .getMousePickerPositionFunc(getMousePickerPositionFunc),
+                    spot.posX,
+                    spot.posY);
+                AlienImGui::SliderFloat2(
+                    AlienImGui::SliderFloat2Parameters()
+                        .name("Velocity (x,y)")
+                        .textWidth(RightColumnWidth)
+                        .min({-4.0f, -4.0f})
+                        .max({4.0f, 4.0f})
+                        .defaultValue(RealVector2D{origSpot.velX, origSpot.velY})
                         .format("%.2f"),
-                    &spot.posX);
-                AlienImGui::SliderFloat(
-                    AlienImGui::SliderFloatParameters()
-                        .name("Position Y")
-                        .textWidth(RightColumnWidth)
-                        .min(0)
-                        .max(toFloat(worldSize.y))
-                        .defaultValue(&origSpot.posY)
-                        .format("%.2f"),
-                    &spot.posY);
-                AlienImGui::SliderFloat(
-                    AlienImGui::SliderFloatParameters()
-                        .name("Velocity X")
-                        .textWidth(RightColumnWidth)
-                        .min(-4.0f)
-                        .max(4.0f)
-                        .defaultValue(&origSpot.velX)
-                        .format("%.3f"),
-                    &spot.velX);
-                AlienImGui::SliderFloat(
-                    AlienImGui::SliderFloatParameters()
-                        .name("Velocity Y")
-                        .textWidth(RightColumnWidth)
-                        .min(-4.0f)
-                        .max(4.0f)
-                        .defaultValue(&origSpot.velY)
-                        .format("%.3f"),
-                    &spot.velY);
+                    spot.velX,
+                    spot.velY);
                 auto maxRadius = toFloat(std::max(worldSize.x, worldSize.y));
                 if (spot.shapeType == SpotShapeType_Circular) {
                     AlienImGui::SliderFloat(
@@ -1677,24 +1718,16 @@ bool _SimulationParametersWindow::processSpot(int index)
                         &spot.shapeData.circularSpot.coreRadius);
                 }
                 if (spot.shapeType == SpotShapeType_Rectangular) {
-                    AlienImGui::SliderFloat(
-                        AlienImGui::SliderFloatParameters()
-                            .name("Core width")
+                    AlienImGui::SliderFloat2(
+                        AlienImGui::SliderFloat2Parameters()
+                            .name("Size (x,y)")
                             .textWidth(RightColumnWidth)
-                            .min(0)
-                            .max(worldSize.x)
-                            .defaultValue(&origSpot.shapeData.rectangularSpot.width)
+                            .min({0, 0})
+                            .max({toFloat(worldSize.x), toFloat(worldSize.y)})
+                            .defaultValue(RealVector2D{origSpot.shapeData.rectangularSpot.width, origSpot.shapeData.rectangularSpot.height})
                             .format("%.1f"),
-                        &spot.shapeData.rectangularSpot.width);
-                    AlienImGui::SliderFloat(
-                        AlienImGui::SliderFloatParameters()
-                            .name("Core height")
-                            .textWidth(RightColumnWidth)
-                            .min(0)
-                            .max(worldSize.y)
-                            .defaultValue(&origSpot.shapeData.rectangularSpot.height)
-                            .format("%.1f"),
-                        &spot.shapeData.rectangularSpot.height);
+                        spot.shapeData.rectangularSpot.width,
+                        spot.shapeData.rectangularSpot.height);
                 }
 
                 AlienImGui::SliderFloat(
@@ -1948,6 +1981,18 @@ bool _SimulationParametersWindow::processSpot(int index)
                         .disabledValue(parameters.baseValues.cellMinEnergy),
                     spot.values.cellMinEnergy,
                     &spot.activatedValues.cellMinEnergy);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name("Decay rate of dying cells")
+                        .colorDependence(true)
+                        .textWidth(RightColumnWidth)
+                        .min(1e-6f)
+                        .max(0.1f)
+                        .format("%.6f")
+                        .logarithmic(true)
+                    .defaultValue(origSpot.values.cellDeathProbability).disabledValue(parameters.baseValues.cellDeathProbability),
+                    spot.values.cellDeathProbability,
+                    &spot.activatedValues.cellDeathProbability);
                 AlienImGui::EndTreeNode();
             }
 
@@ -2127,6 +2172,16 @@ bool _SimulationParametersWindow::processSpot(int index)
                         .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix)),
                     spot.values.cellFunctionAttackerFoodChainColorMatrix,
                     &spot.activatedValues.cellFunctionAttackerFoodChainColorMatrix);
+                AlienImGui::InputFloatColorMatrix(
+                    AlienImGui::InputFloatColorMatrixParameters()
+                        .name("Complex creature protection")
+                        .textWidth(RightColumnWidth)
+                        .min(0)
+                        .max(20.0f)
+                        .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSpot.values.cellFunctionAttackerGenomeComplexityBonus))
+                        .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus)),
+                    spot.values.cellFunctionAttackerGenomeComplexityBonus,
+                    &spot.activatedValues.cellFunctionAttackerGenomeComplexityBonus);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Energy cost")
@@ -2181,16 +2236,6 @@ bool _SimulationParametersWindow::processSpot(int index)
              */
             if (parameters.features.advancedAttackerControl) {
                 if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Advanced attacker control"))) {
-                    AlienImGui::InputFloatColorMatrix(
-                        AlienImGui::InputFloatColorMatrixParameters()
-                            .name("Complex genome protection")
-                            .textWidth(RightColumnWidth)
-                            .min(0)
-                            .max(20.0f)
-                            .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSpot.values.cellFunctionAttackerGenomeComplexityBonus))
-                            .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus)),
-                        spot.values.cellFunctionAttackerGenomeComplexityBonus,
-                        &spot.activatedValues.cellFunctionAttackerGenomeComplexityBonus);
                     AlienImGui::InputFloatColorMatrix(
                         AlienImGui::InputFloatColorMatrixParameters()
                             .name("New complex mutant protection")
@@ -2289,10 +2334,10 @@ bool _SimulationParametersWindow::processSpot(int index)
             }
         }
         ImGui::EndChild();
-        validationAndCorrection(spot, parameters);
+        SimulationParametersValidationService::get().validateAndCorrect(parameters);
 
         if (spot != lastSpot) {
-            _simController->setSimulationParameters(parameters);
+            _simulationFacade->setSimulationParameters(parameters, SimulationParametersUpdateConfig::AllExceptChangingPositions);
         }
 
         ImGui::EndTabItem();
@@ -2301,7 +2346,7 @@ bool _SimulationParametersWindow::processSpot(int index)
     return isOpen;
 }
 
-void _SimulationParametersWindow::processAddonList()
+void SimulationParametersWindow::processAddonList()
 {
     if (_featureListOpen) {
         ImGui::Spacing();
@@ -2311,11 +2356,11 @@ void _SimulationParametersWindow::processAddonList()
         AlienImGui::Separator();
     }
 
-    _featureListOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addons").highlighted(true));
+    _featureListOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addons").highlighted(true).defaultOpen(_featureListOpen));
     if (_featureListOpen) {
         if (ImGui::BeginChild("##addons", {scale(0), 0})) {
-            auto parameters = _simController->getSimulationParameters();
-            auto origFeatures = _simController->getOriginalSimulationParameters().features;
+            auto parameters = _simulationFacade->getSimulationParameters();
+            auto origFeatures = _simulationFacade->getOriginalSimulationParameters().features;
             auto lastFeatures= parameters.features;
 
             AlienImGui::Checkbox(
@@ -2373,14 +2418,14 @@ void _SimulationParametersWindow::processAddonList()
                 parameters.features.genomeComplexityMeasurement);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
-                    .name("Legacy features")
+                    .name("Legacy behavior")
                     .textWidth(0)
                     .defaultValue(origFeatures.legacyModes)
                     .tooltip("It contains features for compatibility with older versions."),
                 parameters.features.legacyModes);
 
             if (parameters.features != lastFeatures) {
-                _simController->setSimulationParameters(parameters);
+                _simulationFacade->setSimulationParameters(parameters);
             }
         }
         ImGui::EndChild();
@@ -2388,24 +2433,32 @@ void _SimulationParametersWindow::processAddonList()
     }
 }
 
-void _SimulationParametersWindow::onAppendTab()
+void SimulationParametersWindow::processStatusBar()
 {
-    auto parameters = _simController->getSimulationParameters();
-    auto origParameters = _simController->getOriginalSimulationParameters();
+    std::vector<std::string> statusItems;
+    statusItems.emplace_back("CTRL + click on a slider to type in a precise value");
+
+    AlienImGui::StatusBar(statusItems);
+}
+
+void SimulationParametersWindow::onAppendTab()
+{
+    auto parameters = _simulationFacade->getSimulationParameters();
+    auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
     int index = parameters.numSpots;
     parameters.spots[index] = createSpot(parameters, index);
     origParameters.spots[index] = createSpot(parameters, index);
     ++parameters.numSpots;
     ++origParameters.numSpots;
-    _simController->setSimulationParameters(parameters);
-    _simController->setOriginalSimulationParameters(origParameters);
+    _simulationFacade->setSimulationParameters(parameters);
+    _simulationFacade->setOriginalSimulationParameters(origParameters);
 }
 
-void _SimulationParametersWindow::onDeleteTab(int index)
+void SimulationParametersWindow::onDeleteTab(int index)
 {
-    auto parameters = _simController->getSimulationParameters();
-    auto origParameters = _simController->getOriginalSimulationParameters();
+    auto parameters = _simulationFacade->getSimulationParameters();
+    auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
     for (int i = index; i < parameters.numSpots - 1; ++i) {
         parameters.spots[i] = parameters.spots[i + 1];
@@ -2413,101 +2466,43 @@ void _SimulationParametersWindow::onDeleteTab(int index)
     }
     --parameters.numSpots;
     --origParameters.numSpots;
-    _simController->setSimulationParameters(parameters);
-    _simController->setOriginalSimulationParameters(origParameters);
+    _simulationFacade->setSimulationParameters(parameters);
+    _simulationFacade->setOriginalSimulationParameters(origParameters);
 }
 
-void _SimulationParametersWindow::onOpenParameters()
+void SimulationParametersWindow::onOpenParameters()
 {
-    GenericFileDialogs::getInstance().showOpenFileDialog(
+    GenericFileDialog::get().showOpenFileDialog(
         "Open simulation parameters", "Simulation parameters (*.parameters){.parameters},.*", _startingPath, [&](std::filesystem::path const& path) {
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
         auto firstFilenameCopy = firstFilename;
         _startingPath = firstFilenameCopy.remove_filename().string();
 
         SimulationParameters parameters;
-        if (!SerializerService::deserializeSimulationParametersFromFile(parameters, firstFilename.string())) {
-            MessageDialog::getInstance().information("Open simulation parameters", "The selected file could not be opened.");
+        if (!SerializerService::get().deserializeSimulationParametersFromFile(parameters, firstFilename.string())) {
+            GenericMessageDialog::get().information("Open simulation parameters", "The selected file could not be opened.");
         } else {
-            _simController->setSimulationParameters(parameters);
+            _simulationFacade->setSimulationParameters(parameters);
         }
     });
 }
 
-void _SimulationParametersWindow::onSaveParameters()
+void SimulationParametersWindow::onSaveParameters()
 {
-    GenericFileDialogs::getInstance().showSaveFileDialog(
+    GenericFileDialog::get().showSaveFileDialog(
         "Save simulation parameters", "Simulation parameters (*.parameters){.parameters},.*", _startingPath, [&](std::filesystem::path const& path) {
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
         auto firstFilenameCopy = firstFilename;
         _startingPath = firstFilenameCopy.remove_filename().string();
 
-        auto parameters = _simController->getSimulationParameters();
-        if (!SerializerService::serializeSimulationParametersToFile(firstFilename.string(), parameters)) {
-            MessageDialog::getInstance().information("Save simulation parameters", "The selected file could not be saved.");
+        auto parameters = _simulationFacade->getSimulationParameters();
+        if (!SerializerService::get().serializeSimulationParametersToFile(firstFilename.string(), parameters)) {
+            GenericMessageDialog::get().information("Save simulation parameters", "The selected file could not be saved.");
         }
     });
 }
 
-void _SimulationParametersWindow::validationAndCorrectionLayout()
+void SimulationParametersWindow::validateAndCorrectLayout()
 {
     _featureListHeight = std::max(0.0f, _featureListHeight);
-}
-
-void _SimulationParametersWindow::validationAndCorrection(SimulationParameters& parameters) const
-{
-    for (int i = 0; i < MAX_COLORS; ++i) {
-        for (int j = 0; j < MAX_COLORS; ++j) {
-            parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j] =
-                std::max(0.0f, std::min(1.0f, parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j]));
-            parameters.cellFunctionAttackerSameMutantPenalty[i][j] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerSameMutantPenalty[i][j]));
-            parameters.baseValues.cellFunctionAttackerNewComplexMutantPenalty[i][j] =
-                std::max(0.0f, std::min(1.0f, parameters.baseValues.cellFunctionAttackerNewComplexMutantPenalty[i][j]));
-            parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus[i][j] =
-                std::max(0.0f, parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus[i][j]);
-        }
-        parameters.baseValues.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorption[i]));
-        parameters.radiationAbsorptionHighVelocityPenalty[i] = std::max(0.0f, parameters.radiationAbsorptionHighVelocityPenalty[i]);
-        parameters.radiationAbsorptionLowConnectionPenalty[i] = std::max(0.0f, parameters.radiationAbsorptionLowConnectionPenalty[i]);
-        parameters.externalEnergyConditionalInflowFactor[i] = std::max(0.0f, std::min(1.0f, parameters.externalEnergyConditionalInflowFactor[i]));
-        parameters.cellFunctionAttackerSensorDetectionFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerSensorDetectionFactor[i]));
-        parameters.cellFunctionDetonatorChainExplosionProbability[i] =
-            std::max(0.0f, std::min(1.0f, parameters.cellFunctionDetonatorChainExplosionProbability[i]));
-        parameters.externalEnergyInflowFactor[i] =
-            std::max(0.0f, std::min(1.0f, parameters.externalEnergyInflowFactor[i]));
-        parameters.baseValues.cellMinEnergy[i] = std::min(parameters.baseValues.cellMinEnergy[i], parameters.cellNormalEnergy[i] * 0.95f);
-        parameters.particleSplitEnergy[i] = std::max(0.0f, parameters.particleSplitEnergy[i]);
-        parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty[i] =
-            std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty[i]));
-        parameters.baseValues.radiationAbsorptionLowVelocityPenalty[i] =
-            std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorptionLowVelocityPenalty[i]));
-        parameters.genomeComplexitySizeFactor[i] = std::max(0.0f, parameters.genomeComplexitySizeFactor[i]);
-        parameters.genomeComplexityRamificationFactor[i] = std::max(0.0f, parameters.genomeComplexityRamificationFactor[i]);
-        parameters.genomeComplexityNeuronFactor[i] = std::max(0.0f, parameters.genomeComplexityNeuronFactor[i]);
-    }
-    parameters.externalEnergy = std::max(0.0f, parameters.externalEnergy);
-    parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
-    parameters.timestepSize = std::max(0.0f, parameters.timestepSize);
-    parameters.cellMaxAgeBalancerInterval = std::max(1000, std::min(1000000, parameters.cellMaxAgeBalancerInterval));
-    parameters.cellGlowRadius = std::max(1.0f, std::min(8.0f, parameters.cellGlowRadius));
-    parameters.cellGlowStrength = std::max(0.0f, std::min(1.0f, parameters.cellGlowStrength));
-}
-
-void _SimulationParametersWindow::validationAndCorrection(SimulationParametersSpot& spot, SimulationParameters const& parameters) const
-{
-    for (int i = 0; i < MAX_COLORS; ++i) {
-        for (int j = 0; j < MAX_COLORS; ++j) {
-            spot.values.cellFunctionAttackerFoodChainColorMatrix[i][j] =
-                std::max(0.0f, std::min(1.0f, spot.values.cellFunctionAttackerFoodChainColorMatrix[i][j]));
-            spot.values.cellFunctionAttackerGenomeComplexityBonus[i][j] = std::max(0.0f, spot.values.cellFunctionAttackerGenomeComplexityBonus[i][j]);
-            spot.values.cellFunctionAttackerNewComplexMutantPenalty[i][j] =
-                std::max(0.0f, std::min(1.0f, spot.values.cellFunctionAttackerNewComplexMutantPenalty[i][j]));
-        }
-        spot.values.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, spot.values.radiationAbsorption[i]));
-        spot.values.cellMinEnergy[i] = std::min(parameters.baseValues.cellMinEnergy[i], parameters.cellNormalEnergy[i] * 0.95f);
-        spot.values.radiationAbsorptionLowGenomeComplexityPenalty[i] =
-            std::max(0.0f, std::min(1.0f, spot.values.radiationAbsorptionLowGenomeComplexityPenalty[i]));
-        spot.values.radiationAbsorptionLowVelocityPenalty[i] = std::max(0.0f, std::min(1.0f, spot.values.radiationAbsorptionLowVelocityPenalty[i]));
-    }
-    spot.values.cellMaxBindingEnergy = std::max(10.0f, spot.values.cellMaxBindingEnergy);
 }

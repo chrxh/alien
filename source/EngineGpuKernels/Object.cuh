@@ -69,10 +69,10 @@ struct CellConnection
     float angleFromPrevious;
 };
 
-struct Activity
+struct Signal
 {
     float channels[MAX_CHANNELS];
-    ActivityOrigin origin;
+    SignalOrigin origin;
     float targetX;
     float targetY;
 };
@@ -117,13 +117,11 @@ struct ConstructorFunction
     uint32_t offspringMutationId;
 
     //temp
-    bool isComplete;
+    bool isReady;
 };
 
 struct SensorFunction
 {
-    SensorMode mode;
-    float angle;
     float minDensity;
     int8_t minRange;          //< 0 = no restriction
     int8_t maxRange;          //< 0 = no restriction
@@ -134,8 +132,8 @@ struct SensorFunction
     float memoryChannel1;
     float memoryChannel2;
     float memoryChannel3;
-    float targetX;
-    float targetY;
+    float memoryTargetX;
+    float memoryTargetY;
 };
 
 struct NerveFunction
@@ -164,6 +162,10 @@ struct MuscleFunction
     MuscleBendingDirection lastBendingDirection;
     uint8_t lastBendingSourceIndex;
     float consecutiveBendingAngle;
+
+    //additional rendering data
+    float lastMovementX;
+    float lastMovementY;
 };
 
 struct DefenderFunction
@@ -225,12 +227,12 @@ struct Cell
     bool outputBlocked;
     CellFunction cellFunction;
     CellFunctionData cellFunctionData;
-    Activity activity;
+    Signal signal;
     uint32_t activationTime;
     CellFunctionUsed cellFunctionUsed;
 
     //process data
-    uint8_t detectedByCreatureId;  //only the first 8 bits from the creature id
+    uint16_t detectedByCreatureId;  //only the first 16 bits from the creature id
 
     //annotations
     CellMetadataDescription metadata;
@@ -265,7 +267,7 @@ struct Cell
     __device__ __inline__ bool isActive()
     {
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            if (abs(activity.channels[i]) > NEAR_ZERO) {
+            if (abs(signal.channels[i]) > NEAR_ZERO) {
                 return true;
             }
         }

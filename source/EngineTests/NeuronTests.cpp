@@ -3,7 +3,7 @@
 
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
 class NeuronTests : public IntegrationTestFramework
@@ -27,13 +27,13 @@ TEST_F(NeuronTests, bias)
 
     auto data = DataDescription().addCells({CellDescription().setId(1).setCellFunction(neuron).setMaxConnections(2).setExecutionOrderNumber(0)});
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    EXPECT_TRUE(approxCompare({0, 0, scaledSigmoid(1), 0, 0, 0, 0, scaledSigmoid(-1)}, actualCellById.at(1).activity.channels));
+    EXPECT_TRUE(approxCompare({0, 0, scaledSigmoid(1), 0, 0, 0, 0, scaledSigmoid(-1)}, actualCellById.at(1).signal.channels));
 }
 
 TEST_F(NeuronTests, weight)
@@ -43,8 +43,8 @@ TEST_F(NeuronTests, weight)
     neuron.weights[2][7] = 0.5f;
     neuron.weights[5][3] = -3.5f;
 
-    ActivityDescription activity;
-    activity.channels = {0, 0, 0, 1, 0, 0, 0, 0.5f};
+    SignalDescription signal;
+    signal.channels = {0, 0, 0, 1, 0, 0, 0, 0.5f};
 
     auto data = DataDescription().addCells({
         CellDescription()
@@ -53,18 +53,18 @@ TEST_F(NeuronTests, weight)
             .setCellFunction(NerveDescription())
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
-            .setActivity(activity),
+            .setSignal(signal),
         CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellFunction(neuron).setMaxConnections(2).setExecutionOrderNumber(0).setInputExecutionOrderNumber(5),
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    EXPECT_TRUE(approxCompare({0, 0, scaledSigmoid(1.0f + 0.5f * 0.5f), 0, 0, scaledSigmoid(-3.5f), 0, 0}, actualCellById.at(2).activity.channels));
+    EXPECT_TRUE(approxCompare({0, 0, scaledSigmoid(1.0f + 0.5f * 0.5f), 0, 0, scaledSigmoid(-3.5f), 0, 0}, actualCellById.at(2).signal.channels));
 }
 
 TEST_F(NeuronTests, activationFunctionBinaryStep)
@@ -77,8 +77,8 @@ TEST_F(NeuronTests, activationFunctionBinaryStep)
     neuron.activationFunctions[5] = NeuronActivationFunction_BinaryStep;
 
 
-    ActivityDescription activity;
-    activity.channels = {0, 0, 0, 1, 0, 0, 0, 0.5f};
+    SignalDescription signal;
+    signal.channels = {0, 0, 0, 1, 0, 0, 0, 0.5f};
 
     auto data = DataDescription().addCells({
         CellDescription()
@@ -87,16 +87,16 @@ TEST_F(NeuronTests, activationFunctionBinaryStep)
             .setCellFunction(NerveDescription())
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
-            .setActivity(activity),
+            .setSignal(signal),
         CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellFunction(neuron).setMaxConnections(2).setExecutionOrderNumber(0).setInputExecutionOrderNumber(5),
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    EXPECT_TRUE(approxCompare({0, 0, binaryStep(1.0f + 0.5f * 0.5f), 0, 0, binaryStep(-3.5f), 0, 0}, actualCellById.at(2).activity.channels));
+    EXPECT_TRUE(approxCompare({0, 0, binaryStep(1.0f + 0.5f * 0.5f), 0, 0, binaryStep(-3.5f), 0, 0}, actualCellById.at(2).signal.channels));
 }

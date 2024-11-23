@@ -2,44 +2,38 @@
 
 #include <chrono>
 
+#include <imgui.h>
+
 #include "Base/Hashes.h"
 #include "Base/Cache.h"
 #include "EngineInterface/Definitions.h"
 #include "Network/NetworkResourceTreeTO.h"
 #include "Network/NetworkResourceRawTO.h"
 #include "Network/UserTO.h"
-#include "EngineInterface/SerializerService.h"
+#include "PersisterInterface/SerializerService.h"
+#include "PersisterInterface/PersisterFacade.h"
 
 #include "AlienWindow.h"
 #include "Definitions.h"
 #include "LastSessionBrowserData.h"
 
-struct ImGuiTableColumnSortSpecs;
-
-using BrowserCache = Cache<std::string, DeserializedSimulation, 5>;
-
-class _BrowserWindow : public _AlienWindow
+class BrowserWindow : public AlienWindow<SimulationFacade, PersisterFacade>
 {
-public:
-    _BrowserWindow(
-        SimulationController const& simController,
-        StatisticsWindow const& statisticsWindow,
-        TemporalControlWindow const& temporalControlWindow,
-        EditorController const& editorController);
-    ~_BrowserWindow();
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(BrowserWindow);
 
-    void registerCyclicReferences(
-        LoginDialogWeakPtr const& loginDialog,
-        UploadSimulationDialogWeakPtr const& uploadSimulationDialog,
-        EditSimulationDialogWeakPtr const& editSimulationDialog,
-        GenomeEditorWindowWeakPtr const& genomeEditorWindow);
+public:
 
     void onRefresh();
     WorkspaceType getCurrentWorkspaceType() const;
 
-    BrowserCache& getSimulationCache();
+    DownloadCache& getSimulationCache();
 
 private:
+    BrowserWindow();
+
+    void initIntern(SimulationFacade simulationFacade, PersisterFacade persisterFacade) override;
+    void shutdownIntern() override;
+
     struct WorkspaceId
     {
         NetworkResourceType resourceType;
@@ -64,7 +58,7 @@ private:
     void processWorkspace();
     void processMovableSeparator();
     void processUserList();
-    void processStatus();
+    void processStatusBar();
 
     void processSimulationList();
     void processGenomeList();
@@ -91,7 +85,11 @@ private:
     bool processActionButton(std::string const& text);
     bool processDetailButton();
 
+    void processRefreshingScreen(RealVector2D const& startPos);
+
     void processActivated() override;
+
+    void processPendingRequestIds();
 
     void createTreeTOs(Workspace& workspace);
     void sortUserList();
@@ -114,6 +112,10 @@ private:
     void pushTextColor(NetworkResourceTreeTO const& to);
     void popTextColor();
 
+    TaskProcessor _refreshProcessor;
+    TaskProcessor _emojiUserNameProcessor;
+    TaskProcessor _reactionProcessor;
+
     bool _activateEmojiPopup = false;
     bool _showAllEmojis = false;
     NetworkResourceTreeTO _emojiPopupTO;
@@ -133,14 +135,8 @@ private:
 
     std::vector<TextureData> _emojis;
 
-    BrowserCache _simulationCache;
+    DownloadCache _downloadCache;
 
-    SimulationController _simController;
-    StatisticsWindow _statisticsWindow;
-    TemporalControlWindow _temporalControlWindow;
-    LoginDialogWeakPtr _loginDialog;
-    EditorController _editorController;
-    UploadSimulationDialogWeakPtr _uploadSimulationDialog;
-    EditSimulationDialogWeakPtr _editSimulationDialog;
-    GenomeEditorWindowWeakPtr _genomeEditorWindow;
+    SimulationFacade _simulationFacade;
+    PersisterFacade _persisterFacade;
 };

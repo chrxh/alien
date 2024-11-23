@@ -10,7 +10,7 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
 private:
-    static int constexpr NumScanAngles = 32;
+    static int constexpr NumScanAngles = 64;
     static int constexpr NumScanPoints = 64;
     static float constexpr ScanStep = 8.0f;
 
@@ -22,8 +22,8 @@ private:
         SensorRestrictToMutants const& restrictToMutants,
         DensityMap const& densityMap,
         float2 const& scanPos);
-    __inline__ __device__ static void searchNeighborhood(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity);
-    __inline__ __device__ static void searchByAngle(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity);
+    __inline__ __device__ static void searchNeighborhood(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Signal& signal);
+    __inline__ __device__ static void searchByAngle(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Signal& signal);
 
     __inline__ __device__ static void flagDetectedCells(SimulationData& data, Cell* cell, float2 const& scanPos);
 
@@ -49,29 +49,22 @@ __inline__ __device__ void SensorProcessor::process(SimulationData& data, Simula
 
 __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    __shared__ Activity activity;
+    __shared__ Signal signal;
     if (threadIdx.x == 0) {
-        activity = CellFunctionProcessor::calcInputActivity(cell);
-        CellFunctionProcessor::updateInvocationState(cell, activity);
+        signal = CellFunctionProcessor::calcInputSignal(cell);
+        CellFunctionProcessor::updateInvocationState(cell, signal);
     }
     __syncthreads();
 
-    if (abs(activity.channels[0]) > cudaSimulationParameters.cellFunctionSensorActivityThreshold) {
+    if (abs(signal.channels[0]) > cudaSimulationParameters.cellFunctionSensorSignalThreshold) {
         statistics.incNumSensorActivities(cell->color);
-        switch (cell->cellFunctionData.sensor.mode) {
-        case SensorMode_Neighborhood: {
-            searchNeighborhood(data, statistics, cell, activity);
-        } break;
-        case SensorMode_FixedAngle: {
-            searchByAngle(data, statistics, cell, activity);
-        } break;
-        }
+        searchNeighborhood(data, statistics, cell, signal);
+        signal.origin = SignalOrigin_Sensor;
     }
     __syncthreads();
 
     if (threadIdx.x == 0) {
-        activity.origin = ActivityOrigin_Sensor;
-        CellFunctionProcessor::setActivity(cell, activity);
+        CellFunctionProcessor::setSignal(cell, signal);
     }
 }
 
@@ -98,10 +91,10 @@ __inline__ __device__ uint32_t SensorProcessor::getCellDensity(
         if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherMutants) {
             result = densityMap.getOtherMutantDensity(timestep, scanPos, cell->mutationId);
         }
-        if (restrictToMutants == SensorRestrictToMutants_RestrictToEmergentCells) {
+        if (restrictToMutants == SensorRestrictToMutants_RestrictToFreeCells) {
             result = densityMap.getEmergentCellDensity(scanPos);
         }
-        if (restrictToMutants == SensorRestrictToMutants_RestrictToZeroMutants) {
+        if (restrictToMutants == SensorRestrictToMutants_RestrictToHandcraftedCells) {
             result = densityMap.getZeroMutantDensity(scanPos);
         }
         if (restrictToMutants == SensorRestrictToMutants_RestrictToLessComplexMutants) {
@@ -118,7 +111,7 @@ __inline__ __device__ uint32_t SensorProcessor::getCellDensity(
 }
 
 __inline__ __device__ void
-SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity)
+SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Signal& signal)
 {
     __shared__ uint32_t minDensity;
     __shared__ uint8_t restrictToColor;
@@ -130,7 +123,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
 
     if (threadIdx.x == 0) {
         refScanAngle = Math::angleOfVector(CellFunctionProcessor::calcSignalDirection(data, cell));
-        minDensity = toInt(cell->cellFunctionData.sensor.minDensity * 100);
+        minDensity = toInt(cell->cellFunctionData.sensor.minDensity * 64);
         minRange = cell->cellFunctionData.sensor.minRange;
         restrictToColor = cell->cellFunctionData.sensor.restrictToColor;
         restrictToMutants = cell->cellFunctionData.sensor.restrictToMutants;
@@ -161,7 +154,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
 
                 uint32_t density = 0;
                 if (!blockedByWall[angleIndex]) {
-                    if (restrictToMutants == SensorRestrictToMutants_NoRestriction || restrictToMutants == SensorRestrictToMutants_RestrictToZeroMutants
+                    if (restrictToMutants == SensorRestrictToMutants_NoRestriction || restrictToMutants == SensorRestrictToMutants_RestrictToHandcraftedCells
                         || densityMap.getZeroMutantDensity(scanPos) == 0) {
                         density = getCellDensity(data.timestep, cell, restrictToColor, restrictToMutants, densityMap, scanPos);
                     } else {
@@ -192,97 +185,34 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             auto scanPos = cell->pos + Math::unitVectorOfAngle(scanAngle) * distance;
             flagDetectedCells(data, cell, scanPos);
 
-            activity.channels[0] = 1;                                                     //something found
-            activity.channels[1] = toFloat((lookupResult >> 40) & 0xff) / 256;  //density
-            activity.channels[2] = 1.0f - min(1.0f, distance / 256);                       //distance: 1 = close, 0 = far away
+            signal.channels[0] = 1;                                                     //something found
+            signal.channels[1] = toFloat((lookupResult >> 40) & 0xff) / 64;  //density
 
-            auto legacyMode_unrestrictedMovements = !cudaSimulationParameters.cellFunctionMuscleMovementTowardTargetedObject;
-            activity.channels[3] = legacyMode_unrestrictedMovements ? angle / 360.0f : 0;  //angle: between -0.5 and 0.5
-            cell->cellFunctionData.sensor.memoryChannel1 = activity.channels[1];
-            cell->cellFunctionData.sensor.memoryChannel2 = activity.channels[2];
-            cell->cellFunctionData.sensor.memoryChannel3 = activity.channels[3];
+            signal.channels[2] = 1.0f - min(1.0f, distance / 256);                       //distance: 1 = close, 0 = far away
+
+            auto movementTowardTargetedObject = !cudaSimulationParameters.cellFunctionMuscleMovementTowardTargetedObject;
+            signal.channels[3] = movementTowardTargetedObject ? angle / 360.0f : 0;  //angle: between -0.5 and 0.5
+            cell->cellFunctionData.sensor.memoryChannel1 = signal.channels[1];
+            cell->cellFunctionData.sensor.memoryChannel2 = signal.channels[2];
+            cell->cellFunctionData.sensor.memoryChannel3 = signal.channels[3];
             statistics.incNumSensorMatches(cell->color);
             auto delta = data.cellMap.getCorrectedDirection(scanPos - cell->pos);
-            activity.targetX = delta.x;
-            activity.targetY = delta.y;
-
-            cell->cellFunctionData.sensor.targetX = delta.x;
-            cell->cellFunctionData.sensor.targetY = delta.y;
+            signal.targetX = delta.x;
+            signal.targetY = delta.y;
+            cell->cellFunctionData.sensor.memoryTargetX = delta.x;
+            cell->cellFunctionData.sensor.memoryTargetY = delta.y;
         } else {
-            activity.channels[0] = 0;  //nothing found
-            activity.channels[1] = cell->cellFunctionData.sensor.memoryChannel1;
-            activity.channels[2] = cell->cellFunctionData.sensor.memoryChannel2;
-            activity.channels[3] = cell->cellFunctionData.sensor.memoryChannel3;
-            activity.targetX = cell->cellFunctionData.sensor.targetX;
-            activity.targetY = cell->cellFunctionData.sensor.targetY;
+            signal.channels[0] = 0;  //nothing found
+            //signal.channels[1] = cell->cellFunctionData.sensor.memoryChannel1;
+            //signal.channels[2] = cell->cellFunctionData.sensor.memoryChannel2;
+            //signal.channels[3] = cell->cellFunctionData.sensor.memoryChannel3;
+            //signal.targetX = cell->cellFunctionData.sensor.memoryTargetX;
+            //signal.targetY = cell->cellFunctionData.sensor.memoryTargetY;
+            signal.targetX = 0;
+            signal.targetY = 0;
         }
     }
     __syncthreads();
-}
-
-__inline__ __device__ void
-SensorProcessor::searchByAngle(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Activity& activity)
-{
-    __shared__ uint32_t minDensity;
-    __shared__ uint8_t restrictToColor;
-    __shared__ SensorRestrictToMutants restrictToMutants;
-    __shared__ float2 searchDelta;
-    __shared__ uint64_t lookupResult;
-
-    if (threadIdx.x == 0) {
-        minDensity = toInt(cell->cellFunctionData.sensor.minDensity * 255);
-        restrictToColor = cell->cellFunctionData.sensor.restrictToColor;
-        restrictToMutants = cell->cellFunctionData.sensor.restrictToMutants;
-        searchDelta = CellFunctionProcessor::calcSignalDirection(data, cell);
-        searchDelta = Math::rotateClockwise(searchDelta, cell->cellFunctionData.sensor.angle);
-
-        lookupResult = 0xffffffffffffffff;
-    }
-    __syncthreads();
-
-    auto const partition = calcPartition(NumScanPoints, threadIdx.x, blockDim.x);
-    auto const startRadius = calcStartDistanceForScanning(restrictToColor, restrictToMutants, cell->color);
-    auto const& densityMap = data.preprocessedSimulationData.densityMap;
-    for (int distanceIndex = partition.startIndex; distanceIndex <= partition.endIndex; ++distanceIndex) {
-        auto distance = startRadius + cudaSimulationParameters.cellFunctionSensorRange[cell->color] / NumScanPoints * distanceIndex;
-        auto scanPos = cell->pos + searchDelta * distance;
-        data.cellMap.correctPosition(scanPos);
-
-        uint32_t density = getCellDensity(data.timestep, cell, restrictToColor, restrictToMutants, densityMap, scanPos);
-
-        if (density < minDensity) {
-            continue;
-        }
-
-        float preciseDistance = distance;
-        uint64_t combined = static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(density) << 40;
-        alienAtomicMin64(&lookupResult, combined);
-    }
-    __syncthreads();
-
-    if (threadIdx.x == 0) {
-        if (lookupResult != 0xffffffffffffffff) {
-
-            auto distance = toFloat(lookupResult >> 48);
-            auto scanPos = cell->pos + searchDelta * distance;
-            flagDetectedCells(data, cell, scanPos);
-
-            activity.channels[0] = 1;                                                     //something found
-            activity.channels[1] = static_cast<float>((lookupResult >> 40) & 0xff) / 256;  //density
-            activity.channels[2] = distance / 256;                                         //distance
-            statistics.incNumSensorMatches(cell->color);
-
-            auto delta = data.cellMap.getCorrectedDirection(scanPos - cell->pos);
-            activity.targetX = delta.x;
-            activity.targetY = delta.y;
-            cell->cellFunctionData.sensor.targetX = delta.x;
-            cell->cellFunctionData.sensor.targetY = delta.y;
-        } else {
-            activity.channels[0] = 0;  //nothing found
-            activity.targetX = cell->cellFunctionData.sensor.targetX;
-            activity.targetY = cell->cellFunctionData.sensor.targetY;
-        }
-    }
 }
 
 __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& data, Cell* cell, float2 const& scanPos)
@@ -310,10 +240,10 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
                     || static_cast<uint8_t>(cell->mutationId & 0xff) == otherCell->ancestorMutationId)) {
                 continue;
             }
-            if (restrictToMutants == SensorRestrictToMutants_RestrictToEmergentCells && otherCell->mutationId != 1) {
+            if (restrictToMutants == SensorRestrictToMutants_RestrictToFreeCells && otherCell->mutationId != 1) {
                 continue;
             }
-            if (restrictToMutants == SensorRestrictToMutants_RestrictToZeroMutants && otherCell->mutationId != 0) {
+            if (restrictToMutants == SensorRestrictToMutants_RestrictToHandcraftedCells && otherCell->mutationId != 0) {
                 continue;
             }
             if (restrictToMutants == SensorRestrictToMutants_RestrictToLessComplexMutants
@@ -330,7 +260,7 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
             //    continue;
             //}
 
-            otherCell->detectedByCreatureId = static_cast<uint8_t>(cell->creatureId & 0xff);
+            otherCell->detectedByCreatureId = static_cast<uint16_t>(cell->creatureId & 0xffff);
         }
     }
 }

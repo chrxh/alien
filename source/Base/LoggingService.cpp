@@ -6,12 +6,6 @@
 #include <sstream>
 #include <algorithm>
 
-LoggingService& LoggingService::getInstance()
-{
-    static LoggingService instance;
-    return instance;
-}
-
 void LoggingService::log(Priority priority, std::string const& message)
 {
     std::lock_guard<std::mutex> lock(_mutex);

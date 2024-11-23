@@ -1,26 +1,22 @@
 #include "UploadSimulationDialog.h"
 
 #include <imgui.h>
-#include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/GlobalSettings.h"
-#include "EngineInterface/SerializerService.h"
-#include "EngineInterface/SimulationController.h"
-#include "EngineInterface/GenomeDescriptionService.h"
+#include "PersisterInterface/SerializerService.h"
 #include "Network/NetworkService.h"
-#include "Network/ValidationService.h"
+#include "Network/NetworkValidationService.h"
 
 #include "AlienImGui.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "StyleRepository.h"
 #include "BrowserWindow.h"
-#include "DelayedExecutionController.h"
-#include "OverlayMessageController.h"
+#include "EditorController.h"
 #include "Viewport.h"
 #include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
 #include "LoginDialog.h"
-#include "SerializationHelperService.h"
+#include "NetworkTransferController.h"
 
 namespace
 {
@@ -34,42 +30,40 @@ namespace
         {NetworkResourceType_Genome, "Genome"}};
 }
 
-_UploadSimulationDialog::_UploadSimulationDialog(
-    BrowserWindow const& browserWindow,
-    LoginDialog const& loginDialog,
-    SimulationController const& simController,
-    GenomeEditorWindow const& genomeEditorWindow)
-    : _AlienDialog("")
-    , _simController(simController)
-    , _browserWindow(browserWindow)
-    , _loginDialog(loginDialog)
-    , _genomeEditorWindow(genomeEditorWindow)
+void UploadSimulationDialog::initIntern(SimulationFacade simulationFacade)
 {
-    auto& settings = GlobalSettings::getInstance();
-    _share = settings.getBool("dialogs.upload.share", _share);
+    _simulationFacade = simulationFacade;
+
+    auto& settings = GlobalSettings::get();
+    _share = settings.getValue("dialogs.upload.share", _share);
 }
 
-_UploadSimulationDialog::~_UploadSimulationDialog()
+void UploadSimulationDialog::shutdownIntern()
 {
-    auto& settings = GlobalSettings::getInstance();
-    settings.setBool("dialogs.upload.share", _share);
+    auto& settings = GlobalSettings::get();
+    settings.setValue("dialogs.upload.share", _share);
 }
 
-void _UploadSimulationDialog::open(NetworkResourceType resourceType, std::string const& folder)
+
+void UploadSimulationDialog::open(NetworkResourceType resourceType, std::string const& folder)
 {
-    if (NetworkService::getLoggedInUserName()) {
+    if (NetworkService::get().getLoggedInUserName()) {
         changeTitle("Upload " + BrowserDataTypeToLowerString.at(resourceType));
         _resourceType = resourceType;
         _folder = folder;
         _resourceName = _resourceNameByFolder[_folder];
         _resourceDescription = _resourceDescriptionByFolder[_folder];
-        _AlienDialog::open();
+        AlienDialog::open();
     } else {
-        _loginDialog->open();
+        LoginDialog::get().open();
     }
 }
 
-void _UploadSimulationDialog::processIntern()
+UploadSimulationDialog::UploadSimulationDialog()
+    : AlienDialog("")
+{}
+
+void UploadSimulationDialog::processIntern()
 {
     auto resourceTypeString = BrowserDataTypeToLowerString.at(_resourceType);
     if (ImGui::BeginChild("##header", ImVec2(0, scale(52.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
@@ -105,7 +99,7 @@ void _UploadSimulationDialog::processIntern()
         AlienImGui::InputTextMultilineParameters()
             .hint("Description (optional)")
             .textWidth(0)
-            .height(ImGui::GetContentRegionAvail().y - StyleRepository::getInstance().scale(70.0f)),
+            .height(ImGui::GetContentRegionAvail().y - StyleRepository::get().scale(70.0f)),
         _resourceDescription);
     ImGui::PopID();
 
@@ -121,7 +115,7 @@ void _UploadSimulationDialog::processIntern()
 
     ImGui::BeginDisabled(_resourceName.empty());
     if (AlienImGui::Button("OK")) {
-        if (ValidationService::isStringValidForDatabase(_resourceName) && ValidationService::isStringValidForDatabase(_resourceDescription)) {
+        if (NetworkValidationService::get().isStringValidForDatabase(_resourceName) && NetworkValidationService::get().isStringValidForDatabase(_resourceDescription)) {
             close();
             onUpload();
         } else {
@@ -139,60 +133,21 @@ void _UploadSimulationDialog::processIntern()
     }
 }
 
-void _UploadSimulationDialog::onUpload()
+void UploadSimulationDialog::onUpload()
 {
-    printOverlayMessage("Uploading ...");
-
-    delayedExecution([=, this] {
-        std::string mainData;
-        std::string settings;
-        std::string statistics;
-        IntVector2D size;
-        int numObjects = 0;
-
-        DeserializedSimulation deserializedSim;
+    auto data = [&]() -> std::variant<UploadNetworkResourceRequestData::SimulationData, UploadNetworkResourceRequestData::GenomeData> {
         if (_resourceType == NetworkResourceType_Simulation) {
-            deserializedSim = SerializationHelperService::getDeserializedSerialization(_simController);
-
-            SerializedSimulation serializedSim;
-            if (!SerializerService::serializeSimulationToStrings(serializedSim, deserializedSim)) {
-                MessageDialog::getInstance().information(
-                    "Upload simulation", "The simulation could not be serialized for uploading.");
-                return;
-            }
-            mainData = serializedSim.mainData;
-            settings = serializedSim.auxiliaryData;
-            statistics = serializedSim.statistics;
-            size = {deserializedSim.auxiliaryData.generalSettings.worldSizeX, deserializedSim.auxiliaryData.generalSettings.worldSizeY};
-            numObjects = deserializedSim.mainData.getNumberOfCellAndParticles();
+            return UploadNetworkResourceRequestData::SimulationData{.zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos()};
         } else {
-            auto genome = _genomeEditorWindow->getCurrentGenome();
-            if (genome.cells.empty()) {
-                showMessage("Upload genome", "The is no valid genome in the genome editor selected.");
-                return;
-            }
-            auto genomeData = GenomeDescriptionService::convertDescriptionToBytes(genome);
-            numObjects = GenomeDescriptionService::getNumNodesRecursively(genomeData, true);
-
-            if (!SerializerService::serializeGenomeToString(mainData, genomeData)) {
-                showMessage("Upload genome", "The genome could not be serialized for uploading.");
-                return;
-            }
+            return UploadNetworkResourceRequestData::GenomeData{.description = GenomeEditorWindow::get().getCurrentGenome()};
         }
-
-        std::string resourceId;
-        auto workspaceType = _share ? WorkspaceType_Public : WorkspaceType_Private;
-        if (!NetworkService::uploadResource(
-                resourceId, _folder + _resourceName, _resourceDescription, size, numObjects, mainData, settings, statistics, _resourceType, workspaceType)) {
-            showMessage(
-                "Error",
-                "Failed to upload " + BrowserDataTypeToLowerString.at(_resourceType)
-                    + ".\n\nPossible reasons:\n\n" ICON_FA_CHEVRON_RIGHT " The server is not reachable.\n\n" ICON_FA_CHEVRON_RIGHT " The total size of your uploads exceeds the allowed storage limit.");
-            return;
-        }
-        if (_resourceType == NetworkResourceType_Simulation) {
-            _browserWindow->getSimulationCache().insertOrAssign(resourceId, deserializedSim);
-        }
-        _browserWindow->onRefresh();
-    });
+    }();
+    auto workspaceType = _share ? WorkspaceType_Public : WorkspaceType_Private;
+    NetworkTransferController::get().onUpload(UploadNetworkResourceRequestData{
+        .folderName = _folder,
+        .resourceWithoutFolderName = _resourceName,
+        .resourceDescription = _resourceDescription,
+        .workspaceType = workspaceType,
+        .downloadCache = BrowserWindow::get().getSimulationCache(),
+        .data = data});
 }

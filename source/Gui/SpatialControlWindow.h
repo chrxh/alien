@@ -1,18 +1,21 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/Descriptions.h"
 
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-class _SpatialControlWindow : public _AlienWindow
+class SpatialControlWindow : public AlienWindow<SimulationFacade>
 {
-public:
-    _SpatialControlWindow(SimulationController const& simController, TemporalControlWindow const& temporalControlWindow);
-    ~_SpatialControlWindow();
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(SpatialControlWindow);
 
 private:
+    SpatialControlWindow();
+
+    void initIntern(SimulationFacade simulationFacade) override;
+    void shutdownIntern() override;
     void processIntern() override;
     void processBackground() override;
 
@@ -23,8 +26,7 @@ private:
 
     void processCenterOnSelection();
 
-    SimulationController _simController;
-    ResizeWorldDialog _resizeWorldDialog;
+    SimulationFacade _simulationFacade;
 
     bool _centerSelection = false;
 };

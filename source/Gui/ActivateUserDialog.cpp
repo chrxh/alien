@@ -2,40 +2,33 @@
 
 #include <imgui.h>
 
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "Network/NetworkService.h"
 
 #include "AlienImGui.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "BrowserWindow.h"
 #include "CreateUserDialog.h"
 #include "StyleRepository.h"
 
-_ActivateUserDialog::_ActivateUserDialog(
-    SimulationController const& simController,
-    BrowserWindow const& browserWindow)
-    : _AlienDialog("Activate user")
-    , _simController(simController)
-    , _browserWindow(browserWindow)
-{}
-
-_ActivateUserDialog::~_ActivateUserDialog() {}
-
-void _ActivateUserDialog::registerCyclicReferences(CreateUserDialogWeakPtr const& createUserDialog)
+void ActivateUserDialog::initIntern(SimulationFacade simulationFacade)
 {
-    _createUserDialog = createUserDialog;
+    _simulationFacade = simulationFacade;
 }
 
-
-void _ActivateUserDialog::open(std::string const& userName, std::string const& password, UserInfo const& userInfo)
+void ActivateUserDialog::open(std::string const& userName, std::string const& password, UserInfo const& userInfo)
 {
-    _AlienDialog::open();
+    AlienDialog::open();
     _userName = userName;
     _password = password;
     _userInfo = userInfo;
 }
 
-void _ActivateUserDialog::processIntern()
+ActivateUserDialog::ActivateUserDialog()
+    : AlienDialog("Activate user")
+{}
+
+void ActivateUserDialog::processIntern()
 {
     AlienImGui::Text("Please enter the confirmation code sent to your email address.");
     AlienImGui::HelpMarker(
@@ -59,13 +52,13 @@ void _ActivateUserDialog::processIntern()
 
     ImGui::SameLine();
     if (AlienImGui::Button("Resend")) {
-        _createUserDialog.lock()->onCreateUser();
+        CreateUserDialog::get().onCreateUser();
     }
 
     ImGui::SameLine();
     if (AlienImGui::Button("Resend to other email address")) {
         close();
-        _createUserDialog.lock()->open(_userName, _password, _userInfo);
+        CreateUserDialog::get().open(_userName, _password, _userInfo);
     }
 
     ImGui::SameLine();
@@ -77,20 +70,20 @@ void _ActivateUserDialog::processIntern()
     }
 }
 
-void _ActivateUserDialog::onActivateUser()
+void ActivateUserDialog::onActivateUser()
 {
-    auto result = NetworkService::activateUser(_userName, _password, _userInfo, _confirmationCode);
+    auto result = NetworkService::get().activateUser(_userName, _password, _userInfo, _confirmationCode);
     if (result) {
         LoginErrorCode errorCode;
-        result |= NetworkService::login(errorCode, _userName, _password, _userInfo);
+        result |= NetworkService::get().login(errorCode, _userName, _password, _userInfo);
     }
     if (!result) {
-        MessageDialog::getInstance().information("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to register again.");
+        GenericMessageDialog::get().information("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to register again.");
     } else {
-        MessageDialog::getInstance().information(
+        GenericMessageDialog::get().information(
             "Information",
             "The user '" + _userName
                 + "' has been successfully created.\nYou are logged in and are now able to upload your own simulations\nor upvote others by likes.");
-        _browserWindow->onRefresh();
+        BrowserWindow::get().onRefresh();
     }
 }

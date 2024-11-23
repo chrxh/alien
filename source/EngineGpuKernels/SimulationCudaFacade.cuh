@@ -18,6 +18,7 @@
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/MutationType.h"
 #include "EngineInterface/StatisticsHistory.h"
+#include "EngineInterface/SimulationParametersUpdateConfig.h"
 
 #include "Definitions.cuh"
 
@@ -60,7 +61,7 @@ public:
     void switchSelection(PointSelectionData const& switchData);
     void swapSelection(PointSelectionData const& selectionData);
     void setSelection(AreaSelectionData const& selectionData);
-    SelectionShallowData getSelectionShallowData(float2 const& refPos);
+    SelectionShallowData getSelectionShallowData();
     void shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& shallowUpdateData);
     void removeSelection();
     void updateSelection();
@@ -70,7 +71,9 @@ public:
 
     void setGpuConstants(GpuSettings const& cudaConstants);
     SimulationParameters getSimulationParameters() const;
-    void setSimulationParameters(SimulationParameters const& parameters);
+    void setSimulationParameters(
+        SimulationParameters const& parameters,
+        SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All);
 
     ArraySizes getArraySizes() const;
 
@@ -107,6 +110,8 @@ private:
 
     mutable std::mutex _mutexForSimulationParameters;
     std::optional<SimulationParameters> _newSimulationParameters;
+    SimulationParametersUpdateConfig _simulationParametersUpdateConfig = SimulationParametersUpdateConfig::All;
+
     Settings _settings;
 
     mutable std::mutex _mutexForSimulationData;
@@ -119,9 +124,9 @@ private:
     mutable std::mutex _mutexForStatistics;
     std::optional<std::chrono::steady_clock::time_point> _lastStatisticsUpdateTime;
     std::optional<RawStatisticsData> _statisticsData;
-    StatisticsService _statisticsService;
     StatisticsHistory _statisticsHistory;
     std::shared_ptr<SimulationStatistics> _cudaSimulationStatistics;
+    MaxAgeBalancer _maxAgeBalancer;
 
     SimulationKernelsLauncher _simulationKernels;
     DataAccessKernelsLauncher _dataAccessKernels;

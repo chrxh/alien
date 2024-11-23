@@ -10,19 +10,22 @@
 #include <windows.h>
 #endif
 
-_GettingStartedWindow::_GettingStartedWindow()
-    : _AlienWindow("Getting started", "windows.getting started", true)
+void GettingStartedWindow::initIntern()
 {
     _showAfterStartup = _on;
 }
 
 
-_GettingStartedWindow::~_GettingStartedWindow()
+GettingStartedWindow::GettingStartedWindow()
+    : AlienWindow("Getting started", "windows.getting started", true)
+{}
+
+void GettingStartedWindow::shutdownIntern()
 {
     _on = _showAfterStartup;
 }
 
-void _GettingStartedWindow::processIntern()
+void GettingStartedWindow::processIntern()
 {
     drawTitle();
 
@@ -152,7 +155,7 @@ void _GettingStartedWindow::processIntern()
         drawHeading2("Cell");
         ImGui::Text(
             "Cells are the basic building blocks that make up everything. They can be connected to each others, possibly attached to the background "
-            "(to model barriers), possess special functions and transport activity values. Additionally, cells have various physical properties, including");
+            "(to model barriers), possess special functions and transport signals. Additionally, cells have various physical properties, including");
         drawItemText("Position in space");
         drawItemText("Velocity");
         drawItemText("Internal energy (may be interpreted as its temperature)");
@@ -171,33 +174,33 @@ void _GettingStartedWindow::processIntern()
         drawHeading2("Cell function");
         ImGui::Text("It is possible to assign a special function to a cell, which will be executed at regular time intervals. The following functions are "
                     "implemented:");
-        drawItemText("Neuron: It equips the cell with a small network of 8 neurons. It processes input gained from the activity states of connected cells and provides an "
-                     "output to other connected cells.");
+        drawItemText("Neuron: It equips the cell with a small network of 8 neurons. It processes input gained from the signals of connected cells and provides an "
+                     "output signal to other connected cells.");
         drawItemText(
             "Transmitter: It distributes energy to other constructors, transmitters or surrounding cells. In particular, it can be used to power active "
-            "constructors. No activity is required for triggering.");
+            "constructors. No signal is required for triggering.");
         drawItemText("Constructor: A constructor can build a cell network based on a built-in genome. The construction is done cell by cell and requires "
-                     "energy. A constructor can either be controlled via activities or become active automatically (default).");
+                     "energy. A constructor can either be controlled via signals or become active automatically (default).");
         drawItemText("Injector: It can infect other constructor cells to inject its own built-in genome.");
-        drawItemText("Nerve: On the one hand, it transfers activity values from connected input cells and on the other hand, it can optionally generate "
-                     "activity pulses at specific intervals.");
+        drawItemText("Nerve: On the one hand, it transfers signals from connected input cells and on the other hand, it can optionally generate "
+                     "signals at specific intervals.");
         drawItemText("Attacker: It attacks surrounding cells from other cell networks by stealing energy from them.");
         drawItemText("Defender: It reduces the attack strength when another cell in the vicinity performs an attack.");
         drawItemText("Muscle: When a muscle cell is activated, it can produce either a movement, a bending or a change in length of the cell connection.");
         drawItemText("Sensor: If activated, it performs a long-range scan for the concentration of cells with a certain color.");
         drawItemText("Reconnector: Has the ability to dynamically create or destroy connections to other cells with a specified color.");
         drawItemText(
-            "Detonator: A cell which can explode by an activity signal. It generates a large amount of kinetic energy for the objects in its surroundings.");
+            "Detonator: A cell which can explode by a signal. It generates a large amount of kinetic energy for the objects in its surroundings.");
 
         ImGui::Spacing();
-        drawHeading2("Activity states");
+        drawHeading2("Signals");
         drawParagraph(
-            "Cells contain activity states comprising of 8 values, primarily utilized for controlling cell functions and sometimes referred to as channel #0 "
+            "Cells can produce signals comprising of 8 values, primarily utilized for controlling cell functions and sometimes referred to as channel #0 "
             "to channel #7. The states are refreshed periodically, specifically when the cell functions are executed. To be more precise, each cell function "
             "is executed at regular time intervals (every 6 time steps). The 'execution order number' specifies the exact time offset within those intervals.");
-        drawParagraph("The process for updating the activity states is as follows: Firstly, the states of all connected cells that serve as input (i.e. "
-                    "the connected cells which matches with the input execution number) are summed up. The resulted sum is then employed as input for "
-                    "the cell function, which may potentially alter the values. Subsequently, the outcome is used to update the activity states.");
+        drawParagraph("The process for updating the values of a signal is as follows: Firstly, the values of all input signals (i.e. "
+                    "signals from connected cells which matches with the input execution number) are summed up. The resulted sum is then employed as input for "
+                    "the cell function, which may potentially alter the values. Subsequently, the outcome is used to generate an output signal.");
 
         ImGui::Spacing();
         drawHeading2("Cell color");
@@ -325,7 +328,7 @@ void _GettingStartedWindow::processIntern()
 
         drawHeading2("How does a simple self-replicating organism work?");
         drawParagraph("In general, an organism in ALIEN consists of a network of cells where the cells work together by communicating with each other through "
-                      "activity signals.");
+                      "signals.");
         drawParagraph(
             "A simple creature first needs a constructor cell that contains its genome and is responsible for self-replication. The constructor cell "
             "is automatically triggered and generates (as soon as enough energy is available) the cell network of the offspring built cell by cell as described in "
@@ -334,11 +337,11 @@ void _GettingStartedWindow::processIntern()
             "Self-replication requires energy, which must be obtained in some way. On the one hand, energy can be acquired by the absorption of "
             "energy particles flying around. This can be the main source of energy for plant-like species. On the other hand, there is the possibility to utilize "
             "attacker cells. They can attack cells from other organisms by stealing energy from them. If an attacker cell is part of the creature, it must be "
-            "explicitly triggered by an activity signal. This signal may come, for example, from another cell equipped with a neural network. The energy "
+            "explicitly triggered by a signal. This signal may come, for example, from another cell equipped with a neural network. The energy "
             "obtained by an attacker cell is distributed to nearby constructor or transmitter cells.");
-        drawParagraph("To perform movements, an organism requires muscle cells. These are also controlled by activity signals. Muscle cells can work in "
+        drawParagraph("To perform movements, an organism requires muscle cells. These are also controlled by signals. Muscle cells can work in "
                       "various modes: they can bend, contract/expand, or generate an impulse.");
-        drawParagraph("For the perception of the environment, sensor cells are available. When such a cell is triggered by activity signals, it provide "
+        drawParagraph("For the perception of the environment, sensor cells are available. When such a cell is triggered by a signal, it provide "
                       "information about the relative position of cell concentrations with respect to a specific color, which can be further processed by e.g. "
                       "cell with neural network.");
 
@@ -369,20 +372,20 @@ void _GettingStartedWindow::processIntern()
                       "parameter window. Next, set the amount of energy to be added (for instance, 1M could sustain 10K cells if each cell has 100 energy "
                       "units). The external energy is not added instantly but at a rate that can be specified under 'inflow'.");
 
-        drawHeading2("How can I create a cell activity in the first place?");
-        drawParagraph("To activate a cell function, an input from a connected cell in the form of non-zero activity states is required. The simplest methods "
-                      "to generate an non-zero activity state are as follows:");
-        drawItemText("The most direct approach involves using a nerve cell that generates an activity pulse at regular time intervals. The advantage here is that "
+        drawHeading2("How can I create a cell signal in the first place?");
+        drawParagraph("To activate most cell functions, an input from a connected cell in the form of a signal is required. The simplest methods "
+                      "to generate a signal are as follows:");
+        drawItemText("The most direct approach involves using a nerve cell that generates an signal at regular time intervals. The advantage here is that "
             "you can precisely configure the length of the time intervals.");
-        drawItemText("Activities can also be generated within a neuron cell using bias values.");
-        drawParagraph("Additionally, other cells such as constructor cells provide an activity output as soon as they are triggered (automatically).");
+        drawItemText("Signals can also be generated within a neuron cell using bias values.");
+        drawParagraph("Additionally, other cells such as constructor cells provide an output signal as soon as they are triggered (automatically).");
 
         //ImGui::Text("There is a lot to explore. ALIEN features an extensive graph and particle editor in order to build custom worlds with desired "
         //            "environmental structures and machines. A documentation with tutorial-like introductions to various topics can be found at");
 
         //ImGui::Dummy(ImVec2(0.0f, 20.0f));
 
-        //ImGui::PushFont(StyleRepository::getInstance().getMonospaceMediumFont());
+        //ImGui::PushFont(StyleRepository::get().getMonospaceMediumFont());
         //auto windowWidth = ImGui::GetWindowSize().x;
         //auto weblink = "https://alien-project.gitbook.io/docs";
         //auto textWidth = ImGui::CalcTextSize(weblink).x;
@@ -402,50 +405,50 @@ void _GettingStartedWindow::processIntern()
     AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Show after startup"), _showAfterStartup);
 }
 
-void _GettingStartedWindow::drawTitle()
+void GettingStartedWindow::drawTitle()
 {
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
 
-    ImGui::PushFont(StyleRepository::getInstance().getMediumFont());
+    ImGui::PushFont(StyleRepository::get().getMediumFont());
     ImGui::Text("What is ");
     ImGui::PopFont();
 
     ImGui::SameLine();
     AlienImGui::NegativeSpacing();
-    ImGui::PushFont(StyleRepository::getInstance().getMediumBoldFont());
+    ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
     ImGui::Text("A");
     ImGui::PopFont();
 
     ImGui::SameLine();
     AlienImGui::NegativeSpacing();
     AlienImGui::NegativeSpacing();
-    ImGui::PushFont(StyleRepository::getInstance().getMediumFont());
+    ImGui::PushFont(StyleRepository::get().getMediumFont());
     ImGui::Text("rtificial ");
     ImGui::PopFont();
 
     ImGui::SameLine();
     AlienImGui::NegativeSpacing();
-    ImGui::PushFont(StyleRepository::getInstance().getMediumBoldFont());
+    ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
     ImGui::Text("LI");
     ImGui::PopFont();
 
     ImGui::SameLine();
     AlienImGui::NegativeSpacing();
     AlienImGui::NegativeSpacing();
-    ImGui::PushFont(StyleRepository::getInstance().getMediumFont());
+    ImGui::PushFont(StyleRepository::get().getMediumFont());
     ImGui::Text("fe ");
     ImGui::PopFont();
 
     ImGui::SameLine();
     AlienImGui::NegativeSpacing();
-    ImGui::PushFont(StyleRepository::getInstance().getMediumBoldFont());
+    ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
     ImGui::Text("EN");
     ImGui::PopFont();
 
     ImGui::SameLine();
     AlienImGui::NegativeSpacing();
     AlienImGui::NegativeSpacing();
-    ImGui::PushFont(StyleRepository::getInstance().getMediumFont());
+    ImGui::PushFont(StyleRepository::get().getMediumFont());
     ImGui::Text("vironment ?");
     ImGui::PopFont();
 
@@ -453,7 +456,7 @@ void _GettingStartedWindow::drawTitle()
     AlienImGui::Separator();
 }
 
-void _GettingStartedWindow::drawHeading1(std::string const& text)
+void GettingStartedWindow::drawHeading1(std::string const& text)
 {
     AlienImGui::Separator();
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
@@ -462,20 +465,20 @@ void _GettingStartedWindow::drawHeading1(std::string const& text)
     AlienImGui::Separator();
 }
 
-void _GettingStartedWindow::drawHeading2(std::string const& text)
+void GettingStartedWindow::drawHeading2(std::string const& text)
 {
     ImGui::Spacing();
     AlienImGui::BoldText(text);
 }
 
-void _GettingStartedWindow::drawItemText(std::string const& text)
+void GettingStartedWindow::drawItemText(std::string const& text)
 {
     ImGui::Text(ICON_FA_CHEVRON_RIGHT);
     ImGui::SameLine();
     AlienImGui::Text(text);
 }
 
-void _GettingStartedWindow::drawParagraph(std::string const& text)
+void GettingStartedWindow::drawParagraph(std::string const& text)
 {
     AlienImGui::Text(text);
 }

@@ -1,22 +1,22 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "Network/Definitions.h"
 
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _NetworkSettingsDialog : public _AlienDialog
+class NetworkSettingsDialog : public AlienDialog<>
 {
-public:
-    _NetworkSettingsDialog(BrowserWindow const& browserWindow);
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(NetworkSettingsDialog);
 
 private:
-    void processIntern();
-    void openIntern();
+    NetworkSettingsDialog();
+
+    void processIntern() override;
+    void openIntern() override;
 
     void onChangeSettings();
-
-    BrowserWindow _browserWindow;
 
     std::string _serverAddress;
     std::string _origServerAddress;

@@ -27,8 +27,8 @@ __inline__ __device__ void NerveProcessor::process(SimulationData& data, Simulat
         auto const& operation = operations.at(i);
         auto const& cell = operation.cell;
 
-        auto activity = CellFunctionProcessor::calcInputActivity(cell);
-        CellFunctionProcessor::updateInvocationState(cell, activity);
+        auto signal = CellFunctionProcessor::calcInputSignal(cell);
+        CellFunctionProcessor::updateInvocationState(cell, signal);
 
         auto const& nerve = cell->cellFunctionData.nerve;
         auto counter = (cell->age / cudaSimulationParameters.cellNumExecutionOrderNumbers) * cudaSimulationParameters.cellNumExecutionOrderNumbers
@@ -36,14 +36,14 @@ __inline__ __device__ void NerveProcessor::process(SimulationData& data, Simulat
         if (nerve.pulseMode > 0 && (counter % (cudaSimulationParameters.cellNumExecutionOrderNumbers * nerve.pulseMode) == cell->executionOrderNumber)) {
             statistics.incNumNervePulses(cell->color);
             if (nerve.alternationMode == 0) {
-                activity.channels[0] += 1.0f;
+                signal.channels[0] += 1.0f;
             } else {
                 auto evenPulse = counter
                         % (cudaSimulationParameters.cellNumExecutionOrderNumbers * nerve.pulseMode * nerve.alternationMode * 2)
                     < cell->executionOrderNumber + cudaSimulationParameters.cellNumExecutionOrderNumbers * nerve.pulseMode * nerve.alternationMode;
-                activity.channels[0] += evenPulse ? 1.0f : -1.0f;
+                signal.channels[0] += evenPulse ? 1.0f : -1.0f;
             }
         }
-        CellFunctionProcessor::setActivity(cell, activity);
+        CellFunctionProcessor::setSignal(cell, signal);
     }
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/SelectionShallowData.h"
@@ -14,23 +15,24 @@ enum MultiplierMode_
     MultiplierMode_Random
 };
 
-class _MultiplierWindow : public _AlienWindow
+class MultiplierWindow : public AlienWindow<SimulationFacade>
 {
-public:
-    _MultiplierWindow(EditorModel const& editorModel, SimulationController const& simController);
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(MultiplierWindow);
 
 private:
+    MultiplierWindow();
+
+    void initIntern(SimulationFacade simulationFacade) override;
     void processIntern() override;
     void processGridPanel();
     void processRandomPanel();
 
-    void validationAndCorrection();
+    void validateAndCorrect();
 
     void onBuild();
     void onUndo();
 
-    EditorModel _editorModel; 
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
 
     MultiplierMode _mode = MultiplierMode_Grid;
 

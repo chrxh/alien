@@ -14,6 +14,7 @@ struct DataPoint
 struct DataPointCollection
 {
     double time; //could be a time step or real-time
+    double systemClock = 0;
 
     DataPoint numCells;
     DataPoint numSelfReplicators;
@@ -23,6 +24,8 @@ struct DataPointCollection
     DataPoint numParticles;
     DataPoint averageGenomeCells;
     DataPoint averageGenomeComplexity;
+    DataPoint varianceGenomeComplexity;
+    DataPoint maxGenomeComplexityOfColonies;
     DataPoint totalEnergy;
 
     DataPoint numCreatedCells;

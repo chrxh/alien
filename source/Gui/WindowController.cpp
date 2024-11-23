@@ -8,10 +8,12 @@
 #include "Base/GlobalSettings.h"
 #include "Base/LoggingService.h"
 
+#include "MainLoopEntityController.h"
+
 namespace
 {
-    auto const WindowedMode = "window";
-    auto const DesktopMode = "desktop";
+    auto const WindowedMode = std::string("window");
+    auto const DesktopMode = std::string("desktop");
 
     GLFWvidmode convert(std::string const& mode)
     {
@@ -44,23 +46,14 @@ namespace
     }
 }
 
-WindowController::WindowData WindowController::_windowData;
-std::shared_ptr<GLFWvidmode> WindowController::_desktopVideoMode;
-IntVector2D WindowController::_startupSize;
-IntVector2D WindowController::_sizeInWindowedMode = {1920 * 3 / 4, 1080 * 3 / 4};
-float WindowController::_contentScaleFactor = 1.0f;
-float WindowController::_lastContentScaleFactor = 1.0f;
-int WindowController::_fps = 40;
-std::string WindowController::_mode;
-
 void WindowController::init()
 {
-    auto& settings = GlobalSettings::getInstance();
-    _mode = settings.getString("settings.display.mode", DesktopMode);
-    _sizeInWindowedMode.x = std::max(100, settings.getInt("settings.display.window width", _sizeInWindowedMode.x));
-    _sizeInWindowedMode.y = std::max(100, settings.getInt("settings.display.window height", _sizeInWindowedMode.y));
-    _fps = settings.getInt("settings.display.fps", _fps);
-    _lastContentScaleFactor = settings.getFloat("settings.display.content scale factor", _lastContentScaleFactor);
+    auto& settings = GlobalSettings::get();
+    _mode = settings.getValue("settings.display.mode", DesktopMode);
+    _sizeInWindowedMode.x = std::max(100, settings.getValue("settings.display.window width", _sizeInWindowedMode.x));
+    _sizeInWindowedMode.y = std::max(100, settings.getValue("settings.display.window height", _sizeInWindowedMode.y));
+    _fps = settings.getValue("settings.display.fps", _fps);
+    _lastContentScaleFactor = settings.getValue("settings.display.content scale factor", _lastContentScaleFactor);
 
     GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
     _windowData.mode = glfwGetVideoMode(primaryMonitor);
@@ -101,12 +94,12 @@ void WindowController::shutdown()
     if (isWindowedMode()) {
         updateWindowSize();
     }
-    auto& settings = GlobalSettings::getInstance();
-    settings.setString("settings.display.mode", _mode);
-    settings.setInt("settings.display.window width", _sizeInWindowedMode.x);
-    settings.setInt("settings.display.window height", _sizeInWindowedMode.y);
-    settings.setInt("settings.display.fps", _fps);
-    settings.setFloat("settings.display.content scale factor", _contentScaleFactor);
+    auto& settings = GlobalSettings::get();
+    settings.setValue("settings.display.mode", _mode);
+    settings.setValue("settings.display.window width", _sizeInWindowedMode.x);
+    settings.setValue("settings.display.window height", _sizeInWindowedMode.y);
+    settings.setValue("settings.display.fps", _fps);
+    settings.setValue("settings.display.content scale factor", _contentScaleFactor);
 
 }
 

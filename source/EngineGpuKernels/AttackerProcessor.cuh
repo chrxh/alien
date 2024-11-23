@@ -10,7 +10,7 @@
 #include "SpotCalculator.cuh"
 #include "SimulationStatistics.cuh"
 #include "ObjectFactory.cuh"
-#include "ParticleProcessor.cuh"
+#include "RadiationProcessor.cuh"
 
 class AttackerProcessor
 {
@@ -42,10 +42,10 @@ __device__ __inline__ void AttackerProcessor::process(SimulationData& data, Simu
 
 __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto activity = CellFunctionProcessor::calcInputActivity(cell);
-    CellFunctionProcessor::updateInvocationState(cell, activity);
+    auto signal = CellFunctionProcessor::calcInputSignal(cell);
+    CellFunctionProcessor::updateInvocationState(cell, signal);
 
-    if (abs(activity.channels[0]) >= cudaSimulationParameters.cellFunctionAttackerActivityThreshold) {
+    if (abs(signal.channels[0]) >= cudaSimulationParameters.cellFunctionAttackerSignalThreshold) {
         float energyDelta = 0;
         auto cellMinEnergy = SpotCalculator::calcParameter(
             &SimulationParametersSpotValues::cellMinEnergy, &SimulationParametersSpotActivatedValues::cellMinEnergy, data, cell->pos, cell->color);
@@ -71,11 +71,11 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             auto color = calcMod(cell->color, MAX_COLORS);
             auto otherColor = calcMod(otherCell->color, MAX_COLORS);
 
-            if (cudaSimulationParameters.features.advancedAttackerControl && otherCell->detectedByCreatureId != (cell->creatureId & 0xff)) {
+            if (cudaSimulationParameters.features.advancedAttackerControl && otherCell->detectedByCreatureId != (cell->creatureId & 0xffff)) {
                 energyToTransfer *= (1.0f - cudaSimulationParameters.cellFunctionAttackerSensorDetectionFactor[color]);
             }
 
-            if (cudaSimulationParameters.features.advancedAttackerControl && otherCell->genomeComplexity > cell->genomeComplexity) {
+            if (otherCell->genomeComplexity > cell->genomeComplexity) {
                 auto cellFunctionAttackerGenomeComplexityBonus = SpotCalculator::calcParameter(
                     &SimulationParametersSpotValues::cellFunctionAttackerGenomeComplexityBonus,
                     &SimulationParametersSpotActivatedValues::cellFunctionAttackerGenomeComplexityBonus,
@@ -161,7 +161,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (energyToTransfer > NEAR_ZERO) {
 
                 //notify attacked cell
-                atomicAdd(&otherCell->activity.channels[7], 1.0f);
+                atomicAdd(&otherCell->signal.channels[7], 1.0f);
                 otherCell->event = CellEvent_Attacked;
                 otherCell->eventCounter = 6;
                 otherCell->eventPos = cell->pos;
@@ -194,7 +194,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         radiate(data, cell);
 
         //output
-        activity.channels[0] = energyDelta / 10;
+        signal.channels[0] = energyDelta / 10;
 
         if (energyDelta > NEAR_ZERO) {
             cell->event = CellEvent_Attacking;
@@ -203,7 +203,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         }
     }
 
-    CellFunctionProcessor::setActivity(cell, activity);
+    CellFunctionProcessor::setSignal(cell, signal);
 }
 
 __device__ __inline__ void AttackerProcessor::radiate(SimulationData& data, Cell* cell)
@@ -231,7 +231,7 @@ __device__ __inline__ void AttackerProcessor::radiate(SimulationData& data, Cell
         float2 particlePos = cell->pos + Math::normalized(particleVel) * 1.5f - particleVel;
         data.cellMap.correctPosition(particlePos);
 
-        ParticleProcessor::radiate(data, particlePos, particleVel, cell->color, radiationEnergy);
+        RadiationProcessor::radiate(data, particlePos, particleVel, cell->color, radiationEnergy);
     }
 }
 
@@ -271,18 +271,22 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
                 return false;
             }
             if (otherCell->cellFunction == CellFunction_Constructor) {
-                if (!GenomeDecoder::isFinished(otherCell->cellFunctionData.constructor) && otherCell->creatureId == cell->creatureId) {
+                if (!GenomeDecoder::isFinished(otherCell->cellFunctionData.constructor) && otherCell->creatureId == cell->creatureId
+                    && otherCell->cellFunctionData.constructor.isReady) {
                     return true;
                 }
             }
             return false;
         };
-        auto matchTransmitterFunc = [&](Cell* const& otherCell) {
+        auto matchSecondChoiceFunc = [&](Cell* const& otherCell) {
             if (otherCell->livingState != LivingState_Ready) {
                 return false;
             }
-            if (otherCell->cellFunction == CellFunction_Transmitter) {
-                if (otherCell->creatureId == cell->creatureId) {
+            if (otherCell->creatureId == cell->creatureId) {
+                if (otherCell->cellFunction == CellFunction_Transmitter) {
+                    return true;
+                }
+                if (otherCell->cellFunction == CellFunction_Constructor && !otherCell->cellFunctionData.constructor.isReady) {
                     return true;
                 }
             }
@@ -294,7 +298,7 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
         auto radius = cudaSimulationParameters.cellFunctionAttackerEnergyDistributionRadius[cell->color];
         data.cellMap.getMatchingCells(receiverCells, 20, numReceivers, cell->pos, radius, cell->detached, matchActiveConstructorFunc);
         if (numReceivers == 0) {
-            data.cellMap.getMatchingCells(receiverCells, 20, numReceivers, cell->pos, radius, cell->detached, matchTransmitterFunc);
+            data.cellMap.getMatchingCells(receiverCells, 20, numReceivers, cell->pos, radius, cell->detached, matchSecondChoiceFunc);
         }
         float energyPerReceiver = energyDelta / (numReceivers + 1);
 

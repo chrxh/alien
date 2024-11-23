@@ -2,7 +2,7 @@
 
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
 class NerveTests : public IntegrationTestFramework
@@ -17,8 +17,8 @@ public:
 
 TEST_F(NerveTests, noInput_execution)
 {
-    ActivityDescription activity;
-    activity.channels = {1, 0, -1, 0, 0, 0, 0, 0};
+    SignalDescription signal;
+    signal.channels = {1, 0, -1, 0, 0, 0, 0, 0};
 
     auto data = DataDescription().addCells({
         CellDescription()
@@ -26,22 +26,22 @@ TEST_F(NerveTests, noInput_execution)
             .setCellFunction(NerveDescription())
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
-            .setActivity(activity),
+            .setSignal(signal),
     });
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    EXPECT_EQ(ActivityDescription(), actualCellById.at(1).activity);
+    EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
 }
 
 TEST_F(NerveTests, noInput_noExecution)
 {
-    ActivityDescription activity;
-    activity.channels = {1, 0, -1, 0, 0, 0, 0, 0};
+    SignalDescription signal;
+    signal.channels = {1, 0, -1, 0, 0, 0, 0, 0};
 
     auto data = DataDescription().addCells({
         CellDescription()
@@ -49,22 +49,22 @@ TEST_F(NerveTests, noInput_noExecution)
             .setCellFunction(NerveDescription())
             .setMaxConnections(2)
             .setExecutionOrderNumber(1)
-            .setActivity(activity),
+            .setSignal(signal),
     });
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
-    auto actualData = _simController->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    EXPECT_EQ(activity, actualCellById.at(1).activity);
+    EXPECT_EQ(signal, actualCellById.at(1).signal);
 }
 
 TEST_F(NerveTests, inputBlocked)
 {
-    ActivityDescription activity;
-    activity.channels = {1, 0, -1, 0, 0, 0, 0, 0};
+    SignalDescription signal;
+    signal.channels = {1, 0, -1, 0, 0, 0, 0, 0};
 
     auto data = DataDescription().addCells({
         CellDescription()
@@ -73,7 +73,7 @@ TEST_F(NerveTests, inputBlocked)
             .setCellFunction(NerveDescription())
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
-            .setActivity(activity),
+            .setSignal(signal),
         CellDescription()
             .setId(2)
             .setPos({2.0f, 1.0f})
@@ -83,22 +83,22 @@ TEST_F(NerveTests, inputBlocked)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
     {
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
         auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(1).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(2).activity);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
     }
 }
 
 TEST_F(NerveTests, outputBlocked)
 {
-    ActivityDescription activity;
-    activity.channels = {1, 0, -1, 0, 0, 0, 0, 0};
+    SignalDescription signal;
+    signal.channels = {1, 0, -1, 0, 0, 0, 0, 0};
 
     auto data = DataDescription().addCells({
         CellDescription()
@@ -108,7 +108,7 @@ TEST_F(NerveTests, outputBlocked)
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
             .setOutputBlocked(true)
-            .setActivity(activity),
+            .setSignal(signal),
         CellDescription()
             .setId(2)
             .setPos({2.0f, 1.0f})
@@ -119,22 +119,22 @@ TEST_F(NerveTests, outputBlocked)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
     {
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
         auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(1).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(2).activity);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
     }
 }
 
 TEST_F(NerveTests, underConstruction1)
 {
-    ActivityDescription activity;
-    activity.channels = {1, 0, -1, 0, 0, 0, 0, 0};
+    SignalDescription signal;
+    signal.channels = {1, 0, -1, 0, 0, 0, 0, 0};
 
     auto data = DataDescription().addCells({
         CellDescription()
@@ -144,7 +144,7 @@ TEST_F(NerveTests, underConstruction1)
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
             .setLivingState(LivingState_UnderConstruction)
-            .setActivity(activity),
+            .setSignal(signal),
         CellDescription()
             .setId(2)
             .setPos({2.0f, 1.0f})
@@ -155,22 +155,22 @@ TEST_F(NerveTests, underConstruction1)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
     {
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
         auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(1).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(2).activity);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
     }
 }
 
 TEST_F(NerveTests, underConstruction2)
 {
-    ActivityDescription activity;
-    activity.channels = {1, 0, -1, 0, 0, 0, 0, 0};
+    SignalDescription signal;
+    signal.channels = {1, 0, -1, 0, 0, 0, 0, 0};
 
     auto data = DataDescription().addCells({
         CellDescription()
@@ -179,7 +179,7 @@ TEST_F(NerveTests, underConstruction2)
             .setCellFunction(NerveDescription())
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
-            .setActivity(activity),
+            .setSignal(signal),
         CellDescription()
             .setId(2)
             .setPos({2.0f, 1.0f})
@@ -191,22 +191,22 @@ TEST_F(NerveTests, underConstruction2)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
     {
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
         auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(1).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(2).activity);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
     }
 }
 
 TEST_F(NerveTests, transfer)
 {
-    ActivityDescription activity;
-    activity.channels = {1, 0, -1, 0, 0, 0, 0, 0};
+    SignalDescription signal;
+    signal.channels = {1, 0, -1, 0, 0, 0, 0, 0};
 
     auto data = DataDescription().addCells({
         CellDescription()
@@ -215,7 +215,7 @@ TEST_F(NerveTests, transfer)
             .setCellFunction(NerveDescription())
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
-            .setActivity(activity),
+            .setSignal(signal),
         CellDescription()
             .setId(2)
             .setPos({2.0f, 1.0f})
@@ -234,43 +234,43 @@ TEST_F(NerveTests, transfer)
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
     {
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
         auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(1).activity);
-        EXPECT_EQ(activity, actualCellById.at(2).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(3).activity);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
+        EXPECT_EQ(signal, actualCellById.at(2).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(3).signal);
     }
 
-    _simController->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(1);
     {
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
         auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(1).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(2).activity);
-        EXPECT_EQ(activity, actualCellById.at(3).activity);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
+        EXPECT_EQ(signal, actualCellById.at(3).signal);
     }
-    _simController->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(1);
     {
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
         auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(1).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(2).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(3).activity);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(3).signal);
     }
 }
 
 
 TEST_F(NerveTests, cycle)
 {
-    ActivityDescription activity;
-    activity.channels = {1, 0, -1, 0, 0, 0, 0, 0};
+    SignalDescription signal;
+    signal.channels = {1, 0, -1, 0, 0, 0, 0, 0};
 
     auto data = DataDescription().addCells(
         {CellDescription()
@@ -301,76 +301,76 @@ TEST_F(NerveTests, cycle)
              .setMaxConnections(2)
              .setExecutionOrderNumber(3)
              .setInputExecutionOrderNumber(2)
-             .setActivity(activity)});
+             .setSignal(signal)});
     data.addConnection(1, 2);
     data.addConnection(2, 3);
     data.addConnection(3, 4);
     data.addConnection(4, 1);
 
-    _simController->setSimulationData(data);
+    _simulationFacade->setSimulationData(data);
 
-    _simController->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(1);
     {
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
         auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(activity, actualCellById.at(1).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(2).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(3).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(4).activity);
+        EXPECT_EQ(signal, actualCellById.at(1).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(3).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(4).signal);
     }
 
-    _simController->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(1);
     {
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
         auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(1).activity);
-        EXPECT_EQ(activity, actualCellById.at(2).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(3).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(4).activity);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
+        EXPECT_EQ(signal, actualCellById.at(2).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(3).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(4).signal);
     }
 
-    _simController->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(1);
     {
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
         auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(1).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(2).activity);
-        EXPECT_EQ(activity, actualCellById.at(3).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(4).activity);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
+        EXPECT_EQ(signal, actualCellById.at(3).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(4).signal);
     }
 
     for (int i = 0; i < 3; ++i) {
-        _simController->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(1);
     }
     {
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
         auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(1).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(2).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(3).activity);
-        EXPECT_EQ(activity, actualCellById.at(4).activity);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(3).signal);
+        EXPECT_EQ(signal, actualCellById.at(4).signal);
     }
 
-    _simController->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(1);
     {
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
         auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(activity, actualCellById.at(1).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(2).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(3).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(4).activity);
+        EXPECT_EQ(signal, actualCellById.at(1).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(3).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(4).signal);
     }
 }
 
 TEST_F(NerveTests, fork)
 {
-    ActivityDescription activity;
-    activity.channels = {1, 0, -1, 0, 0, 0, 0, 0};
+    SignalDescription signal;
+    signal.channels = {1, 0, -1, 0, 0, 0, 0, 0};
 
     auto data = DataDescription().addCells({
         CellDescription()
@@ -386,7 +386,7 @@ TEST_F(NerveTests, fork)
             .setCellFunction(NerveDescription())
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
-            .setActivity(activity),
+            .setSignal(signal),
         CellDescription()
             .setId(3)
             .setPos({3.0f, 1.0f})
@@ -398,23 +398,23 @@ TEST_F(NerveTests, fork)
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
     {
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
         auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(activity, actualCellById.at(1).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(2).activity);
-        EXPECT_EQ(activity, actualCellById.at(3).activity);
+        EXPECT_EQ(signal, actualCellById.at(1).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
+        EXPECT_EQ(signal, actualCellById.at(3).signal);
     }
 }
 
 TEST_F(NerveTests, noFork)
 {
-    ActivityDescription activity;
-    activity.channels = {1, 0, -1, 0, 0, 0, 0, 0};
+    SignalDescription signal;
+    signal.channels = {1, 0, -1, 0, 0, 0, 0, 0};
 
     auto data = DataDescription().addCells({
         CellDescription().setId(1).setPos({1.0f, 1.0f}).setCellFunction(NerveDescription()).setMaxConnections(2).setExecutionOrderNumber(1),
@@ -424,7 +424,7 @@ TEST_F(NerveTests, noFork)
             .setCellFunction(NerveDescription())
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
-            .setActivity(activity),
+            .setSignal(signal),
         CellDescription()
             .setId(3)
             .setPos({3.0f, 1.0f})
@@ -436,25 +436,25 @@ TEST_F(NerveTests, noFork)
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
     {
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
         auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(1).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(2).activity);
-        EXPECT_EQ(activity, actualCellById.at(3).activity);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
+        EXPECT_EQ(signal, actualCellById.at(3).signal);
     }
 }
 
 TEST_F(NerveTests, merge)
 {
-    ActivityDescription activity1, activity2, sumActivity;
-    activity1.channels = {1, 0, -1, 0, 0, 0, 0, 0};
-    activity2.channels = {2, 0, 0.5f, 0, 0, 0, 0, 0};
-    sumActivity.channels = {3, 0, -0.5f, 0, 0, 0, 0, 0};
+    SignalDescription signal1, signal2, sumSignals;
+    signal1.channels = {1, 0, -1, 0, 0, 0, 0, 0};
+    signal2.channels = {2, 0, 0.5f, 0, 0, 0, 0, 0};
+    sumSignals.channels = {3, 0, -0.5f, 0, 0, 0, 0, 0};
 
     auto data = DataDescription().addCells({
         CellDescription()
@@ -463,7 +463,7 @@ TEST_F(NerveTests, merge)
             .setCellFunction(NerveDescription())
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
-            .setActivity(activity1),
+            .setSignal(signal1),
         CellDescription()
             .setId(2)
             .setPos({2.0f, 1.0f})
@@ -477,28 +477,28 @@ TEST_F(NerveTests, merge)
             .setCellFunction(NerveDescription())
             .setMaxConnections(2)
             .setExecutionOrderNumber(5)
-            .setActivity(activity2),
+            .setSignal(signal2),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
     {
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
         auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(1).activity);
-        EXPECT_EQ(sumActivity, actualCellById.at(2).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(3).activity);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
+        EXPECT_EQ(sumSignals, actualCellById.at(2).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(3).signal);
     }
 }
 
 TEST_F(NerveTests, sameExecutionOrderNumber)
 {
-    ActivityDescription activity;
-    activity.channels = {1, 0, -1, 0, 0, 0, 0, 0};
+    SignalDescription signal;
+    signal.channels = {1, 0, -1, 0, 0, 0, 0, 0};
 
     auto data = DataDescription().addCells({
         CellDescription()
@@ -507,7 +507,7 @@ TEST_F(NerveTests, sameExecutionOrderNumber)
             .setCellFunction(NerveDescription())
             .setMaxConnections(2)
             .setExecutionOrderNumber(0)
-            .setActivity(activity),
+            .setSignal(signal),
         CellDescription()
             .setId(2)
             .setPos({2.0f, 1.0f})
@@ -518,15 +518,15 @@ TEST_F(NerveTests, sameExecutionOrderNumber)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
 
     {
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
         auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(1).activity);
-        EXPECT_EQ(ActivityDescription(), actualCellById.at(2).activity);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
+        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
     }
 }
 
@@ -550,19 +550,19 @@ TEST_F(NerveTests, constantPulse)
     });
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
+    _simulationFacade->setSimulationData(data);
 
     for (int i = 0; i <= 18; ++i) {
-        _simController->calcTimesteps(1);
+        _simulationFacade->calcTimesteps(1);
 
-        auto actualData = _simController->getSimulationData();
+        auto actualData = _simulationFacade->getSimulationData();
         auto actualCellById = getCellById(actualData);
 
-        ActivityDescription activity;
+        SignalDescription signal;
         if (i % 18 == 0) {
-            activity.channels = {1, 0, 0, 0, 0, 0, 0, 0};
+            signal.channels = {1, 0, 0, 0, 0, 0, 0, 0};
         }
-        EXPECT_EQ(activity, actualCellById.at(1).activity);
+        EXPECT_EQ(signal, actualCellById.at(1).signal);
     }
 }
 
@@ -585,33 +585,33 @@ TEST_F(NerveTests, alternatingPulse)
              .setOutputBlocked(true)});
     data.addConnection(1, 2);
 
-    _simController->setSimulationData(data);
-    _simController->calcTimesteps(1);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
     {
-        auto actualCellById = getCellById(_simController->getSimulationData());
-        EXPECT_EQ(ActivityDescription().setChannels({1, 0, 0, 0, 0, 0, 0, 0}), actualCellById.at(1).activity);
+        auto actualCellById = getCellById(_simulationFacade->getSimulationData());
+        EXPECT_EQ(SignalDescription().setChannels({1, 0, 0, 0, 0, 0, 0, 0}), actualCellById.at(1).signal);
     }
 
     for (int pulse = 0; pulse < 3; ++pulse) {
         for (int i = 0; i < 6*3; ++i) {
-            _simController->calcTimesteps(1);
+            _simulationFacade->calcTimesteps(1);
         }
-        auto actualCellById = getCellById(_simController->getSimulationData());
-        EXPECT_EQ(ActivityDescription().setChannels({1, 0, 0, 0, 0, 0, 0, 0}), actualCellById.at(1).activity);
+        auto actualCellById = getCellById(_simulationFacade->getSimulationData());
+        EXPECT_EQ(SignalDescription().setChannels({1, 0, 0, 0, 0, 0, 0, 0}), actualCellById.at(1).signal);
     }
 
     for (int pulse = 0; pulse < 4; ++pulse) {
         for (int i = 0; i < 6*3; ++i) {
-            _simController->calcTimesteps(1);
+            _simulationFacade->calcTimesteps(1);
         }
-        auto actualCellById = getCellById(_simController->getSimulationData());
-        EXPECT_EQ(ActivityDescription().setChannels({-1, 0, 0, 0, 0, 0, 0, 0}), actualCellById.at(1).activity);
+        auto actualCellById = getCellById(_simulationFacade->getSimulationData());
+        EXPECT_EQ(SignalDescription().setChannels({-1, 0, 0, 0, 0, 0, 0, 0}), actualCellById.at(1).signal);
     }
     for (int pulse = 0; pulse < 4; ++pulse) {
         for (int i = 0; i < 6*3; ++i) {
-            _simController->calcTimesteps(1);
+            _simulationFacade->calcTimesteps(1);
         }
-        auto actualCellById = getCellById(_simController->getSimulationData());
-        EXPECT_EQ(ActivityDescription().setChannels({1, 0, 0, 0, 0, 0, 0, 0}), actualCellById.at(1).activity);
+        auto actualCellById = getCellById(_simulationFacade->getSimulationData());
+        EXPECT_EQ(SignalDescription().setChannels({1, 0, 0, 0, 0, 0, 0, 0}), actualCellById.at(1).signal);
     }
 }

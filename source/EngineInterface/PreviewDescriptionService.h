@@ -1,13 +1,15 @@
 #pragma once
 
+#include "Base/Singleton.h"
+
 #include "GenomeDescriptions.h"
 #include "SimulationParameters.h"
 #include "PreviewDescriptions.h"
 
-
 class PreviewDescriptionService
 {
+    MAKE_SINGLETON(PreviewDescriptionService);
 public:
-    static PreviewDescription convert(GenomeDescription const& genome, std::optional<int> selectedNode, SimulationParameters const& parameters);
+    PreviewDescription convert(GenomeDescription const& genome, std::optional<int> selectedNode, SimulationParameters const& parameters);
 };
 

@@ -2,6 +2,7 @@
 
 #include <chrono>
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/RawStatisticsData.h"
 
@@ -13,18 +14,21 @@
 
 struct ImPlotPoint;
 
-class _StatisticsWindow : public _AlienWindow
+class StatisticsWindow : public AlienWindow<SimulationFacade>
 {
-public:
-    _StatisticsWindow(SimulationController const& simController);
-    ~_StatisticsWindow();
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(StatisticsWindow);
 
 private:
+    StatisticsWindow();
+
+    void initIntern(SimulationFacade simulationFacade) override;
+    void shutdownIntern() override;
     void processIntern() override;
 
     void processTimelinesTab();
     void processHistogramsTab();
     void processTablesTab();
+    void processSettings();
 
     void processTimelineStatistics();
 
@@ -32,26 +36,82 @@ private:
 
     void processBackground() override;
 
-    void plotSumColorsIntern(int row, DataPoint const* dataPoint, double const* timePoints, int count, double startTime, double endTime, int fracPartDecimals);
+    void plotSumColorsIntern(
+        int row,
+        DataPoint const* dataPoints,
+        double const* timePoints,
+        double const* systemClock,
+        int count,
+        double startTime,
+        double endTime,
+        int fracPartDecimals);
     void plotByColorIntern(int row, DataPoint const* values, double const* timePoints, int count, double startTime, double endTime, int fracPartDecimals);
     void plotForColorIntern(
         int row,
         DataPoint const* values,
         int colorIndex,
         double const* timePoints,
+        double const* systemClock,
         int count,
         double startTime,
         double endTime,
         int fracPartDecimals);
 
+    void setPlotScale();
+    double getUpperBound(double maxValue);
+
+    void drawValuesAtMouseCursor(
+        double const* dataPoints,
+        double const* timePoints,
+        double const* systemClock,
+        int count,
+        double startTime,
+        double endTime,
+        double upperBound,
+        int fracPartDecimals);
+
+    void validateAndCorrect();
+
     float calcPlotHeight(int row) const;
 
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
 
     std::string _startingPath;
 
-    int _plotType = 0;  //0 = accumulated, 1 = by color, 2...8 = specific color
-    int _mode = 0;  //0 = real-time, 1 = entire history
+    bool _settingsOpen = false;
+    float _settingsHeight = 130.0f;
+
+    using PlotScale = int;
+    enum PlotScale_
+    {
+        PlotScale_Linear,
+        PlotScale_Logarithmic,
+    };
+    PlotScale _plotScale = PlotScale_Linear;
+
+    using PlotType = int;
+    enum PlotType_
+    {
+        PlotType_Accumulated,
+        PlotType_ByColor,
+        PlotType_Color0,
+        PlotType_Color1,
+        PlotType_Color2,
+        PlotType_Color3,
+        PlotType_Color4,
+        PlotType_Color5,
+        PlotType_Color6
+    };
+    PlotType _plotType = PlotType_Accumulated;
+
+    using PlotMode = int;
+    enum PlotMode_
+    {
+        PlotMode_RealTime,
+        PlotMode_EntireHistory
+    };
+    PlotMode _plotMode = PlotMode_RealTime;
+
     static auto constexpr MinPlotHeight = 80.0f;
     float _plotHeight = MinPlotHeight;
 
@@ -60,6 +120,7 @@ private:
     std::unordered_set<int> _collapsedPlotIndices;
 
     float _timeHorizonForLiveStatistics = 10.0f;  //in seconds
+    float _timeHorizonForLongtermStatistics = 100.0f;  //in percent
     std::optional<std::chrono::steady_clock::time_point> _lastTimepoint;
     TimelineLiveStatistics _timelineLiveStatistics;
     HistogramLiveStatistics _histogramLiveStatistics;

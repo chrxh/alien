@@ -3,7 +3,7 @@
 #include <imgui.h>
 
 #include "Base/GlobalSettings.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "Viewport.h"
 #include "StatisticsWindow.h"
@@ -13,28 +13,29 @@
 
 namespace
 {
-    auto const ContentTextInputWidth = 60.0f;
+    auto const ContentTextInputWidth = 100.0f;
+    auto const ProjectNameSize = sizeof(Char64) / sizeof(char);
 }
 
-_NewSimulationDialog::_NewSimulationDialog(
-    SimulationController const& simController,
-    TemporalControlWindow const& temporalControlWindow,
-    StatisticsWindow const& statisticsWindow)
-    : _AlienDialog("New simulation")
-    , _simController(simController)
-    , _temporalControlWindow(temporalControlWindow)
-    , _statisticsWindow(statisticsWindow)
+void NewSimulationDialog::initIntern(SimulationFacade simulationFacade)
 {
-    _adoptSimulationParameters = GlobalSettings::getInstance().getBool("dialogs.new simulation.adopt simulation parameters", true);
+    _simulationFacade = simulationFacade;
+    _adoptSimulationParameters =
+            GlobalSettings::get().getValue("dialogs.new simulation.adopt simulation parameters", true);
 }
 
-_NewSimulationDialog::~_NewSimulationDialog()
+void NewSimulationDialog::shutdownIntern()
 {
-    GlobalSettings::getInstance().setBool("dialogs.new simulation.adopt simulation parameters", _adoptSimulationParameters);
+    GlobalSettings::get().setValue("dialogs.new simulation.adopt simulation parameters", _adoptSimulationParameters);
 }
 
-void _NewSimulationDialog::processIntern()
+NewSimulationDialog::NewSimulationDialog()
+    : AlienDialog("New simulation")
+{}
+
+void NewSimulationDialog::processIntern()
 {
+    AlienImGui::InputText(AlienImGui::InputTextParameters().name("Project name").textWidth(ContentTextInputWidth), _projectName, ProjectNameSize);
     AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Width").textWidth(ContentTextInputWidth), _width);
     AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Height").textWidth(ContentTextInputWidth), _height);
     AlienImGui::Checkbox(
@@ -59,26 +60,29 @@ void _NewSimulationDialog::processIntern()
     _height = std::max(1, _height);
 }
 
-void _NewSimulationDialog::openIntern()
+void NewSimulationDialog::openIntern()
 {
-    auto worldSize = _simController->getWorldSize();
+    auto worldSize = _simulationFacade->getWorldSize();
     _width = worldSize.x;
     _height = worldSize.y;
 }
 
-void _NewSimulationDialog::onNewSimulation()
+void NewSimulationDialog::onNewSimulation()
 {
     SimulationParameters parameters;
     if (_adoptSimulationParameters) {
-        parameters = _simController->getSimulationParameters();
+        parameters = _simulationFacade->getSimulationParameters();
     }
-    _simController->closeSimulation();
+    for (int i = 0; i < ProjectNameSize; ++i) {
+        parameters.projectName[i] = _projectName[i];
+    }
+    _simulationFacade->closeSimulation();
 
     GeneralSettings generalSettings;
     generalSettings.worldSizeX = _width;
     generalSettings.worldSizeY = _height;
-    _simController->newSimulation(0, generalSettings, parameters);
-    Viewport::setCenterInWorldPos({toFloat(_width) / 2, toFloat(_height) / 2});
-    Viewport::setZoomFactor(4.0f);
-    _temporalControlWindow->onSnapshot();
+    _simulationFacade->newSimulation(0, generalSettings, parameters);
+    Viewport::get().setCenterInWorldPos({toFloat(_width) / 2, toFloat(_height) / 2});
+    Viewport::get().setZoomFactor(4.0f);
+    TemporalControlWindow::get().onSnapshot();
 }

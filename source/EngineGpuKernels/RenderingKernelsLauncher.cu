@@ -21,10 +21,24 @@ void _RenderingKernelsLauncher::drawImage(
     KERNEL_CALL(cudaFilterParticlesForRendering, data.worldSize, rectUpperLeft, data.objects.particlePointers, data.tempObjects.particlePointers, imageSize, zoom);
     KERNEL_CALL(cudaDrawCells, data.timestep, data.worldSize, rectUpperLeft, rectLowerRight, data.tempObjects.cellPointers, targetImage, imageSize, zoom);
     KERNEL_CALL(cudaDrawParticles, data.worldSize, rectUpperLeft, rectLowerRight, data.tempObjects.particlePointers, targetImage, imageSize, zoom);
-    KERNEL_CALL_1_1(cudaDrawRadiationSources, targetImage, rectUpperLeft, data.worldSize, imageSize, zoom);
+    if (settings.simulationParameters.showRadiationSources) {
+        KERNEL_CALL_1_1(cudaDrawRadiationSources, targetImage, rectUpperLeft, data.worldSize, imageSize, zoom);
+    }
 
     if (settings.simulationParameters.features.cellGlow) {
-        cudaDrawCellGlow<<<512, 128>>>(data.worldSize, rectUpperLeft, data.tempObjects.cellPointers, targetImage, imageSize, zoom);
+        int blocks;
+        int threadsPerBlock;
+        if (zoom < 4) {
+            blocks = 2048;
+            threadsPerBlock = 32;
+        } else if (zoom < 30) {
+            blocks = 512;
+            threadsPerBlock = 16;
+        } else {
+            blocks = 32;
+            threadsPerBlock = 1024;
+        }
+        cudaDrawCellGlow<<<blocks, threadsPerBlock>>>(data.worldSize, rectUpperLeft, data.tempObjects.cellPointers, targetImage, imageSize, zoom);
     }
 
     if (settings.simulationParameters.borderlessRendering) {

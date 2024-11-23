@@ -1,7 +1,5 @@
 #include "ShaderWindow.h"
 
-#include "Base/GlobalSettings.h"
-
 #include "AlienImGui.h"
 #include "SimulationView.h"
 
@@ -10,39 +8,37 @@ namespace
     auto const RightColumnWidth = 140.0f;
 }
 
-_ShaderWindow::_ShaderWindow(SimulationView const& simulationView)
-: _AlienWindow("Shader parameters", "windows.shader", false)
-, _simulationView(simulationView)
+ShaderWindow::ShaderWindow()
+: AlienWindow("Shader parameters", "windows.shader", false)
 {
-    _brightness = GlobalSettings::getInstance().getFloat("windows.shader.brightness", _brightness);
-    _contrast = GlobalSettings::getInstance().getFloat("windows.shader.contrast", _contrast);
-    _motionBlur = GlobalSettings::getInstance().getFloat("windows.shader.motion blur", _motionBlur);
-    _simulationView->setBrightness(_brightness);
-    _simulationView->setContrast(_contrast);
-    _simulationView->setMotionBlur(_motionBlur);
 }
 
-_ShaderWindow::~_ShaderWindow()
+void ShaderWindow::processIntern()
 {
-    GlobalSettings::getInstance().setFloat("windows.shader.brightness", _brightness);
-    GlobalSettings::getInstance().setFloat("windows.shader.contrast", _contrast);
-    GlobalSettings::getInstance().setFloat("windows.shader.motion blur", _motionBlur);
-}
+    auto const defaultBrightness = SimulationView::DefaultBrightness;
+    auto const defaultContrast = SimulationView::DefaultContrast;
+    auto const defaultMotionBlur = SimulationView::DefaultMotionBlur;
 
-void _ShaderWindow::processIntern()
-{
-    auto const defaultValue = 1.0f;
+    auto brightness = SimulationView::get().getBrightness();
+    auto contrast = SimulationView::get().getContrast();
+    auto motionBlur = SimulationView::get().getMotionBlur();
     if (AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters().name("Brightness").min(0).max(3.0f).textWidth(RightColumnWidth).defaultValue(&defaultValue), &_brightness)) {
-        _simulationView->setBrightness(_brightness);
+            AlienImGui::SliderFloatParameters().name("Brightness").min(0).max(3.0f).textWidth(RightColumnWidth).defaultValue(&defaultBrightness), &brightness)) {
+        SimulationView::get().setBrightness(brightness);
     }
     if (AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters().name("Contrast").min(0).max(2.0f).textWidth(RightColumnWidth).defaultValue(&defaultValue), &_contrast)) {
-        _simulationView->setContrast(_contrast);
+            AlienImGui::SliderFloatParameters().name("Contrast").min(0).max(2.0f).textWidth(RightColumnWidth).defaultValue(&defaultContrast), &contrast)) {
+        SimulationView::get().setContrast(contrast);
     }
     if (AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters().name("Motion blur").min(0).max(10.0f).textWidth(RightColumnWidth).logarithmic(true).defaultValue(&defaultValue),
-            &_motionBlur)) {
-        _simulationView->setMotionBlur(_motionBlur);
+            AlienImGui::SliderFloatParameters()
+                .name("Motion blur")
+                .min(0)
+                .max(10.0f)
+                .textWidth(RightColumnWidth)
+                .logarithmic(true)
+                .defaultValue(&defaultMotionBlur),
+            &motionBlur)) {
+        SimulationView::get().setMotionBlur(motionBlur);
     }
 }

@@ -5,11 +5,9 @@
 class _MainWindow;
 using MainWindow = std::shared_ptr<_MainWindow>;
 
-class _AlienWindow;
-using AlienWindow = std::shared_ptr<_AlienWindow>;
+//class AlienWindow;
 
-class _SimulationView;
-using SimulationView= std::shared_ptr<_SimulationView>;
+class SimulationView;
 
 class _Shader;
 using Shader = std::shared_ptr<_Shader>;
@@ -21,142 +19,95 @@ class Viewport;
 
 class StyleRepository;
 
-class _TemporalControlWindow;
-using TemporalControlWindow = std::shared_ptr<_TemporalControlWindow>;
+class TemporalControlWindow;
 
-class _SpatialControlWindow;
-using SpatialControlWindow = std::shared_ptr<_SpatialControlWindow>;
+class SpatialControlWindow;
 
-class _SimulationParametersWindow;
-using SimulationParametersWindow = std::shared_ptr<_SimulationParametersWindow>;
+class SimulationParametersWindow;
 
-class _StatisticsWindow;
-using StatisticsWindow = std::shared_ptr<_StatisticsWindow>;
+class StatisticsWindow;
 
-class _ModeController;
-using ModeController = std::shared_ptr<_ModeController>;
+class SimulationInteractionController;
 
-class _GpuSettingsDialog;
-using GpuSettingsDialog = std::shared_ptr<_GpuSettingsDialog>;
+class GpuSettingsDialog;
 
-class _NewSimulationDialog;
-using NewSimulationDialog = std::shared_ptr<_NewSimulationDialog>;
+class NewSimulationDialog;
 
-class _StartupController;
-using StartupController = std::shared_ptr<_StartupController>;
+class MainLoopController;
 
-class _ExitDialog;
-using ExitDialog = std::shared_ptr<_ExitDialog>;
+class ExitDialog;
 
-class _AboutDialog;
-using AboutDialog = std::shared_ptr<_AboutDialog>;
+class AboutDialog;
 
-class _MassOperationsDialog;
-using MassOperationsDialog = std::shared_ptr<_MassOperationsDialog>;
+class MassOperationsDialog;
 
-class _LogWindow;
-using LogWindow = std::shared_ptr<_LogWindow>;
+class LogWindow;
 
 class _GuiLogger;
 using GuiLogger = std::shared_ptr<_GuiLogger>;
 
-class _UiController;
-using UiController = std::shared_ptr<_UiController>;
+class UiController;
 
-class _AutosaveController;
-using AutosaveController = std::shared_ptr<_AutosaveController>;
+class GettingStartedWindow;
 
-class _GettingStartedWindow;
-using GettingStartedWindow = std::shared_ptr<_GettingStartedWindow>;
+class DisplaySettingsDialog;
 
-class _DisplaySettingsDialog;
-using DisplaySettingsDialog = std::shared_ptr<_DisplaySettingsDialog>;
+class EditorModel;
 
-class _EditorModel;
-using EditorModel = std::shared_ptr<_EditorModel>;
+class EditorController;
 
-class _EditorController;
-using EditorController = std::shared_ptr<_EditorController>;
-using EditorControllerWeakPtr = _EditorController*;
+class SelectionWindow;
 
-class _SelectionWindow;
-using SelectionWindow = std::shared_ptr<_SelectionWindow>;
-
-class _PatternEditorWindow;
-using PatternEditorWindow = std::shared_ptr<_PatternEditorWindow>;
+class PatternEditorWindow;
 
 class WindowController;
 
-class _ResizeWorldDialog;
-using ResizeWorldDialog = std::shared_ptr<_ResizeWorldDialog>;
-
-class _OpenSymbolsDialog;
-using OpenSymbolsDialog = std::shared_ptr<_OpenSymbolsDialog>;
+class ResizeWorldDialog;
 
 class _InspectorWindow;
 using InspectorWindow = std::shared_ptr<_InspectorWindow>;
 
-class _CreatorWindow;
-using CreatorWindow = std::shared_ptr<_CreatorWindow>;
+class CreatorWindow;
 
-class _MultiplierWindow;
-using MultiplierWindow = std::shared_ptr<_MultiplierWindow>;
+class MultiplierWindow;
 
-class _PatternAnalysisDialog;
-using PatternAnalysisDialog = std::shared_ptr<_PatternAnalysisDialog>;
+class PatternAnalysisDialog;
 
-class _FpsController;
-using FpsController = std::shared_ptr<_FpsController>;
+class FpsController;
 
-class _BrowserWindow;
-using BrowserWindow = std::shared_ptr<_BrowserWindow>;
+class BrowserWindow;
 
-class _ShaderWindow;
-using ShaderWindow = std::shared_ptr<_ShaderWindow>;
+class ShaderWindow;
 
-class _LoginDialog;
-using LoginDialog = std::shared_ptr<_LoginDialog>;
-using LoginDialogWeakPtr = std::weak_ptr<_LoginDialog>;
+class LoginDialog;
 
-class _UploadSimulationDialog;
-using UploadSimulationDialog = std::shared_ptr<_UploadSimulationDialog>;
-using UploadSimulationDialogWeakPtr = std::weak_ptr<_UploadSimulationDialog>;
+class UploadSimulationDialog;
 
-class _EditSimulationDialog;
-using EditSimulationDialog = std::shared_ptr<_EditSimulationDialog>;
-using EditSimulationDialogWeakPtr = std::weak_ptr<_EditSimulationDialog>;
+class EditSimulationDialog;
 
-class _CreateUserDialog;
-using CreateUserDialog = std::shared_ptr<_CreateUserDialog>;
-using CreateUserDialogWeakPtr = std::weak_ptr<_CreateUserDialog>;
+class CreateUserDialog;
 
-class _ActivateUserDialog;
-using ActivateUserDialog = std::shared_ptr<_ActivateUserDialog>;
+class ActivateUserDialog;
 
-class _DeleteUserDialog;
-using DeleteUserDialog = std::shared_ptr<_DeleteUserDialog>;
+class DeleteUserDialog;
 
-class _NetworkSettingsDialog;
-using NetworkSettingsDialog = std::shared_ptr<_NetworkSettingsDialog>;
+class NetworkSettingsDialog;
 
-class _ResetPasswordDialog;
-using ResetPasswordDialog = std::shared_ptr<_ResetPasswordDialog>;
+class ResetPasswordDialog;
 
-class _NewPasswordDialog;
-using NewPasswordDialog = std::shared_ptr<_NewPasswordDialog>;
+class NewPasswordDialog;
 
-class _ImageToPatternDialog;
-using ImageToPatternDialog = std::shared_ptr<_ImageToPatternDialog>;
+class ImageToPatternDialog;
 
-class _GenomeEditorWindow;
-using GenomeEditorWindow = std::shared_ptr<_GenomeEditorWindow>;
-using GenomeEditorWindowWeakPtr = std::weak_ptr<_GenomeEditorWindow>;
+class GenomeEditorWindow;
 
-class _RadiationSourcesWindow;
-using RadiationSourcesWindow = std::shared_ptr<_RadiationSourcesWindow>;
+class RadiationSourcesWindow;
 
-class _ChangeColorDialog;
-using ChangeColorDialog = std::shared_ptr<_ChangeColorDialog>;
+class ChangeColorDialog;
+
+class AutosaveWindow;
+
+class FileTransferController;
 
 struct UserInfo;
 
@@ -171,3 +122,4 @@ struct TextureData
     int width;
     int height;
 };
+

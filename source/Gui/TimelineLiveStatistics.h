@@ -11,7 +11,7 @@
 class TimelineLiveStatistics
 {
 public:
-    static auto constexpr MaxLiveHistory = 240.0;  //in seconds
+    static auto constexpr MaxLiveHistory = 240.0f;  //in seconds
 
     std::vector<DataPointCollection> const& getDataPointCollectionHistory() const;
     void update(TimelineStatistics const& statistics, uint64_t timestep);

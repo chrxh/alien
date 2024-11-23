@@ -143,6 +143,12 @@ namespace
             case LivingState_Activating:
                 cellColor = 0xffffff;
                 break;
+            case LivingState_Detaching:
+                cellColor = 0xbf4040;
+                break;
+            case LivingState_Reviving:
+                cellColor = 0x4040bf;
+                break;
             case LivingState_Dying:
                 cellColor = 0xff1010;
                 break;
@@ -483,7 +489,7 @@ __global__ void cudaDrawCells(
             coloring == CellColoring_MutationId_AllCellFunctions ? calcColor(cell, cell->selected, coloring, false) * 0.5f : primaryColor * 0.6f;
         drawCircle(imageData, imageSize, cellImagePos, secondaryColor, cellRadius, shadedCells, true);
 
-        //draw activity
+        //draw signal
         if (cell->isActive() && zoom >= cudaSimulationParameters.zoomLevelNeuronalActivity) {
             drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, cellRadius, shadedCells);
         }
@@ -501,6 +507,34 @@ __global__ void cudaDrawCells(
                 if (isLineVisible(cellImagePos, endImagePos, universeImageSize) && Math::length(cell->eventPos - cell->pos) < 10.0f) {
                     drawLine(cellImagePos, endImagePos, color, imageData, imageSize);
                 }
+            }
+        }
+
+        //draw muscle movements
+        if (cudaSimulationParameters.muscleMovementVisualization && cell->cellFunction == CellFunction_Muscle
+            && (cell->cellFunctionData.muscle.lastMovementX != 0 || cell->cellFunctionData.muscle.lastMovementY != 0)) {
+
+            auto color = float3{0.7f, 0.7f, 0.7f} * min(1.0f, zoom * 0.1f);
+            auto endPos = cell->pos + float2{cell->cellFunctionData.muscle.lastMovementX, cell->cellFunctionData.muscle.lastMovementY} * 100;
+            auto endImagePos = mapWorldPosToImagePos(rectUpperLeft, endPos, universeImageSize, zoom);
+            if (isLineVisible(cellImagePos, endImagePos, universeImageSize)) {
+                drawLine(cellImagePos, endImagePos, color, imageData, imageSize);
+            }
+
+            auto arrowPos1 = endPos + float2{
+                -cell->cellFunctionData.muscle.lastMovementX + cell->cellFunctionData.muscle.lastMovementY,
+                -cell->cellFunctionData.muscle.lastMovementX - cell->cellFunctionData.muscle.lastMovementY} * 20;
+            auto arrowImagePos1 = mapWorldPosToImagePos(rectUpperLeft, arrowPos1, universeImageSize, zoom);
+            if (isLineVisible(arrowImagePos1, endImagePos, universeImageSize)) {
+                drawLine(arrowImagePos1, endImagePos, color, imageData, imageSize);
+            }
+
+            auto arrowPos2 = endPos + float2{
+                -cell->cellFunctionData.muscle.lastMovementX - cell->cellFunctionData.muscle.lastMovementY,
+                +cell->cellFunctionData.muscle.lastMovementX - cell->cellFunctionData.muscle.lastMovementY} * 20;
+            auto arrowImagePos2 = mapWorldPosToImagePos(rectUpperLeft, arrowPos2, universeImageSize, zoom);
+            if (isLineVisible(arrowImagePos2, endImagePos, universeImageSize)) {
+                drawLine(arrowImagePos2, endImagePos, color, imageData, imageSize);
             }
         }
 
