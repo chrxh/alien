@@ -50,6 +50,8 @@ namespace
             tree, parameters.borderlessRendering, defaultParameters.borderlessRendering, "simulation parameters.borderless rendering", parserTask);
         ParameterParser::encodeDecode(
             tree, parameters.markReferenceDomain, defaultParameters.markReferenceDomain, "simulation parameters.mark reference domain", parserTask);
+        ParameterParser::encodeDecode(
+            tree, parameters.showRadiationSources, defaultParameters.showRadiationSources, "simulation parameters.show radiation sources", parserTask);
         ParameterParser::encodeDecode(tree, parameters.gridLines, defaultParameters.gridLines, "simulation parameters.grid lines", parserTask);
         ParameterParser::encodeDecode(
             tree, parameters.attackVisualization, defaultParameters.attackVisualization, "simulation parameters.attack visualization", parserTask);

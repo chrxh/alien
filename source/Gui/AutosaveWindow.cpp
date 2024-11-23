@@ -126,7 +126,7 @@ void AutosaveWindow::processToolbar()
     ImGui::SameLine();
     ImGui::BeginDisabled(!_savepointTable.has_value() || _savepointTable->isEmpty());
     if (AlienImGui::ToolbarButton(ICON_FA_BROOM)) {
-        GenericMessageDialog::get().yesNo("Delete", "Do you really want to delete the all savepoints?", [&]() { scheduleCleanup(); });
+        GenericMessageDialog::get().yesNo("Delete", "Do you really want to delete all savepoints?", [&]() { scheduleCleanup(); });
     }
     AlienImGui::Tooltip("Delete all save points");
     ImGui::EndDisabled();

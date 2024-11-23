@@ -75,6 +75,7 @@ struct SimulationParameters
     bool attackVisualization = false;
     bool muscleMovementVisualization = false;
     float cellRadius = 0.25f;
+    bool showRadiationSources = true;
 
     //all other parameters
     SimulationParametersSpotValues baseValues;
