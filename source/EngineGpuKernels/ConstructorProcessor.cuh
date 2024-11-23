@@ -691,8 +691,6 @@ ConstructorProcessor::constructCellIntern(
         newConstructor.isReady = true;
     } break;
     case CellFunction_Sensor: {
-        result->cellFunctionData.sensor.mode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % SensorMode_Count;
-        result->cellFunctionData.sensor.angle = GenomeDecoder::readAngle(constructor, genomeCurrentBytePosition);
         result->cellFunctionData.sensor.minDensity = (GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition) + 1.0f) / 2;
         result->cellFunctionData.sensor.restrictToColor = GenomeDecoder::readOptionalByte(constructor, genomeCurrentBytePosition, MAX_COLORS);
         result->cellFunctionData.sensor.restrictToMutants =

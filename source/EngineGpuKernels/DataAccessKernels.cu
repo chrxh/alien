@@ -111,8 +111,6 @@ namespace
             cellTO.cellFunctionData.constructor.constructionAngle2 = cell->cellFunctionData.constructor.constructionAngle2;
         } break;
         case CellFunction_Sensor: {
-            cellTO.cellFunctionData.sensor.mode = cell->cellFunctionData.sensor.mode;
-            cellTO.cellFunctionData.sensor.angle = cell->cellFunctionData.sensor.angle;
             cellTO.cellFunctionData.sensor.minDensity = cell->cellFunctionData.sensor.minDensity;
             cellTO.cellFunctionData.sensor.minRange = cell->cellFunctionData.sensor.minRange;
             cellTO.cellFunctionData.sensor.maxRange = cell->cellFunctionData.sensor.maxRange;

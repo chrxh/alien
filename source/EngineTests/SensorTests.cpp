@@ -313,7 +313,7 @@ TEST_F(SensorTests, scanNeighborhood_twoMasses)
              .setMaxConnections(2)
              .setExecutionOrderNumber(0)
              .setInputExecutionOrderNumber(5)
-             .setCellFunction(SensorDescription().setMinDensity(0.3f)),
+             .setCellFunction(SensorDescription().setMinDensity(0.7f)),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
@@ -323,88 +323,22 @@ TEST_F(SensorTests, scanNeighborhood_twoMasses)
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
-    data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(0.8f)));
-    data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 200.0f}).width(16).height(16).cellDistance(0.5f)));
+    data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(1.5f)));
+    data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 200.0f}).width(16).height(16).cellDistance(1.0f)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttackCell = getCell(actualData, 1);
+    auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.signal.channels[0]));
-    EXPECT_TRUE(actualAttackCell.signal.channels[1] > 0.3f);
-    EXPECT_TRUE(actualAttackCell.signal.channels[2] < 1.0f - 80.0f / 256);
-    EXPECT_TRUE(actualAttackCell.signal.channels[2] > 1.0f - 105.0f / 256);
-    EXPECT_TRUE(actualAttackCell.signal.channels[3] > 70.0f / 365);
-    EXPECT_TRUE(actualAttackCell.signal.channels[3] < 105.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
+    EXPECT_TRUE(actualSensorCell.signal.channels[1] > 0.7f);
+    EXPECT_TRUE(actualSensorCell.signal.channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualSensorCell.signal.channels[2] > 1.0f - 105.0f / 256);
+    EXPECT_TRUE(actualSensorCell.signal.channels[3] < -70.0f / 365);
+    EXPECT_TRUE(actualSensorCell.signal.channels[3] > -105.0f / 365);
 }
-
-TEST_F(SensorTests, scanByAngle_found)
-{
-    DataDescription data;
-    data.addCells(
-        {CellDescription()
-             .setId(1)
-             .setPos({100.0f, 100.0f})
-             .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
-             .setCellFunction(SensorDescription().setFixedAngle(-90.0f)),
-         CellDescription()
-             .setId(2)
-             .setPos({101.0f, 100.0f})
-             .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
-             .setCellFunction(NerveDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
-    data.addConnection(1, 2);
-
-    data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttackCell = getCell(actualData, 1);
-
-    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.signal.channels[0]));
-    EXPECT_TRUE(actualAttackCell.signal.channels[1] > 0.3f);
-    EXPECT_TRUE(actualAttackCell.signal.channels[2] > 80.0f / 256);
-    EXPECT_TRUE(actualAttackCell.signal.channels[2] < 105.0f / 256);
-}
-
-TEST_F(SensorTests, scanByAngle_wrongAngle)
-{
-    DataDescription data;
-    data.addCells(
-        {CellDescription()
-             .setId(1)
-             .setPos({100.0f, 100.0f})
-             .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
-             .setCellFunction(SensorDescription().setFixedAngle(90.0f)),
-         CellDescription()
-             .setId(2)
-             .setPos({101.0f, 100.0f})
-             .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
-             .setCellFunction(NerveDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
-    data.addConnection(1, 2);
-
-    data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttackCell = getCell(actualData, 1);
-
-    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.signal.channels[0]));
-}
-
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found)
 {

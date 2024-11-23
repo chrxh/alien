@@ -175,7 +175,6 @@ struct ConstructorDescription
 
 struct SensorDescription
 {
-    std::optional<float> fixedAngle;  //nullopt = entire neighborhood
     float minDensity = 0.05f;
     std::optional<int> minRange;
     std::optional<int> maxRange;
@@ -191,12 +190,6 @@ struct SensorDescription
 
     auto operator<=>(SensorDescription const&) const = default;
 
-    SensorMode getSensorMode() const { return fixedAngle.has_value() ? SensorMode_FixedAngle : SensorMode_Neighborhood; }
-    SensorDescription& setFixedAngle(float value)
-    {
-        fixedAngle = value;
-        return *this;
-    }
     SensorDescription& setColor(int value)
     {
         restrictToColor = value;

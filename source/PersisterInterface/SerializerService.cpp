@@ -87,7 +87,7 @@ namespace
     auto constexpr Id_NerveGenome_PulseMode = 0;
     auto constexpr Id_NerveGenome_AlternationMode = 1;
 
-    auto constexpr Id_SensorGenome_FixedAngle = 0;
+    //auto constexpr Id_SensorGenome_FixedAngle = 0;
     auto constexpr Id_SensorGenome_MinDensity = 1;
     auto constexpr Id_SensorGenome_Color_Deprecated = 2;
     auto constexpr Id_SensorGenome_RestrictToColor = 3;
@@ -168,7 +168,7 @@ namespace
     auto constexpr Id_Nerve_PulseMode = 0;
     auto constexpr Id_Nerve_AlternationMode = 1;
 
-    auto constexpr Id_Sensor_FixedAngle = 0;
+    //auto constexpr Id_Sensor_FixedAngle = 0;
     auto constexpr Id_Sensor_MinDensity = 1;
     auto constexpr Id_Sensor_Color_Deprecated = 2;
     //auto constexpr Id_Sensor_TargetedCreatureId = 3;
@@ -338,7 +338,6 @@ namespace cereal
     {
         SensorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<std::optional<float>>(task, auxiliaries, Id_SensorGenome_FixedAngle, data.fixedAngle, defaultObject.fixedAngle);
         loadSave<float>(task, auxiliaries, Id_SensorGenome_MinDensity, data.minDensity, defaultObject.minDensity);
         loadSave<std::optional<int>>(task, auxiliaries, Id_SensorGenome_RestrictToColor, data.restrictToColor, defaultObject.restrictToColor);
         loadSave(task, auxiliaries, Id_SensorGenome_RestrictToMutants, data.restrictToMutants, defaultObject.restrictToMutants);
@@ -648,7 +647,6 @@ namespace cereal
     {
         SensorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<std::optional<float>>(task, auxiliaries, Id_Sensor_FixedAngle, data.fixedAngle, defaultObject.fixedAngle);
         loadSave<float>(task, auxiliaries, Id_Sensor_MinDensity, data.minDensity, defaultObject.minDensity);
         loadSave<std::optional<int>>(task, auxiliaries, Id_Sensor_RestrictToColor, data.restrictToColor, defaultObject.restrictToColor);
         loadSave(task, auxiliaries, Id_Sensor_RestrictToMutants, data.restrictToMutants, defaultObject.restrictToMutants);
