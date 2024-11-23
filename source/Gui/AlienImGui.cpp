@@ -63,9 +63,9 @@ bool AlienImGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& v
 {
     ImGui::PushID(parameters._name.c_str());
 
-    auto constexpr MousePickerButtonWidth = 21.0f;
+    auto constexpr MousePickerButtonWidth = 22.0f;
 
-    auto mousePickerButtonTotalWidth = parameters._getMousePickerEnabledFunc ? scale(MousePickerButtonWidth) + ImGui::GetStyle().FramePadding.x * 2 : 0.0f;
+    auto mousePickerButtonTotalWidth = parameters._getMousePickerEnabledFunc ? scale(MousePickerButtonWidth) + ImGui::GetStyle().FramePadding.x : 0.0f;
     auto sliderWidth = (ImGui::GetContentRegionAvail().x - scale(parameters._textWidth) - mousePickerButtonTotalWidth);
     ImGui::SetNextItemWidth(sliderWidth);
     bool result = ImGui::SliderFloat("##sliderX", &valueX, parameters._min.x, parameters._max.x, parameters._format.c_str(), 0);
@@ -73,6 +73,7 @@ bool AlienImGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& v
     //mouse picker
     if (parameters._getMousePickerEnabledFunc) {
         ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() - ImGui::GetStyle().FramePadding.x);
         auto mousePickerEnabled = parameters._getMousePickerEnabledFunc.value()();
         if (AlienImGui::SelectableButton(AlienImGui::SelectableButtonParameters().name(ICON_FA_CROSSHAIRS).width(MousePickerButtonWidth), mousePickerEnabled)) {
             parameters._setMousePickerEnabledFunc.value()(mousePickerEnabled);
@@ -339,7 +340,7 @@ void AlienImGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& pa
 bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)
 {
     auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
-    auto folderButtonWidth = parameters._folderButton ? scale(30.0f) + ImGui::GetStyle().FramePadding.x * 2 : 0;
+    auto folderButtonWidth = parameters._folderButton ? scale(30.0f) + ImGui::GetStyle().FramePadding.x : 0;
     ImGui::SetNextItemWidth(width - scale(parameters._textWidth) - folderButtonWidth);
     if (parameters._monospaceFont) {
         ImGui::PushFont(StyleRepository::get().getMonospaceMediumFont());
@@ -363,6 +364,7 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
     if (parameters._folderButton) {
         ImGui::SameLine();
         static std::string selectedFolder;
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() - ImGui::GetStyle().FramePadding.x);
         if (ImGui::Button(ICON_FA_FOLDER_OPEN, {scale(30.0f), 0})) {
             GenericFileDialog::get().showOpenFileDialog(
                 "Select directory", "", std::string(buffer), [&](std::filesystem::path const& path) {
@@ -516,9 +518,9 @@ bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value, bool* enab
         ImGui::SameLine();
     }
 
-    static auto constexpr buttonWidth = 21.0f;
+    static auto constexpr buttonWidth = 22.0f;
     auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
-    auto textAndButtonWidth = scale(parameters._textWidth + buttonWidth * 2) + ImGui::GetStyle().FramePadding.x * 4;
+    auto textAndButtonWidth = scale(parameters._textWidth + buttonWidth * 2) + ImGui::GetStyle().FramePadding.x * 2;
     auto switcherWidth = width - textAndButtonWidth;
 
     auto result = false;
@@ -533,12 +535,14 @@ bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value, bool* enab
     ImGui::InputText(("##" + parameters._name).c_str(), buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly);
 
     ImGui::SameLine();
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() - ImGui::GetStyle().FramePadding.x);
     if (ImGui::Button(ICON_FA_CARET_LEFT, ImVec2(scale(buttonWidth), 0))) {
         value = (value + numValues - 1) % numValues;
         result = true;
     }
 
     ImGui::SameLine();
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() - ImGui::GetStyle().FramePadding.x);
     if (ImGui::Button(ICON_FA_CARET_RIGHT, ImVec2(scale(buttonWidth), 0))) {
         value = (value + 1) % numValues;
         result = true;
@@ -1827,7 +1831,7 @@ namespace
 template <typename Parameter, typename T>
 bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled, bool* pinned)
 {
-    auto constexpr PinnedButtonWidth = 21.0f;
+    auto constexpr PinnedButtonWidth = 22.0f;
 
     ImGui::PushID(parameters._name.c_str());
 
@@ -1878,7 +1882,7 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
 
         //color field
         ImGui::PushID(color);
-        auto pinnedButtonWidth = pinned ? scale(PinnedButtonWidth) + ImGui::GetStyle().FramePadding.x * 2 : 0.0f;
+        auto pinnedButtonWidth = pinned ? scale(PinnedButtonWidth) + ImGui::GetStyle().FramePadding.x : 0.0f;
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - scale(parameters._textWidth) - pinnedButtonWidth);
         if (parameters._colorDependence && isExpanded) {
             AlienImGui::ColorField(Const::IndividualCellColors[color], 0);
@@ -1946,6 +1950,7 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
             //pin button
             if (pinned) {
                 ImGui::SameLine();
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() - ImGui::GetStyle().FramePadding.x);
                 AlienImGui::SelectableButton(AlienImGui::SelectableButtonParameters().name(ICON_FA_THUMBTACK).width(PinnedButtonWidth), *pinned);
             }
 
