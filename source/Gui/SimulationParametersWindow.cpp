@@ -1534,7 +1534,7 @@ void SimulationParametersWindow::processBase()
                             .name("Inflow only for non-replicators")
                             .textWidth(RightColumnWidth)
                             .defaultValue(origParameters.externalEnergyInflowOnlyForNonSelfReplicators)
-                            .tooltip("If activated, activated, external energy can only be transferred to constructor cells that are not self-replicators. "
+                            .tooltip("If activated, external energy can only be transferred to constructor cells that are not self-replicators. "
                                      "This option can be used to foster the evolution of additional body parts."),
                         parameters.externalEnergyInflowOnlyForNonSelfReplicators);
                     AlienImGui::SliderFloat(

@@ -346,8 +346,10 @@ namespace Const
         "This value loosely identifies a specific creature. While not guaranteed, it is very likely that two creatures will have different creature ids.";
 
     std::string const CellMutationIdTooltip =
-        "The mutation id is a value to distinguish mutants. After most mutations (except neural network and cell properties) the mutation id changes.";
-
+        "The mutation id is a value to distinguish mutants. After most mutations (except neural network and cell properties) the mutation id changes. A few "
+        "values have a special meaning:\n\n" ICON_FA_CHEVRON_RIGHT " 0: This value is used for handcrafted cells. This refers to cells that have been "
+        "artificially created by the user.\n\n" ICON_FA_CHEVRON_RIGHT " 1: This value is used for free cells. Free cells are cells that have not been created by a "
+        "self-replication process, but by transformation from an energy particle.";
     std::string const GenomeComplexityTooltip =
         "This value denotes the complexity of the creature's genome. The calculation can be customized in the simulation parameters under the 'Genome "
         "complexity measurement' addon. By default, it is the number of encoded cells in the genome.";
