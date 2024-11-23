@@ -510,6 +510,8 @@ void BrowserWindow::processUserList()
 
 void BrowserWindow::processStatusBar()
 {
+    std::vector<std::string> statusItems;
+
     std::unordered_set<NetworkResourceRawTO> simulations;
     std::unordered_set<NetworkResourceRawTO> genomes;
     for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
@@ -521,29 +523,22 @@ void BrowserWindow::processStatusBar()
 
     auto numSimulations = toInt(simulations.size());
     auto numGenomes = toInt(genomes.size());
-    std::string statusText;
-    statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
-    statusText += std::to_string(numSimulations) + " simulations found";
 
-    statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
-    statusText += std::to_string(numGenomes) + " genomes found";
+    statusItems.emplace_back(std::to_string(numSimulations) + " simulations found");
+    statusItems.emplace_back(std::to_string(numGenomes) + " genomes found");
+    statusItems.emplace_back(std::to_string(_userTOs.size()) + " simulators found");
 
-    statusText += std::string(" " ICON_FA_INFO_CIRCLE " ");
-    statusText += std::to_string(_userTOs.size()) + " simulators found";
-
-    statusText += std::string("  " ICON_FA_INFO_CIRCLE " ");
     if (auto userName = NetworkService::get().getLoggedInUserName()) {
-        statusText += "Logged in as " + *userName + " @ " + NetworkService::get().getServerAddress();  // + ": ";
+        statusItems.emplace_back("Logged in as " + *userName + " @ " + NetworkService::get().getServerAddress());
     } else {
-        statusText += "Not logged in to " + NetworkService::get().getServerAddress();  // + ": ";
+        statusItems.emplace_back("Not logged in to " + NetworkService::get().getServerAddress());
     }
 
     if (!NetworkService::get().getLoggedInUserName()) {
-        statusText += std::string("   " ICON_FA_INFO_CIRCLE " ");
-        statusText += "In order to share and upvote simulations you need to log in.";
+        statusItems.emplace_back("In order to share and upvote simulations you need to log in.");
     }
 
-    AlienImGui::StatusBar(statusText);
+    AlienImGui::StatusBar(statusItems);
 }
 
 void BrowserWindow::processSimulationList()

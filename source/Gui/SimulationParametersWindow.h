@@ -26,6 +26,7 @@ private:
     void processBase();
     bool processSpot(int index);    //returns false if tab should be closed
     void processAddonList();
+    void processStatusBar();
 
     void onAppendTab();
     void onDeleteTab(int index);

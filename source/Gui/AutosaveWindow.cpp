@@ -286,21 +286,20 @@ void AutosaveWindow::processSettings()
 
 void AutosaveWindow::processStatusBar()
 {
-    std::string statusText = " " ICON_FA_INFO_CIRCLE " ";
-    statusText += [&] {
-        if (!_autosaveEnabled) {
-            return std::string("No autosave scheduled");
-        }
-        if (!_savepointTable.has_value()) {
-            return std::string("No valid directory");
-        }
+    std::vector<std::string> statusItems;
+    if (!_savepointTable.has_value()) {
+        statusItems.emplace_back("No valid directory");
+    } else if (!_autosaveEnabled) {
+        statusItems.emplace_back("No autosave scheduled");
+    } else {
         auto secondsSinceLastAutosave = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - _lastAutosaveTimepoint);
-        return "Next autosave in " + StringHelper::format(std::chrono::seconds(_autosaveInterval * 60) - secondsSinceLastAutosave);
-    }();
-    if (_savepointTable.has_value()) {
-        statusText += " " ICON_FA_INFO_CIRCLE " " + std::to_string(_savepointTable->getSize()) + " save points";
+        statusItems.emplace_back("Next autosave in " + StringHelper::format(std::chrono::seconds(_autosaveInterval * 60) - secondsSinceLastAutosave));
     }
-    AlienImGui::StatusBar(statusText);
+    if (_savepointTable.has_value()) {
+        statusItems.emplace_back(std::to_string(_savepointTable->getSize()) + " save points");
+    }
+
+    AlienImGui::StatusBar(statusItems);
 }
 
 void AutosaveWindow::onCreateSavepoint(bool usePeakSimulation)

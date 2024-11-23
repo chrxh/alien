@@ -1240,8 +1240,12 @@ void AlienImGui::Spinner(SpinnerParameters const& parameters)
     AlienImGui::RotateEnd(spinnerAngle, drawList);
 }
 
-void AlienImGui::StatusBar(std::string const& text)
+void AlienImGui::StatusBar(std::vector<std::string> const& textItems)
 {
+    std::string text;
+    for (auto const& textItem : textItems) {
+        text += " " ICON_FA_INFO_CIRCLE " " + textItem;
+    }
     AlienImGui::Separator();
     ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
     AlienImGui::Text(text);
