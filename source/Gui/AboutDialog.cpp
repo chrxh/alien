@@ -3,14 +3,15 @@
 #include <imgui.h>
 
 #include "Base/Resources.h"
+
 #include "AlienImGui.h"
 #include "StyleRepository.h"
 
-_AboutDialog::_AboutDialog()
-    : _AlienDialog("About")
+AboutDialog::AboutDialog()
+    : AlienDialog("About")
 {}
 
-void _AboutDialog::processIntern()
+void AboutDialog::processIntern()
 {
     ImGui::Text("Artificial Life Environment, version %s\n\nis an open source project initiated and maintained by\nChristian Heinemann.", Const::ProgramVersion.c_str());
 

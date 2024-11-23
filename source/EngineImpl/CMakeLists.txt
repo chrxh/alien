@@ -7,8 +7,8 @@ add_library(EngineImpl
     Definitions.h
     EngineWorker.cpp
     EngineWorker.h
-    SimulationControllerImpl.cpp
-    SimulationControllerImpl.h)
+    SimulationFacadeImpl.cpp
+    SimulationFacadeImpl.h)
 
 target_link_libraries(EngineImpl Base)
 target_link_libraries(EngineImpl EngineGpuKernels)

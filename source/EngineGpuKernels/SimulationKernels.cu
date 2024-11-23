@@ -11,7 +11,7 @@
 #include "MuscleProcessor.cuh"
 #include "SensorProcessor.cuh"
 #include "CellProcessor.cuh"
-#include "ParticleProcessor.cuh"
+#include "RadiationProcessor.cuh"
 #include "ReconnectorProcessor.cuh"
 #include "DetonatorProcessor.cuh"
 
@@ -23,13 +23,13 @@ __global__ void cudaNextTimestep_prepare(SimulationData data, SimulationStatisti
 __global__ void cudaNextTimestep_physics_init(SimulationData data)
 {
     CellProcessor::init(data);
-    ParticleProcessor::calcActiveSources(data);
+    RadiationProcessor::calcActiveSources(data);
 }
 
 __global__ void cudaNextTimestep_physics_fillMaps(SimulationData data)
 {
     CellProcessor::updateMap(data);
-    CellProcessor::radiation(data);  //do not use ParticleProcessor in this calcKernel
+    CellProcessor::radiation(data);  //do not use RadiationProcessor in this calcKernel
     CellProcessor::clearDensityMap(data);
 }
 
@@ -38,7 +38,7 @@ __global__ void cudaNextTimestep_physics_calcFluidForces(SimulationData data)
     CellProcessor::calcFluidForces_reconnectCells_correctOverlap(data);
     CellProcessor::fillDensityMap(data);
 
-    ParticleProcessor::updateMap(data);
+    RadiationProcessor::updateMap(data);
 }
 
 __global__ void cudaNextTimestep_physics_calcCollisionForces(SimulationData data)
@@ -46,7 +46,7 @@ __global__ void cudaNextTimestep_physics_calcCollisionForces(SimulationData data
     CellProcessor::calcCollisions_reconnectCells_correctOverlap(data);
     CellProcessor::fillDensityMap(data);
 
-    ParticleProcessor::updateMap(data);
+    RadiationProcessor::updateMap(data);
 }
 
 __global__ void cudaNextTimestep_physics_applyForces(SimulationData data)
@@ -54,8 +54,8 @@ __global__ void cudaNextTimestep_physics_applyForces(SimulationData data)
     CellProcessor::checkForces(data);
     CellProcessor::applyForces(data);
 
-    ParticleProcessor::movement(data);
-    ParticleProcessor::collision(data);
+    RadiationProcessor::movement(data);
+    RadiationProcessor::collision(data);
 }
 
 __global__ void cudaNextTimestep_physics_verletPositionUpdate(SimulationData data)
@@ -63,7 +63,7 @@ __global__ void cudaNextTimestep_physics_verletPositionUpdate(SimulationData dat
     CellProcessor::verletPositionUpdate(data);
     CellProcessor::checkConnections(data);
 
-    ParticleProcessor::splitting(data);
+    RadiationProcessor::splitting(data);
 }
 
 __global__ void cudaNextTimestep_physics_calcConnectionForces(SimulationData data, bool considerAngles)
@@ -84,7 +84,8 @@ __global__ void cudaNextTimestep_cellFunction_prepare_substep1(SimulationData da
 
 __global__ void cudaNextTimestep_cellFunction_prepare_substep2(SimulationData data)
 {
-    CellProcessor::livingStateTransition(data);
+    CellProcessor::livingStateTransition_calcNextState(data);
+    CellProcessor::livingStateTransition_applyNextState(data);
     CellFunctionProcessor::collectCellFunctionOperations(data);
     CellFunctionProcessor::updateRenderingData(data);
 }
@@ -104,7 +105,7 @@ __global__ void cudaNextTimestep_cellFunction_constructor_completenessCheck(Simu
     ConstructorProcessor::preprocess(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_constructor_process(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellFunction_constructor(SimulationData data, SimulationStatistics statistics)
 {
     ConstructorProcessor::process(data, statistics);
 }
@@ -151,7 +152,7 @@ __global__ void cudaNextTimestep_physics_applyInnerFriction(SimulationData data)
 
 __global__ void cudaNextTimestep_physics_applyFriction(SimulationData data)
 {
-    CellFunctionProcessor::resetFetchedActivities(data);
+    CellFunctionProcessor::resetFetchedSignals(data);
     CellProcessor::applyFriction(data);
     CellProcessor::decay(data);
 }
@@ -178,7 +179,7 @@ __global__ void cudaNextTimestep_structuralOperations_substep4(SimulationData da
 
 __global__ void cudaNextTimestep_structuralOperations_substep5(SimulationData data)
 {
-    ParticleProcessor::transformation(data);
+    RadiationProcessor::transformation(data);
 }
 
 __global__ void cudaInitClusterData(SimulationData data)

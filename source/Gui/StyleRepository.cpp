@@ -19,15 +19,9 @@
 
 #include "WindowController.h"
 
-StyleRepository& StyleRepository::getInstance()
+void StyleRepository::setup()
 {
-    static StyleRepository instance;
-    return instance;
-}
-
-void StyleRepository::init()
-{
-    auto scaleFactor = WindowController::getContentScaleFactor();
+    auto scaleFactor = WindowController::get().getContentScaleFactor();
 
     auto& style = ImGui::GetStyle();
     style.ScaleAllSizes(scaleFactor);
@@ -76,8 +70,6 @@ void StyleRepository::init()
 
     _reefMediumFont = io.Fonts->AddFontFromMemoryCompressedTTF(Reef_compressed_data, Reef_compressed_size, 24.0f * scaleFactor);
     _reefLargeFont = io.Fonts->AddFontFromMemoryCompressedTTF(Reef_compressed_data, Reef_compressed_size, 64.0f * scaleFactor);
-
-    ImPlot::GetStyle().AntiAliasedLines = true;
 }
 
 ImFont* StyleRepository::getIconFont() const
@@ -127,10 +119,10 @@ ImFont* StyleRepository::getReefLargeFont() const
 
 float StyleRepository::scale(float value) const
 {
-    return WindowController::getContentScaleFactor() * value;
+    return WindowController::get().getContentScaleFactor() * value;
 }
 
 float StyleRepository::scaleInverse(float value) const
 {
-    return WindowController::getContentScaleFactor() / value;
+    return WindowController::get().getContentScaleFactor() / value;
 }

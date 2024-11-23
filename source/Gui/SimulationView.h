@@ -2,71 +2,60 @@
 
 #include <chrono>
 
+#include "Base/Singleton.h"
 #include "Base/Definitions.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/OverlayDescriptions.h"
+
 #include "Definitions.h"
 
-class _SimulationView
+class SimulationView
 {
+    MAKE_SINGLETON(SimulationView);
+
 public:
-    _SimulationView(
-        SimulationController const& simController,
-        ModeController const& modeWindow,
-        EditorModel const& editorModel);
-    ~_SimulationView();
+    void setup(SimulationFacade const& simulationFacade);
+    void shutdown();
 
     void resize(IntVector2D const& viewportSize);
 
-    void draw(bool renderSimulation);
-    void processControls(bool renderSimulation);
+    void draw();
+    void processSimulationScrollbars();
+
+    bool isRenderSimulation() const;
+    void setRenderSimulation(bool value);
 
     bool isOverlayActive() const;
     void setOverlayActive(bool active);
 
+    float getBrightness() const;
     void setBrightness(float value);
+    float getContrast() const;
     void setContrast(float value);
+    float getMotionBlur() const;
     void setMotionBlur(float value);
 
-private:
-    void processEvents();
-
-    void leftMouseButtonPressed(IntVector2D const& viewPos);
-    void leftMouseButtonHold(IntVector2D const& viewPos, IntVector2D const& prevViewPos);
-    void mouseWheelUp(IntVector2D const& viewPos, float strongness);
-    void leftMouseButtonReleased();
-
-    void rightMouseButtonPressed();
-    void rightMouseButtonHold(IntVector2D const& viewPos);
-    void mouseWheelDown(IntVector2D const& viewPos, float strongness);
-    void rightMouseButtonReleased();
-
-    void processMouseWheel(IntVector2D const& viewPos);
-
-    void middleMouseButtonPressed(IntVector2D const& viewPos);
-    void middleMouseButtonHold(IntVector2D const& viewPos);
-    void middleMouseButtonReleased();
-
-    void updateImageFromSimulation();
     void updateMotionBlur();
 
-    void drawCursor();
+    static auto constexpr DefaultBrightness = 1.0f;
+    static auto constexpr DefaultContrast = 1.0f;
+    static auto constexpr DefaultMotionBlur = 0.25f;
+
+private:
+    void updateImageFromSimulation();
+
     void markReferenceDomain();
-    float calcZoomFactor(std::chrono::steady_clock::time_point const& lastTimepoint);
+
+    SimulationFacade _simulationFacade;
 
     //widgets
     SimulationScrollbar _scrollbarX;
     SimulationScrollbar _scrollbarY;
 
     //overlay
-    bool _isCellDetailOverlayActive = false;
-    float _motionBlurFactor = 1.0f;
-    enum class NavigationState {
-        Static, Moving
-    };
-    NavigationState _navigationState = NavigationState::Static;
+    bool _cellDetailOverlayActive = false;
     std::optional<OverlayDescription> _overlay;
-    
+
     //shader data
     unsigned int _vao, _vbo, _ebo;
     unsigned int _fbo1, _fbo2;
@@ -77,21 +66,10 @@ private:
     unsigned int _textureFramebufferId1 = 0;
     unsigned int _textureFramebufferId2 = 0;
 
-    //navigation
-    std::optional<RealVector2D> _worldPosForMovement;
-    std::optional<IntVector2D> _prevMousePosInt;
-    std::optional<std::chrono::steady_clock::time_point> _lastZoomTimepoint;
+    float _brightness = DefaultBrightness;
+    float _contrast = DefaultContrast;
+    float _motionBlur = DefaultMotionBlur;
 
-    struct MouseWheelAction
-    {
-        bool up;    //false=down
-        float strongness;
-        std::chrono::steady_clock::time_point start;
-        std::chrono::steady_clock::time_point lastTime;
-    };
-    std::optional<MouseWheelAction> _mouseWheelAction;
-
-    ModeController _modeWindow;
-    SimulationController _simController;
-    EditorModel _editorModel;
+    //settings
+    bool _renderSimulation = true;
 };

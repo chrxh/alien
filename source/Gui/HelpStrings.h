@@ -35,8 +35,8 @@ namespace Const
         "Transmitter cells are designed to transport energy. This is important, for example, to supply constructor cells with energy or to "
         "support attacked cells. The energy transport works as follows: A part of the excess energy of the own cell and the directly connected "
         "cells is collected and transferred to other cells in the vicinity. A cell has excess energy when it exceeds a defined normal value (see "
-        "simulation parameter 'Normal energy' in 'Cell life cycle'). Transmitter cells do not need an activation but they also transport the "
-        "activity states from input.";
+        "simulation parameter 'Normal energy' in 'Cell life cycle'). Transmitter cells do not need an activation but they can transport "
+        "signals received from their input.";
 
     std::string const ConstructorTooltip =
         "A constructor cell builds a cell network according to a contained genome. The construction process takes place cell by "
@@ -52,9 +52,9 @@ namespace Const
         "of the last match (0 = far away, 1 = close)\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #3: angle of the last match";
 
     std::string const NerveTooltip =
-        "By default, a nerve cell forwards activity states by receiving activity as input from connected cells (and summing it if "
-        "there are multiple cells) and directly providing it as output to other cells. Independently of this, one can specify "
-        "that it also generates an activity pulse in channel #0 at regular intervals. This can be used to trigger other sensor cells, "
+        "By default, a nerve cell forwards signals from connected cells (and summing it up if "
+        "there are multiple such cells) and thus directly providing it as input to other cells. Independently of this, one can specify "
+        "that it also generates a signal in channel #0 at regular intervals. This can be used to trigger other sensor cells, "
         "attacker cells, etc.";
 
     std::string const AttackerTooltip =
@@ -94,7 +94,7 @@ namespace Const
         "Cells can possess a specific function that enables them to, for example, perceive their environment, process information, or "
         "take action. All cell functions have in common that they obtain the input from connected cells whose execution number matches the input "
         "execution number of the current cell. For this purpose, each channel from #0 to #7 of those cells is summed and the result is written "
-        "to the channel from #0 to #7 of the current cell. In particular, if there is only one input cell, its activity is simply forwarded. After "
+        "to the channel from #0 to #7 of the current cell. In particular, if there is only one input cell, its signal is simply forwarded. After "
         "the execution of a cell function, some channels will be then overriden by the output of the corresponding cell function.\n\nIMPORTANT: If "
         "you choose a cell function, this tooltip will be updated to provide more specific information. ";
 
@@ -121,13 +121,12 @@ namespace Const
 
     std::string const GenomeInputExecutionNumberTooltip =
         "A functioning organism requires cells to collaborate. This can involve sensor cells that perceive the environment, neuron cells that "
-        "process information, muscle cells that perform movements, and so on. These various cell functions often require input and produce an "
-        "output. Both input and output are based on the cell's activity states. The process for updating is performed in two steps:\n\n1) When a "
-        "cell function is executed, the activity states are first updated. This involves reading the activity states of all connected cells "
-        "whose 'execution number' matches the specified 'input execution number', summing them up, and then setting the result to the "
-        "activity states for the considered cell.\n\n2) The cell function is executed and can use the cell's activity states as input. "
-        "The output is used to update the activity states again.\n\nSetting an 'input execution number' is optional. If none is set, the cell can "
-        "receive no input.";
+        "process information, muscle cells that perform movements, and so on. These various cell functions often require input signals and produce "
+        "output signals. The process for updating a cell signal is performed in two steps:\n\n1) When a "
+        "cell function is executed, an input signal will firstly be calculated. This involves reading the signals of all connected cells "
+        "whose 'execution number' matches the specified 'input execution number' and summing their values up.\n\n2) The cell function is executed and can use "
+        "the calculated signal as input. The cell then provides an output in form of an output signal.\n\nSetting an 'input execution number' is optional. If "
+        "none is set, the cell can receive no input signals.";
 
     std::string const GenomeBlockOutputTooltip =
         "Activating this toggle, the cell's output can be locked, preventing any other cell from utilizing it as input.";
@@ -164,8 +163,8 @@ namespace Const
 
     std::string const GenomeConstructorActivationModeTooltip =
         "There are 2 modes available for controlling constructor cells:\n\n" ICON_FA_CHEVRON_RIGHT " Manual: The construction process is only triggered when "
-        "there is activity in channel #0.\n\n" ICON_FA_CHEVRON_RIGHT " Automatic: The construction process is automatically triggered at regular intervals. "
-        "Activity in channel #0 is not necessary.\n\n In both cases, if there is not enough energy available for the cell being "
+        "there is signal in channel #0.\n\n" ICON_FA_CHEVRON_RIGHT " Automatic: The construction process is automatically triggered at regular intervals. "
+        "Signal in channel #0 is not necessary.\n\n In both cases, if there is not enough energy available for the cell being "
         "created, the construction process will pause until the next triggering.";
 
     std::string const GenomeConstructorIntervalTooltip =
@@ -194,7 +193,7 @@ namespace Const
 
     std::string const GenomeSensorScanAngleTooltip =
         "The angle in which direction the scanning process should take place can be determined here. An angle of 0 means that the "
-        "scan will be performed in the direction derived from the input cell (the cell from which the activity input originates) "
+        "scan will be performed in the direction derived from the input cell (the cell from which the input signal originates) "
         "towards the sensor cell.";
 
     std::string const GenomeSensorScanColorTooltip = "Restricts the sensor so that it only scans cells with a certain color.";
@@ -204,7 +203,7 @@ namespace Const
         ICON_FA_CHEVRON_RIGHT" None: No further restriction.\n\n"
         ICON_FA_CHEVRON_RIGHT" Same mutants: Cells that have a related genome.\n\n"
         ICON_FA_CHEVRON_RIGHT" Other mutants: Cells that have a significantly different genome.\n\n"
-        ICON_FA_CHEVRON_RIGHT" Emergent cells: Cells that were not created by reproduction but by the conversion of energy particles (they could serve as free food).\n\n"
+        ICON_FA_CHEVRON_RIGHT" Free cells: Cells that were not created by reproduction but by the conversion of energy particles (they could serve as free food).\n\n"
         ICON_FA_CHEVRON_RIGHT" Handcrafted constructs: Cells that were created in the editor (e.g. walls).\n\n"
         ICON_FA_CHEVRON_RIGHT" Less complex mutants: Cells that have a less complex genome. The complexity calculation can be customized in the simulation parameters under the 'Genome complexity measurement' addon. By default, it is the number of encoded cells in the genome.\n\n"
         ICON_FA_CHEVRON_RIGHT" More complex mutants: Cells that have a more complex genome.\n\n";
@@ -216,15 +215,15 @@ namespace Const
     std::string const GenomeSensorMinRangeTooltip = "If activated, the sensor detects only objects with a distance equal or greater than the specified value.";
     std::string const GenomeSensorMaxRangeTooltip = "If activated, the sensor detects only objects with a distance equal or less than the specified value.";
 
-    std::string const GenomeNerveGeneratePulsesTooltip = "If enabled, an activity pulse in channel #0 will be generated at regular time intervals.";
+    std::string const GenomeNerveGeneratePulsesTooltip = "If enabled, a signal in channel #0 will be generated at regular time intervals.";
 
     std::string const GenomeNervePulseIntervalTooltip =
         "The intervals between two pulses can be set here. It is specified in cycles, which corresponds to 6 time steps each.";
 
     std::string const GenomeNerveAlternatingPulsesTooltip =
         "By default, the generated pulses consist of a positive value in channel #0. When 'Alternating pulses' is enabled, the "
-        "sign of this value alternates at specific time intervals. This can be used, for example, to easily create activity "
-        "signals for back-and-forth movements or bending in muscle cells.";
+        "sign of this value alternates at specific time intervals. This can be used, for example, to easily create signals for back-and-forth movements or "
+        "bending in muscle cells.";
 
     std::string const GenomeNervePulsesPerPhaseTooltip = "This value indicates the number of pulses until the sign will be changed in channel #0.";
 
@@ -260,7 +259,7 @@ namespace Const
         ICON_FA_CHEVRON_RIGHT" None: No further restriction.\n\n"
         ICON_FA_CHEVRON_RIGHT" Same mutants: Cells that have a related genome.\n\n"
         ICON_FA_CHEVRON_RIGHT" Other mutants: Cells that have a significantly different genome.\n\n"
-        ICON_FA_CHEVRON_RIGHT" Emergent cells: Cells that were not created by reproduction but by the conversion of energy particles (they could serve as free food).\n\n"
+        ICON_FA_CHEVRON_RIGHT" Free cells: Cells that were not created by reproduction but by the conversion of energy particles (they could serve as free food).\n\n"
         ICON_FA_CHEVRON_RIGHT" Handcrafted constructs: Cells that were created in the editor (e.g. walls).\n\n"
         ICON_FA_CHEVRON_RIGHT" Less complex mutants: Cells that have a less complex genome. The complexity calculation can be customized in the simulation parameters under the 'Genome complexity measurement' addon. By default, it is the number of encoded cells in the genome.\n\n"
         ICON_FA_CHEVRON_RIGHT" More complex mutants: Cells that have a more complex genome.\n\n";
@@ -347,16 +346,21 @@ namespace Const
         "This value loosely identifies a specific creature. While not guaranteed, it is very likely that two creatures will have different creature ids.";
 
     std::string const CellMutationIdTooltip =
-        "The mutation id is a value to distinguish mutants. After most mutations (except neural network and cell properties) the mutation id changes.";
-
+        "The mutation id is a value to distinguish mutants. After most mutations (except neural network and cell properties) the mutation id changes. A few "
+        "values have a special meaning:\n\n" ICON_FA_CHEVRON_RIGHT " 0: This value is used for handcrafted cells. This refers to cells that have been "
+        "artificially created by the user.\n\n" ICON_FA_CHEVRON_RIGHT " 1: This value is used for free cells. Free cells are cells that have not been created by a "
+        "self-replication process, but by transformation from an energy particle.";
     std::string const GenomeComplexityTooltip =
         "This value denotes the complexity of the creature's genome. The calculation can be customized in the simulation parameters under the 'Genome "
         "complexity measurement' addon. By default, it is the number of encoded cells in the genome.";
 
     std::string const CellLivingStateTooltip =
-        "Cells can exist in various states. When a cell network is being constructed, its cells are in the 'Under construction' state. Once the cell network "
-        "is completed by the constructor, the cells briefly enter the 'Activating' state before transitioning to the 'Ready' state shortly after. If a cell "
-        "network is in the process of dying, its cells are in the 'Dying' state.";
+        "Cells can exist in various states. When a cell network of the organism is being constructed, its cells are in the 'Under construction' state. Once the cell network "
+        "is completed, the cells briefly enter the 'Activating' state before transitioning to the 'Ready' state shortly after. If a cell "
+        "network is in the process of dying, its cells are in the 'Dying' state.\n\n"
+        "In case that the parameter 'Cell death consequences' is set to 'Detached creature parts die': A cell is in 'Detached' state when it is separated from "
+        "its organism where the constructor cell for self-replication is located. However, if a non-dying cell for self-replication is still present, a detached cell will "
+        "transition into the 'Reviving' state and then into 'Ready' state shortly after.";
 
     std::string const ColoringParameterTooltip =
         "Here, one can set how the cells are to be colored during rendering. \n\n" ICON_FA_CHEVRON_RIGHT
@@ -365,7 +369,7 @@ namespace Const
         " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or duplications are taken into "
         "account).\n\n" ICON_FA_CHEVRON_RIGHT " Mutants and cell functions: Combination of mutants and cell function coloring.\n\n" ICON_FA_CHEVRON_RIGHT
         " Cell states: green = under construction, blue = ready, red = dying\n\n" ICON_FA_CHEVRON_RIGHT
-        " Genome complexities: This property can be utilized by attacker cells when the parameter 'Complex genome protection' is "
+        " Genome complexities: This property can be utilized by attacker cells when the parameter 'Complex creature protection' is "
         "activated (see tooltip there). The coloring is as follows: blue = creature with low bonus (usually small or simple genome structure), red = large "
         "bonus\n\n" ICON_FA_CHEVRON_RIGHT
         " Single cell function: A specific type of cell function can be highlighted, which is selected in the next parameter.\n\n" ICON_FA_CHEVRON_RIGHT

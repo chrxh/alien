@@ -21,6 +21,7 @@
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/MutationType.h"
 #include "EngineInterface/StatisticsHistory.h"
+#include "EngineInterface/SimulationParametersUpdateConfig.h"
 
 #include "EngineGpuKernels/Definitions.h"
 
@@ -88,14 +89,16 @@ public:
     void setCurrentTimestep(uint64_t value);
 
     SimulationParameters getSimulationParameters() const;
-    void setSimulationParameters(SimulationParameters const& parameters);
+    void setSimulationParameters(
+        SimulationParameters const& parameters,
+        SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All);
     void setGpuSettings_async(GpuSettings const& gpuSettings);
 
     void applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);
 
     void switchSelection(RealVector2D const& pos, float radius);
     void swapSelection(RealVector2D const& pos, float radius);
-    SelectionShallowData getSelectionShallowData(RealVector2D const& refPos);
+    SelectionShallowData getSelectionShallowData();
     void setSelection(RealVector2D const& startPos, RealVector2D const& endPos);
     void removeSelection();
     void updateSelection();
@@ -115,13 +118,14 @@ public:
 private:
     DataTO provideTO(); 
     void resetTimeIntervalStatistics();
-    void updateStatistics(bool afterMinDuration = false);
     void processJobs();
 
     void syncSimulationWithRenderingIfDesired();
     void waitAndAllowAccess(std::chrono::microseconds const& duration);
     void measureTPS();
     void slowdownTPS();
+
+    void registerImageResource();
 
     CudaSimulationFacade _simulationCudaFacade;
 
@@ -137,9 +141,9 @@ private:
     ExceptionData _exceptionData;
 
     //async jobs
+    std::mutex _mutexForEngineWorkerGuard;
     mutable std::mutex _mutexForAsyncJobs;
     std::optional<GpuSettings> _updateGpuSettingsJob;
-    std::optional<GLuint> _imageResource;
 
     struct ApplyForceJob
     {
@@ -159,7 +163,8 @@ private:
     std::optional<std::chrono::microseconds> _slowDownOvershot;
   
     //internals
-    void* _cudaResource;
+    std::optional<GLuint> _imageResource;
+    void* _cudaResource = nullptr;
     AccessDataTOCache _dataTOCache;
 };
 

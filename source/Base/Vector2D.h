@@ -77,3 +77,12 @@ inline RealVector2D toRealVector2D(IntVector2D const& v)
 {
     return {static_cast<float>(v.x), static_cast<float>(v.y)};
 }
+
+
+using RealMatrix2D = std::array<std::array<float, 2>, 2>;
+
+struct RealRect
+{
+    RealVector2D topLeft;
+    RealVector2D bottomRight;
+};

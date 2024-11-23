@@ -1,20 +1,20 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "Network/Definitions.h"
 
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _DeleteUserDialog : public _AlienDialog
+class DeleteUserDialog : public AlienDialog<>
 {
-public:
-    _DeleteUserDialog(BrowserWindow const& browserWindow);
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(DeleteUserDialog);
 
 private:
+    DeleteUserDialog();
+
     void processIntern();
     void onDelete();
-
-    BrowserWindow _browserWindow;
 
     std::string _reenteredPassword;
 };

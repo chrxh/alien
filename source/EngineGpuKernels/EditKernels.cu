@@ -214,11 +214,11 @@ __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionD
                     data.cellMap.correctPosition(cell->pos);
                 }
 
-                if (updateData.angularVelDelta != 0) {
-                    auto velDelta = relPos;
-                    Math::rotateQuarterClockwise(velDelta);
-                    velDelta = velDelta * updateData.angularVelDelta * Const::DEG_TO_RAD;
-                    cell->vel = cell->vel + velDelta;
+                if (updateData.angularVel != 0) {
+                    auto newVel = relPos;
+                    Math::rotateQuarterClockwise(newVel);
+                    newVel = newVel * updateData.angularVel * Const::DEG_TO_RAD;
+                    cell->vel = newVel;
                 }
             }
         }
@@ -239,17 +239,20 @@ __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionD
     }
 }
 
-__global__ void cudaCalcAccumulatedCenterAndVel(SimulationData data, float2* center, float2* velocity, int* numEntities, bool includeClusters)
+__global__ void cudaCalcAccumulatedCenterAndVel(SimulationData data, int refCellIndex, float2* center, float2* velocity, int* numEntities, bool includeClusters)
 {
     {
+        float2 refPos = refCellIndex != -1 ? data.objects.cellPointers.at(refCellIndex)->pos : float2{0, 0};
+
         auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& cell = data.objects.cellPointers.at(index);
             if (isSelected(cell, includeClusters)) {
                 if (center) {
-                    atomicAdd(&center->x, cell->pos.x);
-                    atomicAdd(&center->y, cell->pos.y);
+                    auto pos = cell->pos + data.cellMap.getCorrectionIncrement(refPos, cell->pos);
+                    atomicAdd(&center->x, pos.x);
+                    atomicAdd(&center->y, pos.y);
                 }
                 if (velocity) {
                     atomicAdd(&velocity->x, cell->vel.x);
@@ -287,7 +290,7 @@ __global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData up
         if (isSelected(cell, updateData.considerClusters)) {
             cell->pos = cell->pos + float2{updateData.posDeltaX, updateData.posDeltaY};
             data.cellMap.correctPosition(cell->pos);
-            cell->vel = cell->vel + float2{updateData.velDeltaX, updateData.velDeltaY};
+            cell->vel = float2{updateData.velX, updateData.velY};
         }
     }
 
@@ -297,7 +300,7 @@ __global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData up
         if (0 != particle->selected) {
             particle->absPos = particle->absPos + float2{updateData.posDeltaX, updateData.posDeltaY};
             data.particleMap.correctPosition(particle->absPos);
-            particle->vel = particle->vel + float2{updateData.velDeltaX, updateData.velDeltaY};
+            particle->vel = float2{updateData.velX, updateData.velY};
         }
     }
 }
@@ -574,8 +577,22 @@ __global__ void cudaResetSelectionResult(SelectionResult result)
     result.reset();
 }
 
-__global__ void cudaGetSelectionShallowData(SimulationData data, float2 refPos, SelectionResult result)
+__global__ void cudaCalcCellWithMinimalPosY(SimulationData data, unsigned long long int* minCellPosYAndIndex)
 {
+    auto const cellBlock = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
+
+    for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+        auto const& cell = data.objects.cellPointers.at(index);
+        if (0 != cell->selected) {
+            atomicMin(minCellPosYAndIndex, (static_cast<unsigned long long int>(abs(cell->pos.y)) << 32) | static_cast<unsigned long long int>(index));
+        }
+    }
+}
+
+__global__ void cudaGetSelectionShallowData(SimulationData data, int refCellIndex, SelectionResult result)
+{
+    float2 refPos = refCellIndex != 0xffffffff ? data.objects.cellPointers.at(refCellIndex)->pos : float2{0, 0};
+
     auto const cellBlock = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
 
     for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {

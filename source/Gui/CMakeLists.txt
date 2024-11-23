@@ -5,14 +5,12 @@ PUBLIC
     AboutDialog.h
     ActivateUserDialog.cpp
     ActivateUserDialog.h
-    AlienDialog.cpp
     AlienDialog.h
     AlienImGui.cpp
     AlienImGui.h
-    AlienWindow.cpp
     AlienWindow.h
-    AutosaveController.cpp
-    AutosaveController.h
+    AutosaveWindow.cpp
+    AutosaveWindow.h
     BrowserWindow.cpp
     BrowserWindow.h
     CellFunctionStrings.h
@@ -37,10 +35,14 @@ PUBLIC
     EditSimulationDialog.h
     ExitDialog.cpp
     ExitDialog.h
+    FileTransferController.cpp
+    FileTransferController.h
     FpsController.cpp
     FpsController.h
-    GenericFileDialogs.cpp
-    GenericFileDialogs.h
+    GenericFileDialog.cpp
+    GenericFileDialog.h
+    GenericMessageDialog.cpp
+    GenericMessageDialog.h
     GenomeEditorWindow.cpp
     GenomeEditorWindow.h
     GettingStartedWindow.cpp
@@ -58,31 +60,37 @@ PUBLIC
     InspectorWindow.h
     LastSessionBrowserData.cpp
     LastSessionBrowserData.h
+    LoginController.cpp
+    LoginController.h
     LoginDialog.cpp
     LoginDialog.h
     LogWindow.cpp
     LogWindow.h
     Main.cpp
+    MainLoopController.cpp
+    MainLoopController.h
+    MainLoopEntity.cpp
+    MainLoopEntity.h
+    MainLoopEntityController.cpp
+    MainLoopEntityController.h
     MainWindow.cpp
     MainWindow.h
     MassOperationsDialog.cpp
     MassOperationsDialog.h
-    MessageDialog.cpp
-    MessageDialog.h
-    ModeController.cpp
-    ModeController.h
     MultiplierWindow.cpp
     MultiplierWindow.h
     NetworkSettingsDialog.cpp
     NetworkSettingsDialog.h
+    NetworkTransferController.cpp
+    NetworkTransferController.h
     NewSimulationDialog.cpp
     NewSimulationDialog.h
     NewPasswordDialog.cpp
     NewPasswordDialog.h
     OpenGLHelper.cpp
     OpenGLHelper.h
-    OverlayMessageController.cpp
-    OverlayMessageController.h
+    OverlayController.cpp
+    OverlayController.h
     PatternAnalysisDialog.cpp
     PatternAnalysisDialog.h
     PatternEditorWindow.cpp
@@ -95,12 +103,12 @@ PUBLIC
     ResizeWorldDialog.h
     SelectionWindow.cpp
     SelectionWindow.h
-    SerializationHelperService.cpp
-    SerializationHelperService.h
     Shader.cpp
     Shader.h
     ShaderWindow.cpp
     ShaderWindow.h
+    SimulationInteractionController.cpp
+    SimulationInteractionController.h
     SimulationParametersWindow.cpp
     SimulationParametersWindow.h
     SimulationScrollbar.cpp
@@ -109,8 +117,8 @@ PUBLIC
     SimulationView.h
     SpatialControlWindow.cpp
     SpatialControlWindow.h
-    StartupController.cpp
-    StartupController.h
+    StartupCheckService.cpp
+    StartupCheckService.h
     StatisticsWindow.cpp
     StatisticsWindow.h
     StyleRepository.cpp
@@ -135,6 +143,8 @@ target_link_libraries(alien EngineGpuKernels)
 target_link_libraries(alien EngineImpl)
 target_link_libraries(alien EngineInterface)
 target_link_libraries(alien Network)
+target_link_libraries(alien PersisterInterface)
+target_link_libraries(alien PersisterImpl)
 
 target_link_libraries(alien im_file_dialog)
 target_link_libraries(alien CUDA::cudart_static)
@@ -147,6 +157,8 @@ target_link_libraries(alien implot::implot)
 target_link_libraries(alien glfw)
 target_link_libraries(alien glad::glad)
 target_link_libraries(alien OpenSSL::SSL OpenSSL::Crypto)
+
+include_directories(${IMGUI_DIR} ${IMGUI_DIR}/backends ..)
 
 if (MSVC)
     target_compile_options(alien PRIVATE "/MP")

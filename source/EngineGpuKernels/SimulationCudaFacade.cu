@@ -38,8 +38,10 @@
 #include "StatisticsKernelsLauncher.cuh"
 #include "SelectionResult.cuh"
 #include "RenderingData.cuh"
+#include "SimulationParametersUpdateService.cuh"
 #include "TestKernelsLauncher.cuh"
 #include "StatisticsService.cuh"
+#include "MaxAgeBalancer.cuh"
 
 namespace
 {
@@ -62,7 +64,7 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, Settings const& 
     _cudaSelectionResult = std::make_shared<SelectionResult>();
     _cudaAccessTO = std::make_shared<DataTO>();
     _cudaSimulationStatistics = std::make_shared<SimulationStatistics>();
-    _statisticsService = std::make_shared<_StatisticsService>();
+    _maxAgeBalancer = std::make_shared<_MaxAgeBalancer>();
 
     _cudaSimulationData->init({settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY}, timestep);
     _cudaRenderingData->init();
@@ -141,7 +143,7 @@ void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateSta
         auto statistics = getRawStatistics();
         {
             std::lock_guard lock(_mutexForSimulationParameters);
-            if (_simulationKernels->updateSimulationParametersAfterTimestep(_settings, simulationData, statistics)) {
+            if (SimulationParametersUpdateService::get().updateSimulationParametersAfterTimestep(_settings, _maxAgeBalancer, simulationData, statistics)) {
                 CHECK_FOR_CUDA_ERROR(
                     cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
             }
@@ -336,9 +338,9 @@ void _SimulationCudaFacade::setSelection(AreaSelectionData const& selectionData)
     _editKernels->setSelection(_settings.gpuSettings, getSimulationDataIntern(), selectionData);
 }
 
- SelectionShallowData _SimulationCudaFacade::getSelectionShallowData(float2 const& refPos)
+ SelectionShallowData _SimulationCudaFacade::getSelectionShallowData()
 {
-    _editKernels->getSelectionShallowData(_settings.gpuSettings, getSimulationDataIntern(), refPos, * _cudaSelectionResult);
+    _editKernels->getSelectionShallowData(_settings.gpuSettings, getSimulationDataIntern(), *_cudaSelectionResult);
     syncAndCheck();
     return _cudaSelectionResult->getSelectionShallowData();
 }
@@ -399,10 +401,11 @@ SimulationParameters _SimulationCudaFacade::getSimulationParameters() const
     return _newSimulationParameters ? *_newSimulationParameters : _settings.simulationParameters;
 }
 
-void _SimulationCudaFacade::setSimulationParameters(SimulationParameters const& parameters)
+void _SimulationCudaFacade::setSimulationParameters(SimulationParameters const& parameters, SimulationParametersUpdateConfig const& updateConfig)
 {
     std::lock_guard lock(_mutexForSimulationParameters);
     _newSimulationParameters = parameters;
+    _simulationParametersUpdateConfig = updateConfig;
 }
 
 auto _SimulationCudaFacade::getArraySizes() const -> ArraySizes
@@ -433,7 +436,7 @@ void _SimulationCudaFacade::updateStatistics()
         std::lock_guard lock(_mutexForStatistics);
         _statisticsData = _cudaSimulationStatistics->getStatistics();
     }
-    _statisticsService->addDataPoint(_statisticsHistory, _statisticsData->timeline, getCurrentTimestep());
+    StatisticsService::get().addDataPoint(_statisticsHistory, _statisticsData->timeline, getCurrentTimestep());
 }
 
 StatisticsHistory const& _SimulationCudaFacade::getStatisticsHistory() const
@@ -443,7 +446,7 @@ StatisticsHistory const& _SimulationCudaFacade::getStatisticsHistory() const
 
 void _SimulationCudaFacade::setStatisticsHistory(StatisticsHistoryData const& data)
 {
-    _statisticsService->rewriteHistory(_statisticsHistory, data, getCurrentTimestep());
+    StatisticsService::get().rewriteHistory(_statisticsHistory, data, getCurrentTimestep());
 }
 
 void _SimulationCudaFacade::resetTimeIntervalStatistics()
@@ -463,7 +466,7 @@ void _SimulationCudaFacade::setCurrentTimestep(uint64_t timestep)
         std::lock_guard lock(_mutexForSimulationData);
         _cudaSimulationData->timestep = timestep;
     }
-    _statisticsService->resetTime(_statisticsHistory, timestep);
+    StatisticsService::get().resetTime(_statisticsHistory, timestep);
 }
 
 void _SimulationCudaFacade::clear()
@@ -503,7 +506,7 @@ void _SimulationCudaFacade::initCuda()
 
     auto result = cudaSetDevice(_gpuInfo.deviceNumber);
     if (result != cudaSuccess) {
-        throw SystemRequirementNotMetException("CUDA device could not be initialized.");
+        throw std::runtime_error("CUDA device could not be initialized.");
     }
 
     cudaGetLastError(); //reset error code
@@ -522,7 +525,7 @@ auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
     int numberOfDevices;
     CHECK_FOR_CUDA_ERROR(cudaGetDeviceCount(&numberOfDevices));
     if (numberOfDevices < 1) {
-        throw SystemRequirementNotMetException("No CUDA device found.");
+        throw std::runtime_error("No CUDA device found.");
     }
     {
         std::stringstream stream;
@@ -551,7 +554,7 @@ auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo
         }
     }
     if (highestComputeCapability < 600) {
-        throw SystemRequirementNotMetException("No CUDA device with compute capability of 6.0 or higher found.");
+        throw std::runtime_error("No CUDA device with compute capability of 6.0 or higher found.");
     }
 
     return *cachedResult;
@@ -640,8 +643,10 @@ void _SimulationCudaFacade::checkAndProcessSimulationParameterChanges()
 {
     std::lock_guard lock(_mutexForSimulationParameters);
     if (_newSimulationParameters) {
-        _settings.simulationParameters = *_newSimulationParameters;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(cudaSimulationParameters, &*_newSimulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+        _settings.simulationParameters =
+            SimulationParametersUpdateService::get().integrateChanges(_settings.simulationParameters, *_newSimulationParameters, _simulationParametersUpdateConfig);
+        CHECK_FOR_CUDA_ERROR(
+            cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
         _newSimulationParameters.reset();
 
         if (_cudaSimulationData) {

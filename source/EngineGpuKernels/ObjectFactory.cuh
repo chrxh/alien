@@ -120,11 +120,11 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->metadata.description);
 
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        cell->activity.channels[i] = cellTO.activity.channels[i];
+        cell->signal.channels[i] = cellTO.signal.channels[i];
     }
-    cell->activity.origin = cellTO.activity.origin;
-    cell->activity.targetX = cellTO.activity.targetX;
-    cell->activity.targetY = cellTO.activity.targetY;
+    cell->signal.origin = cellTO.signal.origin;
+    cell->signal.targetX = cellTO.signal.targetX;
+    cell->signal.targetY = cellTO.signal.targetY;
 
     cell->cellFunction = cellTO.cellFunction;
     switch (cellTO.cellFunction) {
@@ -160,10 +160,9 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.constructor.genomeGeneration = cellTO.cellFunctionData.constructor.genomeGeneration;
         cell->cellFunctionData.constructor.constructionAngle1 = cellTO.cellFunctionData.constructor.constructionAngle1;
         cell->cellFunctionData.constructor.constructionAngle2 = cellTO.cellFunctionData.constructor.constructionAngle2;
+        cell->cellFunctionData.constructor.isReady = true;
     } break;
     case CellFunction_Sensor: {
-        cell->cellFunctionData.sensor.mode = cellTO.cellFunctionData.sensor.mode;
-        cell->cellFunctionData.sensor.angle = cellTO.cellFunctionData.sensor.angle;
         cell->cellFunctionData.sensor.minDensity = cellTO.cellFunctionData.sensor.minDensity;
         cell->cellFunctionData.sensor.minRange = cellTO.cellFunctionData.sensor.minRange;
         cell->cellFunctionData.sensor.maxRange = cellTO.cellFunctionData.sensor.maxRange;
@@ -172,8 +171,8 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.sensor.memoryChannel1 = cellTO.cellFunctionData.sensor.memoryChannel1;
         cell->cellFunctionData.sensor.memoryChannel2 = cellTO.cellFunctionData.sensor.memoryChannel2;
         cell->cellFunctionData.sensor.memoryChannel3 = cellTO.cellFunctionData.sensor.memoryChannel3;
-        cell->cellFunctionData.sensor.targetX = cellTO.cellFunctionData.sensor.targetX;
-        cell->cellFunctionData.sensor.targetY = cellTO.cellFunctionData.sensor.targetY;
+        cell->cellFunctionData.sensor.memoryTargetX = cellTO.cellFunctionData.sensor.memoryTargetX;
+        cell->cellFunctionData.sensor.memoryTargetY = cellTO.cellFunctionData.sensor.memoryTargetY;
     } break;
     case CellFunction_Nerve: {
         cell->cellFunctionData.nerve.pulseMode = cellTO.cellFunctionData.nerve.pulseMode;
@@ -198,6 +197,8 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.muscle.lastBendingDirection = cellTO.cellFunctionData.muscle.lastBendingDirection;
         cell->cellFunctionData.muscle.lastBendingSourceIndex = cellTO.cellFunctionData.muscle.lastBendingSourceIndex;
         cell->cellFunctionData.muscle.consecutiveBendingAngle = cellTO.cellFunctionData.muscle.consecutiveBendingAngle;
+        cell->cellFunctionData.muscle.lastMovementX = cellTO.cellFunctionData.muscle.lastMovementX;
+        cell->cellFunctionData.muscle.lastMovementY = cellTO.cellFunctionData.muscle.lastMovementY;
     } break;
     case CellFunction_Defender: {
         cell->cellFunctionData.defender.mode = cellTO.cellFunctionData.defender.mode;
@@ -283,11 +284,11 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->inputExecutionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellNumExecutionOrderNumbers - 1);
     cell->outputBlocked = _data->numberGen1.randomBool();
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        cell->activity.channels[i] = 0;
+        cell->signal.channels[i] = 0;
     }
-    cell->activity.origin = ActivityOrigin_Unknown;
-    cell->activity.targetX = 0;
-    cell->activity.targetY = 0;
+    cell->signal.origin = SignalOrigin_Unknown;
+    cell->signal.targetX = 0;
+    cell->signal.targetY = 0;
     cell->density = 1.0f;
     cell->creatureId = 0;
     cell->mutationId = 1;
@@ -334,10 +335,9 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             cell->cellFunctionData.constructor.genomeGeneration = 0;
             cell->cellFunctionData.constructor.constructionAngle1 = 0;
             cell->cellFunctionData.constructor.constructionAngle2 = 0;
+            cell->cellFunctionData.constructor.isReady = true;
         } break;
         case CellFunction_Sensor: {
-            cell->cellFunctionData.sensor.mode = _data->numberGen1.random(SensorMode_Count - 1);
-            cell->cellFunctionData.sensor.angle = _data->numberGen1.random(360.0f) - 180.0f;
             cell->cellFunctionData.sensor.minDensity = _data->numberGen1.random(1.0f);
             cell->cellFunctionData.sensor.minRange = -1;
             cell->cellFunctionData.sensor.maxRange = -1;
@@ -346,8 +346,8 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             cell->cellFunctionData.sensor.memoryChannel1 = 0;
             cell->cellFunctionData.sensor.memoryChannel2 = 0;
             cell->cellFunctionData.sensor.memoryChannel3 = 0;
-            cell->cellFunctionData.sensor.targetX = 0;
-            cell->cellFunctionData.sensor.targetY = 0;
+            cell->cellFunctionData.sensor.memoryTargetX = 0;
+            cell->cellFunctionData.sensor.memoryTargetY = 0;
         } break;
         case CellFunction_Nerve: {
         } break;
@@ -370,6 +370,8 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             cell->cellFunctionData.muscle.lastBendingDirection = MuscleBendingDirection_None;
             cell->cellFunctionData.muscle.lastBendingSourceIndex = 0;
             cell->cellFunctionData.muscle.consecutiveBendingAngle = 0;
+            cell->cellFunctionData.muscle.lastMovementX = 0;
+            cell->cellFunctionData.muscle.lastMovementY = 0;
         } break;
         case CellFunction_Defender: {
             cell->cellFunctionData.defender.mode = _data->numberGen1.random(DefenderMode_Count - 1);
@@ -410,11 +412,11 @@ __inline__ __device__ Cell* ObjectFactory::createCell(uint64_t& cellPointerIndex
     cell->vel = {0, 0};
     cell->activationTime = 0;
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        cell->activity.channels[i] = 0;
+        cell->signal.channels[i] = 0;
     }
-    cell->activity.origin = ActivityOrigin_Unknown;
-    cell->activity.targetX = 0;
-    cell->activity.targetY = 0;
+    cell->signal.origin = SignalOrigin_Unknown;
+    cell->signal.targetX = 0;
+    cell->signal.targetY = 0;
     cell->density = 1.0f;
     cell->detectedByCreatureId = 0;
     cell->event = CellEvent_No;

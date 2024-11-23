@@ -1,23 +1,27 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "EngineInterface/GenomeDescriptions.h"
 #include "EngineInterface/PreviewDescriptions.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "AlienWindow.h"
 #include "Definitions.h"
 
-class _GenomeEditorWindow : public _AlienWindow
+class GenomeEditorWindow : public AlienWindow<SimulationFacade>
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(GenomeEditorWindow);
+
 public:
-    _GenomeEditorWindow(EditorModel const& editorModel, SimulationController const& simulationController);
-    ~_GenomeEditorWindow() override;
-
-    void registerCyclicReferences(UploadSimulationDialogWeakPtr const& uploadSimulationDialog);
-
     void openTab(GenomeDescription const& genome, bool openGenomeEditorIfClosed = true);
     GenomeDescription const& getCurrentGenome() const;
 
 private:
+    GenomeEditorWindow();
+
+    void initIntern(SimulationFacade simulationFacade) override;
+    void shutdownIntern() override;
+
     void processIntern() override;
     void processToolbar();
     void processEditor();
@@ -47,8 +51,8 @@ private:
 
     void showPreview(TabData& tab);
 
-    void validationAndCorrection(GenomeHeaderDescription& header) const;
-    void validationAndCorrection(CellGenomeDescription& cell) const;
+    void validateAndCorrect(GenomeHeaderDescription& header) const;
+    void validateAndCorrect(CellGenomeDescription& cell) const;
 
     void scheduleAddTab(GenomeDescription const& genome);
 
@@ -69,8 +73,5 @@ private:
     std::optional<TabData> _tabToAdd;
     std::optional<bool> _expandNodes;
 
-    EditorModel _editorModel;
-    SimulationController _simController;
-    UploadSimulationDialogWeakPtr _uploadSimulationDialog;
-    ChangeColorDialog _changeColorDialog;
+    SimulationFacade _simulationFacade;
 };

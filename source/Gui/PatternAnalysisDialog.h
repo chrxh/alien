@@ -1,18 +1,23 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Descriptions.h"
+#include "EngineInterface/SimulationFacade.h"
+
 #include "Definitions.h"
+#include "MainLoopEntity.h"
 
-class _PatternAnalysisDialog
+class PatternAnalysisDialog : public MainLoopEntity<SimulationFacade>
 {
-public:
-    _PatternAnalysisDialog(SimulationController const& simController);
-    ~_PatternAnalysisDialog();
+    MAKE_SINGLETON(PatternAnalysisDialog);
 
-    void process();
+public:
     void show();
 
 private:
+    void init(SimulationFacade simulationFacade) override;
+    void process() override;
+    void shutdown() override;
     void saveRepetitiveActiveClustersToFiles(std::string const& filename);
 
     struct CellAnalysisDescription
@@ -90,7 +95,7 @@ private:
     ClusterAnalysisDescription getAnalysisDescription(ClusterDescription const& cluster) const;
 
 private:
-    SimulationController _simController;
+    SimulationFacade _simulationFacade;
 
     std::string _startingPath;
 };

@@ -6,6 +6,7 @@ target_link_libraries(cli Base)
 target_link_libraries(cli EngineGpuKernels)
 target_link_libraries(cli EngineImpl)
 target_link_libraries(cli EngineInterface)
+target_link_libraries(cli PersisterInterface)
 
 target_link_libraries(cli CUDA::cudart_static)
 target_link_libraries(cli CUDA::cuda_driver)

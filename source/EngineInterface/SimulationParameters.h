@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstring>
 
 #include "CellFunctionConstants.h"
 #include "SimulationParametersSpotValues.h"
@@ -26,18 +27,35 @@ enum CellColoring_
     CellColoring_AllCellFunctions
 };
 
+using CellDeathConsquences = int;
+enum CellDeathConsquences_
+{
+    CellDeathConsquences_None,
+    CellDeathConsquences_CreatureDies,
+    CellDeathConsquences_DetachedPartsDie
+};
+
+using Char64 = char[64];
+
 struct SimulationParameters
 {
+    //general
+    Char64 projectName = "<unnamed>";
+
     //feature list
     Features features;
 
     //particle sources
     int numRadiationSources = 0;
     RadiationSource radiationSources[MAX_RADIATION_SOURCES];
+    bool baseStrengthRatioPinned = false;
+
     float externalEnergy = 0.0f;
     ColorVector<float> externalEnergyInflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> externalEnergyConditionalInflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    ColorVector<float> externalEnergyBackflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}; 
+    ColorVector<float> externalEnergyBackflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    bool externalEnergyInflowOnlyForNonSelfReplicators = false;
+    float externalEnergyBackflowLimit = Infinity<float>::value;
 
     //spots
     int numSpots = 0;
@@ -55,7 +73,9 @@ struct SimulationParameters
     CellFunction highlightedCellFunction = CellFunction_Constructor;
     float zoomLevelNeuronalActivity = 2.0f;
     bool attackVisualization = false;
+    bool muscleMovementVisualization = false;
     float cellRadius = 0.25f;
+    bool showRadiationSources = true;
 
     //all other parameters
     SimulationParametersSpotValues baseValues;
@@ -86,8 +106,7 @@ struct SimulationParameters
     ColorVector<float> radiationAbsorptionLowConnectionPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> highRadiationFactor = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> highRadiationMinCellEnergy = {500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f};
-    bool clusterDecay = false;
-    ColorVector<float> clusterDecayProb = {0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f, 0.0001f};
+    CellDeathConsquences cellDeathConsequences = CellDeathConsquences_DetachedPartsDie;
     ColorVector<int> cellMaxAge = {
         Infinity<int>::value,
         Infinity<int>::value,
@@ -123,9 +142,8 @@ struct SimulationParameters
         Infinity<float>::value,
         Infinity<float>::value};
 
-    ColorVector<float> cellFunctionConstructorOffspringDistance = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
     ColorVector<float> cellFunctionConstructorConnectingCellMaxDistance = {1.8f, 1.8f, 1.8f, 1.8f, 1.8f, 1.8f, 1.8f};
-    ColorVector<float> cellFunctionConstructorActivityThreshold = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
+    ColorVector<float> cellFunctionConstructorSignalThreshold = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
     bool cellFunctionConstructorCheckCompletenessForSelfReplication = false;
 
     ColorMatrix<bool> cellFunctionConstructorMutationColorTransitions = {
@@ -149,7 +167,7 @@ struct SimulationParameters
         {3, 3, 3, 3, 3, 3, 3},
         {3, 3, 3, 3, 3, 3, 3}
     };
-    float cellFunctionInjectorActivityThreshold = 0.1f;
+    float cellFunctionInjectorSignalThreshold = 0.1f;
 
     ColorVector<float> cellFunctionAttackerRadius = {1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f};
     ColorVector<float> cellFunctionAttackerStrength = {0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f};
@@ -166,7 +184,7 @@ struct SimulationParameters
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}
     };
     ColorVector<float> cellFunctionAttackerSensorDetectionFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    float cellFunctionAttackerActivityThreshold = 0.1f;
+    float cellFunctionAttackerSignalThreshold = 0.1f;
     bool cellFunctionAttackerDestroyCells = false;
 
     ColorVector<float> cellFunctionDefenderAgainstAttackerStrength = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
@@ -182,17 +200,18 @@ struct SimulationParameters
     ColorVector<float> cellFunctionMuscleBendingAcceleration = {0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f};
     float cellFunctionMuscleBendingAccelerationThreshold = 0.1f;
     bool cellFunctionMuscleMovementTowardTargetedObject = true;
-    bool legacyCellFunctionMuscleMovementAngleFromSensor = false;
 
     ColorVector<float> cellFunctionSensorRange = {255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f};
-    float cellFunctionSensorActivityThreshold = 0.1f;
+    float cellFunctionSensorSignalThreshold = 0.1f;
 
     ColorVector<float> cellFunctionReconnectorRadius = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
-    float cellFunctionReconnectorActivityThreshold = 0.1f;
+    float cellFunctionReconnectorSignalThreshold = 0.1f;
 
     ColorVector<float> cellFunctionDetonatorRadius = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
     ColorVector<float> cellFunctionDetonatorChainExplosionProbability = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-    float cellFunctionDetonatorActivityThreshold = 0.1f;
+    float cellFunctionDetonatorSignalThreshold = 0.1f;
+
+    bool legacyCellFunctionMuscleMovementAngleFromSensor = false;
 
     bool operator==(SimulationParameters const& other) const;
     bool operator!=(SimulationParameters const& other) const { return !operator==(other); }

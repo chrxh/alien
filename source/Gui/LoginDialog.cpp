@@ -3,61 +3,30 @@
 #include <imgui.h>
 
 #include "Base/GlobalSettings.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "Network/NetworkService.h"
 
 #include "AlienImGui.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "CreateUserDialog.h"
 #include "BrowserWindow.h"
 #include "ResetPasswordDialog.h"
 #include "ActivateUserDialog.h"
 #include "StyleRepository.h"
 #include "HelpStrings.h"
+#include "LoginController.h"
 
-_LoginDialog::_LoginDialog(
-    SimulationController const& simController,
-    BrowserWindow const& browserWindow,
-    CreateUserDialog const& createUserDialog,
-    ActivateUserDialog const& activateUserDialog,
-    ResetPasswordDialog const& resetPasswordDialog)
-    : _AlienDialog("Login")
-    , _simController(simController)
-    , _browserWindow(browserWindow)
-    , _createUserDialog(createUserDialog)
-    , _activateUserDialog(activateUserDialog)
-    , _resetPasswordDialog(resetPasswordDialog)
-
+void LoginDialog::initIntern(SimulationFacade simulationFacade, PersisterFacade persisterFacade)
 {
-    auto& settings = GlobalSettings::getInstance();
-    _remember = settings.getBool("dialogs.login.remember", _remember);
-    _shareGpuInfo = settings.getBool("dialogs.login.share gpu info", _shareGpuInfo);
-
-    if (_remember) {
-        _userName = settings.getString("dialogs.login.user name", "");
-        _password = settings.getString("dialogs.login.password", "");
-        if (!_userName.empty()) {
-            LoginErrorCode errorCode;
-            if (!NetworkService::login(errorCode, _userName, _password, getUserInfo())) {
-                if (errorCode != LoginErrorCode_UnconfirmedUser) {
-                    MessageDialog::getInstance().information("Error", "Login failed.");
-                }
-            }
-        }
-    }
+    _simulationFacade = simulationFacade;
+    _persisterFacade = persisterFacade;
 }
 
-_LoginDialog::~_LoginDialog()
-{
-    saveSettings();
-}
+LoginDialog::LoginDialog()
+    : AlienDialog("Login")
+{}
 
-bool _LoginDialog::isShareGpuInfo() const
-{
-    return _shareGpuInfo;
-}
-
-void _LoginDialog::processIntern()
+void LoginDialog::processIntern()
 {
     AlienImGui::Text("How to create a new user?");
     AlienImGui::HelpMarker(Const::LoginHowToCreateNewUseTooltip);
@@ -70,28 +39,37 @@ void _LoginDialog::processIntern()
 
     AlienImGui::Separator();
 
-    AlienImGui::InputText(AlienImGui::InputTextParameters().hint("User name").textWidth(0), _userName);
-    AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Password").password(true).textWidth(0), _password);
+    auto& loginController = LoginController::get();
+    auto userName = loginController.getUserName();
+    AlienImGui::InputText(AlienImGui::InputTextParameters().hint("User name").textWidth(0), userName);
+    loginController.setUserName(userName);
+
+    auto password= loginController.getPassword();
+    AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Password").password(true).textWidth(0), password);
+    loginController.setPassword(password);
+
     AlienImGui::Separator();
     ImGui::Spacing();
-    AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Remember").tooltip(Const::LoginRememberTooltip), _remember);
+
+    auto remember = loginController.isRemember();
+    AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Remember").tooltip(Const::LoginRememberTooltip), remember);
+    loginController.setRemember(remember);
+
+    auto shareGpuInfo = loginController.shareGpuInfo();
     AlienImGui::ToggleButton(
         AlienImGui::ToggleButtonParameters()
             .name("Share GPU model info")
-            .tooltip(Const::LoginShareGpuInfoTooltip1 + _simController->getGpuName() + "\n" + Const::LoginShareGpuInfoTooltip2),
-        _shareGpuInfo);
+            .tooltip(Const::LoginShareGpuInfoTooltip1 + _simulationFacade->getGpuName() + "\n" + Const::LoginShareGpuInfoTooltip2),
+        shareGpuInfo);
+    loginController.setShareGpuInfo(shareGpuInfo);
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienImGui::Separator();
 
-    ImGui::BeginDisabled(_userName.empty() || _password.empty());
+    ImGui::BeginDisabled(userName.empty() || password.empty());
     if (AlienImGui::Button("Login")) {
         close();
-        onLogin();
-        if (!_remember) {
-            _userName.clear();
-            _password.clear();
-        }
+        loginController.onLogin();
     }
     ImGui::EndDisabled();
     ImGui::SetItemDefaultFocus();
@@ -100,18 +78,18 @@ void _LoginDialog::processIntern()
     AlienImGui::VerticalSeparator();
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(_userName.empty() || _password.empty());
+    ImGui::BeginDisabled(userName.empty() || password.empty());
     if (AlienImGui::Button("Create user")) {
         close();
-        _createUserDialog->open(_userName, _password, getUserInfo());
+        CreateUserDialog::get().open(userName, password, LoginController::get().getUserInfo());
     }
     ImGui::EndDisabled();
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(_userName.empty());
+    ImGui::BeginDisabled(userName.empty());
     if (AlienImGui::Button("Reset password")) {
         close();
-        _resetPasswordDialog->open(_userName, getUserInfo());
+        ResetPasswordDialog::get().open(userName, LoginController::get().getUserInfo());
     }
     ImGui::EndDisabled();
 
@@ -122,45 +100,4 @@ void _LoginDialog::processIntern()
     if (AlienImGui::Button("Cancel")) {
         close();
     }
-}
-
-void _LoginDialog::onLogin()
-{
-    LoginErrorCode errorCode;
-
-    auto userInfo = getUserInfo();
-
-    if (!NetworkService::login(errorCode, _userName, _password, userInfo)) {
-        switch (errorCode) {
-        case LoginErrorCode_UnconfirmedUser: {
-            _activateUserDialog->open(_userName, _password, userInfo);
-        } break;
-        default: {
-            MessageDialog::getInstance().information("Error", "Login failed.");
-        } break;
-        }
-        return;
-    }
-    _browserWindow->onRefresh();
-    saveSettings();
-}
-
-void _LoginDialog::saveSettings()
-{
-    auto& settings = GlobalSettings::getInstance();
-    settings.setBool("dialogs.login.remember", _remember);
-    settings.setBool("dialogs.login.share gpu info", _shareGpuInfo);
-    if (_remember) {
-        settings.setString("dialogs.login.user name", _userName);
-        settings.setString("dialogs.login.password", _password);
-    }
-}
-
-UserInfo _LoginDialog::getUserInfo()
-{
-    UserInfo result;
-    if (_shareGpuInfo) {
-        result.gpu = _simController->getGpuName();
-    }
-    return result;
 }

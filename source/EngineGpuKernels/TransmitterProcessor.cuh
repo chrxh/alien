@@ -34,12 +34,12 @@ __device__ __inline__ void TransmitterProcessor::process(SimulationData& data, S
 
 __device__ __inline__ void TransmitterProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto activity = CellFunctionProcessor::calcInputActivity(cell);
-    CellFunctionProcessor::updateInvocationState(cell, activity);
+    auto signal = CellFunctionProcessor::calcInputSignal(cell);
+    CellFunctionProcessor::updateInvocationState(cell, signal);
 
     distributeEnergy(data, statistics, cell);
 
-    CellFunctionProcessor::setActivity(cell, activity);
+    CellFunctionProcessor::setSignal(cell, signal);
 }
 
 __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
@@ -100,7 +100,6 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
             }
         }
     }
-
     if (cell->cellFunctionData.transmitter.mode == EnergyDistributionMode_TransmittersAndConstructors) {
         auto matchActiveConstructorFunc = [&](Cell* const& otherCell) {
             if (otherCell->livingState != LivingState_Ready) {
@@ -108,18 +107,22 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
             }
             if (otherCell->cellFunction == CellFunction_Constructor) {
                 if (!GenomeDecoder::isFinished(otherCell->cellFunctionData.constructor)
-                    && (!cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameCreature || otherCell->creatureId == cell->creatureId)) {
+                    && (!cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameCreature || otherCell->creatureId == cell->creatureId)
+                    && otherCell->cellFunctionData.constructor.isReady) {
                     return true;
                 }
             }
             return false;
         };
-        auto matchTransmitterFunc = [&](Cell* const& otherCell) {
+        auto matchSecondChoiceFunc = [&](Cell* const& otherCell) {
             if (otherCell->livingState != LivingState_Ready) {
                 return false;
             }
-            if (otherCell->cellFunction == CellFunction_Transmitter) {
-                if (!cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameCreature || otherCell->creatureId == cell->creatureId) {
+            if (!cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionSameCreature || otherCell->creatureId == cell->creatureId) {
+                if (otherCell->cellFunction == CellFunction_Transmitter) {
+                    return true;
+                }
+                if (otherCell->cellFunction == CellFunction_Constructor && !otherCell->cellFunctionData.constructor.isReady) {
                     return true;
                 }
             }
@@ -131,7 +134,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
         auto const& radius = cudaSimulationParameters.cellFunctionTransmitterEnergyDistributionRadius[cell->color];
         data.cellMap.getMatchingCells(receiverCells, 20, numReceivers, cell->pos, radius, cell->detached, matchActiveConstructorFunc);
         if (numReceivers == 0) {
-            data.cellMap.getMatchingCells(receiverCells, 20, numReceivers, cell->pos, radius, cell->detached, matchTransmitterFunc);
+            data.cellMap.getMatchingCells(receiverCells, 20, numReceivers, cell->pos, radius, cell->detached, matchSecondChoiceFunc);
         }
         float energyPerReceiver = energyDelta / (numReceivers + 1);
 

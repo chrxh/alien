@@ -40,11 +40,11 @@ namespace
         cellTO.color = cell->color;
         cellTO.age = cell->age;
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            cellTO.activity.channels[i] = cell->activity.channels[i];
+            cellTO.signal.channels[i] = cell->signal.channels[i];
         }
-        cellTO.activity.origin = cell->activity.origin;
-        cellTO.activity.targetX = cell->activity.targetX;
-        cellTO.activity.targetY = cell->activity.targetY;
+        cellTO.signal.origin = cell->signal.origin;
+        cellTO.signal.targetX = cell->signal.targetX;
+        cellTO.signal.targetY = cell->signal.targetY;
         cellTO.activationTime = cell->activationTime;
         cellTO.detectedByCreatureId = cell->detectedByCreatureId;
         cellTO.cellFunctionUsed = cell->cellFunctionUsed;
@@ -111,8 +111,6 @@ namespace
             cellTO.cellFunctionData.constructor.constructionAngle2 = cell->cellFunctionData.constructor.constructionAngle2;
         } break;
         case CellFunction_Sensor: {
-            cellTO.cellFunctionData.sensor.mode = cell->cellFunctionData.sensor.mode;
-            cellTO.cellFunctionData.sensor.angle = cell->cellFunctionData.sensor.angle;
             cellTO.cellFunctionData.sensor.minDensity = cell->cellFunctionData.sensor.minDensity;
             cellTO.cellFunctionData.sensor.minRange = cell->cellFunctionData.sensor.minRange;
             cellTO.cellFunctionData.sensor.maxRange = cell->cellFunctionData.sensor.maxRange;
@@ -121,8 +119,8 @@ namespace
             cellTO.cellFunctionData.sensor.memoryChannel1 = cell->cellFunctionData.sensor.memoryChannel1;
             cellTO.cellFunctionData.sensor.memoryChannel2 = cell->cellFunctionData.sensor.memoryChannel2;
             cellTO.cellFunctionData.sensor.memoryChannel3 = cell->cellFunctionData.sensor.memoryChannel3;
-            cellTO.cellFunctionData.sensor.targetX = cell->cellFunctionData.sensor.targetX;
-            cellTO.cellFunctionData.sensor.targetY = cell->cellFunctionData.sensor.targetY;
+            cellTO.cellFunctionData.sensor.memoryTargetX = cell->cellFunctionData.sensor.memoryTargetX;
+            cellTO.cellFunctionData.sensor.memoryTargetY = cell->cellFunctionData.sensor.memoryTargetY;
         } break;
         case CellFunction_Nerve: {
             cellTO.cellFunctionData.nerve.pulseMode = cell->cellFunctionData.nerve.pulseMode;
@@ -148,6 +146,8 @@ namespace
             cellTO.cellFunctionData.muscle.lastBendingDirection = cell->cellFunctionData.muscle.lastBendingDirection;
             cellTO.cellFunctionData.muscle.lastBendingSourceIndex = cell->cellFunctionData.muscle.lastBendingSourceIndex;
             cellTO.cellFunctionData.muscle.consecutiveBendingAngle = cell->cellFunctionData.muscle.consecutiveBendingAngle;
+            cellTO.cellFunctionData.muscle.lastMovementX = cell->cellFunctionData.muscle.lastMovementX;
+            cellTO.cellFunctionData.muscle.lastMovementY = cell->cellFunctionData.muscle.lastMovementY;
         } break;
         case CellFunction_Defender: {
             cellTO.cellFunctionData.defender.mode = cell->cellFunctionData.defender.mode;

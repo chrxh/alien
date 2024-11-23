@@ -1,16 +1,20 @@
 #pragma once
 
+#include "Base/Singleton.h"
+
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-class _LogWindow : public _AlienWindow
+class LogWindow : public AlienWindow<GuiLogger>
 {
-public:
-    _LogWindow(GuiLogger const& logger);
-    ~_LogWindow();
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(LogWindow);
 
 private:
-    void processIntern();
+    LogWindow();
+
+    void initIntern(GuiLogger logger) override;
+    void shutdownIntern() override;
+    void processIntern() override;
 
     bool _verbose = false;
 

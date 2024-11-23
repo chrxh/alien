@@ -1,25 +1,25 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "Network/Definitions.h"
 
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _UploadSimulationDialog : public _AlienDialog
+class UploadSimulationDialog : public AlienDialog<SimulationFacade>
 {
-public:
-    _UploadSimulationDialog(
-        BrowserWindow const& browserWindow,
-        LoginDialog const& loginDialog,
-        SimulationController const& simController,
-        GenomeEditorWindow const& genomeEditorWindow);
-    ~_UploadSimulationDialog();
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(UploadSimulationDialog);
 
+public:
     void open(NetworkResourceType resourceType, std::string const& folder = "");
 
 private:
-    void processIntern();
+    UploadSimulationDialog();
+
+    void initIntern(SimulationFacade simulationFacade) override;
+    void shutdownIntern() override;
+    void processIntern() override;
 
     void onUpload();
 
@@ -33,8 +33,5 @@ private:
     NetworkResourceType _resourceType = NetworkResourceType_Simulation;
     bool _share = false;
 
-    BrowserWindow _browserWindow;
-    LoginDialog _loginDialog;
-    SimulationController _simController;
-    GenomeEditorWindow _genomeEditorWindow;
+    SimulationFacade _simulationFacade;
 };

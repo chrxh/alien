@@ -28,6 +28,8 @@ enum LivingState_
     LivingState_Ready,
     LivingState_UnderConstruction,
     LivingState_Activating,
+    LivingState_Detaching,
+    LivingState_Reviving,
     LivingState_Dying,
     LivingState_Count
 };
@@ -43,22 +45,14 @@ enum NeuronActivationFunction_
     NeuronActivationFunction_Count
 };
 
-using SensorMode = int;
-enum SensorMode_
-{
-    SensorMode_Neighborhood,
-    SensorMode_FixedAngle,
-    SensorMode_Count
-};
-
 using SensorRestrictToMutants = int;
 enum SensorRestrictToMutants_
 {
     SensorRestrictToMutants_NoRestriction,
     SensorRestrictToMutants_RestrictToSameMutants,
     SensorRestrictToMutants_RestrictToOtherMutants,
-    SensorRestrictToMutants_RestrictToEmergentCells,
-    SensorRestrictToMutants_RestrictToZeroMutants,
+    SensorRestrictToMutants_RestrictToFreeCells,
+    SensorRestrictToMutants_RestrictToHandcraftedCells,
     SensorRestrictToMutants_RestrictToLessComplexMutants,
     SensorRestrictToMutants_RestrictToMoreComplexMutants,
     SensorRestrictToMutants_Count
@@ -147,8 +141,8 @@ enum ReconnectorRestrictToMutants_
     ReconnectorRestrictToMutants_NoRestriction,
     ReconnectorRestrictToMutants_RestrictToSameMutants,
     ReconnectorRestrictToMutants_RestrictToOtherMutants,
-    ReconnectorRestrictToMutants_RestrictToRespawnedMutants,
-    ReconnectorRestrictToMutants_RestrictToZeroMutants,
+    ReconnectorRestrictToMutants_RestrictToFreeCells,
+    ReconnectorRestrictToMutants_RestrictToHandcraftedCells,
     ReconnectorRestrictToMutants_RestrictToLessComplexMutants,
     ReconnectorRestrictToMutants_RestrictToMoreComplexMutants,
     ReconnectorRestrictToMutants_Count
@@ -169,11 +163,11 @@ enum CellFunctionUsed_
     CellFunctionUsed_Yes,
 };
 
-using ActivityOrigin = uint8_t;
-enum ActivityOrigin_
+using SignalOrigin = uint8_t;
+enum SignalOrigin_
 {
-    ActivityOrigin_Unknown,
-    ActivityOrigin_Sensor
+    SignalOrigin_Unknown,
+    SignalOrigin_Sensor
 };
 
 auto constexpr MaxActivationTime = 256 * 4;

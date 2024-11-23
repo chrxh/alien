@@ -7,15 +7,15 @@
 
 _FileLogger::_FileLogger()
 {
-    LoggingService::getInstance().registerCallBack(this);
+    LoggingService::get().registerCallBack(this);
 
-    std::remove(Const::LogFilename.c_str());
+    std::filesystem::remove(Const::LogFilename);
     _outfile.open(Const::LogFilename, std::ios_base::app);
 }
 
 _FileLogger::~_FileLogger()
 {
-    LoggingService::getInstance().unregisterCallBack(this);
+    LoggingService::get().unregisterCallBack(this);
 }
 
 void _FileLogger::newLogMessage(Priority priority, std::string const& message)

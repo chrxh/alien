@@ -2,24 +2,21 @@
 
 #include "ExitDialog.h"
 #include "AlienImGui.h"
+#include "MainLoopController.h"
 
-_ExitDialog::_ExitDialog(bool& onExit)
-    : _AlienDialog("Exit")
-    , _onExit(onExit)
+ExitDialog::ExitDialog()
+    : AlienDialog("Exit")
 {}
 
-void _ExitDialog::processIntern()
+void ExitDialog::processIntern()
 {
-    ImGui::Text("Do you really want to terminate the program?");
+    ImGui::TextWrapped("%s", "Do you really want to terminate the program?");
 
-    ImGui::Spacing();
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Spacing();
-    ImGui::Spacing();
+    ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
+    AlienImGui::Separator();
 
     if (AlienImGui::Button("OK")) {
-        _onExit = true;
+        MainLoopController::get().scheduleClosing();
         close();
     }
     ImGui::SameLine();

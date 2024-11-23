@@ -8,12 +8,12 @@
 
 ConstructorDescription::ConstructorDescription()
 {
-    genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription());
+    genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription());
 }
 
 InjectorDescription::InjectorDescription()
 {
-    genome = GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription());
+    genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription());
 }
 
 CellFunction CellDescription::getCellFunctionType() const

@@ -1,20 +1,24 @@
 #pragma once
 
-#include "EngineInterface/Definitions.h"
+#include "Base/Singleton.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "Definitions.h"
+#include "MainLoopEntity.h"
 
-class _ImageToPatternDialog
+class ImageToPatternDialog : public MainLoopEntity<SimulationFacade>
 {
+    MAKE_SINGLETON(ImageToPatternDialog);
+
 public:
-
-	_ImageToPatternDialog(SimulationController const& simController);
-    ~_ImageToPatternDialog();
-
 	void show();
 
 private:
-    SimulationController _simController;
+    void init(SimulationFacade simulationFacade) override;
+    void shutdown() override;
+    void process() override {}
+
+    SimulationFacade _simulationFacade;
 
     std::string _startingPath;
 };

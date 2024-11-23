@@ -1,34 +1,24 @@
 #pragma once
 
 #include "Base/Definitions.h"
+#include "Base/Singleton.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/Descriptions.h"
 
 #include "Definitions.h"
+#include "MainLoopEntity.h"
 
-class _EditorController
+class EditorController : public MainLoopEntity<SimulationFacade>
 {
+    MAKE_SINGLETON(EditorController);
+
 public:
-    _EditorController(SimulationController const& simController);
-
-    void registerCyclicReferences(UploadSimulationDialogWeakPtr const& uploadSimulationDialog);
-
     bool isOn() const;
     void setOn(bool value);
-
-    void process();
-
-    SelectionWindow getSelectionWindow() const;
-    PatternEditorWindow getPatternEditorWindow() const;
-    CreatorWindow getCreatorWindow() const;
-    MultiplierWindow getMultiplierWindow() const;
-    GenomeEditorWindow getGenomeEditorWindow() const;
-    EditorModel getEditorModel() const;
 
     bool areInspectionWindowsActive() const;
     void onCloseAllInspectorWindows();
 
-    bool isObjectInspectionPossible() const;
-    bool isGenomeInspectionPossible() const;
     void onInspectSelectedObjects();
     void onInspectSelectedGenomes();
     void onInspectObjects(std::vector<CellOrParticleDescription> const& entities, bool selectGenomeTab);
@@ -40,43 +30,24 @@ public:
     bool isDeletingPossible() const;
     void onDelete();
 
+    void onSelectObjects(RealVector2D const& viewPos, bool modifierKeyPressed);
+    void onMoveSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
+    void onFixateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& initialViewPos, RealVector2D const& selectionPositionOnClick);
+    void onUpdateSelectionRect(RealRect const& rect);
+    void onApplyForces(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
+    void onAccelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
 
 private:
-    void processEvents();
-    void processSelectionRect();
+    void init(SimulationFacade simulationFacade) override;
+    void process() override;
+    void shutdown() override {}
+
     void processInspectorWindows();
 
-    void selectObjects(RealVector2D const& viewPos, bool modifierKeyPressed);
-    void moveSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
-    void fixateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& initialViewPos);
-    void accelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
-    void applyForces(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
+    SimulationFacade _simulationFacade;
 
-    void createSelectionRect(RealVector2D const& viewPos);
-    void resizeSelectionRect(RealVector2D const& viewPos);
-    void removeSelectionRect();
+    bool _on = false;   //#TODO weg!
 
-private:
-    EditorModel _editorModel;
-    SelectionWindow _selectionWindow;
-    PatternEditorWindow _patternEditorWindow;
-    CreatorWindow _creatorWindow; 
-    MultiplierWindow _multiplierWindow;
-    GenomeEditorWindow _genomeEditorWindow;
-
-    SimulationController _simController;
-
-    bool _on = false;
-
-    struct SelectionRect
-    {
-        RealVector2D startPos;
-        RealVector2D endPos;
-    };
-    std::optional<SelectionRect> _selectionRect;
     std::vector<InspectorWindow> _inspectorWindows;
     DataDescription _drawing;
-    std::optional<RealVector2D> _selectionPositionOnClick;
-    std::optional<RealVector2D> _worldPosOnClick;
-    std::optional<RealVector2D> _prevWorldPos;
 };

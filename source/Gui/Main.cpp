@@ -4,12 +4,16 @@
 #include "Base/GlobalSettings.h"
 #include "Base/LoggingService.h"
 #include "Base/FileLogger.h"
-#include "EngineInterface/SerializerService.h"
-#include "EngineImpl/SimulationControllerImpl.h"
+#include "Base/Exceptions.h"
+#include "Base/Resources.h"
+#include "PersisterInterface/SerializerService.h"
+#include "EngineImpl/SimulationFacadeImpl.h"
+#include "PersisterImpl/PersisterFacadeImpl.h"
 
 #include "MainWindow.h"
 #include "GuiLogger.h"
 #include "HelpStrings.h"
+#include "StartupCheckService.h"
 
 namespace
 {
@@ -22,7 +26,7 @@ namespace
 int main(int argc, char** argv)
 {
     auto inDebugMode = isInDebugMode(argc, argv);
-    GlobalSettings::getInstance().setDebugMode(inDebugMode);
+    GlobalSettings::get().setDebugMode(inDebugMode);
 
     GuiLogger logger = std::make_shared<_GuiLogger>();
     FileLogger fileLogger = std::make_shared<_FileLogger>();
@@ -31,15 +35,23 @@ int main(int argc, char** argv)
         log(Priority::Important, "DEBUG mode");
     }
 
-    SimulationController simController;
+    SimulationFacade simulationFacade;
+    PersisterFacade persisterFacade;
     MainWindow mainWindow;
 
     try {
-        simController = std::make_shared<_SimulationControllerImpl>();
-        mainWindow = std::make_shared<_MainWindow>(simController, logger);
+        log(Priority::Important, "starting ALIEN v" + Const::ProgramVersion);
+
+        simulationFacade = std::make_shared<_SimulationFacadeImpl>();
+        persisterFacade = std::make_shared<_PersisterFacadeImpl>();
+        StartupCheckService::get().check(simulationFacade);
+
+        mainWindow = std::make_shared<_MainWindow>(simulationFacade, persisterFacade, logger);
         mainWindow->mainLoop();
         mainWindow->shutdown();
 
+    } catch (InitialCheckException const& e) {
+        std::cerr << "Initial checks failed: " << std::endl << e.what() << std::endl;
     } catch (std::exception const& e) {
         std::cerr << "An uncaught exception occurred: "
                   << e.what()

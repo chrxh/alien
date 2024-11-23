@@ -1,19 +1,16 @@
 #pragma once
 
+#include "Base/Singleton.h"
+
 #include "AlienWindow.h"
 #include "Definitions.h"
 
-class _ShaderWindow : public _AlienWindow
+class ShaderWindow : public AlienWindow<>
 {
-public:
-    _ShaderWindow(SimulationView const& simulationView);
-    ~_ShaderWindow();
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(ShaderWindow);
 
 private:
-    void processIntern() override;
+    ShaderWindow();
 
-    SimulationView _simulationView;
-    float _brightness = 1.0f;
-    float _contrast = 1.0f;
-    float _motionBlur = 1.0f;
+    void processIntern() override;
 };

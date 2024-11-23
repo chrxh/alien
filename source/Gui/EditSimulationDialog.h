@@ -1,21 +1,23 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "Network/Definitions.h"
 
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class _EditSimulationDialog : public _AlienDialog
+class EditSimulationDialog : public AlienDialog<>
 {
-public:
-    _EditSimulationDialog(BrowserWindow const& browserWindow);
-    virtual ~_EditSimulationDialog() override = default;
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(EditSimulationDialog);
 
+public:
     void openForLeaf(NetworkResourceTreeTO const& treeTO);
     void openForFolder(NetworkResourceTreeTO const& treeTO, std::vector<NetworkResourceRawTO> const& rawTOs);
 
 private:
-    void processIntern();
+    EditSimulationDialog();
+
+    void processIntern() override;
 
     void processForLeaf();
     void processForFolder();
@@ -25,6 +27,4 @@ private:
     std::string _origFolderName;
     std::string _newName;
     std::string _newDescription;
-
-    BrowserWindow _browserWindow;
 };

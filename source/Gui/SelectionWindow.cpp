@@ -6,30 +6,29 @@
 #include "StyleRepository.h"
 #include "EditorModel.h"
 
-_SelectionWindow::_SelectionWindow(EditorModel const& editorModel)
-    : _AlienWindow("Selection", "windows.selection", true), _editorModel(editorModel)
-{
-}
+SelectionWindow::SelectionWindow()
+    : AlienWindow("Selection", "windows.selection", true)
+{}
 
-void _SelectionWindow::processIntern()
+void SelectionWindow::processIntern()
 {
-    auto selection = _editorModel->getSelectionShallowData();
+    auto selection = EditorModel::get().getSelectionShallowData();
     ImGui::Text("Cells");
-    ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
+    ImGui::PushFont(StyleRepository::get().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
     ImGui::TextUnformatted(StringHelper::format(selection.numCells).c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();
 
     ImGui::Text("Connected cells");
-    ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
+    ImGui::PushFont(StyleRepository::get().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
     ImGui::TextUnformatted(StringHelper::format(selection.numClusterCells).c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();
 
     ImGui::Text("Energy particles");
-    ImGui::PushFont(StyleRepository::getInstance().getLargeFont());
+    ImGui::PushFont(StyleRepository::get().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor);
     ImGui::TextUnformatted(StringHelper::format(selection.numParticles).c_str());
     ImGui::PopStyleColor();

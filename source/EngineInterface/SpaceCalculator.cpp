@@ -29,10 +29,21 @@ void SpaceCalculator::correctDisplacement(RealVector2D& displacement) const
     displacement.y = intDisplacement.y + remainder.y;
 }
 
+namespace
+{
+    void correctIntPosition(IntVector2D& pos, IntVector2D const& worldSize)
+    {
+        pos = {((pos.x % worldSize.x) + worldSize.x) % worldSize.x, ((pos.y % worldSize.y) + worldSize.y) % worldSize.y};
+    }
+
+}
+
 void SpaceCalculator::correctPosition(RealVector2D& pos) const
 {
-    pos.x = std::fmod(std::fmod(pos.x, _worldSizeFloat.x) + _worldSizeFloat.x, _worldSizeFloat.x);
-    pos.y = std::fmod(std::fmod(pos.y, _worldSizeFloat.y) + _worldSizeFloat.y, _worldSizeFloat.y);
+    auto intPart = toIntVector2D(pos);
+    auto fracPart = RealVector2D{pos.x - toFloat(intPart.x), pos.y - toFloat(intPart.y)};
+    correctIntPosition(intPart, _worldSize);
+    pos = {static_cast<float>(intPart.x) + fracPart.x, static_cast<float>(intPart.y) + fracPart.y};
 }
 
 RealVector2D SpaceCalculator::getCorrectedPosition(RealVector2D const& pos) const

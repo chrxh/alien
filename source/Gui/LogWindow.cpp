@@ -10,24 +10,27 @@
 #include "GuiLogger.h"
 #include "AlienImGui.h"
 
-_LogWindow::_LogWindow(GuiLogger const& logger)
-    : _AlienWindow("Log", "windows.log", false)
-    , _logger(logger)
+void LogWindow::initIntern(GuiLogger logger)
 {
-    _verbose = GlobalSettings::getInstance().getBool("windows.log.verbose", false);
+    _logger = logger;
+    _verbose = GlobalSettings::get().getValue("windows.log.verbose", false);
 }
 
-_LogWindow::~_LogWindow()
+LogWindow::LogWindow()
+    : AlienWindow("Log", "windows.log", false)
+{}
+
+void LogWindow::shutdownIntern()
 {
-    GlobalSettings::getInstance().setBool("windows.log.verbose", _verbose);
+    GlobalSettings::get().setValue("windows.log.verbose", _verbose);
 }
 
-void _LogWindow::processIntern()
+void LogWindow::processIntern()
 {
-    auto& styleRepository = StyleRepository::getInstance();
+    auto& styleRepository = StyleRepository::get();
     if (ImGui::BeginChild(
             "##", ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.scale(40.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
-        ImGui::PushFont(StyleRepository::getInstance().getMonospaceMediumFont());
+        ImGui::PushFont(StyleRepository::get().getMonospaceMediumFont());
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
 
         for (auto const& logMessage : _logger->getMessages(_verbose ? Priority::Unimportant : Priority::Important) | boost::adaptors::reversed) {

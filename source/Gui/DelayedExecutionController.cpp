@@ -2,13 +2,7 @@
 
 #include "AlienImGui.h"
 #include "DelayedExecutionController.h"
-
-
-DelayedExecutionController& DelayedExecutionController::getInstance()
-{
-    static DelayedExecutionController instance;
-    return instance;
-}
+#include "MainLoopEntityController.h"
 
 void DelayedExecutionController::process()
 {

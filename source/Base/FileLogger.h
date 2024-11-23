@@ -10,7 +10,7 @@ class _FileLogger : public LoggingCallBack
 
 public:
     _FileLogger();
-    virtual ~_FileLogger();
+    ~_FileLogger() override;
 
     void newLogMessage(Priority priority, std::string const& message) override;
 

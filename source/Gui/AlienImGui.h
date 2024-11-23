@@ -30,7 +30,7 @@ public:
         MEMBER_DECLARATION(SliderFloatParameters, bool const*, defaultEnabledValue, nullptr);
         MEMBER_DECLARATION(SliderFloatParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static bool SliderFloat(SliderFloatParameters const& parameters, float* value, bool* enabled = nullptr);
+    static bool SliderFloat(SliderFloatParameters const& parameters, float* value, bool* enabled = nullptr, bool* pinned = nullptr);
 
     struct SliderIntParameters
     {
@@ -47,7 +47,22 @@ public:
         MEMBER_DECLARATION(SliderIntParameters, bool const*, defaultEnabledValue, nullptr);
         MEMBER_DECLARATION(SliderIntParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static bool SliderInt(SliderIntParameters const& parameters, int* value, bool* enabled = nullptr);
+    static bool SliderInt(SliderIntParameters const& parameters, int* value, bool* enabled = nullptr, bool* pinned = nullptr);
+
+    struct SliderFloat2Parameters
+    {
+        MEMBER_DECLARATION(SliderFloat2Parameters, std::string, name, "");
+        MEMBER_DECLARATION(SliderFloat2Parameters, RealVector2D, min, RealVector2D());
+        MEMBER_DECLARATION(SliderFloat2Parameters, RealVector2D, max, RealVector2D());
+        MEMBER_DECLARATION(SliderFloat2Parameters, std::string, format, "%.3f");
+        MEMBER_DECLARATION(SliderFloat2Parameters, float, textWidth, 100);
+        MEMBER_DECLARATION(SliderFloat2Parameters, std::optional<RealVector2D>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(SliderFloat2Parameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER_DECLARATION(SliderFloat2Parameters, std::optional<std::function<bool(void)>>, getMousePickerEnabledFunc, std::nullopt);
+        MEMBER_DECLARATION(SliderFloat2Parameters, std::optional<std::function<void(bool)>>, setMousePickerEnabledFunc, std::nullopt);
+        MEMBER_DECLARATION(SliderFloat2Parameters, std::optional<std::function<std::optional<RealVector2D>(void)>>, getMousePickerPositionFunc, std::nullopt);
+    };
+    static bool SliderFloat2(SliderFloat2Parameters const& parameters, float& valueX, float& valueY);
 
     struct SliderInputFloatParameters
     {
@@ -144,6 +159,7 @@ public:
         MEMBER_DECLARATION(InputTextParameters, bool, monospaceFont, false);
         MEMBER_DECLARATION(InputTextParameters, bool, readOnly, false);
         MEMBER_DECLARATION(InputTextParameters, bool, password, false);
+        MEMBER_DECLARATION(InputTextParameters, bool, folderButton, false);
         MEMBER_DECLARATION(InputTextParameters, std::optional<std::string>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(InputTextParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
@@ -163,6 +179,7 @@ public:
     {
         MEMBER_DECLARATION(ComboParameters, std::string, name, "");
         MEMBER_DECLARATION(ComboParameters, float, textWidth, 100);
+        MEMBER_DECLARATION(ComboParameters, bool, disabled, false);
         MEMBER_DECLARATION(ComboParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(ComboParameters, std::vector<std::string>, values, std::vector<std::string>());
         MEMBER_DECLARATION(ComboParameters, std::optional<std::string>, tooltip, std::nullopt);
@@ -174,6 +191,7 @@ public:
         MEMBER_DECLARATION(SwitcherParameters, std::string, name, "");
         MEMBER_DECLARATION(SwitcherParameters, float, width, 0);
         MEMBER_DECLARATION(SwitcherParameters, float, textWidth, 100);
+        MEMBER_DECLARATION(SwitcherParameters, bool, disabled, false);
         MEMBER_DECLARATION(SwitcherParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(SwitcherParameters, std::vector<std::string>, values, std::vector<std::string>());
         MEMBER_DECLARATION(SwitcherParameters, std::optional<std::string>, tooltip, std::nullopt);
@@ -223,21 +241,35 @@ public:
     };
     static bool ToggleButton(ToggleButtonParameters const& parameters, bool& value);
 
-    struct CheckButtonParameters 
+    struct SelectableButtonParameters 
     {
-        MEMBER_DECLARATION(CheckButtonParameters, std::string, name, "");
-        MEMBER_DECLARATION(CheckButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
-        MEMBER_DECLARATION(CheckButtonParameters, float, width, 0);
+        MEMBER_DECLARATION(SelectableButtonParameters, std::string, name, "");
+        MEMBER_DECLARATION(SelectableButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER_DECLARATION(SelectableButtonParameters, float, width, 0);
     };
-    static bool SelectableButton(CheckButtonParameters const& parameters, bool& value);
+    static bool SelectableButton(SelectableButtonParameters const& parameters, bool& value);
 
     static void Text(std::string const& text);
     static void BoldText(std::string const& text);
     static void MonospaceText(std::string const& text);
 
-    static bool BeginMenuButton(std::string const& text, bool& toggle, std::string const& popup, float focus = true);  //return toggle
-    static void EndMenuButton();
-    static bool ShutdownButton();
+    static void BeginMenuBar();
+    static void BeginMenu(std::string const& text, bool& toggled, float focus = true);
+    struct MenuItemParameters
+    {
+        MEMBER_DECLARATION(MenuItemParameters, std::string, name, "");
+        MEMBER_DECLARATION(MenuItemParameters, bool, keyCtrl, false);
+        MEMBER_DECLARATION(MenuItemParameters, bool, keyAlt, false);
+        MEMBER_DECLARATION(MenuItemParameters, std::optional<ImGuiKey>, key, std::nullopt);
+        MEMBER_DECLARATION(MenuItemParameters, bool, disabled, false);
+        MEMBER_DECLARATION(MenuItemParameters, bool, selected, false);
+        MEMBER_DECLARATION(MenuItemParameters, bool, closeMenuWhenItemClicked, true);
+    };
+    static void MenuItem(MenuItemParameters const& parameters, std::function<void()> const& action);
+    static void MenuSeparator();
+    static void EndMenu();
+    static void MenuShutdownButton(std::function<void()> const& action);
+    static void EndMenuBar();
 
     struct ColorButtonWithPickerParameters
     {
@@ -280,6 +312,21 @@ public:
         MEMBER_DECLARATION(ButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool Button(ButtonParameters const& parameters);
+
+    struct ActionButtonParameters
+    {
+        MEMBER_DECLARATION(ActionButtonParameters, std::string, buttonText, "");
+        MEMBER_DECLARATION(ActionButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
+    };
+    static bool ActionButton(ActionButtonParameters const& parameters);
+
+    struct SpinnerParameters
+    {
+        MEMBER_DECLARATION(SpinnerParameters, RealVector2D, pos, RealVector2D());
+    };
+    static void Spinner(SpinnerParameters const& parameters);
+
+    static void StatusBar(std::vector<std::string> const& textItems);
 
     static void Tooltip(std::string const& text, bool delay = true);
     static void Tooltip(std::function<std::string()> const& textFunc, bool delay = true);
@@ -342,7 +389,7 @@ public:
 private:
 
     template <typename Parameter, typename T>
-    static bool BasicSlider(Parameter const& parameters, T* value, bool* enabled);
+    static bool BasicSlider(Parameter const& parameters, T* value, bool* enabled, bool* pinned);
 
 
     template<typename T>
@@ -363,8 +410,17 @@ private:
 
     static ImVec2 RotationCenter(ImDrawList* drawList);
 
+    static bool revertButton(std::string const& id);
+
+private:
     static std::unordered_set<unsigned int> _basicSilderExpanded;
+
     static int _rotationStartIndex;
+
     static std::unordered_map<unsigned int, int> _neuronSelectedInput;
     static std::unordered_map<unsigned int, int> _neuronSelectedOutput;
+
+    static bool _menuBarVisible;
+    static bool* _menuButtonToggled;
+    static bool _menuButtonToToggle;
 };

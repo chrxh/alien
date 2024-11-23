@@ -4,25 +4,21 @@
 
 #include "Network/NetworkService.h"
 #include "Network/NetworkResourceService.h"
-#include "Network/ValidationService.h"
+#include "Network/NetworkValidationService.h"
 
 #include "AlienImGui.h"
 #include "BrowserWindow.h"
 #include "DelayedExecutionController.h"
 #include "HelpStrings.h"
 #include "StyleRepository.h"
-#include "MessageDialog.h"
-#include "OverlayMessageController.h"
+#include "GenericMessageDialog.h"
+#include "NetworkTransferController.h"
+#include "OverlayController.h"
 
-_EditSimulationDialog::_EditSimulationDialog(BrowserWindow const& browserWindow)
-    : _AlienDialog("")
-    , _browserWindow(browserWindow)
-{}
-
-void _EditSimulationDialog::openForLeaf(NetworkResourceTreeTO const& treeTO)
+void EditSimulationDialog::openForLeaf(NetworkResourceTreeTO const& treeTO)
 {
     changeTitle("Change name or description");
-    _AlienDialog::open();
+    AlienDialog::open();
     _treeTO = treeTO;
 
     auto& rawTO = _treeTO->getLeaf().rawTO;
@@ -30,18 +26,22 @@ void _EditSimulationDialog::openForLeaf(NetworkResourceTreeTO const& treeTO)
     _newDescription = rawTO->description;
 }
 
-void _EditSimulationDialog::openForFolder(NetworkResourceTreeTO const& treeTO, std::vector<NetworkResourceRawTO> const& rawTOs)
+void EditSimulationDialog::openForFolder(NetworkResourceTreeTO const& treeTO, std::vector<NetworkResourceRawTO> const& rawTOs)
 {
     changeTitle("Change folder name");
-    _AlienDialog::open();
+    AlienDialog::open();
     _treeTO = treeTO;
     _rawTOs = rawTOs;
     
-    _newName = NetworkResourceService::concatenateFolderName(treeTO->folderNames, false);
+    _newName = NetworkResourceService::get().concatenateFolderName(treeTO->folderNames, false);
     _origFolderName = _newName;
 }
 
-void _EditSimulationDialog::processIntern()
+EditSimulationDialog::EditSimulationDialog()
+    : AlienDialog("")
+{}
+
+void EditSimulationDialog::processIntern()
 {
     if (_treeTO->isLeaf()) {
         processForLeaf();
@@ -50,7 +50,7 @@ void _EditSimulationDialog::processIntern()
     }
 }
 
-void _EditSimulationDialog::processForLeaf()
+void EditSimulationDialog::processForLeaf()
 {
     auto& rawTO = _treeTO->getLeaf().rawTO;
     std::string resourceTypeString = rawTO->resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
@@ -72,14 +72,9 @@ void _EditSimulationDialog::processForLeaf()
 
     ImGui::BeginDisabled(_newName.empty());
     if (AlienImGui::Button("OK")) {
-        if (ValidationService::isStringValidForDatabase(_newName) && ValidationService::isStringValidForDatabase(_newDescription)) {
-            delayedExecution([rawTO = rawTO, resourceTypeString = resourceTypeString, this] {
-                if (!NetworkService::editResource(rawTO->id, _newName, _newDescription)) {
-                    showMessage("Error", "Failed to edit " + resourceTypeString + ".");
-                }
-                _browserWindow->onRefresh();
-            });
-            printOverlayMessage("Applying changes ...");
+        if (NetworkValidationService::get().isStringValidForDatabase(_newName) && NetworkValidationService::get().isStringValidForDatabase(_newDescription)) {
+            EditNetworkResourceRequestData::Entry entry{.resourceId = rawTO->id, .newName = _newName, .newDescription = _newDescription};
+            NetworkTransferController::get().onEdit(EditNetworkResourceRequestData{.entries = std::vector{entry}});
             close();
         } else {
             showMessage("Error", Const::NotAllowedCharacters);
@@ -94,9 +89,9 @@ void _EditSimulationDialog::processForLeaf()
     }
 }
 
-void _EditSimulationDialog::processForFolder()
+void EditSimulationDialog::processForFolder()
 {
-    if (ImGui::BeginChild("", {0, -scale(50.0f)})) {
+    if (ImGui::BeginChild("##Folder", {0, -scale(50.0f)})) {
         AlienImGui::InputText(AlienImGui::InputTextParameters().textWidth(0).hint("Folder name"), _newName);
     }
     ImGui::EndChild();
@@ -105,19 +100,15 @@ void _EditSimulationDialog::processForFolder()
 
     ImGui::BeginDisabled(_newName.empty());
     if (AlienImGui::Button("OK")) {
-        if (ValidationService::isStringValidForDatabase(_newName)) {
-            delayedExecution([this] {
-                for (auto const& rawTO : _rawTOs) {
-                    auto nameWithoutOldFolder = rawTO->resourceName.substr(_origFolderName.size() + 1);
-                    auto newName = NetworkResourceService::concatenateFolderName({_newName, nameWithoutOldFolder}, false);
-                    if (!NetworkService::editResource(rawTO->id, newName, rawTO->description)) {
-                        showMessage("Error", "Failed to change folder name.");
-                        break;
-                    }
-                }
-                _browserWindow->onRefresh();
-            });
-            printOverlayMessage("Applying changes ...");
+        if (NetworkValidationService::get().isStringValidForDatabase(_newName)) {
+
+            EditNetworkResourceRequestData requestData;
+            for (auto const& rawTO : _rawTOs) {
+                auto nameWithoutOldFolder = rawTO->resourceName.substr(_origFolderName.size() + 1);
+                auto newName = NetworkResourceService::get().concatenateFolderName({_newName, nameWithoutOldFolder}, false);
+                requestData.entries.emplace_back(rawTO->id, newName, rawTO->description);
+            }            
+            NetworkTransferController::get().onEdit(requestData);
             close();
         } else {
             showMessage("Error", Const::NotAllowedCharacters);

@@ -3,7 +3,7 @@
 #include "Base/NumberGenerator.h"
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/GenomeDescriptionService.h"
 #include "EngineInterface/RawStatisticsData.h"
 
@@ -21,9 +21,9 @@ public:
 
 TEST_F(StatisticsTests, selfReplicatorWithRepetitionsInGenome)
 {
-    auto subGenome = GenomeDescriptionService::convertDescriptionToBytes(
+    auto subGenome = GenomeDescriptionService::get().convertDescriptionToBytes(
         GenomeDescription().setHeader(GenomeHeaderDescription().setNumRepetitions(3)).setCells({CellGenomeDescription()}));
-    auto mainGenome = GenomeDescriptionService::convertDescriptionToBytes(
+    auto mainGenome = GenomeDescriptionService::get().convertDescriptionToBytes(
         GenomeDescription()
             .setHeader(GenomeHeaderDescription().setNumRepetitions(2))
             .setCells({
@@ -36,8 +36,8 @@ TEST_F(StatisticsTests, selfReplicatorWithRepetitionsInGenome)
         CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(mainGenome)),
     });
 
-    _simController->setSimulationData(data);
-    auto statistics = _simController->getRawStatistics();
+    _simulationFacade->setSimulationData(data);
+    auto statistics = _simulationFacade->getRawStatistics();
 
     EXPECT_EQ(1, statistics.timeline.timestep.numCells[0]);
     EXPECT_EQ(1, statistics.timeline.timestep.numSelfReplicators[0]);
@@ -46,9 +46,9 @@ TEST_F(StatisticsTests, selfReplicatorWithRepetitionsInGenome)
 
 TEST_F(StatisticsTests, selfReplicatorWithInfiniteRepetitionsInGenome)
 {
-    auto subGenome = GenomeDescriptionService::convertDescriptionToBytes(
+    auto subGenome = GenomeDescriptionService::get().convertDescriptionToBytes(
         GenomeDescription().setHeader(GenomeHeaderDescription().setInfiniteRepetitions()).setCells({CellGenomeDescription()}));
-    auto mainGenome = GenomeDescriptionService::convertDescriptionToBytes(
+    auto mainGenome = GenomeDescriptionService::get().convertDescriptionToBytes(
         GenomeDescription()
             .setHeader(GenomeHeaderDescription().setNumRepetitions(2))
             .setCells({
@@ -61,8 +61,8 @@ TEST_F(StatisticsTests, selfReplicatorWithInfiniteRepetitionsInGenome)
         CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(mainGenome)),
     });
 
-    _simController->setSimulationData(data);
-    auto statistics = _simController->getRawStatistics();
+    _simulationFacade->setSimulationData(data);
+    auto statistics = _simulationFacade->getRawStatistics();
 
     EXPECT_EQ(1, statistics.timeline.timestep.numCells[0]);
     EXPECT_EQ(1, statistics.timeline.timestep.numSelfReplicators[0]);
@@ -71,9 +71,9 @@ TEST_F(StatisticsTests, selfReplicatorWithInfiniteRepetitionsInGenome)
 
 TEST_F(StatisticsTests, nonSelfReplicatorWithRepetitionsInGenome)
 {
-    auto subGenome = GenomeDescriptionService::convertDescriptionToBytes(
+    auto subGenome = GenomeDescriptionService::get().convertDescriptionToBytes(
         GenomeDescription().setHeader(GenomeHeaderDescription().setNumRepetitions(3)).setCells({CellGenomeDescription()}));
-    auto mainGenome = GenomeDescriptionService::convertDescriptionToBytes(
+    auto mainGenome = GenomeDescriptionService::get().convertDescriptionToBytes(
         GenomeDescription()
             .setHeader(GenomeHeaderDescription().setNumRepetitions(2))
             .setCells({
@@ -85,8 +85,8 @@ TEST_F(StatisticsTests, nonSelfReplicatorWithRepetitionsInGenome)
         CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(mainGenome)),
     });
 
-    _simController->setSimulationData(data);
-    auto statistics = _simController->getRawStatistics();
+    _simulationFacade->setSimulationData(data);
+    auto statistics = _simulationFacade->getRawStatistics();
 
     EXPECT_EQ(1, statistics.timeline.timestep.numCells[0]);
     EXPECT_EQ(0, statistics.timeline.timestep.numSelfReplicators[0]);

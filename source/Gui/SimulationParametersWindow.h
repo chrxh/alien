@@ -1,18 +1,21 @@
 #pragma once
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/SimulationParametersSpot.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "Definitions.h"
 #include "AlienWindow.h"
 
-class _SimulationParametersWindow : public _AlienWindow
+class SimulationParametersWindow : public AlienWindow<SimulationFacade>
 {
-public:
-    _SimulationParametersWindow(SimulationController const& simController, RadiationSourcesWindow const& radiationSourcesWindow);
-    ~_SimulationParametersWindow();
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(SimulationParametersWindow);
 
 private:
+    SimulationParametersWindow();
+
+    void initIntern(SimulationFacade simulationFacade) override;
+    void shutdownIntern() override;
     void processIntern() override;
 
     SimulationParametersSpot createSpot(SimulationParameters const& simParameters, int index);
@@ -23,6 +26,7 @@ private:
     void processBase();
     bool processSpot(int index);    //returns false if tab should be closed
     void processAddonList();
+    void processStatusBar();
 
     void onAppendTab();
     void onDeleteTab(int index);
@@ -30,15 +34,12 @@ private:
     void onOpenParameters();
     void onSaveParameters();
 
-    void validationAndCorrectionLayout();
-    void validationAndCorrection(SimulationParameters& parameters) const;
-    void validationAndCorrection(SimulationParametersSpot& spot, SimulationParameters const& parameters) const;
+    void validateAndCorrectLayout();
 
-    SimulationController _simController;
-    RadiationSourcesWindow _radiationSourcesWindow;
+    SimulationFacade _simulationFacade;
 
     uint32_t _savedPalette[32] = {};
-    uint32_t _backupColor;
+    uint32_t _backupColor = 0;
     std::string _startingPath;
     std::optional<SimulationParameters> _copiedParameters;
     std::optional<int> _sessionId;

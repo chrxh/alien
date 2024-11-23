@@ -2,17 +2,24 @@
 
 #include <chrono>
 
-#include "Definitions.h"
+#include "Base/Singleton.h"
 
-class _UiController
+#include "Definitions.h"
+#include "MainLoopEntity.h"
+
+class UiController : public MainLoopEntity<>
 {
+    MAKE_SINGLETON(UiController);
+
 public:
     bool isOn() const;
     void setOn(bool value);
 
-    void process();
-
 private:
+    void init() override {}
+    void process() override;
+    void shutdown() override {}
+
     bool _on = true;
     std::optional<std::chrono::steady_clock::time_point> _lastChangeTimePoint;
 };

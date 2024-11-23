@@ -3,20 +3,14 @@
 #include <GLFW/glfw3.h>
 
 #include "Base/Math.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "WindowController.h"
 
-SimulationController Viewport::_simController;
-float Viewport::_zoomFactor = 1.0f;
-float Viewport::_zoomSensitivity = 1.03f;
-RealVector2D Viewport::_worldCenter;
-IntVector2D Viewport::_viewSize;
-
-void Viewport::init(SimulationController const& simController)
+void Viewport::setup(SimulationFacade const& simulationFacade)
 {
-    _viewSize = WindowController::getStartupWindowSize();
-    _simController = simController;
+    _viewSize = WindowController::get().getStartupWindowSize();
+    _simulationFacade = simulationFacade;
 }
 
 float Viewport::getZoomFactor()
@@ -86,7 +80,7 @@ RealVector2D Viewport::mapViewToWorldPosition(RealVector2D const& viewPos)
 RealVector2D Viewport::mapWorldToViewPosition(RealVector2D worldPos, bool borderlessRendering)
 {
     if (borderlessRendering) {
-        auto worldSize = toRealVector2D(_simController->getWorldSize());
+        auto worldSize = toRealVector2D(_simulationFacade->getWorldSize());
         auto offset = _worldCenter - worldSize / 2;
         worldPos.x = Math::modulo(worldPos.x - offset.x, worldSize.x) + offset.x;
         worldPos.y = Math::modulo(worldPos.y - offset.y, worldSize.y) + offset.y;

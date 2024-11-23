@@ -51,17 +51,17 @@ struct ConnectionDescription
     }
 };
 
-struct ActivityDescription
+struct SignalDescription
 {
     std::vector<float> channels;
-    ActivityOrigin origin = ActivityOrigin_Unknown;
+    SignalOrigin origin = SignalOrigin_Unknown;
     float targetX = 0;
     float targetY = 0;
 
-    ActivityDescription() { channels.resize(MAX_CHANNELS, 0); }
-    auto operator<=>(ActivityDescription const&) const = default;
+    SignalDescription() { channels.resize(MAX_CHANNELS, 0); }
+    auto operator<=>(SignalDescription const&) const = default;
 
-    ActivityDescription& setChannels(std::vector<float> const& value)
+    SignalDescription& setChannels(std::vector<float> const& value)
     {
         CHECK(value.size() == MAX_CHANNELS);
         channels = value;
@@ -175,7 +175,6 @@ struct ConstructorDescription
 
 struct SensorDescription
 {
-    std::optional<float> fixedAngle;  //nullopt = entire neighborhood
     float minDensity = 0.05f;
     std::optional<int> minRange;
     std::optional<int> maxRange;
@@ -186,17 +185,11 @@ struct SensorDescription
     float memoryChannel1 = 0;
     float memoryChannel2 = 0;
     float memoryChannel3 = 0;
-    float targetX = 0;
-    float targetY = 0;
+    float memoryTargetX = 0;
+    float memoryTargetY = 0;
 
     auto operator<=>(SensorDescription const&) const = default;
 
-    SensorMode getSensorMode() const { return fixedAngle.has_value() ? SensorMode_FixedAngle : SensorMode_Neighborhood; }
-    SensorDescription& setFixedAngle(float value)
-    {
-        fixedAngle = value;
-        return *this;
-    }
     SensorDescription& setColor(int value)
     {
         restrictToColor = value;
@@ -288,6 +281,10 @@ struct MuscleDescription
     MuscleBendingDirection lastBendingDirection = MuscleBendingDirection_None;
     int lastBendingSourceIndex = 0;
     float consecutiveBendingAngle = 0;
+
+    //additional rendering data
+    float lastMovementX = 0;
+    float lastMovementY = 0;
 
     auto operator<=>(MuscleDescription const&) const = default;
 
@@ -388,9 +385,9 @@ struct CellDescription
     std::optional<int> inputExecutionOrderNumber;
     bool outputBlocked = false;
     CellFunctionDescription cellFunction;
-    ActivityDescription activity;
+    SignalDescription signal;
     int activationTime = 0;
-    uint8_t detectedByCreatureId = 0;   //only the first 8 bits from the creature id
+    int detectedByCreatureId = 0;   //only the first 16 bits from the creature id
     CellFunctionUsed cellFunctionUsed = CellFunctionUsed_No;
 
     CellMetadataDescription metadata;
@@ -486,18 +483,18 @@ struct CellDescription
         metadata = value;
         return *this;
     }
-    CellDescription& setActivity(ActivityDescription const& value)
+    CellDescription& setSignal(SignalDescription const& value)
     {
-        activity = value;
+        signal = value;
         return *this;
     }
-    CellDescription& setActivity(std::vector<float> const& value)
+    CellDescription& setSignal(std::vector<float> const& value)
     {
         CHECK(value.size() == MAX_CHANNELS);
 
-        ActivityDescription newActivity;
-        newActivity.channels = value;
-        activity = newActivity;
+        SignalDescription newSignal;
+        newSignal.channels = value;
+        signal = newSignal;
         return *this;
     }
     CellDescription& setActivationTime(int value)

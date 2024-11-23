@@ -6,29 +6,23 @@
 #include "Network/NetworkService.h"
 
 #include "AlienImGui.h"
-#include "MessageDialog.h"
+#include "GenericMessageDialog.h"
 #include "ActivateUserDialog.h"
 
-_CreateUserDialog::_CreateUserDialog(ActivateUserDialog const& activateUserDialog)
-    : _AlienDialog("Create user")
-    , _activateUserDialog(activateUserDialog)
-{
-}
+CreateUserDialog::CreateUserDialog()
+    : AlienDialog("Create user")
+{}
 
-_CreateUserDialog::~_CreateUserDialog()
+void CreateUserDialog::open(std::string const& userName, std::string const& password, UserInfo const& userInfo)
 {
-}
-
-void _CreateUserDialog::open(std::string const& userName, std::string const& password, UserInfo const& userInfo)
-{
-    _AlienDialog::open();
+    AlienDialog::open();
     _userName = userName;
     _password = password;
     _email.clear();
     _userInfo = userInfo;
 }
 
-void _CreateUserDialog::processIntern()
+void CreateUserDialog::processIntern()
 {
     AlienImGui::Text("Security information");
     AlienImGui::HelpMarker("The data transfer to the server is encrypted via https. On the server side, the email address is not stored in cleartext, but "
@@ -59,12 +53,12 @@ void _CreateUserDialog::processIntern()
     }
 }
 
-void _CreateUserDialog::onCreateUser()
+void CreateUserDialog::onCreateUser()
 {
-    if (NetworkService::createUser(_userName, _password, _email)) {
-        _activateUserDialog->open(_userName, _password, _userInfo);
+    if (NetworkService::get().createUser(_userName, _password, _email)) {
+        ActivateUserDialog::get().open(_userName, _password, _userInfo);
     } else {
-        MessageDialog::getInstance().information(
+        GenericMessageDialog::get().information(
             "Error",
             "An error occurred on the server. This could be related to the fact that\n" ICON_FA_CARET_RIGHT
             " your user name or email address is already in use,\n" ICON_FA_CARET_RIGHT " or your user "

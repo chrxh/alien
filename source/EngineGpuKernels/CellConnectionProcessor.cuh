@@ -6,7 +6,7 @@
 #include "ConstantMemory.cuh"
 #include "SpotCalculator.cuh"
 #include "ObjectFactory.cuh"
-#include "ParticleProcessor.cuh"
+#include "RadiationProcessor.cuh"
 
 class CellConnectionProcessor
 {
@@ -153,7 +153,7 @@ __inline__ __device__ void CellConnectionProcessor::processDeleteCellOperations(
             Cell* empty = nullptr;
             auto origCell = alienAtomicExch(&data.objects.cellPointers.at(cellIndex), empty);
             if (origCell) {
-                ParticleProcessor::radiate(data, origCell->pos, origCell->vel, origCell->color, origCell->energy);
+                RadiationProcessor::radiate(data, origCell->pos, origCell->vel, origCell->color, origCell->energy);
 
                 for (int i = 0; i < origCell->numConnections; ++i) {
                     StructuralOperation operation;

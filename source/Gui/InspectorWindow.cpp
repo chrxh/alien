@@ -7,7 +7,7 @@
 #include <boost/range/adaptor/indexed.hpp>
 
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/SimulationController.h"
+#include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/GenomeDescriptionService.h"
 #include "EngineInterface/PreviewDescriptionService.h"
 
@@ -18,7 +18,7 @@
 #include "CellFunctionStrings.h"
 #include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
-#include "OverlayMessageController.h"
+#include "OverlayController.h"
 
 using namespace std::string_literals;
 
@@ -30,25 +30,17 @@ namespace
     auto const CellFunctionTextWidth = 195.0f;
     auto const CellFunctionDefenderWidth = 100.0f;
     auto const CellFunctionBaseTabTextWidth = 150.0f;
-    auto const ActivityTextWidth = 130.0f;
+    auto const SignalTextWidth = 130.0f;
     auto const GenomeTabTextWidth = 195.0f;
     auto const ParticleContentTextWidth = 80.0f;
 
     auto const TreeNodeFlags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_DefaultOpen;
 }
 
-_InspectorWindow::_InspectorWindow(
-    SimulationController const& simController,
-    EditorModel const& editorModel,
-    GenomeEditorWindow const& genomeEditorWindow,
-    uint64_t entityId,
-    RealVector2D const& initialPos,
-    bool selectGenomeTab)
+_InspectorWindow::_InspectorWindow(SimulationFacade const& simulationFacade, uint64_t entityId, RealVector2D const& initialPos, bool selectGenomeTab)
     : _entityId(entityId)
     , _initialPos(initialPos)
-    , _editorModel(editorModel)
-    , _simController(simController)
-    , _genomeEditorWindow(genomeEditorWindow)
+    , _simulationFacade(simulationFacade)
     , _selectGenomeTab(selectGenomeTab)
 {
 }
@@ -61,13 +53,13 @@ void _InspectorWindow::process()
         return;
     }
     auto width = calcWindowWidth();
-    auto height = isCell() ? StyleRepository::getInstance().scale(370.0f)
-                           : StyleRepository::getInstance().scale(70.0f);
-    auto borderlessRendering = _simController->getSimulationParameters().borderlessRendering;
+    auto height = isCell() ? StyleRepository::get().scale(370.0f)
+                           : StyleRepository::get().scale(70.0f);
+    auto borderlessRendering = _simulationFacade->getSimulationParameters().borderlessRendering;
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::SetNextWindowSize({width, height}, ImGuiCond_Appearing);
     ImGui::SetNextWindowPos({_initialPos.x, _initialPos.y}, ImGuiCond_Appearing);
-    auto entity = _editorModel->getInspectedEntity(_entityId);
+    auto entity = EditorModel::get().getInspectedEntity(_entityId);
     if (ImGui::Begin(generateTitle().c_str(), &_on, ImGuiWindowFlags_HorizontalScrollbar)) {
         auto windowPos = ImGui::GetWindowPos();
         if (isCell()) {
@@ -76,8 +68,8 @@ void _InspectorWindow::process()
             processParticle(std::get<ParticleDescription>(entity));
         }
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        auto entityPos = Viewport::mapWorldToViewPosition(DescriptionEditService::getPos(entity), borderlessRendering);
-        auto factor = StyleRepository::getInstance().scale(1);
+        auto entityPos = Viewport::get().mapWorldToViewPosition(DescriptionEditService::get().getPos(entity), borderlessRendering);
+        auto factor = StyleRepository::get().scale(1);
 
         drawList->AddLine(
             {windowPos.x + 15.0f * factor, windowPos.y - 5.0f * factor},
@@ -113,13 +105,13 @@ uint64_t _InspectorWindow::getId() const
 
 bool _InspectorWindow::isCell() const
 {
-    auto entity = _editorModel->getInspectedEntity(_entityId);
+    auto entity = EditorModel::get().getInspectedEntity(_entityId);
     return std::holds_alternative<CellDescription>(entity);
 }
 
 std::string _InspectorWindow::generateTitle() const
 {
-    auto entity = _editorModel->getInspectedEntity(_entityId);
+    auto entity = EditorModel::get().getInspectedEntity(_entityId);
     std::stringstream ss;
     if (isCell()) {
         ss << "Cell #" << std::hex << std::uppercase << _entityId;
@@ -144,12 +136,12 @@ void _InspectorWindow::processCell(CellDescription cell)
             processCellGenomeTab(std::get<InjectorDescription>(*cell.cellFunction));
         }
         processCellMetadataTab(cell);
-        validationAndCorrection(cell);
+        validateAndCorrect(cell);
 
         ImGui::EndTabBar();
 
         if (cell != origCell) {
-            _simController->changeCell(cell);
+            _simulationFacade->changeCell(cell);
         }
     }
 }
@@ -292,17 +284,17 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                     AlienImGui::ComboParameters()
                         .name("Living state")
                         .textWidth(CellFunctionBaseTabTextWidth)
-                        .values({"Ready", "Under construction", "Activating", "Dying"})
+                        .values({"Ready", "Under construction", "Activating", "Detached", "Reviving", "Dying"})
                         .tooltip(Const::CellLivingStateTooltip),
                     cell.livingState);
                 ImGui::TreePop();
             }
         }
-        if (ImGui::TreeNodeEx("Activity states", TreeNodeFlags)) {
+        if (ImGui::TreeNodeEx("Signals", TreeNodeFlags)) {
             int index = 0;
-            for (auto& channel : cell.activity.channels) {
+            for (auto& channel : cell.signal.channels) {
                 AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters().name("Channel #" + std::to_string(index)).format("%.3f").step(0.1f).textWidth(ActivityTextWidth),
+                    AlienImGui::InputFloatParameters().name("Channel #" + std::to_string(index)).format("%.3f").step(0.1f).textWidth(SignalTextWidth),
                     channel);
                 ++index;
             }
@@ -367,7 +359,7 @@ void _InspectorWindow::processCellFunctionPropertiesTab(CellDescription& cell)
 template <typename Description>
 void _InspectorWindow::processCellGenomeTab(Description& desc)
 {
-    auto const& parameters = _simController->getSimulationParameters();
+    auto const& parameters = _simulationFacade->getSimulationParameters();
 
     int flags = ImGuiTabItemFlags_None;
     if (_selectGenomeTab) {
@@ -381,20 +373,20 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
             AlienImGui::HelpMarker(Const::GenomePreviewTooltip);
             if (previewNodeResult) {
                 if (ImGui::BeginChild("##child", ImVec2(0, scale(200)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
-                    auto genomDesc = GenomeDescriptionService::convertBytesToDescription(desc.genome);
-                    auto previewDesc = PreviewDescriptionService::convert(genomDesc, std::nullopt, parameters);
+                    auto genomDesc = GenomeDescriptionService::get().convertBytesToDescription(desc.genome);
+                    auto previewDesc = PreviewDescriptionService::get().convert(genomDesc, std::nullopt, parameters);
                     std::optional<int> selectedNodeDummy;
                     AlienImGui::ShowPreviewDescription(previewDesc, _genomeZoom, selectedNodeDummy);
                 }
                 ImGui::EndChild();
                 if (AlienImGui::Button("Edit")) {
-                    _genomeEditorWindow->openTab(GenomeDescriptionService::convertBytesToDescription(desc.genome));
+                    GenomeEditorWindow::get().openTab(GenomeDescriptionService::get().convertBytesToDescription(desc.genome));
                 }
 
                 ImGui::SameLine();
                 if (AlienImGui::Button(AlienImGui::ButtonParameters().buttonText("Inject from editor").textWidth(ImGui::GetContentRegionAvail().x))) {
                     printOverlayMessage("Genome injected");
-                    desc.genome = GenomeDescriptionService::convertDescriptionToBytes(_genomeEditorWindow->getCurrentGenome());
+                    desc.genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeEditorWindow::get().getCurrentGenome());
                     if constexpr (std::is_same<Description, ConstructorDescription>()) {
                         desc.genomeCurrentNodeIndex = 0;
                         desc.setNumInheritedGenomeNodes(0);
@@ -404,7 +396,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
             }
 
             if (ImGui::TreeNodeEx("Properties (entire genome)", TreeNodeFlags)) {
-                auto numNodes = toInt(GenomeDescriptionService::getNumNodesRecursively(desc.genome, true));
+                auto numNodes = toInt(GenomeDescriptionService::get().getNumNodesRecursively(desc.genome, true));
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters()
                         .name("Number of cells")
@@ -430,7 +422,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
 
             if (ImGui::TreeNodeEx("Properties (principal genome part)", TreeNodeFlags)) {
 
-                auto genomeDesc = GenomeDescriptionService::convertBytesToDescription(desc.genome);
+                auto genomeDesc = GenomeDescriptionService::get().convertBytesToDescription(desc.genome);
                 auto numBranches= genomeDesc.header.numBranches;
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters()
@@ -549,10 +541,6 @@ void _InspectorWindow::processConstructorContent(ConstructorDescription& constru
                 AlienImGui::InputIntParameters().name("Interval").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip),
                 constructor.activationMode);
         }
-        //AlienImGui::AngleAlignmentCombo(
-        //    AlienImGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(CellFunctionTextWidth), constructor.angleAlignment);
-        //AlienImGui::InputFloat(
-        //    AlienImGui::InputFloatParameters().name("Offspring stiffness").format("%.2f").step(0.1f).textWidth(CellFunctionTextWidth), constructor.stiffness);
         AlienImGui::InputInt(
             AlienImGui::InputIntParameters()
                 .name("Offspring activation time")
@@ -655,36 +643,13 @@ void _InspectorWindow::processMuscleContent(MuscleDescription& muscle)
 void _InspectorWindow::processSensorContent(SensorDescription& sensor)
 {
     if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
-        int mode = sensor.getSensorMode();
-        if (AlienImGui::Combo(
-                AlienImGui::ComboParameters()
-                    .name("Mode")
-                    .values({"Scan vicinity", "Scan specific direction"})
-                    .textWidth(CellFunctionTextWidth)
-                    .tooltip(Const::GenomeSensorModeTooltip),
-                mode)) {
-            if (mode == SensorMode_Neighborhood) {
-                sensor.fixedAngle.reset();
-            } else {
-                sensor.fixedAngle = 0.0f;
-            }
-        }
-        if (sensor.fixedAngle) {
-            AlienImGui::InputFloat(
-                AlienImGui::InputFloatParameters()
-                    .name("Scan angle")
-                    .format("%.1f")
-                    .textWidth(CellFunctionTextWidth)
-                    .tooltip(Const::GenomeSensorScanAngleTooltip),
-                *sensor.fixedAngle);
-        }
         AlienImGui::ComboOptionalColor(
             AlienImGui::ComboColorParameters().name("Scan color").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeSensorScanColorTooltip), sensor.restrictToColor);
 
         AlienImGui::Combo(
             AlienImGui::ComboParameters()
                 .name("Scan mutants")
-                .values({"None", "Same mutants", "Other mutants", "Emergent cells", "Handcrafted constructs", "Less complex mutants", "More complex mutants"})
+                .values({"None", "Same mutants", "Other mutants", "Free cells", "Handcrafted cells", "Less complex mutants", "More complex mutants"})
                 .textWidth(CellFunctionTextWidth)
                 .tooltip(Const::SensorRestrictToMutantsTooltip),
             sensor.restrictToMutants);
@@ -713,7 +678,7 @@ void _InspectorWindow::processReconnectorContent(ReconnectorDescription& reconne
         AlienImGui::Combo(
             AlienImGui::ComboParameters()
                 .name("Restrict to mutants")
-                .values({"None", "Same mutants", "Other mutants", "Emergent cells", "Handcrafted constructs", "Less complex mutants", "More complex mutants"})
+                .values({"None", "Same mutants", "Other mutants", "Free cells", "Handcrafted cells", "Less complex mutants", "More complex mutants"})
                 .textWidth(CellFunctionTextWidth)
                 .tooltip(Const::ReconnectorRestrictToMutantsTooltip),
             reconnector.restrictToMutants);
@@ -748,22 +713,22 @@ void _InspectorWindow::processParticle(ParticleDescription particle)
 
     particle.energy = energy;
     if (particle != origParticle) {
-        _simController->changeParticle(particle);
+        _simulationFacade->changeParticle(particle);
     }
 }
 
 float _InspectorWindow::calcWindowWidth() const
 {
     if (isCell()) {
-        return StyleRepository::getInstance().scale(CellWindowWidth);
+        return StyleRepository::get().scale(CellWindowWidth);
     } else {
-        return StyleRepository::getInstance().scale(ParticleWindowWidth);
+        return StyleRepository::get().scale(ParticleWindowWidth);
     }
 }
 
-void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
+void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
 {
-    auto const& parameters = _simController->getSimulationParameters();
+    auto const& parameters = _simulationFacade->getSimulationParameters();
 
     cell.maxConnections = (cell.maxConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
     cell.executionOrderNumber = (cell.executionOrderNumber + parameters.cellNumExecutionOrderNumbers) % parameters.cellNumExecutionOrderNumbers;
@@ -775,14 +740,14 @@ void _InspectorWindow::validationAndCorrection(CellDescription& cell) const
     switch (cell.getCellFunctionType()) {
     case CellFunction_Constructor: {
         auto& constructor = std::get<ConstructorDescription>(*cell.cellFunction);
-        auto numNodes = GenomeDescriptionService::convertNodeAddressToNodeIndex(constructor.genome, toInt(constructor.genome.size()));
+        auto numNodes = GenomeDescriptionService::get().convertNodeAddressToNodeIndex(constructor.genome, toInt(constructor.genome.size()));
         if (numNodes > 0) {
             constructor.genomeCurrentNodeIndex = ((constructor.genomeCurrentNodeIndex % numNodes) + numNodes) % numNodes;
         } else {
             constructor.genomeCurrentNodeIndex = 0;
         }
 
-        auto numRepetitions = GenomeDescriptionService::getNumRepetitions(constructor.genome);
+        auto numRepetitions = GenomeDescriptionService::get().getNumRepetitions(constructor.genome);
         if (numRepetitions != std::numeric_limits<int>::max()) {
             constructor.genomeCurrentRepetition = ((constructor.genomeCurrentRepetition % numRepetitions) + numRepetitions) % numRepetitions;
         } else {

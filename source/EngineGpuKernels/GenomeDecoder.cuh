@@ -52,6 +52,8 @@ public:
     __inline__ __device__ static int getNextExecutionNumber(uint8_t* genome, int nodeAddress);
     __inline__ __device__ static int getNextInputExecutionNumber(uint8_t* genome, int nodeAddress);
     __inline__ __device__ static void setNextCellFunctionType(uint8_t* genome, int nodeAddress, CellFunction cellFunction);
+    __inline__ __device__ static void setNextCellSelfReplication(uint8_t* genome, int nodeAddress, bool value);
+    __inline__ __device__ static void setNextCellSubgenomeSize(uint8_t* genome, int nodeAddress, int size);
     __inline__ __device__ static void setNextCellColor(uint8_t* genome, int nodeAddress, int color);
     __inline__ __device__ static void setNextInputExecutionNumber(uint8_t* genome, int nodeAddress, int value);
     __inline__ __device__ static void setNextOutputBlocked(uint8_t* genome, int nodeAddress, bool value);
@@ -61,9 +63,10 @@ public:
     __inline__ __device__ static void setNextConstructionAngle2(uint8_t* genome, int nodeAddress, uint8_t angle);
     __inline__ __device__ static void setNextConstructorSeparation(uint8_t* genome, int nodeAddress, bool separation);
     __inline__ __device__ static void setNextConstructorNumBranches(uint8_t* genome, int nodeAddress, int numBranches);
+    __inline__ __device__ static void setNextConstructorNumRepetitions(uint8_t* genome, int nodeAddress, int numRepetitions);
     __inline__ __device__ static bool containsSectionSelfReplication(uint8_t* genome, int genomeSize);
-    __inline__ __device__ static void
-    setRandomCellFunctionData(SimulationData& data, uint8_t* genome, int nodeAddress, CellFunction const& cellFunction, bool makeSelfCopy, int subGenomeSize);
+    __inline__ __device__ static int getNodeAddressForSelfReplication(uint8_t* genome, int genomeSize, bool& containsSelfReplicator);
+    __inline__ __device__ static void setRandomCellFunctionData(SimulationData& data, uint8_t* genome, int nodeAddress, CellFunction const& cellFunction, bool makeSelfCopy, int subGenomeSize);
     __inline__ __device__ static int getCellFunctionDataSize(
         CellFunction cellFunction,
         bool makeSelfCopy,
@@ -114,7 +117,7 @@ __inline__ __device__ void GenomeDecoder::executeForEachNode(uint8_t* genome, in
 template <typename Func>
 __inline__ __device__ void GenomeDecoder::executeForEachNodeRecursively(uint8_t* genome, int genomeSize, bool includedSeparatedParts, bool countBranches, Func func)
 {
-    CHECK(genomeSize >= Const::GenomeHeaderSize)
+    CUDA_CHECK(genomeSize >= Const::GenomeHeaderSize)
 
     int subGenomeEndAddresses[MAX_SUBGENOME_RECURSION_DEPTH];
     int subGenomeNumRepetitions[MAX_SUBGENOME_RECURSION_DEPTH + 1];
@@ -192,7 +195,7 @@ __inline__ __device__ int GenomeDecoder::getRandomGenomeNodeAddress(
     if (numSubGenomesSizeIndices) {
         *numSubGenomesSizeIndices = 0;
     }
-    CHECK(genomeSize >= Const::GenomeHeaderSize)
+    CUDA_CHECK(genomeSize >= Const::GenomeHeaderSize)
 
     if (genomeSize == Const::GenomeHeaderSize) {
         return Const::GenomeHeaderSize;
@@ -327,8 +330,8 @@ __inline__ __device__ bool GenomeDecoder::hasInfiniteRepetitions(ConstructorFunc
 __inline__ __device__ bool GenomeDecoder::hasEmptyGenome(ConstructorFunction const& constructor)
 {
     if (constructor.genomeSize <= Const::GenomeHeaderSize) {
-        CHECK(constructor.genomeSize == Const::GenomeHeaderSize)
-        CHECK(constructor.genomeCurrentNodeIndex == 0)
+        CUDA_CHECK(constructor.genomeSize == Const::GenomeHeaderSize)
+        CUDA_CHECK(constructor.genomeCurrentNodeIndex == 0)
         return true;
     }
     return false;
@@ -400,7 +403,7 @@ __inline__ __device__ bool GenomeDecoder::containsSelfReplication(ConstructorOrI
 
 __inline__ __device__ GenomeHeader GenomeDecoder::readGenomeHeader(ConstructorFunction const& constructor)
 {
-    CHECK(constructor.genomeSize >= Const::GenomeHeaderSize)
+    CUDA_CHECK(constructor.genomeSize >= Const::GenomeHeaderSize)
 
     GenomeHeader result;    
     result.shape = constructor.genome[Const::GenomeHeaderShapePos] % ConstructionShape_Count;
@@ -615,6 +618,31 @@ __inline__ __device__ void GenomeDecoder::setNextCellFunctionType(uint8_t* genom
     genome[nodeAddress] = static_cast<uint8_t>(cellFunction);
 }
 
+__inline__ __device__ void GenomeDecoder::setNextCellSelfReplication(uint8_t* genome, int nodeAddress, bool value)
+{
+    switch (getNextCellFunctionType(genome, nodeAddress)) {
+    case CellFunction_Constructor: {
+        genome[nodeAddress + Const::CellBasicBytes + Const::ConstructorFixedBytes] = GenomeDecoder::convertBoolToByte(value);
+    } break;
+    case CellFunction_Injector: {
+        genome[nodeAddress + Const::CellBasicBytes + Const::InjectorFixedBytes] = GenomeDecoder::convertBoolToByte(value);
+    } break;
+    }
+}
+
+__inline__ __device__ void GenomeDecoder::setNextCellSubgenomeSize(uint8_t* genome, int nodeAddress, int size)
+{
+    
+    switch (getNextCellFunctionType(genome, nodeAddress)) {
+    case CellFunction_Constructor: {
+        GenomeDecoder::writeWord(genome, nodeAddress + Const::CellBasicBytes + Const::ConstructorFixedBytes + 1, size);
+    } break;
+    case CellFunction_Injector: {
+        GenomeDecoder::writeWord(genome, nodeAddress + Const::CellBasicBytes + Const::InjectorFixedBytes + 1, size);
+    } break;
+    }
+}
+
 __inline__ __device__ void GenomeDecoder::setNextCellColor(uint8_t* genome, int nodeAddress, int color)
 {
     genome[nodeAddress + Const::CellColorPos] = color;
@@ -658,6 +686,11 @@ __inline__ __device__ void GenomeDecoder::setNextConstructorSeparation(uint8_t* 
 __inline__ __device__ void GenomeDecoder::setNextConstructorNumBranches(uint8_t* genome, int nodeAddress, int numBranches)
 {
     genome[nodeAddress + Const::CellBasicBytes + Const::ConstructorFixedBytes + 3 + Const::GenomeHeaderNumBranchesPos] = static_cast<uint8_t>(numBranches);
+}
+
+__inline__ __device__ void GenomeDecoder::setNextConstructorNumRepetitions(uint8_t* genome, int nodeAddress, int numRepetitions)
+{
+    genome[nodeAddress + Const::CellBasicBytes + Const::ConstructorFixedBytes + 3 + Const::GenomeHeaderNumRepetitionsPos] = static_cast<uint8_t>(numRepetitions);
 }
 
 __inline__ __device__ int GenomeDecoder::getNextSubGenomeSize(uint8_t* genome, int genomeSize, int nodeAddress)
@@ -711,4 +744,18 @@ __inline__ __device__ bool GenomeDecoder::containsSectionSelfReplication(uint8_t
     }
 
     return false;
+}
+
+__inline__ __device__ int GenomeDecoder::getNodeAddressForSelfReplication(uint8_t* genome, int genomeSize, bool& containsSelfReplicator)
+{
+    int nodeAddress = 0;
+    for (; nodeAddress < genomeSize;) {
+        if (isNextCellSelfReplication(genome, nodeAddress)) {
+            containsSelfReplicator = true;
+            return nodeAddress;
+        }
+        nodeAddress += Const::CellBasicBytes + getNextCellFunctionDataSize(genome, genomeSize, nodeAddress);
+    }
+    containsSelfReplicator = false;
+    return 0;
 }

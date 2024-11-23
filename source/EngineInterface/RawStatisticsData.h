@@ -3,7 +3,6 @@
 #include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/Colors.h"
 
-
 struct TimestepStatistics
 {
     ColorVector<int> numCells = {0, 0, 0, 0, 0, 0, 0};
@@ -14,6 +13,8 @@ struct TimestepStatistics
     ColorVector<int> numParticles = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<uint64_t> numGenomeCells = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> genomeComplexity = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> maxGenomeComplexityOfColonies = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<double> genomeComplexityVariance = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> totalEnergy = {0, 0, 0, 0, 0, 0, 0};
 };
 
@@ -52,4 +53,13 @@ struct RawStatisticsData
 {
     TimelineStatistics timeline;
     HistogramData histogram;
+};
+
+inline double sumColorVector(ColorVector<double> const& v)
+{
+    auto result = 0.0;
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        result += v[i];
+    }
+    return result;
 };

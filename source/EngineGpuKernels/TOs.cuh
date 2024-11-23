@@ -5,6 +5,7 @@
 
 #include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/CellFunctionConstants.h"
+#include "EngineInterface/ArraySizes.h"
 
 struct ParticleTO
 {
@@ -33,10 +34,10 @@ struct ConnectionTO
     float angleFromPrevious;
 };
 
-struct ActivityTO
+struct SignalTO
 {
     float channels[MAX_CHANNELS];
-    ActivityOrigin origin;
+    SignalOrigin origin;
     float targetX;
     float targetY;
 };
@@ -76,8 +77,6 @@ struct ConstructorTO
 
 struct SensorTO
 {
-    SensorMode mode;
-    float angle;
     float minDensity;
     int8_t minRange;          //< 0 = no restriction
     int8_t maxRange;          //< 0 = no restriction
@@ -88,8 +87,8 @@ struct SensorTO
     float memoryChannel1;
     float memoryChannel2;
     float memoryChannel3;
-    float targetX;
-    float targetY;
+    float memoryTargetX;
+    float memoryTargetY;
 };
 
 struct NerveTO
@@ -118,6 +117,10 @@ struct MuscleTO
     MuscleBendingDirection lastBendingDirection;
     uint8_t lastBendingSourceIndex;
     float consecutiveBendingAngle;
+
+    //additional rendering data
+    float lastMovementX;
+    float lastMovementY;
 };
 
 struct DefenderTO
@@ -179,9 +182,9 @@ struct CellTO
     bool outputBlocked;
     CellFunction cellFunction;
     CellFunctionTO cellFunctionData;
-    ActivityTO activity;
+    SignalTO signal;
     uint32_t activationTime;
-    uint8_t detectedByCreatureId;  //only the first 8 bits from the creature id
+    uint16_t detectedByCreatureId;  //only the first 16 bits from the creature id
     CellFunctionUsed cellFunctionUsed;
 
     CellMetadataTO metadata;
@@ -197,6 +200,29 @@ struct DataTO
 	ParticleTO* particles = nullptr;
     uint64_t* numAuxiliaryData = nullptr;
     uint8_t* auxiliaryData = nullptr;
+
+    void init(ArraySizes arraySizes)
+    {
+        numCells = new uint64_t;
+        numParticles = new uint64_t;
+        numAuxiliaryData = new uint64_t;
+        *numCells = 0;
+        *numParticles = 0;
+        *numAuxiliaryData = 0;
+        cells = new CellTO[arraySizes.cellArraySize];
+        particles = new ParticleTO[arraySizes.particleArraySize];
+        auxiliaryData = new uint8_t[arraySizes.auxiliaryDataSize];
+    }
+
+    void destroy()
+    {
+        delete numCells;
+        delete numParticles;
+        delete numAuxiliaryData;
+        delete[] cells;
+        delete[] particles;
+        delete[] auxiliaryData;
+    }
 
 	bool operator==(DataTO const& other) const
 	{
