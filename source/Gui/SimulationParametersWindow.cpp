@@ -220,7 +220,7 @@ void SimulationParametersWindow::processBase()
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
             /**
-             * Rendering
+             * General
              */
             if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("General"))) {
                 AlienImGui::InputText(
@@ -322,6 +322,13 @@ void SimulationParametersWindow::processBase()
                         .defaultValue(origParameters.markReferenceDomain)
                         .tooltip("Draws borders along the world before it repeats itself."),
                     parameters.markReferenceDomain);
+                AlienImGui::Checkbox(
+                    AlienImGui::CheckboxParameters()
+                        .name("Show radiation sources")
+                        .textWidth(RightColumnWidth)
+                        .defaultValue(origParameters.showRadiationSources)
+                        .tooltip("Draws red crosses in the center of radiation sources."),
+                    parameters.showRadiationSources);
                 AlienImGui::EndTreeNode();
             }
 
