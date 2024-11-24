@@ -379,7 +379,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     if (!constructionData.isLastNodeOfLastRepetition || !constructionData.genomeHeader.separateConstruction) {
         auto distance = constructionData.isLastNodeOfLastRepetition && !constructionData.genomeHeader.separateConstruction
             ? constructionData.genomeHeader.connectionDistance
-            : constructionData.genomeHeader.connectionDistance + 0.6f;
+            : constructionData.genomeHeader.connectionDistance + 0.8f;
         if(!CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance)) {
             CellConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
         }
@@ -486,7 +486,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
         //move connection between lastConstructionCell and hostCell to a connection between newCell and hostCell
         auto distance = constructionData.isLastNodeOfLastRepetition && !constructionData.genomeHeader.separateConstruction
             ? constructionData.genomeHeader.connectionDistance
-            : constructionData.genomeHeader.connectionDistance + 0.6f;
+            : constructionData.genomeHeader.connectionDistance + 0.8f;
         for (int i = 0; i < hostCell->numConnections; ++i) {
             auto& connectedCell = hostCell->connections[i];
             if (connectedCell.cell == constructionData.lastConstructionCell) {
