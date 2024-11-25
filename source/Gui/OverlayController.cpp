@@ -91,12 +91,12 @@ void OverlayController::processProgressAnimation()
         auto center = ImVec2{viewSize.x / 2, viewSize.y - scale(60.0f)};
 
         drawList->AddRectFilledMultiColor(
-            ImVec2{center.x - width, center.y - height * 5},
-            ImVec2{center.x, center.y + height},
+            ImVec2{center.x, center.y - height * 5},
+            ImVec2{center.x - width, center.y + height},
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f),
+            ImColor::HSV(0.66f, 1.0f, 0.1f,0.0f),
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f),
-            ImColor::HSV(0.66f, 1.0f, 0.1f, 1.0f * alpha),
-            ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f));
+            ImColor::HSV(0.66f, 1.0f, 0.1f, 1.0f * alpha));
         drawList->AddRectFilledMultiColor(
             ImVec2{center.x, center.y - height * 5},
             ImVec2{center.x + width, center.y + height},
@@ -105,10 +105,10 @@ void OverlayController::processProgressAnimation()
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f),
             ImColor::HSV(0.66f, 1.0f, 0.1f, 1.0f * alpha));
         drawList->AddRectFilledMultiColor(
-            ImVec2{center.x, center.y + height},
-            ImVec2{center.x + width, center.y + height * 6},
-            ImColor::HSV(0.66f, 1.0f, 0.1f, 1.0f * alpha),
+            ImVec2{center.x + width, center.y + height},
+            ImVec2{center.x, center.y + height * 6},
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f),
+            ImColor::HSV(0.66f, 1.0f, 0.1f, 1.0f * alpha),
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f),
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f));
         drawList->AddRectFilledMultiColor(

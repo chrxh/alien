@@ -1346,6 +1346,7 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
     auto result = false;
 
     auto color = ImGui::GetStyle().Colors[ImGuiCol_WindowBg];
+    auto windowPos = ImGui::GetWindowPos();
     auto windowSize = ImGui::GetWindowSize();
 
     RealVector2D upperLeft;
@@ -1366,6 +1367,9 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
     }
     RealVector2D previewSize = (lowerRight - upperLeft) * cellSize + RealVector2D(cellSize, cellSize) * 2;
 
+    auto mousePos = ImGui::GetMousePos();
+    auto clickedOnPreviewWindow = ImGui::IsMouseClicked(ImGuiMouseButton_Left) && mousePos.x >= windowPos.x && mousePos.y >= windowPos.y
+        && mousePos.x <= windowPos.x + windowSize.x && mousePos.y <= windowPos.y + windowSize.y;
     ImGui::SetCursorPos({std::max(0.0f, windowSize.x - previewSize.x) / 2, std::max(0.0f, windowSize.y - previewSize.y) / 2});
     if (ImGui::BeginChild("##genome", ImVec2(previewSize.x, previewSize.y), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
@@ -1396,8 +1400,7 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
                 }
             }
 
-            if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                auto mousePos = ImGui::GetMousePos();
+            if (clickedOnPreviewWindow) {
                 if (mousePos.x >= cellPos.x - cellSize / 2 && mousePos.y >= cellPos.y - cellSize / 2 && mousePos.x <= cellPos.x + cellSize / 2
                     && mousePos.y <= cellPos.y + cellSize / 2) {
                     selectedNode = cell.nodeIndex;
