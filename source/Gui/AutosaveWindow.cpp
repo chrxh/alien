@@ -168,10 +168,14 @@ void AutosaveWindow::processTable()
                 // project name
                 ImGui::TableNextColumn();
                 if (entry->state == SavepointState_InQueue) {
+                    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextLightDecentColor.Value);
                     AlienImGui::Text("In queue");
+                    ImGui::PopStyleColor();
                 }
                 if (entry->state == SavepointState_InProgress) {
+                    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextLightDecentColor.Value);
                     AlienImGui::Text("In progress");
+                    ImGui::PopStyleColor();
                 }
                 if (entry->state == SavepointState_Persisted) {
                     auto triggerLoadSavepoint = AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_DOWNLOAD));
@@ -215,7 +219,7 @@ void AutosaveWindow::processTable()
 
                 if (!entry->peakType.empty()) {
                     ImGui::SameLine();
-                    ImGui::PushStyleColor(ImGuiCol_Text, Const::BrowserResourcePropertiesTextColor.Value);
+                    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextLightDecentColor.Value);
                     AlienImGui::Text(" (" + entry->peakType + ")");
                     ImGui::PopStyleColor();
                 }
