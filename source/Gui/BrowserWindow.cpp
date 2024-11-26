@@ -786,7 +786,7 @@ bool BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeTO
         result |= processFolderTreeSymbols(treeTO, collapsedFolderNames);
         processShortenedText(treeTO->folderNames.back());
         ImGui::SameLine();
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserResourcePropertiesTextColor);
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextLightDecentColor);
         std::string resourceTypeString = [&] {
             if (treeTO->type == NetworkResourceType_Simulation) {
                 return folder.numLeafs == 1 ? "sim" : "sims";
@@ -884,7 +884,7 @@ void BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
 
         auto pos = ImGui::GetCursorScreenPos();
         ImGui::SetCursorScreenPos({pos.x + scale(3.0f), pos.y});
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::BrowserResourcePropertiesTextColor);
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextLightDecentColor);
         AlienImGui::Text("(" + std::to_string(folder.numReactions) + ")");
         ImGui::PopStyleColor();
     }

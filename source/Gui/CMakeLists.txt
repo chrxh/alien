@@ -111,6 +111,8 @@ PUBLIC
     SimulationInteractionController.h
     SimulationParametersWindow.cpp
     SimulationParametersWindow.h
+    SimulationParametersWindowPrototype.cpp
+    SimulationParametersWindowPrototype.h
     SimulationScrollbar.cpp
     SimulationScrollbar.h
     SimulationView.cpp

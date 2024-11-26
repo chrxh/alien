@@ -57,6 +57,7 @@
 #include "EditorController.h"
 #include "ExitDialog.h"
 #include "FileTransferController.h"
+#include "SimulationParametersWindowPrototype.h"
 
 namespace
 {
@@ -426,6 +427,14 @@ void MainLoopController::processMenubar()
         [&] { SimulationParametersWindow::get().setOn(!SimulationParametersWindow::get().isOn()); });
     AlienImGui::MenuItem(
         AlienImGui::MenuItemParameters()
+            .name("Simulation parameters (new)")
+            .keyAlt(true)
+            .key(ImGuiKey_6)
+            .selected(SimulationParametersWindowPrototype::get().isOn())
+            .closeMenuWhenItemClicked(false),
+        [&] { SimulationParametersWindowPrototype::get().setOn(!SimulationParametersWindowPrototype::get().isOn()); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
             .name("Radiation sources")
             .keyAlt(true)
             .key(ImGuiKey_5)
@@ -436,7 +445,7 @@ void MainLoopController::processMenubar()
         AlienImGui::MenuItemParameters()
             .name("Shader parameters")
             .keyAlt(true)
-            .key(ImGuiKey_6)
+//            .key(ImGuiKey_6)
             .selected(ShaderWindow::get().isOn())
             .closeMenuWhenItemClicked(false),
         [&] { ShaderWindow::get().setOn(!ShaderWindow::get().isOn()); });
