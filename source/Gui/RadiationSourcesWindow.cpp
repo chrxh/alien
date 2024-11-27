@@ -220,7 +220,9 @@ bool RadiationSourcesWindow::processSourceTab(int index)
     }
 
     if (parameters != lastParameters) {
-        _simulationFacade->setSimulationParameters(parameters);
+        auto isRunning = _simulationFacade->isSimulationRunning();
+        _simulationFacade->setSimulationParameters(
+            parameters, isRunning ? SimulationParametersUpdateConfig::AllExceptChangingPositions : SimulationParametersUpdateConfig::All);
     }
 
     return isOpen;
