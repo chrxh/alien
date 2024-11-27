@@ -2353,7 +2353,7 @@ void SimulationParametersWindow::processAddonList()
     if (_featureListOpen) {
         ImGui::Spacing();
         ImGui::Spacing();
-        AlienImGui::MovableSeparator(_featureListHeight);
+        AlienImGui::MovableSeparator(AlienImGui::MovableSeparatorParameters().additive(false), _featureListHeight);
     } else {
         AlienImGui::Separator();
     }

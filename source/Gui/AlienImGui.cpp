@@ -1029,11 +1029,15 @@ void AlienImGui::Separator()
     ImGui::Spacing();
 }
 
-void AlienImGui::MovableSeparator(float& height)
+void AlienImGui::MovableSeparator(MovableSeparatorParameters const& parameters, float& height)
 {
     ImGui::Button("##MovableSeparator", ImVec2(-1, scale(5.0f)));
     if (ImGui::IsItemActive()) {
-        height -= ImGui::GetIO().MouseDelta.y;
+        if (parameters._additive) {
+            height += ImGui::GetIO().MouseDelta.y;
+        } else {
+            height -= ImGui::GetIO().MouseDelta.y;
+        }
     }
 }
 

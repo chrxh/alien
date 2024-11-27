@@ -29,6 +29,7 @@ namespace
     auto constexpr RightColumnWidthTimeline = 150.0f;
     auto constexpr RightColumnWidthTable = 200.0f;
     auto constexpr LiveStatisticsDeltaTime = 50;  //in millisec
+    auto constexpr SettingsHeight = 130.0f;
 }
 
 void StatisticsWindow::initIntern(SimulationFacade simulationFacade)
@@ -41,7 +42,7 @@ void StatisticsWindow::initIntern(SimulationFacade simulationFacade)
     }
     _startingPath = GlobalSettings::get().getValue("windows.statistics.starting path", path.string());
     _settingsOpen = GlobalSettings::get().getValue("windows.statistics.settings.open", _settingsOpen);
-    _settingsHeight = GlobalSettings::get().getValue("windows.statistics.settings.height", _settingsHeight);
+    _settingsHeight = GlobalSettings::get().getValue("windows.statistics.settings.height", scale(SettingsHeight));
     _plotHeight = GlobalSettings::get().getValue("windows.statistics.plot height", _plotHeight);
     _plotMode = GlobalSettings::get().getValue("windows.statistics.mode", _plotMode);
     _timeHorizonForLiveStatistics = GlobalSettings::get().getValue("windows.statistics.live horizon", _timeHorizonForLiveStatistics);
@@ -85,7 +86,7 @@ void StatisticsWindow::shutdownIntern()
 
 void StatisticsWindow::processIntern()
 {
-    if (ImGui::BeginChild("##statistics", {0, _settingsOpen ? -scale(_settingsHeight) : -scale(50.0f)})) {
+    if (ImGui::BeginChild("##statistics", {0, _settingsOpen ? -_settingsHeight : -scale(50.0f)})) {
         if (ImGui::BeginTabBar("##Statistics", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
 
             if (ImGui::BeginTabItem("Timelines")) {
@@ -262,7 +263,7 @@ void StatisticsWindow::processSettings()
     if (_settingsOpen) {
         ImGui::Spacing();
         ImGui::Spacing();
-        AlienImGui::MovableSeparator(_settingsHeight);
+        AlienImGui::MovableSeparator(AlienImGui::MovableSeparatorParameters().additive(false), _settingsHeight);
     } else {
         AlienImGui::Separator();
     }

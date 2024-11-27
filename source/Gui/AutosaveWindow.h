@@ -48,7 +48,7 @@ private:
     PersisterFacade _persisterFacade;
 
     bool _settingsOpen = false;
-    float _settingsHeight = 130.0f;
+    float _settingsHeight = scale(130.0f);
     std::string _origDirectory;
     std::string _directory;
 
