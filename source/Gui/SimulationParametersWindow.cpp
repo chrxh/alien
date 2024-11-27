@@ -2337,7 +2337,9 @@ bool SimulationParametersWindow::processSpot(int index)
         SimulationParametersValidationService::get().validateAndCorrect(parameters);
 
         if (spot != lastSpot) {
-            _simulationFacade->setSimulationParameters(parameters, SimulationParametersUpdateConfig::AllExceptChangingPositions);
+            auto isRunning = _simulationFacade->isSimulationRunning();
+            _simulationFacade->setSimulationParameters(
+                parameters, isRunning ? SimulationParametersUpdateConfig::AllExceptChangingPositions : SimulationParametersUpdateConfig::All);
         }
 
         ImGui::EndTabItem();
