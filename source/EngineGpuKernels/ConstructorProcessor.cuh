@@ -488,10 +488,10 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
             ? constructionData.genomeHeader.connectionDistance
             : constructionData.genomeHeader.connectionDistance + 0.8f;
         for (int i = 0; i < hostCell->numConnections; ++i) {
-            auto& connectedCell = hostCell->connections[i];
-            if (connectedCell.cell == constructionData.lastConstructionCell) {
-                connectedCell.cell = newCell;
-                connectedCell.distance = distance;
+            auto& connection = hostCell->connections[i];
+            if (connection.cell == constructionData.lastConstructionCell) {
+                connection.cell = newCell;
+                connection.distance = distance;
                 newCell->numConnections = 1;
                 newCell->connections[0].cell = hostCell;
                 newCell->connections[0].distance = distance;
