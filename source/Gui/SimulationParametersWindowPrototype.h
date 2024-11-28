@@ -25,6 +25,9 @@ private:
 
     void correctLayout();
 
+    float getMasterWidgetRefHeight() const;
+    float getAddonWidgetRefHeight() const;
+
     float getMasterWidgetHeight() const;
     float getDetailWidgetHeight() const;
     float getAddonWidgetHeight() const;

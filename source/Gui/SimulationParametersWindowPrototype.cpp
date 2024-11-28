@@ -29,38 +29,17 @@ void SimulationParametersWindowPrototype::initIntern(SimulationFacade simulation
 void SimulationParametersWindowPrototype::processIntern()
 {
     processToolbar();
+
     if (ImGui::BeginChild("##content", {0, -scale(50.0f)})) {
 
-        if (ImGui::BeginChild("##masterEditor", {0, getMasterWidgetHeight()})) {
-            processMasterEditor();
-        }
-        ImGui::EndChild();
-        if (_masterOpen) {
-            ImGui::Spacing();
-            ImGui::Spacing();
-            ImGui::PushID("master");
-            AlienImGui::MovableSeparator(AlienImGui::MovableSeparatorParameters(), _masterHeight);
-            ImGui::PopID();
-        }
+        processMasterEditor();
 
-        if (ImGui::BeginChild("##detailEditor", {0, getDetailWidgetHeight()})) {
-            processDetailEditor();
-        }
-        ImGui::EndChild();
-        if (_detailOpen) {
-            ImGui::Spacing();
-            ImGui::Spacing();
-            ImGui::PushID("detail");
-            AlienImGui::MovableSeparator(AlienImGui::MovableSeparatorParameters().additive(false), _addonHeight);
-            ImGui::PopID();
-        }
+        processDetailEditor();
 
-        if (ImGui::BeginChild("##addon", {0, 0})) {
-            processAddonList();
-        }
-        ImGui::EndChild();
+        processAddonList();
     }
     ImGui::EndChild();
+
     processStatusBar();
 
     correctLayout();
@@ -108,35 +87,59 @@ void SimulationParametersWindowPrototype::processToolbar()
 
 void SimulationParametersWindowPrototype::processMasterEditor()
 {
-    if(_masterOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Region").highlighted(true).defaultOpen(_masterOpen))) {
-        ImGui::Button("Test3", ImGui::GetContentRegionAvail());
-        //if (ImGui::BeginChild("##masterChildWindow", {0, scale(_masterHeight)})) {
-        //}        
-        //ImGui::EndChild();
-        AlienImGui::EndTreeNode();
+    if (ImGui::BeginChild("##masterEditor", {0, getMasterWidgetHeight()})) {
+
+        if (_masterOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Region").highlighted(true).defaultOpen(_masterOpen))) {
+            ImGui::Button("Test3", ImGui::GetContentRegionAvail());
+            //if (ImGui::BeginChild("##masterChildWindow", {0, scale(_masterHeight)})) {
+            //}
+            //ImGui::EndChild();
+            AlienImGui::EndTreeNode();
+        }
+    }
+    ImGui::EndChild();
+    if (_masterOpen) {
+        ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::PushID("master");
+        AlienImGui::MovableSeparator(AlienImGui::MovableSeparatorParameters(), _masterHeight);
+        ImGui::PopID();
     }
 }
 
 void SimulationParametersWindowPrototype::processDetailEditor()
 {
-    if (_detailOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Parameters").highlighted(true).defaultOpen(_detailOpen))) {
-        ImGui::Button("Test2", ImGui::GetContentRegionAvail());
-        //if (ImGui::BeginChild("##detailChildWindow", {0, scale(_detailHeight)})) {
-        //}
-        //ImGui::EndChild();
-        AlienImGui::EndTreeNode();
+    if (ImGui::BeginChild("##detailEditor", {0, getDetailWidgetHeight()})) {
+        if (_detailOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Parameters").highlighted(true).defaultOpen(_detailOpen))) {
+            ImGui::Button("Test2", ImGui::GetContentRegionAvail());
+            //if (ImGui::BeginChild("##detailChildWindow", {0, scale(_detailHeight)})) {
+            //}
+            //ImGui::EndChild();
+            AlienImGui::EndTreeNode();
+        }
+    }
+    ImGui::EndChild();
+    if (_detailOpen) {
+        ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::PushID("detail");
+        AlienImGui::MovableSeparator(AlienImGui::MovableSeparatorParameters().additive(false), _addonHeight);
+        ImGui::PopID();
     }
 }
 
 void SimulationParametersWindowPrototype::processAddonList()
 {
-    if (_addonOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addons").highlighted(true).defaultOpen(_addonOpen))) {
-        ImGui::Button("Test", ImGui::GetContentRegionAvail());
-        //if (ImGui::BeginChild("##detailChildWindow", {0, scale(_detailHeight)})) {
-        //}
-        //ImGui::EndChild();
-        AlienImGui::EndTreeNode();
+    if (ImGui::BeginChild("##addon", {0, 0})) {
+        if (_addonOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addons").highlighted(true).defaultOpen(_addonOpen))) {
+            ImGui::Button("Test", ImGui::GetContentRegionAvail());
+            //if (ImGui::BeginChild("##detailChildWindow", {0, scale(_detailHeight)})) {
+            //}
+            //ImGui::EndChild();
+            AlienImGui::EndTreeNode();
+        }
     }
+    ImGui::EndChild();
 }
 
 void SimulationParametersWindowPrototype::processStatusBar()
@@ -149,46 +152,29 @@ void SimulationParametersWindowPrototype::processStatusBar()
 
 void SimulationParametersWindowPrototype::correctLayout()
 {
-    //auto windowHeight = ImGui::GetWindowSize().y;
-    //auto contentHeight = scale(50.0f) + _masterHeight + _addonHeight + scale(50.0f) + scale(90.0f) + scale(25.0f);
-    //if (contentHeight > windowHeight) {
-    //    if (_addonOpen)
+}
 
-    //    auto diff = contentHeight - windowHeight;
-    //    auto addonHeight = scale(25.0f) + std::max(0.0f, _addonHeight - scale(25.0f) - diff);
-    //    _addonHeight = addonHeight;
-    //    diff -= _addonHeight - addonHeight;
-    //    if (diff > 0) {
-    //        _masterHeight = scale(25.0f) + std::max(0.0f, _masterHeight - scale(25.0f) - diff);
-    //    }
-    //}
+float SimulationParametersWindowPrototype::getMasterWidgetRefHeight() const
+{
+    return _masterOpen ? _masterHeight : scale(25.0f);
+}
 
-    //auto windowHeight = ImGui::GetWindowSize().y;
-    //auto sumHeights = 50.0f + _masterHeight + _detailHeight + _addonHeight + 50.0f + 90.0f;
-    //if (sumHeights > windowHeight) {
-    //    printf("sumHeights: %f, windowHeight: %f\n", sumHeights, windowHeight);
-    //    auto diff = sumHeights - windowHeight;
-    //    auto factor = 1.0f - diff / (_masterHeight + _detailHeight + _addonHeight);
-    //    _masterHeight *= factor;
-    //    _detailHeight *= factor;
-    //    _addonHeight *= factor;
-    //} else {
-    //    //_addonHeight += windowHeight - sumHeights;
-    //}
+float SimulationParametersWindowPrototype::getAddonWidgetRefHeight() const
+{
+    return _addonOpen ? _addonHeight : scale(47.0f);
 }
 
 float SimulationParametersWindowPrototype::getMasterWidgetHeight() const
 {
     if (_masterOpen && !_detailOpen && !_addonOpen) {
-        return ImGui::GetContentRegionAvail().y - scale(25.0f + 47.0f);
+        return ImGui::GetContentRegionAvail().y - getDetailWidgetHeight() - getAddonWidgetRefHeight();
     }
-    return _masterOpen ? _masterHeight : scale(25.0f);
+    return getMasterWidgetRefHeight();
 }
 
 float SimulationParametersWindowPrototype::getDetailWidgetHeight() const
 {
-    auto addonHeight = _addonOpen ? _addonHeight : scale(47.0f);
-    return _detailOpen ? ImGui::GetContentRegionAvail().y - addonHeight : scale(25.0f);
+    return _detailOpen ? ImGui::GetContentRegionAvail().y - getAddonWidgetRefHeight() : scale(25.0f);
 }
 
 float SimulationParametersWindowPrototype::getAddonWidgetHeight() const
@@ -196,5 +182,5 @@ float SimulationParametersWindowPrototype::getAddonWidgetHeight() const
     if (!_masterOpen && !_detailOpen) {
         return ImGui::GetContentRegionAvail().y;
     }
-    return _addonOpen ? _addonHeight : scale(47.0f);
+    return getAddonWidgetRefHeight();
 }
