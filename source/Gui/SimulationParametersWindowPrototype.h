@@ -23,7 +23,11 @@ private:
     void processAddonList();
     void processStatusBar();
 
-    void validateAndCorrect();
+    void correctLayout();
+
+    float getMasterWidgetHeight() const;
+    float getDetailWidgetHeight() const;
+    float getAddonWidgetHeight() const;
 
 private:
     SimulationFacade _simulationFacade;
@@ -32,7 +36,6 @@ private:
     bool _detailOpen = true;
     bool _addonOpen = true;
     float _masterHeight = 0;
-    //float _detailHeight = 0;
     float _addonHeight = 0;
 
     std::optional<SimulationParameters> _copiedParameters;
