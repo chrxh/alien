@@ -33,9 +33,7 @@ void SimulationParametersWindowPrototype::processIntern()
     if (ImGui::BeginChild("##content", {0, -scale(50.0f)})) {
 
         processMasterEditor();
-
         processDetailEditor();
-
         processAddonList();
     }
     ImGui::EndChild();
@@ -90,8 +88,9 @@ void SimulationParametersWindowPrototype::processMasterEditor()
     if (ImGui::BeginChild("##masterEditor", {0, getMasterWidgetHeight()})) {
 
         if (_masterOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Region").highlighted(true).defaultOpen(_masterOpen))) {
-            ImGui::Button("Test3", ImGui::GetContentRegionAvail());
-            //if (ImGui::BeginChild("##masterChildWindow", {0, scale(_masterHeight)})) {
+            //if (ImGui::BeginChild("##masterChildWindow", {-0, -50})) {
+                processRegionTable();
+                //ImGui::Button("Test3", ImGui::GetContentRegionAvail());
             //}
             //ImGui::EndChild();
             AlienImGui::EndTreeNode();
@@ -148,6 +147,43 @@ void SimulationParametersWindowPrototype::processStatusBar()
     statusItems.emplace_back("CTRL + click on a slider to type in a precise value");
 
     AlienImGui::StatusBar(statusItems);
+}
+
+void SimulationParametersWindowPrototype::processRegionTable()
+{
+    static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
+        | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
+
+    if (ImGui::BeginTable("Region", 4, flags, ImVec2(-10, -10), 0.0f)) {
+        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
+        ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
+        ImGui::TableSetupColumn("Position", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
+        ImGui::TableSetupScrollFreeze(0, 1);
+        ImGui::TableHeadersRow();
+
+        ImGuiListClipper clipper;
+        clipper.Begin(_regions.size());
+        while (clipper.Step()) {
+            for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
+                auto const& entry = _regions.at(row);
+
+                ImGui::PushID(row);
+                ImGui::TableNextRow(0, scale(ImGui::GetTextLineHeightWithSpacing()));
+
+                // name
+                ImGui::TableNextColumn();
+
+                // type
+                ImGui::TableNextColumn();
+
+                // position
+                ImGui::TableNextColumn();
+
+                ImGui::PopID();
+            }
+        }
+        ImGui::EndTable();
+    }
 }
 
 void SimulationParametersWindowPrototype::correctLayout()

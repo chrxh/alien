@@ -442,7 +442,7 @@ void BrowserWindow::processUserList()
         ImGui::PushID("User list");
         auto& styleRepository = StyleRepository::get();
         static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
-            | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
+            | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
         AlienImGui::Group("Simulators");
         if (ImGui::BeginTable("Browser", 5, flags, ImVec2(0, 0), 0.0f)) {
@@ -545,7 +545,7 @@ void BrowserWindow::processSimulationList()
 {
     ImGui::PushID("SimulationList");
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
-        | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody
+        | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV
         | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
     if (ImGui::BeginTable("Browser", 11, flags, ImVec2(0, -scale(WorkspaceBottomSpace)), 0.0f)) {
