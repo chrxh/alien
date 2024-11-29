@@ -23,6 +23,8 @@ private:
     void processAddonList();
     void processStatusBar();
 
+    void processRegionTable();
+
     void correctLayout();
 
     float getMasterWidgetRefHeight() const;
@@ -42,4 +44,7 @@ private:
     float _addonHeight = 0;
 
     std::optional<SimulationParameters> _copiedParameters;
+
+    struct Region{};
+    std::vector<Region> _regions;
 };
