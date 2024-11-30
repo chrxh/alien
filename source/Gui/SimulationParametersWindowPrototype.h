@@ -23,7 +23,20 @@ private:
     void processAddonList();
     void processStatusBar();
 
-    void processRegionTable();
+    enum class LocationType
+    {
+        Base,
+        ParameterZone,
+        RadiationSource
+    };
+    struct Location
+    {
+        std::string name;
+        LocationType type = LocationType::ParameterZone;
+    };
+    void processLocationTable();
+
+    std::vector<Location> generateLocations() const;
 
     void correctLayout();
 
@@ -44,7 +57,4 @@ private:
     float _addonHeight = 0;
 
     std::optional<SimulationParameters> _copiedParameters;
-
-    struct Region{};
-    std::vector<Region> _regions;
 };

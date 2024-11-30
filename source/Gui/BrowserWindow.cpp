@@ -445,7 +445,7 @@ void BrowserWindow::processUserList()
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
         AlienImGui::Group("Simulators");
-        if (ImGui::BeginTable("Browser", 5, flags, ImVec2(0, 0), 0.0f)) {
+        if (ImGui::BeginTable("Browser", 5, flags, ImVec2(-1, -1), 0.0f)) {
             ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_PreferSortDescending | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
             auto isLoggedIn = NetworkService::get().getLoggedInUserName().has_value();
             ImGui::TableSetupColumn(
@@ -548,7 +548,7 @@ void BrowserWindow::processSimulationList()
         | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV
         | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    if (ImGui::BeginTable("Browser", 11, flags, ImVec2(0, -scale(WorkspaceBottomSpace)), 0.0f)) {
+    if (ImGui::BeginTable("Browser", 11, flags, ImVec2(-1, -scale(WorkspaceBottomSpace)), 0.0f)) {
         ImGui::TableSetupColumn("Simulation", ImGuiTableColumnFlags_WidthFixed, scale(210.0f), NetworkResourceColumnId_SimulationName);
         ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthFixed, scale(200.0f), NetworkResourceColumnId_Description);
         ImGui::TableSetupColumn("Reactions", ImGuiTableColumnFlags_WidthFixed, scale(140.0f), NetworkResourceColumnId_Likes);

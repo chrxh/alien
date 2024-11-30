@@ -60,6 +60,13 @@ void SimulationParametersWindowPrototype::processToolbar()
     }
     AlienImGui::Tooltip("Save simulation parameters to file");
 
+    for (int i = 0; i < 6; ++i) {
+        ImGui::SameLine();
+        if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
+        }
+        AlienImGui::Tooltip("Save simulation parameters to file");
+    }
+
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
 
@@ -87,12 +94,9 @@ void SimulationParametersWindowPrototype::processMasterEditor()
 {
     if (ImGui::BeginChild("##masterEditor", {0, getMasterWidgetHeight()})) {
 
-        if (_masterOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Region").highlighted(true).defaultOpen(_masterOpen))) {
-            //if (ImGui::BeginChild("##masterChildWindow", {-0, -50})) {
-                processRegionTable();
-                //ImGui::Button("Test3", ImGui::GetContentRegionAvail());
-            //}
-            //ImGui::EndChild();
+        if (_masterOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Location").highlighted(true).defaultOpen(_masterOpen))) {
+            processLocationTable();
+
             AlienImGui::EndTreeNode();
         }
     }
@@ -149,34 +153,48 @@ void SimulationParametersWindowPrototype::processStatusBar()
     AlienImGui::StatusBar(statusItems);
 }
 
-void SimulationParametersWindowPrototype::processRegionTable()
+void SimulationParametersWindowPrototype::processLocationTable()
 {
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
         | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    if (ImGui::BeginTable("Region", 4, flags, ImVec2(-10, -10), 0.0f)) {
+    if (ImGui::BeginTable("Location", 5, flags, ImVec2(-1, -1), 0)) {
+
+        auto regions = generateLocations();
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
         ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
         ImGui::TableSetupColumn("Position", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
+        ImGui::TableSetupColumn("Strength", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
 
         ImGuiListClipper clipper;
-        clipper.Begin(_regions.size());
+        clipper.Begin(regions.size());
         while (clipper.Step()) {
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                auto const& entry = _regions.at(row);
+                auto const& entry = regions.at(row);
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(ImGui::GetTextLineHeightWithSpacing()));
 
                 // name
                 ImGui::TableNextColumn();
+                AlienImGui::Text(entry.name);
 
                 // type
                 ImGui::TableNextColumn();
+                if (entry.type == LocationType::Base) {
+                    AlienImGui::Text("Base");
+                } else if (entry.type == LocationType::ParameterZone) {
+                    AlienImGui::Text("Parameter zone");
+                } else if (entry.type == LocationType::RadiationSource) {
+                    AlienImGui::Text("Radiation source");
+                }
 
                 // position
+                ImGui::TableNextColumn();
+
+                // strength
                 ImGui::TableNextColumn();
 
                 ImGui::PopID();
@@ -184,6 +202,22 @@ void SimulationParametersWindowPrototype::processRegionTable()
         }
         ImGui::EndTable();
     }
+}
+
+auto SimulationParametersWindowPrototype::generateLocations() const -> std::vector<Location>
+{
+    auto parameters = _simulationFacade->getSimulationParameters();
+
+    std::vector<Location> result;
+    result.emplace_back("Background", LocationType::Base);
+    for (int i = 0; i < parameters.numSpots; ++i) {
+        result.emplace_back("Test", LocationType::ParameterZone);
+    }
+    for (int i = 0; i < parameters.numRadiationSources; ++i) {
+        result.emplace_back("Test", LocationType::RadiationSource);
+    }
+
+    return result;
 }
 
 void SimulationParametersWindowPrototype::correctLayout()
