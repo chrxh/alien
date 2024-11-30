@@ -58,4 +58,5 @@ private:
     float _expertWidgetHeight = 0;
 
     std::optional<SimulationParameters> _copiedParameters;
+    std::optional<int> _selectedLocationIndex;
 };

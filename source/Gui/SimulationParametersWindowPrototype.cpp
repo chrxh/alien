@@ -135,12 +135,8 @@ void SimulationParametersWindowPrototype::processDetailEditor()
         ImGui::Spacing();
         ImGui::Spacing();
         ImGui::PushID("detail");
-        //auto origExpertWidgetHeight = _expertWidgetHeight;
         AlienImGui::MovableSeparator(AlienImGui::MovableSeparatorParameters().additive(false), _expertWidgetHeight);
         ImGui::PopID();
-        //if (height <= scale(35.0f) && _expertWidgetHeight > origExpertWidgetHeight) {
-        //    _masterHeight -= _expertWidgetHeight - origExpertWidgetHeight;
-        //}
     }
 }
 
@@ -193,6 +189,17 @@ void SimulationParametersWindowPrototype::processLocationTable()
                 // name
                 ImGui::TableNextColumn();
                 AlienImGui::Text(entry.name);
+
+                ImGui::SameLine();
+                auto selected = _selectedLocationIndex.has_value() ? _selectedLocationIndex.value() == row : false;
+                if (ImGui::Selectable(
+                        "",
+                        &selected,
+                        ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap,
+                        ImVec2(0, 0))) {
+                    _selectedLocationIndex = selected ? std::make_optional(row) : std::nullopt;
+                }
+
 
                 // type
                 ImGui::TableNextColumn();
