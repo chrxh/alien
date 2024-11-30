@@ -4,6 +4,7 @@
 
 #include "SimulationParametersSpotActivatedValues.h"
 #include "SimulationParametersSpotValues.h"
+#include "SimulationParametersTypes.h"
 
 using SpotShapeType = int;
 enum SpotShapeType_
@@ -88,6 +89,8 @@ union SpotShapeData
 
 struct SimulationParametersSpot
 {
+    Char64 name = "<unnamed>";
+
     uint32_t color = 0;
     float posX = 0;
     float posY = 0;

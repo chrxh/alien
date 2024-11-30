@@ -5,6 +5,7 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/GlobalSettings.h"
+#include "Base/StringHelper.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/SimulationParametersValidationService.h"
 #include "PersisterInterface/SerializerService.h"
@@ -104,6 +105,8 @@ SimulationParametersSpot SimulationParametersWindow::createSpot(SimulationParame
 {
     auto worldSize = _simulationFacade->getWorldSize();
     SimulationParametersSpot spot;
+    StringHelper::copy(spot.name, sizeof(spot.name), "zone");
+
     spot.posX = toFloat(worldSize.x / 2);
     spot.posY = toFloat(worldSize.y / 2);
 

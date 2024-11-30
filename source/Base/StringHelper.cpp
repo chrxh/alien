@@ -101,10 +101,9 @@ std::string StringHelper::format(std::chrono::system_clock::time_point const& ti
 void StringHelper::copy(char* target, int targetSize, std::string const& source)
 {
     auto sourceSize = source.size();
-    if (sourceSize < targetSize) {
-        source.copy(target, sourceSize);
-        target[sourceSize] = 0;
-    } else {
-        target[0] = 0;
+    if (sourceSize >= targetSize) {
+        sourceSize = targetSize - 1;
     }
+    source.copy(target, sourceSize);
+    target[sourceSize] = 0;
 }

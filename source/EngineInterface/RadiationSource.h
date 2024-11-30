@@ -1,5 +1,7 @@
 #pragma once
 
+#include "SimulationParametersTypes.h"
+
 /**
  * NOTE: header is also included in kernel code
  */
@@ -36,6 +38,8 @@ enum RadiationSourceShapeType_
 
 struct RadiationSource
 {
+    Char64 name = "<unnamed>";
+
     float strength = 0.0f;
     bool strengthPinned = false;
     float posX = 0;
