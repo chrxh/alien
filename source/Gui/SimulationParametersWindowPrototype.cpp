@@ -2,6 +2,8 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
+#include "Base/StringHelper.h"
+#include "EngineInterface/SimulationParametersEditService.h"
 #include "EngineInterface/SimulationFacade.h"
 
 #include "AlienImGui.h"
@@ -34,7 +36,7 @@ void SimulationParametersWindowPrototype::processIntern()
 
         processMasterEditor();
         processDetailEditor();
-        processAddonList();
+        processExpertModes();
     }
     ImGui::EndChild();
 
@@ -131,10 +133,10 @@ void SimulationParametersWindowPrototype::processDetailEditor()
     }
 }
 
-void SimulationParametersWindowPrototype::processAddonList()
+void SimulationParametersWindowPrototype::processExpertModes()
 {
     if (ImGui::BeginChild("##addon", {0, 0})) {
-        if (_addonOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addons").highlighted(true).defaultOpen(_addonOpen))) {
+        if (_expertModesOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert modes").highlighted(true).defaultOpen(_expertModesOpen))) {
             ImGui::Button("Test", ImGui::GetContentRegionAvail());
             //if (ImGui::BeginChild("##detailChildWindow", {0, scale(_detailHeight)})) {
             //}
@@ -158,9 +160,10 @@ void SimulationParametersWindowPrototype::processLocationTable()
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
         | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    if (ImGui::BeginTable("Location", 5, flags, ImVec2(-1, -1), 0)) {
+    if (ImGui::BeginTable("Location", 4, flags, ImVec2(-1, -1), 0)) {
 
-        auto regions = generateLocations();
+        auto locations = generateLocations();
+
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
         ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
         ImGui::TableSetupColumn("Position", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
@@ -169,10 +172,10 @@ void SimulationParametersWindowPrototype::processLocationTable()
         ImGui::TableHeadersRow();
 
         ImGuiListClipper clipper;
-        clipper.Begin(regions.size());
+        clipper.Begin(locations.size());
         while (clipper.Step()) {
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                auto const& entry = regions.at(row);
+                auto const& entry = locations.at(row);
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(ImGui::GetTextLineHeightWithSpacing()));
@@ -193,9 +196,11 @@ void SimulationParametersWindowPrototype::processLocationTable()
 
                 // position
                 ImGui::TableNextColumn();
+                AlienImGui::Text(entry.position);
 
                 // strength
                 ImGui::TableNextColumn();
+                AlienImGui::Text(entry.strength);
 
                 ImGui::PopID();
             }
@@ -209,12 +214,19 @@ auto SimulationParametersWindowPrototype::generateLocations() const -> std::vect
     auto parameters = _simulationFacade->getSimulationParameters();
 
     std::vector<Location> result;
-    result.emplace_back("Background", LocationType::Base);
+    auto strength = SimulationParametersEditService::get().getRadiationStrengths(parameters);
+    auto pinnedString = strength.pinned.contains(0) ? ICON_FA_THUMBTACK " ": " ";
+    result.emplace_back("Background", LocationType::Base, "-", pinnedString + StringHelper::format(strength.values.front() * 100 + 0.5f, 0) + "%");
     for (int i = 0; i < parameters.numSpots; ++i) {
-        result.emplace_back("Test", LocationType::ParameterZone);
+        auto const& spot = parameters.spots[i];
+        auto position = "(" + StringHelper::format(spot.posX, 0) + ", " + StringHelper::format(spot.posY, 0) + ")";
+        result.emplace_back("Test", LocationType::ParameterZone, position);
     }
     for (int i = 0; i < parameters.numRadiationSources; ++i) {
-        result.emplace_back("Test", LocationType::RadiationSource);
+        auto const& source = parameters.radiationSources[i];
+        auto position = "(" + StringHelper::format(source.posX, 0) + ", " + StringHelper::format(source.posY, 0) + ")";
+        auto pinnedString = strength.pinned.contains(i + 1) ? ICON_FA_THUMBTACK " " : " ";
+        result.emplace_back("Test", LocationType::RadiationSource, position, pinnedString + StringHelper::format(strength.values.at(i + 1) * 100 + 0.5f, 0) + "%");
     }
 
     return result;
@@ -231,12 +243,12 @@ float SimulationParametersWindowPrototype::getMasterWidgetRefHeight() const
 
 float SimulationParametersWindowPrototype::getAddonWidgetRefHeight() const
 {
-    return _addonOpen ? _addonHeight : scale(47.0f);
+    return _expertModesOpen ? _addonHeight : scale(47.0f);
 }
 
 float SimulationParametersWindowPrototype::getMasterWidgetHeight() const
 {
-    if (_masterOpen && !_detailOpen && !_addonOpen) {
+    if (_masterOpen && !_detailOpen && !_expertModesOpen) {
         return ImGui::GetContentRegionAvail().y - getDetailWidgetHeight() - getAddonWidgetRefHeight();
     }
     return getMasterWidgetRefHeight();

@@ -86,7 +86,7 @@ void OverlayController::processProgressAnimation()
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
 
         auto viewSize = toRealVector2D(Viewport::get().getViewSize());
-        auto width = viewSize.x / 6 + 1.0f;
+        auto width = scale(300.0f);
         auto height = scale(15.0f);
         auto center = ImVec2{viewSize.x / 2, viewSize.y - scale(60.0f)};
 
