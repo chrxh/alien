@@ -20,7 +20,7 @@ private:
     void processToolbar();
     void processMasterEditor();
     void processDetailEditor();
-    void processAddonList();
+    void processExpertModes();
     void processStatusBar();
 
     enum class LocationType
@@ -33,6 +33,8 @@ private:
     {
         std::string name;
         LocationType type = LocationType::ParameterZone;
+        std::string position;
+        std::string strength;
     };
     void processLocationTable();
 
@@ -52,7 +54,7 @@ private:
 
     bool _masterOpen = true;
     bool _detailOpen = true;
-    bool _addonOpen = true;
+    bool _expertModesOpen = true;
     float _masterHeight = 0;
     float _addonHeight = 0;
 
