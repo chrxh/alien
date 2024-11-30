@@ -187,11 +187,11 @@ void SimulationParametersWindowPrototype::processLocationTable()
                 // type
                 ImGui::TableNextColumn();
                 if (entry.type == LocationType::Base) {
-                    AlienImGui::Text("Base");
+                    AlienImGui::Text("Base parameters");
                 } else if (entry.type == LocationType::ParameterZone) {
-                    AlienImGui::Text("Parameter zone");
+                    AlienImGui::Text("Zone");
                 } else if (entry.type == LocationType::RadiationSource) {
-                    AlienImGui::Text("Radiation source");
+                    AlienImGui::Text("Radiation");
                 }
 
                 // position
@@ -216,17 +216,18 @@ auto SimulationParametersWindowPrototype::generateLocations() const -> std::vect
     std::vector<Location> result;
     auto strength = SimulationParametersEditService::get().getRadiationStrengths(parameters);
     auto pinnedString = strength.pinned.contains(0) ? ICON_FA_THUMBTACK " ": " ";
-    result.emplace_back("Background", LocationType::Base, "-", pinnedString + StringHelper::format(strength.values.front() * 100 + 0.5f, 0) + "%");
+    result.emplace_back("Main", LocationType::Base, "-", pinnedString + StringHelper::format(strength.values.front() * 100 + 0.5f, 0) + "%");
     for (int i = 0; i < parameters.numSpots; ++i) {
         auto const& spot = parameters.spots[i];
         auto position = "(" + StringHelper::format(spot.posX, 0) + ", " + StringHelper::format(spot.posY, 0) + ")";
-        result.emplace_back("Test", LocationType::ParameterZone, position);
+        result.emplace_back(spot.name, LocationType::ParameterZone, position);
     }
     for (int i = 0; i < parameters.numRadiationSources; ++i) {
         auto const& source = parameters.radiationSources[i];
         auto position = "(" + StringHelper::format(source.posX, 0) + ", " + StringHelper::format(source.posY, 0) + ")";
         auto pinnedString = strength.pinned.contains(i + 1) ? ICON_FA_THUMBTACK " " : " ";
-        result.emplace_back("Test", LocationType::RadiationSource, position, pinnedString + StringHelper::format(strength.values.at(i + 1) * 100 + 0.5f, 0) + "%");
+        result.emplace_back(
+            source.name, LocationType::RadiationSource, position, pinnedString + StringHelper::format(strength.values.at(i + 1) * 100 + 0.5f, 0) + "%");
     }
 
     return result;

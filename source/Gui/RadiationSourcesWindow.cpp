@@ -1,13 +1,14 @@
 #include <imgui.h>
 
-#include "AlienImGui.h"
 #include "Base/Definitions.h"
+#include "Base/StringHelper.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/SimulationParametersEditService.h"
 
 #include "RadiationSourcesWindow.h"
 #include "StyleRepository.h"
 #include "SimulationInteractionController.h"
+#include "AlienImGui.h"
 
 namespace
 {
@@ -277,6 +278,7 @@ void RadiationSourcesWindow::onDeleteTab(int index)
 RadiationSource RadiationSourcesWindow::createParticleSource() const
 {
     RadiationSource result;
+    StringHelper::copy(result.name, sizeof(result.name), "source");
     auto worldSize = _simulationFacade->getWorldSize();
     result.posX = toFloat(worldSize.x / 2);
     result.posY = toFloat(worldSize.y / 2);
