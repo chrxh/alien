@@ -40,14 +40,13 @@ private:
 
     std::vector<Location> generateLocations() const;
 
-    void correctLayout();
+    void correctLayout(float origMasterHeight, float origExpertWidgetHeight);
 
     float getMasterWidgetRefHeight() const;
-    float getAddonWidgetRefHeight() const;
+    float getExpertWidgetRefHeight() const;
 
     float getMasterWidgetHeight() const;
     float getDetailWidgetHeight() const;
-    float getAddonWidgetHeight() const;
 
 private:
     SimulationFacade _simulationFacade;
@@ -56,7 +55,7 @@ private:
     bool _detailOpen = true;
     bool _expertModesOpen = true;
     float _masterHeight = 0;
-    float _addonHeight = 0;
+    float _expertWidgetHeight = 0;
 
     std::optional<SimulationParameters> _copiedParameters;
 };

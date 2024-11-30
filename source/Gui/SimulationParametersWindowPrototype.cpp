@@ -11,9 +11,13 @@
 
 namespace
 {
-    auto constexpr MasterEditorHeight = 100.0f;
-    auto constexpr AddonHeight = 100.0f;
+    auto constexpr MasterHeight = 100.0f;
+    auto constexpr MasterMinHeight = 50.0f;
 
+    auto constexpr DetailWidgetMinHeight = 60.0f;
+
+    auto constexpr ExpertWidgetHeight = 100.0f;
+    auto constexpr ExpertWidgetMinHeight = 60.0f;
 }
 
 SimulationParametersWindowPrototype::SimulationParametersWindowPrototype()
@@ -24,8 +28,8 @@ void SimulationParametersWindowPrototype::initIntern(SimulationFacade simulation
 {
     _simulationFacade = simulationFacade;
 
-    _masterHeight = GlobalSettings::get().getValue("windows.simulation parameters prototype.master height", scale(MasterEditorHeight));
-    _addonHeight = GlobalSettings::get().getValue("windows.simulation parameters prototype.addon height", scale(AddonHeight));
+    _masterHeight = GlobalSettings::get().getValue("windows.simulation parameters prototype.master height", scale(MasterHeight));
+    _expertWidgetHeight = GlobalSettings::get().getValue("windows.simulation parameters prototype.addon height", scale(ExpertWidgetHeight));
 }
 
 void SimulationParametersWindowPrototype::processIntern()
@@ -33,22 +37,25 @@ void SimulationParametersWindowPrototype::processIntern()
     processToolbar();
 
     if (ImGui::BeginChild("##content", {0, -scale(50.0f)})) {
+        auto origMasterHeight = _masterHeight;
+        auto origExpertWidgetHeight = _expertWidgetHeight;
 
         processMasterEditor();
         processDetailEditor();
         processExpertModes();
+
+        correctLayout(origMasterHeight, origExpertWidgetHeight);
     }
     ImGui::EndChild();
 
     processStatusBar();
 
-    correctLayout();
 }
 
 void SimulationParametersWindowPrototype::shutdownIntern()
 {
     GlobalSettings::get().setValue("windows.simulation parameters prototype.master height", _masterHeight);
-    GlobalSettings::get().setValue("windows.simulation parameters prototype.addon height", _addonHeight);
+    GlobalSettings::get().setValue("windows.simulation parameters prototype.addon height", _expertWidgetHeight);
 }
 
 void SimulationParametersWindowPrototype::processToolbar()
@@ -114,12 +121,12 @@ void SimulationParametersWindowPrototype::processMasterEditor()
 
 void SimulationParametersWindowPrototype::processDetailEditor()
 {
-    if (ImGui::BeginChild("##detailEditor", {0, getDetailWidgetHeight()})) {
+    auto height = getDetailWidgetHeight();
+    if (ImGui::BeginChild("##detailEditor", {0, height})) {
         if (_detailOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Parameters").highlighted(true).defaultOpen(_detailOpen))) {
-            ImGui::Button("Test2", ImGui::GetContentRegionAvail());
-            //if (ImGui::BeginChild("##detailChildWindow", {0, scale(_detailHeight)})) {
-            //}
-            //ImGui::EndChild();
+            if (ImGui::BeginChild("##detailChildWindow", {0, 0})) {
+            }
+            ImGui::EndChild();
             AlienImGui::EndTreeNode();
         }
     }
@@ -128,8 +135,12 @@ void SimulationParametersWindowPrototype::processDetailEditor()
         ImGui::Spacing();
         ImGui::Spacing();
         ImGui::PushID("detail");
-        AlienImGui::MovableSeparator(AlienImGui::MovableSeparatorParameters().additive(false), _addonHeight);
+        //auto origExpertWidgetHeight = _expertWidgetHeight;
+        AlienImGui::MovableSeparator(AlienImGui::MovableSeparatorParameters().additive(false), _expertWidgetHeight);
         ImGui::PopID();
+        //if (height <= scale(35.0f) && _expertWidgetHeight > origExpertWidgetHeight) {
+        //    _masterHeight -= _expertWidgetHeight - origExpertWidgetHeight;
+        //}
     }
 }
 
@@ -137,10 +148,9 @@ void SimulationParametersWindowPrototype::processExpertModes()
 {
     if (ImGui::BeginChild("##addon", {0, 0})) {
         if (_expertModesOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert modes").highlighted(true).defaultOpen(_expertModesOpen))) {
-            ImGui::Button("Test", ImGui::GetContentRegionAvail());
-            //if (ImGui::BeginChild("##detailChildWindow", {0, scale(_detailHeight)})) {
-            //}
-            //ImGui::EndChild();
+            if (ImGui::BeginChild("##detailChildWindow", {0, 0})) {
+            }
+            ImGui::EndChild();
             AlienImGui::EndTreeNode();
         }
     }
@@ -233,8 +243,16 @@ auto SimulationParametersWindowPrototype::generateLocations() const -> std::vect
     return result;
 }
 
-void SimulationParametersWindowPrototype::correctLayout()
+void SimulationParametersWindowPrototype::correctLayout(float origMasterHeight, float origExpertWidgetHeight)
 {
+    auto detailHeight = ImGui::GetWindowSize().y - getMasterWidgetRefHeight() - getExpertWidgetRefHeight();
+
+    if (detailHeight < scale(DetailWidgetMinHeight)
+        || _masterHeight < scale(MasterMinHeight)
+        || _expertWidgetHeight < scale(ExpertWidgetMinHeight)) {
+        _masterHeight = origMasterHeight;
+        _expertWidgetHeight = origExpertWidgetHeight;
+    }
 }
 
 float SimulationParametersWindowPrototype::getMasterWidgetRefHeight() const
@@ -242,28 +260,20 @@ float SimulationParametersWindowPrototype::getMasterWidgetRefHeight() const
     return _masterOpen ? _masterHeight : scale(25.0f);
 }
 
-float SimulationParametersWindowPrototype::getAddonWidgetRefHeight() const
+float SimulationParametersWindowPrototype::getExpertWidgetRefHeight() const
 {
-    return _expertModesOpen ? _addonHeight : scale(47.0f);
+    return _expertModesOpen ? _expertWidgetHeight : scale(47.0f);
 }
 
 float SimulationParametersWindowPrototype::getMasterWidgetHeight() const
 {
     if (_masterOpen && !_detailOpen && !_expertModesOpen) {
-        return ImGui::GetContentRegionAvail().y - getDetailWidgetHeight() - getAddonWidgetRefHeight();
+        return std::max(scale(MasterMinHeight), ImGui::GetContentRegionAvail().y - getDetailWidgetHeight() - getExpertWidgetRefHeight());
     }
     return getMasterWidgetRefHeight();
 }
 
 float SimulationParametersWindowPrototype::getDetailWidgetHeight() const
 {
-    return _detailOpen ? ImGui::GetContentRegionAvail().y - getAddonWidgetRefHeight() : scale(25.0f);
-}
-
-float SimulationParametersWindowPrototype::getAddonWidgetHeight() const
-{
-    if (!_masterOpen && !_detailOpen) {
-        return ImGui::GetContentRegionAvail().y;
-    }
-    return getAddonWidgetRefHeight();
+    return _detailOpen ? std::max(scale(MasterMinHeight), ImGui::GetContentRegionAvail().y - getExpertWidgetRefHeight()) : scale(25.0f);
 }

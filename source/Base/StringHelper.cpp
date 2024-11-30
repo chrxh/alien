@@ -89,11 +89,10 @@ std::string StringHelper::format(std::chrono::milliseconds duration)
 
 std::string StringHelper::format(std::chrono::system_clock::time_point const& timePoint)
 {
-    std::time_t timeT = std::chrono::system_clock::to_time_t(timePoint);
+    std::time_t time_t = std::chrono::system_clock::to_time_t(timePoint);
 
-    std::tm tm = *std::localtime(&timeT);
     std::stringstream ss;
-    ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
+    ss << std::put_time(std::localtime(&time_t), "%Y-%m-%d %H:%M:%S");
 
     return ss.str();
 }
