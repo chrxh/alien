@@ -2,6 +2,7 @@
 
 #include <set>
 
+#include "Base/VersionChecker.h"
 #include "ParameterParser.h"
 
 namespace
@@ -178,6 +179,21 @@ void LegacyAuxiliaryDataParserService::updateParametersAndFeaturesForLegacyFiles
                 parameters.radiationSources[i].strength = strengthRatio;
             }
             parameters.baseStrengthRatioPinned = true;
+        }
+    }
+
+    auto versionParts = VersionChecker::getVersionParts(programVersion);
+    if (versionParts.major == 4 && versionParts.minor == 11) {
+        int locationPosition = 0;
+        if (parameters.numSpots > 0) {
+            for (int i = 0; i < parameters.numSpots; ++i) {
+                parameters.spots[i].locationPosition = locationPosition++;
+            }
+        }
+        if (parameters.numRadiationSources > 0) {
+            for (int i = 0; i < parameters.numRadiationSources; ++i) {
+                parameters.radiationSources[i].locationPosition = locationPosition++;
+            }
         }
     }
 
