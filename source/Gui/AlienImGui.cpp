@@ -1069,7 +1069,26 @@ bool AlienImGui::ToolbarButton(ToolbarButtonParameters const& parameters)
 
     ImGui::PushStyleColor(ImGuiCol_Text, static_cast<ImVec4> (Const::ToolbarButtonTextColor));
     auto buttonSize = scale(40.0f);
+
+    auto pos = ImGui::GetCursorScreenPos();
     auto result = ImGui::Button(parameters._text.c_str(), {buttonSize, buttonSize});
+
+    if (parameters._secondText.has_value()) {
+        ImGui::GetWindowDrawList()->AddText(
+            ImGui::GetFont(),
+            ImGui::GetFontSize() * parameters._secondTextScale,
+            {pos.x + parameters._secondTextOffset.x, pos.y + parameters._secondTextOffset.y},
+            ImGui::GetColorU32(ImGuiCol_Text),
+            parameters._secondText->c_str());
+    }
+
+    //ImVec2 cursorPos = ImGui::GetCursorPos();
+
+    //ImGui::SetCursorScreenPos({pos.x + 10.0f, pos.y + 10.0f});
+    //ImGui::Text(parameters._text.c_str());
+
+    //ImGui::SetCursorPos(cursorPos);
+
 
     ImGui::PopStyleColor(4);
     ImGui::PopStyleVar();

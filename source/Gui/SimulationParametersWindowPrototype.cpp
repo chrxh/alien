@@ -21,7 +21,7 @@ namespace
 }
 
 SimulationParametersWindowPrototype::SimulationParametersWindowPrototype()
-    : AlienWindow("Simulation parameters Prototype", "windows.simulation parameters prototype", false)
+    : AlienWindow("Simulation parameters (new)", "windows.simulation parameters prototype", false)
 {}
 
 void SimulationParametersWindowPrototype::initIntern(SimulationFacade simulationFacade)
@@ -69,13 +69,6 @@ void SimulationParametersWindowPrototype::processToolbar()
     }
     AlienImGui::Tooltip("Save simulation parameters to file");
 
-    for (int i = 0; i < 6; ++i) {
-        ImGui::SameLine();
-        if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_SAVE))) {
-        }
-        AlienImGui::Tooltip("Save simulation parameters to file");
-    }
-
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
 
@@ -95,6 +88,42 @@ void SimulationParametersWindowPrototype::processToolbar()
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Paste simulation parameters");
+
+    ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
+
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_LAYER_GROUP))) {
+    }
+    AlienImGui::Tooltip("Add parameter zone");
+
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_SUN))) {
+    }
+    AlienImGui::Tooltip("Add radiation source");
+
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_CLONE))) {
+    }
+    AlienImGui::Tooltip("Clone selected entry");
+
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_MINUS))) {
+    }
+    AlienImGui::Tooltip("Delete selected entry");
+
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_CHEVRON_UP))) {
+    }
+    AlienImGui::Tooltip("Move selected entry upward");
+
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_CHEVRON_DOWN))) {
+    }
+    AlienImGui::Tooltip("Move selected entry downward");
+
+    ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
 
     AlienImGui::Separator();
 }
