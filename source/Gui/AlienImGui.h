@@ -295,6 +295,8 @@ public:
     {
         MEMBER_DECLARATION(ToolbarButtonParameters, std::string, text, std::string());
         MEMBER_DECLARATION(ToolbarButtonParameters, std::optional<std::string>, secondText, std::nullopt);
+        MEMBER_DECLARATION(ToolbarButtonParameters, RealVector2D, secondTextOffset, (RealVector2D{25.0f, 25.0f}));
+        MEMBER_DECLARATION(ToolbarButtonParameters, float, secondTextScale, 0.5f);
     };
     static bool ToolbarButton(ToolbarButtonParameters const& parameters);
     static bool SelectableToolbarButton(std::string const& text, int& value, int selectionValue, int deselectionValue);
