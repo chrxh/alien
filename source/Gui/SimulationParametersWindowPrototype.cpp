@@ -60,18 +60,18 @@ void SimulationParametersWindowPrototype::shutdownIntern()
 
 void SimulationParametersWindowPrototype::processToolbar()
 {
-    if (AlienImGui::ToolbarButton(ICON_FA_FOLDER_OPEN)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN))) {
     }
     AlienImGui::Tooltip("Open simulation parameters from file");
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_SAVE))) {
     }
     AlienImGui::Tooltip("Save simulation parameters to file");
 
     for (int i = 0; i < 6; ++i) {
         ImGui::SameLine();
-        if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
+        if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_SAVE))) {
         }
         AlienImGui::Tooltip("Save simulation parameters to file");
     }
@@ -80,7 +80,7 @@ void SimulationParametersWindowPrototype::processToolbar()
     AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_COPY))) {
         _copiedParameters = _simulationFacade->getSimulationParameters();
         printOverlayMessage("Simulation parameters copied");
     }
@@ -88,7 +88,7 @@ void SimulationParametersWindowPrototype::processToolbar()
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!_copiedParameters);
-    if (AlienImGui::ToolbarButton(ICON_FA_PASTE)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PASTE))) {
         _simulationFacade->setSimulationParameters(*_copiedParameters);
         _simulationFacade->setOriginalSimulationParameters(*_copiedParameters);
         printOverlayMessage("Simulation parameters pasted");

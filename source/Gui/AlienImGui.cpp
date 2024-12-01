@@ -1053,9 +1053,9 @@ void AlienImGui::Group(std::string const& text, std::optional<std::string> const
     ImGui::Spacing();
 }
 
-bool AlienImGui::ToolbarButton(std::string const& text)
+bool AlienImGui::ToolbarButton(ToolbarButtonParameters const& parameters)
 {
-    auto id = std::to_string(ImGui::GetID(text.c_str()));
+    auto id = std::to_string(ImGui::GetID(parameters._text.c_str()));
 
     ImGui::PushFont(StyleRepository::get().getIconFont());
     ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0.5f, 0.75f});
@@ -1069,7 +1069,7 @@ bool AlienImGui::ToolbarButton(std::string const& text)
 
     ImGui::PushStyleColor(ImGuiCol_Text, static_cast<ImVec4> (Const::ToolbarButtonTextColor));
     auto buttonSize = scale(40.0f);
-    auto result = ImGui::Button(text.c_str(), {buttonSize, buttonSize});
+    auto result = ImGui::Button(parameters._text.c_str(), {buttonSize, buttonSize});
 
     ImGui::PopStyleColor(4);
     ImGui::PopStyleVar();

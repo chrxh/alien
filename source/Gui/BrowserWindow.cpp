@@ -229,7 +229,7 @@ void BrowserWindow::processToolbar()
 
     //refresh button
     ImGui::BeginDisabled(_refreshProcessor->pendingTasks());
-    if (AlienImGui::ToolbarButton(ICON_FA_SYNC)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_SYNC))) {
         onRefresh();
     }
     ImGui::EndDisabled();
@@ -238,7 +238,7 @@ void BrowserWindow::processToolbar()
     //login button
     ImGui::SameLine();
     ImGui::BeginDisabled(NetworkService::get().getLoggedInUserName().has_value());
-    if (AlienImGui::ToolbarButton(ICON_FA_SIGN_IN_ALT)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_SIGN_IN_ALT))) {
         LoginDialog::get().open();
     }
     ImGui::EndDisabled();
@@ -247,7 +247,7 @@ void BrowserWindow::processToolbar()
     //logout button
     ImGui::SameLine();
     ImGui::BeginDisabled(!NetworkService::get().getLoggedInUserName());
-    if (AlienImGui::ToolbarButton(ICON_FA_SIGN_OUT_ALT)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_SIGN_OUT_ALT))) {
         NetworkService::get().logout();
         onRefresh();
     }
@@ -260,7 +260,7 @@ void BrowserWindow::processToolbar()
 
     //upload button
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_UPLOAD)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_UPLOAD))) {
         std::string prefix = [&] {
             if (_selectedTreeTO == nullptr || _selectedTreeTO->isLeaf()) {
                 return std::string();
@@ -277,7 +277,7 @@ void BrowserWindow::processToolbar()
     //edit button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isOwnerForSelectedItem);
-    if (AlienImGui::ToolbarButton(ICON_FA_EDIT)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_EDIT))) {
         onEditResource(_selectedTreeTO);
     }
     ImGui::EndDisabled();
@@ -286,7 +286,7 @@ void BrowserWindow::processToolbar()
     //replace button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isOwnerForSelectedItem || !_selectedTreeTO->isLeaf());
-    if (AlienImGui::ToolbarButton(ICON_FA_EXCHANGE_ALT)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_EXCHANGE_ALT))) {
         onReplaceResource(_selectedTreeTO->getLeaf());
     }
     ImGui::EndDisabled();
@@ -295,7 +295,7 @@ void BrowserWindow::processToolbar()
     //move to other workspace button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isOwnerForSelectedItem);
-    if (AlienImGui::ToolbarButton(ICON_FA_SHARE_ALT)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_SHARE_ALT))) {
         onMoveResource(_selectedTreeTO);
     }
     ImGui::EndDisabled();
@@ -304,7 +304,7 @@ void BrowserWindow::processToolbar()
     //delete button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isOwnerForSelectedItem);
-    if (AlienImGui::ToolbarButton(ICON_FA_TRASH)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_TRASH))) {
         onDeleteResource(_selectedTreeTO);
     }
     ImGui::EndDisabled();
@@ -316,14 +316,14 @@ void BrowserWindow::processToolbar()
 
     //expand button
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_EXPAND_ARROWS_ALT)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_EXPAND_ARROWS_ALT))) {
         onExpandFolders();
     }
     AlienImGui::Tooltip("Expand all folders");
 
     //collapse button
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_COMPRESS_ARROWS_ALT)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_COMPRESS_ARROWS_ALT))) {
         onCollapseFolders();
     }
     AlienImGui::Tooltip("Collapse all folders");
@@ -335,7 +335,7 @@ void BrowserWindow::processToolbar()
 
     //Discord button
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_COMMENTS)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_COMMENTS))) {
         openWeblink(Const::DiscordURL);
     }
     AlienImGui::Tooltip("Open ALIEN Discord server");

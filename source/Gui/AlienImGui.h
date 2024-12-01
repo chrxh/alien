@@ -291,7 +291,12 @@ public:
 
     static void Group(std::string const& text, std::optional<std::string> const& tooltip = std::nullopt);
 
-    static bool ToolbarButton(std::string const& text);
+    struct ToolbarButtonParameters
+    {
+        MEMBER_DECLARATION(ToolbarButtonParameters, std::string, text, std::string());
+        MEMBER_DECLARATION(ToolbarButtonParameters, std::optional<std::string>, secondText, std::nullopt);
+    };
+    static bool ToolbarButton(ToolbarButtonParameters const& parameters);
     static bool SelectableToolbarButton(std::string const& text, int& value, int selectionValue, int deselectionValue);
 
     static void VerticalSeparator(float length = 23.0f);

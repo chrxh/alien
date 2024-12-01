@@ -109,7 +109,7 @@ void AutosaveWindow::processToolbar()
 {
     ImGui::SameLine();
     ImGui::BeginDisabled(!_savepointTable.has_value());
-    if (AlienImGui::ToolbarButton(ICON_FA_PLUS)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS))) {
         onCreateSavepoint(false);
     }
     ImGui::EndDisabled();
@@ -117,7 +117,7 @@ void AutosaveWindow::processToolbar()
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!static_cast<bool>(_selectedEntry) || (_selectedEntry->state != SavepointState_Persisted && !_selectedEntry->requestId.empty()));
-    if (AlienImGui::ToolbarButton(ICON_FA_MINUS)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_MINUS))) {
         onDeleteSavepoint(_selectedEntry);
     }
     AlienImGui::Tooltip("Delete save point");
@@ -125,7 +125,7 @@ void AutosaveWindow::processToolbar()
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!_savepointTable.has_value() || _savepointTable->isEmpty());
-    if (AlienImGui::ToolbarButton(ICON_FA_BROOM)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_BROOM))) {
         GenericMessageDialog::get().yesNo("Delete", "Do you really want to delete all savepoints?", [&]() { scheduleCleanup(); });
     }
     AlienImGui::Tooltip("Delete all save points");
