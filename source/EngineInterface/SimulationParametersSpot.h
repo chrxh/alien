@@ -90,6 +90,7 @@ union SpotShapeData
 struct SimulationParametersSpot
 {
     Char64 name = "<unnamed>";
+    int locationPosition = -1;
 
     uint32_t color = 0;
     float posX = 0;

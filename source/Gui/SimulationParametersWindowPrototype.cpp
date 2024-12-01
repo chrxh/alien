@@ -105,22 +105,22 @@ void SimulationParametersWindowPrototype::processToolbar()
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_CLONE))) {
     }
-    AlienImGui::Tooltip("Clone selected entry");
+    AlienImGui::Tooltip("Clone selected location");
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_MINUS))) {
     }
-    AlienImGui::Tooltip("Delete selected entry");
+    AlienImGui::Tooltip("Delete selected location");
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_CHEVRON_UP))) {
     }
-    AlienImGui::Tooltip("Move selected entry upward");
+    AlienImGui::Tooltip("Move selected location upward");
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_CHEVRON_DOWN))) {
     }
-    AlienImGui::Tooltip("Move selected entry downward");
+    AlienImGui::Tooltip("Move selected location downward");
 
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
@@ -132,7 +132,7 @@ void SimulationParametersWindowPrototype::processMasterEditor()
 {
     if (ImGui::BeginChild("##masterEditor", {0, getMasterWidgetHeight()})) {
 
-        if (_masterOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Location").highlighted(true).defaultOpen(_masterOpen))) {
+        if (_masterOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Locations").highlighted(true).defaultOpen(_masterOpen))) {
             processLocationTable();
 
             AlienImGui::EndTreeNode();
@@ -195,7 +195,7 @@ void SimulationParametersWindowPrototype::processLocationTable()
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
         | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    if (ImGui::BeginTable("Location", 4, flags, ImVec2(-1, -1), 0)) {
+    if (ImGui::BeginTable("Locations", 4, flags, ImVec2(-1, -1), 0)) {
 
         auto locations = generateLocations();
 
@@ -262,7 +262,7 @@ auto SimulationParametersWindowPrototype::generateLocations() const -> std::vect
     std::vector<Location> result;
     auto strength = SimulationParametersEditService::get().getRadiationStrengths(parameters);
     auto pinnedString = strength.pinned.contains(0) ? ICON_FA_THUMBTACK " ": " ";
-    result.emplace_back("Main", LocationType::Base, "-", pinnedString + StringHelper::format(strength.values.front() * 100 + 0.5f, 0) + "%");
+    result.emplace_back("Main", LocationType::Base, "-", pinnedString + StringHelper::format(strength.values.front() * 100 + 0.05f, 1) + "%");
     for (int i = 0; i < parameters.numSpots; ++i) {
         auto const& spot = parameters.spots[i];
         auto position = "(" + StringHelper::format(spot.posX, 0) + ", " + StringHelper::format(spot.posY, 0) + ")";
@@ -273,7 +273,7 @@ auto SimulationParametersWindowPrototype::generateLocations() const -> std::vect
         auto position = "(" + StringHelper::format(source.posX, 0) + ", " + StringHelper::format(source.posY, 0) + ")";
         auto pinnedString = strength.pinned.contains(i + 1) ? ICON_FA_THUMBTACK " " : " ";
         result.emplace_back(
-            source.name, LocationType::RadiationSource, position, pinnedString + StringHelper::format(strength.values.at(i + 1) * 100 + 0.5f, 0) + "%");
+            source.name, LocationType::RadiationSource, position, pinnedString + StringHelper::format(strength.values.at(i + 1) * 100 + 0.05f, 1) + "%");
     }
 
     return result;

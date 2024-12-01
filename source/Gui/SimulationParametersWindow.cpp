@@ -105,7 +105,7 @@ SimulationParametersSpot SimulationParametersWindow::createSpot(SimulationParame
 {
     auto worldSize = _simulationFacade->getWorldSize();
     SimulationParametersSpot spot;
-    StringHelper::copy(spot.name, sizeof(spot.name), "zone");
+    StringHelper::copy(spot.name, sizeof(spot.name), "Zone");
 
     spot.posX = toFloat(worldSize.x / 2);
     spot.posY = toFloat(worldSize.y / 2);

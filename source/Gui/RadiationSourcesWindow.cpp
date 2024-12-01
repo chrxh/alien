@@ -278,7 +278,7 @@ void RadiationSourcesWindow::onDeleteTab(int index)
 RadiationSource RadiationSourcesWindow::createParticleSource() const
 {
     RadiationSource result;
-    StringHelper::copy(result.name, sizeof(result.name), "radiation");
+    StringHelper::copy(result.name, sizeof(result.name), "Radiation");
     auto worldSize = _simulationFacade->getWorldSize();
     result.posX = toFloat(worldSize.x / 2);
     result.posY = toFloat(worldSize.y / 2);
