@@ -2476,17 +2476,18 @@ void SimulationParametersWindow::onOpenParameters()
 {
     GenericFileDialog::get().showOpenFileDialog(
         "Open simulation parameters", "Simulation parameters (*.parameters){.parameters},.*", _startingPath, [&](std::filesystem::path const& path) {
-        auto firstFilename = ifd::FileDialog::Instance().GetResult();
-        auto firstFilenameCopy = firstFilename;
-        _startingPath = firstFilenameCopy.remove_filename().string();
+            auto firstFilename = ifd::FileDialog::Instance().GetResult();
+            auto firstFilenameCopy = firstFilename;
+            _startingPath = firstFilenameCopy.remove_filename().string();
 
-        SimulationParameters parameters;
-        if (!SerializerService::get().deserializeSimulationParametersFromFile(parameters, firstFilename.string())) {
-            GenericMessageDialog::get().information("Open simulation parameters", "The selected file could not be opened.");
-        } else {
-            _simulationFacade->setSimulationParameters(parameters);
-        }
-    });
+            SimulationParameters parameters;
+            if (!SerializerService::get().deserializeSimulationParametersFromFile(parameters, firstFilename.string())) {
+                GenericMessageDialog::get().information("Open simulation parameters", "The selected file could not be opened.");
+            } else {
+                _simulationFacade->setSimulationParameters(parameters);
+                _simulationFacade->setOriginalSimulationParameters(parameters);
+            }
+        });
 }
 
 void SimulationParametersWindow::onSaveParameters()
