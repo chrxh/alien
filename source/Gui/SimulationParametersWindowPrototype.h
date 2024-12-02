@@ -39,8 +39,9 @@ private:
     void processLocationTable();
 
     void onDecreaseLocationIndex();
+    void onIncreaseLocationIndex();
 
-    std::vector<Location> generateLocations() const;
+    void updateLocations();
 
     void correctLayout(float origMasterHeight, float origExpertWidgetHeight);
 
@@ -60,5 +61,7 @@ private:
     float _expertWidgetHeight = 0;
 
     std::optional<SimulationParameters> _copiedParameters;
+
+    std::vector<Location> _locations;
     std::optional<int> _selectedLocationIndex;
 };
