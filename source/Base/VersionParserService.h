@@ -2,12 +2,16 @@
 #include <optional>
 #include <string>
 
-class VersionChecker
+#include "Singleton.h"
+
+class VersionParserService
 {
+    MAKE_SINGLETON(VersionParserService);
+
 public:
-    static bool isVersionValid(std::string const& otherVersionString);
-    static bool isVersionOutdated(std::string const& otherVersionString);
-    static bool isVersionNewer(std::string const& otherVersionString);
+    bool isVersionValid(std::string const& otherVersionString);
+    bool isVersionOutdated(std::string const& otherVersionString);
+    bool isVersionNewer(std::string const& otherVersionString);
 
     using VersionType = int;
     enum VersionType_
@@ -24,6 +28,6 @@ public:
         VersionType versionType = VersionType_Release;
         std::optional<int> preRelease;
     };
-    static VersionParts getVersionParts(std::string const& versionString);
+    VersionParts getVersionParts(std::string const& versionString);
 };
 

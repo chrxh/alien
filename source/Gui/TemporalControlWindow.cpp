@@ -225,13 +225,13 @@ void TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
 
     if (origParameters.numRadiationSources == parameters.numRadiationSources) {
         for (int i = 0; i < parameters.numRadiationSources; ++i) {
-            restorePosition(parameters.radiationSources[i], origParameters.radiationSources[i], snapshot.timestep);
+            restorePosition(parameters.radiationSource[i], origParameters.radiationSource[i], snapshot.timestep);
         }
     }
 
     if (origParameters.numSpots == parameters.numSpots) {
         for (int i = 0; i < parameters.numSpots; ++i) {
-            restorePosition(parameters.spots[i], origParameters.spots[i], snapshot.timestep);
+            restorePosition(parameters.spot[i], origParameters.spot[i], snapshot.timestep);
         }
     }
 

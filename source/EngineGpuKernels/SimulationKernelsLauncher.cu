@@ -99,7 +99,7 @@ void _SimulationKernelsLauncher::prepareForSimulationParametersChanges(Settings 
 bool _SimulationKernelsLauncher::isRigidityUpdateEnabled(Settings const& settings) const
 {
     for (int i = 0; i < settings.simulationParameters.numSpots; ++i) {
-        if (settings.simulationParameters.spots[i].values.rigidity != 0) {
+        if (settings.simulationParameters.spot[i].values.rigidity != 0) {
             return true;
         }
     }

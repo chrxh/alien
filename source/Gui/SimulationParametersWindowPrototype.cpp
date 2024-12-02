@@ -60,67 +60,61 @@ void SimulationParametersWindowPrototype::shutdownIntern()
 
 void SimulationParametersWindowPrototype::processToolbar()
 {
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN))) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN).tooltip("Open simulation parameters from file"))) {
     }
-    AlienImGui::Tooltip("Open simulation parameters from file");
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_SAVE))) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_SAVE).tooltip("Save simulation parameters to file"))) {
     }
-    AlienImGui::Tooltip("Save simulation parameters to file");
 
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_COPY))) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_COPY).tooltip("Copy simulation parameters"))) {
         _copiedParameters = _simulationFacade->getSimulationParameters();
         printOverlayMessage("Simulation parameters copied");
     }
-    AlienImGui::Tooltip("Copy simulation parameters");
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!_copiedParameters);
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PASTE))) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PASTE).tooltip("Paste simulation parameters"))) {
         _simulationFacade->setSimulationParameters(*_copiedParameters);
         _simulationFacade->setOriginalSimulationParameters(*_copiedParameters);
         printOverlayMessage("Simulation parameters pasted");
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Paste simulation parameters");
 
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_LAYER_GROUP))) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_LAYER_GROUP).tooltip("Add parameter zone"))) {
     }
-    AlienImGui::Tooltip("Add parameter zone");
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_SUN))) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_SUN).tooltip("Add radiation source"))) {
     }
-    AlienImGui::Tooltip("Add radiation source");
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_CLONE))) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_CLONE).tooltip("Clone selected location"))) {
     }
-    AlienImGui::Tooltip("Clone selected location");
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_MINUS))) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_MINUS).tooltip("Delete selected location"))) {
     }
-    AlienImGui::Tooltip("Delete selected location");
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_CHEVRON_UP))) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
+                                      .text(ICON_FA_CHEVRON_UP)
+                                      .tooltip("Move selected location upward")
+                                      .disabled(!_selectedLocationIndex.has_value() || _selectedLocationIndex.value() <= 1))) {
+        onDecreaseLocationIndex();
     }
-    AlienImGui::Tooltip("Move selected location upward");
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_CHEVRON_DOWN))) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_CHEVRON_DOWN).tooltip("Move selected location downward"))) {
     }
-    AlienImGui::Tooltip("Move selected location downward");
 
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
@@ -255,25 +249,72 @@ void SimulationParametersWindowPrototype::processLocationTable()
     }
 }
 
+namespace
+{
+    std::variant<SimulationParametersSpot*, RadiationSource*> findLocation(SimulationParameters& parameters, int locationIndex)
+    {
+        for (int i = 0; i < parameters.numSpots; ++i) {
+            if (parameters.spot[i].locationIndex == locationIndex) {
+                return &parameters.spot[i];
+            }
+        }
+        for (int i = 0; i < parameters.numRadiationSources; ++i) {
+            if (parameters.radiationSource[i].locationIndex == locationIndex) {
+                return &parameters.radiationSource[i];
+            }
+        }
+        THROW_NOT_IMPLEMENTED();
+    }
+
+    void onDecreaseLocationIndexIntern(SimulationParameters& parameters, int locationIndex)
+    {
+        std::variant<SimulationParametersSpot*, RadiationSource*> zoneOrSource1 = findLocation(parameters, locationIndex);
+        std::variant<SimulationParametersSpot*, RadiationSource*> zoneOrSource2 = findLocation(parameters, locationIndex - 1);
+        if (std::holds_alternative<SimulationParametersSpot*>(zoneOrSource1)) {
+            std::get<SimulationParametersSpot*>(zoneOrSource1)->locationIndex -= 1;
+        } else {
+            std::get<RadiationSource*>(zoneOrSource1)->locationIndex -= 1;
+        }
+        if (std::holds_alternative<SimulationParametersSpot*>(zoneOrSource2)) {
+            std::get<SimulationParametersSpot*>(zoneOrSource2)->locationIndex += 1;
+        } else {
+            std::get<RadiationSource*>(zoneOrSource2)->locationIndex += 1;
+        }
+    }
+}
+
+void SimulationParametersWindowPrototype::onDecreaseLocationIndex()
+{
+    auto parameters = _simulationFacade->getSimulationParameters();
+    onDecreaseLocationIndexIntern(parameters, _selectedLocationIndex.value());
+    _simulationFacade->setSimulationParameters(parameters);
+
+    auto origParameters = _simulationFacade->getOriginalSimulationParameters();
+    onDecreaseLocationIndexIntern(origParameters, _selectedLocationIndex.value());
+    _simulationFacade->setOriginalSimulationParameters(parameters);
+
+    --_selectedLocationIndex.value();
+}
+
 auto SimulationParametersWindowPrototype::generateLocations() const -> std::vector<Location>
 {
     auto parameters = _simulationFacade->getSimulationParameters();
 
-    std::vector<Location> result;
+    std::vector<Location> result(1 + parameters.numSpots + parameters.numRadiationSources);
     auto strength = SimulationParametersEditService::get().getRadiationStrengths(parameters);
-    auto pinnedString = strength.pinned.contains(0) ? ICON_FA_THUMBTACK " ": " ";
-    result.emplace_back("Main", LocationType::Base, "-", pinnedString + StringHelper::format(strength.values.front() * 100 + 0.05f, 1) + "%");
+    auto pinnedString = strength.pinned.contains(0) ? ICON_FA_THUMBTACK " " : " ";
+    result.at(0) = Location{"Main", LocationType::Base, "-", pinnedString + StringHelper::format(strength.values.front() * 100 + 0.05f, 1) + "%"};
     for (int i = 0; i < parameters.numSpots; ++i) {
-        auto const& spot = parameters.spots[i];
+        auto const& spot = parameters.spot[i];
         auto position = "(" + StringHelper::format(spot.posX, 0) + ", " + StringHelper::format(spot.posY, 0) + ")";
-        result.emplace_back(spot.name, LocationType::ParameterZone, position);
+        result.at(spot.locationIndex) = Location{spot.name, LocationType::ParameterZone, position};
     }
     for (int i = 0; i < parameters.numRadiationSources; ++i) {
-        auto const& source = parameters.radiationSources[i];
+        auto const& source = parameters.radiationSource[i];
         auto position = "(" + StringHelper::format(source.posX, 0) + ", " + StringHelper::format(source.posY, 0) + ")";
         auto pinnedString = strength.pinned.contains(i + 1) ? ICON_FA_THUMBTACK " " : " ";
-        result.emplace_back(
-            source.name, LocationType::RadiationSource, position, pinnedString + StringHelper::format(strength.values.at(i + 1) * 100 + 0.05f, 1) + "%");
+        result.at(source.locationIndex) = Location{
+            source.name, LocationType::RadiationSource, position, pinnedString + StringHelper::format(strength.values.at(i + 1) * 100 + 0.05f, 1) + "%"};
     }
 
     return result;

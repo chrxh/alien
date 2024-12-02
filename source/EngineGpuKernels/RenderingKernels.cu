@@ -352,7 +352,7 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
     auto baseColor = colorToFloat3(cudaSimulationParameters.backgroundColor);
     float3 spotColors[MAX_SPOTS];
     for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
-        spotColors[i] = colorToFloat3(cudaSimulationParameters.spots[i].color);
+        spotColors[i] = colorToFloat3(cudaSimulationParameters.spot[i].color);
     }
 
     auto const partition = calcAllThreadsPartition(imageSize.x * imageSize.y);
@@ -674,7 +674,7 @@ __global__ void cudaDrawRadiationSources(uint64_t* targetImage, float2 rectUpper
 {
     auto universeImageSize = toFloat2(worldSize) * zoom;
     for (int i = 0; i < cudaSimulationParameters.numRadiationSources; ++i) {
-        float2 sourcePos{cudaSimulationParameters.radiationSources[i].posX, cudaSimulationParameters.radiationSources[i].posY};
+        float2 sourcePos{cudaSimulationParameters.radiationSource[i].posX, cudaSimulationParameters.radiationSource[i].posY};
         auto imagePos = mapWorldPosToImagePos(rectUpperLeft, sourcePos, universeImageSize, zoom);
         if (isContainedInRect({0, 0}, toFloat2(imageSize), imagePos)) {
             for (int dx = -5; dx <= 5; ++dx) {

@@ -25,8 +25,8 @@ add_library(Base
     UnlockGuard.h
     Vector2D.cpp
     Vector2D.h
-    VersionChecker.cpp
-    VersionChecker.h)
+    VersionParserService.cpp
+    VersionParserService.h)
 
 target_link_libraries(Base Boost::boost)
 

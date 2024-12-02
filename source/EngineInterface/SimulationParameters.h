@@ -25,7 +25,7 @@ struct SimulationParameters
 
     //particle sources
     int numRadiationSources = 0;
-    RadiationSource radiationSources[MAX_RADIATION_SOURCES];
+    RadiationSource radiationSource[MAX_RADIATION_SOURCES];
     bool baseStrengthRatioPinned = false;
 
     float externalEnergy = 0.0f;
@@ -37,7 +37,7 @@ struct SimulationParameters
 
     //spots
     int numSpots = 0;
-    SimulationParametersSpot spots[MAX_SPOTS];
+    SimulationParametersSpot spot[MAX_SPOTS];
 
     //rendering
     uint32_t backgroundColor = 0x1b0000;

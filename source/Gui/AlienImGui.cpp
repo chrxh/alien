@@ -1071,7 +1071,9 @@ bool AlienImGui::ToolbarButton(ToolbarButtonParameters const& parameters)
     auto buttonSize = scale(40.0f);
 
     auto pos = ImGui::GetCursorScreenPos();
+    ImGui::BeginDisabled(parameters._disabled);
     auto result = ImGui::Button(parameters._text.c_str(), {buttonSize, buttonSize});
+    ImGui::EndDisabled();
 
     if (parameters._secondText.has_value()) {
         ImGui::GetWindowDrawList()->AddText(
@@ -1082,17 +1084,13 @@ bool AlienImGui::ToolbarButton(ToolbarButtonParameters const& parameters)
             parameters._secondText->c_str());
     }
 
-    //ImVec2 cursorPos = ImGui::GetCursorPos();
-
-    //ImGui::SetCursorScreenPos({pos.x + 10.0f, pos.y + 10.0f});
-    //ImGui::Text(parameters._text.c_str());
-
-    //ImGui::SetCursorPos(cursorPos);
-
-
     ImGui::PopStyleColor(4);
     ImGui::PopStyleVar();
     ImGui::PopFont();
+
+    if (parameters._tooltip) {
+        AlienImGui::Tooltip(*parameters._tooltip);
+    }
     return result;
 }
 

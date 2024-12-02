@@ -38,7 +38,7 @@ void SimulationParametersValidationService::validateAndCorrect(SimulationParamet
     parameters.cellGlowStrength = std::max(0.0f, std::min(1.0f, parameters.cellGlowStrength));
 
     for (int i = 0; i < parameters.numSpots; ++i) {
-        validateAndCorrect(parameters.spots[i], parameters);
+        validateAndCorrect(parameters.spot[i], parameters);
     }
 }
 
