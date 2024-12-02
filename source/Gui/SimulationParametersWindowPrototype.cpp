@@ -37,6 +37,9 @@ void SimulationParametersWindowPrototype::processIntern()
     processToolbar();
 
     if (ImGui::BeginChild("##content", {0, -scale(50.0f)})) {
+
+        updateLocations();
+
         auto origMasterHeight = _masterHeight;
         auto origExpertWidgetHeight = _expertWidgetHeight;
 
@@ -113,7 +116,11 @@ void SimulationParametersWindowPrototype::processToolbar()
     }
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_CHEVRON_DOWN).tooltip("Move selected location downward"))) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
+                                      .text(ICON_FA_CHEVRON_DOWN)
+                                      .tooltip("Move selected location downward")
+                                      .disabled(!_selectedLocationIndex.has_value() || _selectedLocationIndex.value() >= _locations.size() - 1))) {
+        onIncreaseLocationIndex();
     }
 
     ImGui::SameLine();
@@ -191,8 +198,6 @@ void SimulationParametersWindowPrototype::processLocationTable()
 
     if (ImGui::BeginTable("Locations", 4, flags, ImVec2(-1, -1), 0)) {
 
-        auto locations = generateLocations();
-
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
         ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
         ImGui::TableSetupColumn("Position", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
@@ -201,10 +206,10 @@ void SimulationParametersWindowPrototype::processLocationTable()
         ImGui::TableHeadersRow();
 
         ImGuiListClipper clipper;
-        clipper.Begin(locations.size());
+        clipper.Begin(_locations.size());
         while (clipper.Step()) {
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                auto const& entry = locations.at(row);
+                auto const& entry = _locations.at(row);
 
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(ImGui::GetTextLineHeightWithSpacing()));
@@ -281,6 +286,22 @@ namespace
             std::get<RadiationSource*>(zoneOrSource2)->locationIndex += 1;
         }
     }
+
+    void onIncreaseLocationIndexIntern(SimulationParameters& parameters, int locationIndex)
+    {
+        std::variant<SimulationParametersSpot*, RadiationSource*> zoneOrSource1 = findLocation(parameters, locationIndex);
+        std::variant<SimulationParametersSpot*, RadiationSource*> zoneOrSource2 = findLocation(parameters, locationIndex + 1);
+        if (std::holds_alternative<SimulationParametersSpot*>(zoneOrSource1)) {
+            std::get<SimulationParametersSpot*>(zoneOrSource1)->locationIndex += 1;
+        } else {
+            std::get<RadiationSource*>(zoneOrSource1)->locationIndex += 1;
+        }
+        if (std::holds_alternative<SimulationParametersSpot*>(zoneOrSource2)) {
+            std::get<SimulationParametersSpot*>(zoneOrSource2)->locationIndex -= 1;
+        } else {
+            std::get<RadiationSource*>(zoneOrSource2)->locationIndex -= 1;
+        }
+    }
 }
 
 void SimulationParametersWindowPrototype::onDecreaseLocationIndex()
@@ -296,28 +317,39 @@ void SimulationParametersWindowPrototype::onDecreaseLocationIndex()
     --_selectedLocationIndex.value();
 }
 
-auto SimulationParametersWindowPrototype::generateLocations() const -> std::vector<Location>
+void SimulationParametersWindowPrototype::onIncreaseLocationIndex()
+{
+    auto parameters = _simulationFacade->getSimulationParameters();
+    onIncreaseLocationIndexIntern(parameters, _selectedLocationIndex.value());
+    _simulationFacade->setSimulationParameters(parameters);
+
+    auto origParameters = _simulationFacade->getOriginalSimulationParameters();
+    onIncreaseLocationIndexIntern(origParameters, _selectedLocationIndex.value());
+    _simulationFacade->setOriginalSimulationParameters(parameters);
+
+    ++_selectedLocationIndex.value();
+}
+
+void SimulationParametersWindowPrototype::updateLocations()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
 
-    std::vector<Location> result(1 + parameters.numSpots + parameters.numRadiationSources);
+    _locations = std::vector<Location>(1 + parameters.numSpots + parameters.numRadiationSources);
     auto strength = SimulationParametersEditService::get().getRadiationStrengths(parameters);
     auto pinnedString = strength.pinned.contains(0) ? ICON_FA_THUMBTACK " " : " ";
-    result.at(0) = Location{"Main", LocationType::Base, "-", pinnedString + StringHelper::format(strength.values.front() * 100 + 0.05f, 1) + "%"};
+    _locations.at(0) = Location{"Main", LocationType::Base, "-", pinnedString + StringHelper::format(strength.values.front() * 100 + 0.05f, 1) + "%"};
     for (int i = 0; i < parameters.numSpots; ++i) {
         auto const& spot = parameters.spot[i];
         auto position = "(" + StringHelper::format(spot.posX, 0) + ", " + StringHelper::format(spot.posY, 0) + ")";
-        result.at(spot.locationIndex) = Location{spot.name, LocationType::ParameterZone, position};
+        _locations.at(spot.locationIndex) = Location{spot.name, LocationType::ParameterZone, position};
     }
     for (int i = 0; i < parameters.numRadiationSources; ++i) {
         auto const& source = parameters.radiationSource[i];
         auto position = "(" + StringHelper::format(source.posX, 0) + ", " + StringHelper::format(source.posY, 0) + ")";
         auto pinnedString = strength.pinned.contains(i + 1) ? ICON_FA_THUMBTACK " " : " ";
-        result.at(source.locationIndex) = Location{
+        _locations.at(source.locationIndex) = Location{
             source.name, LocationType::RadiationSource, position, pinnedString + StringHelper::format(strength.values.at(i + 1) * 100 + 0.05f, 1) + "%"};
     }
-
-    return result;
 }
 
 void SimulationParametersWindowPrototype::correctLayout(float origMasterHeight, float origExpertWidgetHeight)

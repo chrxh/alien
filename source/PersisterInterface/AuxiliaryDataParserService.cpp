@@ -678,6 +678,7 @@ namespace
             std::string base = "simulation parameters.particle sources." + std::to_string(index) + ".";
             auto& source = parameters.radiationSource[index];
             auto& defaultSource = defaultParameters.radiationSource[index];
+            ParameterParser::encodeDecode(tree, source.name, defaultSource.name, "name", parserTask);
             ParameterParser::encodeDecode(tree, source.locationIndex, defaultSource.locationIndex, base + "location index", parserTask);
             ParameterParser::encodeDecode(tree, source.posX, defaultSource.posX, base + "pos.x", parserTask);
             ParameterParser::encodeDecode(tree, source.posY, defaultSource.posY, base + "pos.y", parserTask);
@@ -718,6 +719,7 @@ namespace
             std::string base = "simulation parameters.spots." + std::to_string(index) + ".";
             auto& spot = parameters.spot[index];
             auto& defaultSpot = defaultParameters.spot[index];
+            ParameterParser::encodeDecode(tree, spot.name, defaultSpot.name, "name", parserTask);
             ParameterParser::encodeDecode(tree, spot.locationIndex, defaultSpot.locationIndex, base + "location index", parserTask);
             ParameterParser::encodeDecode(tree, spot.color, defaultSpot.color, base + "color", parserTask);
             ParameterParser::encodeDecode(tree, spot.posX, defaultSpot.posX, base + "pos.x", parserTask);
