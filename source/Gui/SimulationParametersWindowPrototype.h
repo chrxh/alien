@@ -54,10 +54,10 @@ private:
 private:
     SimulationFacade _simulationFacade;
 
-    bool _masterOpen = true;
-    bool _detailOpen = true;
-    bool _expertModesOpen = true;
-    float _masterHeight = 0;
+    bool _masterWidgetOpen = true;
+    bool _detailWidgetOpen = true;
+    bool _expertWidgetOpen = true;
+    float _masterWidgetHeight = 0;
     float _expertWidgetHeight = 0;
 
     std::optional<SimulationParameters> _copiedParameters;
