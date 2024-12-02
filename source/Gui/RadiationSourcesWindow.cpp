@@ -110,8 +110,8 @@ bool RadiationSourcesWindow::processSourceTab(int index)
 
     auto worldSize = _simulationFacade->getWorldSize();
 
-    RadiationSource& source = parameters.radiationSources[index];
-    RadiationSource& origSource = origParameters.radiationSources[index];
+    RadiationSource& source = parameters.radiationSource[index];
+    RadiationSource& origSource = origParameters.radiationSource[index];
 
     bool isOpen = true;
     static char name[20] = {};
@@ -240,8 +240,8 @@ void RadiationSourcesWindow::onAppendTab()
     auto newStrengths = editService.calcRadiationStrengthsForAddingSpot(strengths);
 
     auto index = parameters.numRadiationSources;
-    parameters.radiationSources[index] = createParticleSource();
-    origParameters.radiationSources[index] = createParticleSource();
+    parameters.radiationSource[index] = createParticleSource();
+    origParameters.radiationSource[index] = createParticleSource();
     ++parameters.numRadiationSources;
     ++origParameters.numRadiationSources;
 
@@ -262,8 +262,8 @@ void RadiationSourcesWindow::onDeleteTab(int index)
     auto newStrengths = editService.calcRadiationStrengthsForDeletingSpot(strengths, index + 1);
 
     for (int i = index; i < parameters.numRadiationSources - 1; ++i) {
-        parameters.radiationSources[i] = parameters.radiationSources[i + 1];
-        origParameters.radiationSources[i] = origParameters.radiationSources[i + 1];
+        parameters.radiationSource[i] = parameters.radiationSource[i + 1];
+        origParameters.radiationSource[i] = origParameters.radiationSource[i + 1];
     }
     --parameters.numRadiationSources;
     --origParameters.numRadiationSources;

@@ -46,7 +46,7 @@ __inline__ __device__ void RadiationProcessor::calcActiveSources(SimulationData&
                 &SimulationParametersSpotValues::radiationDisableSources,
                 &SimulationParametersSpotActivatedValues::radiationDisableSources,
                 data,
-                {cudaSimulationParameters.radiationSources[i].posX, cudaSimulationParameters.radiationSources[i].posY});
+                {cudaSimulationParameters.radiationSource[i].posX, cudaSimulationParameters.radiationSource[i].posY});
             if (sourceActive) {
                 data.preprocessedSimulationData.activeRadiationSources.setActiveSource(activeSourceIndex, i);
                 ++activeSourceIndex;
@@ -230,7 +230,7 @@ __inline__ __device__ void RadiationProcessor::radiate(SimulationData& data, flo
         auto sumActiveRatios = 0.0f;
         for (int i = 0; i < numActiveSources; ++i) {
             auto index = data.preprocessedSimulationData.activeRadiationSources.getActiveSource(i);
-            sumActiveRatios += cudaSimulationParameters.radiationSources[index].strength;
+            sumActiveRatios += cudaSimulationParameters.radiationSource[index].strength;
         }
         if (sumActiveRatios > 0) {
             auto randomRatioValue = data.numberGen1.random(1.0f);
@@ -239,7 +239,7 @@ __inline__ __device__ void RadiationProcessor::radiate(SimulationData& data, flo
             auto matchSource = false;
             for (int i = 0; i < numActiveSources; ++i) {
                 sourceIndex = data.preprocessedSimulationData.activeRadiationSources.getActiveSource(i);
-                sumActiveRatios += cudaSimulationParameters.radiationSources[sourceIndex].strength;
+                sumActiveRatios += cudaSimulationParameters.radiationSource[sourceIndex].strength;
                 if (randomRatioValue <= sumActiveRatios) {
                     matchSource = true;
                     break;
@@ -247,10 +247,10 @@ __inline__ __device__ void RadiationProcessor::radiate(SimulationData& data, flo
             }
             if (matchSource) {
 
-                pos.x = cudaSimulationParameters.radiationSources[sourceIndex].posX;
-                pos.y = cudaSimulationParameters.radiationSources[sourceIndex].posY;
+                pos.x = cudaSimulationParameters.radiationSource[sourceIndex].posX;
+                pos.y = cudaSimulationParameters.radiationSource[sourceIndex].posY;
 
-                auto const& source = cudaSimulationParameters.radiationSources[sourceIndex];
+                auto const& source = cudaSimulationParameters.radiationSource[sourceIndex];
                 if (source.shapeType == RadiationSourceShapeType_Circular) {
                     auto radius = max(1.0f, source.shapeData.circularRadiationSource.radius);
                     float2 delta{0, 0};

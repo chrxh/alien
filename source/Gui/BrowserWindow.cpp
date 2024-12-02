@@ -17,7 +17,7 @@
 #include "Base/LoggingService.h"
 #include "Base/Resources.h"
 #include "Base/StringHelper.h"
-#include "Base/VersionChecker.h"
+#include "Base/VersionParserService.h"
 #include "EngineInterface/GenomeDescriptionService.h"
 #include "PersisterInterface/SerializerService.h"
 #include "EngineInterface/SimulationFacade.h"
@@ -1457,9 +1457,9 @@ void BrowserWindow::pushTextColor(NetworkResourceTreeTO const& to)
 {
     if (to->isLeaf()) {
         auto const& leaf = to->getLeaf();
-        if (VersionChecker::isVersionOutdated(leaf.rawTO->version)) {
+        if (VersionParserService::get().isVersionOutdated(leaf.rawTO->version)) {
             ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::BrowserVersionOutdatedTextColor);
-        } else if (VersionChecker::isVersionNewer(leaf.rawTO->version)) {
+        } else if (VersionParserService::get().isVersionNewer(leaf.rawTO->version)) {
             ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::BrowserVersionNewerTextColor);
         } else {
             ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::BrowserVersionOkTextColor);

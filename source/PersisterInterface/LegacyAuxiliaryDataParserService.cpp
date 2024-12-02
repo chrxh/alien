@@ -2,7 +2,9 @@
 
 #include <set>
 
-#include "Base/VersionChecker.h"
+#include "Base/StringHelper.h"
+#include "Base/VersionParserService.h"
+
 #include "ParameterParser.h"
 
 namespace
@@ -15,7 +17,7 @@ namespace
                 return false;
             }
             for (int j = 0; j < parameters.numSpots; ++j) {
-                if ((parameters.spots[j].values.*parameter)[i] != value) {
+                if ((parameters.spot[j].values.*parameter)[i] != value) {
                     return false;
                 }
             }
@@ -30,7 +32,7 @@ namespace
                 return false;
             }
             for (int j = 0; j < parameters.numSpots; ++j) {
-                if (!values.contains((parameters.spots[j].values.*parameter)[i])) {
+                if (!values.contains((parameters.spot[j].values.*parameter)[i])) {
                     return false;
                 }
             }
@@ -170,29 +172,32 @@ void LegacyAuxiliaryDataParserService::updateParametersAndFeaturesForLegacyFiles
     LegacyParameters const& legacyParameters,
     SimulationParameters& parameters)
 {
-    //parameter conversion for v4.10.2 and below
+    //parameter conversion for v4.10.x and below
     if (programVersion.empty()) {
         parameters.features.legacyModes = true;
         if (parameters.numRadiationSources > 0) {
             auto strengthRatio = 1.0f / parameters.numRadiationSources;
             for (int i = 0; i < parameters.numRadiationSources; ++i) {
-                parameters.radiationSources[i].strength = strengthRatio;
+                parameters.radiationSource[i].strength = strengthRatio;
             }
             parameters.baseStrengthRatioPinned = true;
         }
     }
 
-    auto versionParts = VersionChecker::getVersionParts(programVersion);
+    //parameter conversion for v4.11.x and below
+    auto versionParts = VersionParserService::get().getVersionParts(programVersion);
     if (versionParts.major == 4 && versionParts.minor == 11) {
         int locationPosition = 0;
         if (parameters.numSpots > 0) {
             for (int i = 0; i < parameters.numSpots; ++i) {
-                parameters.spots[i].locationPosition = locationPosition++;
+                parameters.spot[i].locationIndex = ++locationPosition;
+                StringHelper::copy(parameters.spot[i].name, sizeof(parameters.spot[i].name), "Zone " + std::to_string(i + 1));
             }
         }
         if (parameters.numRadiationSources > 0) {
             for (int i = 0; i < parameters.numRadiationSources; ++i) {
-                parameters.radiationSources[i].locationPosition = locationPosition++;
+                parameters.radiationSource[i].locationIndex = ++locationPosition;
+                StringHelper::copy(parameters.radiationSource[i].name, sizeof(parameters.spot[i].name), "Radiation " + std::to_string(i + 1));
             }
         }
     }
@@ -223,7 +228,7 @@ void LegacyAuxiliaryDataParserService::updateParametersAndFeaturesForLegacyFiles
     if (missingFeatures.advancedAttackerControl) {
         auto advancedAttackerControlForSpot = false;
         for (int i = 0; i < parameters.numSpots; ++i) {
-            auto const& spotValues = parameters.spots[i].values;
+            auto const& spotValues = parameters.spot[i].values;
             if (!equals(spotValues.cellFunctionAttackerGeometryDeviationExponent, 0.0f)
                 || !equals(spotValues.cellFunctionAttackerConnectionsMismatchPenalty, 0.0f)) {
                 advancedAttackerControlForSpot = true;
@@ -256,7 +261,7 @@ void LegacyAuxiliaryDataParserService::updateParametersAndFeaturesForLegacyFiles
                 break;
             }
             for (int j = 0; j < parameters.numSpots; ++j) {
-                if (parameters.spots[j].values.cellColorTransitionTargetColor[i] != i) {
+                if (parameters.spot[j].values.cellColorTransitionTargetColor[i] != i) {
                     parameters.features.cellColorTransitionRules = true;
                     break;
                 }
@@ -314,7 +319,7 @@ void LegacyAuxiliaryDataParserService::updateParametersAndFeaturesForLegacyFiles
 
         setParametersForBase(parameters.baseValues, legacyParameters.base);
         for (int i = 0; i < MAX_SPOTS; ++i) {
-            setParametersForSpot(parameters.spots->values, legacyParameters.spots[i]);
+            setParametersForSpot(parameters.spot->values, legacyParameters.spots[i]);
         }
     }
 

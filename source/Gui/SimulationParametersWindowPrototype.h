@@ -38,6 +38,8 @@ private:
     };
     void processLocationTable();
 
+    void onDecreaseLocationIndex();
+
     std::vector<Location> generateLocations() const;
 
     void correctLayout(float origMasterHeight, float origExpertWidgetHeight);

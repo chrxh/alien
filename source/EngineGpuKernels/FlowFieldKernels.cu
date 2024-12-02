@@ -19,7 +19,7 @@ namespace
 
     __device__ __inline__ float2 calcAcceleration(BaseMap const& map, float2 const& pos, int const& spotIndex)
     {
-        auto const& spot = cudaSimulationParameters.spots[spotIndex];
+        auto const& spot = cudaSimulationParameters.spot[spotIndex];
         switch (spot.flowType) {
         case FlowType_Radial: {
             auto baseValue = getHeight(map, pos, spot);
@@ -60,7 +60,7 @@ __global__ void cudaApplyFlowFieldSettings(SimulationData data)
             int numFlowFields = 0;
             for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
 
-                if (cudaSimulationParameters.spots[i].flowType != FlowType_None) {
+                if (cudaSimulationParameters.spot[i].flowType != FlowType_None) {
                     accelerations[numFlowFields] = calcAcceleration(data.cellMap, cell->pos, i);
                     ++numFlowFields;
                 }
@@ -77,7 +77,7 @@ __global__ void cudaApplyFlowFieldSettings(SimulationData data)
             int numFlowFields = 0;
             for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
 
-                if (cudaSimulationParameters.spots[i].flowType != FlowType_None) {
+                if (cudaSimulationParameters.spot[i].flowType != FlowType_None) {
                     accelerations[numFlowFields] = calcAcceleration(data.cellMap, particle->absPos, i);
                     ++numFlowFields;
                 }

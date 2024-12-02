@@ -1,4 +1,4 @@
-#include "VersionChecker.h"
+#include "VersionParserService.h"
 
 #include <optional>
 #include <vector>
@@ -10,7 +10,7 @@
 
 #include "Base/Resources.h"
 
-bool VersionChecker::isVersionValid(std::string const& otherVersionString)
+bool VersionParserService::isVersionValid(std::string const& otherVersionString)
 {
     try {
         std::vector<std::string> versionParts;
@@ -33,7 +33,7 @@ bool VersionChecker::isVersionValid(std::string const& otherVersionString)
     return true;
 }
 
-VersionChecker::VersionParts VersionChecker::getVersionParts(std::string const& versionString)
+VersionParserService::VersionParts VersionParserService::getVersionParts(std::string const& versionString)
 {
     if (versionString.empty()) {
         VersionParts();
@@ -64,7 +64,7 @@ VersionChecker::VersionParts VersionChecker::getVersionParts(std::string const& 
     return result;
 }
 
-bool VersionChecker::isVersionOutdated(std::string const& otherVersionString)
+bool VersionParserService::isVersionOutdated(std::string const& otherVersionString)
 {
     auto otherParts = getVersionParts(otherVersionString);
     auto ownParts = getVersionParts(Const::ProgramVersion);
@@ -77,7 +77,7 @@ bool VersionChecker::isVersionOutdated(std::string const& otherVersionString)
     return false;
 }
 
-bool VersionChecker::isVersionNewer(std::string const& otherVersionString)
+bool VersionParserService::isVersionNewer(std::string const& otherVersionString)
 {
     auto otherParts = getVersionParts(otherVersionString);
     auto ownParts = getVersionParts(Const::ProgramVersion);

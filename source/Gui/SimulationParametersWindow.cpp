@@ -1651,9 +1651,9 @@ bool SimulationParametersWindow::processSpot(int index)
         auto origParameters = _simulationFacade->getOriginalSimulationParameters();
         auto lastParameters = parameters;
 
-        SimulationParametersSpot& spot = parameters.spots[index];
-        SimulationParametersSpot const& origSpot = origParameters.spots[index];
-        SimulationParametersSpot const& lastSpot = lastParameters.spots[index];
+        SimulationParametersSpot& spot = parameters.spot[index];
+        SimulationParametersSpot const& origSpot = origParameters.spot[index];
+        SimulationParametersSpot const& lastSpot = lastParameters.spot[index];
 
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
             auto worldSize = _simulationFacade->getWorldSize();
@@ -2452,8 +2452,8 @@ void SimulationParametersWindow::onAppendTab()
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
     int index = parameters.numSpots;
-    parameters.spots[index] = createSpot(parameters, index);
-    origParameters.spots[index] = createSpot(parameters, index);
+    parameters.spot[index] = createSpot(parameters, index);
+    origParameters.spot[index] = createSpot(parameters, index);
     ++parameters.numSpots;
     ++origParameters.numSpots;
     _simulationFacade->setSimulationParameters(parameters);
@@ -2466,8 +2466,8 @@ void SimulationParametersWindow::onDeleteTab(int index)
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
     for (int i = index; i < parameters.numSpots - 1; ++i) {
-        parameters.spots[i] = parameters.spots[i + 1];
-        origParameters.spots[i] = origParameters.spots[i + 1];
+        parameters.spot[i] = parameters.spot[i + 1];
+        origParameters.spot[i] = origParameters.spot[i + 1];
     }
     --parameters.numSpots;
     --origParameters.numSpots;

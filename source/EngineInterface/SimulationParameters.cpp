@@ -164,7 +164,7 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         return false;
     }
     for (int i = 0; i < numRadiationSources; ++i) {
-        if (radiationSources[i] != other.radiationSources[i]) {
+        if (radiationSource[i] != other.radiationSource[i]) {
             return false;
         }
     }
@@ -172,7 +172,7 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         return false;
     }
     for (int i = 0; i < numSpots; ++i) {
-        if (spots[i] != other.spots[i]) {
+        if (spot[i] != other.spot[i]) {
             return false;
         }
     }

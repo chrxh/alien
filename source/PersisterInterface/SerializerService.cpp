@@ -20,7 +20,7 @@
 
 #include "Base/LoggingService.h"
 #include "Base/Resources.h"
-#include "Base/VersionChecker.h"
+#include "Base/VersionParserService.h"
 
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationParameters.h"
@@ -1174,10 +1174,10 @@ void SerializerService::deserializeDataDescription(ClusteredDataDescription& dat
     std::string version;
     archive(version);
 
-    if (!VersionChecker::isVersionValid(version)) {
+    if (!VersionParserService::get().isVersionValid(version)) {
         throw std::runtime_error("No version detected.");
     }
-    if (VersionChecker::isVersionOutdated(version)) {
+    if (VersionParserService::get().isVersionOutdated(version)) {
         throw std::runtime_error("Version not supported.");
     }
     archive(data);

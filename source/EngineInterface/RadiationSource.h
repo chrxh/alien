@@ -39,7 +39,7 @@ enum RadiationSourceShapeType_
 struct RadiationSource
 {
     Char64 name = "<unnamed>";
-    int locationPosition = -1;
+    int locationIndex = -1;
 
     float strength = 0.0f;
     bool strengthPinned = false;
