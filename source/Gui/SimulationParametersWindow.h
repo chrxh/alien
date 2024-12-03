@@ -2,7 +2,7 @@
 
 #include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/SimulationParametersSpot.h"
+#include "EngineInterface/SimulationParametersZone.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "Definitions.h"
 #include "AlienWindow.h"
@@ -18,8 +18,8 @@ private:
     void shutdownIntern() override;
     void processIntern() override;
 
-    SimulationParametersSpot createSpot(SimulationParameters const& simParameters, int index);
-    void createDefaultSpotData(SimulationParametersSpot& spot);
+    SimulationParametersZone createSpot(SimulationParameters const& simParameters, int index);
+    void createDefaultSpotData(SimulationParametersZone& spot);
 
     void processToolbar();
     void processTabWidget();

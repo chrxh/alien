@@ -101,10 +101,10 @@ void SimulationParametersWindow::processIntern()
     processStatusBar();
 }
 
-SimulationParametersSpot SimulationParametersWindow::createSpot(SimulationParameters const& simParameters, int index)
+SimulationParametersZone SimulationParametersWindow::createSpot(SimulationParameters const& simParameters, int index)
 {
     auto worldSize = _simulationFacade->getWorldSize();
-    SimulationParametersSpot spot;
+    SimulationParametersZone spot;
     StringHelper::copy(spot.name, sizeof(spot.name), "Zone");
 
     spot.posX = toFloat(worldSize.x / 2);
@@ -120,7 +120,7 @@ SimulationParametersSpot SimulationParametersWindow::createSpot(SimulationParame
     return spot;
 }
 
-void SimulationParametersWindow::createDefaultSpotData(SimulationParametersSpot& spot)
+void SimulationParametersWindow::createDefaultSpotData(SimulationParametersZone& spot)
 {
     auto worldSize = _simulationFacade->getWorldSize();
 
@@ -181,8 +181,8 @@ void SimulationParametersWindow::processTabWidget()
         if (ImGui::BeginTabBar("##Parameters", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
             auto parameters = _simulationFacade->getSimulationParameters();
 
-            //add spot
-            if (parameters.numSpots < MAX_SPOTS) {
+            //add zone
+            if (parameters.numZones < MAX_SPOTS) {
                 if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
                     scheduleAppendTab = true;
                 }
@@ -191,7 +191,7 @@ void SimulationParametersWindow::processTabWidget()
 
             processBase();
 
-            for (int tab = 0; tab < parameters.numSpots; ++tab) {
+            for (int tab = 0; tab < parameters.numZones; ++tab) {
                 if (!processSpot(tab)) {
                     scheduleDeleteTabAtIndex = tab;
                 }
@@ -1651,9 +1651,9 @@ bool SimulationParametersWindow::processSpot(int index)
         auto origParameters = _simulationFacade->getOriginalSimulationParameters();
         auto lastParameters = parameters;
 
-        SimulationParametersSpot& spot = parameters.spot[index];
-        SimulationParametersSpot const& origSpot = origParameters.spot[index];
-        SimulationParametersSpot const& lastSpot = lastParameters.spot[index];
+        SimulationParametersZone& spot = parameters.zone[index];
+        SimulationParametersZone const& origSpot = origParameters.zone[index];
+        SimulationParametersZone const& lastSpot = lastParameters.zone[index];
 
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
             auto worldSize = _simulationFacade->getWorldSize();
@@ -1935,7 +1935,7 @@ bool SimulationParametersWindow::processSpot(int index)
                         .name("Disable radiation sources")
                         .textWidth(RightColumnWidth)
                         .defaultValue(origSpot.values.radiationDisableSources)
-                        .tooltip("If activated, all radiation sources within this spot are deactivated."),
+                        .tooltip("If activated, all radiation sources within this zone are deactivated."),
                     spot.values.radiationDisableSources);
                 spot.activatedValues.radiationDisableSources = spot.values.radiationDisableSources;
 
@@ -2451,11 +2451,11 @@ void SimulationParametersWindow::onAppendTab()
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
-    int index = parameters.numSpots;
-    parameters.spot[index] = createSpot(parameters, index);
-    origParameters.spot[index] = createSpot(parameters, index);
-    ++parameters.numSpots;
-    ++origParameters.numSpots;
+    int index = parameters.numZones;
+    parameters.zone[index] = createSpot(parameters, index);
+    origParameters.zone[index] = createSpot(parameters, index);
+    ++parameters.numZones;
+    ++origParameters.numZones;
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 }
@@ -2465,12 +2465,12 @@ void SimulationParametersWindow::onDeleteTab(int index)
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
-    for (int i = index; i < parameters.numSpots - 1; ++i) {
-        parameters.spot[i] = parameters.spot[i + 1];
-        origParameters.spot[i] = origParameters.spot[i + 1];
+    for (int i = index; i < parameters.numZones - 1; ++i) {
+        parameters.zone[i] = parameters.zone[i + 1];
+        origParameters.zone[i] = origParameters.zone[i + 1];
     }
-    --parameters.numSpots;
-    --origParameters.numSpots;
+    --parameters.numZones;
+    --origParameters.numZones;
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 }

@@ -14,7 +14,7 @@ namespace
     auto constexpr MasterHeight = 100.0f;
     auto constexpr MasterMinHeight = 50.0f;
 
-    auto constexpr DetailWidgetMinHeight = 60.0f;
+    auto constexpr DetailWidgetMinHeight = 0.0f;
 
     auto constexpr ExpertWidgetHeight = 100.0f;
     auto constexpr ExpertWidgetMinHeight = 60.0f;
@@ -33,6 +33,13 @@ void SimulationParametersWindowPrototype::initIntern(SimulationFacade simulation
     _expertWidgetOpen = GlobalSettings::get().getValue("windows.simulation parameters prototype.expert widget.open", _expertWidgetOpen);
     _masterWidgetHeight = GlobalSettings::get().getValue("windows.simulation parameters prototype.master widget.height", scale(MasterHeight));
     _expertWidgetHeight = GlobalSettings::get().getValue("windows.simulation parameters prototype.expert widget height", scale(ExpertWidgetHeight));
+
+    for (int n = 0; n < IM_ARRAYSIZE(_savedPalette); n++) {
+        ImVec4 color;
+        ImGui::ColorConvertHSVtoRGB(n / 31.0f, 0.8f, 0.2f, color.x, color.y, color.z);
+        color.w = 1.0f;  //alpha
+        _savedPalette[n] = static_cast<ImU32>(ImColor(color));
+    }
 }
 
 void SimulationParametersWindowPrototype::processIntern()
@@ -99,33 +106,39 @@ void SimulationParametersWindowPrototype::processToolbar()
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_LAYER_GROUP).tooltip("Add parameter zone"))) {
+        onAddZone();
     }
 
     ImGui::SameLine();
+    ImGui::PushID(1);
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_SUN).tooltip("Add radiation source"))) {
+        onAddSource();
+    }
+    ImGui::PopID();
+
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_CLONE).tooltip("Clone selected zone/radiation source"))) {
     }
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_CLONE).tooltip("Clone selected location"))) {
-    }
-
-    ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_MINUS).tooltip("Delete selected location"))) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_MINUS).tooltip("Delete selected zone/radiation source"))) {
     }
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
                                       .text(ICON_FA_CHEVRON_UP)
-                                      .tooltip("Move selected location upward")
+                                      .tooltip("Move selected zone/radiation source upward")
                                       .disabled(!_selectedLocationIndex.has_value() || _selectedLocationIndex.value() <= 1))) {
         onDecreaseLocationIndex();
     }
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
-                                      .text(ICON_FA_CHEVRON_DOWN)
-                                      .tooltip("Move selected location downward")
-                                      .disabled(!_selectedLocationIndex.has_value() || _selectedLocationIndex.value() >= _locations.size() - 1))) {
+    if (AlienImGui::ToolbarButton(
+            AlienImGui::ToolbarButtonParameters()
+                .text(ICON_FA_CHEVRON_DOWN)
+                .tooltip("Move selected zone/radiation source downward")
+                .disabled(
+                    !_selectedLocationIndex.has_value() || _selectedLocationIndex.value() >= _locations.size() - 1 || _selectedLocationIndex.value() == 0))) {
         onIncreaseLocationIndex();
     }
 
@@ -139,7 +152,7 @@ void SimulationParametersWindowPrototype::processMasterEditor()
 {
     if (ImGui::BeginChild("##masterEditor", {0, getMasterWidgetHeight()})) {
 
-        if (_masterWidgetOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Locations").highlighted(true).defaultOpen(_masterWidgetOpen))) {
+        if (_masterWidgetOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Zones and radiation sources").highlighted(true).defaultOpen(_masterWidgetOpen))) {
             processLocationTable();
 
             AlienImGui::EndTreeNode();
@@ -262,11 +275,138 @@ void SimulationParametersWindowPrototype::processLocationTable()
 
 namespace
 {
-    std::variant<SimulationParametersSpot*, RadiationSource*> findLocation(SimulationParameters& parameters, int locationIndex)
+    void increaseLocationIndex(SimulationParameters& parameters, int fromValue)
     {
-        for (int i = 0; i < parameters.numSpots; ++i) {
-            if (parameters.spot[i].locationIndex == locationIndex) {
-                return &parameters.spot[i];
+        for (int i = 0; i < parameters.numZones; ++i) {
+            auto& zone = parameters.zone[i];
+            if (zone.locationIndex >= fromValue) {
+                ++zone.locationIndex;
+            }
+        }
+        for (int i = 0; i < parameters.numRadiationSources; ++i) {
+            auto& source = parameters.radiationSource[i];
+            if (source.locationIndex >= fromValue) {
+                ++source.locationIndex;
+            }
+        }
+    }
+
+    std::string generateZoneName(SimulationParameters& parameters)
+    {
+        int counter = 0;
+        bool alreadyUsed;
+        std::string result;
+        do {
+            alreadyUsed = false;
+            result = "Zone " + std::to_string(++counter);
+            for (int i = 0; i < parameters.numZones; ++i) {
+                auto name = std::string(parameters.zone[i].name);
+                if (result == name) {
+                    alreadyUsed = true;
+                    break;
+                }
+            }
+        } while (alreadyUsed);
+
+        return result;
+    }
+
+    std::string generateSourceName(SimulationParameters& parameters)
+    {
+        int counter = 0;
+        bool alreadyUsed;
+        std::string result;
+        do {
+            alreadyUsed = false;
+            result = "Radiation " + std::to_string(++counter);
+            for (int i = 0; i < parameters.numRadiationSources; ++i) {
+                auto name = std::string(parameters.radiationSource[i].name);
+                if (result == name) {
+                    alreadyUsed = true;
+                    break;
+                }
+            }
+        } while (alreadyUsed);
+
+        return result;
+    }
+}
+
+void SimulationParametersWindowPrototype::onAddZone()
+{
+    auto parameters = _simulationFacade->getSimulationParameters();
+    auto origParameters = _simulationFacade->getOriginalSimulationParameters();
+
+    ++_selectedLocationIndex.value();
+    increaseLocationIndex(parameters, _selectedLocationIndex.value());
+    increaseLocationIndex(origParameters, _selectedLocationIndex.value());
+
+    auto worldSize = _simulationFacade->getWorldSize();
+
+    SimulationParametersZone zone;
+    StringHelper::copy(zone.name, sizeof(zone.name), generateZoneName(parameters));
+    zone.locationIndex = _selectedLocationIndex.value();
+    zone.posX = toFloat(worldSize.x / 2);
+    zone.posY = toFloat(worldSize.y / 2);
+    auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
+    zone.shapeType = SpotShapeType_Circular;
+    zone.fadeoutRadius = maxRadius / 3;
+    zone.color = _savedPalette[((2 + parameters.numZones) * 8) % IM_ARRAYSIZE(_savedPalette)];
+    zone.values = parameters.baseValues;
+
+    setDefaultShapeDataForZone(zone);
+
+    int index = parameters.numZones;
+    parameters.zone[index] = zone;
+    origParameters.zone[index] = zone;
+    ++parameters.numZones;
+    ++origParameters.numZones;
+    _simulationFacade->setSimulationParameters(parameters);
+    _simulationFacade->setOriginalSimulationParameters(origParameters);
+}
+
+void SimulationParametersWindowPrototype::onAddSource()
+{
+    auto& editService = SimulationParametersEditService::get();
+
+    auto parameters = _simulationFacade->getSimulationParameters();
+    auto origParameters = _simulationFacade->getOriginalSimulationParameters();
+
+    ++_selectedLocationIndex.value();
+    increaseLocationIndex(parameters, _selectedLocationIndex.value());
+    increaseLocationIndex(origParameters, _selectedLocationIndex.value());
+
+    auto strengths = editService.getRadiationStrengths(parameters);
+    auto newStrengths = editService.calcRadiationStrengthsForAddingSpot(strengths);
+
+    auto worldSize = _simulationFacade->getWorldSize();
+
+    RadiationSource source;
+    StringHelper::copy(source.name, sizeof(source.name), generateSourceName(parameters));
+    source.locationIndex = _selectedLocationIndex.value();
+    source.posX = toFloat(worldSize.x / 2);
+    source.posY = toFloat(worldSize.y / 2);
+
+    auto index = parameters.numRadiationSources;
+    parameters.radiationSource[index] = source;
+    origParameters.radiationSource[index] = source;
+    ++parameters.numRadiationSources;
+    ++origParameters.numRadiationSources;
+
+    editService.applyRadiationStrengths(parameters, newStrengths);
+    editService.applyRadiationStrengths(origParameters, newStrengths);
+
+    _simulationFacade->setSimulationParameters(parameters);
+    _simulationFacade->setOriginalSimulationParameters(origParameters);
+}
+
+namespace
+{
+    std::variant<SimulationParametersZone*, RadiationSource*> findLocation(SimulationParameters& parameters, int locationIndex)
+    {
+        for (int i = 0; i < parameters.numZones; ++i) {
+            if (parameters.zone[i].locationIndex == locationIndex) {
+                return &parameters.zone[i];
             }
         }
         for (int i = 0; i < parameters.numRadiationSources; ++i) {
@@ -279,15 +419,15 @@ namespace
 
     void onDecreaseLocationIndexIntern(SimulationParameters& parameters, int locationIndex)
     {
-        std::variant<SimulationParametersSpot*, RadiationSource*> zoneOrSource1 = findLocation(parameters, locationIndex);
-        std::variant<SimulationParametersSpot*, RadiationSource*> zoneOrSource2 = findLocation(parameters, locationIndex - 1);
-        if (std::holds_alternative<SimulationParametersSpot*>(zoneOrSource1)) {
-            std::get<SimulationParametersSpot*>(zoneOrSource1)->locationIndex -= 1;
+        std::variant<SimulationParametersZone*, RadiationSource*> zoneOrSource1 = findLocation(parameters, locationIndex);
+        std::variant<SimulationParametersZone*, RadiationSource*> zoneOrSource2 = findLocation(parameters, locationIndex - 1);
+        if (std::holds_alternative<SimulationParametersZone*>(zoneOrSource1)) {
+            std::get<SimulationParametersZone*>(zoneOrSource1)->locationIndex -= 1;
         } else {
             std::get<RadiationSource*>(zoneOrSource1)->locationIndex -= 1;
         }
-        if (std::holds_alternative<SimulationParametersSpot*>(zoneOrSource2)) {
-            std::get<SimulationParametersSpot*>(zoneOrSource2)->locationIndex += 1;
+        if (std::holds_alternative<SimulationParametersZone*>(zoneOrSource2)) {
+            std::get<SimulationParametersZone*>(zoneOrSource2)->locationIndex += 1;
         } else {
             std::get<RadiationSource*>(zoneOrSource2)->locationIndex += 1;
         }
@@ -295,15 +435,15 @@ namespace
 
     void onIncreaseLocationIndexIntern(SimulationParameters& parameters, int locationIndex)
     {
-        std::variant<SimulationParametersSpot*, RadiationSource*> zoneOrSource1 = findLocation(parameters, locationIndex);
-        std::variant<SimulationParametersSpot*, RadiationSource*> zoneOrSource2 = findLocation(parameters, locationIndex + 1);
-        if (std::holds_alternative<SimulationParametersSpot*>(zoneOrSource1)) {
-            std::get<SimulationParametersSpot*>(zoneOrSource1)->locationIndex += 1;
+        std::variant<SimulationParametersZone*, RadiationSource*> zoneOrSource1 = findLocation(parameters, locationIndex);
+        std::variant<SimulationParametersZone*, RadiationSource*> zoneOrSource2 = findLocation(parameters, locationIndex + 1);
+        if (std::holds_alternative<SimulationParametersZone*>(zoneOrSource1)) {
+            std::get<SimulationParametersZone*>(zoneOrSource1)->locationIndex += 1;
         } else {
             std::get<RadiationSource*>(zoneOrSource1)->locationIndex += 1;
         }
-        if (std::holds_alternative<SimulationParametersSpot*>(zoneOrSource2)) {
-            std::get<SimulationParametersSpot*>(zoneOrSource2)->locationIndex -= 1;
+        if (std::holds_alternative<SimulationParametersZone*>(zoneOrSource2)) {
+            std::get<SimulationParametersZone*>(zoneOrSource2)->locationIndex -= 1;
         } else {
             std::get<RadiationSource*>(zoneOrSource2)->locationIndex -= 1;
         }
@@ -340,12 +480,12 @@ void SimulationParametersWindowPrototype::updateLocations()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
 
-    _locations = std::vector<Location>(1 + parameters.numSpots + parameters.numRadiationSources);
+    _locations = std::vector<Location>(1 + parameters.numZones + parameters.numRadiationSources);
     auto strength = SimulationParametersEditService::get().getRadiationStrengths(parameters);
     auto pinnedString = strength.pinned.contains(0) ? ICON_FA_THUMBTACK " " : " ";
     _locations.at(0) = Location{"Main", LocationType::Base, "-", pinnedString + StringHelper::format(strength.values.front() * 100 + 0.05f, 1) + "%"};
-    for (int i = 0; i < parameters.numSpots; ++i) {
-        auto const& spot = parameters.spot[i];
+    for (int i = 0; i < parameters.numZones; ++i) {
+        auto const& spot = parameters.zone[i];
         auto position = "(" + StringHelper::format(spot.posX, 0) + ", " + StringHelper::format(spot.posY, 0) + ")";
         _locations.at(spot.locationIndex) = Location{spot.name, LocationType::ParameterZone, position};
     }
@@ -355,6 +495,19 @@ void SimulationParametersWindowPrototype::updateLocations()
         auto pinnedString = strength.pinned.contains(i + 1) ? ICON_FA_THUMBTACK " " : " ";
         _locations.at(source.locationIndex) = Location{
             source.name, LocationType::RadiationSource, position, pinnedString + StringHelper::format(strength.values.at(i + 1) * 100 + 0.05f, 1) + "%"};
+    }
+}
+
+void SimulationParametersWindowPrototype::setDefaultShapeDataForZone(SimulationParametersZone& spot) const
+{
+    auto worldSize = _simulationFacade->getWorldSize();
+
+    auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
+    if (spot.shapeType == SpotShapeType_Circular) {
+        spot.shapeData.circularSpot.coreRadius = maxRadius / 3;
+    } else {
+        spot.shapeData.rectangularSpot.height = maxRadius / 3;
+        spot.shapeData.rectangularSpot.width = maxRadius / 3;
     }
 }
 

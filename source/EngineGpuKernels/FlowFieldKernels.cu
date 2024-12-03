@@ -7,7 +7,7 @@
 
 namespace
 {
-    __device__ float getHeight(BaseMap const& map, float2 const& pos, SimulationParametersSpot const& spot)
+    __device__ float getHeight(BaseMap const& map, float2 const& pos, SimulationParametersZone const& spot)
     {
         auto dist = map.getDistance(pos, float2{spot.posX, spot.posY});
         if (Orientation_Clockwise == spot.flowData.radialFlow.orientation) {
@@ -19,7 +19,7 @@ namespace
 
     __device__ __inline__ float2 calcAcceleration(BaseMap const& map, float2 const& pos, int const& spotIndex)
     {
-        auto const& spot = cudaSimulationParameters.spot[spotIndex];
+        auto const& spot = cudaSimulationParameters.zone[spotIndex];
         switch (spot.flowType) {
         case FlowType_Radial: {
             auto baseValue = getHeight(map, pos, spot);
@@ -58,9 +58,9 @@ __global__ void cudaApplyFlowFieldSettings(SimulationData data)
                 continue;
             }
             int numFlowFields = 0;
-            for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+            for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
 
-                if (cudaSimulationParameters.spot[i].flowType != FlowType_None) {
+                if (cudaSimulationParameters.zone[i].flowType != FlowType_None) {
                     accelerations[numFlowFields] = calcAcceleration(data.cellMap, cell->pos, i);
                     ++numFlowFields;
                 }
@@ -75,9 +75,9 @@ __global__ void cudaApplyFlowFieldSettings(SimulationData data)
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& particle = particles.at(index);
             int numFlowFields = 0;
-            for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
+            for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
 
-                if (cudaSimulationParameters.spot[i].flowType != FlowType_None) {
+                if (cudaSimulationParameters.zone[i].flowType != FlowType_None) {
                     accelerations[numFlowFields] = calcAcceleration(data.cellMap, particle->absPos, i);
                     ++numFlowFields;
                 }
