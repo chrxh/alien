@@ -14,7 +14,6 @@
 #include "GenomeDecoder.cuh"
 #include "RadiationProcessor.cuh"
 #include "SpotCalculator.cuh"
-#include "Gui/HelpStrings.h"
 
 class CellProcessor
 {
