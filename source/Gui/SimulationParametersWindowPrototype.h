@@ -38,8 +38,11 @@ private:
     };
     void processLocationTable();
 
+    void onOpenParameters();
+    void onSaveParameters();
     void onAddZone();
     void onAddSource();
+    void onCloneLocation();
     void onDecreaseLocationIndex();
     void onIncreaseLocationIndex();
 
@@ -70,4 +73,6 @@ private:
 
     std::vector<Location> _locations;
     std::optional<int> _selectedLocationIndex;
+
+    std::string _fileDialogPath;
 };
