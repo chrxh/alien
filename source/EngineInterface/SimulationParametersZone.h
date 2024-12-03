@@ -87,7 +87,7 @@ union SpotShapeData
     RectangularSpot rectangularSpot;
 };
 
-struct SimulationParametersSpot
+struct SimulationParametersZone
 {
     Char64 name = "<unnamed>";
     int locationIndex = -1;
@@ -109,7 +109,7 @@ struct SimulationParametersSpot
     SimulationParametersSpotValues values;
     SimulationParametersSpotActivatedValues activatedValues;
 
-    bool operator==(SimulationParametersSpot const& other) const
+    bool operator==(SimulationParametersZone const& other) const
     {
         if (flowType != other.flowType) {
             return false;
@@ -146,5 +146,5 @@ struct SimulationParametersSpot
         return color == other.color && posX == other.posX && posY == other.posY && velX == other.velX && velY == other.velY
             && fadeoutRadius == other.fadeoutRadius && values == other.values && activatedValues == other.activatedValues && shapeType == other.shapeType;
     }
-    bool operator!=(SimulationParametersSpot const& other) const { return !operator==(other); }
+    bool operator!=(SimulationParametersZone const& other) const { return !operator==(other); }
 };

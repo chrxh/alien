@@ -6,7 +6,7 @@
 #include "CellFunctionConstants.h"
 #include "SimulationParametersSpotValues.h"
 #include "RadiationSource.h"
-#include "SimulationParametersSpot.h"
+#include "SimulationParametersZone.h"
 #include "Motion.h"
 #include "Features.h"
 #include "SimulationParametersTypes.h"
@@ -36,8 +36,8 @@ struct SimulationParameters
     float externalEnergyBackflowLimit = Infinity<float>::value;
 
     //spots
-    int numSpots = 0;
-    SimulationParametersSpot spot[MAX_SPOTS];
+    int numZones = 0;
+    SimulationParametersZone zone[MAX_SPOTS];
 
     //rendering
     uint32_t backgroundColor = 0x1b0000;

@@ -351,8 +351,8 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
 
     auto baseColor = colorToFloat3(cudaSimulationParameters.backgroundColor);
     float3 spotColors[MAX_SPOTS];
-    for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
-        spotColors[i] = colorToFloat3(cudaSimulationParameters.spot[i].color);
+    for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
+        spotColors[i] = colorToFloat3(cudaSimulationParameters.zone[i].color);
     }
 
     auto const partition = calcAllThreadsPartition(imageSize.x * imageSize.y);

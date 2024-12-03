@@ -1056,6 +1056,10 @@ void AlienImGui::Group(std::string const& text, std::optional<std::string> const
 bool AlienImGui::ToolbarButton(ToolbarButtonParameters const& parameters)
 {
     auto id = std::to_string(ImGui::GetID(parameters._text.c_str()));
+    if (parameters._secondText.has_value()) {
+        id += parameters._secondText.value();
+    }
+    ImGui::PushID(id.c_str());
 
     ImGui::PushFont(StyleRepository::get().getIconFont());
     ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0.5f, 0.75f});
@@ -1091,6 +1095,7 @@ bool AlienImGui::ToolbarButton(ToolbarButtonParameters const& parameters)
     if (parameters._tooltip) {
         AlienImGui::Tooltip(*parameters._tooltip);
     }
+    ImGui::PopID();
     return result;
 }
 

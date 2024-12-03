@@ -37,12 +37,12 @@ void SimulationParametersValidationService::validateAndCorrect(SimulationParamet
     parameters.cellGlowRadius = std::max(1.0f, std::min(8.0f, parameters.cellGlowRadius));
     parameters.cellGlowStrength = std::max(0.0f, std::min(1.0f, parameters.cellGlowStrength));
 
-    for (int i = 0; i < parameters.numSpots; ++i) {
-        validateAndCorrect(parameters.spot[i], parameters);
+    for (int i = 0; i < parameters.numZones; ++i) {
+        validateAndCorrect(parameters.zone[i], parameters);
     }
 }
 
-void SimulationParametersValidationService::validateAndCorrect(SimulationParametersSpot& spot, SimulationParameters const& parameters) const
+void SimulationParametersValidationService::validateAndCorrect(SimulationParametersZone& spot, SimulationParameters const& parameters) const
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {

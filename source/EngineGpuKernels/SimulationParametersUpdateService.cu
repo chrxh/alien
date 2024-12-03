@@ -17,13 +17,13 @@ SimulationParameters SimulationParametersUpdateService::integrateChanges(
     auto result = changedParameters;
 
     if (updateConfig == SimulationParametersUpdateConfig::AllExceptChangingPositions) {
-        auto numSpots = std::min(currentParameters.numSpots, changedParameters.numSpots);
+        auto numSpots = std::min(currentParameters.numZones, changedParameters.numZones);
         for (int i = 0; i < numSpots; ++i) {
-            if (currentParameters.spot[i].velX != 0) {
-                result.spot[i].posX = currentParameters.spot[i].posX;
+            if (currentParameters.zone[i].velX != 0) {
+                result.zone[i].posX = currentParameters.zone[i].posX;
             }
-            if (currentParameters.spot[i].velY != 0) {
-                result.spot[i].posY = currentParameters.spot[i].posY;
+            if (currentParameters.zone[i].velY != 0) {
+                result.zone[i].posY = currentParameters.zone[i].posY;
             }
         }
 
@@ -65,8 +65,8 @@ bool SimulationParametersUpdateService::updateSimulationParametersAfterTimestep(
         source.posX = correctedPosition.x;
         source.posY = correctedPosition.y;
     }
-    for (int i = 0; i < settings.simulationParameters.numSpots; ++i) {
-        auto& spot = settings.simulationParameters.spot[i];
+    for (int i = 0; i < settings.simulationParameters.numZones; ++i) {
+        auto& spot = settings.simulationParameters.zone[i];
         if (abs(spot.velX) > NEAR_ZERO) {
             spot.posX += spot.velX * settings.simulationParameters.timestepSize;
             result = true;

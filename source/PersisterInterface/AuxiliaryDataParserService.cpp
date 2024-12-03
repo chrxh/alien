@@ -714,11 +714,11 @@ namespace
         }
 
         //spots
-        ParameterParser::encodeDecode(tree, parameters.numSpots, defaultParameters.numSpots, "simulation parameters.spots.num spots", parserTask);
-        for (int index = 0; index < parameters.numSpots; ++index) {
+        ParameterParser::encodeDecode(tree, parameters.numZones, defaultParameters.numZones, "simulation parameters.spots.num spots", parserTask);
+        for (int index = 0; index < parameters.numZones; ++index) {
             std::string base = "simulation parameters.spots." + std::to_string(index) + ".";
-            auto& spot = parameters.spot[index];
-            auto& defaultSpot = defaultParameters.spot[index];
+            auto& spot = parameters.zone[index];
+            auto& defaultSpot = defaultParameters.zone[index];
             ParameterParser::encodeDecode(tree, spot.name, defaultSpot.name, base + "name", parserTask);
             ParameterParser::encodeDecode(tree, spot.locationIndex, defaultSpot.locationIndex, base + "location index", parserTask);
             ParameterParser::encodeDecode(tree, spot.color, defaultSpot.color, base + "color", parserTask);

@@ -16,8 +16,8 @@ namespace
             if ((parameters.baseValues.*parameter)[i] != value) {
                 return false;
             }
-            for (int j = 0; j < parameters.numSpots; ++j) {
-                if ((parameters.spot[j].values.*parameter)[i] != value) {
+            for (int j = 0; j < parameters.numZones; ++j) {
+                if ((parameters.zone[j].values.*parameter)[i] != value) {
                     return false;
                 }
             }
@@ -31,8 +31,8 @@ namespace
             if (!values.contains((parameters.baseValues.*parameter)[i])) {
                 return false;
             }
-            for (int j = 0; j < parameters.numSpots; ++j) {
-                if (!values.contains((parameters.spot[j].values.*parameter)[i])) {
+            for (int j = 0; j < parameters.numZones; ++j) {
+                if (!values.contains((parameters.zone[j].values.*parameter)[i])) {
                     return false;
                 }
             }
@@ -158,7 +158,7 @@ void LegacyAuxiliaryDataParserService::searchAndApplyLegacyParameters(
 
     LegacyParameters legacyParameters;
     legacyParameters.base = readLegacyParametersForBase(tree, "simulation parameters.");
-    for (int i = 0; i < parameters.numSpots; ++i) {
+    for (int i = 0; i < parameters.numZones; ++i) {
         legacyParameters.spots[i] = readLegacyParametersForSpot(tree, "simulation parameters.spots." + std::to_string(i) + ".");
     }
     updateParametersAndFeaturesForLegacyFiles(programVersion, missingFeatures, legacyFeatures, missingParameters, legacyParameters, parameters);
@@ -186,18 +186,18 @@ void LegacyAuxiliaryDataParserService::updateParametersAndFeaturesForLegacyFiles
 
     //parameter conversion for v4.11.x and below
     auto versionParts = VersionParserService::get().getVersionParts(programVersion);
-    if (versionParts.major == 4 && versionParts.minor == 11) {
+    if (versionParts.major <= 4 && versionParts.minor <= 11) {
         int locationPosition = 0;
-        if (parameters.numSpots > 0) {
-            for (int i = 0; i < parameters.numSpots; ++i) {
-                parameters.spot[i].locationIndex = ++locationPosition;
-                StringHelper::copy(parameters.spot[i].name, sizeof(parameters.spot[i].name), "Zone " + std::to_string(i + 1));
+        if (parameters.numZones > 0) {
+            for (int i = 0; i < parameters.numZones; ++i) {
+                parameters.zone[i].locationIndex = ++locationPosition;
+                StringHelper::copy(parameters.zone[i].name, sizeof(parameters.zone[i].name), "Zone " + std::to_string(i + 1));
             }
         }
         if (parameters.numRadiationSources > 0) {
             for (int i = 0; i < parameters.numRadiationSources; ++i) {
                 parameters.radiationSource[i].locationIndex = ++locationPosition;
-                StringHelper::copy(parameters.radiationSource[i].name, sizeof(parameters.spot[i].name), "Radiation " + std::to_string(i + 1));
+                StringHelper::copy(parameters.radiationSource[i].name, sizeof(parameters.zone[i].name), "Radiation " + std::to_string(i + 1));
             }
         }
     }
@@ -227,8 +227,8 @@ void LegacyAuxiliaryDataParserService::updateParametersAndFeaturesForLegacyFiles
 
     if (missingFeatures.advancedAttackerControl) {
         auto advancedAttackerControlForSpot = false;
-        for (int i = 0; i < parameters.numSpots; ++i) {
-            auto const& spotValues = parameters.spot[i].values;
+        for (int i = 0; i < parameters.numZones; ++i) {
+            auto const& spotValues = parameters.zone[i].values;
             if (!equals(spotValues.cellFunctionAttackerGeometryDeviationExponent, 0.0f)
                 || !equals(spotValues.cellFunctionAttackerConnectionsMismatchPenalty, 0.0f)) {
                 advancedAttackerControlForSpot = true;
@@ -260,8 +260,8 @@ void LegacyAuxiliaryDataParserService::updateParametersAndFeaturesForLegacyFiles
                 parameters.features.cellColorTransitionRules = true;
                 break;
             }
-            for (int j = 0; j < parameters.numSpots; ++j) {
-                if (parameters.spot[j].values.cellColorTransitionTargetColor[i] != i) {
+            for (int j = 0; j < parameters.numZones; ++j) {
+                if (parameters.zone[j].values.cellColorTransitionTargetColor[i] != i) {
                     parameters.features.cellColorTransitionRules = true;
                     break;
                 }
@@ -319,7 +319,7 @@ void LegacyAuxiliaryDataParserService::updateParametersAndFeaturesForLegacyFiles
 
         setParametersForBase(parameters.baseValues, legacyParameters.base);
         for (int i = 0; i < MAX_SPOTS; ++i) {
-            setParametersForSpot(parameters.spot->values, legacyParameters.spots[i]);
+            setParametersForSpot(parameters.zone->values, legacyParameters.spots[i]);
         }
     }
 

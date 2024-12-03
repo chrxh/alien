@@ -36,7 +36,7 @@ bool VersionParserService::isVersionValid(std::string const& otherVersionString)
 VersionParserService::VersionParts VersionParserService::getVersionParts(std::string const& versionString)
 {
     if (versionString.empty()) {
-        VersionParts();
+        return VersionParts();
     }
 
     std::vector<std::string> versionParts;

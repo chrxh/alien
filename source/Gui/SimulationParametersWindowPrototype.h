@@ -38,10 +38,14 @@ private:
     };
     void processLocationTable();
 
+    void onAddZone();
+    void onAddSource();
     void onDecreaseLocationIndex();
     void onIncreaseLocationIndex();
 
     void updateLocations();
+
+    void setDefaultShapeDataForZone(SimulationParametersZone& spot) const;
 
     void correctLayout(float origMasterHeight, float origExpertWidgetHeight);
 
@@ -59,6 +63,8 @@ private:
     bool _expertWidgetOpen = true;
     float _masterWidgetHeight = 0;
     float _expertWidgetHeight = 0;
+
+    uint32_t _savedPalette[32] = {};
 
     std::optional<SimulationParameters> _copiedParameters;
 

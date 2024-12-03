@@ -229,9 +229,9 @@ void TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
         }
     }
 
-    if (origParameters.numSpots == parameters.numSpots) {
-        for (int i = 0; i < parameters.numSpots; ++i) {
-            restorePosition(parameters.spot[i], origParameters.spot[i], snapshot.timestep);
+    if (origParameters.numZones == parameters.numZones) {
+        for (int i = 0; i < parameters.numZones; ++i) {
+            restorePosition(parameters.zone[i], origParameters.zone[i], snapshot.timestep);
         }
     }
 

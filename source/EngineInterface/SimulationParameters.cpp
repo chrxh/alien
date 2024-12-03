@@ -168,11 +168,11 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
             return false;
         }
     }
-    if (numSpots != other.numSpots) {
+    if (numZones != other.numZones) {
         return false;
     }
-    for (int i = 0; i < numSpots; ++i) {
-        if (spot[i] != other.spot[i]) {
+    for (int i = 0; i < numZones; ++i) {
+        if (zone[i] != other.zone[i]) {
             return false;
         }
     }

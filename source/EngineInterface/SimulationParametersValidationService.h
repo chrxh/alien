@@ -15,5 +15,5 @@ public:
     void validateAndCorrect(SimulationParameters& parameters) const;
 
 private:
-    void validateAndCorrect(SimulationParametersSpot& spot, SimulationParameters const& parameters) const;
+    void validateAndCorrect(SimulationParametersZone& spot, SimulationParameters const& parameters) const;
 };
