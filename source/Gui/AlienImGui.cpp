@@ -1074,10 +1074,10 @@ bool AlienImGui::ToolbarButton(ToolbarButtonParameters const& parameters)
     ImGui::PushStyleColor(ImGuiCol_Text, static_cast<ImVec4> (Const::ToolbarButtonTextColor));
     auto buttonSize = scale(40.0f);
 
-    auto pos = ImGui::GetCursorScreenPos();
     ImGui::BeginDisabled(parameters._disabled);
+
+    auto pos = ImGui::GetCursorScreenPos();
     auto result = ImGui::Button(parameters._text.c_str(), {buttonSize, buttonSize});
-    ImGui::EndDisabled();
 
     if (parameters._secondText.has_value()) {
         ImGui::GetWindowDrawList()->AddText(
@@ -1087,6 +1087,7 @@ bool AlienImGui::ToolbarButton(ToolbarButtonParameters const& parameters)
             ImGui::GetColorU32(ImGuiCol_Text),
             parameters._secondText->c_str());
     }
+    ImGui::EndDisabled();
 
     ImGui::PopStyleColor(4);
     ImGui::PopStyleVar();
@@ -1284,7 +1285,7 @@ void AlienImGui::StatusBar(std::vector<std::string> const& textItems)
 
 void AlienImGui::Tooltip(std::string const& text, bool delay)
 {
-    if (ImGui::IsItemHovered() && (!delay || (delay && GImGui->HoveredIdTimer > HoveredTimer))) {
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled) && (!delay || (delay && GImGui->HoveredIdTimer > HoveredTimer))) {
         ImGui::BeginTooltip();
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TooltipTextColor);
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);

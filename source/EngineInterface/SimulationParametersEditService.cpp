@@ -91,7 +91,7 @@ void SimulationParametersEditService::adaptRadiationStrengths(RadiationStrengths
     }
 }
 
-auto SimulationParametersEditService::calcRadiationStrengthsForAddingSpot(RadiationStrengths const& strengths) const -> RadiationStrengths
+auto SimulationParametersEditService::calcRadiationStrengthsForAddingZone(RadiationStrengths const& strengths) const -> RadiationStrengths
 {
     auto result = strengths;
     if (strengths.values.size() == strengths.pinned.size()) {
@@ -112,7 +112,7 @@ auto SimulationParametersEditService::calcRadiationStrengthsForAddingSpot(Radiat
     return result;
 }
 
-auto SimulationParametersEditService::calcRadiationStrengthsForDeletingSpot(
+auto SimulationParametersEditService::calcRadiationStrengthsForDeletingZone(
     RadiationStrengths const& strengths, int deleteIndex) const -> RadiationStrengths
 {
     auto existsUnpinned = false;

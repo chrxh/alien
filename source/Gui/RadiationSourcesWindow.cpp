@@ -237,7 +237,7 @@ void RadiationSourcesWindow::onAppendTab()
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
     auto strengths = editService.getRadiationStrengths(parameters);
-    auto newStrengths = editService.calcRadiationStrengthsForAddingSpot(strengths);
+    auto newStrengths = editService.calcRadiationStrengthsForAddingZone(strengths);
 
     auto index = parameters.numRadiationSources;
     parameters.radiationSource[index] = createParticleSource();
@@ -259,7 +259,7 @@ void RadiationSourcesWindow::onDeleteTab(int index)
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
     auto strengths = editService.getRadiationStrengths(parameters);
-    auto newStrengths = editService.calcRadiationStrengthsForDeletingSpot(strengths, index + 1);
+    auto newStrengths = editService.calcRadiationStrengthsForDeletingZone(strengths, index + 1);
 
     for (int i = index; i < parameters.numRadiationSources - 1; ++i) {
         parameters.radiationSource[i] = parameters.radiationSource[i + 1];

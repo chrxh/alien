@@ -1,5 +1,6 @@
 #include "SimulationParametersWindowPrototype.h"
 
+#include <ImFileDialog.h>
 #include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/StringHelper.h"
@@ -7,7 +8,10 @@
 #include "EngineInterface/SimulationFacade.h"
 
 #include "AlienImGui.h"
+#include "GenericFileDialog.h"
+#include "GenericMessageDialog.h"
 #include "OverlayController.h"
+#include "PersisterInterface/SerializerService.h"
 
 namespace
 {
@@ -77,10 +81,12 @@ void SimulationParametersWindowPrototype::shutdownIntern()
 void SimulationParametersWindowPrototype::processToolbar()
 {
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN).tooltip("Open simulation parameters from file"))) {
+        onOpenParameters();
     }
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_SAVE).tooltip("Save simulation parameters to file"))) {
+        onSaveParameters();
     }
 
     ImGui::SameLine();
@@ -110,14 +116,18 @@ void SimulationParametersWindowPrototype::processToolbar()
     }
 
     ImGui::SameLine();
-    ImGui::PushID(1);
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_SUN).tooltip("Add radiation source"))) {
         onAddSource();
     }
-    ImGui::PopID();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_CLONE).tooltip("Clone selected zone/radiation source"))) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
+                                      .text(ICON_FA_PLUS)
+                                      .secondText(ICON_FA_CLONE)
+                                      .disabled(!_selectedLocationIndex.has_value() || _selectedLocationIndex.value() == 0)
+                                      .tooltip("Clone selected zone/radiation source")))
+        {
+        onCloneLocation();
     }
 
     ImGui::SameLine();
@@ -127,8 +137,8 @@ void SimulationParametersWindowPrototype::processToolbar()
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
                                       .text(ICON_FA_CHEVRON_UP)
-                                      .tooltip("Move selected zone/radiation source upward")
-                                      .disabled(!_selectedLocationIndex.has_value() || _selectedLocationIndex.value() <= 1))) {
+                                      .disabled(!_selectedLocationIndex.has_value() || _selectedLocationIndex.value() <= 1)
+                                      .tooltip("Move selected zone/radiation source upward"))) {
         onDecreaseLocationIndex();
     }
 
@@ -273,6 +283,39 @@ void SimulationParametersWindowPrototype::processLocationTable()
     }
 }
 
+void SimulationParametersWindowPrototype::onOpenParameters()
+{
+    GenericFileDialog::get().showOpenFileDialog(
+        "Open simulation parameters", "Simulation parameters (*.parameters){.parameters},.*", _fileDialogPath, [&](std::filesystem::path const& path) {
+            auto firstFilename = ifd::FileDialog::Instance().GetResult();
+            auto firstFilenameCopy = firstFilename;
+            _fileDialogPath = firstFilenameCopy.remove_filename().string();
+
+            SimulationParameters parameters;
+            if (!SerializerService::get().deserializeSimulationParametersFromFile(parameters, firstFilename.string())) {
+                GenericMessageDialog::get().information("Open simulation parameters", "The selected file could not be opened.");
+            } else {
+                _simulationFacade->setSimulationParameters(parameters);
+                _simulationFacade->setOriginalSimulationParameters(parameters);
+            }
+        });
+}
+
+void SimulationParametersWindowPrototype::onSaveParameters()
+{
+    GenericFileDialog::get().showSaveFileDialog(
+        "Save simulation parameters", "Simulation parameters (*.parameters){.parameters},.*", _fileDialogPath, [&](std::filesystem::path const& path) {
+            auto firstFilename = ifd::FileDialog::Instance().GetResult();
+            auto firstFilenameCopy = firstFilename;
+            _fileDialogPath = firstFilenameCopy.remove_filename().string();
+
+            auto parameters = _simulationFacade->getSimulationParameters();
+            if (!SerializerService::get().serializeSimulationParametersToFile(firstFilename.string(), parameters)) {
+                GenericMessageDialog::get().information("Save simulation parameters", "The selected file could not be saved.");
+            }
+        });
+}
+
 namespace
 {
     void increaseLocationIndex(SimulationParameters& parameters, int fromValue)
@@ -330,6 +373,21 @@ namespace
 
         return result;
     }
+
+    std::variant<SimulationParametersZone*, RadiationSource*> findLocation(SimulationParameters& parameters, int locationIndex)
+    {
+        for (int i = 0; i < parameters.numZones; ++i) {
+            if (parameters.zone[i].locationIndex == locationIndex) {
+                return &parameters.zone[i];
+            }
+        }
+        for (int i = 0; i < parameters.numRadiationSources; ++i) {
+            if (parameters.radiationSource[i].locationIndex == locationIndex) {
+                return &parameters.radiationSource[i];
+            }
+        }
+        THROW_NOT_IMPLEMENTED();
+    }
 }
 
 void SimulationParametersWindowPrototype::onAddZone()
@@ -377,7 +435,7 @@ void SimulationParametersWindowPrototype::onAddSource()
     increaseLocationIndex(origParameters, _selectedLocationIndex.value());
 
     auto strengths = editService.getRadiationStrengths(parameters);
-    auto newStrengths = editService.calcRadiationStrengthsForAddingSpot(strengths);
+    auto newStrengths = editService.calcRadiationStrengthsForAddingZone(strengths);
 
     auto worldSize = _simulationFacade->getWorldSize();
 
@@ -400,23 +458,55 @@ void SimulationParametersWindowPrototype::onAddSource()
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 }
 
-namespace
+void SimulationParametersWindowPrototype::onCloneLocation()
 {
-    std::variant<SimulationParametersZone*, RadiationSource*> findLocation(SimulationParameters& parameters, int locationIndex)
-    {
-        for (int i = 0; i < parameters.numZones; ++i) {
-            if (parameters.zone[i].locationIndex == locationIndex) {
-                return &parameters.zone[i];
-            }
-        }
-        for (int i = 0; i < parameters.numRadiationSources; ++i) {
-            if (parameters.radiationSource[i].locationIndex == locationIndex) {
-                return &parameters.radiationSource[i];
-            }
-        }
-        THROW_NOT_IMPLEMENTED();
+    auto parameters = _simulationFacade->getSimulationParameters();
+    auto origParameters = _simulationFacade->getOriginalSimulationParameters();
+
+    auto location = findLocation(parameters, _selectedLocationIndex.value());
+
+    ++_selectedLocationIndex.value();
+    increaseLocationIndex(parameters, _selectedLocationIndex.value());
+    increaseLocationIndex(origParameters, _selectedLocationIndex.value());
+
+    if (std::holds_alternative<SimulationParametersZone*>(location)) {
+        auto zone = std::get<SimulationParametersZone*>(location);
+        auto clone = *zone;
+
+        StringHelper::copy(clone.name, sizeof(clone.name), generateZoneName(parameters));
+        clone.locationIndex = _selectedLocationIndex.value();
+
+        int index = parameters.numZones;
+        parameters.zone[index] = clone;
+        origParameters.zone[index] = clone;
+        ++parameters.numZones;
+        ++origParameters.numZones;
+    } else {
+        auto source = std::get<RadiationSource*>(location);
+        auto clone = *source;
+
+        auto& editService = SimulationParametersEditService::get();
+        auto strengths = editService.getRadiationStrengths(parameters);
+        auto newStrengths = editService.calcRadiationStrengthsForAddingZone(strengths);
+
+        StringHelper::copy(clone.name, sizeof(clone.name), generateSourceName(parameters));
+        clone.locationIndex = _selectedLocationIndex.value();
+        auto index = parameters.numRadiationSources;
+        parameters.radiationSource[index] = clone;
+        origParameters.radiationSource[index] = clone;
+        ++parameters.numRadiationSources;
+        ++origParameters.numRadiationSources;
+
+        editService.applyRadiationStrengths(parameters, newStrengths);
+        editService.applyRadiationStrengths(origParameters, newStrengths);
     }
 
+    _simulationFacade->setSimulationParameters(parameters);
+    _simulationFacade->setOriginalSimulationParameters(origParameters);
+}
+
+namespace
+{
     void onDecreaseLocationIndexIntern(SimulationParameters& parameters, int locationIndex)
     {
         std::variant<SimulationParametersZone*, RadiationSource*> zoneOrSource1 = findLocation(parameters, locationIndex);
