@@ -1345,7 +1345,7 @@ void SimulationParametersWindow::processBase()
              * Addon: Cell color transition rules
              */
             if (parameters.features.cellColorTransitionRules) {
-                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell color transition rules").highlighted(false))) {
+                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell color transition rules"))) {
                     for (int color = 0; color < MAX_COLORS; ++color) {
                         ImGui::PushID(color);
                         auto widgetParameters = AlienImGui::InputColorTransitionParameters()
@@ -1377,7 +1377,7 @@ void SimulationParametersWindow::processBase()
              * Addon: Cell age limiter
              */
             if (parameters.features.cellAgeLimiter) {
-                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell age limiter").highlighted(false))) {
+                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell age limiter"))) {
                     AlienImGui::SliderFloat(
                         AlienImGui::SliderFloatParameters()
                             .name("Maximum inactive cell age")
@@ -1443,7 +1443,7 @@ void SimulationParametersWindow::processBase()
              * Addon: Cell glow
              */
             if (parameters.features.cellGlow) {
-                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell glow").highlighted(false))) {
+                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell glow"))) {
                     AlienImGui::Switcher(
                         AlienImGui::SwitcherParameters()
                             .name("Coloring")
@@ -1486,7 +1486,7 @@ void SimulationParametersWindow::processBase()
              * Addon: External energy control
              */
             if (parameters.features.externalEnergyControl) {
-                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: External energy control").highlighted(false))) {
+                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: External energy control"))) {
                     AlienImGui::SliderFloat(
                         AlienImGui::SliderFloatParameters()
                             .name("External energy amount")
@@ -1571,7 +1571,7 @@ void SimulationParametersWindow::processBase()
              * Addon: Genome complexity measurement
              */
             if (parameters.features.genomeComplexityMeasurement) {
-                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Genome complexity measurement").highlighted(false))) {
+                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Genome complexity measurement"))) {
                     AlienImGui::SliderFloat(
                         AlienImGui::SliderFloatParameters()
                             .name("Size factor")
@@ -2280,7 +2280,7 @@ bool SimulationParametersWindow::processSpot(int index)
              * Addon: Cell age limiter
              */
             if (parameters.features.cellAgeLimiter) {
-                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell age limiter").highlighted(false))) {
+                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell age limiter"))) {
                     AlienImGui::SliderFloat(
                         AlienImGui::SliderFloatParameters()
                             .name("Maximum inactive cell age")
@@ -2303,7 +2303,7 @@ bool SimulationParametersWindow::processSpot(int index)
              * Addon: Cell color transition rules
              */
             if (parameters.features.cellColorTransitionRules) {
-                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell color transition rules").highlighted(false))) {
+                if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell color transition rules"))) {
                     ImGui::Checkbox("##cellColorTransition", &spot.activatedValues.cellColorTransition);
                     ImGui::SameLine();
                     ImGui::BeginDisabled(!spot.activatedValues.cellColorTransition);
@@ -2361,7 +2361,8 @@ void SimulationParametersWindow::processAddonList()
         AlienImGui::Separator();
     }
 
-    _featureListOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addons").highlighted(true).defaultOpen(_featureListOpen));
+    _featureListOpen =
+        AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addons").rank(AlienImGui::TreeNodeRank::Low).defaultOpen(_featureListOpen));
     if (_featureListOpen) {
         if (ImGui::BeginChild("##addons", {scale(0), 0})) {
             auto parameters = _simulationFacade->getSimulationParameters();

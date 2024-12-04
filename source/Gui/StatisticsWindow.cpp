@@ -268,7 +268,8 @@ void StatisticsWindow::processSettings()
         AlienImGui::Separator();
     }
 
-    _settingsOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Settings").highlighted(true).defaultOpen(_settingsOpen));
+    _settingsOpen =
+        AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Settings").rank(AlienImGui::TreeNodeRank::Low).defaultOpen(_settingsOpen));
     if (_settingsOpen) {
         if (ImGui::BeginChild("##addons", {scale(0), 0})) {
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - scale(RightColumnWidth));
