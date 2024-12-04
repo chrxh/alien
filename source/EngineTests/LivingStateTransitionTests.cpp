@@ -218,3 +218,19 @@ TEST_P(LivingStateTransitionTests, underConstruction_activating)
     EXPECT_EQ(LivingState_Activating, getCell(actualData, 1).livingState);
     EXPECT_EQ(LivingState_Ready, getCell(actualData, 2).livingState);
 }
+
+TEST_P(LivingStateTransitionTests, noDyingForBarrierCells)
+{
+    _parameters.cellDeathConsequences = GetParam();
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    DataDescription data;
+    data.addCells({
+        CellDescription().setId(1).setBarrier(true).setPos({10.0f, 10.0f}).setMaxConnections(1).setLivingState(LivingState_Dying),
+    });
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_EQ(LivingState_Ready, getCell(actualData, 1).livingState);
+}
