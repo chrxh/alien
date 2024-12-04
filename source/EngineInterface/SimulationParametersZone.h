@@ -2,8 +2,8 @@
 
 #include <cstdint>
 
-#include "SimulationParametersSpotActivatedValues.h"
-#include "SimulationParametersSpotValues.h"
+#include "SimulationParametersZoneActivatedValues.h"
+#include "SimulationParametersZoneValues.h"
 #include "SimulationParametersTypes.h"
 
 using SpotShapeType = int;
@@ -106,8 +106,8 @@ struct SimulationParametersZone
     FlowType flowType = FlowType_None;
     FlowData flowData = {RadialFlow()};
 
-    SimulationParametersSpotValues values;
-    SimulationParametersSpotActivatedValues activatedValues;
+    SimulationParametersZoneValues values;
+    SimulationParametersZoneActivatedValues activatedValues;
 
     bool operator==(SimulationParametersZone const& other) const
     {

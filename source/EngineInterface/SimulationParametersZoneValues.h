@@ -7,7 +7,7 @@
  * NOTE: header is also included in kernel code
  */
 
-struct SimulationParametersSpotValues
+struct SimulationParametersZoneValues
 {
     float friction = 0.001f;
     float rigidity = 0.0f;
@@ -81,7 +81,7 @@ struct SimulationParametersSpotValues
     ColorVector<float> cellCopyMutationSubgenomeColor = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellCopyMutationGenomeColor = {0, 0, 0, 0, 0, 0, 0};
 
-    bool operator==(SimulationParametersSpotValues const& other) const
+    bool operator==(SimulationParametersZoneValues const& other) const
     {
         for (int i = 0; i < MAX_COLORS; ++i) {
             for (int j = 0; j < MAX_COLORS; ++j) {

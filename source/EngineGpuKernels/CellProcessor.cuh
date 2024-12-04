@@ -147,9 +147,9 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             cellPosDelta = {0, 0};
             density = 0;
             cellMaxBindingEnergy = SpotCalculator::calcParameter(
-                &SimulationParametersSpotValues::cellMaxBindingEnergy, &SimulationParametersSpotActivatedValues::cellMaxBindingEnergy, data, cell->pos);
+                &SimulationParametersZoneValues::cellMaxBindingEnergy, &SimulationParametersZoneActivatedValues::cellMaxBindingEnergy, data, cell->pos);
             cellFusionVelocity = SpotCalculator::calcParameter(
-                &SimulationParametersSpotValues::cellFusionVelocity, &SimulationParametersSpotActivatedValues::cellFusionVelocity, data, cell->pos);
+                &SimulationParametersZoneValues::cellFusionVelocity, &SimulationParametersZoneActivatedValues::cellFusionVelocity, data, cell->pos);
 
             int radiusInt = ceilf(smoothingLength * 2);
             scanLength = radiusInt * 2 + 1;
@@ -342,14 +342,14 @@ __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctO
 
                     //fusion
                     auto cellMaxBindingEnergy = SpotCalculator::calcParameter(
-                        &SimulationParametersSpotValues::cellMaxBindingEnergy,
-                        &SimulationParametersSpotActivatedValues::cellMaxBindingEnergy,
+                        &SimulationParametersZoneValues::cellMaxBindingEnergy,
+                        &SimulationParametersZoneActivatedValues::cellMaxBindingEnergy,
                         data,
                         cell->pos);
 
                     auto cellFusionVelocity = SpotCalculator::calcParameter(
-                        &SimulationParametersSpotValues::cellFusionVelocity,
-                        &SimulationParametersSpotActivatedValues::cellFusionVelocity,
+                        &SimulationParametersZoneValues::cellFusionVelocity,
+                        &SimulationParametersZoneActivatedValues::cellFusionVelocity,
                         data,
                         cell->pos);
 
@@ -377,7 +377,7 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
         }
 
         if (Math::length(cell->shared1) > SpotCalculator::calcParameter(
-                &SimulationParametersSpotValues::cellMaxForce, &SimulationParametersSpotActivatedValues::cellMaxForce, data, cell->pos, cell->color)) {
+                &SimulationParametersZoneValues::cellMaxForce, &SimulationParametersZoneActivatedValues::cellMaxForce, data, cell->pos, cell->color)) {
             if (data.numberGen1.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
                 CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
             }
@@ -573,7 +573,7 @@ __inline__ __device__ void CellProcessor::aging(SimulationData& data)
             int transitionDuration;
             int targetColor;
             auto color = calcMod(cell->color, MAX_COLORS);
-            auto spotIndex = SpotCalculator::getFirstMatchingSpotOrBase(data, cell->pos, &SimulationParametersSpotActivatedValues::cellColorTransition);
+            auto spotIndex = SpotCalculator::getFirstMatchingSpotOrBase(data, cell->pos, &SimulationParametersZoneActivatedValues::cellColorTransition);
             if (spotIndex == -1) {
                 transitionDuration = cudaSimulationParameters.baseValues.cellColorTransitionDuration[color];
                 targetColor = cudaSimulationParameters.baseValues.cellColorTransitionTargetColor[color];
@@ -717,7 +717,7 @@ __inline__ __device__ void CellProcessor::applyFriction(SimulationData& data)
         }
 
         auto friction = SpotCalculator::calcParameter(
-            &SimulationParametersSpotValues::friction, &SimulationParametersSpotActivatedValues::friction, data, cell->pos);
+            &SimulationParametersZoneValues::friction, &SimulationParametersZoneActivatedValues::friction, data, cell->pos);
         cell->vel = cell->vel * (1.0f - friction);
     }
 }
@@ -741,8 +741,8 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
             }
             if (cell->age > cudaSimulationParameters.radiationMinCellAge[cell->color]) {
                 radiationFactor += SpotCalculator::calcParameter(
-                    &SimulationParametersSpotValues::radiationCellAgeStrength,
-                    &SimulationParametersSpotActivatedValues::radiationCellAgeStrength,
+                    &SimulationParametersZoneValues::radiationCellAgeStrength,
+                    &SimulationParametersZoneActivatedValues::radiationCellAgeStrength,
                     data,
                     cell->pos,
                     cell->color);
@@ -784,18 +784,18 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             continue;
         }
         auto cellMaxBindingEnergy = SpotCalculator::calcParameter(
-            &SimulationParametersSpotValues::cellMaxBindingEnergy, &SimulationParametersSpotActivatedValues::cellMaxBindingEnergy, data, cell->pos);
+            &SimulationParametersZoneValues::cellMaxBindingEnergy, &SimulationParametersZoneActivatedValues::cellMaxBindingEnergy, data, cell->pos);
         if (cell->energy > cellMaxBindingEnergy) {
             CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
         }
 
         auto cellMinEnergy = SpotCalculator::calcParameter(
-            &SimulationParametersSpotValues::cellMinEnergy, &SimulationParametersSpotActivatedValues::cellMinEnergy, data, cell->pos, cell->color);
+            &SimulationParametersZoneValues::cellMinEnergy, &SimulationParametersZoneActivatedValues::cellMinEnergy, data, cell->pos, cell->color);
 
         if (cell->livingState == LivingState_Dying || cell->livingState == LivingState_Detaching) {
             auto cellDeathProbability = SpotCalculator::calcParameter(
-                &SimulationParametersSpotValues::cellDeathProbability,
-                &SimulationParametersSpotActivatedValues::cellDeathProbability,
+                &SimulationParametersZoneValues::cellDeathProbability,
+                &SimulationParametersZoneActivatedValues::cellDeathProbability,
                 data,
                 cell->pos,
                 cell->color);
@@ -821,8 +821,8 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             }
             if (!adjacentCellsUsed) {
                 auto cellInactiveMaxAge = SpotCalculator::calcParameter(
-                    &SimulationParametersSpotValues::cellInactiveMaxAge,
-                    &SimulationParametersSpotActivatedValues::cellInactiveMaxAge,
+                    &SimulationParametersZoneValues::cellInactiveMaxAge,
+                    &SimulationParametersZoneActivatedValues::cellInactiveMaxAge,
                     data,
                     cell->pos,
                     cell->color);

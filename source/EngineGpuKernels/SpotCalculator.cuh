@@ -2,7 +2,7 @@
 
 #include "cuda_runtime_api.h"
 
-#include "EngineInterface/SimulationParametersSpotValues.h"
+#include "EngineInterface/SimulationParametersZoneValues.h"
 #include "ConstantMemory.cuh"
 #include "Util.cuh"
 #include "Math.cuh"
@@ -18,7 +18,7 @@ public:
         float2 const& worldPos,
         T const& baseValue,
         T (&spotValues)[MAX_SPOTS],
-        bool SimulationParametersSpotActivatedValues::*valueActivated)
+        bool SimulationParametersZoneActivatedValues::*valueActivated)
     {
         if (0 == cudaSimulationParameters.numZones) {
             return baseValue;
@@ -76,8 +76,8 @@ public:
     }
 
     __device__ __inline__ static float calcParameter(
-        float SimulationParametersSpotValues::*value,
-        bool SimulationParametersSpotActivatedValues::*valueActivated,
+        float SimulationParametersZoneValues::*value,
+        bool SimulationParametersZoneActivatedValues::*valueActivated,
         SimulationData const& data,
         float2 const& worldPos)
     {
@@ -93,8 +93,8 @@ public:
     }
 
     __device__ __inline__ static float calcParameter(
-        ColorVector<float> SimulationParametersSpotValues::*value,
-        bool SimulationParametersSpotActivatedValues::*valueActivated,
+        ColorVector<float> SimulationParametersZoneValues::*value,
+        bool SimulationParametersZoneActivatedValues::*valueActivated,
         SimulationData const& data,
         float2 const& worldPos,
         int color)
@@ -111,8 +111,8 @@ public:
     }
 
     __device__ __inline__ static int calcParameter(
-        int SimulationParametersSpotValues::*value,
-        bool SimulationParametersSpotActivatedValues::*valueActivated,
+        int SimulationParametersZoneValues::*value,
+        bool SimulationParametersZoneActivatedValues::*valueActivated,
         SimulationData const& data,
         float2 const& worldPos)
     {
@@ -128,8 +128,8 @@ public:
     }
 
     __device__ __inline__ static bool calcParameter(
-        bool SimulationParametersSpotValues::*value,
-        bool SimulationParametersSpotActivatedValues::*valueActivated,
+        bool SimulationParametersZoneValues::*value,
+        bool SimulationParametersZoneActivatedValues::*valueActivated,
         SimulationData const& data,
         float2 const& worldPos)
     {
@@ -144,8 +144,8 @@ public:
     }
 
     __device__ __inline__ static float calcParameter(
-        ColorMatrix<float> SimulationParametersSpotValues::*value,
-        bool SimulationParametersSpotActivatedValues::*valueActivated,
+        ColorMatrix<float> SimulationParametersZoneValues::*value,
+        bool SimulationParametersZoneActivatedValues::*valueActivated,
         SimulationData const& data,
         float2 const& worldPos,
         int color1,
@@ -164,7 +164,7 @@ public:
 
     //return -1 for base
     __device__ __inline__ static int
-    getFirstMatchingSpotOrBase(SimulationData const& data, float2 const& worldPos, bool SimulationParametersSpotActivatedValues::*valueActivated)
+    getFirstMatchingSpotOrBase(SimulationData const& data, float2 const& worldPos, bool SimulationParametersZoneActivatedValues::*valueActivated)
     {
         if (0 == cudaSimulationParameters.numZones) {
             return -1;
