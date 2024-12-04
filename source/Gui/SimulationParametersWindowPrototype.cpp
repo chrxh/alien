@@ -52,9 +52,9 @@ void SimulationParametersWindowPrototype::processIntern()
         auto origMasterHeight = _masterWidgetHeight;
         auto origExpertWidgetHeight = _expertWidgetHeight;
 
-        processMasterEditor();
-        processDetailEditor();
-        processExpertModes();
+        processMasterWidget();
+        processDetailWidget();
+        processExpertWidget();
 
         correctLayout(origMasterHeight, origExpertWidgetHeight);
     }
@@ -157,7 +157,7 @@ void SimulationParametersWindowPrototype::processToolbar()
     AlienImGui::Separator();
 }
 
-void SimulationParametersWindowPrototype::processMasterEditor()
+void SimulationParametersWindowPrototype::processMasterWidget()
 {
     if (ImGui::BeginChild("##masterEditor", {0, getMasterWidgetHeight()})) {
 
@@ -176,7 +176,7 @@ void SimulationParametersWindowPrototype::processMasterEditor()
     }
 }
 
-void SimulationParametersWindowPrototype::processDetailEditor()
+void SimulationParametersWindowPrototype::processDetailWidget()
 {
     auto height = getDetailWidgetHeight();
     if (ImGui::BeginChild("##detailEditor", {0, height})) {
@@ -198,7 +198,7 @@ void SimulationParametersWindowPrototype::processDetailEditor()
     }
 }
 
-void SimulationParametersWindowPrototype::processExpertModes()
+void SimulationParametersWindowPrototype::processExpertWidget()
 {
     if (ImGui::BeginChild("##addon", {0, 0})) {
         if (_expertWidgetOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Unlock expert settings").highlighted(true).defaultOpen(_expertWidgetOpen))) {
@@ -244,6 +244,8 @@ void SimulationParametersWindowPrototype::processLocationTable()
 
                 // name
                 ImGui::TableNextColumn();
+                AlienImGui::Button(ICON_FA_EXTERNAL_LINK_ALT);
+                ImGui::SameLine();
                 AlienImGui::Text(entry.name);
 
                 ImGui::SameLine();

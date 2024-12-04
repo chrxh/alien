@@ -20,9 +20,9 @@ private:
     void shutdownIntern() override;
 
     void processToolbar();
-    void processMasterEditor();
-    void processDetailEditor();
-    void processExpertModes();
+    void processMasterWidget();
+    void processDetailWidget();
+    void processExpertWidget();
     void processStatusBar();
 
     enum class LocationType
