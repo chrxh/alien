@@ -668,7 +668,9 @@ __inline__ __device__ void CellProcessor::livingStateTransition_applyNextState(S
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        cell->livingState = cell->tag;
+        if (!cell->barrier) {
+            cell->livingState = cell->tag;
+        }
         cell->tag = 0;
     }
 }
