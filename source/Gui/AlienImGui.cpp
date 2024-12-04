@@ -1031,11 +1031,7 @@ void AlienImGui::Separator()
 
 void AlienImGui::MovableSeparator(MovableSeparatorParameters const& parameters, float& height)
 {
-    ImGui::PushStyleColor(ImGuiCol_Button, Const::SeparatorButtonColor.Value);
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Const::SeparatorButtonHoveredColor.Value);
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, Const::SeparatorButtonActiveColor.Value);
     ImGui::Button("##MovableSeparator", ImVec2(-1, scale(5.0f)));
-    ImGui::PopStyleColor(3);
     if (ImGui::IsItemActive()) {
         if (parameters._additive) {
             height += ImGui::GetIO().MouseDelta.y;
@@ -1186,14 +1182,18 @@ bool AlienImGui::CollapseButton(bool collapsed)
 
 bool AlienImGui::BeginTreeNode(TreeNodeParameters const& parameters)
 {
-    if (parameters._highlighted) {
-        ImGui::PushStyleColor(ImGuiCol_Header, Const::TreeNodeHighlightedColor.Value);
-        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, Const::TreeNodeHighlightedHoveredColor.Value);
-        ImGui::PushStyleColor(ImGuiCol_HeaderActive, Const::TreeNodeHighlightedActiveColor.Value);
-    } else {
-        ImGui::PushStyleColor(ImGuiCol_Header, Const::TreeNodeColor.Value);
-        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, Const::TreeNodeHoveredColor.Value);
-        ImGui::PushStyleColor(ImGuiCol_HeaderActive, Const::TreeNodeActiveColor.Value);
+    if (parameters._rank == TreeNodeRank::High) {
+        ImGui::PushStyleColor(ImGuiCol_Header, Const::TreeNodeHighColor.Value);
+        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, Const::TreeNodeHighHoveredColor.Value);
+        ImGui::PushStyleColor(ImGuiCol_HeaderActive, Const::TreeNodeHighActiveColor.Value);
+    } else if (parameters._rank == TreeNodeRank::Default) {
+        ImGui::PushStyleColor(ImGuiCol_Header, Const::TreeNodeDefaultColor.Value);
+        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, Const::TreeNodeDefaultHoveredColor.Value);
+        ImGui::PushStyleColor(ImGuiCol_HeaderActive, Const::TreeNodeDefaultActiveColor.Value);
+    } else if (parameters._rank == TreeNodeRank::Low) {
+        ImGui::PushStyleColor(ImGuiCol_Header, Const::TreeNodeLowColor.Value);
+        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, Const::TreeNodeLowHoveredColor.Value);
+        ImGui::PushStyleColor(ImGuiCol_HeaderActive, Const::TreeNodeLowActiveColor.Value);
     }
     ImGuiTreeNodeFlags treeNodeClosedFlags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_Framed;
     ImGuiTreeNodeFlags treeNodeOpenFlags = treeNodeClosedFlags | ImGuiTreeNodeFlags_DefaultOpen;

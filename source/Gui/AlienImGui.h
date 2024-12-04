@@ -308,10 +308,16 @@ public:
     static bool Button(std::string const& text, float size = 0);
     static bool CollapseButton(bool collapsed);
 
+    enum class TreeNodeRank
+    {
+        Low,
+        Default,
+        High
+    };
     struct TreeNodeParameters
     {
         MEMBER_DECLARATION(TreeNodeParameters, std::string, text, "");
-        MEMBER_DECLARATION(TreeNodeParameters, bool, highlighted, false);
+        MEMBER_DECLARATION(TreeNodeParameters, TreeNodeRank, rank, TreeNodeRank::Default);
         MEMBER_DECLARATION(TreeNodeParameters, bool, defaultOpen, true);
     };
     static bool BeginTreeNode(TreeNodeParameters const& parameters);

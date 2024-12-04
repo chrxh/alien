@@ -161,7 +161,8 @@ void SimulationParametersWindowPrototype::processMasterWidget()
 {
     if (ImGui::BeginChild("##master", {0, getMasterWidgetHeight()})) {
 
-        if (_masterWidgetOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Zones and radiation sources").highlighted(true).defaultOpen(_masterWidgetOpen))) {
+        if (_masterWidgetOpen = AlienImGui::BeginTreeNode(
+                AlienImGui::TreeNodeParameters().text("Zones and radiation sources").rank(AlienImGui::TreeNodeRank::High).defaultOpen(_masterWidgetOpen))) {
             ImGui::Spacing();
             if (ImGui::BeginChild("##master2", {0, -ImGui::GetStyle().FramePadding.y})) {
                 processLocationTable();
@@ -183,7 +184,7 @@ void SimulationParametersWindowPrototype::processDetailWidget()
 {
     auto height = getDetailWidgetHeight();
     if (ImGui::BeginChild("##detail", {0, height})) {
-        if (_detailWidgetOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Parameters").highlighted(true).defaultOpen(_detailWidgetOpen))) {
+        if (_detailWidgetOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Parameters").rank(AlienImGui::TreeNodeRank::High).defaultOpen(_detailWidgetOpen))) {
             ImGui::Spacing();
             if (ImGui::BeginChild("##detail2", {0, -ImGui::GetStyle().FramePadding.y})) {
                 _baseWidgets.process();
@@ -204,7 +205,8 @@ void SimulationParametersWindowPrototype::processDetailWidget()
 void SimulationParametersWindowPrototype::processExpertWidget()
 {
     if (ImGui::BeginChild("##expert", {0, 0})) {
-        if (_expertWidgetOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Unlock expert settings").highlighted(true).defaultOpen(_expertWidgetOpen))) {
+        if (_expertWidgetOpen = AlienImGui::BeginTreeNode(
+                AlienImGui::TreeNodeParameters().text("Unlock expert settings").rank(AlienImGui::TreeNodeRank::High).defaultOpen(_expertWidgetOpen))) {
             if (ImGui::BeginChild("##expert2", {0, 0})) {
             }
             ImGui::EndChild();

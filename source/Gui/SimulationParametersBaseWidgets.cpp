@@ -1170,7 +1170,7 @@ void SimulationParametersBaseWidgets::process()
          * Addon: Cell color transition rules
          */
         if (parameters.features.cellColorTransitionRules) {
-            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell color transition rules").highlighted(false))) {
+            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell color transition rules"))) {
                 for (int color = 0; color < MAX_COLORS; ++color) {
                     ImGui::PushID(color);
                     auto widgetParameters = AlienImGui::InputColorTransitionParameters()
@@ -1203,7 +1203,7 @@ void SimulationParametersBaseWidgets::process()
          * Addon: Cell age limiter
          */
         if (parameters.features.cellAgeLimiter) {
-            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell age limiter").highlighted(false))) {
+            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell age limiter"))) {
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Maximum inactive cell age")
@@ -1270,7 +1270,7 @@ void SimulationParametersBaseWidgets::process()
          * Addon: Cell glow
          */
         if (parameters.features.cellGlow) {
-            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell glow").highlighted(false))) {
+            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell glow"))) {
                 AlienImGui::Switcher(
                     AlienImGui::SwitcherParameters()
                         .name("Coloring")
@@ -1313,7 +1313,7 @@ void SimulationParametersBaseWidgets::process()
          * Addon: External energy control
          */
         if (parameters.features.externalEnergyControl) {
-            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: External energy control").highlighted(false))) {
+            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: External energy control"))) {
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("External energy amount")
@@ -1400,7 +1400,7 @@ void SimulationParametersBaseWidgets::process()
          * Addon: Genome complexity measurement
          */
         if (parameters.features.genomeComplexityMeasurement) {
-            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Genome complexity measurement").highlighted(false))) {
+            if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Genome complexity measurement"))) {
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Size factor")

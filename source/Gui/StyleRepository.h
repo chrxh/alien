@@ -43,12 +43,15 @@ namespace Const
     ImColor const ToggleButtonActiveColor = ImColor::HSV(0.14f, 0.8f, 0.7f);
     ImColor const ToggleButtonActiveHoveredColor = ImColor::HSV(0.14f, 0.8f, 0.8f);
 
-    ImColor const TreeNodeColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
-    ImColor const TreeNodeHoveredColor = ImColor::HSV(0.6f, 0.6f, 0.55f);
-    ImColor const TreeNodeActiveColor = ImColor::HSV(0.6f, 0.6f, 0.65f);
-    ImColor const TreeNodeHighlightedColor = ImColor::HSV(0.0, 0.0f, 0.20f);
-    ImColor const TreeNodeHighlightedHoveredColor = ImColor::HSV(0.0f, 0.0f, 0.25f);
-    ImColor const TreeNodeHighlightedActiveColor = ImColor::HSV(0.0f, 0.0f, 0.35f);
+    ImColor const TreeNodeHighColor = ImColor::HSV(0.6f, 0.6f, 0.60f);
+    ImColor const TreeNodeHighHoveredColor = ImColor::HSV(0.6f, 0.6f, 0.75f);
+    ImColor const TreeNodeHighActiveColor = ImColor::HSV(0.6f, 0.6f, 0.90f);
+    ImColor const TreeNodeDefaultColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
+    ImColor const TreeNodeDefaultHoveredColor = ImColor::HSV(0.6f, 0.6f, 0.55f);
+    ImColor const TreeNodeDefaultActiveColor = ImColor::HSV(0.6f, 0.6f, 0.65f);
+    ImColor const TreeNodeLowColor = ImColor::HSV(0.0, 0.0f, 0.20f);
+    ImColor const TreeNodeLowHoveredColor = ImColor::HSV(0.0f, 0.0f, 0.25f);
+    ImColor const TreeNodeLowActiveColor = ImColor::HSV(0.0f, 0.0f, 0.35f);
     
     ImColor const MonospaceColor = ImColor::HSV(0.3f, 1.0f, 1.0f);
 
@@ -75,10 +78,6 @@ namespace Const
     ImColor const ButtonColor = ImColor::HSV(0.54f, 0.33f, 1.0f, 1.0f);
     ImColor const ToggleColor = ImColor::HSV(0.58f, 0.83f, 1.0f, 1.0f);
     ImColor const DetailButtonColor = ImColor::HSV(0, 0, 1.0f);
-
-    ImColor const SeparatorButtonColor = ImColor::HSV(0, 0, 0.4f, 1.0);
-    ImColor const SeparatorButtonHoveredColor = ImColor::HSV(0, 0, 0.5f, 1.0);
-    ImColor const SeparatorButtonActiveColor = ImColor::HSV(0, 0, 0.6f, 1.0);
 
     ImColor const InspectorLineColor = ImColor::HSV(0.54f, 0.0f, 1.0f, 1.0f);
     ImColor const InspectorRectColor = ImColor::HSV(0.54f, 0.0f, 0.5f, 1.0f);
