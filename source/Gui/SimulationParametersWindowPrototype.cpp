@@ -159,11 +159,14 @@ void SimulationParametersWindowPrototype::processToolbar()
 
 void SimulationParametersWindowPrototype::processMasterWidget()
 {
-    if (ImGui::BeginChild("##masterEditor", {0, getMasterWidgetHeight()})) {
+    if (ImGui::BeginChild("##master", {0, getMasterWidgetHeight()})) {
 
         if (_masterWidgetOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Zones and radiation sources").highlighted(true).defaultOpen(_masterWidgetOpen))) {
-            processLocationTable();
-
+            ImGui::Spacing();
+            if (ImGui::BeginChild("##master2", {0, -ImGui::GetStyle().FramePadding.y})) {
+                processLocationTable();
+            }
+            ImGui::EndChild();
             AlienImGui::EndTreeNode();
         }
     }
@@ -179,10 +182,10 @@ void SimulationParametersWindowPrototype::processMasterWidget()
 void SimulationParametersWindowPrototype::processDetailWidget()
 {
     auto height = getDetailWidgetHeight();
-    if (ImGui::BeginChild("##detailEditor", {0, height})) {
+    if (ImGui::BeginChild("##detail", {0, height})) {
         if (_detailWidgetOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Parameters").highlighted(true).defaultOpen(_detailWidgetOpen))) {
             ImGui::Spacing();
-            if (ImGui::BeginChild("##detailEditor2", {0, -ImGui::GetStyle().FramePadding.y})) {
+            if (ImGui::BeginChild("##detail2", {0, -ImGui::GetStyle().FramePadding.y})) {
                 _baseWidgets.process();
             }
             ImGui::EndChild();
@@ -200,9 +203,9 @@ void SimulationParametersWindowPrototype::processDetailWidget()
 
 void SimulationParametersWindowPrototype::processExpertWidget()
 {
-    if (ImGui::BeginChild("##addon", {0, 0})) {
+    if (ImGui::BeginChild("##expert", {0, 0})) {
         if (_expertWidgetOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Unlock expert settings").highlighted(true).defaultOpen(_expertWidgetOpen))) {
-            if (ImGui::BeginChild("##detailChildWindow", {0, 0})) {
+            if (ImGui::BeginChild("##expert2", {0, 0})) {
             }
             ImGui::EndChild();
             AlienImGui::EndTreeNode();
@@ -224,8 +227,9 @@ void SimulationParametersWindowPrototype::processLocationTable()
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
         | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    if (ImGui::BeginTable("Locations", 4, flags, ImVec2(-1, -1), 0)) {
+    if (ImGui::BeginTable("Locations", 5, flags, ImVec2(-1, -1), 0)) {
 
+        ImGui::TableSetupColumn("", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(25.0f));
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
         ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
         ImGui::TableSetupColumn("Position", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
@@ -242,10 +246,11 @@ void SimulationParametersWindowPrototype::processLocationTable()
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(ImGui::GetTextLineHeightWithSpacing()));
 
-                // name
                 ImGui::TableNextColumn();
                 AlienImGui::Button(ICON_FA_EXTERNAL_LINK_ALT);
-                ImGui::SameLine();
+
+                // name
+                ImGui::TableNextColumn();
                 AlienImGui::Text(entry.name);
 
                 ImGui::SameLine();

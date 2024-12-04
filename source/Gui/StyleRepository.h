@@ -76,6 +76,10 @@ namespace Const
     ImColor const ToggleColor = ImColor::HSV(0.58f, 0.83f, 1.0f, 1.0f);
     ImColor const DetailButtonColor = ImColor::HSV(0, 0, 1.0f);
 
+    ImColor const SeparatorButtonColor = ImColor::HSV(0, 0, 0.4f, 1.0);
+    ImColor const SeparatorButtonHoveredColor = ImColor::HSV(0, 0, 0.5f, 1.0);
+    ImColor const SeparatorButtonActiveColor = ImColor::HSV(0, 0, 0.6f, 1.0);
+
     ImColor const InspectorLineColor = ImColor::HSV(0.54f, 0.0f, 1.0f, 1.0f);
     ImColor const InspectorRectColor = ImColor::HSV(0.54f, 0.0f, 0.5f, 1.0f);
 

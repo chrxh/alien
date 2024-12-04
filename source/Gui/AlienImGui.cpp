@@ -1031,9 +1031,9 @@ void AlienImGui::Separator()
 
 void AlienImGui::MovableSeparator(MovableSeparatorParameters const& parameters, float& height)
 {
-    ImGui::PushStyleColor(ImGuiCol_Button, ImColor::HSV(0, 0, 0.4f, 1.0).Value);
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor::HSV(0, 0, 0.5f, 1.0).Value);
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImColor::HSV(0, 0, 0.6f, 1.0).Value);
+    ImGui::PushStyleColor(ImGuiCol_Button, Const::SeparatorButtonColor.Value);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Const::SeparatorButtonHoveredColor.Value);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, Const::SeparatorButtonActiveColor.Value);
     ImGui::Button("##MovableSeparator", ImVec2(-1, scale(5.0f)));
     ImGui::PopStyleColor(3);
     if (ImGui::IsItemActive()) {

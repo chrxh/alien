@@ -194,7 +194,7 @@ void BrowserWindow::processIntern()
         processWorkspace();
 
         ImGui::SameLine();
-        processMovableSeparator();
+        processVerticalMovableSeparator();
 
         ImGui::SameLine();
         processUserList();
@@ -413,10 +413,14 @@ void BrowserWindow::processWorkspaceSelectionAndFilter()
     }
 }
 
-void BrowserWindow::processMovableSeparator()
+void BrowserWindow::processVerticalMovableSeparator()
 {
     auto sizeAvailable = ImGui::GetContentRegionAvail();
+    ImGui::PushStyleColor(ImGuiCol_Button, Const::SeparatorButtonColor.Value);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Const::SeparatorButtonHoveredColor.Value);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, Const::SeparatorButtonActiveColor.Value);
     ImGui::Button("##MovableSeparator", ImVec2(scale(5.0f), sizeAvailable.y - scale(BrowserBottomSpace)));
+    ImGui::PopStyleColor(3);
     if (ImGui::IsItemActive()) {
         _userTableWidth -= ImGui::GetIO().MouseDelta.x;
     }
