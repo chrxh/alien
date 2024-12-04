@@ -80,7 +80,7 @@ void AutosaveWindow::processIntern()
             processHeader();
 
             //AlienImGui::Separator();
-            if (ImGui::BeginChild("##child2", {0, _settingsOpen ? -_settingsHeight : -scale(50.0f)})) {
+            if (ImGui::BeginChild("##child2", {0, _settingsOpen ? -_settingsHeight : -scale(35.0f)})) {
                 processTable();
             }
             ImGui::EndChild();
@@ -233,12 +233,10 @@ void AutosaveWindow::processTable()
 
 void AutosaveWindow::processSettings()
 {
+    ImGui::Spacing();
+    ImGui::Spacing();
     if (_settingsOpen) {
-        ImGui::Spacing();
-        ImGui::Spacing();
         AlienImGui::MovableSeparator(AlienImGui::MovableSeparatorParameters().additive(false), _settingsHeight);
-    } else {
-        AlienImGui::Separator();
     }
 
     _settingsOpen =

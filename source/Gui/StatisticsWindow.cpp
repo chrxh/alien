@@ -86,11 +86,11 @@ void StatisticsWindow::shutdownIntern()
 
 void StatisticsWindow::processIntern()
 {
-    if (ImGui::BeginChild("##statistics", {0, _settingsOpen ? -_settingsHeight : -scale(50.0f)})) {
+    if (ImGui::BeginChild("##statistics", {0, _settingsOpen ? -_settingsHeight : -scale(40.0f)})) {
         if (ImGui::BeginTabBar("##Statistics", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
 
             if (ImGui::BeginTabItem("Timelines")) {
-                if (ImGui::BeginChild("##timelines", ImVec2(0, 0), false)) {
+                if (ImGui::BeginChild("##timelines", ImVec2(0, 0), ImGuiChildFlags_Border)) {
                     processTimelinesTab();
                 }
                 ImGui::EndChild();
@@ -98,7 +98,7 @@ void StatisticsWindow::processIntern()
             }
 
             if (ImGui::BeginTabItem("Histograms")) {
-                if (ImGui::BeginChild("##histograms", ImVec2(0, 0), false)) {
+                if (ImGui::BeginChild("##histograms", ImVec2(0, 0), ImGuiChildFlags_Border)) {
                     processHistogramsTab();
                 }
                 ImGui::EndChild();
@@ -106,7 +106,7 @@ void StatisticsWindow::processIntern()
             }
 
             if (ImGui::BeginTabItem("Throughput")) {
-                if (ImGui::BeginChild("##throughput", ImVec2(0, 0), false)) {
+                if (ImGui::BeginChild("##throughput", ImVec2(0, 0), ImGuiChildFlags_Border)) {
                     processTablesTab();
                 }
                 ImGui::EndChild();
@@ -139,9 +139,6 @@ void StatisticsWindow::processTimelinesTab()
             .values(
             {"Accumulate values for all colors", "Break down by color", "Color #0", "Color #1", "Color #2", "Color #3", "Color #4", "Color #5", "Color #6"}),
         _plotType);
-    ImGui::Spacing();
-    ImGui::Spacing();
-    ImGui::Separator();
 
     if (ImGui::BeginChild("##plots", ImVec2(0, 0), false)) {
         processTimelineStatistics();
@@ -260,12 +257,10 @@ void StatisticsWindow::processTablesTab()
 
 void StatisticsWindow::processSettings()
 {
+    ImGui::Spacing();
+    ImGui::Spacing();
     if (_settingsOpen) {
-        ImGui::Spacing();
-        ImGui::Spacing();
         AlienImGui::MovableSeparator(AlienImGui::MovableSeparatorParameters().additive(false), _settingsHeight);
-    } else {
-        AlienImGui::Separator();
     }
 
     _settingsOpen =
