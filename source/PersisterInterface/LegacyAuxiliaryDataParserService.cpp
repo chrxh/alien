@@ -10,7 +10,7 @@
 namespace
 {
     template <typename T>
-    bool equals(SimulationParameters const& parameters, ColorVector<T> SimulationParametersSpotValues::*parameter, T const& value)
+    bool equals(SimulationParameters const& parameters, ColorVector<T> SimulationParametersZoneValues::*parameter, T const& value)
     {
         for (int i = 0; i < MAX_COLORS; ++i) {
             if ((parameters.baseValues.*parameter)[i] != value) {
@@ -25,7 +25,7 @@ namespace
         return true;
     }
     template <typename T>
-    bool contains(SimulationParameters const& parameters, ColorVector<T> SimulationParametersSpotValues::*parameter, std::set<T> const& values)
+    bool contains(SimulationParameters const& parameters, ColorVector<T> SimulationParametersZoneValues::*parameter, std::set<T> const& values)
     {
         for (int i = 0; i < MAX_COLORS; ++i) {
             if (!values.contains((parameters.baseValues.*parameter)[i])) {
@@ -252,7 +252,7 @@ void LegacyAuxiliaryDataParserService::updateParametersAndFeaturesForLegacyFiles
     }
 
     if (missingFeatures.cellColorTransitionRules) {
-        if (!contains(parameters, &SimulationParametersSpotValues::cellColorTransitionDuration, {0, Infinity<int>::value})) {
+        if (!contains(parameters, &SimulationParametersZoneValues::cellColorTransitionDuration, {0, Infinity<int>::value})) {
             parameters.features.cellColorTransitionRules = true;
         }
         for (int i = 0; i < MAX_COLORS; ++i) {
@@ -284,7 +284,7 @@ void LegacyAuxiliaryDataParserService::updateParametersAndFeaturesForLegacyFiles
 
     //conversion of mutation rates to genome copy mutations
     if (missingParameters.copyMutations) {
-        auto setParametersForBase = [](SimulationParametersSpotValues& target, LegacyParametersForBase const& source) {
+        auto setParametersForBase = [](SimulationParametersZoneValues& target, LegacyParametersForBase const& source) {
             for (int i = 0; i < MAX_COLORS; ++i) {
                 target.cellCopyMutationNeuronData[i] = source.cellFunctionConstructorMutationNeuronDataProbability.parameter[i] * 250;
                 target.cellCopyMutationCellProperties[i] = source.cellFunctionConstructorMutationPropertiesProbability.parameter[i] * 250;
@@ -300,7 +300,7 @@ void LegacyAuxiliaryDataParserService::updateParametersAndFeaturesForLegacyFiles
                 target.cellCopyMutationGenomeColor[i] = source.cellFunctionConstructorMutationGenomeColorProbability.parameter[i] * 5000;
             }
         };
-        auto setParametersForSpot = [](SimulationParametersSpotValues& target, LegacyParametersForSpot const& source) {
+        auto setParametersForSpot = [](SimulationParametersZoneValues& target, LegacyParametersForSpot const& source) {
             for (int i = 0; i < MAX_COLORS; ++i) {
                 target.cellCopyMutationNeuronData[i] = source.cellFunctionConstructorMutationNeuronDataProbability.parameter[i] * 250;
                 target.cellCopyMutationCellProperties[i] = source.cellFunctionConstructorMutationPropertiesProbability.parameter[i] * 250;

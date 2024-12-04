@@ -4,7 +4,7 @@
 #include <cstring>
 
 #include "CellFunctionConstants.h"
-#include "SimulationParametersSpotValues.h"
+#include "SimulationParametersZoneValues.h"
 #include "RadiationSource.h"
 #include "SimulationParametersZone.h"
 #include "Motion.h"
@@ -56,7 +56,7 @@ struct SimulationParameters
     bool showRadiationSources = true;
 
     //all other parameters
-    SimulationParametersSpotValues baseValues;
+    SimulationParametersZoneValues baseValues;
 
     float timestepSize = 1.0f;
     MotionType motionType = MotionType_Fluid;

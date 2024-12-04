@@ -5,6 +5,8 @@
 #include "EngineInterface/SimulationParameters.h"
 
 #include "AlienWindow.h"
+#include "SimulationParametersBaseWidgets.h"
+#include "ZoneColorPalette.h"
 
 class SimulationParametersWindowPrototype : public AlienWindow<SimulationFacade>
 {
@@ -43,6 +45,7 @@ private:
     void onAddZone();
     void onAddSource();
     void onCloneLocation();
+    void onDeleteLocation();
     void onDecreaseLocationIndex();
     void onIncreaseLocationIndex();
 
@@ -60,14 +63,15 @@ private:
 
 private:
     SimulationFacade _simulationFacade;
+    SimulationParametersBaseWidgets _baseWidgets;
 
     bool _masterWidgetOpen = true;
     bool _detailWidgetOpen = true;
-    bool _expertWidgetOpen = true;
+    bool _expertWidgetOpen = false;
     float _masterWidgetHeight = 0;
     float _expertWidgetHeight = 0;
 
-    uint32_t _savedPalette[32] = {};
+    ZoneColorPalette _zoneColorPalette;
 
     std::optional<SimulationParameters> _copiedParameters;
 

@@ -43,8 +43,8 @@ __inline__ __device__ void RadiationProcessor::calcActiveSources(SimulationData&
         int activeSourceIndex = 0;
         for (int i = 0; i < cudaSimulationParameters.numRadiationSources; ++i) {
             auto sourceActive = !SpotCalculator::calcParameter(
-                &SimulationParametersSpotValues::radiationDisableSources,
-                &SimulationParametersSpotActivatedValues::radiationDisableSources,
+                &SimulationParametersZoneValues::radiationDisableSources,
+                &SimulationParametersZoneActivatedValues::radiationDisableSources,
                 data,
                 {cudaSimulationParameters.radiationSource[i].posX, cudaSimulationParameters.radiationSource[i].posY});
             if (sourceActive) {
@@ -107,8 +107,8 @@ __inline__ __device__ void RadiationProcessor::collision(SimulationData& data)
                         continue;
                     }
                     auto radiationAbsorption = SpotCalculator::calcParameter(
-                        &SimulationParametersSpotValues::radiationAbsorption,
-                        &SimulationParametersSpotActivatedValues::radiationAbsorption,
+                        &SimulationParametersZoneValues::radiationAbsorption,
+                        &SimulationParametersZoneActivatedValues::radiationAbsorption,
                         data,
                         cell->pos,
                         cell->color);
@@ -127,8 +127,8 @@ __inline__ __device__ void RadiationProcessor::collision(SimulationData& data)
                                 max(0.0f, 1.0f - Math::length(cell->vel) * cudaSimulationParameters.radiationAbsorptionHighVelocityPenalty[cell->color]);
 
                             auto radiationAbsorptionLowVelocityPenalty = SpotCalculator::calcParameter(
-                                &SimulationParametersSpotValues::radiationAbsorptionLowVelocityPenalty,
-                                &SimulationParametersSpotActivatedValues::radiationAbsorptionLowVelocityPenalty,
+                                &SimulationParametersZoneValues::radiationAbsorptionLowVelocityPenalty,
+                                &SimulationParametersZoneActivatedValues::radiationAbsorptionLowVelocityPenalty,
                                 data,
                                 cell->pos,
                                 cell->color);
@@ -137,8 +137,8 @@ __inline__ __device__ void RadiationProcessor::collision(SimulationData& data)
                                 powf(toFloat(cell->numConnections + 1) / 7.0f, cudaSimulationParameters.radiationAbsorptionLowConnectionPenalty[cell->color]);
 
                             auto radiationAbsorptionLowGenomeComplexityPenalty = SpotCalculator::calcParameter(
-                                &SimulationParametersSpotValues::radiationAbsorptionLowGenomeComplexityPenalty,
-                                &SimulationParametersSpotActivatedValues::radiationAbsorptionLowGenomeComplexityPenalty,
+                                &SimulationParametersZoneValues::radiationAbsorptionLowGenomeComplexityPenalty,
+                                &SimulationParametersZoneActivatedValues::radiationAbsorptionLowGenomeComplexityPenalty,
                                 data,
                                 cell->pos,
                                 cell->color);

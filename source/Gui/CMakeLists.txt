@@ -109,6 +109,8 @@ PUBLIC
     ShaderWindow.h
     SimulationInteractionController.cpp
     SimulationInteractionController.h
+    SimulationParametersBaseWidgets.cpp
+    SimulationParametersBaseWidgets.h
     SimulationParametersWindow.cpp
     SimulationParametersWindow.h
     SimulationParametersWindowPrototype.cpp
@@ -138,7 +140,9 @@ PUBLIC
     Viewport.cpp
     Viewport.h
     WindowController.cpp
-    WindowController.h)
+    WindowController.h
+    ZoneColorPalette.cpp
+    ZoneColorPalette.h)
 
 target_link_libraries(alien Base)
 target_link_libraries(alien EngineGpuKernels)

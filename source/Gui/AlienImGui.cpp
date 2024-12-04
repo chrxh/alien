@@ -1031,7 +1031,11 @@ void AlienImGui::Separator()
 
 void AlienImGui::MovableSeparator(MovableSeparatorParameters const& parameters, float& height)
 {
+    ImGui::PushStyleColor(ImGuiCol_Button, ImColor::HSV(0, 0, 0.4f, 1.0).Value);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor::HSV(0, 0, 0.5f, 1.0).Value);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImColor::HSV(0, 0, 0.6f, 1.0).Value);
     ImGui::Button("##MovableSeparator", ImVec2(-1, scale(5.0f)));
+    ImGui::PopStyleColor(3);
     if (ImGui::IsItemActive()) {
         if (parameters._additive) {
             height += ImGui::GetIO().MouseDelta.y;
@@ -1279,6 +1283,7 @@ void AlienImGui::StatusBar(std::vector<std::string> const& textItems)
     }
     AlienImGui::Separator();
     ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
+    //ImGui::PushStyleColor(ImGuiCol_Text, Const::StatusBarTextColor.Value);
     AlienImGui::Text(text);
     ImGui::PopStyleColor();
 }
@@ -1287,7 +1292,7 @@ void AlienImGui::Tooltip(std::string const& text, bool delay)
 {
     if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled) && (!delay || (delay && GImGui->HoveredIdTimer > HoveredTimer))) {
         ImGui::BeginTooltip();
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TooltipTextColor);
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::TooltipTextColor.Value);
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
         ImGui::TextUnformatted(text.c_str());
         ImGui::PopTextWrapPos();

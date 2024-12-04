@@ -59,74 +59,74 @@ __inline__ __device__ void MutationProcessor::applyRandomMutationsForCell(Simula
     auto numNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, true));
     auto numNonSeparatedNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, false));
     auto cellCopyMutationNeuronData = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellCopyMutationNeuronData,
-        &SimulationParametersSpotActivatedValues::cellCopyMutationNeuronData,
+        &SimulationParametersZoneValues::cellCopyMutationNeuronData,
+        &SimulationParametersZoneActivatedValues::cellCopyMutationNeuronData,
         data,
         cell->pos,
         cell->color) * numNodes;
     auto cellCopyMutationCellProperties = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellCopyMutationCellProperties,
-        &SimulationParametersSpotActivatedValues::cellCopyMutationCellProperties,
+        &SimulationParametersZoneValues::cellCopyMutationCellProperties,
+        &SimulationParametersZoneActivatedValues::cellCopyMutationCellProperties,
         data,
         cell->pos,
         cell->color) * numNodes;
     auto cellCopyMutationGeometry = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellCopyMutationGeometry,
-        &SimulationParametersSpotActivatedValues::cellCopyMutationGeometry,
+        &SimulationParametersZoneValues::cellCopyMutationGeometry,
+        &SimulationParametersZoneActivatedValues::cellCopyMutationGeometry,
         data,
         cell->pos,
         cell->color) * numNodes;
     auto cellCopyMutationCustomGeometry = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellCopyMutationCustomGeometry,
-        &SimulationParametersSpotActivatedValues::cellCopyMutationCustomGeometry,
+        &SimulationParametersZoneValues::cellCopyMutationCustomGeometry,
+        &SimulationParametersZoneActivatedValues::cellCopyMutationCustomGeometry,
         data,
         cell->pos,
         cell->color) * numNodes;
     auto cellCopyMutationCellFunction = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellCopyMutationCellFunction,
-        &SimulationParametersSpotActivatedValues::cellCopyMutationCellFunction,
+        &SimulationParametersZoneValues::cellCopyMutationCellFunction,
+        &SimulationParametersZoneActivatedValues::cellCopyMutationCellFunction,
         data,
         cell->pos,
         cell->color) * numNodes;
     auto cellCopyMutationInsertion = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellCopyMutationInsertion,
-        &SimulationParametersSpotActivatedValues::cellCopyMutationInsertion,
+        &SimulationParametersZoneValues::cellCopyMutationInsertion,
+        &SimulationParametersZoneActivatedValues::cellCopyMutationInsertion,
         data,
         cell->pos,
         cell->color) * numNodes;
     auto cellCopyMutationDeletion = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellCopyMutationDeletion,
-        &SimulationParametersSpotActivatedValues::cellCopyMutationDeletion,
+        &SimulationParametersZoneValues::cellCopyMutationDeletion,
+        &SimulationParametersZoneActivatedValues::cellCopyMutationDeletion,
         data,
         cell->pos,
         cell->color) * numNodes;
     auto cellCopyMutationCellColor = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellCopyMutationCellColor,
-        &SimulationParametersSpotActivatedValues::cellCopyMutationCellColor,
+        &SimulationParametersZoneValues::cellCopyMutationCellColor,
+        &SimulationParametersZoneActivatedValues::cellCopyMutationCellColor,
         data,
         cell->pos,
         cell->color) * numNodes;
     auto cellCopyMutationTranslation = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellCopyMutationTranslation,
-        &SimulationParametersSpotActivatedValues::cellCopyMutationTranslation,
+        &SimulationParametersZoneValues::cellCopyMutationTranslation,
+        &SimulationParametersZoneActivatedValues::cellCopyMutationTranslation,
         data,
         cell->pos,
         cell->color);
     auto cellCopyMutationDuplication = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellCopyMutationDuplication,
-        &SimulationParametersSpotActivatedValues::cellCopyMutationDuplication,
+        &SimulationParametersZoneValues::cellCopyMutationDuplication,
+        &SimulationParametersZoneActivatedValues::cellCopyMutationDuplication,
         data,
         cell->pos,
         cell->color);
     auto cellCopyMutationSubgenomeColor = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellCopyMutationSubgenomeColor,
-        &SimulationParametersSpotActivatedValues::cellCopyMutationSubgenomeColor,
+        &SimulationParametersZoneValues::cellCopyMutationSubgenomeColor,
+        &SimulationParametersZoneActivatedValues::cellCopyMutationSubgenomeColor,
         data,
         cell->pos,
         cell->color);
     auto cellCopyMutationGenomeColor = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellCopyMutationGenomeColor,
-        &SimulationParametersSpotActivatedValues::cellCopyMutationGenomeColor,
+        &SimulationParametersZoneValues::cellCopyMutationGenomeColor,
+        &SimulationParametersZoneActivatedValues::cellCopyMutationGenomeColor,
         data,
         cell->pos,
         cell->color);
