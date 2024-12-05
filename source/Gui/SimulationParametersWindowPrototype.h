@@ -63,7 +63,8 @@ private:
 
 private:
     SimulationFacade _simulationFacade;
-    SimulationParametersBaseWidgets _baseWidgets;
+
+    LocationWidgets _locationWidgets;
 
     bool _masterWidgetOpen = true;
     bool _detailWidgetOpen = true;

@@ -166,6 +166,9 @@ void GenomeEditorWindow::processToolbar()
     AlienImGui::Tooltip("Delete cell");
 
     ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
+
+    ImGui::SameLine();
     auto& selectedNode = selectedTab.selectedNode;
     ImGui::BeginDisabled(!(selectedNode && *selectedNode > 0));
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_CHEVRON_UP))) {

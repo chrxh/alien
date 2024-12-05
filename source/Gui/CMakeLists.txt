@@ -60,6 +60,11 @@ PUBLIC
     InspectorWindow.h
     LastSessionBrowserData.cpp
     LastSessionBrowserData.h
+    LocationController.cpp
+    LocationController.h
+    LocationWidgets.h
+    LocationWindow.cpp
+    LocationWindow.h
     LoginController.cpp
     LoginController.h
     LoginDialog.cpp

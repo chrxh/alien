@@ -1233,8 +1233,9 @@ bool AlienImGui::ActionButton(ActionButtonParameters const& parameters)
     ImGui::PushStyleColor(ImGuiCol_Text, Const::ActionButtonTextColor.Value);
     ImGui::PushStyleColor(ImGuiCol_Button, Const::ActionButtonBackgroundColor.Value);
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Const::ActionButtonHoveredColor.Value);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, Const::ActionButtonActiveColor.Value);
     auto result = ImGui::Button(parameters._buttonText.c_str());
-    ImGui::PopStyleColor(3);
+    ImGui::PopStyleColor(4);
 
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);

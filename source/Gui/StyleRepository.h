@@ -43,9 +43,9 @@ namespace Const
     ImColor const ToggleButtonActiveColor = ImColor::HSV(0.14f, 0.8f, 0.7f);
     ImColor const ToggleButtonActiveHoveredColor = ImColor::HSV(0.14f, 0.8f, 0.8f);
 
-    ImColor const TreeNodeHighColor = ImColor::HSV(0.6f, 0.6f, 0.60f);
-    ImColor const TreeNodeHighHoveredColor = ImColor::HSV(0.6f, 0.6f, 0.75f);
-    ImColor const TreeNodeHighActiveColor = ImColor::HSV(0.6f, 0.6f, 0.90f);
+    ImColor const TreeNodeHighColor = ImColor::HSV(0.6f, 0.6f, 0.50f);
+    ImColor const TreeNodeHighHoveredColor = ImColor::HSV(0.6f, 0.6f, 0.65f);
+    ImColor const TreeNodeHighActiveColor = ImColor::HSV(0.6f, 0.6f, 0.80f);
     ImColor const TreeNodeDefaultColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
     ImColor const TreeNodeDefaultHoveredColor = ImColor::HSV(0.6f, 0.6f, 0.55f);
     ImColor const TreeNodeDefaultActiveColor = ImColor::HSV(0.6f, 0.6f, 0.65f);
@@ -71,9 +71,10 @@ namespace Const
     ImColor const ToolbarButtonBackgroundColor = ImColor::HSV(0, 0, 0.06f, 0);
     ImColor const ToolbarButtonHoveredColor = ImColor::HSV(0, 0, 1, 0.35f);
 
-    ImColor const ActionButtonTextColor = ImColor::HSV(0.55f, 0.6f, 1.0f, 1.0f);
-    ImColor const ActionButtonBackgroundColor = ImColor::HSV(0, 0, 0.06f, 0);
-    ImColor const ActionButtonHoveredColor = ImColor::HSV(0, 0, 1, 0.35f);
+    ImColor const ActionButtonTextColor = ImColor::HSV(0.54f, 0.43f, 1.0f, 1.0f);
+    ImColor const ActionButtonBackgroundColor = ImColor::HSV(0.54f, 0.43f, 0.0f, 0.0f);
+    ImColor const ActionButtonHoveredColor = ImColor::HSV(0.54f, 0.43f, 0.3f, 1.0f);
+    ImColor const ActionButtonActiveColor = ImColor::HSV(0.54f, 0.43f, 0.45f, 1.0f);
 
     ImColor const ButtonColor = ImColor::HSV(0.54f, 0.33f, 1.0f, 1.0f);
     ImColor const ToggleColor = ImColor::HSV(0.58f, 0.83f, 1.0f, 1.0f);
