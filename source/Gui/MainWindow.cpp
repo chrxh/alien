@@ -75,6 +75,7 @@
 #include "ExitDialog.h"
 #include "AutosaveWindow.h"
 #include "FileTransferController.h"
+#include "LocationController.h"
 #include "LoginController.h"
 #include "NetworkTransferController.h"
 #include "MainLoopEntityController.h"
@@ -128,6 +129,7 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     RadiationSourcesWindow::get().setup(_simulationFacade);
     SimulationParametersWindow::get().setup(_simulationFacade);
     SimulationParametersWindowPrototype::get().setup(_simulationFacade);
+    LocationController::get().setup(_simulationFacade);
     GpuSettingsDialog::get().setup(_simulationFacade);
     MainLoopController::get().setup(_simulationFacade, _persisterFacade);
     ExitDialog::get().setup();

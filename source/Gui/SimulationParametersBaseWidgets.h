@@ -1,9 +1,11 @@
 #pragma once
 
-#include "ZoneColorPalette.h"
 #include "EngineInterface/Definitions.h"
 
-class SimulationParametersBaseWidgets
+#include "LocationWidgets.h"
+#include "ZoneColorPalette.h"
+
+class _SimulationParametersBaseWidgets : public _LocationWidgets
 {
 public:
     void init(SimulationFacade const& simulationFacade);

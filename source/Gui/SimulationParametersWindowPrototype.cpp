@@ -6,17 +6,19 @@
 #include "Base/StringHelper.h"
 #include "EngineInterface/SimulationParametersEditService.h"
 #include "EngineInterface/SimulationFacade.h"
+#include "PersisterInterface/SerializerService.h"
 
 #include "AlienImGui.h"
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
+#include "LocationController.h"
 #include "OverlayController.h"
-#include "PersisterInterface/SerializerService.h"
 
 namespace
 {
     auto constexpr MasterHeight = 100.0f;
     auto constexpr MasterMinHeight = 50.0f;
+    auto constexpr MasterRowHeight = 25.0f;
 
     auto constexpr DetailWidgetMinHeight = 0.0f;
 
@@ -38,7 +40,9 @@ void SimulationParametersWindowPrototype::initIntern(SimulationFacade simulation
     _masterWidgetHeight = GlobalSettings::get().getValue("windows.simulation parameters prototype.master widget.height", scale(MasterHeight));
     _expertWidgetHeight = GlobalSettings::get().getValue("windows.simulation parameters prototype.expert widget height", scale(ExpertWidgetHeight));
 
-    _baseWidgets.init(_simulationFacade);
+    auto baseWidgets = std::make_shared<_SimulationParametersBaseWidgets>();
+    baseWidgets->init(_simulationFacade);
+    _locationWidgets = baseWidgets;
 }
 
 void SimulationParametersWindowPrototype::processIntern()
@@ -106,12 +110,20 @@ void SimulationParametersWindowPrototype::processToolbar()
     AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_LAYER_GROUP).tooltip("Add parameter zone"))) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
+                                      .text(ICON_FA_PLUS)
+                                      .secondText(ICON_FA_LAYER_GROUP)
+                                      .disabled(!_selectedLocationIndex.has_value())
+                                      .tooltip("Add parameter zone"))) {
         onAddZone();
     }
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_SUN).tooltip("Add radiation source"))) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
+                                      .text(ICON_FA_PLUS)
+                                      .secondText(ICON_FA_SUN)
+                                      .disabled(!_selectedLocationIndex.has_value())
+                                      .tooltip("Add radiation source"))) {
         onAddSource();
     }
 
@@ -134,6 +146,9 @@ void SimulationParametersWindowPrototype::processToolbar()
     }
 
     ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
+
+    ImGui::SameLine();
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
                                       .text(ICON_FA_CHEVRON_UP)
                                       .disabled(!_selectedLocationIndex.has_value() || _selectedLocationIndex.value() <= 1)
@@ -153,6 +168,15 @@ void SimulationParametersWindowPrototype::processToolbar()
 
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
+
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(
+            AlienImGui::ToolbarButtonParameters()
+                                      .text(ICON_FA_EXTERNAL_LINK_ALT)
+                                      .tooltip("Open selected zone/radiation source in new window")
+                                      .disabled(!_selectedLocationIndex.has_value()))) {
+        LocationController::get().addBase();
+    }
 
     AlienImGui::Separator();
 }
@@ -187,7 +211,7 @@ void SimulationParametersWindowPrototype::processDetailWidget()
         if (_detailWidgetOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Parameters").rank(AlienImGui::TreeNodeRank::High).defaultOpen(_detailWidgetOpen))) {
             ImGui::Spacing();
             if (ImGui::BeginChild("##detail2", {0, -ImGui::GetStyle().FramePadding.y})) {
-                _baseWidgets.process();
+                _locationWidgets->process();
             }
             ImGui::EndChild();
             AlienImGui::EndTreeNode();
@@ -231,7 +255,7 @@ void SimulationParametersWindowPrototype::processLocationTable()
 
     if (ImGui::BeginTable("Locations", 5, flags, ImVec2(-1, -1), 0)) {
 
-        ImGui::TableSetupColumn("", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(25.0f));
+        ImGui::TableSetupColumn(" ", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(25.0f));
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
         ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
         ImGui::TableSetupColumn("Position", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
@@ -246,10 +270,11 @@ void SimulationParametersWindowPrototype::processLocationTable()
                 auto const& entry = _locations.at(row);
 
                 ImGui::PushID(row);
-                ImGui::TableNextRow(0, scale(ImGui::GetTextLineHeightWithSpacing()));
+                ImGui::TableNextRow(0, scale(MasterRowHeight));
 
                 ImGui::TableNextColumn();
-                AlienImGui::Button(ICON_FA_EXTERNAL_LINK_ALT);
+                if (AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH).tooltip("Open parameters in separate window"))) {
+                }
 
                 // name
                 ImGui::TableNextColumn();

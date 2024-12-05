@@ -31,7 +31,7 @@ namespace
     }
 }
 
-void SimulationParametersBaseWidgets::init(SimulationFacade const& simulationFacade)
+void _SimulationParametersBaseWidgets ::init(SimulationFacade const& simulationFacade)
 {
     _simulationFacade = simulationFacade;
     for (int i = 0; i < CellFunction_Count; ++i) {
@@ -39,7 +39,7 @@ void SimulationParametersBaseWidgets::init(SimulationFacade const& simulationFac
     }
 }
 
-void SimulationParametersBaseWidgets::process()
+void _SimulationParametersBaseWidgets ::process()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
