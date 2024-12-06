@@ -9,7 +9,8 @@ class _SimulationParametersBaseWidgets : public _LocationWidgets
 {
 public:
     void init(SimulationFacade const& simulationFacade);
-    void process();
+    void process() override;
+    std::string getLocationName() override;
 
 private:
     SimulationFacade _simulationFacade;

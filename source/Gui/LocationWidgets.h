@@ -8,4 +8,5 @@ public:
     virtual ~_LocationWidgets() = default;
 
     virtual void process() = 0;
+    virtual std::string getLocationName() = 0;
 };

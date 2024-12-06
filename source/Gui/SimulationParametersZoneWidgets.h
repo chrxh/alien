@@ -10,7 +10,8 @@ class _SimulationParametersZoneWidgets : public _LocationWidgets
 {
 public:
     void init(SimulationFacade const& simulationFacade, int zoneIndex);
-    void process();
+    void process() override;
+    std::string getLocationName() override;
 
 private:
     void setDefaultSpotData(SimulationParametersZone& spot) const;
@@ -22,4 +23,5 @@ private:
     ZoneColorPalette _zoneColorPalette;
     uint32_t _backupColor = 0;
     std::vector<std::string> _cellFunctionStrings;
+    std::string _zoneName;
 };
