@@ -11,6 +11,7 @@ void LocationWindow::init(std::string const& title, LocationWidgets const& widge
 
     static int id = 0;
     _id = ++id;
+    _on = true;
 }
 
 void LocationWindow::process()
@@ -25,4 +26,9 @@ void LocationWindow::process()
     ImGui::End();
 
     ImGui::PopID();
+}
+
+bool LocationWindow::isOn() const
+{
+    return _on;
 }
