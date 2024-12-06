@@ -48,6 +48,7 @@ private:
     void onDeleteLocation();
     void onDecreaseLocationIndex();
     void onIncreaseLocationIndex();
+    void onOpenInLocationWindow();
     void onCenterLocation(int locationIndex);
 
     void updateLocations();

@@ -12,6 +12,7 @@
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
 #include "LocationController.h"
+#include "LocationHelper.h"
 #include "OverlayController.h"
 #include "Viewport.h"
 
@@ -176,7 +177,7 @@ void SimulationParametersWindowPrototype::processToolbar()
                                       .text(ICON_FA_EXTERNAL_LINK_ALT)
                                       .tooltip("Open selected zone/radiation source in new window")
                                       .disabled(!_selectedLocationIndex.has_value()))) {
-        LocationController::get().addBase();
+        onOpenInLocationWindow();
     }
 
     AlienImGui::Separator();
@@ -351,93 +352,19 @@ void SimulationParametersWindowPrototype::onSaveParameters()
         });
 }
 
-namespace
-{
-    void adaptLocationIndex(SimulationParameters& parameters, int fromLocationIndex, int offset)
-    {
-        for (int i = 0; i < parameters.numZones; ++i) {
-            auto& zone = parameters.zone[i];
-            if (zone.locationIndex >= fromLocationIndex) {
-                zone.locationIndex += offset;
-            }
-        }
-        for (int i = 0; i < parameters.numRadiationSources; ++i) {
-            auto& source = parameters.radiationSource[i];
-            if (source.locationIndex >= fromLocationIndex) {
-                source.locationIndex += offset;
-            }
-        }
-    }
-
-    std::string generateZoneName(SimulationParameters& parameters)
-    {
-        int counter = 0;
-        bool alreadyUsed;
-        std::string result;
-        do {
-            alreadyUsed = false;
-            result = "Zone " + std::to_string(++counter);
-            for (int i = 0; i < parameters.numZones; ++i) {
-                auto name = std::string(parameters.zone[i].name);
-                if (result == name) {
-                    alreadyUsed = true;
-                    break;
-                }
-            }
-        } while (alreadyUsed);
-
-        return result;
-    }
-
-    std::string generateSourceName(SimulationParameters& parameters)
-    {
-        int counter = 0;
-        bool alreadyUsed;
-        std::string result;
-        do {
-            alreadyUsed = false;
-            result = "Radiation " + std::to_string(++counter);
-            for (int i = 0; i < parameters.numRadiationSources; ++i) {
-                auto name = std::string(parameters.radiationSource[i].name);
-                if (result == name) {
-                    alreadyUsed = true;
-                    break;
-                }
-            }
-        } while (alreadyUsed);
-
-        return result;
-    }
-
-    std::variant<SimulationParametersZone*, RadiationSource*> findLocation(SimulationParameters& parameters, int locationIndex)
-    {
-        for (int i = 0; i < parameters.numZones; ++i) {
-            if (parameters.zone[i].locationIndex == locationIndex) {
-                return &parameters.zone[i];
-            }
-        }
-        for (int i = 0; i < parameters.numRadiationSources; ++i) {
-            if (parameters.radiationSource[i].locationIndex == locationIndex) {
-                return &parameters.radiationSource[i];
-            }
-        }
-        THROW_NOT_IMPLEMENTED();
-    }
-}
-
 void SimulationParametersWindowPrototype::onAddZone()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
     ++_selectedLocationIndex.value();
-    adaptLocationIndex(parameters, _selectedLocationIndex.value(), 1);
-    adaptLocationIndex(origParameters, _selectedLocationIndex.value(), 1);
+    LocationHelper::adaptLocationIndex(parameters, _selectedLocationIndex.value(), 1);
+    LocationHelper::adaptLocationIndex(origParameters, _selectedLocationIndex.value(), 1);
 
     auto worldSize = _simulationFacade->getWorldSize();
 
     SimulationParametersZone zone;
-    StringHelper::copy(zone.name, sizeof(zone.name), generateZoneName(parameters));
+    StringHelper::copy(zone.name, sizeof(zone.name), LocationHelper::generateZoneName(parameters));
     zone.locationIndex = _selectedLocationIndex.value();
     zone.posX = toFloat(worldSize.x / 2);
     zone.posY = toFloat(worldSize.y / 2);
@@ -466,8 +393,8 @@ void SimulationParametersWindowPrototype::onAddSource()
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
     ++_selectedLocationIndex.value();
-    adaptLocationIndex(parameters, _selectedLocationIndex.value(), 1);
-    adaptLocationIndex(origParameters, _selectedLocationIndex.value(), 1);
+    LocationHelper::adaptLocationIndex(parameters, _selectedLocationIndex.value(), 1);
+    LocationHelper::adaptLocationIndex(origParameters, _selectedLocationIndex.value(), 1);
 
     auto strengths = editService.getRadiationStrengths(parameters);
     auto newStrengths = editService.calcRadiationStrengthsForAddingZone(strengths);
@@ -475,7 +402,7 @@ void SimulationParametersWindowPrototype::onAddSource()
     auto worldSize = _simulationFacade->getWorldSize();
 
     RadiationSource source;
-    StringHelper::copy(source.name, sizeof(source.name), generateSourceName(parameters));
+    StringHelper::copy(source.name, sizeof(source.name), LocationHelper::generateSourceName(parameters));
     source.locationIndex = _selectedLocationIndex.value();
     source.posX = toFloat(worldSize.x / 2);
     source.posY = toFloat(worldSize.y / 2);
@@ -498,17 +425,17 @@ void SimulationParametersWindowPrototype::onCloneLocation()
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
-    auto location = findLocation(parameters, _selectedLocationIndex.value());
+    auto location = LocationHelper::findLocation(parameters, _selectedLocationIndex.value());
 
     ++_selectedLocationIndex.value();
-    adaptLocationIndex(parameters, _selectedLocationIndex.value(), 1);
-    adaptLocationIndex(origParameters, _selectedLocationIndex.value(), 1);
+    LocationHelper::adaptLocationIndex(parameters, _selectedLocationIndex.value(), 1);
+    LocationHelper::adaptLocationIndex(origParameters, _selectedLocationIndex.value(), 1);
 
     if (std::holds_alternative<SimulationParametersZone*>(location)) {
         auto zone = std::get<SimulationParametersZone*>(location);
         auto clone = *zone;
 
-        StringHelper::copy(clone.name, sizeof(clone.name), generateZoneName(parameters));
+        StringHelper::copy(clone.name, sizeof(clone.name), LocationHelper::generateZoneName(parameters));
         clone.locationIndex = _selectedLocationIndex.value();
 
         int index = parameters.numZones;
@@ -524,7 +451,7 @@ void SimulationParametersWindowPrototype::onCloneLocation()
         auto strengths = editService.getRadiationStrengths(parameters);
         auto newStrengths = editService.calcRadiationStrengthsForAddingZone(strengths);
 
-        StringHelper::copy(clone.name, sizeof(clone.name), generateSourceName(parameters));
+        StringHelper::copy(clone.name, sizeof(clone.name), LocationHelper::generateSourceName(parameters));
         clone.locationIndex = _selectedLocationIndex.value();
         auto index = parameters.numRadiationSources;
         parameters.radiationSource[index] = clone;
@@ -544,7 +471,7 @@ void SimulationParametersWindowPrototype::onDeleteLocation()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
-    auto location = findLocation(parameters, _selectedLocationIndex.value());
+    auto location = LocationHelper::findLocation(parameters, _selectedLocationIndex.value());
 
     if (std::holds_alternative<SimulationParametersZone*>(location)) {
         std::optional<int> zoneIndex;
@@ -580,8 +507,8 @@ void SimulationParametersWindowPrototype::onDeleteLocation()
         }
     }
 
-    adaptLocationIndex(parameters, _selectedLocationIndex.value(), -1);
-    adaptLocationIndex(origParameters, _selectedLocationIndex.value(), -1);
+    LocationHelper::adaptLocationIndex(parameters, _selectedLocationIndex.value(), -1);
+    LocationHelper::adaptLocationIndex(origParameters, _selectedLocationIndex.value(), -1);
     if (_locations.size() - 1 == _selectedLocationIndex.value()) {
         --_selectedLocationIndex.value();
     }
@@ -590,49 +517,14 @@ void SimulationParametersWindowPrototype::onDeleteLocation()
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 }
 
-namespace
-{
-    void onDecreaseLocationIndexIntern(SimulationParameters& parameters, int locationIndex)
-    {
-        std::variant<SimulationParametersZone*, RadiationSource*> zoneOrSource1 = findLocation(parameters, locationIndex);
-        std::variant<SimulationParametersZone*, RadiationSource*> zoneOrSource2 = findLocation(parameters, locationIndex - 1);
-        if (std::holds_alternative<SimulationParametersZone*>(zoneOrSource1)) {
-            std::get<SimulationParametersZone*>(zoneOrSource1)->locationIndex -= 1;
-        } else {
-            std::get<RadiationSource*>(zoneOrSource1)->locationIndex -= 1;
-        }
-        if (std::holds_alternative<SimulationParametersZone*>(zoneOrSource2)) {
-            std::get<SimulationParametersZone*>(zoneOrSource2)->locationIndex += 1;
-        } else {
-            std::get<RadiationSource*>(zoneOrSource2)->locationIndex += 1;
-        }
-    }
-
-    void onIncreaseLocationIndexIntern(SimulationParameters& parameters, int locationIndex)
-    {
-        std::variant<SimulationParametersZone*, RadiationSource*> zoneOrSource1 = findLocation(parameters, locationIndex);
-        std::variant<SimulationParametersZone*, RadiationSource*> zoneOrSource2 = findLocation(parameters, locationIndex + 1);
-        if (std::holds_alternative<SimulationParametersZone*>(zoneOrSource1)) {
-            std::get<SimulationParametersZone*>(zoneOrSource1)->locationIndex += 1;
-        } else {
-            std::get<RadiationSource*>(zoneOrSource1)->locationIndex += 1;
-        }
-        if (std::holds_alternative<SimulationParametersZone*>(zoneOrSource2)) {
-            std::get<SimulationParametersZone*>(zoneOrSource2)->locationIndex -= 1;
-        } else {
-            std::get<RadiationSource*>(zoneOrSource2)->locationIndex -= 1;
-        }
-    }
-}
-
 void SimulationParametersWindowPrototype::onDecreaseLocationIndex()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
-    onDecreaseLocationIndexIntern(parameters, _selectedLocationIndex.value());
+    LocationHelper::onDecreaseLocationIndexIntern(parameters, _selectedLocationIndex.value());
     _simulationFacade->setSimulationParameters(parameters);
 
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
-    onDecreaseLocationIndexIntern(origParameters, _selectedLocationIndex.value());
+    LocationHelper::onDecreaseLocationIndexIntern(origParameters, _selectedLocationIndex.value());
     _simulationFacade->setOriginalSimulationParameters(parameters);
 
     --_selectedLocationIndex.value();
@@ -641,20 +533,25 @@ void SimulationParametersWindowPrototype::onDecreaseLocationIndex()
 void SimulationParametersWindowPrototype::onIncreaseLocationIndex()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
-    onIncreaseLocationIndexIntern(parameters, _selectedLocationIndex.value());
+    LocationHelper::onIncreaseLocationIndexIntern(parameters, _selectedLocationIndex.value());
     _simulationFacade->setSimulationParameters(parameters);
 
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
-    onIncreaseLocationIndexIntern(origParameters, _selectedLocationIndex.value());
+    LocationHelper::onIncreaseLocationIndexIntern(origParameters, _selectedLocationIndex.value());
     _simulationFacade->setOriginalSimulationParameters(parameters);
 
     ++_selectedLocationIndex.value();
 }
 
+void SimulationParametersWindowPrototype::onOpenInLocationWindow()
+{
+    LocationController::get().addLocationWindow(_selectedLocationIndex.value());
+}
+
 void SimulationParametersWindowPrototype::onCenterLocation(int locationIndex)
 {
     auto parameters = _simulationFacade->getSimulationParameters();
-    auto location = findLocation(parameters, locationIndex);
+    auto location = LocationHelper::findLocation(parameters, locationIndex);
     RealVector2D pos;
     if (std::holds_alternative<SimulationParametersZone*>(location)) {
         auto zone = std::get<SimulationParametersZone*>(location);

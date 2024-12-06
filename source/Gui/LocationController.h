@@ -13,7 +13,7 @@ class LocationController : public MainLoopEntity<SimulationFacade>
     MAKE_SINGLETON(LocationController);
 
 public:
-    void addBase();
+    void addLocationWindow(int locationIndex);
 
 private:
     void init(SimulationFacade simulationFacade) override;
