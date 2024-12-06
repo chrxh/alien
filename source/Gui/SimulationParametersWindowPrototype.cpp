@@ -13,6 +13,7 @@
 #include "GenericMessageDialog.h"
 #include "LocationController.h"
 #include "OverlayController.h"
+#include "Viewport.h"
 
 namespace
 {
@@ -253,12 +254,11 @@ void SimulationParametersWindowPrototype::processLocationTable()
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
         | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    if (ImGui::BeginTable("Locations", 5, flags, ImVec2(-1, -1), 0)) {
+    if (ImGui::BeginTable("Locations", 4, flags, ImVec2(-1, -1), 0)) {
 
-        ImGui::TableSetupColumn(" ", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(25.0f));
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
         ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
-        ImGui::TableSetupColumn("Position", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
+        ImGui::TableSetupColumn("Position", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(115.0f));
         ImGui::TableSetupColumn("Strength", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
@@ -272,23 +272,18 @@ void SimulationParametersWindowPrototype::processLocationTable()
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(MasterRowHeight));
 
-                ImGui::TableNextColumn();
-                if (AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH).tooltip("Open parameters in separate window"))) {
-                }
-
                 // name
                 ImGui::TableNextColumn();
-                AlienImGui::Text(entry.name);
-
-                ImGui::SameLine();
                 auto selected = _selectedLocationIndex.has_value() ? _selectedLocationIndex.value() == row : false;
                 if (ImGui::Selectable(
                         "",
                         &selected,
                         ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap,
-                        ImVec2(0, 0))) {
+                        ImVec2(0, scale(MasterRowHeight) - ImGui::GetStyle().FramePadding.y))) {
                     _selectedLocationIndex = selected ? std::make_optional(row) : std::nullopt;
                 }
+                ImGui::SameLine();
+                AlienImGui::Text(entry.name);
 
 
                 // type
@@ -303,6 +298,13 @@ void SimulationParametersWindowPrototype::processLocationTable()
 
                 // position
                 ImGui::TableNextColumn();
+                if (row > 0) {
+                    if (AlienImGui::ActionButton(
+                            AlienImGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH))) {
+                        onCenterLocation(row);
+                    }
+                    ImGui::SameLine();
+                }
                 AlienImGui::Text(entry.position);
 
                 // strength
@@ -647,6 +649,21 @@ void SimulationParametersWindowPrototype::onIncreaseLocationIndex()
     _simulationFacade->setOriginalSimulationParameters(parameters);
 
     ++_selectedLocationIndex.value();
+}
+
+void SimulationParametersWindowPrototype::onCenterLocation(int locationIndex)
+{
+    auto parameters = _simulationFacade->getSimulationParameters();
+    auto location = findLocation(parameters, locationIndex);
+    RealVector2D pos;
+    if (std::holds_alternative<SimulationParametersZone*>(location)) {
+        auto zone = std::get<SimulationParametersZone*>(location);
+        pos = {zone->posX, zone->posY};
+    } else {
+        auto source = std::get<RadiationSource*>(location);
+        pos = {source->posX, source->posY};
+    }
+    Viewport::get().setCenterInWorldPos(pos);
 }
 
 void SimulationParametersWindowPrototype::updateLocations()

@@ -1238,7 +1238,7 @@ bool AlienImGui::ActionButton(ActionButtonParameters const& parameters)
     ImGui::PopStyleColor(4);
 
     if (parameters._tooltip) {
-        AlienImGui::HelpMarker(*parameters._tooltip);
+        AlienImGui::Tooltip(*parameters._tooltip);
     }
 
     return result;
