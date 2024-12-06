@@ -13,7 +13,7 @@ void LocationController::addLocationWindow(int locationIndex)
     if (locationIndex == 0) {
         auto widgets = std::make_shared<_SimulationParametersBaseWidgets>();
         widgets->init(_simulationFacade);
-        window.init("Base parameters", widgets);
+        window.init(widgets);
     } else {
         auto parameters = _simulationFacade->getSimulationParameters();
         auto location = LocationHelper::findLocation(parameters, locationIndex);
@@ -21,7 +21,7 @@ void LocationController::addLocationWindow(int locationIndex)
             auto zoneIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
             auto widgets = std::make_shared<_SimulationParametersZoneWidgets>();
             widgets->init(_simulationFacade, zoneIndex);
-            window.init("Zone parameters", widgets);
+            window.init(widgets);
         } else {
             
         }

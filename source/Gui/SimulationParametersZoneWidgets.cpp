@@ -39,9 +39,11 @@ void _SimulationParametersZoneWidgets::process()
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
     auto lastParameters = parameters;
 
-    SimulationParametersZone& spot = parameters.zone[_zoneIndex];
-    SimulationParametersZone const& origSpot = origParameters.zone[_zoneIndex];
-    SimulationParametersZone const& lastSpot = lastParameters.zone[_zoneIndex];
+    SimulationParametersZone& zone = parameters.zone[_zoneIndex];
+    SimulationParametersZone const& origZone = origParameters.zone[_zoneIndex];
+    SimulationParametersZone const& lastZone = lastParameters.zone[_zoneIndex];
+
+    _zoneName = std::string(zone.name);
 
     if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         auto worldSize = _simulationFacade->getWorldSize();
@@ -51,8 +53,8 @@ void _SimulationParametersZoneWidgets::process()
          */
         if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Visualization"))) {
             AlienImGui::ColorButtonWithPicker(
-                AlienImGui::ColorButtonWithPickerParameters().name("Background color").textWidth(RightColumnWidth).defaultValue(origSpot.color),
-                spot.color,
+                AlienImGui::ColorButtonWithPickerParameters().name("Background color").textWidth(RightColumnWidth).defaultValue(origZone.color),
+                zone.color,
                 _backupColor,
                 _zoneColorPalette.getReference());
             AlienImGui::EndTreeNode();
@@ -64,9 +66,9 @@ void _SimulationParametersZoneWidgets::process()
                         .name("Shape")
                         .values({"Circular", "Rectangular"})
                         .textWidth(RightColumnWidth)
-                        .defaultValue(origSpot.shapeType),
-                    spot.shapeType)) {
-                setDefaultSpotData(spot);
+                        .defaultValue(origZone.shapeType),
+                    zone.shapeType)) {
+                setDefaultSpotData(zone);
             }
 
             auto getMousePickerEnabledFunc = [&]() { return SimulationInteractionController::get().isPositionSelectionMode(); };
@@ -79,46 +81,46 @@ void _SimulationParametersZoneWidgets::process()
                     .textWidth(RightColumnWidth)
                     .min({0, 0})
                     .max(toRealVector2D(worldSize))
-                    .defaultValue(RealVector2D{origSpot.posX, origSpot.posY})
+                    .defaultValue(RealVector2D{origZone.posX, origZone.posY})
                     .format("%.2f")
                     .getMousePickerEnabledFunc(getMousePickerEnabledFunc)
                     .setMousePickerEnabledFunc(setMousePickerEnabledFunc)
                     .getMousePickerPositionFunc(getMousePickerPositionFunc),
-                spot.posX,
-                spot.posY);
+                zone.posX,
+                zone.posY);
             AlienImGui::SliderFloat2(
                 AlienImGui::SliderFloat2Parameters()
                     .name("Velocity (x,y)")
                     .textWidth(RightColumnWidth)
                     .min({-4.0f, -4.0f})
                     .max({4.0f, 4.0f})
-                    .defaultValue(RealVector2D{origSpot.velX, origSpot.velY})
+                    .defaultValue(RealVector2D{origZone.velX, origZone.velY})
                     .format("%.2f"),
-                spot.velX,
-                spot.velY);
+                zone.velX,
+                zone.velY);
             auto maxRadius = toFloat(std::max(worldSize.x, worldSize.y));
-            if (spot.shapeType == SpotShapeType_Circular) {
+            if (zone.shapeType == SpotShapeType_Circular) {
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Core radius")
                         .textWidth(RightColumnWidth)
                         .min(0)
                         .max(maxRadius)
-                        .defaultValue(&origSpot.shapeData.circularSpot.coreRadius)
+                        .defaultValue(&origZone.shapeData.circularSpot.coreRadius)
                         .format("%.1f"),
-                    &spot.shapeData.circularSpot.coreRadius);
+                    &zone.shapeData.circularSpot.coreRadius);
             }
-            if (spot.shapeType == SpotShapeType_Rectangular) {
+            if (zone.shapeType == SpotShapeType_Rectangular) {
                 AlienImGui::SliderFloat2(
                     AlienImGui::SliderFloat2Parameters()
                         .name("Size (x,y)")
                         .textWidth(RightColumnWidth)
                         .min({0, 0})
                         .max({toFloat(worldSize.x), toFloat(worldSize.y)})
-                        .defaultValue(RealVector2D{origSpot.shapeData.rectangularSpot.width, origSpot.shapeData.rectangularSpot.height})
+                        .defaultValue(RealVector2D{origZone.shapeData.rectangularSpot.width, origZone.shapeData.rectangularSpot.height})
                         .format("%.1f"),
-                    spot.shapeData.rectangularSpot.width,
-                    spot.shapeData.rectangularSpot.height);
+                    zone.shapeData.rectangularSpot.width,
+                    zone.shapeData.rectangularSpot.height);
             }
 
             AlienImGui::SliderFloat(
@@ -127,9 +129,9 @@ void _SimulationParametersZoneWidgets::process()
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(maxRadius)
-                    .defaultValue(&origSpot.fadeoutRadius)
+                    .defaultValue(&origZone.fadeoutRadius)
                     .format("%.1f"),
-                &spot.fadeoutRadius);
+                &zone.fadeoutRadius);
             AlienImGui::EndTreeNode();
         }
 
@@ -137,12 +139,12 @@ void _SimulationParametersZoneWidgets::process()
          * Flow
          */
         if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Force field"))) {
-            auto isForceFieldActive = spot.flowType != FlowType_None;
+            auto isForceFieldActive = zone.flowType != FlowType_None;
 
-            auto forceFieldTypeIntern = std::max(0, spot.flowType - 1);  //FlowType_None should not be selectable in ComboBox
-            auto origForceFieldTypeIntern = std::max(0, origSpot.flowType - 1);
+            auto forceFieldTypeIntern = std::max(0, zone.flowType - 1);  //FlowType_None should not be selectable in ComboBox
+            auto origForceFieldTypeIntern = std::max(0, origZone.flowType - 1);
             if (ImGui::Checkbox("##forceField", &isForceFieldActive)) {
-                spot.flowType = isForceFieldActive ? FlowType_Radial : FlowType_None;
+                zone.flowType = isForceFieldActive ? FlowType_Radial : FlowType_None;
             }
             ImGui::SameLine();
             ImGui::BeginDisabled(!isForceFieldActive);
@@ -154,26 +156,26 @@ void _SimulationParametersZoneWidgets::process()
                         .textWidth(RightColumnWidth)
                         .defaultValue(origForceFieldTypeIntern),
                     forceFieldTypeIntern)) {
-                spot.flowType = forceFieldTypeIntern + 1;
-                if (spot.flowType == FlowType_Radial) {
-                    spot.flowData.radialFlow = RadialFlow();
+                zone.flowType = forceFieldTypeIntern + 1;
+                if (zone.flowType == FlowType_Radial) {
+                    zone.flowData.radialFlow = RadialFlow();
                 }
-                if (spot.flowType == FlowType_Central) {
-                    spot.flowData.centralFlow = CentralFlow();
+                if (zone.flowType == FlowType_Central) {
+                    zone.flowData.centralFlow = CentralFlow();
                 }
-                if (spot.flowType == FlowType_Linear) {
-                    spot.flowData.linearFlow = LinearFlow();
+                if (zone.flowType == FlowType_Linear) {
+                    zone.flowData.linearFlow = LinearFlow();
                 }
             }
-            if (spot.flowType == FlowType_Radial) {
+            if (zone.flowType == FlowType_Radial) {
                 ImGui::SetCursorPosX(posX);
                 AlienImGui::Combo(
                     AlienImGui::ComboParameters()
                         .name("Orientation")
                         .textWidth(RightColumnWidth)
-                        .defaultValue(origSpot.flowData.radialFlow.orientation)
+                        .defaultValue(origZone.flowData.radialFlow.orientation)
                         .values({"Clockwise", "Counter clockwise"}),
-                    spot.flowData.radialFlow.orientation);
+                    zone.flowData.radialFlow.orientation);
                 ImGui::SetCursorPosX(posX);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
@@ -183,8 +185,8 @@ void _SimulationParametersZoneWidgets::process()
                         .max(0.5f)
                         .logarithmic(true)
                         .format("%.5f")
-                        .defaultValue(&origSpot.flowData.radialFlow.strength),
-                    &spot.flowData.radialFlow.strength);
+                        .defaultValue(&origZone.flowData.radialFlow.strength),
+                    &zone.flowData.radialFlow.strength);
                 ImGui::SetCursorPosX(posX);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
@@ -193,10 +195,10 @@ void _SimulationParametersZoneWidgets::process()
                         .min(-180.0f)
                         .max(180.0f)
                         .format("%.1f")
-                        .defaultValue(&origSpot.flowData.radialFlow.driftAngle),
-                    &spot.flowData.radialFlow.driftAngle);
+                        .defaultValue(&origZone.flowData.radialFlow.driftAngle),
+                    &zone.flowData.radialFlow.driftAngle);
             }
-            if (spot.flowType == FlowType_Central) {
+            if (zone.flowType == FlowType_Central) {
                 ImGui::SetCursorPosX(posX);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
@@ -206,10 +208,10 @@ void _SimulationParametersZoneWidgets::process()
                         .max(0.5f)
                         .logarithmic(true)
                         .format("%.5f")
-                        .defaultValue(&origSpot.flowData.centralFlow.strength),
-                    &spot.flowData.centralFlow.strength);
+                        .defaultValue(&origZone.flowData.centralFlow.strength),
+                    &zone.flowData.centralFlow.strength);
             }
-            if (spot.flowType == FlowType_Linear) {
+            if (zone.flowType == FlowType_Linear) {
                 ImGui::SetCursorPosX(posX);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
@@ -218,8 +220,8 @@ void _SimulationParametersZoneWidgets::process()
                         .min(-180.0f)
                         .max(180.0f)
                         .format("%.1f")
-                        .defaultValue(&origSpot.flowData.linearFlow.angle),
-                    &spot.flowData.linearFlow.angle);
+                        .defaultValue(&origZone.flowData.linearFlow.angle),
+                    &zone.flowData.linearFlow.angle);
                 ImGui::SetCursorPosX(posX);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
@@ -229,8 +231,8 @@ void _SimulationParametersZoneWidgets::process()
                         .max(0.5f)
                         .logarithmic(true)
                         .format("%.5f")
-                        .defaultValue(&origSpot.flowData.linearFlow.strength),
-                    &spot.flowData.linearFlow.strength);
+                        .defaultValue(&origZone.flowData.linearFlow.strength),
+                    &zone.flowData.linearFlow.strength);
             }
             ImGui::EndDisabled();
             AlienImGui::EndTreeNode();
@@ -247,22 +249,22 @@ void _SimulationParametersZoneWidgets::process()
                     .min(0)
                     .max(1)
                     .logarithmic(true)
-                    .defaultValue(&origSpot.values.friction)
+                    .defaultValue(&origZone.values.friction)
                     .disabledValue(&parameters.baseValues.friction)
                     .format("%.4f"),
-                &spot.values.friction,
-                &spot.activatedValues.friction);
+                &zone.values.friction,
+                &zone.activatedValues.friction);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Rigidity")
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(1)
-                    .defaultValue(&origSpot.values.rigidity)
+                    .defaultValue(&origZone.values.rigidity)
                     .disabledValue(&parameters.baseValues.rigidity)
                     .format("%.2f"),
-                &spot.values.rigidity,
-                &spot.activatedValues.rigidity);
+                &zone.values.rigidity,
+                &zone.activatedValues.rigidity);
             AlienImGui::EndTreeNode();
         }
 
@@ -277,10 +279,10 @@ void _SimulationParametersZoneWidgets::process()
                     .min(0)
                     .max(3.0f)
                     .colorDependence(true)
-                    .defaultValue(origSpot.values.cellMaxForce)
+                    .defaultValue(origZone.values.cellMaxForce)
                     .disabledValue(parameters.baseValues.cellMaxForce),
-                spot.values.cellMaxForce,
-                &spot.activatedValues.cellMaxForce);
+                zone.values.cellMaxForce,
+                &zone.activatedValues.cellMaxForce);
             AlienImGui::EndTreeNode();
         }
 
@@ -294,10 +296,10 @@ void _SimulationParametersZoneWidgets::process()
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(2.0f)
-                    .defaultValue(&origSpot.values.cellFusionVelocity)
+                    .defaultValue(&origZone.values.cellFusionVelocity)
                     .disabledValue(&parameters.baseValues.cellFusionVelocity),
-                &spot.values.cellFusionVelocity,
-                &spot.activatedValues.cellFusionVelocity);
+                &zone.values.cellFusionVelocity,
+                &zone.activatedValues.cellFusionVelocity);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Maximum energy")
@@ -307,10 +309,10 @@ void _SimulationParametersZoneWidgets::process()
                     .logarithmic(true)
                     .infinity(true)
                     .format("%.0f")
-                    .defaultValue(&origSpot.values.cellMaxBindingEnergy)
+                    .defaultValue(&origZone.values.cellMaxBindingEnergy)
                     .disabledValue(&parameters.baseValues.cellMaxBindingEnergy),
-                &spot.values.cellMaxBindingEnergy,
-                &spot.activatedValues.cellMaxBindingEnergy);
+                &zone.values.cellMaxBindingEnergy,
+                &zone.activatedValues.cellMaxBindingEnergy);
             AlienImGui::EndTreeNode();
         }
 
@@ -322,10 +324,10 @@ void _SimulationParametersZoneWidgets::process()
                 AlienImGui::CheckboxParameters()
                     .name("Disable radiation sources")
                     .textWidth(RightColumnWidth)
-                    .defaultValue(origSpot.values.radiationDisableSources)
+                    .defaultValue(origZone.values.radiationDisableSources)
                     .tooltip("If activated, all radiation sources within this zone are deactivated."),
-                spot.values.radiationDisableSources);
-            spot.activatedValues.radiationDisableSources = spot.values.radiationDisableSources;
+                zone.values.radiationDisableSources);
+            zone.activatedValues.radiationDisableSources = zone.values.radiationDisableSources;
 
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -336,10 +338,10 @@ void _SimulationParametersZoneWidgets::process()
                     .min(0)
                     .max(1.0)
                     .format("%.4f")
-                    .defaultValue(origSpot.values.radiationAbsorption)
+                    .defaultValue(origZone.values.radiationAbsorption)
                     .disabledValue(parameters.baseValues.radiationAbsorption),
-                spot.values.radiationAbsorption,
-                &spot.activatedValues.radiationAbsorption);
+                zone.values.radiationAbsorption,
+                &zone.activatedValues.radiationAbsorption);
 
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -349,11 +351,11 @@ void _SimulationParametersZoneWidgets::process()
                     .min(0)
                     .max(0.01f)
                     .logarithmic(true)
-                    .defaultValue(origSpot.values.radiationCellAgeStrength)
+                    .defaultValue(origZone.values.radiationCellAgeStrength)
                     .disabledValue(parameters.baseValues.radiationCellAgeStrength)
                     .format("%.6f"),
-                spot.values.radiationCellAgeStrength,
-                &spot.activatedValues.radiationCellAgeStrength);
+                zone.values.radiationCellAgeStrength,
+                &zone.activatedValues.radiationCellAgeStrength);
             AlienImGui::EndTreeNode();
         }
 
@@ -368,10 +370,10 @@ void _SimulationParametersZoneWidgets::process()
                     .colorDependence(true)
                     .min(10.0f)
                     .max(200.0f)
-                    .defaultValue(origSpot.values.cellMinEnergy)
+                    .defaultValue(origZone.values.cellMinEnergy)
                     .disabledValue(parameters.baseValues.cellMinEnergy),
-                spot.values.cellMinEnergy,
-                &spot.activatedValues.cellMinEnergy);
+                zone.values.cellMinEnergy,
+                &zone.activatedValues.cellMinEnergy);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Decay rate of dying cells")
@@ -381,10 +383,10 @@ void _SimulationParametersZoneWidgets::process()
                     .max(0.1f)
                     .format("%.6f")
                     .logarithmic(true)
-                    .defaultValue(origSpot.values.cellDeathProbability)
+                    .defaultValue(origZone.values.cellDeathProbability)
                     .disabledValue(parameters.baseValues.cellDeathProbability),
-                spot.values.cellDeathProbability,
-                &spot.activatedValues.cellDeathProbability);
+                zone.values.cellDeathProbability,
+                &zone.activatedValues.cellDeathProbability);
             AlienImGui::EndTreeNode();
         }
 
@@ -401,10 +403,10 @@ void _SimulationParametersZoneWidgets::process()
                     .format("%.7f")
                     .colorDependence(true)
                     .logarithmic(true)
-                    .defaultValue(origSpot.values.cellCopyMutationNeuronData)
+                    .defaultValue(origZone.values.cellCopyMutationNeuronData)
                     .disabledValue(parameters.baseValues.cellCopyMutationNeuronData),
-                spot.values.cellCopyMutationNeuronData,
-                &spot.activatedValues.cellCopyMutationNeuronData);
+                zone.values.cellCopyMutationNeuronData,
+                &zone.activatedValues.cellCopyMutationNeuronData);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell properties")
@@ -414,10 +416,10 @@ void _SimulationParametersZoneWidgets::process()
                     .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSpot.values.cellCopyMutationCellProperties)
+                    .defaultValue(origZone.values.cellCopyMutationCellProperties)
                     .disabledValue(parameters.baseValues.cellCopyMutationCellProperties),
-                spot.values.cellCopyMutationCellProperties,
-                &spot.activatedValues.cellCopyMutationCellProperties);
+                zone.values.cellCopyMutationCellProperties,
+                &zone.activatedValues.cellCopyMutationCellProperties);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Geometry")
@@ -427,10 +429,10 @@ void _SimulationParametersZoneWidgets::process()
                     .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSpot.values.cellCopyMutationGeometry)
+                    .defaultValue(origZone.values.cellCopyMutationGeometry)
                     .disabledValue(parameters.baseValues.cellCopyMutationGeometry),
-                spot.values.cellCopyMutationGeometry,
-                &spot.activatedValues.cellCopyMutationGeometry);
+                zone.values.cellCopyMutationGeometry,
+                &zone.activatedValues.cellCopyMutationGeometry);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Custom geometry")
@@ -440,10 +442,10 @@ void _SimulationParametersZoneWidgets::process()
                     .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSpot.values.cellCopyMutationCustomGeometry)
+                    .defaultValue(origZone.values.cellCopyMutationCustomGeometry)
                     .disabledValue(parameters.baseValues.cellCopyMutationCustomGeometry),
-                spot.values.cellCopyMutationCustomGeometry,
-                &spot.activatedValues.cellCopyMutationCustomGeometry);
+                zone.values.cellCopyMutationCustomGeometry,
+                &zone.activatedValues.cellCopyMutationCustomGeometry);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell function type")
@@ -453,10 +455,10 @@ void _SimulationParametersZoneWidgets::process()
                     .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSpot.values.cellCopyMutationCellFunction)
+                    .defaultValue(origZone.values.cellCopyMutationCellFunction)
                     .disabledValue(parameters.baseValues.cellCopyMutationCellFunction),
-                spot.values.cellCopyMutationCellFunction,
-                &spot.activatedValues.cellCopyMutationCellFunction);
+                zone.values.cellCopyMutationCellFunction,
+                &zone.activatedValues.cellCopyMutationCellFunction);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell insertion")
@@ -466,10 +468,10 @@ void _SimulationParametersZoneWidgets::process()
                     .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSpot.values.cellCopyMutationInsertion)
+                    .defaultValue(origZone.values.cellCopyMutationInsertion)
                     .disabledValue(parameters.baseValues.cellCopyMutationInsertion),
-                spot.values.cellCopyMutationInsertion,
-                &spot.activatedValues.cellCopyMutationInsertion);
+                zone.values.cellCopyMutationInsertion,
+                &zone.activatedValues.cellCopyMutationInsertion);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Cell deletion")
@@ -479,10 +481,10 @@ void _SimulationParametersZoneWidgets::process()
                     .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSpot.values.cellCopyMutationDeletion)
+                    .defaultValue(origZone.values.cellCopyMutationDeletion)
                     .disabledValue(parameters.baseValues.cellCopyMutationDeletion),
-                spot.values.cellCopyMutationDeletion,
-                &spot.activatedValues.cellCopyMutationDeletion);
+                zone.values.cellCopyMutationDeletion,
+                &zone.activatedValues.cellCopyMutationDeletion);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Translation")
@@ -492,10 +494,10 @@ void _SimulationParametersZoneWidgets::process()
                     .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSpot.values.cellCopyMutationTranslation)
+                    .defaultValue(origZone.values.cellCopyMutationTranslation)
                     .disabledValue(parameters.baseValues.cellCopyMutationTranslation),
-                spot.values.cellCopyMutationTranslation,
-                &spot.activatedValues.cellCopyMutationTranslation);
+                zone.values.cellCopyMutationTranslation,
+                &zone.activatedValues.cellCopyMutationTranslation);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Duplication")
@@ -505,10 +507,10 @@ void _SimulationParametersZoneWidgets::process()
                     .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSpot.values.cellCopyMutationDuplication)
+                    .defaultValue(origZone.values.cellCopyMutationDuplication)
                     .disabledValue(parameters.baseValues.cellCopyMutationDuplication),
-                spot.values.cellCopyMutationDuplication,
-                &spot.activatedValues.cellCopyMutationDuplication);
+                zone.values.cellCopyMutationDuplication,
+                &zone.activatedValues.cellCopyMutationDuplication);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Individual cell color")
@@ -518,10 +520,10 @@ void _SimulationParametersZoneWidgets::process()
                     .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSpot.values.cellCopyMutationCellColor)
+                    .defaultValue(origZone.values.cellCopyMutationCellColor)
                     .disabledValue(parameters.baseValues.cellCopyMutationCellColor),
-                spot.values.cellCopyMutationCellColor,
-                &spot.activatedValues.cellCopyMutationCellColor);
+                zone.values.cellCopyMutationCellColor,
+                &zone.activatedValues.cellCopyMutationCellColor);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Sub-genome color")
@@ -531,10 +533,10 @@ void _SimulationParametersZoneWidgets::process()
                     .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSpot.values.cellCopyMutationSubgenomeColor)
+                    .defaultValue(origZone.values.cellCopyMutationSubgenomeColor)
                     .disabledValue(parameters.baseValues.cellCopyMutationSubgenomeColor),
-                spot.values.cellCopyMutationSubgenomeColor,
-                &spot.activatedValues.cellCopyMutationSubgenomeColor);
+                zone.values.cellCopyMutationSubgenomeColor,
+                &zone.activatedValues.cellCopyMutationSubgenomeColor);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Genome color")
@@ -544,10 +546,10 @@ void _SimulationParametersZoneWidgets::process()
                     .format("%.7f")
                     .logarithmic(true)
                     .colorDependence(true)
-                    .defaultValue(origSpot.values.cellCopyMutationGenomeColor)
+                    .defaultValue(origZone.values.cellCopyMutationGenomeColor)
                     .disabledValue(parameters.baseValues.cellCopyMutationGenomeColor),
-                spot.values.cellCopyMutationGenomeColor,
-                &spot.activatedValues.cellCopyMutationGenomeColor);
+                zone.values.cellCopyMutationGenomeColor,
+                &zone.activatedValues.cellCopyMutationGenomeColor);
             AlienImGui::EndTreeNode();
         }
 
@@ -560,20 +562,20 @@ void _SimulationParametersZoneWidgets::process()
                     .name("Food chain color matrix")
                     .max(1)
                     .textWidth(RightColumnWidth)
-                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSpot.values.cellFunctionAttackerFoodChainColorMatrix))
+                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origZone.values.cellFunctionAttackerFoodChainColorMatrix))
                     .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix)),
-                spot.values.cellFunctionAttackerFoodChainColorMatrix,
-                &spot.activatedValues.cellFunctionAttackerFoodChainColorMatrix);
+                zone.values.cellFunctionAttackerFoodChainColorMatrix,
+                &zone.activatedValues.cellFunctionAttackerFoodChainColorMatrix);
             AlienImGui::InputFloatColorMatrix(
                 AlienImGui::InputFloatColorMatrixParameters()
                     .name("Complex creature protection")
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(20.0f)
-                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSpot.values.cellFunctionAttackerGenomeComplexityBonus))
+                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origZone.values.cellFunctionAttackerGenomeComplexityBonus))
                     .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus)),
-                spot.values.cellFunctionAttackerGenomeComplexityBonus,
-                &spot.activatedValues.cellFunctionAttackerGenomeComplexityBonus);
+                zone.values.cellFunctionAttackerGenomeComplexityBonus,
+                &zone.activatedValues.cellFunctionAttackerGenomeComplexityBonus);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Energy cost")
@@ -583,10 +585,10 @@ void _SimulationParametersZoneWidgets::process()
                     .max(1.0f)
                     .format("%.5f")
                     .logarithmic(true)
-                    .defaultValue(origSpot.values.cellFunctionAttackerEnergyCost)
+                    .defaultValue(origZone.values.cellFunctionAttackerEnergyCost)
                     .disabledValue(parameters.baseValues.cellFunctionAttackerEnergyCost),
-                spot.values.cellFunctionAttackerEnergyCost,
-                &spot.activatedValues.cellFunctionAttackerEnergyCost);
+                zone.values.cellFunctionAttackerEnergyCost,
+                &zone.activatedValues.cellFunctionAttackerEnergyCost);
             AlienImGui::EndTreeNode();
         }
 
@@ -603,10 +605,10 @@ void _SimulationParametersZoneWidgets::process()
                         .min(0)
                         .max(1.0f)
                         .format("%.2f")
-                        .defaultValue(origSpot.values.radiationAbsorptionLowVelocityPenalty)
+                        .defaultValue(origZone.values.radiationAbsorptionLowVelocityPenalty)
                         .disabledValue(parameters.baseValues.radiationAbsorptionLowVelocityPenalty),
-                    spot.values.radiationAbsorptionLowVelocityPenalty,
-                    &spot.activatedValues.radiationAbsorptionLowVelocityPenalty);
+                    zone.values.radiationAbsorptionLowVelocityPenalty,
+                    &zone.activatedValues.radiationAbsorptionLowVelocityPenalty);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Low genome complexity penalty")
@@ -615,10 +617,10 @@ void _SimulationParametersZoneWidgets::process()
                         .min(0)
                         .max(1.0f)
                         .format("%.2f")
-                        .defaultValue(origSpot.values.radiationAbsorptionLowGenomeComplexityPenalty)
+                        .defaultValue(origZone.values.radiationAbsorptionLowGenomeComplexityPenalty)
                         .disabledValue(parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty),
-                    spot.values.radiationAbsorptionLowGenomeComplexityPenalty,
-                    &spot.activatedValues.radiationAbsorptionLowGenomeComplexityPenalty);
+                    zone.values.radiationAbsorptionLowGenomeComplexityPenalty,
+                    &zone.activatedValues.radiationAbsorptionLowGenomeComplexityPenalty);
                 AlienImGui::EndTreeNode();
             }
         }
@@ -634,10 +636,10 @@ void _SimulationParametersZoneWidgets::process()
                         .textWidth(RightColumnWidth)
                         .min(0)
                         .max(1.0f)
-                        .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origSpot.values.cellFunctionAttackerNewComplexMutantPenalty))
+                        .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origZone.values.cellFunctionAttackerNewComplexMutantPenalty))
                         .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.cellFunctionAttackerNewComplexMutantPenalty)),
-                    spot.values.cellFunctionAttackerNewComplexMutantPenalty,
-                    &spot.activatedValues.cellFunctionAttackerNewComplexMutantPenalty);
+                    zone.values.cellFunctionAttackerNewComplexMutantPenalty,
+                    &zone.activatedValues.cellFunctionAttackerNewComplexMutantPenalty);
 
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
@@ -646,10 +648,10 @@ void _SimulationParametersZoneWidgets::process()
                         .colorDependence(true)
                         .min(0)
                         .max(5.0f)
-                        .defaultValue(origSpot.values.cellFunctionAttackerGeometryDeviationExponent)
+                        .defaultValue(origZone.values.cellFunctionAttackerGeometryDeviationExponent)
                         .disabledValue(parameters.baseValues.cellFunctionAttackerGeometryDeviationExponent),
-                    spot.values.cellFunctionAttackerGeometryDeviationExponent,
-                    &spot.activatedValues.cellFunctionAttackerGeometryDeviationExponent);
+                    zone.values.cellFunctionAttackerGeometryDeviationExponent,
+                    &zone.activatedValues.cellFunctionAttackerGeometryDeviationExponent);
                 AlienImGui::SliderFloat(
                     AlienImGui::SliderFloatParameters()
                         .name("Connections mismatch penalty")
@@ -657,10 +659,10 @@ void _SimulationParametersZoneWidgets::process()
                         .colorDependence(true)
                         .min(0)
                         .max(1.0f)
-                        .defaultValue(origSpot.values.cellFunctionAttackerConnectionsMismatchPenalty)
+                        .defaultValue(origZone.values.cellFunctionAttackerConnectionsMismatchPenalty)
                         .disabledValue(parameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty),
-                    spot.values.cellFunctionAttackerConnectionsMismatchPenalty,
-                    &spot.activatedValues.cellFunctionAttackerConnectionsMismatchPenalty);
+                    zone.values.cellFunctionAttackerConnectionsMismatchPenalty,
+                    &zone.activatedValues.cellFunctionAttackerConnectionsMismatchPenalty);
                 AlienImGui::EndTreeNode();
             }
         }
@@ -681,9 +683,9 @@ void _SimulationParametersZoneWidgets::process()
                         .infinity(true)
                         .format("%.0f")
                         .disabledValue(parameters.baseValues.cellInactiveMaxAge)
-                        .defaultValue(origSpot.values.cellInactiveMaxAge),
-                    spot.values.cellInactiveMaxAge,
-                    &spot.activatedValues.cellInactiveMaxAge);
+                        .defaultValue(origZone.values.cellInactiveMaxAge),
+                    zone.values.cellInactiveMaxAge,
+                    &zone.activatedValues.cellInactiveMaxAge);
                 AlienImGui::EndTreeNode();
             }
         }
@@ -693,9 +695,9 @@ void _SimulationParametersZoneWidgets::process()
          */
         if (parameters.features.cellColorTransitionRules) {
             if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell color transition rules"))) {
-                ImGui::Checkbox("##cellColorTransition", &spot.activatedValues.cellColorTransition);
+                ImGui::Checkbox("##cellColorTransition", &zone.activatedValues.cellColorTransition);
                 ImGui::SameLine();
-                ImGui::BeginDisabled(!spot.activatedValues.cellColorTransition);
+                ImGui::BeginDisabled(!zone.activatedValues.cellColorTransition);
                 auto posX = ImGui::GetCursorPos().x;
                 for (int color = 0; color < MAX_COLORS; ++color) {
                     ImGui::SetCursorPosX(posX);
@@ -703,23 +705,23 @@ void _SimulationParametersZoneWidgets::process()
                     auto parameters = AlienImGui::InputColorTransitionParameters()
                                           .textWidth(RightColumnWidth)
                                           .color(color)
-                                          .defaultTargetColor(origSpot.values.cellColorTransitionTargetColor[color])
-                                          .defaultTransitionAge(origSpot.values.cellColorTransitionDuration[color])
+                                          .defaultTargetColor(origZone.values.cellColorTransitionTargetColor[color])
+                                          .defaultTransitionAge(origZone.values.cellColorTransitionDuration[color])
                                           .logarithmic(true)
                                           .infinity(true);
                     if (0 == color) {
                         parameters.name("Target color and duration");
                     }
                     AlienImGui::InputColorTransition(
-                        parameters, color, spot.values.cellColorTransitionTargetColor[color], spot.values.cellColorTransitionDuration[color]);
+                        parameters, color, zone.values.cellColorTransitionTargetColor[color], zone.values.cellColorTransitionDuration[color]);
                     ImGui::PopID();
                 }
                 ImGui::EndDisabled();
                 AlienImGui::EndTreeNode();
-                if (!spot.activatedValues.cellColorTransition) {
+                if (!zone.activatedValues.cellColorTransition) {
                     for (int color = 0; color < MAX_COLORS; ++color) {
-                        spot.values.cellColorTransitionTargetColor[color] = parameters.baseValues.cellColorTransitionTargetColor[color];
-                        spot.values.cellColorTransitionDuration[color] = parameters.baseValues.cellColorTransitionDuration[color];
+                        zone.values.cellColorTransitionTargetColor[color] = parameters.baseValues.cellColorTransitionTargetColor[color];
+                        zone.values.cellColorTransitionDuration[color] = parameters.baseValues.cellColorTransitionDuration[color];
                     }
                 }
             }
@@ -728,11 +730,16 @@ void _SimulationParametersZoneWidgets::process()
     ImGui::EndChild();
     SimulationParametersValidationService::get().validateAndCorrect(parameters);
 
-    if (spot != lastSpot) {
+    if (zone != lastZone) {
         auto isRunning = _simulationFacade->isSimulationRunning();
         _simulationFacade->setSimulationParameters(
             parameters, isRunning ? SimulationParametersUpdateConfig::AllExceptChangingPositions : SimulationParametersUpdateConfig::All);
     }
+}
+
+std::string _SimulationParametersZoneWidgets::getLocationName()
+{
+    return "Parameters for " + _zoneName;
 }
 
 void _SimulationParametersZoneWidgets::setDefaultSpotData(SimulationParametersZone& spot) const

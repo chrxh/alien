@@ -1467,3 +1467,8 @@ void _SimulationParametersBaseWidgets::process()
         _simulationFacade->setSimulationParameters(parameters, SimulationParametersUpdateConfig::AllExceptChangingPositions);
     }
 }
+
+std::string _SimulationParametersBaseWidgets::getLocationName()
+{
+    return "Base parameters";
+}
