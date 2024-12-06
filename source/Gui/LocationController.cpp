@@ -1,15 +1,32 @@
 #include "LocationController.h"
 
-#include "SimulationParametersBaseWidgets.h"
 #include "EngineInterface/SimulationFacade.h"
 
-void LocationController::addBase()
-{
-    auto widgets = std::make_shared<_SimulationParametersBaseWidgets>();
-    widgets->init(_simulationFacade);
+#include "LocationHelper.h"
+#include "SimulationParametersBaseWidgets.h"
+#include "SimulationParametersZoneWidgets.h"
 
+void LocationController::addLocationWindow(int locationIndex)
+{
     LocationWindow window;
-    window.init("Base parameters", widgets);
+
+    if (locationIndex == 0) {
+        auto widgets = std::make_shared<_SimulationParametersBaseWidgets>();
+        widgets->init(_simulationFacade);
+        window.init("Base parameters", widgets);
+    } else {
+        auto parameters = _simulationFacade->getSimulationParameters();
+        auto location = LocationHelper::findLocation(parameters, locationIndex);
+        if (std::holds_alternative<SimulationParametersZone*>(location)) {
+            auto zoneIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+            auto widgets = std::make_shared<_SimulationParametersZoneWidgets>();
+            widgets->init(_simulationFacade, zoneIndex);
+            window.init("Zone parameters", widgets);
+        } else {
+            
+        }
+    }
+
     _locationWindows.emplace_back(std::move(window));
 }
 

@@ -62,6 +62,8 @@ PUBLIC
     LastSessionBrowserData.h
     LocationController.cpp
     LocationController.h
+    LocationHelper.cpp
+    LocationHelper.h
     LocationWidgets.h
     LocationWindow.cpp
     LocationWindow.h
@@ -120,6 +122,8 @@ PUBLIC
     SimulationParametersWindow.h
     SimulationParametersWindowPrototype.cpp
     SimulationParametersWindowPrototype.h
+    SimulationParametersZoneWidgets.cpp
+    SimulationParametersZoneWidgets.h
     SimulationScrollbar.cpp
     SimulationScrollbar.h
     SimulationView.cpp
