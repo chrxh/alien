@@ -8,6 +8,8 @@ public:
     void init(std::string const& title, LocationWidgets const& widgets);
     void process();
 
+    bool isOn() const;
+
 private:
     std::string _title;
     LocationWidgets _widgets;

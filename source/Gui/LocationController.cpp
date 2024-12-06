@@ -20,7 +20,14 @@ void LocationController::init(SimulationFacade simulationFacade)
 
 void LocationController::process()
 {
+    std::vector<LocationWindow> newlocationWindows;
+    newlocationWindows.reserve(_locationWindows.size());
+
     for (auto& locationWindow: _locationWindows) {
         locationWindow.process();
+        if (locationWindow.isOn()) {
+            newlocationWindows.emplace_back(std::move(locationWindow));
+        }
     }
+    _locationWindows.swap(newlocationWindows);
 }
