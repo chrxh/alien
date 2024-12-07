@@ -47,7 +47,7 @@ void _SimulationParametersZoneWidgets::process()
 
     _zoneName = std::string(zone.name);
 
-    if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+    if (ImGui::BeginChild("##", ImVec2(0, 0), ImGuiChildFlags_Border, ImGuiWindowFlags_HorizontalScrollbar)) {
         auto worldSize = _simulationFacade->getWorldSize();
 
         /**
