@@ -57,7 +57,7 @@
 #include "EditorController.h"
 #include "ExitDialog.h"
 #include "FileTransferController.h"
-#include "SimulationParametersWindowPrototype.h"
+#include "SimulationParametersMainWindow.h"
 
 namespace
 {
@@ -430,9 +430,9 @@ void MainLoopController::processMenubar()
             .name("Simulation parameters (new)")
             .keyAlt(true)
             .key(ImGuiKey_6)
-            .selected(SimulationParametersWindowPrototype::get().isOn())
+            .selected(SimulationParametersMainWindow::get().isOn())
             .closeMenuWhenItemClicked(false),
-        [&] { SimulationParametersWindowPrototype::get().setOn(!SimulationParametersWindowPrototype::get().isOn()); });
+        [&] { SimulationParametersMainWindow::get().setOn(!SimulationParametersMainWindow::get().isOn()); });
     AlienImGui::MenuItem(
         AlienImGui::MenuItemParameters()
             .name("Radiation sources")

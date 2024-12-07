@@ -1,4 +1,4 @@
-#include "SimulationParametersWindowPrototype.h"
+#include "SimulationParametersMainWindow.h"
 
 #include <ImFileDialog.h>
 #include <Fonts/IconsFontAwesome5.h>
@@ -28,11 +28,11 @@ namespace
     auto constexpr ExpertWidgetMinHeight = 60.0f;
 }
 
-SimulationParametersWindowPrototype::SimulationParametersWindowPrototype()
+SimulationParametersMainWindow::SimulationParametersMainWindow()
     : AlienWindow("Simulation parameters (new)", "windows.simulation parameters prototype", false)
 {}
 
-void SimulationParametersWindowPrototype::initIntern(SimulationFacade simulationFacade)
+void SimulationParametersMainWindow::initIntern(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
 
@@ -47,7 +47,7 @@ void SimulationParametersWindowPrototype::initIntern(SimulationFacade simulation
     _locationWidgets = baseWidgets;
 }
 
-void SimulationParametersWindowPrototype::processIntern()
+void SimulationParametersMainWindow::processIntern()
 {
     processToolbar();
 
@@ -70,7 +70,7 @@ void SimulationParametersWindowPrototype::processIntern()
 
 }
 
-void SimulationParametersWindowPrototype::shutdownIntern()
+void SimulationParametersMainWindow::shutdownIntern()
 {
     GlobalSettings::get().setValue("windows.simulation parameters prototype.master widget.open", _masterWidgetOpen);
     GlobalSettings::get().setValue("windows.simulation parameters prototype.detail widget.open", _detailWidgetOpen);
@@ -79,7 +79,7 @@ void SimulationParametersWindowPrototype::shutdownIntern()
     GlobalSettings::get().setValue("windows.simulation parameters prototype.expert widget height", _expertWidgetHeight);
 }
 
-void SimulationParametersWindowPrototype::processToolbar()
+void SimulationParametersMainWindow::processToolbar()
 {
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN).tooltip("Open simulation parameters from file"))) {
         onOpenParameters();
@@ -183,7 +183,7 @@ void SimulationParametersWindowPrototype::processToolbar()
     AlienImGui::Separator();
 }
 
-void SimulationParametersWindowPrototype::processMasterWidget()
+void SimulationParametersMainWindow::processMasterWidget()
 {
     if (ImGui::BeginChild("##master", {0, getMasterWidgetHeight()})) {
 
@@ -206,7 +206,7 @@ void SimulationParametersWindowPrototype::processMasterWidget()
     }
 }
 
-void SimulationParametersWindowPrototype::processDetailWidget()
+void SimulationParametersMainWindow::processDetailWidget()
 {
     auto height = getDetailWidgetHeight();
     if (ImGui::BeginChild("##detail", {0, height})) {
@@ -228,7 +228,7 @@ void SimulationParametersWindowPrototype::processDetailWidget()
     }
 }
 
-void SimulationParametersWindowPrototype::processExpertWidget()
+void SimulationParametersMainWindow::processExpertWidget()
 {
     if (ImGui::BeginChild("##expert", {0, 0})) {
         if (_expertWidgetOpen = AlienImGui::BeginTreeNode(
@@ -242,7 +242,7 @@ void SimulationParametersWindowPrototype::processExpertWidget()
     ImGui::EndChild();
 }
 
-void SimulationParametersWindowPrototype::processStatusBar()
+void SimulationParametersMainWindow::processStatusBar()
 {
     std::vector<std::string> statusItems;
     statusItems.emplace_back("CTRL + click on a slider to type in a precise value");
@@ -250,7 +250,7 @@ void SimulationParametersWindowPrototype::processStatusBar()
     AlienImGui::StatusBar(statusItems);
 }
 
-void SimulationParametersWindowPrototype::processLocationTable()
+void SimulationParametersMainWindow::processLocationTable()
 {
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
         | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
@@ -319,7 +319,7 @@ void SimulationParametersWindowPrototype::processLocationTable()
     }
 }
 
-void SimulationParametersWindowPrototype::onOpenParameters()
+void SimulationParametersMainWindow::onOpenParameters()
 {
     GenericFileDialog::get().showOpenFileDialog(
         "Open simulation parameters", "Simulation parameters (*.parameters){.parameters},.*", _fileDialogPath, [&](std::filesystem::path const& path) {
@@ -337,7 +337,7 @@ void SimulationParametersWindowPrototype::onOpenParameters()
         });
 }
 
-void SimulationParametersWindowPrototype::onSaveParameters()
+void SimulationParametersMainWindow::onSaveParameters()
 {
     GenericFileDialog::get().showSaveFileDialog(
         "Save simulation parameters", "Simulation parameters (*.parameters){.parameters},.*", _fileDialogPath, [&](std::filesystem::path const& path) {
@@ -352,7 +352,7 @@ void SimulationParametersWindowPrototype::onSaveParameters()
         });
 }
 
-void SimulationParametersWindowPrototype::onAddZone()
+void SimulationParametersMainWindow::onAddZone()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
@@ -385,7 +385,7 @@ void SimulationParametersWindowPrototype::onAddZone()
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 }
 
-void SimulationParametersWindowPrototype::onAddSource()
+void SimulationParametersMainWindow::onAddSource()
 {
     auto& editService = SimulationParametersEditService::get();
 
@@ -420,7 +420,7 @@ void SimulationParametersWindowPrototype::onAddSource()
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 }
 
-void SimulationParametersWindowPrototype::onCloneLocation()
+void SimulationParametersMainWindow::onCloneLocation()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
@@ -467,7 +467,7 @@ void SimulationParametersWindowPrototype::onCloneLocation()
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 }
 
-void SimulationParametersWindowPrototype::onDeleteLocation()
+void SimulationParametersMainWindow::onDeleteLocation()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
@@ -522,7 +522,7 @@ void SimulationParametersWindowPrototype::onDeleteLocation()
     LocationController::get().remapLocationIndices(newByOldLocationIndex);
 }
 
-void SimulationParametersWindowPrototype::onDecreaseLocationIndex()
+void SimulationParametersMainWindow::onDecreaseLocationIndex()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto newByOldLocationIndex = LocationHelper::onDecreaseLocationIndex(parameters, _selectedLocationIndex.value());
@@ -536,7 +536,7 @@ void SimulationParametersWindowPrototype::onDecreaseLocationIndex()
     LocationController::get().remapLocationIndices(newByOldLocationIndex);
 }
 
-void SimulationParametersWindowPrototype::onIncreaseLocationIndex()
+void SimulationParametersMainWindow::onIncreaseLocationIndex()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto newByOldLocationIndex = LocationHelper::onIncreaseLocationIndex(parameters, _selectedLocationIndex.value());
@@ -550,12 +550,12 @@ void SimulationParametersWindowPrototype::onIncreaseLocationIndex()
     LocationController::get().remapLocationIndices(newByOldLocationIndex);
 }
 
-void SimulationParametersWindowPrototype::onOpenInLocationWindow()
+void SimulationParametersMainWindow::onOpenInLocationWindow()
 {
     LocationController::get().addLocationWindow(_selectedLocationIndex.value());
 }
 
-void SimulationParametersWindowPrototype::onCenterLocation(int locationIndex)
+void SimulationParametersMainWindow::onCenterLocation(int locationIndex)
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto location = LocationHelper::findLocation(parameters, locationIndex);
@@ -570,7 +570,7 @@ void SimulationParametersWindowPrototype::onCenterLocation(int locationIndex)
     Viewport::get().setCenterInWorldPos(pos);
 }
 
-void SimulationParametersWindowPrototype::updateLocations()
+void SimulationParametersMainWindow::updateLocations()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
 
@@ -592,7 +592,7 @@ void SimulationParametersWindowPrototype::updateLocations()
     }
 }
 
-void SimulationParametersWindowPrototype::setDefaultShapeDataForZone(SimulationParametersZone& spot) const
+void SimulationParametersMainWindow::setDefaultShapeDataForZone(SimulationParametersZone& spot) const
 {
     auto worldSize = _simulationFacade->getWorldSize();
 
@@ -605,7 +605,7 @@ void SimulationParametersWindowPrototype::setDefaultShapeDataForZone(SimulationP
     }
 }
 
-void SimulationParametersWindowPrototype::correctLayout(float origMasterHeight, float origExpertWidgetHeight)
+void SimulationParametersMainWindow::correctLayout(float origMasterHeight, float origExpertWidgetHeight)
 {
     auto detailHeight = ImGui::GetWindowSize().y - getMasterWidgetRefHeight() - getExpertWidgetRefHeight();
 
@@ -617,17 +617,17 @@ void SimulationParametersWindowPrototype::correctLayout(float origMasterHeight, 
     }
 }
 
-float SimulationParametersWindowPrototype::getMasterWidgetRefHeight() const
+float SimulationParametersMainWindow::getMasterWidgetRefHeight() const
 {
     return _masterWidgetOpen ? _masterWidgetHeight : scale(25.0f);
 }
 
-float SimulationParametersWindowPrototype::getExpertWidgetRefHeight() const
+float SimulationParametersMainWindow::getExpertWidgetRefHeight() const
 {
     return _expertWidgetOpen ? _expertWidgetHeight : scale(30.0f);
 }
 
-float SimulationParametersWindowPrototype::getMasterWidgetHeight() const
+float SimulationParametersMainWindow::getMasterWidgetHeight() const
 {
     if (_masterWidgetOpen && !_detailWidgetOpen && !_expertWidgetOpen) {
         return std::max(scale(MasterMinHeight), ImGui::GetContentRegionAvail().y - getDetailWidgetHeight() - getExpertWidgetRefHeight());
@@ -635,7 +635,7 @@ float SimulationParametersWindowPrototype::getMasterWidgetHeight() const
     return getMasterWidgetRefHeight();
 }
 
-float SimulationParametersWindowPrototype::getDetailWidgetHeight() const
+float SimulationParametersMainWindow::getDetailWidgetHeight() const
 {
     return _detailWidgetOpen ? std::max(scale(MasterMinHeight), ImGui::GetContentRegionAvail().y - getExpertWidgetRefHeight() + scale(4.0f)) : scale(25.0f);
 }
