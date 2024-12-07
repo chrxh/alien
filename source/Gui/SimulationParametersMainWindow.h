@@ -80,7 +80,7 @@ private:
     std::optional<SimulationParameters> _copiedParameters;
 
     std::vector<Location> _locations;
-    std::optional<int> _selectedLocationIndex = 0;
+    int _selectedLocationIndex = 0;
 
     std::string _fileDialogPath;
 };

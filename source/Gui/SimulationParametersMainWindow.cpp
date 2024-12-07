@@ -120,7 +120,6 @@ void SimulationParametersMainWindow::processToolbar()
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
                                       .text(ICON_FA_PLUS)
                                       .secondText(ICON_FA_LAYER_GROUP)
-                                      .disabled(!_selectedLocationIndex.has_value())
                                       .tooltip("Add parameter zone"))) {
         onAddZone();
     }
@@ -129,7 +128,6 @@ void SimulationParametersMainWindow::processToolbar()
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
                                       .text(ICON_FA_PLUS)
                                       .secondText(ICON_FA_SUN)
-                                      .disabled(!_selectedLocationIndex.has_value())
                                       .tooltip("Add radiation source"))) {
         onAddSource();
     }
@@ -138,7 +136,7 @@ void SimulationParametersMainWindow::processToolbar()
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
                                       .text(ICON_FA_PLUS)
                                       .secondText(ICON_FA_CLONE)
-                                      .disabled(!_selectedLocationIndex.has_value() || _selectedLocationIndex.value() == 0)
+                                      .disabled(_selectedLocationIndex == 0)
                                       .tooltip("Clone selected zone/radiation source")))
         {
         onCloneLocation();
@@ -147,7 +145,7 @@ void SimulationParametersMainWindow::processToolbar()
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
                                       .text(ICON_FA_MINUS)
-                                      .disabled(!_selectedLocationIndex.has_value() || _selectedLocationIndex.value() == 0)
+                                      .disabled(_selectedLocationIndex == 0)
                                       .tooltip("Delete selected zone/radiation source"))) {
         onDeleteLocation();
     }
@@ -158,18 +156,16 @@ void SimulationParametersMainWindow::processToolbar()
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
                                       .text(ICON_FA_CHEVRON_UP)
-                                      .disabled(!_selectedLocationIndex.has_value() || _selectedLocationIndex.value() <= 1)
+                                      .disabled(_selectedLocationIndex <= 1)
                                       .tooltip("Move selected zone/radiation source upward"))) {
         onDecreaseLocationIndex();
     }
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(
-            AlienImGui::ToolbarButtonParameters()
-                .text(ICON_FA_CHEVRON_DOWN)
-                .tooltip("Move selected zone/radiation source downward")
-                .disabled(
-                    !_selectedLocationIndex.has_value() || _selectedLocationIndex.value() >= _locations.size() - 1 || _selectedLocationIndex.value() == 0))) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
+                                      .text(ICON_FA_CHEVRON_DOWN)
+                                      .tooltip("Move selected zone/radiation source downward")
+                                      .disabled(_selectedLocationIndex >= _locations.size() - 1 || _selectedLocationIndex == 0))) {
         onIncreaseLocationIndex();
     }
 
@@ -178,10 +174,7 @@ void SimulationParametersMainWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(
-            AlienImGui::ToolbarButtonParameters()
-                                      .text(ICON_FA_EXTERNAL_LINK_ALT)
-                                      .tooltip("Open selected zone/radiation source in new window")
-                                      .disabled(!_selectedLocationIndex.has_value()))) {
+            AlienImGui::ToolbarButtonParameters().text(ICON_FA_EXTERNAL_LINK_ALT).tooltip("Open selected zone/radiation source in new window"))) {
         onOpenInLocationWindow();
     }
 
@@ -218,15 +211,13 @@ void SimulationParametersMainWindow::processDetailWidget()
         if (_detailWidgetOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Parameters").rank(AlienImGui::TreeNodeRank::High).defaultOpen(_detailWidgetOpen))) {
             ImGui::Spacing();
             if (ImGui::BeginChild("##detail2", {0, -ImGui::GetStyle().FramePadding.y})) {
-                if (_selectedLocationIndex.has_value()) {
-                    auto type = _locations.at(_selectedLocationIndex.value()).type;
-                    if (type == LocationType::Base) {
-                        _baseWidgets->process();
-                    } else if (type == LocationType::ParameterZone) {
-                        _zoneWidgets->setLocationIndex(_selectedLocationIndex.value());
-                        _zoneWidgets->process();
-                    }
-                } 
+                auto type = _locations.at(_selectedLocationIndex).type;
+                if (type == LocationType::Base) {
+                    _baseWidgets->process();
+                } else if (type == LocationType::ParameterZone) {
+                    _zoneWidgets->setLocationIndex(_selectedLocationIndex);
+                    _zoneWidgets->process();
+                }
             }
             ImGui::EndChild();
             AlienImGui::EndTreeNode();
@@ -288,13 +279,13 @@ void SimulationParametersMainWindow::processLocationTable()
 
                 // name
                 ImGui::TableNextColumn();
-                auto selected = _selectedLocationIndex.has_value() ? _selectedLocationIndex.value() == row : false;
+                auto selected = _selectedLocationIndex == row;
                 if (ImGui::Selectable(
                         "",
                         &selected,
                         ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap,
                         ImVec2(0, scale(MasterRowHeight) - ImGui::GetStyle().FramePadding.y))) {
-                    _selectedLocationIndex = selected ? std::make_optional(row) : std::nullopt;
+                    _selectedLocationIndex = row;
                 }
                 ImGui::SameLine();
                 AlienImGui::Text(entry.name);
@@ -370,15 +361,15 @@ void SimulationParametersMainWindow::onAddZone()
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
-    ++_selectedLocationIndex.value();
-    LocationHelper::adaptLocationIndex(parameters, _selectedLocationIndex.value(), 1);
-    LocationHelper::adaptLocationIndex(origParameters, _selectedLocationIndex.value(), 1);
+    ++_selectedLocationIndex;
+    LocationHelper::adaptLocationIndex(parameters, _selectedLocationIndex, 1);
+    LocationHelper::adaptLocationIndex(origParameters, _selectedLocationIndex, 1);
 
     auto worldSize = _simulationFacade->getWorldSize();
 
     SimulationParametersZone zone;
     StringHelper::copy(zone.name, sizeof(zone.name), LocationHelper::generateZoneName(parameters));
-    zone.locationIndex = _selectedLocationIndex.value();
+    zone.locationIndex = _selectedLocationIndex;
     zone.posX = toFloat(worldSize.x / 2);
     zone.posY = toFloat(worldSize.y / 2);
     auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
@@ -405,9 +396,9 @@ void SimulationParametersMainWindow::onAddSource()
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
-    ++_selectedLocationIndex.value();
-    LocationHelper::adaptLocationIndex(parameters, _selectedLocationIndex.value(), 1);
-    LocationHelper::adaptLocationIndex(origParameters, _selectedLocationIndex.value(), 1);
+    ++_selectedLocationIndex;
+    LocationHelper::adaptLocationIndex(parameters, _selectedLocationIndex, 1);
+    LocationHelper::adaptLocationIndex(origParameters, _selectedLocationIndex, 1);
 
     auto strengths = editService.getRadiationStrengths(parameters);
     auto newStrengths = editService.calcRadiationStrengthsForAddingZone(strengths);
@@ -416,7 +407,7 @@ void SimulationParametersMainWindow::onAddSource()
 
     RadiationSource source;
     StringHelper::copy(source.name, sizeof(source.name), LocationHelper::generateSourceName(parameters));
-    source.locationIndex = _selectedLocationIndex.value();
+    source.locationIndex = _selectedLocationIndex;
     source.posX = toFloat(worldSize.x / 2);
     source.posY = toFloat(worldSize.y / 2);
 
@@ -438,18 +429,18 @@ void SimulationParametersMainWindow::onCloneLocation()
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
-    auto location = LocationHelper::findLocation(parameters, _selectedLocationIndex.value());
+    auto location = LocationHelper::findLocation(parameters, _selectedLocationIndex);
 
-    ++_selectedLocationIndex.value();
-    LocationHelper::adaptLocationIndex(parameters, _selectedLocationIndex.value(), 1);
-    LocationHelper::adaptLocationIndex(origParameters, _selectedLocationIndex.value(), 1);
+    ++_selectedLocationIndex;
+    LocationHelper::adaptLocationIndex(parameters, _selectedLocationIndex, 1);
+    LocationHelper::adaptLocationIndex(origParameters, _selectedLocationIndex, 1);
 
     if (std::holds_alternative<SimulationParametersZone*>(location)) {
         auto zone = std::get<SimulationParametersZone*>(location);
         auto clone = *zone;
 
         StringHelper::copy(clone.name, sizeof(clone.name), LocationHelper::generateZoneName(parameters));
-        clone.locationIndex = _selectedLocationIndex.value();
+        clone.locationIndex = _selectedLocationIndex;
 
         int index = parameters.numZones;
         parameters.zone[index] = clone;
@@ -465,7 +456,7 @@ void SimulationParametersMainWindow::onCloneLocation()
         auto newStrengths = editService.calcRadiationStrengthsForAddingZone(strengths);
 
         StringHelper::copy(clone.name, sizeof(clone.name), LocationHelper::generateSourceName(parameters));
-        clone.locationIndex = _selectedLocationIndex.value();
+        clone.locationIndex = _selectedLocationIndex;
         auto index = parameters.numRadiationSources;
         parameters.radiationSource[index] = clone;
         origParameters.radiationSource[index] = clone;
@@ -485,13 +476,13 @@ void SimulationParametersMainWindow::onDeleteLocation()
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
-    LocationController::get().deleteLocationWindow(_selectedLocationIndex.value());
-    auto location = LocationHelper::findLocation(parameters, _selectedLocationIndex.value());
+    LocationController::get().deleteLocationWindow(_selectedLocationIndex);
+    auto location = LocationHelper::findLocation(parameters, _selectedLocationIndex);
 
     if (std::holds_alternative<SimulationParametersZone*>(location)) {
         std::optional<int> zoneIndex;
         for (int i = 0; i < parameters.numZones; ++i) {
-            if (parameters.zone[i].locationIndex == _selectedLocationIndex.value()) {
+            if (parameters.zone[i].locationIndex == _selectedLocationIndex) {
                 zoneIndex = i;
                 break;
             }
@@ -507,7 +498,7 @@ void SimulationParametersMainWindow::onDeleteLocation()
     } else {
         std::optional<int> sourceIndex;
         for (int i = 0; i < parameters.numRadiationSources; ++i) {
-            if (parameters.radiationSource[i].locationIndex == _selectedLocationIndex.value()) {
+            if (parameters.radiationSource[i].locationIndex == _selectedLocationIndex) {
                 sourceIndex = i;
                 break;
             }
@@ -522,11 +513,11 @@ void SimulationParametersMainWindow::onDeleteLocation()
         }
     }
 
-    auto newByOldLocationIndex = LocationHelper::adaptLocationIndex(parameters, _selectedLocationIndex.value(), -1);
-    LocationHelper::adaptLocationIndex(origParameters, _selectedLocationIndex.value(), -1);
+    auto newByOldLocationIndex = LocationHelper::adaptLocationIndex(parameters, _selectedLocationIndex, -1);
+    LocationHelper::adaptLocationIndex(origParameters, _selectedLocationIndex, -1);
 
-    if (_locations.size() - 1 == _selectedLocationIndex.value()) {
-        --_selectedLocationIndex.value();
+    if (_locations.size() - 1 == _selectedLocationIndex) {
+        --_selectedLocationIndex;
     }
 
     _simulationFacade->setSimulationParameters(parameters);
@@ -538,34 +529,34 @@ void SimulationParametersMainWindow::onDeleteLocation()
 void SimulationParametersMainWindow::onDecreaseLocationIndex()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
-    auto newByOldLocationIndex = LocationHelper::onDecreaseLocationIndex(parameters, _selectedLocationIndex.value());
+    auto newByOldLocationIndex = LocationHelper::onDecreaseLocationIndex(parameters, _selectedLocationIndex);
     _simulationFacade->setSimulationParameters(parameters);
 
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
-    LocationHelper::onDecreaseLocationIndex(origParameters, _selectedLocationIndex.value());
+    LocationHelper::onDecreaseLocationIndex(origParameters, _selectedLocationIndex);
     _simulationFacade->setOriginalSimulationParameters(parameters);
 
-    --_selectedLocationIndex.value();
+    --_selectedLocationIndex;
     LocationController::get().remapLocationIndices(newByOldLocationIndex);
 }
 
 void SimulationParametersMainWindow::onIncreaseLocationIndex()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
-    auto newByOldLocationIndex = LocationHelper::onIncreaseLocationIndex(parameters, _selectedLocationIndex.value());
+    auto newByOldLocationIndex = LocationHelper::onIncreaseLocationIndex(parameters, _selectedLocationIndex);
     _simulationFacade->setSimulationParameters(parameters);
 
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
-    LocationHelper::onIncreaseLocationIndex(origParameters, _selectedLocationIndex.value());
+    LocationHelper::onIncreaseLocationIndex(origParameters, _selectedLocationIndex);
     _simulationFacade->setOriginalSimulationParameters(parameters);
 
-    ++_selectedLocationIndex.value();
+    ++_selectedLocationIndex;
     LocationController::get().remapLocationIndices(newByOldLocationIndex);
 }
 
 void SimulationParametersMainWindow::onOpenInLocationWindow()
 {
-    LocationController::get().addLocationWindow(_selectedLocationIndex.value());
+    LocationController::get().addLocationWindow(_selectedLocationIndex);
 }
 
 void SimulationParametersMainWindow::onCenterLocation(int locationIndex)
