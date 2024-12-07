@@ -68,6 +68,14 @@ struct RadiationSource
                 return false;
             }
         }
+        for (int i = 0, j = sizeof(Char64) / sizeof(char); i < j; ++i) {
+            if (name[i] != other.name[i]) {
+                return false;
+            }
+            if (name[i] == '\0') {
+                break;
+            }
+        }
         return posX == other.posX && posY == other.posY && velX == other.velX && velY == other.velY && useAngle == other.useAngle && angle == other.angle
             && strength == other.strength && strengthPinned == other.strengthPinned;
     }

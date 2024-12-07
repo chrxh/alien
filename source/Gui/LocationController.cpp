@@ -18,9 +18,8 @@ void LocationController::addLocationWindow(int locationIndex)
         auto parameters = _simulationFacade->getSimulationParameters();
         auto location = LocationHelper::findLocation(parameters, locationIndex);
         if (std::holds_alternative<SimulationParametersZone*>(location)) {
-            auto zoneIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
             auto widgets = std::make_shared<_SimulationParametersZoneWidgets>();
-            widgets->init(_simulationFacade, zoneIndex);
+            widgets->init(_simulationFacade, locationIndex);
             window.init(widgets);
         } else {
             
@@ -28,6 +27,26 @@ void LocationController::addLocationWindow(int locationIndex)
     }
 
     _locationWindows.emplace_back(std::move(window));
+}
+
+void LocationController::deleteLocationWindow(int locationIndex)
+{
+    std::vector<LocationWindow> newlocationWindows;
+    newlocationWindows.reserve(_locationWindows.size());
+
+    for (auto& locationWindow : _locationWindows) {
+        if (locationWindow.getLocationIndex() != locationIndex) {
+            newlocationWindows.emplace_back(std::move(locationWindow));
+        }
+    }
+    _locationWindows.swap(newlocationWindows);
+}
+
+void LocationController::remapLocationIndices(std::map<int, int> const& newByOldLocationIndex)
+{
+    for (auto& locationWindow : _locationWindows) {
+        locationWindow.setLocationIndex(newByOldLocationIndex.at(locationWindow.getLocationIndex()));
+    }
 }
 
 void LocationController::init(SimulationFacade simulationFacade)

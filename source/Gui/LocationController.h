@@ -14,6 +14,8 @@ class LocationController : public MainLoopEntity<SimulationFacade>
 
 public:
     void addLocationWindow(int locationIndex);
+    void deleteLocationWindow(int locationIndex);
+    void remapLocationIndices(std::map<int, int> const& newByOldLocationIndex);
 
 private:
     void init(SimulationFacade simulationFacade) override;
