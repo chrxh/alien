@@ -8,12 +8,12 @@
 #include "SimulationParametersBaseWidgets.h"
 #include "ZoneColorPalette.h"
 
-class SimulationParametersWindowPrototype : public AlienWindow<SimulationFacade>
+class SimulationParametersMainWindow : public AlienWindow<SimulationFacade>
 {
-    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(SimulationParametersWindowPrototype);
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(SimulationParametersMainWindow);
 
 private:
-    SimulationParametersWindowPrototype();
+    SimulationParametersMainWindow();
 
     void initIntern(SimulationFacade simulationFacade) override;
     void processIntern() override;
