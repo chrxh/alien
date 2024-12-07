@@ -66,7 +66,8 @@ private:
 private:
     SimulationFacade _simulationFacade;
 
-    LocationWidgets _locationWidgets;
+    LocationWidgets _baseWidgets;
+    LocationWidgets _zoneWidgets;
 
     bool _masterWidgetOpen = true;
     bool _detailWidgetOpen = true;
@@ -79,7 +80,7 @@ private:
     std::optional<SimulationParameters> _copiedParameters;
 
     std::vector<Location> _locations;
-    std::optional<int> _selectedLocationIndex;
+    std::optional<int> _selectedLocationIndex = 0;
 
     std::string _fileDialogPath;
 };

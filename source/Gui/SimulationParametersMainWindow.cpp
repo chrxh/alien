@@ -14,6 +14,7 @@
 #include "LocationController.h"
 #include "LocationHelper.h"
 #include "OverlayController.h"
+#include "SimulationParametersZoneWidgets.h"
 #include "Viewport.h"
 
 namespace
@@ -44,7 +45,11 @@ void SimulationParametersMainWindow::initIntern(SimulationFacade simulationFacad
 
     auto baseWidgets = std::make_shared<_SimulationParametersBaseWidgets>();
     baseWidgets->init(_simulationFacade);
-    _locationWidgets = baseWidgets;
+    _baseWidgets = baseWidgets;
+
+    auto zoneWidgets = std::make_shared<_SimulationParametersZoneWidgets>();
+    zoneWidgets->init(_simulationFacade, 0);
+    _zoneWidgets = zoneWidgets;
 }
 
 void SimulationParametersMainWindow::processIntern()
@@ -213,7 +218,15 @@ void SimulationParametersMainWindow::processDetailWidget()
         if (_detailWidgetOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Parameters").rank(AlienImGui::TreeNodeRank::High).defaultOpen(_detailWidgetOpen))) {
             ImGui::Spacing();
             if (ImGui::BeginChild("##detail2", {0, -ImGui::GetStyle().FramePadding.y})) {
-                _locationWidgets->process();
+                if (_selectedLocationIndex.has_value()) {
+                    auto type = _locations.at(_selectedLocationIndex.value()).type;
+                    if (type == LocationType::Base) {
+                        _baseWidgets->process();
+                    } else if (type == LocationType::ParameterZone) {
+                        _zoneWidgets->setLocationIndex(_selectedLocationIndex.value());
+                        _zoneWidgets->process();
+                    }
+                } 
             }
             ImGui::EndChild();
             AlienImGui::EndTreeNode();
