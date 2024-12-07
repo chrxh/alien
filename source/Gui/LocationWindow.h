@@ -10,6 +10,9 @@ public:
 
     bool isOn() const;
 
+    int getLocationIndex() const;
+    void setLocationIndex(int locationIndex);
+
 private:
     LocationWidgets _widgets;
     int _id = 0;

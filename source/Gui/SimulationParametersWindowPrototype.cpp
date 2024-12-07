@@ -471,6 +471,8 @@ void SimulationParametersWindowPrototype::onDeleteLocation()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
+
+    LocationController::get().deleteLocationWindow(_selectedLocationIndex.value());
     auto location = LocationHelper::findLocation(parameters, _selectedLocationIndex.value());
 
     if (std::holds_alternative<SimulationParametersZone*>(location)) {
@@ -507,40 +509,45 @@ void SimulationParametersWindowPrototype::onDeleteLocation()
         }
     }
 
-    LocationHelper::adaptLocationIndex(parameters, _selectedLocationIndex.value(), -1);
+    auto newByOldLocationIndex = LocationHelper::adaptLocationIndex(parameters, _selectedLocationIndex.value(), -1);
     LocationHelper::adaptLocationIndex(origParameters, _selectedLocationIndex.value(), -1);
+
     if (_locations.size() - 1 == _selectedLocationIndex.value()) {
         --_selectedLocationIndex.value();
     }
 
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
+
+    LocationController::get().remapLocationIndices(newByOldLocationIndex);
 }
 
 void SimulationParametersWindowPrototype::onDecreaseLocationIndex()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
-    LocationHelper::onDecreaseLocationIndexIntern(parameters, _selectedLocationIndex.value());
+    auto newByOldLocationIndex = LocationHelper::onDecreaseLocationIndex(parameters, _selectedLocationIndex.value());
     _simulationFacade->setSimulationParameters(parameters);
 
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
-    LocationHelper::onDecreaseLocationIndexIntern(origParameters, _selectedLocationIndex.value());
+    LocationHelper::onDecreaseLocationIndex(origParameters, _selectedLocationIndex.value());
     _simulationFacade->setOriginalSimulationParameters(parameters);
 
     --_selectedLocationIndex.value();
+    LocationController::get().remapLocationIndices(newByOldLocationIndex);
 }
 
 void SimulationParametersWindowPrototype::onIncreaseLocationIndex()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
-    LocationHelper::onIncreaseLocationIndexIntern(parameters, _selectedLocationIndex.value());
+    auto newByOldLocationIndex = LocationHelper::onIncreaseLocationIndex(parameters, _selectedLocationIndex.value());
     _simulationFacade->setSimulationParameters(parameters);
 
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
-    LocationHelper::onIncreaseLocationIndexIntern(origParameters, _selectedLocationIndex.value());
+    LocationHelper::onIncreaseLocationIndex(origParameters, _selectedLocationIndex.value());
     _simulationFacade->setOriginalSimulationParameters(parameters);
 
     ++_selectedLocationIndex.value();
+    LocationController::get().remapLocationIndices(newByOldLocationIndex);
 }
 
 void SimulationParametersWindowPrototype::onOpenInLocationWindow()
@@ -572,9 +579,9 @@ void SimulationParametersWindowPrototype::updateLocations()
     auto pinnedString = strength.pinned.contains(0) ? ICON_FA_THUMBTACK " " : " ";
     _locations.at(0) = Location{"Main", LocationType::Base, "-", pinnedString + StringHelper::format(strength.values.front() * 100 + 0.05f, 1) + "%"};
     for (int i = 0; i < parameters.numZones; ++i) {
-        auto const& spot = parameters.zone[i];
-        auto position = "(" + StringHelper::format(spot.posX, 0) + ", " + StringHelper::format(spot.posY, 0) + ")";
-        _locations.at(spot.locationIndex) = Location{spot.name, LocationType::ParameterZone, position};
+        auto const& zone = parameters.zone[i];
+        auto position = "(" + StringHelper::format(zone.posX, 0) + ", " + StringHelper::format(zone.posY, 0) + ")";
+        _locations.at(zone.locationIndex) = Location{zone.name, LocationType::ParameterZone, position};
     }
     for (int i = 0; i < parameters.numRadiationSources; ++i) {
         auto const& source = parameters.radiationSource[i];

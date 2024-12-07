@@ -142,7 +142,14 @@ struct SimulationParametersZone
                 return false;
             }
         }
-
+        for (int i = 0, j = sizeof(Char64) / sizeof(char); i < j; ++i) {
+            if (name[i] != other.name[i]) {
+                return false;
+            }
+            if (name[i] == '\0') {
+                break;
+            }
+        }
         return color == other.color && posX == other.posX && posY == other.posY && velX == other.velX && velY == other.velY
             && fadeoutRadius == other.fadeoutRadius && values == other.values && activatedValues == other.activatedValues && shapeType == other.shapeType;
     }

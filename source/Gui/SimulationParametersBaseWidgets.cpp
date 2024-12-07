@@ -1472,3 +1472,13 @@ std::string _SimulationParametersBaseWidgets::getLocationName()
 {
     return "Base parameters";
 }
+
+int _SimulationParametersBaseWidgets::getLocationIndex() const
+{
+    return 0;
+}
+
+void _SimulationParametersBaseWidgets::setLocationIndex(int locationIndex)
+{
+    // do nothing
+}

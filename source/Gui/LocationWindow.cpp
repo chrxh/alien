@@ -32,3 +32,13 @@ bool LocationWindow::isOn() const
 {
     return _on;
 }
+
+int LocationWindow::getLocationIndex() const
+{
+    return _widgets->getLocationIndex();
+}
+
+void LocationWindow::setLocationIndex(int locationIndex)
+{
+    _widgets->setLocationIndex(locationIndex);
+}

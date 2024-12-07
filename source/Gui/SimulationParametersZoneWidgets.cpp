@@ -5,6 +5,7 @@
 #include "EngineInterface/SimulationParametersZone.h"
 
 #include "AlienImGui.h"
+#include "LocationHelper.h"
 #include "LoginDialog.h"
 #include "SimulationInteractionController.h"
 
@@ -27,10 +28,10 @@ namespace
     }
 }
 
-void _SimulationParametersZoneWidgets::init(SimulationFacade const& simulationFacade, int zoneIndex)
+void _SimulationParametersZoneWidgets::init(SimulationFacade const& simulationFacade, int locationIndex)
 {
     _simulationFacade = simulationFacade;
-    _zoneIndex = zoneIndex;
+    _locationIndex = locationIndex;
 }
 
 void _SimulationParametersZoneWidgets::process()
@@ -39,9 +40,10 @@ void _SimulationParametersZoneWidgets::process()
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
     auto lastParameters = parameters;
 
-    SimulationParametersZone& zone = parameters.zone[_zoneIndex];
-    SimulationParametersZone const& origZone = origParameters.zone[_zoneIndex];
-    SimulationParametersZone const& lastZone = lastParameters.zone[_zoneIndex];
+    auto zoneIndex = LocationHelper::findLocationArrayIndex(parameters, _locationIndex);
+    SimulationParametersZone& zone = parameters.zone[zoneIndex];
+    SimulationParametersZone const& origZone = origParameters.zone[zoneIndex];
+    SimulationParametersZone const& lastZone = lastParameters.zone[zoneIndex];
 
     _zoneName = std::string(zone.name);
 
@@ -49,7 +51,19 @@ void _SimulationParametersZoneWidgets::process()
         auto worldSize = _simulationFacade->getWorldSize();
 
         /**
-         * Colors and location
+         * General
+         */
+        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("General"))) {
+            AlienImGui::InputText(
+                AlienImGui::InputTextParameters().name("Name").textWidth(RightColumnWidth).defaultValue(origZone.name),
+                zone.name,
+                sizeof(Char64) / sizeof(char));
+
+            AlienImGui::EndTreeNode();
+        }
+
+        /**
+         * Visualization and location
          */
         if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Visualization"))) {
             AlienImGui::ColorButtonWithPicker(
@@ -740,6 +754,16 @@ void _SimulationParametersZoneWidgets::process()
 std::string _SimulationParametersZoneWidgets::getLocationName()
 {
     return "Parameters for " + _zoneName;
+}
+
+int _SimulationParametersZoneWidgets::getLocationIndex() const
+{
+    return _locationIndex;
+}
+
+void _SimulationParametersZoneWidgets::setLocationIndex(int locationIndex)
+{
+    _locationIndex = locationIndex;
 }
 
 void _SimulationParametersZoneWidgets::setDefaultSpotData(SimulationParametersZone& spot) const

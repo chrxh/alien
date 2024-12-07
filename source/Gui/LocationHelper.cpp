@@ -32,7 +32,7 @@ int LocationHelper::findLocationArrayIndex(SimulationParameters const& parameter
     THROW_NOT_IMPLEMENTED();
 }
 
-void LocationHelper::onDecreaseLocationIndexIntern(SimulationParameters& parameters, int locationIndex)
+std::map<int, int> LocationHelper::onDecreaseLocationIndex(SimulationParameters& parameters, int locationIndex)
 {
     std::variant<SimulationParametersZone*, RadiationSource*> zoneOrSource1 = findLocation(parameters, locationIndex);
     std::variant<SimulationParametersZone*, RadiationSource*> zoneOrSource2 = findLocation(parameters, locationIndex - 1);
@@ -46,9 +46,21 @@ void LocationHelper::onDecreaseLocationIndexIntern(SimulationParameters& paramet
     } else {
         std::get<RadiationSource*>(zoneOrSource2)->locationIndex += 1;
     }
+
+    std::map<int, int> result;
+    for (int i = 0; i < parameters.numZones + parameters.numRadiationSources + 1; ++i) {
+        if (i == locationIndex) {
+            result.emplace(i, i - 1);
+        } else if (i == locationIndex - 1) {
+            result.emplace(i, i + 1);
+        } else {
+            result.emplace(i, i);
+        }
+    }
+    return result;
 }
 
-void LocationHelper::onIncreaseLocationIndexIntern(SimulationParameters& parameters, int locationIndex)
+std::map<int, int> LocationHelper::onIncreaseLocationIndex(SimulationParameters& parameters, int locationIndex)
 {
     std::variant<SimulationParametersZone*, RadiationSource*> zoneOrSource1 = findLocation(parameters, locationIndex);
     std::variant<SimulationParametersZone*, RadiationSource*> zoneOrSource2 = findLocation(parameters, locationIndex + 1);
@@ -62,22 +74,43 @@ void LocationHelper::onIncreaseLocationIndexIntern(SimulationParameters& paramet
     } else {
         std::get<RadiationSource*>(zoneOrSource2)->locationIndex -= 1;
     }
+
+    std::map<int, int> result;
+    for (int i = 0; i < parameters.numZones + parameters.numRadiationSources + 1; ++i) {
+        if (i == locationIndex) {
+            result.emplace(i, i + 1);
+        } else if (i == locationIndex + 1) {
+            result.emplace(i, i - 1);
+        } else {
+            result.emplace(i, i);
+        }
+    }
+    return result;
 }
 
-void LocationHelper::adaptLocationIndex(SimulationParameters& parameters, int fromLocationIndex, int offset)
+std::map<int, int> LocationHelper::adaptLocationIndex(SimulationParameters& parameters, int fromLocationIndex, int offset)
 {
+    std::map<int, int> result;
+    result.emplace(0, 0);
     for (int i = 0; i < parameters.numZones; ++i) {
         auto& zone = parameters.zone[i];
         if (zone.locationIndex >= fromLocationIndex) {
+            result.emplace(zone.locationIndex, zone.locationIndex + offset);
             zone.locationIndex += offset;
+        } else {
+            result.emplace(zone.locationIndex, zone.locationIndex);
         }
     }
     for (int i = 0; i < parameters.numRadiationSources; ++i) {
         auto& source = parameters.radiationSource[i];
         if (source.locationIndex >= fromLocationIndex) {
+            result.emplace(source.locationIndex, source.locationIndex + offset);
             source.locationIndex += offset;
+        } else {
+            result.emplace(source.locationIndex, source.locationIndex);
         }
     }
+    return result;
 }
 
 std::string LocationHelper::generateZoneName(SimulationParameters& parameters)
