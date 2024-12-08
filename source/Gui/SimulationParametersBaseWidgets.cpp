@@ -1470,7 +1470,7 @@ void _SimulationParametersBaseWidgets::process()
 
 std::string _SimulationParametersBaseWidgets::getLocationName()
 {
-    return "Base parameters";
+    return "Parameters for 'Base'";
 }
 
 int _SimulationParametersBaseWidgets::getLocationIndex() const

@@ -14,6 +14,7 @@
 #include "LocationController.h"
 #include "LocationHelper.h"
 #include "OverlayController.h"
+#include "SimulationParametersSourceWidgets.h"
 #include "SimulationParametersZoneWidgets.h"
 #include "Viewport.h"
 
@@ -50,6 +51,11 @@ void SimulationParametersMainWindow::initIntern(SimulationFacade simulationFacad
     auto zoneWidgets = std::make_shared<_SimulationParametersZoneWidgets>();
     zoneWidgets->init(_simulationFacade, 0);
     _zoneWidgets = zoneWidgets;
+
+
+    auto sourceWidgets = std::make_shared<_SimulationParametersSourceWidgets>();
+    sourceWidgets->init(_simulationFacade, 0);
+    _sourceWidgets = sourceWidgets;
 }
 
 void SimulationParametersMainWindow::processIntern()
@@ -217,6 +223,9 @@ void SimulationParametersMainWindow::processDetailWidget()
                 } else if (type == LocationType::ParameterZone) {
                     _zoneWidgets->setLocationIndex(_selectedLocationIndex);
                     _zoneWidgets->process();
+                } else if (type == LocationType::RadiationSource) {
+                    _sourceWidgets->setLocationIndex(_selectedLocationIndex);
+                    _sourceWidgets->process();
                 }
             }
             ImGui::EndChild();
@@ -581,7 +590,7 @@ void SimulationParametersMainWindow::updateLocations()
     _locations = std::vector<Location>(1 + parameters.numZones + parameters.numRadiationSources);
     auto strength = SimulationParametersEditService::get().getRadiationStrengths(parameters);
     auto pinnedString = strength.pinned.contains(0) ? ICON_FA_THUMBTACK " " : " ";
-    _locations.at(0) = Location{"Main", LocationType::Base, "-", pinnedString + StringHelper::format(strength.values.front() * 100 + 0.05f, 1) + "%"};
+    _locations.at(0) = Location{"Base", LocationType::Base, "-", pinnedString + StringHelper::format(strength.values.front() * 100 + 0.05f, 1) + "%"};
     for (int i = 0; i < parameters.numZones; ++i) {
         auto const& zone = parameters.zone[i];
         auto position = "(" + StringHelper::format(zone.posX, 0) + ", " + StringHelper::format(zone.posY, 0) + ")";

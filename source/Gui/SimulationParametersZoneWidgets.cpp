@@ -38,14 +38,13 @@ void _SimulationParametersZoneWidgets::process()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
-    auto lastParameters = parameters;
 
     auto zoneIndex = LocationHelper::findLocationArrayIndex(parameters, _locationIndex);
     SimulationParametersZone& zone = parameters.zone[zoneIndex];
     SimulationParametersZone const& origZone = origParameters.zone[zoneIndex];
-    SimulationParametersZone const& lastZone = lastParameters.zone[zoneIndex];
-
+    auto lastZone = zone;
     _zoneName = std::string(zone.name);
+
 
     if (ImGui::BeginChild("##", ImVec2(0, 0), ImGuiChildFlags_Border, ImGuiWindowFlags_HorizontalScrollbar)) {
         auto worldSize = _simulationFacade->getWorldSize();
@@ -740,20 +739,20 @@ void _SimulationParametersZoneWidgets::process()
                 }
             }
         }
+        SimulationParametersValidationService::get().validateAndCorrect(zone, parameters);
+
+        if (zone != lastZone) {
+            auto isRunning = _simulationFacade->isSimulationRunning();
+            _simulationFacade->setSimulationParameters(
+                parameters, isRunning ? SimulationParametersUpdateConfig::AllExceptChangingPositions : SimulationParametersUpdateConfig::All);
+        }
     }
     ImGui::EndChild();
-    SimulationParametersValidationService::get().validateAndCorrect(parameters);
-
-    if (zone != lastZone) {
-        auto isRunning = _simulationFacade->isSimulationRunning();
-        _simulationFacade->setSimulationParameters(
-            parameters, isRunning ? SimulationParametersUpdateConfig::AllExceptChangingPositions : SimulationParametersUpdateConfig::All);
-    }
 }
 
 std::string _SimulationParametersZoneWidgets::getLocationName()
 {
-    return "Parameters for " + _zoneName;
+    return "Parameters for '" + _zoneName + "'";
 }
 
 int _SimulationParametersZoneWidgets::getLocationIndex() const

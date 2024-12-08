@@ -68,6 +68,7 @@ private:
 
     LocationWidgets _baseWidgets;
     LocationWidgets _zoneWidgets;
+    LocationWidgets _sourceWidgets;
 
     bool _masterWidgetOpen = true;
     bool _detailWidgetOpen = true;
