@@ -90,7 +90,7 @@ void StatisticsWindow::processIntern()
         if (ImGui::BeginTabBar("##Statistics", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
 
             if (ImGui::BeginTabItem("Timelines")) {
-                if (ImGui::BeginChild("##timelines", ImVec2(0, 0), ImGuiChildFlags_Border)) {
+                if (ImGui::BeginChild("##timelines", ImVec2(0, 0), 0)) {
                     processTimelinesTab();
                 }
                 ImGui::EndChild();
@@ -98,7 +98,7 @@ void StatisticsWindow::processIntern()
             }
 
             if (ImGui::BeginTabItem("Histograms")) {
-                if (ImGui::BeginChild("##histograms", ImVec2(0, 0), ImGuiChildFlags_Border)) {
+                if (ImGui::BeginChild("##histograms", ImVec2(0, 0), 0)) {
                     processHistogramsTab();
                 }
                 ImGui::EndChild();
@@ -106,7 +106,7 @@ void StatisticsWindow::processIntern()
             }
 
             if (ImGui::BeginTabItem("Throughput")) {
-                if (ImGui::BeginChild("##throughput", ImVec2(0, 0), ImGuiChildFlags_Border)) {
+                if (ImGui::BeginChild("##throughput", ImVec2(0, 0), 0)) {
                     processTablesTab();
                 }
                 ImGui::EndChild();

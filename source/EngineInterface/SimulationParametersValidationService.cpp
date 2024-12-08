@@ -42,21 +42,32 @@ void SimulationParametersValidationService::validateAndCorrect(SimulationParamet
     }
 }
 
-void SimulationParametersValidationService::validateAndCorrect(SimulationParametersZone& spot, SimulationParameters const& parameters) const
+void SimulationParametersValidationService::validateAndCorrect(RadiationSource& source) const
+{
+    if (source.shapeType == RadiationSourceShapeType_Circular) {
+        source.shapeData.circularRadiationSource.radius = std::max(1.0f, source.shapeData.circularRadiationSource.radius);
+    }
+    if (source.shapeType == RadiationSourceShapeType_Rectangular) {
+        source.shapeData.rectangularRadiationSource.width = std::max(1.0f, source.shapeData.rectangularRadiationSource.width);
+        source.shapeData.rectangularRadiationSource.height = std::max(1.0f, source.shapeData.rectangularRadiationSource.height);
+    }
+}
+
+void SimulationParametersValidationService::validateAndCorrect(SimulationParametersZone& zone, SimulationParameters const& parameters) const
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
-            spot.values.cellFunctionAttackerFoodChainColorMatrix[i][j] =
-                std::max(0.0f, std::min(1.0f, spot.values.cellFunctionAttackerFoodChainColorMatrix[i][j]));
-            spot.values.cellFunctionAttackerGenomeComplexityBonus[i][j] = std::max(0.0f, spot.values.cellFunctionAttackerGenomeComplexityBonus[i][j]);
-            spot.values.cellFunctionAttackerNewComplexMutantPenalty[i][j] =
-                std::max(0.0f, std::min(1.0f, spot.values.cellFunctionAttackerNewComplexMutantPenalty[i][j]));
+            zone.values.cellFunctionAttackerFoodChainColorMatrix[i][j] =
+                std::max(0.0f, std::min(1.0f, zone.values.cellFunctionAttackerFoodChainColorMatrix[i][j]));
+            zone.values.cellFunctionAttackerGenomeComplexityBonus[i][j] = std::max(0.0f, zone.values.cellFunctionAttackerGenomeComplexityBonus[i][j]);
+            zone.values.cellFunctionAttackerNewComplexMutantPenalty[i][j] =
+                std::max(0.0f, std::min(1.0f, zone.values.cellFunctionAttackerNewComplexMutantPenalty[i][j]));
         }
-        spot.values.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, spot.values.radiationAbsorption[i]));
-        spot.values.cellMinEnergy[i] = std::min(parameters.baseValues.cellMinEnergy[i], parameters.cellNormalEnergy[i] * 0.95f);
-        spot.values.radiationAbsorptionLowGenomeComplexityPenalty[i] =
-            std::max(0.0f, std::min(1.0f, spot.values.radiationAbsorptionLowGenomeComplexityPenalty[i]));
-        spot.values.radiationAbsorptionLowVelocityPenalty[i] = std::max(0.0f, std::min(1.0f, spot.values.radiationAbsorptionLowVelocityPenalty[i]));
+        zone.values.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, zone.values.radiationAbsorption[i]));
+        zone.values.cellMinEnergy[i] = std::min(parameters.baseValues.cellMinEnergy[i], parameters.cellNormalEnergy[i] * 0.95f);
+        zone.values.radiationAbsorptionLowGenomeComplexityPenalty[i] =
+            std::max(0.0f, std::min(1.0f, zone.values.radiationAbsorptionLowGenomeComplexityPenalty[i]));
+        zone.values.radiationAbsorptionLowVelocityPenalty[i] = std::max(0.0f, std::min(1.0f, zone.values.radiationAbsorptionLowVelocityPenalty[i]));
     }
-    spot.values.cellMaxBindingEnergy = std::max(10.0f, spot.values.cellMaxBindingEnergy);
+    zone.values.cellMaxBindingEnergy = std::max(10.0f, zone.values.cellMaxBindingEnergy);
 }
