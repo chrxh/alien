@@ -40,6 +40,8 @@ private:
     };
     void processLocationTable();
 
+    void processExpertToggles();
+
     void onOpenParameters();
     void onSaveParameters();
     void onAddZone();

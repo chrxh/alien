@@ -26,7 +26,7 @@ namespace
 
     auto constexpr DetailWidgetMinHeight = 0.0f;
 
-    auto constexpr ExpertWidgetHeight = 100.0f;
+    auto constexpr ExpertWidgetHeight = 120.0f;
     auto constexpr ExpertWidgetMinHeight = 60.0f;
 }
 
@@ -216,7 +216,7 @@ void SimulationParametersMainWindow::processDetailWidget()
     if (ImGui::BeginChild("##detail", {0, height})) {
         if (_detailWidgetOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Parameters").rank(AlienImGui::TreeNodeRank::High).defaultOpen(_detailWidgetOpen))) {
             ImGui::Spacing();
-            if (ImGui::BeginChild("##detail2", {0, -ImGui::GetStyle().FramePadding.y})) {
+            if (ImGui::BeginChild("##detail2", {0, -ImGui::GetStyle().FramePadding.y}, ImGuiChildFlags_Border, ImGuiWindowFlags_HorizontalScrollbar)) {
                 auto type = _locations.at(_selectedLocationIndex).type;
                 if (type == LocationType::Base) {
                     _baseWidgets->process();
@@ -246,7 +246,8 @@ void SimulationParametersMainWindow::processExpertWidget()
     if (ImGui::BeginChild("##expert", {0, 0})) {
         if (_expertWidgetOpen = AlienImGui::BeginTreeNode(
                 AlienImGui::TreeNodeParameters().text("Unlock expert settings").rank(AlienImGui::TreeNodeRank::High).defaultOpen(_expertWidgetOpen))) {
-            if (ImGui::BeginChild("##expert2", {0, 0})) {
+            if (ImGui::BeginChild("##expert2", {0, 0}, ImGuiChildFlags_Border, ImGuiWindowFlags_HorizontalScrollbar)) {
+                    processExpertToggles();
             }
             ImGui::EndChild();
             AlienImGui::EndTreeNode();
@@ -329,6 +330,78 @@ void SimulationParametersMainWindow::processLocationTable()
             }
         }
         ImGui::EndTable();
+    }
+}
+
+void SimulationParametersMainWindow::processExpertToggles()
+{
+    auto parameters = _simulationFacade->getSimulationParameters();
+    auto origFeatures = _simulationFacade->getOriginalSimulationParameters().features;
+    auto lastFeatures = parameters.features;
+
+    AlienImGui::Checkbox(
+        AlienImGui::CheckboxParameters()
+            .name("Advanced absorption control")
+            .textWidth(0)
+            .defaultValue(origFeatures.advancedAbsorptionControl)
+            .tooltip("This addon offers extended possibilities for controlling the absorption of energy particles by cells."),
+        parameters.features.advancedAbsorptionControl);
+    AlienImGui::Checkbox(
+        AlienImGui::CheckboxParameters()
+            .name("Advanced attacker control")
+            .textWidth(0)
+            .defaultValue(origFeatures.advancedAttackerControl)
+            .tooltip("It contains further settings that influence how much energy can be obtained from an attack by attacker cells."),
+        parameters.features.advancedAttackerControl);
+    AlienImGui::Checkbox(
+        AlienImGui::CheckboxParameters()
+            .name("Cell age limiter")
+            .textWidth(0)
+            .defaultValue(origFeatures.cellAgeLimiter)
+            .tooltip("It enables additional possibilities to control the maximal cell age."),
+        parameters.features.cellAgeLimiter);
+    AlienImGui::Checkbox(
+        AlienImGui::CheckboxParameters()
+            .name("Cell color transition rules")
+            .textWidth(0)
+            .defaultValue(origFeatures.cellColorTransitionRules)
+            .tooltip("This can be used to define color transitions for cells depending on their age."),
+        parameters.features.cellColorTransitionRules);
+    AlienImGui::Checkbox(
+        AlienImGui::CheckboxParameters()
+            .name("Cell glow")
+            .textWidth(0)
+            .defaultValue(origFeatures.cellGlow)
+            .tooltip("It enables an additional rendering step that makes the cells glow."),
+        parameters.features.cellGlow);
+    AlienImGui::Checkbox(
+        AlienImGui::CheckboxParameters()
+            .name("External energy control")
+            .textWidth(0)
+            .defaultValue(origFeatures.externalEnergyControl)
+            .tooltip("This addon is used to add an external energy source. Its energy can be gradually transferred to the constructor cells in the "
+                     "simulation. Vice versa, the energy from radiation and dying cells can also be transferred back to the external source."),
+        parameters.features.externalEnergyControl);
+    AlienImGui::Checkbox(
+        AlienImGui::CheckboxParameters()
+            .name("Genome complexity measurement")
+            .textWidth(0)
+            .defaultValue(origFeatures.genomeComplexityMeasurement)
+            .tooltip("Parameters for the calculation of genome complexity are activated here. This genome complexity can be used for 'Advanced "
+                     "absorption control' "
+                     "and 'Advanced attacker control' to favor more complex genomes in natural selection. If it is deactivated, default values are "
+                     "used that simply take the genome size into account."),
+        parameters.features.genomeComplexityMeasurement);
+    AlienImGui::Checkbox(
+        AlienImGui::CheckboxParameters()
+            .name("Legacy behavior")
+            .textWidth(0)
+            .defaultValue(origFeatures.legacyModes)
+            .tooltip("It contains features for compatibility with older versions."),
+        parameters.features.legacyModes);
+
+    if (parameters.features != lastFeatures) {
+        _simulationFacade->setSimulationParameters(parameters);
     }
 }
 
