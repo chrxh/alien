@@ -20,29 +20,29 @@
 
 namespace
 {
-    auto constexpr MasterHeight = 100.0f;
+    auto constexpr MasterHeight = 130.0f;
     auto constexpr MasterMinHeight = 50.0f;
     auto constexpr MasterRowHeight = 25.0f;
 
     auto constexpr DetailWidgetMinHeight = 0.0f;
 
-    auto constexpr ExpertWidgetHeight = 120.0f;
+    auto constexpr ExpertWidgetHeight = 130.0f;
     auto constexpr ExpertWidgetMinHeight = 60.0f;
 }
 
 SimulationParametersMainWindow::SimulationParametersMainWindow()
-    : AlienWindow("Simulation parameters (new)", "windows.simulation parameters prototype", false)
+    : AlienWindow("Simulation parameters", "windows.simulation parameters", false)
 {}
 
 void SimulationParametersMainWindow::initIntern(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
 
-    _masterWidgetOpen = GlobalSettings::get().getValue("windows.simulation parameters prototype.master widget.open", _masterWidgetOpen);
-    _detailWidgetOpen = GlobalSettings::get().getValue("windows.simulation parameters prototype.detail widget.open", _detailWidgetOpen);
-    _expertWidgetOpen = GlobalSettings::get().getValue("windows.simulation parameters prototype.expert widget.open", _expertWidgetOpen);
-    _masterWidgetHeight = GlobalSettings::get().getValue("windows.simulation parameters prototype.master widget.height", scale(MasterHeight));
-    _expertWidgetHeight = GlobalSettings::get().getValue("windows.simulation parameters prototype.expert widget height", scale(ExpertWidgetHeight));
+    _masterWidgetOpen = GlobalSettings::get().getValue("windows.simulation parameters.master widget.open", _masterWidgetOpen);
+    _detailWidgetOpen = GlobalSettings::get().getValue("windows.simulation parameters.detail widget.open", _detailWidgetOpen);
+    _expertWidgetOpen = GlobalSettings::get().getValue("windows.simulation parameters.expert widget.open", _expertWidgetOpen);
+    _masterWidgetHeight = GlobalSettings::get().getValue("windows.simulation parameters.master widget.height", scale(MasterHeight));
+    _expertWidgetHeight = GlobalSettings::get().getValue("windows.simulation parameters.expert widget height", scale(ExpertWidgetHeight));
 
     auto baseWidgets = std::make_shared<_SimulationParametersBaseWidgets>();
     baseWidgets->init(_simulationFacade);
@@ -83,11 +83,11 @@ void SimulationParametersMainWindow::processIntern()
 
 void SimulationParametersMainWindow::shutdownIntern()
 {
-    GlobalSettings::get().setValue("windows.simulation parameters prototype.master widget.open", _masterWidgetOpen);
-    GlobalSettings::get().setValue("windows.simulation parameters prototype.detail widget.open", _detailWidgetOpen);
-    GlobalSettings::get().setValue("windows.simulation parameters prototype.expert widget.open", _expertWidgetOpen);
-    GlobalSettings::get().setValue("windows.simulation parameters prototype.master widget.height", _masterWidgetHeight);
-    GlobalSettings::get().setValue("windows.simulation parameters prototype.expert widget height", _expertWidgetHeight);
+    GlobalSettings::get().setValue("windows.simulation parameters.master widget.open", _masterWidgetOpen);
+    GlobalSettings::get().setValue("windows.simulation parameters.detail widget.open", _detailWidgetOpen);
+    GlobalSettings::get().setValue("windows.simulation parameters.expert widget.open", _expertWidgetOpen);
+    GlobalSettings::get().setValue("windows.simulation parameters.master widget.height", _masterWidgetHeight);
+    GlobalSettings::get().setValue("windows.simulation parameters.expert widget height", _expertWidgetHeight);
 }
 
 void SimulationParametersMainWindow::processToolbar()

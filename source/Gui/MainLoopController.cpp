@@ -42,7 +42,6 @@
 #include "SelectionWindow.h"
 #include "ShaderWindow.h"
 #include "SimulationInteractionController.h"
-#include "SimulationParametersWindow.h"
 #include "SpatialControlWindow.h"
 #include "StatisticsWindow.h"
 #include "UiController.h"
@@ -422,14 +421,6 @@ void MainLoopController::processMenubar()
             .name("Simulation parameters")
             .keyAlt(true)
             .key(ImGuiKey_4)
-            .selected(SimulationParametersWindow::get().isOn())
-            .closeMenuWhenItemClicked(false),
-        [&] { SimulationParametersWindow::get().setOn(!SimulationParametersWindow::get().isOn()); });
-    AlienImGui::MenuItem(
-        AlienImGui::MenuItemParameters()
-            .name("Simulation parameters (new)")
-            .keyAlt(true)
-            .key(ImGuiKey_6)
             .selected(SimulationParametersMainWindow::get().isOn())
             .closeMenuWhenItemClicked(false),
         [&] { SimulationParametersMainWindow::get().setOn(!SimulationParametersMainWindow::get().isOn()); });
@@ -445,7 +436,7 @@ void MainLoopController::processMenubar()
         AlienImGui::MenuItemParameters()
             .name("Shader parameters")
             .keyAlt(true)
-//            .key(ImGuiKey_6)
+            .key(ImGuiKey_6)
             .selected(ShaderWindow::get().isOn())
             .closeMenuWhenItemClicked(false),
         [&] { ShaderWindow::get().setOn(!ShaderWindow::get().isOn()); });

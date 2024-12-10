@@ -23,7 +23,7 @@ class TemporalControlWindow;
 
 class SpatialControlWindow;
 
-class SimulationParametersWindow;
+class SimulationParametersMainWindow;
 
 class StatisticsWindow;
 
