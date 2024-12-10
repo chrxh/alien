@@ -4,6 +4,7 @@
 
 #include "LocationHelper.h"
 #include "SimulationParametersBaseWidgets.h"
+#include "SimulationParametersSourceWidgets.h"
 #include "SimulationParametersZoneWidgets.h"
 
 void LocationController::addLocationWindow(int locationIndex)
@@ -22,7 +23,9 @@ void LocationController::addLocationWindow(int locationIndex)
             widgets->init(_simulationFacade, locationIndex);
             window.init(widgets);
         } else {
-            
+            auto widgets = std::make_shared<_SimulationParametersSourceWidgets>();
+            widgets->init(_simulationFacade, locationIndex);
+            window.init(widgets);
         }
     }
 
