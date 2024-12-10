@@ -33,7 +33,6 @@
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"
 #include "SpatialControlWindow.h"
-#include "SimulationParametersWindow.h"
 #include "StatisticsWindow.h"
 #include "GpuSettingsDialog.h"
 #include "Viewport.h"
@@ -127,7 +126,6 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     TemporalControlWindow::get().setup(_simulationFacade);
     SpatialControlWindow::get().setup(_simulationFacade);
     RadiationSourcesWindow::get().setup(_simulationFacade);
-    SimulationParametersWindow::get().setup(_simulationFacade);
     SimulationParametersMainWindow::get().setup(_simulationFacade);
     LocationController::get().setup(_simulationFacade);
     GpuSettingsDialog::get().setup(_simulationFacade);

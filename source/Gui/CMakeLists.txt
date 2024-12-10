@@ -118,10 +118,10 @@ PUBLIC
     SimulationInteractionController.h
     SimulationParametersBaseWidgets.cpp
     SimulationParametersBaseWidgets.h
-    SimulationParametersWindow.cpp
-    SimulationParametersWindow.h
-    SimulationParametersWindowPrototype.cpp
-    SimulationParametersWindowPrototype.h
+    SimulationParametersMainWindow.cpp
+    SimulationParametersMainWindow.h
+    SimulationParametersSourceWidgets.cpp
+    SimulationParametersSourceWidgets.h
     SimulationParametersZoneWidgets.cpp
     SimulationParametersZoneWidgets.h
     SimulationScrollbar.cpp
