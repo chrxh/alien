@@ -205,7 +205,7 @@ namespace Const
         ICON_FA_CHEVRON_RIGHT" Other mutants: Cells that have a significantly different genome.\n\n"
         ICON_FA_CHEVRON_RIGHT" Free cells: Cells that were not created by reproduction but by the conversion of energy particles (they could serve as free food).\n\n"
         ICON_FA_CHEVRON_RIGHT" Handcrafted constructs: Cells that were created in the editor (e.g. walls).\n\n"
-        ICON_FA_CHEVRON_RIGHT" Less complex mutants: Cells that have a less complex genome. The complexity calculation can be customized in the simulation parameters under the 'Genome complexity measurement' addon. By default, it is the number of encoded cells in the genome.\n\n"
+        ICON_FA_CHEVRON_RIGHT" Less complex mutants: Cells that have a less complex genome. The complexity calculation can be customized in the simulation parameters under the 'Genome complexity measurement' expert settings. By default, it is the number of encoded cells in the genome.\n\n"
         ICON_FA_CHEVRON_RIGHT" More complex mutants: Cells that have a more complex genome.\n\n";
 
     std::string const GenomeSensorMinDensityTooltip =
@@ -261,7 +261,7 @@ namespace Const
         ICON_FA_CHEVRON_RIGHT" Other mutants: Cells that have a significantly different genome.\n\n"
         ICON_FA_CHEVRON_RIGHT" Free cells: Cells that were not created by reproduction but by the conversion of energy particles (they could serve as free food).\n\n"
         ICON_FA_CHEVRON_RIGHT" Handcrafted constructs: Cells that were created in the editor (e.g. walls).\n\n"
-        ICON_FA_CHEVRON_RIGHT" Less complex mutants: Cells that have a less complex genome. The complexity calculation can be customized in the simulation parameters under the 'Genome complexity measurement' addon. By default, it is the number of encoded cells in the genome.\n\n"
+        ICON_FA_CHEVRON_RIGHT" Less complex mutants: Cells that have a less complex genome. The complexity calculation can be customized in the simulation parameters under the 'Genome complexity measurement' expert settings. By default, it is the number of encoded cells in the genome.\n\n"
         ICON_FA_CHEVRON_RIGHT" More complex mutants: Cells that have a more complex genome.\n\n";
 
     std::string const DetonatorStateTooltip =
@@ -352,7 +352,7 @@ namespace Const
         "self-replication process, but by transformation from an energy particle.";
     std::string const GenomeComplexityTooltip =
         "This value denotes the complexity of the creature's genome. The calculation can be customized in the simulation parameters under the 'Genome "
-        "complexity measurement' addon. By default, it is the number of encoded cells in the genome.";
+        "complexity measurement' expert settings. By default, it is the number of encoded cells in the genome.";
 
     std::string const CellLivingStateTooltip =
         "Cells can exist in various states. When a cell network of the organism is being constructed, its cells are in the 'Under construction' state. Once the cell network "

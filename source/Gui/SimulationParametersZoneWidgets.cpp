@@ -598,10 +598,10 @@ void _SimulationParametersZoneWidgets::process()
     }
 
     /**
-     * Addon: Advanced absorption control
+     * Expert settings: Advanced absorption control
      */
     if (parameters.features.advancedAbsorptionControl) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Advanced energy absorption control"))) {
+        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Advanced energy absorption control"))) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Low velocity penalty")
@@ -631,10 +631,10 @@ void _SimulationParametersZoneWidgets::process()
     }
 
     /**
-     * Addon: Advanced attacker control
+     * Expert settings: Advanced attacker control
      */
     if (parameters.features.advancedAttackerControl) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Advanced attacker control"))) {
+        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Advanced attacker control"))) {
             AlienImGui::InputFloatColorMatrix(
                 AlienImGui::InputFloatColorMatrixParameters()
                     .name("New complex mutant protection")
@@ -673,10 +673,10 @@ void _SimulationParametersZoneWidgets::process()
     }
 
     /**
-     * Addon: Cell age limiter
+     * Expert settings: Cell age limiter
      */
     if (parameters.features.cellAgeLimiter) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell age limiter"))) {
+        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Cell age limiter"))) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Maximum inactive cell age")
@@ -696,10 +696,10 @@ void _SimulationParametersZoneWidgets::process()
     }
 
     /**
-     * Addon: Cell color transition rules
+     * Expert settings: Cell color transition rules
      */
     if (parameters.features.cellColorTransitionRules) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell color transition rules"))) {
+        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Cell color transition rules"))) {
             ImGui::Checkbox("##cellColorTransition", &zone.activatedValues.cellColorTransition);
             ImGui::SameLine();
             ImGui::BeginDisabled(!zone.activatedValues.cellColorTransition);

@@ -1027,10 +1027,10 @@ void _SimulationParametersBaseWidgets::process()
     }
 
     /**
-     * Addon: Advanced absorption control
+     * Expert settings: Advanced absorption control
      */
     if (parameters.features.advancedAbsorptionControl) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Advanced energy absorption control"))) {
+        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Advanced energy absorption control"))) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Low genome complexity penalty")
@@ -1082,10 +1082,10 @@ void _SimulationParametersBaseWidgets::process()
     }
 
     /**
-     * Addon: Advanced attacker control
+     * Expert settings: Advanced attacker control
      */
     if (parameters.features.advancedAttackerControl) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Advanced attacker control"))) {
+        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Advanced attacker control"))) {
             AlienImGui::InputFloatColorMatrix(
                 AlienImGui::InputFloatColorMatrixParameters()
                     .name("Same mutant protection")
@@ -1176,10 +1176,10 @@ void _SimulationParametersBaseWidgets::process()
     }
 
     /**
-     * Addon: Cell color transition rules
+     * Expert settings: Cell color transition rules
      */
     if (parameters.features.cellColorTransitionRules) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell color transition rules"))) {
+        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Cell color transition rules"))) {
             for (int color = 0; color < MAX_COLORS; ++color) {
                 ImGui::PushID(color);
                 auto widgetParameters = AlienImGui::InputColorTransitionParameters()
@@ -1209,10 +1209,10 @@ void _SimulationParametersBaseWidgets::process()
     }
 
     /**
-     * Addon: Cell age limiter
+     * Expert settings: Cell age limiter
      */
     if (parameters.features.cellAgeLimiter) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell age limiter"))) {
+        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Cell age limiter"))) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Maximum inactive cell age")
@@ -1276,10 +1276,10 @@ void _SimulationParametersBaseWidgets::process()
     }
 
     /**
-     * Addon: Cell glow
+     * Expert settings: Cell glow
      */
     if (parameters.features.cellGlow) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Cell glow"))) {
+        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Cell glow"))) {
             AlienImGui::Switcher(
                 AlienImGui::SwitcherParameters()
                     .name("Coloring")
@@ -1319,10 +1319,10 @@ void _SimulationParametersBaseWidgets::process()
     }
 
     /**
-     * Addon: External energy control
+     * Expert settings: External energy control
      */
     if (parameters.features.externalEnergyControl) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: External energy control"))) {
+        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: External energy control"))) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("External energy amount")
@@ -1406,10 +1406,10 @@ void _SimulationParametersBaseWidgets::process()
     }
 
     /**
-     * Addon: Genome complexity measurement
+     * Expert settings: Genome complexity measurement
      */
     if (parameters.features.genomeComplexityMeasurement) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Genome complexity measurement"))) {
+        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Genome complexity measurement"))) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Size factor")
@@ -1462,10 +1462,10 @@ void _SimulationParametersBaseWidgets::process()
     }
 
     /**
-     * Addon: Legacy behavior
+     * Expert settings: Legacy behavior
      */
     if (parameters.features.legacyModes) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Addon: Legacy behavior"))) {
+        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Legacy behavior"))) {
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name("Fetch angle from adjacent sensor")
