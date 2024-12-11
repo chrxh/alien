@@ -17,13 +17,13 @@ public:
         BaseMap const& map,
         float2 const& worldPos,
         T const& baseValue,
-        T (&spotValues)[MAX_SPOTS],
+        T (&spotValues)[MAX_ZONES],
         bool SimulationParametersZoneActivatedValues::*valueActivated)
     {
         if (0 == cudaSimulationParameters.numZones) {
             return baseValue;
         } else {
-            float spotWeights[MAX_SPOTS];
+            float spotWeights[MAX_ZONES];
             int numValues = 0;
             for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
                 if (cudaSimulationParameters.zone[i].activatedValues.*valueActivated) {
@@ -37,12 +37,12 @@ public:
     }
 
     template <typename T>
-    __device__ __inline__ static T calcResultingValue(BaseMap const& map, float2 const& worldPos, T const& baseValue, T (&spotValues)[MAX_SPOTS])
+    __device__ __inline__ static T calcResultingValue(BaseMap const& map, float2 const& worldPos, T const& baseValue, T (&spotValues)[MAX_ZONES])
     {
         if (0 == cudaSimulationParameters.numZones) {
             return baseValue;
         } else {
-            float spotWeights[MAX_SPOTS];
+            float spotWeights[MAX_ZONES];
             for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
                 float2 spotPos = {cudaSimulationParameters.zone[i].posX, cudaSimulationParameters.zone[i].posY};
                 auto delta = map.getCorrectedDirection(spotPos - worldPos);
@@ -57,12 +57,12 @@ public:
         BaseMap const& map,
         float2 const& worldPos,
         T const& baseValue,
-        T (&spotValues)[MAX_SPOTS])
+        T (&spotValues)[MAX_ZONES])
     {
         if (0 == cudaSimulationParameters.numZones) {
             return baseValue;
         } else {
-            float spotWeights[MAX_SPOTS];
+            float spotWeights[MAX_ZONES];
             int numValues = 0;
             for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
                 if (cudaSimulationParameters.zone[i].flowType != FlowType_None) {
@@ -81,7 +81,7 @@ public:
         SimulationData const& data,
         float2 const& worldPos)
     {
-        float spotValues[MAX_SPOTS];
+        float spotValues[MAX_ZONES];
         int numValues = 0;
         for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
             if (cudaSimulationParameters.zone[i].activatedValues.*valueActivated) {
@@ -99,7 +99,7 @@ public:
         float2 const& worldPos,
         int color)
     {
-        float spotValues[MAX_SPOTS];
+        float spotValues[MAX_ZONES];
         int numValues = 0;
         for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
             if (cudaSimulationParameters.zone[i].activatedValues.*valueActivated) {
@@ -116,7 +116,7 @@ public:
         SimulationData const& data,
         float2 const& worldPos)
     {
-        float spotValues[MAX_SPOTS];
+        float spotValues[MAX_ZONES];
         int numValues = 0;
         for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
             if (cudaSimulationParameters.zone[i].activatedValues.*valueActivated) {
@@ -133,7 +133,7 @@ public:
         SimulationData const& data,
         float2 const& worldPos)
     {
-        float spotValues[MAX_SPOTS];
+        float spotValues[MAX_ZONES];
         int numValues = 0;
         for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
             if (cudaSimulationParameters.zone[i].activatedValues.*valueActivated) {
@@ -151,7 +151,7 @@ public:
         int color1,
         int color2)
     {
-        float spotValues[MAX_SPOTS];
+        float spotValues[MAX_ZONES];
         int numValues = 0;
         for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
             if (cudaSimulationParameters.zone[i].activatedValues.*valueActivated) {
@@ -215,7 +215,7 @@ private:
     }
 
     template<typename T>
-    __device__ __inline__ static T mix(T const& baseValue, T (&spotValues)[MAX_SPOTS], float (&spotWeights)[MAX_SPOTS], int numValues)
+    __device__ __inline__ static T mix(T const& baseValue, T (&spotValues)[MAX_ZONES], float (&spotWeights)[MAX_ZONES], int numValues)
     {
         float baseFactor = 1;
         float sum = 0;
@@ -232,7 +232,7 @@ private:
     }
 
     template <typename T>
-    __device__ __inline__ static T mix(T const& baseValue, T (&spotValues)[MAX_SPOTS], float (&spotWeights)[MAX_SPOTS])
+    __device__ __inline__ static T mix(T const& baseValue, T (&spotValues)[MAX_ZONES], float (&spotWeights)[MAX_ZONES])
     {
         float baseFactor = 1;
         float sum = 0;

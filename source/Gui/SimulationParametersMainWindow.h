@@ -59,6 +59,9 @@ private:
 
     void correctLayout(float origMasterHeight, float origExpertWidgetHeight);
 
+    bool checkNumZones(SimulationParameters const& parameters);
+    bool checkNumSources(SimulationParameters const& parameters);
+
     float getMasterWidgetRefHeight() const;
     float getExpertWidgetRefHeight() const;
 
@@ -81,9 +84,12 @@ private:
     ZoneColorPalette _zoneColorPalette;
 
     std::optional<SimulationParameters> _copiedParameters;
+    std::optional<int> _sessionId;
 
     std::vector<Location> _locations;
     int _selectedLocationIndex = 0;
+
+    int _locationWindowCounter = 0;
 
     std::string _fileDialogPath;
 };

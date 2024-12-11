@@ -37,7 +37,7 @@ struct SimulationParameters
 
     //spots
     int numZones = 0;
-    SimulationParametersZone zone[MAX_SPOTS];
+    SimulationParametersZone zone[MAX_ZONES];
 
     //rendering
     uint32_t backgroundColor = 0x1b0000;

@@ -47,7 +47,7 @@ namespace
 
 __global__ void cudaApplyFlowFieldSettings(SimulationData data)
 {
-    float2 accelerations[MAX_SPOTS];
+    float2 accelerations[MAX_ZONES];
     {
         auto& cells = data.objects.cellPointers;
         auto partition = calcAllThreadsPartition(cells.getNumEntries());

@@ -5,7 +5,7 @@
 class LocationWindow
 {
 public:
-    void init(LocationWidgets const& widgets);
+    void init(LocationWidgets const& widgets, RealVector2D const& initialPos);
     void process();
 
     bool isOn() const;
@@ -16,5 +16,6 @@ public:
 private:
     LocationWidgets _widgets;
     int _id = 0;
+    RealVector2D _initialPos;
     bool _on = false;
 };

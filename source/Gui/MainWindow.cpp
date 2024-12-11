@@ -70,7 +70,6 @@
 #include "GenericFileDialog.h"
 #include "ShaderWindow.h"
 #include "GenomeEditorWindow.h"
-#include "RadiationSourcesWindow.h"
 #include "ExitDialog.h"
 #include "AutosaveWindow.h"
 #include "FileTransferController.h"
@@ -125,7 +124,6 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     StatisticsWindow::get().setup(_simulationFacade);
     TemporalControlWindow::get().setup(_simulationFacade);
     SpatialControlWindow::get().setup(_simulationFacade);
-    RadiationSourcesWindow::get().setup(_simulationFacade);
     SimulationParametersMainWindow::get().setup(_simulationFacade);
     LocationController::get().setup(_simulationFacade);
     GpuSettingsDialog::get().setup(_simulationFacade);

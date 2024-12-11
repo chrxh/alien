@@ -45,7 +45,6 @@ void _SimulationParametersZoneWidgets::process()
     auto lastZone = zone;
     _zoneName = std::string(zone.name);
 
-
     auto worldSize = _simulationFacade->getWorldSize();
 
     /**
