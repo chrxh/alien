@@ -60,6 +60,10 @@ void SimulationParametersMainWindow::initIntern(SimulationFacade simulationFacad
 
 void SimulationParametersMainWindow::processIntern()
 {
+    if (!_sessionId.has_value() || _sessionId.value() != _simulationFacade->getSessionId()) {
+        _selectedLocationIndex = 0;
+    }
+
     processToolbar();
 
     if (ImGui::BeginChild("##content", {0, -scale(50.0f)})) {
@@ -79,6 +83,7 @@ void SimulationParametersMainWindow::processIntern()
 
     processStatusBar();
 
+    _sessionId = _simulationFacade->getSessionId();
 }
 
 void SimulationParametersMainWindow::shutdownIntern()
@@ -443,6 +448,10 @@ void SimulationParametersMainWindow::onAddZone()
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
+    if (!checkNumZones(parameters)) {
+        return;
+    }
+
     ++_selectedLocationIndex;
     LocationHelper::adaptLocationIndex(parameters, _selectedLocationIndex, 1);
     LocationHelper::adaptLocationIndex(origParameters, _selectedLocationIndex, 1);
@@ -478,6 +487,10 @@ void SimulationParametersMainWindow::onAddSource()
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
+    if (!checkNumSources(parameters)) {
+        return;
+    }
+
     ++_selectedLocationIndex;
     LocationHelper::adaptLocationIndex(parameters, _selectedLocationIndex, 1);
     LocationHelper::adaptLocationIndex(origParameters, _selectedLocationIndex, 1);
@@ -512,6 +525,16 @@ void SimulationParametersMainWindow::onCloneLocation()
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
     auto location = LocationHelper::findLocation(parameters, _selectedLocationIndex);
+
+    if (std::holds_alternative<SimulationParametersZone*>(location)) {
+        if (!checkNumZones(parameters)) {
+            return;
+        }
+    } else {
+        if (!checkNumSources(parameters)) {
+            return;
+        }
+    }
 
     ++_selectedLocationIndex;
     LocationHelper::adaptLocationIndex(parameters, _selectedLocationIndex, 1);
@@ -638,7 +661,10 @@ void SimulationParametersMainWindow::onIncreaseLocationIndex()
 
 void SimulationParametersMainWindow::onOpenInLocationWindow()
 {
-    LocationController::get().addLocationWindow(_selectedLocationIndex);
+    auto mousePos = ImGui::GetMousePos();
+    auto offset = RealVector2D{50.0f + toFloat(_locationWindowCounter) * 15, toFloat(_locationWindowCounter) * 15};
+    LocationController::get().addLocationWindow(_selectedLocationIndex, {mousePos.x + offset.x, mousePos.y + offset.y});
+    _locationWindowCounter = (_locationWindowCounter + 1) % 8;
 }
 
 void SimulationParametersMainWindow::onCenterLocation(int locationIndex)
@@ -701,6 +727,24 @@ void SimulationParametersMainWindow::correctLayout(float origMasterHeight, float
         _masterWidgetHeight = origMasterHeight;
         _expertWidgetHeight = origExpertWidgetHeight;
     }
+}
+
+bool SimulationParametersMainWindow::checkNumZones(SimulationParameters const& parameters)
+{
+    if (parameters.numZones == MAX_ZONES) {
+        showMessage("Error", "The maximum number of zones has been reached.");
+        return false;
+    }
+    return true;
+}
+
+bool SimulationParametersMainWindow::checkNumSources(SimulationParameters const& parameters)
+{
+    if (parameters.numRadiationSources == MAX_RADIATION_SOURCES) {
+        showMessage("Error", "The maximum number of radiation sources has been reached.");
+        return false;
+    }
+    return true;
 }
 
 float SimulationParametersMainWindow::getMasterWidgetRefHeight() const

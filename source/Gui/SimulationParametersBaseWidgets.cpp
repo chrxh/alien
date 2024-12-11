@@ -9,7 +9,6 @@
 #include "AlienImGui.h"
 #include "CellFunctionStrings.h"
 #include "HelpStrings.h"
-#include "RadiationSourcesWindow.h"
 #include "EngineInterface/SimulationParametersEditService.h"
 #include "EngineInterface/SimulationParametersValidationService.h"
 

@@ -13,7 +13,7 @@ class LocationController : public MainLoopEntity<SimulationFacade>
     MAKE_SINGLETON(LocationController);
 
 public:
-    void addLocationWindow(int locationIndex);
+    void addLocationWindow(int locationIndex, RealVector2D const& initialPos);
     void deleteLocationWindow(int locationIndex);
     void remapLocationIndices(std::map<int, int> const& newByOldLocationIndex);
 
@@ -25,4 +25,5 @@ private:
     SimulationFacade _simulationFacade;
 
     std::vector<LocationWindow> _locationWindows;
+    std::optional<int> _sessionId;
 };

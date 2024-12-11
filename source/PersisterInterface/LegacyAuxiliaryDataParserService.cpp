@@ -318,7 +318,7 @@ void LegacyAuxiliaryDataParserService::updateParametersAndFeaturesForLegacyFiles
         };
 
         setParametersForBase(parameters.baseValues, legacyParameters.base);
-        for (int i = 0; i < MAX_SPOTS; ++i) {
+        for (int i = 0; i < MAX_ZONES; ++i) {
             setParametersForSpot(parameters.zone->values, legacyParameters.spots[i]);
         }
     }

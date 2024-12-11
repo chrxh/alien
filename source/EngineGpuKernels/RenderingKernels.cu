@@ -350,7 +350,7 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
         imageSize.x - max(toInt((rectLowerRight.x - worldSize.x) * zoom), 0), imageSize.y - max(toInt((rectLowerRight.y - worldSize.y) * zoom), 0)};
 
     auto baseColor = colorToFloat3(cudaSimulationParameters.backgroundColor);
-    float3 spotColors[MAX_SPOTS];
+    float3 spotColors[MAX_ZONES];
     for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
         spotColors[i] = colorToFloat3(cudaSimulationParameters.zone[i].color);
     }

@@ -7,28 +7,29 @@
 #include "SimulationParametersSourceWidgets.h"
 #include "SimulationParametersZoneWidgets.h"
 
-void LocationController::addLocationWindow(int locationIndex)
+void LocationController::addLocationWindow(int locationIndex, RealVector2D const& initialPos)
 {
     LocationWindow window;
-
+    LocationWidgets widgets;
     if (locationIndex == 0) {
-        auto widgets = std::make_shared<_SimulationParametersBaseWidgets>();
-        widgets->init(_simulationFacade);
-        window.init(widgets);
+        auto baseWidgets = std::make_shared<_SimulationParametersBaseWidgets>();
+        baseWidgets->init(_simulationFacade);
+        widgets = baseWidgets;
     } else {
         auto parameters = _simulationFacade->getSimulationParameters();
         auto location = LocationHelper::findLocation(parameters, locationIndex);
         if (std::holds_alternative<SimulationParametersZone*>(location)) {
-            auto widgets = std::make_shared<_SimulationParametersZoneWidgets>();
-            widgets->init(_simulationFacade, locationIndex);
-            window.init(widgets);
+            auto zoneWidgets = std::make_shared<_SimulationParametersZoneWidgets>();
+            zoneWidgets->init(_simulationFacade, locationIndex);
+            widgets = zoneWidgets;
         } else {
-            auto widgets = std::make_shared<_SimulationParametersSourceWidgets>();
-            widgets->init(_simulationFacade, locationIndex);
-            window.init(widgets);
+            auto sourceWidgets = std::make_shared<_SimulationParametersSourceWidgets>();
+            sourceWidgets->init(_simulationFacade, locationIndex);
+            widgets = sourceWidgets;
         }
     }
 
+    window.init(widgets, initialPos);
     _locationWindows.emplace_back(std::move(window));
 }
 
@@ -59,6 +60,10 @@ void LocationController::init(SimulationFacade simulationFacade)
 
 void LocationController::process()
 {
+    if (!_sessionId.has_value() || _sessionId.value() != _simulationFacade->getSessionId()) {
+        _locationWindows.clear();
+    }
+
     std::vector<LocationWindow> newlocationWindows;
     newlocationWindows.reserve(_locationWindows.size());
 
@@ -69,4 +74,6 @@ void LocationController::process()
         }
     }
     _locationWindows.swap(newlocationWindows);
+
+    _sessionId = _simulationFacade->getSessionId();
 }
