@@ -349,7 +349,7 @@ void SimulationParametersMainWindow::processExpertToggles()
             .name("Advanced absorption control")
             .textWidth(0)
             .defaultValue(origFeatures.advancedAbsorptionControl)
-            .tooltip("This addon offers extended possibilities for controlling the absorption of energy particles by cells."),
+            .tooltip("These settings offer extended possibilities for controlling the absorption of energy particles by cells."),
         parameters.features.advancedAbsorptionControl);
     AlienImGui::Checkbox(
         AlienImGui::CheckboxParameters()
@@ -384,7 +384,7 @@ void SimulationParametersMainWindow::processExpertToggles()
             .name("External energy control")
             .textWidth(0)
             .defaultValue(origFeatures.externalEnergyControl)
-            .tooltip("This addon is used to add an external energy source. Its energy can be gradually transferred to the constructor cells in the "
+            .tooltip("These settings are used to add and control an external energy source. Its energy can be gradually transferred to the constructor cells in the "
                      "simulation. Vice versa, the energy from radiation and dying cells can also be transferred back to the external source."),
         parameters.features.externalEnergyControl);
     AlienImGui::Checkbox(

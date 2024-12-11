@@ -368,7 +368,7 @@ void GettingStartedWindow::processIntern()
 
         drawHeading2("How can I add energy to a simulation?");
         drawParagraph("Adding energy to a simulation can increase the available resources and thus the population. There is a convenient way to directly feed "
-                      "all constructor cells with additional energy. This can be achieved by enabling the 'External Energy Control' addon in the simulation "
+                      "all constructor cells with additional energy. This can be achieved by enabling the 'External energy control' expert settings in the simulation "
                       "parameter window. Next, set the amount of energy to be added (for instance, 1M could sustain 10K cells if each cell has 100 energy "
                       "units). The external energy is not added instantly but at a rate that can be specified under 'inflow'.");
 
