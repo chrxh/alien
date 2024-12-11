@@ -146,6 +146,9 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         if (genomeComplexityNeuronFactor[i] != other.genomeComplexityNeuronFactor[i]) {
             return false;
         }
+        if (genomeComplexityDepthLevel[i] != other.genomeComplexityDepthLevel[i]) {
+            return false;
+        }
     }
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {

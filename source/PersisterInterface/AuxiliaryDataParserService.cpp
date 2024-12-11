@@ -203,6 +203,12 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
+            parameters.genomeComplexityDepthLevel,
+            defaultParameters.genomeComplexityDepthLevel,
+            "simulation parameters.genome complexity.genome complexity depth level",
+            parserTask);
+        ParameterParser::encodeDecode(
+            tree,
             parameters.baseValues.radiationCellAgeStrength,
             defaultParameters.baseValues.radiationCellAgeStrength,
             "simulation parameters.radiation.factor",

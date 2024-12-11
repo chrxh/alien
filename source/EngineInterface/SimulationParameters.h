@@ -74,6 +74,7 @@ struct SimulationParameters
     ColorVector<float> genomeComplexitySizeFactor  = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     ColorVector<float> genomeComplexityRamificationFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> genomeComplexityNeuronFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    ColorVector<int> genomeComplexityDepthLevel = {3, 3, 3, 3, 3, 3, 3};
 
 
     float radiationProb = 0.03f;

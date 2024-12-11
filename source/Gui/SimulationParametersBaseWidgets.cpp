@@ -1434,6 +1434,18 @@ void _SimulationParametersBaseWidgets::process()
                              "calculation of the genome complexity. For instance, genomes that contain many sub-genomes or many construction branches will "
                              "then have a high complexity value."),
                 parameters.genomeComplexityRamificationFactor);
+            AlienImGui::SliderInt(
+                AlienImGui::SliderIntParameters()
+                    .name("Depth level")
+                    .textWidth(RightColumnWidth)
+                    .colorDependence(true)
+                    .min(1)
+                    .max(20)
+                    .infinity(true)
+                    .defaultValue(origParameters.genomeComplexityDepthLevel)
+                    .tooltip("This allows to specify up to which level of the sub-genomes the complexity calculation should be carried out. For example, a "
+                             "value of 2 means that the sub- and sub-sub-genomes are taken into account in addition to the main genome."),
+                parameters.genomeComplexityDepthLevel);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Neuron factor")
