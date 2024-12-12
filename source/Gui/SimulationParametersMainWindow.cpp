@@ -185,7 +185,7 @@ void SimulationParametersMainWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(
-            AlienImGui::ToolbarButtonParameters().text(ICON_FA_EXTERNAL_LINK_ALT).tooltip("Open selected zone/radiation source in new window"))) {
+            AlienImGui::ToolbarButtonParameters().text(ICON_FA_EXTERNAL_LINK_ALT).tooltip("Open parameters for selected zone/radiation source in a new window"))) {
         onOpenInLocationWindow();
     }
 

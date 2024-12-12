@@ -16,6 +16,7 @@ public:
 
     __inline__ __device__ static void neuronDataMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void propertiesMutation(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void propertiesMutation2(SimulationData& data, uint8_t* genome, int nodeAddress);
     __inline__ __device__ static void geometryMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void customGeometryMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void cellFunctionMutation(SimulationData& data, Cell* cell);
@@ -28,6 +29,9 @@ public:
     __inline__ __device__ static void genomeColorMutation(SimulationData& data, Cell* cell);
 
 private:
+    __inline__ __device__ static void neuronDataMutationNode(SimulationData& data, uint8_t* genome, int nodeAddress);
+    __inline__ __device__ static void propertiesMutationNode(SimulationData& data, uint8_t* genome, int nodeAddress);
+
     template <typename Func>
     __inline__ __device__ static void executeEvent(SimulationData& data, float probability, Func eventFunc);
     template <typename Func>
@@ -58,12 +62,6 @@ __inline__ __device__ void MutationProcessor::applyRandomMutationsForCell(Simula
     auto& constructor = cell->cellFunctionData.constructor;
     auto numNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, true));
     auto numNonSeparatedNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, false));
-    auto cellCopyMutationNeuronData = SpotCalculator::calcParameter(
-        &SimulationParametersZoneValues::cellCopyMutationNeuronData,
-        &SimulationParametersZoneActivatedValues::cellCopyMutationNeuronData,
-        data,
-        cell->pos,
-        cell->color) * numNodes;
     auto cellCopyMutationCellProperties = SpotCalculator::calcParameter(
         &SimulationParametersZoneValues::cellCopyMutationCellProperties,
         &SimulationParametersZoneActivatedValues::cellCopyMutationCellProperties,
@@ -131,8 +129,9 @@ __inline__ __device__ void MutationProcessor::applyRandomMutationsForCell(Simula
         cell->pos,
         cell->color);
 
+    neuronDataMutation(data, cell);
+
     executeMultipleEvents(data, cellCopyMutationCellProperties, [&]() { propertiesMutation(data, cell); });
-    executeMultipleEvents(data, cellCopyMutationNeuronData, [&]() { neuronDataMutation(data, cell); });
     executeEvent(data, cellCopyMutationGeometry, [&]() {
         if (numNodes < 2 * numNonSeparatedNodes) {
             geometryMutation(data, cell);
@@ -170,13 +169,19 @@ __inline__ __device__ void MutationProcessor::neuronDataMutation(SimulationData&
 
     auto& genome = constructor.genome;
     auto const& genomeSize = constructor.genomeSize;
-    auto nodeAddress = GenomeDecoder::getRandomGenomeNodeAddress(data, genome, genomeSize, false);
 
-    auto type = GenomeDecoder::getNextCellFunctionType(genome, nodeAddress);
-    if (type == CellFunction_Neuron) {
-        auto delta = data.numberGen1.random(Const::NeuronBytes - 1);
-        genome[nodeAddress + Const::CellBasicBytes + delta] = data.numberGen1.randomByte();
-    }
+    auto cellCopyMutationNeuronData = SpotCalculator::calcParameter(
+        &SimulationParametersZoneValues::cellCopyMutationNeuronData,
+        &SimulationParametersZoneActivatedValues::cellCopyMutationNeuronData,
+        data,
+        cell->pos,
+        cell->color);
+
+    GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, false, [&](int depth, int nodeAddressIntern, int repetition) {
+        if (isRandomEvent(data, cellCopyMutationNeuronData)) {
+            neuronDataMutationNode(data, genome, nodeAddressIntern);
+        }
+    });
 }
 
 __inline__ __device__ void MutationProcessor::propertiesMutation(SimulationData& data, Cell* cell)
@@ -253,6 +258,8 @@ __inline__ __device__ void MutationProcessor::propertiesMutation(SimulationData&
     }
 }
 
+__inline__ __device__ void MutationProcessor::propertiesMutation2(SimulationData& data, uint8_t* genome, int nodeAddress) {}
+
 __inline__ __device__ void MutationProcessor::geometryMutation(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
@@ -328,7 +335,6 @@ __inline__ __device__ void MutationProcessor::customGeometryMutation(SimulationD
     if (GenomeDecoder::hasEmptyGenome(constructor)) {
         return;
     }
-
 
     auto& genome = constructor.genome;
     auto const& genomeSize = constructor.genomeSize;
@@ -899,6 +905,99 @@ __inline__ __device__ void MutationProcessor::subgenomeColorMutation(SimulationD
     for (int dummy = 0; nodeAddress < subgenomeSize && dummy < subgenomeSize; ++dummy) {
         GenomeDecoder::setNextCellColor(subgenome, nodeAddress, newColor);
         nodeAddress += Const::CellBasicBytes + GenomeDecoder::getNextCellFunctionDataSize(subgenome, subgenomeSize, nodeAddress);
+    }
+}
+
+__inline__ __device__ void MutationProcessor::neuronDataMutationNode(SimulationData& data, uint8_t* genome, int nodeAddress)
+{
+    auto type = GenomeDecoder::getNextCellFunctionType(genome, nodeAddress);
+    if (type == CellFunction_Neuron) {
+        auto neuronMutationType = data.numberGen1.random(3);
+        for (int i = 0; i < Const::NeuronWeightsAndBiasesBytes; ++i) {
+            if (data.numberGen1.random() < 0.2f) {
+                auto property = GenomeDecoder::convertByteToFloat(genome[nodeAddress + Const::CellBasicBytes + i]);
+                if (neuronMutationType == 0) {
+                    property *= 1.05f;
+                } else if (neuronMutationType == 1) {
+                    property /= 1.05f;
+                } else if (neuronMutationType == 2) {
+                    property += 0.05f;
+                } else if (neuronMutationType == 3) {
+                    property -= 0.05f;
+                }
+                genome[nodeAddress + Const::CellBasicBytes + i] = GenomeDecoder::convertFloatToByte(property);
+            }
+        }
+        for (int i = Const::NeuronWeightsAndBiasesBytes; i < Const::NeuronBytes; ++i) {
+            if (data.numberGen1.random() < 0.05f) {
+                genome[nodeAddress + Const::CellBasicBytes + i] = data.numberGen1.randomByte();
+            }
+        }
+    }
+}
+
+__inline__ __device__ void MutationProcessor::propertiesMutationNode(SimulationData& data, uint8_t* genome, int nodeAddress)
+{
+    auto sequenceNumber = 0;
+
+    uint8_t prevExecutionNumber = data.numberGen1.randomByte();
+    uint8_t nextExecutionNumber = data.numberGen1.randomByte();
+    //int nodeAddress = 0;
+    //GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, false, [&](int depth, int nodeAddressIntern, int repetition) {
+    //    auto origSequenceNumber = sequenceNumber;
+    //    ++sequenceNumber;
+    //    if (origSequenceNumber == node - 1) {
+    //        prevExecutionNumber = GenomeDecoder::getNextExecutionNumber(genome, nodeAddressIntern);
+    //    }
+    //    if (origSequenceNumber == node + 1) {
+    //        nextExecutionNumber = GenomeDecoder::getNextExecutionNumber(genome, nodeAddressIntern);
+    //    }
+    //    if (origSequenceNumber == node) {
+    //        nodeAddress = nodeAddressIntern;
+    //    }
+    //});
+    //if (nodeAddress == 0) {
+    //    return;
+    //}
+
+    //basic property mutation
+    if (data.numberGen1.randomBool()) {
+        if (data.numberGen1.randomBool()) {
+            auto randomByte = data.numberGen1.randomByte();
+            if (data.numberGen1.random() < 0.8f) {
+                randomByte = data.numberGen1.randomBool() ? prevExecutionNumber : nextExecutionNumber;
+            }
+            GenomeDecoder::setNextInputExecutionNumber(genome, nodeAddress, randomByte);
+        } else {
+            auto randomDelta = data.numberGen1.random(Const::CellBasicBytes - 1);
+            auto randomByte = data.numberGen1.randomByte();
+            if (randomDelta == 0) {  //no cell function type change
+                return;
+            }
+            if (randomDelta == Const::CellColorPos) {  //no color change
+                return;
+            }
+            if (randomDelta == Const::CellAnglePos || randomDelta == Const::CellRequiredConnectionsPos) {  //no structure change
+                return;
+            }
+            genome[nodeAddress + randomDelta] = randomByte;
+        }
+    }
+
+    //cell function specific mutation
+    else {
+        auto nextCellFunctionDataSize = GenomeDecoder::getNextCellFunctionDataSize(genome, genomeSize, nodeAddress, false);
+        if (nextCellFunctionDataSize > 0) {
+            auto randomDelta = data.numberGen1.random(nextCellFunctionDataSize - 1);
+            auto cellFunction = GenomeDecoder::getNextCellFunctionType(genome, nodeAddress);
+            if (cellFunction == CellFunction_Constructor
+                && (randomDelta == Const::ConstructorConstructionAngle1Pos
+                    || randomDelta == Const::ConstructorConstructionAngle2Pos)) {  //no construction angles change
+                return;
+            }
+            genome[nodeAddress + Const::CellBasicBytes + randomDelta] = data.numberGen1.randomByte();
+            //adaptMutationId(data, constructor);
+        }
     }
 }
 
