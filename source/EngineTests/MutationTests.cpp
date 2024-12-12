@@ -34,6 +34,7 @@ public:
             _parameters.baseValues.cellCopyMutationSubgenomeColor[i] = 1;
             _parameters.baseValues.cellCopyMutationGenomeColor[i] = 1;
         }
+        _simulationFacade->setSimulationParameters(_parameters);
     }
 
     ~MutationTests() = default;
