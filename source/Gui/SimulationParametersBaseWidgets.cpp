@@ -530,7 +530,7 @@ void _SimulationParametersBaseWidgets::process()
     ImGui::PopID();
 
     /**
-     * Mutation 
+     * Mutations
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Genome copy mutations"))) {
         AlienImGui::SliderFloat(
@@ -543,8 +543,7 @@ void _SimulationParametersBaseWidgets::process()
                 .logarithmic(true)
                 .colorDependence(true)
                 .defaultValue(origParameters.baseValues.cellCopyMutationNeuronData)
-                .tooltip("This type of mutation changes a weight or a bias of the neural networks of a single neuron cell encoded in the genome. The "
-                         "probability of a change is given by the specified value times the number of coded cells in the genome."),
+                .tooltip("This type of mutation can change the weights, biases and activation functions of neural networks of each neuron cell encoded in the genome."),
             parameters.baseValues.cellCopyMutationNeuronData);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -558,8 +557,7 @@ void _SimulationParametersBaseWidgets::process()
                 .defaultValue(origParameters.baseValues.cellCopyMutationCellProperties)
                 .tooltip("This type of mutation changes a random property (e.g. (input) execution order number, required energy, block output and "
                          "function-specific properties such as minimum density for sensors, neural net weights etc.). The spatial structure, color, cell "
-                         "function type and self-replication capabilities are not changed. The probability of a change is given by the specified value "
-                         "times the number of coded cells in the genome."),
+                         "function type and self-replication capabilities are not changed. This mutation is applied to each encoded cell in the genome."),
             parameters.baseValues.cellCopyMutationCellProperties);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
