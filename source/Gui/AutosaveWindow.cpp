@@ -354,7 +354,12 @@ void AutosaveWindow::onDeleteSavepoint(SavepointEntry const& entry)
 
 void AutosaveWindow::onLoadSavepoint(SavepointEntry const& entry)
 {
-    FileTransferController::get().onOpenSimulation(entry->filename);
+    auto fullFilename = _savepointTable.value().getFilename().parent_path() / entry->filename;
+    if (std::filesystem::exists(fullFilename)) {
+        FileTransferController::get().onOpenSimulation(fullFilename);
+    } else {
+        FileTransferController::get().onOpenSimulation(entry->filename);
+    }
 }
 
 void AutosaveWindow::processCleanup()
@@ -457,13 +462,13 @@ void AutosaveWindow::updateSavepoint(int row)
                     newEntry->timestep = data.timestep;
                     newEntry->timestamp = StringHelper::format(data.timestamp);
                     newEntry->name = data.projectName;
-                    newEntry->filename = data.filename;
+                    newEntry->filename = std::filesystem::relative(data.filename, _savepointTable->getFilename().parent_path());
                 } else if (auto saveResult = std::dynamic_pointer_cast<_SaveDeserializedSimulationRequestResult>(requestResult)) {
                     auto const& data = saveResult->getData();
                     newEntry->timestep = data.timestep;
                     newEntry->timestamp = StringHelper::format(data.timestamp);
                     newEntry->name = data.projectName;
-                    newEntry->filename = data.filename;
+                    newEntry->filename = std::filesystem::relative(data.filename, _savepointTable->getFilename().parent_path());
                     newEntry->peak = StringHelper::format(toFloat(sumColorVector(data.rawStatisticsData.timeline.timestep.genomeComplexityVariance)), 2);
                     newEntry->peakType = "genome complexity variance";
                 }
