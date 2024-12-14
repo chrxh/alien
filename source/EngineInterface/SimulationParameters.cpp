@@ -152,7 +152,7 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
     }
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
-            if (cellFunctionConstructorMutationColorTransitions[i][j] != other.cellFunctionConstructorMutationColorTransitions[i][j]) {
+            if (cellCopyMutationColorTransitions[i][j] != other.cellCopyMutationColorTransitions[i][j]) {
                 return false;
             }
             if (cellFunctionInjectorDurationColorMatrix[i][j] != other.cellFunctionInjectorDurationColorMatrix[i][j]) {
@@ -193,9 +193,9 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize && cellDeathConsequences == other.cellDeathConsequences
         && cellFunctionSensorSignalThreshold == other.cellFunctionSensorSignalThreshold
         && cellFunctionMuscleBendingAccelerationThreshold == other.cellFunctionMuscleBendingAccelerationThreshold
-        && cellFunctionConstructorMutationSelfReplication == other.cellFunctionConstructorMutationSelfReplication
+        && cellCopyMutationSelfReplication == other.cellCopyMutationSelfReplication
         && cellMaxAgeBalancer == other.cellMaxAgeBalancer && cellMaxAgeBalancerInterval == other.cellMaxAgeBalancerInterval
-        && cellFunctionConstructorMutationPreventDepthIncrease == other.cellFunctionConstructorMutationPreventDepthIncrease
+        && cellCopyMutationPreventDepthIncrease == other.cellCopyMutationPreventDepthIncrease
         && cellFunctionConstructorCheckCompletenessForSelfReplication == other.cellFunctionConstructorCheckCompletenessForSelfReplication
         && cellFunctionAttackerDestroyCells == other.cellFunctionAttackerDestroyCells
         && cellFunctionReconnectorSignalThreshold == other.cellFunctionReconnectorSignalThreshold
@@ -211,5 +211,12 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && muscleMovementVisualization == other.muscleMovementVisualization
         && externalEnergyInflowOnlyForNonSelfReplicators == other.externalEnergyInflowOnlyForNonSelfReplicators
         && externalEnergyBackflowLimit == other.externalEnergyBackflowLimit && baseStrengthRatioPinned == other.baseStrengthRatioPinned
-        && showRadiationSources == other.showRadiationSources;
+        && showRadiationSources == other.showRadiationSources
+        && cellCopyMutationNeuronDataWeight == other.cellCopyMutationNeuronDataWeight
+        && cellCopyMutationNeuronDataBias == other.cellCopyMutationNeuronDataBias
+        && cellCopyMutationNeuronDataActivationFunction == other.cellCopyMutationNeuronDataActivationFunction
+        && cellCopyMutationNeuronDataReinforcement == other.cellCopyMutationNeuronDataReinforcement
+        && cellCopyMutationNeuronDataDamping == other.cellCopyMutationNeuronDataDamping
+        && cellCopyMutationNeuronDataOffset == other.cellCopyMutationNeuronDataOffset
+    ;
 }

@@ -125,7 +125,7 @@ struct SimulationParameters
     ColorVector<float> cellFunctionConstructorSignalThreshold = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
     bool cellFunctionConstructorCheckCompletenessForSelfReplication = false;
 
-    ColorMatrix<bool> cellFunctionConstructorMutationColorTransitions = {
+    ColorMatrix<bool> cellCopyMutationColorTransitions = {
         {true, true, true, true, true, true, true},
         {true, true, true, true, true, true, true},
         {true, true, true, true, true, true, true},
@@ -133,8 +133,16 @@ struct SimulationParameters
         {true, true, true, true, true, true, true},
         {true, true, true, true, true, true, true},
         {true, true, true, true, true, true, true}};
-    bool cellFunctionConstructorMutationPreventDepthIncrease = false;
-    bool cellFunctionConstructorMutationSelfReplication = false;
+    bool cellCopyMutationPreventDepthIncrease = false;
+    bool cellCopyMutationSelfReplication = false;
+
+    // customize neuron mutations feature
+    float cellCopyMutationNeuronDataWeight = 0.2f;
+    float cellCopyMutationNeuronDataBias = 0.2f;
+    float cellCopyMutationNeuronDataActivationFunction = 0.05f;
+    float cellCopyMutationNeuronDataReinforcement = 1.05f;
+    float cellCopyMutationNeuronDataDamping = 1.05f;
+    float cellCopyMutationNeuronDataOffset = 0.05f;
 
     ColorVector<float> cellFunctionInjectorRadius = {3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f};
     ColorMatrix<int> cellFunctionInjectorDurationColorMatrix = {

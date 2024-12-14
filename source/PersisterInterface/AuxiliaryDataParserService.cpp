@@ -342,6 +342,42 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
+            parameters.cellCopyMutationNeuronDataWeight,
+            defaultParameters.cellCopyMutationNeuronDataWeight,
+            "simulation parameters.cell.copy mutation.neuron data.weights",
+            parserTask);
+        ParameterParser::encodeDecode(
+            tree,
+            parameters.cellCopyMutationNeuronDataBias,
+            defaultParameters.cellCopyMutationNeuronDataBias,
+            "simulation parameters.cell.copy mutation.neuron data.biases",
+            parserTask);
+        ParameterParser::encodeDecode(
+            tree,
+            parameters.cellCopyMutationNeuronDataActivationFunction,
+            defaultParameters.cellCopyMutationNeuronDataActivationFunction,
+            "simulation parameters.cell.copy mutation.neuron data.activation functions",
+            parserTask);
+        ParameterParser::encodeDecode(
+            tree,
+            parameters.cellCopyMutationNeuronDataReinforcement,
+            defaultParameters.cellCopyMutationNeuronDataReinforcement,
+            "simulation parameters.cell.copy mutation.neuron data.reinforcement",
+            parserTask);
+        ParameterParser::encodeDecode(
+            tree,
+            parameters.cellCopyMutationNeuronDataDamping,
+            defaultParameters.cellCopyMutationNeuronDataDamping,
+            "simulation parameters.cell.copy mutation.neuron data.damping",
+            parserTask);
+        ParameterParser::encodeDecode(
+            tree,
+            parameters.cellCopyMutationNeuronDataOffset,
+            defaultParameters.cellCopyMutationNeuronDataOffset,
+            "simulation parameters.cell.copy mutation.neuron data.offset",
+            parserTask);
+        ParameterParser::encodeDecode(
+            tree,
             parameters.baseValues.cellCopyMutationCellProperties,
             defaultParameters.baseValues.cellCopyMutationCellProperties,
             "simulation parameters.cell.copy mutation.cell properties",
@@ -408,20 +444,20 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellFunctionConstructorMutationColorTransitions,
-            defaultParameters.cellFunctionConstructorMutationColorTransitions,
+            parameters.cellCopyMutationColorTransitions,
+            defaultParameters.cellCopyMutationColorTransitions,
             "simulation parameters.cell.copy mutation.color transition",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellFunctionConstructorMutationSelfReplication,
-            defaultParameters.cellFunctionConstructorMutationSelfReplication,
+            parameters.cellCopyMutationSelfReplication,
+            defaultParameters.cellCopyMutationSelfReplication,
             "simulation parameters.cell.copy mutation.self replication flag",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellFunctionConstructorMutationPreventDepthIncrease,
-            defaultParameters.cellFunctionConstructorMutationPreventDepthIncrease,
+            parameters.cellCopyMutationPreventDepthIncrease,
+            defaultParameters.cellCopyMutationPreventDepthIncrease,
             "simulation parameters.cell.copy mutation.prevent depth increase",
             parserTask);
 
