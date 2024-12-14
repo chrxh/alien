@@ -1310,7 +1310,7 @@ void _SimulationParametersBaseWidgets::process()
                     .name("Reinforcement factor")
                     .textWidth(RightColumnWidth)
                     .min(1.0f)
-                    .max(2.0f)
+                    .max(1.2f)
                     .format("%.3f")
                     .defaultValue(&origParameters.cellCopyMutationNeuronDataReinforcement),
                 &parameters.cellCopyMutationNeuronDataReinforcement);
@@ -1319,7 +1319,7 @@ void _SimulationParametersBaseWidgets::process()
                     .name("Damping factor")
                     .textWidth(RightColumnWidth)
                     .min(1.0f)
-                    .max(2.0f)
+                    .max(1.2f)
                     .format("%.3f")
                     .defaultValue(&origParameters.cellCopyMutationNeuronDataDamping),
                 &parameters.cellCopyMutationNeuronDataDamping);
