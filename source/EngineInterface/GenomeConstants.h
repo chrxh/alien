@@ -24,8 +24,9 @@ namespace Const
     auto constexpr ConstructorConstructionAngle2Pos = 4;
 
     auto constexpr CellBasicBytes = 8;
-    auto constexpr NeuronWeightsAndBiasesBytes = 64 + 8;
-    auto constexpr NeuronBytes = NeuronWeightsAndBiasesBytes + 8;
+    auto constexpr NeuronWeightBytes = 64;
+    auto constexpr NeuronWeightAndBiasBytes = NeuronWeightBytes + 8;
+    auto constexpr NeuronBytes = NeuronWeightAndBiasBytes + 8;
     auto constexpr TransmitterBytes = 1;
     auto constexpr ConstructorFixedBytes = 5;
     auto constexpr SensorBytes = 5;

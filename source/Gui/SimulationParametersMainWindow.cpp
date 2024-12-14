@@ -252,7 +252,7 @@ void SimulationParametersMainWindow::processExpertWidget()
         if (_expertWidgetOpen = AlienImGui::BeginTreeNode(
                 AlienImGui::TreeNodeParameters().text("Unlock expert settings").rank(AlienImGui::TreeNodeRank::High).defaultOpen(_expertWidgetOpen))) {
             if (ImGui::BeginChild("##expert2", {0, 0}, ImGuiChildFlags_Border, ImGuiWindowFlags_HorizontalScrollbar)) {
-                    processExpertToggles();
+                    processExpertSettings();
             }
             ImGui::EndChild();
             AlienImGui::EndTreeNode();
@@ -338,7 +338,7 @@ void SimulationParametersMainWindow::processLocationTable()
     }
 }
 
-void SimulationParametersMainWindow::processExpertToggles()
+void SimulationParametersMainWindow::processExpertSettings()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origFeatures = _simulationFacade->getOriginalSimulationParameters().features;
@@ -379,6 +379,12 @@ void SimulationParametersMainWindow::processExpertToggles()
             .defaultValue(origFeatures.cellGlow)
             .tooltip("It enables an additional rendering step that makes the cells glow."),
         parameters.features.cellGlow);
+    AlienImGui::Checkbox(
+        AlienImGui::CheckboxParameters()
+            .name("Customize neuron mutations")
+            .textWidth(0)
+            .defaultValue(origFeatures.customizeNeuronMutations),
+        parameters.features.customizeNeuronMutations);
     AlienImGui::Checkbox(
         AlienImGui::CheckboxParameters()
             .name("External energy control")

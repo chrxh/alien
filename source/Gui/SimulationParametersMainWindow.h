@@ -40,7 +40,7 @@ private:
     };
     void processLocationTable();
 
-    void processExpertToggles();
+    void processExpertSettings();
 
     void onOpenParameters();
     void onSaveParameters();

@@ -691,28 +691,28 @@ void _SimulationParametersBaseWidgets::process()
             AlienImGui::CheckboxColorMatrixParameters()
                 .name("Color transitions")
                 .textWidth(RightColumnWidth)
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.cellFunctionConstructorMutationColorTransitions))
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.cellCopyMutationColorTransitions))
                 .tooltip("The color transitions are used for color mutations. The row index indicates the source color and the column index the target "
                          "color."),
-            parameters.cellFunctionConstructorMutationColorTransitions);
+            parameters.cellCopyMutationColorTransitions);
         AlienImGui::Checkbox(
             AlienImGui::CheckboxParameters()
                 .name("Prevent genome depth increase")
                 .textWidth(RightColumnWidth)
-                .defaultValue(origParameters.cellFunctionConstructorMutationPreventDepthIncrease)
+                .defaultValue(origParameters.cellCopyMutationPreventDepthIncrease)
                 .tooltip(std::string("A genome has a tree-like structure because it can contain sub-genomes. If this flag is activated, the mutations will "
                                      "not increase the depth of the genome structure.")),
-            parameters.cellFunctionConstructorMutationPreventDepthIncrease);
-        auto preserveSelfReplication = !parameters.cellFunctionConstructorMutationSelfReplication;
+            parameters.cellCopyMutationPreventDepthIncrease);
+        auto preserveSelfReplication = !parameters.cellCopyMutationSelfReplication;
         AlienImGui::Checkbox(
             AlienImGui::CheckboxParameters()
                 .name("Preserve self-replication")
                 .textWidth(RightColumnWidth)
-                .defaultValue(!origParameters.cellFunctionConstructorMutationSelfReplication)
+                .defaultValue(!origParameters.cellCopyMutationSelfReplication)
                 .tooltip("If deactivated, a mutation can also alter self-replication capabilities in the genome by changing a constructor cell to "
                          "something else or vice versa."),
             preserveSelfReplication);
-        parameters.cellFunctionConstructorMutationSelfReplication = !preserveSelfReplication;
+        parameters.cellCopyMutationSelfReplication = !preserveSelfReplication;
         AlienImGui::EndTreeNode();
     }
 
@@ -1272,6 +1272,70 @@ void _SimulationParametersBaseWidgets::process()
             AlienImGui::EndTreeNode();
         }
     }
+
+    /**
+     * Expert settings: Customize neuron mutations
+     */
+    if (parameters.features.customizeNeuronMutations) {
+        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Customize neuron mutations"))) {
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Affected weights")
+                    .textWidth(RightColumnWidth)
+                    .min(0.0f)
+                    .max(1.0f)
+                    .format("%.3f")
+                    .defaultValue(&origParameters.cellCopyMutationNeuronDataWeight),
+                &parameters.cellCopyMutationNeuronDataWeight);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Affected biases")
+                    .textWidth(RightColumnWidth)
+                    .min(0.0f)
+                    .max(1.0f)
+                    .format("%.3f")
+                    .defaultValue(&origParameters.cellCopyMutationNeuronDataBias),
+                &parameters.cellCopyMutationNeuronDataBias);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Affected activation functions")
+                    .textWidth(RightColumnWidth)
+                    .min(0.0f)
+                    .max(1.0f)
+                    .format("%.3f")
+                    .defaultValue(&origParameters.cellCopyMutationNeuronDataActivationFunction),
+                &parameters.cellCopyMutationNeuronDataActivationFunction);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Reinforcement factor")
+                    .textWidth(RightColumnWidth)
+                    .min(1.0f)
+                    .max(2.0f)
+                    .format("%.3f")
+                    .defaultValue(&origParameters.cellCopyMutationNeuronDataReinforcement),
+                &parameters.cellCopyMutationNeuronDataReinforcement);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Damping factor")
+                    .textWidth(RightColumnWidth)
+                    .min(1.0f)
+                    .max(2.0f)
+                    .format("%.3f")
+                    .defaultValue(&origParameters.cellCopyMutationNeuronDataDamping),
+                &parameters.cellCopyMutationNeuronDataDamping);
+            AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name("Offset")
+                    .textWidth(RightColumnWidth)
+                    .min(0.0f)
+                    .max(0.2f)
+                    .format("%.3f")
+                    .defaultValue(&origParameters.cellCopyMutationNeuronDataOffset),
+                &parameters.cellCopyMutationNeuronDataOffset);
+            AlienImGui::EndTreeNode();
+        }
+    }
+
 
     /**
      * Expert settings: Cell glow

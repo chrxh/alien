@@ -845,7 +845,7 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_preserveSelfReplication)
 
 TEST_F(MutationTests, deleteMutation_eraseLargeGenome_changeSelfReplication)
 {
-    _parameters.cellFunctionConstructorMutationSelfReplication = true;
+    _parameters.cellCopyMutationSelfReplication = true;
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
@@ -928,13 +928,13 @@ TEST_F(MutationTests, cellColorMutation)
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
-            _parameters.cellFunctionConstructorMutationColorTransitions[i][j] = false;
+            _parameters.cellCopyMutationColorTransitions[i][j] = false;
         }
     }
-    _parameters.cellFunctionConstructorMutationColorTransitions[0][3] = true;
-    _parameters.cellFunctionConstructorMutationColorTransitions[0][5] = true;
-    _parameters.cellFunctionConstructorMutationColorTransitions[4][2] = true;
-    _parameters.cellFunctionConstructorMutationColorTransitions[4][5] = true;
+    _parameters.cellCopyMutationColorTransitions[0][3] = true;
+    _parameters.cellCopyMutationColorTransitions[0][5] = true;
+    _parameters.cellCopyMutationColorTransitions[4][2] = true;
+    _parameters.cellCopyMutationColorTransitions[4][5] = true;
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto genome = createGenomeWithUniformColorPerSubgenome();
@@ -958,13 +958,13 @@ TEST_F(MutationTests, subgenomeColorMutation)
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
-            _parameters.cellFunctionConstructorMutationColorTransitions[i][j] = false;
+            _parameters.cellCopyMutationColorTransitions[i][j] = false;
         }
     }
-    _parameters.cellFunctionConstructorMutationColorTransitions[0][3] = true;
-    _parameters.cellFunctionConstructorMutationColorTransitions[0][5] = true;
-    _parameters.cellFunctionConstructorMutationColorTransitions[4][2] = true;
-    _parameters.cellFunctionConstructorMutationColorTransitions[4][5] = true;
+    _parameters.cellCopyMutationColorTransitions[0][3] = true;
+    _parameters.cellCopyMutationColorTransitions[0][5] = true;
+    _parameters.cellCopyMutationColorTransitions[4][2] = true;
+    _parameters.cellCopyMutationColorTransitions[4][5] = true;
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto genome = createGenomeWithUniformColorPerSubgenome();
@@ -988,13 +988,13 @@ TEST_F(MutationTests, genomeColorMutation)
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
-            _parameters.cellFunctionConstructorMutationColorTransitions[i][j] = false;
+            _parameters.cellCopyMutationColorTransitions[i][j] = false;
         }
     }
-    _parameters.cellFunctionConstructorMutationColorTransitions[0][3] = true;
-    _parameters.cellFunctionConstructorMutationColorTransitions[0][5] = true;
-    _parameters.cellFunctionConstructorMutationColorTransitions[4][2] = true;
-    _parameters.cellFunctionConstructorMutationColorTransitions[4][5] = true;
+    _parameters.cellCopyMutationColorTransitions[0][3] = true;
+    _parameters.cellCopyMutationColorTransitions[0][5] = true;
+    _parameters.cellCopyMutationColorTransitions[4][2] = true;
+    _parameters.cellCopyMutationColorTransitions[4][5] = true;
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto genome = createGenomeWithUniformColor();

@@ -325,12 +325,12 @@ __inline__ __device__ void MutationProcessor::cellFunctionMutation(SimulationDat
     auto nodeAddress = GenomeDecoder::getRandomGenomeNodeAddress(data, genome, genomeSize, false, subGenomesSizeIndices, &numSubGenomesSizeIndices);
 
     auto newCellFunction = data.numberGen1.random(CellFunction_Count - 1);
-    auto makeSelfCopy = cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication ? data.numberGen1.randomBool() : false;
+    auto makeSelfCopy = cudaSimulationParameters.cellCopyMutationSelfReplication ? data.numberGen1.randomBool() : false;
     if (newCellFunction == CellFunction_Injector) {      //not injection mutation allowed at the moment
         return;
     }
     if ((newCellFunction == CellFunction_Constructor || newCellFunction == CellFunction_Injector) && !makeSelfCopy) {
-        if (cudaSimulationParameters.cellFunctionConstructorMutationPreventDepthIncrease
+        if (cudaSimulationParameters.cellCopyMutationPreventDepthIncrease
             && GenomeDecoder::getGenomeDepth(genome, genomeSize) <= numSubGenomesSizeIndices) {
             return;
         }
@@ -346,7 +346,7 @@ __inline__ __device__ void MutationProcessor::cellFunctionMutation(SimulationDat
     auto origCellFunctionSize = GenomeDecoder::getNextCellFunctionDataSize(genome, genomeSize, nodeAddress);
     auto sizeDelta = newCellFunctionSize - origCellFunctionSize;
 
-    if (!cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication) {
+    if (!cudaSimulationParameters.cellCopyMutationSelfReplication) {
         if (GenomeDecoder::containsSectionSelfReplication(genome + nodeAddress, Const::CellBasicBytes + origCellFunctionSize)) {
             return;
         }
@@ -430,12 +430,12 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
         nextExecutionNumber = GenomeDecoder::getNextExecutionNumber(genome, nodeAddress);
     }
     auto newCellFunction = data.numberGen1.random(CellFunction_Count - 1);
-    auto makeSelfCopy = cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication ? data.numberGen1.randomBool() : false;
+    auto makeSelfCopy = cudaSimulationParameters.cellCopyMutationSelfReplication ? data.numberGen1.randomBool() : false;
     if (newCellFunction == CellFunction_Injector) {  //not injection mutation allowed at the moment
         return;
     }
     if ((newCellFunction == CellFunction_Constructor || newCellFunction == CellFunction_Injector) && !makeSelfCopy) {
-        if (cudaSimulationParameters.cellFunctionConstructorMutationPreventDepthIncrease
+        if (cudaSimulationParameters.cellCopyMutationPreventDepthIncrease
             && GenomeDecoder::getGenomeDepth(genome, genomeSize) <= numSubGenomesSizeIndices) {
             return;
         }
@@ -498,7 +498,7 @@ __inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& dat
     auto origCellFunctionSize = GenomeDecoder::getNextCellFunctionDataSize(genome, genomeSize, nodeAddress);
     auto deleteSize = Const::CellBasicBytes + origCellFunctionSize;
 
-    if (!cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication) {
+    if (!cudaSimulationParameters.cellCopyMutationSelfReplication) {
         if (GenomeDecoder::containsSectionSelfReplication(genome + nodeAddress, deleteSize)) {
             return;
         }
@@ -554,7 +554,7 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
         return;
     }
     auto sourceRangeSize = endSourceIndex - startSourceIndex;
-    if (!cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication) {
+    if (!cudaSimulationParameters.cellCopyMutationSelfReplication) {
         if (GenomeDecoder::containsSectionSelfReplication(genome + startSourceIndex, sourceRangeSize)) {
             return;
         }
@@ -569,7 +569,7 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
         return;
     }
     auto sourceRangeDepth = GenomeDecoder::getGenomeDepth(subGenome, subGenomeSize);
-    if (cudaSimulationParameters.cellFunctionConstructorMutationPreventDepthIncrease) {
+    if (cudaSimulationParameters.cellCopyMutationPreventDepthIncrease) {
         auto genomeDepth = GenomeDecoder::getGenomeDepth(genome, genomeSize);
         if (genomeDepth < sourceRangeDepth + numSubGenomesSizeIndices2) {
             return;
@@ -690,7 +690,7 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
     auto sizeDelta = endSourceIndex - startSourceIndex;
     auto nodeAddressForSelfReplication = -1;
     auto duplicatedSegmentContainsSelfReplicator = false;
-    if (!cudaSimulationParameters.cellFunctionConstructorMutationSelfReplication) {
+    if (!cudaSimulationParameters.cellCopyMutationSelfReplication) {
         nodeAddressForSelfReplication =
             GenomeDecoder::getNodeAddressForSelfReplication(genome + startSourceIndex, sizeDelta, duplicatedSegmentContainsSelfReplicator) + startSourceIndex;
         if (duplicatedSegmentContainsSelfReplicator) {
@@ -735,7 +735,7 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
     }
 
     auto sourceRangeDepth = GenomeDecoder::getGenomeDepth(subGenome, subGenomeSize);
-    if (cudaSimulationParameters.cellFunctionConstructorMutationPreventDepthIncrease) {
+    if (cudaSimulationParameters.cellCopyMutationPreventDepthIncrease) {
         auto genomeDepth = GenomeDecoder::getGenomeDepth(genome, genomeSize);
         if (genomeDepth < sourceRangeDepth + numSubGenomesSizeIndices) {
             return;
@@ -855,24 +855,53 @@ __inline__ __device__ void MutationProcessor::neuronDataMutationNode(SimulationD
 {
     auto type = GenomeDecoder::getNextCellFunctionType(genome, nodeAddress);
     if (type == CellFunction_Neuron) {
+        auto cellCopyMutationNeuronDataWeightsPercentage =
+            cudaSimulationParameters.features.customizeNeuronMutations ? cudaSimulationParameters.cellCopyMutationNeuronDataWeight : 0.2f;
+        auto cellCopyMutationNeuronDataBiasesPercentage =
+            cudaSimulationParameters.features.customizeNeuronMutations ? cudaSimulationParameters.cellCopyMutationNeuronDataBias : 0.2f;
+        auto cellCopyMutationNeuronDataActivationFunctionPercentage = cudaSimulationParameters.features.customizeNeuronMutations
+            ? cudaSimulationParameters.cellCopyMutationNeuronDataActivationFunction
+            : 0.05f;
+        auto cellCopyMutationNeuronDataReinforcement =
+            cudaSimulationParameters.features.customizeNeuronMutations ? cudaSimulationParameters.cellCopyMutationNeuronDataReinforcement : 1.05f;
+        auto cellCopyMutationNeuronDataDamping =
+            cudaSimulationParameters.features.customizeNeuronMutations ? cudaSimulationParameters.cellCopyMutationNeuronDataDamping : 1.05f;
+        auto cellCopyMutationNeuronDataOffset =
+            cudaSimulationParameters.features.customizeNeuronMutations ? cudaSimulationParameters.cellCopyMutationNeuronDataOffset : 0.05f;
+
         auto neuronMutationType = data.numberGen1.random(3);
-        for (int i = 0; i < Const::NeuronWeightsAndBiasesBytes; ++i) {
-            if (data.numberGen1.random() < 0.2f) {
+        for (int i = 0; i < Const::NeuronWeightBytes; ++i) {
+            if (data.numberGen1.random() < cellCopyMutationNeuronDataWeightsPercentage) {
                 auto property = GenomeDecoder::convertByteToFloat(genome[nodeAddress + Const::CellBasicBytes + i]);
                 if (neuronMutationType == 0) {
-                    property *= 1.05f;
+                    property *= cellCopyMutationNeuronDataReinforcement;
                 } else if (neuronMutationType == 1) {
-                    property /= 1.05f;
+                    property /= cellCopyMutationNeuronDataDamping;
                 } else if (neuronMutationType == 2) {
-                    property += 0.05f;
+                    property += cellCopyMutationNeuronDataOffset;
                 } else if (neuronMutationType == 3) {
-                    property -= 0.05f;
+                    property -= cellCopyMutationNeuronDataOffset;
                 }
                 genome[nodeAddress + Const::CellBasicBytes + i] = GenomeDecoder::convertFloatToByte(property);
             }
         }
-        for (int i = Const::NeuronWeightsAndBiasesBytes; i < Const::NeuronBytes; ++i) {
-            if (data.numberGen1.random() < 0.05f) {
+        for (int i = Const::NeuronWeightBytes; i < Const::NeuronWeightAndBiasBytes; ++i) {
+            if (data.numberGen1.random() < cellCopyMutationNeuronDataBiasesPercentage) {
+                auto property = GenomeDecoder::convertByteToFloat(genome[nodeAddress + Const::CellBasicBytes + i]);
+                if (neuronMutationType == 0) {
+                    property *= cellCopyMutationNeuronDataReinforcement;
+                } else if (neuronMutationType == 1) {
+                    property /= cellCopyMutationNeuronDataDamping;
+                } else if (neuronMutationType == 2) {
+                    property += cellCopyMutationNeuronDataOffset;
+                } else if (neuronMutationType == 3) {
+                    property -= cellCopyMutationNeuronDataOffset;
+                }
+                genome[nodeAddress + Const::CellBasicBytes + i] = GenomeDecoder::convertFloatToByte(property);
+            }
+        }
+        for (int i = Const::NeuronWeightAndBiasBytes; i < Const::NeuronBytes; ++i) {
+            if (data.numberGen1.random() < cellCopyMutationNeuronDataActivationFunctionPercentage) {
                 genome[nodeAddress + Const::CellBasicBytes + i] = data.numberGen1.randomByte();
             }
         }
@@ -995,7 +1024,7 @@ __inline__ __device__ int MutationProcessor::getNewColorFromTransition(Simulatio
 {
     int numAllowedColors = 0;
     for (int i = 0; i < MAX_COLORS; ++i) {
-        if (cudaSimulationParameters.cellFunctionConstructorMutationColorTransitions[origColor][i]) {
+        if (cudaSimulationParameters.cellCopyMutationColorTransitions[origColor][i]) {
             ++numAllowedColors;
         }
     }
@@ -1006,7 +1035,7 @@ __inline__ __device__ int MutationProcessor::getNewColorFromTransition(Simulatio
     int allowedColorIndex = 0;
     int result = 0;
     for (int i = 0; i < MAX_COLORS; ++i) {
-        if (cudaSimulationParameters.cellFunctionConstructorMutationColorTransitions[origColor][i]) {
+        if (cudaSimulationParameters.cellCopyMutationColorTransitions[origColor][i]) {
             if (allowedColorIndex == randomAllowedColorIndex) {
                 result = i;
                 break;
