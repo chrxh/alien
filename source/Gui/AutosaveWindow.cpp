@@ -357,7 +357,10 @@ void AutosaveWindow::onLoadSavepoint(SavepointEntry const& entry)
     auto fullFilename = _savepointTable.value().getFilename().parent_path() / entry->filename;
     if (std::filesystem::exists(fullFilename)) {
         FileTransferController::get().onOpenSimulation(fullFilename);
-    } else {
+    }
+
+    // compatibility with v4.11
+    else {
         FileTransferController::get().onOpenSimulation(entry->filename);
     }
 }
