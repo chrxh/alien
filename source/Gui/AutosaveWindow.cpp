@@ -385,6 +385,7 @@ void AutosaveWindow::processAutomaticSavepoints()
     if (!_lastSessionId.has_value() || _lastSessionId.value() != _simulationFacade->getSessionId()) {
         _lastAutosaveTimepoint = std::chrono::steady_clock::now();
         _lastSessionId = _simulationFacade->getSessionId();
+        _peakDeserializedSimulation->reset();
     }
 
     auto minSinceLastAutosave = std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - _lastAutosaveTimepoint).count();
