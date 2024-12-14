@@ -1064,6 +1064,12 @@ namespace
             parserTask);
         missingFeatures.legacyMode = ParameterParser::encodeDecode(
             tree, parameters.features.legacyModes, defaultParameters.features.legacyModes, "simulation parameters.features.legacy modes", parserTask);
+        ParameterParser::encodeDecode(
+            tree,
+            parameters.features.customizeNeuronMutations,
+            defaultParameters.features.customizeNeuronMutations,
+            "simulation parameters.features.customize neuron mutations",
+            parserTask);
     }
 
     void encodeDecodeSimulationParameters(
