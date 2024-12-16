@@ -44,8 +44,8 @@ void _SimulationParametersSourceWidgets::process()
             source.name,
             sizeof(Char64) / sizeof(char));
 
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Location
@@ -116,8 +116,8 @@ void _SimulationParametersSourceWidgets::process()
                 source.shapeData.rectangularRadiationSource.width,
                 source.shapeData.rectangularRadiationSource.height);
         }
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Radiation
@@ -157,8 +157,8 @@ void _SimulationParametersSourceWidgets::process()
             &source.angle,
             &source.useAngle);
 
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     SimulationParametersValidationService::get().validateAndCorrect(source);
 

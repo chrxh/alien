@@ -56,8 +56,8 @@ void _SimulationParametersBaseWidgets::process()
             parameters.projectName,
             sizeof(Char64) / sizeof(char));
 
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
     /**
      * Rendering
      */
@@ -154,8 +154,8 @@ void _SimulationParametersBaseWidgets::process()
                 .defaultValue(origParameters.showRadiationSources)
                 .tooltip("Draws red crosses in the center of radiation sources."),
             parameters.showRadiationSources);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Numerics
@@ -171,8 +171,8 @@ void _SimulationParametersBaseWidgets::process()
                 .tooltip(std::string("The time duration calculated in a single simulation step. Smaller values increase the accuracy of the simulation "
                                      "while larger values can lead to numerical instabilities.")),
             &parameters.timestepSize);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Physics: Motion
@@ -267,8 +267,8 @@ void _SimulationParametersBaseWidgets::process()
                 .tooltip(std::string(
                     "Controls the rigidity of connected cells.\nA higher value will cause connected cells to move more uniformly as a rigid body.")),
             &parameters.baseValues.rigidity);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Physics: Thresholds
@@ -302,8 +302,8 @@ void _SimulationParametersBaseWidgets::process()
                 .defaultValue(&origParameters.cellMinDistance)
                 .tooltip(std::string("Minimum distance between two cells.")),
             &parameters.cellMinDistance);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Physics: Binding
@@ -341,8 +341,8 @@ void _SimulationParametersBaseWidgets::process()
                 .tooltip(std::string("Maximum energy of a cell at which it can contain bonds to adjacent cells. If the energy of a cell exceeds this "
                                      "value, all bonds will be destroyed.")),
             &parameters.baseValues.cellMaxBindingEnergy);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Physics: Radiation
@@ -452,9 +452,8 @@ void _SimulationParametersBaseWidgets::process()
                 .defaultValue(origParameters.particleTransformationAllowed)
                 .tooltip("If activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal energy value."),
             parameters.particleTransformationAllowed);
-
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Cell life cycle
@@ -527,8 +526,8 @@ void _SimulationParametersBaseWidgets::process()
                          " Detached creature parts die: Only the parts of the organism that are no longer connected to a "
                          "constructor cell for self-replication die."),
             parameters.cellDeathConsequences);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
     ImGui::PopID();
 
     /**
@@ -715,8 +714,8 @@ void _SimulationParametersBaseWidgets::process()
                          "something else or vice versa."),
             preserveSelfReplication);
         parameters.cellCopyMutationSelfReplication = !preserveSelfReplication;
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Attacker
@@ -787,8 +786,8 @@ void _SimulationParametersBaseWidgets::process()
                 .defaultValue(origParameters.cellFunctionAttackerDestroyCells)
                 .tooltip("If activated, the attacker cell is able to destroy other cells. If deactivated, it only damages them."),
             parameters.cellFunctionAttackerDestroyCells);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
     ImGui::PopID();
 
     /**
@@ -813,8 +812,8 @@ void _SimulationParametersBaseWidgets::process()
                 .tooltip("If activated, a self-replication process can only start when all other non-self-replicating constructors in the cell network are "
                          "finished."),
             parameters.cellFunctionConstructorCheckCompletenessForSelfReplication);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Defender
@@ -841,8 +840,8 @@ void _SimulationParametersBaseWidgets::process()
                 .tooltip("If a constructor cell is attacked by an injector and connected to defender cells, the injection duration is increased by this "
                          "factor."),
             parameters.cellFunctionDefenderAgainstInjectorStrength);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Injector
@@ -868,8 +867,8 @@ void _SimulationParametersBaseWidgets::process()
                 .tooltip("The number of activations an injector cell requires to infect another cell. One activation usually takes 6 time steps. The row "
                          "number determines the color of the injector cell, while the column number corresponds to the color of the infected cell."),
             parameters.cellFunctionInjectorDurationColorMatrix);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Muscle
@@ -928,8 +927,8 @@ void _SimulationParametersBaseWidgets::process()
                 .tooltip("The maximum value by which a muscle cell can modify its velocity during a bending action. This parameter applies "
                          "only to muscle cells which are in bending mode."),
             parameters.cellFunctionMuscleBendingAcceleration);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Sensor
@@ -945,8 +944,8 @@ void _SimulationParametersBaseWidgets::process()
                 .defaultValue(origParameters.cellFunctionSensorRange)
                 .tooltip("The maximum radius in which a sensor cell can detect mass concentrations."),
             parameters.cellFunctionSensorRange);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Transmitter
@@ -979,8 +978,8 @@ void _SimulationParametersBaseWidgets::process()
                 .defaultValue(origParameters.cellFunctionTransmitterEnergyDistributionSameCreature)
                 .tooltip("If activated, the transmitter cells can only transfer energy to nearby cells belonging to the same creature."),
             parameters.cellFunctionTransmitterEnergyDistributionSameCreature);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Reconnector
@@ -996,8 +995,8 @@ void _SimulationParametersBaseWidgets::process()
                 .defaultValue(origParameters.cellFunctionReconnectorRadius)
                 .tooltip("The maximum radius in which a reconnector cell can establish or destroy connections to other cells."),
             parameters.cellFunctionReconnectorRadius);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Detonator
@@ -1023,8 +1022,8 @@ void _SimulationParametersBaseWidgets::process()
                 .defaultValue(origParameters.cellFunctionDetonatorChainExplosionProbability)
                 .tooltip("The probability that the explosion of one detonator will trigger the explosion of other detonators within the blast radius."),
             parameters.cellFunctionDetonatorChainExplosionProbability);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Expert settings: Advanced absorption control
@@ -1079,8 +1078,8 @@ void _SimulationParametersBaseWidgets::process()
                 .defaultValue(origParameters.baseValues.radiationAbsorptionLowVelocityPenalty)
                 .tooltip("When this parameter is increased, slowly moving cells will absorb less energy from an incoming energy particle."),
             parameters.baseValues.radiationAbsorptionLowVelocityPenalty);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Expert settings: Advanced attacker control
@@ -1174,8 +1173,8 @@ void _SimulationParametersBaseWidgets::process()
                 .defaultValue(origParameters.cellFunctionAttackerEnergyDistributionValue)
                 .tooltip("The amount of energy which a attacker cell can transfer to nearby transmitter or constructor cells or to connected cells."),
             parameters.cellFunctionAttackerEnergyDistributionValue);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Expert settings: Cell color transition rules
@@ -1208,8 +1207,8 @@ void _SimulationParametersBaseWidgets::process()
                 parameters.baseValues.cellColorTransitionDuration[color]);
             ImGui::PopID();
         }
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Expert settings: Cell age limiter
@@ -1276,8 +1275,8 @@ void _SimulationParametersBaseWidgets::process()
                          "Conversely, the maximum age is decreased for the cell color with the most replicators."),
             &parameters.cellMaxAgeBalancerInterval,
             &parameters.cellMaxAgeBalancer);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Expert settings: Cell glow
@@ -1318,8 +1317,8 @@ void _SimulationParametersBaseWidgets::process()
                 .defaultValue(&origParameters.cellGlowStrength)
                 .tooltip("The strength of the glow."),
             &parameters.cellGlowStrength);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Expert settings: Customize neuron mutations
@@ -1382,8 +1381,8 @@ void _SimulationParametersBaseWidgets::process()
                 .format("%.3f")
                 .defaultValue(&origParameters.cellCopyMutationNeuronDataOffset),
             &parameters.cellCopyMutationNeuronDataOffset);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Expert settings: External energy control
@@ -1470,8 +1469,8 @@ void _SimulationParametersBaseWidgets::process()
                 .tooltip("Energy from the simulation can only flow back into the external energy pool as long as the amount of external energy is "
                          "below this value."),
             &parameters.externalEnergyBackflowLimit);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Expert settings: Genome complexity measurement
@@ -1527,8 +1526,8 @@ void _SimulationParametersBaseWidgets::process()
                 .defaultValue(origParameters.genomeComplexityNeuronFactor)
                 .tooltip("This parameter takes into account the number of encoded neurons in the genome for the complexity value."),
             parameters.genomeComplexityNeuronFactor);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Expert settings: Legacy behavior
@@ -1546,8 +1545,8 @@ void _SimulationParametersBaseWidgets::process()
                          "(legacy behavior). If deactivated, the input signal must only originate from a sensor cell and must not be adjacent (new "
                          "behavior)."),
             parameters.legacyCellFunctionMuscleMovementAngleFromSensor);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     SimulationParametersValidationService::get().validateAndCorrect(parameters);
 

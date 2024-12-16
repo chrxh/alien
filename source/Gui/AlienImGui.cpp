@@ -30,9 +30,10 @@ std::string AlienImGui::_filterText;
 std::unordered_set<unsigned int> AlienImGui::_basicSilderExpanded;
 std::unordered_map<unsigned int, std::chrono::steady_clock::time_point> AlienImGui::_treeNodeInvisibleTimepointById;
 std::unordered_set<unsigned int> AlienImGui::_treeNodeEmpty;
-float AlienImGui::_treeNodeStartCursorPosY = 0;
-int AlienImGui::_treeNodeId = 0;
-bool AlienImGui::_treeNodeOpen = false;
+std::vector<float> AlienImGui::_treeNodeStartCursorPosY;
+std::vector<int> AlienImGui::_treeNodeId;
+std::vector<bool> AlienImGui::_treeNodeOpen;
+
 std::unordered_map<unsigned int, int> AlienImGui::_neuronSelectedInput;
 std::unordered_map<unsigned int, int> AlienImGui::_neuronSelectedOutput;
 int AlienImGui::_rotationStartIndex = 0;
@@ -1237,30 +1238,31 @@ bool AlienImGui::CollapseButton(bool collapsed)
 
 bool AlienImGui::BeginTreeNode(TreeNodeParameters const& parameters)
 {
-    _treeNodeStartCursorPosY = 0;
-    _treeNodeId = ImGui::GetID(parameters._text.c_str());
+
+    auto id = ImGui::GetID(parameters._text.c_str());
+    _treeNodeId.push_back(id);
 
     if (!parameters._visible) {
-        _treeNodeInvisibleTimepointById.insert_or_assign(_treeNodeId, std::chrono::steady_clock::now());
-        _treeNodeOpen = false;
+        _treeNodeInvisibleTimepointById.insert_or_assign(id, std::chrono::steady_clock::now());
+        _treeNodeOpen.push_back(false);
+        _treeNodeStartCursorPosY.push_back(0);
         return false;
     }
 
     int highlightCountdown = 0;
-    if (parameters._blinkWhenActivated && _treeNodeInvisibleTimepointById.contains(_treeNodeId)) {
+    if (parameters._blinkWhenActivated && _treeNodeInvisibleTimepointById.contains(id)) {
         highlightCountdown = std::max(
             0ll,
-            1000
-                - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - _treeNodeInvisibleTimepointById.at(_treeNodeId))
+            1000 - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - _treeNodeInvisibleTimepointById.at(id))
                       .count());
         if (highlightCountdown > 0) {
             ImGui::SetScrollHereY();
         }
     }
 
-    if (!_filterText.empty() && _treeNodeEmpty.contains(_treeNodeId)) {
-        _treeNodeStartCursorPosY = ImGui::GetCursorPosY();
-        _treeNodeOpen = false;
+    if (!_filterText.empty() && _treeNodeEmpty.contains(id)) {
+        _treeNodeStartCursorPosY.push_back(ImGui::GetCursorPosY());
+        _treeNodeOpen.push_back(false);
         return true;
     }
 
@@ -1290,24 +1292,36 @@ bool AlienImGui::BeginTreeNode(TreeNodeParameters const& parameters)
     ImGuiTreeNodeFlags treeNodeClosedFlags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_Framed;
     ImGuiTreeNodeFlags treeNodeOpenFlags = treeNodeClosedFlags | ImGuiTreeNodeFlags_DefaultOpen;
     ImGui::PushFont(StyleRepository::get().getSmallBoldFont());
+    if (!_filterText.empty()) {
+        ImGui::SetNextItemOpen(true);
+    }
     bool result = ImGui::TreeNodeEx(parameters._text.c_str(), parameters._defaultOpen ? treeNodeOpenFlags : treeNodeClosedFlags);
     ImGui::PopFont();
     ImGui::PopStyleColor(3);
 
-    _treeNodeStartCursorPosY = ImGui::GetCursorPosY();
-    _treeNodeOpen = result;
+    _treeNodeStartCursorPosY.push_back(ImGui::GetCursorPosY());
+    _treeNodeOpen.push_back(result);
     return result;
 }
 
 void AlienImGui::EndTreeNode()
 {
-    if (_treeNodeStartCursorPosY != 0 && _treeNodeStartCursorPosY == ImGui::GetCursorPosY()) {
-        _treeNodeEmpty.insert(_treeNodeId);
+    float startCursorPosY = _treeNodeStartCursorPosY.back();
+    _treeNodeStartCursorPosY.pop_back();
+
+    int id = _treeNodeId.back();
+    _treeNodeId.pop_back();
+
+    bool isOpen = _treeNodeOpen.back();
+    _treeNodeOpen.pop_back();
+
+    if (startCursorPosY != 0 && startCursorPosY == ImGui::GetCursorPosY()) {
+        _treeNodeEmpty.insert(id);
     } else {
-        _treeNodeEmpty.erase(_treeNodeId);
+        _treeNodeEmpty.erase(id);
     }
 
-    if (_treeNodeOpen) {
+    if (isOpen) {
         ImGui::TreePop();
     }
 }

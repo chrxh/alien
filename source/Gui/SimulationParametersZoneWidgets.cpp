@@ -54,8 +54,8 @@ void _SimulationParametersZoneWidgets::process()
         AlienImGui::InputText(
             AlienImGui::InputTextParameters().name("Name").textWidth(RightColumnWidth).defaultValue(origZone.name), zone.name, sizeof(Char64) / sizeof(char));
 
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Visualization and location
@@ -66,8 +66,8 @@ void _SimulationParametersZoneWidgets::process()
             zone.color,
             _backupColor,
             _zoneColorPalette.getReference());
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Location"))) {
         if (AlienImGui::Switcher(
@@ -137,11 +137,11 @@ void _SimulationParametersZoneWidgets::process()
                 .defaultValue(&origZone.fadeoutRadius)
                 .format("%.1f"),
             &zone.fadeoutRadius);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
-     * Flow
+     * Force field
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Force field"))) {
         auto isForceFieldActive = zone.flowType != FlowType_None;
@@ -240,8 +240,8 @@ void _SimulationParametersZoneWidgets::process()
                 &zone.flowData.linearFlow.strength);
         }
         ImGui::EndDisabled();
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Physics: Motion
@@ -270,8 +270,8 @@ void _SimulationParametersZoneWidgets::process()
                 .format("%.2f"),
             &zone.values.rigidity,
             &zone.activatedValues.rigidity);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Physics: Thresholds
@@ -288,8 +288,8 @@ void _SimulationParametersZoneWidgets::process()
                 .disabledValue(parameters.baseValues.cellMaxForce),
             zone.values.cellMaxForce,
             &zone.activatedValues.cellMaxForce);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Physics: Binding
@@ -318,8 +318,9 @@ void _SimulationParametersZoneWidgets::process()
                 .disabledValue(&parameters.baseValues.cellMaxBindingEnergy),
             &zone.values.cellMaxBindingEnergy,
             &zone.activatedValues.cellMaxBindingEnergy);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
+
 
     /**
      * Physics: Radiation
@@ -361,8 +362,8 @@ void _SimulationParametersZoneWidgets::process()
                 .format("%.6f"),
             zone.values.radiationCellAgeStrength,
             &zone.activatedValues.radiationCellAgeStrength);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Cell life cycle
@@ -392,8 +393,8 @@ void _SimulationParametersZoneWidgets::process()
                 .disabledValue(parameters.baseValues.cellDeathProbability),
             zone.values.cellDeathProbability,
             &zone.activatedValues.cellDeathProbability);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Mutation 
@@ -555,8 +556,8 @@ void _SimulationParametersZoneWidgets::process()
                 .disabledValue(parameters.baseValues.cellCopyMutationGenomeColor),
             zone.values.cellCopyMutationGenomeColor,
             &zone.activatedValues.cellCopyMutationGenomeColor);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Attacker
@@ -594,8 +595,8 @@ void _SimulationParametersZoneWidgets::process()
                 .disabledValue(parameters.baseValues.cellFunctionAttackerEnergyCost),
             zone.values.cellFunctionAttackerEnergyCost,
             &zone.activatedValues.cellFunctionAttackerEnergyCost);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Expert settings: Advanced absorption control
@@ -628,8 +629,8 @@ void _SimulationParametersZoneWidgets::process()
                 .disabledValue(parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty),
             zone.values.radiationAbsorptionLowGenomeComplexityPenalty,
             &zone.activatedValues.radiationAbsorptionLowGenomeComplexityPenalty);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Expert settings: Advanced attacker control
@@ -671,8 +672,8 @@ void _SimulationParametersZoneWidgets::process()
                 .disabledValue(parameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty),
             zone.values.cellFunctionAttackerConnectionsMismatchPenalty,
             &zone.activatedValues.cellFunctionAttackerConnectionsMismatchPenalty);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Expert settings: Cell age limiter
@@ -695,8 +696,8 @@ void _SimulationParametersZoneWidgets::process()
                 .defaultValue(origZone.values.cellInactiveMaxAge),
             zone.values.cellInactiveMaxAge,
             &zone.activatedValues.cellInactiveMaxAge);
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 
     /**
      * Expert settings: Cell color transition rules
@@ -727,7 +728,6 @@ void _SimulationParametersZoneWidgets::process()
             ImGui::PopID();
         }
         ImGui::EndDisabled();
-        AlienImGui::EndTreeNode();
         if (!zone.activatedValues.cellColorTransition) {
             for (int color = 0; color < MAX_COLORS; ++color) {
                 zone.values.cellColorTransitionTargetColor[color] = parameters.baseValues.cellColorTransitionTargetColor[color];
@@ -735,6 +735,7 @@ void _SimulationParametersZoneWidgets::process()
             }
         }
     }
+    AlienImGui::EndTreeNode();
 
     SimulationParametersValidationService::get().validateAndCorrect(zone, parameters);
 
