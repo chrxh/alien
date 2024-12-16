@@ -326,6 +326,9 @@ public:
     static bool BeginTreeNode(TreeNodeParameters const& parameters);
     static void EndTreeNode();
 
+    static void SetFilterText(std::string const& value);
+    static void ResetFilterText();
+
     struct ButtonParameters
     {
         MEMBER_DECLARATION(ButtonParameters, std::string, buttonText, "");
@@ -436,6 +439,7 @@ private:
     static bool revertButton(std::string const& id);
 
 private:
+    static std::string _filterText;
     static std::unordered_set<unsigned int> _basicSilderExpanded;
     static std::unordered_map<unsigned int, std::chrono::steady_clock::time_point> _invisibleTimepointById;
 

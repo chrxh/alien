@@ -26,6 +26,7 @@ namespace
     auto constexpr HoveredTimer = 0.5f;
 }
 
+std::string AlienImGui::_filterText;
 std::unordered_set<unsigned int> AlienImGui::_basicSilderExpanded;
 std::unordered_map<unsigned int, std::chrono::steady_clock::time_point> AlienImGui::_invisibleTimepointById;
 std::unordered_map<unsigned int, int> AlienImGui::_neuronSelectedInput;
@@ -62,6 +63,10 @@ bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int* value, bo
 
 bool AlienImGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& valueX, float& valueY)
 {
+    if (!_filterText.empty() && !StringHelper::containsCaseInsensitive(parameters._name, _filterText)) {
+        return false;
+    }
+
     ImGui::PushID(parameters._name.c_str());
 
     auto constexpr MousePickerButtonWidth = 22.0f;
@@ -252,6 +257,10 @@ bool AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value
 
 void AlienImGui::InputFloat2(InputFloat2Parameters const& parameters, float& value1, float& value2)
 {
+    if (!_filterText.empty() && !StringHelper::containsCaseInsensitive(parameters._name, _filterText)) {
+        return;
+    }
+
     auto textWidth = StyleRepository::get().scale(parameters._textWidth);
 
     ImGuiInputTextFlags flags = parameters._readOnly ? ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_None;
@@ -340,6 +349,9 @@ void AlienImGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& pa
 
 bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)
 {
+    if (!_filterText.empty() && !StringHelper::containsCaseInsensitive(parameters._name, _filterText)) {
+        return false;
+    }
     auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
     auto folderButtonWidth = parameters._folderButton ? scale(30.0f) + ImGui::GetStyle().FramePadding.x : 0;
     ImGui::SetNextItemWidth(width - scale(parameters._textWidth) - folderButtonWidth);
@@ -450,6 +462,10 @@ namespace
 
 bool AlienImGui::Combo(ComboParameters& parameters, int& value, bool* enabled)
 {
+    if (!_filterText.empty() && !StringHelper::containsCaseInsensitive(parameters._name, _filterText)) {
+        return false;
+    }
+
     auto textWidth = StyleRepository::get().scale(parameters._textWidth);
 
     const char** items = new const char*[parameters._values.size()];
@@ -506,6 +522,10 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value, bool* enabled)
 
 bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value, bool* enabled /*= nullptr*/)
 {
+    if (!_filterText.empty() && !StringHelper::containsCaseInsensitive(parameters._name, _filterText)) {
+        return false;
+    }
+
     ImGui::PushID(parameters._name.c_str());
 
     if (parameters._disabled) {
@@ -648,6 +668,10 @@ bool AlienImGui::ComboOptionalColor(ComboColorParameters const& parameters, std:
 
 void AlienImGui::InputColorTransition(InputColorTransitionParameters const& parameters, int sourceColor, int& targetColor, int& transitionAge)
 {
+    if (!_filterText.empty() && !StringHelper::containsCaseInsensitive(parameters._name, _filterText)) {
+        return;
+    }
+
     //source color field
     ImGui::PushID(sourceColor);
     AlienImGui::ColorField(Const::IndividualCellColors[sourceColor]);
@@ -704,6 +728,10 @@ void AlienImGui::InputColorTransition(InputColorTransitionParameters const& para
 
 bool AlienImGui::Checkbox(CheckboxParameters const& parameters, bool& value)
 {
+    if (!_filterText.empty() && !StringHelper::containsCaseInsensitive(parameters._name, _filterText)) {
+        return false;
+    }
+
     auto result = ImGui::Checkbox(("##" + parameters._name).c_str(), &value);
     if (parameters._textWidth != 0) {
         ImGui::SameLine();
@@ -938,6 +966,10 @@ void AlienImGui::EndMenuBar()
 
 void AlienImGui::ColorButtonWithPicker(ColorButtonWithPickerParameters const& parameters, uint32_t& color, uint32_t& backupColor, uint32_t(& savedPalette)[32])
 {
+    if (!_filterText.empty() && !StringHelper::containsCaseInsensitive(parameters._name, _filterText)) {
+        return;
+    }
+
     ImVec4 imGuiColor = ImColor(color);
     ImVec4 imGuiBackupColor = ImColor(backupColor);
     ImVec4 imGuiSavedPalette[32];
@@ -1233,6 +1265,16 @@ bool AlienImGui::BeginTreeNode(TreeNodeParameters const& parameters)
 void AlienImGui::EndTreeNode()
 {
     ImGui::TreePop();
+}
+
+void AlienImGui::SetFilterText(std::string const& value)
+{
+    _filterText = value;
+}
+
+void AlienImGui::ResetFilterText()
+{
+    _filterText.clear();
 }
 
 bool AlienImGui::Button(ButtonParameters const& parameters)
@@ -1893,6 +1935,10 @@ namespace
 template <typename Parameter, typename T>
 bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled, bool* pinned)
 {
+    if (!_filterText.empty() && !StringHelper::containsCaseInsensitive(parameters._name, _filterText)) {
+        return false;
+    }
+
     auto constexpr PinnedButtonWidth = 22.0f;
 
     ImGui::PushID(parameters._name.c_str());
@@ -2080,6 +2126,10 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
 template <typename T>
 void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], bool* enabled)
 {
+    if (!_filterText.empty() && !StringHelper::containsCaseInsensitive(parameters._name, _filterText)) {
+        return;
+    }
+
     ImGui::PushID(parameters._name.c_str());
 
     if (enabled) {

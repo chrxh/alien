@@ -735,6 +735,7 @@ void _SimulationParametersZoneWidgets::process()
             }
         }
     }
+
     SimulationParametersValidationService::get().validateAndCorrect(zone, parameters);
 
     if (zone != lastZone) {
