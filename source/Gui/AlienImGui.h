@@ -445,9 +445,9 @@ private:
     static std::unordered_set<unsigned int> _basicSilderExpanded;
     static std::unordered_map<unsigned int, std::chrono::steady_clock::time_point> _treeNodeInvisibleTimepointById;
     static std::unordered_set<unsigned int> _treeNodeEmpty;
-    static float _treeNodeStartCursorPosY;
-    static int _treeNodeId;
-    static bool _treeNodeOpen;
+    static std::vector<float> _treeNodeStartCursorPosY;
+    static std::vector<int> _treeNodeId;
+    static std::vector<bool> _treeNodeOpen;
 
     static int _rotationStartIndex;
 

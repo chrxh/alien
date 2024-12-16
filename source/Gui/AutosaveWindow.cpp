@@ -291,8 +291,8 @@ void AutosaveWindow::processSettings()
             }
         }
         ImGui::EndChild();
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 }
 
 void AutosaveWindow::processStatusBar()

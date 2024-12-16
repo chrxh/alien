@@ -290,8 +290,8 @@ void StatisticsWindow::processSettings()
             AlienImGui::Switcher(AlienImGui::SwitcherParameters().name("Scale").textWidth(RightColumnWidth).values({"Linear", "Logarithmic"}), _plotScale);
         }
         ImGui::EndChild();
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 }
 
 void StatisticsWindow::processTimelineStatistics()

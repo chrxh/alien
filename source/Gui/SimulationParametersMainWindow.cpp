@@ -220,8 +220,8 @@ void SimulationParametersMainWindow::processMasterWidget()
                 processLocationTable();
             }
             ImGui::EndChild();
-            AlienImGui::EndTreeNode();
         }
+        AlienImGui::EndTreeNode();
     }
     ImGui::EndChild();
 
@@ -236,7 +236,9 @@ void SimulationParametersMainWindow::processDetailWidget()
 {
     auto height = getDetailWidgetHeight();
     if (ImGui::BeginChild("##detail", {0, height})) {
-        if (_detailWidgetOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Parameters").rank(AlienImGui::TreeNodeRank::High).defaultOpen(_detailWidgetOpen))) {
+        auto title = _filter.empty() ? "Parameters" : "Parameters (filtered)";
+        if (_detailWidgetOpen =
+                AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text((std::string(title) + "###parameters").c_str()).rank(AlienImGui::TreeNodeRank::High).defaultOpen(_detailWidgetOpen))) {
             ImGui::Spacing();
             AlienImGui::SetFilterText(_filter);
             if (ImGui::BeginChild(
@@ -257,8 +259,8 @@ void SimulationParametersMainWindow::processDetailWidget()
 
             ImGui::Spacing();
             AlienImGui::InputFilter(_filter);
-            AlienImGui::EndTreeNode();
         }
+        AlienImGui::EndTreeNode();
     }
     ImGui::EndChild();
 
@@ -278,8 +280,8 @@ void SimulationParametersMainWindow::processExpertWidget()
                     processExpertSettings();
             }
             ImGui::EndChild();
-            AlienImGui::EndTreeNode();
         }
+        AlienImGui::EndTreeNode();
     }
     ImGui::EndChild();
 }
