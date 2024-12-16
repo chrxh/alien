@@ -256,7 +256,7 @@ void SimulationParametersMainWindow::processDetailWidget()
             AlienImGui::ResetFilterText();
 
             ImGui::Spacing();
-            AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Filter").textWidth(0), _filter);
+            AlienImGui::InputFilter(_filter);
             AlienImGui::EndTreeNode();
         }
     }
