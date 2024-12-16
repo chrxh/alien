@@ -167,6 +167,8 @@ public:
     static bool InputText(InputTextParameters const& parameters, char* buffer, int bufferSize);
     static bool InputText(InputTextParameters const& parameters, std::string& text);
 
+    static bool InputFilter(std::string& filter);
+
     struct InputTextMultilineParameters
     {
         MEMBER_DECLARATION(InputTextMultilineParameters, std::string, name, "");

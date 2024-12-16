@@ -424,6 +424,24 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, std::string& t
     return result;
 }
 
+bool AlienImGui::InputFilter(std::string& filter)
+{
+    auto result = AlienImGui::InputText(
+        AlienImGui::InputTextParameters().hint("Filter").textWidth(0).width(
+            ImGui::GetContentRegionAvail().x - scale(12.0f) - ImGui::GetStyle().WindowPadding.x * 2),
+        filter);
+    ImGui::SameLine();
+
+    ImGui::BeginDisabled(filter.empty());
+    if (AlienImGui::Button(ICON_FA_TIMES)) {
+        filter.clear();
+        result = true;
+    }
+    ImGui::EndDisabled();
+
+    return result;
+}
+
 void AlienImGui::InputTextMultiline(InputTextMultilineParameters const& parameters, std::string& text)
 {
     static char buffer[1024*16];
