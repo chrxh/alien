@@ -600,134 +600,138 @@ void _SimulationParametersZoneWidgets::process()
     /**
      * Expert settings: Advanced absorption control
      */
-    if (parameters.features.advancedAbsorptionControl) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Advanced energy absorption control"))) {
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Low velocity penalty")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(1.0f)
-                    .format("%.2f")
-                    .defaultValue(origZone.values.radiationAbsorptionLowVelocityPenalty)
-                    .disabledValue(parameters.baseValues.radiationAbsorptionLowVelocityPenalty),
-                zone.values.radiationAbsorptionLowVelocityPenalty,
-                &zone.activatedValues.radiationAbsorptionLowVelocityPenalty);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Low genome complexity penalty")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(1.0f)
-                    .format("%.2f")
-                    .defaultValue(origZone.values.radiationAbsorptionLowGenomeComplexityPenalty)
-                    .disabledValue(parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty),
-                zone.values.radiationAbsorptionLowGenomeComplexityPenalty,
-                &zone.activatedValues.radiationAbsorptionLowGenomeComplexityPenalty);
-            AlienImGui::EndTreeNode();
-        }
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
+                                      .text("Expert settings: Advanced energy absorption control")
+                                      .visible(parameters.features.advancedAbsorptionControl)
+                                      .blinkWhenActivated(true))) {
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Low velocity penalty")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(0)
+                .max(1.0f)
+                .format("%.2f")
+                .defaultValue(origZone.values.radiationAbsorptionLowVelocityPenalty)
+                .disabledValue(parameters.baseValues.radiationAbsorptionLowVelocityPenalty),
+            zone.values.radiationAbsorptionLowVelocityPenalty,
+            &zone.activatedValues.radiationAbsorptionLowVelocityPenalty);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Low genome complexity penalty")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(0)
+                .max(1.0f)
+                .format("%.2f")
+                .defaultValue(origZone.values.radiationAbsorptionLowGenomeComplexityPenalty)
+                .disabledValue(parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty),
+            zone.values.radiationAbsorptionLowGenomeComplexityPenalty,
+            &zone.activatedValues.radiationAbsorptionLowGenomeComplexityPenalty);
+        AlienImGui::EndTreeNode();
     }
 
     /**
      * Expert settings: Advanced attacker control
      */
-    if (parameters.features.advancedAttackerControl) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Advanced attacker control"))) {
-            AlienImGui::InputFloatColorMatrix(
-                AlienImGui::InputFloatColorMatrixParameters()
-                    .name("New complex mutant protection")
-                    .textWidth(RightColumnWidth)
-                    .min(0)
-                    .max(1.0f)
-                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origZone.values.cellFunctionAttackerNewComplexMutantPenalty))
-                    .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.cellFunctionAttackerNewComplexMutantPenalty)),
-                zone.values.cellFunctionAttackerNewComplexMutantPenalty,
-                &zone.activatedValues.cellFunctionAttackerNewComplexMutantPenalty);
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
+                                      .text("Expert settings: Advanced attacker control")
+                                      .visible(parameters.features.advancedAttackerControl)
+                                      .blinkWhenActivated(true))) {
+        AlienImGui::InputFloatColorMatrix(
+            AlienImGui::InputFloatColorMatrixParameters()
+                .name("New complex mutant protection")
+                .textWidth(RightColumnWidth)
+                .min(0)
+                .max(1.0f)
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origZone.values.cellFunctionAttackerNewComplexMutantPenalty))
+                .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.cellFunctionAttackerNewComplexMutantPenalty)),
+            zone.values.cellFunctionAttackerNewComplexMutantPenalty,
+            &zone.activatedValues.cellFunctionAttackerNewComplexMutantPenalty);
 
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Geometry penalty")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(5.0f)
-                    .defaultValue(origZone.values.cellFunctionAttackerGeometryDeviationExponent)
-                    .disabledValue(parameters.baseValues.cellFunctionAttackerGeometryDeviationExponent),
-                zone.values.cellFunctionAttackerGeometryDeviationExponent,
-                &zone.activatedValues.cellFunctionAttackerGeometryDeviationExponent);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Connections mismatch penalty")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(1.0f)
-                    .defaultValue(origZone.values.cellFunctionAttackerConnectionsMismatchPenalty)
-                    .disabledValue(parameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty),
-                zone.values.cellFunctionAttackerConnectionsMismatchPenalty,
-                &zone.activatedValues.cellFunctionAttackerConnectionsMismatchPenalty);
-            AlienImGui::EndTreeNode();
-        }
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Geometry penalty")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(0)
+                .max(5.0f)
+                .defaultValue(origZone.values.cellFunctionAttackerGeometryDeviationExponent)
+                .disabledValue(parameters.baseValues.cellFunctionAttackerGeometryDeviationExponent),
+            zone.values.cellFunctionAttackerGeometryDeviationExponent,
+            &zone.activatedValues.cellFunctionAttackerGeometryDeviationExponent);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Connections mismatch penalty")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(0)
+                .max(1.0f)
+                .defaultValue(origZone.values.cellFunctionAttackerConnectionsMismatchPenalty)
+                .disabledValue(parameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty),
+            zone.values.cellFunctionAttackerConnectionsMismatchPenalty,
+            &zone.activatedValues.cellFunctionAttackerConnectionsMismatchPenalty);
+        AlienImGui::EndTreeNode();
     }
 
     /**
      * Expert settings: Cell age limiter
      */
-    if (parameters.features.cellAgeLimiter) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Cell age limiter"))) {
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Maximum inactive cell age")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(1.0f)
-                    .max(10000000.0f)
-                    .logarithmic(true)
-                    .infinity(true)
-                    .format("%.0f")
-                    .disabledValue(parameters.baseValues.cellInactiveMaxAge)
-                    .defaultValue(origZone.values.cellInactiveMaxAge),
-                zone.values.cellInactiveMaxAge,
-                &zone.activatedValues.cellInactiveMaxAge);
-            AlienImGui::EndTreeNode();
-        }
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
+                                      .text("Expert settings: Cell age limiter")
+                                      .visible(parameters.features.cellAgeLimiter)
+                                      .blinkWhenActivated(true))) {
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Maximum inactive cell age")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(1.0f)
+                .max(10000000.0f)
+                .logarithmic(true)
+                .infinity(true)
+                .format("%.0f")
+                .disabledValue(parameters.baseValues.cellInactiveMaxAge)
+                .defaultValue(origZone.values.cellInactiveMaxAge),
+            zone.values.cellInactiveMaxAge,
+            &zone.activatedValues.cellInactiveMaxAge);
+        AlienImGui::EndTreeNode();
     }
 
     /**
      * Expert settings: Cell color transition rules
      */
-    if (parameters.features.cellColorTransitionRules) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Cell color transition rules"))) {
-            ImGui::Checkbox("##cellColorTransition", &zone.activatedValues.cellColorTransition);
-            ImGui::SameLine();
-            ImGui::BeginDisabled(!zone.activatedValues.cellColorTransition);
-            auto posX = ImGui::GetCursorPos().x;
-            for (int color = 0; color < MAX_COLORS; ++color) {
-                ImGui::SetCursorPosX(posX);
-                ImGui::PushID(color);
-                auto parameters = AlienImGui::InputColorTransitionParameters()
-                                      .textWidth(RightColumnWidth)
-                                      .color(color)
-                                      .defaultTargetColor(origZone.values.cellColorTransitionTargetColor[color])
-                                      .defaultTransitionAge(origZone.values.cellColorTransitionDuration[color])
-                                      .logarithmic(true)
-                                      .infinity(true);
-                if (0 == color) {
-                    parameters.name("Target color and duration");
-                }
-                AlienImGui::InputColorTransition(
-                    parameters, color, zone.values.cellColorTransitionTargetColor[color], zone.values.cellColorTransitionDuration[color]);
-                ImGui::PopID();
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
+                                      .text("Expert settings: Cell color transition rules")
+                                      .visible(parameters.features.cellColorTransitionRules)
+                                      .blinkWhenActivated(true))) {
+        ImGui::Checkbox("##cellColorTransition", &zone.activatedValues.cellColorTransition);
+        ImGui::SameLine();
+        ImGui::BeginDisabled(!zone.activatedValues.cellColorTransition);
+        auto posX = ImGui::GetCursorPos().x;
+        for (int color = 0; color < MAX_COLORS; ++color) {
+            ImGui::SetCursorPosX(posX);
+            ImGui::PushID(color);
+            auto parameters = AlienImGui::InputColorTransitionParameters()
+                                  .textWidth(RightColumnWidth)
+                                  .color(color)
+                                  .defaultTargetColor(origZone.values.cellColorTransitionTargetColor[color])
+                                  .defaultTransitionAge(origZone.values.cellColorTransitionDuration[color])
+                                  .logarithmic(true)
+                                  .infinity(true);
+            if (0 == color) {
+                parameters.name("Target color and duration");
             }
-            ImGui::EndDisabled();
-            AlienImGui::EndTreeNode();
-            if (!zone.activatedValues.cellColorTransition) {
-                for (int color = 0; color < MAX_COLORS; ++color) {
-                    zone.values.cellColorTransitionTargetColor[color] = parameters.baseValues.cellColorTransitionTargetColor[color];
-                    zone.values.cellColorTransitionDuration[color] = parameters.baseValues.cellColorTransitionDuration[color];
-                }
+            AlienImGui::InputColorTransition(
+                parameters, color, zone.values.cellColorTransitionTargetColor[color], zone.values.cellColorTransitionDuration[color]);
+            ImGui::PopID();
+        }
+        ImGui::EndDisabled();
+        AlienImGui::EndTreeNode();
+        if (!zone.activatedValues.cellColorTransition) {
+            for (int color = 0; color < MAX_COLORS; ++color) {
+                zone.values.cellColorTransitionTargetColor[color] = parameters.baseValues.cellColorTransitionTargetColor[color];
+                zone.values.cellColorTransitionDuration[color] = parameters.baseValues.cellColorTransitionDuration[color];
             }
         }
     }

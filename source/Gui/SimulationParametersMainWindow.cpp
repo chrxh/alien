@@ -110,19 +110,36 @@ void SimulationParametersMainWindow::processToolbar()
     AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_COPY).tooltip("Copy simulation parameters"))) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_COPY).tooltip("Copy simulation parameters to clipboard"))) {
         _copiedParameters = _simulationFacade->getSimulationParameters();
         printOverlayMessage("Simulation parameters copied");
     }
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(!_copiedParameters);
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PASTE).tooltip("Paste simulation parameters"))) {
+    if (AlienImGui::ToolbarButton(
+            AlienImGui::ToolbarButtonParameters().text(ICON_FA_PASTE).tooltip("Paste simulation parameters from clipboard").disabled(!_copiedParameters))) {
         _simulationFacade->setSimulationParameters(*_copiedParameters);
         _simulationFacade->setOriginalSimulationParameters(*_copiedParameters);
         printOverlayMessage("Simulation parameters pasted");
     }
-    ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
+                                      .text(ICON_FA_PASTE)
+                                      .secondText(ICON_FA_UNDO)
+                                      .secondTextOffset(RealVector2D{32.0f, 28.0f})
+                                      .secondTextScale(0.3f)
+                                      .tooltip("Replace reference values by values from the clipboard")
+                                      .disabled(!_copiedParameters))) {
+        auto parameters = _simulationFacade->getSimulationParameters();
+        if (_copiedParameters->numZones == parameters.numZones && _copiedParameters->numRadiationSources == parameters.numRadiationSources) {
+            _simulationFacade->setOriginalSimulationParameters(*_copiedParameters);
+            printOverlayMessage("Reference simulation parameters replaced");
+        } else {
+            GenericMessageDialog::get().information(
+                "Error", "The number of zones and radiation sources of the current simulation parameters must match with those from the clipboard.");
+        }
+    }
 
     ImGui::SameLine();
     AlienImGui::ToolbarSeparator();
@@ -185,7 +202,7 @@ void SimulationParametersMainWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(
-            AlienImGui::ToolbarButtonParameters().text(ICON_FA_EXTERNAL_LINK_ALT).tooltip("Open parameters for selected zone/radiation source in a new window"))) {
+            AlienImGui::ToolbarButtonParameters().text(ICON_FA_EXTERNAL_LINK_SQUARE_ALT).tooltip("Open parameters for selected zone/radiation source in a new window"))) {
         onOpenInLocationWindow();
     }
 

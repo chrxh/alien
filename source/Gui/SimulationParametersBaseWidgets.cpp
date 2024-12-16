@@ -9,6 +9,7 @@
 #include "AlienImGui.h"
 #include "CellFunctionStrings.h"
 #include "HelpStrings.h"
+#include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationParametersEditService.h"
 #include "EngineInterface/SimulationParametersValidationService.h"
 
@@ -1027,519 +1028,524 @@ void _SimulationParametersBaseWidgets::process()
     /**
      * Expert settings: Advanced absorption control
      */
-    if (parameters.features.advancedAbsorptionControl) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Advanced energy absorption control"))) {
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Low genome complexity penalty")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(1.0f)
-                    .format("%.2f")
-                    .defaultValue(origParameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty)
-                    .tooltip(Const::ParameterRadiationAbsorptionLowGenomeComplexityPenaltyTooltip),
-                parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Low connection penalty")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(5.0f)
-                    .format("%.1f")
-                    .defaultValue(origParameters.radiationAbsorptionLowConnectionPenalty)
-                    .tooltip("When this parameter is increased, cells with fewer cell connections will absorb less energy from an incoming energy "
-                             "particle."),
-                parameters.radiationAbsorptionLowConnectionPenalty);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("High velocity penalty")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(30.0f)
-                    .logarithmic(true)
-                    .format("%.2f")
-                    .defaultValue(origParameters.radiationAbsorptionHighVelocityPenalty)
-                    .tooltip("When this parameter is increased, fast moving cells will absorb less energy from an incoming energy particle."),
-                parameters.radiationAbsorptionHighVelocityPenalty);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Low velocity penalty")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(1.0f)
-                    .format("%.2f")
-                    .defaultValue(origParameters.baseValues.radiationAbsorptionLowVelocityPenalty)
-                    .tooltip("When this parameter is increased, slowly moving cells will absorb less energy from an incoming energy particle."),
-                parameters.baseValues.radiationAbsorptionLowVelocityPenalty);
-            AlienImGui::EndTreeNode();
-        }
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
+                                      .text("Expert settings: Advanced energy absorption control")
+                                      .visible(parameters.features.advancedAbsorptionControl)
+                                      .blinkWhenActivated(true))) {
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Low genome complexity penalty")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(0)
+                .max(1.0f)
+                .format("%.2f")
+                .defaultValue(origParameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty)
+                .tooltip(Const::ParameterRadiationAbsorptionLowGenomeComplexityPenaltyTooltip),
+            parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Low connection penalty")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(0)
+                .max(5.0f)
+                .format("%.1f")
+                .defaultValue(origParameters.radiationAbsorptionLowConnectionPenalty)
+                .tooltip("When this parameter is increased, cells with fewer cell connections will absorb less energy from an incoming energy "
+                         "particle."),
+            parameters.radiationAbsorptionLowConnectionPenalty);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("High velocity penalty")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(0)
+                .max(30.0f)
+                .logarithmic(true)
+                .format("%.2f")
+                .defaultValue(origParameters.radiationAbsorptionHighVelocityPenalty)
+                .tooltip("When this parameter is increased, fast moving cells will absorb less energy from an incoming energy particle."),
+            parameters.radiationAbsorptionHighVelocityPenalty);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Low velocity penalty")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(0)
+                .max(1.0f)
+                .format("%.2f")
+                .defaultValue(origParameters.baseValues.radiationAbsorptionLowVelocityPenalty)
+                .tooltip("When this parameter is increased, slowly moving cells will absorb less energy from an incoming energy particle."),
+            parameters.baseValues.radiationAbsorptionLowVelocityPenalty);
+        AlienImGui::EndTreeNode();
     }
 
     /**
      * Expert settings: Advanced attacker control
      */
-    if (parameters.features.advancedAttackerControl) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Advanced attacker control"))) {
-            AlienImGui::InputFloatColorMatrix(
-                AlienImGui::InputFloatColorMatrixParameters()
-                    .name("Same mutant protection")
-                    .textWidth(RightColumnWidth)
-                    .min(0)
-                    .max(1.0f)
-                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.cellFunctionAttackerSameMutantPenalty))
-                    .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with the same mutation id."),
-                parameters.cellFunctionAttackerSameMutantPenalty);
-            AlienImGui::InputFloatColorMatrix(
-                AlienImGui::InputFloatColorMatrixParameters()
-                    .name("New complex mutant protection")
-                    .textWidth(RightColumnWidth)
-                    .min(0)
-                    .max(1.0f)
-                    .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.baseValues.cellFunctionAttackerNewComplexMutantPenalty))
-                    .tooltip("A high value protects new mutants with equal or greater genome complexity from being attacked."),
-                parameters.baseValues.cellFunctionAttackerNewComplexMutantPenalty);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Sensor detection factor")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(1.0f)
-                    .defaultValue(origParameters.cellFunctionAttackerSensorDetectionFactor)
-                    .tooltip(
-                        "This parameter controls whether the target must be previously detected with sensors in order to be attacked. The larger this "
-                        "value is, the less energy can be gained during the attack if the target has not already been detected. For this purpose, the "
-                        "attacker "
-                        "cell searches for connected (or connected-connected) sensor cells to see which cell networks they have detected last time and "
-                        "compares them with the attacked target."),
-                parameters.cellFunctionAttackerSensorDetectionFactor);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Geometry penalty")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(5.0f)
-                    .defaultValue(origParameters.baseValues.cellFunctionAttackerGeometryDeviationExponent)
-                    .tooltip("The larger this value is, the less energy a cell can gain from an attack if the local "
-                             "geometry of the attacked cell does not match the attacking cell."),
-                parameters.baseValues.cellFunctionAttackerGeometryDeviationExponent);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Connections mismatch penalty")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(1.0f)
-                    .defaultValue(origParameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty)
-                    .tooltip("The larger this parameter is, the more difficult it is to attack cells that contain more connections."),
-                parameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Color inhomogeneity factor")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(2.0f)
-                    .defaultValue(origParameters.cellFunctionAttackerColorInhomogeneityFactor)
-                    .tooltip("If the attacked cell is connected to cells with different colors, this factor affects the energy of the captured energy."),
-                parameters.cellFunctionAttackerColorInhomogeneityFactor);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Energy distribution radius")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(5.0f)
-                    .defaultValue(origParameters.cellFunctionAttackerEnergyDistributionRadius)
-                    .tooltip("The maximum distance over which an attacker cell transfers its energy captured during an attack to nearby transmitter or "
-                             "constructor cells."),
-                parameters.cellFunctionAttackerEnergyDistributionRadius);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Energy distribution Value")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0)
-                    .max(20.0f)
-                    .defaultValue(origParameters.cellFunctionAttackerEnergyDistributionValue)
-                    .tooltip("The amount of energy which a attacker cell can transfer to nearby transmitter or constructor cells or to connected cells."),
-                parameters.cellFunctionAttackerEnergyDistributionValue);
-            AlienImGui::EndTreeNode();
-        }
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
+                                      .text("Expert settings: Advanced attacker control")
+                                      .visible(parameters.features.advancedAttackerControl)
+                                      .blinkWhenActivated(true))) {
+        AlienImGui::InputFloatColorMatrix(
+            AlienImGui::InputFloatColorMatrixParameters()
+                .name("Same mutant protection")
+                .textWidth(RightColumnWidth)
+                .min(0)
+                .max(1.0f)
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.cellFunctionAttackerSameMutantPenalty))
+                .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with the same mutation id."),
+            parameters.cellFunctionAttackerSameMutantPenalty);
+        AlienImGui::InputFloatColorMatrix(
+            AlienImGui::InputFloatColorMatrixParameters()
+                .name("New complex mutant protection")
+                .textWidth(RightColumnWidth)
+                .min(0)
+                .max(1.0f)
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.baseValues.cellFunctionAttackerNewComplexMutantPenalty))
+                .tooltip("A high value protects new mutants with equal or greater genome complexity from being attacked."),
+            parameters.baseValues.cellFunctionAttackerNewComplexMutantPenalty);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Sensor detection factor")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(0)
+                .max(1.0f)
+                .defaultValue(origParameters.cellFunctionAttackerSensorDetectionFactor)
+                .tooltip(
+                    "This parameter controls whether the target must be previously detected with sensors in order to be attacked. The larger this "
+                    "value is, the less energy can be gained during the attack if the target has not already been detected. For this purpose, the "
+                    "attacker "
+                    "cell searches for connected (or connected-connected) sensor cells to see which cell networks they have detected last time and "
+                    "compares them with the attacked target."),
+            parameters.cellFunctionAttackerSensorDetectionFactor);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Geometry penalty")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(0)
+                .max(5.0f)
+                .defaultValue(origParameters.baseValues.cellFunctionAttackerGeometryDeviationExponent)
+                .tooltip("The larger this value is, the less energy a cell can gain from an attack if the local "
+                         "geometry of the attacked cell does not match the attacking cell."),
+            parameters.baseValues.cellFunctionAttackerGeometryDeviationExponent);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Connections mismatch penalty")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(0)
+                .max(1.0f)
+                .defaultValue(origParameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty)
+                .tooltip("The larger this parameter is, the more difficult it is to attack cells that contain more connections."),
+            parameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Color inhomogeneity factor")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(0)
+                .max(2.0f)
+                .defaultValue(origParameters.cellFunctionAttackerColorInhomogeneityFactor)
+                .tooltip("If the attacked cell is connected to cells with different colors, this factor affects the energy of the captured energy."),
+            parameters.cellFunctionAttackerColorInhomogeneityFactor);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Energy distribution radius")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(0)
+                .max(5.0f)
+                .defaultValue(origParameters.cellFunctionAttackerEnergyDistributionRadius)
+                .tooltip("The maximum distance over which an attacker cell transfers its energy captured during an attack to nearby transmitter or "
+                         "constructor cells."),
+            parameters.cellFunctionAttackerEnergyDistributionRadius);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Energy distribution Value")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(0)
+                .max(20.0f)
+                .defaultValue(origParameters.cellFunctionAttackerEnergyDistributionValue)
+                .tooltip("The amount of energy which a attacker cell can transfer to nearby transmitter or constructor cells or to connected cells."),
+            parameters.cellFunctionAttackerEnergyDistributionValue);
+        AlienImGui::EndTreeNode();
     }
 
     /**
      * Expert settings: Cell color transition rules
      */
-    if (parameters.features.cellColorTransitionRules) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Cell color transition rules"))) {
-            for (int color = 0; color < MAX_COLORS; ++color) {
-                ImGui::PushID(color);
-                auto widgetParameters = AlienImGui::InputColorTransitionParameters()
-                                            .textWidth(RightColumnWidth)
-                                            .color(color)
-                                            .defaultTargetColor(origParameters.baseValues.cellColorTransitionTargetColor[color])
-                                            .defaultTransitionAge(origParameters.baseValues.cellColorTransitionDuration[color])
-                                            .logarithmic(true)
-                                            .infinity(true);
-                if (0 == color) {
-                    widgetParameters.name("Target color and duration")
-                        .tooltip("Rules can be defined that describe how the colors of cells will change over time. For this purpose, a subsequent "
-                                 "color can "
-                                 "be defined for each cell color. In addition, durations must be specified that define how many time steps the "
-                                 "corresponding "
-                                 "color are kept.");
-                }
-                AlienImGui::InputColorTransition(
-                    widgetParameters,
-                    color,
-                    parameters.baseValues.cellColorTransitionTargetColor[color],
-                    parameters.baseValues.cellColorTransitionDuration[color]);
-                ImGui::PopID();
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
+                                      .text("Expert settings: Cell color transition rules")
+                                      .visible(parameters.features.cellColorTransitionRules)
+                                      .blinkWhenActivated(true))) {
+        for (int color = 0; color < MAX_COLORS; ++color) {
+            ImGui::PushID(color);
+            auto widgetParameters = AlienImGui::InputColorTransitionParameters()
+                                        .textWidth(RightColumnWidth)
+                                        .color(color)
+                                        .defaultTargetColor(origParameters.baseValues.cellColorTransitionTargetColor[color])
+                                        .defaultTransitionAge(origParameters.baseValues.cellColorTransitionDuration[color])
+                                        .logarithmic(true)
+                                        .infinity(true);
+            if (0 == color) {
+                widgetParameters.name("Target color and duration")
+                    .tooltip("Rules can be defined that describe how the colors of cells will change over time. For this purpose, a subsequent "
+                             "color can "
+                             "be defined for each cell color. In addition, durations must be specified that define how many time steps the "
+                             "corresponding "
+                             "color are kept.");
             }
-            AlienImGui::EndTreeNode();
+            AlienImGui::InputColorTransition(
+                widgetParameters,
+                color,
+                parameters.baseValues.cellColorTransitionTargetColor[color],
+                parameters.baseValues.cellColorTransitionDuration[color]);
+            ImGui::PopID();
         }
+        AlienImGui::EndTreeNode();
     }
 
     /**
      * Expert settings: Cell age limiter
      */
-    if (parameters.features.cellAgeLimiter) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Cell age limiter"))) {
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Maximum inactive cell age")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(1.0f)
-                    .max(10000000.0f)
-                    .format("%.0f")
-                    .logarithmic(true)
-                    .infinity(true)
-                    .disabledValue(parameters.baseValues.cellInactiveMaxAge)
-                    .defaultEnabledValue(&origParameters.cellInactiveMaxAgeActivated)
-                    .defaultValue(origParameters.baseValues.cellInactiveMaxAge)
-                    .tooltip("Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered. Cells which "
-                             "are in state 'Under construction' are not affected by this option."),
-                parameters.baseValues.cellInactiveMaxAge,
-                &parameters.cellInactiveMaxAgeActivated);
-            AlienImGui::SliderInt(
-                AlienImGui::SliderIntParameters()
-                    .name("Maximum emergent cell age")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(1)
-                    .max(10000000)
-                    .logarithmic(true)
-                    .infinity(true)
-                    .disabledValue(parameters.cellEmergentMaxAge)
-                    .defaultEnabledValue(&origParameters.cellEmergentMaxAgeActivated)
-                    .defaultValue(origParameters.cellEmergentMaxAge)
-                    .tooltip("The maximal age of cells that arise from energy particles can be set here."),
-                parameters.cellEmergentMaxAge,
-                &parameters.cellEmergentMaxAgeActivated);
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters()
-                    .name("Reset age after construction")
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(origParameters.cellResetAgeAfterActivation)
-                    .tooltip("If this option is activated, the age of the cells is reset to 0 after the construction of their cell network is completed, "
-                             "i.e. when the state of the cells changes from 'Under construction' to 'Ready'. This option is particularly useful if a low "
-                             "'Maximum "
-                             "inactive cell age' is set, as cell networks that are under construction are inactive and could die immediately after "
-                             "completion if their construction takes a long time."),
-                parameters.cellResetAgeAfterActivation);
-            AlienImGui::SliderInt(
-                AlienImGui::SliderIntParameters()
-                    .name("Maximum age balancing")
-                    .textWidth(RightColumnWidth)
-                    .logarithmic(true)
-                    .min(1000)
-                    .max(1000000)
-                    .disabledValue(&parameters.cellMaxAgeBalancerInterval)
-                    .defaultEnabledValue(&origParameters.cellMaxAgeBalancer)
-                    .defaultValue(&origParameters.cellMaxAgeBalancerInterval)
-                    .tooltip("Adjusts the maximum age at regular intervals. It increases the maximum age for the cell color where the fewest "
-                             "replicators exist. "
-                             "Conversely, the maximum age is decreased for the cell color with the most replicators."),
-                &parameters.cellMaxAgeBalancerInterval,
-                &parameters.cellMaxAgeBalancer);
-            AlienImGui::EndTreeNode();
-        }
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
+                                      .text("Expert settings: Cell age limiter")
+                                      .visible(parameters.features.cellAgeLimiter)
+                                      .blinkWhenActivated(true))) {
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Maximum inactive cell age")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(1.0f)
+                .max(10000000.0f)
+                .format("%.0f")
+                .logarithmic(true)
+                .infinity(true)
+                .disabledValue(parameters.baseValues.cellInactiveMaxAge)
+                .defaultEnabledValue(&origParameters.cellInactiveMaxAgeActivated)
+                .defaultValue(origParameters.baseValues.cellInactiveMaxAge)
+                .tooltip("Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered. Cells which "
+                         "are in state 'Under construction' are not affected by this option."),
+            parameters.baseValues.cellInactiveMaxAge,
+            &parameters.cellInactiveMaxAgeActivated);
+        AlienImGui::SliderInt(
+            AlienImGui::SliderIntParameters()
+                .name("Maximum emergent cell age")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(1)
+                .max(10000000)
+                .logarithmic(true)
+                .infinity(true)
+                .disabledValue(parameters.cellEmergentMaxAge)
+                .defaultEnabledValue(&origParameters.cellEmergentMaxAgeActivated)
+                .defaultValue(origParameters.cellEmergentMaxAge)
+                .tooltip("The maximal age of cells that arise from energy particles can be set here."),
+            parameters.cellEmergentMaxAge,
+            &parameters.cellEmergentMaxAgeActivated);
+        AlienImGui::Checkbox(
+            AlienImGui::CheckboxParameters()
+                .name("Reset age after construction")
+                .textWidth(RightColumnWidth)
+                .defaultValue(origParameters.cellResetAgeAfterActivation)
+                .tooltip("If this option is activated, the age of the cells is reset to 0 after the construction of their cell network is completed, "
+                         "i.e. when the state of the cells changes from 'Under construction' to 'Ready'. This option is particularly useful if a low "
+                         "'Maximum "
+                         "inactive cell age' is set, as cell networks that are under construction are inactive and could die immediately after "
+                         "completion if their construction takes a long time."),
+            parameters.cellResetAgeAfterActivation);
+        AlienImGui::SliderInt(
+            AlienImGui::SliderIntParameters()
+                .name("Maximum age balancing")
+                .textWidth(RightColumnWidth)
+                .logarithmic(true)
+                .min(1000)
+                .max(1000000)
+                .disabledValue(&parameters.cellMaxAgeBalancerInterval)
+                .defaultEnabledValue(&origParameters.cellMaxAgeBalancer)
+                .defaultValue(&origParameters.cellMaxAgeBalancerInterval)
+                .tooltip("Adjusts the maximum age at regular intervals. It increases the maximum age for the cell color where the fewest "
+                         "replicators exist. "
+                         "Conversely, the maximum age is decreased for the cell color with the most replicators."),
+            &parameters.cellMaxAgeBalancerInterval,
+            &parameters.cellMaxAgeBalancer);
+        AlienImGui::EndTreeNode();
+    }
+
+    /**
+     * Expert settings: Cell glow
+     */
+    if (AlienImGui::BeginTreeNode(
+            AlienImGui::TreeNodeParameters().text("Expert settings: Cell glow").visible(parameters.features.cellGlow).blinkWhenActivated(true))) {
+        AlienImGui::Switcher(
+            AlienImGui::SwitcherParameters()
+                .name("Coloring")
+                .textWidth(RightColumnWidth)
+                .defaultValue(origParameters.cellGlowColoring)
+                .values(
+                    {"Energy",
+                     "Standard cell colors",
+                     "Mutants",
+                     "Mutants and cell functions",
+                     "Cell states",
+                     "Genome complexities",
+                     "Single cell function",
+                     "All cell functions"})
+                .tooltip(Const::ColoringParameterTooltip),
+            parameters.cellGlowColoring);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Radius")
+                .textWidth(RightColumnWidth)
+                .min(1.0f)
+                .max(8.0f)
+                .defaultValue(&origParameters.cellGlowRadius)
+                .tooltip("The radius of the glow. Please note that a large radius affects the performance."),
+            &parameters.cellGlowRadius);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Strength")
+                .textWidth(RightColumnWidth)
+                .min(0)
+                .max(1.0f)
+                .defaultValue(&origParameters.cellGlowStrength)
+                .tooltip("The strength of the glow."),
+            &parameters.cellGlowStrength);
+        AlienImGui::EndTreeNode();
     }
 
     /**
      * Expert settings: Customize neuron mutations
      */
-    if (parameters.features.customizeNeuronMutations) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Customize neuron mutations"))) {
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Affected weights")
-                    .textWidth(RightColumnWidth)
-                    .min(0.0f)
-                    .max(1.0f)
-                    .format("%.3f")
-                    .defaultValue(&origParameters.cellCopyMutationNeuronDataWeight),
-                &parameters.cellCopyMutationNeuronDataWeight);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Affected biases")
-                    .textWidth(RightColumnWidth)
-                    .min(0.0f)
-                    .max(1.0f)
-                    .format("%.3f")
-                    .defaultValue(&origParameters.cellCopyMutationNeuronDataBias),
-                &parameters.cellCopyMutationNeuronDataBias);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Affected activation functions")
-                    .textWidth(RightColumnWidth)
-                    .min(0.0f)
-                    .max(1.0f)
-                    .format("%.3f")
-                    .defaultValue(&origParameters.cellCopyMutationNeuronDataActivationFunction),
-                &parameters.cellCopyMutationNeuronDataActivationFunction);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Reinforcement factor")
-                    .textWidth(RightColumnWidth)
-                    .min(1.0f)
-                    .max(1.2f)
-                    .format("%.3f")
-                    .defaultValue(&origParameters.cellCopyMutationNeuronDataReinforcement),
-                &parameters.cellCopyMutationNeuronDataReinforcement);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Damping factor")
-                    .textWidth(RightColumnWidth)
-                    .min(1.0f)
-                    .max(1.2f)
-                    .format("%.3f")
-                    .defaultValue(&origParameters.cellCopyMutationNeuronDataDamping),
-                &parameters.cellCopyMutationNeuronDataDamping);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Offset")
-                    .textWidth(RightColumnWidth)
-                    .min(0.0f)
-                    .max(0.2f)
-                    .format("%.3f")
-                    .defaultValue(&origParameters.cellCopyMutationNeuronDataOffset),
-                &parameters.cellCopyMutationNeuronDataOffset);
-            AlienImGui::EndTreeNode();
-        }
-    }
-
-
-    /**
-     * Expert settings: Cell glow
-     */
-    if (parameters.features.cellGlow) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Cell glow"))) {
-            AlienImGui::Switcher(
-                AlienImGui::SwitcherParameters()
-                    .name("Coloring")
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(origParameters.cellGlowColoring)
-                    .values(
-                        {"Energy",
-                         "Standard cell colors",
-                         "Mutants",
-                         "Mutants and cell functions",
-                         "Cell states",
-                         "Genome complexities",
-                         "Single cell function",
-                         "All cell functions"})
-                    .tooltip(Const::ColoringParameterTooltip),
-                parameters.cellGlowColoring);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Radius")
-                    .textWidth(RightColumnWidth)
-                    .min(1.0f)
-                    .max(8.0f)
-                    .defaultValue(&origParameters.cellGlowRadius)
-                    .tooltip("The radius of the glow. Please note that a large radius affects the performance."),
-                &parameters.cellGlowRadius);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Strength")
-                    .textWidth(RightColumnWidth)
-                    .min(0)
-                    .max(1.0f)
-                    .defaultValue(&origParameters.cellGlowStrength)
-                    .tooltip("The strength of the glow."),
-                &parameters.cellGlowStrength);
-            AlienImGui::EndTreeNode();
-        }
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
+                                      .text("Expert settings: Customize neuron mutations")
+                                      .visible(parameters.features.customizeNeuronMutations)
+                                      .blinkWhenActivated(true))) {
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Affected weights")
+                .textWidth(RightColumnWidth)
+                .min(0.0f)
+                .max(1.0f)
+                .format("%.3f")
+                .defaultValue(&origParameters.cellCopyMutationNeuronDataWeight),
+            &parameters.cellCopyMutationNeuronDataWeight);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Affected biases")
+                .textWidth(RightColumnWidth)
+                .min(0.0f)
+                .max(1.0f)
+                .format("%.3f")
+                .defaultValue(&origParameters.cellCopyMutationNeuronDataBias),
+            &parameters.cellCopyMutationNeuronDataBias);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Affected activation functions")
+                .textWidth(RightColumnWidth)
+                .min(0.0f)
+                .max(1.0f)
+                .format("%.3f")
+                .defaultValue(&origParameters.cellCopyMutationNeuronDataActivationFunction),
+            &parameters.cellCopyMutationNeuronDataActivationFunction);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Reinforcement factor")
+                .textWidth(RightColumnWidth)
+                .min(1.0f)
+                .max(1.2f)
+                .format("%.3f")
+                .defaultValue(&origParameters.cellCopyMutationNeuronDataReinforcement),
+            &parameters.cellCopyMutationNeuronDataReinforcement);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Damping factor")
+                .textWidth(RightColumnWidth)
+                .min(1.0f)
+                .max(1.2f)
+                .format("%.3f")
+                .defaultValue(&origParameters.cellCopyMutationNeuronDataDamping),
+            &parameters.cellCopyMutationNeuronDataDamping);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Offset")
+                .textWidth(RightColumnWidth)
+                .min(0.0f)
+                .max(0.2f)
+                .format("%.3f")
+                .defaultValue(&origParameters.cellCopyMutationNeuronDataOffset),
+            &parameters.cellCopyMutationNeuronDataOffset);
+        AlienImGui::EndTreeNode();
     }
 
     /**
      * Expert settings: External energy control
      */
-    if (parameters.features.externalEnergyControl) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: External energy control"))) {
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("External energy amount")
-                    .textWidth(RightColumnWidth)
-                    .min(0.0f)
-                    .max(100000000.0f)
-                    .format("%.0f")
-                    .logarithmic(true)
-                    .infinity(true)
-                    .defaultValue(&origParameters.externalEnergy)
-                    .tooltip("This parameter can be used to set the amount of energy of an external energy pool. This type of energy can then be "
-                             "transferred to all constructor cells at a certain rate (see inflow settings).\n\nTip: You can explicitly enter a "
-                             "numerical value by clicking on the slider while holding CTRL.\n\nWarning: Too much external energy can result in a "
-                             "massive production of cells and slow down or even crash the simulation."),
-                &parameters.externalEnergy);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Inflow")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0.0f)
-                    .max(1.0f)
-                    .format("%.5f")
-                    .logarithmic(true)
-                    .defaultValue(origParameters.externalEnergyInflowFactor)
-                    .tooltip("Here one can specify the fraction of energy transferred to constructor cells.\n\nFor example, a value of 0.05 means that "
-                             "each time "
-                             "a constructor cell tries to build a new cell, 5% of the required energy is transferred for free from the external energy "
-                             "source."),
-                parameters.externalEnergyInflowFactor);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Conditional inflow")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0.00f)
-                    .max(1.0f)
-                    .format("%.5f")
-                    .defaultValue(origParameters.externalEnergyConditionalInflowFactor)
-                    .tooltip(
-                        "Here one can specify the fraction of energy transferred to constructor cells if they can provide the remaining energy for the "
-                        "construction process.\n\nFor example, a value of 0.6 means that a constructor cell receives 60% of the energy required to "
-                        "build the new cell for free from the external energy source. However, it must provide 40% of the energy required by itself. "
-                        "Otherwise, no energy will be transferred."),
-                parameters.externalEnergyConditionalInflowFactor);
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters()
-                    .name("Inflow only for non-replicators")
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(origParameters.externalEnergyInflowOnlyForNonSelfReplicators)
-                    .tooltip("If activated, external energy can only be transferred to constructor cells that are not self-replicators. "
-                             "This option can be used to foster the evolution of additional body parts."),
-                parameters.externalEnergyInflowOnlyForNonSelfReplicators);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Backflow")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0.0f)
-                    .max(1.0f)
-                    .defaultValue(origParameters.externalEnergyBackflowFactor)
-                    .tooltip("The proportion of energy that flows back from the simulation to the external energy pool. Each time a cell loses energy "
-                             "or dies a fraction of its energy will be taken. The remaining "
-                             "fraction of the energy stays in the simulation and will be used to create a new energy particle."),
-                parameters.externalEnergyBackflowFactor);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Backflow limit")
-                    .textWidth(RightColumnWidth)
-                    .min(0.0f)
-                    .max(100000000.0f)
-                    .format("%.0f")
-                    .logarithmic(true)
-                    .infinity(true)
-                    .defaultValue(&origParameters.externalEnergyBackflowLimit)
-                    .tooltip("Energy from the simulation can only flow back into the external energy pool as long as the amount of external energy is "
-                             "below this value."),
-                &parameters.externalEnergyBackflowLimit);
-            AlienImGui::EndTreeNode();
-        }
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
+                                      .text("Expert settings: External energy control")
+                                      .visible(parameters.features.externalEnergyControl)
+                                      .blinkWhenActivated(true))) {
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("External energy amount")
+                .textWidth(RightColumnWidth)
+                .min(0.0f)
+                .max(100000000.0f)
+                .format("%.0f")
+                .logarithmic(true)
+                .infinity(true)
+                .defaultValue(&origParameters.externalEnergy)
+                .tooltip("This parameter can be used to set the amount of energy of an external energy pool. This type of energy can then be "
+                         "transferred to all constructor cells at a certain rate (see inflow settings).\n\nTip: You can explicitly enter a "
+                         "numerical value by clicking on the slider while holding CTRL.\n\nWarning: Too much external energy can result in a "
+                         "massive production of cells and slow down or even crash the simulation."),
+            &parameters.externalEnergy);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Inflow")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(0.0f)
+                .max(1.0f)
+                .format("%.5f")
+                .logarithmic(true)
+                .defaultValue(origParameters.externalEnergyInflowFactor)
+                .tooltip("Here one can specify the fraction of energy transferred to constructor cells.\n\nFor example, a value of 0.05 means that "
+                         "each time "
+                         "a constructor cell tries to build a new cell, 5% of the required energy is transferred for free from the external energy "
+                         "source."),
+            parameters.externalEnergyInflowFactor);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Conditional inflow")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(0.00f)
+                .max(1.0f)
+                .format("%.5f")
+                .defaultValue(origParameters.externalEnergyConditionalInflowFactor)
+                .tooltip(
+                    "Here one can specify the fraction of energy transferred to constructor cells if they can provide the remaining energy for the "
+                    "construction process.\n\nFor example, a value of 0.6 means that a constructor cell receives 60% of the energy required to "
+                    "build the new cell for free from the external energy source. However, it must provide 40% of the energy required by itself. "
+                    "Otherwise, no energy will be transferred."),
+            parameters.externalEnergyConditionalInflowFactor);
+        AlienImGui::Checkbox(
+            AlienImGui::CheckboxParameters()
+                .name("Inflow only for non-replicators")
+                .textWidth(RightColumnWidth)
+                .defaultValue(origParameters.externalEnergyInflowOnlyForNonSelfReplicators)
+                .tooltip("If activated, external energy can only be transferred to constructor cells that are not self-replicators. "
+                         "This option can be used to foster the evolution of additional body parts."),
+            parameters.externalEnergyInflowOnlyForNonSelfReplicators);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Backflow")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(0.0f)
+                .max(1.0f)
+                .defaultValue(origParameters.externalEnergyBackflowFactor)
+                .tooltip("The proportion of energy that flows back from the simulation to the external energy pool. Each time a cell loses energy "
+                         "or dies a fraction of its energy will be taken. The remaining "
+                         "fraction of the energy stays in the simulation and will be used to create a new energy particle."),
+            parameters.externalEnergyBackflowFactor);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Backflow limit")
+                .textWidth(RightColumnWidth)
+                .min(0.0f)
+                .max(100000000.0f)
+                .format("%.0f")
+                .logarithmic(true)
+                .infinity(true)
+                .defaultValue(&origParameters.externalEnergyBackflowLimit)
+                .tooltip("Energy from the simulation can only flow back into the external energy pool as long as the amount of external energy is "
+                         "below this value."),
+            &parameters.externalEnergyBackflowLimit);
+        AlienImGui::EndTreeNode();
     }
 
     /**
      * Expert settings: Genome complexity measurement
      */
-    if (parameters.features.genomeComplexityMeasurement) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Genome complexity measurement"))) {
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Size factor")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0.0f)
-                    .max(1.0f)
-                    .format("%.2f")
-                    .defaultValue(origParameters.genomeComplexitySizeFactor)
-                    .tooltip("This parameter controls how the number of encoded cells in the genome influences the calculation of its complexity."),
-                parameters.genomeComplexitySizeFactor);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Ramification factor")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0.0f)
-                    .max(20.0f)
-                    .format("%.2f")
-                    .defaultValue(origParameters.genomeComplexityRamificationFactor)
-                    .tooltip("With this parameter, the number of ramifications of the cell structure to the genome is taken into account for the "
-                             "calculation of the genome complexity. For instance, genomes that contain many sub-genomes or many construction branches will "
-                             "then have a high complexity value."),
-                parameters.genomeComplexityRamificationFactor);
-            AlienImGui::SliderInt(
-                AlienImGui::SliderIntParameters()
-                    .name("Depth level")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(1)
-                    .max(20)
-                    .infinity(true)
-                    .defaultValue(origParameters.genomeComplexityDepthLevel)
-                    .tooltip("This allows to specify up to which level of the sub-genomes the complexity calculation should be carried out. For example, a "
-                             "value of 2 means that the sub- and sub-sub-genomes are taken into account in addition to the main genome."),
-                parameters.genomeComplexityDepthLevel);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name("Neuron factor")
-                    .textWidth(RightColumnWidth)
-                    .colorDependence(true)
-                    .min(0.0f)
-                    .max(4.0f)
-                    .format("%.2f")
-                    .defaultValue(origParameters.genomeComplexityNeuronFactor)
-                    .tooltip("This parameter takes into account the number of encoded neurons in the genome for the complexity value."),
-                parameters.genomeComplexityNeuronFactor);
-            AlienImGui::EndTreeNode();
-        }
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
+                                      .text("Expert settings: Genome complexity measurement")
+                                      .visible(parameters.features.genomeComplexityMeasurement)
+                                      .blinkWhenActivated(true))) {
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Size factor")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(0.0f)
+                .max(1.0f)
+                .format("%.2f")
+                .defaultValue(origParameters.genomeComplexitySizeFactor)
+                .tooltip("This parameter controls how the number of encoded cells in the genome influences the calculation of its complexity."),
+            parameters.genomeComplexitySizeFactor);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Ramification factor")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(0.0f)
+                .max(20.0f)
+                .format("%.2f")
+                .defaultValue(origParameters.genomeComplexityRamificationFactor)
+                .tooltip("With this parameter, the number of ramifications of the cell structure to the genome is taken into account for the "
+                         "calculation of the genome complexity. For instance, genomes that contain many sub-genomes or many construction branches will "
+                         "then have a high complexity value."),
+            parameters.genomeComplexityRamificationFactor);
+        AlienImGui::SliderInt(
+            AlienImGui::SliderIntParameters()
+                .name("Depth level")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(1)
+                .max(20)
+                .infinity(true)
+                .defaultValue(origParameters.genomeComplexityDepthLevel)
+                .tooltip("This allows to specify up to which level of the sub-genomes the complexity calculation should be carried out. For example, a "
+                         "value of 2 means that the sub- and sub-sub-genomes are taken into account in addition to the main genome."),
+            parameters.genomeComplexityDepthLevel);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Neuron factor")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(0.0f)
+                .max(4.0f)
+                .format("%.2f")
+                .defaultValue(origParameters.genomeComplexityNeuronFactor)
+                .tooltip("This parameter takes into account the number of encoded neurons in the genome for the complexity value."),
+            parameters.genomeComplexityNeuronFactor);
+        AlienImGui::EndTreeNode();
     }
 
     /**
      * Expert settings: Legacy behavior
      */
-    if (parameters.features.legacyModes) {
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Expert settings: Legacy behavior"))) {
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters()
-                    .name("Fetch angle from adjacent sensor")
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(origParameters.legacyCellFunctionMuscleMovementAngleFromSensor)
-                    .tooltip("This parameter changes the behavior of the parameter 'Movement toward target'. If activated, the muscle cell fetches the "
-                             "movement angle directly from a connected (or connected-connected) sensor cell that has previously detected a target "
-                             "(legacy behavior). If deactivated, the input signal must only originate from a sensor cell and must not be adjacent (new "
-                             "behavior)."),
-                parameters.legacyCellFunctionMuscleMovementAngleFromSensor);
-            AlienImGui::EndTreeNode();
-        }
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
+                                      .text("Expert settings: Legacy behavior").visible(parameters.features.legacyModes)
+                                      .blinkWhenActivated(true))) {
+        AlienImGui::Checkbox(
+            AlienImGui::CheckboxParameters()
+                .name("Fetch angle from adjacent sensor")
+                .textWidth(RightColumnWidth)
+                .defaultValue(origParameters.legacyCellFunctionMuscleMovementAngleFromSensor)
+                .tooltip("This parameter changes the behavior of the parameter 'Movement toward target'. If activated, the muscle cell fetches the "
+                         "movement angle directly from a connected (or connected-connected) sensor cell that has previously detected a target "
+                         "(legacy behavior). If deactivated, the input signal must only originate from a sensor cell and must not be adjacent (new "
+                         "behavior)."),
+            parameters.legacyCellFunctionMuscleMovementAngleFromSensor);
+        AlienImGui::EndTreeNode();
     }
 
     SimulationParametersValidationService::get().validateAndCorrect(parameters);

@@ -27,6 +27,7 @@ namespace
 }
 
 std::unordered_set<unsigned int> AlienImGui::_basicSilderExpanded;
+std::unordered_map<unsigned int, std::chrono::steady_clock::time_point> AlienImGui::_invisibleTimepointById;
 std::unordered_map<unsigned int, int> AlienImGui::_neuronSelectedInput;
 std::unordered_map<unsigned int, int> AlienImGui::_neuronSelectedOutput;
 int AlienImGui::_rotationStartIndex = 0;
@@ -1083,7 +1084,7 @@ bool AlienImGui::ToolbarButton(ToolbarButtonParameters const& parameters)
         ImGui::GetWindowDrawList()->AddText(
             ImGui::GetFont(),
             ImGui::GetFontSize() * parameters._secondTextScale,
-            {pos.x + parameters._secondTextOffset.x, pos.y + parameters._secondTextOffset.y},
+            {pos.x + scale(parameters._secondTextOffset.x), pos.y + scale(parameters._secondTextOffset.y)},
             ImGui::GetColorU32(ImGuiCol_Text),
             parameters._secondText->c_str());
     }
@@ -1182,19 +1183,44 @@ bool AlienImGui::CollapseButton(bool collapsed)
 
 bool AlienImGui::BeginTreeNode(TreeNodeParameters const& parameters)
 {
-    if (parameters._rank == TreeNodeRank::High) {
-        ImGui::PushStyleColor(ImGuiCol_Header, Const::TreeNodeHighColor.Value);
-        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, Const::TreeNodeHighHoveredColor.Value);
-        ImGui::PushStyleColor(ImGuiCol_HeaderActive, Const::TreeNodeHighActiveColor.Value);
-    } else if (parameters._rank == TreeNodeRank::Default) {
-        ImGui::PushStyleColor(ImGuiCol_Header, Const::TreeNodeDefaultColor.Value);
-        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, Const::TreeNodeDefaultHoveredColor.Value);
-        ImGui::PushStyleColor(ImGuiCol_HeaderActive, Const::TreeNodeDefaultActiveColor.Value);
-    } else if (parameters._rank == TreeNodeRank::Low) {
-        ImGui::PushStyleColor(ImGuiCol_Header, Const::TreeNodeLowColor.Value);
-        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, Const::TreeNodeLowHoveredColor.Value);
-        ImGui::PushStyleColor(ImGuiCol_HeaderActive, Const::TreeNodeLowActiveColor.Value);
+    auto id = ImGui::GetID(parameters._text.c_str());
+    if (!parameters._visible) {
+        _invisibleTimepointById.insert_or_assign(id, std::chrono::steady_clock::now());
+        return false;
     }
+
+    int highlightCountdown = 0;
+    if (parameters._blinkWhenActivated && _invisibleTimepointById.contains(id)) {
+        highlightCountdown = std::max(
+            0ll, 1000 - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - _invisibleTimepointById.at(id)).count());
+        if (highlightCountdown > 0) {
+            ImGui::SetScrollHereY();
+        }
+    }
+
+    ImColor header, headerHovered, headerActive;
+    if (parameters._rank == TreeNodeRank::High) {
+        header = Const::TreeNodeHighColor;
+        headerHovered = Const::TreeNodeHighHoveredColor;
+        headerActive = Const::TreeNodeHighActiveColor;
+    } else if (parameters._rank == TreeNodeRank::Default) {
+        header = Const::TreeNodeDefaultColor;
+        headerHovered = Const::TreeNodeDefaultHoveredColor;
+        headerActive = Const::TreeNodeDefaultActiveColor;
+    } else if (parameters._rank == TreeNodeRank::Low) {
+        header = Const::TreeNodeLowColor;
+        headerHovered = Const::TreeNodeLowHoveredColor;
+        headerActive = Const::TreeNodeLowActiveColor;
+    }
+    float h, s, v;
+    ImGui::ColorConvertRGBtoHSV(header.Value.x, header.Value.y, header.Value.z, h, s, v);
+    v = std::min(1.0f, v * (1.0f + toFloat(highlightCountdown) / 1000));
+    h = h + toFloat(highlightCountdown) / 5000;
+    header = ImColor::HSV(h, s, v);
+
+    ImGui::PushStyleColor(ImGuiCol_Header, header.Value);
+    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, headerHovered.Value);
+    ImGui::PushStyleColor(ImGuiCol_HeaderActive, headerActive.Value);
     ImGuiTreeNodeFlags treeNodeClosedFlags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_Framed;
     ImGuiTreeNodeFlags treeNodeOpenFlags = treeNodeClosedFlags | ImGuiTreeNodeFlags_DefaultOpen;
     ImGui::PushFont(StyleRepository::get().getSmallBoldFont());

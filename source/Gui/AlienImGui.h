@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <functional>
 
 #include <imgui.h>
@@ -319,6 +320,8 @@ public:
         MEMBER_DECLARATION(TreeNodeParameters, std::string, text, "");
         MEMBER_DECLARATION(TreeNodeParameters, TreeNodeRank, rank, TreeNodeRank::Default);
         MEMBER_DECLARATION(TreeNodeParameters, bool, defaultOpen, true);
+        MEMBER_DECLARATION(TreeNodeParameters, bool, visible, true);
+        MEMBER_DECLARATION(TreeNodeParameters, bool, blinkWhenActivated, false);
     };
     static bool BeginTreeNode(TreeNodeParameters const& parameters);
     static void EndTreeNode();
@@ -434,6 +437,7 @@ private:
 
 private:
     static std::unordered_set<unsigned int> _basicSilderExpanded;
+    static std::unordered_map<unsigned int, std::chrono::steady_clock::time_point> _invisibleTimepointById;
 
     static int _rotationStartIndex;
 
