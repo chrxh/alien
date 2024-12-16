@@ -26,14 +26,10 @@ namespace
     auto constexpr HoveredTimer = 0.5f;
 }
 
-std::string AlienImGui::_filterText;
+std::vector<std::string> AlienImGui::_filterTextStack;
 std::unordered_set<unsigned int> AlienImGui::_basicSilderExpanded;
-std::unordered_map<unsigned int, std::chrono::steady_clock::time_point> AlienImGui::_treeNodeInvisibleTimepointById;
-std::unordered_set<unsigned int> AlienImGui::_treeNodeEmpty;
-std::vector<float> AlienImGui::_treeNodeStartCursorPosY;
-std::vector<int> AlienImGui::_treeNodeId;
-std::vector<bool> AlienImGui::_treeNodeOpen;
-
+std::vector<TreeNodeStackElement> AlienImGui::_treeNodeStack;
+std::unordered_map<unsigned int, TreeNodeInfo> AlienImGui::_treeNodeInfoById;
 std::unordered_map<unsigned int, int> AlienImGui::_neuronSelectedInput;
 std::unordered_map<unsigned int, int> AlienImGui::_neuronSelectedOutput;
 int AlienImGui::_rotationStartIndex = 0;
@@ -68,7 +64,7 @@ bool AlienImGui::SliderInt(SliderIntParameters const& parameters, int* value, bo
 
 bool AlienImGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& valueX, float& valueY)
 {
-    if (!_filterText.empty() && !StringHelper::containsCaseInsensitive(parameters._name, _filterText)) {
+    if (!matchWithFilter(parameters._name)) {
         return false;
     }
 
@@ -106,7 +102,7 @@ bool AlienImGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& v
         ImGui::SameLine();
 
         ImGui::BeginDisabled(valueX == parameters._defaultValue->x && valueY == parameters._defaultValue->y);
-        if (AlienImGui::revertButton(parameters._name)) {
+        if (AlienImGui::RevertButton(parameters._name)) {
             valueX = parameters._defaultValue->x;
             valueY = parameters._defaultValue->y;
         }
@@ -180,7 +176,7 @@ bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool
     if (parameters._defaultValue) {
         ImGui::SameLine();
         ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (revertButton(parameters._name)) {
+        if (RevertButton(parameters._name)) {
             value = *parameters._defaultValue;
             result = true;
         }
@@ -245,7 +241,7 @@ bool AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value
     ImGui::SameLine();
     if (parameters._defaultValue) {
         ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (revertButton(parameters._name)) {
+        if (RevertButton(parameters._name)) {
             value = *parameters._defaultValue;
             result = true;
         }
@@ -262,7 +258,7 @@ bool AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value
 
 void AlienImGui::InputFloat2(InputFloat2Parameters const& parameters, float& value1, float& value2)
 {
-    if (!_filterText.empty() && !StringHelper::containsCaseInsensitive(parameters._name, _filterText)) {
+    if (!matchWithFilter(parameters._name)) {
         return;
     }
 
@@ -279,7 +275,7 @@ void AlienImGui::InputFloat2(InputFloat2Parameters const& parameters, float& val
     ImGui::SameLine();
     if (parameters._defaultValue1 && parameters._defaultValue2) {
         ImGui::BeginDisabled(value1 == *parameters._defaultValue1 && value2 == *parameters._defaultValue2);
-        if (revertButton(parameters._name)) {
+        if (RevertButton(parameters._name)) {
             value1 = *parameters._defaultValue1;
             value2 = *parameters._defaultValue2;
         }
@@ -354,14 +350,18 @@ void AlienImGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& pa
 
 bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)
 {
-    if (!_filterText.empty() && !StringHelper::containsCaseInsensitive(parameters._name, _filterText)) {
+    if (!matchWithFilter(parameters._name)) {
         return false;
     }
+
     auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
     auto folderButtonWidth = parameters._folderButton ? scale(30.0f) + ImGui::GetStyle().FramePadding.x : 0;
     ImGui::SetNextItemWidth(width - scale(parameters._textWidth) - folderButtonWidth);
     if (parameters._monospaceFont) {
         ImGui::PushFont(StyleRepository::get().getMonospaceMediumFont());
+    }
+    if (parameters._bold) {
+        ImGui::PushFont(StyleRepository::get().getSmallBoldFont());
     }
     ImGuiInputTextFlags flags = 0;
     if (parameters._readOnly) {
@@ -376,7 +376,7 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
         }
         return ImGui::InputText(("##" + parameters._name).c_str(), buffer, bufferSize, flags);
     }();
-    if (parameters._monospaceFont) {
+    if (parameters._monospaceFont || parameters._bold) {
         ImGui::PopFont();
     }
     if (parameters._folderButton) {
@@ -402,7 +402,7 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
     if (parameters._defaultValue) {
         ImGui::SameLine();
         ImGui::BeginDisabled(std::string(buffer) == *parameters._defaultValue);
-        if (revertButton(parameters._name)) {
+        if (RevertButton(parameters._name)) {
             StringHelper::copy(buffer, bufferSize, *parameters._defaultValue);
             result = true;
         }
@@ -432,7 +432,11 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, std::string& t
 bool AlienImGui::InputFilter(std::string& filter)
 {
     auto result = AlienImGui::InputText(
-        AlienImGui::InputTextParameters().hint("Filter").textWidth(0).width(
+        AlienImGui::InputTextParameters()
+            .hint("Filter")
+            .bold(!filter.empty())
+            .textWidth(0)
+            .width(
             ImGui::GetContentRegionAvail().x - scale(12.0f) - ImGui::GetStyle().WindowPadding.x * 2),
         filter);
     ImGui::SameLine();
@@ -485,7 +489,7 @@ namespace
 
 bool AlienImGui::Combo(ComboParameters& parameters, int& value, bool* enabled)
 {
-    if (!_filterText.empty() && !StringHelper::containsCaseInsensitive(parameters._name, _filterText)) {
+    if (!matchWithFilter(parameters._name)) {
         return false;
     }
 
@@ -518,7 +522,7 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value, bool* enabled)
     ImGui::SameLine();
     if (parameters._defaultValue) {
         ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (revertButton(parameters._name)) {
+        if (RevertButton(parameters._name)) {
             value = *parameters._defaultValue;
             result = true;
         }
@@ -545,7 +549,7 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value, bool* enabled)
 
 bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value, bool* enabled /*= nullptr*/)
 {
-    if (!_filterText.empty() && !StringHelper::containsCaseInsensitive(parameters._name, _filterText)) {
+    if (!matchWithFilter(parameters._name)) {
         return false;
     }
 
@@ -595,7 +599,7 @@ bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value, bool* enab
     ImGui::SameLine();
     if (parameters._defaultValue) {
         ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (revertButton(parameters._name)) {
+        if (RevertButton(parameters._name)) {
             value = *parameters._defaultValue;
             result = true;
         }
@@ -691,7 +695,7 @@ bool AlienImGui::ComboOptionalColor(ComboColorParameters const& parameters, std:
 
 void AlienImGui::InputColorTransition(InputColorTransitionParameters const& parameters, int sourceColor, int& targetColor, int& transitionAge)
 {
-    if (!_filterText.empty() && !StringHelper::containsCaseInsensitive(parameters._name, _filterText)) {
+    if (!matchWithFilter(parameters._name)) {
         return;
     }
 
@@ -733,7 +737,7 @@ void AlienImGui::InputColorTransition(InputColorTransitionParameters const& para
     if (parameters._defaultTransitionAge && parameters._defaultTargetColor) {
         ImGui::SameLine();
         ImGui::BeginDisabled(transitionAge == *parameters._defaultTransitionAge && targetColor == *parameters._defaultTargetColor);
-        if (revertButton(parameters._name)) {
+        if (RevertButton(parameters._name)) {
             transitionAge = *parameters._defaultTransitionAge;
             targetColor = *parameters._defaultTargetColor;
         }
@@ -751,7 +755,7 @@ void AlienImGui::InputColorTransition(InputColorTransitionParameters const& para
 
 bool AlienImGui::Checkbox(CheckboxParameters const& parameters, bool& value)
 {
-    if (!_filterText.empty() && !StringHelper::containsCaseInsensitive(parameters._name, _filterText)) {
+    if (!matchWithFilter(parameters._name)) {
         return false;
     }
 
@@ -764,7 +768,7 @@ bool AlienImGui::Checkbox(CheckboxParameters const& parameters, bool& value)
     ImGui::SameLine();
     if (parameters._defaultValue) {
         ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (revertButton(parameters._name)) {
+        if (RevertButton(parameters._name)) {
             value = *parameters._defaultValue;
             result = true;
         }
@@ -989,7 +993,7 @@ void AlienImGui::EndMenuBar()
 
 void AlienImGui::ColorButtonWithPicker(ColorButtonWithPickerParameters const& parameters, uint32_t& color, uint32_t& backupColor, uint32_t(& savedPalette)[32])
 {
-    if (!_filterText.empty() && !StringHelper::containsCaseInsensitive(parameters._name, _filterText)) {
+    if (!matchWithFilter(parameters._name)) {
         return;
     }
 
@@ -1058,7 +1062,7 @@ void AlienImGui::ColorButtonWithPicker(ColorButtonWithPickerParameters const& pa
     ImGui::SameLine();
     if (parameters._defaultValue) {
         ImGui::BeginDisabled(color == *parameters._defaultValue);
-        if (revertButton(parameters._name)) {
+        if (RevertButton(parameters._name)) {
             color = *parameters._defaultValue;
         }
         ImGui::EndDisabled();
@@ -1238,31 +1242,39 @@ bool AlienImGui::CollapseButton(bool collapsed)
 
 bool AlienImGui::BeginTreeNode(TreeNodeParameters const& parameters)
 {
+    if (_treeNodeStack.size() > 10) {
+        THROW_NOT_IMPLEMENTED();
+    }
+    auto forceTreeNodeOpen = isFilterActive();
 
-    auto id = ImGui::GetID(parameters._text.c_str());
-    _treeNodeId.push_back(id);
+    if (matchWithFilter(parameters._name)) {
+        _filterTextStack.emplace_back(std::string(""));
+    } else if (!_filterTextStack.empty()) {
+        _filterTextStack.emplace_back(_filterTextStack.back());
+    } else {
+        _filterTextStack.emplace_back(std::string(""));
+    }
+
+    auto id = ImGui::GetID(parameters._name.c_str());
 
     if (!parameters._visible) {
-        _treeNodeInvisibleTimepointById.insert_or_assign(id, std::chrono::steady_clock::now());
-        _treeNodeOpen.push_back(false);
-        _treeNodeStartCursorPosY.push_back(0);
+        _treeNodeStack.emplace_back(0.0f, id, false);
+        _treeNodeInfoById.insert_or_assign(id, TreeNodeInfo{.invisibleTimepoint = std::chrono::steady_clock::now(), .isEmpty = false});
         return false;
     }
 
+    TreeNodeInfo info = _treeNodeInfoById.contains(id) ? _treeNodeInfoById.at(id) : TreeNodeInfo();
     int highlightCountdown = 0;
-    if (parameters._blinkWhenActivated && _treeNodeInvisibleTimepointById.contains(id)) {
-        highlightCountdown = std::max(
-            0ll,
-            1000 - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - _treeNodeInvisibleTimepointById.at(id))
+    if (parameters._blinkWhenActivated) {
+        highlightCountdown = std::max(0ll, 1000 - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - info.invisibleTimepoint)
                       .count());
         if (highlightCountdown > 0) {
             ImGui::SetScrollHereY();
         }
     }
 
-    if (!_filterText.empty() && _treeNodeEmpty.contains(id)) {
-        _treeNodeStartCursorPosY.push_back(ImGui::GetCursorPosY());
-        _treeNodeOpen.push_back(false);
+    if (isFilterActive() && info.isEmpty) {
+        _treeNodeStack.emplace_back(ImGui::GetCursorPosY(), id, false);
         return true;
     }
 
@@ -1291,49 +1303,46 @@ bool AlienImGui::BeginTreeNode(TreeNodeParameters const& parameters)
     ImGui::PushStyleColor(ImGuiCol_HeaderActive, headerActive.Value);
     ImGuiTreeNodeFlags treeNodeClosedFlags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_Framed;
     ImGuiTreeNodeFlags treeNodeOpenFlags = treeNodeClosedFlags | ImGuiTreeNodeFlags_DefaultOpen;
-    ImGui::PushFont(StyleRepository::get().getSmallBoldFont());
-    if (!_filterText.empty()) {
+
+    if (forceTreeNodeOpen) {
         ImGui::SetNextItemOpen(true);
+        treeNodeClosedFlags |= ImGuiTreeNodeFlags_Bullet;
+        treeNodeOpenFlags |= ImGuiTreeNodeFlags_Bullet;
     }
-    bool result = ImGui::TreeNodeEx(parameters._text.c_str(), parameters._defaultOpen ? treeNodeOpenFlags : treeNodeClosedFlags);
+    ImGui::PushFont(StyleRepository::get().getSmallBoldFont());
+    bool result = ImGui::TreeNodeEx(parameters._name.c_str(), parameters._defaultOpen ? treeNodeOpenFlags : treeNodeClosedFlags);
     ImGui::PopFont();
     ImGui::PopStyleColor(3);
 
-    _treeNodeStartCursorPosY.push_back(ImGui::GetCursorPosY());
-    _treeNodeOpen.push_back(result);
+    _treeNodeStack.emplace_back(ImGui::GetCursorPosY(), id, result);
     return result;
 }
 
 void AlienImGui::EndTreeNode()
 {
-    float startCursorPosY = _treeNodeStartCursorPosY.back();
-    _treeNodeStartCursorPosY.pop_back();
+    _filterTextStack.pop_back();
+    TreeNodeStackElement stackElement = _treeNodeStack.back();
+    _treeNodeStack.pop_back();
 
-    int id = _treeNodeId.back();
-    _treeNodeId.pop_back();
+    _treeNodeInfoById[stackElement.treeNodeId].isEmpty =
+        stackElement.treeNodeStartCursorPosY != 0 && stackElement.treeNodeStartCursorPosY == ImGui::GetCursorPosY();
 
-    bool isOpen = _treeNodeOpen.back();
-    _treeNodeOpen.pop_back();
-
-    if (startCursorPosY != 0 && startCursorPosY == ImGui::GetCursorPosY()) {
-        _treeNodeEmpty.insert(id);
-    } else {
-        _treeNodeEmpty.erase(id);
-    }
-
-    if (isOpen) {
+    if (stackElement.isOpen) {
         ImGui::TreePop();
     }
 }
 
 void AlienImGui::SetFilterText(std::string const& value)
 {
-    _filterText = value;
+    if (_filterTextStack.size() > 10) {
+        THROW_NOT_IMPLEMENTED();
+    }
+    _filterTextStack.emplace_back(value);
 }
 
 void AlienImGui::ResetFilterText()
 {
-    _filterText.clear();
+    _filterTextStack.pop_back();
 }
 
 bool AlienImGui::Button(ButtonParameters const& parameters)
@@ -1344,7 +1353,7 @@ bool AlienImGui::Button(ButtonParameters const& parameters)
 
     if (parameters._showDisabledRevertButton) {
         ImGui::BeginDisabled(true);
-        revertButton(parameters._name);
+        RevertButton(parameters._name);
         ImGui::EndDisabled();
         ImGui::SameLine();
     }
@@ -1994,7 +2003,7 @@ namespace
 template <typename Parameter, typename T>
 bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled, bool* pinned)
 {
-    if (!_filterText.empty() && !StringHelper::containsCaseInsensitive(parameters._name, _filterText)) {
+    if (!matchWithFilter(parameters._name)) {
         return false;
     }
 
@@ -2139,7 +2148,7 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
                     }
                 }
                 ImGui::BeginDisabled(equal);
-                if (revertButton(parameters._name)) {
+                if (RevertButton(parameters._name)) {
                     for (int row = 0; row < numRows; ++row) {
                         value[row] = parameters._defaultValue[row];
                     }
@@ -2185,7 +2194,7 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
 template <typename T>
 void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], bool* enabled)
 {
-    if (!_filterText.empty() && !StringHelper::containsCaseInsensitive(parameters._name, _filterText)) {
+    if (!matchWithFilter(parameters._name)) {
         return;
     }
 
@@ -2329,7 +2338,7 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
             }
         }
         ImGui::BeginDisabled(!changed);
-        if (revertButton(parameters._name)) {
+        if (RevertButton(parameters._name)) {
             for (int row = 0; row < MAX_COLORS; ++row) {
                 for (int col = 0; col < MAX_COLORS; ++col) {
                     value[row][col] = (*parameters._defaultValue)[row][col];
@@ -2371,11 +2380,27 @@ ImVec2 AlienImGui::RotationCenter(ImDrawList* drawList)
     return ImVec2((l.x + u.x) / 2, (l.y + u.y) / 2);  // or use _ClipRectStack?
 }
 
-bool AlienImGui::revertButton(std::string const& id)
+bool AlienImGui::RevertButton(std::string const& id)
 {
     auto result = ImGui::Button((ICON_FA_UNDO "##" + id).c_str());
     AlienImGui::Tooltip("Revert changes");
     return result;
+}
+
+bool AlienImGui::isFilterActive()
+{
+    if (_filterTextStack.empty()) {
+        return false;
+    }
+    return !_filterTextStack.back().empty();
+}
+
+bool AlienImGui::matchWithFilter(std::string const& text)
+{
+    if (!isFilterActive()) {
+        return true;
+    }
+    return StringHelper::containsCaseInsensitive(text, _filterTextStack.back());
 }
 
 namespace

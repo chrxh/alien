@@ -240,7 +240,7 @@ void AutosaveWindow::processSettings()
     }
 
     _settingsOpen =
-        AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Settings").rank(AlienImGui::TreeNodeRank::Low).defaultOpen(_settingsOpen));
+        AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Settings").rank(AlienImGui::TreeNodeRank::Low).defaultOpen(_settingsOpen));
     if (_settingsOpen) {
         if (ImGui::BeginChild("##autosaveSettings", {scale(0), 0})) {
             if (AlienImGui::InputInt(

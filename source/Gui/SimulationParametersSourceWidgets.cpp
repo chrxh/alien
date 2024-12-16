@@ -38,7 +38,7 @@ void _SimulationParametersSourceWidgets::process()
     /**
      * General
      */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("General"))) {
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("General"))) {
         AlienImGui::InputText(
             AlienImGui::InputTextParameters().name("Name").textWidth(RightColumnWidth).defaultValue(origSource.name),
             source.name,
@@ -50,7 +50,7 @@ void _SimulationParametersSourceWidgets::process()
     /**
      * Location
      */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Location"))) {
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Location"))) {
         if (AlienImGui::Switcher(
                 AlienImGui::SwitcherParameters()
                     .name("Shape")
@@ -122,7 +122,7 @@ void _SimulationParametersSourceWidgets::process()
     /**
      * Radiation
      */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Radiation"))) {
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Radiation"))) {
         auto origStrengths = editService.getRadiationStrengths(parameters);
         if (AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()

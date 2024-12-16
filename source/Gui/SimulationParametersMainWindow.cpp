@@ -214,7 +214,7 @@ void SimulationParametersMainWindow::processMasterWidget()
     if (ImGui::BeginChild("##master", {0, getMasterWidgetHeight()})) {
 
         if (_masterWidgetOpen = AlienImGui::BeginTreeNode(
-                AlienImGui::TreeNodeParameters().text("Overview").rank(AlienImGui::TreeNodeRank::High).defaultOpen(_masterWidgetOpen))) {
+                AlienImGui::TreeNodeParameters().name("Overview").rank(AlienImGui::TreeNodeRank::High).defaultOpen(_masterWidgetOpen))) {
             ImGui::Spacing();
             if (ImGui::BeginChild("##master2", {0, -ImGui::GetStyle().FramePadding.y})) {
                 processLocationTable();
@@ -238,7 +238,7 @@ void SimulationParametersMainWindow::processDetailWidget()
     if (ImGui::BeginChild("##detail", {0, height})) {
         auto title = _filter.empty() ? "Parameters" : "Parameters (filtered)";
         if (_detailWidgetOpen =
-                AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text((std::string(title) + "###parameters").c_str()).rank(AlienImGui::TreeNodeRank::High).defaultOpen(_detailWidgetOpen))) {
+                AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name((std::string(title) + "###parameters").c_str()).rank(AlienImGui::TreeNodeRank::High).defaultOpen(_detailWidgetOpen))) {
             ImGui::Spacing();
             AlienImGui::SetFilterText(_filter);
             if (ImGui::BeginChild(
@@ -275,7 +275,7 @@ void SimulationParametersMainWindow::processExpertWidget()
 {
     if (ImGui::BeginChild("##expert", {0, 0})) {
         if (_expertWidgetOpen = AlienImGui::BeginTreeNode(
-                AlienImGui::TreeNodeParameters().text("Expert settings").rank(AlienImGui::TreeNodeRank::High).defaultOpen(_expertWidgetOpen))) {
+                AlienImGui::TreeNodeParameters().name("Expert settings").rank(AlienImGui::TreeNodeRank::High).defaultOpen(_expertWidgetOpen))) {
             if (ImGui::BeginChild("##expert2", {0, 0}, ImGuiChildFlags_Border, ImGuiWindowFlags_HorizontalScrollbar)) {
                     processExpertSettings();
             }

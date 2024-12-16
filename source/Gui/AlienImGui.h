@@ -11,6 +11,19 @@
 #include "Definitions.h"
 #include "EngineInterface/CellFunctionConstants.h"
 
+struct TreeNodeStackElement
+{
+    float treeNodeStartCursorPosY = 0;
+    ImGuiID treeNodeId = 0;
+    bool isOpen = false;
+};
+
+struct TreeNodeInfo
+{
+    std::chrono::steady_clock::time_point invisibleTimepoint;
+    bool isEmpty = false;
+};
+
 class AlienImGui
 {
 public:
@@ -158,6 +171,7 @@ public:
         MEMBER_DECLARATION(InputTextParameters, float, width, 0);
         MEMBER_DECLARATION(InputTextParameters, float, textWidth, 100);
         MEMBER_DECLARATION(InputTextParameters, bool, monospaceFont, false);
+        MEMBER_DECLARATION(InputTextParameters, bool, bold, false);
         MEMBER_DECLARATION(InputTextParameters, bool, readOnly, false);
         MEMBER_DECLARATION(InputTextParameters, bool, password, false);
         MEMBER_DECLARATION(InputTextParameters, bool, folderButton, false);
@@ -319,7 +333,7 @@ public:
     };
     struct TreeNodeParameters
     {
-        MEMBER_DECLARATION(TreeNodeParameters, std::string, text, "");
+        MEMBER_DECLARATION(TreeNodeParameters, std::string, name, "");
         MEMBER_DECLARATION(TreeNodeParameters, TreeNodeRank, rank, TreeNodeRank::Default);
         MEMBER_DECLARATION(TreeNodeParameters, bool, defaultOpen, true);
         MEMBER_DECLARATION(TreeNodeParameters, bool, visible, true);
@@ -438,16 +452,17 @@ private:
 
     static ImVec2 RotationCenter(ImDrawList* drawList);
 
-    static bool revertButton(std::string const& id);
+    static bool RevertButton(std::string const& id);
 
 private:
-    static std::string _filterText;
+    static bool isFilterActive();
+    static bool matchWithFilter(std::string const& text);
+
+    static std::vector<std::string> _filterTextStack;
+    static std::vector<TreeNodeStackElement> _treeNodeStack;
+    static std::unordered_map<unsigned int, TreeNodeInfo> _treeNodeInfoById;
+
     static std::unordered_set<unsigned int> _basicSilderExpanded;
-    static std::unordered_map<unsigned int, std::chrono::steady_clock::time_point> _treeNodeInvisibleTimepointById;
-    static std::unordered_set<unsigned int> _treeNodeEmpty;
-    static std::vector<float> _treeNodeStartCursorPosY;
-    static std::vector<int> _treeNodeId;
-    static std::vector<bool> _treeNodeOpen;
 
     static int _rotationStartIndex;
 
