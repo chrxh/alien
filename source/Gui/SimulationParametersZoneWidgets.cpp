@@ -50,7 +50,7 @@ void _SimulationParametersZoneWidgets::process()
     /**
      * General
      */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("General"))) {
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("General"))) {
         AlienImGui::InputText(
             AlienImGui::InputTextParameters().name("Name").textWidth(RightColumnWidth).defaultValue(origZone.name), zone.name, sizeof(Char64) / sizeof(char));
 
@@ -60,7 +60,7 @@ void _SimulationParametersZoneWidgets::process()
     /**
      * Visualization and location
      */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Visualization"))) {
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Visualization"))) {
         AlienImGui::ColorButtonWithPicker(
             AlienImGui::ColorButtonWithPickerParameters().name("Background color").textWidth(RightColumnWidth).defaultValue(origZone.color),
             zone.color,
@@ -69,7 +69,7 @@ void _SimulationParametersZoneWidgets::process()
     }
     AlienImGui::EndTreeNode();
 
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Location"))) {
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Location"))) {
         if (AlienImGui::Switcher(
                 AlienImGui::SwitcherParameters().name("Shape").values({"Circular", "Rectangular"}).textWidth(RightColumnWidth).defaultValue(origZone.shapeType),
                 zone.shapeType)) {
@@ -143,7 +143,7 @@ void _SimulationParametersZoneWidgets::process()
     /**
      * Force field
      */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Force field"))) {
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Force field"))) {
         auto isForceFieldActive = zone.flowType != FlowType_None;
 
         auto forceFieldTypeIntern = std::max(0, zone.flowType - 1);  //FlowType_None should not be selectable in ComboBox
@@ -246,7 +246,7 @@ void _SimulationParametersZoneWidgets::process()
     /**
      * Physics: Motion
      */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Physics: Motion"))) {
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Physics: Motion"))) {
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Friction")
@@ -276,7 +276,7 @@ void _SimulationParametersZoneWidgets::process()
     /**
      * Physics: Thresholds
      */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Physics: Thresholds"))) {
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Physics: Thresholds"))) {
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Maximum force")
@@ -294,7 +294,7 @@ void _SimulationParametersZoneWidgets::process()
     /**
      * Physics: Binding
      */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Physics: Binding"))) {
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Physics: Binding"))) {
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Binding creation velocity")
@@ -325,7 +325,7 @@ void _SimulationParametersZoneWidgets::process()
     /**
      * Physics: Radiation
      */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Physics: Radiation"))) {
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Physics: Radiation"))) {
         AlienImGui::Checkbox(
             AlienImGui::CheckboxParameters()
                 .name("Disable radiation sources")
@@ -368,7 +368,7 @@ void _SimulationParametersZoneWidgets::process()
     /**
      * Cell life cycle
      */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Cell life cycle"))) {
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Cell life cycle"))) {
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Minimum energy")
@@ -399,7 +399,7 @@ void _SimulationParametersZoneWidgets::process()
     /**
      * Mutation 
      */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Genome copy mutations"))) {
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Genome copy mutations"))) {
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Neuron weights and biases")
@@ -562,7 +562,7 @@ void _SimulationParametersZoneWidgets::process()
     /**
      * Attacker
      */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Cell function: Attacker"))) {
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Cell function: Attacker"))) {
         AlienImGui::InputFloatColorMatrix(
             AlienImGui::InputFloatColorMatrixParameters()
                 .name("Food chain color matrix")
@@ -602,7 +602,7 @@ void _SimulationParametersZoneWidgets::process()
      * Expert settings: Advanced absorption control
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
-                                      .text("Expert settings: Advanced energy absorption control")
+                                      .name("Expert settings: Advanced energy absorption control")
                                       .visible(parameters.features.advancedAbsorptionControl)
                                       .blinkWhenActivated(true))) {
         AlienImGui::SliderFloat(
@@ -636,7 +636,7 @@ void _SimulationParametersZoneWidgets::process()
      * Expert settings: Advanced attacker control
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
-                                      .text("Expert settings: Advanced attacker control")
+                                      .name("Expert settings: Advanced attacker control")
                                       .visible(parameters.features.advancedAttackerControl)
                                       .blinkWhenActivated(true))) {
         AlienImGui::InputFloatColorMatrix(
@@ -679,7 +679,7 @@ void _SimulationParametersZoneWidgets::process()
      * Expert settings: Cell age limiter
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
-                                      .text("Expert settings: Cell age limiter")
+                                      .name("Expert settings: Cell age limiter")
                                       .visible(parameters.features.cellAgeLimiter)
                                       .blinkWhenActivated(true))) {
         AlienImGui::SliderFloat(
@@ -703,7 +703,7 @@ void _SimulationParametersZoneWidgets::process()
      * Expert settings: Cell color transition rules
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
-                                      .text("Expert settings: Cell color transition rules")
+                                      .name("Expert settings: Cell color transition rules")
                                       .visible(parameters.features.cellColorTransitionRules)
                                       .blinkWhenActivated(true))) {
         ImGui::Checkbox("##cellColorTransition", &zone.activatedValues.cellColorTransition);
