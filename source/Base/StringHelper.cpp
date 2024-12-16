@@ -106,3 +106,14 @@ void StringHelper::copy(char* target, int targetSize, std::string const& source)
     source.copy(target, sourceSize);
     target[sourceSize] = 0;
 }
+
+bool StringHelper::containsCaseInsensitive(std::string const& str, std::string const& substr)
+{
+    std::string strLower = str;
+    std::string substrLower = substr;
+
+    std::transform(str.begin(), str.end(), strLower.begin(), ::tolower);
+    std::transform(substr.begin(), substr.end(), substrLower.begin(), ::tolower);
+
+    return strLower.find(substrLower) != std::string::npos;
+}

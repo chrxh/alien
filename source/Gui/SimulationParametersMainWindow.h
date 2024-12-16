@@ -92,4 +92,6 @@ private:
     int _locationWindowCounter = 0;
 
     std::string _fileDialogPath;
+
+    std::string _filter;
 };
