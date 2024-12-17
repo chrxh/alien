@@ -144,34 +144,39 @@ void _SimulationParametersZoneWidgets::process()
      * Force field
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Force field"))) {
+        {
+            auto forceFieldTypeIntern = std::max(0, zone.flowType - 1);  //FlowType_None should not be selectable in ComboBox
+            auto origForceFieldTypeIntern = std::max(0, origZone.flowType - 1);
+
+            auto isEnabled = zone.flowType != 0;
+            auto origIsEnabled = origZone.flowType != 0;
+            if (AlienImGui::Combo(
+                    AlienImGui::ComboParameters()
+                        .name("Field type")
+                        .values({"Radial", "Central", "Linear"})
+                        .textWidth(RightColumnWidth)
+                        .defaultValue(origForceFieldTypeIntern)
+                        .defaultEnabledValue(&origIsEnabled),
+                    forceFieldTypeIntern,
+                    &isEnabled)) {
+                zone.flowType = isEnabled ? forceFieldTypeIntern + 1 : FlowType_None;
+
+                if (zone.flowType == FlowType_Radial) {
+                    zone.flowData.radialFlow = RadialFlow();
+                }
+                if (zone.flowType == FlowType_Central) {
+                    zone.flowData.centralFlow = CentralFlow();
+                }
+                if (zone.flowType == FlowType_Linear) {
+                    zone.flowData.linearFlow = LinearFlow();
+                }
+            }
+        }
+
         auto isForceFieldActive = zone.flowType != FlowType_None;
 
-        auto forceFieldTypeIntern = std::max(0, zone.flowType - 1);  //FlowType_None should not be selectable in ComboBox
-        auto origForceFieldTypeIntern = std::max(0, origZone.flowType - 1);
-        if (ImGui::Checkbox("##forceField", &isForceFieldActive)) {
-            zone.flowType = isForceFieldActive ? FlowType_Radial : FlowType_None;
-        }
-        ImGui::SameLine();
         ImGui::BeginDisabled(!isForceFieldActive);
         auto posX = ImGui::GetCursorPos().x;
-        if (AlienImGui::Combo(
-                AlienImGui::ComboParameters()
-                    .name("Type")
-                    .values({"Radial", "Central", "Linear"})
-                    .textWidth(RightColumnWidth)
-                    .defaultValue(origForceFieldTypeIntern),
-                forceFieldTypeIntern)) {
-            zone.flowType = forceFieldTypeIntern + 1;
-            if (zone.flowType == FlowType_Radial) {
-                zone.flowData.radialFlow = RadialFlow();
-            }
-            if (zone.flowType == FlowType_Central) {
-                zone.flowData.centralFlow = CentralFlow();
-            }
-            if (zone.flowType == FlowType_Linear) {
-                zone.flowData.linearFlow = LinearFlow();
-            }
-        }
         if (zone.flowType == FlowType_Radial) {
             ImGui::SetCursorPosX(posX);
             AlienImGui::Combo(

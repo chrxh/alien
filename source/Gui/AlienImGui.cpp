@@ -26,7 +26,7 @@ namespace
     auto constexpr HoveredTimer = 0.5f;
 }
 
-std::vector<std::string> AlienImGui::_filterTextStack;
+std::vector<FilterStackElement> AlienImGui::_filterStack;
 std::unordered_set<unsigned int> AlienImGui::_basicSilderExpanded;
 std::vector<TreeNodeStackElement> AlienImGui::_treeNodeStack;
 std::unordered_map<unsigned int, TreeNodeInfo> AlienImGui::_treeNodeInfoById;
@@ -433,7 +433,7 @@ bool AlienImGui::InputFilter(std::string& filter)
 {
     auto result = AlienImGui::InputText(
         AlienImGui::InputTextParameters()
-            .hint("Filter")
+            .hint("Filter (case insensitive)")
             .bold(!filter.empty())
             .textWidth(0)
             .width(
@@ -504,32 +504,21 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value, bool* enabled)
         ImGui::BeginDisabled();
     }
 
+    auto result = false;
     if (enabled) {
-        ImGui::Checkbox(("##checkbox" + parameters._name).c_str(), enabled);
+        result |= ImGui::Checkbox(("##checkbox" + parameters._name).c_str(), enabled);
         ImGui::BeginDisabled(!(*enabled));
         ImGui::SameLine();
     }
 
     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
-    auto result = ImGui::Combo(
+    result |= ImGui::Combo(
         ("##" + parameters._name).c_str(),
         &value,
         vectorGetter,
         static_cast<void*>(&parameters._values),
         parameters._values.size());
     ImGui::PopItemWidth();
-
-    ImGui::SameLine();
-    if (parameters._defaultValue) {
-        ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (RevertButton(parameters._name)) {
-            value = *parameters._defaultValue;
-            result = true;
-        }
-        ImGui::EndDisabled();
-    }
-    ImGui::SameLine();
-    AlienImGui::Text(parameters._name.c_str());
 
     if (enabled) {
         ImGui::EndDisabled();
@@ -538,6 +527,21 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value, bool* enabled)
     if (parameters._disabled) {
         ImGui::EndDisabled();
     }
+
+    ImGui::SameLine();
+    if (parameters._defaultValue) {
+        auto equalEnabledValue = !parameters._defaultEnabledValue || *parameters._defaultEnabledValue == *enabled;
+        ImGui::BeginDisabled(value == *parameters._defaultValue && equalEnabledValue);
+        if (RevertButton(parameters._name)) {
+            value = *parameters._defaultValue;
+            *enabled = *parameters._defaultEnabledValue;
+            result = true;
+        }
+        ImGui::EndDisabled();
+    }
+
+    ImGui::SameLine();
+    AlienImGui::Text(parameters._name.c_str());
 
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
@@ -810,7 +814,7 @@ void AlienImGui::Text(std::string const& text)
     auto refPos = ImGui::GetCursorScreenPos();
     ImGui::TextUnformatted(text.c_str());
     if (isFilterActive()) {
-        auto [beforeMatch, match] = StringHelper::decomposeCaseInsensitiveMatch(text, _filterTextStack.back());
+        auto [beforeMatch, match] = StringHelper::decomposeCaseInsensitiveMatch(text, _filterStack.back().text);
         if (!match.empty()) {
             auto prefixSize = ImGui::CalcTextSize(beforeMatch.c_str());
             ImGui::GetWindowDrawList()->AddText(
@@ -1267,11 +1271,14 @@ bool AlienImGui::BeginTreeNode(TreeNodeParameters const& parameters)
     auto forceTreeNodeOpen = isFilterActive();
 
     if (matchWithFilter(parameters._name)) {
-        _filterTextStack.emplace_back(std::string(""));
-    } else if (!_filterTextStack.empty()) {
-        _filterTextStack.emplace_back(_filterTextStack.back());
+        auto newFilterElement = !_filterStack.empty() ? _filterStack.back() : FilterStackElement();
+        newFilterElement.alreadyMatched = true;
+        _filterStack.emplace_back(newFilterElement);
+    } else if (!_filterStack.empty()) {
+        _filterStack.emplace_back(_filterStack.back());
     } else {
-        _filterTextStack.emplace_back(std::string(""));
+        // insert dummy element since AlienImGui:EndTreeNode pops last element
+        _filterStack.emplace_back(FilterStackElement());
     }
 
     auto id = ImGui::GetID(parameters._name.c_str());
@@ -1339,7 +1346,7 @@ bool AlienImGui::BeginTreeNode(TreeNodeParameters const& parameters)
 
 void AlienImGui::EndTreeNode()
 {
-    _filterTextStack.pop_back();
+    _filterStack.pop_back();
     TreeNodeStackElement stackElement = _treeNodeStack.back();
     _treeNodeStack.pop_back();
 
@@ -1353,15 +1360,15 @@ void AlienImGui::EndTreeNode()
 
 void AlienImGui::SetFilterText(std::string const& value)
 {
-    if (_filterTextStack.size() > 10) {
+    if (_filterStack.size() > 10) {
         THROW_NOT_IMPLEMENTED();
     }
-    _filterTextStack.emplace_back(value);
+    _filterStack.emplace_back(value);
 }
 
 void AlienImGui::ResetFilterText()
 {
-    _filterTextStack.pop_back();
+    _filterStack.pop_back();
 }
 
 bool AlienImGui::Button(ButtonParameters const& parameters)
@@ -1444,9 +1451,9 @@ void AlienImGui::StatusBar(std::vector<std::string> const& textItems)
     ImGui::PopStyleColor();
 }
 
-void AlienImGui::Tooltip(std::string const& text, bool delay)
+void AlienImGui::Tooltip(std::string const& text, bool delay, ImGuiHoveredFlags flags)
 {
-    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled) && (!delay || (delay && GImGui->HoveredIdTimer > HoveredTimer))) {
+    if (ImGui::IsItemHovered(flags) && (!delay || (delay && GImGui->HoveredIdTimer > HoveredTimer))) {
         ImGui::BeginTooltip();
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TooltipTextColor.Value);
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
@@ -2402,16 +2409,16 @@ ImVec2 AlienImGui::RotationCenter(ImDrawList* drawList)
 bool AlienImGui::RevertButton(std::string const& id)
 {
     auto result = ImGui::Button((ICON_FA_UNDO "##" + id).c_str());
-    AlienImGui::Tooltip("Revert changes");
+    AlienImGui::Tooltip("Revert changes", true, ImGuiHoveredFlags_None);
     return result;
 }
 
 bool AlienImGui::isFilterActive()
 {
-    if (_filterTextStack.empty()) {
+    if (_filterStack.empty()) {
         return false;
     }
-    return !_filterTextStack.back().empty();
+    return !_filterStack.back().text.empty();
 }
 
 bool AlienImGui::matchWithFilter(std::string const& text)
@@ -2419,7 +2426,11 @@ bool AlienImGui::matchWithFilter(std::string const& text)
     if (!isFilterActive()) {
         return true;
     }
-    return StringHelper::containsCaseInsensitive(text, _filterTextStack.back());
+    auto filterElement = _filterStack.back();
+    if (filterElement.alreadyMatched) {
+        return true;
+    }
+    return StringHelper::containsCaseInsensitive(text, filterElement.text);
 }
 
 namespace
