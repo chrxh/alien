@@ -28,7 +28,11 @@ namespace
 
 std::string AlienImGui::_filterText;
 std::unordered_set<unsigned int> AlienImGui::_basicSilderExpanded;
-std::unordered_map<unsigned int, std::chrono::steady_clock::time_point> AlienImGui::_invisibleTimepointById;
+std::unordered_map<unsigned int, std::chrono::steady_clock::time_point> AlienImGui::_treeNodeInvisibleTimepointById;
+std::unordered_set<unsigned int> AlienImGui::_treeNodeEmpty;
+float AlienImGui::_treeNodeStartCursorPosY = 0;
+int AlienImGui::_treeNodeId = 0;
+bool AlienImGui::_treeNodeOpen = false;
 std::unordered_map<unsigned int, int> AlienImGui::_neuronSelectedInput;
 std::unordered_map<unsigned int, int> AlienImGui::_neuronSelectedOutput;
 int AlienImGui::_rotationStartIndex = 0;
@@ -1233,19 +1237,31 @@ bool AlienImGui::CollapseButton(bool collapsed)
 
 bool AlienImGui::BeginTreeNode(TreeNodeParameters const& parameters)
 {
-    auto id = ImGui::GetID(parameters._text.c_str());
+    _treeNodeStartCursorPosY = 0;
+    _treeNodeId = ImGui::GetID(parameters._text.c_str());
+
     if (!parameters._visible) {
-        _invisibleTimepointById.insert_or_assign(id, std::chrono::steady_clock::now());
+        _treeNodeInvisibleTimepointById.insert_or_assign(_treeNodeId, std::chrono::steady_clock::now());
+        _treeNodeOpen = false;
         return false;
     }
 
     int highlightCountdown = 0;
-    if (parameters._blinkWhenActivated && _invisibleTimepointById.contains(id)) {
+    if (parameters._blinkWhenActivated && _treeNodeInvisibleTimepointById.contains(_treeNodeId)) {
         highlightCountdown = std::max(
-            0ll, 1000 - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - _invisibleTimepointById.at(id)).count());
+            0ll,
+            1000
+                - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - _treeNodeInvisibleTimepointById.at(_treeNodeId))
+                      .count());
         if (highlightCountdown > 0) {
             ImGui::SetScrollHereY();
         }
+    }
+
+    if (!_filterText.empty() && _treeNodeEmpty.contains(_treeNodeId)) {
+        _treeNodeStartCursorPosY = ImGui::GetCursorPosY();
+        _treeNodeOpen = false;
+        return true;
     }
 
     ImColor header, headerHovered, headerActive;
@@ -1277,12 +1293,23 @@ bool AlienImGui::BeginTreeNode(TreeNodeParameters const& parameters)
     bool result = ImGui::TreeNodeEx(parameters._text.c_str(), parameters._defaultOpen ? treeNodeOpenFlags : treeNodeClosedFlags);
     ImGui::PopFont();
     ImGui::PopStyleColor(3);
+
+    _treeNodeStartCursorPosY = ImGui::GetCursorPosY();
+    _treeNodeOpen = result;
     return result;
 }
 
 void AlienImGui::EndTreeNode()
 {
-    ImGui::TreePop();
+    if (_treeNodeStartCursorPosY != 0 && _treeNodeStartCursorPosY == ImGui::GetCursorPosY()) {
+        _treeNodeEmpty.insert(_treeNodeId);
+    } else {
+        _treeNodeEmpty.erase(_treeNodeId);
+    }
+
+    if (_treeNodeOpen) {
+        ImGui::TreePop();
+    }
 }
 
 void AlienImGui::SetFilterText(std::string const& value)

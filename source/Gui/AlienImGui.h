@@ -443,7 +443,11 @@ private:
 private:
     static std::string _filterText;
     static std::unordered_set<unsigned int> _basicSilderExpanded;
-    static std::unordered_map<unsigned int, std::chrono::steady_clock::time_point> _invisibleTimepointById;
+    static std::unordered_map<unsigned int, std::chrono::steady_clock::time_point> _treeNodeInvisibleTimepointById;
+    static std::unordered_set<unsigned int> _treeNodeEmpty;
+    static float _treeNodeStartCursorPosY;
+    static int _treeNodeId;
+    static bool _treeNodeOpen;
 
     static int _rotationStartIndex;
 
