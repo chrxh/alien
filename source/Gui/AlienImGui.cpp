@@ -112,7 +112,7 @@ bool AlienImGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& v
     //text
     if (!parameters._name.empty()) {
         ImGui::SameLine();
-        ImGui::TextUnformatted(parameters._name.c_str());
+        AlienImGui::Text(parameters._name.c_str());
     }
 
     //tooltip
@@ -140,7 +140,7 @@ void AlienImGui::SliderInputFloat(SliderInputFloatParameters const& parameters, 
     ImGui::SetNextItemWidth(inputWidth);
     ImGui::InputFloat(("##input" + parameters._name).c_str(), &value, 0, 0, parameters._format.c_str());
     ImGui::SameLine();
-    ImGui::TextUnformatted(parameters._name.c_str());
+    AlienImGui::Text(parameters._name.c_str());
 }
 
 bool AlienImGui::InputInt(InputIntParameters const& parameters, int& value, bool* enabled)
@@ -248,7 +248,7 @@ bool AlienImGui::InputFloat(InputFloatParameters const& parameters, float& value
         ImGui::EndDisabled();
     }
     ImGui::SameLine();
-    ImGui::TextUnformatted(parameters._name.c_str());
+    AlienImGui::Text(parameters._name.c_str());
 
     if (parameters._tooltip) {
         HelpMarker(*parameters._tooltip);
@@ -282,7 +282,7 @@ void AlienImGui::InputFloat2(InputFloat2Parameters const& parameters, float& val
         ImGui::EndDisabled();
     }
     ImGui::SameLine();
-    ImGui::TextUnformatted(parameters._name.c_str());
+    AlienImGui::Text(parameters._name.c_str());
 
     if (parameters._tooltip) {
         HelpMarker(*parameters._tooltip);
@@ -410,7 +410,7 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
     }
     if (!parameters._name.empty()) {
         ImGui::SameLine();
-        ImGui::TextUnformatted(parameters._name.c_str());
+        AlienImGui::Text(parameters._name.c_str());
     }
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
@@ -469,7 +469,7 @@ void AlienImGui::InputTextMultiline(InputTextMultilineParameters const& paramete
         {ImGui::GetContentRegionAvail().x - textWidth, height},
         ImGuiInputTextFlags_Multiline);
     ImGui::SameLine();
-    ImGui::TextUnformatted(parameters._name.c_str());
+    AlienImGui::Text(parameters._name.c_str());
 
     text = std::string(buffer);
 }
@@ -529,7 +529,7 @@ bool AlienImGui::Combo(ComboParameters& parameters, int& value, bool* enabled)
         ImGui::EndDisabled();
     }
     ImGui::SameLine();
-    ImGui::TextUnformatted(parameters._name.c_str());
+    AlienImGui::Text(parameters._name.c_str());
 
     if (enabled) {
         ImGui::EndDisabled();
@@ -607,7 +607,7 @@ bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value, bool* enab
     }
 
     ImGui::SameLine();
-    ImGui::TextUnformatted(parameters._name.c_str());
+    AlienImGui::Text(parameters._name.c_str());
 
     if (enabled) {
         ImGui::EndDisabled();
@@ -744,7 +744,7 @@ void AlienImGui::InputColorTransition(InputColorTransitionParameters const& para
         ImGui::EndDisabled();
     }
     ImGui::SameLine();
-    ImGui::TextUnformatted(parameters._name.c_str());
+    AlienImGui::Text(parameters._name.c_str());
 
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
@@ -775,7 +775,7 @@ bool AlienImGui::Checkbox(CheckboxParameters const& parameters, bool& value)
         ImGui::EndDisabled();
     }
     ImGui::SameLine();
-    ImGui::TextUnformatted(parameters._name.c_str());
+    AlienImGui::Text(parameters._name.c_str());
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
@@ -807,7 +807,26 @@ bool AlienImGui::SelectableButton(SelectableButtonParameters const& parameters, 
 
 void AlienImGui::Text(std::string const& text)
 {
+    auto refPos = ImGui::GetCursorScreenPos();
     ImGui::TextUnformatted(text.c_str());
+    if (isFilterActive()) {
+        auto [beforeMatch, match] = StringHelper::decomposeCaseInsensitiveMatch(text, _filterTextStack.back());
+        if (!match.empty()) {
+            auto prefixSize = ImGui::CalcTextSize(beforeMatch.c_str());
+            ImGui::GetWindowDrawList()->AddText(
+                ImGui::GetFont(),
+                ImGui::GetFontSize(),
+                {refPos.x + prefixSize.x + 1, refPos.y + ImGui::GetStyle().FramePadding.y},
+                ImGui::GetColorU32(ImGuiCol_Text),
+                match.c_str());
+            ImGui::GetWindowDrawList()->AddText(
+                ImGui::GetFont(),
+                ImGui::GetFontSize(),
+                {refPos.x + prefixSize.x, refPos.y + ImGui::GetStyle().FramePadding.y + 1},
+                ImGui::GetColorU32(ImGuiCol_Text),
+                match.c_str());
+        }
+    }
 }
 
 void AlienImGui::BoldText(std::string const& text)
@@ -1068,7 +1087,7 @@ void AlienImGui::ColorButtonWithPicker(ColorButtonWithPickerParameters const& pa
         ImGui::EndDisabled();
     }
     ImGui::SameLine();
-    ImGui::TextUnformatted(parameters._name.c_str());
+    AlienImGui::Text(parameters._name.c_str());
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
@@ -1357,7 +1376,7 @@ bool AlienImGui::Button(ButtonParameters const& parameters)
         ImGui::EndDisabled();
         ImGui::SameLine();
     }
-    ImGui::TextUnformatted(parameters._name.c_str());
+    AlienImGui::Text(parameters._name.c_str());
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
@@ -1489,7 +1508,7 @@ bool AlienImGui::ToggleButton(ToggleButtonParameters const& parameters, bool& va
     drawList->AddCircleFilled(ImVec2(p.x + radius + (value ? 1 : 0) * (width - radius * 2.0f), p.y + radius), radius - 2.5f, IM_COL32(255, 255, 255, 255));
 
     ImGui::SameLine();
-    ImGui::TextUnformatted(parameters._name.c_str());
+    AlienImGui::Text(parameters._name.c_str());
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
     }
@@ -2166,7 +2185,7 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
                 if (enabled) {
                     ImGui::EndDisabled();
                 }
-                ImGui::TextUnformatted(parameters._name.c_str());
+                AlienImGui::Text(parameters._name);
                 if (enabled) {
                     ImGui::BeginDisabled(!(*enabled));
                 }
@@ -2353,7 +2372,7 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
     }
 
     ImGui::SameLine();
-    ImGui::TextUnformatted(parameters._name.c_str());
+    AlienImGui::Text(parameters._name.c_str());
 
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);

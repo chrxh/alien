@@ -107,13 +107,29 @@ void StringHelper::copy(char* target, int targetSize, std::string const& source)
     target[sourceSize] = 0;
 }
 
-bool StringHelper::containsCaseInsensitive(std::string const& str, std::string const& substr)
+bool StringHelper::containsCaseInsensitive(std::string const& str, std::string const& toMatch)
 {
     std::string strLower = str;
-    std::string substrLower = substr;
+    std::string toMatchLower = toMatch;
 
     std::transform(str.begin(), str.end(), strLower.begin(), ::tolower);
-    std::transform(substr.begin(), substr.end(), substrLower.begin(), ::tolower);
+    std::transform(toMatch.begin(), toMatch.end(), toMatchLower.begin(), ::tolower);
 
-    return strLower.find(substrLower) != std::string::npos;
+    return strLower.find(toMatchLower) != std::string::npos;
+}
+
+StringHelper::Decomposition StringHelper::decomposeCaseInsensitiveMatch(std::string const& str, std::string const& toMatch)
+{
+    std::string strLower = str;
+    std::string toMatchLower = toMatch;
+
+    std::transform(str.begin(), str.end(), strLower.begin(), ::tolower);
+    std::transform(toMatch.begin(), toMatch.end(), toMatchLower.begin(), ::tolower);
+
+    auto findResult = strLower.find(toMatchLower);
+    if (findResult == std::string::npos) {
+        return {.beforeMatch = str};
+    }
+
+    return {.beforeMatch = str.substr(0, findResult), .match = str.substr(findResult, toMatch.size())};
 }
