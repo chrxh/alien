@@ -16,5 +16,12 @@ public:
 
     static void copy(char* target, int targetSize, std::string const& source);
 
-    static bool containsCaseInsensitive(std::string const& str, std::string const& substr);
+    static bool containsCaseInsensitive(std::string const& str, std::string const& toMatch);
+
+    struct Decomposition
+    {
+        std::string beforeMatch;
+        std::string match;
+    };
+    static Decomposition decomposeCaseInsensitiveMatch(std::string const& str, std::string const& toMatch);
 };
