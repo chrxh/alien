@@ -8,8 +8,15 @@
 #include "Base/Definitions.h"
 #include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/PreviewDescriptions.h"
-#include "Definitions.h"
 #include "EngineInterface/CellFunctionConstants.h"
+
+#include "Definitions.h"
+
+struct FilterStackElement
+{
+    std::string text;
+    bool alreadyMatched = false;
+};
 
 struct TreeNodeStackElement
 {
@@ -198,6 +205,7 @@ public:
         MEMBER_DECLARATION(ComboParameters, float, textWidth, 100);
         MEMBER_DECLARATION(ComboParameters, bool, disabled, false);
         MEMBER_DECLARATION(ComboParameters, std::optional<int>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(ComboParameters, bool const*, defaultEnabledValue, nullptr);
         MEMBER_DECLARATION(ComboParameters, std::vector<std::string>, values, std::vector<std::string>());
         MEMBER_DECLARATION(ComboParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
@@ -370,7 +378,7 @@ public:
 
     static void StatusBar(std::vector<std::string> const& textItems);
 
-    static void Tooltip(std::string const& text, bool delay = true);
+    static void Tooltip(std::string const& text, bool delay = true, ImGuiHoveredFlags flags = ImGuiHoveredFlags_AllowWhenDisabled);
     static void Tooltip(std::function<std::string()> const& textFunc, bool delay = true);
 
     static void ConvertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v);
@@ -458,7 +466,7 @@ private:
     static bool isFilterActive();
     static bool matchWithFilter(std::string const& text);
 
-    static std::vector<std::string> _filterTextStack;
+    static std::vector<FilterStackElement> _filterStack;
     static std::vector<TreeNodeStackElement> _treeNodeStack;
     static std::unordered_map<unsigned int, TreeNodeInfo> _treeNodeInfoById;
 
