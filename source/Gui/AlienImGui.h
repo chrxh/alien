@@ -188,7 +188,11 @@ public:
     static bool InputText(InputTextParameters const& parameters, char* buffer, int bufferSize);
     static bool InputText(InputTextParameters const& parameters, std::string& text);
 
-    static bool InputFilter(std::string& filter);
+    struct InputFilterParameters
+    {
+        MEMBER_DECLARATION(InputFilterParameters, float, width, 0);
+    };
+    static bool InputFilter(InputFilterParameters const& parameters, std::string& filter);
 
     struct InputTextMultilineParameters
     {

@@ -152,3 +152,8 @@ inline float scale(float value)
 {
     return StyleRepository::get().scale(value);
 }
+
+inline float scaleInverse(float value)
+{
+    return StyleRepository::get().scaleInverse(value);
+}
