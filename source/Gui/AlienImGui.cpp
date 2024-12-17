@@ -429,16 +429,10 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, std::string& t
     return result;
 }
 
-bool AlienImGui::InputFilter(std::string& filter)
+bool AlienImGui::InputFilter(InputFilterParameters const& parameters, std::string& filter)
 {
     auto result = AlienImGui::InputText(
-        AlienImGui::InputTextParameters()
-            .hint("Filter (case insensitive)")
-            .bold(!filter.empty())
-            .textWidth(0)
-            .width(
-            ImGui::GetContentRegionAvail().x - scale(12.0f) - ImGui::GetStyle().WindowPadding.x * 2),
-        filter);
+        AlienImGui::InputTextParameters().hint("Filter (case insensitive)").bold(!filter.empty()).textWidth(0).width(parameters._width - 28.0f), filter);
     ImGui::SameLine();
 
     ImGui::BeginDisabled(filter.empty());
