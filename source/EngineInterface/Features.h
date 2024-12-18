@@ -7,6 +7,7 @@ struct Features
     bool advancedAttackerControl = false;
     bool externalEnergyControl = false;
     bool customizeNeuronMutations = false;
+    bool customizeDeletionMutations = false;
     bool cellColorTransitionRules = false;
     bool cellAgeLimiter = false;
     bool cellGlow = false;

@@ -414,6 +414,12 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
+            parameters.cellCopyMutationDeletionMinSize,
+            defaultParameters.cellCopyMutationDeletionMinSize,
+            "simulation parameters.cell.copy mutation.deletion.min size",
+            parserTask);
+        ParameterParser::encodeDecode(
+            tree,
             parameters.baseValues.cellCopyMutationTranslation,
             defaultParameters.baseValues.cellCopyMutationTranslation,
             "simulation parameters.cell.copy mutation.translation",
@@ -1069,6 +1075,12 @@ namespace
             parameters.features.customizeNeuronMutations,
             defaultParameters.features.customizeNeuronMutations,
             "simulation parameters.features.customize neuron mutations",
+            parserTask);
+        ParameterParser::encodeDecode(
+            tree,
+            parameters.features.customizeDeletionMutations,
+            defaultParameters.features.customizeDeletionMutations,
+            "simulation parameters.features.customize deletion mutations",
             parserTask);
     }
 

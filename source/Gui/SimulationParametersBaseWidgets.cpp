@@ -1321,6 +1321,25 @@ void _SimulationParametersBaseWidgets::process()
     AlienImGui::EndTreeNode();
 
     /**
+     * Expert settings: Customize deletion mutations
+     */
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
+                                      .name("Expert settings: Customize deletion mutations")
+                                      .visible(parameters.features.customizeDeletionMutations)
+                                      .blinkWhenActivated(true))) {
+        AlienImGui::SliderInt(
+            AlienImGui::SliderIntParameters()
+                .name("Minimal size")
+                .textWidth(RightColumnWidth)
+                .min(0)
+                .max(1000)
+                .logarithmic(true)
+                .defaultValue(&origParameters.cellCopyMutationDeletionMinSize),
+            &parameters.cellCopyMutationDeletionMinSize);
+    }
+    AlienImGui::EndTreeNode();
+
+    /**
      * Expert settings: Customize neuron mutations
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
