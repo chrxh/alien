@@ -406,6 +406,9 @@ void SimulationParametersMainWindow::processExpertSettings()
             .tooltip("It enables an additional rendering step that makes the cells glow."),
         parameters.features.cellGlow);
     AlienImGui::Checkbox(
+        AlienImGui::CheckboxParameters().name("Customize deletion mutations").textWidth(0).defaultValue(origFeatures.customizeDeletionMutations),
+        parameters.features.customizeDeletionMutations);
+    AlienImGui::Checkbox(
         AlienImGui::CheckboxParameters()
             .name("Customize neuron mutations")
             .textWidth(0)

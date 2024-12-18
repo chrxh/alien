@@ -45,7 +45,7 @@ __inline__ __device__ void CellFunctionProcessor::collectCellFunctionOperations(
         if (cell->cellFunction != CellFunction_None && cell->executionOrderNumber == executionOrderNumber) {
             if (cell->cellFunction == CellFunction_Detonator && cell->cellFunctionData.detonator.state == DetonatorState_Activated) {
                 data.cellFunctionOperations[cell->cellFunction].tryAddEntry(CellFunctionOperation{cell});
-            } else if (cell->livingState == LivingState_Ready && cell->activationTime == 0) {
+            } else if (cell->livingState != LivingState_UnderConstruction && cell->livingState != LivingState_Activating && cell->activationTime == 0) {
                 data.cellFunctionOperations[cell->cellFunction].tryAddEntry(CellFunctionOperation{cell});
             }
 
@@ -128,7 +128,8 @@ __inline__ __device__ Signal CellFunctionProcessor::calcInputSignal(Cell* cell)
     int numSensorSignals = 0;
     for (int i = 0, j = cell->numConnections; i < j; ++i) {
         auto connectedCell = cell->connections[i].cell;
-        if (connectedCell->outputBlocked || connectedCell->livingState != LivingState_Ready ) {
+        if (connectedCell->outputBlocked || connectedCell->livingState == LivingState_UnderConstruction
+            || connectedCell->livingState == LivingState_Activating) {
             continue;
         }
         if (connectedCell->executionOrderNumber == cell->inputExecutionOrderNumber) {

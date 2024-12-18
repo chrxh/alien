@@ -76,7 +76,6 @@ struct SimulationParameters
     ColorVector<float> genomeComplexityNeuronFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<int> genomeComplexityDepthLevel = {3, 3, 3, 3, 3, 3, 3};
 
-
     float radiationProb = 0.03f;
     float radiationVelocityMultiplier = 1.0f;
     float radiationVelocityPerturbation = 0.5f;
@@ -136,7 +135,7 @@ struct SimulationParameters
     bool cellCopyMutationPreventDepthIncrease = false;
     bool cellCopyMutationSelfReplication = false;
 
-    // customize neuron mutations feature
+    // customize neuron mutations setting
     float cellCopyMutationNeuronDataWeight = 0.2f;
     float cellCopyMutationNeuronDataBias = 0.2f;
     float cellCopyMutationNeuronDataActivationFunction = 0.05f;
@@ -144,6 +143,9 @@ struct SimulationParameters
     float cellCopyMutationNeuronDataDamping = 1.05f;
     float cellCopyMutationNeuronDataOffset = 0.05f;
 
+    // customize deletion mutations setting
+    int cellCopyMutationDeletionMinSize = 0;
+    
     ColorVector<float> cellFunctionInjectorRadius = {3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f};
     ColorMatrix<int> cellFunctionInjectorDurationColorMatrix = {
         {3, 3, 3, 3, 3, 3, 3},

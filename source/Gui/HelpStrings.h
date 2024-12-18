@@ -368,7 +368,7 @@ namespace Const
         " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n" ICON_FA_CHEVRON_RIGHT
         " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or duplications are taken into "
         "account).\n\n" ICON_FA_CHEVRON_RIGHT " Mutants and cell functions: Combination of mutants and cell function coloring.\n\n" ICON_FA_CHEVRON_RIGHT
-        " Cell states: green = under construction, blue = ready, red = dying\n\n" ICON_FA_CHEVRON_RIGHT
+        " Cell states: blue = ready, green = under construction, white = activating, pink = detached, pale blue = reviving, red = dying\n\n" ICON_FA_CHEVRON_RIGHT
         " Genome complexities: This property can be utilized by attacker cells when the parameter 'Complex creature protection' is "
         "activated (see tooltip there). The coloring is as follows: blue = creature with low bonus (usually small or simple genome structure), red = large "
         "bonus\n\n" ICON_FA_CHEVRON_RIGHT

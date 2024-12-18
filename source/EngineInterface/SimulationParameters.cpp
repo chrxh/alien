@@ -218,5 +218,6 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && cellCopyMutationNeuronDataReinforcement == other.cellCopyMutationNeuronDataReinforcement
         && cellCopyMutationNeuronDataDamping == other.cellCopyMutationNeuronDataDamping
         && cellCopyMutationNeuronDataOffset == other.cellCopyMutationNeuronDataOffset
+        && cellCopyMutationDeletionMinSize == other.cellCopyMutationDeletionMinSize
     ;
 }

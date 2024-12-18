@@ -141,9 +141,12 @@ __inline__ __device__ void MutationProcessor::applyRandomMutationsForCell(Simula
 __inline__ __device__ void MutationProcessor::checkMutationsForCell(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
-    auto numNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, true));
-    auto numNonSeparatedNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, false));
-    if (numNodes > 2 * numNonSeparatedNodes) {
+    auto numNodes = GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, true);
+    auto numNonSeparatedNodes = GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, false);
+    auto tooMuchSeparatedParts = numNodes > 2 * numNonSeparatedNodes;
+    auto tooSmall =
+        cudaSimulationParameters.features.customizeDeletionMutations && numNonSeparatedNodes < cudaSimulationParameters.cellCopyMutationDeletionMinSize;
+    if (tooMuchSeparatedParts || tooSmall) {
         cell->livingState = LivingState_Dying;
         for (int i = 0; i < cell->numConnections; ++i) {
             auto const& connectedCell = cell->connections[i].cell;
