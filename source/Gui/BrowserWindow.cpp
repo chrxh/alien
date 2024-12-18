@@ -460,6 +460,7 @@ void BrowserWindow::processUserList()
             ImGui::TableSetupColumn("Reactions given", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, styleRepository.scale(100.0f));
             ImGui::TableSetupScrollFreeze(0, 1);
             ImGui::TableHeadersRow();
+            ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor, 0);
 
             ImGuiListClipper clipper;
             clipper.Begin(_userTOs.size());
@@ -566,6 +567,7 @@ void BrowserWindow::processSimulationList()
         ImGui::TableSetupColumn("Version", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Version);
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
+        ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor, 0);
 
         //create treeTOs if sorting changed
         if (auto sortSpecs = ImGui::TableGetSortSpecs()) {
@@ -671,6 +673,7 @@ void BrowserWindow::processGenomeList()
         ImGui::TableSetupColumn("Version", ImGuiTableColumnFlags_WidthFixed, 0.0f, NetworkResourceColumnId_Version);
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
+        ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor, 0);
 
         //create treeTOs if sorting changed
         if (auto sortSpecs = ImGui::TableGetSortSpecs()) {

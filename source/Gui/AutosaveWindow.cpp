@@ -154,6 +154,7 @@ void AutosaveWindow::processTable()
         ImGui::TableSetupColumn("Peak value", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(200.0f));
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
+        ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor, 0);
 
         ImGuiListClipper clipper;
         clipper.Begin(_savepointTable->getSize());
@@ -240,7 +241,7 @@ void AutosaveWindow::processSettings()
     }
 
     _settingsOpen =
-        AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Settings").rank(AlienImGui::TreeNodeRank::Low).defaultOpen(_settingsOpen));
+        AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Settings").rank(AlienImGui::TreeNodeRank::High).defaultOpen(_settingsOpen));
     if (_settingsOpen) {
         if (ImGui::BeginChild("##autosaveSettings", {scale(0), 0})) {
             if (AlienImGui::InputInt(

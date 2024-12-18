@@ -298,7 +298,7 @@ void SimulationParametersMainWindow::processLocationTable()
 {
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
         | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
-
+    
     if (ImGui::BeginTable("Locations", 4, flags, ImVec2(-1, -1), 0)) {
 
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
@@ -307,6 +307,7 @@ void SimulationParametersMainWindow::processLocationTable()
         ImGui::TableSetupColumn("Strength", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
+        ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor, 0);
 
         ImGuiListClipper clipper;
         clipper.Begin(_locations.size());
