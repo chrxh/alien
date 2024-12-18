@@ -1329,7 +1329,7 @@ void _SimulationParametersBaseWidgets::process()
                                       .blinkWhenActivated(true))) {
         AlienImGui::SliderInt(
             AlienImGui::SliderIntParameters()
-                .name("Minimal size")
+                .name("Minimum size")
                 .textWidth(RightColumnWidth)
                 .min(0)
                 .max(1000)
