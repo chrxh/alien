@@ -13,6 +13,7 @@ public:
 
     __inline__ __device__ static void applyRandomMutations(SimulationData& data);
     __inline__ __device__ static void applyRandomMutationsForCell(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void checkMutationsForCell(SimulationData& data, Cell* cell);
 
     __inline__ __device__ static void neuronDataMutation(SimulationData& data, Cell* cell);
     __inline__ __device__ static void propertiesMutation(SimulationData& data, Cell* cell);
@@ -52,6 +53,7 @@ __inline__ __device__ void MutationProcessor::applyRandomMutations(SimulationDat
         auto& cell = cells.at(index);
         if (cell->livingState== LivingState_Activating && cell->cellFunction == CellFunction_Constructor) {
             MutationProcessor::applyRandomMutationsForCell(data, cell);
+            MutationProcessor::checkMutationsForCell(data, cell);
         }
     }
 }
@@ -60,7 +62,6 @@ __inline__ __device__ void MutationProcessor::applyRandomMutationsForCell(Simula
 {
     auto& constructor = cell->cellFunctionData.constructor;
     auto numNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, true));
-    auto numNonSeparatedNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, false));
     auto cellCopyMutationGeometry = SpotCalculator::calcParameter(
         &SimulationParametersZoneValues::cellCopyMutationGeometry,
         &SimulationParametersZoneActivatedValues::cellCopyMutationGeometry,
@@ -125,32 +126,32 @@ __inline__ __device__ void MutationProcessor::applyRandomMutationsForCell(Simula
     neuronDataMutation(data, cell);
     propertiesMutation(data, cell);
 
-    executeEvent(data, cellCopyMutationGeometry, [&]() {
-        if (numNodes < 2 * numNonSeparatedNodes) {
-            geometryMutation(data, cell);
-        }
-    });
+    executeEvent(data, cellCopyMutationGeometry, [&]() { geometryMutation(data, cell); });
     executeEvent(data, cellCopyMutationCustomGeometry, [&]() { customGeometryMutation(data, cell); });
     executeMultipleEvents(data, cellCopyMutationCellFunction, [&]() { cellFunctionMutation(data, cell); });
-    executeEvent(data, cellCopyMutationInsertion, [&]() {
-        if (numNodes < 2 * numNonSeparatedNodes) {
-            insertMutation(data, cell);
-        }
-    });
+    executeEvent(data, cellCopyMutationInsertion, [&]() { insertMutation(data, cell); });
     executeEvent(data, cellCopyMutationDeletion, [&]() { deleteMutation(data, cell); });
     executeEvent(data, cellCopyMutationCellColor, [&]() { cellColorMutation(data, cell); });
-    executeEvent(data, cellCopyMutationTranslation, [&]() {
-        if (numNodes < 2 * numNonSeparatedNodes) {
-            translateMutation(data, cell);
-        }
-    });
-    executeEvent(data, cellCopyMutationDuplication, [&]() {
-        if (numNodes < 2 * numNonSeparatedNodes) {
-            duplicateMutation(data, cell);
-        }
-    });
+    executeEvent(data, cellCopyMutationTranslation, [&]() { translateMutation(data, cell); });
+    executeEvent(data, cellCopyMutationDuplication, [&]() { duplicateMutation(data, cell); });
     executeEvent(data, cellCopyMutationSubgenomeColor, [&]() { subgenomeColorMutation(data, cell); });
     executeEvent(data, cellCopyMutationGenomeColor, [&]() { genomeColorMutation(data, cell); });
+}
+
+__inline__ __device__ void MutationProcessor::checkMutationsForCell(SimulationData& data, Cell* cell)
+{
+    auto& constructor = cell->cellFunctionData.constructor;
+    auto numNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, true));
+    auto numNonSeparatedNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, false));
+    if (numNodes > 2 * numNonSeparatedNodes) {
+        cell->livingState = LivingState_Dying;
+        for (int i = 0; i < cell->numConnections; ++i) {
+            auto const& connectedCell = cell->connections[i].cell;
+            if (connectedCell->creatureId == cell->creatureId) {
+                connectedCell->livingState = LivingState_Detaching;
+            }
+        }
+    }
 }
 
 __inline__ __device__ void MutationProcessor::neuronDataMutation(SimulationData& data, Cell* cell)

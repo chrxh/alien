@@ -462,6 +462,9 @@ private:
     template <typename T>
     static void BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], bool* enabled = nullptr);
 
+    //static bool BeginTable(std::string const& id, int column, ImGuiTableFlags flags = 0, RealVector2D size = RealVector2D(0.0f, 0.0f));
+    //static void EndTable();
+
     static ImVec2 RotationCenter(ImDrawList* drawList);
 
     static bool RevertButton(std::string const& id);
