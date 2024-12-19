@@ -104,6 +104,9 @@ struct SimulationParameters
         Infinity<int>::value,
         Infinity<int>::value};
 
+    // advanced cell life cycle control
+    ColorVector<int> cellMinReplicatorGenomeSize = {0, 0, 0, 0, 0, 0, 0};
+
     bool cellMaxAgeBalancer = false;
     int cellMaxAgeBalancerInterval = 10000;
     bool cellResetAgeAfterActivation = false;
@@ -143,9 +146,6 @@ struct SimulationParameters
     float cellCopyMutationNeuronDataDamping = 1.05f;
     float cellCopyMutationNeuronDataOffset = 0.05f;
 
-    // customize deletion mutations setting
-    int cellCopyMutationDeletionMinSize = 0;
-    
     ColorVector<float> cellFunctionInjectorRadius = {3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f};
     ColorMatrix<int> cellFunctionInjectorDurationColorMatrix = {
         {3, 3, 3, 3, 3, 3, 3},

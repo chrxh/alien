@@ -316,6 +316,9 @@ namespace
             parserTask);
 
         ParameterParser::encodeDecode(
+            tree, parameters.cellMinReplicatorGenomeSize, defaultParameters.cellMinReplicatorGenomeSize, "simulation parameters.cell.min replicator genome size", parserTask);
+
+        ParameterParser::encodeDecode(
             tree,
             parameters.cellFunctionConstructorConnectingCellMaxDistance,
             defaultParameters.cellFunctionConstructorConnectingCellMaxDistance,
@@ -411,12 +414,6 @@ namespace
             parameters.baseValues.cellCopyMutationDeletion,
             defaultParameters.baseValues.cellCopyMutationDeletion,
             "simulation parameters.cell.copy mutation.deletion",
-            parserTask);
-        ParameterParser::encodeDecode(
-            tree,
-            parameters.cellCopyMutationDeletionMinSize,
-            defaultParameters.cellCopyMutationDeletionMinSize,
-            "simulation parameters.cell.copy mutation.deletion.min size",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
@@ -1048,6 +1045,12 @@ namespace
             defaultParameters.features.advancedAttackerControl,
             "simulation parameters.features.additional attacker control",
             parserTask);
+        ParameterParser::encodeDecode(
+            tree,
+            parameters.features.advancedCellLifeCycleControl,
+            defaultParameters.features.advancedCellLifeCycleControl,
+            "simulation parameters.features.advanced cell life cycle control",
+            parserTask);
         missingFeatures.externalEnergyControl = ParameterParser::encodeDecode(
             tree, parameters.features.externalEnergyControl, defaultParameters.features.externalEnergyControl, "simulation parameters.features.external energy", parserTask);
         missingFeatures.cellColorTransitionRules = ParameterParser::encodeDecode(
@@ -1075,12 +1078,6 @@ namespace
             parameters.features.customizeNeuronMutations,
             defaultParameters.features.customizeNeuronMutations,
             "simulation parameters.features.customize neuron mutations",
-            parserTask);
-        ParameterParser::encodeDecode(
-            tree,
-            parameters.features.customizeDeletionMutations,
-            defaultParameters.features.customizeDeletionMutations,
-            "simulation parameters.features.customize deletion mutations",
             parserTask);
     }
 

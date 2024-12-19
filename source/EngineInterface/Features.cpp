@@ -6,5 +6,5 @@ bool Features::operator==(Features const& other) const
         && cellColorTransitionRules == other.cellColorTransitionRules && advancedAbsorptionControl == other.advancedAbsorptionControl
         && advancedAttackerControl == other.advancedAttackerControl && cellAgeLimiter == other.cellAgeLimiter && cellGlow == other.cellGlow
         && legacyModes == other.legacyModes && customizeNeuronMutations == other.customizeNeuronMutations
-        && customizeDeletionMutations == other.customizeDeletionMutations;
+        && advancedCellLifeCycleControl == other.advancedCellLifeCycleControl;
 }

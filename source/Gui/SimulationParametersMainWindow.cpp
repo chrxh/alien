@@ -385,6 +385,9 @@ void SimulationParametersMainWindow::processExpertSettings()
             .tooltip("It contains further settings that influence how much energy can be obtained from an attack by attacker cells."),
         parameters.features.advancedAttackerControl);
     AlienImGui::Checkbox(
+        AlienImGui::CheckboxParameters().name("Advanced cell life cycle control").textWidth(0).defaultValue(origFeatures.advancedCellLifeCycleControl),
+        parameters.features.advancedCellLifeCycleControl);
+    AlienImGui::Checkbox(
         AlienImGui::CheckboxParameters()
             .name("Cell age limiter")
             .textWidth(0)
@@ -405,9 +408,6 @@ void SimulationParametersMainWindow::processExpertSettings()
             .defaultValue(origFeatures.cellGlow)
             .tooltip("It enables an additional rendering step that makes the cells glow."),
         parameters.features.cellGlow);
-    AlienImGui::Checkbox(
-        AlienImGui::CheckboxParameters().name("Customize deletion mutations").textWidth(0).defaultValue(origFeatures.customizeDeletionMutations),
-        parameters.features.customizeDeletionMutations);
     AlienImGui::Checkbox(
         AlienImGui::CheckboxParameters()
             .name("Customize neuron mutations")
