@@ -497,6 +497,12 @@ void EngineWorker::testOnly_mutate(uint64_t cellId, MutationType mutationType)
     _simulationCudaFacade->testOnly_mutate(cellId, mutationType);
 }
 
+void EngineWorker::testOnly_mutationCheck(uint64_t cellId)
+{
+    EngineWorkerGuard access(this);
+    _simulationCudaFacade->testOnly_mutationCheck(cellId);
+}
+
 DataTO EngineWorker::provideTO()
 {
     return _dataTOCache->getDataTO(_simulationCudaFacade->getArraySizes());

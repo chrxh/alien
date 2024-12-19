@@ -106,4 +106,5 @@ public:
 
     //for tests
     virtual void testOnly_mutate(uint64_t cellId, MutationType mutationType) = 0;
+    virtual void testOnly_mutationCheck(uint64_t cellId) = 0;
 };

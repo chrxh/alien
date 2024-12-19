@@ -499,6 +499,21 @@ void _SimulationCudaFacade::testOnly_mutate(uint64_t cellId, MutationType mutati
     resizeArraysIfNecessary();
 }
 
+void _SimulationCudaFacade::testOnly_mutationCheck(uint64_t cellId)
+{
+    {
+        std::lock_guard lock(_mutexForSimulationParameters);
+        if (_newSimulationParameters) {
+            _settings.simulationParameters = *_newSimulationParameters;
+            CHECK_FOR_CUDA_ERROR(
+                cudaMemcpyToSymbol(cudaSimulationParameters, &*_newSimulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+            _newSimulationParameters.reset();
+        }
+    }
+    _testKernels->testOnly_mutationCheck(_settings.gpuSettings, getSimulationDataIntern(), cellId);
+    syncAndCheck();
+}
+
 void _SimulationCudaFacade::initCuda()
 {
     log(Priority::Important, "initialize CUDA");

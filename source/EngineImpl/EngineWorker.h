@@ -112,8 +112,9 @@ public:
     void pauseSimulation();
     bool isSimulationRunning() const;
 
-    //for tests
+    // for tests only
     void testOnly_mutate(uint64_t cellId, MutationType mutationType);
+    void testOnly_mutationCheck(uint64_t cellId);
 
 private:
     DataTO provideTO(); 
