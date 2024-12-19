@@ -234,3 +234,55 @@ TEST_P(LivingStateTransitionTests, noDyingForBarrierCells)
     auto actualData = _simulationFacade->getSimulationData();
     EXPECT_EQ(LivingState_Ready, getCell(actualData, 1).livingState);
 }
+
+TEST_F(LivingStateTransitionTests, mutationCheck_replicatorWithGenomeBelowMinSize)
+{
+    _parameters.features.advancedCellLifeCycleControl = true;
+    _parameters.cellMinReplicatorGenomeSize[0] = 3;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto subGenome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+    auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells(
+        {CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()),
+         CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome))}));
+
+    auto data = DataDescription().addCells(
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome)).setLivingState(LivingState_Activating)});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_mutationCheck(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(1, actualData.cells.size());
+    auto actualCell = getCell(actualData, 1);
+    EXPECT_EQ(LivingState_Dying, actualCell.livingState);
+}
+
+TEST_F(LivingStateTransitionTests, mutationCheck_replicatorWithGenomeAboveMinSize)
+{
+    _parameters.features.advancedCellLifeCycleControl = true;
+    _parameters.cellMinReplicatorGenomeSize[0] = 3;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto subGenome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+    auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells(
+        {CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()),
+         CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome)),
+         CellGenomeDescription()}));
+
+    auto data = DataDescription().addCells(
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome)).setLivingState(LivingState_Activating)});
+
+    _parameters.features.advancedCellLifeCycleControl = true;
+    _parameters.cellMinReplicatorGenomeSize[0] = 3;
+    _simulationFacade->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->testOnly_mutationCheck(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(1, actualData.cells.size());
+    auto actualCell = getCell(actualData, 1);
+    EXPECT_EQ(LivingState_Activating, actualCell.livingState);
+}
