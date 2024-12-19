@@ -52,3 +52,16 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t cellId, MutationTyp
     }
 }
 
+__global__ void cudaTestMutationCheck(SimulationData data, uint64_t cellId)
+{
+    auto& cells = data.objects.cellPointers;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (cell->id == cellId) {
+            MutationProcessor::checkMutationsForCell(data, cell);
+        }
+    }
+}
+
