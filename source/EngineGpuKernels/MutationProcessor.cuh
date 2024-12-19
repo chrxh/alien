@@ -146,7 +146,7 @@ __inline__ __device__ void MutationProcessor::checkMutationsForCell(SimulationDa
         auto numNonSeparatedNodes = GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, false);
         auto tooMuchSeparatedParts = numNodes > 2 * numNonSeparatedNodes;
         auto tooSmall =
-            cudaSimulationParameters.features.advancedCellLifeCycleControl && numNonSeparatedNodes < cudaSimulationParameters.cellMinReplicatorGenomeSize[cell->color];
+            cudaSimulationParameters.features.advancedCellLifeCycleControl && numNonSeparatedNodes < cudaSimulationParameters.cellMinSelfReplicatorGenomeSize[cell->color];
         if (tooMuchSeparatedParts || tooSmall) {
             cell->livingState = LivingState_Dying;
             for (int i = 0; i < cell->numConnections; ++i) {

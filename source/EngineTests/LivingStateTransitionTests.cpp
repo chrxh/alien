@@ -235,10 +235,10 @@ TEST_P(LivingStateTransitionTests, noDyingForBarrierCells)
     EXPECT_EQ(LivingState_Ready, getCell(actualData, 1).livingState);
 }
 
-TEST_F(LivingStateTransitionTests, mutationCheck_replicatorWithGenomeBelowMinSize)
+TEST_F(LivingStateTransitionTests, mutationCheck_selfReplicatorWithGenomeBelowMinSize)
 {
     _parameters.features.advancedCellLifeCycleControl = true;
-    _parameters.cellMinReplicatorGenomeSize[0] = 3;
+    _parameters.cellMinSelfReplicatorGenomeSize[0] = 3;
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto subGenome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
@@ -259,10 +259,10 @@ TEST_F(LivingStateTransitionTests, mutationCheck_replicatorWithGenomeBelowMinSiz
     EXPECT_EQ(LivingState_Dying, actualCell.livingState);
 }
 
-TEST_F(LivingStateTransitionTests, mutationCheck_replicatorWithGenomeAboveMinSize)
+TEST_F(LivingStateTransitionTests, mutationCheck_selfReplicatorWithGenomeAboveMinSize)
 {
     _parameters.features.advancedCellLifeCycleControl = true;
-    _parameters.cellMinReplicatorGenomeSize[0] = 3;
+    _parameters.cellMinSelfReplicatorGenomeSize[0] = 3;
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto subGenome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
@@ -275,7 +275,7 @@ TEST_F(LivingStateTransitionTests, mutationCheck_replicatorWithGenomeAboveMinSiz
         {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome)).setLivingState(LivingState_Activating)});
 
     _parameters.features.advancedCellLifeCycleControl = true;
-    _parameters.cellMinReplicatorGenomeSize[0] = 3;
+    _parameters.cellMinSelfReplicatorGenomeSize[0] = 3;
     _simulationFacade->setSimulationParameters(_parameters);
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutationCheck(1);

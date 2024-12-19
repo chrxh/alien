@@ -1185,14 +1185,14 @@ void _SimulationParametersBaseWidgets::process()
                                       .blinkWhenActivated(true))) {
         AlienImGui::SliderInt(
             AlienImGui::SliderIntParameters()
-                .name("Minimum replicator genome size")
+                .name("Minimum self-replicator genome size")
                 .textWidth(RightColumnWidth)
                 .colorDependence(true)
                 .min(0)
                 .max(1000)
                 .logarithmic(true)
-                .defaultValue(origParameters.cellMinReplicatorGenomeSize),
-            parameters.cellMinReplicatorGenomeSize);
+                .defaultValue(origParameters.cellMinSelfReplicatorGenomeSize),
+            parameters.cellMinSelfReplicatorGenomeSize);
     }
     AlienImGui::EndTreeNode();
 

@@ -149,7 +149,7 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         if (genomeComplexityDepthLevel[i] != other.genomeComplexityDepthLevel[i]) {
             return false;
         }
-        if (cellMinReplicatorGenomeSize[i] != other.cellMinReplicatorGenomeSize[i]) {
+        if (cellMinSelfReplicatorGenomeSize[i] != other.cellMinSelfReplicatorGenomeSize[i]) {
             return false;
         }
     }
