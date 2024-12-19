@@ -105,7 +105,7 @@ struct SimulationParameters
         Infinity<int>::value};
 
     // advanced cell life cycle control
-    ColorVector<int> cellMinReplicatorGenomeSize = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<int> cellMinSelfReplicatorGenomeSize = {0, 0, 0, 0, 0, 0, 0};
 
     bool cellMaxAgeBalancer = false;
     int cellMaxAgeBalancerInterval = 10000;

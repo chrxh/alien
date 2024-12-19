@@ -316,7 +316,7 @@ namespace
             parserTask);
 
         ParameterParser::encodeDecode(
-            tree, parameters.cellMinReplicatorGenomeSize, defaultParameters.cellMinReplicatorGenomeSize, "simulation parameters.cell.min replicator genome size", parserTask);
+            tree, parameters.cellMinSelfReplicatorGenomeSize, defaultParameters.cellMinSelfReplicatorGenomeSize, "simulation parameters.cell.min self replicator genome size", parserTask);
 
         ParameterParser::encodeDecode(
             tree,
