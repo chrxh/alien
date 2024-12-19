@@ -1177,6 +1177,26 @@ void _SimulationParametersBaseWidgets::process()
     AlienImGui::EndTreeNode();
 
     /**
+     * Expert settings: Advanced cell life cycle control
+     */
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
+                                      .name("Expert settings: Advanced cell life cycle control")
+                                      .visible(parameters.features.advancedCellLifeCycleControl)
+                                      .blinkWhenActivated(true))) {
+        AlienImGui::SliderInt(
+            AlienImGui::SliderIntParameters()
+                .name("Minimum replicator genome size")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(0)
+                .max(1000)
+                .logarithmic(true)
+                .defaultValue(origParameters.cellMinReplicatorGenomeSize),
+            parameters.cellMinReplicatorGenomeSize);
+    }
+    AlienImGui::EndTreeNode();
+
+    /**
      * Expert settings: Cell color transition rules
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
@@ -1317,25 +1337,6 @@ void _SimulationParametersBaseWidgets::process()
                 .defaultValue(&origParameters.cellGlowStrength)
                 .tooltip("The strength of the glow."),
             &parameters.cellGlowStrength);
-    }
-    AlienImGui::EndTreeNode();
-
-    /**
-     * Expert settings: Customize deletion mutations
-     */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
-                                      .name("Expert settings: Customize deletion mutations")
-                                      .visible(parameters.features.customizeDeletionMutations)
-                                      .blinkWhenActivated(true))) {
-        AlienImGui::SliderInt(
-            AlienImGui::SliderIntParameters()
-                .name("Minimum size")
-                .textWidth(RightColumnWidth)
-                .min(0)
-                .max(1000)
-                .logarithmic(true)
-                .defaultValue(&origParameters.cellCopyMutationDeletionMinSize),
-            &parameters.cellCopyMutationDeletionMinSize);
     }
     AlienImGui::EndTreeNode();
 

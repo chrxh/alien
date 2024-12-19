@@ -393,6 +393,7 @@ void AutosaveWindow::processAutomaticSavepoints()
     if (minSinceLastAutosave >= _autosaveInterval && _savepointTable.has_value()) {
         onCreateSavepoint(_catchPeaks != CatchPeaks_None);
         _lastAutosaveTimepoint = std::chrono::steady_clock::now();
+        _lastPeakTimepoint = std::chrono::steady_clock::now();
     }
 
     if (_catchPeaks != CatchPeaks_None) {
