@@ -201,6 +201,7 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveSi
 
     DeserializedSimulation deserializedData;
     std::chrono::system_clock::time_point timestamp;
+
     try {
         timestamp = std::chrono::system_clock::now();
         deserializedData.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();

@@ -116,7 +116,7 @@ void AutosaveWindow::processToolbar()
     AlienImGui::Tooltip("Create save point");
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(!static_cast<bool>(_selectedEntry) || (_selectedEntry->state != SavepointState_Persisted && !_selectedEntry->requestId.empty()));
+    ImGui::BeginDisabled(!static_cast<bool>(_selectedEntry));
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_MINUS))) {
         onDeleteSavepoint(_selectedEntry);
     }
@@ -355,15 +355,8 @@ void AutosaveWindow::onDeleteSavepoint(SavepointEntry const& entry)
 
 void AutosaveWindow::onLoadSavepoint(SavepointEntry const& entry)
 {
-    auto fullFilename = _savepointTable.value().getFilename().parent_path() / entry->filename;
-    if (std::filesystem::exists(fullFilename)) {
-        FileTransferController::get().onOpenSimulation(fullFilename);
-    }
-
-    // compatibility with v4.11
-    else {
-        FileTransferController::get().onOpenSimulation(entry->filename);
-    }
+    auto path = SavepointTableService::get().calcAbsolutePath(_savepointTable.value(), entry);
+    FileTransferController::get().onOpenSimulation(path);
 }
 
 void AutosaveWindow::processCleanup()
@@ -420,10 +413,6 @@ void AutosaveWindow::scheduleDeleteNonPersistentSavepoint(std::vector<SavepointE
     for (auto const& entry : entries) {
         if (!entry->requestId.empty() && (entry->state == SavepointState_InQueue || entry->state == SavepointState_InProgress)) {
             _savepointsInProgressToDelete.emplace_back(entry);
-        } else {
-
-            //no request id => savepoint has been created on an other session
-            SerializerService::get().deleteSimulation(entry->filename);
         }
     }
 }
@@ -433,9 +422,11 @@ void AutosaveWindow::processDeleteNonPersistentSavepoint()
     std::vector<SavepointEntry> newRequestsToDelete;
     for (auto const& entry : _savepointsInProgressToDelete) {
         if (auto requestState = _persisterFacade->getRequestState(PersisterRequestId{entry->requestId})) {
-            if (requestState.value() == PersisterRequestState::Finished || requestState.value() == PersisterRequestState::Error) {
+            if (requestState.value() == PersisterRequestState::Finished) {
                 auto resultData = _persisterFacade->fetchSaveSimulationData(PersisterRequestId{entry->requestId});
                 SerializerService::get().deleteSimulation(resultData.filename);
+            } else if (requestState.value() == PersisterRequestState::Error) {
+                // do nothing
             } else {
                 newRequestsToDelete.emplace_back(entry);
             }
@@ -468,13 +459,13 @@ void AutosaveWindow::updateSavepoint(int row)
                     newEntry->timestep = data.timestep;
                     newEntry->timestamp = StringHelper::format(data.timestamp);
                     newEntry->name = data.projectName;
-                    newEntry->filename = std::filesystem::relative(data.filename, _savepointTable->getFilename().parent_path());
+                    newEntry->filename = SavepointTableService::get().calcEntryPath(_savepointTable.value(), data.filename);
                 } else if (auto saveResult = std::dynamic_pointer_cast<_SaveDeserializedSimulationRequestResult>(requestResult)) {
                     auto const& data = saveResult->getData();
                     newEntry->timestep = data.timestep;
                     newEntry->timestamp = StringHelper::format(data.timestamp);
                     newEntry->name = data.projectName;
-                    newEntry->filename = std::filesystem::relative(data.filename, _savepointTable->getFilename().parent_path());
+                    newEntry->filename = SavepointTableService::get().calcEntryPath(_savepointTable.value(), data.filename);
                     newEntry->peak = StringHelper::format(toFloat(sumColorVector(data.rawStatisticsData.timeline.timestep.genomeComplexityVariance)), 2);
                     newEntry->peakType = "genome complexity variance";
                 }
