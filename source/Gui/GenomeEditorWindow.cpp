@@ -29,6 +29,7 @@
 #include "HelpStrings.h"
 #include "UploadSimulationDialog.h"
 #include "ChangeColorDialog.h"
+#include "EditorController.h"
 
 namespace
 {
@@ -112,6 +113,11 @@ void GenomeEditorWindow::processIntern()
 {
     processToolbar();
     processEditor();
+}
+
+bool GenomeEditorWindow::isShown()
+{
+    return _on && EditorController::get().isOn();
 }
 
 void GenomeEditorWindow::processToolbar()

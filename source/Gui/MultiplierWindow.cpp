@@ -10,6 +10,7 @@
 #include "EditorModel.h"
 #include "GenericMessageDialog.h"
 #include "StyleRepository.h"
+#include "EditorController.h"
 
 namespace
 {
@@ -71,6 +72,11 @@ void MultiplierWindow::processIntern()
     ImGui::EndDisabled();
 
     validateAndCorrect();
+}
+
+bool MultiplierWindow::isShown()
+{
+    return _on && EditorController::get().isOn();
 }
 
 void MultiplierWindow::processGridPanel()
