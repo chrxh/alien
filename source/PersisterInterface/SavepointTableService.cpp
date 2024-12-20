@@ -73,7 +73,8 @@ std::vector<SavepointEntry> SavepointTableService::truncate(SavepointTable& tabl
 
     for (auto const& entry : entries | std::views::drop(newSize)) {
         if (entry->state == SavepointState_Persisted) {
-            SerializerService::get().deleteSimulation(entry->filename);
+            auto filename = calcAbsolutePath(table, entry);
+            SerializerService::get().deleteSimulation(filename);
         } else {
             result.emplace_back(entry);
         }
@@ -99,12 +100,28 @@ void SavepointTableService::updateEntry(SavepointTable& table, int row, Savepoin
 
 void SavepointTableService::deleteEntry(SavepointTable& table, SavepointEntry const& entry) const
 {
-    if (entry->state == SavepointState_Persisted) {
-        SerializerService::get().deleteSimulation(entry->filename);
+    if (!entry->filename.empty()) {
+        auto filename = calcAbsolutePath(table, entry);
+        SerializerService::get().deleteSimulation(filename);
     }
 
     table._entries.erase(std::remove(table._entries.begin(), table._entries.end(), entry), table._entries.end());
     updateFile(table);
+}
+
+std::filesystem::path SavepointTableService::calcAbsolutePath(SavepointTable const& table, SavepointEntry const& entry) const
+{
+    //compatibility with v4.11
+    if (entry->filename.is_absolute()) {
+        return entry->filename;
+    }
+
+    return table.getFilename().parent_path() / entry->filename;
+}
+
+std::filesystem::path SavepointTableService::calcEntryPath(SavepointTable const& table, std::filesystem::path const& absolutePath) const
+{
+    return std::filesystem::relative(absolutePath, table.getFilename().parent_path());
 }
 
 void SavepointTableService::updateFile(SavepointTable& table) const

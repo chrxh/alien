@@ -25,6 +25,9 @@ public:
     void updateEntry(SavepointTable& table, int row, SavepointEntry const& newEntry) const;
     void deleteEntry(SavepointTable& table, SavepointEntry const& entry) const;
 
+    std::filesystem::path calcAbsolutePath(SavepointTable const& table, SavepointEntry const& entry) const;
+    std::filesystem::path calcEntryPath(SavepointTable const& table, std::filesystem::path const& absolutePath) const;
+
 private:
     void updateFile(SavepointTable& table) const;
     void encodeDecode(boost::property_tree::ptree& tree, SavepointTable& table, ParserTask task) const;
