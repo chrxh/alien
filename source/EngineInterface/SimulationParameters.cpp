@@ -149,9 +149,6 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         if (genomeComplexityDepthLevel[i] != other.genomeComplexityDepthLevel[i]) {
             return false;
         }
-        if (cellMinSelfReplicatorGenomeSize[i] != other.cellMinSelfReplicatorGenomeSize[i]) {
-            return false;
-        }
     }
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
@@ -196,9 +193,8 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize && cellDeathConsequences == other.cellDeathConsequences
         && cellFunctionSensorSignalThreshold == other.cellFunctionSensorSignalThreshold
         && cellFunctionMuscleBendingAccelerationThreshold == other.cellFunctionMuscleBendingAccelerationThreshold
-        && cellCopyMutationSelfReplication == other.cellCopyMutationSelfReplication
-        && cellMaxAgeBalancer == other.cellMaxAgeBalancer && cellMaxAgeBalancerInterval == other.cellMaxAgeBalancerInterval
-        && cellCopyMutationPreventDepthIncrease == other.cellCopyMutationPreventDepthIncrease
+        && cellCopyMutationSelfReplication == other.cellCopyMutationSelfReplication && cellMaxAgeBalancer == other.cellMaxAgeBalancer
+        && cellMaxAgeBalancerInterval == other.cellMaxAgeBalancerInterval && cellCopyMutationPreventDepthIncrease == other.cellCopyMutationPreventDepthIncrease
         && cellFunctionConstructorCheckCompletenessForSelfReplication == other.cellFunctionConstructorCheckCompletenessForSelfReplication
         && cellFunctionAttackerDestroyCells == other.cellFunctionAttackerDestroyCells
         && cellFunctionReconnectorSignalThreshold == other.cellFunctionReconnectorSignalThreshold
@@ -214,12 +210,11 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && muscleMovementVisualization == other.muscleMovementVisualization
         && externalEnergyInflowOnlyForNonSelfReplicators == other.externalEnergyInflowOnlyForNonSelfReplicators
         && externalEnergyBackflowLimit == other.externalEnergyBackflowLimit && baseStrengthRatioPinned == other.baseStrengthRatioPinned
-        && showRadiationSources == other.showRadiationSources
-        && cellCopyMutationNeuronDataWeight == other.cellCopyMutationNeuronDataWeight
+        && showRadiationSources == other.showRadiationSources && cellCopyMutationNeuronDataWeight == other.cellCopyMutationNeuronDataWeight
         && cellCopyMutationNeuronDataBias == other.cellCopyMutationNeuronDataBias
         && cellCopyMutationNeuronDataActivationFunction == other.cellCopyMutationNeuronDataActivationFunction
         && cellCopyMutationNeuronDataReinforcement == other.cellCopyMutationNeuronDataReinforcement
         && cellCopyMutationNeuronDataDamping == other.cellCopyMutationNeuronDataDamping
         && cellCopyMutationNeuronDataOffset == other.cellCopyMutationNeuronDataOffset
-    ;
+        && cellCopyMutationDeletionMinSize == other.cellCopyMutationDeletionMinSize;
 }

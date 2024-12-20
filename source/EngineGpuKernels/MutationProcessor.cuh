@@ -145,9 +145,7 @@ __inline__ __device__ void MutationProcessor::checkMutationsForCell(SimulationDa
         auto numNodes = GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, true);
         auto numNonSeparatedNodes = GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, false);
         auto tooMuchSeparatedParts = numNodes > 2 * numNonSeparatedNodes;
-        auto tooSmall =
-            cudaSimulationParameters.features.advancedCellLifeCycleControl && numNonSeparatedNodes < cudaSimulationParameters.cellMinSelfReplicatorGenomeSize[cell->color];
-        if (tooMuchSeparatedParts || tooSmall) {
+        if (tooMuchSeparatedParts) {
             cell->livingState = LivingState_Dying;
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto const& connectedCell = cell->connections[i].cell;
@@ -493,6 +491,13 @@ __inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& dat
     if (GenomeDecoder::hasEmptyGenome(constructor)) {
         return;
     }
+
+    auto numNonSeparatedNodes = GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, false);
+    if (cudaSimulationParameters.features.customizeDeletionMutations
+        && numNonSeparatedNodes <= cudaSimulationParameters.cellCopyMutationDeletionMinSize) {
+        return;
+    }
+
 
     auto& genome = constructor.genome;
     auto const& genomeSize = constructor.genomeSize;

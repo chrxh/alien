@@ -2,11 +2,11 @@
 
 #include <imgui.h>
 
+#include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationFacade.h"
+#include "EngineInterface/SimulationParametersEditService.h"
 #include "EngineInterface/SimulationParametersTypes.h"
 #include "EngineInterface/SimulationParametersUpdateConfig.h"
-#include "EngineInterface/Descriptions.h"
-#include "EngineInterface/SimulationParametersEditService.h"
 #include "EngineInterface/SimulationParametersValidationService.h"
 
 #include "AlienImGui.h"
@@ -55,7 +55,6 @@ void _SimulationParametersBaseWidgets::process()
             AlienImGui::InputTextParameters().name("Project name").textWidth(RightColumnWidth).defaultValue(origParameters.projectName),
             parameters.projectName,
             sizeof(Char64) / sizeof(char));
-
     }
     AlienImGui::EndTreeNode();
     /**
@@ -490,15 +489,14 @@ void _SimulationParametersBaseWidgets::process()
                 .min(10.0f)
                 .max(200.0f)
                 .defaultValue(origParameters.cellNormalEnergy)
-                .tooltip(
-                    "The normal energy value of a cell is defined here. This is used as a reference value in various contexts: "
-                    "\n\n" ICON_FA_CHEVRON_RIGHT
-                    " Attacker and Transmitter cells: When the energy of these cells is above the normal value, some of their energy is distributed to "
-                    "surrounding cells.\n\n" ICON_FA_CHEVRON_RIGHT
-                    " Constructor cells: Creating new cells costs energy. The creation of new cells is executed only when the "
-                    "residual energy of the constructor cell does not fall below the normal value.\n\n" ICON_FA_CHEVRON_RIGHT
-                    " If the transformation of energy particles to "
-                    "cells is activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal value."),
+                .tooltip("The normal energy value of a cell is defined here. This is used as a reference value in various contexts: "
+                         "\n\n" ICON_FA_CHEVRON_RIGHT
+                         " Attacker and Transmitter cells: When the energy of these cells is above the normal value, some of their energy is distributed to "
+                         "surrounding cells.\n\n" ICON_FA_CHEVRON_RIGHT
+                         " Constructor cells: Creating new cells costs energy. The creation of new cells is executed only when the "
+                         "residual energy of the constructor cell does not fall below the normal value.\n\n" ICON_FA_CHEVRON_RIGHT
+                         " If the transformation of energy particles to "
+                         "cells is activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal value."),
             parameters.cellNormalEnergy);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -544,7 +542,8 @@ void _SimulationParametersBaseWidgets::process()
                 .logarithmic(true)
                 .colorDependence(true)
                 .defaultValue(origParameters.baseValues.cellCopyMutationNeuronData)
-                .tooltip("This type of mutation can change the weights, biases and activation functions of neural networks of each neuron cell encoded in the genome."),
+                .tooltip("This type of mutation can change the weights, biases and activation functions of neural networks of each neuron cell encoded in the "
+                         "genome."),
             parameters.baseValues.cellCopyMutationNeuronData);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -727,13 +726,12 @@ void _SimulationParametersBaseWidgets::process()
                 .name("Food chain color matrix")
                 .max(1)
                 .textWidth(RightColumnWidth)
-                .tooltip(
-                    "This matrix can be used to determine how well one cell can attack another cell. The color of the attacking cell correspond to the "
-                    "row "
-                    "number and the color of the attacked cell to the column number. A value of 0 means that the attacked cell cannot be digested, "
-                    "i.e. no energy can be obtained. A value of 1 means that the maximum energy can be obtained in the digestion process.\n\nExample: "
-                    "If a "
-                    "zero is entered in row 2 (red) and column 3 (green), it means that red cells cannot eat green cells.")
+                .tooltip("This matrix can be used to determine how well one cell can attack another cell. The color of the attacking cell correspond to the "
+                         "row "
+                         "number and the color of the attacked cell to the column number. A value of 0 means that the attacked cell cannot be digested, "
+                         "i.e. no energy can be obtained. A value of 1 means that the maximum energy can be obtained in the digestion process.\n\nExample: "
+                         "If a "
+                         "zero is entered in row 2 (red) and column 3 (green), it means that red cells cannot eat green cells.")
                 .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.baseValues.cellFunctionAttackerFoodChainColorMatrix)),
             parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix);
         AlienImGui::SliderFloat(
@@ -1114,12 +1112,11 @@ void _SimulationParametersBaseWidgets::process()
                 .min(0)
                 .max(1.0f)
                 .defaultValue(origParameters.cellFunctionAttackerSensorDetectionFactor)
-                .tooltip(
-                    "This parameter controls whether the target must be previously detected with sensors in order to be attacked. The larger this "
-                    "value is, the less energy can be gained during the attack if the target has not already been detected. For this purpose, the "
-                    "attacker "
-                    "cell searches for connected (or connected-connected) sensor cells to see which cell networks they have detected last time and "
-                    "compares them with the attacked target."),
+                .tooltip("This parameter controls whether the target must be previously detected with sensors in order to be attacked. The larger this "
+                         "value is, the less energy can be gained during the attack if the target has not already been detected. For this purpose, the "
+                         "attacker "
+                         "cell searches for connected (or connected-connected) sensor cells to see which cell networks they have detected last time and "
+                         "compares them with the attacked target."),
             parameters.cellFunctionAttackerSensorDetectionFactor);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -1177,26 +1174,6 @@ void _SimulationParametersBaseWidgets::process()
     AlienImGui::EndTreeNode();
 
     /**
-     * Expert settings: Advanced cell life cycle control
-     */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
-                                      .name("Expert settings: Advanced cell life cycle control")
-                                      .visible(parameters.features.advancedCellLifeCycleControl)
-                                      .blinkWhenActivated(true))) {
-        AlienImGui::SliderInt(
-            AlienImGui::SliderIntParameters()
-                .name("Minimum self-replicator genome size")
-                .textWidth(RightColumnWidth)
-                .colorDependence(true)
-                .min(0)
-                .max(1000)
-                .logarithmic(true)
-                .defaultValue(origParameters.cellMinSelfReplicatorGenomeSize),
-            parameters.cellMinSelfReplicatorGenomeSize);
-    }
-    AlienImGui::EndTreeNode();
-
-    /**
      * Expert settings: Cell color transition rules
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
@@ -1221,10 +1198,7 @@ void _SimulationParametersBaseWidgets::process()
                              "color are kept.");
             }
             AlienImGui::InputColorTransition(
-                widgetParameters,
-                color,
-                parameters.baseValues.cellColorTransitionTargetColor[color],
-                parameters.baseValues.cellColorTransitionDuration[color]);
+                widgetParameters, color, parameters.baseValues.cellColorTransitionTargetColor[color], parameters.baseValues.cellColorTransitionDuration[color]);
             ImGui::PopID();
         }
     }
@@ -1233,10 +1207,8 @@ void _SimulationParametersBaseWidgets::process()
     /**
      * Expert settings: Cell age limiter
      */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
-                                      .name("Expert settings: Cell age limiter")
-                                      .visible(parameters.features.cellAgeLimiter)
-                                      .blinkWhenActivated(true))) {
+    if (AlienImGui::BeginTreeNode(
+            AlienImGui::TreeNodeParameters().name("Expert settings: Cell age limiter").visible(parameters.features.cellAgeLimiter).blinkWhenActivated(true))) {
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Maximum inactive cell age")
@@ -1337,6 +1309,25 @@ void _SimulationParametersBaseWidgets::process()
                 .defaultValue(&origParameters.cellGlowStrength)
                 .tooltip("The strength of the glow."),
             &parameters.cellGlowStrength);
+    }
+    AlienImGui::EndTreeNode();
+
+    /**
+     * Expert settings: Customize deletion mutations
+     */
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
+                                      .name("Expert settings: Customize deletion mutations")
+                                      .visible(parameters.features.customizeDeletionMutations)
+                                      .blinkWhenActivated(true))) {
+        AlienImGui::SliderInt(
+            AlienImGui::SliderIntParameters()
+                .name("Minimum size")
+                .textWidth(RightColumnWidth)
+                .min(0)
+                .max(1000)
+                .logarithmic(true)
+                .defaultValue(&origParameters.cellCopyMutationDeletionMinSize),
+            &parameters.cellCopyMutationDeletionMinSize);
     }
     AlienImGui::EndTreeNode();
 
@@ -1450,11 +1441,10 @@ void _SimulationParametersBaseWidgets::process()
                 .max(1.0f)
                 .format("%.5f")
                 .defaultValue(origParameters.externalEnergyConditionalInflowFactor)
-                .tooltip(
-                    "Here one can specify the fraction of energy transferred to constructor cells if they can provide the remaining energy for the "
-                    "construction process.\n\nFor example, a value of 0.6 means that a constructor cell receives 60% of the energy required to "
-                    "build the new cell for free from the external energy source. However, it must provide 40% of the energy required by itself. "
-                    "Otherwise, no energy will be transferred."),
+                .tooltip("Here one can specify the fraction of energy transferred to constructor cells if they can provide the remaining energy for the "
+                         "construction process.\n\nFor example, a value of 0.6 means that a constructor cell receives 60% of the energy required to "
+                         "build the new cell for free from the external energy source. However, it must provide 40% of the energy required by itself. "
+                         "Otherwise, no energy will be transferred."),
             parameters.externalEnergyConditionalInflowFactor);
         AlienImGui::Checkbox(
             AlienImGui::CheckboxParameters()
@@ -1552,9 +1542,8 @@ void _SimulationParametersBaseWidgets::process()
     /**
      * Expert settings: Legacy behavior
      */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
-                                      .name("Expert settings: Legacy behavior").visible(parameters.features.legacyModes)
-                                      .blinkWhenActivated(true))) {
+    if (AlienImGui::BeginTreeNode(
+            AlienImGui::TreeNodeParameters().name("Expert settings: Legacy behavior").visible(parameters.features.legacyModes).blinkWhenActivated(true))) {
         AlienImGui::Checkbox(
             AlienImGui::CheckboxParameters()
                 .name("Fetch angle from adjacent sensor")
