@@ -314,6 +314,11 @@ void PatternEditorWindow::processIntern()
                            "If you hold down the SHIFT key, this toggle button is temporarily turned off.");
 }
 
+bool PatternEditorWindow::isShown()
+{
+    return _on && EditorController::get().isOn();
+}
+
 void PatternEditorWindow::onOpenPattern()
 {
     GenericFileDialog::get().showOpenFileDialog(

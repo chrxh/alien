@@ -3,6 +3,8 @@
 #include <imgui.h>
 
 #include "Base/StringHelper.h"
+
+#include "EditorController.h"
 #include "StyleRepository.h"
 #include "EditorModel.h"
 
@@ -33,4 +35,9 @@ void SelectionWindow::processIntern()
     ImGui::TextUnformatted(StringHelper::format(selection.numParticles).c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();
+}
+
+bool SelectionWindow::isShown()
+{
+    return _on && EditorController::get().isOn();
 }
