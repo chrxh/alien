@@ -887,6 +887,64 @@ TEST_F(MutationTests, deleteMutation_partiallyEraseGenome)
     EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
 }
 
+TEST_F(MutationTests, deleteMutation_selfReplicatorWithGenomeBelowMinSize)
+{
+    _parameters.features.customizeDeletionMutations = true;
+    _parameters.cellCopyMutationDeletionMinSize = 3;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells(
+        {CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()),
+        CellGenomeDescription(),
+        CellGenomeDescription(),
+    }));
+
+    auto data = DataDescription().addCells(
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome)).setLivingState(LivingState_Activating)});
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 10; ++i) {
+        _simulationFacade->testOnly_mutate(1, MutationType::Deletion);
+    }
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualCellById = getCellById(actualData);
+
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualGenome = GenomeDescriptionService::get().convertBytesToDescription(actualConstructor.genome);
+    
+    EXPECT_EQ(3, actualGenome.cells.size());
+}
+
+TEST_F(MutationTests, deleteMutation_selfReplicatorWithGenomeAboveMinSize)
+{
+    _parameters.features.customizeDeletionMutations = true;
+    _parameters.cellCopyMutationDeletionMinSize = 1;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({
+        CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()),
+        CellGenomeDescription(),
+        CellGenomeDescription(),
+    }));
+
+    auto data = DataDescription().addCells(
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome)).setLivingState(LivingState_Activating)});
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 10; ++i) {
+        _simulationFacade->testOnly_mutate(1, MutationType::Deletion);
+    }
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualCellById = getCellById(actualData);
+
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualGenome = GenomeDescriptionService::get().convertBytesToDescription(actualConstructor.genome);
+
+    EXPECT_EQ(1, actualGenome.cells.size());
+}
+
 TEST_F(MutationTests, duplicateMutation)
 {
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();

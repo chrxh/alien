@@ -4,12 +4,12 @@
 #include <cstring>
 
 #include "CellFunctionConstants.h"
-#include "SimulationParametersZoneValues.h"
-#include "RadiationSource.h"
-#include "SimulationParametersZone.h"
-#include "Motion.h"
 #include "Features.h"
+#include "Motion.h"
+#include "RadiationSource.h"
 #include "SimulationParametersTypes.h"
+#include "SimulationParametersZone.h"
+#include "SimulationParametersZoneValues.h"
 
 /**
  * NOTE: header is also included in kernel code
@@ -63,15 +63,15 @@ struct SimulationParameters
     MotionData motionData = {FluidMotion()};
 
     float innerFriction = 0.3f;
-    float cellMaxVelocity = 2.0f;              
+    float cellMaxVelocity = 2.0f;
     ColorVector<float> cellMaxBindingDistance = {3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f};
 
     ColorVector<float> cellNormalEnergy = {100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f};
-    float cellMinDistance = 0.3f;         
+    float cellMinDistance = 0.3f;
     float cellMaxForceDecayProb = 0.2f;
     int cellNumExecutionOrderNumbers = 6;
 
-    ColorVector<float> genomeComplexitySizeFactor  = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+    ColorVector<float> genomeComplexitySizeFactor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     ColorVector<float> genomeComplexityRamificationFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> genomeComplexityNeuronFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<int> genomeComplexityDepthLevel = {3, 3, 3, 3, 3, 3, 3};
@@ -103,9 +103,6 @@ struct SimulationParameters
         Infinity<int>::value,
         Infinity<int>::value,
         Infinity<int>::value};
-
-    // advanced cell life cycle control
-    ColorVector<int> cellMinSelfReplicatorGenomeSize = {0, 0, 0, 0, 0, 0, 0};
 
     bool cellMaxAgeBalancer = false;
     int cellMaxAgeBalancerInterval = 10000;
@@ -146,6 +143,9 @@ struct SimulationParameters
     float cellCopyMutationNeuronDataDamping = 1.05f;
     float cellCopyMutationNeuronDataOffset = 0.05f;
 
+    // customize deletion mutations setting
+    int cellCopyMutationDeletionMinSize = 0;
+
     ColorVector<float> cellFunctionInjectorRadius = {3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f};
     ColorMatrix<int> cellFunctionInjectorDurationColorMatrix = {
         {3, 3, 3, 3, 3, 3, 3},
@@ -154,8 +154,7 @@ struct SimulationParameters
         {3, 3, 3, 3, 3, 3, 3},
         {3, 3, 3, 3, 3, 3, 3},
         {3, 3, 3, 3, 3, 3, 3},
-        {3, 3, 3, 3, 3, 3, 3}
-    };
+        {3, 3, 3, 3, 3, 3, 3}};
     float cellFunctionInjectorSignalThreshold = 0.1f;
 
     ColorVector<float> cellFunctionAttackerRadius = {1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f};
@@ -170,8 +169,7 @@ struct SimulationParameters
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}
-    };
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     ColorVector<float> cellFunctionAttackerSensorDetectionFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     float cellFunctionAttackerSignalThreshold = 0.1f;
     bool cellFunctionAttackerDestroyCells = false;

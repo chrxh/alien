@@ -1,14 +1,14 @@
 #include "SimulationParametersMainWindow.h"
 
 #include <ImFileDialog.h>
+
 #include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/StringHelper.h"
-#include "EngineInterface/SimulationParametersEditService.h"
 #include "EngineInterface/SimulationFacade.h"
+#include "EngineInterface/SimulationParametersEditService.h"
 #include "PersisterInterface/SerializerService.h"
 
-#include "AlienImGui.h"
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
 #include "LocationController.h"
@@ -16,6 +16,7 @@
 #include "OverlayController.h"
 #include "SimulationParametersSourceWidgets.h"
 #include "SimulationParametersZoneWidgets.h"
+#include "AlienImGui.h"
 #include "Viewport.h"
 
 namespace
@@ -145,18 +146,12 @@ void SimulationParametersMainWindow::processToolbar()
     AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
-                                      .text(ICON_FA_PLUS)
-                                      .secondText(ICON_FA_LAYER_GROUP)
-                                      .tooltip("Add parameter zone"))) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_LAYER_GROUP).tooltip("Add parameter zone"))) {
         onAddZone();
     }
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
-                                      .text(ICON_FA_PLUS)
-                                      .secondText(ICON_FA_SUN)
-                                      .tooltip("Add radiation source"))) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_SUN).tooltip("Add radiation source"))) {
         onAddSource();
     }
 
@@ -165,16 +160,13 @@ void SimulationParametersMainWindow::processToolbar()
                                       .text(ICON_FA_PLUS)
                                       .secondText(ICON_FA_CLONE)
                                       .disabled(_selectedLocationIndex == 0)
-                                      .tooltip("Clone selected zone/radiation source")))
-        {
+                                      .tooltip("Clone selected zone/radiation source"))) {
         onCloneLocation();
     }
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
-                                      .text(ICON_FA_MINUS)
-                                      .disabled(_selectedLocationIndex == 0)
-                                      .tooltip("Delete selected zone/radiation source"))) {
+    if (AlienImGui::ToolbarButton(
+            AlienImGui::ToolbarButtonParameters().text(ICON_FA_MINUS).disabled(_selectedLocationIndex == 0).tooltip("Delete selected zone/radiation source"))) {
         onDeleteLocation();
     }
 
@@ -201,8 +193,9 @@ void SimulationParametersMainWindow::processToolbar()
     AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(
-            AlienImGui::ToolbarButtonParameters().text(ICON_FA_EXTERNAL_LINK_SQUARE_ALT).tooltip("Open parameters for selected zone/radiation source in a new window"))) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
+                                      .text(ICON_FA_EXTERNAL_LINK_SQUARE_ALT)
+                                      .tooltip("Open parameters for selected zone/radiation source in a new window"))) {
         onOpenInLocationWindow();
     }
 
@@ -237,8 +230,10 @@ void SimulationParametersMainWindow::processDetailWidget()
     auto height = getDetailWidgetHeight();
     if (ImGui::BeginChild("##detail", {0, height})) {
         auto title = _filter.empty() ? "Parameters" : "Parameters (filtered)";
-        if (_detailWidgetOpen =
-                AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name((std::string(title) + "###parameters").c_str()).rank(AlienImGui::TreeNodeRank::High).defaultOpen(_detailWidgetOpen))) {
+        if (_detailWidgetOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
+                                                              .name((std::string(title) + "###parameters").c_str())
+                                                              .rank(AlienImGui::TreeNodeRank::High)
+                                                              .defaultOpen(_detailWidgetOpen))) {
             ImGui::Spacing();
             AlienImGui::SetFilterText(_filter);
             if (ImGui::BeginChild(
@@ -277,7 +272,7 @@ void SimulationParametersMainWindow::processExpertWidget()
         if (_expertWidgetOpen = AlienImGui::BeginTreeNode(
                 AlienImGui::TreeNodeParameters().name("Expert settings").rank(AlienImGui::TreeNodeRank::High).defaultOpen(_expertWidgetOpen))) {
             if (ImGui::BeginChild("##expert2", {0, 0}, ImGuiChildFlags_Border, ImGuiWindowFlags_HorizontalScrollbar)) {
-                    processExpertSettings();
+                processExpertSettings();
             }
             ImGui::EndChild();
         }
@@ -298,7 +293,7 @@ void SimulationParametersMainWindow::processLocationTable()
 {
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
         | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
-    
+
     if (ImGui::BeginTable("Locations", 4, flags, ImVec2(-1, -1), 0)) {
 
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
@@ -345,8 +340,7 @@ void SimulationParametersMainWindow::processLocationTable()
                 // position
                 ImGui::TableNextColumn();
                 if (row > 0) {
-                    if (AlienImGui::ActionButton(
-                            AlienImGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH))) {
+                    if (AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH))) {
                         onCenterLocation(row);
                     }
                     ImGui::SameLine();
@@ -385,9 +379,6 @@ void SimulationParametersMainWindow::processExpertSettings()
             .tooltip("It contains further settings that influence how much energy can be obtained from an attack by attacker cells."),
         parameters.features.advancedAttackerControl);
     AlienImGui::Checkbox(
-        AlienImGui::CheckboxParameters().name("Advanced cell life cycle control").textWidth(0).defaultValue(origFeatures.advancedCellLifeCycleControl),
-        parameters.features.advancedCellLifeCycleControl);
-    AlienImGui::Checkbox(
         AlienImGui::CheckboxParameters()
             .name("Cell age limiter")
             .textWidth(0)
@@ -409,18 +400,19 @@ void SimulationParametersMainWindow::processExpertSettings()
             .tooltip("It enables an additional rendering step that makes the cells glow."),
         parameters.features.cellGlow);
     AlienImGui::Checkbox(
-        AlienImGui::CheckboxParameters()
-            .name("Customize neuron mutations")
-            .textWidth(0)
-            .defaultValue(origFeatures.customizeNeuronMutations),
+        AlienImGui::CheckboxParameters().name("Customize deletion mutations").textWidth(0).defaultValue(origFeatures.customizeDeletionMutations),
+        parameters.features.customizeDeletionMutations);
+    AlienImGui::Checkbox(
+        AlienImGui::CheckboxParameters().name("Customize neuron mutations").textWidth(0).defaultValue(origFeatures.customizeNeuronMutations),
         parameters.features.customizeNeuronMutations);
     AlienImGui::Checkbox(
         AlienImGui::CheckboxParameters()
             .name("External energy control")
             .textWidth(0)
             .defaultValue(origFeatures.externalEnergyControl)
-            .tooltip("These settings are used to add and control an external energy source. Its energy can be gradually transferred to the constructor cells in the "
-                     "simulation. Vice versa, the energy from radiation and dying cells can also be transferred back to the external source."),
+            .tooltip(
+                "These settings are used to add and control an external energy source. Its energy can be gradually transferred to the constructor cells in the "
+                "simulation. Vice versa, the energy from radiation and dying cells can also be transferred back to the external source."),
         parameters.features.externalEnergyControl);
     AlienImGui::Checkbox(
         AlienImGui::CheckboxParameters()
@@ -756,9 +748,7 @@ void SimulationParametersMainWindow::correctLayout(float origMasterHeight, float
 {
     auto detailHeight = ImGui::GetWindowSize().y - getMasterWidgetRefHeight() - getExpertWidgetRefHeight();
 
-    if (detailHeight < scale(DetailWidgetMinHeight)
-        || _masterWidgetHeight < scale(MasterMinHeight)
-        || _expertWidgetHeight < scale(ExpertWidgetMinHeight)) {
+    if (detailHeight < scale(DetailWidgetMinHeight) || _masterWidgetHeight < scale(MasterMinHeight) || _expertWidgetHeight < scale(ExpertWidgetMinHeight)) {
         _masterWidgetHeight = origMasterHeight;
         _expertWidgetHeight = origExpertWidgetHeight;
     }
