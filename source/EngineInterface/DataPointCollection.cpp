@@ -29,7 +29,7 @@ DataPointCollection DataPointCollection::operator+(DataPointCollection const& ot
     result.numSelfReplicators = numSelfReplicators + other.numSelfReplicators;
     result.numColonies = numColonies + other.numColonies;
     result.numViruses = numViruses + other.numViruses;
-    result.numConnections = numConnections + other.numConnections;
+    result.numFreeCells = numFreeCells + other.numFreeCells;
     result.numParticles = numParticles + other.numParticles;
     result.averageGenomeCells = averageGenomeCells + other.averageGenomeCells;
     result.averageGenomeComplexity = averageGenomeComplexity + other.averageGenomeComplexity;
@@ -62,7 +62,7 @@ DataPointCollection DataPointCollection::operator/(double divisor) const
     result.numSelfReplicators = numSelfReplicators / divisor;
     result.numColonies = numColonies / divisor;
     result.numViruses = numViruses / divisor;
-    result.numConnections = numConnections / divisor;
+    result.numFreeCells = numFreeCells / divisor;
     result.numParticles = numParticles / divisor;
     result.averageGenomeCells = averageGenomeCells / divisor;
     result.averageGenomeComplexity = averageGenomeComplexity / divisor;

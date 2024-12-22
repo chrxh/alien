@@ -314,12 +314,6 @@ void StatisticsWindow::processTimelineStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPointCollection::numConnections);
-        ImGui::TableSetColumnIndex(1);
-        AlienImGui::Text("Cell connections");
-
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numParticles);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Energy particles");
@@ -376,6 +370,12 @@ void StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Viruses");
 
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        processPlot(row++, &DataPointCollection::numFreeCells);
+        ImGui::TableSetColumnIndex(1);
+        AlienImGui::Text("Free cells");
+
         ImPlot::PopColormap();
 
         ImGui::EndTable();
@@ -383,7 +383,7 @@ void StatisticsWindow::processTimelineStatistics()
     ImGui::PopID();
 
     ImGui::Spacing();
-    AlienImGui::Group("Processes per time step and cell");
+    AlienImGui::Group("Processes per time step and free cell");
     ImGui::PushID(2);
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_BordersInnerH, ImVec2(-1, 0))) {
         ImGui::TableSetupColumn("##");
