@@ -929,7 +929,7 @@ __inline__ __device__ void MutationProcessor::propertiesMutationNode(SimulationD
         prevExecutionNumber = GenomeDecoder::getNextExecutionNumber(genome, prevNodeAddress);
     }
     if (nextNodeAddress < genomeSize - 1) {
-        nextExecutionNumber = GenomeDecoder::getNextExecutionNumber(genome, nextExecutionNumber);
+        nextExecutionNumber = GenomeDecoder::getNextExecutionNumber(genome, nextNodeAddress);
     }
 
     //basic property mutation
