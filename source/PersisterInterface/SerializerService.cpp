@@ -1253,7 +1253,7 @@ namespace
         loadSave(task, serializedData, 1 + 0 * 8, dataPoints.numCells);
         loadSave(task, serializedData, 1 + 1 * 8, dataPoints.numSelfReplicators);
         loadSave(task, serializedData, 1 + 2 * 8, dataPoints.numViruses);
-        loadSave(task, serializedData, 1 + 3 * 8, dataPoints.numConnections);
+        loadSave(task, serializedData, 1 + 3 * 8, dataPoints.numFreeCells);
         loadSave(task, serializedData, 1 + 4 * 8, dataPoints.numParticles);
         loadSave(task, serializedData, 1 + 5 * 8, dataPoints.averageGenomeCells);
         loadSave(task, serializedData, 1 + 6 * 8, dataPoints.totalEnergy);
@@ -1292,7 +1292,7 @@ void SerializerService::serializeStatistics(StatisticsHistoryData const& statist
     writeLabelAllColors("Cells");
     writeLabelAllColors("Self-replicators");
     writeLabelAllColors("Viruses");
-    writeLabelAllColors("Cell connections");
+    writeLabelAllColors("Free cells");
     writeLabelAllColors("Energy particles");
     writeLabelAllColors("Average genome cells");
     writeLabelAllColors("Total energy");

@@ -16,7 +16,9 @@ __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, Simul
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& cell = cells.at(index);
             statistics.incNumCells(cell->color);
-            statistics.incNumConnections(cell->color, cell->numConnections);
+            if (cell->mutationId == Const::MutationIdForFreeCell) {
+                statistics.incNumFreeCells(cell->color);
+            }
             statistics.addEnergy(cell->color, cell->energy);
             if (cell->cellFunction == CellFunction_Constructor && GenomeDecoder::containsSelfReplication(cell->cellFunctionData.constructor)) {
                 statistics.incNumReplicator(cell->color);
