@@ -1216,101 +1216,99 @@ namespace
         return ss.str();        
     }
 
-    std::vector<std::pair<std::string, int>> const ColumnDescriptions = {
-        {"Time step", 1},
-        {"Cells", 8},
-        {"Self-replicators", 8},
-        {"Viruses", 8},
-        {"Free cells", 8},
-        {"Energy particles", 8},
-        {"Average genome cells", 8},
-        {"Total energy", 8},
-        {"Created cells", 8},
-        {"Attacks", 8},
-        {"Muscle activities", 8},
-        {"Transmitter activities", 8},
-        {"Defender activities", 8},
-        {"Injection activities", 8},
-        {"Completed injections", 8},
-        {"Nerve pulses", 8},
-        {"Neuron activities", 8},
-        {"Sensor activities", 8},
-        {"Sensor matches", 8},
-        {"Reconnector creations", 8},
-        {"Reconnector deletions", 8},
-        {"Detonations", 8},
-        {"Colonies", 8},
-        {"Genome complexity average", 8},
-        {"Genome complexity Maximum", 8},
-        {"Genome complexity variance", 8},
-        {"System clock", 1}};
-
-    std::variant<DataPoint*, double*> indexToDatapoint(int index, DataPointCollection& dataPoints)
+    struct ColumnDescription
     {
-        if (index == 0) {
+        std::string name;
+        bool colorDependent = false;
+    };
+    std::vector<ColumnDescription> const ColumnDescriptions = {
+        {"Time step", false},
+        {"Cells", true},
+        {"Self-replicators", true},
+        {"Viruses", true},
+        {"Free cells", true},
+        {"Energy particles", true},
+        {"Average genome cells", true},
+        {"Total energy", true},
+        {"Created cells", true},
+        {"Attacks", true},
+        {"Muscle activities", true},
+        {"Transmitter activities", true},
+        {"Defender activities", true},
+        {"Injection activities", true},
+        {"Completed injections", true},
+        {"Nerve pulses", true},
+        {"Neuron activities", true},
+        {"Sensor activities", true},
+        {"Sensor matches", true},
+        {"Reconnector creations", true},
+        {"Reconnector deletions", true},
+        {"Detonations", true},
+        {"Colonies", true},
+        {"Genome complexity average", true},
+        {"Genome complexity Maximum", true},
+        {"Genome complexity variance", true},
+        {"System clock", false}};
+
+    std::variant<DataPoint*, double*> getDataRef(int colIndex, DataPointCollection& dataPoints)
+    {
+        if (colIndex == 0) {
             return &dataPoints.time;
-        } else if (index == 1) {
+        } else if (colIndex == 1) {
             return &dataPoints.numCells;
-        } else if (index == 2) {
+        } else if (colIndex == 2) {
             return &dataPoints.numSelfReplicators;
-        } else if (index == 3) {
+        } else if (colIndex == 3) {
             return &dataPoints.numViruses;
-        } else if (index == 4) {
+        } else if (colIndex == 4) {
             return &dataPoints.numFreeCells;
-        } else if (index == 5) {
+        } else if (colIndex == 5) {
             return &dataPoints.numParticles;
-        } else if (index == 6) {
+        } else if (colIndex == 6) {
             return &dataPoints.averageGenomeCells;
-        } else if (index == 7) {
+        } else if (colIndex == 7) {
             return &dataPoints.totalEnergy;
-        } else if (index == 8) {
+        } else if (colIndex == 8) {
             return &dataPoints.numCreatedCells;
-        } else if (index == 9) {
+        } else if (colIndex == 9) {
             return &dataPoints.numAttacks;
-        } else if (index == 10) {
+        } else if (colIndex == 10) {
             return &dataPoints.numMuscleActivities;
-        } else if (index == 11) {
+        } else if (colIndex == 11) {
             return &dataPoints.numDefenderActivities;
-        } else if (index == 12) {
+        } else if (colIndex == 12) {
             return &dataPoints.numTransmitterActivities;
-        } else if (index == 13) {
+        } else if (colIndex == 13) {
             return &dataPoints.numInjectionActivities;
-        } else if (index == 14) {
+        } else if (colIndex == 14) {
             return &dataPoints.numCompletedInjections;
-        } else if (index == 15) {
+        } else if (colIndex == 15) {
             return &dataPoints.numNervePulses;
-        } else if (index == 16) {
+        } else if (colIndex == 16) {
             return &dataPoints.numNeuronActivities;
-        } else if (index == 17) {
+        } else if (colIndex == 17) {
             return &dataPoints.numSensorActivities;
-        } else if (index == 18) {
+        } else if (colIndex == 18) {
             return &dataPoints.numSensorMatches;
-        } else if (index == 19) {
+        } else if (colIndex == 19) {
             return &dataPoints.numReconnectorCreated;
-        } else if (index == 20) {
+        } else if (colIndex == 20) {
             return &dataPoints.numReconnectorRemoved;
-        } else if (index == 21) {
+        } else if (colIndex == 21) {
             return &dataPoints.numDetonations;
-        } else if (index == 22) {
+        } else if (colIndex == 22) {
             return &dataPoints.numColonies;
-        } else if (index == 23) {
+        } else if (colIndex == 23) {
             return &dataPoints.averageGenomeComplexity;
-        } else if (index == 24) {
+        } else if (colIndex == 24) {
             return &dataPoints.maxGenomeComplexityOfColonies;
-        } else if (index == 25) {
+        } else if (colIndex == 25) {
             return &dataPoints.varianceGenomeComplexity;
-        } else if (index == 26) {
+        } else if (colIndex == 26) {
             return &dataPoints.systemClock;
         }
         THROW_NOT_IMPLEMENTED();
     }
-
-    struct ColumnInfo
-    {
-        std::string name;
-        std::optional<int> colIndex;
-        int size = 0;
-    };
 
     void load(int startIndex, std::vector<std::string>& serializedData, double& value)
     {
@@ -1345,7 +1343,13 @@ namespace
         serializedData.emplace_back(toString(dataPoint.summedValues));
     }
 
-    void load(std::vector<ColumnInfo> const& colInfos, std::vector<std::string>& serializedData, DataPointCollection& dataPoints)
+    struct ParsedColumnInfo
+    {
+        std::string name;
+        std::optional<int> colIndex;
+        int size = 0;
+    };
+    void load(std::vector<ParsedColumnInfo> const& colInfos, std::vector<std::string>& serializedData, DataPointCollection& dataPoints)
     {
         int startIndex = 0;
         for (auto const& colInfo : colInfos) {
@@ -1354,7 +1358,7 @@ namespace
                 continue;
             }
             auto col = colInfo.colIndex.value();
-            auto data = indexToDatapoint(col, dataPoints);
+            auto data = getDataRef(col, dataPoints);
             if (std::holds_alternative<DataPoint*>(data)) {
                 load(startIndex, serializedData, *std::get<DataPoint*>(data));
             }
@@ -1369,7 +1373,7 @@ namespace
     {
         int index = 0;
         for (auto const& column : ColumnDescriptions) {
-            auto data = indexToDatapoint(index, dataPoints);
+            auto data = getDataRef(index, dataPoints);
             if (std::holds_alternative<DataPoint*>(data)) {
                 save(serializedData, *std::get<DataPoint*>(data));
             }
@@ -1394,7 +1398,7 @@ namespace
     std::optional<int> getColumnIndex(std::string const& colName)
     {
         for (auto const& [index, colDescription] : ColumnDescriptions | boost::adaptors::indexed(0)) {
-            if (colDescription.first == colName) {
+            if (colDescription.name == colName) {
                 return toInt(index);
             }
         }
@@ -1416,11 +1420,11 @@ void SerializerService::serializeStatistics(StatisticsHistoryData const& statist
     };
 
     int index = 0;
-    for (auto const& [colName, size]: ColumnDescriptions) {
+    for (auto const& [colName, colorDependent]: ColumnDescriptions) {
         if (index != 0) {
             stream << ", ";
         }
-        if (size == 1) {
+        if (!colorDependent) {
             stream << colName;
         }
         else {
@@ -1451,7 +1455,7 @@ void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics,
     std::vector<std::string> colNames;
     boost::split(colNames, header, boost::is_any_of(","));
 
-    std::vector<ColumnInfo> colInfos;
+    std::vector<ParsedColumnInfo> colInfos;
         for (auto const& colName : colNames) {
         auto principalPart = getPrincipalPart(colName);
 
