@@ -34,10 +34,15 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     __shared__ Signal outputSignal;
     __shared__ Signal inputSignal;
     if (0 == threadIdx.x) {
-        inputSignal = CellFunctionProcessor::calcInputSignal(cell);
+        inputSignal = CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
         CellFunctionProcessor::updateInvocationState(cell, inputSignal);
     }
     __syncthreads();
+
+    if (!inputSignal.active) {
+        CellFunctionProcessor::setSignal(cell, inputSignal);
+        return;
+    }
 
     __shared__ float sumInput[MAX_CHANNELS];
     auto channelPartition = calcPartition(MAX_CHANNELS, threadIdx.x, blockDim.x);

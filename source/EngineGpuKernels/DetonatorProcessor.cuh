@@ -34,7 +34,7 @@ __device__ __inline__ void DetonatorProcessor::process(SimulationData& data, Sim
 
 __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto signal = CellFunctionProcessor::calcInputSignal(cell);
+    auto signal = CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
     CellFunctionProcessor::updateInvocationState(cell, signal);
 
     auto& detonator = cell->cellFunctionData.detonator;

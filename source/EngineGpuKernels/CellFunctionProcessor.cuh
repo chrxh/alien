@@ -13,7 +13,7 @@ public:
     __inline__ __device__ static void updateRenderingData(SimulationData& data);
     __inline__ __device__ static void resetFetchedSignals(SimulationData& data);
 
-    __inline__ __device__ static Signal calcInputSignal(Cell* cell);
+    __inline__ __device__ static Signal updateFutureSignalOriginsAndReturnInputSignal(Cell* cell);
     __inline__ __device__ static void setSignal(Cell* cell, Signal const& newSignal);
     __inline__ __device__ static void updateInvocationState(Cell* cell, Signal const& signal);
 
@@ -110,9 +110,10 @@ __inline__ __device__ void CellFunctionProcessor::resetFetchedSignals(Simulation
     }
 }
 
-__inline__ __device__ Signal CellFunctionProcessor::calcInputSignal(Cell* cell)
+__inline__ __device__ Signal CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(Cell* cell)
 {
     Signal result;
+    result.active = false;
     result.origin = SignalOrigin_Unknown;
     result.targetX = 0;
     result.targetY = 0;
@@ -121,56 +122,64 @@ __inline__ __device__ Signal CellFunctionProcessor::calcInputSignal(Cell* cell)
         result.channels[i] = 0;
     }
 
-    if (cell->inputExecutionOrderNumber == -1 || cell->inputExecutionOrderNumber == cell->executionOrderNumber) {
-        return result;
-    }
-
     int numSensorSignals = 0;
+    int numSignalOrigins = 0;
     for (int i = 0, j = cell->numConnections; i < j; ++i) {
         auto connectedCell = cell->connections[i].cell;
-        if (connectedCell->outputBlocked || connectedCell->livingState == LivingState_UnderConstruction
-            || connectedCell->livingState == LivingState_Activating) {
+        if (connectedCell->livingState == LivingState_UnderConstruction
+            || connectedCell->outputBlocked
+            || connectedCell->inputExecutionOrderNumber == cell->executionOrderNumber) {
             continue;
         }
-        if (connectedCell->executionOrderNumber == cell->inputExecutionOrderNumber) {
-            for (int i = 0; i < MAX_CHANNELS; ++i) {
-                result.channels[i] += connectedCell->signal.channels[i];
-                result.channels[i] = max(-10.0f, min(10.0f, result.channels[i])); //truncate value to avoid overflow
-            }
-            if (connectedCell->signal.origin == SignalOrigin_Sensor) {
-                result.origin = SignalOrigin_Sensor;
-                result.targetX += connectedCell->signal.targetX;
-                result.targetY += connectedCell->signal.targetY;
-                ++numSensorSignals;
+        int skip = false;
+        for (int k = 0, l = connectedCell->numSignalOrigins; k < l; ++k) {
+            if (connectedCell->signalOrigins[k] == cell->id) {
+                skip = true;
+                break;
             }
         }
+        if (skip) {
+            continue;
+        }
+        result.active = true;
+        for (int k = 0; k < MAX_CHANNELS; ++k) {
+            result.channels[k] += connectedCell->signal.channels[k];
+            result.channels[k] = max(-10.0f, min(10.0f, result.channels[k])); // truncate value to avoid overflow
+        }
+        if (connectedCell->signal.origin == SignalOrigin_Sensor) {
+            result.origin = SignalOrigin_Sensor;
+            result.targetX += connectedCell->signal.targetX;
+            result.targetY += connectedCell->signal.targetY;
+            ++numSensorSignals;
+        }
+        cell->futureSignalOrigins[numSignalOrigins] = connectedCell->id;
+        ++numSignalOrigins;
     }
+    cell->futureNumSignalOrigins = numSignalOrigins;
     if (numSensorSignals > 0) {
-        result.targetX /= numSensorSignals;
-        result.targetY /= numSensorSignals;
+        result.targetX /= toFloat(numSensorSignals);
+        result.targetY /= toFloat(numSensorSignals);
     }
     return result;
 }
 
 __inline__ __device__ void CellFunctionProcessor::setSignal(Cell* cell, Signal const& newSignal)
 {
-    for (int i = 0; i < MAX_CHANNELS; ++i) {
-        cell->signal.channels[i] = newSignal.channels[i];
+    cell->futureSignal.active = newSignal.active;
+    if (newSignal.active) {
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            cell->futureSignal.channels[i] = newSignal.channels[i];
+        }
+        cell->futureSignal.origin = newSignal.origin;
+        cell->futureSignal.targetX = newSignal.targetX;
+        cell->futureSignal.targetY = newSignal.targetY;
     }
-    cell->signal.origin = newSignal.origin;
-    cell->signal.targetX = newSignal.targetX;
-    cell->signal.targetY = newSignal.targetY;
 }
 
 __inline__ __device__ void CellFunctionProcessor::updateInvocationState(Cell* cell, Signal const& signal)
 {
-    if (cell->cellFunctionUsed == CellFunctionUsed_No) {
-        for (int i = 0; i < MAX_CHANNELS - 1; ++i) {
-            if (signal.channels[i] != 0) {
-                cell->cellFunctionUsed = CellFunctionUsed_Yes;
-                break;
-            }
-        }
+    if (signal.active) {
+        cell->cellFunctionUsed = CellFunctionUsed_Yes;
     }
 }
 

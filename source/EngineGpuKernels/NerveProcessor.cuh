@@ -27,7 +27,7 @@ __inline__ __device__ void NerveProcessor::process(SimulationData& data, Simulat
         auto const& operation = operations.at(i);
         auto const& cell = operation.cell;
 
-        auto signal = CellFunctionProcessor::calcInputSignal(cell);
+        auto signal = CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
         CellFunctionProcessor::updateInvocationState(cell, signal);
 
         auto const& nerve = cell->cellFunctionData.nerve;

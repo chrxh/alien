@@ -102,7 +102,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
     if (!GenomeDecoder::isFirstNode(constructor)) {
         return;
     }
-    auto signal = CellFunctionProcessor::calcInputSignal(cell);
+    auto signal = CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
     if (!isConstructionTriggered(data, cell, signal)) {
         return;
     }
@@ -149,7 +149,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
 __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
-    auto signal = CellFunctionProcessor::calcInputSignal(cell);
+    auto signal = CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
     CellFunctionProcessor::updateInvocationState(cell, signal);
     if (!GenomeDecoder::isFinished(constructor)) {
         auto constructionData = readConstructionData(cell);

@@ -39,7 +39,7 @@ __device__ __inline__ void MuscleProcessor::process(SimulationData& data, Simula
 
 __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto signal = CellFunctionProcessor::calcInputSignal(cell);
+    auto signal = CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
     CellFunctionProcessor::updateInvocationState(cell, signal);
 
     cell->cellFunctionData.muscle.lastMovementX = 0;
