@@ -71,6 +71,7 @@ struct CellConnection
 
 struct Signal
 {
+    bool active;
     float channels[MAX_CHANNELS];
     SignalOrigin origin;
     float targetX;
@@ -222,16 +223,21 @@ struct Cell
     float genomeComplexity;
 
     //cell function
+    Signal signal;
+    int numSignalOrigins;
+    uint64_t signalOrigins[MAX_CELL_BONDS];
     uint8_t executionOrderNumber;
     int8_t inputExecutionOrderNumber;
     bool outputBlocked;
     CellFunction cellFunction;
     CellFunctionData cellFunctionData;
-    Signal signal;
     uint32_t activationTime;
     CellFunctionUsed cellFunctionUsed;
 
     //process data
+    Signal futureSignal;
+    int futureNumSignalOrigins;
+    uint64_t futureSignalOrigins[MAX_CELL_BONDS];
     uint16_t detectedByCreatureId;  //only the first 16 bits from the creature id
 
     //annotations

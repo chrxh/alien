@@ -28,7 +28,7 @@ __device__ __inline__ void InjectorProcessor::process(SimulationData& data, Simu
 
 __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto signal = CellFunctionProcessor::calcInputSignal(cell);
+    auto signal = CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
     CellFunctionProcessor::updateInvocationState(cell, signal);
 
     if (abs(signal.channels[0]) >= cudaSimulationParameters.cellFunctionInjectorSignalThreshold) {
