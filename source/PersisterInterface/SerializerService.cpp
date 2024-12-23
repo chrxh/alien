@@ -1216,7 +1216,7 @@ namespace
         return ss.str();        
     }
 
-    std::vector<std::pair<std::string, int>> const ColumnsAndSizes = {
+    std::vector<std::pair<std::string, int>> const ColumnDescriptions = {
         {"Time step", 1},
         {"Cells", 8},
         {"Self-replicators", 8},
@@ -1312,76 +1312,71 @@ namespace
         int size = 0;
     };
 
-    void loadSave(
-        SerializationTask task,
-        int startIndex,
-        std::vector<std::string>& serializedData,
-        double& value)
+    void load(int startIndex, std::vector<std::string>& serializedData, double& value)
     {
-        if (task == SerializationTask::Load) {
-            if (startIndex < serializedData.size()) {
-                value = std::stod(serializedData.at(startIndex));
-            }
-        } else {
-            serializedData.emplace_back(toString(value));
+        if (startIndex < serializedData.size()) {
+            value = std::stod(serializedData.at(startIndex));
         }
     }
 
-    void loadSave(
-        SerializationTask task,
-        int startIndex,
-        std::vector<std::string>& serializedData,
-        DataPoint& dataPoint)
+    void save(std::vector<std::string>& serializedData, double& value)
     {
-        if (task == SerializationTask::Load) {
-            for (int i = 0; i < MAX_COLORS; ++i) {
-                auto index = startIndex + i;
-                if (index < serializedData.size()) {
-                    dataPoint.values[i] = std::stod(serializedData.at(index));
-                }
+        serializedData.emplace_back(toString(value));
+    }
+
+    void load(int startIndex, std::vector<std::string>& serializedData, DataPoint& dataPoint)
+    {
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            auto index = startIndex + i;
+            if (index < serializedData.size()) {
+                dataPoint.values[i] = std::stod(serializedData.at(index));
             }
-            if (startIndex + 7 < serializedData.size()) {
-                dataPoint.summedValues = std::stod(serializedData.at(startIndex + 7));
-            }
-        } else {
-            for (int i = 0; i < MAX_COLORS; ++i) {
-                serializedData.emplace_back(toString(dataPoint.values[i]));
-            }
-            serializedData.emplace_back(toString(dataPoint.summedValues));
+        }
+        if (startIndex + 7 < serializedData.size()) {
+            dataPoint.summedValues = std::stod(serializedData.at(startIndex + 7));
         }
     }
 
-    void loadSave(SerializationTask task, std::vector<ColumnInfo> const& colInfos, std::vector<std::string>& serializedData, DataPointCollection& dataPoints)
+    void save(std::vector<std::string>& serializedData, DataPoint& dataPoint)
     {
-        if (task == SerializationTask::Load) {
-            int startIndex = 0;
-            for (auto const& colInfo : colInfos) {
-                if (!colInfo.colIndex.has_value()) {
-                    startIndex += colInfo.size;
-                    continue;
-                }
-                auto col = colInfo.colIndex.value();
-                auto data = indexToDatapoint(col, dataPoints);
-                if (std::holds_alternative<DataPoint*>(data)) {
-                    loadSave(task, startIndex, serializedData, *std::get<DataPoint*>(data));
-                }
-                if (std::holds_alternative<double*>(data)) {
-                    loadSave(task, startIndex, serializedData, *std::get<double*>(data));
-                }
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            serializedData.emplace_back(toString(dataPoint.values[i]));
+        }
+        serializedData.emplace_back(toString(dataPoint.summedValues));
+    }
+
+    void load(std::vector<ColumnInfo> const& colInfos, std::vector<std::string>& serializedData, DataPointCollection& dataPoints)
+    {
+        int startIndex = 0;
+        for (auto const& colInfo : colInfos) {
+            if (!colInfo.colIndex.has_value()) {
                 startIndex += colInfo.size;
+                continue;
             }
-        } else {
-            int index = 0;
-            for (auto const& column : ColumnsAndSizes) {
-                auto data = indexToDatapoint(index, dataPoints);
-                if (std::holds_alternative<DataPoint*>(data)) {
-                    loadSave(task, 0, serializedData, *std::get<DataPoint*>(data));
-                }
-                if (std::holds_alternative<double*>(data)) {
-                    loadSave(task, 0, serializedData, *std::get<double*>(data));
-                }
-                ++index;
+            auto col = colInfo.colIndex.value();
+            auto data = indexToDatapoint(col, dataPoints);
+            if (std::holds_alternative<DataPoint*>(data)) {
+                load(startIndex, serializedData, *std::get<DataPoint*>(data));
             }
+            if (std::holds_alternative<double*>(data)) {
+                load(startIndex, serializedData, *std::get<double*>(data));
+            }
+            startIndex += colInfo.size;
+        }
+    }
+
+    void save(std::vector<std::string>& serializedData, DataPointCollection& dataPoints)
+    {
+        int index = 0;
+        for (auto const& column : ColumnDescriptions) {
+            auto data = indexToDatapoint(index, dataPoints);
+            if (std::holds_alternative<DataPoint*>(data)) {
+                save(serializedData, *std::get<DataPoint*>(data));
+            }
+            if (std::holds_alternative<double*>(data)) {
+                save(serializedData, *std::get<double*>(data));
+            }
+            ++index;
         }
     }
 
@@ -1396,10 +1391,10 @@ namespace
         }
     }
 
-    std::optional<int> getColumnIndex(std::string const& columnName)
+    std::optional<int> getColumnIndex(std::string const& colName)
     {
-        for (auto const& [index, columnAndSize] : ColumnsAndSizes | boost::adaptors::indexed(0)) {
-            if (columnAndSize.first == columnName) {
+        for (auto const& [index, colDescription] : ColumnDescriptions | boost::adaptors::indexed(0)) {
+            if (colDescription.first == colName) {
                 return toInt(index);
             }
         }
@@ -1410,23 +1405,35 @@ namespace
 void SerializerService::serializeStatistics(StatisticsHistoryData const& statistics, std::ostream& stream)
 {
     //header row
-    stream << "Time step";
     auto writeLabelAllColors = [&stream](auto const& name) {
         for (int i = 0; i < MAX_COLORS; ++i) {
-            stream << "," << name << " (color " << i << ")";
+            if (i != 0) {
+                stream << ",";
+            }
+            stream << name << " (color " << i << ")";
         }
         stream << "," << name << " (accumulated)";
     };
 
-    for (auto const& column : ColumnsAndSizes) {
-        writeLabelAllColors(column.first);
+    int index = 0;
+    for (auto const& [colName, size]: ColumnDescriptions) {
+        if (index != 0) {
+            stream << ", ";
+        }
+        if (size == 1) {
+            stream << colName;
+        }
+        else {
+            writeLabelAllColors(colName);
+        }
+        ++index;
     }
     stream << std::endl;
 
     //content
     for (auto dataPoints : statistics) {
         std::vector<std::string> entries;
-        loadSave(SerializationTask::Save, {}, entries, dataPoints);
+        save(entries, dataPoints);
         stream << boost::join(entries, ",") << std::endl;
     }
 }
@@ -1444,9 +1451,6 @@ void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics,
     std::vector<std::string> colNames;
     boost::split(colNames, header, boost::is_any_of(","));
 
-    //std::vector<std::string> colNamesTrimmed;
-    //std::vector<int> colSizes;
-
     std::vector<ColumnInfo> colInfos;
         for (auto const& colName : colNames) {
         auto principalPart = getPrincipalPart(colName);
@@ -1463,12 +1467,13 @@ void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics,
         }
     }
 
+    // data lines
     while (std::getline(stream, header)) {
         std::vector<std::string> entries;
         boost::split(entries, header, boost::is_any_of(","));
 
         DataPointCollection dataPoints;
-        loadSave(SerializationTask::Load, colInfos, entries, dataPoints);
+        load(colInfos, entries, dataPoints);
 
         statistics.emplace_back(dataPoints);
     }
