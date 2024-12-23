@@ -1259,9 +1259,8 @@ bool AlienImGui::CollapseButton(bool collapsed)
 
 bool AlienImGui::BeginTreeNode(TreeNodeParameters const& parameters)
 {
-    if (_treeNodeStack.size() > 10) {
-        THROW_NOT_IMPLEMENTED();
-    }
+    CHECK(_treeNodeStack.size() < 10);
+
     auto forceTreeNodeOpen = isFilterActive();
 
     if (matchWithFilter(parameters._name)) {
@@ -1354,9 +1353,8 @@ void AlienImGui::EndTreeNode()
 
 void AlienImGui::SetFilterText(std::string const& value)
 {
-    if (_filterStack.size() > 10) {
-        THROW_NOT_IMPLEMENTED();
-    }
+    CHECK(_filterStack.size() < 10);
+
     _filterStack.emplace_back(value);
 }
 
