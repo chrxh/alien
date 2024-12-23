@@ -129,7 +129,7 @@ namespace Const
         "none is set, the cell can receive no input signals.";
 
     std::string const GenomeBlockOutputTooltip =
-        "Activating this toggle, the cell's output can be locked, preventing any other cell from utilizing it as input.";
+        "Activating this toggle, the cell's output will be discarded. This prevents any other cell from utilizing it as input.";
 
     std::string const GenomeRequiredConnectionsTooltip =
         "By default, cells in the genome sequence are automatically connected to all neighboring cells belonging to the same genome when they "
