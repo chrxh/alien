@@ -164,7 +164,7 @@ void AutosaveWindow::processTable()
                 auto const& entry = _savepointTable->at(row);
 
                 ImGui::PushID(row);
-                ImGui::TableNextRow(0, scale(ImGui::GetTextLineHeightWithSpacing()));
+                ImGui::TableNextRow(0, scale(23.0f));
 
                 // project name
                 ImGui::TableNextColumn();
