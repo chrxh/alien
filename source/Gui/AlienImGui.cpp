@@ -1285,8 +1285,8 @@ bool AlienImGui::BeginTreeNode(TreeNodeParameters const& parameters)
     TreeNodeInfo info = _treeNodeInfoById.contains(id) ? _treeNodeInfoById.at(id) : TreeNodeInfo();
     int highlightCountdown = 0;
     if (parameters._blinkWhenActivated) {
-        highlightCountdown = std::max(0ll, 1000 - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - info.invisibleTimepoint)
-                      .count());
+        highlightCountdown = std::max(0, toInt(1000 - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - info.invisibleTimepoint)
+                      .count()));
         if (highlightCountdown > 0) {
             ImGui::SetScrollHereY();
         }
