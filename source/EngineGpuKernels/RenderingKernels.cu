@@ -490,7 +490,7 @@ __global__ void cudaDrawCells(
         drawCircle(imageData, imageSize, cellImagePos, secondaryColor, cellRadius, shadedCells, true);
 
         //draw signal
-        if (cell->isActive() && zoom >= cudaSimulationParameters.zoomLevelNeuronalActivity) {
+        if (cell->signal.active && zoom >= cudaSimulationParameters.zoomLevelNeuronalActivity) {
             drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, cellRadius, shadedCells);
         }
 
