@@ -38,7 +38,6 @@ __device__ __inline__ void ReconnectorProcessor::process(SimulationData& data, S
 __device__ __inline__ void ReconnectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     auto signal = CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
-    CellFunctionProcessor::updateInvocationState(cell, signal);
 
     if (signal.channels[0] >= cudaSimulationParameters.cellFunctionReconnectorSignalThreshold) {
         tryCreateConnection(data, statistics, cell, signal);

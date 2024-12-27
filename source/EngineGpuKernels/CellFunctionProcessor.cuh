@@ -15,7 +15,6 @@ public:
 
     __inline__ __device__ static Signal updateFutureSignalOriginsAndReturnInputSignal(Cell* cell);
     __inline__ __device__ static void setSignal(Cell* cell, Signal const& newSignal);
-    __inline__ __device__ static void updateInvocationState(Cell* cell, Signal const& signal);
 
     struct ReferenceAndActualAngle
     {
@@ -40,9 +39,8 @@ __inline__ __device__ void CellFunctionProcessor::collectCellFunctionOperations(
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        auto executionOrderNumber = getCurrentExecutionNumber(data, cell);
 
-        if (cell->cellFunction != CellFunction_None && cell->executionOrderNumber == executionOrderNumber) {
+        if (cell->cellFunction != CellFunction_None) {
             if (cell->cellFunction == CellFunction_Detonator && cell->cellFunctionData.detonator.state == DetonatorState_Activated) {
                 data.cellFunctionOperations[cell->cellFunction].tryAddEntry(CellFunctionOperation{cell});
             } else if (cell->livingState != LivingState_UnderConstruction && cell->livingState != LivingState_Activating && cell->activationTime == 0) {
@@ -165,6 +163,9 @@ __inline__ __device__ Signal CellFunctionProcessor::updateFutureSignalOriginsAnd
 
 __inline__ __device__ void CellFunctionProcessor::setSignal(Cell* cell, Signal const& newSignal)
 {
+    if (newSignal.active) {
+        cell->cellFunctionUsed = CellFunctionUsed_Yes;
+    }
     cell->futureSignal.active = newSignal.active;
     if (newSignal.active) {
         for (int i = 0; i < MAX_CHANNELS; ++i) {
@@ -176,12 +177,6 @@ __inline__ __device__ void CellFunctionProcessor::setSignal(Cell* cell, Signal c
     }
 }
 
-__inline__ __device__ void CellFunctionProcessor::updateInvocationState(Cell* cell, Signal const& signal)
-{
-    if (signal.active) {
-        cell->cellFunctionUsed = CellFunctionUsed_Yes;
-    }
-}
 
 __inline__ __device__ CellFunctionProcessor::ReferenceAndActualAngle
 CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData& data, Cell* cell, float angleDeviation)

@@ -41,8 +41,7 @@ __device__ __inline__ void AttackerProcessor::process(SimulationData& data, Simu
 
 __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto signal = CellFunctionProcessor::calcInputSignal(cell);
-    CellFunctionProcessor::updateInvocationState(cell, signal);
+    auto signal = CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
 
     if (abs(signal.channels[0]) >= cudaSimulationParameters.cellFunctionAttackerSignalThreshold) {
         float energyDelta = 0;

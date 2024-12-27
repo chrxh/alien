@@ -150,7 +150,6 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 {
     auto& constructor = cell->cellFunctionData.constructor;
     auto signal = CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
-    CellFunctionProcessor::updateInvocationState(cell, signal);
     if (!GenomeDecoder::isFinished(constructor)) {
         auto constructionData = readConstructionData(cell);
         auto cellBuilt = false;

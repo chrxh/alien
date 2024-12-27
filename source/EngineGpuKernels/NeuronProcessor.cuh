@@ -35,7 +35,6 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     __shared__ Signal inputSignal;
     if (0 == threadIdx.x) {
         inputSignal = CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
-        CellFunctionProcessor::updateInvocationState(cell, inputSignal);
     }
     __syncthreads();
 

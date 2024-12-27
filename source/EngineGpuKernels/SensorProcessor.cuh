@@ -51,8 +51,7 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
 {
     __shared__ Signal signal;
     if (threadIdx.x == 0) {
-        signal = CellFunctionProcessor::calcInputSignal(cell);
-        CellFunctionProcessor::updateInvocationState(cell, signal);
+        signal = CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
     }
     __syncthreads();
 

@@ -270,16 +270,6 @@ struct Cell
     float clusterAngularMass;
     uint32_t numCellsInCluster;
 
-    __device__ __inline__ bool isActive()
-    {
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
-            if (abs(signal.channels[i]) > NEAR_ZERO) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     __device__ __inline__ uint8_t* getGenome()
     {
         if (cellFunction == CellFunction_Constructor) {
