@@ -145,6 +145,11 @@ __global__ void cudaNextTimestep_cellFunction_detonator(SimulationData data, Sim
     DetonatorProcessor::process(data, statistics);
 }
 
+__global__ void cudaNextTimestep_cellFunction_updateSignal(SimulationData data, SimulationStatistics statistics)
+{
+    CellFunctionProcessor::updateSignals(data);
+}
+
 __global__ void cudaNextTimestep_physics_applyInnerFriction(SimulationData data)
 {
     CellProcessor::applyInnerFriction(data);

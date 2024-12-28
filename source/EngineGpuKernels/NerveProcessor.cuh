@@ -33,6 +33,7 @@ __inline__ __device__ void NerveProcessor::process(SimulationData& data, Simulat
         auto counter = (cell->age / cudaSimulationParameters.cellNumExecutionOrderNumbers) * cudaSimulationParameters.cellNumExecutionOrderNumbers
             + cell->executionOrderNumber % cudaSimulationParameters.cellNumExecutionOrderNumbers;
         if (nerve.pulseMode > 0 && cell->age % nerve.pulseMode == 0) {
+            signal.active = true;
             statistics.incNumNervePulses(cell->color);
             if (nerve.alternationMode == 0) {
                 signal.channels[0] += 1.0f;

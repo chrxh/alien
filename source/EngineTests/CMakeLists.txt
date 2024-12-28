@@ -15,6 +15,7 @@ PUBLIC
     MutationTests.cpp
     NerveTests.cpp
     NeuronTests.cpp
+    NewNerveTests.cpp
     ReconnectorTests.cpp
     SensorTests.cpp
     StatisticsTests.cpp
