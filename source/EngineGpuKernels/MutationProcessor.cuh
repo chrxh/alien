@@ -142,8 +142,8 @@ __inline__ __device__ void MutationProcessor::checkMutationsForCell(SimulationDa
 {
     auto& constructor = cell->cellFunctionData.constructor;
     if (GenomeDecoder::containsSelfReplication(constructor)) {
-        auto numNodes = GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, true);
-        auto numNonSeparatedNodes = GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, false);
+        auto numNodes = GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, true, true);
+        auto numNonSeparatedNodes = GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, true, false);
         auto tooMuchSeparatedParts = numNodes > 2 * numNonSeparatedNodes;
         if (tooMuchSeparatedParts) {
             cell->livingState = LivingState_Dying;
