@@ -512,6 +512,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         result.signal.channels[i] = cellTO.signal.channels[i];
     }
+    result.signal.active = cellTO.signal.active;
     result.signal.origin = cellTO.signal.origin;
     result.signal.targetX = cellTO.signal.targetX;
     result.signal.targetY = cellTO.signal.targetY;
@@ -675,6 +676,7 @@ void DescriptionConverter::addCell(
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cellTO.signal.channels[i] = cellDesc.signal.channels[i];
     }
+    cellTO.signal.active = cellDesc.signal.active;
     cellTO.signal.origin = cellDesc.signal.origin;
     cellTO.signal.targetX = cellDesc.signal.targetX;
     cellTO.signal.targetY = cellDesc.signal.targetY;
