@@ -34,12 +34,11 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     __shared__ Signal outputSignal;
     __shared__ Signal inputSignal;
     if (0 == threadIdx.x) {
-        inputSignal = SignalProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
+        inputSignal = cell->signal;
     }
     __syncthreads();
 
     if (!inputSignal.active) {
-        SignalProcessor::setSignal(cell, inputSignal);
         return;
     }
 
@@ -67,10 +66,7 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     
 
     if (0 == threadIdx.x) {
-        outputSignal.origin = inputSignal.origin;
-        outputSignal.targetX = inputSignal.targetX;
-        outputSignal.targetY = inputSignal.targetY;
-        SignalProcessor::setSignal(cell, outputSignal);
+        cell->signal = outputSignal;
         statistics.incNumNeuronActivities(cell->color);
     }
     __syncthreads();

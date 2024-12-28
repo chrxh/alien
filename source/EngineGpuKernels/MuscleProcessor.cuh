@@ -15,9 +15,9 @@ public:
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
-    __inline__ __device__ static void movement(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Signal& signal);
-    __inline__ __device__ static void contractionExpansion(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Signal const& signal);
-    __inline__ __device__ static void bending(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Signal const& signal);
+    __inline__ __device__ static void movement(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void contractionExpansion(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void bending(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
     __inline__ __device__ static int getConnectionIndex(Cell* cell, Cell* otherCell);
     __inline__ __device__ static bool hasTriangularConnection(Cell* cell, Cell* otherCell);
@@ -39,24 +39,20 @@ __device__ __inline__ void MuscleProcessor::process(SimulationData& data, Simula
 
 __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto signal = SignalProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
-
     cell->cellFunctionData.muscle.lastMovementX = 0;
     cell->cellFunctionData.muscle.lastMovementY = 0;
 
     switch (cell->cellFunctionData.muscle.mode) {
     case MuscleMode_Movement: {
-        movement(data, statistics, cell, signal);
+        movement(data, statistics, cell);
     } break;
     case MuscleMode_ContractionExpansion: {
-        contractionExpansion(data, statistics, cell, signal);
+        contractionExpansion(data, statistics, cell);
     } break;
     case MuscleMode_Bending: {
-        bending(data, statistics, cell, signal);
+        bending(data, statistics, cell);
     } break;
     }
-
-    SignalProcessor::setSignal(cell, signal);
 }
 
 
@@ -83,9 +79,9 @@ namespace
     }
 }
 
-__device__ __inline__ void MuscleProcessor::movement(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Signal& signal)
+__device__ __inline__ void MuscleProcessor::movement(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    if (abs(signal.channels[0]) < NEAR_ZERO) {
+    if (abs(cell->signal.channels[0]) < NEAR_ZERO) {
         return;
     }
     if (!cell->tryLock()) {
@@ -104,8 +100,8 @@ __device__ __inline__ void MuscleProcessor::movement(SimulationData& data, Simul
                 }
             }
         } else {
-            if (signal.origin == SignalOrigin_Sensor && (signal.targetX != 0 || signal.targetY != 0)) {
-                direction = {signal.targetX, signal.targetY};
+            if (cell->signal.origin == SignalOrigin_Sensor && (cell->signal.targetX != 0 || cell->signal.targetY != 0)) {
+                direction = {cell->signal.targetX, cell->signal.targetY};
                 acceleration = cudaSimulationParameters.cellFunctionMuscleMovementAcceleration[cell->color];
             }
         }
@@ -113,8 +109,8 @@ __device__ __inline__ void MuscleProcessor::movement(SimulationData& data, Simul
         direction = SignalProcessor::calcSignalDirection(data, cell);
         acceleration = cudaSimulationParameters.cellFunctionMuscleMovementAcceleration[cell->color];
     }
-    float angle = max(-0.5f, min(0.5f, signal.channels[3])) * 360.0f;
-    direction = Math::normalized(Math::rotateClockwise(direction, angle)) * acceleration * getTruncatedUnitValue(signal);
+    float angle = max(-0.5f, min(0.5f, cell->signal.channels[3])) * 360.0f;
+    direction = Math::normalized(Math::rotateClockwise(direction, angle)) * acceleration * getTruncatedUnitValue(cell->signal);
     cell->vel += direction;
     cell->cellFunctionData.muscle.lastMovementX = direction.x;
     cell->cellFunctionData.muscle.lastMovementY = direction.y;
@@ -123,9 +119,9 @@ __device__ __inline__ void MuscleProcessor::movement(SimulationData& data, Simul
     radiate(data, cell);
 }
 
-__device__ __inline__ void MuscleProcessor::contractionExpansion(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Signal const& signal)
+__device__ __inline__ void MuscleProcessor::contractionExpansion(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    if (abs(signal.channels[0]) < NEAR_ZERO) {
+    if (abs(cell->signal.channels[0]) < NEAR_ZERO) {
         return;
     }
     if (!cell->tryLock()) {
@@ -140,11 +136,11 @@ __device__ __inline__ void MuscleProcessor::contractionExpansion(SimulationData&
                 continue;
             }
             auto newDistance =
-                connection.distance + cudaSimulationParameters.cellFunctionMuscleContractionExpansionDelta[cell->color] * getTruncatedUnitValue(signal);
-            if (signal.channels[0] > 0 && newDistance >= maxDistance) {
+                connection.distance + cudaSimulationParameters.cellFunctionMuscleContractionExpansionDelta[cell->color] * getTruncatedUnitValue(cell->signal);
+            if (cell->signal.channels[0] > 0 && newDistance >= maxDistance) {
                 continue;
             }
-            if (signal.channels[0] < 0 && newDistance <= minDistance) {
+            if (cell->signal.channels[0] < 0 && newDistance <= minDistance) {
                 continue;
             }
             connection.distance = newDistance;
@@ -159,9 +155,9 @@ __device__ __inline__ void MuscleProcessor::contractionExpansion(SimulationData&
     radiate(data, cell);
 }
 
-__inline__ __device__ void MuscleProcessor::bending(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Signal const& signal)
+__inline__ __device__ void MuscleProcessor::bending(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    if (abs(signal.channels[0]) < NEAR_ZERO) {
+    if (abs(cell->signal.channels[0]) < NEAR_ZERO) {
         return;
     }
     if (cell->numConnections < 2) {
@@ -173,7 +169,7 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
     for (int i = 0; i < cell->numConnections; ++i) {
         auto& connection = cell->connections[i];
         //if (connection.cell->executionOrderNumber == cell->inputExecutionOrderNumber) {
-            auto intensityChannel0 = getTruncatedUnitValue(signal);
+        auto intensityChannel0 = getTruncatedUnitValue(cell->signal);
             auto bendingAngle = cudaSimulationParameters.cellFunctionMuscleBendingAngle[cell->color] * intensityChannel0;
 
             if (bendingAngle < 0 && connection.angleFromPrevious <= -bendingAngle) {
@@ -203,11 +199,11 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
             cell->cellFunctionData.muscle.lastBendingDirection = bendingDirection;
             cell->cellFunctionData.muscle.lastBendingSourceIndex = i;
 
-            if (abs(signal.channels[1]) > cudaSimulationParameters.cellFunctionMuscleBendingAccelerationThreshold
+            if (abs(cell->signal.channels[1]) > cudaSimulationParameters.cellFunctionMuscleBendingAccelerationThreshold
                 && !hasTriangularConnection(cell, connection.cell)) {
                 auto delta = Math::normalized(data.cellMap.getCorrectedDirection(connection.cell->pos - cell->pos));
                 Math::rotateQuarterCounterClockwise(delta);
-                auto intensityChannel1 = getTruncatedUnitValue(signal, 1);
+                auto intensityChannel1 = getTruncatedUnitValue(cell->signal, 1);
                 if ((intensityChannel0 < -NEAR_ZERO && intensityChannel1 < -NEAR_ZERO) || (intensityChannel0 > NEAR_ZERO && intensityChannel1 > NEAR_ZERO)) {
                     auto acceleration = delta * intensityChannel0 * cudaSimulationParameters.cellFunctionMuscleBendingAcceleration[cell->color]
                         * sqrtf(cell->cellFunctionData.muscle.consecutiveBendingAngle + 1.0f) / 20 /*abs(bendingAngle) / 10*/;

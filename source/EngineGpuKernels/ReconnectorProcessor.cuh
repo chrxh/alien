@@ -18,8 +18,8 @@ public:
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
-    __inline__ __device__ static void tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Signal& signal);
-    __inline__ __device__ static void removeConnections(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Signal& signal);
+    __inline__ __device__ static void tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void removeConnections(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 };
 
 /************************************************************************/
@@ -37,17 +37,14 @@ __device__ __inline__ void ReconnectorProcessor::process(SimulationData& data, S
 
 __device__ __inline__ void ReconnectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto signal = SignalProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
-
-    if (signal.channels[0] >= cudaSimulationParameters.cellFunctionReconnectorSignalThreshold) {
-        tryCreateConnection(data, statistics, cell, signal);
-    } else if (signal.channels[0] <= -cudaSimulationParameters.cellFunctionReconnectorSignalThreshold) {
-        removeConnections(data, statistics, cell, signal);
+    if (cell->signal.channels[0] >= cudaSimulationParameters.cellFunctionReconnectorSignalThreshold) {
+        tryCreateConnection(data, statistics, cell);
+    } else if (cell->signal.channels[0] <= -cudaSimulationParameters.cellFunctionReconnectorSignalThreshold) {
+        removeConnections(data, statistics, cell);
     }
-    SignalProcessor::setSignal(cell, signal);
 }
 
-__inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Signal& signal)
+__inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     auto const& reconnector = cell->cellFunctionData.reconnector;
     Cell* closestCell = nullptr;
@@ -93,7 +90,7 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
         }
     });
 
-    signal.channels[0] = 0;
+    cell->signal.channels[0] = 0;
     if (closestCell) {
         SystemDoubleLock lock;
         lock.init(&cell->locked, &closestCell->locked);
@@ -102,7 +99,7 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
                 closestCell->maxConnections = min(max(closestCell->maxConnections, closestCell->numConnections + 1), MAX_CELL_BONDS);
                 cell->maxConnections = min(max(cell->maxConnections, cell->numConnections + 1), MAX_CELL_BONDS);
                 CellConnectionProcessor::scheduleAddConnectionPair(data, cell, closestCell);
-                signal.channels[0] = 1;
+                cell->signal.channels[0] = 1;
                 statistics.incNumReconnectorCreated(cell->color);
             }
             lock.releaseLock();
@@ -110,15 +107,15 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
     }
 }
 
-__inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Signal& signal)
+__inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    signal.channels[0] = 0;
+    cell->signal.channels[0] = 0;
     if (cell->tryLock()) {
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
             if (connectedCell->creatureId != cell->creatureId) {
                 CellConnectionProcessor::scheduleDeleteConnectionPair(data, cell, connectedCell);
-                signal.channels[0] = 1;
+                cell->signal.channels[0] = 1;
                 statistics.incNumReconnectorRemoved(cell->color);
             }
         }
