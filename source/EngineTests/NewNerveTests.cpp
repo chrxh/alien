@@ -142,8 +142,6 @@ TEST_F(NewNerveTests, generatePulse_timeBeforeFirstPulseAlternation)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(97 * 2);
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
-
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
@@ -160,8 +158,6 @@ TEST_F(NewNerveTests, generatePulse_timeAtFirstPulseAlternation)
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(97 * 3);
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
