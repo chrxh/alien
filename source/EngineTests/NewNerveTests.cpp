@@ -64,6 +64,23 @@ TEST_F(NewNerveTests, timeDuringPulse)
     EXPECT_EQ(1.0f, nerve.signal.channels.at(0));
 }
 
+TEST_F(NewNerveTests, timeDuringSecondPulse)
+{
+    auto data = DataDescription().addCells({
+        CellDescription().setId(1).setCellFunction(NerveDescription().setPulseMode(97 * 2)),
+    });
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(97 * 2);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualCellById = getCellById(actualData);
+
+    auto nerve = actualCellById.at(1);
+    EXPECT_TRUE(nerve.signal.active);
+    EXPECT_EQ(1.0f, nerve.signal.channels.at(0));
+}
+
 TEST_F(NewNerveTests, timeAfterPulse)
 {
     auto data = DataDescription().addCells({
@@ -80,7 +97,7 @@ TEST_F(NewNerveTests, timeAfterPulse)
     EXPECT_FALSE(nerve.signal.active);
 }
 
-TEST_F(NewNerveTests, timeAfterAlternatingPulse)
+TEST_F(NewNerveTests, timeDuringPulse_beforeAlternation)
 {
     auto data = DataDescription().addCells({
         CellDescription().setId(1).setCellFunction(NerveDescription().setPulseMode(97).setAlternationMode(3)),
@@ -89,10 +106,50 @@ TEST_F(NewNerveTests, timeAfterAlternatingPulse)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(97 * 2);
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualCellById = getCellById(actualData);
+
+    auto nerve = actualCellById.at(1);
+    EXPECT_TRUE(nerve.signal.active);
+    EXPECT_EQ(1.0f, nerve.signal.channels.at(0));
+}
+
+TEST_F(NewNerveTests, timeDuringPulse_duringFirstAlternation)
+{
+    auto data = DataDescription().addCells({
+        CellDescription().setId(1).setCellFunction(NerveDescription().setPulseMode(97).setAlternationMode(3)),
+    });
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(97 * 3);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
     auto nerve = actualCellById.at(1);
     EXPECT_TRUE(nerve.signal.active);
     EXPECT_EQ(-1.0f, nerve.signal.channels.at(0));
+}
+
+TEST_F(NewNerveTests, timeDuringPulse_duringSecondAlternation)
+{
+    auto data = DataDescription().addCells({
+        CellDescription().setId(1).setCellFunction(NerveDescription().setPulseMode(97).setAlternationMode(3)),
+    });
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(97 * 6);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualCellById = getCellById(actualData);
+
+    auto nerve = actualCellById.at(1);
+    EXPECT_TRUE(nerve.signal.active);
+    EXPECT_EQ(1.0f, nerve.signal.channels.at(0));
 }
