@@ -157,7 +157,6 @@ __global__ void cudaNextTimestep_physics_applyInnerFriction(SimulationData data)
 
 __global__ void cudaNextTimestep_physics_applyFriction(SimulationData data)
 {
-    CellFunctionProcessor::resetFetchedSignals(data);
     CellProcessor::applyFriction(data);
     CellProcessor::decay(data);
 }

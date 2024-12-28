@@ -11,7 +11,6 @@ class CellFunctionProcessor
 public:
     __inline__ __device__ static void collectCellFunctionOperations(SimulationData& data);
     __inline__ __device__ static void updateRenderingData(SimulationData& data);
-    __inline__ __device__ static void resetFetchedSignals(SimulationData& data);
     __inline__ __device__ static void updateSignals(SimulationData& data);
 
     __inline__ __device__ static Signal updateFutureSignalOriginsAndReturnInputSignal(Cell* cell);
@@ -61,50 +60,6 @@ __inline__ __device__ void CellFunctionProcessor::updateRenderingData(Simulation
         auto& cell = cells.at(index);
         if (cell->eventCounter > 0) {
             --cell->eventCounter;
-        }
-    }
-}
-
-__inline__ __device__ void CellFunctionProcessor::resetFetchedSignals(SimulationData& data)
-{
-    auto& cells = data.objects.cellPointers;
-    auto partition = calcAllThreadsPartition(cells.getNumEntries());
-
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& cell = cells.at(index);
-        if (cell->cellFunction == CellFunction_None) {
-            for (int i = 0; i < MAX_CHANNELS; ++i) {
-                cell->signal.channels[i] = 0;
-            }
-            continue;
-        }
-        auto executionOrderNumber = getCurrentExecutionNumber(data, cell);
-        int maxOtherExecutionOrderNumber = -1;
-
-        if (!cell->outputBlocked) {
-            for (int i = 0, j = cell->numConnections; i < j; ++i) {
-                auto otherExecutionOrderNumber = cell->connections[i].cell->executionOrderNumber;
-                auto otherInputExecutionOrderNumber = cell->connections[i].cell->inputExecutionOrderNumber;
-                if (otherInputExecutionOrderNumber == cell->executionOrderNumber) {
-                    if (maxOtherExecutionOrderNumber == -1) {
-                        maxOtherExecutionOrderNumber = otherExecutionOrderNumber;
-                    } else {
-                        if ((maxOtherExecutionOrderNumber > cell->executionOrderNumber
-                             && (otherExecutionOrderNumber > maxOtherExecutionOrderNumber || otherExecutionOrderNumber < cell->executionOrderNumber))
-                            || (maxOtherExecutionOrderNumber < cell->executionOrderNumber && otherExecutionOrderNumber > maxOtherExecutionOrderNumber
-                                && otherExecutionOrderNumber < cell->executionOrderNumber)) {
-                            maxOtherExecutionOrderNumber = otherExecutionOrderNumber;
-                        }
-                    }
-                }
-            }
-        }
-        if ((maxOtherExecutionOrderNumber == -1
-             && executionOrderNumber == (cell->executionOrderNumber + 1) % cudaSimulationParameters.cellNumExecutionOrderNumbers)
-            || (maxOtherExecutionOrderNumber != -1 && maxOtherExecutionOrderNumber == executionOrderNumber)) {
-            for (int i = 0; i < MAX_CHANNELS; ++i) {
-                cell->signal.channels[i] = 0;
-            }
         }
     }
 }
