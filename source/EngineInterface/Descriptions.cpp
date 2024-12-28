@@ -276,7 +276,8 @@ DataDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2,
     auto& cell2 = getCellRef(cellId2, cache);
 
     auto addConnection = [this, &cache](auto& cell, auto& otherCell) {
-        CHECK(cell.connections.size() < cell.maxConnections);
+        CHECK(cell.connections.size() < MAX_CELL_BONDS);
+        cell.maxConnections = std::max(cell.maxConnections, toInt(cell.connections.size() + 1));
 
         auto newAngle = Math::angleOfVector(otherCell.pos - cell.pos);
 

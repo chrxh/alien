@@ -476,6 +476,7 @@ struct CellDescription
         CHECK(value.size() == MAX_CHANNELS);
 
         SignalDescription newSignal;
+        newSignal.active = true;
         newSignal.channels = value;
         signal = newSignal;
         return *this;

@@ -18,7 +18,7 @@ public:
 TEST_F(NewNerveTests, noSignal)
 {
     auto data = DataDescription().addCells({
-        CellDescription().setId(1).setCellFunction(NerveDescription().setPulseMode(0)),
+        CellDescription().setId(1).setCellFunction(NerveDescription()),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -31,7 +31,43 @@ TEST_F(NewNerveTests, noSignal)
     EXPECT_FALSE(nerve.signal.active);
 }
 
-TEST_F(NewNerveTests, timeBeforePulse)
+TEST_F(NewNerveTests, forwardInputSignal)
+{
+    auto data = DataDescription().addCells({
+        CellDescription().setId(1).setCellFunction(NerveDescription()).setSignal({1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0}),
+        CellDescription().setId(2).setCellFunction(NerveDescription()),
+    });
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+
+    {
+        _simulationFacade->calcTimesteps(1);
+
+        auto actualData = _simulationFacade->getSimulationData();
+        auto actualCellById = getCellById(actualData);
+
+        auto nerve1 = actualCellById.at(1);
+        EXPECT_FALSE(nerve1.signal.active);
+
+        auto nerve2 = actualCellById.at(2);
+        EXPECT_TRUE(nerve2.signal.active);
+    }
+    {
+        _simulationFacade->calcTimesteps(1);
+
+        auto actualData = _simulationFacade->getSimulationData();
+        auto actualCellById = getCellById(actualData);
+
+        auto nerve1 = actualCellById.at(1);
+        EXPECT_FALSE(nerve1.signal.active);
+
+        auto nerve2 = actualCellById.at(2);
+        EXPECT_FALSE(nerve2.signal.active);
+    }
+}
+
+TEST_F(NewNerveTests, generatePulse_timeBeforeFirstPulse)
 {
     auto data = DataDescription().addCells({
         CellDescription().setId(1).setCellFunction(NerveDescription().setPulseMode(97)),
@@ -47,7 +83,7 @@ TEST_F(NewNerveTests, timeBeforePulse)
     EXPECT_FALSE(nerve.signal.active);
 }
 
-TEST_F(NewNerveTests, timeDuringPulse)
+TEST_F(NewNerveTests, generatePulse_timeAtFirstPulse)
 {
     auto data = DataDescription().addCells({
         CellDescription().setId(1).setCellFunction(NerveDescription().setPulseMode(97)),
@@ -64,7 +100,7 @@ TEST_F(NewNerveTests, timeDuringPulse)
     EXPECT_EQ(1.0f, nerve.signal.channels.at(0));
 }
 
-TEST_F(NewNerveTests, timeDuringSecondPulse)
+TEST_F(NewNerveTests, generatePulse_timeAtSecondPulse)
 {
     auto data = DataDescription().addCells({
         CellDescription().setId(1).setCellFunction(NerveDescription().setPulseMode(97 * 2)),
@@ -81,7 +117,7 @@ TEST_F(NewNerveTests, timeDuringSecondPulse)
     EXPECT_EQ(1.0f, nerve.signal.channels.at(0));
 }
 
-TEST_F(NewNerveTests, timeAfterPulse)
+TEST_F(NewNerveTests, generatePulse_timeAfterFirstPulse)
 {
     auto data = DataDescription().addCells({
         CellDescription().setId(1).setCellFunction(NerveDescription().setPulseMode(97)),
@@ -97,7 +133,7 @@ TEST_F(NewNerveTests, timeAfterPulse)
     EXPECT_FALSE(nerve.signal.active);
 }
 
-TEST_F(NewNerveTests, timeDuringPulse_beforeAlternation)
+TEST_F(NewNerveTests, generatePulse_timeBeforeFirstPulseAlternation)
 {
     auto data = DataDescription().addCells({
         CellDescription().setId(1).setCellFunction(NerveDescription().setPulseMode(97).setAlternationMode(3)),
@@ -116,7 +152,7 @@ TEST_F(NewNerveTests, timeDuringPulse_beforeAlternation)
     EXPECT_EQ(1.0f, nerve.signal.channels.at(0));
 }
 
-TEST_F(NewNerveTests, timeDuringPulse_duringFirstAlternation)
+TEST_F(NewNerveTests, generatePulse_timeAtFirstPulseAlternation)
 {
     auto data = DataDescription().addCells({
         CellDescription().setId(1).setCellFunction(NerveDescription().setPulseMode(97).setAlternationMode(3)),
@@ -135,7 +171,7 @@ TEST_F(NewNerveTests, timeDuringPulse_duringFirstAlternation)
     EXPECT_EQ(-1.0f, nerve.signal.channels.at(0));
 }
 
-TEST_F(NewNerveTests, timeDuringPulse_duringSecondAlternation)
+TEST_F(NewNerveTests, generatePulse_timeAtSecondPulseAlternation)
 {
     auto data = DataDescription().addCells({
         CellDescription().setId(1).setCellFunction(NerveDescription().setPulseMode(97).setAlternationMode(3)),
