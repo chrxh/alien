@@ -33,7 +33,6 @@ private:
 
     void onOpenPattern();
     void onSavePattern();
-    void onGenerateExecutionOrderNumbers();
     void onMakeSticky();
     void onRemoveStickiness();
     void onSetBarrier(bool value);

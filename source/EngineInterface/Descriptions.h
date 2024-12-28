@@ -382,9 +382,6 @@ struct CellDescription
     float genomeComplexity = 0;
 
     //cell function
-    int executionOrderNumber = 0;
-    std::optional<int> inputExecutionOrderNumber;
-    bool outputBlocked = false;
     CellFunctionDescription cellFunction;
     SignalDescription signal;
     int activationTime = 0;
@@ -447,11 +444,6 @@ struct CellDescription
         connections = value;
         return *this;
     }
-    CellDescription& setExecutionOrderNumber(int value)
-    {
-        executionOrderNumber = value;
-        return *this;
-    }
     CellDescription& setLivingState(LivingState value)
     {
         livingState = value;
@@ -460,16 +452,6 @@ struct CellDescription
     CellDescription& setConstructionId(int value)
     {
         creatureId = value;
-        return *this;
-    }
-    CellDescription& setInputExecutionOrderNumber(int value)
-    {
-        inputExecutionOrderNumber = value;
-        return *this;
-    }
-    CellDescription& setOutputBlocked(bool value)
-    {
-        outputBlocked = value;
         return *this;
     }
     CellFunction getCellFunctionType() const;

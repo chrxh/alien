@@ -25,7 +25,7 @@ TEST_F(NeuronTests, bias)
     NeuronDescription neuron;
     neuron.biases = {0, 0, 1, 0, 0, 0, 0, -1};
 
-    auto data = DataDescription().addCells({CellDescription().setId(1).setCellFunction(neuron).setMaxConnections(2).setExecutionOrderNumber(0)});
+    auto data = DataDescription().addCells({CellDescription().setId(1).setCellFunction(neuron).setMaxConnections(2)});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -52,9 +52,8 @@ TEST_F(NeuronTests, weight)
             .setPos({1.0f, 1.0f})
             .setCellFunction(NerveDescription())
             .setMaxConnections(2)
-            .setExecutionOrderNumber(5)
             .setSignal(signal),
-        CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellFunction(neuron).setMaxConnections(2).setExecutionOrderNumber(0).setInputExecutionOrderNumber(5),
+        CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellFunction(neuron).setMaxConnections(2),
     });
     data.addConnection(1, 2);
 
@@ -86,9 +85,8 @@ TEST_F(NeuronTests, activationFunctionBinaryStep)
             .setPos({1.0f, 1.0f})
             .setCellFunction(NerveDescription())
             .setMaxConnections(2)
-            .setExecutionOrderNumber(5)
             .setSignal(signal),
-        CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellFunction(neuron).setMaxConnections(2).setExecutionOrderNumber(0).setInputExecutionOrderNumber(5),
+        CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellFunction(neuron).setMaxConnections(2),
     });
     data.addConnection(1, 2);
 

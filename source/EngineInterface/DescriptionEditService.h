@@ -111,8 +111,6 @@ public:
     void randomizeCountdowns(ClusteredDataDescription& data, int minValue, int maxValue);
     void randomizeMutationIds(ClusteredDataDescription& data);
 
-    void generateExecutionOrderNumbers(DataDescription& data, std::unordered_set<uint64_t> const& cellIds, int maxBranchNumbers);
-
     uint64_t getId(CellOrParticleDescription const& entity);
     RealVector2D getPos(CellOrParticleDescription const& entity);
     std::vector<CellOrParticleDescription> getObjects(DataDescription const& data);

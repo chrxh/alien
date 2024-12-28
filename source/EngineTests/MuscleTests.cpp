@@ -36,14 +36,11 @@ TEST_F(MuscleTests, doNothing)
              .setId(1)
              .setPos({10.0f, 10.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(MuscleDescription().setMode(MuscleMode_Movement)),
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({0, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -75,14 +72,11 @@ TEST_F(MuscleTests, moveForward)
              .setId(1)
              .setPos({10.0f, 10.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(MuscleDescription().setMode(MuscleMode_Movement)),
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -114,14 +108,11 @@ TEST_F(MuscleTests, moveBackward)
              .setId(1)
              .setPos({10.0f, 10.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(MuscleDescription().setMode(MuscleMode_Movement)),
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({-1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -152,21 +143,17 @@ TEST_F(MuscleTests, multipleMovementDirections)
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(MuscleDescription().setMode(MuscleMode_Movement)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
             .setPos({10.0f, 11.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
     });
@@ -194,14 +181,11 @@ TEST_F(MuscleTests, expansion)
              .setId(1)
              .setPos({10.0f, 10.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
          CellDescription()
              .setId(2)
              .setPos({10.0f + smallDistance, 10.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -231,14 +215,11 @@ TEST_F(MuscleTests, expansionNotPossible)
              .setId(1)
              .setPos({10.0f, 10.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
          CellDescription()
              .setId(2)
              .setPos({10.0f + largeDistance, 10.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -264,14 +245,11 @@ TEST_F(MuscleTests, contraction)
              .setId(1)
              .setPos({10.0f, 10.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
          CellDescription()
              .setId(2)
              .setPos({10.0f + largeDistance, 10.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({-1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -298,21 +276,17 @@ TEST_F(MuscleTests, multipleContraction)
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
         CellDescription()
             .setId(2)
             .setPos({10.0f + largeDistance, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({-1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
             .setPos({10.0f, 10.0f + largeDistance})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({-1, 0, 0, 0, 0, 0, 0, 0}),
     });
@@ -342,14 +316,11 @@ TEST_F(MuscleTests, contractionNotPossible)
              .setId(1)
              .setPos({10.0f, 10.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
          CellDescription()
              .setId(2)
              .setPos({10.0f + smallDistance, 10.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({-1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -374,14 +345,11 @@ TEST_F(MuscleTests, bendClockwise)
             .setId(2)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(MuscleDescription().setMode(MuscleMode_Bending)),
         CellDescription()
             .setId(3)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
     });
@@ -415,14 +383,11 @@ TEST_F(MuscleTests, bendCounterClockwise)
             .setId(2)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(MuscleDescription().setMode(MuscleMode_Bending)),
         CellDescription()
             .setId(3)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({-1, 0, 0, 0, 0, 0, 0, 0}),
     });

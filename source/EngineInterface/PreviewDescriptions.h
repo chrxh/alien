@@ -4,7 +4,6 @@
 struct CellPreviewDescription
 {
     RealVector2D pos;
-    int executionOrderNumber = 0;
     int color = 0;
     int nodeIndex = 0;
     bool partStart = false;

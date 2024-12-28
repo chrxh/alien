@@ -1574,11 +1574,6 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
             auto cellRadiusFactor = zoom > ZoomLevelForConnections ? 0.25f : 0.5f;
             drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * cellRadiusFactor, ImColor::HSV(h, s * 1.2f, v * 1.0f));
 
-            if (zoom > ZoomLevelForLabels) {
-                RealVector2D textPos(cellPos.x - cellSize / 8, cellPos.y - cellSize / 4);
-                drawTextWithShadow(std::to_string(cell.executionOrderNumber), textPos.x, textPos.y);
-            }
-
             if (selectedNode && cell.nodeIndex == *selectedNode) {
                 if (zoom > ZoomLevelForLabels) {
                     drawList->AddCircle({cellPos.x, cellPos.y}, cellSize / 2, ImColor(1.0f, 1.0f, 1.0f));

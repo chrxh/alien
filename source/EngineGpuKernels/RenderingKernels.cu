@@ -1,7 +1,5 @@
 ﻿#include "RenderingKernels.cuh"
 
-#include <boost/mpl/min_max.hpp>
-
 #include "CellFunctionProcessor.cuh"
 #include "SpotCalculator.cuh"
 
@@ -9,7 +7,6 @@ namespace
 {
     auto constexpr ZoomLevelForConnections = 1.0f;
     auto constexpr ZoomLevelForShadedCells = 10.0f;
-    auto constexpr ZoomLevelForArrows = 15.0f;
 
     __device__ __inline__ void drawPixel(uint64_t* imageData, unsigned int index, float3 const& color)
     {
@@ -543,7 +540,7 @@ __global__ void cudaDrawCells(
         if (cell->cellFunction == CellFunction_Detonator) {
             auto const& detonator = cell->cellFunctionData.detonator;
             if (detonator.state == DetonatorState_Activated && detonator.countdown < 2) {
-                auto radius = toFloat((timestep - cell->executionOrderNumber + 5) % 6 + (6 - detonator.countdown * 6));
+                auto radius = toFloat(6 - detonator.countdown * 6);
                 radius *= radius;
                 radius *= cudaSimulationParameters.cellFunctionDetonatorRadius[cell->color] * zoom / 36;
                 drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.0f}, radius, shadedCells);
@@ -569,44 +566,44 @@ __global__ void cudaDrawCells(
         }
 
         //draw arrows
-        if (zoom >= ZoomLevelForArrows) {
-            auto inputExecutionOrderNumber = cell->inputExecutionOrderNumber;
-            if (inputExecutionOrderNumber != -1 && inputExecutionOrderNumber != cell->executionOrderNumber) {
-                for (int i = 0; i < cell->numConnections; ++i) {
-                    auto const& otherCell = cell->connections[i].cell;
-                    if (otherCell->executionOrderNumber == inputExecutionOrderNumber && !otherCell->outputBlocked) {
-                        auto otherCellPos = otherCell->pos;
-                        auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
-                        otherCellPos += topologyCorrection;
+        //if (zoom >= ZoomLevelForArrows) {
+        //    auto inputExecutionOrderNumber = cell->inputExecutionOrderNumber;
+        //    if (inputExecutionOrderNumber != -1 && inputExecutionOrderNumber != cell->executionOrderNumber) {
+        //        for (int i = 0; i < cell->numConnections; ++i) {
+        //            auto const& otherCell = cell->connections[i].cell;
+        //            if (otherCell->executionOrderNumber == inputExecutionOrderNumber && !otherCell->outputBlocked) {
+        //                auto otherCellPos = otherCell->pos;
+        //                auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
+        //                otherCellPos += topologyCorrection;
 
-                        auto const otherCellImagePos = mapWorldPosToImagePos(rectUpperLeft, otherCellPos, universeImageSize, zoom);
-                        if (!isContainedInRect({0, 0}, toFloat2(imageSize), otherCellImagePos)) {
-                            continue;
-                        }
-                        auto const arrowEnd =
-                            mapWorldPosToImagePos(rectUpperLeft, cellPos + Math::normalized(otherCellPos - cellPos) / 4, universeImageSize, zoom);
-                        if (!isContainedInRect({0, 0}, toFloat2(imageSize), arrowEnd)) {
-                            continue;
-                        }
-                        auto direction = Math::normalized(arrowEnd - otherCellImagePos);
-                        {
-                            float2 arrowPartStart = {-direction.x + direction.y, -direction.x - direction.y};
-                            arrowPartStart = arrowPartStart * zoom / 14 + arrowEnd;
-                            if (isLineVisible(arrowPartStart, arrowEnd, universeImageSize)) {
-                                drawLine(arrowPartStart, arrowEnd, lineColor, imageData, imageSize, 0.5f);
-                            }
-                        }
-                        {
-                            float2 arrowPartStart = {-direction.x - direction.y, direction.x - direction.y};
-                            arrowPartStart = arrowPartStart * zoom / 14 + arrowEnd;
-                            if (isLineVisible(arrowPartStart, arrowEnd, universeImageSize)) {
-                                drawLine(arrowPartStart, arrowEnd, lineColor, imageData, imageSize, 0.5f);
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        //                auto const otherCellImagePos = mapWorldPosToImagePos(rectUpperLeft, otherCellPos, universeImageSize, zoom);
+        //                if (!isContainedInRect({0, 0}, toFloat2(imageSize), otherCellImagePos)) {
+        //                    continue;
+        //                }
+        //                auto const arrowEnd =
+        //                    mapWorldPosToImagePos(rectUpperLeft, cellPos + Math::normalized(otherCellPos - cellPos) / 4, universeImageSize, zoom);
+        //                if (!isContainedInRect({0, 0}, toFloat2(imageSize), arrowEnd)) {
+        //                    continue;
+        //                }
+        //                auto direction = Math::normalized(arrowEnd - otherCellImagePos);
+        //                {
+        //                    float2 arrowPartStart = {-direction.x + direction.y, -direction.x - direction.y};
+        //                    arrowPartStart = arrowPartStart * zoom / 14 + arrowEnd;
+        //                    if (isLineVisible(arrowPartStart, arrowEnd, universeImageSize)) {
+        //                        drawLine(arrowPartStart, arrowEnd, lineColor, imageData, imageSize, 0.5f);
+        //                    }
+        //                }
+        //                {
+        //                    float2 arrowPartStart = {-direction.x - direction.y, direction.x - direction.y};
+        //                    arrowPartStart = arrowPartStart * zoom / 14 + arrowEnd;
+        //                    if (isLineVisible(arrowPartStart, arrowEnd, universeImageSize)) {
+        //                        drawLine(arrowPartStart, arrowEnd, lineColor, imageData, imageSize, 0.5f);
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
     }
 }
 

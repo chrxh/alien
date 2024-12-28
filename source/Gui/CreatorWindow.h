@@ -42,7 +42,6 @@ private:
     void validateAndCorrect();
 
     RealVector2D getRandomPos() const;
-    void incExecutionNumber();
 
     float _energy = 100.0f;
     float _stiffness = 1.0f;
@@ -50,8 +49,6 @@ private:
     float _cellDistance = 1.0f;
     bool _makeSticky = false;
     int _maxConnections = 6;
-    bool _ascendingExecutionNumbers = true;
-    int _lastExecutionNumber = 0;
 
     //rectangle
     int _rectHorizontalCells = 10;

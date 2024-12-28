@@ -242,10 +242,7 @@ struct CellGenomeDescription
     float energy = 100.0f;
     int color = 0;
     std::optional<int> numRequiredAdditionalConnections;
-    int executionOrderNumber = 0;
 
-    std::optional<int> inputExecutionOrderNumber;
-    bool outputBlocked = false;
     CellFunctionGenomeDescription cellFunction;
 
     CellGenomeDescription() = default;
@@ -264,21 +261,6 @@ struct CellGenomeDescription
     CellGenomeDescription& setColor(unsigned char value)
     {
         color = value;
-        return *this;
-    }
-    CellGenomeDescription& setExecutionOrderNumber(int value)
-    {
-        executionOrderNumber = value;
-        return *this;
-    }
-    CellGenomeDescription& setInputExecutionOrderNumber(int value)
-    {
-        inputExecutionOrderNumber = value;
-        return *this;
-    }
-    CellGenomeDescription& setOutputBlocked(bool value)
-    {
-        outputBlocked = value;
         return *this;
     }
     bool hasGenome() const

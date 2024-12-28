@@ -226,9 +226,6 @@ struct Cell
     Signal signal;
     int numSignalOrigins;
     uint64_t signalOrigins[MAX_CELL_BONDS];
-    uint8_t executionOrderNumber;
-    int8_t inputExecutionOrderNumber;
-    bool outputBlocked;
     CellFunction cellFunction;
     CellFunctionData cellFunctionData;
     uint32_t activationTime;

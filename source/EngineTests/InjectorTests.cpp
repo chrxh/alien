@@ -39,14 +39,11 @@ TEST_F(InjectorTests, nothingFound)
              .setId(1)
              .setPos({10.0f, 10.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(InjectorDescription().setMode(InjectorMode_InjectAll)),
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription().setPulseMode(1))
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -75,21 +72,17 @@ TEST_F(InjectorTests, matchButNoInjection)
              .setId(1)
              .setPos({10.0f, 10.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
              .setCellFunction(InjectorDescription().setMode(InjectorMode_InjectAll).setGenome(genome)),
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription().setPulseMode(1))
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
             .setPos({9.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setNumInheritedGenomeNodes(1)),
     });
     data.addConnection(1, 2);
@@ -122,17 +115,14 @@ TEST_F(InjectorTests, injection)
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(InjectorDescription().setMode(InjectorMode_InjectAll).setGenome(genome)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription().setPulseMode(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(ConstructorDescription().setNumInheritedGenomeNodes(1)),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setCellFunction(ConstructorDescription().setNumInheritedGenomeNodes(1)),
     });
     data.addConnection(1, 2);
 
@@ -167,21 +157,17 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_failed)
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(InjectorDescription().setMode(InjectorMode_InjectOnlyEmptyCells).setGenome(genome)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription().setPulseMode(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
             .setPos({9.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(otherGenome).setNumInheritedGenomeNodes(2)),
     });
     data.addConnection(1, 2);
@@ -217,27 +203,22 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_success)
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(InjectorDescription().setMode(InjectorMode_InjectOnlyEmptyCells).setGenome(genome)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription().setPulseMode(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
             .setPos({9.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(otherGenome)),
         CellDescription()
             .setId(4)
             .setPos({7.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setNumInheritedGenomeNodes(2)),
     });
     data.addConnection(1, 2);

@@ -267,12 +267,6 @@ void PatternEditorWindow::processIntern()
         AlienImGui::Tooltip("Release stresses");
 
         ImGui::SameLine();
-        if (ImGui::Button(ICON_FA_SORT_NUMERIC_DOWN)) {
-            onGenerateExecutionOrderNumbers();
-        }
-        AlienImGui::Tooltip("Generate ascending execution order numbers");
-
-        ImGui::SameLine();
         if (ImGui::Button(ICON_FA_TINT)) {
             onMakeSticky();
         }
@@ -406,19 +400,6 @@ PatternEditorWindow::PatternEditorWindow()
 void PatternEditorWindow::shutdownIntern()
 {
     GlobalSettings::get().setValue("editors.pattern editor.starting path", _startingPath);
-}
-
-void PatternEditorWindow::onGenerateExecutionOrderNumbers()
-{
-    auto dataWithClusters = _simulationFacade->getSelectedSimulationData(true);
-    auto dataWithoutClusters = _simulationFacade->getSelectedSimulationData(false);
-    std::unordered_set<uint64_t> cellIds = dataWithoutClusters.getCellIds();
-
-    auto parameters = _simulationFacade->getSimulationParameters();
-    DescriptionEditService::get().generateExecutionOrderNumbers(dataWithClusters, cellIds, parameters.cellNumExecutionOrderNumbers);
-
-    _simulationFacade->removeSelectedObjects(true);
-    _simulationFacade->addAndSelectSimulationData(dataWithClusters);
 }
 
 void PatternEditorWindow::onMakeSticky()

@@ -32,10 +32,7 @@ private:
         float angle;
         float energy;
         int numRequiredAdditionalConnections;
-        int executionOrderNumber;
         int color;
-        int inputExecutionOrderNumber;
-        bool outputBlocked;
         CellFunction cellFunction;
 
         //construction data
@@ -233,12 +230,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.energy = GenomeDecoder::readEnergy(constructor, result.genomeCurrentBytePosition);
     int numRequiredAdditionalConnections = GenomeDecoder::readByte(constructor, result.genomeCurrentBytePosition);
     numRequiredAdditionalConnections = numRequiredAdditionalConnections > 127 ? -1 : numRequiredAdditionalConnections % (MAX_CELL_BONDS + 1);
-    result.executionOrderNumber =
-        GenomeDecoder::readByte(constructor, result.genomeCurrentBytePosition) % cudaSimulationParameters.cellNumExecutionOrderNumbers;
     result.color = GenomeDecoder::readByte(constructor, result.genomeCurrentBytePosition) % MAX_COLORS;
-    result.inputExecutionOrderNumber =
-        GenomeDecoder::readOptionalByte(constructor, result.genomeCurrentBytePosition, cudaSimulationParameters.cellNumExecutionOrderNumbers);
-    result.outputBlocked = GenomeDecoder::readBool(constructor, result.genomeCurrentBytePosition);
 
     if (result.genomeHeader.shape == ConstructionShape_Custom) {
         result.angle = angle;
@@ -274,8 +266,7 @@ ConstructorProcessor::isConstructionTriggered(SimulationData const& data, Cell* 
         && abs(signal.channels[0]) < cudaSimulationParameters.cellFunctionConstructorSignalThreshold[cell->color]) {
         return false;
     }
-    if (cell->cellFunctionData.constructor.activationMode > 0
-        && ((data.timestep /*+ cell->creatureId*/) % (cudaSimulationParameters.cellNumExecutionOrderNumbers * cell->cellFunctionData.constructor.activationMode) != cell->executionOrderNumber)) {
+    if (cell->cellFunctionData.constructor.activationMode > 0 && data.timestep % cell->cellFunctionData.constructor.activationMode != 0) {
         return false;
     }
     return true;
@@ -664,15 +655,12 @@ ConstructorProcessor::constructCellIntern(
     data.cellMap.correctPosition(result->pos);
     result->maxConnections = maxConnections;
     result->numConnections = 0;
-    result->executionOrderNumber = constructionData.executionOrderNumber;
     result->livingState = LivingState_UnderConstruction;
     result->creatureId = constructor.offspringCreatureId;
     result->mutationId = constructor.offspringMutationId;
     result->ancestorMutationId = static_cast<uint8_t>(hostCell->mutationId & 0xff);
     result->cellFunction = constructionData.cellFunction;
     result->color = constructionData.color;
-    result->inputExecutionOrderNumber = constructionData.inputExecutionOrderNumber;
-    result->outputBlocked = constructionData.outputBlocked;
 
     result->activationTime = constructionData.containsSelfReplication ? constructor.constructionActivationTime : 0;
     result->genomeComplexity = hostCell->genomeComplexity;

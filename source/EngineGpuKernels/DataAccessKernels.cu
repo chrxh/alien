@@ -28,14 +28,11 @@ namespace
         cellTO.stiffness = cell->stiffness;
         cellTO.maxConnections = cell->maxConnections;
         cellTO.numConnections = cell->numConnections;
-        cellTO.executionOrderNumber = cell->executionOrderNumber;
         cellTO.livingState = cell->livingState;
         cellTO.creatureId = cell->creatureId;
         cellTO.mutationId = cell->mutationId;
         cellTO.ancestorMutationId = cell->ancestorMutationId;
         cellTO.genomeComplexity = cell->genomeComplexity;
-        cellTO.inputExecutionOrderNumber = cell->inputExecutionOrderNumber;
-        cellTO.outputBlocked = cell->outputBlocked;
         cellTO.cellFunction = cell->cellFunction;
         cellTO.color = cell->color;
         cellTO.age = cell->age;
@@ -284,7 +281,6 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
             cellTO.pos = cell->pos;
             cellTO.cellFunction = cell->cellFunction;
             cellTO.selected = cell->selected;
-            cellTO.executionOrderNumber = cell->executionOrderNumber;
         }
     }
     {

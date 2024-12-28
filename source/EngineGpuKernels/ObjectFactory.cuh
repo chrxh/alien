@@ -91,13 +91,10 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->pos = cellTO.pos;
     _map.correctPosition(cell->pos);
     cell->vel = cellTO.vel;
-    cell->executionOrderNumber = cellTO.executionOrderNumber;
     cell->livingState = cellTO.livingState;
     cell->creatureId = cellTO.creatureId;
     cell->mutationId = cellTO.mutationId;
     cell->ancestorMutationId = cellTO.ancestorMutationId;
-    cell->inputExecutionOrderNumber = cellTO.inputExecutionOrderNumber;
-    cell->outputBlocked = cellTO.outputBlocked;
     cell->maxConnections = cellTO.maxConnections;
     cell->energy = cellTO.energy;
     cell->stiffness = cellTO.stiffness;
@@ -268,7 +265,6 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->energy = energy;
     cell->stiffness = _data->numberGen1.random();
     cell->maxConnections = _data->numberGen1.random(MAX_CELL_BONDS);
-    cell->executionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellNumExecutionOrderNumbers - 1);
     cell->numConnections = 0;
     cell->livingState = LivingState_Ready;
     cell->locked = 0;
@@ -282,8 +278,6 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->age = 0;
     cell->activationTime = 0;
     cell->genomeComplexity = 0;
-    cell->inputExecutionOrderNumber = _data->numberGen1.random(cudaSimulationParameters.cellNumExecutionOrderNumbers - 1);
-    cell->outputBlocked = _data->numberGen1.randomBool();
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->signal.channels[i] = 0;
     }

@@ -69,7 +69,6 @@ struct SimulationParameters
     ColorVector<float> cellNormalEnergy = {100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f};
     float cellMinDistance = 0.3f;
     float cellMaxForceDecayProb = 0.2f;
-    int cellNumExecutionOrderNumbers = 6;
 
     ColorVector<float> genomeComplexitySizeFactor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     ColorVector<float> genomeComplexityRamificationFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};

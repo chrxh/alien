@@ -58,9 +58,6 @@ namespace
     auto constexpr Id_CellGenome_Energy = 7;
     auto constexpr Id_CellGenome_Color = 2;
     auto constexpr Id_CellGenome_NumRequiredAdditionalConnections = 9;
-    auto constexpr Id_CellGenome_ExecutionOrderNumber = 4;
-    auto constexpr Id_CellGenome_InputExecutionOrderNumber = 8;
-    auto constexpr Id_CellGenome_OutputBlocked = 6;
 
     auto constexpr Id_NeuronGenome_ActivationFunctions = 0;
 
@@ -108,21 +105,16 @@ namespace
 
     auto constexpr Id_Cell_Stiffness = 0;
     auto constexpr Id_Cell_Color = 1;
-    auto constexpr Id_Cell_ExecutionOrderNumber = 2;
     auto constexpr Id_Cell_Barrier = 3;
     auto constexpr Id_Cell_Age = 4;
     auto constexpr Id_Cell_LivingState = 5;
-    auto constexpr Id_Cell_OutputBlocked = 7;
     auto constexpr Id_Cell_ActivationTime = 8;
-    auto constexpr Id_Cell_InputExecutionOrderNumber = 9;
     auto constexpr Id_Cell_CreatureId = 11;
     auto constexpr Id_Cell_MutationId = 12;
     auto constexpr Id_Cell_GenomeComplexity_Deprecated = 13;
-    //auto constexpr Id_Cell_DetectedByCreatureId = 14;
     auto constexpr Id_Cell_CellFunctionUsed = 15;
     auto constexpr Id_Cell_AncestorMutationId = 16;
     auto constexpr Id_Cell_GenomeComplexity = 17;
-    //auto constexpr Id_Cell_AncestorMutationId = 18;
     auto constexpr Id_Cell_DetectedByCreatureId = 19;
     auto constexpr Id_Cell_Signal_Origin = 20;
     auto constexpr Id_Cell_Signal_TargetX = 21;
@@ -168,10 +160,8 @@ namespace
     auto constexpr Id_Nerve_PulseMode = 0;
     auto constexpr Id_Nerve_AlternationMode = 1;
 
-    //auto constexpr Id_Sensor_FixedAngle = 0;
     auto constexpr Id_Sensor_MinDensity = 1;
     auto constexpr Id_Sensor_Color_Deprecated = 2;
-    //auto constexpr Id_Sensor_TargetedCreatureId = 3;
     auto constexpr Id_Sensor_MemoryChannel1 = 4;
     auto constexpr Id_Sensor_MemoryChannel2 = 5;
     auto constexpr Id_Sensor_MemoryChannel3 = 6;
@@ -484,9 +474,6 @@ namespace cereal
         loadSave<float>(task, auxiliaries, Id_CellGenome_Energy, data.energy, defaultObject.energy);
         loadSave<int>(task, auxiliaries, Id_CellGenome_Color, data.color, defaultObject.color);
         loadSave<std::optional<int>>(task, auxiliaries, Id_CellGenome_NumRequiredAdditionalConnections, data.numRequiredAdditionalConnections, defaultObject.numRequiredAdditionalConnections);
-        loadSave<int>(task, auxiliaries, Id_CellGenome_ExecutionOrderNumber, data.executionOrderNumber, defaultObject.executionOrderNumber);
-        loadSave<std::optional<int>>(task, auxiliaries, Id_CellGenome_InputExecutionOrderNumber, data.inputExecutionOrderNumber, defaultObject.inputExecutionOrderNumber);
-        loadSave<bool>(task, auxiliaries, Id_CellGenome_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.cellFunction);
@@ -788,16 +775,12 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave<float>(task, auxiliaries, Id_Cell_Stiffness, data.stiffness, defaultObject.stiffness);
         loadSave<int>(task, auxiliaries, Id_Cell_Color, data.color, defaultObject.color);
-        loadSave<int>(task, auxiliaries, Id_Cell_ExecutionOrderNumber, data.executionOrderNumber, defaultObject.executionOrderNumber);
         loadSave<bool>(task, auxiliaries, Id_Cell_Barrier, data.barrier, defaultObject.barrier);
         loadSave<int>(task, auxiliaries, Id_Cell_Age, data.age, defaultObject.age);
         loadSave<int>(task, auxiliaries, Id_Cell_LivingState, data.livingState, defaultObject.livingState);
         loadSave<int>(task, auxiliaries, Id_Cell_CreatureId, data.creatureId, defaultObject.creatureId);
         loadSave<int>(task, auxiliaries, Id_Cell_MutationId, data.mutationId, defaultObject.mutationId);
         loadSave<uint8_t>(task, auxiliaries, Id_Cell_AncestorMutationId, data.ancestorMutationId, defaultObject.ancestorMutationId);
-        loadSave<std::optional<int>>(
-            task, auxiliaries, Id_Cell_InputExecutionOrderNumber, data.inputExecutionOrderNumber, defaultObject.inputExecutionOrderNumber);
-        loadSave<bool>(task, auxiliaries, Id_Cell_OutputBlocked, data.outputBlocked, defaultObject.outputBlocked);
         loadSave<int>(task, auxiliaries, Id_Cell_ActivationTime, data.activationTime, defaultObject.activationTime);
         loadSave<float>(task, auxiliaries, Id_Cell_GenomeComplexity, data.genomeComplexity, defaultObject.genomeComplexity);
         loadSave(task, auxiliaries, Id_Cell_DetectedByCreatureId, data.detectedByCreatureId, defaultObject.detectedByCreatureId);

@@ -33,14 +33,11 @@ TEST_F(SensorTests, scanNeighborhood_noSignal)
              .setId(1)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription()),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({0, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -63,14 +60,11 @@ TEST_F(SensorTests, scanNeighborhood_noOtherCell)
              .setId(1)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription()),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -92,14 +86,11 @@ TEST_F(SensorTests, scanNeighborhood_densityTooLow)
              .setId(1)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription().setMinDensity(0.3f)),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -124,14 +115,11 @@ TEST_F(SensorTests, scanNeighborhood_wrongColor)
              .setId(1)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription().setColor(1)),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -155,14 +143,11 @@ TEST_F(SensorTests, scanNeighborhood_foundAtFront)
              .setId(1)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription()),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -194,14 +179,11 @@ TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
              .setId(1)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription()),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -233,14 +215,11 @@ TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
              .setId(1)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription()),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -272,14 +251,11 @@ TEST_F(SensorTests, scanNeighborhood_foundAtBack)
              .setId(1)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription()),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -311,14 +287,11 @@ TEST_F(SensorTests, scanNeighborhood_twoMasses)
              .setId(1)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription().setMinDensity(0.7f)),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -351,15 +324,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found)
              .setMutationId(6)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
          CellDescription()
              .setId(2)
              .setMutationId(6)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -392,15 +362,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found_wallBehi
              .setMutationId(6)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
          CellDescription()
              .setId(2)
              .setMutationId(6)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -431,15 +398,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound)
              .setMutationId(7)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
          CellDescription()
              .setId(2)
              .setMutationId(7)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -467,15 +431,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound_wallI
              .setMutationId(7)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
          CellDescription()
              .setId(2)
              .setMutationId(7)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -506,15 +467,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_found)
              .setMutationId(6)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
          CellDescription()
              .setId(2)
              .setMutationId(6)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -548,15 +506,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_notFound)
                  .setMutationId(MutantId)
                  .setPos({100.0f, 100.0f})
                  .setMaxConnections(2)
-                 .setExecutionOrderNumber(0)
-                 .setInputExecutionOrderNumber(5)
                  .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
              CellDescription()
                  .setId(2)
                  .setMutationId(MutantId)
                  .setPos({101.0f, 100.0f})
                  .setMaxConnections(1)
-                 .setExecutionOrderNumber(5)
                  .setCellFunction(NerveDescription())
                  .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
@@ -587,15 +542,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_found)
              .setMutationId(6)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToHandcraftedCells)),
          CellDescription()
              .setId(2)
              .setMutationId(6)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -623,15 +575,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_notFound)
              .setMutationId(6)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToHandcraftedCells)),
          CellDescription()
              .setId(2)
              .setMutationId(6)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -659,15 +608,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_found)
              .setMutationId(6)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToFreeCells)),
          CellDescription()
              .setId(2)
              .setMutationId(6)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -695,15 +641,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_notFound)
              .setMutationId(6)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToFreeCells)),
          CellDescription()
              .setId(2)
              .setMutationId(6)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -734,15 +677,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_found)
                  .setPos({100.0f, 100.0f})
                  .setMaxConnections(2)
                  .setGenomeComplexity(1000.0f)
-                 .setExecutionOrderNumber(0)
-                 .setInputExecutionOrderNumber(5)
                  .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
              CellDescription()
                  .setId(2)
                  .setMutationId(5)
                  .setPos({101.0f, 100.0f})
                  .setMaxConnections(1)
-                 .setExecutionOrderNumber(5)
                  .setCellFunction(NerveDescription())
                  .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
@@ -781,15 +721,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
                  .setPos({100.0f, 100.0f})
                  .setMaxConnections(2)
                  .setGenomeComplexity(1000.0f)
-                 .setExecutionOrderNumber(0)
-                 .setInputExecutionOrderNumber(5)
                  .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
              CellDescription()
                  .setId(2)
                  .setMutationId(5)
                  .setPos({101.0f, 100.0f})
                  .setMaxConnections(1)
-                 .setExecutionOrderNumber(5)
                  .setCellFunction(NerveDescription())
                  .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
@@ -825,8 +762,6 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
              .setMutationId(100)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setGenomeComplexity(1000.0f)
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
          CellDescription()
@@ -834,7 +769,6 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
              .setMutationId(100)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -863,15 +797,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
              .setGenomeComplexity(1000.0f)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
          CellDescription()
              .setId(2)
              .setMutationId(100)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -902,15 +833,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_found)
                  .setPos({100.0f, 100.0f})
                  .setMaxConnections(2)
                  .setGenomeComplexity(500.0f)
-                 .setExecutionOrderNumber(0)
-                 .setInputExecutionOrderNumber(5)
                  .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
              CellDescription()
                  .setId(2)
                  .setMutationId(5)
                  .setPos({101.0f, 100.0f})
                  .setMaxConnections(1)
-                 .setExecutionOrderNumber(5)
                  .setCellFunction(NerveDescription())
                  .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
@@ -949,15 +877,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
                  .setPos({100.0f, 100.0f})
                  .setMaxConnections(2)
                  .setGenomeComplexity(500.0f)
-                 .setExecutionOrderNumber(0)
-                 .setInputExecutionOrderNumber(5)
                  .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
              CellDescription()
                  .setId(2)
                  .setMutationId(5)
                  .setPos({101.0f, 100.0f})
                  .setMaxConnections(1)
-                 .setExecutionOrderNumber(5)
                  .setCellFunction(NerveDescription())
                  .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
@@ -994,15 +919,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
              .setGenomeComplexity(100.0f)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
          CellDescription()
              .setId(2)
              .setMutationId(100)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -1031,15 +953,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
              .setGenomeComplexity(100.0f)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
          CellDescription()
              .setId(2)
              .setMutationId(100)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -1064,14 +983,11 @@ TEST_F(SensorTests, scanNeighborhood_minRange_found)
              .setId(1)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription().setMinRange(50)),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -1096,14 +1012,11 @@ TEST_F(SensorTests, scanNeighborhood_minRange_notFound)
              .setId(1)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription().setMinRange(120)),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -1128,14 +1041,11 @@ TEST_F(SensorTests, scanNeighborhood_maxRange_found)
              .setId(1)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription().setMaxRange(120)),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -1160,14 +1070,11 @@ TEST_F(SensorTests, scanNeighborhood_maxRange_notFound)
              .setId(1)
              .setPos({100.0f, 100.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(SensorDescription().setMaxRange(50)),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);

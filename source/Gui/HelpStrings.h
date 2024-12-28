@@ -470,9 +470,6 @@ namespace Const
 
     std::string const CreatorPencilRadiusTooltip = "The radius of the pencil in number of cells.";
 
-    std::string const CreatorAscendingExecutionOrderNumberTooltip =
-        "Each generated cell has an 'execution order number' that is one greater than the previous generated cell.";
-
     std::string const CreatorRectangleWidthTooltip = "The width of the rectangle in cells.";
 
     std::string const CreatorRectangleHeightTooltip = "The height of the rectangle in cells.";
