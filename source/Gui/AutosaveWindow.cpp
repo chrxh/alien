@@ -172,13 +172,11 @@ void AutosaveWindow::processTable()
                     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextLightDecentColor.Value);
                     AlienImGui::Text("In queue");
                     ImGui::PopStyleColor();
-                }
-                if (entry->state == SavepointState_InProgress) {
+                } else if (entry->state == SavepointState_InProgress) {
                     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextLightDecentColor.Value);
                     AlienImGui::Text("In progress");
                     ImGui::PopStyleColor();
-                }
-                if (entry->state == SavepointState_Persisted) {
+                } else if (entry->state == SavepointState_Persisted) {
                     auto triggerLoadSavepoint = AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_DOWNLOAD));
                     AlienImGui::Tooltip("Load save point", false);
                     if (triggerLoadSavepoint) {
@@ -187,10 +185,11 @@ void AutosaveWindow::processTable()
 
                     ImGui::SameLine();
                     AlienImGui::Text(entry->name);
-                }
-                if (entry->state == SavepointState_Error) {
+                } else if (entry->state == SavepointState_Error) {
                     AlienImGui::Text("Error");
                 }
+                ImGui::SameLine();
+                ImGui::Dummy({0, scale(22.0f)});
 
                 ImGui::SameLine();
                 auto selected = _selectedEntry == entry;
