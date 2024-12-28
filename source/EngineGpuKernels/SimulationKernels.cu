@@ -80,6 +80,7 @@ __global__ void cudaNextTimestep_cellFunction_prepare_substep1(SimulationData da
 {
     CellProcessor::aging(data);
     MutationProcessor::applyRandomMutations(data);
+    SignalProcessor::calcFutureSignals(data);
     CellProcessor::livingStateTransition_calcFutureState(data);
 }
 
@@ -88,6 +89,7 @@ __global__ void cudaNextTimestep_cellFunction_prepare_substep2(SimulationData da
     CellProcessor::livingStateTransition_applyNextState(data);
     SignalProcessor::collectCellFunctionOperations(data);
     CellProcessor::updateRenderingData(data);
+    SignalProcessor::updateSignals(data);
 }
 
 __global__ void cudaNextTimestep_cellFunction_nerve(SimulationData data, SimulationStatistics statistics)
@@ -143,11 +145,6 @@ __global__ void cudaNextTimestep_cellFunction_reconnector(SimulationData data, S
 __global__ void cudaNextTimestep_cellFunction_detonator(SimulationData data, SimulationStatistics statistics)
 {
     DetonatorProcessor::process(data, statistics);
-}
-
-__global__ void cudaNextTimestep_cellFunction_updateSignal(SimulationData data, SimulationStatistics statistics)
-{
-    SignalProcessor::updateSignals(data);
 }
 
 __global__ void cudaNextTimestep_physics_applyInnerFriction(SimulationData data)

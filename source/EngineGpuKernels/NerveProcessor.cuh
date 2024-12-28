@@ -27,20 +27,17 @@ __inline__ __device__ void NerveProcessor::process(SimulationData& data, Simulat
         auto const& operation = operations.at(i);
         auto const& cell = operation.cell;
 
-        auto signal = SignalProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
-
         auto const& nerve = cell->cellFunctionData.nerve;
         if (nerve.pulseMode > 0 && cell->age % nerve.pulseMode == 0) {
-            signal.active = true;
+            cell->signal.active = true;
             statistics.incNumNervePulses(cell->color);
             if (nerve.alternationMode == 0) {
-                signal.channels[0] += 1.0f;
+                cell->signal.channels[0] += 1.0f;
             } else {
                 auto evenPulse = cell->age % (nerve.pulseMode * nerve.alternationMode * 2) < nerve.pulseMode * nerve.alternationMode;
-                signal.channels[0] += evenPulse ? 1.0f : -1.0f;
+                cell->signal.channels[0] += evenPulse ? 1.0f : -1.0f;
             }
         }
 
-        SignalProcessor::setSignal(cell, signal);
     }
 }

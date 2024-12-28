@@ -41,9 +41,7 @@ __device__ __inline__ void AttackerProcessor::process(SimulationData& data, Simu
 
 __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto signal = SignalProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
-
-    if (abs(signal.channels[0]) >= cudaSimulationParameters.cellFunctionAttackerSignalThreshold) {
+    if (abs(cell->signal.channels[0]) >= cudaSimulationParameters.cellFunctionAttackerSignalThreshold) {
         float energyDelta = 0;
         auto cellMinEnergy = SpotCalculator::calcParameter(
             &SimulationParametersZoneValues::cellMinEnergy, &SimulationParametersZoneActivatedValues::cellMinEnergy, data, cell->pos, cell->color);
@@ -201,7 +199,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         }
 
         // output
-        signal.channels[0] = energyDelta / 10;
+        cell->signal.channels[0] = energyDelta / 10;
 
         if (energyDelta > NEAR_ZERO) {
             cell->event = CellEvent_Attacking;
@@ -209,8 +207,6 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             statistics.incNumAttacks(cell->color);
         }
     }
-
-    SignalProcessor::setSignal(cell, signal);
 }
 
 __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& data, Cell* cell, float energyDelta)

@@ -34,10 +34,8 @@ __device__ __inline__ void DetonatorProcessor::process(SimulationData& data, Sim
 
 __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto signal = SignalProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
-
     auto& detonator = cell->cellFunctionData.detonator;
-    if (signal.channels[0] >= abs(cudaSimulationParameters.cellFunctionDetonatorSignalThreshold) && detonator.state == DetonatorState_Ready) {
+    if (cell->signal.channels[0] >= abs(cudaSimulationParameters.cellFunctionDetonatorSignalThreshold) && detonator.state == DetonatorState_Ready) {
         detonator.state = DetonatorState_Activated;
     }
     if (detonator.state == DetonatorState_Activated) {
@@ -71,5 +69,4 @@ __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data,
             detonator.state = DetonatorState_Exploded;
         }
     }
-    SignalProcessor::setSignal(cell, signal);
 }

@@ -44,7 +44,7 @@ private:
 
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static ConstructionData readConstructionData(Cell* cell);
-    __inline__ __device__ static bool isConstructionTriggered(SimulationData const& data, Cell* cell, Signal const& signal);
+    __inline__ __device__ static bool isConstructionTriggered(SimulationData const& data, Cell* cell);
 
     __inline__ __device__ static Cell* tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
 
@@ -99,8 +99,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
     if (!GenomeDecoder::isFirstNode(constructor)) {
         return;
     }
-    auto signal = SignalProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
-    if (!isConstructionTriggered(data, cell, signal)) {
+    if (!isConstructionTriggered(data, cell)) {
         return;
     }
 
@@ -146,11 +145,10 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
 __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
-    auto signal = SignalProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
     if (!GenomeDecoder::isFinished(constructor)) {
         auto constructionData = readConstructionData(cell);
         auto cellBuilt = false;
-        if (isConstructionTriggered(data, cell, signal)) {
+        if (isConstructionTriggered(data, cell)) {
             if (tryConstructCell(data, statistics, cell, constructionData)) {
                 cellBuilt = true;
                 cell->cellFunctionUsed = CellFunctionUsed_Yes;
@@ -158,7 +156,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
         }
 
         if (cellBuilt) {
-            signal.channels[0] = 1;
+            cell->signal.channels[0] = 1;
             if (GenomeDecoder::isLastNode(constructor)) {
                 constructor.genomeCurrentNodeIndex = 0;
                 if (!constructionData.genomeHeader.hasInfiniteRepetitions()) {
@@ -174,10 +172,9 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
                 ++constructor.genomeCurrentNodeIndex;
             }
         } else {
-            signal.channels[0] = 0;
+            cell->signal.channels[0] = 0;
         }
     }
-    SignalProcessor::setSignal(cell, signal);
 }
 
 __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcessor::readConstructionData(Cell* cell)
@@ -260,10 +257,10 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
 }
 
 __inline__ __device__ bool
-ConstructorProcessor::isConstructionTriggered(SimulationData const& data, Cell* cell, Signal const& signal)
+ConstructorProcessor::isConstructionTriggered(SimulationData const& data, Cell* cell)
 {
     if (cell->cellFunctionData.constructor.activationMode == 0
-        && abs(signal.channels[0]) < cudaSimulationParameters.cellFunctionConstructorSignalThreshold[cell->color]) {
+        && abs(cell->signal.channels[0]) < cudaSimulationParameters.cellFunctionConstructorSignalThreshold[cell->color]) {
         return false;
     }
     if (cell->cellFunctionData.constructor.activationMode > 0 && data.timestep % cell->cellFunctionData.constructor.activationMode != 0) {
