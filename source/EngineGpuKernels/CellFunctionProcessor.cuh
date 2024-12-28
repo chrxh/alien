@@ -12,6 +12,7 @@ public:
     __inline__ __device__ static void collectCellFunctionOperations(SimulationData& data);
     __inline__ __device__ static void updateRenderingData(SimulationData& data);
     __inline__ __device__ static void resetFetchedSignals(SimulationData& data);
+    __inline__ __device__ static void updateSignals(SimulationData& data);
 
     __inline__ __device__ static Signal updateFutureSignalOriginsAndReturnInputSignal(Cell* cell);
     __inline__ __device__ static void setSignal(Cell* cell, Signal const& newSignal);
@@ -108,6 +109,25 @@ __inline__ __device__ void CellFunctionProcessor::resetFetchedSignals(Simulation
     }
 }
 
+__inline__ __device__ void CellFunctionProcessor::updateSignals(SimulationData& data)
+{
+    auto& cells = data.objects.cellPointers;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        cell->signal.active = cell->futureSignal.active;
+        if (cell->signal.active) {
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                cell->signal.channels[i] = cell->futureSignal.channels[i];
+            }
+            cell->signal.origin = cell->futureSignal.origin;
+            cell->signal.targetX = cell->futureSignal.targetX;
+            cell->signal.targetY = cell->futureSignal.targetY;
+        }
+    }
+}
+
 __inline__ __device__ Signal CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(Cell* cell)
 {
     Signal result;
@@ -124,9 +144,8 @@ __inline__ __device__ Signal CellFunctionProcessor::updateFutureSignalOriginsAnd
     int numSignalOrigins = 0;
     for (int i = 0, j = cell->numConnections; i < j; ++i) {
         auto connectedCell = cell->connections[i].cell;
-        if (connectedCell->livingState == LivingState_UnderConstruction
-            || connectedCell->outputBlocked
-            || connectedCell->inputExecutionOrderNumber == cell->executionOrderNumber) {
+        if (connectedCell->livingState == LivingState_UnderConstruction || connectedCell->outputBlocked
+            || connectedCell->inputExecutionOrderNumber == cell->executionOrderNumber || !connectedCell->signal.active) {
             continue;
         }
         int skip = false;
