@@ -186,7 +186,7 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
     return backgroundColor == other.backgroundColor && cellColoring == other.cellColoring && cellGlowColoring == other.cellGlowColoring
         && zoomLevelNeuronalActivity == other.zoomLevelNeuronalActivity && baseValues == other.baseValues && timestepSize == other.timestepSize
         && cellMaxVelocity == other.cellMaxVelocity && cellMinDistance == other.cellMinDistance && cellMaxForceDecayProb == other.cellMaxForceDecayProb
-        && cellNumExecutionOrderNumbers == other.cellNumExecutionOrderNumbers && radiationProb == other.radiationProb
+        && radiationProb == other.radiationProb
         && radiationVelocityMultiplier == other.radiationVelocityMultiplier && radiationVelocityPerturbation == other.radiationVelocityPerturbation
         && cellFunctionAttackerSignalThreshold == other.cellFunctionAttackerSignalThreshold
         && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize

@@ -52,12 +52,10 @@ TEST_F(ConstructorTests, noEnergy)
         GenomeDescription().setHeader(GenomeHeaderDescription().setSeparateConstruction(false)).setCells({CellGenomeDescription()}));
 
     DataDescription data;
-    data.addCell(
-        CellDescription()
-            .setId(1)
-            .setEnergy(_parameters.cellNormalEnergy[0] * 2 - 1.0f)
-            .setMaxConnections(1)
-            .setExecutionOrderNumber(0)
+    data.addCell(CellDescription()
+                     .setId(1)
+                     .setEnergy(_parameters.cellNormalEnergy[0] * 2 - 1.0f)
+                     .setMaxConnections(1)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
@@ -87,7 +85,6 @@ TEST_F(ConstructorTests, alreadyFinished)
             .setId(1)
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(0)
             .setCellFunction(constructor));
 
     _simulationFacade->setSimulationData(data);
@@ -114,7 +111,6 @@ TEST_F(ConstructorTests, notActivated)
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
-                     .setExecutionOrderNumber(0)
                      .setCellFunction(constructor)
                      .setActivationTime(2));
 
@@ -133,14 +129,11 @@ TEST_F(ConstructorTests, manualConstruction_noInputSignal)
     auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
 
     DataDescription data;
-    data.addCell(
-        CellDescription()
-            .setId(1)
-            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
-            .setMaxConnections(1)
-            .setExecutionOrderNumber(0)
-                     .setCellFunction(
-                         ConstructorDescription().setActivationMode(0).setGenome(genome)));
+    data.addCell(CellDescription()
+                     .setId(1)
+                     .setEnergy(_parameters.cellNormalEnergy[0] * 3)
+                     .setMaxConnections(1)
+                     .setCellFunction(ConstructorDescription().setActivationMode(0).setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -166,13 +159,10 @@ TEST_F(ConstructorTests, constructFirstCell_correctCycle)
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
-                     .setExecutionOrderNumber(0)
-                     .setCellFunction(ConstructorDescription().setActivationMode(3).setGenome(genome)));
+                     .setCellFunction(ConstructorDescription().setActivationMode(3 * 6).setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < _parameters.cellNumExecutionOrderNumbers * 3; ++i) {
-        _simulationFacade->calcTimesteps(1);
-    }
+    _simulationFacade->calcTimesteps(3 * 6);
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
@@ -190,13 +180,10 @@ TEST_F(ConstructorTests, constructFirstCell_oneCellGenome_infiniteRepetitions)
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
-                     .setExecutionOrderNumber(0)
-                     .setCellFunction(ConstructorDescription().setActivationMode(3).setGenome(genome)));
+                     .setCellFunction(ConstructorDescription().setActivationMode(3 * 6).setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < _parameters.cellNumExecutionOrderNumbers * 3; ++i) {
-        _simulationFacade->calcTimesteps(1);
-    }
+    _simulationFacade->calcTimesteps(3 * 6);
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(2, actualData.cells.size());
 
@@ -219,13 +206,10 @@ TEST_F(ConstructorTests, constructFirstCell_twoCellGenome_infiniteRepetitions)
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
-                     .setExecutionOrderNumber(0)
-                     .setCellFunction(ConstructorDescription().setActivationMode(3).setGenome(genome)));
+                     .setCellFunction(ConstructorDescription().setActivationMode(3 * 6).setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < _parameters.cellNumExecutionOrderNumbers * 3; ++i) {
-        _simulationFacade->calcTimesteps(1);
-    }
+    _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(2, actualData.cells.size());
 
@@ -248,13 +232,10 @@ TEST_F(ConstructorTests, constructFirstCell_wrongCycle)
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
-                     .setExecutionOrderNumber(0)
-                     .setCellFunction(ConstructorDescription().setActivationMode(3).setGenome(genome)));
+                     .setCellFunction(ConstructorDescription().setActivationMode(3 * 6).setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < _parameters.cellNumExecutionOrderNumbers * 3 - 1; ++i) {
-        _simulationFacade->calcTimesteps(1);
-    }
+    _simulationFacade->calcTimesteps(3 * 6 - 1);
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(1, actualData.cells.size());
@@ -274,15 +255,13 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_constructionNotBui
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setNumInheritedGenomeNodes(4)),
-        CellDescription().setId(2).setPos({11.0f, 10.0f}).setEnergy(100).setMaxConnections(2).setExecutionOrderNumber(5).setCellFunction(NerveDescription()),
+        CellDescription().setId(2).setPos({11.0f, 10.0f}).setEnergy(100).setMaxConnections(2).setCellFunction(NerveDescription()),
         CellDescription()
             .setId(3)
             .setPos({12.0f, 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(4)
             .setCellFunction(ConstructorDescription().setGenome(otherGenome)),
     });
     data.addConnection(1, 2);
@@ -312,15 +291,13 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_repeatedConstructi
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setNumInheritedGenomeNodes(5)),
-        CellDescription().setId(2).setPos({11.0f, 10.0f}).setEnergy(100).setMaxConnections(2).setExecutionOrderNumber(5).setCellFunction(NerveDescription()),
+        CellDescription().setId(2).setPos({11.0f, 10.0f}).setEnergy(100).setMaxConnections(2).setCellFunction(NerveDescription()),
         CellDescription()
             .setId(3)
             .setPos({12.0f, 10.0f})
             .setEnergy(100)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(4)
             .setCellFunction(ConstructorDescription().setGenome(otherGenome).setGenomeCurrentRepetition(1)),
         CellDescription().setId(4).setPos({10.0f, 11.0f}).setEnergy(100).setMaxConnections(1),
     });
@@ -353,15 +330,13 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_constructionBuilt)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setNumInheritedGenomeNodes(4)),
-        CellDescription().setId(2).setPos({11.0f, 10.0f}).setEnergy(100).setMaxConnections(2).setExecutionOrderNumber(5).setCellFunction(NerveDescription()),
+        CellDescription().setId(2).setPos({11.0f, 10.0f}).setEnergy(100).setMaxConnections(2).setCellFunction(NerveDescription()),
         CellDescription()
             .setId(3)
             .setPos({12.0f, 10.0f})
             .setEnergy(100)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(4)
             .setCellFunction(ConstructorDescription().setGenome(otherGenome).setCurrentBranch(1)),
         CellDescription().setId(4).setPos({10.0f, 11.0f}).setEnergy(100).setMaxConnections(1),
     });
@@ -395,15 +370,13 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_infiniteConstructi
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setNumInheritedGenomeNodes(4)),
-        CellDescription().setId(2).setPos({11.0f, 10.0f}).setEnergy(100).setMaxConnections(2).setExecutionOrderNumber(5).setCellFunction(NerveDescription()),
+        CellDescription().setId(2).setPos({11.0f, 10.0f}).setEnergy(100).setMaxConnections(2).setCellFunction(NerveDescription()),
         CellDescription()
             .setId(3)
             .setPos({12.0f, 10.0f})
             .setEnergy(100)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(4)
             .setCellFunction(ConstructorDescription().setGenome(otherGenome).setCurrentBranch(1)),
         CellDescription().setId(4).setPos({10.0f, 11.0f}).setEnergy(100).setMaxConnections(1),
     });
@@ -432,7 +405,6 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_largeCluster)
 
     auto& cell1 = rect.cells.at(0);
     cell1.setEnergy(_parameters.cellNormalEnergy[0] * 3)
-        .setExecutionOrderNumber(0)
         .setCellFunction(ConstructorDescription().setGenome(genome).setNumInheritedGenomeNodes(RectLength * RectLength));
 
     _parameters.cellFunctionConstructorCheckCompletenessForSelfReplication = true;
@@ -463,7 +435,6 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_thinCluster)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(3)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setNumInheritedGenomeNodes(5))
             .setCreatureId(1),
         CellDescription()
@@ -471,7 +442,6 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_thinCluster)
             .setPos({10.0f, 9.0f})
             .setEnergy(100)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setCreatureId(1),
         CellDescription()
@@ -479,7 +449,6 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_thinCluster)
             .setPos({10.0f, 8.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(4)
             .setCellFunction(NerveDescription())
             .setCreatureId(1),
         CellDescription()
@@ -487,7 +456,6 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_thinCluster)
             .setPos({10.0f, 11.0f})
             .setEnergy(100)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(4)
             .setCellFunction(NerveDescription())
             .setCreatureId(1),
         CellDescription()
@@ -495,7 +463,6 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_thinCluster)
             .setPos({10.0f, 12.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(4)
             .setCellFunction(NerveDescription())
             .setCreatureId(1),
         CellDescription()
@@ -503,7 +470,6 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_thinCluster)
             .setPos({11.0f, 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(4)
             .setCellFunction(NerveDescription())
             .setCreatureId(2),
     });
@@ -556,14 +522,12 @@ TEST_F(ConstructorTests, DISABLED_constructFirstCell_completenessCheck_underCons
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setEnergy(100)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(4)
             .setCellFunction(ConstructorDescription().setGenome(otherGenome).setCurrentBranch(1)),
         CellDescription()
             .setId(3)
@@ -571,7 +535,6 @@ TEST_F(ConstructorTests, DISABLED_constructFirstCell_completenessCheck_underCons
             .setEnergy(100)
             .setMaxConnections(2)
             .setLivingState(LivingState_UnderConstruction)
-            .setExecutionOrderNumber(4)
             .setCellFunction(ConstructorDescription().setGenome(otherGenome).setCurrentBranch(0)),
     });
     data.addConnection(1, 2);
@@ -591,12 +554,7 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
     auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(
         GenomeDescription()
             .setHeader(GenomeHeaderDescription().setSeparateConstruction(false).setStiffness(0.35f))
-                                                                      .setCells({CellGenomeDescription()
-                                                                                     .setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy())
-                                                                                     .setColor(2)
-                                                                                     .setExecutionOrderNumber(4)
-                                                                                     .setInputExecutionOrderNumber(5)
-                                                                                     .setOutputBlocked(true)}));
+            .setCells({CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()).setColor(2)}));
 
     DataDescription data;
     data.addCell(
@@ -605,7 +563,6 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setConstructionActivationTime(123)));
 
     _simulationFacade->setSimulationData(data);
@@ -629,9 +586,6 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
     EXPECT_EQ(1, actualConstructedCell.connections.size());
     EXPECT_EQ(1, actualConstructedCell.maxConnections);
     EXPECT_EQ(2, actualConstructedCell.color);
-    EXPECT_EQ(4, actualConstructedCell.executionOrderNumber);
-    EXPECT_EQ(5, actualConstructedCell.inputExecutionOrderNumber);
-    EXPECT_TRUE(actualConstructedCell.outputBlocked);
     EXPECT_EQ(CellFunction_Constructor, actualConstructedCell.getCellFunctionType());
     EXPECT_EQ(123, actualConstructedCell.activationTime);
     EXPECT_TRUE(approxCompare(0.35f, actualConstructedCell.stiffness, 0.01f));
@@ -651,7 +605,6 @@ TEST_F(ConstructorTests, constructFirstCell_notFinished)
                      .setPos({10.0f, 10.0f})
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
-                     .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
@@ -683,7 +636,6 @@ TEST_F(ConstructorTests, constructFirstCell_separation)
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
-                     .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription()
                                           .setGenome(genome)));
 
@@ -719,15 +671,12 @@ TEST_F(ConstructorTests, constructFirstCell_manualConstruction)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(ConstructorDescription().setActivationMode(0).setGenome(genome)),
         CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
              .setEnergy(100)
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})
     });
@@ -761,15 +710,12 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle1)
              .setPos({10.0f, 10.0f})
              .setEnergy(_parameters.cellNormalEnergy[0] * 3)
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(ConstructorDescription().setActivationMode(0).setGenome(genome).setConstructionAngle1(90.0f)),
         CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
              .setEnergy(100)
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -797,15 +743,12 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle2)
              .setPos({10.0f, 10.0f})
              .setEnergy(_parameters.cellNormalEnergy[0] * 3)
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(ConstructorDescription().setActivationMode(0).setGenome(genome).setConstructionAngle1(-90.0f)),
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
              .setEnergy(100)
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -834,10 +777,9 @@ TEST_F(ConstructorTests, constructNeuronCell)
     DataDescription data;
     data.addCell(
         CellDescription()
-            .setId(1)
-            .setEnergy(_parameters.cellNormalEnergy[0] * 3)
-            .setMaxConnections(1)
-            .setExecutionOrderNumber(0)
+                     .setId(1)
+                     .setEnergy(_parameters.cellNormalEnergy[0] * 3)
+                     .setMaxConnections(1)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
@@ -873,7 +815,6 @@ TEST_F(ConstructorTests, constructConstructorCell)
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
-                     .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
@@ -901,7 +842,6 @@ TEST_F(ConstructorTests, constructNerveCell)
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
-                     .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
@@ -927,7 +867,6 @@ TEST_F(ConstructorTests, constructAttackerCell)
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
-                     .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
@@ -953,7 +892,6 @@ TEST_F(ConstructorTests, constructDefenderCell)
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
-                     .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
@@ -980,7 +918,6 @@ TEST_F(ConstructorTests, constructTransmitterCell)
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
-                     .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
@@ -1006,7 +943,6 @@ TEST_F(ConstructorTests, constructMuscleCell)
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
-                     .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
@@ -1034,7 +970,6 @@ TEST_F(ConstructorTests, constructSensorCell)
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
-                     .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
@@ -1062,7 +997,6 @@ TEST_F(ConstructorTests, constructInjectorCell)
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
-                     .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
@@ -1090,7 +1024,6 @@ TEST_F(ConstructorTests, constructReconnectorCell)
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
-                     .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
@@ -1117,7 +1050,6 @@ TEST_F(ConstructorTests, constructDetonatorCell)
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
-                     .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
@@ -1146,7 +1078,6 @@ TEST_F(ConstructorTests, constructConstructorCell_nestingGenomeTooLarge)
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
-                     .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
@@ -1177,7 +1108,6 @@ TEST_F(ConstructorTests, constructConstructorCell_copyGenome)
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
                      .setMaxConnections(1)
-                     .setExecutionOrderNumber(0)
                      .setCellFunction(ConstructorDescription().setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
@@ -1205,14 +1135,12 @@ TEST_F(ConstructorTests, constructSecondCell_separation)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenomeCurrentNodeIndex(1).setGenome(genome)),
         CellDescription()
             .setId(2)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
@@ -1251,14 +1179,12 @@ TEST_F(ConstructorTests, constructSecondCell_constructionStateTransitions)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenomeCurrentNodeIndex(1).setGenome(genome)),
         CellDescription()
             .setId(2)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
@@ -1306,14 +1232,12 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenomeCurrentNodeIndex(1).setGenome(genome)),
         CellDescription()
             .setId(2)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
@@ -1360,14 +1284,12 @@ TEST_F(ConstructorTests, constructSecondCell_noSpace)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenomeCurrentNodeIndex(1).setGenome(genome)),
         CellDescription()
             .setId(2)
             .setPos({10.0f - 1.0f - _parameters.cellMinDistance/2, 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
@@ -1401,14 +1323,12 @@ TEST_F(ConstructorTests, constructSecondCell_notFinished)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenomeCurrentNodeIndex(1).setGenome(genome)),
         CellDescription()
             .setId(2)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
@@ -1445,14 +1365,12 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle1)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setConstructionAngle2(90.0f).setGenomeCurrentNodeIndex(1)),
         CellDescription()
             .setId(2)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
@@ -1494,14 +1412,12 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setConstructionAngle2(-90.0f).setGenomeCurrentNodeIndex(1)),
         CellDescription()
             .setId(2)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
@@ -1543,7 +1459,6 @@ TEST_F(ConstructorTests, constructSecondCell_twoCellGenome_infiniteRepetitions)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenomeCurrentNodeIndex(1).setGenome(genome)),
         CellDescription().setId(2).setPos({11.0f, 10.0f}).setMaxConnections(1).setLivingState(LivingState_UnderConstruction),
     });
@@ -1574,14 +1489,12 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_upperPart)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenomeCurrentNodeIndex(2).setGenome(genome)),
         CellDescription()
             .setId(2)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setLivingState(LivingState_UnderConstruction),
         CellDescription()
@@ -1589,11 +1502,10 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_upperPart)
             .setPos({10.0f - getConstructorOffspringDistance(), 9.0f})
             .setEnergy(100)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setLivingState(LivingState_UnderConstruction),
-        CellDescription().setId(4).setPos({10.0f, 9.5f}).setEnergy(_parameters.cellNormalEnergy[0] * 3).setMaxConnections(2).setExecutionOrderNumber(0),
-        CellDescription().setId(5).setPos({10.0f, 9.0f}).setEnergy(_parameters.cellNormalEnergy[0] * 3).setMaxConnections(2).setExecutionOrderNumber(0),
+        CellDescription().setId(4).setPos({10.0f, 9.5f}).setEnergy(_parameters.cellNormalEnergy[0] * 3).setMaxConnections(2),
+        CellDescription().setId(5).setPos({10.0f, 9.0f}).setEnergy(_parameters.cellNormalEnergy[0] * 3).setMaxConnections(2),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -1633,14 +1545,12 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_bottomPart)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenomeCurrentNodeIndex(2).setGenome(genome)),
         CellDescription()
             .setId(2)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setLivingState(LivingState_UnderConstruction),
         CellDescription()
@@ -1648,11 +1558,10 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_bottomPart)
             .setPos({10.0f - getConstructorOffspringDistance(), 11.0f})
             .setEnergy(100)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setLivingState(LivingState_UnderConstruction),
-        CellDescription().setId(4).setPos({10.0f, 10.5f}).setEnergy(_parameters.cellNormalEnergy[0] * 3).setMaxConnections(2).setExecutionOrderNumber(0),
-        CellDescription().setId(5).setPos({10.0f, 11.0f}).setEnergy(_parameters.cellNormalEnergy[0] * 3).setMaxConnections(2).setExecutionOrderNumber(0),
+        CellDescription().setId(4).setPos({10.0f, 10.5f}).setEnergy(_parameters.cellNormalEnergy[0] * 3).setMaxConnections(2),
+        CellDescription().setId(5).setPos({10.0f, 11.0f}).setEnergy(_parameters.cellNormalEnergy[0] * 3).setMaxConnections(2),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -1691,14 +1600,12 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation_singleConstruction)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome)),
         CellDescription()
             .setId(2)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
@@ -1732,14 +1639,12 @@ TEST_F(ConstructorTests, constructFourthCell_noOverlappingConnection)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenomeCurrentNodeIndex(4).setGenome(genome)),
         CellDescription()
             .setId(2)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(3)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setLivingState(LivingState_UnderConstruction),
         CellDescription()
@@ -1747,14 +1652,12 @@ TEST_F(ConstructorTests, constructFourthCell_noOverlappingConnection)
             .setPos({10.0f - getConstructorOffspringDistance(), 11.0f})
             .setEnergy(100)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setLivingState(LivingState_UnderConstruction),
         CellDescription()
             .setId(4)
             .setPos({10.0f - getConstructorOffspringDistance() + 1.0f, 11.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
             .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1799,14 +1702,12 @@ TEST_F(ConstructorTests, constructLastCellFirstRepetition)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(1)),
         CellDescription()
             .setId(2)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
@@ -1834,14 +1735,12 @@ TEST_F(ConstructorTests, constructLastCellLastRepetition)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(1).setGenomeCurrentRepetition(1)),
         CellDescription()
             .setId(2)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setLivingState(LivingState_UnderConstruction),
         CellDescription()
@@ -1849,7 +1748,6 @@ TEST_F(ConstructorTests, constructLastCellLastRepetition)
             .setPos({9.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
@@ -1880,14 +1778,12 @@ TEST_F(ConstructorTests, restartIfNoLastConstructedCellFound)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(1).setGenomeCurrentRepetition(1)),
         CellDescription()
             .setId(2)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
     });
@@ -1919,14 +1815,12 @@ TEST_F(ConstructorTests, restartIfLastConstructedCellHasLowNumConnections)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(1).setGenomeCurrentRepetition(1).setNumInheritedGenomeNodes(3)),
         CellDescription()
             .setId(2)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
@@ -1956,10 +1850,9 @@ TEST_F(ConstructorTests, allowLargeConstructionAngle1)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setConstructionAngle1(180.0f)),
-        CellDescription().setId(2).setPos({11.0f, 9.0f}).setEnergy(100).setMaxConnections(1).setExecutionOrderNumber(5),
-        CellDescription().setId(3).setPos({11.0f, 11.0f}).setEnergy(100).setMaxConnections(1).setExecutionOrderNumber(5),
+        CellDescription().setId(2).setPos({11.0f, 9.0f}).setEnergy(100).setMaxConnections(1),
+        CellDescription().setId(3).setPos({11.0f, 11.0f}).setEnergy(100).setMaxConnections(1),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -1987,10 +1880,9 @@ TEST_F(ConstructorTests, allowLargeConstructionAngle2)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setConstructionAngle1(-180.0f)),
-        CellDescription().setId(2).setPos({11.0f, 9.0f}).setEnergy(100).setMaxConnections(1).setExecutionOrderNumber(5),
-        CellDescription().setId(3).setPos({11.0f, 11.0f}).setEnergy(100).setMaxConnections(1).setExecutionOrderNumber(5),
+        CellDescription().setId(2).setPos({11.0f, 9.0f}).setEnergy(100).setMaxConnections(1),
+        CellDescription().setId(3).setPos({11.0f, 11.0f}).setEnergy(100).setMaxConnections(1),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -2020,7 +1912,6 @@ TEST_F(ConstructorTests, repetitionsAndBranches)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 2 * 3 * 4 * 3)
             .setMaxConnections(6)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setActivationMode(20)),
     });
 
@@ -2048,7 +1939,6 @@ TEST_F(ConstructorTests, severalRepetitionsOfSingleCell)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 2 * 3 * 4 * 3)
             .setMaxConnections(6)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome)),
     });
 
@@ -2078,7 +1968,6 @@ TEST_F(ConstructorTests, severalRepetitionsAndBranchesOfSingleCell)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 2 * 3 * 4 * 3)
             .setMaxConnections(6)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome)),
     });
 
@@ -2110,7 +1999,6 @@ TEST_F(ConstructorTests, severalRepetitionsOfSingleCell_ignoreNumRequiredConnect
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 2 * 3 * 4 * 3)
             .setMaxConnections(6)
-            .setExecutionOrderNumber(0)
             .setCellFunction(ConstructorDescription().setGenome(genome).setNumInheritedGenomeNodes(3)),
     });
 

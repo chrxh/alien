@@ -101,12 +101,6 @@ void CreatorWindow::processIntern()
                     .textWidth(RightColumnWidth)
                     .tooltip(Const::CellMaxConnectionTooltip),
                 &_maxConnections);
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters()
-                    .name("Set execution order")
-                    .textWidth(RightColumnWidth)
-                    .tooltip(Const::CreatorAscendingExecutionOrderNumberTooltip),
-                _ascendingExecutionNumbers);
         }
         if (_mode == CreationMode_CreateRectangle) {
             AlienImGui::InputInt(
@@ -256,16 +250,11 @@ void CreatorWindow::createCell()
                     .setEnergy(_energy)
                     .setStiffness(_stiffness)
                     .setMaxConnections(_maxConnections)
-                    .setExecutionOrderNumber(_lastExecutionNumber)
                     .setColor(EditorModel::get().getDefaultColorCode())
                     .setBarrier(_barrier)
                     .setCreatureId(creatureId);
-    if (_ascendingExecutionNumbers) {
-        cell.setInputExecutionOrderNumber((_lastExecutionNumber + 5) % 6);
-    }
     auto data = DataDescription().addCell(cell);
     _simulationFacade->addAndSelectSimulationData(data);
-    incExecutionNumber();
 }
 
 void CreatorWindow::createParticle()
@@ -372,12 +361,4 @@ RealVector2D CreatorWindow::getRandomPos() const
     result.x += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
     result.y += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
     return result;
-}
-
-void CreatorWindow::incExecutionNumber()
-{
-    if (_ascendingExecutionNumbers) {
-        auto parameters = _simulationFacade->getSimulationParameters();
-        _lastExecutionNumber = (_lastExecutionNumber + 1) % parameters.cellNumExecutionOrderNumbers;
-    }
 }

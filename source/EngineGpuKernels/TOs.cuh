@@ -178,9 +178,6 @@ struct CellTO
     float genomeComplexity;
 
     //cell function
-    uint8_t executionOrderNumber;
-    int8_t inputExecutionOrderNumber;
-    bool outputBlocked;
     CellFunction cellFunction;
     CellFunctionTO cellFunctionData;
     SignalTO signal;

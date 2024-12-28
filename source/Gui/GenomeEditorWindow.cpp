@@ -535,17 +535,6 @@ void GenomeEditorWindow::processNode(
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters().name("Energy").textWidth(ContentTextWidth).format("%.1f").tooltip(Const::GenomeEnergyTooltip), cell.energy);
         table.next();
-        AlienImGui::InputInt(
-            AlienImGui::InputIntParameters().name("Execution number").textWidth(ContentTextWidth).tooltip(Const::GenomeExecutionNumberTooltip),
-            cell.executionOrderNumber);
-        table.next();
-        AlienImGui::InputOptionalInt(
-            AlienImGui::InputIntParameters().name("Input execution number").textWidth(ContentTextWidth).tooltip(Const::GenomeInputExecutionNumberTooltip),
-            cell.inputExecutionOrderNumber);
-        table.next();
-        AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters().name("Block output").textWidth(ContentTextWidth).tooltip(Const::GenomeBlockOutputTooltip), cell.outputBlocked);
-        table.next();
         auto numRequiredAdditionalConnections =
             shapeGeneratorResult ? shapeGeneratorResult->numRequiredAdditionalConnections : cell.numRequiredAdditionalConnections;
         if (!isFirst && numRequiredAdditionalConnections) {
@@ -938,7 +927,6 @@ void GenomeEditorWindow::onCreateSpore()
                     .setEnergy(energy)
                     .setStiffness(1.0f)
                     .setMaxConnections(6)
-                    .setExecutionOrderNumber(0)
                     .setColor(EditorModel::get().getDefaultColorCode())
                     .setCellFunction(ConstructorDescription().setGenome(genome));
     auto data = DataDescription().addCell(cell);
@@ -967,12 +955,7 @@ void GenomeEditorWindow::validateAndCorrect(GenomeHeaderDescription& header) con
 
 void GenomeEditorWindow::validateAndCorrect(CellGenomeDescription& cell) const
 {
-    auto numExecutionOrderNumbers = _simulationFacade->getSimulationParameters().cellNumExecutionOrderNumbers;
     cell.color = (cell.color + MAX_COLORS) % MAX_COLORS;
-    cell.executionOrderNumber = (cell.executionOrderNumber + numExecutionOrderNumbers) % numExecutionOrderNumbers;
-    if (cell.inputExecutionOrderNumber) {
-        cell.inputExecutionOrderNumber = (*cell.inputExecutionOrderNumber + numExecutionOrderNumbers) % numExecutionOrderNumbers;
-    }
     if (cell.numRequiredAdditionalConnections) {
         cell.numRequiredAdditionalConnections = (*cell.numRequiredAdditionalConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
     }

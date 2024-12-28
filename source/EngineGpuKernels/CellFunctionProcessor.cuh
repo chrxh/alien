@@ -24,8 +24,6 @@ public:
     __inline__ __device__ static ReferenceAndActualAngle calcLargestGapReferenceAndActualAngle(SimulationData& data, Cell* cell, float angleDeviation);
 
     __inline__ __device__ static float2 calcSignalDirection(SimulationData& data, Cell* cell);
-
-    __inline__ __device__ static int getCurrentExecutionNumber(SimulationData& data, Cell* cell);
 };
 
 /************************************************************************/
@@ -99,8 +97,7 @@ __inline__ __device__ Signal CellFunctionProcessor::updateFutureSignalOriginsAnd
     int numSignalOrigins = 0;
     for (int i = 0, j = cell->numConnections; i < j; ++i) {
         auto connectedCell = cell->connections[i].cell;
-        if (connectedCell->livingState == LivingState_UnderConstruction || connectedCell->outputBlocked
-            || connectedCell->inputExecutionOrderNumber == cell->executionOrderNumber || !connectedCell->signal.active) {
+        if (connectedCell->livingState == LivingState_UnderConstruction || !connectedCell->signal.active) {
             continue;
         }
         int skip = false;
@@ -207,16 +204,9 @@ __inline__ __device__ float2 CellFunctionProcessor::calcSignalDirection(Simulati
     float2 result{0, 0};
     for (int i = 0; i < cell->numConnections; ++i) {
         auto& connectedCell = cell->connections[i].cell;
-        if (connectedCell->executionOrderNumber == cell->inputExecutionOrderNumber && !connectedCell->outputBlocked) {
-            auto directionDelta = cell->pos - connectedCell->pos;
-            data.cellMap.correctDirection(directionDelta);
-            result = result + Math::normalized(directionDelta);
-        }
+        auto directionDelta = cell->pos - connectedCell->pos;
+        data.cellMap.correctDirection(directionDelta);
+        result = result + Math::normalized(directionDelta);
     }
     return Math::normalized(result);
-}
-
-__inline__ __device__ int CellFunctionProcessor::getCurrentExecutionNumber(SimulationData& data, Cell* cell)
-{
-    return toInt((data.timestep /*+ cell->creatureId*/) % cudaSimulationParameters.cellNumExecutionOrderNumbers);
 }

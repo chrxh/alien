@@ -135,7 +135,7 @@ __device__ __inline__ void MuscleProcessor::contractionExpansion(SimulationData&
     auto const maxDistance = max(cudaSimulationParameters.cellMaxBindingDistance[cell->color] * 0.5f, minDistance);
     for (int i = 0; i < cell->numConnections; ++i) {
         auto& connection = cell->connections[i];
-        if (connection.cell->executionOrderNumber == cell->inputExecutionOrderNumber) {
+        //if (connection.cell->executionOrderNumber == cell->inputExecutionOrderNumber) {
             if (!connection.cell->tryLock()) {
                 continue;
             }
@@ -152,7 +152,7 @@ __device__ __inline__ void MuscleProcessor::contractionExpansion(SimulationData&
             auto otherIndex = getConnectionIndex(connection.cell, cell);
             connection.cell->connections[otherIndex].distance = newDistance;
             connection.cell->releaseLock();
-        }
+        //}
     }
     cell->releaseLock();
     statistics.incNumMuscleActivities(cell->color);
@@ -172,7 +172,7 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
     }
     for (int i = 0; i < cell->numConnections; ++i) {
         auto& connection = cell->connections[i];
-        if (connection.cell->executionOrderNumber == cell->inputExecutionOrderNumber) {
+        //if (connection.cell->executionOrderNumber == cell->inputExecutionOrderNumber) {
             auto intensityChannel0 = getTruncatedUnitValue(signal);
             auto bendingAngle = cudaSimulationParameters.cellFunctionMuscleBendingAngle[cell->color] * intensityChannel0;
 
@@ -215,7 +215,7 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
                     atomicAdd(&connection.cell->vel.y, acceleration.y);
                 }
             }
-        }
+        //}
     }
     cell->releaseLock();
     statistics.incNumMuscleActivities(cell->color);

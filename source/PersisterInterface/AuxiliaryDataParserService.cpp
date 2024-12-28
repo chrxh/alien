@@ -110,12 +110,6 @@ namespace
             "simulation parameters.cell.max force decay probability",
             parserTask);
         ParameterParser::encodeDecode(
-            tree,
-            parameters.cellNumExecutionOrderNumbers,
-            defaultParameters.cellNumExecutionOrderNumbers,
-            "simulation parameters.cell.max execution order number",
-            parserTask);
-        ParameterParser::encodeDecode(
             tree, parameters.baseValues.cellMinEnergy, defaultParameters.baseValues.cellMinEnergy, "simulation parameters.cell.min energy", parserTask);
         ParameterParser::encodeDecode(
             tree,

@@ -13,7 +13,6 @@ PUBLIC
     LivingStateTransitionTests.cpp
     MuscleTests.cpp
     MutationTests.cpp
-    NerveTests.cpp
     NeuronTests.cpp
     NewNerveTests.cpp
     ReconnectorTests.cpp

@@ -36,8 +36,6 @@ TEST_F(DetonatorTests, doNothing)
              .setId(1)
              .setPos({10.0f, 10.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
             .setCellFunction(DetonatorDescription().setCountDown(14)),
     });
 
@@ -62,14 +60,11 @@ TEST_F(DetonatorTests, activateDetonator)
              .setId(1)
              .setPos({10.0f, 10.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(DetonatorDescription().setCountDown(10)),
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -92,7 +87,7 @@ TEST_F(DetonatorTests, explosion)
     DataDescription data;
     data.addCells({
         CellDescription().setId(1).setPos({10.0f, 10.0f}).setCellFunction(DetonatorDescription().setState(DetonatorState_Activated).setCountDown(10)),
-        CellDescription().setId(2).setPos({12.0f, 10.0f}).setExecutionOrderNumber(5),
+        CellDescription().setId(2).setPos({12.0f, 10.0f}),
     });
 
     _simulationFacade->setSimulationData(data);

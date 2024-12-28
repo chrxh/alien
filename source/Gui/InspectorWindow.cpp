@@ -274,12 +274,6 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                         .textWidth(CellFunctionBaseTabTextWidth)
                         .tooltip(Const::GenomeConstructorOffspringActivationTime),
                     cell.activationTime);
-                AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters().name("Execution number").textWidth(CellFunctionBaseTabTextWidth).tooltip(Const::GenomeExecutionNumberTooltip), cell.executionOrderNumber);
-                AlienImGui::InputOptionalInt(
-                    AlienImGui::InputIntParameters().name("Input number").textWidth(CellFunctionBaseTabTextWidth).tooltip(Const::GenomeInputExecutionNumberTooltip), cell.inputExecutionOrderNumber);
-                AlienImGui::Checkbox(
-                    AlienImGui::CheckboxParameters().name("Block Output").textWidth(CellFunctionBaseTabTextWidth).tooltip(Const::GenomeBlockOutputTooltip), cell.outputBlocked);
                 AlienImGui::Combo(
                     AlienImGui::ComboParameters()
                         .name("Living state")
@@ -731,10 +725,6 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
     auto const& parameters = _simulationFacade->getSimulationParameters();
 
     cell.maxConnections = (cell.maxConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
-    cell.executionOrderNumber = (cell.executionOrderNumber + parameters.cellNumExecutionOrderNumbers) % parameters.cellNumExecutionOrderNumbers;
-    if (cell.inputExecutionOrderNumber) {
-        cell.inputExecutionOrderNumber = (*cell.inputExecutionOrderNumber + parameters.cellNumExecutionOrderNumbers) % parameters.cellNumExecutionOrderNumbers;
-    }
     cell.stiffness = std::max(0.0f, std::min(1.0f, cell.stiffness));
     cell.energy = std::max(0.0f, cell.energy);
     switch (cell.getCellFunctionType()) {

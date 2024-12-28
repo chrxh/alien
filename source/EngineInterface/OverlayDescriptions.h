@@ -11,7 +11,6 @@ struct OverlayElementDescription
     bool cell;  //false = energy particle
     CellFunction cellType;
     RealVector2D pos;
-    int executionOrderNumber;
     int selected;
 };
 

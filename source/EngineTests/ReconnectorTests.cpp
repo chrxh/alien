@@ -34,14 +34,11 @@ TEST_F(ReconnectorTests, establishConnection_noRestriction_nothingFound)
              .setId(1)
              .setPos({10.0f, 10.0f})
              .setMaxConnections(2)
-             .setExecutionOrderNumber(0)
-             .setInputExecutionOrderNumber(5)
              .setCellFunction(ReconnectorDescription()),
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
              .setMaxConnections(1)
-             .setExecutionOrderNumber(5)
              .setCellFunction(NerveDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
@@ -67,14 +64,11 @@ TEST_F(ReconnectorTests, establishConnection_noRestriction_success)
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(ReconnectorDescription()),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}),
@@ -106,14 +100,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToColor_failed)
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(ReconnectorDescription().setRestrictToColor(1)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}),
@@ -143,14 +134,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToColor_success)
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(ReconnectorDescription()),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}),
@@ -183,14 +171,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_success)
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToSameMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(5),
@@ -223,14 +208,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_failed)
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToSameMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(4),
@@ -260,14 +242,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_success)
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(4),
@@ -299,14 +278,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_zeroM
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(0),
@@ -336,14 +312,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_respa
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1),
@@ -373,14 +346,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_sameM
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(5),
@@ -410,14 +380,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_success)
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToHandcraftedCells)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(0),
@@ -449,14 +416,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_failed)
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToHandcraftedCells)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(4),
@@ -486,14 +450,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_success)
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToFreeCells)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1),
@@ -525,14 +486,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_failed)
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToFreeCells)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(0),
@@ -563,14 +521,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_succes
             .setMutationId(5)
             .setGenomeComplexity(1000.0f)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToLessComplexMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(999.0f),
@@ -594,14 +549,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_failed
             .setMutationId(5)
             .setGenomeComplexity(1000.0f)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToLessComplexMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(1001.0f),
@@ -625,14 +577,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_succes
             .setMutationId(5)
             .setGenomeComplexity(1000.0f)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToMoreComplexMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(1001.0f),
@@ -656,14 +605,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_failed
             .setMutationId(5)
             .setGenomeComplexity(1000.0f)
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToMoreComplexMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(1000.0f),
@@ -685,15 +631,12 @@ TEST_F(ReconnectorTests, deleteConnections_success)
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(3)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(ReconnectorDescription())
             .setCreatureId(1),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription())
             .setSignal({-1, 0, 0, 0, 0, 0, 0, 0})
             .setCreatureId(1),

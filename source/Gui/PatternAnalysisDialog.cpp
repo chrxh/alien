@@ -126,9 +126,6 @@ auto PatternAnalysisDialog::getAnalysisDescription(ClusterDescription const& clu
             result.maxConnections = cell.maxConnections;
             result.numConnections = cell.connections.size();
             result.constructionState = cell.livingState;
-            result.inputExecutionOrderNumber = cell.inputExecutionOrderNumber;
-            result.outputBlocked = cell.outputBlocked;
-            result.executionOrderNumber = cell.executionOrderNumber;
             result.color = cell.color;
             result.cellFunction = cell.getCellFunctionType();
 

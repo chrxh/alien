@@ -21,9 +21,6 @@ namespace
         bool multipleConstructor = false;
         bool selfReplicator = false;
 
-        int executionOrderNumber = 0;
-        std::optional<int> inputExecutionOrderNumber;
-        bool outputBlocked = false;
         int color = 0;
         std::set<int> connectionIndices;
     };
@@ -175,9 +172,6 @@ namespace
                 //create cell description intern
                 CellPreviewDescriptionIntern cellIntern;
                 cellIntern.color = node.color;
-                cellIntern.inputExecutionOrderNumber = node.inputExecutionOrderNumber;
-                cellIntern.outputBlocked = node.outputBlocked;
-                cellIntern.executionOrderNumber = node.executionOrderNumber;
                 cellIntern.nodeIndex = uniformNodeIndex ? *uniformNodeIndex : partIndex;
                 cellIntern.pos = pos;
                 if (index > 0) {
@@ -353,7 +347,6 @@ namespace
         for (auto const& cell : previewIntern.cells) {
             CellPreviewDescription cellPreview{
                 .pos = cell.pos,
-                .executionOrderNumber = cell.executionOrderNumber,
                 .color = cell.color,
                 .nodeIndex = cell.nodeIndex,
                 .partStart = cell.partStart,
@@ -365,19 +358,12 @@ namespace
             for (auto const& connectionIndex : cell.connectionIndices) {
                 auto const& otherCell = previewIntern.cells.at(connectionIndex);
                 auto findResult = cellIndicesToCreatedConnectionIndex.find(std::pair(index, connectionIndex));
-                auto inputExecutionOrderNumber = cell.inputExecutionOrderNumber.value_or(-1);
                 if (findResult == cellIndicesToCreatedConnectionIndex.end()) {
                     ConnectionPreviewDescription connection;
                     connection.cell1 = cell.pos;
                     connection.cell2 = otherCell.pos;
-                    connection.arrowToCell1 = inputExecutionOrderNumber == otherCell.executionOrderNumber && !otherCell.outputBlocked
-                        && inputExecutionOrderNumber != cell.executionOrderNumber;
                     result.connections.emplace_back(connection);
                     cellIndicesToCreatedConnectionIndex.emplace(std::pair(connectionIndex, index), toInt(result.connections.size() - 1));
-                } else {
-                    auto connectionIndex = findResult->second;
-                    result.connections.at(connectionIndex).arrowToCell2 = inputExecutionOrderNumber == otherCell.executionOrderNumber
-                        && !otherCell.outputBlocked && inputExecutionOrderNumber != cell.executionOrderNumber;
                 }
             }
             ++index;

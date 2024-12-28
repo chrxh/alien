@@ -182,10 +182,7 @@ std::vector<uint8_t> GenomeDescriptionService::convertDescriptionToBytes(GenomeD
         writeAngle(result, cell.referenceAngle);
         writeEnergy(result, cell.energy);
         writeOptionalByte(result, cell.numRequiredAdditionalConnections);
-        writeByte(result, cell.executionOrderNumber);
         writeByte(result, cell.color);
-        writeOptionalByte(result, cell.inputExecutionOrderNumber);
-        writeBool(result, cell.outputBlocked);
         switch (cell.getCellFunctionType()) {
         case CellFunction_Neuron: {
             auto const& neuron = std::get<NeuronGenomeDescription>(*cell.cellFunction);
@@ -300,10 +297,7 @@ namespace
             cell.referenceAngle = readAngle(data, bytePosition);
             cell.energy = readEnergy(data, bytePosition);
             cell.numRequiredAdditionalConnections = readOptionalByte(data, bytePosition, MAX_CELL_BONDS + 1);
-            cell.executionOrderNumber = readByte(data, bytePosition) % parameters.cellNumExecutionOrderNumbers;
             cell.color = readByte(data, bytePosition) % MAX_COLORS;
-            cell.inputExecutionOrderNumber = readOptionalByte(data, bytePosition, parameters.cellNumExecutionOrderNumbers);
-            cell.outputBlocked = readBool(data, bytePosition);
 
             switch (cellFunction) {
             case CellFunction_Neuron: {

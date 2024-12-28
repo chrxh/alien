@@ -312,10 +312,6 @@ void SimulationView::updateImageFromSimulation()
                     auto viewPos = Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.3f}, parameters.borderlessRendering);
                     if (overlayElement.cellType != CellFunction_None) {
                         auto text = Const::CellFunctionToStringMap.at(overlayElement.cellType);
-                        if (overlayElement.executionOrderNumber == toInt((timestep - 1) % parameters.cellNumExecutionOrderNumbers)) {
-                            drawList->AddCircleFilled(
-                                {viewPos.x - 2.0f * fontSizeUnit, viewPos.y + 0.5f * fontSizeUnit}, fontSizeUnit / 5, ImColor::HSV(0.0f, 1.0f, 0.7f, 1.0f));
-                        }
                         drawList->AddText(
                             StyleRepository::get().getMediumFont(),
                             fontSizeUnit,
@@ -329,23 +325,6 @@ void SimulationView::updateImageFromSimulation()
                             Const::CellFunctionOverlayColor,
                             text.c_str());
                     }
-                }
-                {
-                    auto viewPos =
-                        Viewport::get().mapWorldToViewPosition({overlayElement.pos.x - 0.12f, overlayElement.pos.y - 0.25f}, parameters.borderlessRendering);
-                    auto fontSize = Viewport::get().getZoomFactor() / 2;
-                    drawList->AddText(
-                        StyleRepository::get().getLargeFont(),
-                        fontSize,
-                        {viewPos.x, viewPos.y},
-                        Const::ExecutionNumberOverlayShadowColor,
-                        std::to_string(overlayElement.executionOrderNumber).c_str());
-                    drawList->AddText(
-                        StyleRepository::get().getLargeFont(),
-                        fontSize,
-                        {viewPos.x + 1, viewPos.y + 1},
-                        Const::ExecutionNumberOverlayColor,
-                        std::to_string(overlayElement.executionOrderNumber).c_str());
                 }
             }
 

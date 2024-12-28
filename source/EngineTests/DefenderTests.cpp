@@ -39,27 +39,22 @@ TEST_F(DefenderTests, attackerVsAntiAttacker)
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription().setPulseMode(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
             .setPos({9.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
             .setCellFunction(NerveDescription()),
         CellDescription()
             .setId(4)
             .setPos({7.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
             .setCellFunction(DefenderDescription().setMode(DefenderMode_DefendAgainstAttacker)),
     });
     data.addConnection(1, 2);
@@ -87,22 +82,18 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription().setPulseMode(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(NerveDescription()),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setCellFunction(NerveDescription()),
         CellDescription()
             .setId(4)
             .setPos({7.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
             .setCellFunction(DefenderDescription().setMode(DefenderMode_DefendAgainstInjector)),
     });
     data.addConnection(1, 2);
@@ -132,22 +123,18 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(InjectorDescription().setMode(InjectorMode_InjectAll).setGenome(genome)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription().setPulseMode(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(ConstructorDescription()),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setCellFunction(ConstructorDescription()),
         CellDescription()
             .setId(4)
             .setPos({7.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
             .setCellFunction(DefenderDescription().setMode(DefenderMode_DefendAgainstAttacker)),
     });
     data.addConnection(1, 2);
@@ -184,22 +171,18 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
-            .setInputExecutionOrderNumber(5)
             .setCellFunction(InjectorDescription().setMode(InjectorMode_InjectAll).setGenome(genome)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setExecutionOrderNumber(5)
             .setCellFunction(NerveDescription().setPulseMode(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setExecutionOrderNumber(0).setCellFunction(ConstructorDescription()),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setCellFunction(ConstructorDescription()),
         CellDescription()
             .setId(4)
             .setPos({7.0f, 10.0f})
             .setMaxConnections(2)
-            .setExecutionOrderNumber(0)
             .setCellFunction(DefenderDescription().setMode(DefenderMode_DefendAgainstInjector)),
     });
     data.addConnection(1, 2);

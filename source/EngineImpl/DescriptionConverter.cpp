@@ -212,7 +212,6 @@ OverlayDescription DescriptionConverter::convertTOtoOverlayDescription(DataTO co
         element.pos = {cellTO.pos.x, cellTO.pos.y};
         element.cellType = static_cast<CellFunction>(static_cast<unsigned int>(cellTO.cellFunction) % CellFunction_Count);
         element.selected = cellTO.selected;
-        element.executionOrderNumber = cellTO.executionOrderNumber;
         result.elements.emplace_back(element);
     }
 
@@ -389,9 +388,6 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     result.creatureId = cellTO.creatureId;
     result.mutationId = cellTO.mutationId;
     result.ancestorMutationId = cellTO.ancestorMutationId;
-    result.inputExecutionOrderNumber = cellTO.inputExecutionOrderNumber >= 0 ? std::make_optional(cellTO.inputExecutionOrderNumber) : std::nullopt;
-    result.outputBlocked = cellTO.outputBlocked;
-    result.executionOrderNumber = cellTO.executionOrderNumber;
     result.barrier = cellTO.barrier;
     result.age = cellTO.age;
     result.color = cellTO.color;
@@ -555,13 +551,10 @@ void DescriptionConverter::addCell(
     checkAndCorrectInvalidEnergy(cellTO.energy);
     cellTO.stiffness = cellDesc.stiffness;
     cellTO.maxConnections = cellDesc.maxConnections;
-    cellTO.executionOrderNumber = cellDesc.executionOrderNumber;
     cellTO.livingState = cellDesc.livingState;
     cellTO.creatureId = cellDesc.creatureId;
     cellTO.mutationId = cellDesc.mutationId;
     cellTO.ancestorMutationId = cellDesc.ancestorMutationId;
-    cellTO.inputExecutionOrderNumber = cellDesc.inputExecutionOrderNumber.value_or(-1);
-    cellTO.outputBlocked = cellDesc.outputBlocked;
     cellTO.cellFunction = cellDesc.getCellFunctionType();
     cellTO.detectedByCreatureId = cellDesc.detectedByCreatureId;
     cellTO.cellFunctionUsed = cellDesc.cellFunctionUsed;
