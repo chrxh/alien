@@ -56,6 +56,10 @@ __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
             cell->signal.origin = cell->futureSignal.origin;
             cell->signal.targetX = cell->futureSignal.targetX;
             cell->signal.targetY = cell->futureSignal.targetY;
+            cell->numSignalOrigins = cell->futureNumSignalOrigins;
+            for (int i = 0; i < cell->numSignalOrigins; ++i) {
+                cell->signalOrigins[i] = cell->futureSignalOrigins[i];
+            }
         }
     }
 }
