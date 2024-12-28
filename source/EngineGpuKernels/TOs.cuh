@@ -36,6 +36,7 @@ struct ConnectionTO
 
 struct SignalTO
 {
+    bool active;
     float channels[MAX_CHANNELS];
     SignalOrigin origin;
     float targetX;

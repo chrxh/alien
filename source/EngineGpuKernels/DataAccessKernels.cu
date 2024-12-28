@@ -42,6 +42,7 @@ namespace
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             cellTO.signal.channels[i] = cell->signal.channels[i];
         }
+        cellTO.signal.active = cell->signal.active;
         cellTO.signal.origin = cell->signal.origin;
         cellTO.signal.targetX = cell->signal.targetX;
         cellTO.signal.targetY = cell->signal.targetY;

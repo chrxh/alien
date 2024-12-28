@@ -53,6 +53,7 @@ struct ConnectionDescription
 
 struct SignalDescription
 {
+    bool active = false;
     std::vector<float> channels;
     SignalOrigin origin = SignalOrigin_Unknown;
     float targetX = 0;
