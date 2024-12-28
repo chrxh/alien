@@ -6,7 +6,7 @@
 #include "TOs.cuh"
 #include "Base.cuh"
 #include "CellConnectionProcessor.cuh"
-#include "CellFunctionProcessor.cuh"
+#include "SignalProcessor.cuh"
 #include "SimulationStatistics.cuh"
 
 class NerveProcessor
@@ -27,7 +27,7 @@ __inline__ __device__ void NerveProcessor::process(SimulationData& data, Simulat
         auto const& operation = operations.at(i);
         auto const& cell = operation.cell;
 
-        auto signal = CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
+        auto signal = SignalProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
 
         auto const& nerve = cell->cellFunctionData.nerve;
         if (nerve.pulseMode > 0 && cell->age % nerve.pulseMode == 0) {
@@ -41,6 +41,6 @@ __inline__ __device__ void NerveProcessor::process(SimulationData& data, Simulat
             }
         }
 
-        CellFunctionProcessor::setSignal(cell, signal);
+        SignalProcessor::setSignal(cell, signal);
     }
 }

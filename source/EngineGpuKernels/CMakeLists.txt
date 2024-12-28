@@ -6,7 +6,6 @@ add_library(EngineGpuKernels
     Base.cuh
     CellComputationProcessor.cuh
     CellConnectionProcessor.cuh
-    CellFunctionProcessor.cuh
     CellProcessor.cuh
     ClusterProcessor.cuh
     ConstantMemory.cu
@@ -67,6 +66,7 @@ add_library(EngineGpuKernels
     RenderingKernelsLauncher.cuh
     SelectionResult.cuh
     SensorProcessor.cuh
+    SignalProcessor.cuh
     SimulationCudaFacade.cu
     SimulationCudaFacade.cuh
     SimulationData.cu

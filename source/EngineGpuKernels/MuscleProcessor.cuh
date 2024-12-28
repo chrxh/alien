@@ -4,7 +4,7 @@
 
 #include "Object.cuh"
 #include "SimulationData.cuh"
-#include "CellFunctionProcessor.cuh"
+#include "SignalProcessor.cuh"
 #include "SimulationStatistics.cuh"
 
 class MuscleProcessor
@@ -39,7 +39,7 @@ __device__ __inline__ void MuscleProcessor::process(SimulationData& data, Simula
 
 __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto signal = CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
+    auto signal = SignalProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
 
     cell->cellFunctionData.muscle.lastMovementX = 0;
     cell->cellFunctionData.muscle.lastMovementY = 0;
@@ -56,7 +56,7 @@ __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, Si
     } break;
     }
 
-    CellFunctionProcessor::setSignal(cell, signal);
+    SignalProcessor::setSignal(cell, signal);
 }
 
 
@@ -110,7 +110,7 @@ __device__ __inline__ void MuscleProcessor::movement(SimulationData& data, Simul
             }
         }
     } else {
-        direction = CellFunctionProcessor::calcSignalDirection(data, cell);
+        direction = SignalProcessor::calcSignalDirection(data, cell);
         acceleration = cudaSimulationParameters.cellFunctionMuscleMovementAcceleration[cell->color];
     }
     float angle = max(-0.5f, min(0.5f, signal.channels[3])) * 360.0f;

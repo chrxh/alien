@@ -45,6 +45,8 @@ public:
 
     __inline__ __device__ static void resetDensity(SimulationData& data);
 
+    __inline__ __device__ static void updateRenderingData(SimulationData& data);
+
 private:
     static auto constexpr MaxBarrierCellsForCollision = 10;
 };
@@ -866,5 +868,18 @@ __inline__ __device__ void CellProcessor::resetDensity(SimulationData& data)
         auto& cell = cells.at(index);
 
         cell->density = 1.0f;
+    }
+}
+
+__inline__ __device__ void CellProcessor::updateRenderingData(SimulationData& data)
+{
+    auto& cells = data.objects.cellPointers;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (cell->eventCounter > 0) {
+            --cell->eventCounter;
+        }
     }
 }

@@ -3,7 +3,7 @@
 #include "sm_60_atomic_functions.h"
 
 #include "SimulationData.cuh"
-#include "CellFunctionProcessor.cuh"
+#include "SignalProcessor.cuh"
 
 class NeuronProcessor
 {
@@ -34,12 +34,12 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     __shared__ Signal outputSignal;
     __shared__ Signal inputSignal;
     if (0 == threadIdx.x) {
-        inputSignal = CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
+        inputSignal = SignalProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
     }
     __syncthreads();
 
     if (!inputSignal.active) {
-        CellFunctionProcessor::setSignal(cell, inputSignal);
+        SignalProcessor::setSignal(cell, inputSignal);
         return;
     }
 
@@ -70,7 +70,7 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
         outputSignal.origin = inputSignal.origin;
         outputSignal.targetX = inputSignal.targetX;
         outputSignal.targetY = inputSignal.targetY;
-        CellFunctionProcessor::setSignal(cell, outputSignal);
+        SignalProcessor::setSignal(cell, outputSignal);
         statistics.incNumNeuronActivities(cell->color);
     }
     __syncthreads();

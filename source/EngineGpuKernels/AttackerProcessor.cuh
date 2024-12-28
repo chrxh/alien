@@ -4,7 +4,7 @@
 #include "EngineInterface/CellFunctionConstants.h"
 
 #include "Object.cuh"
-#include "CellFunctionProcessor.cuh"
+#include "SignalProcessor.cuh"
 #include "ConstantMemory.cuh"
 #include "SimulationData.cuh"
 #include "SpotCalculator.cuh"
@@ -41,7 +41,7 @@ __device__ __inline__ void AttackerProcessor::process(SimulationData& data, Simu
 
 __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto signal = CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
+    auto signal = SignalProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
 
     if (abs(signal.channels[0]) >= cudaSimulationParameters.cellFunctionAttackerSignalThreshold) {
         float energyDelta = 0;
@@ -210,7 +210,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         }
     }
 
-    CellFunctionProcessor::setSignal(cell, signal);
+    SignalProcessor::setSignal(cell, signal);
 }
 
 __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& data, Cell* cell, float energyDelta)

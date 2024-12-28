@@ -2,7 +2,7 @@
 
 #include "EngineInterface/CellFunctionConstants.h"
 
-#include "CellFunctionProcessor.cuh"
+#include "SignalProcessor.cuh"
 #include "SimulationCudaFacade.cuh"
 #include "SimulationStatistics.cuh"
 #include "CellConnectionProcessor.cuh"
@@ -99,7 +99,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
     if (!GenomeDecoder::isFirstNode(constructor)) {
         return;
     }
-    auto signal = CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
+    auto signal = SignalProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
     if (!isConstructionTriggered(data, cell, signal)) {
         return;
     }
@@ -146,7 +146,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
 __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     auto& constructor = cell->cellFunctionData.constructor;
-    auto signal = CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
+    auto signal = SignalProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
     if (!GenomeDecoder::isFinished(constructor)) {
         auto constructionData = readConstructionData(cell);
         auto cellBuilt = false;
@@ -177,7 +177,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
             signal.channels[0] = 0;
         }
     }
-    CellFunctionProcessor::setSignal(cell, signal);
+    SignalProcessor::setSignal(cell, signal);
 }
 
 __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcessor::readConstructionData(Cell* cell)
@@ -334,7 +334,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     if (!isConnectable(hostCell->numConnections, hostCell->maxConnections, true)) {
         return nullptr;
     }
-    auto anglesForNewConnection = CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(data, hostCell, constructionData.angle);
+    auto anglesForNewConnection = CellConnectionProcessor::calcLargestGapReferenceAndActualAngle(data, hostCell, constructionData.angle);
 
     auto newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.actualAngle);
     float2 newCellPos = hostCell->pos + newCellDirection;

@@ -1,6 +1,6 @@
 ﻿#include "RenderingKernels.cuh"
 
-#include "CellFunctionProcessor.cuh"
+#include "SignalProcessor.cuh"
 #include "SpotCalculator.cuh"
 
 namespace
