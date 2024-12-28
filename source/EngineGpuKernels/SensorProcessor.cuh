@@ -2,7 +2,7 @@
 
 #include "Object.cuh"
 #include "SimulationData.cuh"
-#include "CellFunctionProcessor.cuh"
+#include "SignalProcessor.cuh"
 
 class SensorProcessor
 {
@@ -51,7 +51,7 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
 {
     __shared__ Signal signal;
     if (threadIdx.x == 0) {
-        signal = CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
+        signal = SignalProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
     }
     __syncthreads();
 
@@ -63,7 +63,7 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
     __syncthreads();
 
     if (threadIdx.x == 0) {
-        CellFunctionProcessor::setSignal(cell, signal);
+        SignalProcessor::setSignal(cell, signal);
     }
 }
 
@@ -121,7 +121,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
     __shared__ int8_t minRange;
 
     if (threadIdx.x == 0) {
-        refScanAngle = Math::angleOfVector(CellFunctionProcessor::calcSignalDirection(data, cell));
+        refScanAngle = Math::angleOfVector(SignalProcessor::calcSignalDirection(data, cell));
         minDensity = toInt(cell->cellFunctionData.sensor.minDensity * 64);
         minRange = cell->cellFunctionData.sensor.minRange;
         restrictToColor = cell->cellFunctionData.sensor.restrictToColor;

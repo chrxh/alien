@@ -2,7 +2,7 @@
 
 
 #include "CellConnectionProcessor.cuh"
-#include "CellFunctionProcessor.cuh"
+#include "SignalProcessor.cuh"
 #include "ConstantMemory.cuh"
 #include "EngineInterface/CellFunctionConstants.h"
 #include "Object.cuh"
@@ -34,7 +34,7 @@ __device__ __inline__ void DetonatorProcessor::process(SimulationData& data, Sim
 
 __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto signal = CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
+    auto signal = SignalProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
 
     auto& detonator = cell->cellFunctionData.detonator;
     if (signal.channels[0] >= abs(cudaSimulationParameters.cellFunctionDetonatorSignalThreshold) && detonator.state == DetonatorState_Ready) {
@@ -71,5 +71,5 @@ __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data,
             detonator.state = DetonatorState_Exploded;
         }
     }
-    CellFunctionProcessor::setSignal(cell, signal);
+    SignalProcessor::setSignal(cell, signal);
 }

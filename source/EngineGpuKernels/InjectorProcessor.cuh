@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CellFunctionProcessor.cuh"
+#include "SignalProcessor.cuh"
 #include "SimulationData.cuh"
 
 class InjectorProcessor
@@ -28,7 +28,7 @@ __device__ __inline__ void InjectorProcessor::process(SimulationData& data, Simu
 
 __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto signal = CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
+    auto signal = SignalProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
 
     if (abs(signal.channels[0]) >= cudaSimulationParameters.cellFunctionInjectorSignalThreshold) {
 
@@ -138,7 +138,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             signal.channels[0] = 0;
         }
     }
-    CellFunctionProcessor::setSignal(cell, signal);
+    SignalProcessor::setSignal(cell, signal);
 }
 
 __inline__ __device__ int InjectorProcessor::countAndTrackDefenderCells(SimulationStatistics& statistics, Cell* cell)

@@ -2,7 +2,7 @@
 
 
 #include "CellConnectionProcessor.cuh"
-#include "CellFunctionProcessor.cuh"
+#include "SignalProcessor.cuh"
 #include "ConstantMemory.cuh"
 #include "EngineInterface/CellFunctionConstants.h"
 #include "Object.cuh"
@@ -37,14 +37,14 @@ __device__ __inline__ void ReconnectorProcessor::process(SimulationData& data, S
 
 __device__ __inline__ void ReconnectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto signal = CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
+    auto signal = SignalProcessor::updateFutureSignalOriginsAndReturnInputSignal(cell);
 
     if (signal.channels[0] >= cudaSimulationParameters.cellFunctionReconnectorSignalThreshold) {
         tryCreateConnection(data, statistics, cell, signal);
     } else if (signal.channels[0] <= -cudaSimulationParameters.cellFunctionReconnectorSignalThreshold) {
         removeConnections(data, statistics, cell, signal);
     }
-    CellFunctionProcessor::setSignal(cell, signal);
+    SignalProcessor::setSignal(cell, signal);
 }
 
 __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Signal& signal)

@@ -35,6 +35,13 @@ public:
     __inline__ __device__ static bool wouldResultInOverlappingConnection(Cell* cell1, float2 otherCellPos);
     __inline__ __device__ static bool isConnectedConnected(Cell* cell, Cell* otherCell);
 
+    struct ReferenceAndActualAngle
+    {
+        float referenceAngle;
+        float actualAngle;
+    };
+    __inline__ __device__ static ReferenceAndActualAngle calcLargestGapReferenceAndActualAngle(SimulationData& data, Cell* cell, float angleDeviation);
+
 private:
     static int constexpr MaxOperationsPerCell = 30;
 
@@ -523,6 +530,56 @@ __inline__ __device__ bool CellConnectionProcessor::isConnectedConnected(Cell* c
         }
     }
     return result;
+}
+
+__inline__ __device__ CellConnectionProcessor::ReferenceAndActualAngle
+CellConnectionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData& data, Cell* cell, float angleDeviation)
+{
+    if (0 == cell->numConnections) {
+        return ReferenceAndActualAngle{0, data.numberGen1.random() * 360};
+    }
+    auto displacement = cell->connections[0].cell->pos - cell->pos;
+    data.cellMap.correctDirection(displacement);
+    auto angle = Math::angleOfVector(displacement);
+    int index = 0;
+    float largestAngleGap = 0;
+    float angleOfLargestAngleGap = 0;
+    auto numConnections = cell->numConnections;
+    for (int i = 1; i <= numConnections; ++i) {
+        auto angleDiff = cell->connections[i % numConnections].angleFromPrevious;
+        if (angleDiff > largestAngleGap) {
+            largestAngleGap = angleDiff;
+            index = i % numConnections;
+            angleOfLargestAngleGap = angle;
+        }
+        angle += angleDiff;
+    }
+
+    auto angleFromPrev = cell->connections[index].angleFromPrevious;
+    for (int i = 0; i < numConnections - 1; ++i) {
+        if (angleDeviation > angleFromPrev / 2) {
+            angleDeviation -= angleFromPrev / 2;
+            index = (index + 1) % numConnections;
+            angleOfLargestAngleGap += angleFromPrev;
+            angleFromPrev = cell->connections[index].angleFromPrevious;
+            angleDeviation = angleDeviation - angleFromPrev / 2;
+        }
+        if (angleDeviation < -angleFromPrev / 2) {
+            angleDeviation += angleFromPrev / 2;
+            index = (index + numConnections - 1) % numConnections;
+            angleFromPrev = cell->connections[index].angleFromPrevious;
+            angleDeviation = angleDeviation + angleFromPrev / 2;
+            angleOfLargestAngleGap -= angleFromPrev;
+        }
+    }
+    auto angleFromPreviousConnection = angleFromPrev / 2 + angleDeviation;
+
+    if (angleFromPreviousConnection > 360.0f) {
+        angleFromPreviousConnection -= 360;
+    }
+    angleFromPreviousConnection = max(30.0f, min(angleFromPrev - 30.0f, angleFromPreviousConnection));
+
+    return ReferenceAndActualAngle{angleFromPreviousConnection, angleOfLargestAngleGap + angleFromPreviousConnection};
 }
 
 __inline__ __device__ void CellConnectionProcessor::scheduleOperationOnCell(SimulationData& data, Cell* cell, int operationIndex)

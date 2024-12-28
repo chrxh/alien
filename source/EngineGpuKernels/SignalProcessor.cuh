@@ -6,22 +6,14 @@
 #include "ObjectFactory.cuh"
 #include "SpotCalculator.cuh"
 
-class CellFunctionProcessor
+class SignalProcessor
 {
 public:
     __inline__ __device__ static void collectCellFunctionOperations(SimulationData& data);
-    __inline__ __device__ static void updateRenderingData(SimulationData& data);
     __inline__ __device__ static void updateSignals(SimulationData& data);
 
     __inline__ __device__ static Signal updateFutureSignalOriginsAndReturnInputSignal(Cell* cell);
     __inline__ __device__ static void setSignal(Cell* cell, Signal const& newSignal);
-
-    struct ReferenceAndActualAngle
-    {
-        float referenceAngle;
-        float actualAngle;
-    };
-    __inline__ __device__ static ReferenceAndActualAngle calcLargestGapReferenceAndActualAngle(SimulationData& data, Cell* cell, float angleDeviation);
 
     __inline__ __device__ static float2 calcSignalDirection(SimulationData& data, Cell* cell);
 };
@@ -30,7 +22,7 @@ public:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void CellFunctionProcessor::collectCellFunctionOperations(SimulationData& data)
+__inline__ __device__ void SignalProcessor::collectCellFunctionOperations(SimulationData& data)
 {
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -49,20 +41,7 @@ __inline__ __device__ void CellFunctionProcessor::collectCellFunctionOperations(
     }
 }
 
-__inline__ __device__ void CellFunctionProcessor::updateRenderingData(SimulationData& data)
-{
-    auto& cells = data.objects.cellPointers;
-    auto partition = calcAllThreadsPartition(cells.getNumEntries());
-
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& cell = cells.at(index);
-        if (cell->eventCounter > 0) {
-            --cell->eventCounter;
-        }
-    }
-}
-
-__inline__ __device__ void CellFunctionProcessor::updateSignals(SimulationData& data)
+__inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
 {
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -81,7 +60,7 @@ __inline__ __device__ void CellFunctionProcessor::updateSignals(SimulationData& 
     }
 }
 
-__inline__ __device__ Signal CellFunctionProcessor::updateFutureSignalOriginsAndReturnInputSignal(Cell* cell)
+__inline__ __device__ Signal SignalProcessor::updateFutureSignalOriginsAndReturnInputSignal(Cell* cell)
 {
     Signal result;
     result.active = false;
@@ -132,7 +111,7 @@ __inline__ __device__ Signal CellFunctionProcessor::updateFutureSignalOriginsAnd
     return result;
 }
 
-__inline__ __device__ void CellFunctionProcessor::setSignal(Cell* cell, Signal const& newSignal)
+__inline__ __device__ void SignalProcessor::setSignal(Cell* cell, Signal const& newSignal)
 {
     if (newSignal.active) {
         cell->cellFunctionUsed = CellFunctionUsed_Yes;
@@ -148,58 +127,7 @@ __inline__ __device__ void CellFunctionProcessor::setSignal(Cell* cell, Signal c
     }
 }
 
-
-__inline__ __device__ CellFunctionProcessor::ReferenceAndActualAngle
-CellFunctionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData& data, Cell* cell, float angleDeviation)
-{
-    if (0 == cell->numConnections) {
-        return ReferenceAndActualAngle{0, data.numberGen1.random()*360};
-    }
-    auto displacement = cell->connections[0].cell->pos - cell->pos;
-    data.cellMap.correctDirection(displacement);
-    auto angle = Math::angleOfVector(displacement);
-    int index = 0;
-    float largestAngleGap = 0;
-    float angleOfLargestAngleGap = 0;
-    auto numConnections = cell->numConnections;
-    for (int i = 1; i <= numConnections; ++i) {
-        auto angleDiff = cell->connections[i % numConnections].angleFromPrevious;
-        if (angleDiff > largestAngleGap) {
-            largestAngleGap = angleDiff;
-            index = i % numConnections;
-            angleOfLargestAngleGap = angle;
-        }
-        angle += angleDiff;
-    }
-
-    auto angleFromPrev = cell->connections[index].angleFromPrevious;
-    for (int i = 0; i < numConnections - 1; ++i) {
-        if (angleDeviation > angleFromPrev / 2) {
-            angleDeviation -= angleFromPrev / 2;
-            index = (index + 1) % numConnections;
-            angleOfLargestAngleGap += angleFromPrev; 
-            angleFromPrev = cell->connections[index].angleFromPrevious;
-            angleDeviation = angleDeviation - angleFromPrev / 2;
-        }
-        if (angleDeviation < -angleFromPrev / 2) {
-            angleDeviation += angleFromPrev / 2;
-            index = (index + numConnections - 1) % numConnections;
-            angleFromPrev = cell->connections[index].angleFromPrevious;
-            angleDeviation = angleDeviation + angleFromPrev / 2;
-            angleOfLargestAngleGap -= angleFromPrev;
-        }
-    }
-    auto angleFromPreviousConnection = angleFromPrev / 2 + angleDeviation;
-
-    if (angleFromPreviousConnection > 360.0f) {
-        angleFromPreviousConnection -= 360;
-    }
-    angleFromPreviousConnection = max(30.0f, min(angleFromPrev - 30.0f, angleFromPreviousConnection));
-
-    return ReferenceAndActualAngle{angleFromPreviousConnection, angleOfLargestAngleGap + angleFromPreviousConnection};
-}
-
-__inline__ __device__ float2 CellFunctionProcessor::calcSignalDirection(SimulationData& data, Cell* cell)
+__inline__ __device__ float2 SignalProcessor::calcSignalDirection(SimulationData& data, Cell* cell)
 {
     float2 result{0, 0};
     for (int i = 0; i < cell->numConnections; ++i) {

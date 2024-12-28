@@ -1,7 +1,7 @@
 ﻿#include "SimulationKernels.cuh"
 #include "FlowFieldKernels.cuh"
 #include "ClusterProcessor.cuh"
-#include "CellFunctionProcessor.cuh"
+#include "SignalProcessor.cuh"
 #include "NerveProcessor.cuh"
 #include "NeuronProcessor.cuh"
 #include "ConstructorProcessor.cuh"
@@ -86,8 +86,8 @@ __global__ void cudaNextTimestep_cellFunction_prepare_substep1(SimulationData da
 __global__ void cudaNextTimestep_cellFunction_prepare_substep2(SimulationData data)
 {
     CellProcessor::livingStateTransition_applyNextState(data);
-    CellFunctionProcessor::collectCellFunctionOperations(data);
-    CellFunctionProcessor::updateRenderingData(data);
+    SignalProcessor::collectCellFunctionOperations(data);
+    CellProcessor::updateRenderingData(data);
 }
 
 __global__ void cudaNextTimestep_cellFunction_nerve(SimulationData data, SimulationStatistics statistics)
@@ -147,7 +147,7 @@ __global__ void cudaNextTimestep_cellFunction_detonator(SimulationData data, Sim
 
 __global__ void cudaNextTimestep_cellFunction_updateSignal(SimulationData data, SimulationStatistics statistics)
 {
-    CellFunctionProcessor::updateSignals(data);
+    SignalProcessor::updateSignals(data);
 }
 
 __global__ void cudaNextTimestep_physics_applyInnerFriction(SimulationData data)
