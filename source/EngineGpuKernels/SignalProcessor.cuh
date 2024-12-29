@@ -13,6 +13,7 @@ public:
     __inline__ __device__ static void calcFutureSignals(SimulationData& data);
     __inline__ __device__ static void updateSignals(SimulationData& data);
 
+    __inline__ __device__ static void createEmptySignal(Cell* cell);
     __inline__ __device__ static float2 calcSignalDirection(SimulationData& data, Cell* cell);
 };
 
@@ -116,6 +117,17 @@ __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
                 cell->signalOrigins[i] = cell->futureSignalOrigins[i];
             }
         }
+    }
+}
+
+__inline__ __device__ void SignalProcessor::createEmptySignal(Cell* cell)
+{
+    cell->signal.active = true;
+    cell->signal.origin = SignalOrigin_Unknown;
+    cell->signal.targetX = 0;
+    cell->signal.targetY = 0;
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        cell->signal.channels[i] = 0;
     }
 }
 

@@ -29,7 +29,9 @@ __inline__ __device__ void NerveProcessor::process(SimulationData& data, Simulat
 
         auto const& nerve = cell->cellFunctionData.nerve;
         if (nerve.pulseMode > 0 && cell->age % nerve.pulseMode == 0) {
-            cell->signal.active = true;
+            if (!cell->signal.active) {
+                SignalProcessor::createEmptySignal(cell);
+            }
             statistics.incNumNervePulses(cell->color);
             if (nerve.alternationMode == 0) {
                 cell->signal.channels[0] += 1.0f;
