@@ -383,7 +383,7 @@ void StatisticsWindow::processTimelineStatistics()
     ImGui::PopID();
 
     ImGui::Spacing();
-    AlienImGui::Group("Processes per time step and free cell");
+    AlienImGui::Group("Processes per time step and non free cell");
     ImGui::PushID(2);
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_BordersInnerH, ImVec2(-1, 0))) {
         ImGui::TableSetupColumn("##");
