@@ -18,7 +18,9 @@ public:
     __inline__ __device__ static void collision(SimulationData& data);
     __inline__ __device__ static void splitting(SimulationData& data);
     __inline__ __device__ static void transformation(SimulationData& data);
-    __inline__ __device__ static void radiate(SimulationData& data, float2 pos, float2 vel, int color, float energy);  //return needed energy
+
+    __inline__ __device__ static void radiate(SimulationData& data, Cell* cell, float energy);
+    __inline__ __device__ static void createEnergyParticle(SimulationData& data, float2 pos, float2 vel, int color, float energy);
 
 private:
     static auto constexpr MaxFusionEnergy = 5.0f;
@@ -222,7 +224,28 @@ __inline__ __device__ void RadiationProcessor::transformation(SimulationData& da
     }
 }
 
-__inline__ __device__ void RadiationProcessor::radiate(SimulationData& data, float2 pos, float2 vel, int color, float energy)
+__inline__ __device__ void RadiationProcessor::radiate(SimulationData& data, Cell* cell, float energy)
+{
+    auto const cellEnergy = atomicAdd(&cell->energy, 0);
+
+    auto const radiationEnergy = min(cellEnergy, energy);
+    auto origEnergy = atomicAdd(&cell->energy, -radiationEnergy);
+    if (origEnergy < 1.0f) {
+        atomicAdd(&cell->energy, radiationEnergy);  //revert
+        return;
+    }
+
+    float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
+        + float2{
+            (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
+            (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
+    float2 particlePos = cell->pos + Math::normalized(particleVel) * 1.5f - particleVel;
+    data.cellMap.correctPosition(particlePos);
+
+    RadiationProcessor::createEnergyParticle(data, particlePos, particleVel, cell->color, radiationEnergy);
+}
+
+__inline__ __device__ void RadiationProcessor::createEnergyParticle(SimulationData& data, float2 pos, float2 vel, int color, float energy)
 {
     auto numActiveSources = data.preprocessedSimulationData.activeRadiationSources.getNumActiveSources();
     if (numActiveSources > 0) {

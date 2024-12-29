@@ -764,7 +764,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
                     if (energyLoss > cellEnergy - 1) {
                         energyLoss = cellEnergy - 1;
                     }
-                    RadiationProcessor::radiate(data, particlePos, particleVel, cell->color, energyLoss);
+                    RadiationProcessor::createEnergyParticle(data, particlePos, particleVel, cell->color, energyLoss);
                     cell->energy -= energyLoss;
                 }
             }

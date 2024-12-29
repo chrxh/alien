@@ -633,6 +633,12 @@ namespace
             defaultParameters.cellFunctionMuscleMovementTowardTargetedObject,
             "simulation parameters.cell.function.muscle.movement toward targeted object",
             parserTask);
+        ParameterParser::encodeDecode(
+            tree,
+            parameters.cellFunctionMuscleEnergyCost,
+            defaultParameters.cellFunctionMuscleEnergyCost,
+            "simulation parameters.cell.function.muscle.energy cost",
+            parserTask);
 
         ParameterParser::encodeDecode(
             tree,
