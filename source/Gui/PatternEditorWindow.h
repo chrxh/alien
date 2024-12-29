@@ -29,6 +29,7 @@ private:
     void initIntern(SimulationFacade simulationFacade) override;
     void shutdownIntern() override;
     void processIntern() override;
+    bool isShown() override;
 
     void onOpenPattern();
     void onSavePattern();

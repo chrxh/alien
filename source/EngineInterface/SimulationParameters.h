@@ -4,38 +4,16 @@
 #include <cstring>
 
 #include "CellFunctionConstants.h"
-#include "SimulationParametersSpotValues.h"
-#include "RadiationSource.h"
-#include "SimulationParametersSpot.h"
-#include "Motion.h"
 #include "Features.h"
+#include "Motion.h"
+#include "RadiationSource.h"
+#include "SimulationParametersTypes.h"
+#include "SimulationParametersZone.h"
+#include "SimulationParametersZoneValues.h"
 
 /**
  * NOTE: header is also included in kernel code
  */
-
-using CellColoring = int;
-enum CellColoring_
-{
-    CellColoring_None,
-    CellColoring_CellColor,
-    CellColoring_MutationId,
-    CellColoring_MutationId_AllCellFunctions,
-    CellColoring_LivingState,
-    CellColoring_GenomeSize,
-    CellColoring_CellFunction,
-    CellColoring_AllCellFunctions
-};
-
-using CellDeathConsquences = int;
-enum CellDeathConsquences_
-{
-    CellDeathConsquences_None,
-    CellDeathConsquences_CreatureDies,
-    CellDeathConsquences_DetachedPartsDie
-};
-
-using Char64 = char[64];
 
 struct SimulationParameters
 {
@@ -47,7 +25,7 @@ struct SimulationParameters
 
     //particle sources
     int numRadiationSources = 0;
-    RadiationSource radiationSources[MAX_RADIATION_SOURCES];
+    RadiationSource radiationSource[MAX_RADIATION_SOURCES];
     bool baseStrengthRatioPinned = false;
 
     float externalEnergy = 0.0f;
@@ -58,8 +36,8 @@ struct SimulationParameters
     float externalEnergyBackflowLimit = Infinity<float>::value;
 
     //spots
-    int numSpots = 0;
-    SimulationParametersSpot spots[MAX_SPOTS];
+    int numZones = 0;
+    SimulationParametersZone zone[MAX_ZONES];
 
     //rendering
     uint32_t backgroundColor = 0x1b0000;
@@ -78,25 +56,25 @@ struct SimulationParameters
     bool showRadiationSources = true;
 
     //all other parameters
-    SimulationParametersSpotValues baseValues;
+    SimulationParametersZoneValues baseValues;
 
     float timestepSize = 1.0f;
     MotionType motionType = MotionType_Fluid;
     MotionData motionData = {FluidMotion()};
 
     float innerFriction = 0.3f;
-    float cellMaxVelocity = 2.0f;              
+    float cellMaxVelocity = 2.0f;
     ColorVector<float> cellMaxBindingDistance = {3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f};
 
     ColorVector<float> cellNormalEnergy = {100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f};
-    float cellMinDistance = 0.3f;         
+    float cellMinDistance = 0.3f;
     float cellMaxForceDecayProb = 0.2f;
     int cellNumExecutionOrderNumbers = 6;
 
-    ColorVector<float> genomeComplexitySizeFactor  = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+    ColorVector<float> genomeComplexitySizeFactor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     ColorVector<float> genomeComplexityRamificationFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> genomeComplexityNeuronFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-
+    ColorVector<int> genomeComplexityDepthLevel = {3, 3, 3, 3, 3, 3, 3};
 
     float radiationProb = 0.03f;
     float radiationVelocityMultiplier = 1.0f;
@@ -146,7 +124,7 @@ struct SimulationParameters
     ColorVector<float> cellFunctionConstructorSignalThreshold = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
     bool cellFunctionConstructorCheckCompletenessForSelfReplication = false;
 
-    ColorMatrix<bool> cellFunctionConstructorMutationColorTransitions = {
+    ColorMatrix<bool> cellCopyMutationColorTransitions = {
         {true, true, true, true, true, true, true},
         {true, true, true, true, true, true, true},
         {true, true, true, true, true, true, true},
@@ -154,8 +132,19 @@ struct SimulationParameters
         {true, true, true, true, true, true, true},
         {true, true, true, true, true, true, true},
         {true, true, true, true, true, true, true}};
-    bool cellFunctionConstructorMutationPreventDepthIncrease = false;
-    bool cellFunctionConstructorMutationSelfReplication = false;
+    bool cellCopyMutationPreventDepthIncrease = false;
+    bool cellCopyMutationSelfReplication = false;
+
+    // customize neuron mutations setting
+    float cellCopyMutationNeuronDataWeight = 0.2f;
+    float cellCopyMutationNeuronDataBias = 0.2f;
+    float cellCopyMutationNeuronDataActivationFunction = 0.05f;
+    float cellCopyMutationNeuronDataReinforcement = 1.05f;
+    float cellCopyMutationNeuronDataDamping = 1.05f;
+    float cellCopyMutationNeuronDataOffset = 0.05f;
+
+    // customize deletion mutations setting
+    int cellCopyMutationDeletionMinSize = 0;
 
     ColorVector<float> cellFunctionInjectorRadius = {3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f};
     ColorMatrix<int> cellFunctionInjectorDurationColorMatrix = {
@@ -165,8 +154,7 @@ struct SimulationParameters
         {3, 3, 3, 3, 3, 3, 3},
         {3, 3, 3, 3, 3, 3, 3},
         {3, 3, 3, 3, 3, 3, 3},
-        {3, 3, 3, 3, 3, 3, 3}
-    };
+        {3, 3, 3, 3, 3, 3, 3}};
     float cellFunctionInjectorSignalThreshold = 0.1f;
 
     ColorVector<float> cellFunctionAttackerRadius = {1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f};
@@ -181,8 +169,7 @@ struct SimulationParameters
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}
-    };
+        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     ColorVector<float> cellFunctionAttackerSensorDetectionFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     float cellFunctionAttackerSignalThreshold = 0.1f;
     bool cellFunctionAttackerDestroyCells = false;
@@ -200,6 +187,7 @@ struct SimulationParameters
     ColorVector<float> cellFunctionMuscleBendingAcceleration = {0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f};
     float cellFunctionMuscleBendingAccelerationThreshold = 0.1f;
     bool cellFunctionMuscleMovementTowardTargetedObject = true;
+    ColorVector<float> cellFunctionMuscleEnergyCost = {0, 0, 0, 0, 0, 0, 0};
 
     ColorVector<float> cellFunctionSensorRange = {255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f};
     float cellFunctionSensorSignalThreshold = 0.1f;

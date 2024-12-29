@@ -158,6 +158,7 @@ A short architectural overview of the source code can be found in the [documenta
 
 ALIEN has been initiated, mainly developed and maintained by [Christian Heinemann](mailto:heinemann.christian@gmail.com). Thanks to all the others who contributed to this repository:
 - [tlemo](https://github.com/tlemo)
+- [Gardene-el](https://github.com/Gardene-el)
 - [mpersano](https://github.com/mpersano)
 - [dguerizec](https://github.com/dguerizec)
 - [Will Allen](https://github.com/willjallen)

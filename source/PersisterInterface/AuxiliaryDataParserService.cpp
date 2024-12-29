@@ -4,8 +4,8 @@
 #include "EngineInterface/GeneralSettings.h"
 #include "EngineInterface/Settings.h"
 
-#include "ParameterParser.h"
 #include "LegacyAuxiliaryDataParserService.h"
+#include "ParameterParser.h"
 
 namespace
 {
@@ -18,28 +18,16 @@ namespace
     {
         SimulationParameters defaultParameters;
         ParameterParser::encodeDecode(tree, parameters.projectName, defaultParameters.projectName, "simulation parameters.project name", parserTask);
-        ParameterParser::encodeDecode(tree, parameters.backgroundColor, defaultParameters.backgroundColor, "simulation parameters.background color", parserTask);
+        ParameterParser::encodeDecode(
+            tree, parameters.backgroundColor, defaultParameters.backgroundColor, "simulation parameters.background color", parserTask);
         ParameterParser::encodeDecode(tree, parameters.cellColoring, defaultParameters.cellColoring, "simulation parameters.cell colorization", parserTask);
         ParameterParser::encodeDecode(
             tree, parameters.cellGlowColoring, defaultParameters.cellGlowColoring, "simulation parameters.cell glow.coloring", parserTask);
+        ParameterParser::encodeDecode(tree, parameters.cellGlowRadius, defaultParameters.cellGlowRadius, "simulation parameters.cell glow.radius", parserTask);
         ParameterParser::encodeDecode(
-            tree,
-            parameters.cellGlowRadius,
-            defaultParameters.cellGlowRadius,
-            "simulation parameters.cell glow.radius",
-            parserTask);
+            tree, parameters.cellGlowStrength, defaultParameters.cellGlowStrength, "simulation parameters.cell glow.strength", parserTask);
         ParameterParser::encodeDecode(
-            tree,
-            parameters.cellGlowStrength,
-            defaultParameters.cellGlowStrength,
-            "simulation parameters.cell glow.strength",
-            parserTask);
-        ParameterParser::encodeDecode(
-            tree,
-            parameters.highlightedCellFunction,
-            defaultParameters.highlightedCellFunction,
-            "simulation parameters.highlighted cell function",
-            parserTask);
+            tree, parameters.highlightedCellFunction, defaultParameters.highlightedCellFunction, "simulation parameters.highlighted cell function", parserTask);
         ParameterParser::encodeDecode(
             tree,
             parameters.zoomLevelNeuronalActivity,
@@ -100,14 +88,19 @@ namespace
                 parserTask);
         }
 
-        ParameterParser::encodeDecode(tree, parameters.baseValues.friction, defaultParameters.baseValues.friction, "simulation parameters.friction", parserTask);
-        ParameterParser::encodeDecode(tree, parameters.baseValues.rigidity, defaultParameters.baseValues.rigidity, "simulation parameters.rigidity", parserTask);
-        ParameterParser::encodeDecode(tree, parameters.cellMaxVelocity, defaultParameters.cellMaxVelocity, "simulation parameters.cell.max velocity", parserTask);
+        ParameterParser::encodeDecode(
+            tree, parameters.baseValues.friction, defaultParameters.baseValues.friction, "simulation parameters.friction", parserTask);
+        ParameterParser::encodeDecode(
+            tree, parameters.baseValues.rigidity, defaultParameters.baseValues.rigidity, "simulation parameters.rigidity", parserTask);
+        ParameterParser::encodeDecode(
+            tree, parameters.cellMaxVelocity, defaultParameters.cellMaxVelocity, "simulation parameters.cell.max velocity", parserTask);
         ParameterParser::encodeDecode(
             tree, parameters.cellMaxBindingDistance, defaultParameters.cellMaxBindingDistance, "simulation parameters.cell.max binding distance", parserTask);
-        ParameterParser::encodeDecode(tree, parameters.cellNormalEnergy, defaultParameters.cellNormalEnergy, "simulation parameters.cell.normal energy", parserTask);
+        ParameterParser::encodeDecode(
+            tree, parameters.cellNormalEnergy, defaultParameters.cellNormalEnergy, "simulation parameters.cell.normal energy", parserTask);
 
-        ParameterParser::encodeDecode(tree, parameters.cellMinDistance, defaultParameters.cellMinDistance, "simulation parameters.cell.min distance", parserTask);
+        ParameterParser::encodeDecode(
+            tree, parameters.cellMinDistance, defaultParameters.cellMinDistance, "simulation parameters.cell.min distance", parserTask);
         ParameterParser::encodeDecode(
             tree, parameters.baseValues.cellMaxForce, defaultParameters.baseValues.cellMaxForce, "simulation parameters.cell.max force", parserTask);
         ParameterParser::encodeDecode(
@@ -203,11 +196,18 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
+            parameters.genomeComplexityDepthLevel,
+            defaultParameters.genomeComplexityDepthLevel,
+            "simulation parameters.genome complexity.genome complexity depth level",
+            parserTask);
+        ParameterParser::encodeDecode(
+            tree,
             parameters.baseValues.radiationCellAgeStrength,
             defaultParameters.baseValues.radiationCellAgeStrength,
             "simulation parameters.radiation.factor",
             parserTask);
-        ParameterParser::encodeDecode(tree, parameters.radiationProb, defaultParameters.radiationProb, "simulation parameters.radiation.probability", parserTask);
+        ParameterParser::encodeDecode(
+            tree, parameters.radiationProb, defaultParameters.radiationProb, "simulation parameters.radiation.probability", parserTask);
         ParameterParser::encodeDecode(
             tree,
             parameters.radiationVelocityMultiplier,
@@ -336,6 +336,42 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
+            parameters.cellCopyMutationNeuronDataWeight,
+            defaultParameters.cellCopyMutationNeuronDataWeight,
+            "simulation parameters.cell.copy mutation.neuron data.weights",
+            parserTask);
+        ParameterParser::encodeDecode(
+            tree,
+            parameters.cellCopyMutationNeuronDataBias,
+            defaultParameters.cellCopyMutationNeuronDataBias,
+            "simulation parameters.cell.copy mutation.neuron data.biases",
+            parserTask);
+        ParameterParser::encodeDecode(
+            tree,
+            parameters.cellCopyMutationNeuronDataActivationFunction,
+            defaultParameters.cellCopyMutationNeuronDataActivationFunction,
+            "simulation parameters.cell.copy mutation.neuron data.activation functions",
+            parserTask);
+        ParameterParser::encodeDecode(
+            tree,
+            parameters.cellCopyMutationNeuronDataReinforcement,
+            defaultParameters.cellCopyMutationNeuronDataReinforcement,
+            "simulation parameters.cell.copy mutation.neuron data.reinforcement",
+            parserTask);
+        ParameterParser::encodeDecode(
+            tree,
+            parameters.cellCopyMutationNeuronDataDamping,
+            defaultParameters.cellCopyMutationNeuronDataDamping,
+            "simulation parameters.cell.copy mutation.neuron data.damping",
+            parserTask);
+        ParameterParser::encodeDecode(
+            tree,
+            parameters.cellCopyMutationNeuronDataOffset,
+            defaultParameters.cellCopyMutationNeuronDataOffset,
+            "simulation parameters.cell.copy mutation.neuron data.offset",
+            parserTask);
+        ParameterParser::encodeDecode(
+            tree,
             parameters.baseValues.cellCopyMutationCellProperties,
             defaultParameters.baseValues.cellCopyMutationCellProperties,
             "simulation parameters.cell.copy mutation.cell properties",
@@ -372,6 +408,12 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
+            parameters.cellCopyMutationDeletionMinSize,
+            defaultParameters.cellCopyMutationDeletionMinSize,
+            "simulation parameters.cell.copy mutation.deletion.min size",
+            parserTask);
+        ParameterParser::encodeDecode(
+            tree,
             parameters.baseValues.cellCopyMutationTranslation,
             defaultParameters.baseValues.cellCopyMutationTranslation,
             "simulation parameters.cell.copy mutation.translation",
@@ -402,20 +444,20 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellFunctionConstructorMutationColorTransitions,
-            defaultParameters.cellFunctionConstructorMutationColorTransitions,
+            parameters.cellCopyMutationColorTransitions,
+            defaultParameters.cellCopyMutationColorTransitions,
             "simulation parameters.cell.copy mutation.color transition",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellFunctionConstructorMutationSelfReplication,
-            defaultParameters.cellFunctionConstructorMutationSelfReplication,
+            parameters.cellCopyMutationSelfReplication,
+            defaultParameters.cellCopyMutationSelfReplication,
             "simulation parameters.cell.copy mutation.self replication flag",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellFunctionConstructorMutationPreventDepthIncrease,
-            defaultParameters.cellFunctionConstructorMutationPreventDepthIncrease,
+            parameters.cellCopyMutationPreventDepthIncrease,
+            defaultParameters.cellCopyMutationPreventDepthIncrease,
             "simulation parameters.cell.copy mutation.prevent depth increase",
             parserTask);
 
@@ -591,6 +633,12 @@ namespace
             defaultParameters.cellFunctionMuscleMovementTowardTargetedObject,
             "simulation parameters.cell.function.muscle.movement toward targeted object",
             parserTask);
+        ParameterParser::encodeDecode(
+            tree,
+            parameters.cellFunctionMuscleEnergyCost,
+            defaultParameters.cellFunctionMuscleEnergyCost,
+            "simulation parameters.cell.function.muscle.energy cost",
+            parserTask);
 
         ParameterParser::encodeDecode(
             tree,
@@ -676,8 +724,10 @@ namespace
             parserTask);
         for (int index = 0; index < parameters.numRadiationSources; ++index) {
             std::string base = "simulation parameters.particle sources." + std::to_string(index) + ".";
-            auto& source = parameters.radiationSources[index];
-            auto& defaultSource = defaultParameters.radiationSources[index];
+            auto& source = parameters.radiationSource[index];
+            auto& defaultSource = defaultParameters.radiationSource[index];
+            ParameterParser::encodeDecode(tree, source.name, defaultSource.name, base + "name", parserTask);
+            ParameterParser::encodeDecode(tree, source.locationIndex, defaultSource.locationIndex, base + "location index", parserTask);
             ParameterParser::encodeDecode(tree, source.posX, defaultSource.posX, base + "pos.x", parserTask);
             ParameterParser::encodeDecode(tree, source.posY, defaultSource.posY, base + "pos.y", parserTask);
             ParameterParser::encodeDecode(tree, source.velX, defaultSource.velX, base + "vel.x", parserTask);
@@ -712,11 +762,13 @@ namespace
         }
 
         //spots
-        ParameterParser::encodeDecode(tree, parameters.numSpots, defaultParameters.numSpots, "simulation parameters.spots.num spots", parserTask);
-        for (int index = 0; index < parameters.numSpots; ++index) {
+        ParameterParser::encodeDecode(tree, parameters.numZones, defaultParameters.numZones, "simulation parameters.spots.num spots", parserTask);
+        for (int index = 0; index < parameters.numZones; ++index) {
             std::string base = "simulation parameters.spots." + std::to_string(index) + ".";
-            auto& spot = parameters.spots[index];
-            auto& defaultSpot = defaultParameters.spots[index];
+            auto& spot = parameters.zone[index];
+            auto& defaultSpot = defaultParameters.zone[index];
+            ParameterParser::encodeDecode(tree, spot.name, defaultSpot.name, base + "name", parserTask);
+            ParameterParser::encodeDecode(tree, spot.locationIndex, defaultSpot.locationIndex, base + "location index", parserTask);
             ParameterParser::encodeDecode(tree, spot.color, defaultSpot.color, base + "color", parserTask);
             ParameterParser::encodeDecode(tree, spot.posX, defaultSpot.posX, base + "pos.x", parserTask);
             ParameterParser::encodeDecode(tree, spot.posY, defaultSpot.posY, base + "pos.y", parserTask);
@@ -756,14 +808,17 @@ namespace
                     tree, spot.flowData.centralFlow.strength, defaultSpot.flowData.centralFlow.strength, base + "flow.central.strength", parserTask);
             }
             if (spot.flowType == FlowType_Linear) {
-                ParameterParser::encodeDecode(tree, spot.flowData.linearFlow.angle, defaultSpot.flowData.linearFlow.angle, base + "flow.linear.angle", parserTask);
+                ParameterParser::encodeDecode(
+                    tree, spot.flowData.linearFlow.angle, defaultSpot.flowData.linearFlow.angle, base + "flow.linear.angle", parserTask);
                 ParameterParser::encodeDecode(
                     tree, spot.flowData.linearFlow.strength, defaultSpot.flowData.linearFlow.strength, base + "flow.linear.strength", parserTask);
             }
             ParameterParser::encodeDecode(tree, spot.fadeoutRadius, defaultSpot.fadeoutRadius, base + "fadeout radius", parserTask);
 
-            ParameterParser::encodeDecodeWithEnabled(tree, spot.values.friction, spot.activatedValues.friction, defaultSpot.values.friction, base + "friction", parserTask);
-            ParameterParser::encodeDecodeWithEnabled(tree, spot.values.rigidity, spot.activatedValues.rigidity, defaultSpot.values.rigidity, base + "rigidity", parserTask);
+            ParameterParser::encodeDecodeWithEnabled(
+                tree, spot.values.friction, spot.activatedValues.friction, defaultSpot.values.friction, base + "friction", parserTask);
+            ParameterParser::encodeDecodeWithEnabled(
+                tree, spot.values.rigidity, spot.activatedValues.rigidity, defaultSpot.values.rigidity, base + "rigidity", parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.radiationDisableSources,
@@ -790,7 +845,7 @@ namespace
                 spot.values.radiationAbsorptionLowGenomeComplexityPenalty,
                 spot.activatedValues.radiationAbsorptionLowGenomeComplexityPenalty,
                 defaultSpot.values.radiationAbsorptionLowGenomeComplexityPenalty,
-                base +"radiation.absorption low genome complexity penalty",
+                base + "radiation.absorption low genome complexity penalty",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
@@ -997,7 +1052,11 @@ namespace
             "simulation parameters.features.additional attacker control",
             parserTask);
         missingFeatures.externalEnergyControl = ParameterParser::encodeDecode(
-            tree, parameters.features.externalEnergyControl, defaultParameters.features.externalEnergyControl, "simulation parameters.features.external energy", parserTask);
+            tree,
+            parameters.features.externalEnergyControl,
+            defaultParameters.features.externalEnergyControl,
+            "simulation parameters.features.external energy",
+            parserTask);
         missingFeatures.cellColorTransitionRules = ParameterParser::encodeDecode(
             tree,
             parameters.features.cellColorTransitionRules,
@@ -1005,25 +1064,26 @@ namespace
             "simulation parameters.features.cell color transition rules",
             parserTask);
         missingFeatures.cellAgeLimiter = ParameterParser::encodeDecode(
+            tree, parameters.features.cellAgeLimiter, defaultParameters.features.cellAgeLimiter, "simulation parameters.features.cell age limiter", parserTask);
+        ParameterParser::encodeDecode(
+            tree, parameters.features.cellGlow, defaultParameters.features.cellGlow, "simulation parameters.features.cell glow", parserTask);
+        missingFeatures.legacyMode = ParameterParser::encodeDecode(
+            tree, parameters.features.legacyModes, defaultParameters.features.legacyModes, "simulation parameters.features.legacy modes", parserTask);
+        ParameterParser::encodeDecode(
             tree,
-            parameters.features.cellAgeLimiter,
-            defaultParameters.features.cellAgeLimiter,
-            "simulation parameters.features.cell age limiter",
+            parameters.features.customizeNeuronMutations,
+            defaultParameters.features.customizeNeuronMutations,
+            "simulation parameters.features.customize neuron mutations",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.features.cellGlow,
-            defaultParameters.features.cellGlow,
-            "simulation parameters.features.cell glow",
+            parameters.features.customizeDeletionMutations,
+            defaultParameters.features.customizeDeletionMutations,
+            "simulation parameters.features.customize deletion mutations",
             parserTask);
-        missingFeatures.legacyMode = ParameterParser::encodeDecode(
-            tree, parameters.features.legacyModes, defaultParameters.features.legacyModes, "simulation parameters.features.legacy modes", parserTask);
     }
 
-    void encodeDecodeSimulationParameters(
-        boost::property_tree::ptree& tree,
-        SimulationParameters& parameters,
-        ParserTask parserTask)
+    void encodeDecodeSimulationParameters(boost::property_tree::ptree& tree, SimulationParameters& parameters, ParserTask parserTask)
     {
         auto programVersion = Const::ProgramVersion;
         ParameterParser::encodeDecode(tree, programVersion, std::string(), "simulation parameters.version", parserTask);

@@ -90,8 +90,9 @@ public:
 
     void resizeArraysIfNecessary(ArraySizes const& additionals = ArraySizes());
 
-    //for tests
+    // only for tests
     void testOnly_mutate(uint64_t cellId, MutationType mutationType);
+    void testOnly_mutationCheck(uint64_t cellId);
 
 private:
     void initCuda();

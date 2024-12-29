@@ -1,5 +1,42 @@
 # Release notes
 
+## [4.12.0] - 2024-12-29
+### Added
+- gui/simulation parameters: overview widget for all parameter zones and radiation sources
+- gui/simulation parameters: allow to name and order zones and radiation sources
+- gui/simulation parameters: all zones and radiation sources can be opened in separate windows
+- gui/simulation parameters: location function for zones/radiation sources
+- gui/simulation parameters: quick filter for parameters
+- gui/simulation parameters: cloning of zones/radiation sources
+- gui/simulation parameters: diff function for parameters (by replacing reference parameters)
+- gui/simulation parameters: jump to and highlight expert settings if activated
+- gui/statistics: show number of free cells
+- engine, gui/simulation parameters: neuron mutation revised (gradual adaption, applied to a configurable subset of weights and biases) + expert settings
+- engine, gui/simulation parameters: minimal size for deletion mutation + expert settings
+- engine, gui/simulation parameters: energy cost for muscle functions + parameter
+- engine: parameter for depth of genome complexity
+
+### Changed
+- engine: indestructible cells can only be in ready state
+- persister: use relative path for savepoints with respect to savepoint table file
+- gui: layout of simulation parameter window, browser and autosave window adjusted
+- gui: hide edit widgets when the simulator is not in edit mode
+
+### Deleted
+- gui: window for radiation sources removed (integrated in new parameter window)
+- gui/statistics: number of cell connections
+
+### Fixed
+- gui/simulation view: limit arrow size in muscle movement visualization
+- gui/simulation view: prevent non-disappearing selection rect in case the mouse is released over a widget
+- gui/simulation parameters: prevent crash when deleting zones in special situations (e.g. when reference parameters differs)
+- gui/genome editor: capture mouse clicks in the genome preview only in the corresponding widget
+- gui/autosave: reset peak value save in autosave window if session has changed (avoid autosave of wrong simulation)
+- gui/autosave: prevent crash in case that the creation of a savepoint failed
+- engine: allow position updates of moving zones/radiation sources in case that simulation is paused
+- engine: prevent mutants with bloating of separated cell networks
+- engine: transition of cell state corrected (in rare cases of race conditions)
+
 ## [4.11.0] - 2024-11-23
 ### Added
 - gui: autosave window for managing savepoints and keeping track of interesting moments (e.g. high 'Genome complexity variance') added 

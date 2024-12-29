@@ -4,6 +4,8 @@
 #include <ranges>
 #include <imgui.h>
 
+#include "Base/StringHelper.h"
+
 int _NetworkResourceRawTO::compare(NetworkResourceRawTO const& left, NetworkResourceRawTO const& right, std::vector<ImGuiTableColumnSortSpecs> const& sortSpecs)
 {
     for (auto const& sortSpec : sortSpecs) {
@@ -55,52 +57,37 @@ int _NetworkResourceRawTO::compare(NetworkResourceRawTO const& left, NetworkReso
     return 0;
 }
 
-namespace
-{
-    bool containsIgnoreCase(std::string const& str, std::string const& substr)
-    {
-        std::string strLower = str;
-        std::string substrLower = substr;
-
-        std::transform(str.begin(), str.end(), strLower.begin(), ::tolower);
-        std::transform(substr.begin(), substr.end(), substrLower.begin(), ::tolower);
-
-        return strLower.find(substrLower) != std::string::npos;
-    }
-}
-
 bool _NetworkResourceRawTO::matchWithFilter(std::string const& filter) const
 {
-
     auto match = false;
-    if (containsIgnoreCase(timestamp, filter)) {
+    if (StringHelper::containsCaseInsensitive(timestamp, filter)) {
         match = true;
     }
-    if (containsIgnoreCase(userName, filter)) {
+    if (StringHelper::containsCaseInsensitive(userName, filter)) {
         match = true;
     }
-    if (containsIgnoreCase(resourceName, filter)) {
+    if (StringHelper::containsCaseInsensitive(resourceName, filter)) {
         match = true;
     }
-    if (containsIgnoreCase(std::to_string(numDownloads), filter)) {
+    if (StringHelper::containsCaseInsensitive(std::to_string(numDownloads), filter)) {
         match = true;
     }
-    if (containsIgnoreCase(std::to_string(width), filter)) {
+    if (StringHelper::containsCaseInsensitive(std::to_string(width), filter)) {
         match = true;
     }
-    if (containsIgnoreCase(std::to_string(height), filter)) {
+    if (StringHelper::containsCaseInsensitive(std::to_string(height), filter)) {
         match = true;
     }
-    if (containsIgnoreCase(std::to_string(particles), filter)) {
+    if (StringHelper::containsCaseInsensitive(std::to_string(particles), filter)) {
         match = true;
     }
-    if (containsIgnoreCase(std::to_string(contentSize), filter)) {
+    if (StringHelper::containsCaseInsensitive(std::to_string(contentSize), filter)) {
         match = true;
     }
-    if (containsIgnoreCase(description, filter)) {
+    if (StringHelper::containsCaseInsensitive(description, filter)) {
         match = true;
     }
-    if (containsIgnoreCase(version, filter)) {
+    if (StringHelper::containsCaseInsensitive(version, filter)) {
         match = true;
     }
     return match;

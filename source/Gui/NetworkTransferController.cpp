@@ -1,6 +1,6 @@
 #include "NetworkTransferController.h"
 
-#include "Base/VersionChecker.h"
+#include "Base/VersionParserService.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "PersisterInterface/TaskProcessor.h"
 
@@ -73,7 +73,7 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                 EditorController::get().setOn(true);
                 GenomeEditorWindow::get().openTab(std::get<GenomeDescription>(data.resourceData));
             }
-            if (VersionChecker::isVersionNewer(data.resourceVersion)) {
+            if (VersionParserService::get().isVersionNewer(data.resourceVersion)) {
                 std::string dataTypeString = data.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";
                 GenericMessageDialog::get().information(
                     "Warning",

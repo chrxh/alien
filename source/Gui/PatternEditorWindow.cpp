@@ -45,7 +45,7 @@ void PatternEditorWindow::processIntern()
     }
 
     //load button
-    if (AlienImGui::ToolbarButton(ICON_FA_FOLDER_OPEN)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN))) {
         onOpenPattern();
     }
     AlienImGui::Tooltip("Open pattern");
@@ -53,7 +53,7 @@ void PatternEditorWindow::processIntern()
     //save button
     ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_SAVE))) {
         onSavePattern();
     }
     ImGui::EndDisabled();
@@ -65,7 +65,7 @@ void PatternEditorWindow::processIntern()
     //copy button
     ImGui::SameLine();
     ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
-    if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_COPY))) {
         onCopy();
     }
     ImGui::EndDisabled();
@@ -74,7 +74,7 @@ void PatternEditorWindow::processIntern()
     //paste button
     ImGui::SameLine();
     ImGui::BeginDisabled(!_copiedSelection.has_value());
-    if (AlienImGui::ToolbarButton(ICON_FA_PASTE)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PASTE))) {
         onPaste();
     }
     ImGui::EndDisabled();
@@ -83,7 +83,7 @@ void PatternEditorWindow::processIntern()
     //delete button
     ImGui::SameLine();
     ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
-    if (AlienImGui::ToolbarButton(ICON_FA_TRASH)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_TRASH))) {
         onDelete();
     }
     ImGui::EndDisabled();
@@ -95,7 +95,7 @@ void PatternEditorWindow::processIntern()
     //inspect objects button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isObjectInspectionPossible());
-    if (AlienImGui::ToolbarButton(ICON_FA_MICROSCOPE)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_MICROSCOPE))) {
         EditorController::get().onInspectSelectedObjects();
     }
     ImGui::EndDisabled();
@@ -104,7 +104,7 @@ void PatternEditorWindow::processIntern()
     //inspect genomes button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isGenomeInspectionPossible());
-    if (AlienImGui::ToolbarButton(ICON_FA_DNA)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_DNA))) {
         EditorController::get().onInspectSelectedGenomes();
     }
     ImGui::EndDisabled();
@@ -312,6 +312,11 @@ void PatternEditorWindow::processIntern()
     AlienImGui::HelpMarker("If turned on, all changes made in this window or with the mouse cursor are applied to the cell networks of the selected cell.\n"
                            "If this option is disabled, the changes will be applied only to the selected cells. In this case, the connections between the cells and the neighboring cells are recalculated when the positions are changed.\n"
                            "If you hold down the SHIFT key, this toggle button is temporarily turned off.");
+}
+
+bool PatternEditorWindow::isShown()
+{
+    return _on && EditorController::get().isOn();
 }
 
 void PatternEditorWindow::onOpenPattern()

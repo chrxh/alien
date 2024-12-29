@@ -87,6 +87,8 @@ public:
     __inline__ __device__ static void writeWord(uint8_t* genome, int address, int word);
 
     //conversion methods
+    __inline__ __device__ static float convertByteToFloat(uint8_t b);
+    __inline__ __device__ static uint8_t convertFloatToByte(float b);
     __inline__ __device__ static bool convertByteToBool(uint8_t b);
     __inline__ __device__ static uint8_t convertBoolToByte(bool value);
     __inline__ __device__ static int convertBytesToWord(uint8_t b1, uint8_t b2);
@@ -284,12 +286,12 @@ __inline__ __device__ int GenomeDecoder::readWord(ConstructorFunction& construct
 
 __inline__ __device__ float GenomeDecoder::readFloat(ConstructorFunction& constructor, int& genomeBytePosition)
 {
-    return static_cast<float>(static_cast<int8_t>(readByte(constructor, genomeBytePosition))) / 128;
+    return convertByteToFloat(readByte(constructor, genomeBytePosition));
 }
 
 __inline__ __device__ float GenomeDecoder::readEnergy(ConstructorFunction& constructor, int& genomeBytePosition)
 {
-    return static_cast<float>(static_cast<int8_t>(readByte(constructor, genomeBytePosition))) / 128 * 100 + 150;
+    return readFloat(constructor, genomeBytePosition) * 100 + 150.0f;
 }
 
 __inline__ __device__ float GenomeDecoder::readAngle(ConstructorFunction& constructor, int& genomeBytePosition)
@@ -426,6 +428,16 @@ __inline__ __device__ int GenomeDecoder::readWord(uint8_t* genome, int address)
 __inline__ __device__ void GenomeDecoder::writeWord(uint8_t* genome, int address, int word)
 {
     GenomeDecoder::convertWordToBytes(word, genome[address], genome[address + 1]);
+}
+
+__inline__ __device__ float GenomeDecoder::convertByteToFloat(uint8_t b)
+{
+    return static_cast<float>(static_cast<int8_t>(b)) / 128;
+}
+
+__inline__ __device__ uint8_t GenomeDecoder::convertFloatToByte(float v)
+{
+    return static_cast<uint8_t>(static_cast<int8_t>(v * 128));
 }
 
 __inline__ __device__ bool GenomeDecoder::convertByteToBool(uint8_t b)

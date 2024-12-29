@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <functional>
 
 #include <imgui.h>
@@ -7,8 +8,28 @@
 #include "Base/Definitions.h"
 #include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/PreviewDescriptions.h"
-#include "Definitions.h"
 #include "EngineInterface/CellFunctionConstants.h"
+
+#include "Definitions.h"
+
+struct FilterStackElement
+{
+    std::string text;
+    bool alreadyMatched = false;
+};
+
+struct TreeNodeStackElement
+{
+    float treeNodeStartCursorPosY = 0;
+    ImGuiID treeNodeId = 0;
+    bool isOpen = false;
+};
+
+struct TreeNodeInfo
+{
+    std::chrono::steady_clock::time_point invisibleTimepoint;
+    bool isEmpty = false;
+};
 
 class AlienImGui
 {
@@ -157,6 +178,7 @@ public:
         MEMBER_DECLARATION(InputTextParameters, float, width, 0);
         MEMBER_DECLARATION(InputTextParameters, float, textWidth, 100);
         MEMBER_DECLARATION(InputTextParameters, bool, monospaceFont, false);
+        MEMBER_DECLARATION(InputTextParameters, bool, bold, false);
         MEMBER_DECLARATION(InputTextParameters, bool, readOnly, false);
         MEMBER_DECLARATION(InputTextParameters, bool, password, false);
         MEMBER_DECLARATION(InputTextParameters, bool, folderButton, false);
@@ -165,6 +187,12 @@ public:
     };
     static bool InputText(InputTextParameters const& parameters, char* buffer, int bufferSize);
     static bool InputText(InputTextParameters const& parameters, std::string& text);
+
+    struct InputFilterParameters
+    {
+        MEMBER_DECLARATION(InputFilterParameters, float, width, 0);
+    };
+    static bool InputFilter(InputFilterParameters const& parameters, std::string& filter);
 
     struct InputTextMultilineParameters
     {
@@ -181,6 +209,7 @@ public:
         MEMBER_DECLARATION(ComboParameters, float, textWidth, 100);
         MEMBER_DECLARATION(ComboParameters, bool, disabled, false);
         MEMBER_DECLARATION(ComboParameters, std::optional<int>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(ComboParameters, bool const*, defaultEnabledValue, nullptr);
         MEMBER_DECLARATION(ComboParameters, std::vector<std::string>, values, std::vector<std::string>());
         MEMBER_DECLARATION(ComboParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
@@ -282,11 +311,25 @@ public:
 
     static void NegativeSpacing();
     static void Separator();
-    static void MovableSeparator(float& height);
+
+    struct MovableSeparatorParameters
+    {
+        MEMBER_DECLARATION(MovableSeparatorParameters, bool, additive, true);
+    };
+    static void MovableSeparator(MovableSeparatorParameters const& parameters, float& height);
 
     static void Group(std::string const& text, std::optional<std::string> const& tooltip = std::nullopt);
 
-    static bool ToolbarButton(std::string const& text);
+    struct ToolbarButtonParameters
+    {
+        MEMBER_DECLARATION(ToolbarButtonParameters, std::string, text, std::string());
+        MEMBER_DECLARATION(ToolbarButtonParameters, std::optional<std::string>, secondText, std::nullopt);
+        MEMBER_DECLARATION(ToolbarButtonParameters, RealVector2D, secondTextOffset, (RealVector2D{25.0f, 25.0f}));
+        MEMBER_DECLARATION(ToolbarButtonParameters, float, secondTextScale, 0.5f);
+        MEMBER_DECLARATION(ToolbarButtonParameters, bool, disabled, false);
+        MEMBER_DECLARATION(ToolbarButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
+    };
+    static bool ToolbarButton(ToolbarButtonParameters const& parameters);
     static bool SelectableToolbarButton(std::string const& text, int& value, int selectionValue, int deselectionValue);
 
     static void VerticalSeparator(float length = 23.0f);
@@ -294,14 +337,25 @@ public:
     static bool Button(std::string const& text, float size = 0);
     static bool CollapseButton(bool collapsed);
 
+    enum class TreeNodeRank
+    {
+        Low,
+        Default,
+        High
+    };
     struct TreeNodeParameters
     {
-        MEMBER_DECLARATION(TreeNodeParameters, std::string, text, "");
-        MEMBER_DECLARATION(TreeNodeParameters, bool, highlighted, false);
+        MEMBER_DECLARATION(TreeNodeParameters, std::string, name, "");
+        MEMBER_DECLARATION(TreeNodeParameters, TreeNodeRank, rank, TreeNodeRank::Default);
         MEMBER_DECLARATION(TreeNodeParameters, bool, defaultOpen, true);
+        MEMBER_DECLARATION(TreeNodeParameters, bool, visible, true);
+        MEMBER_DECLARATION(TreeNodeParameters, bool, blinkWhenActivated, false);
     };
     static bool BeginTreeNode(TreeNodeParameters const& parameters);
     static void EndTreeNode();
+
+    static void SetFilterText(std::string const& value);
+    static void ResetFilterText();
 
     struct ButtonParameters
     {
@@ -328,7 +382,7 @@ public:
 
     static void StatusBar(std::vector<std::string> const& textItems);
 
-    static void Tooltip(std::string const& text, bool delay = true);
+    static void Tooltip(std::string const& text, bool delay = true, ImGuiHoveredFlags flags = ImGuiHoveredFlags_AllowWhenDisabled);
     static void Tooltip(std::function<std::string()> const& textFunc, bool delay = true);
 
     static void ConvertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v);
@@ -408,11 +462,21 @@ private:
     template <typename T>
     static void BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], bool* enabled = nullptr);
 
+    //static bool BeginTable(std::string const& id, int column, ImGuiTableFlags flags = 0, RealVector2D size = RealVector2D(0.0f, 0.0f));
+    //static void EndTable();
+
     static ImVec2 RotationCenter(ImDrawList* drawList);
 
-    static bool revertButton(std::string const& id);
+    static bool RevertButton(std::string const& id);
 
 private:
+    static bool isFilterActive();
+    static bool matchWithFilter(std::string const& text);
+
+    static std::vector<FilterStackElement> _filterStack;
+    static std::vector<TreeNodeStackElement> _treeNodeStack;
+    static std::unordered_map<unsigned int, TreeNodeInfo> _treeNodeInfoById;
+
     static std::unordered_set<unsigned int> _basicSilderExpanded;
 
     static int _rotationStartIndex;

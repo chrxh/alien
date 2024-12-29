@@ -23,7 +23,7 @@ class TemporalControlWindow;
 
 class SpatialControlWindow;
 
-class SimulationParametersWindow;
+class SimulationParametersMainWindow;
 
 class StatisticsWindow;
 
@@ -108,6 +108,9 @@ class ChangeColorDialog;
 class AutosaveWindow;
 
 class FileTransferController;
+
+class _LocationWidgets;
+using LocationWidgets = std::shared_ptr<_LocationWidgets>;
 
 struct UserInfo;
 

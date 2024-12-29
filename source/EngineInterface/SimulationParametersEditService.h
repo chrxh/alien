@@ -22,6 +22,6 @@ public:
     void applyRadiationStrengths(SimulationParameters& parameters, RadiationStrengths const& strengths);
 
     void adaptRadiationStrengths(RadiationStrengths& strengths, RadiationStrengths& origStrengths, int changeIndex) const;
-    RadiationStrengths calcRadiationStrengthsForAddingSpot(RadiationStrengths const& strengths) const;
-    RadiationStrengths calcRadiationStrengthsForDeletingSpot(RadiationStrengths const& strengths, int deleteIndex) const;
+    RadiationStrengths calcRadiationStrengthsForAddingZone(RadiationStrengths const& strengths) const;
+    RadiationStrengths calcRadiationStrengthsForDeletingZone(RadiationStrengths const& strengths, int deleteIndex) const;
 };

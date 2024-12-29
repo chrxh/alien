@@ -4,7 +4,7 @@
 
 #include "Base/JsonParser.h"
 #include "Base/Singleton.h"
-#include "EngineInterface/SimulationParametersSpotValues.h"
+#include "EngineInterface/SimulationParametersZoneValues.h"
 
 #include "AuxiliaryData.h"
 #include "Definitions.h"

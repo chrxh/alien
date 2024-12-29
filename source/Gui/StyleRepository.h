@@ -24,6 +24,7 @@ namespace Const
     int64_t const SimulationSliderColor_Active = 0xff6c6c6c;
     int64_t const TextDecentColor = 0xff909090;
     int64_t const TextInfoColor = 0xff308787;
+    ImColor const TextLightDecentColor = ImColor::HSV(0.0f, 0.0f, 0.5f, 1.0f);
 
     ImColor const HeaderColor = ImColor::HSV(0.58f, 0.7f, 0.3f);
     ImColor const HeaderActiveColor = ImColor::HSV(0.58f, 0.7f, 0.5f);
@@ -42,13 +43,18 @@ namespace Const
     ImColor const ToggleButtonActiveColor = ImColor::HSV(0.14f, 0.8f, 0.7f);
     ImColor const ToggleButtonActiveHoveredColor = ImColor::HSV(0.14f, 0.8f, 0.8f);
 
-    ImColor const TreeNodeColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
-    ImColor const TreeNodeHoveredColor = ImColor::HSV(0.6f, 0.6f, 0.55f);
-    ImColor const TreeNodeActiveColor = ImColor::HSV(0.6f, 0.6f, 0.65f);
-    ImColor const TreeNodeHighlightedColor = ImColor::HSV(0.0, 0.0f, 0.15f);
-    ImColor const TreeNodeHighlightedHoveredColor = ImColor::HSV(0.0f, 0.0f, 0.25f);
-    ImColor const TreeNodeHighlightedActiveColor = ImColor::HSV(0.0f, 0.0f, 0.35f);
-    
+    ImColor const TreeNodeHighColor = ImColor::HSV(0.6f, 0.6f, 0.50f);
+    ImColor const TreeNodeHighHoveredColor = ImColor::HSV(0.6f, 0.6f, 0.65f);
+    ImColor const TreeNodeHighActiveColor = ImColor::HSV(0.6f, 0.6f, 0.80f);
+    ImColor const TreeNodeDefaultColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
+    ImColor const TreeNodeDefaultHoveredColor = ImColor::HSV(0.6f, 0.6f, 0.55f);
+    ImColor const TreeNodeDefaultActiveColor = ImColor::HSV(0.6f, 0.6f, 0.65f);
+    ImColor const TreeNodeLowColor = ImColor::HSV(0.0, 0.0f, 0.20f);
+    ImColor const TreeNodeLowHoveredColor = ImColor::HSV(0.0f, 0.0f, 0.25f);
+    ImColor const TreeNodeLowActiveColor = ImColor::HSV(0.0f, 0.0f, 0.35f);
+
+    ImColor const TableHeaderColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
+
     ImColor const MonospaceColor = ImColor::HSV(0.3f, 1.0f, 1.0f);
 
     ImColor const HeadlineColor = ImColor::HSV(0.4f, 0.4f, 0.8f);
@@ -67,9 +73,10 @@ namespace Const
     ImColor const ToolbarButtonBackgroundColor = ImColor::HSV(0, 0, 0.06f, 0);
     ImColor const ToolbarButtonHoveredColor = ImColor::HSV(0, 0, 1, 0.35f);
 
-    ImColor const ActionButtonTextColor = ImColor::HSV(0.55f, 0.6f, 1.0f, 1.0f);
-    ImColor const ActionButtonBackgroundColor = ImColor::HSV(0, 0, 0.06f, 0);
-    ImColor const ActionButtonHoveredColor = ImColor::HSV(0, 0, 1, 0.35f);
+    ImColor const ActionButtonTextColor = ImColor::HSV(0.54f, 0.43f, 1.0f, 1.0f);
+    ImColor const ActionButtonBackgroundColor = ImColor::HSV(0.54f, 0.43f, 0.0f, 0.0f);
+    ImColor const ActionButtonHoveredColor = ImColor::HSV(0.54f, 0.43f, 0.3f, 1.0f);
+    ImColor const ActionButtonActiveColor = ImColor::HSV(0.54f, 0.43f, 0.45f, 1.0f);
 
     ImColor const ButtonColor = ImColor::HSV(0.54f, 0.33f, 1.0f, 1.0f);
     ImColor const ToggleColor = ImColor::HSV(0.58f, 0.83f, 1.0f, 1.0f);
@@ -99,7 +106,6 @@ namespace Const
     ImColor const BrowserDeleteButtonTextColor = ImColor::HSV(0.0f, 0.6f, 0.8f, 1.0f);
     ImColor const BrowserResourceTextColor = ImColor::HSV(0.0f, 0.0f, 1.0f);
     ImColor const BrowserResourceLineColor = ImColor::HSV(0.0f, 0.0f, 0.5f);
-    ImColor const BrowserResourcePropertiesTextColor = ImColor::HSV(0.0f, 0.0f, 0.5f, 1.0f);
     ImColor const BrowserResourceNewTextColor = ImColor::HSV(0.15f, 0.8f, 1.0f);
     ImColor const BrowserResourceSymbolColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 1.0f);
 
@@ -147,4 +153,9 @@ private:
 inline float scale(float value)
 {
     return StyleRepository::get().scale(value);
+}
+
+inline float scaleInverse(float value)
+{
+    return StyleRepository::get().scaleInverse(value);
 }

@@ -79,7 +79,7 @@ private:
     std::string _startingPath;
 
     bool _settingsOpen = false;
-    float _settingsHeight = 130.0f;
+    float _settingsHeight = 0;
 
     using PlotScale = int;
     enum PlotScale_

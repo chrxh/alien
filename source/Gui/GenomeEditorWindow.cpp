@@ -29,6 +29,7 @@
 #include "HelpStrings.h"
 #include "UploadSimulationDialog.h"
 #include "ChangeColorDialog.h"
+#include "EditorController.h"
 
 namespace
 {
@@ -114,6 +115,11 @@ void GenomeEditorWindow::processIntern()
     processEditor();
 }
 
+bool GenomeEditorWindow::isShown()
+{
+    return _on && EditorController::get().isOn();
+}
+
 void GenomeEditorWindow::processToolbar()
 {
     if (_tabDatas.empty()) {
@@ -121,19 +127,19 @@ void GenomeEditorWindow::processToolbar()
     }
     auto& selectedTab = _tabDatas.at(_selectedTabIndex);
 
-    if (AlienImGui::ToolbarButton(ICON_FA_FOLDER_OPEN)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN))) {
         onOpenGenome();
     }
     AlienImGui::Tooltip("Open genome from file");
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_SAVE)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_SAVE))) {
         onSaveGenome();
     }
     AlienImGui::Tooltip("Save genome to file");
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_UPLOAD)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_UPLOAD))) {
         onUploadGenome();
     }
     AlienImGui::Tooltip("Share your genome with other users:\nYour current genome will be uploaded to the server and made visible in the browser.");
@@ -142,7 +148,7 @@ void GenomeEditorWindow::processToolbar()
     AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_COPY)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_COPY))) {
         _copiedGenome = GenomeDescriptionService::get().convertDescriptionToBytes(selectedTab.genome);
         printOverlayMessage("Genome copied");
     }
@@ -152,23 +158,26 @@ void GenomeEditorWindow::processToolbar()
     AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_PLUS)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS))) {
         onAddNode();
     }
     AlienImGui::Tooltip("Add cell");
 
     ImGui::SameLine();
     ImGui::BeginDisabled(selectedTab.genome.cells.empty());
-    if (AlienImGui::ToolbarButton(ICON_FA_MINUS)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_MINUS))) {
         onDeleteNode();
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Delete cell");
 
     ImGui::SameLine();
+    AlienImGui::ToolbarSeparator();
+
+    ImGui::SameLine();
     auto& selectedNode = selectedTab.selectedNode;
     ImGui::BeginDisabled(!(selectedNode && *selectedNode > 0));
-    if (AlienImGui::ToolbarButton(ICON_FA_CHEVRON_UP)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_CHEVRON_UP))) {
         onNodeDecreaseSequenceNumber();
     }
     ImGui::EndDisabled();
@@ -176,7 +185,7 @@ void GenomeEditorWindow::processToolbar()
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!(selectedNode && *selectedNode < selectedTab.genome.cells.size() - 1));
-    if (AlienImGui::ToolbarButton(ICON_FA_CHEVRON_DOWN)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_CHEVRON_DOWN))) {
         onNodeIncreaseSequenceNumber();
     }
     ImGui::EndDisabled();
@@ -187,7 +196,7 @@ void GenomeEditorWindow::processToolbar()
 
     ImGui::SameLine();
     ImGui::BeginDisabled(selectedTab.genome.cells.empty());
-    if (AlienImGui::ToolbarButton(ICON_FA_EXPAND_ARROWS_ALT)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_EXPAND_ARROWS_ALT))) {
         _expandNodes = true;
     }
     ImGui::EndDisabled();
@@ -195,7 +204,7 @@ void GenomeEditorWindow::processToolbar()
 
     ImGui::SameLine();
     ImGui::BeginDisabled(selectedTab.genome.cells.empty());
-    if (AlienImGui::ToolbarButton(ICON_FA_COMPRESS_ARROWS_ALT)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_COMPRESS_ARROWS_ALT))) {
         _expandNodes = false;
     }
     ImGui::EndDisabled();
@@ -206,7 +215,7 @@ void GenomeEditorWindow::processToolbar()
 
     ImGui::SameLine();
     ImGui::BeginDisabled(selectedTab.genome.cells.empty());
-    if (AlienImGui::ToolbarButton(ICON_FA_PALETTE)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PALETTE))) {
         ChangeColorDialog::get().open();
     }
     ImGui::EndDisabled();
@@ -216,7 +225,7 @@ void GenomeEditorWindow::processToolbar()
     AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(ICON_FA_SEEDLING)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_SEEDLING))) {
         onCreateSpore();
     }
     AlienImGui::Tooltip("Create a spore with current genome");
@@ -288,7 +297,7 @@ void GenomeEditorWindow::processTab(TabData& tab)
     }
     ImGui::EndChild();
 
-    AlienImGui::MovableSeparator(_previewHeight);
+    AlienImGui::MovableSeparator(AlienImGui::MovableSeparatorParameters().additive(false), _previewHeight);
 
     AlienImGui::Group("Preview (reference configuration)", Const::GenomePreviewTooltip);
     ImGui::SameLine();
@@ -974,7 +983,7 @@ void GenomeEditorWindow::validateAndCorrect(CellGenomeDescription& cell) const
         if (constructor.mode < 0) {
             constructor.mode = 0;
         }
-        constructor.constructionActivationTime = ((constructor.constructionActivationTime % MaxActivationTime) + MaxActivationTime) % MaxActivationTime;
+        constructor.constructionActivationTime = ((constructor.constructionActivationTime % Const::MaxActivationTime) + Const::MaxActivationTime) % Const::MaxActivationTime;
     } break;
     case CellFunction_Sensor: {
         auto& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);

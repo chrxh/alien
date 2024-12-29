@@ -9,7 +9,7 @@ struct TimestepStatistics
     ColorVector<int> numSelfReplicators = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<int> numColonies = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<int> numViruses = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<int> numConnections = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<int> numFreeCells = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<int> numParticles = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<uint64_t> numGenomeCells = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> genomeComplexity = {0, 0, 0, 0, 0, 0, 0};

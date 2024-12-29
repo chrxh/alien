@@ -350,9 +350,9 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
         imageSize.x - max(toInt((rectLowerRight.x - worldSize.x) * zoom), 0), imageSize.y - max(toInt((rectLowerRight.y - worldSize.y) * zoom), 0)};
 
     auto baseColor = colorToFloat3(cudaSimulationParameters.backgroundColor);
-    float3 spotColors[MAX_SPOTS];
-    for (int i = 0; i < cudaSimulationParameters.numSpots; ++i) {
-        spotColors[i] = colorToFloat3(cudaSimulationParameters.spots[i].color);
+    float3 spotColors[MAX_ZONES];
+    for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
+        spotColors[i] = colorToFloat3(cudaSimulationParameters.zone[i].color);
     }
 
     auto const partition = calcAllThreadsPartition(imageSize.x * imageSize.y);
@@ -513,25 +513,26 @@ __global__ void cudaDrawCells(
         //draw muscle movements
         if (cudaSimulationParameters.muscleMovementVisualization && cell->cellFunction == CellFunction_Muscle
             && (cell->cellFunctionData.muscle.lastMovementX != 0 || cell->cellFunctionData.muscle.lastMovementY != 0)) {
+            float2 lastMovement{cell->cellFunctionData.muscle.lastMovementX, cell->cellFunctionData.muscle.lastMovementY};
+            auto lastMovementLength = Math::length(lastMovement);
+            if (lastMovementLength > 0.05f) {
+                lastMovement = lastMovement / lastMovementLength * 0.05f;
+            }
 
             auto color = float3{0.7f, 0.7f, 0.7f} * min(1.0f, zoom * 0.1f);
-            auto endPos = cell->pos + float2{cell->cellFunctionData.muscle.lastMovementX, cell->cellFunctionData.muscle.lastMovementY} * 100;
+            auto endPos = cell->pos + lastMovement * 100;
             auto endImagePos = mapWorldPosToImagePos(rectUpperLeft, endPos, universeImageSize, zoom);
             if (isLineVisible(cellImagePos, endImagePos, universeImageSize)) {
                 drawLine(cellImagePos, endImagePos, color, imageData, imageSize);
             }
 
-            auto arrowPos1 = endPos + float2{
-                -cell->cellFunctionData.muscle.lastMovementX + cell->cellFunctionData.muscle.lastMovementY,
-                -cell->cellFunctionData.muscle.lastMovementX - cell->cellFunctionData.muscle.lastMovementY} * 20;
+            auto arrowPos1 = endPos + float2{-lastMovement.x + lastMovement.y, -lastMovement.x - lastMovement.y} * 20;
             auto arrowImagePos1 = mapWorldPosToImagePos(rectUpperLeft, arrowPos1, universeImageSize, zoom);
             if (isLineVisible(arrowImagePos1, endImagePos, universeImageSize)) {
                 drawLine(arrowImagePos1, endImagePos, color, imageData, imageSize);
             }
 
-            auto arrowPos2 = endPos + float2{
-                -cell->cellFunctionData.muscle.lastMovementX - cell->cellFunctionData.muscle.lastMovementY,
-                +cell->cellFunctionData.muscle.lastMovementX - cell->cellFunctionData.muscle.lastMovementY} * 20;
+            auto arrowPos2 = endPos + float2{-lastMovement.x - lastMovement.y, +lastMovement.x - lastMovement.y} * 20;
             auto arrowImagePos2 = mapWorldPosToImagePos(rectUpperLeft, arrowPos2, universeImageSize, zoom);
             if (isLineVisible(arrowImagePos2, endImagePos, universeImageSize)) {
                 drawLine(arrowImagePos2, endImagePos, color, imageData, imageSize);
@@ -673,7 +674,7 @@ __global__ void cudaDrawRadiationSources(uint64_t* targetImage, float2 rectUpper
 {
     auto universeImageSize = toFloat2(worldSize) * zoom;
     for (int i = 0; i < cudaSimulationParameters.numRadiationSources; ++i) {
-        float2 sourcePos{cudaSimulationParameters.radiationSources[i].posX, cudaSimulationParameters.radiationSources[i].posY};
+        float2 sourcePos{cudaSimulationParameters.radiationSource[i].posX, cudaSimulationParameters.radiationSource[i].posY};
         auto imagePos = mapWorldPosToImagePos(rectUpperLeft, sourcePos, universeImageSize, zoom);
         if (isContainedInRect({0, 0}, toFloat2(imageSize), imagePos)) {
             for (int dx = -5; dx <= 5; ++dx) {

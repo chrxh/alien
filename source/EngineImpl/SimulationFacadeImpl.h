@@ -113,8 +113,9 @@ public:
 
     float getTps() const override;
 
-    //for tests
+    // for tests only
     void testOnly_mutate(uint64_t cellId, MutationType mutationType) override;
+    void testOnly_mutationCheck(uint64_t cellId) override;
 
 private:
     bool _selectionNeedsUpdate = false;

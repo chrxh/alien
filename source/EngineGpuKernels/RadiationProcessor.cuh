@@ -18,7 +18,9 @@ public:
     __inline__ __device__ static void collision(SimulationData& data);
     __inline__ __device__ static void splitting(SimulationData& data);
     __inline__ __device__ static void transformation(SimulationData& data);
-    __inline__ __device__ static void radiate(SimulationData& data, float2 pos, float2 vel, int color, float energy);  //return needed energy
+
+    __inline__ __device__ static void radiate(SimulationData& data, Cell* cell, float energy);
+    __inline__ __device__ static void createEnergyParticle(SimulationData& data, float2 pos, float2 vel, int color, float energy);
 
 private:
     static auto constexpr MaxFusionEnergy = 5.0f;
@@ -43,10 +45,10 @@ __inline__ __device__ void RadiationProcessor::calcActiveSources(SimulationData&
         int activeSourceIndex = 0;
         for (int i = 0; i < cudaSimulationParameters.numRadiationSources; ++i) {
             auto sourceActive = !SpotCalculator::calcParameter(
-                &SimulationParametersSpotValues::radiationDisableSources,
-                &SimulationParametersSpotActivatedValues::radiationDisableSources,
+                &SimulationParametersZoneValues::radiationDisableSources,
+                &SimulationParametersZoneActivatedValues::radiationDisableSources,
                 data,
-                {cudaSimulationParameters.radiationSources[i].posX, cudaSimulationParameters.radiationSources[i].posY});
+                {cudaSimulationParameters.radiationSource[i].posX, cudaSimulationParameters.radiationSource[i].posY});
             if (sourceActive) {
                 data.preprocessedSimulationData.activeRadiationSources.setActiveSource(activeSourceIndex, i);
                 ++activeSourceIndex;
@@ -107,8 +109,8 @@ __inline__ __device__ void RadiationProcessor::collision(SimulationData& data)
                         continue;
                     }
                     auto radiationAbsorption = SpotCalculator::calcParameter(
-                        &SimulationParametersSpotValues::radiationAbsorption,
-                        &SimulationParametersSpotActivatedValues::radiationAbsorption,
+                        &SimulationParametersZoneValues::radiationAbsorption,
+                        &SimulationParametersZoneActivatedValues::radiationAbsorption,
                         data,
                         cell->pos,
                         cell->color);
@@ -127,8 +129,8 @@ __inline__ __device__ void RadiationProcessor::collision(SimulationData& data)
                                 max(0.0f, 1.0f - Math::length(cell->vel) * cudaSimulationParameters.radiationAbsorptionHighVelocityPenalty[cell->color]);
 
                             auto radiationAbsorptionLowVelocityPenalty = SpotCalculator::calcParameter(
-                                &SimulationParametersSpotValues::radiationAbsorptionLowVelocityPenalty,
-                                &SimulationParametersSpotActivatedValues::radiationAbsorptionLowVelocityPenalty,
+                                &SimulationParametersZoneValues::radiationAbsorptionLowVelocityPenalty,
+                                &SimulationParametersZoneActivatedValues::radiationAbsorptionLowVelocityPenalty,
                                 data,
                                 cell->pos,
                                 cell->color);
@@ -137,8 +139,8 @@ __inline__ __device__ void RadiationProcessor::collision(SimulationData& data)
                                 powf(toFloat(cell->numConnections + 1) / 7.0f, cudaSimulationParameters.radiationAbsorptionLowConnectionPenalty[cell->color]);
 
                             auto radiationAbsorptionLowGenomeComplexityPenalty = SpotCalculator::calcParameter(
-                                &SimulationParametersSpotValues::radiationAbsorptionLowGenomeComplexityPenalty,
-                                &SimulationParametersSpotActivatedValues::radiationAbsorptionLowGenomeComplexityPenalty,
+                                &SimulationParametersZoneValues::radiationAbsorptionLowGenomeComplexityPenalty,
+                                &SimulationParametersZoneActivatedValues::radiationAbsorptionLowGenomeComplexityPenalty,
                                 data,
                                 cell->pos,
                                 cell->color);
@@ -222,7 +224,28 @@ __inline__ __device__ void RadiationProcessor::transformation(SimulationData& da
     }
 }
 
-__inline__ __device__ void RadiationProcessor::radiate(SimulationData& data, float2 pos, float2 vel, int color, float energy)
+__inline__ __device__ void RadiationProcessor::radiate(SimulationData& data, Cell* cell, float energy)
+{
+    auto const cellEnergy = atomicAdd(&cell->energy, 0);
+
+    auto const radiationEnergy = min(cellEnergy, energy);
+    auto origEnergy = atomicAdd(&cell->energy, -radiationEnergy);
+    if (origEnergy < 1.0f) {
+        atomicAdd(&cell->energy, radiationEnergy);  //revert
+        return;
+    }
+
+    float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
+        + float2{
+            (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
+            (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
+    float2 particlePos = cell->pos + Math::normalized(particleVel) * 1.5f - particleVel;
+    data.cellMap.correctPosition(particlePos);
+
+    RadiationProcessor::createEnergyParticle(data, particlePos, particleVel, cell->color, radiationEnergy);
+}
+
+__inline__ __device__ void RadiationProcessor::createEnergyParticle(SimulationData& data, float2 pos, float2 vel, int color, float energy)
 {
     auto numActiveSources = data.preprocessedSimulationData.activeRadiationSources.getNumActiveSources();
     if (numActiveSources > 0) {
@@ -230,7 +253,7 @@ __inline__ __device__ void RadiationProcessor::radiate(SimulationData& data, flo
         auto sumActiveRatios = 0.0f;
         for (int i = 0; i < numActiveSources; ++i) {
             auto index = data.preprocessedSimulationData.activeRadiationSources.getActiveSource(i);
-            sumActiveRatios += cudaSimulationParameters.radiationSources[index].strength;
+            sumActiveRatios += cudaSimulationParameters.radiationSource[index].strength;
         }
         if (sumActiveRatios > 0) {
             auto randomRatioValue = data.numberGen1.random(1.0f);
@@ -239,7 +262,7 @@ __inline__ __device__ void RadiationProcessor::radiate(SimulationData& data, flo
             auto matchSource = false;
             for (int i = 0; i < numActiveSources; ++i) {
                 sourceIndex = data.preprocessedSimulationData.activeRadiationSources.getActiveSource(i);
-                sumActiveRatios += cudaSimulationParameters.radiationSources[sourceIndex].strength;
+                sumActiveRatios += cudaSimulationParameters.radiationSource[sourceIndex].strength;
                 if (randomRatioValue <= sumActiveRatios) {
                     matchSource = true;
                     break;
@@ -247,10 +270,10 @@ __inline__ __device__ void RadiationProcessor::radiate(SimulationData& data, flo
             }
             if (matchSource) {
 
-                pos.x = cudaSimulationParameters.radiationSources[sourceIndex].posX;
-                pos.y = cudaSimulationParameters.radiationSources[sourceIndex].posY;
+                pos.x = cudaSimulationParameters.radiationSource[sourceIndex].posX;
+                pos.y = cudaSimulationParameters.radiationSource[sourceIndex].posY;
 
-                auto const& source = cudaSimulationParameters.radiationSources[sourceIndex];
+                auto const& source = cudaSimulationParameters.radiationSource[sourceIndex];
                 if (source.shapeType == RadiationSourceShapeType_Circular) {
                     auto radius = max(1.0f, source.shapeData.circularRadiationSource.radius);
                     float2 delta{0, 0};

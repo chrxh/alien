@@ -33,7 +33,6 @@
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"
 #include "SpatialControlWindow.h"
-#include "SimulationParametersWindow.h"
 #include "StatisticsWindow.h"
 #include "GpuSettingsDialog.h"
 #include "Viewport.h"
@@ -71,14 +70,15 @@
 #include "GenericFileDialog.h"
 #include "ShaderWindow.h"
 #include "GenomeEditorWindow.h"
-#include "RadiationSourcesWindow.h"
 #include "ExitDialog.h"
 #include "AutosaveWindow.h"
 #include "FileTransferController.h"
+#include "LocationController.h"
 #include "LoginController.h"
 #include "NetworkTransferController.h"
 #include "MainLoopEntityController.h"
 #include "OverlayController.h"
+#include "SimulationParametersMainWindow.h"
 
 namespace
 {
@@ -124,8 +124,8 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     StatisticsWindow::get().setup(_simulationFacade);
     TemporalControlWindow::get().setup(_simulationFacade);
     SpatialControlWindow::get().setup(_simulationFacade);
-    RadiationSourcesWindow::get().setup(_simulationFacade);
-    SimulationParametersWindow::get().setup(_simulationFacade);
+    SimulationParametersMainWindow::get().setup(_simulationFacade);
+    LocationController::get().setup(_simulationFacade);
     GpuSettingsDialog::get().setup(_simulationFacade);
     MainLoopController::get().setup(_simulationFacade, _persisterFacade);
     ExitDialog::get().setup();

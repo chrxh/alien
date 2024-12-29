@@ -15,4 +15,13 @@ public:
     static std::string format(std::chrono::system_clock::time_point const& timePoint);
 
     static void copy(char* target, int targetSize, std::string const& source);
+
+    static bool containsCaseInsensitive(std::string const& str, std::string const& toMatch);
+
+    struct Decomposition
+    {
+        std::string beforeMatch;
+        std::string match;
+    };
+    static Decomposition decomposeCaseInsensitiveMatch(std::string const& str, std::string const& toMatch);
 };

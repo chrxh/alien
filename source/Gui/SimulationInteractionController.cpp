@@ -121,9 +121,6 @@ void SimulationInteractionController::processEvents()
         if (ImGui::GetIO().MouseWheel > 0) {
             mouseWheelUp(mousePosInt, std::abs(ImGui::GetIO().MouseWheel));
         }
-        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-            leftMouseButtonReleased(mousePosInt, prevMousePosInt);
-        }
 
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
             rightMouseButtonPressed(mousePosInt);
@@ -134,9 +131,6 @@ void SimulationInteractionController::processEvents()
         if (ImGui::GetIO().MouseWheel < 0) {
             mouseWheelDown(mousePosInt, std::abs(ImGui::GetIO().MouseWheel));
         }
-        if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
-            rightMouseButtonReleased();
-        }
 
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Middle)) {
             middleMouseButtonPressed(mousePosInt);
@@ -144,11 +138,18 @@ void SimulationInteractionController::processEvents()
         if (ImGui::IsMouseDown(ImGuiMouseButton_Middle)) {
             middleMouseButtonHold(mousePosInt);
         }
-        if (ImGui::IsMouseReleased(ImGuiMouseButton_Middle)) {
-            middleMouseButtonReleased();
-        }
         drawCursor();
     }
+    if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+        leftMouseButtonReleased(mousePosInt, prevMousePosInt);
+    }
+    if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
+        rightMouseButtonReleased();
+    }
+    if (ImGui::IsMouseReleased(ImGuiMouseButton_Middle)) {
+        middleMouseButtonReleased();
+    }
+
     processMouseWheel(mousePosInt);
 
     _prevMousePosInt = mousePosInt;

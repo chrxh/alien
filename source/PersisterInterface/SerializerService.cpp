@@ -20,7 +20,7 @@
 
 #include "Base/LoggingService.h"
 #include "Base/Resources.h"
-#include "Base/VersionChecker.h"
+#include "Base/VersionParserService.h"
 
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationParameters.h"
@@ -1174,10 +1174,10 @@ void SerializerService::deserializeDataDescription(ClusteredDataDescription& dat
     std::string version;
     archive(version);
 
-    if (!VersionChecker::isVersionValid(version)) {
+    if (!VersionParserService::get().isVersionValid(version)) {
         throw std::runtime_error("No version detected.");
     }
-    if (VersionChecker::isVersionOutdated(version)) {
+    if (VersionParserService::get().isVersionOutdated(version)) {
         throw std::runtime_error("Version not supported.");
     }
     archive(data);
@@ -1216,111 +1216,228 @@ namespace
         return ss.str();        
     }
 
-    void loadSave(SerializationTask task, std::vector<std::string>& serializedData, int startIndex, double& value)
+    struct ColumnDescription
     {
-        if (task == SerializationTask::Load) {
-            if (startIndex < serializedData.size()) {
-                value = std::stod(serializedData.at(startIndex));
-            }
-        } else {
-            serializedData.emplace_back(toString(value));
+        std::string name;
+        bool colorDependent = false;
+    };
+    std::vector<ColumnDescription> const ColumnDescriptions = {
+        {"Time step", false},
+        {"Cells", true},
+        {"Self-replicators", true},
+        {"Viruses", true},
+        {"Free cells", true},
+        {"Energy particles", true},
+        {"Average genome cells", true},
+        {"Total energy", true},
+        {"Created cells", true},
+        {"Attacks", true},
+        {"Muscle activities", true},
+        {"Transmitter activities", true},
+        {"Defender activities", true},
+        {"Injection activities", true},
+        {"Completed injections", true},
+        {"Nerve pulses", true},
+        {"Neuron activities", true},
+        {"Sensor activities", true},
+        {"Sensor matches", true},
+        {"Reconnector creations", true},
+        {"Reconnector deletions", true},
+        {"Detonations", true},
+        {"Colonies", true},
+        {"Genome complexity average", true},
+        {"Genome complexity Maximum", true},
+        {"Genome complexity variance", true},
+        {"System clock", false}};
+
+    std::variant<DataPoint*, double*> getDataRef(int colIndex, DataPointCollection& dataPoints)
+    {
+        if (colIndex == 0) {
+            return &dataPoints.time;
+        } else if (colIndex == 1) {
+            return &dataPoints.numCells;
+        } else if (colIndex == 2) {
+            return &dataPoints.numSelfReplicators;
+        } else if (colIndex == 3) {
+            return &dataPoints.numViruses;
+        } else if (colIndex == 4) {
+            return &dataPoints.numFreeCells;
+        } else if (colIndex == 5) {
+            return &dataPoints.numParticles;
+        } else if (colIndex == 6) {
+            return &dataPoints.averageGenomeCells;
+        } else if (colIndex == 7) {
+            return &dataPoints.totalEnergy;
+        } else if (colIndex == 8) {
+            return &dataPoints.numCreatedCells;
+        } else if (colIndex == 9) {
+            return &dataPoints.numAttacks;
+        } else if (colIndex == 10) {
+            return &dataPoints.numMuscleActivities;
+        } else if (colIndex == 11) {
+            return &dataPoints.numDefenderActivities;
+        } else if (colIndex == 12) {
+            return &dataPoints.numTransmitterActivities;
+        } else if (colIndex == 13) {
+            return &dataPoints.numInjectionActivities;
+        } else if (colIndex == 14) {
+            return &dataPoints.numCompletedInjections;
+        } else if (colIndex == 15) {
+            return &dataPoints.numNervePulses;
+        } else if (colIndex == 16) {
+            return &dataPoints.numNeuronActivities;
+        } else if (colIndex == 17) {
+            return &dataPoints.numSensorActivities;
+        } else if (colIndex == 18) {
+            return &dataPoints.numSensorMatches;
+        } else if (colIndex == 19) {
+            return &dataPoints.numReconnectorCreated;
+        } else if (colIndex == 20) {
+            return &dataPoints.numReconnectorRemoved;
+        } else if (colIndex == 21) {
+            return &dataPoints.numDetonations;
+        } else if (colIndex == 22) {
+            return &dataPoints.numColonies;
+        } else if (colIndex == 23) {
+            return &dataPoints.averageGenomeComplexity;
+        } else if (colIndex == 24) {
+            return &dataPoints.maxGenomeComplexityOfColonies;
+        } else if (colIndex == 25) {
+            return &dataPoints.varianceGenomeComplexity;
+        } else if (colIndex == 26) {
+            return &dataPoints.systemClock;
+        }
+        THROW_NOT_IMPLEMENTED();
+    }
+
+    void load(int startIndex, std::vector<std::string>& serializedData, double& value)
+    {
+        if (startIndex < serializedData.size()) {
+            value = std::stod(serializedData.at(startIndex));
         }
     }
 
-    void loadSave(SerializationTask task, std::vector<std::string>& serializedData, int startIndex, DataPoint& dataPoint)
+    void save(std::vector<std::string>& serializedData, double& value)
     {
-        if (task == SerializationTask::Load) {
-            for (int i = 0; i < MAX_COLORS; ++i) {
-                auto index = startIndex + i;
-                if (index < serializedData.size()) {
-                    dataPoint.values[i] = std::stod(serializedData.at(index));
-                }
+        serializedData.emplace_back(toString(value));
+    }
+
+    void load(int startIndex, std::vector<std::string>& serializedData, DataPoint& dataPoint)
+    {
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            auto index = startIndex + i;
+            if (index < serializedData.size()) {
+                dataPoint.values[i] = std::stod(serializedData.at(index));
             }
-            if (startIndex + 7 < serializedData.size()) {
-                dataPoint.summedValues = std::stod(serializedData.at(startIndex + 7));
-            }
-        } else {
-            for (int i = 0; i < MAX_COLORS; ++i) {
-                serializedData.emplace_back(toString(dataPoint.values[i]));
-            }
-            serializedData.emplace_back(toString(dataPoint.summedValues));
+        }
+        if (startIndex + 7 < serializedData.size()) {
+            dataPoint.summedValues = std::stod(serializedData.at(startIndex + 7));
         }
     }
 
-    void loadSave(SerializationTask task, std::vector<std::string>& serializedData, DataPointCollection& dataPoints)
+    void save(std::vector<std::string>& serializedData, DataPoint& dataPoint)
     {
-        loadSave(task, serializedData, 0, dataPoints.time);
-        loadSave(task, serializedData, 1 + 0 * 8, dataPoints.numCells);
-        loadSave(task, serializedData, 1 + 1 * 8, dataPoints.numSelfReplicators);
-        loadSave(task, serializedData, 1 + 2 * 8, dataPoints.numViruses);
-        loadSave(task, serializedData, 1 + 3 * 8, dataPoints.numConnections);
-        loadSave(task, serializedData, 1 + 4 * 8, dataPoints.numParticles);
-        loadSave(task, serializedData, 1 + 5 * 8, dataPoints.averageGenomeCells);
-        loadSave(task, serializedData, 1 + 6 * 8, dataPoints.totalEnergy);
-        loadSave(task, serializedData, 1 + 7 * 8, dataPoints.numCreatedCells);
-        loadSave(task, serializedData, 1 + 8 * 8, dataPoints.numAttacks);
-        loadSave(task, serializedData, 1 + 9 * 8, dataPoints.numMuscleActivities);
-        loadSave(task, serializedData, 1 + 10 * 8, dataPoints.numDefenderActivities);
-        loadSave(task, serializedData, 1 + 11 * 8, dataPoints.numTransmitterActivities);
-        loadSave(task, serializedData, 1 + 12 * 8, dataPoints.numInjectionActivities);
-        loadSave(task, serializedData, 1 + 13 * 8, dataPoints.numCompletedInjections);
-        loadSave(task, serializedData, 1 + 14 * 8, dataPoints.numNervePulses);
-        loadSave(task, serializedData, 1 + 15 * 8, dataPoints.numNeuronActivities);
-        loadSave(task, serializedData, 1 + 16 * 8, dataPoints.numSensorActivities);
-        loadSave(task, serializedData, 1 + 17 * 8, dataPoints.numSensorMatches);
-        loadSave(task, serializedData, 1 + 18 * 8, dataPoints.numReconnectorCreated);
-        loadSave(task, serializedData, 1 + 19 * 8, dataPoints.numReconnectorRemoved);
-        loadSave(task, serializedData, 1 + 20 * 8, dataPoints.numDetonations);
-        loadSave(task, serializedData, 1 + 21 * 8, dataPoints.numColonies);
-        loadSave(task, serializedData, 1 + 22 * 8, dataPoints.averageGenomeComplexity);
-        loadSave(task, serializedData, 1 + 23 * 8, dataPoints.maxGenomeComplexityOfColonies);
-        loadSave(task, serializedData, 1 + 24 * 8, dataPoints.varianceGenomeComplexity);
-        loadSave(task, serializedData, 1 + 25 * 8, dataPoints.systemClock);
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            serializedData.emplace_back(toString(dataPoint.values[i]));
+        }
+        serializedData.emplace_back(toString(dataPoint.summedValues));
+    }
+
+    struct ParsedColumnInfo
+    {
+        std::string name;
+        std::optional<int> colIndex;
+        int size = 0;
+    };
+    void load(std::vector<ParsedColumnInfo> const& colInfos, std::vector<std::string>& serializedData, DataPointCollection& dataPoints)
+    {
+        int startIndex = 0;
+        for (auto const& colInfo : colInfos) {
+            if (!colInfo.colIndex.has_value()) {
+                startIndex += colInfo.size;
+                continue;
+            }
+            auto col = colInfo.colIndex.value();
+            auto data = getDataRef(col, dataPoints);
+            if (std::holds_alternative<DataPoint*>(data)) {
+                load(startIndex, serializedData, *std::get<DataPoint*>(data));
+            }
+            if (std::holds_alternative<double*>(data)) {
+                load(startIndex, serializedData, *std::get<double*>(data));
+            }
+            startIndex += colInfo.size;
+        }
+    }
+
+    void save(std::vector<std::string>& serializedData, DataPointCollection& dataPoints)
+    {
+        int index = 0;
+        for (auto const& column : ColumnDescriptions) {
+            auto data = getDataRef(index, dataPoints);
+            if (std::holds_alternative<DataPoint*>(data)) {
+                save(serializedData, *std::get<DataPoint*>(data));
+            }
+            if (std::holds_alternative<double*>(data)) {
+                save(serializedData, *std::get<double*>(data));
+            }
+            ++index;
+        }
+    }
+
+    std::string getPrincipalPart(std::string const& colName)
+    {
+        auto colNameTrimmed = boost::algorithm::trim_left_copy(colName);
+        size_t pos = colNameTrimmed.find(" (");
+        if (pos != std::string::npos) {
+            return colNameTrimmed.substr(0, pos);
+        } else {
+            return colNameTrimmed;
+        }
+    }
+
+    std::optional<int> getColumnIndex(std::string const& colName)
+    {
+        for (auto const& [index, colDescription] : ColumnDescriptions | boost::adaptors::indexed(0)) {
+            if (colDescription.name == colName) {
+                return toInt(index);
+            }
+        }
+        return std::nullopt;
     }
 }
 
 void SerializerService::serializeStatistics(StatisticsHistoryData const& statistics, std::ostream& stream)
 {
     //header row
-    stream << "Time step";
     auto writeLabelAllColors = [&stream](auto const& name) {
         for (int i = 0; i < MAX_COLORS; ++i) {
-            stream << ", " << name << " (color " << i << ")";
+            if (i != 0) {
+                stream << ",";
+            }
+            stream << name << " (color " << i << ")";
         }
-        stream << ", " << name << " (accumulated)";
+        stream << "," << name << " (accumulated)";
     };
-    writeLabelAllColors("Cells");
-    writeLabelAllColors("Self-replicators");
-    writeLabelAllColors("Viruses");
-    writeLabelAllColors("Cell connections");
-    writeLabelAllColors("Energy particles");
-    writeLabelAllColors("Average genome cells");
-    writeLabelAllColors("Total energy");
-    writeLabelAllColors("Created cells");
-    writeLabelAllColors("Attacks");
-    writeLabelAllColors("Muscle activities");
-    writeLabelAllColors("Transmitter activities");
-    writeLabelAllColors("Defender activities");
-    writeLabelAllColors("Injection activities");
-    writeLabelAllColors("Completed injections");
-    writeLabelAllColors("Nerve pulses");
-    writeLabelAllColors("Neuron activities");
-    writeLabelAllColors("Sensor activities");
-    writeLabelAllColors("Sensor matches");
-    writeLabelAllColors("Reconnector creations");
-    writeLabelAllColors("Reconnector deletions");
-    writeLabelAllColors("Detonations");
-    writeLabelAllColors("Colonies");
-    writeLabelAllColors("Genome complexity average");
-    writeLabelAllColors("Genome complexity Maximum");
-    writeLabelAllColors("Genome complexity variance");
-    writeLabelAllColors("System clock");
+
+    int index = 0;
+    for (auto const& [colName, colorDependent]: ColumnDescriptions) {
+        if (index != 0) {
+            stream << ", ";
+        }
+        if (!colorDependent) {
+            stream << colName;
+        }
+        else {
+            writeLabelAllColors(colName);
+        }
+        ++index;
+    }
     stream << std::endl;
 
     //content
     for (auto dataPoints : statistics) {
         std::vector<std::string> entries;
-        loadSave(SerializationTask::Save, entries, dataPoints);
+        save(entries, dataPoints);
         stream << boost::join(entries, ",") << std::endl;
     }
 }
@@ -1330,14 +1447,37 @@ void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics,
     statistics.clear();
 
     std::vector<std::vector<std::string>> data;
-    std::string line;
-    std::getline(stream, line); //skip header line
-    while (std::getline(stream, line)) {
+
+    // header line
+    std::string header;
+    std::getline(stream, header);
+
+    std::vector<std::string> colNames;
+    boost::split(colNames, header, boost::is_any_of(","));
+
+    std::vector<ParsedColumnInfo> colInfos;
+        for (auto const& colName : colNames) {
+        auto principalPart = getPrincipalPart(colName);
+
+        if (colInfos.empty()) {
+            colInfos.emplace_back(principalPart, getColumnIndex(principalPart), 1);
+        } else {
+            auto& lastColInfo = colInfos.back();
+            if (lastColInfo.name == principalPart) {
+                ++lastColInfo.size;
+            } else {
+                colInfos.emplace_back(principalPart, getColumnIndex(principalPart), 1);
+            }
+        }
+    }
+
+    // data lines
+    while (std::getline(stream, header)) {
         std::vector<std::string> entries;
-        boost::split(entries, line, boost::is_any_of(","));
+        boost::split(entries, header, boost::is_any_of(","));
 
         DataPointCollection dataPoints;
-        loadSave(SerializationTask::Load, entries, dataPoints);
+        load(colInfos, entries, dataPoints);
 
         statistics.emplace_back(dataPoints);
     }

@@ -38,11 +38,9 @@
 #include "NewSimulationDialog.h"
 #include "PatternAnalysisDialog.h"
 #include "PatternEditorWindow.h"
-#include "RadiationSourcesWindow.h"
 #include "SelectionWindow.h"
 #include "ShaderWindow.h"
 #include "SimulationInteractionController.h"
-#include "SimulationParametersWindow.h"
 #include "SpatialControlWindow.h"
 #include "StatisticsWindow.h"
 #include "UiController.h"
@@ -57,6 +55,7 @@
 #include "EditorController.h"
 #include "ExitDialog.h"
 #include "FileTransferController.h"
+#include "SimulationParametersMainWindow.h"
 
 namespace
 {
@@ -421,30 +420,22 @@ void MainLoopController::processMenubar()
             .name("Simulation parameters")
             .keyAlt(true)
             .key(ImGuiKey_4)
-            .selected(SimulationParametersWindow::get().isOn())
+            .selected(SimulationParametersMainWindow::get().isOn())
             .closeMenuWhenItemClicked(false),
-        [&] { SimulationParametersWindow::get().setOn(!SimulationParametersWindow::get().isOn()); });
-    AlienImGui::MenuItem(
-        AlienImGui::MenuItemParameters()
-            .name("Radiation sources")
-            .keyAlt(true)
-            .key(ImGuiKey_5)
-            .selected(RadiationSourcesWindow::get().isOn())
-            .closeMenuWhenItemClicked(false),
-        [&] { RadiationSourcesWindow::get().setOn(!RadiationSourcesWindow::get().isOn()); });
+        [&] { SimulationParametersMainWindow::get().setOn(!SimulationParametersMainWindow::get().isOn()); });
     AlienImGui::MenuItem(
         AlienImGui::MenuItemParameters()
             .name("Shader parameters")
             .keyAlt(true)
-            .key(ImGuiKey_6)
+            .key(ImGuiKey_5)
             .selected(ShaderWindow::get().isOn())
             .closeMenuWhenItemClicked(false),
         [&] { ShaderWindow::get().setOn(!ShaderWindow::get().isOn()); });
     AlienImGui::MenuItem(
-        AlienImGui::MenuItemParameters().name("Autosave").keyAlt(true).key(ImGuiKey_7).selected(AutosaveWindow::get().isOn()).closeMenuWhenItemClicked(false),
+        AlienImGui::MenuItemParameters().name("Autosave").keyAlt(true).key(ImGuiKey_6).selected(AutosaveWindow::get().isOn()).closeMenuWhenItemClicked(false),
         [&] { AutosaveWindow::get().setOn(!AutosaveWindow::get().isOn()); });
     AlienImGui::MenuItem(
-        AlienImGui::MenuItemParameters().name("Log").keyAlt(true).key(ImGuiKey_8).selected(LogWindow::get().isOn()).closeMenuWhenItemClicked(false),
+        AlienImGui::MenuItemParameters().name("Log").keyAlt(true).key(ImGuiKey_7).selected(LogWindow::get().isOn()).closeMenuWhenItemClicked(false),
         [&] { LogWindow::get().setOn(!LogWindow::get().isOn()); });
     AlienImGui::EndMenu();
 

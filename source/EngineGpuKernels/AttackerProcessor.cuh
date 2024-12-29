@@ -19,7 +19,6 @@ public:
 
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
-    __inline__ __device__ static void radiate(SimulationData& data, Cell* cell);
     __inline__ __device__ static void distributeEnergy(SimulationData& data, Cell* cell, float energyDelta);
 
     __inline__ __device__ static float calcOpenAngle(Cell* cell, float2 direction);
@@ -48,7 +47,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     if (abs(signal.channels[0]) >= cudaSimulationParameters.cellFunctionAttackerSignalThreshold) {
         float energyDelta = 0;
         auto cellMinEnergy = SpotCalculator::calcParameter(
-            &SimulationParametersSpotValues::cellMinEnergy, &SimulationParametersSpotActivatedValues::cellMinEnergy, data, cell->pos, cell->color);
+            &SimulationParametersZoneValues::cellMinEnergy, &SimulationParametersZoneActivatedValues::cellMinEnergy, data, cell->pos, cell->color);
         auto baseValue = cudaSimulationParameters.cellFunctionAttackerDestroyCells ? cellMinEnergy * 0.1f : cellMinEnergy;
 
         Cell* someOtherCell = nullptr;
@@ -77,8 +76,8 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
             if (otherCell->genomeComplexity > cell->genomeComplexity) {
                 auto cellFunctionAttackerGenomeComplexityBonus = SpotCalculator::calcParameter(
-                    &SimulationParametersSpotValues::cellFunctionAttackerGenomeComplexityBonus,
-                    &SimulationParametersSpotActivatedValues::cellFunctionAttackerGenomeComplexityBonus,
+                    &SimulationParametersZoneValues::cellFunctionAttackerGenomeComplexityBonus,
+                    &SimulationParametersZoneActivatedValues::cellFunctionAttackerGenomeComplexityBonus,
                     data,
                     cell->pos,
                     color,
@@ -95,8 +94,8 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (cudaSimulationParameters.features.advancedAttackerControl && cell->mutationId < otherCell->mutationId
                 && cell->genomeComplexity <= otherCell->genomeComplexity) {
                 auto cellFunctionAttackerArisingComplexMutantPenalty = SpotCalculator::calcParameter(
-                    &SimulationParametersSpotValues::cellFunctionAttackerNewComplexMutantPenalty,
-                    &SimulationParametersSpotActivatedValues::cellFunctionAttackerNewComplexMutantPenalty,
+                    &SimulationParametersZoneValues::cellFunctionAttackerNewComplexMutantPenalty,
+                    &SimulationParametersZoneActivatedValues::cellFunctionAttackerNewComplexMutantPenalty,
                     data,
                     cell->pos,
                     color,
@@ -115,8 +114,8 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
             if (cudaSimulationParameters.features.advancedAttackerControl) {
                 auto cellFunctionAttackerGeometryDeviationExponent = SpotCalculator::calcParameter(
-                    &SimulationParametersSpotValues::cellFunctionAttackerGeometryDeviationExponent,
-                    &SimulationParametersSpotActivatedValues::cellFunctionAttackerGeometryDeviationExponent,
+                    &SimulationParametersZoneValues::cellFunctionAttackerGeometryDeviationExponent,
+                    &SimulationParametersZoneActivatedValues::cellFunctionAttackerGeometryDeviationExponent,
                     data,
                     cell->pos,
                     cell->color);
@@ -132,8 +131,8 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
             if (cudaSimulationParameters.features.advancedAttackerControl) {
                 auto cellFunctionAttackerConnectionsMismatchPenalty = SpotCalculator::calcParameter(
-                    &SimulationParametersSpotValues::cellFunctionAttackerConnectionsMismatchPenalty,
-                    &SimulationParametersSpotActivatedValues::cellFunctionAttackerConnectionsMismatchPenalty,
+                    &SimulationParametersZoneValues::cellFunctionAttackerConnectionsMismatchPenalty,
+                    &SimulationParametersZoneActivatedValues::cellFunctionAttackerConnectionsMismatchPenalty,
                     data,
                     cell->pos,
                     cell->color);
@@ -146,8 +145,8 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             }
 
             energyToTransfer *= SpotCalculator::calcParameter(
-                &SimulationParametersSpotValues::cellFunctionAttackerFoodChainColorMatrix,
-                &SimulationParametersSpotActivatedValues::cellFunctionAttackerFoodChainColorMatrix,
+                &SimulationParametersZoneValues::cellFunctionAttackerFoodChainColorMatrix,
+                &SimulationParametersZoneActivatedValues::cellFunctionAttackerFoodChainColorMatrix,
                 data,
                 cell->pos,
                 color,
@@ -191,9 +190,18 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             }
         }
 
-        radiate(data, cell);
+        // radiation
+        auto cellFunctionWeaponEnergyCost = SpotCalculator::calcParameter(
+            &SimulationParametersZoneValues::cellFunctionAttackerEnergyCost,
+            &SimulationParametersZoneActivatedValues::cellFunctionAttackerEnergyCost,
+            data,
+            cell->pos,
+            cell->color);
+        if (cellFunctionWeaponEnergyCost > 0) {
+            RadiationProcessor::radiate(data, cell, cellFunctionWeaponEnergyCost);
+        }
 
-        //output
+        // output
         signal.channels[0] = energyDelta / 10;
 
         if (energyDelta > NEAR_ZERO) {
@@ -204,35 +212,6 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     }
 
     CellFunctionProcessor::setSignal(cell, signal);
-}
-
-__device__ __inline__ void AttackerProcessor::radiate(SimulationData& data, Cell* cell)
-{
-    auto cellFunctionWeaponEnergyCost = SpotCalculator::calcParameter(
-        &SimulationParametersSpotValues::cellFunctionAttackerEnergyCost,
-        &SimulationParametersSpotActivatedValues::cellFunctionAttackerEnergyCost,
-        data,
-        cell->pos,
-        cell->color);
-    if (cellFunctionWeaponEnergyCost > 0) {
-        auto const cellEnergy = atomicAdd(&cell->energy, 0);
-
-        auto const radiationEnergy = min(cellEnergy, cellFunctionWeaponEnergyCost);
-        auto origEnergy = atomicAdd(&cell->energy, -radiationEnergy);
-        if (origEnergy < 1.0f) {
-            atomicAdd(&cell->energy, radiationEnergy);  //revert
-            return;
-        }
-
-        float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
-            + float2{
-                (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
-                (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
-        float2 particlePos = cell->pos + Math::normalized(particleVel) * 1.5f - particleVel;
-        data.cellMap.correctPosition(particlePos);
-
-        RadiationProcessor::radiate(data, particlePos, particleVel, cell->color, radiationEnergy);
-    }
 }
 
 __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& data, Cell* cell, float energyDelta)

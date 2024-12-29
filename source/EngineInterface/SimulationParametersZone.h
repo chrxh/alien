@@ -2,8 +2,9 @@
 
 #include <cstdint>
 
-#include "SimulationParametersSpotActivatedValues.h"
-#include "SimulationParametersSpotValues.h"
+#include "SimulationParametersZoneActivatedValues.h"
+#include "SimulationParametersZoneValues.h"
+#include "SimulationParametersTypes.h"
 
 using SpotShapeType = int;
 enum SpotShapeType_
@@ -86,8 +87,11 @@ union SpotShapeData
     RectangularSpot rectangularSpot;
 };
 
-struct SimulationParametersSpot
+struct SimulationParametersZone
 {
+    Char64 name = "<unnamed>";
+    int locationIndex = -1;
+
     uint32_t color = 0;
     float posX = 0;
     float posY = 0;
@@ -102,10 +106,10 @@ struct SimulationParametersSpot
     FlowType flowType = FlowType_None;
     FlowData flowData = {RadialFlow()};
 
-    SimulationParametersSpotValues values;
-    SimulationParametersSpotActivatedValues activatedValues;
+    SimulationParametersZoneValues values;
+    SimulationParametersZoneActivatedValues activatedValues;
 
-    bool operator==(SimulationParametersSpot const& other) const
+    bool operator==(SimulationParametersZone const& other) const
     {
         if (flowType != other.flowType) {
             return false;
@@ -138,9 +142,16 @@ struct SimulationParametersSpot
                 return false;
             }
         }
-
+        for (int i = 0, j = sizeof(Char64) / sizeof(char); i < j; ++i) {
+            if (name[i] != other.name[i]) {
+                return false;
+            }
+            if (name[i] == '\0') {
+                break;
+            }
+        }
         return color == other.color && posX == other.posX && posY == other.posY && velX == other.velX && velY == other.velY
             && fadeoutRadius == other.fadeoutRadius && values == other.values && activatedValues == other.activatedValues && shapeType == other.shapeType;
     }
-    bool operator!=(SimulationParametersSpot const& other) const { return !operator==(other); }
+    bool operator!=(SimulationParametersZone const& other) const { return !operator==(other); }
 };
