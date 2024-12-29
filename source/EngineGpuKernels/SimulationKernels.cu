@@ -80,11 +80,11 @@ __global__ void cudaNextTimestep_cellFunction_prepare_substep1(SimulationData da
 {
     CellProcessor::aging(data);
     MutationProcessor::applyRandomMutations(data);
+    CellProcessor::livingStateTransition_calcFutureState(data);
 }
 
 __global__ void cudaNextTimestep_cellFunction_prepare_substep2(SimulationData data)
 {
-    CellProcessor::livingStateTransition_calcNextState(data);
     CellProcessor::livingStateTransition_applyNextState(data);
     CellFunctionProcessor::collectCellFunctionOperations(data);
     CellFunctionProcessor::updateRenderingData(data);
