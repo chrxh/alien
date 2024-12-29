@@ -19,7 +19,23 @@ class MutationTests : public IntegrationTestFramework
 public:
     MutationTests()
         : IntegrationTestFramework()
-    {}
+    {
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            _parameters.baseValues.cellCopyMutationNeuronData[i] = 1;
+            _parameters.baseValues.cellCopyMutationCellProperties[i] = 1;
+            _parameters.baseValues.cellCopyMutationCellFunction[i] = 1;
+            _parameters.baseValues.cellCopyMutationGeometry[i] = 1;
+            _parameters.baseValues.cellCopyMutationCustomGeometry[i] = 1;
+            _parameters.baseValues.cellCopyMutationInsertion[i] = 1;
+            _parameters.baseValues.cellCopyMutationDeletion[i] = 1;
+            _parameters.baseValues.cellCopyMutationTranslation[i] = 1;
+            _parameters.baseValues.cellCopyMutationDuplication[i] = 1;
+            _parameters.baseValues.cellCopyMutationCellColor[i] = 1;
+            _parameters.baseValues.cellCopyMutationSubgenomeColor[i] = 1;
+            _parameters.baseValues.cellCopyMutationGenomeColor[i] = 1;
+        }
+        _simulationFacade->setSimulationParameters(_parameters);
+    }
 
     ~MutationTests() = default;
 
@@ -829,7 +845,7 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_preserveSelfReplication)
 
 TEST_F(MutationTests, deleteMutation_eraseLargeGenome_changeSelfReplication)
 {
-    _parameters.cellFunctionConstructorMutationSelfReplication = true;
+    _parameters.cellCopyMutationSelfReplication = true;
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
@@ -869,6 +885,64 @@ TEST_F(MutationTests, deleteMutation_partiallyEraseGenome)
     auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
     EXPECT_TRUE(compareDeleteMutation(genome, actualConstructor.genome));
     EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
+}
+
+TEST_F(MutationTests, deleteMutation_selfReplicatorWithGenomeBelowMinSize)
+{
+    _parameters.features.customizeDeletionMutations = true;
+    _parameters.cellCopyMutationDeletionMinSize = 3;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells(
+        {CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()),
+        CellGenomeDescription(),
+        CellGenomeDescription(),
+    }));
+
+    auto data = DataDescription().addCells(
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome)).setLivingState(LivingState_Activating)});
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 10; ++i) {
+        _simulationFacade->testOnly_mutate(1, MutationType::Deletion);
+    }
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualCellById = getCellById(actualData);
+
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualGenome = GenomeDescriptionService::get().convertBytesToDescription(actualConstructor.genome);
+    
+    EXPECT_EQ(3, actualGenome.cells.size());
+}
+
+TEST_F(MutationTests, deleteMutation_selfReplicatorWithGenomeAboveMinSize)
+{
+    _parameters.features.customizeDeletionMutations = true;
+    _parameters.cellCopyMutationDeletionMinSize = 1;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({
+        CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()),
+        CellGenomeDescription(),
+        CellGenomeDescription(),
+    }));
+
+    auto data = DataDescription().addCells(
+        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome)).setLivingState(LivingState_Activating)});
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 10; ++i) {
+        _simulationFacade->testOnly_mutate(1, MutationType::Deletion);
+    }
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualCellById = getCellById(actualData);
+
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualGenome = GenomeDescriptionService::get().convertBytesToDescription(actualConstructor.genome);
+
+    EXPECT_EQ(1, actualGenome.cells.size());
 }
 
 TEST_F(MutationTests, duplicateMutation)
@@ -912,13 +986,13 @@ TEST_F(MutationTests, cellColorMutation)
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
-            _parameters.cellFunctionConstructorMutationColorTransitions[i][j] = false;
+            _parameters.cellCopyMutationColorTransitions[i][j] = false;
         }
     }
-    _parameters.cellFunctionConstructorMutationColorTransitions[0][3] = true;
-    _parameters.cellFunctionConstructorMutationColorTransitions[0][5] = true;
-    _parameters.cellFunctionConstructorMutationColorTransitions[4][2] = true;
-    _parameters.cellFunctionConstructorMutationColorTransitions[4][5] = true;
+    _parameters.cellCopyMutationColorTransitions[0][3] = true;
+    _parameters.cellCopyMutationColorTransitions[0][5] = true;
+    _parameters.cellCopyMutationColorTransitions[4][2] = true;
+    _parameters.cellCopyMutationColorTransitions[4][5] = true;
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto genome = createGenomeWithUniformColorPerSubgenome();
@@ -942,13 +1016,13 @@ TEST_F(MutationTests, subgenomeColorMutation)
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
-            _parameters.cellFunctionConstructorMutationColorTransitions[i][j] = false;
+            _parameters.cellCopyMutationColorTransitions[i][j] = false;
         }
     }
-    _parameters.cellFunctionConstructorMutationColorTransitions[0][3] = true;
-    _parameters.cellFunctionConstructorMutationColorTransitions[0][5] = true;
-    _parameters.cellFunctionConstructorMutationColorTransitions[4][2] = true;
-    _parameters.cellFunctionConstructorMutationColorTransitions[4][5] = true;
+    _parameters.cellCopyMutationColorTransitions[0][3] = true;
+    _parameters.cellCopyMutationColorTransitions[0][5] = true;
+    _parameters.cellCopyMutationColorTransitions[4][2] = true;
+    _parameters.cellCopyMutationColorTransitions[4][5] = true;
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto genome = createGenomeWithUniformColorPerSubgenome();
@@ -972,13 +1046,13 @@ TEST_F(MutationTests, genomeColorMutation)
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
-            _parameters.cellFunctionConstructorMutationColorTransitions[i][j] = false;
+            _parameters.cellCopyMutationColorTransitions[i][j] = false;
         }
     }
-    _parameters.cellFunctionConstructorMutationColorTransitions[0][3] = true;
-    _parameters.cellFunctionConstructorMutationColorTransitions[0][5] = true;
-    _parameters.cellFunctionConstructorMutationColorTransitions[4][2] = true;
-    _parameters.cellFunctionConstructorMutationColorTransitions[4][5] = true;
+    _parameters.cellCopyMutationColorTransitions[0][3] = true;
+    _parameters.cellCopyMutationColorTransitions[0][5] = true;
+    _parameters.cellCopyMutationColorTransitions[4][2] = true;
+    _parameters.cellCopyMutationColorTransitions[4][5] = true;
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto genome = createGenomeWithUniformColor();

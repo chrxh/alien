@@ -19,7 +19,7 @@ enum SavepointState_
 struct _SavepointEntry
 {
     std::filesystem::path filename;
-    SavepointState state = SavepointState_InQueue;
+    SavepointState state = SavepointState_Error;
     std::string timestamp;
     std::string name;
     uint64_t timestep = 0;

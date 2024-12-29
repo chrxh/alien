@@ -488,10 +488,10 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
             ? constructionData.genomeHeader.connectionDistance
             : constructionData.genomeHeader.connectionDistance + 0.8f;
         for (int i = 0; i < hostCell->numConnections; ++i) {
-            auto& connectedCell = hostCell->connections[i];
-            if (connectedCell.cell == constructionData.lastConstructionCell) {
-                connectedCell.cell = newCell;
-                connectedCell.distance = distance;
+            auto& connection = hostCell->connections[i];
+            if (connection.cell == constructionData.lastConstructionCell) {
+                connection.cell = newCell;
+                connection.distance = distance;
                 newCell->numConnections = 1;
                 newCell->connections[0].cell = hostCell;
                 newCell->connections[0].distance = distance;
@@ -672,7 +672,7 @@ ConstructorProcessor::constructCellIntern(
     case CellFunction_Constructor: {
         auto& newConstructor = result->cellFunctionData.constructor;
         newConstructor.activationMode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
-        newConstructor.constructionActivationTime = GenomeDecoder::readWord(constructor, genomeCurrentBytePosition) % MaxActivationTime;
+        newConstructor.constructionActivationTime = GenomeDecoder::readWord(constructor, genomeCurrentBytePosition) % Const::MaxActivationTime;
         newConstructor.lastConstructedCellId = 0;
         newConstructor.currentBranch = 0;
         newConstructor.genomeCurrentNodeIndex = 0;
@@ -819,11 +819,14 @@ __inline__ __device__ float ConstructorProcessor::calcGenomeComplexity(int color
         cudaSimulationParameters.features.genomeComplexityMeasurement ? cudaSimulationParameters.genomeComplexityRamificationFactor[color] : 0.0f;
     auto sizeFactor =
         cudaSimulationParameters.features.genomeComplexityMeasurement ? cudaSimulationParameters.genomeComplexitySizeFactor[color] : 1.0f;
+    auto depthLevel = cudaSimulationParameters.features.genomeComplexityMeasurement ? cudaSimulationParameters.genomeComplexityDepthLevel[color] : 3;
     GenomeDecoder::executeForEachNodeRecursively(genome, toInt(genomeSize), false, false, [&](int depth, int nodeAddress, int repetitions) {
         auto ramificationFactor = depth > lastDepth ? genomeComplexityRamificationFactor * toFloat(numRamifications) : 0.0f;
         auto cellFunctionType = GenomeDecoder::getNextCellFunctionType(genome, nodeAddress);
         auto neuronFactor = cellFunctionType == CellFunction_Neuron ? cudaSimulationParameters.genomeComplexityNeuronFactor[color] : 0.0f;
-        result += /* (1.0f + toFloat(depth)) * */ toFloat(repetitions) * (ramificationFactor + sizeFactor + neuronFactor);
+        if (depth <= depthLevel) {
+            result += /* (1.0f + toFloat(depth)) * */ toFloat(repetitions) * (ramificationFactor + sizeFactor + neuronFactor);
+        }
         lastDepth = depth;
         if (ramificationFactor > 0) {
             ++numRamifications;

@@ -16,6 +16,7 @@
 
 #include "StyleRepository.h"
 #include "AlienImGui.h"
+#include "EditorController.h"
 #include "Viewport.h"
 #include "EditorModel.h"
 #include "HelpStrings.h"
@@ -176,6 +177,11 @@ void CreatorWindow::processIntern()
         }
     }
     validateAndCorrect();
+}
+
+bool CreatorWindow::isShown()
+{
+    return _on && EditorController::get().isOn();
 }
 
 void CreatorWindow::onDrawing()

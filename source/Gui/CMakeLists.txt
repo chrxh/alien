@@ -60,6 +60,13 @@ PUBLIC
     InspectorWindow.h
     LastSessionBrowserData.cpp
     LastSessionBrowserData.h
+    LocationController.cpp
+    LocationController.h
+    LocationHelper.cpp
+    LocationHelper.h
+    LocationWidgets.h
+    LocationWindow.cpp
+    LocationWindow.h
     LoginController.cpp
     LoginController.h
     LoginDialog.cpp
@@ -95,8 +102,6 @@ PUBLIC
     PatternAnalysisDialog.h
     PatternEditorWindow.cpp
     PatternEditorWindow.h
-    RadiationSourcesWindow.cpp
-    RadiationSourcesWindow.h
     ResetPasswordDialog.cpp
     ResetPasswordDialog.h
     ResizeWorldDialog.cpp
@@ -109,8 +114,14 @@ PUBLIC
     ShaderWindow.h
     SimulationInteractionController.cpp
     SimulationInteractionController.h
-    SimulationParametersWindow.cpp
-    SimulationParametersWindow.h
+    SimulationParametersBaseWidgets.cpp
+    SimulationParametersBaseWidgets.h
+    SimulationParametersMainWindow.cpp
+    SimulationParametersMainWindow.h
+    SimulationParametersSourceWidgets.cpp
+    SimulationParametersSourceWidgets.h
+    SimulationParametersZoneWidgets.cpp
+    SimulationParametersZoneWidgets.h
     SimulationScrollbar.cpp
     SimulationScrollbar.h
     SimulationView.cpp
@@ -136,7 +147,9 @@ PUBLIC
     Viewport.cpp
     Viewport.h
     WindowController.cpp
-    WindowController.h)
+    WindowController.h
+    ZoneColorPalette.cpp
+    ZoneColorPalette.h)
 
 target_link_libraries(alien Base)
 target_link_libraries(alien EngineGpuKernels)

@@ -2,19 +2,22 @@
 
 #include <set>
 
+#include "Base/StringHelper.h"
+#include "Base/VersionParserService.h"
+
 #include "ParameterParser.h"
 
 namespace
 {
     template <typename T>
-    bool equals(SimulationParameters const& parameters, ColorVector<T> SimulationParametersSpotValues::*parameter, T const& value)
+    bool equals(SimulationParameters const& parameters, ColorVector<T> SimulationParametersZoneValues::*parameter, T const& value)
     {
         for (int i = 0; i < MAX_COLORS; ++i) {
             if ((parameters.baseValues.*parameter)[i] != value) {
                 return false;
             }
-            for (int j = 0; j < parameters.numSpots; ++j) {
-                if ((parameters.spots[j].values.*parameter)[i] != value) {
+            for (int j = 0; j < parameters.numZones; ++j) {
+                if ((parameters.zone[j].values.*parameter)[i] != value) {
                     return false;
                 }
             }
@@ -22,14 +25,14 @@ namespace
         return true;
     }
     template <typename T>
-    bool contains(SimulationParameters const& parameters, ColorVector<T> SimulationParametersSpotValues::*parameter, std::set<T> const& values)
+    bool contains(SimulationParameters const& parameters, ColorVector<T> SimulationParametersZoneValues::*parameter, std::set<T> const& values)
     {
         for (int i = 0; i < MAX_COLORS; ++i) {
             if (!values.contains((parameters.baseValues.*parameter)[i])) {
                 return false;
             }
-            for (int j = 0; j < parameters.numSpots; ++j) {
-                if (!values.contains((parameters.spots[j].values.*parameter)[i])) {
+            for (int j = 0; j < parameters.numZones; ++j) {
+                if (!values.contains((parameters.zone[j].values.*parameter)[i])) {
                     return false;
                 }
             }
@@ -155,7 +158,7 @@ void LegacyAuxiliaryDataParserService::searchAndApplyLegacyParameters(
 
     LegacyParameters legacyParameters;
     legacyParameters.base = readLegacyParametersForBase(tree, "simulation parameters.");
-    for (int i = 0; i < parameters.numSpots; ++i) {
+    for (int i = 0; i < parameters.numZones; ++i) {
         legacyParameters.spots[i] = readLegacyParametersForSpot(tree, "simulation parameters.spots." + std::to_string(i) + ".");
     }
     updateParametersAndFeaturesForLegacyFiles(programVersion, missingFeatures, legacyFeatures, missingParameters, legacyParameters, parameters);
@@ -169,15 +172,33 @@ void LegacyAuxiliaryDataParserService::updateParametersAndFeaturesForLegacyFiles
     LegacyParameters const& legacyParameters,
     SimulationParameters& parameters)
 {
-    //parameter conversion for v4.10.2 and below
+    //parameter conversion for v4.10.x and below
     if (programVersion.empty()) {
         parameters.features.legacyModes = true;
         if (parameters.numRadiationSources > 0) {
             auto strengthRatio = 1.0f / parameters.numRadiationSources;
             for (int i = 0; i < parameters.numRadiationSources; ++i) {
-                parameters.radiationSources[i].strength = strengthRatio;
+                parameters.radiationSource[i].strength = strengthRatio;
             }
             parameters.baseStrengthRatioPinned = true;
+        }
+    }
+
+    //parameter conversion for v4.11.x and below
+    auto versionParts = VersionParserService::get().getVersionParts(programVersion);
+    if (versionParts.major <= 4 && versionParts.minor <= 11) {
+        int locationPosition = 0;
+        if (parameters.numZones > 0) {
+            for (int i = 0; i < parameters.numZones; ++i) {
+                parameters.zone[i].locationIndex = ++locationPosition;
+                StringHelper::copy(parameters.zone[i].name, sizeof(parameters.zone[i].name), "Zone " + std::to_string(i + 1));
+            }
+        }
+        if (parameters.numRadiationSources > 0) {
+            for (int i = 0; i < parameters.numRadiationSources; ++i) {
+                parameters.radiationSource[i].locationIndex = ++locationPosition;
+                StringHelper::copy(parameters.radiationSource[i].name, sizeof(parameters.zone[i].name), "Radiation " + std::to_string(i + 1));
+            }
         }
     }
 
@@ -206,8 +227,8 @@ void LegacyAuxiliaryDataParserService::updateParametersAndFeaturesForLegacyFiles
 
     if (missingFeatures.advancedAttackerControl) {
         auto advancedAttackerControlForSpot = false;
-        for (int i = 0; i < parameters.numSpots; ++i) {
-            auto const& spotValues = parameters.spots[i].values;
+        for (int i = 0; i < parameters.numZones; ++i) {
+            auto const& spotValues = parameters.zone[i].values;
             if (!equals(spotValues.cellFunctionAttackerGeometryDeviationExponent, 0.0f)
                 || !equals(spotValues.cellFunctionAttackerConnectionsMismatchPenalty, 0.0f)) {
                 advancedAttackerControlForSpot = true;
@@ -231,7 +252,7 @@ void LegacyAuxiliaryDataParserService::updateParametersAndFeaturesForLegacyFiles
     }
 
     if (missingFeatures.cellColorTransitionRules) {
-        if (!contains(parameters, &SimulationParametersSpotValues::cellColorTransitionDuration, {0, Infinity<int>::value})) {
+        if (!contains(parameters, &SimulationParametersZoneValues::cellColorTransitionDuration, {0, Infinity<int>::value})) {
             parameters.features.cellColorTransitionRules = true;
         }
         for (int i = 0; i < MAX_COLORS; ++i) {
@@ -239,8 +260,8 @@ void LegacyAuxiliaryDataParserService::updateParametersAndFeaturesForLegacyFiles
                 parameters.features.cellColorTransitionRules = true;
                 break;
             }
-            for (int j = 0; j < parameters.numSpots; ++j) {
-                if (parameters.spots[j].values.cellColorTransitionTargetColor[i] != i) {
+            for (int j = 0; j < parameters.numZones; ++j) {
+                if (parameters.zone[j].values.cellColorTransitionTargetColor[i] != i) {
                     parameters.features.cellColorTransitionRules = true;
                     break;
                 }
@@ -263,7 +284,7 @@ void LegacyAuxiliaryDataParserService::updateParametersAndFeaturesForLegacyFiles
 
     //conversion of mutation rates to genome copy mutations
     if (missingParameters.copyMutations) {
-        auto setParametersForBase = [](SimulationParametersSpotValues& target, LegacyParametersForBase const& source) {
+        auto setParametersForBase = [](SimulationParametersZoneValues& target, LegacyParametersForBase const& source) {
             for (int i = 0; i < MAX_COLORS; ++i) {
                 target.cellCopyMutationNeuronData[i] = source.cellFunctionConstructorMutationNeuronDataProbability.parameter[i] * 250;
                 target.cellCopyMutationCellProperties[i] = source.cellFunctionConstructorMutationPropertiesProbability.parameter[i] * 250;
@@ -279,7 +300,7 @@ void LegacyAuxiliaryDataParserService::updateParametersAndFeaturesForLegacyFiles
                 target.cellCopyMutationGenomeColor[i] = source.cellFunctionConstructorMutationGenomeColorProbability.parameter[i] * 5000;
             }
         };
-        auto setParametersForSpot = [](SimulationParametersSpotValues& target, LegacyParametersForSpot const& source) {
+        auto setParametersForSpot = [](SimulationParametersZoneValues& target, LegacyParametersForSpot const& source) {
             for (int i = 0; i < MAX_COLORS; ++i) {
                 target.cellCopyMutationNeuronData[i] = source.cellFunctionConstructorMutationNeuronDataProbability.parameter[i] * 250;
                 target.cellCopyMutationCellProperties[i] = source.cellFunctionConstructorMutationPropertiesProbability.parameter[i] * 250;
@@ -297,8 +318,8 @@ void LegacyAuxiliaryDataParserService::updateParametersAndFeaturesForLegacyFiles
         };
 
         setParametersForBase(parameters.baseValues, legacyParameters.base);
-        for (int i = 0; i < MAX_SPOTS; ++i) {
-            setParametersForSpot(parameters.spots->values, legacyParameters.spots[i]);
+        for (int i = 0; i < MAX_ZONES; ++i) {
+            setParametersForSpot(parameters.zone->values, legacyParameters.spots[i]);
         }
     }
 

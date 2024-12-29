@@ -131,7 +131,7 @@ void TemporalControlWindow::processTpsRestriction()
 void TemporalControlWindow::processRunButton()
 {
     ImGui::BeginDisabled(_simulationFacade->isSimulationRunning());
-    auto result = AlienImGui::ToolbarButton(ICON_FA_PLAY);
+    auto result = AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLAY));
     AlienImGui::Tooltip("Run");
     if (result) {
         _history.clear();
@@ -144,7 +144,7 @@ void TemporalControlWindow::processRunButton()
 void TemporalControlWindow::processPauseButton()
 {
     ImGui::BeginDisabled(!_simulationFacade->isSimulationRunning());
-    auto result = AlienImGui::ToolbarButton(ICON_FA_PAUSE);
+    auto result = AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PAUSE));
     AlienImGui::Tooltip("Pause");
     if (result) {
         _simulationFacade->pauseSimulation();
@@ -156,7 +156,7 @@ void TemporalControlWindow::processPauseButton()
 void TemporalControlWindow::processStepBackwardButton()
 {
     ImGui::BeginDisabled(_history.empty() || _simulationFacade->isSimulationRunning());
-    auto result = AlienImGui::ToolbarButton(ICON_FA_CHEVRON_LEFT);
+    auto result = AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_CHEVRON_LEFT));
     AlienImGui::Tooltip("Load previous time step");
     if (result) {
         auto const& snapshot = _history.back();
@@ -171,7 +171,7 @@ void TemporalControlWindow::processStepBackwardButton()
 void TemporalControlWindow::processStepForwardButton()
 {
     ImGui::BeginDisabled(_simulationFacade->isSimulationRunning());
-    auto result = AlienImGui::ToolbarButton(ICON_FA_CHEVRON_RIGHT);
+    auto result = AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_CHEVRON_RIGHT));
     AlienImGui::Tooltip("Process single time step");
     if (result) {
         _history.emplace_back(createSnapshot());
@@ -182,7 +182,7 @@ void TemporalControlWindow::processStepForwardButton()
 
 void TemporalControlWindow::processCreateFlashbackButton()
 {
-    auto result = AlienImGui::ToolbarButton(ICON_FA_CAMERA);
+    auto result = AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_CAMERA));
     AlienImGui::Tooltip("Creating in-memory flashback: It saves the content of the current world to the memory.");
     if (result) {
         delayedExecution([this] { onSnapshot(); });
@@ -194,7 +194,7 @@ void TemporalControlWindow::processCreateFlashbackButton()
 void TemporalControlWindow::processLoadFlashbackButton()
 {
     ImGui::BeginDisabled(!_snapshot);
-    auto result = AlienImGui::ToolbarButton(ICON_FA_UNDO);
+    auto result = AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_UNDO));
     AlienImGui::Tooltip("Loading in-memory flashback: It loads the saved world from the memory. Static simulation parameters will not be changed. Non-static parameters "
                         "(such as the position of moving zones) will be restored as well.");
     if (result) {
@@ -225,13 +225,13 @@ void TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
 
     if (origParameters.numRadiationSources == parameters.numRadiationSources) {
         for (int i = 0; i < parameters.numRadiationSources; ++i) {
-            restorePosition(parameters.radiationSources[i], origParameters.radiationSources[i], snapshot.timestep);
+            restorePosition(parameters.radiationSource[i], origParameters.radiationSource[i], snapshot.timestep);
         }
     }
 
-    if (origParameters.numSpots == parameters.numSpots) {
-        for (int i = 0; i < parameters.numSpots; ++i) {
-            restorePosition(parameters.spots[i], origParameters.spots[i], snapshot.timestep);
+    if (origParameters.numZones == parameters.numZones) {
+        for (int i = 0; i < parameters.numZones; ++i) {
+            restorePosition(parameters.zone[i], origParameters.zone[i], snapshot.timestep);
         }
     }
 

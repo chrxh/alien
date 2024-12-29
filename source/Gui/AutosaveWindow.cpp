@@ -80,7 +80,7 @@ void AutosaveWindow::processIntern()
             processHeader();
 
             //AlienImGui::Separator();
-            if (ImGui::BeginChild("##child2", {0, _settingsOpen ? -scale(_settingsHeight) : -scale(50.0f)})) {
+            if (ImGui::BeginChild("##child2", {0, _settingsOpen ? -_settingsHeight : -scale(35.0f)})) {
                 processTable();
             }
             ImGui::EndChild();
@@ -109,15 +109,15 @@ void AutosaveWindow::processToolbar()
 {
     ImGui::SameLine();
     ImGui::BeginDisabled(!_savepointTable.has_value());
-    if (AlienImGui::ToolbarButton(ICON_FA_PLUS)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS))) {
         onCreateSavepoint(false);
     }
     ImGui::EndDisabled();
     AlienImGui::Tooltip("Create save point");
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(!static_cast<bool>(_selectedEntry) || (_selectedEntry->state != SavepointState_Persisted && !_selectedEntry->requestId.empty()));
-    if (AlienImGui::ToolbarButton(ICON_FA_MINUS)) {
+    ImGui::BeginDisabled(!static_cast<bool>(_selectedEntry));
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_MINUS))) {
         onDeleteSavepoint(_selectedEntry);
     }
     AlienImGui::Tooltip("Delete save point");
@@ -125,7 +125,7 @@ void AutosaveWindow::processToolbar()
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!_savepointTable.has_value() || _savepointTable->isEmpty());
-    if (AlienImGui::ToolbarButton(ICON_FA_BROOM)) {
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_BROOM))) {
         GenericMessageDialog::get().yesNo("Delete", "Do you really want to delete all savepoints?", [&]() { scheduleCleanup(); });
     }
     AlienImGui::Tooltip("Delete all save points");
@@ -145,15 +145,16 @@ void AutosaveWindow::processTable()
         return;
     }
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
-        | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
+        | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    if (ImGui::BeginTable("Save files", 4, flags, ImVec2(0, 0), 0.0f)) {
+    if (ImGui::BeginTable("Save files", 4, flags, ImVec2(-1, -1), 0.0f)) {
         ImGui::TableSetupColumn("Simulation", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
         ImGui::TableSetupColumn("Timestamp", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
         ImGui::TableSetupColumn("Time step", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
         ImGui::TableSetupColumn("Peak value", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(200.0f));
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
+        ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
 
         ImGuiListClipper clipper;
         clipper.Begin(_savepointTable->getSize());
@@ -163,17 +164,19 @@ void AutosaveWindow::processTable()
                 auto const& entry = _savepointTable->at(row);
 
                 ImGui::PushID(row);
-                ImGui::TableNextRow(0, scale(ImGui::GetTextLineHeightWithSpacing()));
+                ImGui::TableNextRow(0, scale(23.0f));
 
                 // project name
                 ImGui::TableNextColumn();
                 if (entry->state == SavepointState_InQueue) {
+                    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextLightDecentColor.Value);
                     AlienImGui::Text("In queue");
-                }
-                if (entry->state == SavepointState_InProgress) {
+                    ImGui::PopStyleColor();
+                } else if (entry->state == SavepointState_InProgress) {
+                    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextLightDecentColor.Value);
                     AlienImGui::Text("In progress");
-                }
-                if (entry->state == SavepointState_Persisted) {
+                    ImGui::PopStyleColor();
+                } else if (entry->state == SavepointState_Persisted) {
                     auto triggerLoadSavepoint = AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_DOWNLOAD));
                     AlienImGui::Tooltip("Load save point", false);
                     if (triggerLoadSavepoint) {
@@ -182,10 +185,11 @@ void AutosaveWindow::processTable()
 
                     ImGui::SameLine();
                     AlienImGui::Text(entry->name);
-                }
-                if (entry->state == SavepointState_Error) {
+                } else if (entry->state == SavepointState_Error) {
                     AlienImGui::Text("Error");
                 }
+                ImGui::SameLine();
+                ImGui::Dummy({0, scale(22.0f)});
 
                 ImGui::SameLine();
                 auto selected = _selectedEntry == entry;
@@ -215,7 +219,7 @@ void AutosaveWindow::processTable()
 
                 if (!entry->peakType.empty()) {
                     ImGui::SameLine();
-                    ImGui::PushStyleColor(ImGuiCol_Text, Const::BrowserResourcePropertiesTextColor.Value);
+                    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextLightDecentColor.Value);
                     AlienImGui::Text(" (" + entry->peakType + ")");
                     ImGui::PopStyleColor();
                 }
@@ -229,15 +233,14 @@ void AutosaveWindow::processTable()
 
 void AutosaveWindow::processSettings()
 {
+    ImGui::Spacing();
+    ImGui::Spacing();
     if (_settingsOpen) {
-        ImGui::Spacing();
-        ImGui::Spacing();
-        AlienImGui::MovableSeparator(_settingsHeight);
-    } else {
-        AlienImGui::Separator();
+        AlienImGui::MovableSeparator(AlienImGui::MovableSeparatorParameters().additive(false), _settingsHeight);
     }
 
-    _settingsOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Settings").highlighted(true).defaultOpen(_settingsOpen));
+    _settingsOpen =
+        AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Settings").rank(AlienImGui::TreeNodeRank::High).defaultOpen(_settingsOpen));
     if (_settingsOpen) {
         if (ImGui::BeginChild("##autosaveSettings", {scale(0), 0})) {
             if (AlienImGui::InputInt(
@@ -288,8 +291,8 @@ void AutosaveWindow::processSettings()
             }
         }
         ImGui::EndChild();
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 }
 
 void AutosaveWindow::processStatusBar()
@@ -351,7 +354,8 @@ void AutosaveWindow::onDeleteSavepoint(SavepointEntry const& entry)
 
 void AutosaveWindow::onLoadSavepoint(SavepointEntry const& entry)
 {
-    FileTransferController::get().onOpenSimulation(entry->filename);
+    auto path = SavepointTableService::get().calcAbsolutePath(_savepointTable.value(), entry);
+    FileTransferController::get().onOpenSimulation(path);
 }
 
 void AutosaveWindow::processCleanup()
@@ -374,12 +378,14 @@ void AutosaveWindow::processAutomaticSavepoints()
     if (!_lastSessionId.has_value() || _lastSessionId.value() != _simulationFacade->getSessionId()) {
         _lastAutosaveTimepoint = std::chrono::steady_clock::now();
         _lastSessionId = _simulationFacade->getSessionId();
+        _peakDeserializedSimulation->reset();
     }
 
     auto minSinceLastAutosave = std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - _lastAutosaveTimepoint).count();
     if (minSinceLastAutosave >= _autosaveInterval && _savepointTable.has_value()) {
         onCreateSavepoint(_catchPeaks != CatchPeaks_None);
         _lastAutosaveTimepoint = std::chrono::steady_clock::now();
+        _lastPeakTimepoint = std::chrono::steady_clock::now();
     }
 
     if (_catchPeaks != CatchPeaks_None) {
@@ -406,10 +412,6 @@ void AutosaveWindow::scheduleDeleteNonPersistentSavepoint(std::vector<SavepointE
     for (auto const& entry : entries) {
         if (!entry->requestId.empty() && (entry->state == SavepointState_InQueue || entry->state == SavepointState_InProgress)) {
             _savepointsInProgressToDelete.emplace_back(entry);
-        } else {
-
-            //no request id => savepoint has been created on an other session
-            SerializerService::get().deleteSimulation(entry->filename);
         }
     }
 }
@@ -419,9 +421,11 @@ void AutosaveWindow::processDeleteNonPersistentSavepoint()
     std::vector<SavepointEntry> newRequestsToDelete;
     for (auto const& entry : _savepointsInProgressToDelete) {
         if (auto requestState = _persisterFacade->getRequestState(PersisterRequestId{entry->requestId})) {
-            if (requestState.value() == PersisterRequestState::Finished || requestState.value() == PersisterRequestState::Error) {
+            if (requestState.value() == PersisterRequestState::Finished) {
                 auto resultData = _persisterFacade->fetchSaveSimulationData(PersisterRequestId{entry->requestId});
                 SerializerService::get().deleteSimulation(resultData.filename);
+            } else if (requestState.value() == PersisterRequestState::Error) {
+                // do nothing
             } else {
                 newRequestsToDelete.emplace_back(entry);
             }
@@ -454,13 +458,13 @@ void AutosaveWindow::updateSavepoint(int row)
                     newEntry->timestep = data.timestep;
                     newEntry->timestamp = StringHelper::format(data.timestamp);
                     newEntry->name = data.projectName;
-                    newEntry->filename = data.filename;
+                    newEntry->filename = SavepointTableService::get().calcEntryPath(_savepointTable.value(), data.filename);
                 } else if (auto saveResult = std::dynamic_pointer_cast<_SaveDeserializedSimulationRequestResult>(requestResult)) {
                     auto const& data = saveResult->getData();
                     newEntry->timestep = data.timestep;
                     newEntry->timestamp = StringHelper::format(data.timestamp);
                     newEntry->name = data.projectName;
-                    newEntry->filename = data.filename;
+                    newEntry->filename = SavepointTableService::get().calcEntryPath(_savepointTable.value(), data.filename);
                     newEntry->peak = StringHelper::format(toFloat(sumColorVector(data.rawStatisticsData.timeline.timestep.genomeComplexityVariance)), 2);
                     newEntry->peakType = "genome complexity variance";
                 }

@@ -29,6 +29,7 @@ namespace
     auto constexpr RightColumnWidthTimeline = 150.0f;
     auto constexpr RightColumnWidthTable = 200.0f;
     auto constexpr LiveStatisticsDeltaTime = 50;  //in millisec
+    auto constexpr SettingsHeight = 130.0f;
 }
 
 void StatisticsWindow::initIntern(SimulationFacade simulationFacade)
@@ -41,7 +42,7 @@ void StatisticsWindow::initIntern(SimulationFacade simulationFacade)
     }
     _startingPath = GlobalSettings::get().getValue("windows.statistics.starting path", path.string());
     _settingsOpen = GlobalSettings::get().getValue("windows.statistics.settings.open", _settingsOpen);
-    _settingsHeight = GlobalSettings::get().getValue("windows.statistics.settings.height", _settingsHeight);
+    _settingsHeight = GlobalSettings::get().getValue("windows.statistics.settings.height", scale(SettingsHeight));
     _plotHeight = GlobalSettings::get().getValue("windows.statistics.plot height", _plotHeight);
     _plotMode = GlobalSettings::get().getValue("windows.statistics.mode", _plotMode);
     _timeHorizonForLiveStatistics = GlobalSettings::get().getValue("windows.statistics.live horizon", _timeHorizonForLiveStatistics);
@@ -85,11 +86,11 @@ void StatisticsWindow::shutdownIntern()
 
 void StatisticsWindow::processIntern()
 {
-    if (ImGui::BeginChild("##statistics", {0, _settingsOpen ? -scale(_settingsHeight) : -scale(50.0f)})) {
+    if (ImGui::BeginChild("##statistics", {0, _settingsOpen ? -_settingsHeight : -scale(40.0f)})) {
         if (ImGui::BeginTabBar("##Statistics", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
 
             if (ImGui::BeginTabItem("Timelines")) {
-                if (ImGui::BeginChild("##timelines", ImVec2(0, 0), false)) {
+                if (ImGui::BeginChild("##timelines", ImVec2(0, 0), 0)) {
                     processTimelinesTab();
                 }
                 ImGui::EndChild();
@@ -97,7 +98,7 @@ void StatisticsWindow::processIntern()
             }
 
             if (ImGui::BeginTabItem("Histograms")) {
-                if (ImGui::BeginChild("##histograms", ImVec2(0, 0), false)) {
+                if (ImGui::BeginChild("##histograms", ImVec2(0, 0), 0)) {
                     processHistogramsTab();
                 }
                 ImGui::EndChild();
@@ -105,7 +106,7 @@ void StatisticsWindow::processIntern()
             }
 
             if (ImGui::BeginTabItem("Throughput")) {
-                if (ImGui::BeginChild("##throughput", ImVec2(0, 0), false)) {
+                if (ImGui::BeginChild("##throughput", ImVec2(0, 0), 0)) {
                     processTablesTab();
                 }
                 ImGui::EndChild();
@@ -138,9 +139,6 @@ void StatisticsWindow::processTimelinesTab()
             .values(
             {"Accumulate values for all colors", "Break down by color", "Color #0", "Color #1", "Color #2", "Color #3", "Color #4", "Color #5", "Color #6"}),
         _plotType);
-    ImGui::Spacing();
-    ImGui::Spacing();
-    ImGui::Separator();
 
     if (ImGui::BeginChild("##plots", ImVec2(0, 0), false)) {
         processTimelineStatistics();
@@ -259,15 +257,14 @@ void StatisticsWindow::processTablesTab()
 
 void StatisticsWindow::processSettings()
 {
+    ImGui::Spacing();
+    ImGui::Spacing();
     if (_settingsOpen) {
-        ImGui::Spacing();
-        ImGui::Spacing();
-        AlienImGui::MovableSeparator(_settingsHeight);
-    } else {
-        AlienImGui::Separator();
+        AlienImGui::MovableSeparator(AlienImGui::MovableSeparatorParameters().additive(false), _settingsHeight);
     }
 
-    _settingsOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().text("Settings").highlighted(true).defaultOpen(_settingsOpen));
+    _settingsOpen =
+        AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Settings").rank(AlienImGui::TreeNodeRank::High).defaultOpen(_settingsOpen));
     if (_settingsOpen) {
         if (ImGui::BeginChild("##addons", {scale(0), 0})) {
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - scale(RightColumnWidth));
@@ -293,8 +290,8 @@ void StatisticsWindow::processSettings()
             AlienImGui::Switcher(AlienImGui::SwitcherParameters().name("Scale").textWidth(RightColumnWidth).values({"Linear", "Logarithmic"}), _plotScale);
         }
         ImGui::EndChild();
-        AlienImGui::EndTreeNode();
     }
+    AlienImGui::EndTreeNode();
 }
 
 void StatisticsWindow::processTimelineStatistics()
@@ -314,12 +311,6 @@ void StatisticsWindow::processTimelineStatistics()
         processPlot(row++, &DataPointCollection::numCells);
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Cells");
-
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPointCollection::numConnections);
-        ImGui::TableSetColumnIndex(1);
-        AlienImGui::Text("Cell connections");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
@@ -379,6 +370,12 @@ void StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(1);
         AlienImGui::Text("Viruses");
 
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        processPlot(row++, &DataPointCollection::numFreeCells);
+        ImGui::TableSetColumnIndex(1);
+        AlienImGui::Text("Free cells");
+
         ImPlot::PopColormap();
 
         ImGui::EndTable();
@@ -386,7 +383,7 @@ void StatisticsWindow::processTimelineStatistics()
     ImGui::PopID();
 
     ImGui::Spacing();
-    AlienImGui::Group("Processes per time step and cell");
+    AlienImGui::Group("Processes per time step and free cell");
     ImGui::PushID(2);
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_BordersInnerH, ImVec2(-1, 0))) {
         ImGui::TableSetupColumn("##");

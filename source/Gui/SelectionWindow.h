@@ -12,5 +12,6 @@ class SelectionWindow : public AlienWindow<>
 private:
     SelectionWindow();
 
-    void processIntern();
+    void processIntern() override;
+    bool isShown() override;
 };

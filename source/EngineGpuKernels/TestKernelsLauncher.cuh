@@ -8,4 +8,5 @@ class _TestKernelsLauncher
 {
 public:
     void testOnly_mutate(GpuSettings const& gpuSettings, SimulationData const& data, uint64_t cellId, MutationType mutationType);
+    void testOnly_mutationCheck(GpuSettings const& gpuSettings, SimulationData const& data, uint64_t cellId);
 };

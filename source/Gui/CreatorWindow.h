@@ -31,6 +31,7 @@ private:
 
     void initIntern(SimulationFacade simulationFacade) override;
     void processIntern() override;
+    bool isShown() override;
 
     void createCell();
     void createParticle();

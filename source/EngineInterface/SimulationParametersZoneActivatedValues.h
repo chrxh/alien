@@ -2,7 +2,7 @@
 
 //NOTE: header is also included in CUDA code
 
-struct SimulationParametersSpotActivatedValues
+struct SimulationParametersZoneActivatedValues
 {
     bool friction = false;
     bool rigidity = false;
@@ -38,7 +38,7 @@ struct SimulationParametersSpotActivatedValues
     bool cellCopyMutationSubgenomeColor = false;
     bool cellCopyMutationGenomeColor = false;
 
-    bool operator==(SimulationParametersSpotActivatedValues const& other) const
+    bool operator==(SimulationParametersZoneActivatedValues const& other) const
     {
         return friction == other.friction && rigidity == other.rigidity && radiationCellAgeStrength == other.radiationCellAgeStrength && cellMaxForce == other.cellMaxForce
             && cellMinEnergy == other.cellMinEnergy && cellFusionVelocity == other.cellFusionVelocity

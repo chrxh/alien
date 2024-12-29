@@ -20,7 +20,7 @@ struct DataPointCollection
     DataPoint numSelfReplicators;
     DataPoint numColonies;
     DataPoint numViruses;
-    DataPoint numConnections;
+    DataPoint numFreeCells;
     DataPoint numParticles;
     DataPoint averageGenomeCells;
     DataPoint averageGenomeComplexity;

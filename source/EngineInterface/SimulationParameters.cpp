@@ -146,10 +146,16 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         if (genomeComplexityNeuronFactor[i] != other.genomeComplexityNeuronFactor[i]) {
             return false;
         }
+        if (genomeComplexityDepthLevel[i] != other.genomeComplexityDepthLevel[i]) {
+            return false;
+        }
+        if (cellFunctionMuscleEnergyCost[i] != other.cellFunctionMuscleEnergyCost[i]) {
+            return false;
+        }
     }
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
-            if (cellFunctionConstructorMutationColorTransitions[i][j] != other.cellFunctionConstructorMutationColorTransitions[i][j]) {
+            if (cellCopyMutationColorTransitions[i][j] != other.cellCopyMutationColorTransitions[i][j]) {
                 return false;
             }
             if (cellFunctionInjectorDurationColorMatrix[i][j] != other.cellFunctionInjectorDurationColorMatrix[i][j]) {
@@ -164,15 +170,15 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         return false;
     }
     for (int i = 0; i < numRadiationSources; ++i) {
-        if (radiationSources[i] != other.radiationSources[i]) {
+        if (radiationSource[i] != other.radiationSource[i]) {
             return false;
         }
     }
-    if (numSpots != other.numSpots) {
+    if (numZones != other.numZones) {
         return false;
     }
-    for (int i = 0; i < numSpots; ++i) {
-        if (spots[i] != other.spots[i]) {
+    for (int i = 0; i < numZones; ++i) {
+        if (zone[i] != other.zone[i]) {
             return false;
         }
     }
@@ -190,9 +196,8 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && particleTransformationMaxGenomeSize == other.particleTransformationMaxGenomeSize && cellDeathConsequences == other.cellDeathConsequences
         && cellFunctionSensorSignalThreshold == other.cellFunctionSensorSignalThreshold
         && cellFunctionMuscleBendingAccelerationThreshold == other.cellFunctionMuscleBendingAccelerationThreshold
-        && cellFunctionConstructorMutationSelfReplication == other.cellFunctionConstructorMutationSelfReplication
-        && cellMaxAgeBalancer == other.cellMaxAgeBalancer && cellMaxAgeBalancerInterval == other.cellMaxAgeBalancerInterval
-        && cellFunctionConstructorMutationPreventDepthIncrease == other.cellFunctionConstructorMutationPreventDepthIncrease
+        && cellCopyMutationSelfReplication == other.cellCopyMutationSelfReplication && cellMaxAgeBalancer == other.cellMaxAgeBalancer
+        && cellMaxAgeBalancerInterval == other.cellMaxAgeBalancerInterval && cellCopyMutationPreventDepthIncrease == other.cellCopyMutationPreventDepthIncrease
         && cellFunctionConstructorCheckCompletenessForSelfReplication == other.cellFunctionConstructorCheckCompletenessForSelfReplication
         && cellFunctionAttackerDestroyCells == other.cellFunctionAttackerDestroyCells
         && cellFunctionReconnectorSignalThreshold == other.cellFunctionReconnectorSignalThreshold
@@ -208,5 +213,11 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         && muscleMovementVisualization == other.muscleMovementVisualization
         && externalEnergyInflowOnlyForNonSelfReplicators == other.externalEnergyInflowOnlyForNonSelfReplicators
         && externalEnergyBackflowLimit == other.externalEnergyBackflowLimit && baseStrengthRatioPinned == other.baseStrengthRatioPinned
-        && showRadiationSources == other.showRadiationSources;
+        && showRadiationSources == other.showRadiationSources && cellCopyMutationNeuronDataWeight == other.cellCopyMutationNeuronDataWeight
+        && cellCopyMutationNeuronDataBias == other.cellCopyMutationNeuronDataBias
+        && cellCopyMutationNeuronDataActivationFunction == other.cellCopyMutationNeuronDataActivationFunction
+        && cellCopyMutationNeuronDataReinforcement == other.cellCopyMutationNeuronDataReinforcement
+        && cellCopyMutationNeuronDataDamping == other.cellCopyMutationNeuronDataDamping
+        && cellCopyMutationNeuronDataOffset == other.cellCopyMutationNeuronDataOffset
+        && cellCopyMutationDeletionMinSize == other.cellCopyMutationDeletionMinSize;
 }

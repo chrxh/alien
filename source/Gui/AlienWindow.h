@@ -19,13 +19,14 @@ public:
     bool isOn() const;
     void setOn(bool value);
 
-
 protected:
     virtual void initIntern(Dependencies... dependencies) {}
     virtual void shutdownIntern() {}
     virtual void processIntern() = 0;
     virtual void processBackground() {}
     virtual void processActivated() {}
+
+    virtual bool isShown() { return _on; }
 
     bool _sizeInitialized = false;
     bool _on = false;
@@ -62,7 +63,7 @@ void AlienWindow<Dependencies...>::process()
 {
     processBackground();
 
-    if (!_on) {
+    if (!isShown()) {
         return;
     }
     ImGui::PushID(_title.c_str());

@@ -129,7 +129,7 @@ namespace Const
         "none is set, the cell can receive no input signals.";
 
     std::string const GenomeBlockOutputTooltip =
-        "Activating this toggle, the cell's output can be locked, preventing any other cell from utilizing it as input.";
+        "Activating this toggle, the cell's output will be discarded. This prevents any other cell from utilizing it as input.";
 
     std::string const GenomeRequiredConnectionsTooltip =
         "By default, cells in the genome sequence are automatically connected to all neighboring cells belonging to the same genome when they "
@@ -205,7 +205,7 @@ namespace Const
         ICON_FA_CHEVRON_RIGHT" Other mutants: Cells that have a significantly different genome.\n\n"
         ICON_FA_CHEVRON_RIGHT" Free cells: Cells that were not created by reproduction but by the conversion of energy particles (they could serve as free food).\n\n"
         ICON_FA_CHEVRON_RIGHT" Handcrafted constructs: Cells that were created in the editor (e.g. walls).\n\n"
-        ICON_FA_CHEVRON_RIGHT" Less complex mutants: Cells that have a less complex genome. The complexity calculation can be customized in the simulation parameters under the 'Genome complexity measurement' addon. By default, it is the number of encoded cells in the genome.\n\n"
+        ICON_FA_CHEVRON_RIGHT" Less complex mutants: Cells that have a less complex genome. The complexity calculation can be customized in the simulation parameters under the 'Genome complexity measurement' expert settings. By default, it is the number of encoded cells in the genome.\n\n"
         ICON_FA_CHEVRON_RIGHT" More complex mutants: Cells that have a more complex genome.\n\n";
 
     std::string const GenomeSensorMinDensityTooltip =
@@ -261,7 +261,7 @@ namespace Const
         ICON_FA_CHEVRON_RIGHT" Other mutants: Cells that have a significantly different genome.\n\n"
         ICON_FA_CHEVRON_RIGHT" Free cells: Cells that were not created by reproduction but by the conversion of energy particles (they could serve as free food).\n\n"
         ICON_FA_CHEVRON_RIGHT" Handcrafted constructs: Cells that were created in the editor (e.g. walls).\n\n"
-        ICON_FA_CHEVRON_RIGHT" Less complex mutants: Cells that have a less complex genome. The complexity calculation can be customized in the simulation parameters under the 'Genome complexity measurement' addon. By default, it is the number of encoded cells in the genome.\n\n"
+        ICON_FA_CHEVRON_RIGHT" Less complex mutants: Cells that have a less complex genome. The complexity calculation can be customized in the simulation parameters under the 'Genome complexity measurement' expert settings. By default, it is the number of encoded cells in the genome.\n\n"
         ICON_FA_CHEVRON_RIGHT" More complex mutants: Cells that have a more complex genome.\n\n";
 
     std::string const DetonatorStateTooltip =
@@ -352,7 +352,7 @@ namespace Const
         "self-replication process, but by transformation from an energy particle.";
     std::string const GenomeComplexityTooltip =
         "This value denotes the complexity of the creature's genome. The calculation can be customized in the simulation parameters under the 'Genome "
-        "complexity measurement' addon. By default, it is the number of encoded cells in the genome.";
+        "complexity measurement' expert settings. By default, it is the number of encoded cells in the genome.";
 
     std::string const CellLivingStateTooltip =
         "Cells can exist in various states. When a cell network of the organism is being constructed, its cells are in the 'Under construction' state. Once the cell network "
@@ -368,7 +368,7 @@ namespace Const
         " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n" ICON_FA_CHEVRON_RIGHT
         " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or duplications are taken into "
         "account).\n\n" ICON_FA_CHEVRON_RIGHT " Mutants and cell functions: Combination of mutants and cell function coloring.\n\n" ICON_FA_CHEVRON_RIGHT
-        " Cell states: green = under construction, blue = ready, red = dying\n\n" ICON_FA_CHEVRON_RIGHT
+        " Cell states: blue = ready, green = under construction, white = activating, pink = detached, pale blue = reviving, red = dying\n\n" ICON_FA_CHEVRON_RIGHT
         " Genome complexities: This property can be utilized by attacker cells when the parameter 'Complex creature protection' is "
         "activated (see tooltip there). The coloring is as follows: blue = creature with low bonus (usually small or simple genome structure), red = large "
         "bonus\n\n" ICON_FA_CHEVRON_RIGHT

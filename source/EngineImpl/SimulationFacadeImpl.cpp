@@ -377,3 +377,8 @@ void _SimulationFacadeImpl::testOnly_mutate(uint64_t cellId, MutationType mutati
 {
     _worker.testOnly_mutate(cellId, mutationType);
 }
+
+void _SimulationFacadeImpl::testOnly_mutationCheck(uint64_t cellId)
+{
+    _worker.testOnly_mutationCheck(cellId);
+}

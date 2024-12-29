@@ -89,11 +89,10 @@ std::string StringHelper::format(std::chrono::milliseconds duration)
 
 std::string StringHelper::format(std::chrono::system_clock::time_point const& timePoint)
 {
-    std::time_t timeT = std::chrono::system_clock::to_time_t(timePoint);
+    std::time_t time_t = std::chrono::system_clock::to_time_t(timePoint);
 
-    std::tm tm = *std::localtime(&timeT);
     std::stringstream ss;
-    ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
+    ss << std::put_time(std::localtime(&time_t), "%Y-%m-%d %H:%M:%S");
 
     return ss.str();
 }
@@ -101,10 +100,36 @@ std::string StringHelper::format(std::chrono::system_clock::time_point const& ti
 void StringHelper::copy(char* target, int targetSize, std::string const& source)
 {
     auto sourceSize = source.size();
-    if (sourceSize < targetSize) {
-        source.copy(target, sourceSize);
-        target[sourceSize] = 0;
-    } else {
-        target[0] = 0;
+    if (sourceSize >= targetSize) {
+        sourceSize = targetSize - 1;
     }
+    source.copy(target, sourceSize);
+    target[sourceSize] = 0;
+}
+
+bool StringHelper::containsCaseInsensitive(std::string const& str, std::string const& toMatch)
+{
+    std::string strLower = str;
+    std::string toMatchLower = toMatch;
+
+    std::transform(str.begin(), str.end(), strLower.begin(), ::tolower);
+    std::transform(toMatch.begin(), toMatch.end(), toMatchLower.begin(), ::tolower);
+
+    return strLower.find(toMatchLower) != std::string::npos;
+}
+
+StringHelper::Decomposition StringHelper::decomposeCaseInsensitiveMatch(std::string const& str, std::string const& toMatch)
+{
+    std::string strLower = str;
+    std::string toMatchLower = toMatch;
+
+    std::transform(str.begin(), str.end(), strLower.begin(), ::tolower);
+    std::transform(toMatch.begin(), toMatch.end(), toMatchLower.begin(), ::tolower);
+
+    auto findResult = strLower.find(toMatchLower);
+    if (findResult == std::string::npos) {
+        return {.beforeMatch = str};
+    }
+
+    return {.beforeMatch = str.substr(0, findResult), .match = str.substr(findResult, toMatch.size())};
 }

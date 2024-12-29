@@ -1,5 +1,7 @@
 #pragma once
 
+#include "SimulationParametersTypes.h"
+
 /**
  * NOTE: header is also included in kernel code
  */
@@ -36,6 +38,9 @@ enum RadiationSourceShapeType_
 
 struct RadiationSource
 {
+    Char64 name = "<unnamed>";
+    int locationIndex = -1;
+
     float strength = 0.0f;
     bool strengthPinned = false;
     float posX = 0;
@@ -61,6 +66,14 @@ struct RadiationSource
         if (shapeType == RadiationSourceShapeType_Rectangular) {
             if (shapeData.rectangularRadiationSource != other.shapeData.rectangularRadiationSource) {
                 return false;
+            }
+        }
+        for (int i = 0, j = sizeof(Char64) / sizeof(char); i < j; ++i) {
+            if (name[i] != other.name[i]) {
+                return false;
+            }
+            if (name[i] == '\0') {
+                break;
             }
         }
         return posX == other.posX && posY == other.posY && velX == other.velX && velY == other.velY && useAngle == other.useAngle && angle == other.angle
