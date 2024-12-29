@@ -505,13 +505,17 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     } break;
     }
 
+    result.signal.active = cellTO.signal.active;
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         result.signal.channels[i] = cellTO.signal.channels[i];
     }
-    result.signal.active = cellTO.signal.active;
     result.signal.origin = cellTO.signal.origin;
     result.signal.targetX = cellTO.signal.targetX;
     result.signal.targetY = cellTO.signal.targetY;
+    result.signal.numPrevCells = cellTO.signal.numPrevCells;
+    for (int i = 0; i < MAX_CELL_BONDS; ++i) {
+        result.signal.prevCellIds[i] = cellTO.signal.prevCellIds[i];
+    }
     result.activationTime = cellTO.activationTime;
     return result;
 }
@@ -673,6 +677,10 @@ void DescriptionConverter::addCell(
     cellTO.signal.origin = cellDesc.signal.origin;
     cellTO.signal.targetX = cellDesc.signal.targetX;
     cellTO.signal.targetY = cellDesc.signal.targetY;
+    cellTO.signal.numPrevCells = cellDesc.signal.numPrevCells;
+    for (int i = 0; i < MAX_CELL_BONDS; ++i) {
+        cellTO.signal.prevCellIds[i] = cellDesc.signal.prevCellIds[i];
+    }
     cellTO.activationTime = cellDesc.activationTime;
     cellTO.numConnections = 0;
     cellTO.barrier = cellDesc.barrier;

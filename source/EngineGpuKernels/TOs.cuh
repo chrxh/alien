@@ -41,6 +41,8 @@ struct SignalTO
     SignalOrigin origin;
     float targetX;
     float targetY;
+    int numPrevCells;
+    uint64_t prevCellIds[MAX_CELL_BONDS];
 };
 
 struct NeuronTO

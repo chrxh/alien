@@ -35,8 +35,8 @@ TEST_F(NewNerveTests, forwardInputSignal)
 {
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
     auto data = DataDescription().addCells({
-        CellDescription().setId(1).setCellFunction(NerveDescription()).setSignal(signal),
-        CellDescription().setId(2).setCellFunction(NerveDescription()),
+        CellDescription().setId(1).setCellFunction(NerveDescription()).setPos({0, 0}).setSignal(signal),
+        CellDescription().setId(2).setCellFunction(NerveDescription()).setPos({1, 0}),
     });
     data.addConnection(1, 2);
 
@@ -74,9 +74,9 @@ TEST_F(NewNerveTests, mergeInputSignals)
     std::vector<float> signal1 = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
     std::vector<float> signal2 = {-0.5f, -2.0f, 0.5f, 1.0f, 1.5f, -1.5f, 0.5f, -0.5f};
     auto data = DataDescription().addCells({
-        CellDescription().setId(1).setCellFunction(NerveDescription()).setSignal(signal1),
-        CellDescription().setId(2).setCellFunction(NerveDescription()),
-        CellDescription().setId(3).setCellFunction(NerveDescription()).setSignal(signal2),
+        CellDescription().setId(1).setCellFunction(NerveDescription()).setPos({0, 0}).setSignal(signal1),
+        CellDescription().setId(2).setCellFunction(NerveDescription()).setPos({1, 0}),
+        CellDescription().setId(3).setCellFunction(NerveDescription()).setPos({2, 0}).setSignal(signal2),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -168,6 +168,32 @@ TEST_F(NewNerveTests, generatePulse_timeAtSecondPulse)
     auto nerve = actualCellById.at(1);
     EXPECT_TRUE(nerve.signal.active);
     EXPECT_EQ(1.0f, nerve.signal.channels.at(0));
+}
+
+TEST_F(NewNerveTests, generatePulse_timeAtSecondPulse_noOrigin)
+{
+    auto data = DataDescription().addCells({
+        CellDescription().setId(1).setPos({0, 0}).setCellFunction(NerveDescription().setPulseMode(10)),
+        CellDescription().setId(2).setPos({1, 0}).setCellFunction(NerveDescription()),
+        CellDescription().setId(3).setPos({0.5, 0.5}).setCellFunction(NerveDescription()),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+    data.addConnection(3, 1);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(12);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualCellById = getCellById(actualData);
+
+    auto nerve1 = actualCellById.at(1);
+    EXPECT_TRUE(nerve1.signal.active);
+    EXPECT_EQ(1.0f, nerve1.signal.channels.at(0));
+    EXPECT_EQ(0, nerve1.signal.numPrevCells);
+
+    auto nerve2 = actualCellById.at(2);
+    EXPECT_FALSE(nerve2.signal.active);
 }
 
 TEST_F(NewNerveTests, generatePulse_timeAfterFirstPulse)

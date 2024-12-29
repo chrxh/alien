@@ -65,8 +65,8 @@ __inline__ __device__  void SignalProcessor::calcFutureSignals(SimulationData& d
                 continue;
             }
             int skip = false;
-            for (int k = 0, l = connectedCell->numSignalOrigins; k < l; ++k) {
-                if (connectedCell->signalOrigins[k] == cell->id) {
+            for (int k = 0, l = connectedCell->signal.numPrevCells; k < l; ++k) {
+                if (connectedCell->signal.prevCellIds[k] == cell->id) {
                     skip = true;
                     break;
                 }
@@ -85,10 +85,10 @@ __inline__ __device__  void SignalProcessor::calcFutureSignals(SimulationData& d
                 cell->futureSignal.targetY += connectedCell->signal.targetY;
                 ++numSensorSignals;
             }
-            cell->futureSignalOrigins[numSignalOrigins] = connectedCell->id;
+            cell->futureSignal.prevCellIds[numSignalOrigins] = connectedCell->id;
             ++numSignalOrigins;
         }
-        cell->futureNumSignalOrigins = numSignalOrigins;
+        cell->futureSignal.numPrevCells = numSignalOrigins;
         if (numSensorSignals > 0) {
             cell->futureSignal.targetX /= toFloat(numSensorSignals);
             cell->futureSignal.targetY /= toFloat(numSensorSignals);
@@ -112,9 +112,9 @@ __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
             cell->signal.origin = cell->futureSignal.origin;
             cell->signal.targetX = cell->futureSignal.targetX;
             cell->signal.targetY = cell->futureSignal.targetY;
-            cell->numSignalOrigins = cell->futureNumSignalOrigins;
-            for (int i = 0; i < cell->numSignalOrigins; ++i) {
-                cell->signalOrigins[i] = cell->futureSignalOrigins[i];
+            cell->signal.numPrevCells = cell->futureSignal.numPrevCells;
+            for (int i = 0; i < cell->signal.numPrevCells; ++i) {
+                cell->signal.prevCellIds[i] = cell->futureSignal.prevCellIds[i];
             }
         }
     }
