@@ -64,12 +64,7 @@ namespace
     auto constexpr Id_TransmitterGenome_Mode = 0;
 
     auto constexpr Id_ConstructorGenome_Mode = 0;
-    auto constexpr Id_ConstructorGenome_SingleConstruction = 1;
-    auto constexpr Id_ConstructorGenome_SeparateConstruction = 2;
-    auto constexpr Id_ConstructorGenome_AngleAlignment = 4;
-    auto constexpr Id_ConstructorGenome_Stiffness = 5;
     auto constexpr Id_ConstructorGenome_ConstructionActivationTime = 6;
-    auto constexpr Id_ConstructorGenome_GenomeHeader = 8;
     auto constexpr Id_ConstructorGenome_ConstructionAngle1 = 9;
     auto constexpr Id_ConstructorGenome_ConstructionAngle2 = 10;
 
@@ -84,22 +79,16 @@ namespace
     auto constexpr Id_NerveGenome_PulseMode = 0;
     auto constexpr Id_NerveGenome_AlternationMode = 1;
 
-    //auto constexpr Id_SensorGenome_FixedAngle = 0;
     auto constexpr Id_SensorGenome_MinDensity = 1;
-    auto constexpr Id_SensorGenome_Color_Deprecated = 2;
     auto constexpr Id_SensorGenome_RestrictToColor = 3;
-    auto constexpr Id_SensorGenome_RestrictToOtherMutants_Deprecated = 4;
     auto constexpr Id_SensorGenome_RestrictToMutants = 5;
     auto constexpr Id_SensorGenome_MinRange = 6;
     auto constexpr Id_SensorGenome_MaxRange = 7;
 
-
-    auto constexpr Id_ReconnectorGenome_Color_Deprecated = 0;
     auto constexpr Id_ReconnectorGenome_RestrictToColor = 1;
     auto constexpr Id_ReconnectorGenome_RestrictToMutants = 2;
 
     auto constexpr Id_DetonatorGenome_Countdown = 0;
-
 
     auto constexpr Id_Particle_Color = 0;
 
@@ -111,34 +100,28 @@ namespace
     auto constexpr Id_Cell_ActivationTime = 8;
     auto constexpr Id_Cell_CreatureId = 11;
     auto constexpr Id_Cell_MutationId = 12;
-    auto constexpr Id_Cell_GenomeComplexity_Deprecated = 13;
     auto constexpr Id_Cell_CellFunctionUsed = 15;
     auto constexpr Id_Cell_AncestorMutationId = 16;
     auto constexpr Id_Cell_GenomeComplexity = 17;
     auto constexpr Id_Cell_DetectedByCreatureId = 19;
-    auto constexpr Id_Cell_Signal_Origin = 20;
-    auto constexpr Id_Cell_Signal_TargetX = 21;
-    auto constexpr Id_Cell_Signal_TargetY = 22;
+    auto constexpr Id_Cell_Signal_Active = 20;
+    auto constexpr Id_Cell_Signal_Channels = 21;
+    auto constexpr Id_Cell_Signal_Origin = 22;
+    auto constexpr Id_Cell_Signal_TargetX = 23;
+    auto constexpr Id_Cell_Signal_TargetY = 24;
 
     auto constexpr Id_Neuron_ActivationFunctions = 0;
 
     auto constexpr Id_Constructor_ActivationMode = 0;
-    auto constexpr Id_Constructor_SingleConstruction = 1;
-    auto constexpr Id_Constructor_SeparateConstruction = 2;
-    auto constexpr Id_Constructor_AngleAlignment = 4;
-    auto constexpr Id_Constructor_Stiffness = 5;
     auto constexpr Id_Constructor_ConstructionActivationTime = 6;
     auto constexpr Id_Constructor_GenomeCurrentNodeIndex = 7;
     auto constexpr Id_Constructor_GenomeGeneration = 9;
-    auto constexpr Id_Constructor_GenomeHeader = 10;
     auto constexpr Id_Constructor_ConstructionAngle1 = 11;
     auto constexpr Id_Constructor_ConstructionAngle2 = 12;
     auto constexpr Id_Constructor_OffspringCreatureId = 13;
     auto constexpr Id_Constructor_OffspringMutationId = 14;
-    auto constexpr Id_Constructor_IsConstructionBuilt = 15; //unused
     auto constexpr Id_Constructor_GenomeCurrentRepetition = 16;
     auto constexpr Id_Constructor_LastConstructedCellId = 17;
-    auto constexpr Id_Constructor_StateFlags = 18;
     auto constexpr Id_Constructor_NumInheritedGenomeNodes = 19;
     auto constexpr Id_Constructor_CurrentBranch = 20;
 
@@ -153,7 +136,6 @@ namespace
 
     auto constexpr Id_Injector_Mode = 0;
     auto constexpr Id_Injector_Counter = 1;
-    auto constexpr Id_Injector_GenomeHeader = 2;
 
     auto constexpr Id_Attacker_Mode = 0;
 
@@ -161,12 +143,10 @@ namespace
     auto constexpr Id_Nerve_AlternationMode = 1;
 
     auto constexpr Id_Sensor_MinDensity = 1;
-    auto constexpr Id_Sensor_Color_Deprecated = 2;
     auto constexpr Id_Sensor_MemoryChannel1 = 4;
     auto constexpr Id_Sensor_MemoryChannel2 = 5;
     auto constexpr Id_Sensor_MemoryChannel3 = 6;
     auto constexpr Id_Sensor_RestrictToColor = 7;
-    auto constexpr Id_Sensor_RestrictToOtherMutants_Deprecated = 8;
     auto constexpr Id_Sensor_RestrictToMutants = 9;
     auto constexpr Id_Sensor_TargetX = 10;
     auto constexpr Id_Sensor_TargetY = 11;
@@ -175,7 +155,6 @@ namespace
 
     auto constexpr Id_Transmitter_Mode = 0;
 
-    auto constexpr Id_Reconnector_Color_Deprecated = 0;
     auto constexpr Id_Reconnector_RestrictToColor = 1;
     auto constexpr Id_Reconnector_RestrictToMutants = 2;
 
@@ -191,7 +170,31 @@ namespace
 
 namespace cereal
 {
-    using VariantData = std::variant<int, float, uint64_t, bool, std::optional<float>, std::optional<int>, std::vector<int>, uint32_t, uint8_t>;
+    using VariantData = std::variant<
+        int,
+        float,
+        bool,
+        double,
+        uint64_t,
+        uint32_t,
+        uint8_t,
+        int64_t,
+        int8_t,
+        std::optional<bool>,
+        std::optional<uint8_t>,
+        std::optional<int8_t>,
+        std::optional<int>,
+        std::optional<float>,
+        std::vector<bool>,
+        std::vector<uint8_t>,
+        std::vector<int8_t>,
+        std::vector<int>,
+        std::vector<float>,
+        std::vector<std::vector<uint8_t>>,
+        std::vector<std::vector<int8_t>>,
+        std::vector<std::vector<int>>,
+        std::vector<std::vector<float>>
+    >;
 
     template <class Archive>
     std::unordered_map<int, VariantData> getLoadSaveMap(SerializationTask task, Archive& ar)
@@ -241,7 +244,7 @@ namespace cereal
     {
         NeuronGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<std::vector<int>>(task, auxiliaries, Id_NeuronGenome_ActivationFunctions, data.activationFunctions, defaultObject.activationFunctions);
+        loadSave(task, auxiliaries, Id_NeuronGenome_ActivationFunctions, data.activationFunctions, defaultObject.activationFunctions);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.weights, data.biases);
@@ -253,7 +256,7 @@ namespace cereal
     {
         TransmitterGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Id_TransmitterGenome_Mode, data.mode, defaultObject.mode);
+        loadSave(task, auxiliaries, Id_TransmitterGenome_Mode, data.mode, defaultObject.mode);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(TransmitterGenomeDescription)
@@ -267,49 +270,19 @@ namespace cereal
     {
         ConstructorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Id_ConstructorGenome_Mode, data.mode, defaultObject.mode);
-        loadSave<int>(task, auxiliaries, Id_ConstructorGenome_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
-        loadSave<float>(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle1, data.constructionAngle1, defaultObject.constructionAngle1);
-        loadSave<float>(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle2, data.constructionAngle2, defaultObject.constructionAngle2);
-        if (task == SerializationTask::Save) {
-            auxiliaries[Id_ConstructorGenome_GenomeHeader] = true;
-        }
+        loadSave(task, auxiliaries, Id_ConstructorGenome_Mode, data.mode, defaultObject.mode);
+        loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
+        loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle1, data.constructionAngle1, defaultObject.constructionAngle1);
+        loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle2, data.constructionAngle2, defaultObject.constructionAngle2);
         processLoadSaveMap(task, ar, auxiliaries);
 
         if (task == SerializationTask::Load) {
-            auto hasGenomeHeader = auxiliaries.contains(Id_ConstructorGenome_GenomeHeader);
-            if (hasGenomeHeader) {
-                std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
-                ar(genomeData);
-                if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
-                    data.genome = MakeGenomeCopy();
-                } else {
-                    data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
-                }
+            std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
+            ar(genomeData);
+            if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
+                data.genome = MakeGenomeCopy();
             } else {
-                std::variant<MakeGenomeCopy, std::vector<CellGenomeDescription>> genomeData;
-                ar(genomeData);
-                if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
-                    data.genome = MakeGenomeCopy();
-                }
-
-                //compatibility with older versions
-                //>>>
-                else {
-                    GenomeDescription genomeDesc;
-                    genomeDesc.cells = std::get<std::vector<CellGenomeDescription>>(genomeData);
-                    genomeDesc.header.numBranches =
-                        std::get<bool>(auxiliaries.at(Id_ConstructorGenome_SingleConstruction)) ? 1 : 2;
-                    genomeDesc.header.separateConstruction = std::get<bool>(auxiliaries.at(Id_ConstructorGenome_SeparateConstruction));
-                    genomeDesc.header.angleAlignment = std::get<int>(auxiliaries.at(Id_ConstructorGenome_AngleAlignment));
-                    genomeDesc.header.stiffness = std::get<float>(auxiliaries.at(Id_ConstructorGenome_Stiffness));
-                    data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(genomeDesc);
-                    if (!genomeDesc.cells.empty()) {
-                        data.constructionAngle1 = genomeDesc.cells.front().referenceAngle;
-                        data.constructionAngle2 = genomeDesc.cells.back().referenceAngle;
-                    }
-                }
-                //<<<
+                data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
             }
         } else {
             std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
@@ -328,25 +301,12 @@ namespace cereal
     {
         SensorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<float>(task, auxiliaries, Id_SensorGenome_MinDensity, data.minDensity, defaultObject.minDensity);
-        loadSave<std::optional<int>>(task, auxiliaries, Id_SensorGenome_RestrictToColor, data.restrictToColor, defaultObject.restrictToColor);
+        loadSave(task, auxiliaries, Id_SensorGenome_MinDensity, data.minDensity, defaultObject.minDensity);
+        loadSave(task, auxiliaries, Id_SensorGenome_RestrictToColor, data.restrictToColor, defaultObject.restrictToColor);
         loadSave(task, auxiliaries, Id_SensorGenome_RestrictToMutants, data.restrictToMutants, defaultObject.restrictToMutants);
-        loadSave<std::optional<int>>(task, auxiliaries, Id_SensorGenome_MinRange, data.minRange, defaultObject.minRange);
-        loadSave<std::optional<int>>(task, auxiliaries, Id_SensorGenome_MaxRange, data.maxRange, defaultObject.maxRange);
+        loadSave(task, auxiliaries, Id_SensorGenome_MinRange, data.minRange, defaultObject.minRange);
+        loadSave(task, auxiliaries, Id_SensorGenome_MaxRange, data.maxRange, defaultObject.maxRange);
         processLoadSaveMap(task, ar, auxiliaries);
-
-        //compatibility with older versions
-        //>>>
-        if (task == SerializationTask::Load) {
-            if (auxiliaries.contains(Id_SensorGenome_Color_Deprecated)) {
-                data.restrictToColor = std::get<int>(auxiliaries.at(Id_SensorGenome_Color_Deprecated));
-            }
-            if (auxiliaries.contains(Id_SensorGenome_RestrictToOtherMutants_Deprecated)) {
-                auto restrictToOtherMutants = std::get<bool>(auxiliaries.at(Id_SensorGenome_RestrictToOtherMutants_Deprecated));
-                data.restrictToMutants = restrictToOtherMutants ? SensorRestrictToMutants_RestrictToFreeCells : SensorRestrictToMutants_NoRestriction;
-            }
-        }
-        //<<<
     }
     SPLIT_SERIALIZATION(SensorGenomeDescription)
 
@@ -355,8 +315,8 @@ namespace cereal
     {
         NerveGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Id_NerveGenome_PulseMode, data.pulseMode, defaultObject.pulseMode);
-        loadSave<int>(task, auxiliaries, Id_NerveGenome_AlternationMode, data.alternationMode, defaultObject.alternationMode);
+        loadSave(task, auxiliaries, Id_NerveGenome_PulseMode, data.pulseMode, defaultObject.pulseMode);
+        loadSave(task, auxiliaries, Id_NerveGenome_AlternationMode, data.alternationMode, defaultObject.alternationMode);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(NerveGenomeDescription)
@@ -366,7 +326,7 @@ namespace cereal
     {
         AttackerGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Id_AttackerGenome_Mode, data.mode, defaultObject.mode);
+        loadSave(task, auxiliaries, Id_AttackerGenome_Mode, data.mode, defaultObject.mode);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AttackerGenomeDescription)
@@ -376,32 +336,16 @@ namespace cereal
     {
         InjectorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Id_InjectorGenome_Mode, data.mode, defaultObject.mode);
-        if (task == SerializationTask::Save) {
-            auxiliaries[Id_Constructor_GenomeHeader] = true;
-        }
+        loadSave(task, auxiliaries, Id_InjectorGenome_Mode, data.mode, defaultObject.mode);
         processLoadSaveMap(task, ar, auxiliaries);
 
         if (task == SerializationTask::Load) {
-            auto hasGenomeHeader = auxiliaries.contains(Id_Constructor_GenomeHeader);
-            if (hasGenomeHeader) {
-                std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
-                ar(genomeData);
-                if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
-                    data.genome = MakeGenomeCopy();
-                } else {
-                    data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
-                }
+            std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
+            ar(genomeData);
+            if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
+                data.genome = MakeGenomeCopy();
             } else {
-                std::variant<MakeGenomeCopy, std::vector<CellGenomeDescription>> genomeData;
-                ar(genomeData);
-                if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
-                    data.genome = MakeGenomeCopy();
-                } else {
-                    GenomeDescription genomeDesc;
-                    genomeDesc.cells = std::get<std::vector<CellGenomeDescription>>(genomeData);
-                    data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(genomeDesc);
-                }
+                data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
             }
         } else {
             std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
@@ -420,7 +364,7 @@ namespace cereal
     {
         MuscleGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Id_MuscleGenome_Mode, data.mode, defaultObject.mode);
+        loadSave(task, auxiliaries, Id_MuscleGenome_Mode, data.mode, defaultObject.mode);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(MuscleGenomeDescription)
@@ -430,7 +374,7 @@ namespace cereal
     {
         DefenderGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Id_DefenderGenome_Mode, data.mode, defaultObject.mode);
+        loadSave(task, auxiliaries, Id_DefenderGenome_Mode, data.mode, defaultObject.mode);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(DefenderGenomeDescription)
@@ -443,15 +387,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_ReconnectorGenome_RestrictToColor, data.restrictToColor, defaultObject.restrictToColor);
         loadSave(task, auxiliaries, Id_ReconnectorGenome_RestrictToMutants, data.restrictToMutants, defaultObject.restrictToMutants);
         processLoadSaveMap(task, ar, auxiliaries);
-
-        //compatibility with older versions
-        //>>>
-        if (task == SerializationTask::Load) {
-            if (auxiliaries.contains(Id_ReconnectorGenome_Color_Deprecated)) {
-                data.restrictToColor = std::get<int>(auxiliaries.at(Id_ReconnectorGenome_Color_Deprecated));
-            }
-        }
-        //<<<
     }
     SPLIT_SERIALIZATION(ReconnectorGenomeDescription)
 
@@ -460,7 +395,7 @@ namespace cereal
     {
         DetonatorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Id_DetonatorGenome_Countdown, data.countdown, defaultObject.countdown);
+        loadSave(task, auxiliaries, Id_DetonatorGenome_Countdown, data.countdown, defaultObject.countdown);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(DetonatorGenomeDescription)
@@ -470,10 +405,10 @@ namespace cereal
     {
         CellGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<float>(task, auxiliaries, Id_CellGenome_ReferenceAngle, data.referenceAngle, defaultObject.referenceAngle);
-        loadSave<float>(task, auxiliaries, Id_CellGenome_Energy, data.energy, defaultObject.energy);
-        loadSave<int>(task, auxiliaries, Id_CellGenome_Color, data.color, defaultObject.color);
-        loadSave<std::optional<int>>(task, auxiliaries, Id_CellGenome_NumRequiredAdditionalConnections, data.numRequiredAdditionalConnections, defaultObject.numRequiredAdditionalConnections);
+        loadSave(task, auxiliaries, Id_CellGenome_ReferenceAngle, data.referenceAngle, defaultObject.referenceAngle);
+        loadSave(task, auxiliaries, Id_CellGenome_Energy, data.energy, defaultObject.energy);
+        loadSave(task, auxiliaries, Id_CellGenome_Color, data.color, defaultObject.color);
+        loadSave(task, auxiliaries, Id_CellGenome_NumRequiredAdditionalConnections, data.numRequiredAdditionalConnections, defaultObject.numRequiredAdditionalConnections);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.cellFunction);
@@ -485,24 +420,15 @@ namespace cereal
     {
         GenomeHeaderDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Id_GenomeHeader_Shape, data.shape, defaultObject.shape);
-        loadSave<int>(task, auxiliaries, Id_GenomeHeader_NumBranches, data.numBranches, defaultObject.numBranches);
-        loadSave<bool>(task, auxiliaries, Id_GenomeHeader_SeparateConstruction, data.separateConstruction, defaultObject.separateConstruction);
-        loadSave<int>(task, auxiliaries, Id_GenomeHeader_AngleAlignment, data.angleAlignment, defaultObject.angleAlignment);
-        loadSave<float>(task, auxiliaries, Id_GenomeHeader_Stiffness, data.stiffness, defaultObject.stiffness);
-        loadSave<float>(task, auxiliaries, Id_GenomeHeader_ConnectionDistance, data.connectionDistance, defaultObject.connectionDistance);
-        loadSave<int>(task, auxiliaries, Id_GenomeHeader_NumRepetitions, data.numRepetitions, defaultObject.numRepetitions);
-        loadSave<float>(task, auxiliaries, Id_GenomeHeader_ConcatenationAngle1, data.concatenationAngle1, defaultObject.concatenationAngle1);
-        loadSave<float>(task, auxiliaries, Id_GenomeHeader_ConcatenationAngle2, data.concatenationAngle2, defaultObject.concatenationAngle2);
-
-        //compatibility with older versions
-        //>>>
-        if (task == SerializationTask::Load) {
-            if (auxiliaries.contains(Id_Constructor_SingleConstruction)) {
-                data.numBranches = std::get<bool>(auxiliaries.at(Id_Constructor_SingleConstruction)) ? 1 : 2;
-            }
-        }
-        //<<<
+        loadSave(task, auxiliaries, Id_GenomeHeader_Shape, data.shape, defaultObject.shape);
+        loadSave(task, auxiliaries, Id_GenomeHeader_NumBranches, data.numBranches, defaultObject.numBranches);
+        loadSave(task, auxiliaries, Id_GenomeHeader_SeparateConstruction, data.separateConstruction, defaultObject.separateConstruction);
+        loadSave(task, auxiliaries, Id_GenomeHeader_AngleAlignment, data.angleAlignment, defaultObject.angleAlignment);
+        loadSave(task, auxiliaries, Id_GenomeHeader_Stiffness, data.stiffness, defaultObject.stiffness);
+        loadSave(task, auxiliaries, Id_GenomeHeader_ConnectionDistance, data.connectionDistance, defaultObject.connectionDistance);
+        loadSave(task, auxiliaries, Id_GenomeHeader_NumRepetitions, data.numRepetitions, defaultObject.numRepetitions);
+        loadSave(task, auxiliaries, Id_GenomeHeader_ConcatenationAngle1, data.concatenationAngle1, defaultObject.concatenationAngle1);
+        loadSave(task, auxiliaries, Id_GenomeHeader_ConcatenationAngle2, data.concatenationAngle2, defaultObject.concatenationAngle2);
 
         processLoadSaveMap(task, ar, auxiliaries);
     }
@@ -528,6 +454,15 @@ namespace cereal
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, SignalDescription& data)
     {
+        SignalDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_Cell_Signal_Active, data.active, defaultObject.active);
+        loadSave(task, auxiliaries, Id_Cell_Signal_Channels, data.channels, defaultObject.channels);
+        loadSave(task, auxiliaries, Id_Cell_Signal_Origin, data.origin, defaultObject.origin);
+        loadSave(task, auxiliaries, Id_Cell_Signal_TargetX, data.targetX, defaultObject.targetX);
+        loadSave(task, auxiliaries, Id_Cell_Signal_TargetY, data.targetY, defaultObject.targetY);
+        processLoadSaveMap(task, ar, auxiliaries);
+
         ar(data.channels);
     }
     SPLIT_SERIALIZATION(SignalDescription)
@@ -549,7 +484,7 @@ namespace cereal
     {
         TransmitterDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Id_Transmitter_Mode, data.mode, defaultObject.mode);
+        loadSave(task, auxiliaries, Id_Transmitter_Mode, data.mode, defaultObject.mode);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(TransmitterDescription)
@@ -559,69 +494,24 @@ namespace cereal
     {
         ConstructorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Id_Constructor_ActivationMode, data.activationMode, defaultObject.activationMode);
-        loadSave<int>(task, auxiliaries, Id_Constructor_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
-        loadSave<uint64_t>(task, auxiliaries, Id_Constructor_LastConstructedCellId, data.lastConstructedCellId, defaultObject.lastConstructedCellId);
-        loadSave<int>(task, auxiliaries, Id_Constructor_GenomeCurrentNodeIndex, data.genomeCurrentNodeIndex, defaultObject.genomeCurrentNodeIndex);
-        loadSave<int>(task, auxiliaries, Id_Constructor_GenomeCurrentRepetition, data.genomeCurrentRepetition, defaultObject.genomeCurrentRepetition);
-        loadSave<int>(task, auxiliaries, Id_Constructor_CurrentBranch, data.currentBranch, defaultObject.currentBranch);
-        loadSave<int>(task, auxiliaries, Id_Constructor_OffspringCreatureId, data.offspringCreatureId, defaultObject.offspringCreatureId);
-        loadSave<int>(task, auxiliaries, Id_Constructor_OffspringMutationId, data.offspringMutationId, defaultObject.offspringMutationId);
-        loadSave<int>(task, auxiliaries, Id_Constructor_GenomeGeneration, data.genomeGeneration, defaultObject.genomeGeneration);
-        loadSave<float>(task, auxiliaries, Id_Constructor_ConstructionAngle1, data.constructionAngle1, defaultObject.constructionAngle1);
-        loadSave<float>(task, auxiliaries, Id_Constructor_ConstructionAngle2, data.constructionAngle2, defaultObject.constructionAngle2);
-        loadSave<int>(task, auxiliaries, Id_Constructor_NumInheritedGenomeNodes, data.numInheritedGenomeNodes, defaultObject.numInheritedGenomeNodes);
-        if (task == SerializationTask::Save) {
-            auxiliaries[Id_Constructor_GenomeHeader] = true;
-        }
+        loadSave(task, auxiliaries, Id_Constructor_ActivationMode, data.activationMode, defaultObject.activationMode);
+        loadSave(task, auxiliaries, Id_Constructor_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
+        loadSave(task, auxiliaries, Id_Constructor_LastConstructedCellId, data.lastConstructedCellId, defaultObject.lastConstructedCellId);
+        loadSave(task, auxiliaries, Id_Constructor_GenomeCurrentNodeIndex, data.genomeCurrentNodeIndex, defaultObject.genomeCurrentNodeIndex);
+        loadSave(task, auxiliaries, Id_Constructor_GenomeCurrentRepetition, data.genomeCurrentRepetition, defaultObject.genomeCurrentRepetition);
+        loadSave(task, auxiliaries, Id_Constructor_CurrentBranch, data.currentBranch, defaultObject.currentBranch);
+        loadSave(task, auxiliaries, Id_Constructor_OffspringCreatureId, data.offspringCreatureId, defaultObject.offspringCreatureId);
+        loadSave(task, auxiliaries, Id_Constructor_OffspringMutationId, data.offspringMutationId, defaultObject.offspringMutationId);
+        loadSave(task, auxiliaries, Id_Constructor_GenomeGeneration, data.genomeGeneration, defaultObject.genomeGeneration);
+        loadSave(task, auxiliaries, Id_Constructor_ConstructionAngle1, data.constructionAngle1, defaultObject.constructionAngle1);
+        loadSave(task, auxiliaries, Id_Constructor_ConstructionAngle2, data.constructionAngle2, defaultObject.constructionAngle2);
+        loadSave(task, auxiliaries, Id_Constructor_NumInheritedGenomeNodes, data.numInheritedGenomeNodes, defaultObject.numInheritedGenomeNodes);
         processLoadSaveMap(task, ar, auxiliaries);
 
         if (task == SerializationTask::Load) {
-            auto hasGenomeHeader = auxiliaries.contains(Id_Constructor_GenomeHeader);
-            auto useNewGenomeIndex = auxiliaries.contains(Id_Constructor_IsConstructionBuilt) || auxiliaries.contains(Id_Constructor_StateFlags)
-                || auxiliaries.contains(Id_Constructor_CurrentBranch);
-
-            if (hasGenomeHeader && useNewGenomeIndex) {
-                GenomeDescription genomeDesc;
-                ar(genomeDesc);
-                data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(genomeDesc);
-            }
-
-            //compatibility with older versions
-            //>>>
-            if (!hasGenomeHeader) {
-                GenomeDescription genomeDesc;
-                ar(genomeDesc.cells);
-                genomeDesc.header.numBranches =
-                    std::get<bool>(auxiliaries.at(Id_Constructor_SingleConstruction)) ? 1 : 2;
-                genomeDesc.header.separateConstruction = std::get<bool>(auxiliaries.at(Id_Constructor_SeparateConstruction));
-                genomeDesc.header.angleAlignment = std::get<int>(auxiliaries.at(Id_Constructor_AngleAlignment));
-                genomeDesc.header.stiffness = std::get<float>(auxiliaries.at(Id_Constructor_Stiffness));
-                data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(genomeDesc);
-
-                data.genomeCurrentNodeIndex = 0;
-
-                if (!genomeDesc.cells.empty()) {
-                    data.constructionAngle1 = genomeDesc.cells.front().referenceAngle;
-                    data.constructionAngle2 = genomeDesc.cells.back().referenceAngle;
-                }
-            }
-
-            if (hasGenomeHeader && !useNewGenomeIndex) {
-                GenomeDescription genomeDesc;
-                ar(genomeDesc);
-                data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(genomeDesc);
-
-                auto oldVersionSpec =
-                    GenomeEncodingSpecification().numRepetitions(false).concatenationAngle1(false).concatenationAngle2(false);
-                auto oldGenome = GenomeDescriptionService::get().convertDescriptionToBytes(genomeDesc, oldVersionSpec);
-                data.genomeCurrentNodeIndex = GenomeDescriptionService::get().convertNodeAddressToNodeIndex(oldGenome, data.genomeCurrentNodeIndex, oldVersionSpec);
-                if (data.genomeCurrentNodeIndex >= toInt(genomeDesc.cells.size())) {
-                    data.genomeCurrentNodeIndex = 0;
-                }
-            }
-            //<<<
-
+            GenomeDescription genomeDesc;
+            ar(genomeDesc);
+            data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(genomeDesc);
         } else {
             GenomeDescription genomeDesc = GenomeDescriptionService::get().convertBytesToDescription(data.genome);
             ar(genomeDesc);
@@ -634,30 +524,17 @@ namespace cereal
     {
         SensorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<float>(task, auxiliaries, Id_Sensor_MinDensity, data.minDensity, defaultObject.minDensity);
-        loadSave<std::optional<int>>(task, auxiliaries, Id_Sensor_RestrictToColor, data.restrictToColor, defaultObject.restrictToColor);
+        loadSave(task, auxiliaries, Id_Sensor_MinDensity, data.minDensity, defaultObject.minDensity);
+        loadSave(task, auxiliaries, Id_Sensor_RestrictToColor, data.restrictToColor, defaultObject.restrictToColor);
         loadSave(task, auxiliaries, Id_Sensor_RestrictToMutants, data.restrictToMutants, defaultObject.restrictToMutants);
-        loadSave<float>(task, auxiliaries, Id_Sensor_MemoryChannel1, data.memoryChannel1, defaultObject.memoryChannel1);
-        loadSave<float>(task, auxiliaries, Id_Sensor_MemoryChannel2, data.memoryChannel2, defaultObject.memoryChannel2);
-        loadSave<float>(task, auxiliaries, Id_Sensor_MemoryChannel3, data.memoryChannel3, defaultObject.memoryChannel3);
-        loadSave<float>(task, auxiliaries, Id_Sensor_TargetX, data.memoryTargetX, defaultObject.memoryTargetX);
-        loadSave<float>(task, auxiliaries, Id_Sensor_TargetY, data.memoryTargetY, defaultObject.memoryTargetY);
-        loadSave<std::optional<int>>(task, auxiliaries, Id_Sensor_MinRange, data.minRange, defaultObject.minRange);
-        loadSave<std::optional<int>>(task, auxiliaries, Id_Sensor_MaxRange, data.maxRange, defaultObject.maxRange);
+        loadSave(task, auxiliaries, Id_Sensor_MemoryChannel1, data.memoryChannel1, defaultObject.memoryChannel1);
+        loadSave(task, auxiliaries, Id_Sensor_MemoryChannel2, data.memoryChannel2, defaultObject.memoryChannel2);
+        loadSave(task, auxiliaries, Id_Sensor_MemoryChannel3, data.memoryChannel3, defaultObject.memoryChannel3);
+        loadSave(task, auxiliaries, Id_Sensor_TargetX, data.memoryTargetX, defaultObject.memoryTargetX);
+        loadSave(task, auxiliaries, Id_Sensor_TargetY, data.memoryTargetY, defaultObject.memoryTargetY);
+        loadSave(task, auxiliaries, Id_Sensor_MinRange, data.minRange, defaultObject.minRange);
+        loadSave(task, auxiliaries, Id_Sensor_MaxRange, data.maxRange, defaultObject.maxRange);
         processLoadSaveMap(task, ar, auxiliaries);
-
-        //compatibility with older versions
-        //>>>
-        if (task == SerializationTask::Load) {
-            if (auxiliaries.contains(Id_Sensor_Color_Deprecated)) {
-                data.restrictToColor = std::get<int>(auxiliaries.at(Id_Sensor_Color_Deprecated));
-            }
-            if (auxiliaries.contains(Id_Sensor_RestrictToOtherMutants_Deprecated)) {
-                auto restrictToOtherMutants = std::get<bool>(auxiliaries.at(Id_Sensor_RestrictToOtherMutants_Deprecated));
-                data.restrictToMutants = restrictToOtherMutants ? SensorRestrictToMutants_RestrictToFreeCells : SensorRestrictToMutants_NoRestriction;
-            }
-        }
-        //<<<
     }
     SPLIT_SERIALIZATION(SensorDescription)
 
@@ -666,8 +543,8 @@ namespace cereal
     {
         NerveDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Id_Nerve_PulseMode, data.pulseMode, defaultObject.pulseMode);
-        loadSave<int>(task, auxiliaries, Id_Nerve_AlternationMode, data.alternationMode, defaultObject.alternationMode);
+        loadSave(task, auxiliaries, Id_Nerve_PulseMode, data.pulseMode, defaultObject.pulseMode);
+        loadSave(task, auxiliaries, Id_Nerve_AlternationMode, data.alternationMode, defaultObject.alternationMode);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(NerveDescription)
@@ -677,7 +554,7 @@ namespace cereal
     {
         AttackerDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Id_Attacker_Mode, data.mode, defaultObject.mode);
+        loadSave(task, auxiliaries, Id_Attacker_Mode, data.mode, defaultObject.mode);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AttackerDescription)
@@ -687,24 +564,14 @@ namespace cereal
     {
         InjectorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Id_Injector_Mode, data.mode, defaultObject.mode);
-        loadSave<int>(task, auxiliaries, Id_Injector_Counter, data.counter, defaultObject.counter);
-        if (task == SerializationTask::Save) {
-            auxiliaries[Id_Injector_GenomeHeader] = true;
-        }
+        loadSave(task, auxiliaries, Id_Injector_Mode, data.mode, defaultObject.mode);
+        loadSave(task, auxiliaries, Id_Injector_Counter, data.counter, defaultObject.counter);
         processLoadSaveMap(task, ar, auxiliaries);
 
         if (task == SerializationTask::Load) {
-            auto hasGenomeHeader = auxiliaries.contains(Id_Injector_GenomeHeader);
-            if (hasGenomeHeader) {
-                GenomeDescription genomeDesc;
-                ar(genomeDesc);
-                data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(genomeDesc);
-            } else {
-                GenomeDescription genomeDesc;
-                ar(genomeDesc.cells);
-                data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(genomeDesc);
-            }
+            GenomeDescription genomeDesc;
+            ar(genomeDesc);
+            data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(genomeDesc);
         } else {
             GenomeDescription genomeDesc = GenomeDescriptionService::get().convertBytesToDescription(data.genome);
             ar(genomeDesc);
@@ -717,10 +584,10 @@ namespace cereal
     {
         MuscleDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Id_Muscle_Mode, data.mode, defaultObject.mode);
-        loadSave<int>(task, auxiliaries, Id_Muscle_LastBendingDirection, data.lastBendingDirection, defaultObject.lastBendingDirection);
-        loadSave<int>(task, auxiliaries, Id_Muscle_LastBendingSourceIndex, data.lastBendingSourceIndex, defaultObject.lastBendingSourceIndex);
-        loadSave<float>(task, auxiliaries, Id_Muscle_ConsecutiveBendingAngle, data.consecutiveBendingAngle, defaultObject.consecutiveBendingAngle);
+        loadSave(task, auxiliaries, Id_Muscle_Mode, data.mode, defaultObject.mode);
+        loadSave(task, auxiliaries, Id_Muscle_LastBendingDirection, data.lastBendingDirection, defaultObject.lastBendingDirection);
+        loadSave(task, auxiliaries, Id_Muscle_LastBendingSourceIndex, data.lastBendingSourceIndex, defaultObject.lastBendingSourceIndex);
+        loadSave(task, auxiliaries, Id_Muscle_ConsecutiveBendingAngle, data.consecutiveBendingAngle, defaultObject.consecutiveBendingAngle);
         loadSave(task, auxiliaries, Id_Muscle_LastMovementX, data.lastMovementX, defaultObject.lastMovementX);
         loadSave(task, auxiliaries, Id_Muscle_LastMovementY, data.lastMovementY, defaultObject.lastMovementY);
         processLoadSaveMap(task, ar, auxiliaries);
@@ -732,7 +599,7 @@ namespace cereal
     {
         DefenderDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Id_Defender_Mode, data.mode, defaultObject.mode);
+        loadSave(task, auxiliaries, Id_Defender_Mode, data.mode, defaultObject.mode);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(DefenderDescription)
@@ -745,15 +612,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Reconnector_RestrictToColor, data.restrictToColor, defaultObject.restrictToColor);
         loadSave(task, auxiliaries, Id_Reconnector_RestrictToMutants, data.restrictToMutants, defaultObject.restrictToMutants);
         processLoadSaveMap(task, ar, auxiliaries);
-
-        //compatibility with older versions
-        //>>>
-        if (task == SerializationTask::Load) {
-            if (auxiliaries.contains(Id_Reconnector_Color_Deprecated)) {
-                data.restrictToColor = std::get<int>(auxiliaries.at(Id_Reconnector_Color_Deprecated));
-            }
-        }
-        //<<<
     }
     SPLIT_SERIALIZATION(ReconnectorDescription)
 
@@ -762,8 +620,8 @@ namespace cereal
     {
         DetonatorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Id_Detonator_State, data.state, defaultObject.state);
-        loadSave<int>(task, auxiliaries, Id_Detonator_Countdown, data.countdown, defaultObject.countdown);
+        loadSave(task, auxiliaries, Id_Detonator_State, data.state, defaultObject.state);
+        loadSave(task, auxiliaries, Id_Detonator_Countdown, data.countdown, defaultObject.countdown);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(DetonatorDescription)
@@ -773,41 +631,27 @@ namespace cereal
     {
         CellDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<float>(task, auxiliaries, Id_Cell_Stiffness, data.stiffness, defaultObject.stiffness);
-        loadSave<int>(task, auxiliaries, Id_Cell_Color, data.color, defaultObject.color);
-        loadSave<bool>(task, auxiliaries, Id_Cell_Barrier, data.barrier, defaultObject.barrier);
-        loadSave<int>(task, auxiliaries, Id_Cell_Age, data.age, defaultObject.age);
-        loadSave<int>(task, auxiliaries, Id_Cell_LivingState, data.livingState, defaultObject.livingState);
-        loadSave<int>(task, auxiliaries, Id_Cell_CreatureId, data.creatureId, defaultObject.creatureId);
-        loadSave<int>(task, auxiliaries, Id_Cell_MutationId, data.mutationId, defaultObject.mutationId);
-        loadSave<uint8_t>(task, auxiliaries, Id_Cell_AncestorMutationId, data.ancestorMutationId, defaultObject.ancestorMutationId);
-        loadSave<int>(task, auxiliaries, Id_Cell_ActivationTime, data.activationTime, defaultObject.activationTime);
-        loadSave<float>(task, auxiliaries, Id_Cell_GenomeComplexity, data.genomeComplexity, defaultObject.genomeComplexity);
+        loadSave(task, auxiliaries, Id_Cell_Stiffness, data.stiffness, defaultObject.stiffness);
+        loadSave(task, auxiliaries, Id_Cell_Color, data.color, defaultObject.color);
+        loadSave(task, auxiliaries, Id_Cell_Barrier, data.barrier, defaultObject.barrier);
+        loadSave(task, auxiliaries, Id_Cell_Age, data.age, defaultObject.age);
+        loadSave(task, auxiliaries, Id_Cell_LivingState, data.livingState, defaultObject.livingState);
+        loadSave(task, auxiliaries, Id_Cell_CreatureId, data.creatureId, defaultObject.creatureId);
+        loadSave(task, auxiliaries, Id_Cell_MutationId, data.mutationId, defaultObject.mutationId);
+        loadSave(task, auxiliaries, Id_Cell_AncestorMutationId, data.ancestorMutationId, defaultObject.ancestorMutationId);
+        loadSave(task, auxiliaries, Id_Cell_ActivationTime, data.activationTime, defaultObject.activationTime);
+        loadSave(task, auxiliaries, Id_Cell_GenomeComplexity, data.genomeComplexity, defaultObject.genomeComplexity);
         loadSave(task, auxiliaries, Id_Cell_DetectedByCreatureId, data.detectedByCreatureId, defaultObject.detectedByCreatureId);
-        loadSave<uint8_t>(task, auxiliaries, Id_Cell_CellFunctionUsed, data.cellFunctionUsed, defaultObject.cellFunctionUsed);
-        loadSave(task, auxiliaries, Id_Cell_Signal_Origin, data.signal.origin, defaultObject.signal.origin);
-        loadSave(task, auxiliaries, Id_Cell_Signal_TargetX, data.signal.targetX, defaultObject.signal.targetX);
-        loadSave(task, auxiliaries, Id_Cell_Signal_TargetY, data.signal.targetY, defaultObject.signal.targetY);
+        loadSave(task, auxiliaries, Id_Cell_CellFunctionUsed, data.cellFunctionUsed, defaultObject.cellFunctionUsed);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.id, data.connections, data.pos, data.vel, data.energy, data.maxConnections, data.cellFunction, data.signal, data.metadata);
-
-        //compatibility with older versions
-        //>>>
-        if (task == SerializationTask::Load) {
-            if (auxiliaries.contains(Id_Cell_GenomeComplexity_Deprecated)) {
-                data.genomeComplexity = toFloat(std::get<int>(auxiliaries.at(Id_Cell_GenomeComplexity_Deprecated)));
-            }
-        }
-        //<<<
     }
     SPLIT_SERIALIZATION(CellDescription)
 
     template <class Archive>
     void serialize(Archive& ar, ClusterDescription& data)
     {
-        uint64_t id = 0;
-        ar(id); //legacy: not used anymore
         ar(data.cells);
     }
 
@@ -816,7 +660,7 @@ namespace cereal
     {
         ParticleDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<int>(task, auxiliaries, Id_Particle_Color, data.color, defaultObject.color);
+        loadSave(task, auxiliaries, Id_Particle_Color, data.color, defaultObject.color);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.id, data.pos, data.vel, data.energy);
