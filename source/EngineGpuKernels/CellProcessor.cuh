@@ -759,7 +759,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
                     float2 particleVel = cell->vel * cudaSimulationParameters.radiationVelocityMultiplier
                         + Math::unitVectorOfAngle(data.numberGen1.random() * 360) * cudaSimulationParameters.radiationVelocityPerturbation;
                     float2 particlePos = cell->pos + Math::normalized(particleVel) * 1.5f
-                        - particleVel;  //"- particleVel" because particle will still be moved in current time step
+                        - particleVel;  // minus particleVel because particle will still be moved in current time step
                     data.cellMap.correctPosition(particlePos);
                     if (energyLoss > cellEnergy - 1) {
                         energyLoss = cellEnergy - 1;

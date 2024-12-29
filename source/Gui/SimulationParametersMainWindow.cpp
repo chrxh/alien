@@ -130,7 +130,8 @@ void SimulationParametersMainWindow::processToolbar()
                                       .secondText(ICON_FA_UNDO)
                                       .secondTextOffset(RealVector2D{32.0f, 28.0f})
                                       .secondTextScale(0.3f)
-                                      .tooltip("Replace reference values by values from the clipboard")
+                                      .tooltip("Replace reference values by values from the clipboard. This is useful to see the diff between the current "
+                                               "parameters and those from the clipboard.")
                                       .disabled(!_copiedParameters))) {
         auto parameters = _simulationFacade->getSimulationParameters();
         if (_copiedParameters->numZones == parameters.numZones && _copiedParameters->numRadiationSources == parameters.numRadiationSources) {
