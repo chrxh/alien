@@ -58,8 +58,14 @@ struct SignalDescription
     SignalOrigin origin = SignalOrigin_Unknown;
     float targetX = 0;
     float targetY = 0;
+    int numPrevCells = 0;
+    std::vector<uint64_t> prevCellIds;
 
-    SignalDescription() { channels.resize(MAX_CHANNELS, 0); }
+    SignalDescription()
+    {
+        channels.resize(MAX_CHANNELS, 0);
+        prevCellIds.resize(MAX_CELL_BONDS, 0);
+    }
     auto operator<=>(SignalDescription const&) const = default;
 
     SignalDescription& setChannels(std::vector<float> const& value)

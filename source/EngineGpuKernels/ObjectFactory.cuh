@@ -123,6 +123,10 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->signal.origin = cellTO.signal.origin;
     cell->signal.targetX = cellTO.signal.targetX;
     cell->signal.targetY = cellTO.signal.targetY;
+    cell->signal.numPrevCells = cellTO.signal.numPrevCells;
+    for (int i = 0; i < MAX_CELL_BONDS; ++i) {
+        cell->signal.prevCellIds[i] = cellTO.signal.prevCellIds[i];
+    }
 
     cell->cellFunction = cellTO.cellFunction;
     switch (cellTO.cellFunction) {

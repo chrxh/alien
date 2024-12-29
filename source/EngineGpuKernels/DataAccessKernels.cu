@@ -43,6 +43,10 @@ namespace
         cellTO.signal.origin = cell->signal.origin;
         cellTO.signal.targetX = cell->signal.targetX;
         cellTO.signal.targetY = cell->signal.targetY;
+        cellTO.signal.numPrevCells = cell->signal.numPrevCells;
+        for (int i = 0; i < MAX_CELL_BONDS; ++i) {
+            cellTO.signal.prevCellIds[i] = cell->signal.prevCellIds[i];
+        }
         cellTO.activationTime = cell->activationTime;
         cellTO.detectedByCreatureId = cell->detectedByCreatureId;
         cellTO.cellFunctionUsed = cell->cellFunctionUsed;

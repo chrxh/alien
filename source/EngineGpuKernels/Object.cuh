@@ -76,6 +76,8 @@ struct Signal
     SignalOrigin origin;
     float targetX;
     float targetY;
+    int numPrevCells;
+    uint64_t prevCellIds[MAX_CELL_BONDS];
 };
 
 struct NeuronFunction
@@ -224,8 +226,6 @@ struct Cell
 
     //cell function
     Signal signal;
-    int numSignalOrigins;
-    uint64_t signalOrigins[MAX_CELL_BONDS];
     CellFunction cellFunction;
     CellFunctionData cellFunctionData;
     uint32_t activationTime;
@@ -233,8 +233,6 @@ struct Cell
 
     //process data
     Signal futureSignal;
-    int futureNumSignalOrigins;
-    uint64_t futureSignalOrigins[MAX_CELL_BONDS];
     uint16_t detectedByCreatureId;  //only the first 16 bits from the creature id
 
     //annotations
