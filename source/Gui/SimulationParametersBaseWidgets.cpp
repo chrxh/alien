@@ -1326,7 +1326,9 @@ void _SimulationParametersBaseWidgets::process()
                 .min(0)
                 .max(1000)
                 .logarithmic(true)
-                .defaultValue(&origParameters.cellCopyMutationDeletionMinSize),
+                .defaultValue(&origParameters.cellCopyMutationDeletionMinSize)
+                .tooltip("The minimum size of genomes (on the basis of the coded cells) is determined here that can result from delete mutations. The default "
+                         "is 0."),
             &parameters.cellCopyMutationDeletionMinSize);
     }
     AlienImGui::EndTreeNode();
@@ -1345,7 +1347,8 @@ void _SimulationParametersBaseWidgets::process()
                 .min(0.0f)
                 .max(1.0f)
                 .format("%.3f")
-                .defaultValue(&origParameters.cellCopyMutationNeuronDataWeight),
+                .defaultValue(&origParameters.cellCopyMutationNeuronDataWeight)
+                .tooltip("The proportion of weights in the neuronal network of a cell that are changed within a neuron mutation. The default is 0.2."),
             &parameters.cellCopyMutationNeuronDataWeight);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -1354,7 +1357,8 @@ void _SimulationParametersBaseWidgets::process()
                 .min(0.0f)
                 .max(1.0f)
                 .format("%.3f")
-                .defaultValue(&origParameters.cellCopyMutationNeuronDataBias),
+                .defaultValue(&origParameters.cellCopyMutationNeuronDataBias)
+                .tooltip("The proportion of biases in the neuronal network of a cell that are changed within a neuron mutation. The default is 0.2."),
             &parameters.cellCopyMutationNeuronDataBias);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -1363,7 +1367,8 @@ void _SimulationParametersBaseWidgets::process()
                 .min(0.0f)
                 .max(1.0f)
                 .format("%.3f")
-                .defaultValue(&origParameters.cellCopyMutationNeuronDataActivationFunction),
+                .defaultValue(&origParameters.cellCopyMutationNeuronDataActivationFunction)
+                .tooltip("The proportion of activation functions in the neuronal network of a cell that are changed within a neuron mutation. The default is 0.05."),
             &parameters.cellCopyMutationNeuronDataActivationFunction);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -1372,7 +1377,9 @@ void _SimulationParametersBaseWidgets::process()
                 .min(1.0f)
                 .max(1.2f)
                 .format("%.3f")
-                .defaultValue(&origParameters.cellCopyMutationNeuronDataReinforcement),
+                .defaultValue(&origParameters.cellCopyMutationNeuronDataReinforcement)
+                .tooltip("If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an offset. "
+                         "The factor that is used for reinforcement is defined here. The default is 1.05."),
             &parameters.cellCopyMutationNeuronDataReinforcement);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -1381,7 +1388,9 @@ void _SimulationParametersBaseWidgets::process()
                 .min(1.0f)
                 .max(1.2f)
                 .format("%.3f")
-                .defaultValue(&origParameters.cellCopyMutationNeuronDataDamping),
+                .defaultValue(&origParameters.cellCopyMutationNeuronDataDamping)
+                .tooltip("If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an offset. "
+                         "The factor that is used for weakening is defined here. The default is 1.05."),
             &parameters.cellCopyMutationNeuronDataDamping);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -1390,7 +1399,9 @@ void _SimulationParametersBaseWidgets::process()
                 .min(0.0f)
                 .max(0.2f)
                 .format("%.3f")
-                .defaultValue(&origParameters.cellCopyMutationNeuronDataOffset),
+                .defaultValue(&origParameters.cellCopyMutationNeuronDataOffset)
+                .tooltip("If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an offset. "
+                         "The value that is used for the offset is defined here. The default is 0.05."),
             &parameters.cellCopyMutationNeuronDataOffset);
     }
     AlienImGui::EndTreeNode();
