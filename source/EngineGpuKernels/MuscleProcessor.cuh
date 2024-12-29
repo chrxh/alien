@@ -22,6 +22,7 @@ private:
     __inline__ __device__ static int getConnectionIndex(Cell* cell, Cell* otherCell);
     __inline__ __device__ static bool hasTriangularConnection(Cell* cell, Cell* otherCell);
     __inline__ __device__ static float getTruncatedUnitValue(Signal const& signal, int channel = 0);
+    __inline__ __device__ static void radiate(SimulationData& data, Cell* cell);
 };
 
 /************************************************************************/
@@ -120,6 +121,7 @@ __device__ __inline__ void MuscleProcessor::movement(SimulationData& data, Simul
     cell->cellFunctionData.muscle.lastMovementY = direction.y;
     cell->releaseLock();
     statistics.incNumMuscleActivities(cell->color);
+    radiate(data, cell);
 }
 
 __device__ __inline__ void MuscleProcessor::contractionExpansion(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Signal const& signal)
@@ -155,6 +157,7 @@ __device__ __inline__ void MuscleProcessor::contractionExpansion(SimulationData&
     }
     cell->releaseLock();
     statistics.incNumMuscleActivities(cell->color);
+    radiate(data, cell);
 }
 
 __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Signal const& signal)
@@ -217,6 +220,7 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
     }
     cell->releaseLock();
     statistics.incNumMuscleActivities(cell->color);
+    radiate(data, cell);
 }
 
 __inline__ __device__ int MuscleProcessor::getConnectionIndex(Cell* cell, Cell* otherCell)
@@ -249,4 +253,12 @@ __inline__ __device__ bool MuscleProcessor::hasTriangularConnection(Cell* cell, 
 __inline__ __device__ float MuscleProcessor::getTruncatedUnitValue(Signal const& signal, int channel)
 {
     return max(-0.3f, min(0.3f, signal.channels[channel])) / 0.3f;
+}
+
+__inline__ __device__ void MuscleProcessor::radiate(SimulationData& data, Cell* cell)
+{
+    auto cellFunctionMuscleEnergyCost = cudaSimulationParameters.cellFunctionMuscleEnergyCost[cell->color];
+    if (cellFunctionMuscleEnergyCost > 0) {
+        RadiationProcessor::radiate(data, cell, cellFunctionMuscleEnergyCost);
+    }
 }

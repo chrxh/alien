@@ -882,6 +882,18 @@ void _SimulationParametersBaseWidgets::process()
             parameters.cellFunctionMuscleMovementTowardTargetedObject);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
+                .name("Energy cost")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(0)
+                .max(1.0f)
+                .format("%.5f")
+                .logarithmic(true)
+                .defaultValue(origParameters.cellFunctionMuscleEnergyCost)
+                .tooltip("Amount of energy lost by a muscle action of a cell in form of emitted energy particles."),
+            parameters.cellFunctionMuscleEnergyCost);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
                 .name("Movement acceleration")
                 .textWidth(RightColumnWidth)
                 .colorDependence(true)

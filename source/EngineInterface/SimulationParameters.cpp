@@ -149,6 +149,9 @@ bool SimulationParameters::operator==(SimulationParameters const& other) const
         if (genomeComplexityDepthLevel[i] != other.genomeComplexityDepthLevel[i]) {
             return false;
         }
+        if (cellFunctionMuscleEnergyCost[i] != other.cellFunctionMuscleEnergyCost[i]) {
+            return false;
+        }
     }
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
