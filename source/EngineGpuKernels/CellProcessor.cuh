@@ -34,7 +34,7 @@ public:
     __inline__ __device__ static void verletVelocityUpdate(SimulationData& data);
 
     __inline__ __device__ static void aging(SimulationData& data);
-    __inline__ __device__ static void livingStateTransition_calcNextState(SimulationData& data);
+    __inline__ __device__ static void livingStateTransition_calcFutureState(SimulationData& data);
     __inline__ __device__ static void livingStateTransition_applyNextState(SimulationData& data);
 
     __inline__ __device__ static void applyInnerFriction(SimulationData& data);
@@ -593,7 +593,7 @@ __inline__ __device__ void CellProcessor::aging(SimulationData& data)
 }
 
 
-__inline__ __device__ void CellProcessor::livingStateTransition_calcNextState(SimulationData& data)
+__inline__ __device__ void CellProcessor::livingStateTransition_calcFutureState(SimulationData& data)
 {
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
