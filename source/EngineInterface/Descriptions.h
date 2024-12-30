@@ -58,7 +58,6 @@ struct SignalDescription
     SignalOrigin origin = SignalOrigin_Unknown;
     float targetX = 0;
     float targetY = 0;
-    int numPrevCells = 0;
     std::vector<uint64_t> prevCellIds;
 
     SignalDescription()
@@ -72,6 +71,11 @@ struct SignalDescription
     {
         CHECK(value.size() == MAX_CHANNELS);
         channels = value;
+        return *this;
+    }
+    SignalDescription& setPrevCellIds(std::vector<uint64_t> const& value)
+    {
+        prevCellIds = value;
         return *this;
     }
 };

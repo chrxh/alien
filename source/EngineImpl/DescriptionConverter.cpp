@@ -512,7 +512,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     result.signal.origin = cellTO.signal.origin;
     result.signal.targetX = cellTO.signal.targetX;
     result.signal.targetY = cellTO.signal.targetY;
-    result.signal.numPrevCells = cellTO.signal.numPrevCells;
+    result.signal.prevCellIds.resize(cellTO.signal.numPrevCells);
     for (int i = 0; i < MAX_CELL_BONDS; ++i) {
         result.signal.prevCellIds[i] = cellTO.signal.prevCellIds[i];
     }
@@ -677,8 +677,8 @@ void DescriptionConverter::addCell(
     cellTO.signal.origin = cellDesc.signal.origin;
     cellTO.signal.targetX = cellDesc.signal.targetX;
     cellTO.signal.targetY = cellDesc.signal.targetY;
-    cellTO.signal.numPrevCells = cellDesc.signal.numPrevCells;
-    for (int i = 0; i < MAX_CELL_BONDS; ++i) {
+    cellTO.signal.numPrevCells = toInt(cellDesc.signal.prevCellIds.size());
+    for (int i = 0; i < cellTO.signal.numPrevCells; ++i) {
         cellTO.signal.prevCellIds[i] = cellDesc.signal.prevCellIds[i];
     }
     cellTO.activationTime = cellDesc.activationTime;
