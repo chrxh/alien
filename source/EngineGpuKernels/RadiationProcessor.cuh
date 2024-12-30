@@ -274,8 +274,8 @@ __inline__ __device__ void RadiationProcessor::createEnergyParticle(SimulationDa
                 pos.y = cudaSimulationParameters.radiationSource[sourceIndex].posY;
 
                 auto const& source = cudaSimulationParameters.radiationSource[sourceIndex];
-                if (source.shapeType == RadiationSourceShapeType_Circular) {
-                    auto radius = max(1.0f, source.shapeData.circularRadiationSource.radius);
+                if (source.shape.type == RadiationSourceShapeType_Circular) {
+                    auto radius = max(1.0f, source.shape.alternatives.circularRadiationSource.radius);
                     float2 delta{0, 0};
                     for (int i = 0; i < 10; ++i) {
                         delta.x = data.numberGen1.random() * radius * 2 - radius;
@@ -291,8 +291,8 @@ __inline__ __device__ void RadiationProcessor::createEnergyParticle(SimulationDa
                         vel = Math::normalized(delta) * data.numberGen1.random(0.5f, 1.0f);
                     }
                 }
-                if (source.shapeType == RadiationSourceShapeType_Rectangular) {
-                    auto const& rectangle = source.shapeData.rectangularRadiationSource;
+                if (source.shape.type == RadiationSourceShapeType_Rectangular) {
+                    auto const& rectangle = source.shape.alternatives.rectangularRadiationSource;
                     float2 delta;
                     delta.x = data.numberGen1.random() * rectangle.width - rectangle.width / 2;
                     delta.y = data.numberGen1.random() * rectangle.height - rectangle.height / 2;

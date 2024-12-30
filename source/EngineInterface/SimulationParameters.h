@@ -59,7 +59,7 @@ struct SimulationParameters
     SimulationParametersZoneValues baseValues;
 
     float timestepSize = 1.0f;
-    MotionData motionData;
+    Motion motionData;
 
     float innerFriction = 0.3f;
     float cellMaxVelocity = 2.0f;

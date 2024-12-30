@@ -56,13 +56,13 @@ void _SimulationParametersSourceWidgets::process()
                     .name("Shape")
                     .values({"Circular", "Rectangular"})
                     .textWidth(RightColumnWidth)
-                    .defaultValue(origSource.shapeType),
-                source.shapeType)) {
-            if (source.shapeType == RadiationSourceShapeType_Circular) {
-                source.shapeData.circularRadiationSource.radius = 1;
+                    .defaultValue(origSource.shape.type),
+                source.shape.type)) {
+            if (source.shape.type == RadiationSourceShapeType_Circular) {
+                source.shape.alternatives.circularRadiationSource.radius = 1;
             } else {
-                source.shapeData.rectangularRadiationSource.width = 40;
-                source.shapeData.rectangularRadiationSource.height = 10;
+                source.shape.alternatives.rectangularRadiationSource.width = 40;
+                source.shape.alternatives.rectangularRadiationSource.height = 10;
             }
         }
 
@@ -92,7 +92,7 @@ void _SimulationParametersSourceWidgets::process()
                 .format("%.2f"),
             source.velX,
             source.velY);
-        if (source.shapeType == RadiationSourceShapeType_Circular) {
+        if (source.shape.type == RadiationSourceShapeType_Circular) {
             auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y));
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -101,20 +101,21 @@ void _SimulationParametersSourceWidgets::process()
                     .min(1)
                     .max(maxRadius)
                     .format("%.0f")
-                    .defaultValue(&origSource.shapeData.circularRadiationSource.radius),
-                &source.shapeData.circularRadiationSource.radius);
+                    .defaultValue(&origSource.shape.alternatives.circularRadiationSource.radius),
+                &source.shape.alternatives.circularRadiationSource.radius);
         }
-        if (source.shapeType == RadiationSourceShapeType_Rectangular) {
+        if (source.shape.type == RadiationSourceShapeType_Rectangular) {
             AlienImGui::SliderFloat2(
                 AlienImGui::SliderFloat2Parameters()
                     .name("Size (x,y)")
                     .textWidth(RightColumnWidth)
                     .min({0, 0})
                     .max({toFloat(worldSize.x), toFloat(worldSize.y)})
-                    .defaultValue(RealVector2D{origSource.shapeData.rectangularRadiationSource.height, origSource.shapeData.rectangularRadiationSource.height})
+                    .defaultValue(RealVector2D{
+                        origSource.shape.alternatives.rectangularRadiationSource.height, origSource.shape.alternatives.rectangularRadiationSource.height})
                     .format("%.1f"),
-                source.shapeData.rectangularRadiationSource.width,
-                source.shapeData.rectangularRadiationSource.height);
+                source.shape.alternatives.rectangularRadiationSource.width,
+                source.shape.alternatives.rectangularRadiationSource.height);
         }
     }
     AlienImGui::EndTreeNode();

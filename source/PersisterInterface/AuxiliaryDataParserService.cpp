@@ -730,26 +730,26 @@ namespace
             ParameterParser::encodeDecode(tree, source.strength, defaultSource.strength, base + "strength", parserTask);
             ParameterParser::encodeDecode(tree, source.strengthPinned, defaultSource.strengthPinned, base + "strength pinned", parserTask);
             ParameterParser::encodeDecode(tree, source.angle, defaultSource.angle, base + "angle", parserTask);
-            ParameterParser::encodeDecode(tree, source.shapeType, defaultSource.shapeType, base + "shape.type", parserTask);
-            if (source.shapeType == SpotShapeType_Circular) {
+            ParameterParser::encodeDecode(tree, source.shape.type, defaultSource.shape.type, base + "shape.type", parserTask);
+            if (source.shape.type == SpotShapeType_Circular) {
                 ParameterParser::encodeDecode(
                     tree,
-                    source.shapeData.circularRadiationSource.radius,
-                    defaultSource.shapeData.circularRadiationSource.radius,
+                    source.shape.alternatives.circularRadiationSource.radius,
+                    defaultSource.shape.alternatives.circularRadiationSource.radius,
                     base + "shape.circular.radius",
                     parserTask);
             }
-            if (source.shapeType == SpotShapeType_Rectangular) {
+            if (source.shape.type == SpotShapeType_Rectangular) {
                 ParameterParser::encodeDecode(
                     tree,
-                    source.shapeData.rectangularRadiationSource.width,
-                    defaultSource.shapeData.rectangularRadiationSource.width,
+                    source.shape.alternatives.rectangularRadiationSource.width,
+                    defaultSource.shape.alternatives.rectangularRadiationSource.width,
                     base + "shape.rectangular.width",
                     parserTask);
                 ParameterParser::encodeDecode(
                     tree,
-                    source.shapeData.rectangularRadiationSource.height,
-                    defaultSource.shapeData.rectangularRadiationSource.height,
+                    source.shape.alternatives.rectangularRadiationSource.height,
+                    defaultSource.shape.alternatives.rectangularRadiationSource.height,
                     base + "shape.rectangular.height",
                     parserTask);
             }
