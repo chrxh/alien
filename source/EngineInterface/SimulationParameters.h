@@ -59,8 +59,7 @@ struct SimulationParameters
     SimulationParametersZoneValues baseValues;
 
     float timestepSize = 1.0f;
-    MotionType motionType = MotionType_Fluid;
-    MotionData motionData = {FluidMotion()};
+    MotionData motionData;
 
     float innerFriction = 0.3f;
     float cellMaxVelocity = 2.0f;
@@ -200,6 +199,5 @@ struct SimulationParameters
 
     bool legacyCellFunctionMuscleMovementAngleFromSensor = false;
 
-    bool operator==(SimulationParameters const& other) const;
-    bool operator!=(SimulationParameters const& other) const { return !operator==(other); }
+    bool operator==(SimulationParameters const&) const = default;
 };

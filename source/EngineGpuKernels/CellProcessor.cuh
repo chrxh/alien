@@ -125,7 +125,7 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
 {
     auto& cells = data.objects.cellPointers;
     auto blockPartition = calcBlockPartition(cells.getNumEntries());
-    auto const& smoothingLength = cudaSimulationParameters.motionData.fluidMotion.smoothingLength;
+    auto const& smoothingLength = cudaSimulationParameters.motionData.alternatives.fluidMotion.smoothingLength;
 
     for (int cellIndex = blockPartition.startIndex; cellIndex <= blockPartition.endIndex; ++cellIndex) {
         auto& cell = cells.at(cellIndex);
@@ -276,8 +276,8 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             }
 
             cell->pos += cellPosDelta;
-            cell->shared1 += F_pressure * cudaSimulationParameters.motionData.fluidMotion.pressureStrength
-                + F_viscosity * cudaSimulationParameters.motionData.fluidMotion.viscosityStrength;
+            cell->shared1 += F_pressure * cudaSimulationParameters.motionData.alternatives.fluidMotion.pressureStrength
+                + F_viscosity * cudaSimulationParameters.motionData.alternatives.fluidMotion.viscosityStrength;
             cell->shared2.x = density;
         }
         __syncthreads();
@@ -292,7 +292,7 @@ __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctO
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         data.cellMap.executeForEach(
-            cell->pos, cudaSimulationParameters.motionData.collisionMotion.cellMaxCollisionDistance, cell->detached, [&](auto const& otherCell) {
+            cell->pos, cudaSimulationParameters.motionData.alternatives.collisionMotion.cellMaxCollisionDistance, cell->detached, [&](auto const& otherCell) {
                 if (otherCell == cell) {
                     return;
                 }
@@ -334,8 +334,8 @@ __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctO
                         atomicAdd(&otherCell->shared1.y, -force.y);
                     } else {
                         auto force = Math::normalized(posDelta)
-                            * (cudaSimulationParameters.motionData.collisionMotion.cellMaxCollisionDistance - Math::length(posDelta))
-                            * cudaSimulationParameters.motionData.collisionMotion.cellRepulsionStrength * barrierFactor;
+                            * (cudaSimulationParameters.motionData.alternatives.collisionMotion.cellMaxCollisionDistance - Math::length(posDelta))
+                            * cudaSimulationParameters.motionData.alternatives.collisionMotion.cellRepulsionStrength * barrierFactor;
                         atomicAdd(&cell->shared1.x, force.x);
                         atomicAdd(&cell->shared1.y, force.y);
                         atomicAdd(&otherCell->shared1.x, -force.x);

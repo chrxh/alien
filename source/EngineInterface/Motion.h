@@ -10,11 +10,7 @@ struct FluidMotion
     float viscosityStrength = 0.1f;
     float pressureStrength = 0.1f;
 
-    bool operator==(FluidMotion const& other) const
-    {
-        return smoothingLength == other.smoothingLength && viscosityStrength == other.viscosityStrength && pressureStrength == other.pressureStrength;
-    }
-    bool operator!=(FluidMotion const& other) const { return !operator==(other); }
+    bool operator==(FluidMotion const&) const = default;
 };
 
 struct CollisionMotion
@@ -22,14 +18,10 @@ struct CollisionMotion
     float cellMaxCollisionDistance = 1.3f;
     float cellRepulsionStrength = 0.08f;
 
-    bool operator==(CollisionMotion const& other) const
-    {
-        return cellMaxCollisionDistance == other.cellMaxCollisionDistance && cellRepulsionStrength == other.cellRepulsionStrength;
-    }
-    bool operator!=(CollisionMotion const& other) const { return !operator==(other); }
+    bool operator==(CollisionMotion const&) const = default;
 };
 
-union MotionData
+union MotionDataAlternatives
 {
     FluidMotion fluidMotion;
     CollisionMotion collisionMotion;
@@ -40,4 +32,28 @@ enum MotionType_
 {
     MotionType_Fluid,
     MotionType_Collision
+};
+
+struct MotionData
+{
+    MotionType type = MotionType_Fluid;
+    MotionDataAlternatives alternatives = {FluidMotion()};
+
+    bool operator==(MotionData const& other) const
+    {
+        if (type != other.type) {
+            return false;
+        }
+        if (type == MotionType_Fluid) {
+            if (alternatives.fluidMotion != other.alternatives.fluidMotion) {
+                return false;
+            }
+        }
+        if (type == MotionType_Collision) {
+            if (alternatives.collisionMotion != other.alternatives.collisionMotion) {
+                return false;
+            }
+        }
+        return true;
+    }
 };

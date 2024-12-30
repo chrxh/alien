@@ -10,8 +10,7 @@ struct CircularRadiationSource
 {
     float radius = 1;
 
-    bool operator==(CircularRadiationSource const& other) const { return radius == other.radius; }
-    bool operator!=(CircularRadiationSource const& other) const { return !operator==(other); }
+    bool operator==(CircularRadiationSource const&) const = default;
 };
 
 struct RectangularRadiationSource
@@ -19,14 +18,15 @@ struct RectangularRadiationSource
     float width = 100.0f;
     float height = 200.0f;
 
-    bool operator==(RectangularRadiationSource const& other) const { return width == other.width && height == other.height; }
-    bool operator!=(RectangularRadiationSource const& other) const { return !operator==(other); }
+    bool operator==(RectangularRadiationSource const&) const = default;
 };
 
 union RadiationSourceShapeData
 {
     CircularRadiationSource circularRadiationSource;
     RectangularRadiationSource rectangularRadiationSource;
+
+    bool operator==(RectangularRadiationSource const&) const { return true; }
 };
 
 using RadiationSourceShapeType = int;
@@ -79,5 +79,4 @@ struct RadiationSource
         return posX == other.posX && posY == other.posY && velX == other.velX && velY == other.velY && useAngle == other.useAngle && angle == other.angle
             && strength == other.strength && strengthPinned == other.strengthPinned;
     }
-    bool operator!=(RadiationSource const& other) const { return !operator==(other); }
 };
