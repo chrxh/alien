@@ -71,8 +71,8 @@ void _SimulationParametersZoneWidgets::process()
 
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Location"))) {
         if (AlienImGui::Switcher(
-                AlienImGui::SwitcherParameters().name("Shape").values({"Circular", "Rectangular"}).textWidth(RightColumnWidth).defaultValue(origZone.shapeType),
-                zone.shapeType)) {
+                AlienImGui::SwitcherParameters().name("Shape").values({"Circular", "Rectangular"}).textWidth(RightColumnWidth).defaultValue(origZone.shape.type),
+                zone.shape.type)) {
             setDefaultSpotData(zone);
         }
 
@@ -104,28 +104,28 @@ void _SimulationParametersZoneWidgets::process()
             zone.velX,
             zone.velY);
         auto maxRadius = toFloat(std::max(worldSize.x, worldSize.y));
-        if (zone.shapeType == SpotShapeType_Circular) {
+        if (zone.shape.type == ZoneShapeType_Circular) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Core radius")
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(maxRadius)
-                    .defaultValue(&origZone.shapeData.circularSpot.coreRadius)
+                    .defaultValue(&origZone.shape.alternatives.circularSpot.coreRadius)
                     .format("%.1f"),
-                &zone.shapeData.circularSpot.coreRadius);
+                &zone.shape.alternatives.circularSpot.coreRadius);
         }
-        if (zone.shapeType == SpotShapeType_Rectangular) {
+        if (zone.shape.type == ZoneShapeType_Rectangular) {
             AlienImGui::SliderFloat2(
                 AlienImGui::SliderFloat2Parameters()
                     .name("Size (x,y)")
                     .textWidth(RightColumnWidth)
                     .min({0, 0})
                     .max({toFloat(worldSize.x), toFloat(worldSize.y)})
-                    .defaultValue(RealVector2D{origZone.shapeData.rectangularSpot.width, origZone.shapeData.rectangularSpot.height})
+                    .defaultValue(RealVector2D{origZone.shape.alternatives.rectangularSpot.width, origZone.shape.alternatives.rectangularSpot.height})
                     .format("%.1f"),
-                zone.shapeData.rectangularSpot.width,
-                zone.shapeData.rectangularSpot.height);
+                zone.shape.alternatives.rectangularSpot.width,
+                zone.shape.alternatives.rectangularSpot.height);
         }
 
         AlienImGui::SliderFloat(
@@ -145,11 +145,11 @@ void _SimulationParametersZoneWidgets::process()
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Force field"))) {
         {
-            auto forceFieldTypeIntern = std::max(0, zone.flowType - 1);  //FlowType_None should not be selectable in ComboBox
-            auto origForceFieldTypeIntern = std::max(0, origZone.flowType - 1);
+            auto forceFieldTypeIntern = std::max(0, zone.flow.type - 1);  //FlowType_None should not be selectable in ComboBox
+            auto origForceFieldTypeIntern = std::max(0, origZone.flow.type - 1);
 
-            auto isEnabled = zone.flowType != 0;
-            auto origIsEnabled = origZone.flowType != 0;
+            auto isEnabled = zone.flow.type != 0;
+            auto origIsEnabled = origZone.flow.type != 0;
             if (AlienImGui::Combo(
                     AlienImGui::ComboParameters()
                         .name("Field type")
@@ -159,33 +159,33 @@ void _SimulationParametersZoneWidgets::process()
                         .defaultEnabledValue(&origIsEnabled),
                     forceFieldTypeIntern,
                     &isEnabled)) {
-                zone.flowType = isEnabled ? forceFieldTypeIntern + 1 : FlowType_None;
+                zone.flow.type = isEnabled ? forceFieldTypeIntern + 1 : FlowType_None;
 
-                if (zone.flowType == FlowType_Radial) {
-                    zone.flowData.radialFlow = RadialFlow();
+                if (zone.flow.type == FlowType_Radial) {
+                    zone.flow.alternatives.radialFlow = RadialFlow();
                 }
-                if (zone.flowType == FlowType_Central) {
-                    zone.flowData.centralFlow = CentralFlow();
+                if (zone.flow.type == FlowType_Central) {
+                    zone.flow.alternatives.centralFlow = CentralFlow();
                 }
-                if (zone.flowType == FlowType_Linear) {
-                    zone.flowData.linearFlow = LinearFlow();
+                if (zone.flow.type == FlowType_Linear) {
+                    zone.flow.alternatives.linearFlow = LinearFlow();
                 }
             }
         }
 
-        auto isForceFieldActive = zone.flowType != FlowType_None;
+        auto isForceFieldActive = zone.flow.type != FlowType_None;
 
         ImGui::BeginDisabled(!isForceFieldActive);
         auto posX = ImGui::GetCursorPos().x;
-        if (zone.flowType == FlowType_Radial) {
+        if (zone.flow.type == FlowType_Radial) {
             ImGui::SetCursorPosX(posX);
             AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Orientation")
                     .textWidth(RightColumnWidth)
-                    .defaultValue(origZone.flowData.radialFlow.orientation)
+                    .defaultValue(origZone.flow.alternatives.radialFlow.orientation)
                     .values({"Clockwise", "Counter clockwise"}),
-                zone.flowData.radialFlow.orientation);
+                zone.flow.alternatives.radialFlow.orientation);
             ImGui::SetCursorPosX(posX);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -195,8 +195,8 @@ void _SimulationParametersZoneWidgets::process()
                     .max(0.5f)
                     .logarithmic(true)
                     .format("%.5f")
-                    .defaultValue(&origZone.flowData.radialFlow.strength),
-                &zone.flowData.radialFlow.strength);
+                    .defaultValue(&origZone.flow.alternatives.radialFlow.strength),
+                &zone.flow.alternatives.radialFlow.strength);
             ImGui::SetCursorPosX(posX);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -205,10 +205,10 @@ void _SimulationParametersZoneWidgets::process()
                     .min(-180.0f)
                     .max(180.0f)
                     .format("%.1f")
-                    .defaultValue(&origZone.flowData.radialFlow.driftAngle),
-                &zone.flowData.radialFlow.driftAngle);
+                    .defaultValue(&origZone.flow.alternatives.radialFlow.driftAngle),
+                &zone.flow.alternatives.radialFlow.driftAngle);
         }
-        if (zone.flowType == FlowType_Central) {
+        if (zone.flow.type == FlowType_Central) {
             ImGui::SetCursorPosX(posX);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -218,10 +218,10 @@ void _SimulationParametersZoneWidgets::process()
                     .max(0.5f)
                     .logarithmic(true)
                     .format("%.5f")
-                    .defaultValue(&origZone.flowData.centralFlow.strength),
-                &zone.flowData.centralFlow.strength);
+                    .defaultValue(&origZone.flow.alternatives.centralFlow.strength),
+                &zone.flow.alternatives.centralFlow.strength);
         }
-        if (zone.flowType == FlowType_Linear) {
+        if (zone.flow.type == FlowType_Linear) {
             ImGui::SetCursorPosX(posX);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -230,8 +230,8 @@ void _SimulationParametersZoneWidgets::process()
                     .min(-180.0f)
                     .max(180.0f)
                     .format("%.1f")
-                    .defaultValue(&origZone.flowData.linearFlow.angle),
-                &zone.flowData.linearFlow.angle);
+                    .defaultValue(&origZone.flow.alternatives.linearFlow.angle),
+                &zone.flow.alternatives.linearFlow.angle);
             ImGui::SetCursorPosX(posX);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -241,8 +241,8 @@ void _SimulationParametersZoneWidgets::process()
                     .max(0.5f)
                     .logarithmic(true)
                     .format("%.5f")
-                    .defaultValue(&origZone.flowData.linearFlow.strength),
-                &zone.flowData.linearFlow.strength);
+                    .defaultValue(&origZone.flow.alternatives.linearFlow.strength),
+                &zone.flow.alternatives.linearFlow.strength);
         }
         ImGui::EndDisabled();
     }
@@ -771,10 +771,10 @@ void _SimulationParametersZoneWidgets::setDefaultSpotData(SimulationParametersZo
     auto worldSize = _simulationFacade->getWorldSize();
 
     auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
-    if (spot.shapeType == SpotShapeType_Circular) {
-        spot.shapeData.circularSpot.coreRadius = maxRadius / 3;
+    if (spot.shape.type == ZoneShapeType_Circular) {
+        spot.shape.alternatives.circularSpot.coreRadius = maxRadius / 3;
     } else {
-        spot.shapeData.rectangularSpot.height = maxRadius / 3;
-        spot.shapeData.rectangularSpot.width = maxRadius / 3;
+        spot.shape.alternatives.rectangularSpot.height = maxRadius / 3;
+        spot.shape.alternatives.rectangularSpot.width = maxRadius / 3;
     }
 }

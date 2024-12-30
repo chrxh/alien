@@ -731,7 +731,7 @@ namespace
             ParameterParser::encodeDecode(tree, source.strengthPinned, defaultSource.strengthPinned, base + "strength pinned", parserTask);
             ParameterParser::encodeDecode(tree, source.angle, defaultSource.angle, base + "angle", parserTask);
             ParameterParser::encodeDecode(tree, source.shape.type, defaultSource.shape.type, base + "shape.type", parserTask);
-            if (source.shape.type == SpotShapeType_Circular) {
+            if (source.shape.type == ZoneShapeType_Circular) {
                 ParameterParser::encodeDecode(
                     tree,
                     source.shape.alternatives.circularRadiationSource.radius,
@@ -739,7 +739,7 @@ namespace
                     base + "shape.circular.radius",
                     parserTask);
             }
-            if (source.shape.type == SpotShapeType_Rectangular) {
+            if (source.shape.type == ZoneShapeType_Rectangular) {
                 ParameterParser::encodeDecode(
                     tree,
                     source.shape.alternatives.rectangularRadiationSource.width,
@@ -769,43 +769,47 @@ namespace
             ParameterParser::encodeDecode(tree, spot.velX, defaultSpot.velX, base + "vel.x", parserTask);
             ParameterParser::encodeDecode(tree, spot.velY, defaultSpot.velY, base + "vel.y", parserTask);
 
-            ParameterParser::encodeDecode(tree, spot.shapeType, defaultSpot.shapeType, base + "shape.type", parserTask);
-            if (spot.shapeType == SpotShapeType_Circular) {
+            ParameterParser::encodeDecode(tree, spot.shape.type, defaultSpot.shape.type, base + "shape.type", parserTask);
+            if (spot.shape.type == ZoneShapeType_Circular) {
                 ParameterParser::encodeDecode(
                     tree,
-                    spot.shapeData.circularSpot.coreRadius,
-                    defaultSpot.shapeData.circularSpot.coreRadius,
+                    spot.shape.alternatives.circularSpot.coreRadius,
+                    defaultSpot.shape.alternatives.circularSpot.coreRadius,
                     base + "shape.circular.core radius",
                     parserTask);
             }
-            if (spot.shapeType == SpotShapeType_Rectangular) {
-                ParameterParser::encodeDecode(
-                    tree, spot.shapeData.rectangularSpot.width, defaultSpot.shapeData.rectangularSpot.width, base + "shape.rectangular.core width", parserTask);
+            if (spot.shape.type == ZoneShapeType_Rectangular) {
                 ParameterParser::encodeDecode(
                     tree,
-                    spot.shapeData.rectangularSpot.height,
-                    defaultSpot.shapeData.rectangularSpot.height,
+                    spot.shape.alternatives.rectangularSpot.width,
+                    defaultSpot.shape.alternatives.rectangularSpot.width,
+                    base + "shape.rectangular.core width",
+                    parserTask);
+                ParameterParser::encodeDecode(
+                    tree,
+                    spot.shape.alternatives.rectangularSpot.height,
+                    defaultSpot.shape.alternatives.rectangularSpot.height,
                     base + "shape.rectangular.core height",
                     parserTask);
             }
-            ParameterParser::encodeDecode(tree, spot.flowType, defaultSpot.flowType, base + "flow.type", parserTask);
-            if (spot.flowType == FlowType_Radial) {
+            ParameterParser::encodeDecode(tree, spot.flow.type, defaultSpot.flow.type, base + "flow.type", parserTask);
+            if (spot.flow.type == FlowType_Radial) {
                 ParameterParser::encodeDecode(
-                    tree, spot.flowData.radialFlow.orientation, defaultSpot.flowData.radialFlow.orientation, base + "flow.radial.orientation", parserTask);
+                    tree, spot.flow.alternatives.radialFlow.orientation, defaultSpot.flow.alternatives.radialFlow.orientation, base + "flow.radial.orientation", parserTask);
                 ParameterParser::encodeDecode(
-                    tree, spot.flowData.radialFlow.strength, defaultSpot.flowData.radialFlow.strength, base + "flow.radial.strength", parserTask);
+                    tree, spot.flow.alternatives.radialFlow.strength, defaultSpot.flow.alternatives.radialFlow.strength, base + "flow.radial.strength", parserTask);
                 ParameterParser::encodeDecode(
-                    tree, spot.flowData.radialFlow.driftAngle, defaultSpot.flowData.radialFlow.driftAngle, base + "flow.radial.drift angle", parserTask);
+                    tree, spot.flow.alternatives.radialFlow.driftAngle, defaultSpot.flow.alternatives.radialFlow.driftAngle, base + "flow.radial.drift angle", parserTask);
             }
-            if (spot.flowType == FlowType_Central) {
+            if (spot.flow.type == FlowType_Central) {
                 ParameterParser::encodeDecode(
-                    tree, spot.flowData.centralFlow.strength, defaultSpot.flowData.centralFlow.strength, base + "flow.central.strength", parserTask);
+                    tree, spot.flow.alternatives.centralFlow.strength, defaultSpot.flow.alternatives.centralFlow.strength, base + "flow.central.strength", parserTask);
             }
-            if (spot.flowType == FlowType_Linear) {
+            if (spot.flow.type == FlowType_Linear) {
                 ParameterParser::encodeDecode(
-                    tree, spot.flowData.linearFlow.angle, defaultSpot.flowData.linearFlow.angle, base + "flow.linear.angle", parserTask);
+                    tree, spot.flow.alternatives.linearFlow.angle, defaultSpot.flow.alternatives.linearFlow.angle, base + "flow.linear.angle", parserTask);
                 ParameterParser::encodeDecode(
-                    tree, spot.flowData.linearFlow.strength, defaultSpot.flowData.linearFlow.strength, base + "flow.linear.strength", parserTask);
+                    tree, spot.flow.alternatives.linearFlow.strength, defaultSpot.flow.alternatives.linearFlow.strength, base + "flow.linear.strength", parserTask);
             }
             ParameterParser::encodeDecode(tree, spot.fadeoutRadius, defaultSpot.fadeoutRadius, base + "fadeout radius", parserTask);
 

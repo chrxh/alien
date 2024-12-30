@@ -38,34 +38,5 @@ struct SimulationParametersZoneActivatedValues
     bool cellCopyMutationSubgenomeColor = false;
     bool cellCopyMutationGenomeColor = false;
 
-    bool operator==(SimulationParametersZoneActivatedValues const& other) const
-    {
-        return friction == other.friction && rigidity == other.rigidity && radiationCellAgeStrength == other.radiationCellAgeStrength && cellMaxForce == other.cellMaxForce
-            && cellMinEnergy == other.cellMinEnergy && cellFusionVelocity == other.cellFusionVelocity
-            && cellFunctionAttackerEnergyCost == other.cellFunctionAttackerEnergyCost && cellColorTransition == other.cellColorTransition
-            && cellFunctionAttackerFoodChainColorMatrix == other.cellFunctionAttackerFoodChainColorMatrix
-            && cellFunctionAttackerGeometryDeviationExponent == other.cellFunctionAttackerGeometryDeviationExponent
-            && cellMaxBindingEnergy == other.cellMaxBindingEnergy
-            && cellFunctionAttackerConnectionsMismatchPenalty == other.cellFunctionAttackerConnectionsMismatchPenalty
-            && cellCopyMutationNeuronData == other.cellCopyMutationNeuronData
-            && cellCopyMutationCellProperties == other.cellCopyMutationCellProperties
-            && cellCopyMutationCellFunction == other.cellCopyMutationCellFunction
-            && cellCopyMutationInsertion == other.cellCopyMutationInsertion
-            && cellCopyMutationDeletion == other.cellCopyMutationDeletion
-            && cellCopyMutationTranslation == other.cellCopyMutationTranslation
-            && cellCopyMutationDuplication == other.cellCopyMutationDuplication
-            && cellCopyMutationSubgenomeColor == other.cellCopyMutationSubgenomeColor
-            && radiationAbsorption == other.radiationAbsorption
-            && cellCopyMutationCustomGeometry == other.cellCopyMutationCustomGeometry
-            && cellCopyMutationGeometry == other.cellCopyMutationGeometry
-            && cellCopyMutationGenomeColor == other.cellCopyMutationGenomeColor
-            && cellCopyMutationCellColor == other.cellCopyMutationCellColor
-            && radiationAbsorptionLowGenomeComplexityPenalty == other.radiationAbsorptionLowGenomeComplexityPenalty
-            && cellFunctionAttackerGenomeComplexityBonus == other.cellFunctionAttackerGenomeComplexityBonus
-            && radiationAbsorptionLowVelocityPenalty == other.radiationAbsorptionLowVelocityPenalty
-            && cellFunctionAttackerNewComplexMutantPenalty == other.cellFunctionAttackerNewComplexMutantPenalty
-            && cellInactiveMaxAge == other.cellInactiveMaxAge && radiationDisableSources == other.radiationDisableSources
-            && cellDeathProbability == other.cellDeathProbability
-        ;
-    }
+    bool operator==(SimulationParametersZoneActivatedValues const&) const = default;
 };

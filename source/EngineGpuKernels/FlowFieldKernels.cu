@@ -10,32 +10,32 @@ namespace
     __device__ float getHeight(BaseMap const& map, float2 const& pos, SimulationParametersZone const& spot)
     {
         auto dist = map.getDistance(pos, float2{spot.posX, spot.posY});
-        if (Orientation_Clockwise == spot.flowData.radialFlow.orientation) {
-            return sqrtf(dist) * spot.flowData.radialFlow.strength;
+        if (Orientation_Clockwise == spot.flow.alternatives.radialFlow.orientation) {
+            return sqrtf(dist) * spot.flow.alternatives.radialFlow.strength;
         } else {
-            return -sqrtf(dist) * spot.flowData.radialFlow.strength;
+            return -sqrtf(dist) * spot.flow.alternatives.radialFlow.strength;
         }
     }
 
     __device__ __inline__ float2 calcAcceleration(BaseMap const& map, float2 const& pos, int const& spotIndex)
     {
         auto const& spot = cudaSimulationParameters.zone[spotIndex];
-        switch (spot.flowType) {
+        switch (spot.flow.type) {
         case FlowType_Radial: {
             auto baseValue = getHeight(map, pos, spot);
             auto downValue = getHeight(map, pos + float2{0, 1}, spot);
             auto rightValue = getHeight(map, pos + float2{1, 0}, spot);
             float2 result{rightValue - baseValue, downValue - baseValue};
-            result = Math::rotateClockwise(result, 90.0f + spot.flowData.radialFlow.driftAngle);
+            result = Math::rotateClockwise(result, 90.0f + spot.flow.alternatives.radialFlow.driftAngle);
             return result;
         }
         case FlowType_Central: {
             auto centerDirection = map.getCorrectedDirection(float2{spot.posX, spot.posY} - pos);
-            return centerDirection * spot.flowData.centralFlow.strength / (Math::lengthSquared(centerDirection) + 50.0f);
+            return centerDirection * spot.flow.alternatives.centralFlow.strength / (Math::lengthSquared(centerDirection) + 50.0f);
         }
         case FlowType_Linear: {
-            auto centerDirection = Math::unitVectorOfAngle(spot.flowData.linearFlow.angle);
-            return centerDirection * spot.flowData.linearFlow.strength;
+            auto centerDirection = Math::unitVectorOfAngle(spot.flow.alternatives.linearFlow.angle);
+            return centerDirection * spot.flow.alternatives.linearFlow.strength;
         }
         default:
             return {0, 0};
@@ -60,7 +60,7 @@ __global__ void cudaApplyFlowFieldSettings(SimulationData data)
             int numFlowFields = 0;
             for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
 
-                if (cudaSimulationParameters.zone[i].flowType != FlowType_None) {
+                if (cudaSimulationParameters.zone[i].flow.type != FlowType_None) {
                     accelerations[numFlowFields] = calcAcceleration(data.cellMap, cell->pos, i);
                     ++numFlowFields;
                 }
@@ -77,7 +77,7 @@ __global__ void cudaApplyFlowFieldSettings(SimulationData data)
             int numFlowFields = 0;
             for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
 
-                if (cudaSimulationParameters.zone[i].flowType != FlowType_None) {
+                if (cudaSimulationParameters.zone[i].flow.type != FlowType_None) {
                     accelerations[numFlowFields] = calcAcceleration(data.cellMap, particle->absPos, i);
                     ++numFlowFields;
                 }

@@ -65,7 +65,7 @@ public:
             float spotWeights[MAX_ZONES];
             int numValues = 0;
             for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
-                if (cudaSimulationParameters.zone[i].flowType != FlowType_None) {
+                if (cudaSimulationParameters.zone[i].flow.type != FlowType_None) {
                     float2 spotPos = {cudaSimulationParameters.zone[i].posX, cudaSimulationParameters.zone[i].posY};
                     auto delta = map.getCorrectedDirection(spotPos - worldPos);
                     spotWeights[numValues++] = calcWeight(delta, i);
@@ -187,7 +187,7 @@ private:
 
     __device__ __inline__ static float calcWeight(float2 const& delta, int const& spotIndex)
     {
-        if (cudaSimulationParameters.zone[spotIndex].shapeType == SpotShapeType_Rectangular) {
+        if (cudaSimulationParameters.zone[spotIndex].shape.type == ZoneShapeType_Rectangular) {
             return calcWeightForRectSpot(delta, spotIndex);
         } else {
             return calcWeightForCircularSpot(delta, spotIndex);
@@ -197,7 +197,7 @@ private:
     __device__ __inline__ static float calcWeightForCircularSpot(float2 const& delta, int const& spotIndex)
     {
         auto distance = Math::length(delta);
-        auto coreRadius = cudaSimulationParameters.zone[spotIndex].shapeData.circularSpot.coreRadius;
+        auto coreRadius = cudaSimulationParameters.zone[spotIndex].shape.alternatives.circularSpot.coreRadius;
         auto fadeoutRadius = cudaSimulationParameters.zone[spotIndex].fadeoutRadius + 1;
         return distance < coreRadius ? 0.0f : min(1.0f, (distance - coreRadius) / fadeoutRadius);
     }
@@ -206,9 +206,10 @@ private:
     {
         auto const& spot = cudaSimulationParameters.zone[spotIndex];
         float result = 0;
-        if (abs(delta.x) > spot.shapeData.rectangularSpot.width / 2 || abs(delta.y) > spot.shapeData.rectangularSpot.height / 2) {
+        if (abs(delta.x) > spot.shape.alternatives.rectangularSpot.width / 2 || abs(delta.y) > spot.shape.alternatives.rectangularSpot.height / 2) {
             float2 distanceFromRect = {
-                max(0.0f, abs(delta.x) - spot.shapeData.rectangularSpot.width / 2), max(0.0f, abs(delta.y) - spot.shapeData.rectangularSpot.height / 2)};
+                max(0.0f, abs(delta.x) - spot.shape.alternatives.rectangularSpot.width / 2),
+                max(0.0f, abs(delta.y) - spot.shape.alternatives.rectangularSpot.height / 2)};
             result = min(1.0f, Math::length(distanceFromRect) / (spot.fadeoutRadius + 1));
         }
         return result;
