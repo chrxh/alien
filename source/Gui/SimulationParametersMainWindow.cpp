@@ -500,7 +500,7 @@ void SimulationParametersMainWindow::onAddZone()
     zone.posX = toFloat(worldSize.x / 2);
     zone.posY = toFloat(worldSize.y / 2);
     auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
-    zone.shapeType = SpotShapeType_Circular;
+    zone.shapeType = ZoneShapeType_Circular;
     zone.fadeoutRadius = maxRadius / 3;
     zone.color = _zoneColorPalette.getColor((2 + parameters.numZones) * 8);
     zone.values = parameters.baseValues;
@@ -745,7 +745,7 @@ void SimulationParametersMainWindow::setDefaultShapeDataForZone(SimulationParame
     auto worldSize = _simulationFacade->getWorldSize();
 
     auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
-    if (spot.shapeType == SpotShapeType_Circular) {
+    if (spot.shapeType == ZoneShapeType_Circular) {
         spot.shapeData.circularSpot.coreRadius = maxRadius / 3;
     } else {
         spot.shapeData.rectangularSpot.height = maxRadius / 3;

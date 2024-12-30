@@ -6,11 +6,11 @@
 #include "SimulationParametersZoneValues.h"
 #include "SimulationParametersTypes.h"
 
-using SpotShapeType = int;
-enum SpotShapeType_
+using Orientation = int;
+enum Orientation_
 {
-    SpotShapeType_Circular,
-    SpotShapeType_Rectangular
+    Orientation_Clockwise,
+    Orientation_CounterClockwise
 };
 
 using FlowType = int;
@@ -20,13 +20,6 @@ enum FlowType_
     FlowType_Radial,
     FlowType_Central,
     FlowType_Linear
-};
-
-using Orientation = int;
-enum Orientation_
-{
-    Orientation_Clockwise,
-    Orientation_CounterClockwise
 };
 
 struct RadialFlow
@@ -56,35 +49,92 @@ struct LinearFlow
     bool operator!=(LinearFlow const& other) const { return !operator==(other); }
 };
 
-union FlowData
+union FlowAlternatives
 {
     RadialFlow radialFlow;
     CentralFlow centralFlow;
     LinearFlow linearFlow;
 };
 
+struct Flow
+{
+    FlowType type = FlowType_None;
+    FlowAlternatives alternatives = {RadialFlow()};
 
-struct CircularSpot
+    bool operator==(Flow const& other) const
+    {
+        if (type != other.type) {
+            return false;
+        }
+        if (type == FlowType_Radial) {
+            if (alternatives.radialFlow != other.alternatives.radialFlow) {
+                return false;
+            }
+        }
+        if (type == FlowType_Central) {
+            if (alternatives.centralFlow != other.alternatives.centralFlow) {
+                return false;
+            }
+        }
+        if (type == FlowType_Linear) {
+            if (alternatives.linearFlow != other.alternatives.linearFlow) {
+                return false;
+            }
+        }
+        return true;
+    }
+};
+
+using ZoneShapeType = int;
+enum ZoneShapeType_
+{
+    ZoneShapeType_Circular,
+    ZoneShapeType_Rectangular
+};
+
+struct CircularZone
 {
     float coreRadius = 100.0f;
 
-    bool operator==(CircularSpot const& other) const { return coreRadius == other.coreRadius; }
-    bool operator!=(CircularSpot const& other) const { return !operator==(other); }
+    bool operator==(CircularZone const&) const = default;
 };
 
-struct RectangularSpot
+struct RectangularZone
 {
     float width = 100.0f;
     float height = 200.0f;
 
-    bool operator==(RectangularSpot const& other) const { return width == other.width && height == other.height; }
-    bool operator!=(RectangularSpot const& other) const { return !operator==(other); }
+    bool operator==(RectangularZone const&) const = default;
 };
 
-union SpotShapeData
+union ZoneShapeAlternatives
 {
-    CircularSpot circularSpot;
-    RectangularSpot rectangularSpot;
+    CircularZone circularSpot;
+    RectangularZone rectangularSpot;
+};
+
+struct ZoneShape
+{
+    ZoneShapeType type = ZoneShapeType_Circular;
+    ZoneShapeAlternatives alternatives = {CircularZone()};
+
+    bool operator==(ZoneShape const& other) const
+    {
+        if (type != other.type) {
+            return false;
+        }
+        if (type == ZoneShapeType_Circular) {
+            if (alternatives.circularSpot != other.alternatives.circularSpot) {
+                return false;
+            }
+        }
+        if (type == ZoneShapeType_Rectangular) {
+            if (alternatives.rectangularSpot != other.alternatives.rectangularSpot) {
+                return false;
+            }
+        }
+        return true;
+    }
 };
 
 struct SimulationParametersZone
@@ -100,58 +150,12 @@ struct SimulationParametersZone
 
     float fadeoutRadius = 100.0f;
 
-    SpotShapeType shapeType = SpotShapeType_Circular;
-    SpotShapeData shapeData = {CircularSpot()};
+    ZoneShape shape;
 
-    FlowType flowType = FlowType_None;
-    FlowData flowData = {RadialFlow()};
+    Flow flow;
 
     SimulationParametersZoneValues values;
     SimulationParametersZoneActivatedValues activatedValues;
 
-    bool operator==(SimulationParametersZone const& other) const
-    {
-        if (flowType != other.flowType) {
-            return false;
-        }
-        if (flowType == FlowType_Radial) {
-            if (flowData.radialFlow != other.flowData.radialFlow) {
-                return false;
-            }
-        }
-        if (flowType == FlowType_Central) {
-            if (flowData.centralFlow != other.flowData.centralFlow) {
-                return false;
-            }
-        }
-        if (flowType == FlowType_Linear) {
-            if (flowData.linearFlow != other.flowData.linearFlow) {
-                return false;
-            }
-        }
-        if (shapeType != other.shapeType) {
-            return false;
-        }
-        if (shapeType == SpotShapeType_Circular) {
-            if (shapeData.circularSpot != other.shapeData.circularSpot) {
-                return false;
-            }
-        }
-        if (shapeType == SpotShapeType_Rectangular) {
-            if (shapeData.rectangularSpot != other.shapeData.rectangularSpot) {
-                return false;
-            }
-        }
-        for (int i = 0, j = sizeof(Char64) / sizeof(char); i < j; ++i) {
-            if (name[i] != other.name[i]) {
-                return false;
-            }
-            if (name[i] == '\0') {
-                break;
-            }
-        }
-        return color == other.color && posX == other.posX && posY == other.posY && velX == other.velX && velY == other.velY
-            && fadeoutRadius == other.fadeoutRadius && values == other.values && activatedValues == other.activatedValues && shapeType == other.shapeType;
-    }
-    bool operator!=(SimulationParametersZone const& other) const { return !operator==(other); }
+    bool operator==(SimulationParametersZone const&) const = default;
 };
