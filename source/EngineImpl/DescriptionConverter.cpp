@@ -505,16 +505,19 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     } break;
     }
 
-    result.signal.active = cellTO.signal.active;
-    for (int i = 0; i < MAX_CHANNELS; ++i) {
-        result.signal.channels[i] = cellTO.signal.channels[i];
-    }
-    result.signal.origin = cellTO.signal.origin;
-    result.signal.targetX = cellTO.signal.targetX;
-    result.signal.targetY = cellTO.signal.targetY;
-    result.signal.prevCellIds.resize(cellTO.signal.numPrevCells);
-    for (int i = 0; i < MAX_CELL_BONDS; ++i) {
-        result.signal.prevCellIds[i] = cellTO.signal.prevCellIds[i];
+    if (cellTO.signal.active) {
+        SignalDescription signal;
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            signal.channels[i] = cellTO.signal.channels[i];
+        }
+        signal.origin = cellTO.signal.origin;
+        signal.targetX = cellTO.signal.targetX;
+        signal.targetY = cellTO.signal.targetY;
+        signal.prevCellIds.resize(cellTO.signal.numPrevCells);
+        for (int i = 0; i < cellTO.signal.numPrevCells; ++i) {
+            signal.prevCellIds[i] = cellTO.signal.prevCellIds[i];
+        }
+        result.signal = signal;
     }
     result.activationTime = cellTO.activationTime;
     return result;
@@ -670,16 +673,18 @@ void DescriptionConverter::addCell(
         cellTO.cellFunctionData.detonator = detonatorTO;
     } break;
     }
-    for (int i = 0; i < MAX_CHANNELS; ++i) {
-        cellTO.signal.channels[i] = cellDesc.signal.channels[i];
-    }
-    cellTO.signal.active = cellDesc.signal.active;
-    cellTO.signal.origin = cellDesc.signal.origin;
-    cellTO.signal.targetX = cellDesc.signal.targetX;
-    cellTO.signal.targetY = cellDesc.signal.targetY;
-    cellTO.signal.numPrevCells = toInt(cellDesc.signal.prevCellIds.size());
-    for (int i = 0; i < cellTO.signal.numPrevCells; ++i) {
-        cellTO.signal.prevCellIds[i] = cellDesc.signal.prevCellIds[i];
+    cellTO.signal.active = cellDesc.signal.has_value();
+    if (cellTO.signal.active) {
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            cellTO.signal.channels[i] = cellDesc.signal->channels[i];
+        }
+        cellTO.signal.origin = cellDesc.signal->origin;
+        cellTO.signal.targetX = cellDesc.signal->targetX;
+        cellTO.signal.targetY = cellDesc.signal->targetY;
+        cellTO.signal.numPrevCells = toInt(cellDesc.signal->prevCellIds.size());
+        for (int i = 0; i < cellTO.signal.numPrevCells; ++i) {
+            cellTO.signal.prevCellIds[i] = cellDesc.signal->prevCellIds[i];
+        }
     }
     cellTO.activationTime = cellDesc.activationTime;
     cellTO.numConnections = 0;

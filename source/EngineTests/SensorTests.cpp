@@ -49,7 +49,7 @@ TEST_F(SensorTests, scanNeighborhood_noSignal)
     auto actualAttackCell = getCell(actualData, 1);
 
     EXPECT_EQ(2, actualData.cells.size());
-    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.signal.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.signal->channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_noOtherCell)
@@ -75,7 +75,7 @@ TEST_F(SensorTests, scanNeighborhood_noOtherCell)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.signal.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.signal->channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_densityTooLow)
@@ -104,7 +104,7 @@ TEST_F(SensorTests, scanNeighborhood_densityTooLow)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.signal.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.signal->channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_wrongColor)
@@ -132,7 +132,7 @@ TEST_F(SensorTests, scanNeighborhood_wrongColor)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.signal.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.signal->channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_foundAtFront)
@@ -160,12 +160,12 @@ TEST_F(SensorTests, scanNeighborhood_foundAtFront)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
-    EXPECT_TRUE(actualSensorCell.signal.channels[1] > 0.3f);
-    EXPECT_TRUE(actualSensorCell.signal.channels[2] < 1.0f - 80.0f / 256);
-    EXPECT_TRUE(actualSensorCell.signal.channels[2] > 1.0f - 105.0f / 256);
-    EXPECT_TRUE(actualSensorCell.signal.channels[3] > -15.0f / 365);
-    EXPECT_TRUE(actualSensorCell.signal.channels[3] < 15.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(actualSensorCell.signal->channels[1] > 0.3f);
+    EXPECT_TRUE(actualSensorCell.signal->channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualSensorCell.signal->channels[2] > 1.0f - 105.0f / 256);
+    EXPECT_TRUE(actualSensorCell.signal->channels[3] > -15.0f / 365);
+    EXPECT_TRUE(actualSensorCell.signal->channels[3] < 15.0f / 365);
 }
 
 TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
@@ -196,12 +196,12 @@ TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.signal.channels[0]));
-    EXPECT_TRUE(actualAttackCell.signal.channels[1] > 0.3f);
-    EXPECT_TRUE(actualAttackCell.signal.channels[2] < 1.0f - 80.0f / 256);
-    EXPECT_TRUE(actualAttackCell.signal.channels[2] > 1.0f - 105.0f / 256);
-    EXPECT_TRUE(actualAttackCell.signal.channels[3] > 70.0f / 365);
-    EXPECT_TRUE(actualAttackCell.signal.channels[3] < 105.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.signal->channels[0]));
+    EXPECT_TRUE(actualAttackCell.signal->channels[1] > 0.3f);
+    EXPECT_TRUE(actualAttackCell.signal->channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualAttackCell.signal->channels[2] > 1.0f - 105.0f / 256);
+    EXPECT_TRUE(actualAttackCell.signal->channels[3] > 70.0f / 365);
+    EXPECT_TRUE(actualAttackCell.signal->channels[3] < 105.0f / 365);
 }
 
 TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
@@ -232,12 +232,12 @@ TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.signal.channels[0]));
-    EXPECT_TRUE(actualAttackCell.signal.channels[1] > 0.3f);
-    EXPECT_TRUE(actualAttackCell.signal.channels[2] < 1.0f - 80.0f / 256);
-    EXPECT_TRUE(actualAttackCell.signal.channels[2] > 1.0f - 105.0f / 256);
-    EXPECT_TRUE(actualAttackCell.signal.channels[3] < -70.0f / 365);
-    EXPECT_TRUE(actualAttackCell.signal.channels[3] > -105.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.signal->channels[0]));
+    EXPECT_TRUE(actualAttackCell.signal->channels[1] > 0.3f);
+    EXPECT_TRUE(actualAttackCell.signal->channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualAttackCell.signal->channels[2] > 1.0f - 105.0f / 256);
+    EXPECT_TRUE(actualAttackCell.signal->channels[3] < -70.0f / 365);
+    EXPECT_TRUE(actualAttackCell.signal->channels[3] > -105.0f / 365);
 }
 
 TEST_F(SensorTests, scanNeighborhood_foundAtBack)
@@ -268,11 +268,11 @@ TEST_F(SensorTests, scanNeighborhood_foundAtBack)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.signal.channels[0]));
-    EXPECT_TRUE(actualAttackCell.signal.channels[1] > 0.3f);
-    EXPECT_TRUE(actualAttackCell.signal.channels[2] < 1.0f - 80.0f / 256);
-    EXPECT_TRUE(actualAttackCell.signal.channels[2] > 1.0f - 105.0f / 256);
-    EXPECT_TRUE(actualAttackCell.signal.channels[3] < -165.0f / 365 || actualAttackCell.signal.channels[3] > 165.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.signal->channels[0]));
+    EXPECT_TRUE(actualAttackCell.signal->channels[1] > 0.3f);
+    EXPECT_TRUE(actualAttackCell.signal->channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualAttackCell.signal->channels[2] > 1.0f - 105.0f / 256);
+    EXPECT_TRUE(actualAttackCell.signal->channels[3] < -165.0f / 365 || actualAttackCell.signal->channels[3] > 165.0f / 365);
 }
 
 
@@ -305,12 +305,12 @@ TEST_F(SensorTests, scanNeighborhood_twoMasses)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
-    EXPECT_TRUE(actualSensorCell.signal.channels[1] > 0.7f);
-    EXPECT_TRUE(actualSensorCell.signal.channels[2] < 1.0f - 80.0f / 256);
-    EXPECT_TRUE(actualSensorCell.signal.channels[2] > 1.0f - 105.0f / 256);
-    EXPECT_TRUE(actualSensorCell.signal.channels[3] < -70.0f / 365);
-    EXPECT_TRUE(actualSensorCell.signal.channels[3] > -105.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(actualSensorCell.signal->channels[1] > 0.7f);
+    EXPECT_TRUE(actualSensorCell.signal->channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualSensorCell.signal->channels[2] > 1.0f - 105.0f / 256);
+    EXPECT_TRUE(actualSensorCell.signal->channels[3] < -70.0f / 365);
+    EXPECT_TRUE(actualSensorCell.signal->channels[3] > -105.0f / 365);
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found)
@@ -343,12 +343,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
-    EXPECT_TRUE(actualSensorCell.signal.channels[1] > 0.3f);
-    EXPECT_TRUE(actualSensorCell.signal.channels[2] < 1.0f - 80.0f / 256);
-    EXPECT_TRUE(actualSensorCell.signal.channels[2] > 1.0f - 105.0f / 256);
-    EXPECT_TRUE(actualSensorCell.signal.channels[3] > -15.0f / 365);
-    EXPECT_TRUE(actualSensorCell.signal.channels[3] < 15.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(actualSensorCell.signal->channels[1] > 0.3f);
+    EXPECT_TRUE(actualSensorCell.signal->channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualSensorCell.signal->channels[2] > 1.0f - 105.0f / 256);
+    EXPECT_TRUE(actualSensorCell.signal->channels[3] > -15.0f / 365);
+    EXPECT_TRUE(actualSensorCell.signal->channels[3] < 15.0f / 365);
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found_wallBehind)
@@ -384,7 +384,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found_wallBehi
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound)
@@ -417,7 +417,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound_wallInBetween)
@@ -453,7 +453,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound_wallI
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_found)
@@ -486,7 +486,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_notFound)
@@ -527,7 +527,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_notFound)
         auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
-        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
+        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
     }
 }
 
@@ -561,7 +561,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_notFound)
@@ -594,7 +594,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_found)
@@ -627,7 +627,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_notFound)
@@ -660,7 +660,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_found)
@@ -703,7 +703,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_found)
         auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
-        EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
+        EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
     }
 }
 
@@ -747,7 +747,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
         auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
-        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
+        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
     }
 }
 
@@ -782,7 +782,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound_respawnedCell)
@@ -816,7 +816,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_found)
@@ -859,7 +859,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_found)
         auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
-        EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
+        EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
     }
 }
 
@@ -903,7 +903,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
         auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
-        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
+        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
     }
 }
 
@@ -938,7 +938,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound_respawnedCell)
@@ -972,7 +972,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_minRange_found)
@@ -1001,7 +1001,7 @@ TEST_F(SensorTests, scanNeighborhood_minRange_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_minRange_notFound)
@@ -1030,7 +1030,7 @@ TEST_F(SensorTests, scanNeighborhood_minRange_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_maxRange_found)
@@ -1059,7 +1059,7 @@ TEST_F(SensorTests, scanNeighborhood_maxRange_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_maxRange_notFound)
@@ -1088,5 +1088,5 @@ TEST_F(SensorTests, scanNeighborhood_maxRange_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
 }

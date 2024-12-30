@@ -28,7 +28,7 @@ TEST_F(NerveTests_New, generatePulse_timeBeforeFirstPulse)
     auto actualCellById = getCellById(actualData);
 
     auto nerve = actualCellById.at(1);
-    EXPECT_FALSE(nerve.signal.active);
+    EXPECT_FALSE(nerve.signal.has_value());
 }
 
 TEST_F(NerveTests_New, generatePulse_timeAtFirstPulse)
@@ -44,8 +44,8 @@ TEST_F(NerveTests_New, generatePulse_timeAtFirstPulse)
     auto actualCellById = getCellById(actualData);
 
     auto nerve = actualCellById.at(1);
-    EXPECT_TRUE(nerve.signal.active);
-    EXPECT_EQ(1.0f, nerve.signal.channels.at(0));
+    EXPECT_TRUE(nerve.signal.has_value());
+    EXPECT_EQ(1.0f, nerve.signal->channels.at(0));
 }
 
 TEST_F(NerveTests_New, generatePulse_timeAtSecondPulse)
@@ -61,8 +61,8 @@ TEST_F(NerveTests_New, generatePulse_timeAtSecondPulse)
     auto actualCellById = getCellById(actualData);
 
     auto nerve = actualCellById.at(1);
-    EXPECT_TRUE(nerve.signal.active);
-    EXPECT_EQ(1.0f, nerve.signal.channels.at(0));
+    EXPECT_TRUE(nerve.signal.has_value());
+    EXPECT_EQ(1.0f, nerve.signal->channels.at(0));
 }
 
 TEST_F(NerveTests_New, generatePulse_timeAfterFirstPulse)
@@ -78,7 +78,7 @@ TEST_F(NerveTests_New, generatePulse_timeAfterFirstPulse)
     auto actualCellById = getCellById(actualData);
 
     auto nerve = actualCellById.at(1);
-    EXPECT_FALSE(nerve.signal.active);
+    EXPECT_FALSE(nerve.signal.has_value());
 }
 
 TEST_F(NerveTests_New, generatePulse_timeBeforeFirstPulseAlternation)
@@ -94,8 +94,8 @@ TEST_F(NerveTests_New, generatePulse_timeBeforeFirstPulseAlternation)
     auto actualCellById = getCellById(actualData);
 
     auto nerve = actualCellById.at(1);
-    EXPECT_TRUE(nerve.signal.active);
-    EXPECT_EQ(1.0f, nerve.signal.channels.at(0));
+    EXPECT_TRUE(nerve.signal.has_value());
+    EXPECT_EQ(1.0f, nerve.signal->channels.at(0));
 }
 
 TEST_F(NerveTests_New, generatePulse_timeAtFirstPulseAlternation)
@@ -111,8 +111,8 @@ TEST_F(NerveTests_New, generatePulse_timeAtFirstPulseAlternation)
     auto actualCellById = getCellById(actualData);
 
     auto nerve = actualCellById.at(1);
-    EXPECT_TRUE(nerve.signal.active);
-    EXPECT_EQ(-1.0f, nerve.signal.channels.at(0));
+    EXPECT_TRUE(nerve.signal.has_value());
+    EXPECT_EQ(-1.0f, nerve.signal->channels.at(0));
 }
 
 TEST_F(NerveTests_New, generatePulse_timeAtSecondPulseAlternation)
@@ -130,8 +130,8 @@ TEST_F(NerveTests_New, generatePulse_timeAtSecondPulseAlternation)
     auto actualCellById = getCellById(actualData);
 
     auto nerve = actualCellById.at(1);
-    EXPECT_TRUE(nerve.signal.active);
-    EXPECT_EQ(1.0f, nerve.signal.channels.at(0));
+    EXPECT_TRUE(nerve.signal.has_value());
+    EXPECT_EQ(1.0f, nerve.signal->channels.at(0));
 }
 
 TEST_F(NerveTests_New, generatePulse_triangularNetwork)
@@ -153,14 +153,14 @@ TEST_F(NerveTests_New, generatePulse_triangularNetwork)
         auto actualCellById = getCellById(actualData);
 
         auto nerve1 = actualCellById.at(1);
-        EXPECT_TRUE(nerve1.signal.active);
-        EXPECT_TRUE(approxCompare(1.0f, nerve1.signal.channels.at(0)));
-        EXPECT_TRUE(nerve1.signal.prevCellIds.empty());
+        EXPECT_TRUE(nerve1.signal.has_value());
+        EXPECT_TRUE(approxCompare(1.0f, nerve1.signal->channels.at(0)));
+        EXPECT_TRUE(nerve1.signal->prevCellIds.empty());
 
         auto nerve2 = actualCellById.at(2);
-        EXPECT_FALSE(nerve2.signal.active);
+        EXPECT_FALSE(nerve2.signal.has_value());
 
         auto nerve3 = actualCellById.at(3);
-        EXPECT_FALSE(nerve3.signal.active);
+        EXPECT_FALSE(nerve3.signal.has_value());
     }
 }

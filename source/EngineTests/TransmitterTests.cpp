@@ -63,7 +63,7 @@ TEST_F(TransmitterTests, distributeToOtherTransmitter)
     auto origNerveCell = getCell(data, 2);
     auto actualNerveCell = getCell(actualData, 2);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualTransmitterCell1.signal.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualTransmitterCell1.signal->channels[0]));
     EXPECT_TRUE(actualTransmitterCell1.energy < origTransmitterCell1.energy - NEAR_ZERO);
     EXPECT_TRUE(actualTransmitterCell2.energy > origTransmitterCell2.energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(origNerveCell.energy, actualNerveCell.energy));
@@ -109,7 +109,7 @@ TEST_F(TransmitterTests, distributeToOneOtherTransmitter_forwardSignal)
     auto actualNerveCell = getCell(actualData, 2);
 
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        EXPECT_TRUE(approxCompare(signal.channels[i], actualTransmitterCell1.signal.channels[i]));
+        EXPECT_TRUE(approxCompare(signal.channels[i], actualTransmitterCell1.signal->channels[i]));
     }
     EXPECT_TRUE(actualTransmitterCell1.energy < origTransmitterCell1.energy - NEAR_ZERO);
     EXPECT_TRUE(actualTransmitterCell2.energy > origTransmitterCell2.energy + NEAR_ZERO);
