@@ -52,12 +52,12 @@ void SimulationParametersValidationService::validateAndCorrect(SimulationParamet
 
 void SimulationParametersValidationService::validateAndCorrect(RadiationSource& source) const
 {
-    if (source.shapeType == RadiationSourceShapeType_Circular) {
-        source.shapeData.circularRadiationSource.radius = std::max(1.0f, source.shapeData.circularRadiationSource.radius);
+    if (source.shape.type == RadiationSourceShapeType_Circular) {
+        source.shape.alternatives.circularRadiationSource.radius = std::max(1.0f, source.shape.alternatives.circularRadiationSource.radius);
     }
-    if (source.shapeType == RadiationSourceShapeType_Rectangular) {
-        source.shapeData.rectangularRadiationSource.width = std::max(1.0f, source.shapeData.rectangularRadiationSource.width);
-        source.shapeData.rectangularRadiationSource.height = std::max(1.0f, source.shapeData.rectangularRadiationSource.height);
+    if (source.shape.type == RadiationSourceShapeType_Rectangular) {
+        source.shape.alternatives.rectangularRadiationSource.width = std::max(1.0f, source.shape.alternatives.rectangularRadiationSource.width);
+        source.shape.alternatives.rectangularRadiationSource.height = std::max(1.0f, source.shape.alternatives.rectangularRadiationSource.height);
     }
 }
 

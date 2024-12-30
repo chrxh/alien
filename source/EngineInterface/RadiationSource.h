@@ -21,19 +21,41 @@ struct RectangularRadiationSource
     bool operator==(RectangularRadiationSource const&) const = default;
 };
 
-union RadiationSourceShapeData
-{
-    CircularRadiationSource circularRadiationSource;
-    RectangularRadiationSource rectangularRadiationSource;
-
-    bool operator==(RectangularRadiationSource const&) const { return true; }
-};
-
 using RadiationSourceShapeType = int;
 enum RadiationSourceShapeType_
 {
     RadiationSourceShapeType_Circular,
     RadiationSourceShapeType_Rectangular
+};
+
+union RadiationSourceShapeAlternatives
+{
+    CircularRadiationSource circularRadiationSource;
+    RectangularRadiationSource rectangularRadiationSource;
+};
+
+struct RadiationSourceShape
+{
+    RadiationSourceShapeType type = RadiationSourceShapeType_Circular;
+    RadiationSourceShapeAlternatives alternatives = {CircularRadiationSource()};
+
+    bool operator==(RadiationSourceShape const& other) const
+    {
+        if (type != other.type) {
+            return false;
+        }
+        if (type == RadiationSourceShapeType_Circular) {
+            if (alternatives.circularRadiationSource != other.alternatives.circularRadiationSource) {
+                return false;
+            }
+        }
+        if (type == RadiationSourceShapeType_Rectangular) {
+            if (alternatives.rectangularRadiationSource != other.alternatives.rectangularRadiationSource) {
+                return false;
+            }
+        }
+        return true;
+    }
 };
 
 struct RadiationSource
@@ -50,33 +72,7 @@ struct RadiationSource
     bool useAngle = false;
     float angle = 0;
 
-    RadiationSourceShapeType shapeType = RadiationSourceShapeType_Circular;
-    RadiationSourceShapeData shapeData = {CircularRadiationSource()};
+    RadiationSourceShape shape;
 
-    bool operator==(RadiationSource const& other) const
-    {
-        if (shapeType != other.shapeType) {
-            return false;
-        }
-        if (shapeType == RadiationSourceShapeType_Circular) {
-            if (shapeData.circularRadiationSource != other.shapeData.circularRadiationSource) {
-                return false;
-            }
-        }
-        if (shapeType == RadiationSourceShapeType_Rectangular) {
-            if (shapeData.rectangularRadiationSource != other.shapeData.rectangularRadiationSource) {
-                return false;
-            }
-        }
-        for (int i = 0, j = sizeof(Char64) / sizeof(char); i < j; ++i) {
-            if (name[i] != other.name[i]) {
-                return false;
-            }
-            if (name[i] == '\0') {
-                break;
-            }
-        }
-        return posX == other.posX && posY == other.posY && velX == other.velX && velY == other.velY && useAngle == other.useAngle && angle == other.angle
-            && strength == other.strength && strengthPinned == other.strengthPinned;
-    }
+    bool operator==(RadiationSource const& other) const = default;
 };

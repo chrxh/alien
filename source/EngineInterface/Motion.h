@@ -21,12 +21,6 @@ struct CollisionMotion
     bool operator==(CollisionMotion const&) const = default;
 };
 
-union MotionDataAlternatives
-{
-    FluidMotion fluidMotion;
-    CollisionMotion collisionMotion;
-};
-
 using MotionType = int;
 enum MotionType_
 {
@@ -34,12 +28,18 @@ enum MotionType_
     MotionType_Collision
 };
 
-struct MotionData
+union MotionDataAlternatives
+{
+    FluidMotion fluidMotion;
+    CollisionMotion collisionMotion;
+};
+
+struct Motion
 {
     MotionType type = MotionType_Fluid;
     MotionDataAlternatives alternatives = {FluidMotion()};
 
-    bool operator==(MotionData const& other) const
+    bool operator==(Motion const& other) const
     {
         if (type != other.type) {
             return false;
