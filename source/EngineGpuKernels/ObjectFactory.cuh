@@ -116,10 +116,14 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->metadata.descriptionSize,
         cell->metadata.description);
 
+    cell->signalRoutingRestriction.active = cellTO.signalRoutingRestriction.active;
+    cell->signalRoutingRestriction.baseAngle = cellTO.signalRoutingRestriction.baseAngle;
+    cell->signalRoutingRestriction.openingAngle = cellTO.signalRoutingRestriction.openingAngle;
+
+    cell->signal.active = cellTO.signal.active;
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->signal.channels[i] = cellTO.signal.channels[i];
     }
-    cell->signal.active = cellTO.signal.active;
     cell->signal.origin = cellTO.signal.origin;
     cell->signal.targetX = cellTO.signal.targetX;
     cell->signal.targetY = cellTO.signal.targetY;
@@ -282,13 +286,8 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->age = 0;
     cell->activationTime = 0;
     cell->genomeComplexity = 0;
-    for (int i = 0; i < MAX_CHANNELS; ++i) {
-        cell->signal.channels[i] = 0;
-    }
+    cell->signalRoutingRestriction.active = false;
     cell->signal.active = false;
-    cell->signal.origin = SignalOrigin_Unknown;
-    cell->signal.targetX = 0;
-    cell->signal.targetY = 0;
     cell->density = 1.0f;
     cell->creatureId = 0;
     cell->mutationId = Const::MutationIdForFreeCell;
@@ -411,13 +410,8 @@ __inline__ __device__ Cell* ObjectFactory::createCell(uint64_t& cellPointerIndex
     cell->age = 0;
     cell->vel = {0, 0};
     cell->activationTime = 0;
-    for (int i = 0; i < MAX_CHANNELS; ++i) {
-        cell->signal.channels[i] = 0;
-    }
+    cell->signalRoutingRestriction.active = false;
     cell->signal.active = false;
-    cell->signal.origin = SignalOrigin_Unknown;
-    cell->signal.targetX = 0;
-    cell->signal.targetY = 0;
     cell->density = 1.0f;
     cell->detectedByCreatureId = 0;
     cell->event = CellEvent_No;

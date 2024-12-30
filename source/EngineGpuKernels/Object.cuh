@@ -69,17 +69,6 @@ struct CellConnection
     float angleFromPrevious;
 };
 
-struct Signal
-{
-    bool active;
-    float channels[MAX_CHANNELS];
-    SignalOrigin origin;
-    float targetX;
-    float targetY;
-    int numPrevCells;
-    uint64_t prevCellIds[MAX_CELL_BONDS];
-};
-
 struct NeuronFunction
 {
     struct NeuronState
@@ -203,6 +192,24 @@ union CellFunctionData
     DetonatorFunction detonator;
 };
 
+struct SignalRoutingRestriction
+{
+    bool active;
+    float baseAngle;
+    float openingAngle;
+};
+
+struct Signal
+{
+    bool active;
+    float channels[MAX_CHANNELS];
+    SignalOrigin origin;
+    float targetX;
+    float targetY;
+    int numPrevCells;
+    uint64_t prevCellIds[MAX_CELL_BONDS];
+};
+
 struct Cell
 {
     uint64_t id;
@@ -225,6 +232,7 @@ struct Cell
     float genomeComplexity;
 
     //cell function
+    SignalRoutingRestriction signalRoutingRestriction;
     Signal signal;
     CellFunction cellFunction;
     CellFunctionData cellFunctionData;

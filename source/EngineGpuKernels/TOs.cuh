@@ -34,17 +34,6 @@ struct ConnectionTO
     float angleFromPrevious;
 };
 
-struct SignalTO
-{
-    bool active;
-    float channels[MAX_CHANNELS];
-    SignalOrigin origin;
-    float targetX;
-    float targetY;
-    int numPrevCells;
-    uint64_t prevCellIds[MAX_CELL_BONDS];
-};
-
 struct NeuronTO
 {
     uint64_t weightsAndBiasesDataIndex;   //size is always: sizeof(float) * MAX_CHANNELS * (MAX_CHANNELS + 1)
@@ -158,6 +147,24 @@ union CellFunctionTO
     DetonatorTO detonator;
 };
 
+struct SignalRoutingRestrictionTO
+{
+    bool active;
+    float baseAngle;
+    float openingAngle;
+};
+
+struct SignalTO
+{
+    bool active;
+    float channels[MAX_CHANNELS];
+    SignalOrigin origin;
+    float targetX;
+    float targetY;
+    int numPrevCells;
+    uint64_t prevCellIds[MAX_CELL_BONDS];
+};
+
 struct CellTO
 {
 	uint64_t id;
@@ -182,6 +189,7 @@ struct CellTO
     //cell function
     CellFunction cellFunction;
     CellFunctionTO cellFunctionData;
+    SignalRoutingRestrictionTO signalRoutingRestriction;
     SignalTO signal;
     uint32_t activationTime;
     uint16_t detectedByCreatureId;  //only the first 16 bits from the creature id

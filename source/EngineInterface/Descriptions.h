@@ -341,6 +341,14 @@ using CellFunctionDescription = std::optional<std::variant<
     ReconnectorDescription,
     DetonatorDescription>>;
 
+struct SignalRoutingRestrictionDescription
+{
+    float baseAngle = 0;
+    float openingAngle = 0;
+
+    auto operator<=>(SignalRoutingRestrictionDescription const&) const = default;
+};
+
 struct SignalDescription
 {
     std::vector<float> channels;
@@ -391,6 +399,7 @@ struct CellDescription
 
     //cell function
     CellFunctionDescription cellFunction;
+    std::optional<SignalRoutingRestrictionDescription> signalRoutingRestriction;
     std::optional<SignalDescription> signal;
     int activationTime = 0;
     int detectedByCreatureId = 0;   //only the first 16 bits from the creature id
