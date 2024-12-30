@@ -53,7 +53,7 @@ TEST_F(AttackerTests, nothingFound)
 
     EXPECT_EQ(2, actualData.cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.signal.channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.signal->channels[0]));
 }
 
 TEST_F(AttackerTests, successNoTransmitter)
@@ -88,7 +88,7 @@ TEST_F(AttackerTests, successNoTransmitter)
     auto origTargetCell = getCell(data, 3);
     auto actualTargetCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(actualAttackCell.signal.channels[0] > NEAR_ZERO);
+    EXPECT_TRUE(actualAttackCell.signal->channels[0] > NEAR_ZERO);
     EXPECT_TRUE(actualAttackCell.energy > origAttackCell.energy + NEAR_ZERO);
     EXPECT_TRUE(actualTargetCell.energy < origTargetCell.energy - NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -127,7 +127,7 @@ TEST_F(AttackerTests, successDistributeToOneTransmitter)
     auto origTransmitterCell = getCell(data, 3);
     auto actualTransmitterCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(actualAttackCell.signal.channels[0] > NEAR_ZERO);
+    EXPECT_TRUE(actualAttackCell.signal->channels[0] > NEAR_ZERO);
     EXPECT_TRUE(approxCompare(origNerveCell.energy, actualNerveCell.energy));
     EXPECT_TRUE(actualTransmitterCell.energy > origTransmitterCell.energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -166,7 +166,7 @@ TEST_F(AttackerTests, successDistributeToTwoTransmitters)
     auto origTransmitterCell2 = getCell(data, 4);
     auto actualTransmitterCell2 = getCell(actualData, 4);
 
-    EXPECT_TRUE(actualAttackCell.signal.channels[0] > NEAR_ZERO);
+    EXPECT_TRUE(actualAttackCell.signal->channels[0] > NEAR_ZERO);
     EXPECT_TRUE(actualTransmitterCell1.energy > origTransmitterCell1.energy + NEAR_ZERO);
     EXPECT_TRUE(actualTransmitterCell2.energy > origTransmitterCell2.energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -205,7 +205,7 @@ TEST_F(AttackerTests, successDistributeToTwoTransmittersWithDifferentColor)
     auto origTransmitterCell2 = getCell(data, 4);
     auto actualTransmitterCell2 = getCell(actualData, 4);
 
-    EXPECT_TRUE(actualAttackCell.signal.channels[0] > NEAR_ZERO);
+    EXPECT_TRUE(actualAttackCell.signal->channels[0] > NEAR_ZERO);
     EXPECT_TRUE(actualTransmitterCell1.energy > origTransmitterCell1.energy + NEAR_ZERO);
     EXPECT_TRUE(actualTransmitterCell2.energy > origTransmitterCell2.energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -251,7 +251,7 @@ TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
     auto origConstructorCell = getCell(data, 4);
     auto actualConstructorCell = getCell(actualData, 4);
 
-    EXPECT_TRUE(actualAttackCell.signal.channels[0] > NEAR_ZERO);
+    EXPECT_TRUE(actualAttackCell.signal->channels[0] > NEAR_ZERO);
     EXPECT_TRUE(approxCompare(actualTransmitterCell.energy, origTransmitterCell.energy));
     EXPECT_TRUE(actualConstructorCell.energy > origConstructorCell.energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -290,7 +290,7 @@ TEST_F(AttackerTests, successDistributeToConnectedCells)
     auto origNerveCell2 = getCell(data, 3);
     auto actualNerveCell2 = getCell(actualData, 3);
 
-    EXPECT_TRUE(actualAttackCell.signal.channels[0] > NEAR_ZERO);
+    EXPECT_TRUE(actualAttackCell.signal->channels[0] > NEAR_ZERO);
     EXPECT_TRUE(actualNerveCell1.energy > origNerveCell1.energy + NEAR_ZERO);
     EXPECT_TRUE(actualNerveCell2.energy > origNerveCell2.energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -330,7 +330,7 @@ TEST_F(AttackerTests, successTwoTargets)
     auto origTargetCell2 = getCell(data, 4);
     auto actualTargetCell2 = getCell(actualData, 4);
 
-    EXPECT_TRUE(actualAttackCell.signal.channels[0] > NEAR_ZERO);
+    EXPECT_TRUE(actualAttackCell.signal->channels[0] > NEAR_ZERO);
     EXPECT_TRUE(actualAttackCell.energy > origAttackCell.energy + NEAR_ZERO);
     EXPECT_TRUE(actualTargetCell1.energy < origTargetCell1.energy - NEAR_ZERO);
     EXPECT_TRUE(actualTargetCell2.energy < origTargetCell2.energy - NEAR_ZERO);

@@ -286,7 +286,7 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
         }
         if (ImGui::TreeNodeEx("Signals", TreeNodeFlags)) {
             int index = 0;
-            for (auto& channel : cell.signal.channels) {
+            for (auto& channel : cell.signal->channels) {
                 AlienImGui::InputFloat(
                     AlienImGui::InputFloatParameters().name("Channel #" + std::to_string(index)).format("%.3f").step(0.1f).textWidth(SignalTextWidth),
                     channel);

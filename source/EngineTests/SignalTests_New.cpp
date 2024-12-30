@@ -28,7 +28,7 @@ TEST_F(SignalTests_New, noSignal)
     auto actualCellById = getCellById(actualData);
 
     auto nerve = actualCellById.at(1);
-    EXPECT_FALSE(nerve.signal.active);
+    EXPECT_FALSE(nerve.signal.has_value());
 }
 
 TEST_F(SignalTests_New, forwardSignal)
@@ -47,13 +47,13 @@ TEST_F(SignalTests_New, forwardSignal)
     auto actualCellById = getCellById(actualData);
 
     auto nerve1 = actualCellById.at(1);
-    EXPECT_FALSE(nerve1.signal.active);
+    EXPECT_FALSE(nerve1.signal.has_value());
 
     auto nerve2 = actualCellById.at(2);
-    EXPECT_TRUE(nerve2.signal.active);
-    EXPECT_EQ(signal, nerve2.signal.channels);
-    EXPECT_EQ(1, nerve2.signal.prevCellIds.size());
-    EXPECT_EQ(1, nerve2.signal.prevCellIds[0]);
+    EXPECT_TRUE(nerve2.signal.has_value());
+    EXPECT_EQ(signal, nerve2.signal->channels);
+    EXPECT_EQ(1, nerve2.signal->prevCellIds.size());
+    EXPECT_EQ(1, nerve2.signal->prevCellIds[0]);
 }
 
 TEST_F(SignalTests_New, vanishSignal_singleCell)
@@ -70,7 +70,7 @@ TEST_F(SignalTests_New, vanishSignal_singleCell)
     auto actualCellById = getCellById(actualData);
 
     auto nerve1 = actualCellById.at(1);
-    EXPECT_FALSE(nerve1.signal.active);
+    EXPECT_FALSE(nerve1.signal.has_value());
 }
 
 TEST_F(SignalTests_New, vanishSignal_withPrevCell)
@@ -89,7 +89,7 @@ TEST_F(SignalTests_New, vanishSignal_withPrevCell)
     auto actualCellById = getCellById(actualData);
 
     auto nerve1 = actualCellById.at(1);
-    EXPECT_FALSE(nerve1.signal.active);
+    EXPECT_FALSE(nerve1.signal.has_value());
 }
 
 TEST_F(SignalTests_New, mergeSignals)
@@ -112,20 +112,20 @@ TEST_F(SignalTests_New, mergeSignals)
     auto actualCellById = getCellById(actualData);
 
     auto nerve1 = actualCellById.at(1);
-    EXPECT_FALSE(nerve1.signal.active);
+    EXPECT_FALSE(nerve1.signal.has_value());
 
     auto nerve2 = actualCellById.at(2);
-    EXPECT_TRUE(nerve2.signal.active);
+    EXPECT_TRUE(nerve2.signal.has_value());
     std::vector<float> sumSignal(signal1.size());
     for (size_t i = 0; i < signal1.size(); ++i) {
         sumSignal[i] = signal1[i] + signal2[i];
     }
-    EXPECT_TRUE(approxCompare(sumSignal, nerve2.signal.channels));
-    auto prevCellIdSet = std::set(nerve2.signal.prevCellIds.begin(), nerve2.signal.prevCellIds.end());
+    EXPECT_TRUE(approxCompare(sumSignal, nerve2.signal->channels));
+    auto prevCellIdSet = std::set(nerve2.signal->prevCellIds.begin(), nerve2.signal->prevCellIds.end());
     EXPECT_EQ((std::set<uint64_t>{1, 3}), prevCellIdSet);
 
     auto nerve3 = actualCellById.at(3);
-    EXPECT_FALSE(nerve3.signal.active);
+    EXPECT_FALSE(nerve3.signal.has_value());
 }
 
 TEST_F(SignalTests_New, forkSignals)
@@ -146,17 +146,17 @@ TEST_F(SignalTests_New, forkSignals)
     auto actualCellById = getCellById(actualData);
 
     auto nerve1 = actualCellById.at(1);
-    EXPECT_TRUE(nerve1.signal.active);
-    EXPECT_TRUE(approxCompare(signal, nerve1.signal.channels));
-    EXPECT_EQ(1, nerve1.signal.prevCellIds.size());
-    EXPECT_EQ(2, nerve1.signal.prevCellIds[0]);
+    EXPECT_TRUE(nerve1.signal.has_value());
+    EXPECT_TRUE(approxCompare(signal, nerve1.signal->channels));
+    EXPECT_EQ(1, nerve1.signal->prevCellIds.size());
+    EXPECT_EQ(2, nerve1.signal->prevCellIds[0]);
 
     auto nerve2 = actualCellById.at(2);
-    EXPECT_FALSE(nerve2.signal.active);
+    EXPECT_FALSE(nerve2.signal.has_value());
 
     auto nerve3 = actualCellById.at(3);
-    EXPECT_TRUE(nerve3.signal.active);
-    EXPECT_TRUE(approxCompare(signal, nerve3.signal.channels));
-    EXPECT_EQ(1, nerve1.signal.prevCellIds.size());
-    EXPECT_EQ(2, nerve1.signal.prevCellIds[0]);
+    EXPECT_TRUE(nerve3.signal.has_value());
+    EXPECT_TRUE(approxCompare(signal, nerve3.signal->channels));
+    EXPECT_EQ(1, nerve1.signal->prevCellIds.size());
+    EXPECT_EQ(2, nerve1.signal->prevCellIds[0]);
 }

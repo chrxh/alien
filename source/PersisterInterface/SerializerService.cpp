@@ -104,7 +104,6 @@ namespace
     auto constexpr Id_Cell_AncestorMutationId = 16;
     auto constexpr Id_Cell_GenomeComplexity = 17;
     auto constexpr Id_Cell_DetectedByCreatureId = 19;
-    auto constexpr Id_Cell_Signal_Active = 20;
     auto constexpr Id_Cell_Signal_Channels = 21;
     auto constexpr Id_Cell_Signal_Origin = 22;
     auto constexpr Id_Cell_Signal_TargetX = 23;
@@ -456,7 +455,6 @@ namespace cereal
     {
         SignalDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Cell_Signal_Active, data.active, defaultObject.active);
         loadSave(task, auxiliaries, Id_Cell_Signal_Channels, data.channels, defaultObject.channels);
         loadSave(task, auxiliaries, Id_Cell_Signal_Origin, data.origin, defaultObject.origin);
         loadSave(task, auxiliaries, Id_Cell_Signal_TargetX, data.targetX, defaultObject.targetX);

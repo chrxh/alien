@@ -51,36 +51,6 @@ struct ConnectionDescription
     }
 };
 
-struct SignalDescription
-{
-    bool active = false;
-    std::vector<float> channels;
-    SignalOrigin origin = SignalOrigin_Unknown;
-    float targetX = 0;
-    float targetY = 0;
-    std::vector<uint64_t> prevCellIds;
-
-    SignalDescription()
-    {
-        channels.resize(MAX_CHANNELS, 0);
-        prevCellIds.resize(MAX_CELL_BONDS, 0);
-    }
-    auto operator<=>(SignalDescription const&) const = default;
-
-    SignalDescription& setChannels(std::vector<float> const& value)
-    {
-        CHECK(value.size() == MAX_CHANNELS);
-        channels = value;
-        return *this;
-    }
-    SignalDescription& setPrevCellIds(std::vector<uint64_t> const& value)
-    {
-        prevCellIds = value;
-        return *this;
-    }
-};
-
-
 struct NeuronDescription
 {
     std::vector<std::vector<float>> weights;
@@ -371,6 +341,34 @@ using CellFunctionDescription = std::optional<std::variant<
     ReconnectorDescription,
     DetonatorDescription>>;
 
+struct SignalDescription
+{
+    std::vector<float> channels;
+    SignalOrigin origin = SignalOrigin_Unknown;
+    float targetX = 0;
+    float targetY = 0;
+    std::vector<uint64_t> prevCellIds;
+
+    SignalDescription()
+    {
+        channels.resize(MAX_CHANNELS, 0);
+        prevCellIds.resize(MAX_CELL_BONDS, 0);
+    }
+    auto operator<=>(SignalDescription const&) const = default;
+
+    SignalDescription& setChannels(std::vector<float> const& value)
+    {
+        CHECK(value.size() == MAX_CHANNELS);
+        channels = value;
+        return *this;
+    }
+    SignalDescription& setPrevCellIds(std::vector<uint64_t> const& value)
+    {
+        prevCellIds = value;
+        return *this;
+    }
+};
+
 struct CellDescription
 {
     uint64_t id = 0;
@@ -393,7 +391,7 @@ struct CellDescription
 
     //cell function
     CellFunctionDescription cellFunction;
-    SignalDescription signal;
+    std::optional<SignalDescription> signal;
     int activationTime = 0;
     int detectedByCreatureId = 0;   //only the first 16 bits from the creature id
     CellFunctionUsed cellFunctionUsed = CellFunctionUsed_No;
@@ -486,7 +484,6 @@ struct CellDescription
         CHECK(value.size() == MAX_CHANNELS);
 
         SignalDescription newSignal;
-        newSignal.active = true;
         newSignal.channels = value;
         signal = newSignal;
         return *this;
