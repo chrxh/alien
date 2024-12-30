@@ -14,9 +14,10 @@ PUBLIC
     MuscleTests.cpp
     MutationTests.cpp
     NeuronTests.cpp
-    NewNerveTests.cpp
+    NerveTests_New.cpp
     ReconnectorTests.cpp
     SensorTests.cpp
+    SignalTests_New.cpp
     StatisticsTests.cpp
     Testsuite.cpp
     TransmitterTests.cpp)
