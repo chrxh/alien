@@ -1,5 +1,11 @@
 #pragma once
 
+#include <compare>
+
+/**
+ * NOTE: header is also included in kernel code
+ */
+
 struct Features
 {
     bool genomeComplexityMeasurement = false;
@@ -13,5 +19,5 @@ struct Features
     bool cellGlow = false;
     bool legacyModes = false;
 
-    bool operator==(Features const& other) const;
+    bool operator==(Features const&) const = default;
 };

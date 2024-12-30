@@ -53,37 +53,37 @@ namespace
 
         ParameterParser::encodeDecode(tree, parameters.timestepSize, defaultParameters.timestepSize, "simulation parameters.time step size", parserTask);
 
-        ParameterParser::encodeDecode(tree, parameters.motionType, defaultParameters.motionType, "simulation parameters.motion.type", parserTask);
-        if (parameters.motionType == MotionType_Fluid) {
+        ParameterParser::encodeDecode(tree, parameters.motionData.type, defaultParameters.motionData.type, "simulation parameters.motion.type", parserTask);
+        if (parameters.motionData.type == MotionType_Fluid) {
             ParameterParser::encodeDecode(
                 tree,
-                parameters.motionData.fluidMotion.smoothingLength,
-                defaultParameters.motionData.fluidMotion.smoothingLength,
+                parameters.motionData.alternatives.fluidMotion.smoothingLength,
+                defaultParameters.motionData.alternatives.fluidMotion.smoothingLength,
                 "simulation parameters.fluid.smoothing length",
                 parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.motionData.fluidMotion.pressureStrength,
-                defaultParameters.motionData.fluidMotion.pressureStrength,
+                parameters.motionData.alternatives.fluidMotion.pressureStrength,
+                defaultParameters.motionData.alternatives.fluidMotion.pressureStrength,
                 "simulation parameters.fluid.pressure strength",
                 parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.motionData.fluidMotion.viscosityStrength,
-                defaultParameters.motionData.fluidMotion.viscosityStrength,
+                parameters.motionData.alternatives.fluidMotion.viscosityStrength,
+                defaultParameters.motionData.alternatives.fluidMotion.viscosityStrength,
                 "simulation parameters.fluid.viscosity strength",
                 parserTask);
         } else {
             ParameterParser::encodeDecode(
                 tree,
-                parameters.motionData.collisionMotion.cellMaxCollisionDistance,
-                defaultParameters.motionData.collisionMotion.cellMaxCollisionDistance,
+                parameters.motionData.alternatives.collisionMotion.cellMaxCollisionDistance,
+                defaultParameters.motionData.alternatives.collisionMotion.cellMaxCollisionDistance,
                 "simulation parameters.motion.collision.max distance",
                 parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.motionData.collisionMotion.cellRepulsionStrength,
-                defaultParameters.motionData.collisionMotion.cellRepulsionStrength,
+                parameters.motionData.alternatives.collisionMotion.cellRepulsionStrength,
+                defaultParameters.motionData.alternatives.collisionMotion.cellRepulsionStrength,
                 "simulation parameters.motion.collision.repulsion strength",
                 parserTask);
         }

@@ -181,49 +181,49 @@ void _SimulationParametersBaseWidgets::process()
                 AlienImGui::SwitcherParameters()
                     .name("Motion type")
                     .textWidth(RightColumnWidth)
-                    .defaultValue(origParameters.motionType)
+                    .defaultValue(origParameters.motionData.type)
                     .values({"Fluid dynamics", "Collision-based"})
                     .tooltip(std::string(
                         "The algorithm for the particle motions is defined here. If 'Fluid dynamics' is selected, an SPH fluid solver is used for the "
                         "calculation of the forces. The particles then behave like (compressible) liquids or gases. The other option 'Collision-based' "
                         "calculates the forces based on particle collisions and should be preferred for mechanical simulation with solids.")),
-                parameters.motionType)) {
-            if (parameters.motionType == MotionType_Fluid) {
-                parameters.motionData.fluidMotion = FluidMotion();
+                parameters.motionData.type)) {
+            if (parameters.motionData.type == MotionType_Fluid) {
+                parameters.motionData.alternatives.fluidMotion = FluidMotion();
             } else {
-                parameters.motionData.collisionMotion = CollisionMotion();
+                parameters.motionData.alternatives.collisionMotion = CollisionMotion();
             }
         }
-        if (parameters.motionType == MotionType_Fluid) {
+        if (parameters.motionData.type == MotionType_Fluid) {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Smoothing length")
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(3.0f)
-                    .defaultValue(&origParameters.motionData.fluidMotion.smoothingLength)
+                    .defaultValue(&origParameters.motionData.alternatives.fluidMotion.smoothingLength)
                     .tooltip(std::string("The smoothing length determines the region of influence of the neighboring particles for the calculation of "
                                          "density, pressure and viscosity. Values that are too small lead to numerical instabilities, while values that "
                                          "are too large cause the particles to drift apart.")),
-                &parameters.motionData.fluidMotion.smoothingLength);
+                &parameters.motionData.alternatives.fluidMotion.smoothingLength);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Pressure")
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(0.3f)
-                    .defaultValue(&origParameters.motionData.fluidMotion.pressureStrength)
+                    .defaultValue(&origParameters.motionData.alternatives.fluidMotion.pressureStrength)
                     .tooltip(std::string("This parameter allows to control the strength of the pressure.")),
-                &parameters.motionData.fluidMotion.pressureStrength);
+                &parameters.motionData.alternatives.fluidMotion.pressureStrength);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Viscosity")
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(0.3f)
-                    .defaultValue(&origParameters.motionData.fluidMotion.viscosityStrength)
+                    .defaultValue(&origParameters.motionData.alternatives.fluidMotion.viscosityStrength)
                     .tooltip(std::string("This parameter be used to control the strength of the viscosity. Larger values lead to a smoother movement.")),
-                &parameters.motionData.fluidMotion.viscosityStrength);
+                &parameters.motionData.alternatives.fluidMotion.viscosityStrength);
         } else {
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -231,18 +231,18 @@ void _SimulationParametersBaseWidgets::process()
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(0.3f)
-                    .defaultValue(&origParameters.motionData.collisionMotion.cellRepulsionStrength)
+                    .defaultValue(&origParameters.motionData.alternatives.collisionMotion.cellRepulsionStrength)
                     .tooltip(std::string("The strength of the repulsive forces, between two cells that are not connected.")),
-                &parameters.motionData.collisionMotion.cellRepulsionStrength);
+                &parameters.motionData.alternatives.collisionMotion.cellRepulsionStrength);
             AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
                     .name("Maximum collision distance")
                     .textWidth(RightColumnWidth)
                     .min(0)
                     .max(3.0f)
-                    .defaultValue(&origParameters.motionData.collisionMotion.cellMaxCollisionDistance)
+                    .defaultValue(&origParameters.motionData.alternatives.collisionMotion.cellMaxCollisionDistance)
                     .tooltip(std::string("Maximum distance up to which a collision of two cells is possible.")),
-                &parameters.motionData.collisionMotion.cellMaxCollisionDistance);
+                &parameters.motionData.alternatives.collisionMotion.cellMaxCollisionDistance);
         }
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
