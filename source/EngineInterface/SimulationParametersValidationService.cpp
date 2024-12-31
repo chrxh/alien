@@ -29,6 +29,7 @@ void SimulationParametersValidationService::validateAndCorrect(SimulationParamet
         parameters.genomeComplexitySizeFactor[i] = std::max(0.0f, parameters.genomeComplexitySizeFactor[i]);
         parameters.genomeComplexityRamificationFactor[i] = std::max(0.0f, parameters.genomeComplexityRamificationFactor[i]);
         parameters.genomeComplexityNeuronFactor[i] = std::max(0.0f, parameters.genomeComplexityNeuronFactor[i]);
+        parameters.cellFunctionMuscleEnergyCost[i] = std::max(0.0f, std::min(5.0f, parameters.cellFunctionMuscleEnergyCost[i]));
     }
     parameters.externalEnergy = std::max(0.0f, parameters.externalEnergy);
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
