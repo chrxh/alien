@@ -735,6 +735,7 @@ void GenomeEditorWindow::processNode(
             AlienImGui::ComboOptionalColor(
                 AlienImGui::ComboColorParameters().name("Restrict to color").textWidth(ContentTextWidth).tooltip(Const::GenomeReconnectorRestrictToColorTooltip),
                 reconnector.restrictToColor);
+            table.next();
             AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Restrict to mutants")
