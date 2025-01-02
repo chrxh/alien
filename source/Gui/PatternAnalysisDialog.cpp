@@ -123,7 +123,6 @@ auto PatternAnalysisDialog::getAnalysisDescription(ClusterDescription const& clu
     auto insertCellAnalysisDescription = [&cellAnalysisDescById](CellDescription const& cell) {
         if (cellAnalysisDescById.find(cell.id) == cellAnalysisDescById.end()) {
             CellAnalysisDescription result;
-            result.maxConnections = cell.maxConnections;
             result.numConnections = cell.connections.size();
             result.constructionState = cell.livingState;
             result.color = cell.color;

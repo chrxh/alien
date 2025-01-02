@@ -93,15 +93,6 @@ void CreatorWindow::processIntern()
                 &_stiffness);
         }
         
-        if (_mode == CreationMode_CreateCell) {
-            AlienImGui::SliderInt(
-                AlienImGui::SliderIntParameters()
-                    .name("Max connections")
-                    .max(MAX_CELL_BONDS)
-                    .textWidth(RightColumnWidth)
-                    .tooltip(Const::CellMaxConnectionTooltip),
-                &_maxConnections);
-        }
         if (_mode == CreationMode_CreateRectangle) {
             AlienImGui::InputInt(
                 AlienImGui::InputIntParameters().name("Horizontal cells").textWidth(RightColumnWidth).tooltip(Const::CreatorRectangleWidthTooltip),
@@ -197,7 +188,6 @@ void CreatorWindow::onDrawing()
                                                               .energy(_energy)
                                                               .stiffness(_stiffness)
                                                               .cellDistance(1.0f)
-                                                              .maxConnections(MAX_CELL_BONDS)
                                                               .color(EditorModel::get().getDefaultColorCode())
                                                               .barrier(_barrier));
     };
@@ -249,7 +239,6 @@ void CreatorWindow::createCell()
                     .setPos(getRandomPos())
                     .setEnergy(_energy)
                     .setStiffness(_stiffness)
-                    .setMaxConnections(_maxConnections)
                     .setColor(EditorModel::get().getDefaultColorCode())
                     .setBarrier(_barrier)
                     .setCreatureId(creatureId);
@@ -277,7 +266,6 @@ void CreatorWindow::createRectangle()
                                                   .energy(_energy)
                                                   .stiffness(_stiffness)
                                                   .removeStickiness(!_makeSticky)
-                                                  .maxConnections(MAX_CELL_BONDS)
                                                   .color(EditorModel::get().getDefaultColorCode())
                                                   .center(getRandomPos())
                                                   .barrier(_barrier));
@@ -296,7 +284,6 @@ void CreatorWindow::createHexagon()
                                                             .energy(_energy)
                                                             .stiffness(_stiffness)
                                                             .removeStickiness(!_makeSticky)
-                                                            .maxConnections(MAX_CELL_BONDS)
                                                             .color(EditorModel::get().getDefaultColorCode())
                                                             .center(getRandomPos())
                                                             .barrier(_barrier));
@@ -329,7 +316,6 @@ void CreatorWindow::createDisc()
                              .setEnergy(_energy)
                              .setStiffness(_stiffness)
                              .setPos(relPos)
-                             .setMaxConnections(MAX_CELL_BONDS)
                              .setColor(EditorModel::get().getDefaultColorCode())
                              .setBarrier(_barrier));
         }

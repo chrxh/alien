@@ -926,7 +926,6 @@ void GenomeEditorWindow::onCreateSpore()
                     .setPos(pos)
                     .setEnergy(energy)
                     .setStiffness(1.0f)
-                    .setMaxConnections(6)
                     .setColor(EditorModel::get().getDefaultColorCode())
                     .setCellFunction(ConstructorDescription().setGenome(genome));
     auto data = DataDescription().addCell(cell);

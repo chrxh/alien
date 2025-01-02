@@ -267,8 +267,7 @@ CellConnectionProcessor::lockAndtryAddConnections(SimulationData& data, Cell* ce
             }
         }
 
-        if (!alreadyConnected && cell1->numConnections < cell1->maxConnections
-            && cell2->numConnections < cell2->maxConnections) {
+        if (!alreadyConnected && cell1->numConnections < MAX_CELL_BONDS && cell2->numConnections < MAX_CELL_BONDS) {
 
             tryAddConnections(data, cell1, cell2, 0, 0, 0);
         }

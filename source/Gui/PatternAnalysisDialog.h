@@ -22,7 +22,6 @@ private:
 
     struct CellAnalysisDescription
     {
-        int maxConnections;
         int numConnections;
         bool constructionState;
         int color;
@@ -30,7 +29,7 @@ private:
 
         bool operator==(CellAnalysisDescription const& other) const
         {
-            return maxConnections == other.maxConnections && numConnections == other.numConnections && constructionState == other.constructionState
+            return numConnections == other.numConnections && constructionState == other.constructionState
                 && cellFunction == other.cellFunction && color == other.color;
         }
 
@@ -38,9 +37,6 @@ private:
 
         bool operator<(CellAnalysisDescription const& other) const
         {
-            if (maxConnections != other.maxConnections) {
-                return maxConnections < other.maxConnections;
-            }
             if (numConnections != other.numConnections) {
                 return numConnections < other.numConnections;
             }

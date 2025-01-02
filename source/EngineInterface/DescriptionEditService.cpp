@@ -21,7 +21,6 @@ DataDescription DescriptionEditService::createRect(CreateRectParameters const& p
                                .setPos({toFloat(i) * parameters._cellDistance, toFloat(j) * parameters._cellDistance})
                                .setEnergy(parameters._energy)
                                .setStiffness(parameters._stiffness)
-                               .setMaxConnections(parameters._maxConnections)
                                .setColor(parameters._color)
                                .setBarrier(parameters._barrier)
                                .setCreatureId(creatureId)
@@ -51,7 +50,6 @@ DataDescription DescriptionEditService::createHex(CreateHexParameters const& par
                                .setEnergy(parameters._energy)
                                .setStiffness(parameters._stiffness)
                                .setPos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
-                               .setMaxConnections(parameters._maxConnections)
                                .setColor(parameters._color)
                                .setBarrier(parameters._barrier)
                                .setCreatureId(creatureId));
@@ -63,7 +61,6 @@ DataDescription DescriptionEditService::createHex(CreateHexParameters const& par
                                    .setEnergy(parameters._energy)
                                    .setStiffness(parameters._stiffness)
                                    .setPos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(j * incY)})
-                                   .setMaxConnections(parameters._maxConnections)
                                    .setColor(parameters._color)
                                    .setBarrier(parameters._barrier)
                                    .setCreatureId(creatureId));
@@ -91,7 +88,6 @@ DataDescription DescriptionEditService::createUnconnectedCircle(CreateUnconnecte
                            .setPos(parameters._center)
                            .setEnergy(parameters._energy)
                            .setStiffness(parameters._stiffness)
-                           .setMaxConnections(parameters._maxConnections)
                            .setColor(parameters._color)
                            .setBarrier(parameters._barrier)
                            .setCreatureId(creatureId));
@@ -116,7 +112,6 @@ DataDescription DescriptionEditService::createUnconnectedCircle(CreateUnconnecte
                                .setEnergy(parameters._energy)
                                .setStiffness(parameters._stiffness)
                                .setPos({parameters._center.x + dxMod, parameters._center.y + dy})
-                               .setMaxConnections(parameters._maxConnections)
                                .setColor(parameters._color)
                                .setBarrier(parameters._barrier)
                                .setCreatureId(creatureId));
@@ -372,7 +367,7 @@ void DescriptionEditService::reconnectCells(DataDescription& data, float maxDist
         auto nearbyCellIndices = getCellIndicesWithinRadius(data, cellIndicesBySlot, cell.pos, maxDistance);
         for (auto const& nearbyCellIndex : nearbyCellIndices) {
             auto const& nearbyCell = data.cells.at(nearbyCellIndex);
-            if (cell.id != nearbyCell.id && cell.connections.size() < cell.maxConnections && nearbyCell.connections.size() < nearbyCell.maxConnections
+            if (cell.id != nearbyCell.id && cell.connections.size() < MAX_CELL_BONDS && nearbyCell.connections.size() < MAX_CELL_BONDS
                 && !cell.isConnectedTo(nearbyCell.id)) {
                 data.addConnection(cell.id, nearbyCell.id, &cache);
             }
@@ -383,7 +378,7 @@ void DescriptionEditService::reconnectCells(DataDescription& data, float maxDist
 void DescriptionEditService::removeStickiness(DataDescription& data)
 {
     for (auto& cell : data.cells) {
-        cell.maxConnections = toInt(cell.connections.size());
+        //#TODO introduce sticky flag
     }
 }
 

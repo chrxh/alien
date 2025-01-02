@@ -369,7 +369,6 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     result.vel = RealVector2D(cellTO.vel.x, cellTO.vel.y);
     result.energy = cellTO.energy;
     result.stiffness = cellTO.stiffness;
-    result.maxConnections = cellTO.maxConnections;
     std::vector<ConnectionDescription> connections;
     for (int i = 0; i < cellTO.numConnections; ++i) {
         auto const& connectionTO = cellTO.connections[i];
@@ -563,7 +562,6 @@ void DescriptionConverter::addCell(
     cellTO.energy = cellDesc.energy;
     checkAndCorrectInvalidEnergy(cellTO.energy);
     cellTO.stiffness = cellDesc.stiffness;
-    cellTO.maxConnections = cellDesc.maxConnections;
     cellTO.livingState = cellDesc.livingState;
     cellTO.creatureId = cellDesc.creatureId;
     cellTO.mutationId = cellDesc.mutationId;

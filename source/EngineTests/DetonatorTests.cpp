@@ -35,7 +35,6 @@ TEST_F(DetonatorTests, doNothing)
         {CellDescription()
              .setId(1)
              .setPos({10.0f, 10.0f})
-             .setMaxConnections(2)
             .setCellFunction(DetonatorDescription().setCountDown(14)),
     });
 
@@ -59,12 +58,10 @@ TEST_F(DetonatorTests, activateDetonator)
         {CellDescription()
              .setId(1)
              .setPos({10.0f, 10.0f})
-             .setMaxConnections(2)
              .setCellFunction(DetonatorDescription().setCountDown(10)),
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
-             .setMaxConnections(1)
              .setCellFunction(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);

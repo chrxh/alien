@@ -176,7 +176,6 @@ struct CellTO
 	float energy;
     float stiffness;
     uint8_t color;
-    uint8_t maxConnections;
     uint8_t numConnections;
     bool barrier;
     uint32_t age;

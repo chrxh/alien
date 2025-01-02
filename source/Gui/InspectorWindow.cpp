@@ -168,7 +168,6 @@ void _InspectorWindow::processCellBaseTab(CellDescription& cell)
                 AlienImGui::InputFloat(
                     AlienImGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(BaseTabTextWidth).tooltip(Const::CellStiffnessTooltip),
                     cell.stiffness);
-                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Max connections").textWidth(BaseTabTextWidth).tooltip(Const::CellMaxConnectionTooltip), cell.maxConnections);
                 AlienImGui::Checkbox(
                     AlienImGui::CheckboxParameters().name("Indestructible wall").textWidth(BaseTabTextWidth).tooltip(Const::CellIndestructibleTooltip), cell.barrier);
                 AlienImGui::InputText(
@@ -724,7 +723,6 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
 {
     auto const& parameters = _simulationFacade->getSimulationParameters();
 
-    cell.maxConnections = (cell.maxConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
     cell.stiffness = std::max(0.0f, std::min(1.0f, cell.stiffness));
     cell.energy = std::max(0.0f, cell.energy);
     switch (cell.getCellFunctionType()) {
@@ -751,10 +749,6 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
         if (constructor.activationMode < 0) {
             constructor.activationMode = 0;
         }
-        //if (constructor.maxConnections) {
-        //    constructor.maxConnections = (*constructor.maxConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
-        //}
-        //constructor.stiffness = std::max(0.0f, std::min(1.0f, constructor.stiffness));
         constructor.genomeGeneration = std::max(0, constructor.genomeGeneration);
     } break;
     case CellFunction_Sensor: {
