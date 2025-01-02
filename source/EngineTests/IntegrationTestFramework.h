@@ -7,6 +7,20 @@
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationParameters.h"
 
+namespace std
+{
+    template <>
+    struct hash<std::pair<uint64_t, uint64_t>>
+    {
+        size_t operator()(const std::pair<uint64_t, uint64_t>& p) const
+        {
+            auto hash1 = std::hash<uint64_t>{}(p.first);
+            auto hash2 = std::hash<uint64_t>{}(p.second);
+            return hash1 ^ (hash2 << 1);
+        }
+    };
+}
+
 class IntegrationTestFramework : public ::testing::Test
 {
 public:
@@ -18,6 +32,8 @@ protected:
 
     std::unordered_map<uint64_t, CellDescription> getCellById(DataDescription const& data) const;
     CellDescription getCell(DataDescription const& data, uint64_t id) const;
+
+    std::unordered_map<std::pair<uint64_t, uint64_t>, ConnectionDescription> getConnectionById(DataDescription const& data) const;
     ConnectionDescription getConnection(DataDescription const& data, uint64_t id, uint64_t otherId) const;
     bool hasConnection(DataDescription const& data, uint64_t id, uint64_t otherId) const;
     CellDescription getOtherCell(DataDescription const& data, uint64_t id) const;

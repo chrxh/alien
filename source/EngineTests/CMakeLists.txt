@@ -5,7 +5,7 @@ PUBLIC
     ConstructorTests.cpp
     DataTransferTests.cpp
     DefenderTests.cpp
-    DescriptionHelperTests.cpp
+    DescriptionEditTests.cpp
     DetonatorTests.cpp
     InjectorTests.cpp
     IntegrationTestFramework.cpp

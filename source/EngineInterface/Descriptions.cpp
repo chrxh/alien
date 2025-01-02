@@ -338,7 +338,9 @@ DataDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2,
             angleDiff1 += 360.0f;
         }
         auto angleDiff2 = connectionIt->angleFromPrevious;
-        auto index = std::distance(cell.connections.begin(), connectionIt);
+        if (connectionIt == cell.connections.begin()) {
+            connectionIt = cell.connections.end(); // connection at index 0 should be an invariant
+        }
 
         auto factor = (angleDiff2 != 0) ? angleDiff1 / angleDiff2 : 0.5f;
         newConnection.angleFromPrevious = toFloat(angleDiff2 * factor);
