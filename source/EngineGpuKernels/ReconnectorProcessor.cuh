@@ -96,8 +96,6 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
         lock.init(&cell->locked, &closestCell->locked);
         if (lock.tryLock()) {
             if (cell->numConnections < MAX_CELL_BONDS && closestCell->numConnections < MAX_CELL_BONDS) {
-                closestCell->maxConnections = min(max(closestCell->maxConnections, closestCell->numConnections + 1), MAX_CELL_BONDS);
-                cell->maxConnections = min(max(cell->maxConnections, cell->numConnections + 1), MAX_CELL_BONDS);
                 CellConnectionProcessor::scheduleAddConnectionPair(data, cell, closestCell);
                 cell->signal.channels[0] = 1;
                 statistics.incNumReconnectorCreated(cell->color);

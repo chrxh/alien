@@ -105,7 +105,6 @@ void ImageToPatternDialog::show()
                                          .setId(NumberGenerator::get().getId())
                                          .setEnergy(matchedCellIntensity * 200)
                                          .setPos({toFloat(x) + xOffset, toFloat(y)})
-                                         .setMaxConnections(MAX_CELL_BONDS)
                                          .setColor(matchedCellColor)
                                          .setBarrier(false));
                 }

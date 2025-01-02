@@ -19,7 +19,6 @@ public:
         MEMBER_DECLARATION(CreateRectParameters, float, stiffness, 1.0f);
         MEMBER_DECLARATION(CreateRectParameters, RealVector2D, center, RealVector2D({0, 0}));
         MEMBER_DECLARATION(CreateRectParameters, bool, removeStickiness, false);
-        MEMBER_DECLARATION(CreateRectParameters, int, maxConnections, 6);
         MEMBER_DECLARATION(CreateRectParameters, int, color, 0);
         MEMBER_DECLARATION(CreateRectParameters, bool, barrier, false);
         MEMBER_DECLARATION(CreateRectParameters, bool, randomCreatureId, true);
@@ -36,7 +35,6 @@ public:
         MEMBER_DECLARATION(CreateHexParameters, float, stiffness, 1.0f);
         MEMBER_DECLARATION(CreateHexParameters, RealVector2D, center, RealVector2D({0, 0}));
         MEMBER_DECLARATION(CreateHexParameters, bool, removeStickiness, false);
-        MEMBER_DECLARATION(CreateHexParameters, int, maxConnections, 6);
         MEMBER_DECLARATION(CreateHexParameters, int, color, 0);
         MEMBER_DECLARATION(CreateHexParameters, bool, barrier, false);
         MEMBER_DECLARATION(CreateHexParameters, bool, randomCreatureId, true);
@@ -50,7 +48,6 @@ public:
         MEMBER_DECLARATION(CreateUnconnectedCircleParameters, float, energy, 100.0f);
         MEMBER_DECLARATION(CreateUnconnectedCircleParameters, float, stiffness, 1.0f);
         MEMBER_DECLARATION(CreateUnconnectedCircleParameters, RealVector2D, center, RealVector2D({0, 0}));
-        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, int, maxConnections, 6);
         MEMBER_DECLARATION(CreateUnconnectedCircleParameters, int, color, 0);
         MEMBER_DECLARATION(CreateUnconnectedCircleParameters, bool, barrier, false);
         MEMBER_DECLARATION(CreateUnconnectedCircleParameters, bool, randomCreatureId, true);

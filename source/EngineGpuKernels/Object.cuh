@@ -218,7 +218,6 @@ struct Cell
     CellConnection connections[MAX_CELL_BONDS];
     float2 pos;
     float2 vel;
-    uint8_t maxConnections;
     uint8_t numConnections;
     float energy;
     float stiffness;

@@ -52,15 +52,12 @@ private:
     __inline__ __device__ static Cell* startNewConstruction(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
     __inline__ __device__ static Cell* continueConstruction(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
 
-    __inline__ __device__ static bool isConnectable(int numConnections, int maxConnections, bool adaptMaxConnections);
-
     __inline__ __device__ static Cell* constructCellIntern(
         SimulationData& data,
         SimulationStatistics& statistics,
         uint64_t& cellPointerIndex,
         Cell* hostCell,
         float2 const& newCellPos,
-        int maxConnections,
         ConstructionData const& constructionData);
 
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData);
@@ -328,7 +325,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
 {
     auto& constructor = hostCell->cellFunctionData.constructor;
 
-    if (!isConnectable(hostCell->numConnections, hostCell->maxConnections, true)) {
+    if (hostCell->numConnections == MAX_CELL_BONDS) {
         return nullptr;
     }
     auto anglesForNewConnection = CellConnectionProcessor::calcLargestGapReferenceAndActualAngle(data, hostCell, constructionData.angle);
@@ -357,7 +354,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     }
 
     uint64_t cellPointerIndex;
-    Cell* newCell = constructCellIntern(data, statistics, cellPointerIndex, hostCell, newCellPos, 0, constructionData);
+    Cell* newCell = constructCellIntern(data, statistics, cellPointerIndex, hostCell, newCellPos, constructionData);
 
     if (!newCell->tryLock()) {
         return nullptr;
@@ -374,8 +371,6 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     if (constructionData.isLastNodeOfLastRepetition || (constructionData.isLastNode && constructionData.hasInfiniteRepetitions)) {
         newCell->livingState = LivingState_Activating;
     }
-    hostCell->maxConnections = max(hostCell->numConnections, hostCell->maxConnections);
-    newCell->maxConnections = max(newCell->numConnections, newCell->maxConnections);
 
     newCell->releaseLock();
     return newCell;
@@ -472,7 +467,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
         return nullptr;
     }
     uint64_t cellPointerIndex;
-    Cell* newCell = constructCellIntern(data, statistics, cellPointerIndex, hostCell, newCellPos, 0, constructionData);
+    Cell* newCell = constructCellIntern(data, statistics, cellPointerIndex, hostCell, newCellPos, constructionData);
 
     if (!newCell->tryLock()) {
         return nullptr;
@@ -564,11 +559,8 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
             Cell* otherCell = otherCells[i];
 
             if (otherCell->tryLock()) {
-                if (isConnectable(newCell->numConnections, newCell->maxConnections, true)
-                    && isConnectable(otherCell->numConnections, otherCell->maxConnections, true)) {
-
+                if (newCell->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS) {
                     CellConnectionProcessor::tryAddConnections(data, newCell, otherCell, 0, 0, desiredDistance, constructionData.genomeHeader.angleAlignment);
-                    otherCell->maxConnections = max(otherCell->numConnections, otherCell->maxConnections);
                 }
                 otherCell->releaseLock();
             }
@@ -608,25 +600,9 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
             newCell->connections[hostIndex].angleFromPrevious = 360.0f - angleFromPreviousForNewCell - consumedAngle2;
         }
     }
-    hostCell->maxConnections = max(hostCell->numConnections, hostCell->maxConnections);
-    newCell->maxConnections = max(newCell->numConnections, newCell->maxConnections);
 
     newCell->releaseLock();
     return newCell;
-}
-
-__inline__ __device__ bool ConstructorProcessor::isConnectable(int numConnections, int maxConnections, bool adaptMaxConnections)
-{
-    if (!adaptMaxConnections) {
-        if (numConnections >= maxConnections) {
-            return false;
-        }
-    } else {
-        if (numConnections >= MAX_CELL_BONDS) {
-            return false;
-        }
-    }
-    return true;
 }
 
 __inline__ __device__ Cell*
@@ -636,7 +612,6 @@ ConstructorProcessor::constructCellIntern(
     uint64_t& cellPointerIndex,
     Cell* hostCell,
     float2 const& posOfNewCell,
-    int maxConnections,
     ConstructionData const& constructionData)
 {
     auto& constructor = hostCell->cellFunctionData.constructor;
@@ -650,7 +625,6 @@ ConstructorProcessor::constructCellIntern(
     result->stiffness = constructionData.genomeHeader.stiffness;
     result->pos = posOfNewCell;
     data.cellMap.correctPosition(result->pos);
-    result->maxConnections = maxConnections;
     result->numConnections = 0;
     result->livingState = LivingState_UnderConstruction;
     result->creatureId = constructor.offspringCreatureId;

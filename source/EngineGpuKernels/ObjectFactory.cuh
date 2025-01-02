@@ -95,7 +95,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->creatureId = cellTO.creatureId;
     cell->mutationId = cellTO.mutationId;
     cell->ancestorMutationId = cellTO.ancestorMutationId;
-    cell->maxConnections = cellTO.maxConnections;
     cell->energy = cellTO.energy;
     cell->stiffness = cellTO.stiffness;
     cell->cellFunction = cellTO.cellFunction;
@@ -272,7 +271,6 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->vel = vel;
     cell->energy = energy;
     cell->stiffness = _data->numberGen1.random();
-    cell->maxConnections = _data->numberGen1.random(MAX_CELL_BONDS);
     cell->numConnections = 0;
     cell->livingState = LivingState_Ready;
     cell->locked = 0;

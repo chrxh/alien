@@ -643,7 +643,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_CellFunctionUsed, data.cellFunctionUsed, defaultObject.cellFunctionUsed);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data.id, data.connections, data.pos, data.vel, data.energy, data.maxConnections, data.cellFunction, data.signal, data.metadata);
+        ar(data.id, data.connections, data.pos, data.vel, data.energy, data.cellFunction, data.signal, data.metadata);
     }
     SPLIT_SERIALIZATION(CellDescription)
 

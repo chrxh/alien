@@ -38,23 +38,19 @@ TEST_F(DefenderTests, attackerVsAntiAttacker)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setMaxConnections(2)
             .setCellFunction(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setMaxConnections(1)
             .setCellFunction(OscillatorDescription().setPulseMode(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
             .setPos({9.0f, 10.0f})
-            .setMaxConnections(2)
             .setCellFunction(OscillatorDescription()),
         CellDescription()
             .setId(4)
             .setPos({7.0f, 10.0f})
-            .setMaxConnections(2)
             .setCellFunction(DefenderDescription().setMode(DefenderMode_DefendAgainstAttacker)),
     });
     data.addConnection(1, 2);
@@ -81,19 +77,16 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setMaxConnections(2)
             .setCellFunction(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setMaxConnections(1)
             .setCellFunction(OscillatorDescription().setPulseMode(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setCellFunction(OscillatorDescription()),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellFunction(OscillatorDescription()),
         CellDescription()
             .setId(4)
             .setPos({7.0f, 10.0f})
-            .setMaxConnections(2)
             .setCellFunction(DefenderDescription().setMode(DefenderMode_DefendAgainstInjector)),
     });
     data.addConnection(1, 2);
@@ -122,19 +115,16 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setMaxConnections(2)
             .setCellFunction(InjectorDescription().setMode(InjectorMode_InjectAll).setGenome(genome)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setMaxConnections(1)
             .setCellFunction(OscillatorDescription().setPulseMode(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setCellFunction(ConstructorDescription()),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellFunction(ConstructorDescription()),
         CellDescription()
             .setId(4)
             .setPos({7.0f, 10.0f})
-            .setMaxConnections(2)
             .setCellFunction(DefenderDescription().setMode(DefenderMode_DefendAgainstAttacker)),
     });
     data.addConnection(1, 2);
@@ -170,19 +160,16 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setMaxConnections(2)
             .setCellFunction(InjectorDescription().setMode(InjectorMode_InjectAll).setGenome(genome)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setMaxConnections(1)
             .setCellFunction(OscillatorDescription().setPulseMode(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setCellFunction(ConstructorDescription()),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellFunction(ConstructorDescription()),
         CellDescription()
             .setId(4)
             .setPos({7.0f, 10.0f})
-            .setMaxConnections(2)
             .setCellFunction(DefenderDescription().setMode(DefenderMode_DefendAgainstInjector)),
     });
     data.addConnection(1, 2);

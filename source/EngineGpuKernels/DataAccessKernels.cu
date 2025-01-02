@@ -26,7 +26,6 @@ namespace
         cellTO.barrier = cell->barrier;
         cellTO.energy = cell->energy;
         cellTO.stiffness = cell->stiffness;
-        cellTO.maxConnections = cell->maxConnections;
         cellTO.numConnections = cell->numConnections;
         cellTO.livingState = cell->livingState;
         cellTO.creatureId = cell->creatureId;

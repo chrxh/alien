@@ -48,7 +48,6 @@ private:
     bool _barrier = false;
     float _cellDistance = 1.0f;
     bool _makeSticky = false;
-    int _maxConnections = 6;
 
     //rectangle
     int _rectHorizontalCells = 10;

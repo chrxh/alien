@@ -43,8 +43,8 @@ TEST_P(LivingStateTransitionTests, ready_ready)
 
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setPos({10.0f, 10.0f}).setMaxConnections(1).setLivingState(LivingState_Ready),
-        CellDescription().setId(2).setPos({11.0f, 10.0f}).setMaxConnections(1).setLivingState(LivingState_Ready),
+        CellDescription().setId(1).setPos({10.0f, 10.0f}).setLivingState(LivingState_Ready),
+        CellDescription().setId(2).setPos({11.0f, 10.0f}).setLivingState(LivingState_Ready),
     });
     data.addConnection(1, 2);
 
@@ -62,8 +62,8 @@ TEST_P(LivingStateTransitionTests, ready_dying)
 
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setPos({10.0f, 10.0f}).setMaxConnections(1).setLivingState(LivingState_Ready),
-        CellDescription().setId(2).setPos({11.0f, 10.0f}).setMaxConnections(1).setLivingState(LivingState_Dying),
+        CellDescription().setId(1).setPos({10.0f, 10.0f}).setLivingState(LivingState_Ready),
+        CellDescription().setId(2).setPos({11.0f, 10.0f}).setLivingState(LivingState_Dying),
     });
     data.addConnection(1, 2);
 
@@ -81,8 +81,8 @@ TEST_P(LivingStateTransitionTests, ready_detaching)
 
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setPos({10.0f, 10.0f}).setMaxConnections(1).setLivingState(LivingState_Ready),
-        CellDescription().setId(2).setPos({11.0f, 10.0f}).setMaxConnections(1).setLivingState(LivingState_Detaching),
+        CellDescription().setId(1).setPos({10.0f, 10.0f}).setLivingState(LivingState_Ready),
+        CellDescription().setId(2).setPos({11.0f, 10.0f}).setLivingState(LivingState_Detaching),
     });
     data.addConnection(1, 2);
 
@@ -118,12 +118,10 @@ TEST_P(LivingStateTransitionTests, ready_detaching_onSelfReplicator)
             .setId(1)
             .setCellFunction(ConstructorDescription().setGenome(genome))
             .setPos({10.0f, 10.0f})
-            .setMaxConnections(1)
             .setLivingState(LivingState_Ready),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setMaxConnections(1)
             .setLivingState(LivingState_Detaching),
     });
     data.addConnection(1, 2);
@@ -151,8 +149,8 @@ TEST_P(LivingStateTransitionTests, ready_detaching_differentCreature)
 
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setPos({10.0f, 10.0f}).setMaxConnections(1).setCreatureId(1).setLivingState(LivingState_Ready),
-        CellDescription().setId(2).setPos({11.0f, 10.0f}).setMaxConnections(1).setCreatureId(2).setLivingState(LivingState_Detaching),
+        CellDescription().setId(1).setPos({10.0f, 10.0f}).setCreatureId(1).setLivingState(LivingState_Ready),
+        CellDescription().setId(2).setPos({11.0f, 10.0f}).setCreatureId(2).setLivingState(LivingState_Detaching),
     });
     data.addConnection(1, 2);
 
@@ -179,8 +177,8 @@ TEST_P(LivingStateTransitionTests, detaching_reviving)
 
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setPos({10.0f, 10.0f}).setMaxConnections(1).setLivingState(LivingState_Detaching),
-        CellDescription().setId(2).setPos({11.0f, 10.0f}).setMaxConnections(1).setLivingState(LivingState_Reviving),
+        CellDescription().setId(1).setPos({10.0f, 10.0f}).setLivingState(LivingState_Detaching),
+        CellDescription().setId(2).setPos({11.0f, 10.0f}).setLivingState(LivingState_Reviving),
     });
     data.addConnection(1, 2);
 
@@ -207,8 +205,8 @@ TEST_P(LivingStateTransitionTests, underConstruction_activating)
 
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setPos({10.0f, 10.0f}).setMaxConnections(1).setLivingState(LivingState_UnderConstruction),
-        CellDescription().setId(2).setPos({11.0f, 10.0f}).setMaxConnections(1).setLivingState(LivingState_Activating),
+        CellDescription().setId(1).setPos({10.0f, 10.0f}).setLivingState(LivingState_UnderConstruction),
+        CellDescription().setId(2).setPos({11.0f, 10.0f}).setLivingState(LivingState_Activating),
     });
     data.addConnection(1, 2);
 
@@ -226,7 +224,7 @@ TEST_P(LivingStateTransitionTests, noDyingForBarrierCells)
 
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setBarrier(true).setPos({10.0f, 10.0f}).setMaxConnections(1).setLivingState(LivingState_Dying),
+        CellDescription().setId(1).setBarrier(true).setPos({10.0f, 10.0f}).setLivingState(LivingState_Dying),
     });
 
     _simulationFacade->setSimulationData(data);

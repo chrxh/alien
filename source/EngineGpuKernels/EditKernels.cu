@@ -175,7 +175,7 @@ __global__ void cudaScheduleConnectSelection(SimulationData data, bool considerW
                     return;
                 }
             }
-            if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections) {
+            if (cell->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS) {
                 CellConnectionProcessor::scheduleAddConnectionPair(data, cell, otherCell);
                 atomicExch(result, 1);
             }
@@ -330,7 +330,7 @@ __global__ void cudaMakeSticky(SimulationData data, bool includeClusters)
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = data.objects.cellPointers.at(index);
         if (isSelected(cell, includeClusters)) {
-            cell->maxConnections = MAX_CELL_BONDS;
+            //#TODO introduce sticky flag
         }
     }
 }
@@ -341,7 +341,7 @@ __global__ void cudaRemoveStickiness(SimulationData data, bool includeClusters)
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = data.objects.cellPointers.at(index);
         if (isSelected(cell, includeClusters)) {
-            cell->maxConnections = cell->numConnections;
+            //#TODO introduce sticky flag
         }
     }
 }

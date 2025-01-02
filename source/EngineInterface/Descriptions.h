@@ -388,7 +388,6 @@ struct CellDescription
     float energy = 100.0f;
     float stiffness = 1.0f;
     int color = 0;
-    int maxConnections = 0;
     bool barrier = false;
     int age = 0;
     LivingState livingState = LivingState_Ready;
@@ -451,11 +450,6 @@ struct CellDescription
         return *this;
     }
 
-    CellDescription& setMaxConnections(int value)
-    {
-        maxConnections = value;
-        return *this;
-    }
     CellDescription& setConnectingCells(std::vector<ConnectionDescription> const& value)
     {
         connections = value;
