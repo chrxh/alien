@@ -161,12 +161,26 @@ TEST_F(SignalTests_New, forkSignals)
     EXPECT_EQ(2, cell3.signal->prevCellIds[0]);
 }
 
-TEST_F(SignalTests_New, routeSignal)
+enum class AngleRange
 {
+    Start, End
+};
+
+class SignalTests_BothSides_New
+    : public SignalTests_New
+    , public testing::WithParamInterface<AngleRange>
+{
+};
+
+INSTANTIATE_TEST_SUITE_P(SignalTests_BothSides_New, SignalTests_BothSides_New, ::testing::Values(AngleRange::Start, AngleRange::End));
+
+TEST_P(SignalTests_BothSides_New, routeSignalOnRight_sharpMatch)
+{
+    auto side = GetParam();
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
     auto data = DataDescription().addCells({
         CellDescription().setId(1).setPos({0, 0}),
-        CellDescription().setId(2).setPos({1, 0}).setSignal(signal).setSignalRoutingRestriction(0, 90.0f),
+        CellDescription().setId(2).setPos({1, 0}).setSignal(signal).setSignalRoutingRestriction(side == AngleRange::Start ? -45.0f : 45.0f, 90.0f),
         CellDescription().setId(3).setPos({2, 0}),
     });
     data.addConnection(1, 2);
@@ -189,4 +203,32 @@ TEST_F(SignalTests_New, routeSignal)
     EXPECT_TRUE(approxCompare(signal, cell3.signal->channels));
     EXPECT_EQ(1, cell3.signal->prevCellIds.size());
     EXPECT_EQ(2, cell3.signal->prevCellIds[0]);
+}
+
+TEST_P(SignalTests_BothSides_New, routeSignalOnRight_sharpMismatch)
+{
+    auto side = GetParam();
+    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
+    auto data = DataDescription().addCells({
+        CellDescription().setId(1).setPos({0, 0}),
+        CellDescription().setId(2).setPos({1, 0}).setSignal(signal).setSignalRoutingRestriction(side == AngleRange::Start ? -46.0f : 46.0f, 90.0f),
+        CellDescription().setId(3).setPos({2, 0}),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualCellById = getCellById(actualData);
+
+    auto cell1 = actualCellById.at(1);
+    EXPECT_FALSE(cell1.signal.has_value());
+
+    auto cell2 = actualCellById.at(2);
+    EXPECT_FALSE(cell2.signal.has_value());
+
+    auto cell3 = actualCellById.at(3);
+    EXPECT_FALSE(cell3.signal.has_value());
 }
