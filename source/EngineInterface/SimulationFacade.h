@@ -104,7 +104,8 @@ public:
 
     virtual float getTps() const = 0;
 
-    //for tests
+    // for tests
     virtual void testOnly_mutate(uint64_t cellId, MutationType mutationType) = 0;
     virtual void testOnly_mutationCheck(uint64_t cellId) = 0;
+    virtual void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2) = 0;
 };

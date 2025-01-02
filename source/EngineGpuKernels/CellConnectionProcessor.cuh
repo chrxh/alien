@@ -392,9 +392,6 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
     }
     cell1->connections[index] = newConnection;
     cell1->connections[(index + 1) % (cell1->numConnections + 1)].angleFromPrevious = refAngle - angleFromPrevious;
-    if (cell1->signalRoutingRestriction.active && index == cell1->signalRoutingRestriction.refConnectionIndex) {
-        ++cell1->signalRoutingRestriction.refConnectionIndex;
-    }
 
     // align angles
     if (angleAlignment != ConstructorAngleAlignment_None) {

@@ -503,6 +503,12 @@ void EngineWorker::testOnly_mutationCheck(uint64_t cellId)
     _simulationCudaFacade->testOnly_mutationCheck(cellId);
 }
 
+void EngineWorker::testOnly_createConnection(uint64_t cellId1, uint64_t cellId2)
+{
+    EngineWorkerGuard access(this);
+    _simulationCudaFacade->testOnly_createConnection(cellId1, cellId2);
+}
+
 DataTO EngineWorker::provideTO()
 {
     return _dataTOCache->getDataTO(_simulationCudaFacade->getArraySizes());

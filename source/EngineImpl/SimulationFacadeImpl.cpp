@@ -382,3 +382,8 @@ void _SimulationFacadeImpl::testOnly_mutationCheck(uint64_t cellId)
 {
     _worker.testOnly_mutationCheck(cellId);
 }
+
+void _SimulationFacadeImpl::testOnly_createConnection(uint64_t cellId1, uint64_t cellId2)
+{
+    _worker.testOnly_createConnection(cellId1, cellId2);
+}

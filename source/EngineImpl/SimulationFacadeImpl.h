@@ -116,6 +116,7 @@ public:
     // for tests only
     void testOnly_mutate(uint64_t cellId, MutationType mutationType) override;
     void testOnly_mutationCheck(uint64_t cellId) override;
+    void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2) override;
 
 private:
     bool _selectionNeedsUpdate = false;

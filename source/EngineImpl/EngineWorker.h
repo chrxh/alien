@@ -115,6 +115,7 @@ public:
     // for tests only
     void testOnly_mutate(uint64_t cellId, MutationType mutationType);
     void testOnly_mutationCheck(uint64_t cellId);
+    void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2);
 
 private:
     DataTO provideTO(); 
