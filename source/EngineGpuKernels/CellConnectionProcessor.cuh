@@ -386,6 +386,9 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
     if (index == 0) {
         index = cell1->numConnections;  // connection at index 0 should be an invariant
     }
+    if (index == 0) {
+        index = cell1->numConnections;  // connection at index 0 should be an invariant
+    }
     for (int j = cell1->numConnections; j > index; --j) {
         cell1->connections[j] = cell1->connections[j - 1];
     }
