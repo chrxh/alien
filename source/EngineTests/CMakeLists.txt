@@ -1,7 +1,7 @@
 target_sources(EngineTests
 PUBLIC
     AttackerTests.cpp
-    CellConnectionTests.cpp
+    CellConnectionTests_New.cpp
     ConstructorTests.cpp
     DataTransferTests.cpp
     DefenderTests.cpp

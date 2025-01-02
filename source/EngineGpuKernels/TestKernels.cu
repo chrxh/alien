@@ -52,6 +52,32 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t cellId, MutationTyp
     }
 }
 
+__global__ void cudaTestCreateConnection(SimulationData data, uint64_t cellId1, uint64_t cellId2)
+{
+    CUDA_CHECK(blockDim.x == 1 && gridDim.x == 1);
+
+    auto& cells = data.objects.cellPointers;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+    Cell* cell1 = nullptr;
+    Cell* cell2 = nullptr;
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (cell->id == cellId1) {
+            cell1 = cell;
+        }
+        if (cell->id == cellId2) {
+            cell2 = cell;
+        }
+    }
+
+    if (cell1 != nullptr && cell2 != nullptr) {
+        data.prepareForNextTimestep();
+        CellConnectionProcessor::scheduleAddConnectionPair(data, cell1, cell2);
+        data.structuralOperations.saveNumEntries();
+        CellConnectionProcessor::processAddOperations(data);
+    }
+}
+
 __global__ void cudaTestMutationCheck(SimulationData data, uint64_t cellId)
 {
     auto& cells = data.objects.cellPointers;

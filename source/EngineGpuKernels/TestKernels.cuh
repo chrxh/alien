@@ -8,3 +8,5 @@
 
 __global__ void cudaTestMutate(SimulationData data, uint64_t cellId, MutationType mutationType);
 __global__ void cudaTestMutationCheck(SimulationData data, uint64_t cellId);
+__global__ void cudaTestMutate(SimulationData data, uint64_t cellId, MutationType mutationType);
+__global__ void cudaTestCreateConnection(SimulationData data, uint64_t cellId1, uint64_t cellId2);

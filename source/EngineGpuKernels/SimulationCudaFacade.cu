@@ -484,15 +484,7 @@ void _SimulationCudaFacade::resizeArraysIfNecessary(ArraySizes const& additional
 
 void _SimulationCudaFacade::testOnly_mutate(uint64_t cellId, MutationType mutationType)
 {
-    {
-        std::lock_guard lock(_mutexForSimulationParameters);
-        if (_newSimulationParameters) {
-            _settings.simulationParameters = *_newSimulationParameters;
-            CHECK_FOR_CUDA_ERROR(
-                cudaMemcpyToSymbol(cudaSimulationParameters, &*_newSimulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
-            _newSimulationParameters.reset();
-        }
-    }
+    checkAndProcessSimulationParameterChanges();
     _testKernels->testOnly_mutate(_settings.gpuSettings, getSimulationDataIntern(), cellId, mutationType);
     syncAndCheck();
 
@@ -501,16 +493,15 @@ void _SimulationCudaFacade::testOnly_mutate(uint64_t cellId, MutationType mutati
 
 void _SimulationCudaFacade::testOnly_mutationCheck(uint64_t cellId)
 {
-    {
-        std::lock_guard lock(_mutexForSimulationParameters);
-        if (_newSimulationParameters) {
-            _settings.simulationParameters = *_newSimulationParameters;
-            CHECK_FOR_CUDA_ERROR(
-                cudaMemcpyToSymbol(cudaSimulationParameters, &*_newSimulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
-            _newSimulationParameters.reset();
-        }
-    }
+    checkAndProcessSimulationParameterChanges();
     _testKernels->testOnly_mutationCheck(_settings.gpuSettings, getSimulationDataIntern(), cellId);
+    syncAndCheck();
+}
+
+void _SimulationCudaFacade::testOnly_createConnection(uint64_t cellId1, uint64_t cellId2)
+{
+    checkAndProcessSimulationParameterChanges();
+    _testKernels->testOnly_createConnection(_settings.gpuSettings, getSimulationDataIntern(), cellId1, cellId2);
     syncAndCheck();
 }
 
