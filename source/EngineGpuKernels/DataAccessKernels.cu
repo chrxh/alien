@@ -37,7 +37,6 @@ namespace
         cellTO.color = cell->color;
         cellTO.age = cell->age;
         cellTO.signalRoutingRestriction.active = cell->signalRoutingRestriction.active;
-        cellTO.signalRoutingRestriction.refConnectionIndex = cell->signalRoutingRestriction.refConnectionIndex;
         cellTO.signalRoutingRestriction.baseAngle = cell->signalRoutingRestriction.baseAngle;
         cellTO.signalRoutingRestriction.openingAngle = cell->signalRoutingRestriction.openingAngle;
         cellTO.signal.active = cell->signal.active;

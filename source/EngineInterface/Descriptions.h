@@ -343,7 +343,6 @@ using CellFunctionDescription = std::optional<std::variant<
 
 struct SignalRoutingRestrictionDescription
 {
-    uint8_t refConnectionIndex = 0;
     float baseAngle = 0;
     float openingAngle = 0;
 
