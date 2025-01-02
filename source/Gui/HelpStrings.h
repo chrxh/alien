@@ -51,8 +51,8 @@ namespace Const
         "0 (no match) or 1 (match)\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #1: density of the last match\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #2: distance "
         "of the last match (0 = far away, 1 = close)\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #3: angle of the last match";
 
-    std::string const NerveTooltip =
-        "By default, a nerve cell forwards signals from connected cells (and summing it up if "
+    std::string const OscillatorTooltip =
+        "By default, a oscillator cell forwards signals from connected cells (and summing it up if "
         "there are multiple such cells) and thus directly providing it as input to other cells. Independently of this, one can specify "
         "that it also generates a signal in channel #0 at regular intervals. This can be used to trigger other sensor cells, "
         "attacker cells, etc.";
@@ -215,17 +215,17 @@ namespace Const
     std::string const GenomeSensorMinRangeTooltip = "If activated, the sensor detects only objects with a distance equal or greater than the specified value.";
     std::string const GenomeSensorMaxRangeTooltip = "If activated, the sensor detects only objects with a distance equal or less than the specified value.";
 
-    std::string const GenomeNerveGeneratePulsesTooltip = "If enabled, a signal in channel #0 will be generated at regular time intervals.";
+    std::string const GenomeOscillatorGeneratePulsesTooltip = "If enabled, a signal in channel #0 will be generated at regular time intervals.";
 
-    std::string const GenomeNervePulseIntervalTooltip =
+    std::string const GenomeOscillatorPulseIntervalTooltip =
         "The intervals between two pulses can be set here. It is specified in cycles, which corresponds to 6 time steps each.";
 
-    std::string const GenomeNerveAlternatingPulsesTooltip =
+    std::string const GenomeOscillatorAlternatingPulsesTooltip =
         "By default, the generated pulses consist of a positive value in channel #0. When 'Alternating pulses' is enabled, the "
         "sign of this value alternates at specific time intervals. This can be used, for example, to easily create signals for back-and-forth movements or "
         "bending in muscle cells.";
 
-    std::string const GenomeNervePulsesPerPhaseTooltip = "This value indicates the number of pulses until the sign will be changed in channel #0.";
+    std::string const GenomeOscillatorPulsesPerPhaseTooltip = "This value indicates the number of pulses until the sign will be changed in channel #0.";
 
     std::string const GenomeAttackerEnergyDistributionTooltip =
         "Attacker cells can distribute the acquired energy through two different methods. The energy distribution is analogous to "
@@ -386,8 +386,8 @@ namespace Const
             return Const::ConstructorTooltip;
         case CellFunction_Sensor:
             return Const::SensorTooltip;
-        case CellFunction_Nerve:
-            return Const::NerveTooltip;
+        case CellFunction_Oscillator:
+            return Const::OscillatorTooltip;
         case CellFunction_Attacker:
             return Const::AttackerTooltip;
         case CellFunction_Injector:

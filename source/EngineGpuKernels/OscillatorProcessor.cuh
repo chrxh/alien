@@ -9,7 +9,7 @@
 #include "SignalProcessor.cuh"
 #include "SimulationStatistics.cuh"
 
-class NerveProcessor
+class OscillatorProcessor
 {
 public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
@@ -19,24 +19,24 @@ public:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void NerveProcessor::process(SimulationData& data, SimulationStatistics& statistics)
+__inline__ __device__ void OscillatorProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
-    auto& operations = data.cellFunctionOperations[CellFunction_Nerve];
+    auto& operations = data.cellFunctionOperations[CellFunction_Oscillator];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         auto const& operation = operations.at(i);
         auto const& cell = operation.cell;
 
-        auto const& nerve = cell->cellFunctionData.nerve;
-        if (nerve.pulseMode > 0 && cell->age % nerve.pulseMode == 0) {
+        auto const& oscillator = cell->cellFunctionData.oscillator;
+        if (oscillator.pulseMode > 0 && cell->age % oscillator.pulseMode == 0) {
             if (!cell->signal.active) {
                 SignalProcessor::createEmptySignal(cell);
             }
-            statistics.incNumNervePulses(cell->color);
-            if (nerve.alternationMode == 0) {
+            statistics.incNumOscillatorPulses(cell->color);
+            if (oscillator.alternationMode == 0) {
                 cell->signal.channels[0] += 1.0f;
             } else {
-                auto evenPulse = cell->age % (nerve.pulseMode * nerve.alternationMode * 2) < nerve.pulseMode * nerve.alternationMode;
+                auto evenPulse = cell->age % (oscillator.pulseMode * oscillator.alternationMode * 2) < oscillator.pulseMode * oscillator.alternationMode;
                 cell->signal.channels[0] += evenPulse ? 1.0f : -1.0f;
             }
         }

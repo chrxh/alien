@@ -714,9 +714,9 @@ ConstructorProcessor::constructCellIntern(
         result->cellFunctionData.sensor.memoryTargetX = 0;
         result->cellFunctionData.sensor.memoryTargetY = 0;
     } break;
-    case CellFunction_Nerve: {
-        result->cellFunctionData.nerve.pulseMode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
-        result->cellFunctionData.nerve.alternationMode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
+    case CellFunction_Oscillator: {
+        result->cellFunctionData.oscillator.pulseMode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
+        result->cellFunctionData.oscillator.alternationMode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
     } break;
     case CellFunction_Attacker: {
         result->cellFunctionData.attacker.mode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % EnergyDistributionMode_Count;

@@ -37,6 +37,7 @@ namespace
         cellTO.color = cell->color;
         cellTO.age = cell->age;
         cellTO.signalRoutingRestriction.active = cell->signalRoutingRestriction.active;
+        cellTO.signalRoutingRestriction.connectionIndex = cell->signalRoutingRestriction.connectionIndex;
         cellTO.signalRoutingRestriction.baseAngle = cell->signalRoutingRestriction.baseAngle;
         cellTO.signalRoutingRestriction.openingAngle = cell->signalRoutingRestriction.openingAngle;
         cellTO.signal.active = cell->signal.active;
@@ -127,9 +128,9 @@ namespace
             cellTO.cellFunctionData.sensor.memoryTargetX = cell->cellFunctionData.sensor.memoryTargetX;
             cellTO.cellFunctionData.sensor.memoryTargetY = cell->cellFunctionData.sensor.memoryTargetY;
         } break;
-        case CellFunction_Nerve: {
-            cellTO.cellFunctionData.nerve.pulseMode = cell->cellFunctionData.nerve.pulseMode;
-            cellTO.cellFunctionData.nerve.alternationMode = cell->cellFunctionData.nerve.alternationMode;
+        case CellFunction_Oscillator: {
+            cellTO.cellFunctionData.oscillator.pulseMode = cell->cellFunctionData.oscillator.pulseMode;
+            cellTO.cellFunctionData.oscillator.alternationMode = cell->cellFunctionData.oscillator.alternationMode;
         } break;
         case CellFunction_Attacker: {
             cellTO.cellFunctionData.attacker.mode = cell->cellFunctionData.attacker.mode;

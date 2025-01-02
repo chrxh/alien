@@ -128,7 +128,7 @@ struct SensorFunction
     float memoryTargetY;
 };
 
-struct NerveFunction
+struct OscillatorFunction
 {
     uint8_t pulseMode;   //0 = none, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
     uint8_t alternationMode;  //0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
@@ -183,7 +183,7 @@ union CellFunctionData
     TransmitterFunction transmitter;
     ConstructorFunction constructor;
     SensorFunction sensor;
-    NerveFunction nerve;
+    OscillatorFunction oscillator;
     AttackerFunction attacker;
     InjectorFunction injector;
     MuscleFunction muscle;
@@ -195,6 +195,7 @@ union CellFunctionData
 struct SignalRoutingRestriction
 {
     bool active;
+    int connectionIndex;
     float baseAngle;
     float openingAngle;
 };

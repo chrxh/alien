@@ -256,7 +256,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_constructionNotBui
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(2)
             .setCellFunction(ConstructorDescription().setGenome(genome).setNumInheritedGenomeNodes(4)),
-        CellDescription().setId(2).setPos({11.0f, 10.0f}).setEnergy(100).setMaxConnections(2).setCellFunction(NerveDescription()),
+        CellDescription().setId(2).setPos({11.0f, 10.0f}).setEnergy(100).setMaxConnections(2).setCellFunction(OscillatorDescription()),
         CellDescription()
             .setId(3)
             .setPos({12.0f, 10.0f})
@@ -292,7 +292,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_repeatedConstructi
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(2)
             .setCellFunction(ConstructorDescription().setGenome(genome).setNumInheritedGenomeNodes(5)),
-        CellDescription().setId(2).setPos({11.0f, 10.0f}).setEnergy(100).setMaxConnections(2).setCellFunction(NerveDescription()),
+        CellDescription().setId(2).setPos({11.0f, 10.0f}).setEnergy(100).setMaxConnections(2).setCellFunction(OscillatorDescription()),
         CellDescription()
             .setId(3)
             .setPos({12.0f, 10.0f})
@@ -331,7 +331,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_constructionBuilt)
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(2)
             .setCellFunction(ConstructorDescription().setGenome(genome).setNumInheritedGenomeNodes(4)),
-        CellDescription().setId(2).setPos({11.0f, 10.0f}).setEnergy(100).setMaxConnections(2).setCellFunction(NerveDescription()),
+        CellDescription().setId(2).setPos({11.0f, 10.0f}).setEnergy(100).setMaxConnections(2).setCellFunction(OscillatorDescription()),
         CellDescription()
             .setId(3)
             .setPos({12.0f, 10.0f})
@@ -371,7 +371,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_infiniteConstructi
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setMaxConnections(2)
             .setCellFunction(ConstructorDescription().setGenome(genome).setNumInheritedGenomeNodes(4)),
-        CellDescription().setId(2).setPos({11.0f, 10.0f}).setEnergy(100).setMaxConnections(2).setCellFunction(NerveDescription()),
+        CellDescription().setId(2).setPos({11.0f, 10.0f}).setEnergy(100).setMaxConnections(2).setCellFunction(OscillatorDescription()),
         CellDescription()
             .setId(3)
             .setPos({12.0f, 10.0f})
@@ -442,35 +442,35 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_thinCluster)
             .setPos({10.0f, 9.0f})
             .setEnergy(100)
             .setMaxConnections(2)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setCreatureId(1),
         CellDescription()
             .setId(3)
             .setPos({10.0f, 8.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setCreatureId(1),
         CellDescription()
             .setId(4)
             .setPos({10.0f, 11.0f})
             .setEnergy(100)
             .setMaxConnections(2)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setCreatureId(1),
         CellDescription()
             .setId(5)
             .setPos({10.0f, 12.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setCreatureId(1),
         CellDescription()
             .setId(6)
             .setPos({11.0f, 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setCreatureId(2),
     });
     data.addConnection(1, 2);
@@ -677,7 +677,7 @@ TEST_F(ConstructorTests, constructFirstCell_manualConstruction)
              .setPos({11.0f, 10.0f})
              .setEnergy(100)
              .setMaxConnections(1)
-             .setCellFunction(NerveDescription())
+             .setCellFunction(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})
     });
     data.addConnection(1, 2);
@@ -716,7 +716,7 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle1)
              .setPos({11.0f, 10.0f})
              .setEnergy(100)
              .setMaxConnections(1)
-             .setCellFunction(NerveDescription())
+             .setCellFunction(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -749,7 +749,7 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle2)
              .setPos({11.0f, 10.0f})
              .setEnergy(100)
              .setMaxConnections(1)
-             .setCellFunction(NerveDescription())
+             .setCellFunction(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -832,10 +832,10 @@ TEST_F(ConstructorTests, constructConstructorCell)
     EXPECT_EQ(constructorGenome.getGenomeData(), actualConstructor.genome);
 }
 
-TEST_F(ConstructorTests, constructNerveCell)
+TEST_F(ConstructorTests, constructOscillatorCell)
 {
-    auto nerveDesc = NerveGenomeDescription().setPulseMode(2).setAlternationMode(4);
-    auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setCellFunction(nerveDesc)}));
+    auto oscillatorDesc = OscillatorGenomeDescription().setPulseMode(2).setAlternationMode(4);
+    auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setCellFunction(oscillatorDesc)}));
 
     DataDescription data;
     data.addCell(CellDescription()
@@ -850,11 +850,11 @@ TEST_F(ConstructorTests, constructNerveCell)
 
     ASSERT_EQ(2, actualData.cells.size());
     auto actualConstructedCell = getOtherCell(actualData, 1);
-    auto actualNerve = std::get<NerveDescription>(*actualConstructedCell.cellFunction);
+    auto actualOscillator = std::get<OscillatorDescription>(*actualConstructedCell.cellFunction);
 
-    EXPECT_EQ(CellFunction_Nerve, actualConstructedCell.getCellFunctionType());
-    EXPECT_EQ(nerveDesc.pulseMode, actualNerve.pulseMode);
-    EXPECT_EQ(nerveDesc.alternationMode, actualNerve.alternationMode);
+    EXPECT_EQ(CellFunction_Oscillator, actualConstructedCell.getCellFunctionType());
+    EXPECT_EQ(oscillatorDesc.pulseMode, actualOscillator.pulseMode);
+    EXPECT_EQ(oscillatorDesc.alternationMode, actualOscillator.alternationMode);
 }
 
 TEST_F(ConstructorTests, constructAttackerCell)
@@ -1141,7 +1141,7 @@ TEST_F(ConstructorTests, constructSecondCell_separation)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1185,7 +1185,7 @@ TEST_F(ConstructorTests, constructSecondCell_constructionStateTransitions)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1238,7 +1238,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1290,7 +1290,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSpace)
             .setPos({10.0f - 1.0f - _parameters.cellMinDistance/2, 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1329,7 +1329,7 @@ TEST_F(ConstructorTests, constructSecondCell_notFinished)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1371,7 +1371,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle1)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1418,7 +1418,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1495,14 +1495,14 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_upperPart)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(2)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
         CellDescription()
             .setId(3)
             .setPos({10.0f - getConstructorOffspringDistance(), 9.0f})
             .setEnergy(100)
             .setMaxConnections(2)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
         CellDescription().setId(4).setPos({10.0f, 9.5f}).setEnergy(_parameters.cellNormalEnergy[0] * 3).setMaxConnections(2),
         CellDescription().setId(5).setPos({10.0f, 9.0f}).setEnergy(_parameters.cellNormalEnergy[0] * 3).setMaxConnections(2),
@@ -1551,14 +1551,14 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_bottomPart)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(2)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
         CellDescription()
             .setId(3)
             .setPos({10.0f - getConstructorOffspringDistance(), 11.0f})
             .setEnergy(100)
             .setMaxConnections(2)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
         CellDescription().setId(4).setPos({10.0f, 10.5f}).setEnergy(_parameters.cellNormalEnergy[0] * 3).setMaxConnections(2),
         CellDescription().setId(5).setPos({10.0f, 11.0f}).setEnergy(_parameters.cellNormalEnergy[0] * 3).setMaxConnections(2),
@@ -1606,7 +1606,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation_singleConstruction)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1645,14 +1645,14 @@ TEST_F(ConstructorTests, constructFourthCell_noOverlappingConnection)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(3)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
         CellDescription()
             .setId(3)
             .setPos({10.0f - getConstructorOffspringDistance(), 11.0f})
             .setEnergy(100)
             .setMaxConnections(2)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
         CellDescription()
             .setId(4)
@@ -1708,7 +1708,7 @@ TEST_F(ConstructorTests, constructLastCellFirstRepetition)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1741,14 +1741,14 @@ TEST_F(ConstructorTests, constructLastCellLastRepetition)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(2)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
         CellDescription()
             .setId(3)
             .setPos({9.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1784,7 +1784,7 @@ TEST_F(ConstructorTests, restartIfNoLastConstructedCellFound)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
     });
     data.addConnection(1, 2);
@@ -1821,7 +1821,7 @@ TEST_F(ConstructorTests, restartIfLastConstructedCellHasLowNumConnections)
             .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);

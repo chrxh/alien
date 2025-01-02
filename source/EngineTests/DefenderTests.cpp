@@ -44,13 +44,13 @@ TEST_F(DefenderTests, attackerVsAntiAttacker)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription().setPulseMode(1))
+            .setCellFunction(OscillatorDescription().setPulseMode(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
             .setPos({9.0f, 10.0f})
             .setMaxConnections(2)
-            .setCellFunction(NerveDescription()),
+            .setCellFunction(OscillatorDescription()),
         CellDescription()
             .setId(4)
             .setPos({7.0f, 10.0f})
@@ -87,9 +87,9 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription().setPulseMode(1))
+            .setCellFunction(OscillatorDescription().setPulseMode(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setCellFunction(NerveDescription()),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setCellFunction(OscillatorDescription()),
         CellDescription()
             .setId(4)
             .setPos({7.0f, 10.0f})
@@ -128,7 +128,7 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription().setPulseMode(1))
+            .setCellFunction(OscillatorDescription().setPulseMode(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setCellFunction(ConstructorDescription()),
         CellDescription()
@@ -176,7 +176,7 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription().setPulseMode(1))
+            .setCellFunction(OscillatorDescription().setPulseMode(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setCellFunction(ConstructorDescription()),
         CellDescription()

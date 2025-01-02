@@ -41,7 +41,7 @@ TEST_F(AttackerTests, nothingFound)
              .setId(2)
              .setPos({11.0f, 10.0f})
              .setMaxConnections(1)
-             .setCellFunction(NerveDescription())
+             .setCellFunction(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -69,7 +69,7 @@ TEST_F(AttackerTests, successNoTransmitter)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
@@ -107,7 +107,7 @@ TEST_F(AttackerTests, successDistributeToOneTransmitter)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(2)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({12.0f, 10.0f}).setMaxConnections(1).setCellFunction(TransmitterDescription()),
         CellDescription().setId(4).setPos({9.0f, 10.0f}),
@@ -121,14 +121,14 @@ TEST_F(AttackerTests, successDistributeToOneTransmitter)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
-    auto origNerveCell = getCell(data, 2);
-    auto actualNerveCell = getCell(actualData, 2);
+    auto origOscillatorCell = getCell(data, 2);
+    auto actualOscillatorCell = getCell(actualData, 2);
 
     auto origTransmitterCell = getCell(data, 3);
     auto actualTransmitterCell = getCell(actualData, 3);
 
     EXPECT_TRUE(actualAttackCell.signal->channels[0] > NEAR_ZERO);
-    EXPECT_TRUE(approxCompare(origNerveCell.energy, actualNerveCell.energy));
+    EXPECT_TRUE(approxCompare(origOscillatorCell.energy, actualOscillatorCell.energy));
     EXPECT_TRUE(actualTransmitterCell.energy > origTransmitterCell.energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
@@ -146,7 +146,7 @@ TEST_F(AttackerTests, successDistributeToTwoTransmitters)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(2)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({12.0f, 10.0f}).setMaxConnections(1).setCellFunction(TransmitterDescription()),
         CellDescription().setId(4).setPos({11.0f, 9.0f}).setMaxConnections(1).setCellFunction(TransmitterDescription()),
@@ -185,7 +185,7 @@ TEST_F(AttackerTests, successDistributeToTwoTransmittersWithDifferentColor)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(2)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({12.0f, 10.0f}).setMaxConnections(1).setCellFunction(TransmitterDescription()),
         CellDescription().setId(4).setPos({11.0f, 9.0f}).setMaxConnections(1).setCellFunction(TransmitterDescription()).setColor(1),
@@ -227,7 +227,7 @@ TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(2)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({12.0f, 10.0f}).setMaxConnections(1).setCellFunction(TransmitterDescription()),
         CellDescription()
@@ -270,9 +270,9 @@ TEST_F(AttackerTests, successDistributeToConnectedCells)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(2)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({12.0f, 10.0f}).setMaxConnections(1).setCellFunction(NerveDescription()),
+        CellDescription().setId(3).setPos({12.0f, 10.0f}).setMaxConnections(1).setCellFunction(OscillatorDescription()),
         CellDescription().setId(4).setPos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);
@@ -284,15 +284,15 @@ TEST_F(AttackerTests, successDistributeToConnectedCells)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
-    auto origNerveCell1 = getCell(data, 2);
-    auto actualNerveCell1 = getCell(actualData, 2);
+    auto origOscillatorCell1 = getCell(data, 2);
+    auto actualOscillatorCell1 = getCell(actualData, 2);
 
-    auto origNerveCell2 = getCell(data, 3);
-    auto actualNerveCell2 = getCell(actualData, 3);
+    auto origOscillatorCell2 = getCell(data, 3);
+    auto actualOscillatorCell2 = getCell(actualData, 3);
 
     EXPECT_TRUE(actualAttackCell.signal->channels[0] > NEAR_ZERO);
-    EXPECT_TRUE(actualNerveCell1.energy > origNerveCell1.energy + NEAR_ZERO);
-    EXPECT_TRUE(actualNerveCell2.energy > origNerveCell2.energy + NEAR_ZERO);
+    EXPECT_TRUE(actualOscillatorCell1.energy > origOscillatorCell1.energy + NEAR_ZERO);
+    EXPECT_TRUE(actualOscillatorCell2.energy > origOscillatorCell2.energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
@@ -309,7 +309,7 @@ TEST_F(AttackerTests, successTwoTargets)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}),
         CellDescription().setId(4).setPos({9.0f, 11.0f}),

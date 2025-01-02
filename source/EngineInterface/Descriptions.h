@@ -198,19 +198,19 @@ struct SensorDescription
     }
 };
 
-struct NerveDescription
+struct OscillatorDescription
 {
     int pulseMode = 0;          //0 = none, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
     int alternationMode = 0;    //0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
 
-    auto operator<=>(NerveDescription const&) const = default;
+    auto operator<=>(OscillatorDescription const&) const = default;
 
-    NerveDescription& setPulseMode(int value)
+    OscillatorDescription& setPulseMode(int value)
     {
         pulseMode = value;
         return *this;
     }
-    NerveDescription& setAlternationMode(int value)
+    OscillatorDescription& setAlternationMode(int value)
     {
         alternationMode = value;
         return *this;
@@ -333,7 +333,7 @@ using CellFunctionDescription = std::optional<std::variant<
     TransmitterDescription,
     ConstructorDescription,
     SensorDescription,
-    NerveDescription,
+    OscillatorDescription,
     AttackerDescription,
     InjectorDescription,
     MuscleDescription,
@@ -343,6 +343,7 @@ using CellFunctionDescription = std::optional<std::variant<
 
 struct SignalRoutingRestrictionDescription
 {
+    int connectionIndex = 0;
     float baseAngle = 0;
     float openingAngle = 0;
 

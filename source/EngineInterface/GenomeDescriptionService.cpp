@@ -218,10 +218,10 @@ std::vector<uint8_t> GenomeDescriptionService::convertDescriptionToBytes(GenomeD
             writeOptionalByte(result, sensor.minRange);
             writeOptionalByte(result, sensor.maxRange);
         } break;
-        case CellFunction_Nerve: {
-            auto const& nerve = std::get<NerveGenomeDescription>(*cell.cellFunction);
-            writeByte(result, nerve.pulseMode);
-            writeByte(result, nerve.alternationMode);
+        case CellFunction_Oscillator: {
+            auto const& oscillator = std::get<OscillatorGenomeDescription>(*cell.cellFunction);
+            writeByte(result, oscillator.pulseMode);
+            writeByte(result, oscillator.alternationMode);
         } break;
         case CellFunction_Attacker: {
             auto const& attacker = std::get<AttackerGenomeDescription>(*cell.cellFunction);
@@ -338,11 +338,11 @@ namespace
                 sensor.maxRange = readOptionalByte(data, bytePosition);
                 cell.cellFunction = sensor;
             } break;
-            case CellFunction_Nerve: {
-                NerveGenomeDescription nerve;
-                nerve.pulseMode = readByte(data, bytePosition);
-                nerve.alternationMode = readByte(data, bytePosition);
-                cell.cellFunction = nerve;
+            case CellFunction_Oscillator: {
+                OscillatorGenomeDescription oscillator;
+                oscillator.pulseMode = readByte(data, bytePosition);
+                oscillator.alternationMode = readByte(data, bytePosition);
+                cell.cellFunction = oscillator;
             } break;
             case CellFunction_Attacker: {
                 AttackerGenomeDescription attacker;

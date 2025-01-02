@@ -404,8 +404,8 @@ namespace
         case CellFunction_Sensor: {
             cell.cellFunction = SensorGenomeDescription();
         } break;
-        case CellFunction_Nerve: {
-            cell.cellFunction = NerveGenomeDescription();
+        case CellFunction_Oscillator: {
+            cell.cellFunction = OscillatorGenomeDescription();
         } break;
         case CellFunction_Attacker: {
             cell.cellFunction = AttackerGenomeDescription();
@@ -644,32 +644,32 @@ void GenomeEditorWindow::processNode(
             AlienImGui::InputOptionalInt(
                 AlienImGui::InputIntParameters().name("Max range").textWidth(ContentTextWidth).tooltip(Const::GenomeSensorMaxRangeTooltip), sensor.maxRange);
         } break;
-        case CellFunction_Nerve: {
-            auto& nerve = std::get<NerveGenomeDescription>(*cell.cellFunction);
-            bool pulseGeneration = nerve.pulseMode > 0;
+        case CellFunction_Oscillator: {
+            auto& oscillator = std::get<OscillatorGenomeDescription>(*cell.cellFunction);
+            bool pulseGeneration = oscillator.pulseMode > 0;
             table.next();
             if (AlienImGui::Checkbox(
-                    AlienImGui::CheckboxParameters().name("Generate pulses").textWidth(ContentTextWidth).tooltip(Const::GenomeNerveGeneratePulsesTooltip),
+                    AlienImGui::CheckboxParameters().name("Generate pulses").textWidth(ContentTextWidth).tooltip(Const::GenomeOscillatorGeneratePulsesTooltip),
                     pulseGeneration)) {
-                nerve.pulseMode = pulseGeneration ? 1 : 0;
+                oscillator.pulseMode = pulseGeneration ? 1 : 0;
             }
             if (pulseGeneration) {
                 table.next();
                 AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters().name("Pulse interval").textWidth(ContentTextWidth).tooltip(Const::GenomeNervePulseIntervalTooltip),
-                    nerve.pulseMode);
-                bool alternation = nerve.alternationMode > 0;
+                    AlienImGui::InputIntParameters().name("Pulse interval").textWidth(ContentTextWidth).tooltip(Const::GenomeOscillatorPulseIntervalTooltip),
+                    oscillator.pulseMode);
+                bool alternation = oscillator.alternationMode > 0;
                 table.next();
                 if (AlienImGui::Checkbox(
-                        AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(ContentTextWidth).tooltip(Const::GenomeNerveAlternatingPulsesTooltip),
+                        AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(ContentTextWidth).tooltip(Const::GenomeOscillatorAlternatingPulsesTooltip),
                         alternation)) {
-                    nerve.alternationMode = alternation ? 1 : 0;
+                    oscillator.alternationMode = alternation ? 1 : 0;
                 }
                 if (alternation) {
                     table.next();
                     AlienImGui::InputInt(
-                        AlienImGui::InputIntParameters().name("Pulses per phase").textWidth(ContentTextWidth).tooltip(Const::GenomeNervePulsesPerPhaseTooltip),
-                        nerve.alternationMode);
+                        AlienImGui::InputIntParameters().name("Pulses per phase").textWidth(ContentTextWidth).tooltip(Const::GenomeOscillatorPulsesPerPhaseTooltip),
+                        oscillator.alternationMode);
                 }
             }
         } break;
@@ -979,10 +979,10 @@ void GenomeEditorWindow::validateAndCorrect(CellGenomeDescription& cell) const
             sensor.maxRange = std::max(0, std::min(127, *sensor.maxRange));
         }
     } break;
-    case CellFunction_Nerve: {
-        auto& nerve = std::get<NerveGenomeDescription>(*cell.cellFunction);
-        nerve.pulseMode = std::max(0, nerve.pulseMode);
-        nerve.alternationMode = std::max(0, nerve.alternationMode);
+    case CellFunction_Oscillator: {
+        auto& oscillator = std::get<OscillatorGenomeDescription>(*cell.cellFunction);
+        oscillator.pulseMode = std::max(0, oscillator.pulseMode);
+        oscillator.alternationMode = std::max(0, oscillator.alternationMode);
     } break;
     }
 }

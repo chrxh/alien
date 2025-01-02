@@ -43,7 +43,7 @@ DataPointCollection DataPointCollection::operator+(DataPointCollection const& ot
     result.numTransmitterActivities = numTransmitterActivities + other.numTransmitterActivities;
     result.numInjectionActivities = numInjectionActivities + other.numInjectionActivities;
     result.numCompletedInjections = numCompletedInjections + other.numCompletedInjections;
-    result.numNervePulses = numNervePulses + other.numNervePulses;
+    result.numOscillatorPulses = numOscillatorPulses + other.numOscillatorPulses;
     result.numNeuronActivities = numNeuronActivities + other.numNeuronActivities;
     result.numSensorActivities = numSensorActivities + other.numSensorActivities;
     result.numSensorMatches = numSensorMatches + other.numSensorMatches;
@@ -76,7 +76,7 @@ DataPointCollection DataPointCollection::operator/(double divisor) const
     result.numTransmitterActivities = numTransmitterActivities / divisor;
     result.numInjectionActivities = numInjectionActivities / divisor;
     result.numCompletedInjections = numCompletedInjections / divisor;
-    result.numNervePulses = numNervePulses / divisor;
+    result.numOscillatorPulses = numOscillatorPulses / divisor;
     result.numNeuronActivities = numNeuronActivities / divisor;
     result.numSensorActivities = numSensorActivities / divisor;
     result.numSensorMatches = numSensorMatches / divisor;

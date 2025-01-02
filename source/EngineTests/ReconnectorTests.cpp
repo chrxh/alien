@@ -39,7 +39,7 @@ TEST_F(ReconnectorTests, establishConnection_noRestriction_nothingFound)
              .setId(2)
              .setPos({11.0f, 10.0f})
              .setMaxConnections(1)
-             .setCellFunction(NerveDescription())
+             .setCellFunction(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -69,7 +69,7 @@ TEST_F(ReconnectorTests, establishConnection_noRestriction_success)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}),
     });
@@ -105,7 +105,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToColor_failed)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}),
     });
@@ -139,7 +139,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToColor_success)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}),
     });
@@ -176,7 +176,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_success)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(5),
     });
@@ -213,7 +213,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_failed)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(4),
     });
@@ -247,7 +247,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_success)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(4),
     });
@@ -283,7 +283,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_zeroM
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(0),
     });
@@ -317,7 +317,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_respa
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1),
     });
@@ -351,7 +351,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_sameM
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(5),
     });
@@ -385,7 +385,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_success)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(0),
     });
@@ -421,7 +421,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_failed)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(4),
     });
@@ -455,7 +455,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_success)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1),
     });
@@ -491,7 +491,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_failed)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(0),
     });
@@ -526,7 +526,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_succes
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(999.0f),
     });
@@ -554,7 +554,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_failed
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(1001.0f),
     });
@@ -582,7 +582,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_succes
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(1001.0f),
     });
@@ -610,7 +610,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_failed
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(1000.0f),
     });
@@ -637,7 +637,7 @@ TEST_F(ReconnectorTests, deleteConnections_success)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({-1, 0, 0, 0, 0, 0, 0, 0})
             .setCreatureId(1),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(1).setCreatureId(3),

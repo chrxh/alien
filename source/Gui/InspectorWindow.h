@@ -30,7 +30,7 @@ private:
     void processCellGenomeTab(Description& desc);
     void processCellMetadataTab(CellDescription& cell);
 
-    void processNerveContent(NerveDescription& nerve);
+    void processOscillatorContent(OscillatorDescription& oscillator);
     void processNeuronContent(NeuronDescription& neuron);
     void processConstructorContent(ConstructorDescription& constructor);
     void processInjectorContent(InjectorDescription& injector);

@@ -241,8 +241,8 @@ void _InspectorWindow::processCellFunctionTab(CellDescription& cell)
                     case CellFunction_Sensor: {
                         cell.cellFunction = SensorDescription();
                     } break;
-                    case CellFunction_Nerve: {
-                        cell.cellFunction = NerveDescription();
+                    case CellFunction_Oscillator: {
+                        cell.cellFunction = OscillatorDescription();
                     } break;
                     case CellFunction_Attacker: {
                         cell.cellFunction = AttackerDescription();
@@ -322,8 +322,8 @@ void _InspectorWindow::processCellFunctionPropertiesTab(CellDescription& cell)
             case CellFunction_Sensor: {
                 processSensorContent(std::get<SensorDescription>(*cell.cellFunction));
             } break;
-            case CellFunction_Nerve: {
-                processNerveContent(std::get<NerveDescription>(*cell.cellFunction));
+            case CellFunction_Oscillator: {
+                processOscillatorContent(std::get<OscillatorDescription>(*cell.cellFunction));
             } break;
             case CellFunction_Attacker: {
                 processAttackerContent(std::get<AttackerDescription>(*cell.cellFunction));
@@ -482,26 +482,26 @@ void _InspectorWindow::processCellMetadataTab(CellDescription& cell)
     }
 }
 
-void _InspectorWindow::processNerveContent(NerveDescription& nerve)
+void _InspectorWindow::processOscillatorContent(OscillatorDescription& oscillator)
 {
     if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
 
-        bool pulseGeneration = nerve.pulseMode > 0;
-        if (AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Generate pulses").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeNerveGeneratePulsesTooltip), pulseGeneration)) {
-            nerve.pulseMode = pulseGeneration ? 1 : 0;
+        bool pulseGeneration = oscillator.pulseMode > 0;
+        if (AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Generate pulses").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeOscillatorGeneratePulsesTooltip), pulseGeneration)) {
+            oscillator.pulseMode = pulseGeneration ? 1 : 0;
         }
         if (pulseGeneration) {
-            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Pulse interval").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeNervePulseIntervalTooltip), nerve.pulseMode);
-            bool alternation = nerve.alternationMode > 0;
+            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Pulse interval").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeOscillatorPulseIntervalTooltip), oscillator.pulseMode);
+            bool alternation = oscillator.alternationMode > 0;
             if (AlienImGui::Checkbox(
-                    AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeNerveAlternatingPulsesTooltip),
+                    AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeOscillatorAlternatingPulsesTooltip),
                     alternation)) {
-                nerve.alternationMode = alternation ? 1 : 0;
+                oscillator.alternationMode = alternation ? 1 : 0;
             }
             if (alternation) {
                 AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters().name("Pulses per phase").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeNervePulsesPerPhaseTooltip),
-                    nerve.alternationMode);
+                    AlienImGui::InputIntParameters().name("Pulses per phase").textWidth(CellFunctionTextWidth).tooltip(Const::GenomeOscillatorPulsesPerPhaseTooltip),
+                    oscillator.alternationMode);
             }
         }
         ImGui::TreePop();
@@ -767,10 +767,10 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
             sensor.maxRange = std::max(0, std::min(127, *sensor.maxRange));
         }
     } break;
-    case CellFunction_Nerve: {
-        auto& nerve = std::get<NerveDescription>(*cell.cellFunction);
-        nerve.pulseMode = std::max(0, nerve.pulseMode);
-        nerve.alternationMode = std::max(0, nerve.alternationMode);
+    case CellFunction_Oscillator: {
+        auto& oscillator = std::get<OscillatorDescription>(*cell.cellFunction);
+        oscillator.pulseMode = std::max(0, oscillator.pulseMode);
+        oscillator.alternationMode = std::max(0, oscillator.alternationMode);
     } break;
     case CellFunction_Detonator: {
         auto& detonator = std::get<DetonatorDescription>(*cell.cellFunction);

@@ -27,8 +27,8 @@ TEST_F(SignalTests_New, noSignal)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto nerve = actualCellById.at(1);
-    EXPECT_FALSE(nerve.signal.has_value());
+    auto oscillator = actualCellById.at(1);
+    EXPECT_FALSE(oscillator.signal.has_value());
 }
 
 TEST_F(SignalTests_New, forwardSignal)
@@ -46,14 +46,14 @@ TEST_F(SignalTests_New, forwardSignal)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto nerve1 = actualCellById.at(1);
-    EXPECT_FALSE(nerve1.signal.has_value());
+    auto oscillator1 = actualCellById.at(1);
+    EXPECT_FALSE(oscillator1.signal.has_value());
 
-    auto nerve2 = actualCellById.at(2);
-    EXPECT_TRUE(nerve2.signal.has_value());
-    EXPECT_EQ(signal, nerve2.signal->channels);
-    EXPECT_EQ(1, nerve2.signal->prevCellIds.size());
-    EXPECT_EQ(1, nerve2.signal->prevCellIds[0]);
+    auto oscillator2 = actualCellById.at(2);
+    EXPECT_TRUE(oscillator2.signal.has_value());
+    EXPECT_EQ(signal, oscillator2.signal->channels);
+    EXPECT_EQ(1, oscillator2.signal->prevCellIds.size());
+    EXPECT_EQ(1, oscillator2.signal->prevCellIds[0]);
 }
 
 TEST_F(SignalTests_New, vanishSignal_singleCell)
@@ -69,8 +69,8 @@ TEST_F(SignalTests_New, vanishSignal_singleCell)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto nerve1 = actualCellById.at(1);
-    EXPECT_FALSE(nerve1.signal.has_value());
+    auto oscillator1 = actualCellById.at(1);
+    EXPECT_FALSE(oscillator1.signal.has_value());
 }
 
 TEST_F(SignalTests_New, vanishSignal_withPrevCell)
@@ -88,8 +88,8 @@ TEST_F(SignalTests_New, vanishSignal_withPrevCell)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto nerve1 = actualCellById.at(1);
-    EXPECT_FALSE(nerve1.signal.has_value());
+    auto oscillator1 = actualCellById.at(1);
+    EXPECT_FALSE(oscillator1.signal.has_value());
 }
 
 TEST_F(SignalTests_New, mergeSignals)
@@ -111,21 +111,21 @@ TEST_F(SignalTests_New, mergeSignals)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto nerve1 = actualCellById.at(1);
-    EXPECT_FALSE(nerve1.signal.has_value());
+    auto oscillator1 = actualCellById.at(1);
+    EXPECT_FALSE(oscillator1.signal.has_value());
 
-    auto nerve2 = actualCellById.at(2);
-    EXPECT_TRUE(nerve2.signal.has_value());
+    auto oscillator2 = actualCellById.at(2);
+    EXPECT_TRUE(oscillator2.signal.has_value());
     std::vector<float> sumSignal(signal1.size());
     for (size_t i = 0; i < signal1.size(); ++i) {
         sumSignal[i] = signal1[i] + signal2[i];
     }
-    EXPECT_TRUE(approxCompare(sumSignal, nerve2.signal->channels));
-    auto prevCellIdSet = std::set(nerve2.signal->prevCellIds.begin(), nerve2.signal->prevCellIds.end());
+    EXPECT_TRUE(approxCompare(sumSignal, oscillator2.signal->channels));
+    auto prevCellIdSet = std::set(oscillator2.signal->prevCellIds.begin(), oscillator2.signal->prevCellIds.end());
     EXPECT_EQ((std::set<uint64_t>{1, 3}), prevCellIdSet);
 
-    auto nerve3 = actualCellById.at(3);
-    EXPECT_FALSE(nerve3.signal.has_value());
+    auto oscillator3 = actualCellById.at(3);
+    EXPECT_FALSE(oscillator3.signal.has_value());
 }
 
 TEST_F(SignalTests_New, forkSignals)
@@ -145,18 +145,18 @@ TEST_F(SignalTests_New, forkSignals)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto nerve1 = actualCellById.at(1);
-    EXPECT_TRUE(nerve1.signal.has_value());
-    EXPECT_TRUE(approxCompare(signal, nerve1.signal->channels));
-    EXPECT_EQ(1, nerve1.signal->prevCellIds.size());
-    EXPECT_EQ(2, nerve1.signal->prevCellIds[0]);
+    auto oscillator1 = actualCellById.at(1);
+    EXPECT_TRUE(oscillator1.signal.has_value());
+    EXPECT_TRUE(approxCompare(signal, oscillator1.signal->channels));
+    EXPECT_EQ(1, oscillator1.signal->prevCellIds.size());
+    EXPECT_EQ(2, oscillator1.signal->prevCellIds[0]);
 
-    auto nerve2 = actualCellById.at(2);
-    EXPECT_FALSE(nerve2.signal.has_value());
+    auto oscillator2 = actualCellById.at(2);
+    EXPECT_FALSE(oscillator2.signal.has_value());
 
-    auto nerve3 = actualCellById.at(3);
-    EXPECT_TRUE(nerve3.signal.has_value());
-    EXPECT_TRUE(approxCompare(signal, nerve3.signal->channels));
-    EXPECT_EQ(1, nerve1.signal->prevCellIds.size());
-    EXPECT_EQ(2, nerve1.signal->prevCellIds[0]);
+    auto oscillator3 = actualCellById.at(3);
+    EXPECT_TRUE(oscillator3.signal.has_value());
+    EXPECT_TRUE(approxCompare(signal, oscillator3.signal->channels));
+    EXPECT_EQ(1, oscillator1.signal->prevCellIds.size());
+    EXPECT_EQ(2, oscillator1.signal->prevCellIds[0]);
 }

@@ -33,8 +33,8 @@ CellFunction CellDescription::getCellFunctionType() const
     if (std::holds_alternative<SensorDescription>(*cellFunction)) {
         return CellFunction_Sensor;
     }
-    if (std::holds_alternative<NerveDescription>(*cellFunction)) {
-        return CellFunction_Nerve;
+    if (std::holds_alternative<OscillatorDescription>(*cellFunction)) {
+        return CellFunction_Oscillator;
     }
     if (std::holds_alternative<AttackerDescription>(*cellFunction)) {
         return CellFunction_Attacker;

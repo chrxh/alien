@@ -65,7 +65,7 @@ TEST_F(DetonatorTests, activateDetonator)
              .setId(2)
              .setPos({11.0f, 10.0f})
              .setMaxConnections(1)
-             .setCellFunction(NerveDescription())
+             .setCellFunction(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 

@@ -13,7 +13,7 @@ __global__ void cudaNextTimestep_physics_calcConnectionForces(SimulationData dat
 __global__ void cudaNextTimestep_physics_verletVelocityUpdate(SimulationData data);
 __global__ void cudaNextTimestep_cellFunction_prepare_substep1(SimulationData data);
 __global__ void cudaNextTimestep_cellFunction_prepare_substep2(SimulationData data);
-__global__ void cudaNextTimestep_cellFunction_nerve(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_cellFunction_oscillator(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellFunction_neuron(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellFunction_constructor_completenessCheck(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellFunction_constructor(SimulationData data, SimulationStatistics statistics);

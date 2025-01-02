@@ -106,19 +106,19 @@ struct SensorGenomeDescription
     }
 };
 
-struct NerveGenomeDescription
+struct OscillatorGenomeDescription
 {
     int pulseMode = 0;        //0 = none, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
     int alternationMode = 0;  //0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
 
-    auto operator<=>(NerveGenomeDescription const&) const = default;
+    auto operator<=>(OscillatorGenomeDescription const&) const = default;
 
-    NerveGenomeDescription& setPulseMode(int value)
+    OscillatorGenomeDescription& setPulseMode(int value)
     {
         pulseMode = value;
         return *this;
     }
-    NerveGenomeDescription& setAlternationMode(int value)
+    OscillatorGenomeDescription& setAlternationMode(int value)
     {
         alternationMode = value;
         return *this;
@@ -228,7 +228,7 @@ using CellFunctionGenomeDescription = std::optional<std::variant<
     TransmitterGenomeDescription,
     ConstructorGenomeDescription,
     SensorGenomeDescription,
-    NerveGenomeDescription,
+    OscillatorGenomeDescription,
     AttackerGenomeDescription,
     InjectorGenomeDescription,
     MuscleGenomeDescription,
@@ -363,8 +363,8 @@ struct CellGenomeDescription
         if (std::holds_alternative<SensorGenomeDescription>(*cellFunction)) {
             return CellFunction_Sensor;
         }
-        if (std::holds_alternative<NerveGenomeDescription>(*cellFunction)) {
-            return CellFunction_Nerve;
+        if (std::holds_alternative<OscillatorGenomeDescription>(*cellFunction)) {
+            return CellFunction_Oscillator;
         }
         if (std::holds_alternative<AttackerGenomeDescription>(*cellFunction)) {
             return CellFunction_Attacker;
