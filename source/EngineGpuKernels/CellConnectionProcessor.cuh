@@ -451,14 +451,6 @@ __inline__ __device__ void CellConnectionProcessor::deleteConnectionOneWay(Cell*
             }
 
             --cell1->numConnections;
-
-            if (cell1->signalRoutingRestriction.active && i == cell1->signalRoutingRestriction.refConnectionIndex) {
-                if (cell1->signalRoutingRestriction.refConnectionIndex > 0) {
-                    --cell1->signalRoutingRestriction.refConnectionIndex;
-                } else {
-                    cell1->signalRoutingRestriction.refConnectionIndex = cell1->numConnections;
-                }
-            }
             return;
         }
     }

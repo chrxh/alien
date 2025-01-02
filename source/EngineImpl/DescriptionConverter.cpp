@@ -507,7 +507,6 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
 
     if (cellTO.signalRoutingRestriction.active) {
         SignalRoutingRestrictionDescription routingRestriction;
-        routingRestriction.refConnectionIndex = cellTO.signalRoutingRestriction.refConnectionIndex;
         routingRestriction.baseAngle = cellTO.signalRoutingRestriction.baseAngle;
         routingRestriction.openingAngle = cellTO.signalRoutingRestriction.openingAngle;
         result.signalRoutingRestriction = routingRestriction;
@@ -682,7 +681,6 @@ void DescriptionConverter::addCell(
     }
     cellTO.signalRoutingRestriction.active = cellDesc.signalRoutingRestriction.has_value();
     if (cellTO.signalRoutingRestriction.active) {
-        cellTO.signalRoutingRestriction.refConnectionIndex = cellDesc.signalRoutingRestriction->refConnectionIndex;
         cellTO.signalRoutingRestriction.baseAngle = cellDesc.signalRoutingRestriction->baseAngle;
         cellTO.signalRoutingRestriction.openingAngle = cellDesc.signalRoutingRestriction->openingAngle;
     }
