@@ -144,32 +144,32 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
     auto& constructor = cell->cellFunctionData.constructor;
     if (!GenomeDecoder::isFinished(constructor)) {
         auto constructionData = readConstructionData(cell);
-        auto cellBuilt = false;
         if (isConstructionTriggered(data, cell)) {
             if (tryConstructCell(data, statistics, cell, constructionData)) {
-                cellBuilt = true;
-                cell->cellFunctionUsed = CellFunctionUsed_Yes;
-            } 
-        }
-
-        if (cellBuilt) {
-            cell->signal.channels[0] = 1;
-            if (GenomeDecoder::isLastNode(constructor)) {
-                constructor.genomeCurrentNodeIndex = 0;
-                if (!constructionData.genomeHeader.hasInfiniteRepetitions()) {
-                    ++constructor.genomeCurrentRepetition;
-                    if (constructor.genomeCurrentRepetition == constructionData.genomeHeader.numRepetitions) {
-                        constructor.genomeCurrentRepetition = 0;
-                        if (!constructionData.genomeHeader.separateConstruction) {
-                            ++constructor.currentBranch;
+                if (!cell->signal.active) {
+                    SignalProcessor::createEmptySignal(cell);
+                }
+                cell->signal.active = true;
+                cell->signal.channels[0] = 1;
+                if (GenomeDecoder::isLastNode(constructor)) {
+                    constructor.genomeCurrentNodeIndex = 0;
+                    if (!constructionData.genomeHeader.hasInfiniteRepetitions()) {
+                        ++constructor.genomeCurrentRepetition;
+                        if (constructor.genomeCurrentRepetition == constructionData.genomeHeader.numRepetitions) {
+                            constructor.genomeCurrentRepetition = 0;
+                            if (!constructionData.genomeHeader.separateConstruction) {
+                                ++constructor.currentBranch;
+                            }
                         }
                     }
+                } else {
+                    ++constructor.genomeCurrentNodeIndex;
                 }
             } else {
-                ++constructor.genomeCurrentNodeIndex;
+                cell->signal.channels[0] = 0;
             }
         } else {
-            cell->signal.channels[0] = 0;
+            cell->signal.active = false;
         }
     }
 }
@@ -256,8 +256,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
 __inline__ __device__ bool
 ConstructorProcessor::isConstructionTriggered(SimulationData const& data, Cell* cell)
 {
-    if (cell->cellFunctionData.constructor.activationMode == 0
-        && abs(cell->signal.channels[0]) < cudaSimulationParameters.cellFunctionConstructorSignalThreshold[cell->color]) {
+    if (cell->cellFunctionData.constructor.activationMode == 0 && !cell->signal.active) {
         return false;
     }
     if (cell->cellFunctionData.constructor.activationMode > 0 && data.timestep % cell->cellFunctionData.constructor.activationMode != 0) {
