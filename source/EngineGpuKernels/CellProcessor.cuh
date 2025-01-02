@@ -850,11 +850,6 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
                     }
                 }
             }
-            //else {
-            //    if (data.numberGen1.random() < cudaSimulationParameters.clusterDecayProb[cell->color]) {
-            //        CellConnectionProcessor::scheduleDeleteCell(data, index);
-            //    }
-            //}
         }
     }
 }

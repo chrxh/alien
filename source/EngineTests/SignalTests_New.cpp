@@ -157,8 +157,8 @@ TEST_F(SignalTests_New, forkSignals)
     auto cell3 = actualCellById.at(3);
     EXPECT_TRUE(cell3.signal.has_value());
     EXPECT_TRUE(approxCompare(signal, cell3.signal->channels));
-    EXPECT_EQ(1, cell1.signal->prevCellIds.size());
-    EXPECT_EQ(2, cell1.signal->prevCellIds[0]);
+    EXPECT_EQ(1, cell3.signal->prevCellIds.size());
+    EXPECT_EQ(2, cell3.signal->prevCellIds[0]);
 }
 
 TEST_F(SignalTests_New, routeSignal)
@@ -187,6 +187,6 @@ TEST_F(SignalTests_New, routeSignal)
     auto cell3 = actualCellById.at(3);
     EXPECT_TRUE(cell3.signal.has_value());
     EXPECT_TRUE(approxCompare(signal, cell3.signal->channels));
-    EXPECT_EQ(1, cell1.signal->prevCellIds.size());
-    EXPECT_EQ(2, cell1.signal->prevCellIds[0]);
+    EXPECT_EQ(1, cell3.signal->prevCellIds.size());
+    EXPECT_EQ(2, cell3.signal->prevCellIds[0]);
 }

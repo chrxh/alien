@@ -74,10 +74,35 @@ __inline__ __device__  void SignalProcessor::calcFutureSignals(SimulationData& d
             if (skip) {
                 continue;
             }
+
+            if (connectedCell->signalRoutingRestriction.active) {
+                float signalAngleRestrictionStart = 0;
+                float signalAngleRestrictionEnd = 0;
+                if (connectedCell->signalRoutingRestriction.active) {
+                    signalAngleRestrictionStart =
+                        180.0f - connectedCell->signalRoutingRestriction.baseAngle - connectedCell->signalRoutingRestriction.openingAngle / 2;
+                    signalAngleRestrictionEnd =
+                        180.0f - connectedCell->signalRoutingRestriction.baseAngle + connectedCell->signalRoutingRestriction.openingAngle / 2;
+                }
+
+                float connectionAngle = 0;
+                for (int k = 0, l = connectedCell->numConnections; k < l; ++k) {
+                    if (connectedCell->connections[k].cell == cell) {
+                        if (connectionAngle < signalAngleRestrictionStart - NEAR_ZERO || connectionAngle > signalAngleRestrictionEnd + NEAR_ZERO) {
+                            skip = true;
+                        }
+                        break;
+                    }
+                    connectionAngle += connectedCell->connections[k].angleFromPrevious;
+                }
+                if (skip) {
+                    continue;
+                }
+            }
+
             cell->futureSignal.active = true;
             for (int k = 0; k < MAX_CHANNELS; ++k) {
                 cell->futureSignal.channels[k] += connectedCell->signal.channels[k];
-                cell->futureSignal.channels[k] = max(-10.0f, min(10.0f, cell->futureSignal.channels[k]));  // truncate value to avoid overflow
             }
             if (connectedCell->signal.origin == SignalOrigin_Sensor) {
                 cell->futureSignal.origin = SignalOrigin_Sensor;
@@ -87,6 +112,10 @@ __inline__ __device__  void SignalProcessor::calcFutureSignals(SimulationData& d
             }
             cell->futureSignal.prevCellIds[numSignalOrigins] = connectedCell->id;
             ++numSignalOrigins;
+
+        }
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            cell->futureSignal.channels[i] = max(-10.0f, min(10.0f, cell->futureSignal.channels[i]));  // truncate value to avoid overflow
         }
         cell->futureSignal.numPrevCells = numSignalOrigins;
         if (numSensorSignals > 0) {
