@@ -117,7 +117,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->metadata.description);
 
     cell->signalRoutingRestriction.active = cellTO.signalRoutingRestriction.active;
-    cell->signalRoutingRestriction.connectionIndex = cellTO.signalRoutingRestriction.connectionIndex;
+    cell->signalRoutingRestriction.refConnectionIndex = cellTO.signalRoutingRestriction.refConnectionIndex;
     cell->signalRoutingRestriction.baseAngle = cellTO.signalRoutingRestriction.baseAngle;
     cell->signalRoutingRestriction.openingAngle = cellTO.signalRoutingRestriction.openingAngle;
 
