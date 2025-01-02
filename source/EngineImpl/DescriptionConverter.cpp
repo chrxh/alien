@@ -288,7 +288,7 @@ void DescriptionConverter::addAdditionalDataSizeForCell(CellDescription const& c
         break;
     case CellFunction_Sensor:
         break;
-    case CellFunction_Nerve:
+    case CellFunction_Oscillator:
         break;
     case CellFunction_Attacker:
         break;
@@ -456,11 +456,11 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
         sensor.memoryTargetY = cellTO.cellFunctionData.sensor.memoryTargetY;
         result.cellFunction = sensor;
     } break;
-    case CellFunction_Nerve: {
-        NerveDescription nerve;
-        nerve.pulseMode = cellTO.cellFunctionData.nerve.pulseMode;
-        nerve.alternationMode = cellTO.cellFunctionData.nerve.alternationMode;
-        result.cellFunction = nerve;
+    case CellFunction_Oscillator: {
+        OscillatorDescription oscillator;
+        oscillator.pulseMode = cellTO.cellFunctionData.oscillator.pulseMode;
+        oscillator.alternationMode = cellTO.cellFunctionData.oscillator.alternationMode;
+        result.cellFunction = oscillator;
     } break;
     case CellFunction_Attacker: {
         AttackerDescription attacker;
@@ -507,6 +507,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
 
     if (cellTO.signalRoutingRestriction.active) {
         SignalRoutingRestrictionDescription routingRestriction;
+        routingRestriction.connectionIndex = cellTO.signalRoutingRestriction.connectionIndex;
         routingRestriction.baseAngle = cellTO.signalRoutingRestriction.baseAngle;
         routingRestriction.openingAngle = cellTO.signalRoutingRestriction.openingAngle;
         result.signalRoutingRestriction = routingRestriction;
@@ -624,12 +625,12 @@ void DescriptionConverter::addCell(
         sensorTO.memoryTargetY = sensorDesc.memoryTargetY;
         cellTO.cellFunctionData.sensor = sensorTO;
     } break;
-    case CellFunction_Nerve: {
-        auto const& nerveDesc = std::get<NerveDescription>(*cellDesc.cellFunction);
-        NerveTO nerveTO;
-        nerveTO.pulseMode = nerveDesc.pulseMode;
-        nerveTO.alternationMode = nerveDesc.alternationMode;
-        cellTO.cellFunctionData.nerve = nerveTO;
+    case CellFunction_Oscillator: {
+        auto const& oscillatorDesc = std::get<OscillatorDescription>(*cellDesc.cellFunction);
+        OscillatorTO oscillatorTO;
+        oscillatorTO.pulseMode = oscillatorDesc.pulseMode;
+        oscillatorTO.alternationMode = oscillatorDesc.alternationMode;
+        cellTO.cellFunctionData.oscillator = oscillatorTO;
     } break;
     case CellFunction_Attacker: {
         auto const& attackerDesc = std::get<AttackerDescription>(*cellDesc.cellFunction);
@@ -681,6 +682,7 @@ void DescriptionConverter::addCell(
     }
     cellTO.signalRoutingRestriction.active = cellDesc.signalRoutingRestriction.has_value();
     if (cellTO.signalRoutingRestriction.active) {
+        cellTO.signalRoutingRestriction.connectionIndex = cellDesc.signalRoutingRestriction->connectionIndex;
         cellTO.signalRoutingRestriction.baseAngle = cellDesc.signalRoutingRestriction->baseAngle;
         cellTO.signalRoutingRestriction.openingAngle = cellDesc.signalRoutingRestriction->openingAngle;
     }

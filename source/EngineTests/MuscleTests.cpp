@@ -41,7 +41,7 @@ TEST_F(MuscleTests, doNothing)
              .setId(2)
              .setPos({11.0f, 10.0f})
              .setMaxConnections(1)
-             .setCellFunction(NerveDescription())
+             .setCellFunction(OscillatorDescription())
              .setSignal({0, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -50,12 +50,12 @@ TEST_F(MuscleTests, doNothing)
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
-    auto actualNerveCell = getCell(actualData, 2);
+    auto actualOscillatorCell = getCell(actualData, 2);
 
     EXPECT_EQ(2, actualData.cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     EXPECT_TRUE(approxCompare(0, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(actualNerveCell.connections.at(0).distance, actualMuscleCell.connections.at(0).distance));
+    EXPECT_TRUE(approxCompare(actualOscillatorCell.connections.at(0).distance, actualMuscleCell.connections.at(0).distance));
     EXPECT_TRUE(approxCompare(1.0f , actualMuscleCell.connections.at(0).distance));
     EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.x));
     EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.y));
@@ -77,7 +77,7 @@ TEST_F(MuscleTests, moveForward)
              .setId(2)
              .setPos({11.0f, 10.0f})
              .setMaxConnections(1)
-             .setCellFunction(NerveDescription())
+             .setCellFunction(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -86,12 +86,12 @@ TEST_F(MuscleTests, moveForward)
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
-    auto actualNerveCell = getCell(actualData, 2);
+    auto actualOscillatorCell = getCell(actualData, 2);
 
     EXPECT_EQ(2, actualData.cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(actualNerveCell.connections.at(0).distance, actualMuscleCell.connections.at(0).distance));
+    EXPECT_TRUE(approxCompare(actualOscillatorCell.connections.at(0).distance, actualMuscleCell.connections.at(0).distance));
     EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.connections.at(0).distance));
     EXPECT_TRUE(approxCompare(-_parameters.cellFunctionMuscleMovementAcceleration[0], actualMuscleCell.vel.x));
     EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.y));
@@ -113,7 +113,7 @@ TEST_F(MuscleTests, moveBackward)
              .setId(2)
              .setPos({11.0f, 10.0f})
              .setMaxConnections(1)
-             .setCellFunction(NerveDescription())
+             .setCellFunction(OscillatorDescription())
              .setSignal({-1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -122,11 +122,11 @@ TEST_F(MuscleTests, moveBackward)
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
-    auto actualNerveCell = getCell(actualData, 2);
+    auto actualOscillatorCell = getCell(actualData, 2);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     EXPECT_TRUE(approxCompare(-1.0f, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(actualNerveCell.connections.at(0).distance, actualMuscleCell.connections.at(0).distance));
+    EXPECT_TRUE(approxCompare(actualOscillatorCell.connections.at(0).distance, actualMuscleCell.connections.at(0).distance));
     EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.connections.at(0).distance));
     EXPECT_TRUE(approxCompare(_parameters.cellFunctionMuscleMovementAcceleration[0], actualMuscleCell.vel.x));
     EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.y));
@@ -148,13 +148,13 @@ TEST_F(MuscleTests, multipleMovementDirections)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
             .setPos({10.0f, 11.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
     });
     data.addConnection(1, 2);
@@ -186,7 +186,7 @@ TEST_F(MuscleTests, expansion)
              .setId(2)
              .setPos({10.0f + smallDistance, 10.0f})
              .setMaxConnections(1)
-             .setCellFunction(NerveDescription())
+             .setCellFunction(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -195,11 +195,11 @@ TEST_F(MuscleTests, expansion)
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
-    auto actualNerveCell = getCell(actualData, 2);
+    auto actualOscillatorCell = getCell(actualData, 2);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(actualNerveCell.connections.at(0).distance, actualMuscleCell.connections.at(0).distance));
+    EXPECT_TRUE(approxCompare(actualOscillatorCell.connections.at(0).distance, actualMuscleCell.connections.at(0).distance));
     EXPECT_TRUE(approxCompare(smallDistance + _parameters.cellFunctionMuscleContractionExpansionDelta[0], actualMuscleCell.connections.at(0).distance));
     EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.x));
     EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.y));
@@ -220,7 +220,7 @@ TEST_F(MuscleTests, expansionNotPossible)
              .setId(2)
              .setPos({10.0f + largeDistance, 10.0f})
              .setMaxConnections(1)
-             .setCellFunction(NerveDescription())
+             .setCellFunction(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -229,7 +229,7 @@ TEST_F(MuscleTests, expansionNotPossible)
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
-    auto actualNerveCell = getCell(actualData, 2);
+    auto actualOscillatorCell = getCell(actualData, 2);
 
     EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.signal->channels[0]));
     EXPECT_TRUE(approxCompare(largeDistance, actualMuscleCell.connections.at(0).distance));
@@ -250,7 +250,7 @@ TEST_F(MuscleTests, contraction)
              .setId(2)
              .setPos({10.0f + largeDistance, 10.0f})
              .setMaxConnections(1)
-             .setCellFunction(NerveDescription())
+             .setCellFunction(OscillatorDescription())
              .setSignal({-1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -259,10 +259,10 @@ TEST_F(MuscleTests, contraction)
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
-    auto actualNerveCell = getCell(actualData, 2);
+    auto actualOscillatorCell = getCell(actualData, 2);
 
     EXPECT_TRUE(approxCompare(-1.0f, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(actualNerveCell.connections.at(0).distance, actualMuscleCell.connections.at(0).distance));
+    EXPECT_TRUE(approxCompare(actualOscillatorCell.connections.at(0).distance, actualMuscleCell.connections.at(0).distance));
     EXPECT_TRUE(approxCompare(largeDistance - _parameters.cellFunctionMuscleContractionExpansionDelta[0], actualMuscleCell.connections.at(0).distance));
 }
 
@@ -281,13 +281,13 @@ TEST_F(MuscleTests, multipleContraction)
             .setId(2)
             .setPos({10.0f + largeDistance, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({-1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
             .setPos({10.0f, 10.0f + largeDistance})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({-1, 0, 0, 0, 0, 0, 0, 0}),
     });
     data.addConnection(1, 2);
@@ -298,12 +298,12 @@ TEST_F(MuscleTests, multipleContraction)
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
-    auto muscleToNerveConnection1 = getConnection(actualData, 1, 2);
-    auto muscleToNerveConnection2 = getConnection(actualData, 1, 3);
+    auto muscleToOscillatorConnection1 = getConnection(actualData, 1, 2);
+    auto muscleToOscillatorConnection2 = getConnection(actualData, 1, 3);
 
     EXPECT_TRUE(approxCompare(-2.0f, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(largeDistance - _parameters.cellFunctionMuscleContractionExpansionDelta[0], muscleToNerveConnection1.distance));
-    EXPECT_TRUE(approxCompare(largeDistance - _parameters.cellFunctionMuscleContractionExpansionDelta[0], muscleToNerveConnection2.distance));
+    EXPECT_TRUE(approxCompare(largeDistance - _parameters.cellFunctionMuscleContractionExpansionDelta[0], muscleToOscillatorConnection1.distance));
+    EXPECT_TRUE(approxCompare(largeDistance - _parameters.cellFunctionMuscleContractionExpansionDelta[0], muscleToOscillatorConnection2.distance));
 }
 
 TEST_F(MuscleTests, contractionNotPossible)
@@ -321,7 +321,7 @@ TEST_F(MuscleTests, contractionNotPossible)
              .setId(2)
              .setPos({10.0f + smallDistance, 10.0f})
              .setMaxConnections(1)
-             .setCellFunction(NerveDescription())
+             .setCellFunction(OscillatorDescription())
              .setSignal({-1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -330,7 +330,7 @@ TEST_F(MuscleTests, contractionNotPossible)
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
-    auto actualNerveCell = getCell(actualData, 2);
+    auto actualOscillatorCell = getCell(actualData, 2);
 
     EXPECT_TRUE(approxCompare(-1.0f, actualMuscleCell.signal->channels[0]));
     EXPECT_TRUE(approxCompare(smallDistance, actualMuscleCell.connections.at(0).distance));
@@ -350,7 +350,7 @@ TEST_F(MuscleTests, bendClockwise)
             .setId(3)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
     });
     data.addConnection(1, 2);
@@ -361,7 +361,7 @@ TEST_F(MuscleTests, bendClockwise)
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 2);
-    auto actualNerveCell = getCell(actualData, 3);
+    auto actualOscillatorCell = getCell(actualData, 3);
     auto connection1 = getConnection(actualData, 2, 3);
     auto connection2 = getConnection(actualData, 3, 2);
 
@@ -388,7 +388,7 @@ TEST_F(MuscleTests, bendCounterClockwise)
             .setId(3)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setSignal({-1, 0, 0, 0, 0, 0, 0, 0}),
     });
     data.addConnection(1, 2);
@@ -399,7 +399,7 @@ TEST_F(MuscleTests, bendCounterClockwise)
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 2);
-    auto actualNerveCell = getCell(actualData, 3);
+    auto actualOscillatorCell = getCell(actualData, 3);
     auto connection1 = getConnection(actualData, 2, 3);
     auto connection2 = getConnection(actualData, 3, 2);
 

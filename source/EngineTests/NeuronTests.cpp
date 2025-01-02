@@ -50,7 +50,7 @@ TEST_F(NeuronTests, weight)
         CellDescription()
             .setId(1)
             .setPos({1.0f, 1.0f})
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setMaxConnections(2)
             .setSignal(signal),
         CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellFunction(neuron).setMaxConnections(2),
@@ -83,7 +83,7 @@ TEST_F(NeuronTests, activationFunctionBinaryStep)
         CellDescription()
             .setId(1)
             .setPos({1.0f, 1.0f})
-            .setCellFunction(NerveDescription())
+            .setCellFunction(OscillatorDescription())
             .setMaxConnections(2)
             .setSignal(signal),
         CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellFunction(neuron).setMaxConnections(2),

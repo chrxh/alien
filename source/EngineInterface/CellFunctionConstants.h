@@ -9,7 +9,7 @@ enum CellFunction_
     CellFunction_Transmitter,
     CellFunction_Constructor,
     CellFunction_Sensor,
-    CellFunction_Nerve,
+    CellFunction_Oscillator,
     CellFunction_Attacker,
     CellFunction_Injector,
     CellFunction_Muscle,

@@ -44,7 +44,7 @@ TEST_F(InjectorTests, nothingFound)
              .setId(2)
              .setPos({11.0f, 10.0f})
              .setMaxConnections(1)
-             .setCellFunction(NerveDescription().setPulseMode(1))
+             .setCellFunction(OscillatorDescription().setPulseMode(1))
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -77,7 +77,7 @@ TEST_F(InjectorTests, matchButNoInjection)
              .setId(2)
              .setPos({11.0f, 10.0f})
              .setMaxConnections(1)
-             .setCellFunction(NerveDescription().setPulseMode(1))
+             .setCellFunction(OscillatorDescription().setPulseMode(1))
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
@@ -120,7 +120,7 @@ TEST_F(InjectorTests, injection)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription().setPulseMode(1))
+            .setCellFunction(OscillatorDescription().setPulseMode(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMaxConnections(2).setCellFunction(ConstructorDescription().setNumInheritedGenomeNodes(1)),
     });
@@ -162,7 +162,7 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_failed)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription().setPulseMode(1))
+            .setCellFunction(OscillatorDescription().setPulseMode(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
@@ -208,7 +208,7 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_success)
             .setId(2)
             .setPos({11.0f, 10.0f})
             .setMaxConnections(1)
-            .setCellFunction(NerveDescription().setPulseMode(1))
+            .setCellFunction(OscillatorDescription().setPulseMode(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)

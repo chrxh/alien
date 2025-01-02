@@ -565,8 +565,8 @@ __inline__ __device__ int GenomeDecoder::getNextCellFunctionDataSize(uint8_t* ge
     }
     case CellFunction_Sensor:
         return Const::SensorBytes;
-    case CellFunction_Nerve:
-        return Const::NerveBytes;
+    case CellFunction_Oscillator:
+        return Const::OscillatorBytes;
     case CellFunction_Attacker:
         return Const::AttackerBytes;
     case CellFunction_Injector: {
@@ -725,8 +725,8 @@ __inline__ __device__ int GenomeDecoder::getCellFunctionDataSize(CellFunction ce
     }
     case CellFunction_Sensor:
         return Const::SensorBytes;
-    case CellFunction_Nerve:
-        return Const::NerveBytes;
+    case CellFunction_Oscillator:
+        return Const::OscillatorBytes;
     case CellFunction_Attacker:
         return Const::AttackerBytes;
     case CellFunction_Injector: {

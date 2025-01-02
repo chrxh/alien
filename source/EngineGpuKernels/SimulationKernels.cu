@@ -2,7 +2,7 @@
 #include "FlowFieldKernels.cuh"
 #include "ClusterProcessor.cuh"
 #include "SignalProcessor.cuh"
-#include "NerveProcessor.cuh"
+#include "OscillatorProcessor.cuh"
 #include "NeuronProcessor.cuh"
 #include "ConstructorProcessor.cuh"
 #include "AttackerProcessor.cuh"
@@ -92,9 +92,9 @@ __global__ void cudaNextTimestep_cellFunction_prepare_substep2(SimulationData da
     SignalProcessor::updateSignals(data);
 }
 
-__global__ void cudaNextTimestep_cellFunction_nerve(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellFunction_oscillator(SimulationData data, SimulationStatistics statistics)
 {
-    NerveProcessor::process(data, statistics);
+    OscillatorProcessor::process(data, statistics);
 }
 
 __global__ void cudaNextTimestep_cellFunction_neuron(SimulationData data, SimulationStatistics statistics)

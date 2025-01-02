@@ -182,7 +182,7 @@ void GettingStartedWindow::processIntern()
         drawItemText("Constructor: A constructor can build a cell network based on a built-in genome. The construction is done cell by cell and requires "
                      "energy. A constructor can either be controlled via signals or become active automatically (default).");
         drawItemText("Injector: It can infect other constructor cells to inject its own built-in genome.");
-        drawItemText("Nerve: On the one hand, it transfers signals from connected input cells and on the other hand, it can optionally generate "
+        drawItemText("Oscillator: On the one hand, it transfers signals from connected input cells and on the other hand, it can optionally generate "
                      "signals at specific intervals.");
         drawItemText("Attacker: It attacks surrounding cells from other cell networks by stealing energy from them.");
         drawItemText("Defender: It reduces the attack strength when another cell in the vicinity performs an attack.");
@@ -375,7 +375,7 @@ void GettingStartedWindow::processIntern()
         drawHeading2("How can I create a cell signal in the first place?");
         drawParagraph("To activate most cell functions, an input from a connected cell in the form of a signal is required. The simplest methods "
                       "to generate a signal are as follows:");
-        drawItemText("The most direct approach involves using a nerve cell that generates an signal at regular time intervals. The advantage here is that "
+        drawItemText("The most direct approach involves using a oscillator cell that generates an signal at regular time intervals. The advantage here is that "
             "you can precisely configure the length of the time intervals.");
         drawItemText("Signals can also be generated within a neuron cell using bias values.");
         drawParagraph("Additionally, other cells such as constructor cells provide an output signal as soon as they are triggered (automatically).");

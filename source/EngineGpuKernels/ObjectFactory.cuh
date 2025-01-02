@@ -117,6 +117,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->metadata.description);
 
     cell->signalRoutingRestriction.active = cellTO.signalRoutingRestriction.active;
+    cell->signalRoutingRestriction.connectionIndex = cellTO.signalRoutingRestriction.connectionIndex;
     cell->signalRoutingRestriction.baseAngle = cellTO.signalRoutingRestriction.baseAngle;
     cell->signalRoutingRestriction.openingAngle = cellTO.signalRoutingRestriction.openingAngle;
 
@@ -180,9 +181,9 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellFunctionData.sensor.memoryTargetX = cellTO.cellFunctionData.sensor.memoryTargetX;
         cell->cellFunctionData.sensor.memoryTargetY = cellTO.cellFunctionData.sensor.memoryTargetY;
     } break;
-    case CellFunction_Nerve: {
-        cell->cellFunctionData.nerve.pulseMode = cellTO.cellFunctionData.nerve.pulseMode;
-        cell->cellFunctionData.nerve.alternationMode = cellTO.cellFunctionData.nerve.alternationMode;
+    case CellFunction_Oscillator: {
+        cell->cellFunctionData.oscillator.pulseMode = cellTO.cellFunctionData.oscillator.pulseMode;
+        cell->cellFunctionData.oscillator.alternationMode = cellTO.cellFunctionData.oscillator.alternationMode;
     } break;
     case CellFunction_Attacker: {
         cell->cellFunctionData.attacker.mode = cellTO.cellFunctionData.attacker.mode;
@@ -348,7 +349,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
             cell->cellFunctionData.sensor.memoryTargetX = 0;
             cell->cellFunctionData.sensor.memoryTargetY = 0;
         } break;
-        case CellFunction_Nerve: {
+        case CellFunction_Oscillator: {
         } break;
         case CellFunction_Attacker: {
             cell->cellFunctionData.attacker.mode = _data->numberGen1.random(EnergyDistributionMode_Count - 1);

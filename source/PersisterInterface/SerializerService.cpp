@@ -76,8 +76,8 @@ namespace
 
     auto constexpr Id_AttackerGenome_Mode = 0;
 
-    auto constexpr Id_NerveGenome_PulseMode = 0;
-    auto constexpr Id_NerveGenome_AlternationMode = 1;
+    auto constexpr Id_OscillatorGenome_PulseMode = 0;
+    auto constexpr Id_OscillatorGenome_AlternationMode = 1;
 
     auto constexpr Id_SensorGenome_MinDensity = 1;
     auto constexpr Id_SensorGenome_RestrictToColor = 3;
@@ -138,8 +138,8 @@ namespace
 
     auto constexpr Id_Attacker_Mode = 0;
 
-    auto constexpr Id_Nerve_PulseMode = 0;
-    auto constexpr Id_Nerve_AlternationMode = 1;
+    auto constexpr Id_Oscillator_PulseMode = 0;
+    auto constexpr Id_Oscillator_AlternationMode = 1;
 
     auto constexpr Id_Sensor_MinDensity = 1;
     auto constexpr Id_Sensor_MemoryChannel1 = 4;
@@ -310,15 +310,15 @@ namespace cereal
     SPLIT_SERIALIZATION(SensorGenomeDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, NerveGenomeDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, OscillatorGenomeDescription& data)
     {
-        NerveGenomeDescription defaultObject;
+        OscillatorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_NerveGenome_PulseMode, data.pulseMode, defaultObject.pulseMode);
-        loadSave(task, auxiliaries, Id_NerveGenome_AlternationMode, data.alternationMode, defaultObject.alternationMode);
+        loadSave(task, auxiliaries, Id_OscillatorGenome_PulseMode, data.pulseMode, defaultObject.pulseMode);
+        loadSave(task, auxiliaries, Id_OscillatorGenome_AlternationMode, data.alternationMode, defaultObject.alternationMode);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(NerveGenomeDescription)
+    SPLIT_SERIALIZATION(OscillatorGenomeDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, AttackerGenomeDescription& data)
@@ -537,15 +537,15 @@ namespace cereal
     SPLIT_SERIALIZATION(SensorDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, NerveDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, OscillatorDescription& data)
     {
-        NerveDescription defaultObject;
+        OscillatorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Nerve_PulseMode, data.pulseMode, defaultObject.pulseMode);
-        loadSave(task, auxiliaries, Id_Nerve_AlternationMode, data.alternationMode, defaultObject.alternationMode);
+        loadSave(task, auxiliaries, Id_Oscillator_PulseMode, data.pulseMode, defaultObject.pulseMode);
+        loadSave(task, auxiliaries, Id_Oscillator_AlternationMode, data.alternationMode, defaultObject.alternationMode);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(NerveDescription)
+    SPLIT_SERIALIZATION(OscillatorDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, AttackerDescription& data)
@@ -1062,7 +1062,7 @@ namespace
         {"Defender activities", true},
         {"Injection activities", true},
         {"Completed injections", true},
-        {"Nerve pulses", true},
+        {"Oscillator pulses", true},
         {"Neuron activities", true},
         {"Sensor activities", true},
         {"Sensor matches", true},
@@ -1108,7 +1108,7 @@ namespace
         } else if (colIndex == 14) {
             return &dataPoints.numCompletedInjections;
         } else if (colIndex == 15) {
-            return &dataPoints.numNervePulses;
+            return &dataPoints.numOscillatorPulses;
         } else if (colIndex == 16) {
             return &dataPoints.numNeuronActivities;
         } else if (colIndex == 17) {
