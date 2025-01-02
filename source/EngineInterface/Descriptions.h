@@ -343,7 +343,7 @@ using CellFunctionDescription = std::optional<std::variant<
 
 struct SignalRoutingRestrictionDescription
 {
-    int connectionIndex = 0;
+    uint8_t refConnectionIndex = 0;
     float baseAngle = 0;
     float openingAngle = 0;
 
@@ -496,6 +496,19 @@ struct CellDescription
         SignalDescription newSignal;
         newSignal.channels = value;
         signal = newSignal;
+        return *this;
+    }
+    CellDescription& setSignalRoutingRestriction(SignalRoutingRestrictionDescription const& value)
+    {
+        signalRoutingRestriction = value;
+        return *this;
+    }
+    CellDescription& setSignalRoutingRestriction(float baseAngle, float openingAngle)
+    {
+        SignalRoutingRestrictionDescription routingRestriction;
+        routingRestriction.baseAngle = baseAngle;
+        routingRestriction.openingAngle = openingAngle;
+        signalRoutingRestriction = routingRestriction;
         return *this;
     }
     CellDescription& setActivationTime(int value)

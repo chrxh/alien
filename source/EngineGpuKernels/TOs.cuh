@@ -150,7 +150,7 @@ union CellFunctionTO
 struct SignalRoutingRestrictionTO
 {
     bool active;
-    int connectionIndex;
+    uint8_t refConnectionIndex;
     float baseAngle;
     float openingAngle;
 };

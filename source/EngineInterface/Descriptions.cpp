@@ -275,7 +275,7 @@ DataDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2,
     auto& cell1 = getCellRef(cellId1, cache);
     auto& cell2 = getCellRef(cellId2, cache);
 
-    auto addConnection = [this, &cache](auto& cell, auto& otherCell) {
+    auto addConnection = [this, &cache](CellDescription& cell, CellDescription& otherCell) {
         CHECK(cell.connections.size() < MAX_CELL_BONDS);
         cell.maxConnections = std::max(cell.maxConnections, toInt(cell.connections.size() + 1));
 
@@ -339,6 +339,10 @@ DataDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2,
             angleDiff1 += 360.0f;
         }
         auto angleDiff2 = connectionIt->angleFromPrevious;
+        auto index = std::distance(cell.connections.begin(), connectionIt);
+        if (cell.signalRoutingRestriction.has_value() && index == cell.signalRoutingRestriction->refConnectionIndex) {
+            ++cell.signalRoutingRestriction->refConnectionIndex;
+        }
 
         auto factor = (angleDiff2 != 0) ? angleDiff1 / angleDiff2 : 0.5f;
         newConnection.angleFromPrevious = toFloat(angleDiff2 * factor);
