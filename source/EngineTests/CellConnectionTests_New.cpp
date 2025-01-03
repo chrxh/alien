@@ -72,11 +72,11 @@ TEST_F(CellConnectionTests_New, addSecondConnection)
     _simulationFacade->testOnly_createConnection(1, 3);
 
     auto actualData = _simulationFacade->getSimulationData();
-    EXPECT_EQ(3, actualData.cells.size());
+    ASSERT_EQ(3, actualData.cells.size());
 
     auto actualCellById = getCellById(actualData);
     auto cell = actualCellById.at(1);
-    EXPECT_EQ(2, cell.connections.size());
+    ASSERT_EQ(2, cell.connections.size());
 
     auto connection1 = cell.connections.at(0);
     EXPECT_TRUE(approxCompare(1.0f, connection1.distance));
