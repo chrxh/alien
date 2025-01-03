@@ -414,7 +414,21 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
 
     auto newCellPos = hostCell->pos + posDelta;
 
-    //get surrounding cells
+    float angleFromPrevious1;
+    float angleFromPrevious2;
+    auto const& lastConstructionCell = constructionData.lastConstructionCell;
+
+    for (int i = 0; i < lastConstructionCell->numConnections; ++i) {
+        if (lastConstructionCell->connections[i].cell == hostCell) {
+            angleFromPrevious1 = lastConstructionCell->connections[i].angleFromPrevious;
+            angleFromPrevious2 = lastConstructionCell->connections[(i + 1) % lastConstructionCell->numConnections].angleFromPrevious;
+            break;
+        }
+    }
+    auto n = Math::normalized(hostCell->pos - lastConstructionCell->pos);
+    Math::rotateQuarterClockwise(n);
+
+    // assemble surrounding cell candidates
     Cell* otherCellCandidates[MAX_CELL_BONDS * 2];
     int numOtherCellCandidates = 0;
     data.cellMap.getMatchingCells(
@@ -426,14 +440,27 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
         hostCell->detached,
         [&](Cell* const& otherCell) {
             if (otherCell == constructionData.lastConstructionCell || otherCell == hostCell
-                || (otherCell->livingState != LivingState_UnderConstruction
-                && otherCell->activationTime == 0) || otherCell->creatureId != hostCell->cellFunctionData.constructor.offspringCreatureId) {
+                || (otherCell->livingState != LivingState_UnderConstruction && otherCell->activationTime == 0)
+                || otherCell->creatureId != hostCell->cellFunctionData.constructor.offspringCreatureId) {
                 return false;
+            }
+
+            // discard cells that are not on the correct side
+            auto delta = data.cellMap.getCorrectedDirection(otherCell->pos - lastConstructionCell->pos);
+            if (angleFromPrevious2 < angleFromPrevious1) {
+                if (Math::dot(delta, n) < 0) {
+                    return false;
+                }
+            }
+            if (angleFromPrevious2 > angleFromPrevious1) {
+                if (Math::dot(delta, n) > 0) {
+                    return false;
+                }
             }
             return true;
         });
 
-    //assemble surrounding cell candidates
+    // evaluate candidates
     Cell* otherCells[MAX_CELL_BONDS];
     int numOtherCells = 0;
     for (int i = 0; i < numOtherCellCandidates; ++i) {

@@ -4,7 +4,7 @@
 
 namespace Const
 {
-    std::string const ProgramVersion = "4.12.0";
+    std::string const ProgramVersion = "4.12.1";
     std::string const DiscordURL = "https://discord.gg/7bjyZdXXQ2";
     std::string const AlienURL = "alien-project.org";
 
