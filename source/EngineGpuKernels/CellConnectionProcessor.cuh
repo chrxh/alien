@@ -377,59 +377,51 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
     newConnection.angleFromPrevious = angleFromPrevious;
 
     // insert new connection to a clone of the existing connection array
-    CellConnection newConnections[MAX_CELL_BONDS];
-    for (int i = 0; i < cell1->numConnections; ++i) {
-        newConnections[i] = cell1->connections[i];
-    }
     if (index == 0) {
         index = cell1->numConnections;  // connection at index 0 should be an invariant
     }
     for (int j = cell1->numConnections; j > index; --j) {
-        newConnections[j] = newConnections[j - 1];
+        cell1->connections[j] = cell1->connections[j - 1];
     }
-    newConnections[index] = newConnection;
-    newConnections[(index + 1) % (cell1->numConnections + 1)].angleFromPrevious = refAngle - angleFromPrevious;
+    cell1->connections[index] = newConnection;
+    cell1->connections[(index + 1) % (cell1->numConnections + 1)].angleFromPrevious = refAngle - angleFromPrevious;
 
     // align angles
     if (angleAlignment != ConstructorAngleAlignment_None) {
         auto const angleUnit = 360.0f / (angleAlignment + 1);
         for (int i = 0; i < cell1->numConnections + 1; ++i) {
-            newConnections[i].angleFromPrevious = Math::alignAngle(newConnections[i].angleFromPrevious, angleAlignment);
-            if (abs(newConnections[i].angleFromPrevious) < NEAR_ZERO) {
-                newConnections[i].angleFromPrevious = angleUnit;
+            cell1->connections[i].angleFromPrevious = Math::alignAngle(cell1->connections[i].angleFromPrevious, angleAlignment);
+            if (abs(cell1->connections[i].angleFromPrevious) < NEAR_ZERO) {
+                cell1->connections[i].angleFromPrevious = angleUnit;
             }
         }
 
-        for (int i = 0; i < MAX_CELL_BONDS; ++i) {
+        for (int repetition = 0; repetition < MAX_CELL_BONDS; ++repetition) {
             float sumAngle = 0;
-            for (int i = 0; i < cell1->numConnections + 1; ++i) {
-                sumAngle += newConnections[i].angleFromPrevious;
+            for (int i = 0, j = cell1->numConnections + 1; i < j; ++i) {
+                sumAngle += cell1->connections[i].angleFromPrevious;
             }
             if (sumAngle > 360.0f + NEAR_ZERO || sumAngle < 360.0f - NEAR_ZERO) {
                 int indexWithMaxAngle = -1;
                 float maxAngle = 0;
-                for (int j = 0; j < cell1->numConnections + 1; ++j) {
-                    if (newConnections[j].angleFromPrevious > maxAngle) {
-                        maxAngle = newConnections[j].angleFromPrevious;
-                        indexWithMaxAngle = j;
+                for (int k = 0, l = cell1->numConnections + 1; k < l; ++k) {
+                    if (cell1->connections[k].angleFromPrevious > maxAngle) {
+                        maxAngle = cell1->connections[k].angleFromPrevious;
+                        indexWithMaxAngle = k;
                     }
                 }
                 if (sumAngle > 360.0f + NEAR_ZERO) {
-                    newConnections[indexWithMaxAngle].angleFromPrevious -= angleUnit;
+                    cell1->connections[indexWithMaxAngle].angleFromPrevious -= angleUnit;
                 } else {
-                    newConnections[indexWithMaxAngle].angleFromPrevious += angleUnit;
+                    cell1->connections[indexWithMaxAngle].angleFromPrevious += angleUnit;
                 }
             } else {
                 break;
             }
         }
     }
-
-    // adopt new connections
     cell1->numConnections++;
-    for (int i = 0; i < cell1->numConnections; ++i) {
-        cell1->connections[i] = newConnections[i];
-    }
+
     return true;
 }
 
