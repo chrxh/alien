@@ -56,5 +56,7 @@ private:
 
     bool _slowDown = false;
     int _tpsRestriction = 30;
+
+    std::optional<int> _sessionId;
 };
 

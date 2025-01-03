@@ -64,6 +64,11 @@ void TemporalControlWindow::processIntern()
         processTpsRestriction();
     }
     ImGui::EndChild();
+
+    if (!_sessionId.has_value() || _sessionId.value() != _simulationFacade->getSessionId()) {
+        _history.clear();
+    }
+    _sessionId = _simulationFacade->getSessionId();
 }
 
 void TemporalControlWindow::processTpsInfo()
