@@ -1,5 +1,9 @@
 # Release notes
 
+## [4.12.1] - 2025-01-03
+### Fixed
+- engine: heuristics for reconnecting cells in constructors improved (yields less defective offspring)
+
 ## [4.12.0] - 2024-12-29
 ### Added
 - gui/simulation parameters: overview widget for all parameter zones and radiation sources
@@ -14,7 +18,7 @@
 - engine, gui/simulation parameters: neuron mutation revised (gradual adaption, applied to a configurable subset of weights and biases) + expert settings
 - engine, gui/simulation parameters: minimal size for deletion mutation + expert settings
 - engine, gui/simulation parameters: energy cost for muscle functions + parameter
-- engine: parameter for depth of genome complexity
+- engine, gui/simulation parameters: parameter for depth of genome complexity
 
 ### Changed
 - engine: indestructible cells can only be in ready state
