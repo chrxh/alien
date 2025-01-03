@@ -296,6 +296,17 @@ struct Cell
         return 0;
     }
 
+    __device__ __inline__ float getRefDistance(Cell* connectedCell)
+    {
+        for (int i = 0; i < numConnections; i++) {
+            if (connections[i].cell == connectedCell) {
+                return connections[i].distance;
+            }
+        }
+        CUDA_THROW_NOT_IMPLEMENTED();
+        return 0;
+    }
+
     __device__ __inline__ void getLock()
     {
         while (1 == atomicExch(&locked, 1)) {}

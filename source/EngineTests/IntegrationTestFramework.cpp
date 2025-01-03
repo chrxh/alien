@@ -58,22 +58,21 @@ CellDescription IntegrationTestFramework::getCell(DataDescription const& data, u
     THROW_NOT_IMPLEMENTED();
 }
 
-std::unordered_map<std::pair<uint64_t, uint64_t>, ConnectionDescription> IntegrationTestFramework::getConnectionById(DataDescription const& data) const
-{
-    std::unordered_map<std::pair<uint64_t, uint64_t>, ConnectionDescription> result;
-    for (auto const& cell : data.cells) {
-        for (auto const& connection : cell.connections) {
-            result.emplace(std::make_pair(cell.id, connection.cellId), connection);
-        }
-    }
-    return result;
-}
-
 ConnectionDescription IntegrationTestFramework::getConnection(DataDescription const& data, uint64_t id, uint64_t otherId) const
 {
     auto cell = getCell(data, id);
     for (auto const& connection : cell.connections) {
         if (connection.cellId == otherId) {
+            return connection;
+        }
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
+ConnectionDescription IntegrationTestFramework::getConnection(CellDescription const& cell1, CellDescription const& cell2) const
+{
+    for (auto const& connection : cell1.connections) {
+        if (connection.cellId == cell2.id) {
             return connection;
         }
     }

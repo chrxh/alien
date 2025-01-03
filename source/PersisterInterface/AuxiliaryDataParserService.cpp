@@ -311,6 +311,12 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
+            parameters.cellFunctionConstructorAdditionalOffspringDistance,
+            defaultParameters.cellFunctionConstructorAdditionalOffspringDistance,
+            "simulation parameters.cell.function.constructor.additional offspring distance",
+            parserTask);
+        ParameterParser::encodeDecode(
+            tree,
             parameters.cellFunctionConstructorSignalThreshold,
             defaultParameters.cellFunctionConstructorSignalThreshold,
             "simulation parameters.cell.function.constructor.activity threshold",

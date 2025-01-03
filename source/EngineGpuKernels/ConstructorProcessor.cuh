@@ -362,7 +362,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     if (!constructionData.isLastNodeOfLastRepetition || !constructionData.genomeHeader.separateConstruction) {
         auto distance = constructionData.isLastNodeOfLastRepetition && !constructionData.genomeHeader.separateConstruction
             ? constructionData.genomeHeader.connectionDistance
-            : constructionData.genomeHeader.connectionDistance + 0.8f;
+            : constructionData.genomeHeader.connectionDistance + cudaSimulationParameters.cellFunctionConstructorAdditionalOffspringDistance;
         if(!CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance)) {
             CellConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
         }
@@ -381,11 +381,11 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
     Cell* hostCell,
     ConstructionData const& constructionData)
 {
-    auto posDelta = constructionData.lastConstructionCell->pos - hostCell->pos;
-    data.cellMap.correctDirection(posDelta);
+    auto const& lastConstructionCell = constructionData.lastConstructionCell;
+    auto posDelta = data.cellMap.getCorrectedDirection(lastConstructionCell->pos - hostCell->pos);
 
     auto desiredDistance = constructionData.genomeHeader.connectionDistance;
-    auto constructionSiteDistance = data.cellMap.getDistance(hostCell->pos, constructionData.lastConstructionCell->pos);
+    auto constructionSiteDistance = hostCell->getRefDistance(lastConstructionCell);
     posDelta = Math::normalized(posDelta) * (constructionSiteDistance - desiredDistance);
 
     if (Math::length(posDelta) <= cudaSimulationParameters.cellMinDistance
@@ -397,8 +397,6 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
 
     float angleFromPrevious1;
     float angleFromPrevious2;
-    auto const& lastConstructionCell = constructionData.lastConstructionCell;
-
     for (int i = 0; i < lastConstructionCell->numConnections; ++i) {
         if (lastConstructionCell->connections[i].cell == hostCell) {
             angleFromPrevious1 = lastConstructionCell->connections[i].angleFromPrevious;
@@ -421,6 +419,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
         hostCell->detached,
         [&](Cell* const& otherCell) {
             if (otherCell == constructionData.lastConstructionCell || otherCell == hostCell
+                || (otherCell->livingState != LivingState_UnderConstruction
                 || (otherCell->livingState != LivingState_UnderConstruction && otherCell->activationTime == 0)
                 || otherCell->creatureId != hostCell->cellFunctionData.constructor.offspringCreatureId) {
                 return false;
@@ -540,28 +539,40 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
 
     //get surrounding cells
     if (numOtherCells > 0) {
-
-        //sort surrounding cells by distance from newCell
+        //sort surrounding cells by angle diff from newCell to hostCell
+        auto refAngle = Math::angleOfVector(lastConstructionCell->pos - newCellPos);
         bubbleSort(otherCells, numOtherCells, [&](auto const& cell1, auto const& cell2) {
-            auto dist1 = data.cellMap.getDistance(cell1->pos, newCellPos);
-            auto dist2 = data.cellMap.getDistance(cell2->pos, newCellPos);
-            return dist1 < dist2;
+            auto angle1 = Math::angleOfVector(data.cellMap.getCorrectedDirection(cell1->pos - newCellPos));
+            auto angle2 = Math::angleOfVector(data.cellMap.getCorrectedDirection(cell2->pos - newCellPos));
+
+            auto diff1 = Math::subtractAngle(angle1, refAngle);
+            auto diff2 = Math::subtractAngle(angle2, refAngle);
+            if (diff1 > 180.0) {
+                diff1 -= 360.0f;
+            }
+            if (diff2 > 180.0) {
+                diff2 -= 360.0f;
+            }
+            return abs(diff1) < abs(diff2);
         });
 
-        if (constructionData.numRequiredAdditionalConnections != -1) {
-            //it is already ensured that numOtherCells is not less than constructionData.numRequiredAdditionalConnections
-            numOtherCells = constructionData.numRequiredAdditionalConnections;
-        }
-
         //connect surrounding cells if possible
+        int numConnectedCells = 0;
         for (int i = 0; i < numOtherCells; ++i) {
             Cell* otherCell = otherCells[i];
 
             if (otherCell->tryLock()) {
                 if (newCell->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS) {
-                    CellConnectionProcessor::tryAddConnections(data, newCell, otherCell, 0, 0, desiredDistance, constructionData.genomeHeader.angleAlignment);
+                    if (CellConnectionProcessor::tryAddConnections(data, newCell, otherCell, 0, 0, desiredDistance, constructionData.genomeHeader.angleAlignment)) {
+                        ++numConnectedCells; 
+                    }
                 }
                 otherCell->releaseLock();
+            }
+            if (constructionData.numRequiredAdditionalConnections != -1) {
+                if (numConnectedCells == constructionData.numRequiredAdditionalConnections) {
+                    break;
+                }
             }
         }
     }

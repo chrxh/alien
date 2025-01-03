@@ -33,8 +33,8 @@ protected:
     std::unordered_map<uint64_t, CellDescription> getCellById(DataDescription const& data) const;
     CellDescription getCell(DataDescription const& data, uint64_t id) const;
 
-    std::unordered_map<std::pair<uint64_t, uint64_t>, ConnectionDescription> getConnectionById(DataDescription const& data) const;
     ConnectionDescription getConnection(DataDescription const& data, uint64_t id, uint64_t otherId) const;
+    ConnectionDescription getConnection(CellDescription const& cell1, CellDescription const& cell2) const;
     bool hasConnection(DataDescription const& data, uint64_t id, uint64_t otherId) const;
     CellDescription getOtherCell(DataDescription const& data, uint64_t id) const;
     CellDescription getOtherCell(DataDescription const& data, std::set<uint64_t> ids) const;
