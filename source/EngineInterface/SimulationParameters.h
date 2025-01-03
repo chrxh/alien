@@ -120,6 +120,8 @@ struct SimulationParameters
 
     ColorVector<float> cellFunctionConstructorConnectingCellMaxDistance = {1.8f, 1.8f, 1.8f, 1.8f, 1.8f, 1.8f, 1.8f};
     ColorVector<float> cellFunctionConstructorSignalThreshold = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
+    float cellFunctionConstructorAdditionalOffspringDistance = 0.8f;
+    
     bool cellFunctionConstructorCheckCompletenessForSelfReplication = false;
 
     ColorMatrix<bool> cellCopyMutationColorTransitions = {

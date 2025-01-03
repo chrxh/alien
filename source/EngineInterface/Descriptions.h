@@ -152,6 +152,11 @@ struct ConstructorDescription
         constructionAngle2 = value;
         return *this;
     }
+    ConstructorDescription& setLastConstructedCellId(uint64_t value)
+    {
+        lastConstructedCellId = value;
+        return *this;
+    }
 };
 
 struct SensorDescription
@@ -668,6 +673,7 @@ struct DataDescription
     std::unordered_set<uint64_t> getCellIds() const;
 
     DataDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>* cache = nullptr);
+    DataDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, RealVector2D const& refPosCell2, std::unordered_map<uint64_t, int>* cache = nullptr);
 
 private:
     CellDescription& getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>* cache = nullptr);

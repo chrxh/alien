@@ -272,18 +272,29 @@ std::unordered_set<uint64_t> DataDescription::getCellIds() const
 DataDescription&
 DataDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>* cache)
 {
+    auto& cell2 = getCellRef(cellId2, cache);
+    return addConnection(cellId1, cellId2, cell2.pos, cache);
+}
+
+DataDescription& DataDescription::addConnection(
+    uint64_t const& cellId1,
+    uint64_t const& cellId2,
+    RealVector2D const& refPosCell2,
+    std::unordered_map<uint64_t, int>* cache /*= nullptr*/)
+{
     auto& cell1 = getCellRef(cellId1, cache);
     auto& cell2 = getCellRef(cellId2, cache);
 
-    auto addConnection = [this, &cache](CellDescription& cell, CellDescription& otherCell) {
+    auto addConnection = [this,
+                          &cache](CellDescription& cell, CellDescription& otherCell, RealVector2D const& cellRefPos, RealVector2D const& otherCellRefPos) {
         CHECK(cell.connections.size() < MAX_CELL_BONDS);
 
-        auto newAngle = Math::angleOfVector(otherCell.pos - cell.pos);
+        auto newAngle = Math::angleOfVector(otherCellRefPos - cellRefPos);
 
         if (cell.connections.empty()) {
             ConnectionDescription newConnection;
             newConnection.cellId = otherCell.id;
-            newConnection.distance = toFloat(Math::length(otherCell.pos - cell.pos));
+            newConnection.distance = toFloat(Math::length(otherCellRefPos - cellRefPos));
             newConnection.angleFromPrevious = 360.0;
             cell.connections.emplace_back(newConnection);
             return;
@@ -291,10 +302,10 @@ DataDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2,
         if (1 == cell.connections.size()) {
             ConnectionDescription newConnection;
             newConnection.cellId = otherCell.id;
-            newConnection.distance = toFloat(Math::length(otherCell.pos - cell.pos));
+            newConnection.distance = toFloat(Math::length(otherCellRefPos - cellRefPos));
 
             auto connectedCell = getCellRef(cell.connections.front().cellId, cache);
-            auto connectedCellDelta = connectedCell.pos - cell.pos;
+            auto connectedCellDelta = connectedCell.pos - cellRefPos;
             auto prevAngle = Math::angleOfVector(connectedCellDelta);
             auto angleDiff = newAngle - prevAngle;
             if (angleDiff >= 0) {
@@ -309,7 +320,7 @@ DataDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2,
         }
 
         auto firstConnectedCell = getCellRef(cell.connections.front().cellId, cache);
-        auto firstConnectedCellDelta = firstConnectedCell.pos - cell.pos;
+        auto firstConnectedCellDelta = firstConnectedCell.pos - cellRefPos;
         auto angle = Math::angleOfVector(firstConnectedCellDelta);
         auto connectionIt = ++cell.connections.begin();
         while (true) {
@@ -331,7 +342,7 @@ DataDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2,
 
         ConnectionDescription newConnection;
         newConnection.cellId = otherCell.id;
-        newConnection.distance = toFloat(Math::length(otherCell.pos - cell.pos));
+        newConnection.distance = toFloat(Math::length(otherCellRefPos - cellRefPos));
 
         auto angleDiff1 = newAngle - angle;
         if (angleDiff1 < 0) {
@@ -339,7 +350,7 @@ DataDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2,
         }
         auto angleDiff2 = connectionIt->angleFromPrevious;
         if (connectionIt == cell.connections.begin()) {
-            connectionIt = cell.connections.end(); // connection at index 0 should be an invariant
+            connectionIt = cell.connections.end();  // connection at index 0 should be an invariant
         }
 
         auto factor = (angleDiff2 != 0) ? angleDiff1 / angleDiff2 : 0.5f;
@@ -352,8 +363,8 @@ DataDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2,
         connectionIt->angleFromPrevious = toFloat(angleDiff2 * (1 - factor));
     };
 
-    addConnection(cell1, cell2);
-    addConnection(cell2, cell1);
+    addConnection(cell1, cell2, cell1.pos, refPosCell2);
+    addConnection(cell2, cell1, refPosCell2, cell1.pos);
 
     return *this;
 }

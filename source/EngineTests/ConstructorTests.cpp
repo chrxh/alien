@@ -40,7 +40,7 @@ protected:
         return result;
     }
 
-    float getConstructorOffspringDistance() const
+    float getOffspringDistance() const
     {
         return 1.0f + 0.6f;  //0.5 = default connection distance
     }
@@ -1087,7 +1087,7 @@ TEST_F(ConstructorTests, constructSecondCell_separation)
             .setCellFunction(ConstructorDescription().setGenomeCurrentNodeIndex(1).setGenome(genome)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
+            .setPos({10.0f - getOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
@@ -1129,7 +1129,7 @@ TEST_F(ConstructorTests, constructSecondCell_constructionStateTransitions)
             .setCellFunction(ConstructorDescription().setGenomeCurrentNodeIndex(1).setGenome(genome)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
+            .setPos({10.0f - getOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
@@ -1180,7 +1180,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation)
             .setCellFunction(ConstructorDescription().setGenomeCurrentNodeIndex(1).setGenome(genome)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
+            .setPos({10.0f - getOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
@@ -1267,7 +1267,7 @@ TEST_F(ConstructorTests, constructSecondCell_notFinished)
             .setCellFunction(ConstructorDescription().setGenomeCurrentNodeIndex(1).setGenome(genome)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
+            .setPos({10.0f - getOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
@@ -1307,7 +1307,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle1)
             .setCellFunction(ConstructorDescription().setGenome(genome).setConstructionAngle2(90.0f).setGenomeCurrentNodeIndex(1)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
+            .setPos({10.0f - getOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
@@ -1352,7 +1352,7 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
             .setCellFunction(ConstructorDescription().setGenome(genome).setConstructionAngle2(-90.0f).setGenomeCurrentNodeIndex(1)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
+            .setPos({10.0f - getOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
@@ -1392,7 +1392,7 @@ TEST_F(ConstructorTests, constructSecondCell_twoCellGenome_infiniteRepetitions)
     data.addCells({
         CellDescription()
             .setId(1)
-            .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
+            .setPos({10.0f - getOffspringDistance(), 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
             .setCellFunction(ConstructorDescription().setGenomeCurrentNodeIndex(1).setGenome(genome)),
         CellDescription().setId(2).setPos({11.0f, 10.0f}).setLivingState(LivingState_UnderConstruction),
@@ -1426,13 +1426,13 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_upperPart)
             .setCellFunction(ConstructorDescription().setGenomeCurrentNodeIndex(2).setGenome(genome)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
+            .setPos({10.0f - getOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
         CellDescription()
             .setId(3)
-            .setPos({10.0f - getConstructorOffspringDistance(), 9.0f})
+            .setPos({10.0f - getOffspringDistance(), 9.0f})
             .setEnergy(100)
             .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
@@ -1479,13 +1479,13 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_bottomPart)
             .setCellFunction(ConstructorDescription().setGenomeCurrentNodeIndex(2).setGenome(genome)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
+            .setPos({10.0f - getOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
         CellDescription()
             .setId(3)
-            .setPos({10.0f - getConstructorOffspringDistance(), 11.0f})
+            .setPos({10.0f - getOffspringDistance(), 11.0f})
             .setEnergy(100)
             .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
@@ -1531,7 +1531,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation_singleConstruction)
             .setCellFunction(ConstructorDescription().setGenome(genome)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
+            .setPos({10.0f - getOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
@@ -1568,19 +1568,19 @@ TEST_F(ConstructorTests, constructFourthCell_noOverlappingConnection)
             .setCellFunction(ConstructorDescription().setGenomeCurrentNodeIndex(4).setGenome(genome)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
+            .setPos({10.0f - getOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
         CellDescription()
             .setId(3)
-            .setPos({10.0f - getConstructorOffspringDistance(), 11.0f})
+            .setPos({10.0f - getOffspringDistance(), 11.0f})
             .setEnergy(100)
             .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
         CellDescription()
             .setId(4)
-            .setPos({10.0f - getConstructorOffspringDistance() + 1.0f, 11.0f})
+            .setPos({10.0f - getOffspringDistance() + 1.0f, 11.0f})
             .setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1623,7 +1623,7 @@ TEST_F(ConstructorTests, constructLastCellFirstRepetition)
             .setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(1)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
+            .setPos({10.0f - getOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
@@ -1654,13 +1654,13 @@ TEST_F(ConstructorTests, constructLastCellLastRepetition)
             .setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(1).setGenomeCurrentRepetition(1)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
+            .setPos({10.0f - getOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
         CellDescription()
             .setId(3)
-            .setPos({9.0f - getConstructorOffspringDistance(), 10.0f})
+            .setPos({9.0f - getOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
@@ -1694,7 +1694,7 @@ TEST_F(ConstructorTests, restartIfNoLastConstructedCellFound)
             .setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(1).setGenomeCurrentRepetition(1)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
+            .setPos({10.0f - getOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setCellFunction(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
@@ -1729,7 +1729,7 @@ TEST_F(ConstructorTests, restartIfLastConstructedCellHasLowNumConnections)
             .setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(1).setGenomeCurrentRepetition(1).setNumInheritedGenomeNodes(3)),
         CellDescription()
             .setId(2)
-            .setPos({10.0f - getConstructorOffspringDistance(), 10.0f})
+            .setPos({10.0f - getOffspringDistance(), 10.0f})
             .setEnergy(100)
             .setCellFunction(OscillatorDescription())
             .setLivingState(LivingState_UnderConstruction),
