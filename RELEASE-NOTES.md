@@ -1,5 +1,9 @@
 # Release notes
 
+## [4.12.1] - 2025-01-03
+### Fixed
+- engine: heuristics for reconnecting cells in constructors improved (yields less defective offspring)
+
 ## [4.12.0] - 2024-12-29
 ### Added
 - gui/simulation parameters: overview widget for all parameter zones and radiation sources
