@@ -150,8 +150,8 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_smallAng
             .setEnergy(getConstructorEnergy())
             .setCellFunction(ConstructorDescription().setGenomeCurrentNodeIndex(1).setActivationMode(1).setGenome(genome).setLastConstructedCellId(2)),
         CellDescription().setId(2).setPos({10.0f + getOffspringDistance(), 10.0f}).setLivingState(LivingState_UnderConstruction),
-        CellDescription().setId(3).setPos(RealVector2D(10.0f + getOffspringDistance(), 10.0f) + offset * 0.2f).setLivingState(LivingState_UnderConstruction),
-        CellDescription().setId(4).setPos(RealVector2D(10.0f + getOffspringDistance(), 10.0f) + offset * 0.4f).setLivingState(LivingState_UnderConstruction),
+        CellDescription().setId(3).setPos(RealVector2D(10.0f + getOffspringDistance() + 0.2f, 10.0f) + offset * 0.1f).setLivingState(LivingState_UnderConstruction),
+        CellDescription().setId(4).setPos(RealVector2D(10.0f + getOffspringDistance(), 10.0f) + offset * 0.2f).setLivingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
