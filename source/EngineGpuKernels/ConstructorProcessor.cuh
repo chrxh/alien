@@ -408,11 +408,11 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
     Math::rotateQuarterClockwise(n);
 
     // assemble surrounding cell candidates
-    Cell* otherCellCandidates[MAX_CELL_BONDS * 2];
+    Cell* otherCellCandidates[MAX_CELL_BONDS * 4];
     int numOtherCellCandidates = 0;
     data.cellMap.getMatchingCells(
         otherCellCandidates,
-        MAX_CELL_BONDS * 2,
+        MAX_CELL_BONDS * 4,
         numOtherCellCandidates,
         newCellPos,
         cudaSimulationParameters.cellFunctionConstructorConnectingCellMaxDistance[hostCell->color],
@@ -445,7 +445,22 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
     for (int i = 0; i < numOtherCellCandidates; ++i) {
         Cell* otherCell = otherCellCandidates[i];
         if (otherCell->tryLock()) {
-            if (!CellConnectionProcessor::wouldResultInOverlappingConnection(otherCell, newCellPos)) {
+            bool crossingLinks = false;
+            for (int j = 0; j < numOtherCellCandidates; ++j) {
+                if (i == j) {
+                    continue;
+                }
+                auto otherCell2 = otherCellCandidates[j];
+                for (int k = 0; k < otherCell2->numConnections; ++k) {
+                    if (otherCell2->connections[k].cell == otherCell) {
+                        continue;
+                    }
+                    if (Math::crossing(newCellPos, otherCell->pos, otherCell2->pos, otherCell2->connections[k].cell->pos)) {
+                        crossingLinks = true;
+                    }
+                }
+            }
+            if (!crossingLinks) {
                 auto delta = data.cellMap.getCorrectedDirection(newCellPos - otherCell->pos);
                 if (CellConnectionProcessor::hasAngleSpace(data, otherCell, Math::angleOfVector(delta), constructionData.genomeHeader.angleAlignment)) {
                     otherCells[numOtherCells++] = otherCell;
