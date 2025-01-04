@@ -537,23 +537,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
     Math::rotateQuarterClockwise(posDelta);
 
     //get surrounding cells
-    if (numOtherCells > 0) {
-        //sort surrounding cells by angle diff from newCell to hostCell
-        //auto refAngle = Math::angleOfVector(lastConstructionCell->pos - newCellPos);
-        //bubbleSort(otherCells, numOtherCells, [&](auto const& cell1, auto const& cell2) {
-        //    auto angle1 = Math::angleOfVector(data.cellMap.getCorrectedDirection(cell1->pos - newCellPos));
-        //    auto angle2 = Math::angleOfVector(data.cellMap.getCorrectedDirection(cell2->pos - newCellPos));
-
-        //    auto diff1 = Math::subtractAngle(angle1, refAngle);
-        //    auto diff2 = Math::subtractAngle(angle2, refAngle);
-        //    if (diff1 > 180.0) {
-        //        diff1 -= 360.0f;
-        //    }
-        //    if (diff2 > 180.0) {
-        //        diff2 -= 360.0f;
-        //    }
-        //    return abs(diff1) < abs(diff2);
-        //});
+    if (numOtherCells > 0 && constructionData.numRequiredAdditionalConnections != 0) {
 
         //sort surrounding cells by distance from newCell
         bubbleSort(otherCells, numOtherCells, [&](auto const& cell1, auto const& cell2) {
