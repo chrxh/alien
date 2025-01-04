@@ -460,14 +460,17 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
             return true;
         });
 
-    // evaluate candidates
+    // evaluate candidates (locking is needed for the evaluation)
     Cell* otherCells[MAX_CELL_BONDS];
     int numOtherCells = 0;
     for (int i = 0; i < numOtherCellCandidates; ++i) {
         Cell* otherCell = otherCellCandidates[i];
         if (otherCell->tryLock()) {
             if (!CellConnectionProcessor::wouldResultInOverlappingConnection(otherCell, newCellPos)) {
-                otherCells[numOtherCells++] = otherCell;
+                auto delta = data.cellMap.getCorrectedDirection(newCellPos - otherCell->pos);
+                if (CellConnectionProcessor::hasAngleSpace(data, otherCell, Math::angleOfVector(delta), constructionData.genomeHeader.angleAlignment)) {
+                    otherCells[numOtherCells++] = otherCell;
+                }
             }
             otherCell->releaseLock();
         }
