@@ -3,6 +3,7 @@ PUBLIC
     AttackerTests.cpp
     CellConnectionTests_New.cpp
     ConstructorTests.cpp
+    ConstructorTests_New.cpp
     DataTransferTests.cpp
     DefenderTests.cpp
     DescriptionEditTests.cpp
