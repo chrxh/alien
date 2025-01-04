@@ -558,7 +558,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
     Math::rotateQuarterClockwise(posDelta);
 
     //get surrounding cells
-    if (numOtherCells > 0) {
+    if (numOtherCells > 0 && constructionData.numRequiredAdditionalConnections != 0) {
 
         //sort surrounding cells by distance from newCell
         bubbleSort(otherCells, numOtherCells, [&](auto const& cell1, auto const& cell2) {
