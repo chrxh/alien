@@ -33,6 +33,7 @@ public:
 
     __inline__ __device__ static bool existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached, int color);
     __inline__ __device__ static bool wouldResultInOverlappingConnection(Cell* cell1, float2 otherCellPos);
+    __inline__ __device__ static bool hasAngleSpace(SimulationData& data, Cell* cell, float angle, ConstructorAngleAlignment angleAlignment);
     __inline__ __device__ static bool isConnectedConnected(Cell* cell, Cell* otherCell);
 
     struct ReferenceAndActualAngle
@@ -397,7 +398,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
 
     // align angles
     if (angleAlignment != ConstructorAngleAlignment_None) {
-        auto const angleUnit = 360.0f / (angleAlignment + 1);
+        auto const angleUnit = 360.0f / toFloat(angleAlignment + 1);
         for (int i = 0; i < cell1->numConnections + 1; ++i) {
             cell1->connections[i].angleFromPrevious = Math::alignAngle(cell1->connections[i].angleFromPrevious, angleAlignment);
             if (abs(cell1->connections[i].angleFromPrevious) < NEAR_ZERO) {
@@ -505,6 +506,27 @@ __inline__ __device__ bool CellConnectionProcessor::wouldResultInOverlappingConn
         }
     }
     return false;
+}
+
+__inline__ __device__ bool CellConnectionProcessor::hasAngleSpace(SimulationData& data, Cell* cell, float angle, ConstructorAngleAlignment angleAlignment)
+{
+    if (angleAlignment == ConstructorAngleAlignment_None) {
+        return true;
+    }
+
+    int index = 0;
+    float prevAngle;
+    float nextAngle;
+    for (; index < cell->numConnections; ++index) {
+        auto prevIndex = (index + cell->numConnections - 1) % cell->numConnections;
+        prevAngle = Math::angleOfVector(data.cellMap.getCorrectedDirection(cell->connections[prevIndex].cell->pos - cell->pos));
+        nextAngle = Math::angleOfVector(data.cellMap.getCorrectedDirection(cell->connections[index].cell->pos - cell->pos));
+        if (Math::isAngleInBetween(prevAngle, nextAngle, angle) || prevIndex == index) {
+            auto const angleUnit = 360.0f / toFloat(angleAlignment + 1);
+            return cell->connections[index].angleFromPrevious > angleUnit + NEAR_ZERO;
+        }
+    }
+    return true;
 }
 
 __inline__ __device__ bool CellConnectionProcessor::isConnectedConnected(Cell* cell, Cell* otherCell)
