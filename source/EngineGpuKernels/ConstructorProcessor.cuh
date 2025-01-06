@@ -407,12 +407,23 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
     auto n = Math::normalized(hostCell->pos - lastConstructionCell->pos);
     Math::rotateQuarterClockwise(n);
 
+    Cell* nearCells[MAX_CELL_BONDS * 4];
+    int numNearCells = 0;
+    data.cellMap.getMatchingCells(
+        nearCells,
+        MAX_CELL_BONDS * 4,
+        numNearCells,
+        newCellPos,
+        cudaSimulationParameters.cellFunctionConstructorConnectingCellMaxDistance[hostCell->color],
+        hostCell->detached,
+        [&](Cell* const& otherCell) { return otherCell != hostCell && otherCell != constructionData.lastConstructionCell; });
+
     // assemble surrounding cell candidates
-    Cell* otherCellCandidates[MAX_CELL_BONDS * 4];
+    Cell* otherCellCandidates[MAX_CELL_BONDS * 2];
     int numOtherCellCandidates = 0;
     data.cellMap.getMatchingCells(
         otherCellCandidates,
-        MAX_CELL_BONDS * 4,
+        MAX_CELL_BONDS * 2,
         numOtherCellCandidates,
         newCellPos,
         cudaSimulationParameters.cellFunctionConstructorConnectingCellMaxDistance[hostCell->color],
@@ -446,17 +457,23 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
         Cell* otherCell = otherCellCandidates[i];
         if (otherCell->tryLock()) {
             bool crossingLinks = false;
-            for (int j = 0; j < numOtherCellCandidates; ++j) {
+            for (int j = 0; j < numNearCells; ++j) {
                 if (i == j) {
                     continue;
                 }
-                auto otherCell2 = otherCellCandidates[j];
-                for (int k = 0; k < otherCell2->numConnections; ++k) {
-                    if (otherCell2->connections[k].cell == otherCell) {
-                        continue;
-                    }
-                    if (Math::crossing(newCellPos, otherCell->pos, otherCell2->pos, otherCell2->connections[k].cell->pos)) {
-                        crossingLinks = true;
+                auto nearCell = nearCells[j];
+                for (int counter = 0; counter < 10; ++counter) {
+                    if (nearCell->tryLock()) {
+                        for (int k = 0; k < nearCell->numConnections; ++k) {
+                            if (nearCell->connections[k].cell == otherCell) {
+                                continue;
+                            }
+                            if (Math::crossing(newCellPos, otherCell->pos, nearCell->pos, nearCell->connections[k].cell->pos)) {
+                                crossingLinks = true;
+                            }
+                        }
+                        nearCell->releaseLock();
+                        break;
                     }
                 }
             }

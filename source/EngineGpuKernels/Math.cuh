@@ -362,6 +362,12 @@ __inline__ __device__ float Math::alignAngleOnBoundaries(float angle, float maxA
 
 __inline__ __device__ bool Math::crossing(float2 const& segmentStart, float2 const& segmentEnd, float2 const& otherSegmentStart, float2 const& otherSegmentEnd)
 {
+    if ((segmentStart.x == otherSegmentStart.x && segmentStart.y == otherSegmentStart.y)
+        || (segmentStart.x == otherSegmentEnd.x && segmentStart.y == otherSegmentEnd.y) || (segmentEnd.x == otherSegmentStart.x && segmentEnd.y == otherSegmentStart.y)
+        || (segmentEnd.x == otherSegmentEnd.x && segmentEnd.y == otherSegmentEnd.y)) {
+        return false;
+    }
+
     auto const& p1 = segmentStart;
     auto v1 = segmentEnd - segmentStart;
     auto const& p2 = otherSegmentStart;
