@@ -20,24 +20,24 @@ public:
     ShapeGeneratorResult generateNextConstructionData() override
     {
         ShapeGeneratorResult result;
-        auto edgeLength = std::max(2, _processedEdges + 1);
-        result.angle = _edgePos < edgeLength - 1 ? 0 : 120.0f;
-        if (_processedEdges == 0) {
+        auto edgeLength = std::max(2, _edgePos + 1);
+        result.angle = _nodePos < edgeLength - 1 ? 0 : 120.0f;
+        if (_edgePos == 0) {
             result.numRequiredAdditionalConnections = 0;
-        } else if (_processedEdges == 1) {
-            result.numRequiredAdditionalConnections = _edgePos == 0 ? 1 : 0;
+        } else if (_edgePos == 1) {
+            result.numRequiredAdditionalConnections = _nodePos == 0 ? 1 : 0;
         } else {
-            if (_edgePos == edgeLength - 1) {
+            if (_nodePos == edgeLength - 1) {
                 result.numRequiredAdditionalConnections = 0;
-            } else if (_edgePos == edgeLength - 2) {
+            } else if (_nodePos == edgeLength - 2) {
                 result.numRequiredAdditionalConnections = 1;
             } else {
                 result.numRequiredAdditionalConnections = 2;
             }
         }
-        if (++_edgePos == edgeLength) {
-            _edgePos = 0;
-            ++_processedEdges;
+        if (++_nodePos == edgeLength) {
+            _nodePos = 0;
+            ++_edgePos;
         }
         return result;
     }
@@ -45,8 +45,8 @@ public:
     ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
 
 private:
+    int _nodePos = 0;
     int _edgePos = 0;
-    int _processedEdges = 0;
 };
 
 class _RectangleGenerator : public _ShapeGenerator
@@ -55,21 +55,21 @@ public:
     ShapeGeneratorResult generateNextConstructionData() override
     {
         ShapeGeneratorResult result;
-        if (_processedEdges == 0) {
+        if (_edgePos == 0) {
             result.angle = 0.0f;
             result.numRequiredAdditionalConnections = 0;
-        } else if (_processedEdges == 1) {
+        } else if (_edgePos == 1) {
             result.angle = 90.0f;
             result.numRequiredAdditionalConnections = 0;
         } else {
-            result.angle = _edgePos == 0 ? 90.0f : 0.0f;
-            result.numRequiredAdditionalConnections = _edgePos == 0 ? 0 : 1;
+            result.angle = _nodePos == 0 ? 90.0f : 0.0f;
+            result.numRequiredAdditionalConnections = _nodePos == 0 ? 0 : 1;
         }
 
-        auto edgeLength = _processedEdges / 2;
-        if (++_edgePos > edgeLength) {
-            _edgePos = 0;
-            ++_processedEdges;
+        auto edgeLength = _edgePos / 2;
+        if (++_nodePos > edgeLength) {
+            _nodePos = 0;
+            ++_edgePos;
         }
         return result;
     }
@@ -77,8 +77,8 @@ public:
     ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_90; }
 
 private:
+    int _nodePos = 0;
     int _edgePos = 0;
-    int _processedEdges = 0;
 };
 
 class _HexagonGenerator : public _ShapeGenerator
@@ -88,25 +88,25 @@ public:
     {
         ShapeGeneratorResult result;
 
-        auto edgeLength = _processedEdges / 6 + 1;
-        if (_processedEdges % 6 == 1) {
+        auto edgeLength = _edgePos / 6 + 1;
+        if (_edgePos % 6 == 1) {
             --edgeLength;
         }
 
-        if (_processedEdges < 2) {
+        if (_edgePos < 2) {
             result.angle = 120.0f;
             result.numRequiredAdditionalConnections = 0;
-        } else if (_processedEdges < 6) {
+        } else if (_edgePos < 6) {
             result.angle = 60.0f;
             result.numRequiredAdditionalConnections = 1;
         } else {
-            result.angle = _edgePos < edgeLength - 1 ? 0.0f : 60.0f;
-            result.numRequiredAdditionalConnections = _edgePos < edgeLength - 1 ? 2 : 1;
+            result.angle = _nodePos < edgeLength - 1 ? 0.0f : 60.0f;
+            result.numRequiredAdditionalConnections = _nodePos < edgeLength - 1 ? 2 : 1;
         }
 
-        if (++_edgePos >= edgeLength) {
-            _edgePos = 0;
-            ++_processedEdges;
+        if (++_nodePos >= edgeLength) {
+            _nodePos = 0;
+            ++_edgePos;
         }
         return result;
     }
@@ -114,8 +114,8 @@ public:
     ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
 
 private:
+    int _nodePos = 0;
     int _edgePos = 0;
-    int _processedEdges = 0;
 };
 
 class _LoopGenerator : public _ShapeGenerator
@@ -125,25 +125,25 @@ public:
     {
         ShapeGeneratorResult result;
 
-        auto edgeLength = (_processedEdges + 1) / 6 + 1;
-        if (_processedEdges % 6 == 0) {
+        auto edgeLength = (_edgePos + 1) / 6 + 1;
+        if (_edgePos % 6 == 0) {
             --edgeLength;
         }
 
-        if (_processedEdges < 5) {
+        if (_edgePos < 5) {
             result.angle = 60.0f;
             result.numRequiredAdditionalConnections = 0;
-        } else if (_processedEdges == 5) {
-            result.angle = _edgePos == 0 ? 0.0f : 60.0f;
+        } else if (_edgePos == 5) {
+            result.angle = _nodePos == 0 ? 0.0f : 60.0f;
             result.numRequiredAdditionalConnections = 1;
         } else {
-            result.angle = _edgePos < edgeLength - 1 ? 0.0f : 60.0f;
-            result.numRequiredAdditionalConnections = _edgePos < edgeLength - 1 ? 2 : 1;
+            result.angle = _nodePos < edgeLength - 1 ? 0.0f : 60.0f;
+            result.numRequiredAdditionalConnections = _nodePos < edgeLength - 1 ? 2 : 1;
         }
 
-        if (++_edgePos >= edgeLength) {
-            _edgePos = 0;
-            ++_processedEdges;
+        if (++_nodePos >= edgeLength) {
+            _nodePos = 0;
+            ++_edgePos;
         }
         return result;
     }
@@ -151,8 +151,8 @@ public:
     ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
 
 private:
+    int _nodePos = 0;
     int _edgePos = 0;
-    int _processedEdges = 0;
 };
 
 class _TubeGenerator : public _ShapeGenerator
@@ -203,31 +203,31 @@ public:
     {
         ShapeGeneratorResult result;
 
-        if (_processedEdges < 12 || _edgePos == 0) {
-            auto edgeLength = _processedEdges / 6 + 1;
-            if (_processedEdges % 6 == 1) {
+        if (_edgePos < 12 || _nodePos == 0) {
+            auto edgeLength = _edgePos / 6 + 1;
+            if (_edgePos % 6 == 1) {
                 --edgeLength;
             }
 
-            if (_processedEdges < 2) {
+            if (_edgePos < 2) {
                 result.angle = 120.0f;
                 result.numRequiredAdditionalConnections = 0;
-            } else if (_processedEdges < 6) {
+            } else if (_edgePos < 6) {
                 result.angle = 60.0f;
                 result.numRequiredAdditionalConnections = 1;
             } else {
-                result.angle = _edgePos < edgeLength - 1 ? 0.0f : 60.0f;
-                result.numRequiredAdditionalConnections = _edgePos < edgeLength - 1 ? 2 : 1;
+                result.angle = _nodePos < edgeLength - 1 ? 0.0f : 60.0f;
+                result.numRequiredAdditionalConnections = _nodePos < edgeLength - 1 ? 2 : 1;
             }
 
-            if (++_edgePos >= edgeLength) {
-                _edgePos = 0;
-                ++_processedEdges;
+            if (++_nodePos >= edgeLength) {
+                _nodePos = 0;
+                ++_edgePos;
             }
         } else {
-            result.angle = _edgePos == 1 ? -60.0f : 0.0f;
-            result.numRequiredAdditionalConnections = _edgePos == 1 ? 2 : 0;
-            ++_edgePos;
+            result.angle = _nodePos == 1 ? -60.0f : 0.0f;
+            result.numRequiredAdditionalConnections = _nodePos == 1 ? 2 : 0;
+            ++_nodePos;
         }
         return result;
     }
@@ -235,8 +235,8 @@ public:
     ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
 
 private:
+    int _nodePos = 0;
     int _edgePos = 0;
-    int _processedEdges = 0;
 };
 
 class _SmallLolliGenerator : public _ShapeGenerator
@@ -246,13 +246,13 @@ public:
     {
         ShapeGeneratorResult result;
 
-        if (_processedEdges < 6) {
-            auto edgeLength = _processedEdges / 6 + 1;
-            if (_processedEdges % 6 == 1) {
+        if (_edgePos < 6) {
+            auto edgeLength = _edgePos / 6 + 1;
+            if (_edgePos % 6 == 1) {
                 --edgeLength;
             }
 
-            if (_processedEdges < 2) {
+            if (_edgePos < 2) {
                 result.angle = 120.0f;
                 result.numRequiredAdditionalConnections = 0;
             } else {
@@ -260,14 +260,14 @@ public:
                 result.numRequiredAdditionalConnections = 1;
             }
 
-            if (++_edgePos >= edgeLength) {
-                _edgePos = 0;
-                ++_processedEdges;
+            if (++_nodePos >= edgeLength) {
+                _nodePos = 0;
+                ++_edgePos;
             }
         } else {
-            result.angle = _edgePos == 0 ? -60.0f : 0.0f;
-            result.numRequiredAdditionalConnections = _edgePos == 0 ? 2 : 0;
-            ++_edgePos;
+            result.angle = _nodePos == 0 ? -60.0f : 0.0f;
+            result.numRequiredAdditionalConnections = _nodePos == 0 ? 2 : 0;
+            ++_nodePos;
         }
         return result;
     }
@@ -275,8 +275,8 @@ public:
     ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
 
 private:
+    int _nodePos = 0;
     int _edgePos = 0;
-    int _processedEdges = 0;
 };
 
 class _ZigzagGenerator : public _ShapeGenerator
@@ -285,30 +285,30 @@ public:
     ShapeGeneratorResult generateNextConstructionData() override
     {
         ShapeGeneratorResult result;
-        if (_edgePos % 4 == 0) {
+        if (_nodePos % 4 == 0) {
             result.angle = 120.0f;
             result.numRequiredAdditionalConnections = 0;
         }
-        if (_edgePos % 4 == 1) {
+        if (_nodePos % 4 == 1) {
             result.angle = 0;
-            result.numRequiredAdditionalConnections = _edgePos == 1 ? 0 : 1;
+            result.numRequiredAdditionalConnections = _nodePos == 1 ? 0 : 1;
         }
-        if (_edgePos % 4 == 2) {
+        if (_nodePos % 4 == 2) {
             result.angle = -120.0f;
             result.numRequiredAdditionalConnections = 0;
         }
-        if (_edgePos % 4 == 3) {
+        if (_nodePos % 4 == 3) {
             result.angle = 0;
             result.numRequiredAdditionalConnections = 1;
         }
-        ++_edgePos;
+        ++_nodePos;
         return result;
     }
 
     ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
 
 private:
-    int _edgePos = 0;
+    int _nodePos = 0;
 };
 
 ShapeGenerator ShapeGeneratorFactory::create(ConstructionShape shape)

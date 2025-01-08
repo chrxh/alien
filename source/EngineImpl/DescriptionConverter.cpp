@@ -393,6 +393,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     result.genomeComplexity = cellTO.genomeComplexity;
     result.detectedByCreatureId = cellTO.detectedByCreatureId;
     result.cellFunctionUsed = cellTO.cellFunctionUsed;
+    result.genomeNodeIndex = cellTO.genomeNodeIndex;
 
     auto const& metadataTO = cellTO.metadata;
     auto metadata = CellMetadataDescription();
@@ -569,6 +570,7 @@ void DescriptionConverter::addCell(
     cellTO.cellFunction = cellDesc.getCellFunctionType();
     cellTO.detectedByCreatureId = cellDesc.detectedByCreatureId;
     cellTO.cellFunctionUsed = cellDesc.cellFunctionUsed;
+    cellTO.genomeNodeIndex = cellDesc.genomeNodeIndex;
     switch (cellDesc.getCellFunctionType()) {
     case CellFunction_Neuron: {
         NeuronTO neuronTO;

@@ -105,6 +105,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->genomeComplexity = cellTO.genomeComplexity;
     cell->detectedByCreatureId = cellTO.detectedByCreatureId;
     cell->cellFunctionUsed = cellTO.cellFunctionUsed;
+    cell->genomeNodeIndex = cellTO.genomeNodeIndex;
 
     createAuxiliaryData(cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, dataTO.auxiliaryData, cell->metadata.nameSize, cell->metadata.name);
 
@@ -293,6 +294,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->detectedByCreatureId = 0;
     cell->event = CellEvent_No;
     cell->cellFunctionUsed = CellFunctionUsed_No;
+    cell->genomeNodeIndex = 0;
 
     if (cudaSimulationParameters.particleTransformationRandomCellFunction) {
         cell->cellFunction = _data->numberGen1.random(CellFunction_Count - 1);

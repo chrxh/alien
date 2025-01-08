@@ -20,7 +20,7 @@ struct SimulationParametersZoneValues
     ColorVector<float> cellMinEnergy = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f};
     ColorVector<float> cellDeathProbability = {0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f};
 
-    float cellFusionVelocity = 0.6f;
+    float cellFusionVelocity = 2.0f;
     float cellMaxBindingEnergy = Infinity<float>::value;
     ColorVector<float> cellInactiveMaxAge = {
         Infinity<float>::value,

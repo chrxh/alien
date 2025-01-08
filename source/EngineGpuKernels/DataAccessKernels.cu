@@ -52,6 +52,7 @@ namespace
         cellTO.activationTime = cell->activationTime;
         cellTO.detectedByCreatureId = cell->detectedByCreatureId;
         cellTO.cellFunctionUsed = cell->cellFunctionUsed;
+        cellTO.genomeNodeIndex = cell->genomeNodeIndex;
 
         copyAuxiliaryData(
             cell->metadata.nameSize,
