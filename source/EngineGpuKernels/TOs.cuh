@@ -184,6 +184,7 @@ struct CellTO
     uint32_t mutationId;
     uint8_t ancestorMutationId;  //only the first 8 bits from ancestor mutation id
     float genomeComplexity;
+    uint16_t genomeNodeIndex;
 
     //cell function
     CellFunction cellFunction;

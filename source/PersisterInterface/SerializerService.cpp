@@ -108,6 +108,7 @@ namespace
     auto constexpr Id_Cell_Signal_Origin = 22;
     auto constexpr Id_Cell_Signal_TargetX = 23;
     auto constexpr Id_Cell_Signal_TargetY = 24;
+    auto constexpr Id_Cell_GenomeNodeIndex = 25;
 
     auto constexpr Id_Neuron_ActivationFunctions = 0;
 
@@ -176,8 +177,10 @@ namespace cereal
         double,
         uint64_t,
         uint32_t,
+        uint16_t,
         uint8_t,
         int64_t,
+        int16_t,
         int8_t,
         std::optional<bool>,
         std::optional<uint8_t>,
@@ -641,6 +644,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_GenomeComplexity, data.genomeComplexity, defaultObject.genomeComplexity);
         loadSave(task, auxiliaries, Id_Cell_DetectedByCreatureId, data.detectedByCreatureId, defaultObject.detectedByCreatureId);
         loadSave(task, auxiliaries, Id_Cell_CellFunctionUsed, data.cellFunctionUsed, defaultObject.cellFunctionUsed);
+        loadSave(task, auxiliaries, Id_Cell_GenomeNodeIndex, data.genomeNodeIndex, defaultObject.genomeNodeIndex);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.id, data.connections, data.pos, data.vel, data.energy, data.cellFunction, data.signal, data.metadata);

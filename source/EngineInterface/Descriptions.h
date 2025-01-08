@@ -400,6 +400,7 @@ struct CellDescription
     int mutationId = 0;
     uint8_t ancestorMutationId = 0;
     float genomeComplexity = 0;
+    uint16_t genomeNodeIndex = 0;
 
     //cell function
     CellFunctionDescription cellFunction;
