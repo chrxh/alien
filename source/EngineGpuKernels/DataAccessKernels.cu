@@ -232,6 +232,11 @@ __global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds id
             if (ids.values[i] == cell->id) {
                 found = true;
             }
+            for (int j = 0; j < cell->numConnections; ++j) {
+                if (ids.values[i] == cell->connections[j].cell->id) {
+                    found = true;
+                }
+            }
         }
         if (!found) {
             cell->tag = -1;
@@ -336,7 +341,6 @@ __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectL
 __global__ void cudaResolveConnections(SimulationData data, DataTO dataTO)
 {
     auto const partition = calcAllThreadsPartition(*dataTO.numCells);
-    auto const firstCell = data.objects.cells.getArray();
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cellTO = dataTO.cells[index];

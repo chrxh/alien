@@ -24,7 +24,7 @@ using namespace std::string_literals;
 
 namespace
 {
-    auto const CellWindowWidth = 350.0f;
+    auto const CellWindowWidth = 380.0f;
     auto const ParticleWindowWidth = 280.0f;
     auto const BaseTabTextWidth = 162.0f;
     auto const CellFunctionTextWidth = 195.0f;
@@ -188,6 +188,13 @@ void _InspectorWindow::processCellBaseTab(CellDescription& cell)
             if (ImGui::TreeNodeEx("Connections to other cells", TreeNodeFlags)) {
                 for (auto const& [index, connection] : cell.connections | boost::adaptors::indexed(0)) {
                     if (ImGui::TreeNodeEx(("Connection [" + std::to_string(index) + "]").c_str(), ImGuiTreeNodeFlags_None)) {
+                        std::stringstream ss;
+                        ss << "0x" << std::hex << std::uppercase << connection.cellId;
+                        auto cellId = ss.str();
+
+                        AlienImGui::InputText(
+                            AlienImGui::InputTextParameters().name("Cell id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true),
+                            cellId);
                         AlienImGui::InputFloat(
                             AlienImGui::InputFloatParameters()
                                 .name("Reference distance")
