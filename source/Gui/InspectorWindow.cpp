@@ -114,9 +114,9 @@ std::string _InspectorWindow::generateTitle() const
     auto entity = EditorModel::get().getInspectedEntity(_entityId);
     std::stringstream ss;
     if (isCell()) {
-        ss << "Cell #" << std::hex << std::uppercase << _entityId;
+        ss << "Cell with id 0x" << std::hex << std::uppercase << _entityId;
     } else {
-        ss << "Energy particle #" << std::hex << std::uppercase << _entityId;
+        ss << "Energy particle with id 0x" << std::hex << std::uppercase << _entityId;
     }
     return ss.str();
 }
