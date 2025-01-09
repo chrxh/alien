@@ -625,15 +625,17 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
                 }
 
                 // discard cells that are not on the correct side
-                auto delta = data.cellMap.getCorrectedDirection(otherCell->pos - lastConstructionCell->pos);
-                if (angleFromPrevious2 < angleFromPrevious1) {
-                    if (Math::dot(delta, n) < 0) {
-                        return false;
+                if (abs(angleFromPrevious1 - angleFromPrevious2) > NEAR_ZERO) {
+                    auto delta = data.cellMap.getCorrectedDirection(otherCell->pos - lastConstructionCell->pos);
+                    if (angleFromPrevious2 < angleFromPrevious1) {
+                        if (Math::dot(delta, n) < 0) {
+                            return false;
+                        }
                     }
-                }
-                if (angleFromPrevious2 > angleFromPrevious1) {
-                    if (Math::dot(delta, n) > 0) {
-                        return false;
+                    if (angleFromPrevious2 > angleFromPrevious1) {
+                        if (Math::dot(delta, n) > 0) {
+                            return false;
+                        }
                     }
                 }
                 return true;
