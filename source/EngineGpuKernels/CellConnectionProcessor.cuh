@@ -383,7 +383,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
     }
     newConnection.angleFromPrevious = angleFromPrevious;
 
-    // insert new connection to a clone of the existing connection array
+    // insert new connection
     if (index == 0) {
         index = cell1->numConnections;  // connection at index 0 should be an invariant
     }
@@ -396,16 +396,27 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
     cell1->connections[index] = newConnection;
     cell1->connections[(index + 1) % (cell1->numConnections + 1)].angleFromPrevious = refAngle - angleFromPrevious;
 
-    // align angles
+    // alignment
     if (angleAlignment != ConstructorAngleAlignment_None) {
         auto const angleUnit = 360.0f / toFloat(angleAlignment + 1);
-        for (int i = 0; i < cell1->numConnections + 1; ++i) {
-            cell1->connections[i].angleFromPrevious = Math::alignAngle(cell1->connections[i].angleFromPrevious, angleAlignment);
-            if (abs(cell1->connections[i].angleFromPrevious) < NEAR_ZERO) {
-                cell1->connections[i].angleFromPrevious = angleUnit;
+
+        // align angles
+        auto angleAdded = 0.0f;
+        for (int i = 0; i < cell1->numConnections + 2; ++i) {
+            auto index = i % (cell1->numConnections + 1);
+            cell1->connections[index].angleFromPrevious = Math::alignAngle(cell1->connections[index].angleFromPrevious, angleAlignment);
+            if (angleAdded > NEAR_ZERO && cell1->connections[index].angleFromPrevious - angleAdded > NEAR_ZERO) {
+                cell1->connections[index].angleFromPrevious -= angleUnit;
+            }
+            if (abs(cell1->connections[index].angleFromPrevious) < NEAR_ZERO) {
+                cell1->connections[index].angleFromPrevious = angleUnit;
+                angleAdded = angleUnit;
+            } else {
+                angleAdded = 0;
             }
         }
 
+        // ensure that sum of angles is 360 deg
         for (int repetition = 0; repetition < MAX_CELL_BONDS; ++repetition) {
             float sumAngle = 0;
             for (int i = 0, j = cell1->numConnections + 1; i < j; ++i) {
