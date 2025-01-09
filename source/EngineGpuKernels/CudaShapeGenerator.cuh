@@ -31,8 +31,8 @@ private:
 
     int _nodePos = 0;
     int _edgePos = 0;
-    int _connectedNodePos1 = 0;
     int _connectedNodePos2 = 0;
+    int _connectedNodePos1 = 0;
 };
 
 /************************************************************************/
@@ -115,31 +115,29 @@ __inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConst
         result.requiredNodeId1 = _nodePos == 0 ? 0 : -1;
         result.requiredNodeId2 = -1;
     } else {
-        if (_nodePos == edgeLength - 1) {
-            result.numRequiredAdditionalConnections = 0;
+        if (_nodePos == 0) {
+            result.numRequiredAdditionalConnections = 2;
+            result.requiredNodeId1 = _connectedNodePos1;
+            result.requiredNodeId2 = _connectedNodePos2;
         } else if (_nodePos == edgeLength - 2) {
             result.numRequiredAdditionalConnections = 1;
-        } else {
-            result.numRequiredAdditionalConnections = 2;
-        }
-
-        if (_nodePos == 0) {
-            result.requiredNodeId1 = _connectedNodePos2;
-            result.requiredNodeId2 = _connectedNodePos1;
-        } else if (_nodePos == edgeLength - 2) {
-            result.requiredNodeId1 = _connectedNodePos2;
+            result.requiredNodeId1 = _connectedNodePos1;
             result.requiredNodeId2 = -1;
         } else if (_nodePos == edgeLength - 1) {
+            result.numRequiredAdditionalConnections = 0;
             result.requiredNodeId1 = -1;
             result.requiredNodeId2 = -1;
         } else {
-            result.requiredNodeId1 = _connectedNodePos2;
-            result.requiredNodeId2 = _connectedNodePos2 + 1;
-            ++_connectedNodePos2;
+            result.numRequiredAdditionalConnections = 2;
+            result.requiredNodeId1 = _connectedNodePos1;
+            result.requiredNodeId2 = _connectedNodePos1 + 1;
         }
     }
 
     if (_edgePos > 0) {
+        ++_connectedNodePos2;
+    }
+    if (_edgePos > 1 && _nodePos > 0 && _nodePos < edgeLength - 2) {
         ++_connectedNodePos1;
     }
     if (++_nodePos == edgeLength) {
@@ -167,12 +165,12 @@ __inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConst
     } else {
         result.angle = _nodePos == 0 ? 90.0f : 0.0f;
         result.numRequiredAdditionalConnections = _nodePos == 0 ? 0 : 1;
-        result.requiredNodeId1 = _connectedNodePos1;
+        result.requiredNodeId1 = _connectedNodePos2;
         result.requiredNodeId2 = -1;
     }
 
     if (_edgePos >= 4 && _nodePos >= 1 && _nodePos < edgeLength) {
-        ++_connectedNodePos1;
+        ++_connectedNodePos2;
     }
     if (++_nodePos > edgeLength) {
         _nodePos = 0;
@@ -205,12 +203,12 @@ __inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConst
 
         if (_nodePos < edgeLength - 1) {
             result.numRequiredAdditionalConnections = 2;
-            result.requiredNodeId1 = _connectedNodePos1;
-            result.requiredNodeId2 = _connectedNodePos1 + 1;
-            ++_connectedNodePos1;
+            result.requiredNodeId1 = _connectedNodePos2;
+            result.requiredNodeId2 = _connectedNodePos2 + 1;
+            ++_connectedNodePos2;
         } else {
             result.numRequiredAdditionalConnections = 1;
-            result.requiredNodeId1 = _connectedNodePos1;
+            result.requiredNodeId1 = _connectedNodePos2;
             result.requiredNodeId2 = -1;
         }
     }
