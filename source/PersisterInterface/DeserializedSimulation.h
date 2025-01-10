@@ -3,11 +3,11 @@
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/StatisticsHistory.h"
 
-#include "SettingsData.h"
+#include "SettingsForSerialization.h"
 
 struct DeserializedSimulation
 {
     ClusteredDataDescription mainData;
-    SettingsData auxiliaryData;
+    SettingsForSerialization auxiliaryData;
     StatisticsHistoryData statistics;
 };

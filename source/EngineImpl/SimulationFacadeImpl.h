@@ -4,7 +4,7 @@
 #include <chrono>
 
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/Settings.h"
+#include "EngineInterface/SettingsForSimulation.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/OverlayDescriptions.h"
@@ -121,9 +121,11 @@ private:
     bool _selectionNeedsUpdate = false;
     int _sessionId = 0;
 
-    Settings _origSettings;
     IntVector2D _worldSize;
     GpuSettings _gpuSettings;
+
+    SettingsForSimulation _origSettings;
+
     std::chrono::milliseconds _realTime;
     std::optional<std::chrono::time_point<std::chrono::system_clock>> _simRunTimePoint;
 

@@ -27,7 +27,7 @@ add_library(EngineInterface
     RadiationSource.h
     RawStatisticsData.h
     SelectionShallowData.h
-    Settings.h
+    SettingsForSimulation.h
     ShallowUpdateSelectionData.h
     ShapeGenerator.cpp
     ShapeGenerator.h

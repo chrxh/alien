@@ -18,7 +18,7 @@ struct ParticleDescription;
 
 struct GpuSettings;
 
-struct Settings;
+struct SettingsForSimulation;
 
 class _SimulationFacade;
 using SimulationFacade = std::shared_ptr<_SimulationFacade>;

@@ -16,7 +16,7 @@
 #include "EngineInterface/GpuSettings.h"
 #include "EngineInterface/RawStatisticsData.h"
 #include "EngineInterface/OverlayDescriptions.h"
-#include "EngineInterface/Settings.h"
+#include "EngineInterface/SettingsForSimulation.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/MutationType.h"
@@ -39,7 +39,7 @@ class EngineWorker
 {
     friend class EngineWorkerGuard;
 public:
-    void newSimulation(uint64_t timestep, Settings const& _settings);
+    void newSimulation(uint64_t timestep, SettingsForSimulation const& _settings);
     void clear();
 
     void setImageResource(void* image);
@@ -132,7 +132,7 @@ private:
     CudaSimulationFacade _simulationCudaFacade;
 
     //settings
-    Settings _settings;
+    SettingsForSimulation _settings;
 
     //sync
     std::atomic<bool> _syncSimulationWithRendering{false};

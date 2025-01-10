@@ -3,7 +3,7 @@
 #include "SimulationParameters.h"
 #include "GpuSettings.h"
 
-struct Settings
+struct SettingsForSimulation
 {
     int worldSizeX;
     int worldSizeY;

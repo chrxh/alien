@@ -2,7 +2,7 @@
 
 #include "EngineInterface/GpuSettings.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
-#include "EngineInterface/Settings.h"
+#include "EngineInterface/SettingsForSimulation.h"
 
 #include "Base.cuh"
 #include "DataAccessKernels.cuh"
@@ -14,7 +14,7 @@ class _RenderingKernelsLauncher
 {
 public:
     void drawImage(
-        Settings const& settings,
+        SettingsForSimulation const& settings,
         float2 rectUpperLeft,
         float2 rectLowerRight,
         int2 imageSize,

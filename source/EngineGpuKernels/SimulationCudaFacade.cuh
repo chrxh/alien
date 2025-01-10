@@ -13,7 +13,7 @@
 #include <GL/gl.h>
 
 #include "EngineInterface/RawStatisticsData.h"
-#include "EngineInterface/Settings.h"
+#include "EngineInterface/SettingsForSimulation.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/MutationType.h"
@@ -34,7 +34,7 @@ public:
     };
     static GpuInfo checkAndReturnGpuInfo();
 
-    _SimulationCudaFacade(uint64_t timestep, Settings const& settings);
+    _SimulationCudaFacade(uint64_t timestep, SettingsForSimulation const& settings);
     ~_SimulationCudaFacade();
 
     void* registerImageResource(GLuint image);
@@ -114,7 +114,7 @@ private:
     std::optional<SimulationParameters> _newSimulationParameters;
     SimulationParametersUpdateConfig _simulationParametersUpdateConfig = SimulationParametersUpdateConfig::All;
 
-    Settings _settings;
+    SettingsForSimulation _settings;
 
     mutable std::mutex _mutexForSimulationData;
     std::shared_ptr<SimulationData> _cudaSimulationData;

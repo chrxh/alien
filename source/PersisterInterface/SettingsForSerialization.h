@@ -3,9 +3,9 @@
 #include <chrono>
 
 #include "Base/Definitions.h"
-#include "EngineInterface/Settings.h"
+#include "EngineInterface/SettingsForSimulation.h"
 
-struct SettingsData
+struct SettingsForSerialization
 {
     uint64_t timestep = 0;
     std::chrono::milliseconds realTime;
