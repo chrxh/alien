@@ -1928,13 +1928,15 @@ void AlienImGui::NeuronSelection(
     if (ImGui::BeginChild("##", ImVec2(editorWidth, scale(toFloat(numRows) * 26.0f + 18.0f + 28.0f)), true)) {
         DynamicTableLayout table(editorColumnWidth);
         if (table.begin()) {
+            int activationFunction = activationFunctions.at(selectedOutput);
             AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Activation function")
                     .textWidth(editorColumnTextWidth)
                     .values(Const::ActivationFunctions)
                     .tooltip(Const::GenomeNeuronActivationFunctionTooltip),
-                activationFunctions.at(selectedOutput));
+                activationFunction);
+            activationFunctions.at(selectedOutput) = static_cast<NeuronActivationFunction>(activationFunction);
             table.next();
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters().name("Weight").step(0.05f).textWidth(editorColumnTextWidth).tooltip(Const::GenomeNeuronWeightAndBiasTooltip),

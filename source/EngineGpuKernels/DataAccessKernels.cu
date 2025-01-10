@@ -84,12 +84,9 @@ namespace
                 sizeof(NeuronFunction::NeuronState),
                 reinterpret_cast<uint8_t*>(cell->cellFunctionData.neuron.neuronState),
                 targetSize,
-                cellTO.cellFunctionData.neuron.weightsAndBiasesDataIndex,
+                cellTO.cellFunctionData.neuron.neuronDataIndex,
                 *dataTO.numAuxiliaryData,
                 dataTO.auxiliaryData);
-            for (int i = 0; i < MAX_CHANNELS; ++i) {
-                cellTO.cellFunctionData.neuron.activationFunctions[i] = cell->cellFunctionData.neuron.activationFunctions[i];
-            }
         } break;
         case CellFunction_Transmitter: {
             cellTO.cellFunctionData.transmitter.mode = cell->cellFunctionData.transmitter.mode;

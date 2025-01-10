@@ -34,7 +34,7 @@ enum LivingState_
     LivingState_Count
 };
 
-using NeuronActivationFunction = int;
+using NeuronActivationFunction = uint8_t;
 enum NeuronActivationFunction_
 {
     NeuronActivationFunction_Sigmoid,

@@ -110,6 +110,8 @@ namespace
     auto constexpr Id_Cell_Signal_TargetY = 24;
     auto constexpr Id_Cell_GenomeNodeIndex = 25;
 
+    auto constexpr Id_Neuron_Weights = 0;
+    auto constexpr Id_Neuron_Biases = 0;
     auto constexpr Id_Neuron_ActivationFunctions = 0;
 
     auto constexpr Id_Constructor_ActivationMode = 0;
@@ -473,10 +475,10 @@ namespace cereal
     {
         NeuronDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave<std::vector<int>>(task, auxiliaries, Id_Neuron_ActivationFunctions, data.activationFunctions, defaultObject.activationFunctions);
+        loadSave(task, auxiliaries, Id_Neuron_Weights, data.weights, defaultObject.weights);
+        loadSave(task, auxiliaries, Id_Neuron_Biases, data.biases, defaultObject.biases);
+        loadSave(task, auxiliaries, Id_Neuron_ActivationFunctions, data.activationFunctions, defaultObject.activationFunctions);
         processLoadSaveMap(task, ar, auxiliaries);
-
-        ar(data.weights, data.biases);
     }
     SPLIT_SERIALIZATION(NeuronDescription)
 

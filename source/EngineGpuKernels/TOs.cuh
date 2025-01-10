@@ -36,8 +36,8 @@ struct ConnectionTO
 
 struct NeuronTO
 {
-    uint64_t weightsAndBiasesDataIndex;   //size is always: sizeof(float) * MAX_CHANNELS * (MAX_CHANNELS + 1)
-    NeuronActivationFunction activationFunctions[MAX_CHANNELS];
+    static auto constexpr NeuronDataSize = sizeof(float) * MAX_CHANNELS * (MAX_CHANNELS + 1) + MAX_CHANNELS;
+    uint64_t neuronDataIndex;
 };
 
 struct TransmitterTO

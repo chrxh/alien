@@ -750,7 +750,7 @@ ConstructorProcessor::constructCellIntern(
             result->cellFunctionData.neuron.neuronState->biases[i] = GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition) * 4;
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            result->cellFunctionData.neuron.activationFunctions[i] =
+            result->cellFunctionData.neuron.neuronState->activationFunctions[i] =
                 GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % NeuronActivationFunction_Count;
         }
     } break;

@@ -75,10 +75,10 @@ struct NeuronFunction
     {
         float weights[MAX_CHANNELS * MAX_CHANNELS];
         float biases[MAX_CHANNELS];
+        NeuronActivationFunction activationFunctions[MAX_CHANNELS];
     };
 
     NeuronState* neuronState;
-    NeuronActivationFunction activationFunctions[MAX_CHANNELS];
 };
 
 struct TransmitterFunction
