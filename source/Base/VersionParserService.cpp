@@ -14,7 +14,7 @@ bool VersionParserService::isVersionValid(std::string const& otherVersionString)
 {
     try {
         std::vector<std::string> versionParts;
-        boost::split(versionParts, otherVersionString, boost::is_any_of("."));
+        boost::split(versionParts, otherVersionString, boost::is_any_of(".-"));
         if (versionParts.size() != 3 && versionParts.size() != 5) {
             return false;
         }
@@ -40,7 +40,7 @@ VersionParserService::VersionParts VersionParserService::getVersionParts(std::st
     }
 
     std::vector<std::string> versionParts;
-    boost::split(versionParts, versionString, boost::is_any_of("."));
+    boost::split(versionParts, versionString, boost::is_any_of(".-"));
     VersionParts result{
         .major = std::stoi(versionParts.at(0)),
         .minor = std::stoi(versionParts.at(1)),
