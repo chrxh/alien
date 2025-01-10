@@ -44,7 +44,7 @@ bool SimulationParametersUpdateService::updateSimulationParametersAfterTimestep(
     SettingsForSimulation& settings,
     MaxAgeBalancer const& maxAgeBalancer,
     SimulationData const& simulationData,
-    RawStatisticsData const& statistics)
+    StatisticsRawData const& statistics)
 {
     auto result = false;
 
