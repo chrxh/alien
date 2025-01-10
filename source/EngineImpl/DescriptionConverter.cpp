@@ -26,16 +26,34 @@ namespace
         }
     }
 
-    void convert(DataTO const& dataTO, uint64_t sourceSize, uint64_t sourceIndex, std::vector<float>& target)
+    NeuronDescription convertToNeuronDescription(DataTO const& dataTO, uint64_t sourceIndex)
     {
+        NeuronDescription result;
+
         BytesAsFloat bytesAsFloat;
-        target.resize(sourceSize / 4);
-        for (uint64_t i = 0; i < sourceSize / 4; ++i) {
-            for (int j = 0; j < 4; ++j) {
-                bytesAsFloat.b[j] = dataTO.auxiliaryData[sourceIndex + i * 4 + j];
+        int index = 0;
+        for (int row = 0; row < MAX_CHANNELS; ++row) {
+            for (int col = 0; col < MAX_CHANNELS; ++col) {
+                for (int i = 0; i < 4; ++i) {
+                    bytesAsFloat.b[i] = dataTO.auxiliaryData[sourceIndex + index];
+                    ++index;
+                }
+                result.weights[row][col] = bytesAsFloat.f;
             }
-            target[i] = bytesAsFloat.f;
         }
+        for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
+            for (int i = 0; i < 4; ++i) {
+                bytesAsFloat.b[i] = dataTO.auxiliaryData[sourceIndex + index];
+                ++index;
+            }
+            result.biases[channel] = bytesAsFloat.f;
+        }
+        for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
+            result.activationFunctions[channel] = dataTO.auxiliaryData[sourceIndex + index];
+            ++index;
+        }
+
+        return result;
     }
 
     template<typename Container, typename SizeType>
@@ -52,52 +70,33 @@ namespace
         }
     }
 
-    template <>
-    void convert(DataTO const& dataTO, std::vector<float> const& source, int& targetSize, uint64_t& targetIndex)
+    void convertToNeuronData(DataTO const& dataTO, NeuronDescription const& neuronDesc, uint64_t& targetIndex)
     {
+        targetIndex = *dataTO.numAuxiliaryData;
+        *dataTO.numAuxiliaryData *= NeuronTO::NeuronDataSize;
+
         BytesAsFloat bytesAsFloat;
-        targetSize = source.size() * 4;
-        if (targetSize > 0) {
-            targetIndex = *dataTO.numAuxiliaryData;
-            uint64_t size = source.size();
-            for (uint64_t i = 0; i < size; ++i) {
-                bytesAsFloat.f = source.at(i);
-                for (int j = 0; j < 4; ++j) {
-                    dataTO.auxiliaryData[targetIndex + i * 4 + j] = bytesAsFloat.b[j];
+        int bytePos = 0;
+        for (int row = 0; row < MAX_CHANNELS; ++row) {
+            for (int col = 0; col < MAX_CHANNELS; ++col) {
+                bytesAsFloat.f = neuronDesc.weights[row][col];
+                for (int i = 0; i < 4; ++i) {
+                    dataTO.auxiliaryData[targetIndex + bytePos] = bytesAsFloat.b[i];
+                    ++bytePos;
                 }
             }
-            (*dataTO.numAuxiliaryData) += targetSize;
         }
-    }
-
-    std::vector<float> unitWeightsAndBias(std::vector<std::vector<float>> const& weights, std::vector<float> const& bias)
-    {
-        std::vector<float> result(MAX_CHANNELS * MAX_CHANNELS + MAX_CHANNELS, 0);
-        for (int row = 0; row < MAX_CHANNELS; ++row) {
-            for (int col = 0; col < MAX_CHANNELS; ++col) {
-                result[col + row * MAX_CHANNELS] = weights[row][col];
+        for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
+            bytesAsFloat.f = neuronDesc.biases[channel];
+            for (int i = 0; i < 4; ++i) {
+                dataTO.auxiliaryData[targetIndex + bytePos] = bytesAsFloat.b[i];
+                ++bytePos;
             }
         }
-        for (int col = 0; col < MAX_CHANNELS; ++col) {
-            result[col + MAX_CHANNELS * MAX_CHANNELS] = bias[col];
+        for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
+            dataTO.auxiliaryData[targetIndex + bytePos] = neuronDesc.activationFunctions[channel];
+            ++bytePos;
         }
-
-        return result;
-    }
-
-    std::pair<std::vector<std::vector<float>>, std::vector<float>> splitWeightsAndBias(std::vector<float> const& weightsAndBias)
-    {
-        std::vector<std::vector<float>> weights(MAX_CHANNELS, std::vector<float>(MAX_CHANNELS, 0));
-        for (int row = 0; row < MAX_CHANNELS; ++row) {
-            for (int col = 0; col < MAX_CHANNELS; ++col) {
-                weights[row][col] = weightsAndBias[col + row * MAX_CHANNELS];
-            }
-        }
-
-        std::vector<float> bias;
-        bias = std::vector<float>(weightsAndBias.begin() + MAX_CHANNELS * MAX_CHANNELS, weightsAndBias.end());
-
-        return std::make_pair(weights, bias);
     }
 }
 
@@ -410,14 +409,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
 
     switch (cellTO.cellFunction) {
     case CellFunction_Neuron: {
-        NeuronDescription neuron;
-        std::vector<float> weigthsAndBias;
-        convert(dataTO, sizeof(float) * MAX_CHANNELS * (MAX_CHANNELS + 1), cellTO.cellFunctionData.neuron.weightsAndBiasesDataIndex, weigthsAndBias);
-        std::tie(neuron.weights, neuron.biases) = splitWeightsAndBias(weigthsAndBias);
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
-            neuron.activationFunctions[i] = cellTO.cellFunctionData.neuron.activationFunctions[i];
-        }
-        result.cellFunction = neuron;
+        result.cellFunction = convertToNeuronDescription(dataTO, cellTO.cellFunctionData.neuron.neuronDataIndex);
     } break;
     case CellFunction_Transmitter: {
         TransmitterDescription transmitter;
@@ -573,15 +565,10 @@ void DescriptionConverter::addCell(
     cellTO.genomeNodeIndex = cellDesc.genomeNodeIndex;
     switch (cellDesc.getCellFunctionType()) {
     case CellFunction_Neuron: {
-        NeuronTO neuronTO;
         auto const& neuronDesc = std::get<NeuronDescription>(*cellDesc.cellFunction);
-        std::vector<float> weigthsAndBias = unitWeightsAndBias(neuronDesc.weights, neuronDesc.biases);
-        int targetSize;
-        convert(dataTO, weigthsAndBias, targetSize, neuronTO.weightsAndBiasesDataIndex);
-        CHECK(targetSize == sizeof(float) * MAX_CHANNELS * (MAX_CHANNELS + 1));
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
-            neuronTO.activationFunctions[i] = neuronDesc.activationFunctions[i];
-        }
+
+        NeuronTO neuronTO;
+        convertToNeuronData(dataTO, neuronDesc, neuronTO.neuronDataIndex);
         cellTO.cellFunctionData.neuron = neuronTO;
     } break;
     case CellFunction_Transmitter: {

@@ -60,7 +60,7 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     __syncthreads();
 
     for (int i = channelPartition.startIndex; i <= channelPartition.endIndex; ++i) {
-        outputSignal.channels[i] = applyActivationFunction(cell->cellFunctionData.neuron.activationFunctions[i], sumInput[i]);  
+        outputSignal.channels[i] = applyActivationFunction(cell->cellFunctionData.neuron.neuronState->activationFunctions[i], sumInput[i]);  
     }
     __syncthreads();
     
