@@ -81,7 +81,7 @@ struct TransmitterDescription
 
 struct ConstructorDescription
 {
-    int activationMode = 13;   //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
+    int activationMode = 100;   //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third timestep, etc.
     int constructionActivationTime = 100;
     std::vector<uint8_t> genome;
     int numInheritedGenomeNodes = 0;

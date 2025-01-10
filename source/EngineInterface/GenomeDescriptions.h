@@ -45,7 +45,7 @@ struct TransmitterGenomeDescription
 
 struct ConstructorGenomeDescription
 {
-    int mode = 13;   //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
+    int mode = 100;   //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third timestep, etc.
     int constructionActivationTime = 100;
 
     std::variant<MakeGenomeCopy, std::vector<uint8_t>> genome = std::vector<uint8_t>();
