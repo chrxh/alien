@@ -76,18 +76,18 @@ void ResizeWorldDialog::processIntern()
 void ResizeWorldDialog::onResizing()
 {
     auto timestep = _simulationFacade->getCurrentTimestep();
-    auto generalSettings = _simulationFacade->getGeneralSettings();
+    auto worldSize = _simulationFacade->getWorldSize();
     auto parameters = _simulationFacade->getSimulationParameters();
     auto content = _simulationFacade->getClusteredSimulationData();
     auto realtime = _simulationFacade->getRealTime();
     auto const& statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
     _simulationFacade->closeSimulation();
 
-    IntVector2D origWorldSize{generalSettings.worldSizeX, generalSettings.worldSizeY};
-    generalSettings.worldSizeX = _width;
-    generalSettings.worldSizeY = _height;
+    IntVector2D origWorldSize = worldSize;
+    worldSize.x = _width;
+    worldSize.y = _height;
 
-    _simulationFacade->newSimulation(timestep, generalSettings, parameters);
+    _simulationFacade->newSimulation(timestep, worldSize, parameters);
 
     DescriptionEditService::get().correctConnections(content, {_width, _height});
     if (_scaleContent) {

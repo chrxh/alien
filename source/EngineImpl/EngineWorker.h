@@ -39,7 +39,7 @@ class EngineWorker
 {
     friend class EngineWorkerGuard;
 public:
-    void newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters);
+    void newSimulation(uint64_t timestep, Settings const& _settings);
     void clear();
 
     void setImageResource(void* image);

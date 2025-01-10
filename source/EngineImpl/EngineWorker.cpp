@@ -12,13 +12,12 @@ namespace
     std::chrono::milliseconds const FrameTimeout(500);
 }
 
-void EngineWorker::newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters)
+void EngineWorker::newSimulation(uint64_t timestep, Settings const& settings)
 {
     _accessState = 0;
-    _settings.generalSettings = generalSettings;
-    _settings.simulationParameters = parameters;
+    _settings = settings;
     _dataTOCache = std::make_shared<_AccessDataTOCache>();
-    _simulationCudaFacade = std::make_shared<_SimulationCudaFacade>(timestep, _settings);
+    _simulationCudaFacade = std::make_shared<_SimulationCudaFacade>(timestep, settings);
     _cudaResource = nullptr;
 }
 

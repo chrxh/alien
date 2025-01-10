@@ -78,10 +78,7 @@ void NewSimulationDialog::onNewSimulation()
     }
     _simulationFacade->closeSimulation();
 
-    GeneralSettings generalSettings;
-    generalSettings.worldSizeX = _width;
-    generalSettings.worldSizeY = _height;
-    _simulationFacade->newSimulation(0, generalSettings, parameters);
+    _simulationFacade->newSimulation(0, {_width, _height}, parameters);
     Viewport::get().setCenterInWorldPos({toFloat(_width) / 2, toFloat(_height) / 2});
     Viewport::get().setZoomFactor(4.0f);
     TemporalControlWindow::get().onSnapshot();

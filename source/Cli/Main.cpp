@@ -48,7 +48,7 @@ int main(int argc, char** argv)
         auto startTimepoint = std::chrono::steady_clock::now();
 
         auto simulationFacade = std::make_shared<_SimulationFacadeImpl>();
-        simulationFacade->newSimulation(simData.auxiliaryData.timestep, simData.auxiliaryData.generalSettings, simData.auxiliaryData.simulationParameters);
+        simulationFacade->newSimulation(simData.auxiliaryData.timestep, simData.auxiliaryData.worldSize, simData.auxiliaryData.simulationParameters);
         simulationFacade->setClusteredSimulationData(simData.mainData);
         simulationFacade->setStatisticsHistory(simData.statistics);
         simulationFacade->setRealTime(simData.auxiliaryData.realTime);

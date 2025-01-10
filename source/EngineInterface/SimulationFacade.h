@@ -15,7 +15,7 @@ class _SimulationFacade
 public:
     virtual ~_SimulationFacade() = default;
 
-    virtual void newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& simulationParameters) = 0;
+    virtual void newSimulation(uint64_t timestep, IntVector2D const& worldSize, SimulationParameters const& simulationParameters) = 0;
     virtual int getSessionId() const = 0;
 
     virtual void clear() = 0;
@@ -93,7 +93,6 @@ public:
     virtual void removeSelection() = 0;
     virtual bool updateSelectionIfNecessary() = 0;
 
-    virtual GeneralSettings getGeneralSettings() const = 0;
     virtual IntVector2D getWorldSize() const = 0;
     virtual RawStatisticsData getRawStatistics() const = 0;
     virtual StatisticsHistory const& getStatisticsHistory() const = 0;

@@ -18,7 +18,6 @@ struct ParticleDescription;
 
 struct GpuSettings;
 
-struct GeneralSettings;
 struct Settings;
 
 class _SimulationFacade;

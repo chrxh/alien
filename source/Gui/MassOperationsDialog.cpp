@@ -145,7 +145,7 @@ void MassOperationsDialog::onExecute()
 {
     auto timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
     auto parameters = _simulationFacade->getSimulationParameters();
-    auto generalSettings = _simulationFacade->getGeneralSettings();
+    auto worldSize = _simulationFacade->getWorldSize();
     auto content = [&] {
         if (_restrictToSelectedClusters) {
             return _simulationFacade->getSelectedClusteredSimulationData(true);
@@ -187,7 +187,7 @@ void MassOperationsDialog::onExecute()
         _simulationFacade->addAndSelectSimulationData(DataDescription(content));
     } else {
         _simulationFacade->closeSimulation();
-        _simulationFacade->newSimulation(timestep, generalSettings, parameters);
+        _simulationFacade->newSimulation(timestep, worldSize, parameters);
         _simulationFacade->setClusteredSimulationData(content);       
     }
 }

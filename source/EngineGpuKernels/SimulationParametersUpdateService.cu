@@ -48,8 +48,8 @@ bool SimulationParametersUpdateService::updateSimulationParametersAfterTimestep(
 {
     auto result = false;
 
-    auto const& worldSizeX = settings.generalSettings.worldSizeX;
-    auto const& worldSizeY = settings.generalSettings.worldSizeY;
+    auto const& worldSizeX = settings.worldSizeX;
+    auto const& worldSizeY = settings.worldSizeY;
     SpaceCalculator space({worldSizeX, worldSizeY});
     for (int i = 0; i < settings.simulationParameters.numRadiationSources; ++i) {
         auto& source = settings.simulationParameters.radiationSource[i];

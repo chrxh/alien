@@ -16,7 +16,7 @@
 class _SimulationFacadeImpl : public _SimulationFacade
 {
 public:
-    void newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters) override;
+    void newSimulation(uint64_t timestep, IntVector2D const& worldSize, SimulationParameters const& parameters) override;
     int getSessionId() const override;
 
     void clear() override;
@@ -102,7 +102,6 @@ public:
     void removeSelection() override;
     bool updateSelectionIfNecessary() override;
 
-    GeneralSettings getGeneralSettings() const override;
     IntVector2D getWorldSize() const override;
     RawStatisticsData getRawStatistics() const override;
     StatisticsHistory const& getStatisticsHistory() const override;
@@ -123,7 +122,7 @@ private:
     int _sessionId = 0;
 
     Settings _origSettings;
-    GeneralSettings _generalSettings;
+    IntVector2D _worldSize;
     GpuSettings _gpuSettings;
     std::chrono::milliseconds _realTime;
     std::optional<std::chrono::time_point<std::chrono::system_clock>> _simRunTimePoint;

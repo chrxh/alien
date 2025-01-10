@@ -1,8 +1,5 @@
 
 add_library(PersisterInterface
-    AuxiliaryData.h
-    AuxiliaryDataParserService.cpp
-    AuxiliaryDataParserService.h
     Definitions.h
     DeleteNetworkResourceRequestData.h
     DeleteNetworkResourceResultData.h
@@ -18,8 +15,8 @@ add_library(PersisterInterface
     GetPeakSimulationResultData.h
     GetUserNamesForReactionRequestData.h
     GetUserNamesForReactionResultData.h
-    LegacyAuxiliaryDataParserService.cpp
-    LegacyAuxiliaryDataParserService.h
+    LegacySettingsDataParserService.cpp
+    LegacySettingsDataParserService.h
     LoginRequestData.h
     LoginResultData.h
     MoveNetworkResourceRequestData.h
@@ -46,6 +43,9 @@ add_library(PersisterInterface
     SerializerService.cpp
     SerializerService.h
     SerializedSimulation.h
+    SettingsData.h
+    SettingsDataParserService.cpp
+    SettingsDataParserService.h
     SharedDeserializedSimulation.h
     TaskProcessor.cpp
     TaskProcessor.h
