@@ -10,7 +10,7 @@
 #include "DeserializedSimulation.h"
 #include "SerializedSimulation.h"
 #include "Definitions.h"
-#include "AuxiliaryData.h"
+#include "SettingsData.h"
 #include "Base/Singleton.h"
 
 class SerializerService
@@ -44,8 +44,8 @@ private:
     bool deserializeDataDescription(ClusteredDataDescription& data, std::filesystem::path const& filename);
     void deserializeDataDescription(ClusteredDataDescription& data, std::istream& stream);
 
-    void serializeAuxiliaryData(AuxiliaryData const& auxiliaryData, std::ostream& stream);
-    void deserializeAuxiliaryData(AuxiliaryData& auxiliaryData, std::istream& stream);
+    void serializeAuxiliaryData(SettingsData const& auxiliaryData, std::ostream& stream);
+    void deserializeAuxiliaryData(SettingsData& auxiliaryData, std::istream& stream);
 
     void serializeSimulationParameters(SimulationParameters const& parameters, std::ostream& stream);
     void deserializeSimulationParameters(SimulationParameters& parameters, std::istream& stream);

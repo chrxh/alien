@@ -41,7 +41,7 @@ void FileTransferController::onOpenSimulation(std::filesystem::path const& filen
             try {
                 _simulationFacade->newSimulation(
                     data.deserializedSimulation.auxiliaryData.timestep,
-                    data.deserializedSimulation.auxiliaryData.generalSettings,
+                    data.deserializedSimulation.auxiliaryData.worldSize,
                     data.deserializedSimulation.auxiliaryData.simulationParameters);
                 _simulationFacade->setClusteredSimulationData(data.deserializedSimulation.mainData);
                 _simulationFacade->setStatisticsHistory(data.deserializedSimulation.statistics);
@@ -57,7 +57,7 @@ void FileTransferController::onOpenSimulation(std::filesystem::path const& filen
                 _simulationFacade->closeSimulation();
                 _simulationFacade->newSimulation(
                     data.deserializedSimulation.auxiliaryData.timestep,
-                    data.deserializedSimulation.auxiliaryData.generalSettings,
+                    data.deserializedSimulation.auxiliaryData.worldSize,
                     data.deserializedSimulation.auxiliaryData.simulationParameters);
             }
             _persisterFacade->restart();

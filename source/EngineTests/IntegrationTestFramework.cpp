@@ -9,7 +9,6 @@
 IntegrationTestFramework::IntegrationTestFramework(std::optional<SimulationParameters> const& parameters_, IntVector2D const& universeSize)
 {
     _simulationFacade = std::make_shared<_SimulationFacadeImpl>();
-    GeneralSettings generalSettings{universeSize.x, universeSize.y};
     SimulationParameters parameters;
     if (parameters_) {
         parameters = *parameters_;
@@ -18,7 +17,7 @@ IntegrationTestFramework::IntegrationTestFramework(std::optional<SimulationParam
             parameters.baseValues.radiationCellAgeStrength[i] = 0;
         }
     }
-    _simulationFacade->newSimulation(0, generalSettings, parameters);
+    _simulationFacade->newSimulation(0, universeSize, parameters);
     _parameters = _simulationFacade->getSimulationParameters();
 }
 

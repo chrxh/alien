@@ -2,12 +2,13 @@
 
 #include "EngineInterface/Descriptions.h"
 
-void _SimulationFacadeImpl::newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters)
+void _SimulationFacadeImpl::newSimulation(uint64_t timestep, IntVector2D const& worldSize, SimulationParameters const& parameters)
 {
-    _generalSettings = generalSettings;
-    _origSettings.generalSettings = generalSettings;
+    _worldSize = worldSize;
+    _origSettings.worldSizeX = worldSize.x;
+    _origSettings.worldSizeY = worldSize.y;
     _origSettings.simulationParameters = parameters;
-    _worker.newSimulation(timestep, generalSettings, parameters);
+    _worker.newSimulation(timestep, _origSettings);
 
     _thread = new std::thread(&EngineWorker::runThreadLoop, &_worker);
 
@@ -332,14 +333,9 @@ bool _SimulationFacadeImpl::updateSelectionIfNecessary()
     return result;
 }
 
-GeneralSettings _SimulationFacadeImpl::getGeneralSettings() const
-{
-    return _generalSettings;
-}
-
 IntVector2D _SimulationFacadeImpl::getWorldSize() const
 {
-    return {_generalSettings.worldSizeX, _generalSettings.worldSizeY};
+    return _worldSize;
 }
 
 RawStatisticsData _SimulationFacadeImpl::getRawStatistics() const

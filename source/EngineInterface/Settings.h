@@ -2,11 +2,11 @@
 
 #include "SimulationParameters.h"
 #include "GpuSettings.h"
-#include "GeneralSettings.h"
 
 struct Settings
 {
-    GeneralSettings generalSettings;
+    int worldSizeX;
+    int worldSizeY;
     SimulationParameters simulationParameters;
     GpuSettings gpuSettings;
 };

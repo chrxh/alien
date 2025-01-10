@@ -44,7 +44,7 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                 try {
                     _simulationFacade->newSimulation(
                         deserializedSimulation.auxiliaryData.timestep,
-                        deserializedSimulation.auxiliaryData.generalSettings,
+                        deserializedSimulation.auxiliaryData.worldSize,
                         deserializedSimulation.auxiliaryData.simulationParameters);
                     _simulationFacade->setRealTime(deserializedSimulation.auxiliaryData.realTime);
                     _simulationFacade->setClusteredSimulationData(deserializedSimulation.mainData);
@@ -59,7 +59,7 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                     _simulationFacade->closeSimulation();
                     _simulationFacade->newSimulation(
                         deserializedSimulation.auxiliaryData.timestep,
-                        deserializedSimulation.auxiliaryData.generalSettings,
+                        deserializedSimulation.auxiliaryData.worldSize,
                         deserializedSimulation.auxiliaryData.simulationParameters);
                 }
                 _persisterFacade->restart();

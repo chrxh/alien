@@ -53,7 +53,7 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, Settings const& 
     initCuda();
     CudaMemoryManager::getInstance().reset();
 
-    _settings.generalSettings = settings.generalSettings;
+    _settings = settings;
     setSimulationParameters(settings.simulationParameters);
     setGpuConstants(settings.gpuSettings);
 
@@ -66,7 +66,7 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, Settings const& 
     _cudaSimulationStatistics = std::make_shared<SimulationStatistics>();
     _maxAgeBalancer = std::make_shared<_MaxAgeBalancer>();
 
-    _cudaSimulationData->init({settings.generalSettings.worldSizeX, settings.generalSettings.worldSizeY}, timestep);
+    _cudaSimulationData->init({settings.worldSizeX, settings.worldSizeY}, timestep);
     _cudaRenderingData->init();
     _cudaSimulationStatistics->init();
     _cudaSelectionResult->init();

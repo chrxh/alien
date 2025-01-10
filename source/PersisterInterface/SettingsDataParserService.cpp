@@ -1,10 +1,9 @@
-#include "AuxiliaryDataParserService.h"
+#include "SettingsDataParserService.h"
 
 #include "Base/Resources.h"
-#include "EngineInterface/GeneralSettings.h"
 #include "EngineInterface/Settings.h"
 
-#include "LegacyAuxiliaryDataParserService.h"
+#include "LegacySettingsDataParserService.h"
 #include "ParameterParser.h"
 
 namespace
@@ -1098,13 +1097,13 @@ namespace
 
         // Compatibility with legacy parameters
         if (parserTask == ParserTask::Decode) {
-            LegacyAuxiliaryDataParserService::get().searchAndApplyLegacyParameters(programVersion, tree, missingFeatures, missingParameters, parameters);
+            LegacySettingsDataParserService::get().searchAndApplyLegacyParameters(programVersion, tree, missingFeatures, missingParameters, parameters);
         }
     }
 
-    void encodeDecode(boost::property_tree::ptree& tree, AuxiliaryData& data, ParserTask parserTask)
+    void encodeDecode(boost::property_tree::ptree& tree, SettingsData& data, ParserTask parserTask)
     {
-        AuxiliaryData defaultSettings;
+        SettingsData defaultSettings;
 
         //general settings
         ParameterParser::encodeDecode(tree, data.timestep, uint64_t(0), "general.time step", parserTask);
@@ -1112,35 +1111,35 @@ namespace
         ParameterParser::encodeDecode(tree, data.zoom, 4.0f, "general.zoom", parserTask);
         ParameterParser::encodeDecode(tree, data.center.x, 0.0f, "general.center.x", parserTask);
         ParameterParser::encodeDecode(tree, data.center.y, 0.0f, "general.center.y", parserTask);
-        ParameterParser::encodeDecode(tree, data.generalSettings.worldSizeX, defaultSettings.generalSettings.worldSizeX, "general.world size.x", parserTask);
-        ParameterParser::encodeDecode(tree, data.generalSettings.worldSizeY, defaultSettings.generalSettings.worldSizeY, "general.world size.y", parserTask);
+        ParameterParser::encodeDecode(tree, data.worldSize.x, defaultSettings.worldSize.x, "general.world size.x", parserTask);
+        ParameterParser::encodeDecode(tree, data.worldSize.y, defaultSettings.worldSize.y, "general.world size.y", parserTask);
 
         encodeDecodeSimulationParameters(tree, data.simulationParameters, parserTask);
     }
 }
 
-boost::property_tree::ptree AuxiliaryDataParserService::encodeAuxiliaryData(AuxiliaryData const& data)
+boost::property_tree::ptree SettingsDataParserService::encodeAuxiliaryData(SettingsData const& data)
 {
     boost::property_tree::ptree tree;
-    encodeDecode(tree, const_cast<AuxiliaryData&>(data), ParserTask::Encode);
+    encodeDecode(tree, const_cast<SettingsData&>(data), ParserTask::Encode);
     return tree;
 }
 
-AuxiliaryData AuxiliaryDataParserService::decodeAuxiliaryData(boost::property_tree::ptree tree)
+SettingsData SettingsDataParserService::decodeAuxiliaryData(boost::property_tree::ptree tree)
 {
-    AuxiliaryData result;
+    SettingsData result;
     encodeDecode(tree, result, ParserTask::Decode);
     return result;
 }
 
-boost::property_tree::ptree AuxiliaryDataParserService::encodeSimulationParameters(SimulationParameters const& data)
+boost::property_tree::ptree SettingsDataParserService::encodeSimulationParameters(SimulationParameters const& data)
 {
     boost::property_tree::ptree tree;
     encodeDecodeSimulationParameters(tree, const_cast<SimulationParameters&>(data), ParserTask::Encode);
     return tree;
 }
 
-SimulationParameters AuxiliaryDataParserService::decodeSimulationParameters(boost::property_tree::ptree tree)
+SimulationParameters SettingsDataParserService::decodeSimulationParameters(boost::property_tree::ptree tree)
 {
     SimulationParameters result;
     encodeDecodeSimulationParameters(tree, result, ParserTask::Decode);

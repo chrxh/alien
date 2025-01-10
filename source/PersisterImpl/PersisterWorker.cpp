@@ -208,7 +208,7 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveSi
         deserializedData.auxiliaryData.realTime = _simulationFacade->getRealTime();
         deserializedData.auxiliaryData.zoom = requestData.zoom;
         deserializedData.auxiliaryData.center = requestData.center;
-        deserializedData.auxiliaryData.generalSettings = _simulationFacade->getGeneralSettings();
+        deserializedData.auxiliaryData.worldSize = _simulationFacade->getWorldSize();
         deserializedData.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
         deserializedData.auxiliaryData.timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
         deserializedData.mainData = _simulationFacade->getClusteredSimulationData();
@@ -393,7 +393,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             deserializedSim.auxiliaryData.realTime = _simulationFacade->getRealTime();
             deserializedSim.auxiliaryData.zoom = simulationData.zoom;
             deserializedSim.auxiliaryData.center = simulationData.center;
-            deserializedSim.auxiliaryData.generalSettings = _simulationFacade->getGeneralSettings();
+            deserializedSim.auxiliaryData.worldSize = _simulationFacade->getWorldSize();
             deserializedSim.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
             deserializedSim.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
             deserializedSim.mainData = _simulationFacade->getClusteredSimulationData();
@@ -414,7 +414,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         mainData = serializedSim.mainData;
         settings = serializedSim.auxiliaryData;
         statistics = serializedSim.statistics;
-        size = {deserializedSim.auxiliaryData.generalSettings.worldSizeX, deserializedSim.auxiliaryData.generalSettings.worldSizeY};
+        size = {deserializedSim.auxiliaryData.worldSize.x, deserializedSim.auxiliaryData.worldSize.y};
         numObjects = deserializedSim.mainData.getNumberOfCellAndParticles();
     } else {
         auto genome = std::get<UploadNetworkResourceRequestData::GenomeData>(requestData.data).description;
@@ -483,7 +483,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             deserializedSim.auxiliaryData.realTime = _simulationFacade->getRealTime();
             deserializedSim.auxiliaryData.zoom = simulationData.zoom;
             deserializedSim.auxiliaryData.center = simulationData.center;
-            deserializedSim.auxiliaryData.generalSettings = _simulationFacade->getGeneralSettings();
+            deserializedSim.auxiliaryData.worldSize = _simulationFacade->getWorldSize();
             deserializedSim.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
             deserializedSim.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
             deserializedSim.mainData = _simulationFacade->getClusteredSimulationData();
@@ -502,7 +502,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         mainData = serializedSim.mainData;
         settings = serializedSim.auxiliaryData;
         statistics = serializedSim.statistics;
-        worldSize = {deserializedSim.auxiliaryData.generalSettings.worldSizeX, deserializedSim.auxiliaryData.generalSettings.worldSizeY};
+        worldSize = {deserializedSim.auxiliaryData.worldSize.x, deserializedSim.auxiliaryData.worldSize.y};
         numObjects = deserializedSim.mainData.getNumberOfCellAndParticles();
     } else {
         auto genome = std::get<ReplaceNetworkResourceRequestData::GenomeData>(requestData.data).description;
@@ -637,7 +637,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             deserializedSimulation.auxiliaryData.realTime = _simulationFacade->getRealTime();
             deserializedSimulation.auxiliaryData.zoom = requestData.zoom;
             deserializedSimulation.auxiliaryData.center = requestData.center;
-            deserializedSimulation.auxiliaryData.generalSettings = _simulationFacade->getGeneralSettings();
+            deserializedSimulation.auxiliaryData.worldSize = _simulationFacade->getWorldSize();
             deserializedSimulation.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
             deserializedSimulation.auxiliaryData.timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
             deserializedSimulation.mainData = _simulationFacade->getClusteredSimulationData();
