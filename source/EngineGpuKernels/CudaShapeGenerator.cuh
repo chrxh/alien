@@ -268,27 +268,63 @@ __inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConst
     ShapeGeneratorResult result;
     if (_nodePos % 6 == 0) {
         result.angle = 0;
-        result.numRequiredAdditionalConnections = 2;
+        if (_nodePos == 0) {
+            result.numRequiredAdditionalConnections = 0;
+            result.requiredNodeId1 = -1;
+            result.requiredNodeId2 = -1;
+        } else {
+            result.numRequiredAdditionalConnections = 2;
+            result.requiredNodeId1 = _connectedNodePos1;
+            result.requiredNodeId2 = _connectedNodePos1 + 1;
+        }
     }
     if (_nodePos % 6 == 1) {
         result.angle = 60.0f;
-        result.numRequiredAdditionalConnections = _nodePos == 1 ? 0 : 1;
+        if (_nodePos == 1) {
+            result.numRequiredAdditionalConnections = 0;
+            result.requiredNodeId1 = -1;
+            result.requiredNodeId2 = -1;
+        } else {
+            result.numRequiredAdditionalConnections = 1;
+            result.requiredNodeId1 = _connectedNodePos1;
+            result.requiredNodeId2 = -1;
+        }
     }
     if (_nodePos % 6 == 2) {
         result.angle = 120.0f;
         result.numRequiredAdditionalConnections = 0;
+        result.requiredNodeId1 = -1;
+        result.requiredNodeId2 = -1;
     }
     if (_nodePos % 6 == 3) {
         result.angle = 0;
         result.numRequiredAdditionalConnections = 2;
+        result.requiredNodeId1 = _connectedNodePos1;
+        result.requiredNodeId2 = _connectedNodePos1 + 1;
     }
     if (_nodePos % 6 == 4) {
         result.angle = -120.0f;
         result.numRequiredAdditionalConnections = _nodePos == 4 ? 1 : 2;
+        if (_nodePos == 4) {
+            result.requiredNodeId1 = _connectedNodePos1;
+            result.requiredNodeId2 = -1;
+        } else {
+            result.requiredNodeId1 = _connectedNodePos1 - 1;
+            result.requiredNodeId2 = _connectedNodePos1;
+        }
     }
     if (_nodePos % 6 == 5) {
         result.angle = -60.0f;
         result.numRequiredAdditionalConnections = 1;
+        result.requiredNodeId1 = _connectedNodePos1 + 3;
+        result.requiredNodeId2 = -1;
+    }
+
+    if (_nodePos % 6 == 1 && _nodePos > 1) {
+        _connectedNodePos1 += 4;
+    }
+    if (_nodePos % 6 == 5) {
+        _connectedNodePos1 += 2;
     }
     ++_nodePos;
 
@@ -298,63 +334,47 @@ __inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConst
 __inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConstructionDataForLolli()
 {
     ShapeGeneratorResult result;
-
-    if (_edgePos < 12 || _nodePos == 0) {
-        auto edgeLength = _edgePos / 6 + 1;
-        if (_edgePos % 6 == 1) {
-            --edgeLength;
-        }
-
-        if (_edgePos < 2) {
-            result.angle = 120.0f;
-            result.numRequiredAdditionalConnections = 0;
-        } else if (_edgePos < 6) {
-            result.angle = 60.0f;
-            result.numRequiredAdditionalConnections = 1;
-        } else {
-            result.angle = _nodePos < edgeLength - 1 ? 0.0f : 60.0f;
-            result.numRequiredAdditionalConnections = _nodePos < edgeLength - 1 ? 2 : 1;
-        }
-
-        if (++_nodePos >= edgeLength) {
-            _nodePos = 0;
-            ++_edgePos;
-        }
-    } else {
-        result.angle = _nodePos == 1 ? -60.0f : 0.0f;
-        result.numRequiredAdditionalConnections = _nodePos == 1 ? 2 : 0;
-        ++_nodePos;
+    if (_edgePos < 12 || (_edgePos == 12 && _nodePos == 0)) {
+        return generateNextConstructionDataForHexagon();
     }
+
+    if (_nodePos == 1) {
+        result.angle = -60.0f;
+        result.numRequiredAdditionalConnections = 2;
+        result.requiredNodeId1 = 6;
+        result.requiredNodeId2 = 7;
+    }
+    else {
+        result.angle = 0.0f;
+        result.numRequiredAdditionalConnections = 0;
+        result.requiredNodeId1 = -1;
+        result.requiredNodeId2 = -1;
+    }
+
+    _nodePos = 2;
     return result;
 }
 
 __inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConstructionDataForSmallLolli()
 {
     ShapeGeneratorResult result;
-
     if (_edgePos < 6) {
-        auto edgeLength = _edgePos / 6 + 1;
-        if (_edgePos % 6 == 1) {
-            --edgeLength;
-        }
-
-        if (_edgePos < 2) {
-            result.angle = 120.0f;
-            result.numRequiredAdditionalConnections = 0;
-        } else {
-            result.angle = 60.0f;
-            result.numRequiredAdditionalConnections = 1;
-        }
-
-        if (++_nodePos >= edgeLength) {
-            _nodePos = 0;
-            ++_edgePos;
-        }
-    } else {
-        result.angle = _nodePos == 0 ? -60.0f : 0.0f;
-        result.numRequiredAdditionalConnections = _nodePos == 0 ? 2 : 0;
-        ++_nodePos;
+        return generateNextConstructionDataForHexagon();
     }
+
+    if (_nodePos == 0) {
+        result.angle = -60.0f;
+        result.numRequiredAdditionalConnections = 2;
+        result.requiredNodeId1 = 0;
+        result.requiredNodeId2 = 1;
+    } else {
+        result.angle = 0.0f;
+        result.numRequiredAdditionalConnections = 0;
+        result.requiredNodeId1 = -1;
+        result.requiredNodeId2 = -1;
+    }
+
+    _nodePos = 1;
     return result;
 }
 
@@ -364,18 +384,29 @@ __inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConst
     if (_nodePos % 4 == 0) {
         result.angle = 120.0f;
         result.numRequiredAdditionalConnections = 0;
+        result.requiredNodeId1 = -1;
+        result.requiredNodeId2 = -1;
     }
     if (_nodePos % 4 == 1) {
         result.angle = 0;
         result.numRequiredAdditionalConnections = _nodePos == 1 ? 0 : 1;
+        result.requiredNodeId1 = _connectedNodePos1;
+        result.requiredNodeId2 = -1;
     }
     if (_nodePos % 4 == 2) {
         result.angle = -120.0f;
         result.numRequiredAdditionalConnections = 0;
+        result.requiredNodeId1 = -1;
+        result.requiredNodeId2 = -1;
     }
     if (_nodePos % 4 == 3) {
         result.angle = 0;
         result.numRequiredAdditionalConnections = 1;
+        result.requiredNodeId1 = _connectedNodePos1;
+        result.requiredNodeId2 = -1;
+    }
+    if (_nodePos > 1) {
+        ++_connectedNodePos1;
     }
     ++_nodePos;
     return result;
