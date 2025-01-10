@@ -22,7 +22,7 @@ namespace
     }
 }
 
-void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, SimulationData const& data, SimulationStatistics const& statistics)
+void _SimulationKernelsLauncher::calcTimestep(SettingsForSimulation const& settings, SimulationData const& data, SimulationStatistics const& statistics)
 {
     auto const gpuSettings = settings.gpuSettings;
     KERNEL_CALL_1_1(cudaNextTimestep_prepare, data, statistics);
@@ -90,13 +90,13 @@ void _SimulationKernelsLauncher::calcTimestep(Settings const& settings, Simulati
     _garbageCollector->cleanupAfterTimestep(settings.gpuSettings, data);
 }
 
-void _SimulationKernelsLauncher::prepareForSimulationParametersChanges(Settings const& settings, SimulationData const& data)
+void _SimulationKernelsLauncher::prepareForSimulationParametersChanges(SettingsForSimulation const& settings, SimulationData const& data)
 {
     auto const gpuSettings = settings.gpuSettings;
     KERNEL_CALL(cudaResetDensity, data);
 }
 
-bool _SimulationKernelsLauncher::isRigidityUpdateEnabled(Settings const& settings) const
+bool _SimulationKernelsLauncher::isRigidityUpdateEnabled(SettingsForSimulation const& settings) const
 {
     for (int i = 0; i < settings.simulationParameters.numZones; ++i) {
         if (settings.simulationParameters.zone[i].values.rigidity != 0) {

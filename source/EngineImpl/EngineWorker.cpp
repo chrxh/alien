@@ -12,7 +12,7 @@ namespace
     std::chrono::milliseconds const FrameTimeout(500);
 }
 
-void EngineWorker::newSimulation(uint64_t timestep, Settings const& settings)
+void EngineWorker::newSimulation(uint64_t timestep, SettingsForSimulation const& settings)
 {
     _accessState = 0;
     _settings = settings;

@@ -1,4 +1,4 @@
-#include "LegacySettingsDataParserService.h"
+#include "LegacySettingsParserService.h"
 
 #include <set>
 
@@ -146,7 +146,7 @@ namespace
     }
 }
 
-void LegacySettingsDataParserService::searchAndApplyLegacyParameters(
+void LegacySettingsParserService::searchAndApplyLegacyParameters(
     std::string const& programVersion,
     boost::property_tree::ptree& tree,
     MissingFeatures const& missingFeatures,
@@ -164,7 +164,7 @@ void LegacySettingsDataParserService::searchAndApplyLegacyParameters(
     updateParametersAndFeaturesForLegacyFiles(programVersion, missingFeatures, legacyFeatures, missingParameters, legacyParameters, parameters);
 }
 
-void LegacySettingsDataParserService::updateParametersAndFeaturesForLegacyFiles(
+void LegacySettingsParserService::updateParametersAndFeaturesForLegacyFiles(
     std::string const& programVersion,
     MissingFeatures const& missingFeatures,
     LegacyFeatures const& legacyFeatures,

@@ -41,7 +41,7 @@ SimulationParameters SimulationParametersUpdateService::integrateChanges(
 }
 
 bool SimulationParametersUpdateService::updateSimulationParametersAfterTimestep(
-    Settings& settings,
+    SettingsForSimulation& settings,
     MaxAgeBalancer const& maxAgeBalancer,
     SimulationData const& simulationData,
     RawStatisticsData const& statistics)

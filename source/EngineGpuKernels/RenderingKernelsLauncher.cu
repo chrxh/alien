@@ -4,7 +4,7 @@
 #include "RenderingKernels.cuh"
 
 void _RenderingKernelsLauncher::drawImage(
-    Settings const& settings,
+    SettingsForSimulation const& settings,
     float2 rectUpperLeft,
     float2 rectLowerRight,
     int2 imageSize,

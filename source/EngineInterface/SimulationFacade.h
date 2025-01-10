@@ -2,7 +2,7 @@
 #include "Definitions.h"
 #include "OverlayDescriptions.h"
 #include "SelectionShallowData.h"
-#include "Settings.h"
+#include "SettingsForSimulation.h"
 #include "ShallowUpdateSelectionData.h"
 #include "SimulationFacade.h"
 #include "MutationType.h"

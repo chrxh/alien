@@ -85,9 +85,9 @@ struct LegacyParameters
     LegacyParametersForSpot spots[MAX_ZONES];
 };
 
-class LegacySettingsDataParserService
+class LegacySettingsParserService
 {
-    MAKE_SINGLETON(LegacySettingsDataParserService);
+    MAKE_SINGLETON(LegacySettingsParserService);
 
 public:
     //Note: missingFeatures and missingParameters are deprecated, use programVersion instead

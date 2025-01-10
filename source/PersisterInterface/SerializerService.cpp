@@ -28,7 +28,7 @@
 #include "EngineInterface/GenomeDescriptions.h"
 #include "EngineInterface/GenomeDescriptionService.h"
 
-#include "SettingsDataParserService.h"
+#include "SettingsParserService.h"
 
 #define SPLIT_SERIALIZATION(Classname) \
     template <class Archive> \
@@ -1014,28 +1014,28 @@ void SerializerService::deserializeDataDescription(ClusteredDataDescription& dat
     archive(data);
 }
 
-void SerializerService::serializeAuxiliaryData(SettingsData const& auxiliaryData, std::ostream& stream)
+void SerializerService::serializeAuxiliaryData(SettingsForSerialization const& auxiliaryData, std::ostream& stream)
 {
-    boost::property_tree::json_parser::write_json(stream, SettingsDataParserService::get().encodeAuxiliaryData(auxiliaryData));
+    boost::property_tree::json_parser::write_json(stream, SettingsParserService::get().encodeAuxiliaryData(auxiliaryData));
 }
 
-void SerializerService::deserializeAuxiliaryData(SettingsData& auxiliaryData, std::istream& stream)
+void SerializerService::deserializeAuxiliaryData(SettingsForSerialization& auxiliaryData, std::istream& stream)
 {
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(stream, tree);
-    auxiliaryData = SettingsDataParserService::get().decodeAuxiliaryData(tree);
+    auxiliaryData = SettingsParserService::get().decodeAuxiliaryData(tree);
 }
 
 void SerializerService::serializeSimulationParameters(SimulationParameters const& parameters, std::ostream& stream)
 {
-    boost::property_tree::json_parser::write_json(stream, SettingsDataParserService::get().encodeSimulationParameters(parameters));
+    boost::property_tree::json_parser::write_json(stream, SettingsParserService::get().encodeSimulationParameters(parameters));
 }
 
 void SerializerService::deserializeSimulationParameters(SimulationParameters& parameters, std::istream& stream)
 {
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(stream, tree);
-    parameters = SettingsDataParserService::get().decodeSimulationParameters(tree);
+    parameters = SettingsParserService::get().decodeSimulationParameters(tree);
 }
 
 namespace

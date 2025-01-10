@@ -48,7 +48,7 @@ namespace
     std::chrono::milliseconds const StatisticsUpdate(30);
 }
 
-_SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, Settings const& settings)
+_SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimulation const& settings)
 {
     initCuda();
     CudaMemoryManager::getInstance().reset();

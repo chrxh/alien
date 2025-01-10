@@ -1,9 +1,9 @@
-#include "SettingsDataParserService.h"
+#include "SettingsParserService.h"
 
 #include "Base/Resources.h"
-#include "EngineInterface/Settings.h"
+#include "EngineInterface/SettingsForSimulation.h"
 
-#include "LegacySettingsDataParserService.h"
+#include "LegacySettingsParserService.h"
 #include "ParameterParser.h"
 
 namespace
@@ -1097,13 +1097,13 @@ namespace
 
         // Compatibility with legacy parameters
         if (parserTask == ParserTask::Decode) {
-            LegacySettingsDataParserService::get().searchAndApplyLegacyParameters(programVersion, tree, missingFeatures, missingParameters, parameters);
+            LegacySettingsParserService::get().searchAndApplyLegacyParameters(programVersion, tree, missingFeatures, missingParameters, parameters);
         }
     }
 
-    void encodeDecode(boost::property_tree::ptree& tree, SettingsData& data, ParserTask parserTask)
+    void encodeDecode(boost::property_tree::ptree& tree, SettingsForSerialization& data, ParserTask parserTask)
     {
-        SettingsData defaultSettings;
+        SettingsForSerialization defaultSettings;
 
         //general settings
         ParameterParser::encodeDecode(tree, data.timestep, uint64_t(0), "general.time step", parserTask);
@@ -1118,28 +1118,28 @@ namespace
     }
 }
 
-boost::property_tree::ptree SettingsDataParserService::encodeAuxiliaryData(SettingsData const& data)
+boost::property_tree::ptree SettingsParserService::encodeAuxiliaryData(SettingsForSerialization const& data)
 {
     boost::property_tree::ptree tree;
-    encodeDecode(tree, const_cast<SettingsData&>(data), ParserTask::Encode);
+    encodeDecode(tree, const_cast<SettingsForSerialization&>(data), ParserTask::Encode);
     return tree;
 }
 
-SettingsData SettingsDataParserService::decodeAuxiliaryData(boost::property_tree::ptree tree)
+SettingsForSerialization SettingsParserService::decodeAuxiliaryData(boost::property_tree::ptree tree)
 {
-    SettingsData result;
+    SettingsForSerialization result;
     encodeDecode(tree, result, ParserTask::Decode);
     return result;
 }
 
-boost::property_tree::ptree SettingsDataParserService::encodeSimulationParameters(SimulationParameters const& data)
+boost::property_tree::ptree SettingsParserService::encodeSimulationParameters(SimulationParameters const& data)
 {
     boost::property_tree::ptree tree;
     encodeDecodeSimulationParameters(tree, const_cast<SimulationParameters&>(data), ParserTask::Encode);
     return tree;
 }
 
-SimulationParameters SettingsDataParserService::decodeSimulationParameters(boost::property_tree::ptree tree)
+SimulationParameters SettingsParserService::decodeSimulationParameters(boost::property_tree::ptree tree)
 {
     SimulationParameters result;
     encodeDecodeSimulationParameters(tree, result, ParserTask::Decode);
