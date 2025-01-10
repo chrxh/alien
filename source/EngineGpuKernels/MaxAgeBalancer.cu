@@ -13,7 +13,7 @@ namespace
     auto constexpr MinReplicatorsLowerValue = 20;
 }
 
-bool _MaxAgeBalancer::balance(SimulationParameters& parameters, RawStatisticsData const& statistics, uint64_t timestep)
+bool _MaxAgeBalancer::balance(SimulationParameters& parameters, StatisticsRawData const& statistics, uint64_t timestep)
 {
     auto result = false;
     if (parameters.features.cellAgeLimiter && parameters.cellMaxAgeBalancer) {
@@ -46,7 +46,7 @@ void _MaxAgeBalancer::initializeIfNecessary(SimulationParameters const& paramete
     }
 }
 
-bool _MaxAgeBalancer::doAdaptionIfNecessary(SimulationParameters& parameters, RawStatisticsData const& statistics, uint64_t timestep)
+bool _MaxAgeBalancer::doAdaptionIfNecessary(SimulationParameters& parameters, StatisticsRawData const& statistics, uint64_t timestep)
 {
     auto result = false;
     for (int i = 0; i < MAX_COLORS; ++i) {

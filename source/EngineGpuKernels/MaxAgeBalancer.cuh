@@ -5,17 +5,17 @@
 
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/SimulationParameters.h"
-#include "EngineInterface/RawStatisticsData.h"
+#include "EngineInterface/StatisticsRawData.h"
 
 class _MaxAgeBalancer
 {
 public:
     //returns true if parameters have been changed
-    bool balance(SimulationParameters& parameters, RawStatisticsData const& statistics, uint64_t timestep);
+    bool balance(SimulationParameters& parameters, StatisticsRawData const& statistics, uint64_t timestep);
 
 private:
     void initializeIfNecessary(SimulationParameters const& parameters, uint64_t timestep);
-    bool doAdaptionIfNecessary(SimulationParameters& parameters, RawStatisticsData const& statistics, uint64_t timestep);
+    bool doAdaptionIfNecessary(SimulationParameters& parameters, StatisticsRawData const& statistics, uint64_t timestep);
     void startNewMeasurement(uint64_t timestep);
     void saveLastState(SimulationParameters const& parameters);
 

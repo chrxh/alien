@@ -10,7 +10,7 @@ class StatisticsService
     MAKE_SINGLETON(StatisticsService);
 
 public:
-    void addDataPoint(StatisticsHistory& history, TimelineStatistics const& newRawStatistics, uint64_t timestep);
+    void addDataPoint(StatisticsHistory& history, TimelineStatistics const& newTimelineStatistics, uint64_t timestep);
     void resetTime(StatisticsHistory& history, uint64_t timestep);
     void rewriteHistory(StatisticsHistory& history, StatisticsHistoryData const& newHistoryData, uint64_t timestep);
 
@@ -22,6 +22,6 @@ private:
     int _numDataPoints = 0;
     std::optional<DataPointCollection> _accumulatedDataPoint;
 
-    std::optional<TimelineStatistics> _lastRawStatistics;
+    std::optional<TimelineStatistics> _lastTimelineStatistics;
     std::optional<uint64_t> _lastTimestep;
 };

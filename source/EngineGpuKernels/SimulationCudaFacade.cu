@@ -140,7 +140,7 @@ void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateSta
             std::lock_guard lock(_mutexForSimulationData);
             ++_cudaSimulationData->timestep;
         }
-        auto statistics = getRawStatistics();
+        auto statistics = getStatisticsRawData();
         {
             std::lock_guard lock(_mutexForSimulationParameters);
             if (SimulationParametersUpdateService::get().updateSimulationParametersAfterTimestep(_settings, _maxAgeBalancer, simulationData, statistics)) {
@@ -417,13 +417,13 @@ auto _SimulationCudaFacade::getArraySizes() const -> ArraySizes
     };
 }
 
-RawStatisticsData _SimulationCudaFacade::getRawStatistics()
+StatisticsRawData _SimulationCudaFacade::getStatisticsRawData()
 {
     std::lock_guard lock(_mutexForStatistics);
     if (_statisticsData) {
         return *_statisticsData;
     } else {
-        return RawStatisticsData();
+        return StatisticsRawData();
     }
 }
 

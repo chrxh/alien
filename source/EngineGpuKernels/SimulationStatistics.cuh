@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/RawStatisticsData.h"
+#include "EngineInterface/StatisticsRawData.h"
 
 #include "Base.cuh"
 #include "Definitions.cuh"
@@ -11,9 +11,9 @@ public:
 
     __host__ void init()
     {
-        CudaMemoryManager::getInstance().acquireMemory<RawStatisticsData>(1, _data);
+        CudaMemoryManager::getInstance().acquireMemory<StatisticsRawData>(1, _data);
         CudaMemoryManager::getInstance().acquireMemory<MutantStatistics>(MutantToColorCountMapSize, _mutantToMutantStatisticsMap);
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_data, 0, sizeof(RawStatisticsData)));
+        CHECK_FOR_CUDA_ERROR(cudaMemset(_data, 0, sizeof(StatisticsRawData)));
     }
 
     __host__ void free()
@@ -22,10 +22,10 @@ public:
         CudaMemoryManager::getInstance().freeMemory(_mutantToMutantStatisticsMap);
     }
 
-    __host__ RawStatisticsData getStatistics()
+    __host__ StatisticsRawData getStatistics()
     {
-        RawStatisticsData result;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _data, sizeof(RawStatisticsData), cudaMemcpyDeviceToHost));
+        StatisticsRawData result;
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _data, sizeof(StatisticsRawData), cudaMemcpyDeviceToHost));
         return result;
     }
 
@@ -102,10 +102,10 @@ public:
     //accumulated statistics
     __host__ void resetAccumulatedStatistics()
     {
-        RawStatisticsData hostData;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&hostData, _data, sizeof(RawStatisticsData), cudaMemcpyDeviceToHost));
+        StatisticsRawData hostData;
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&hostData, _data, sizeof(StatisticsRawData), cudaMemcpyDeviceToHost));
         hostData.timeline.accumulated = AccumulatedStatistics();
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &hostData, sizeof(RawStatisticsData), cudaMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &hostData, sizeof(StatisticsRawData), cudaMemcpyHostToDevice));
     }
 
     __inline__ __device__ void incNumCreatedCells(int color) { alienAtomicAdd64(&_data->timeline.accumulated.numCreatedCells[color], uint64_t(1)); }
@@ -148,7 +148,7 @@ public:
     __inline__ __device__ int getMaxValue() const { return _data->histogram.maxValue; }
 
 private:
-    RawStatisticsData* _data;
+    StatisticsRawData* _data;
 
     //for diversity calculation
     static auto constexpr MutantToColorCountMapSize = 1 << 20;

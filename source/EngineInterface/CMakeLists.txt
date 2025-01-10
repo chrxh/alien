@@ -25,7 +25,6 @@ add_library(EngineInterface
     PreviewDescriptionService.h
     PreviewDescriptions.h
     RadiationSource.h
-    RawStatisticsData.h
     SelectionShallowData.h
     SettingsForSimulation.h
     ShallowUpdateSelectionData.h
@@ -48,6 +47,7 @@ add_library(EngineInterface
     StatisticsConverterService.h
     StatisticsHistory.cpp
     StatisticsHistory.h
+    StatisticsRawData.h
     ZoomLevels.h)
 
 target_link_libraries(EngineInterface Base)

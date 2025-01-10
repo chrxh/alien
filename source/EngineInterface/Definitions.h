@@ -25,7 +25,7 @@ using SimulationFacade = std::shared_ptr<_SimulationFacade>;
 
 struct TimelineStatistics;
 struct HistogramData;
-struct RawStatisticsData;
+struct StatisticsRawData;
 
 class SpaceCalculator;
 

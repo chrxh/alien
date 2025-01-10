@@ -5,7 +5,7 @@
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/GenomeDescriptionService.h"
-#include "EngineInterface/RawStatisticsData.h"
+#include "EngineInterface/StatisticsRawData.h"
 
 #include "IntegrationTestFramework.h"
 
@@ -37,7 +37,7 @@ TEST_F(StatisticsTests, selfReplicatorWithRepetitionsInGenome)
     });
 
     _simulationFacade->setSimulationData(data);
-    auto statistics = _simulationFacade->getRawStatistics();
+    auto statistics = _simulationFacade->getStatisticsRawData();
 
     EXPECT_EQ(1, statistics.timeline.timestep.numCells[0]);
     EXPECT_EQ(1, statistics.timeline.timestep.numSelfReplicators[0]);
@@ -62,7 +62,7 @@ TEST_F(StatisticsTests, selfReplicatorWithInfiniteRepetitionsInGenome)
     });
 
     _simulationFacade->setSimulationData(data);
-    auto statistics = _simulationFacade->getRawStatistics();
+    auto statistics = _simulationFacade->getStatisticsRawData();
 
     EXPECT_EQ(1, statistics.timeline.timestep.numCells[0]);
     EXPECT_EQ(1, statistics.timeline.timestep.numSelfReplicators[0]);
@@ -86,7 +86,7 @@ TEST_F(StatisticsTests, nonSelfReplicatorWithRepetitionsInGenome)
     });
 
     _simulationFacade->setSimulationData(data);
-    auto statistics = _simulationFacade->getRawStatistics();
+    auto statistics = _simulationFacade->getStatisticsRawData();
 
     EXPECT_EQ(1, statistics.timeline.timestep.numCells[0]);
     EXPECT_EQ(0, statistics.timeline.timestep.numSelfReplicators[0]);

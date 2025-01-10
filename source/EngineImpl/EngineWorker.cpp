@@ -180,9 +180,9 @@ DataDescription EngineWorker::getInspectedSimulationData(std::vector<uint64_t> o
     return result;
 }
 
-RawStatisticsData EngineWorker::getRawStatistics() const
+StatisticsRawData EngineWorker::getStatisticsRawData() const
 {
-    return _simulationCudaFacade->getRawStatistics();
+    return _simulationCudaFacade->getStatisticsRawData();
 }
 
 StatisticsHistory const& EngineWorker::getStatisticsHistory() const

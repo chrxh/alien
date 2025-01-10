@@ -626,11 +626,11 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
 
         auto const& requestData = request->getData();
 
-        auto peakStatistics = requestData.peakDeserializedSimulation->getRawStatisticsData();
+        auto peakStatistics = requestData.peakDeserializedSimulation->getStatisticsRawData();
 
         DeserializedSimulation deserializedSimulation;
         deserializedSimulation.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
-        auto currentRawStatistics = _simulationFacade->getRawStatistics();
+        auto currentRawStatistics = _simulationFacade->getStatisticsRawData();
         if (sumColorVector(currentRawStatistics.timeline.timestep.genomeComplexityVariance)
             >= sumColorVector(peakStatistics.timeline.timestep.genomeComplexityVariance)) {
 
@@ -676,7 +676,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
                 .projectName = deserializedData.auxiliaryData.simulationParameters.projectName,
                 .timestep = deserializedData.auxiliaryData.timestep,
                 .timestamp = requestData.sharedDeserializedSimulation->getTimestamp(),
-                .rawStatisticsData = requestData.sharedDeserializedSimulation->getRawStatisticsData()});
+                .statisticsRawData = requestData.sharedDeserializedSimulation->getStatisticsRawData()});
 
         if (requestData.resetDeserializedSimulation) {
             requestData.sharedDeserializedSimulation->reset();
