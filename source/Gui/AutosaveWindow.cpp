@@ -465,7 +465,7 @@ void AutosaveWindow::updateSavepoint(int row)
                     newEntry->timestamp = StringHelper::format(data.timestamp);
                     newEntry->name = data.projectName;
                     newEntry->filename = SavepointTableService::get().calcEntryPath(_savepointTable.value(), data.filename);
-                    newEntry->peak = StringHelper::format(toFloat(sumColorVector(data.rawStatisticsData.timeline.timestep.genomeComplexityVariance)), 2);
+                    newEntry->peak = StringHelper::format(toFloat(sumColorVector(data.statisticsRawData.timeline.timestep.genomeComplexityVariance)), 2);
                     newEntry->peakType = "genome complexity variance";
                 }
             }

@@ -103,7 +103,7 @@ public:
     bool updateSelectionIfNecessary() override;
 
     IntVector2D getWorldSize() const override;
-    RawStatisticsData getRawStatistics() const override;
+    StatisticsRawData getStatisticsRawData() const override;
     StatisticsHistory const& getStatisticsHistory() const override;
     void setStatisticsHistory(StatisticsHistoryData const& data) override;
 

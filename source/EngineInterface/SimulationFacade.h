@@ -94,7 +94,7 @@ public:
     virtual bool updateSelectionIfNecessary() = 0;
 
     virtual IntVector2D getWorldSize() const = 0;
-    virtual RawStatisticsData getRawStatistics() const = 0;
+    virtual StatisticsRawData getStatisticsRawData() const = 0;
     virtual StatisticsHistory const& getStatisticsHistory() const = 0;
     virtual void setStatisticsHistory(StatisticsHistoryData const& data) = 0;
 

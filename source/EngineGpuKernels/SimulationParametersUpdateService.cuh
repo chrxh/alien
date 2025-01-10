@@ -2,7 +2,7 @@
 
 #include "Base/Singleton.h"
 
-#include "EngineInterface/RawStatisticsData.h"
+#include "EngineInterface/StatisticsRawData.h"
 #include "EngineInterface/SettingsForSimulation.h"
 #include "EngineInterface/SimulationParametersUpdateConfig.h"
 
@@ -22,5 +22,5 @@ public:
         SettingsForSimulation& settings,
         MaxAgeBalancer const& maxAgeBalancer,
         SimulationData const& simulationData,
-        RawStatisticsData const& statistics);  //returns true if parameters have been changed
+        StatisticsRawData const& statistics);  //returns true if parameters have been changed
 };

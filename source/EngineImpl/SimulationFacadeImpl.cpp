@@ -338,9 +338,9 @@ IntVector2D _SimulationFacadeImpl::getWorldSize() const
     return _worldSize;
 }
 
-RawStatisticsData _SimulationFacadeImpl::getRawStatistics() const
+StatisticsRawData _SimulationFacadeImpl::getStatisticsRawData() const
 {
-    return _worker.getRawStatistics();
+    return _worker.getStatisticsRawData();
 }
 
 StatisticsHistory const& _SimulationFacadeImpl::getStatisticsHistory() const

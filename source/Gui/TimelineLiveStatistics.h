@@ -5,7 +5,7 @@
 #include <optional>
 
 #include "EngineInterface/Colors.h"
-#include "EngineInterface/RawStatisticsData.h"
+#include "EngineInterface/StatisticsRawData.h"
 #include "EngineInterface/DataPointCollection.h"
 
 class TimelineLiveStatistics

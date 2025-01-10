@@ -49,7 +49,7 @@ struct HistogramData
     int numCellsByColorBySlot[MAX_COLORS][MAX_HISTOGRAM_SLOTS];
 };
 
-struct RawStatisticsData
+struct StatisticsRawData
 {
     TimelineStatistics timeline;
     HistogramData histogram;

@@ -534,7 +534,7 @@ void StatisticsWindow::processBackground()
     auto duration = _lastTimepoint.has_value() ? static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(timepoint - *_lastTimepoint).count()) : 0;
     if(!_lastTimepoint || duration > LiveStatisticsDeltaTime) {
         _lastTimepoint = timepoint;
-        auto rawStatistics = _simulationFacade->getRawStatistics();
+        auto rawStatistics = _simulationFacade->getStatisticsRawData();
         _histogramLiveStatistics.update(rawStatistics.histogram);
         _timelineLiveStatistics.update(rawStatistics.timeline, _simulationFacade->getCurrentTimestep());
         _tableLiveStatistics.update(rawStatistics.timeline);
