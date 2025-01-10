@@ -271,11 +271,17 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
 __inline__ __device__ bool
 ConstructorProcessor::isConstructionTriggered(SimulationData const& data, Cell* cell)
 {
-    if (cell->cellFunctionData.constructor.activationMode == 0 && !cell->signal.active) {
-        return false;
-    }
-    if (cell->cellFunctionData.constructor.activationMode > 0 && data.timestep % cell->cellFunctionData.constructor.activationMode != 0) {
-        return false;
+    if (cell->cellFunctionData.constructor.activationMode == 0) {
+        if (!cell->signal.active) {
+            return false;
+        }
+        if (cell->signal.active && abs(cell->signal.channels[0]) < cudaSimulationParameters.cellFunctionConstructorSignalThreshold[cell->color]) {
+            return false;
+        }
+    } else {
+        if (data.timestep % cell->cellFunctionData.constructor.activationMode != 0) {
+            return false;
+        }
     }
     return true;
 }
