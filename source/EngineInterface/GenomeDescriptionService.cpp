@@ -178,14 +178,14 @@ std::vector<uint8_t> GenomeDescriptionService::convertDescriptionToBytes(GenomeD
     }
 
     for (auto const& cell : cells) {
-        writeByte(result, cell.getCellFunctionType());
+        writeByte(result, cell.getCellType());
         writeAngle(result, cell.referenceAngle);
         writeEnergy(result, cell.energy);
         writeOptionalByte(result, cell.numRequiredAdditionalConnections);
         writeByte(result, cell.color);
-        switch (cell.getCellFunctionType()) {
-        case CellFunction_Neuron: {
-            auto const& neuron = std::get<NeuronGenomeDescription>(*cell.cellFunction);
+        switch (cell.getCellType()) {
+        case CellType_Neuron: {
+            auto const& neuron = std::get<NeuronGenomeDescription>(*cell.cellTypeData);
             for (int row = 0; row < MAX_CHANNELS; ++row) {
                 for (int col = 0; col < MAX_CHANNELS; ++col) {
                     writeNeuronProperty(result, neuron.weights[row][col]);
@@ -198,55 +198,55 @@ std::vector<uint8_t> GenomeDescriptionService::convertDescriptionToBytes(GenomeD
                 writeByte(result, neuron.activationFunctions[i]);
             }
         } break;
-        case CellFunction_Transmitter: {
-            auto const& transmitter = std::get<TransmitterGenomeDescription>(*cell.cellFunction);
+        case CellType_Transmitter: {
+            auto const& transmitter = std::get<TransmitterGenomeDescription>(*cell.cellTypeData);
             writeByte(result, transmitter.mode);
         } break;
-        case CellFunction_Constructor: {
-            auto const& constructor = std::get<ConstructorGenomeDescription>(*cell.cellFunction);
+        case CellType_Constructor: {
+            auto const& constructor = std::get<ConstructorGenomeDescription>(*cell.cellTypeData);
             writeByte(result, constructor.mode);
             writeWord(result, constructor.constructionActivationTime);
             writeAngle(result, constructor.constructionAngle1);
             writeAngle(result, constructor.constructionAngle2);
             writeGenome(result, constructor.genome);
         } break;
-        case CellFunction_Sensor: {
-            auto const& sensor = std::get<SensorGenomeDescription>(*cell.cellFunction);
+        case CellType_Sensor: {
+            auto const& sensor = std::get<SensorGenomeDescription>(*cell.cellTypeData);
             writeDensity(result, sensor.minDensity);
             writeOptionalByte(result, sensor.restrictToColor);
             writeByte(result, sensor.restrictToMutants);
             writeOptionalByte(result, sensor.minRange);
             writeOptionalByte(result, sensor.maxRange);
         } break;
-        case CellFunction_Oscillator: {
-            auto const& oscillator = std::get<OscillatorGenomeDescription>(*cell.cellFunction);
+        case CellType_Oscillator: {
+            auto const& oscillator = std::get<OscillatorGenomeDescription>(*cell.cellTypeData);
             writeByte(result, oscillator.pulseMode);
             writeByte(result, oscillator.alternationMode);
         } break;
-        case CellFunction_Attacker: {
-            auto const& attacker = std::get<AttackerGenomeDescription>(*cell.cellFunction);
+        case CellType_Attacker: {
+            auto const& attacker = std::get<AttackerGenomeDescription>(*cell.cellTypeData);
             writeByte(result, attacker.mode);
         } break;
-        case CellFunction_Injector: {
-            auto const& injector = std::get<InjectorGenomeDescription>(*cell.cellFunction);
+        case CellType_Injector: {
+            auto const& injector = std::get<InjectorGenomeDescription>(*cell.cellTypeData);
             writeByte(result, injector.mode);
             writeGenome(result, injector.genome);
         } break;
-        case CellFunction_Muscle: {
-            auto const& muscle = std::get<MuscleGenomeDescription>(*cell.cellFunction);
+        case CellType_Muscle: {
+            auto const& muscle = std::get<MuscleGenomeDescription>(*cell.cellTypeData);
             writeByte(result, muscle.mode);
         } break;
-        case CellFunction_Defender: {
-            auto const& defender = std::get<DefenderGenomeDescription>(*cell.cellFunction);
+        case CellType_Defender: {
+            auto const& defender = std::get<DefenderGenomeDescription>(*cell.cellTypeData);
             writeByte(result, defender.mode);
         } break;
-        case CellFunction_Reconnector: {
-            auto const& reconnector = std::get<ReconnectorGenomeDescription>(*cell.cellFunction);
+        case CellType_Reconnector: {
+            auto const& reconnector = std::get<ReconnectorGenomeDescription>(*cell.cellTypeData);
             writeOptionalByte(result, reconnector.restrictToColor);
             writeByte(result, reconnector.restrictToMutants);
         } break;
-        case CellFunction_Detonator: {
-            auto const& detonator = std::get<DetonatorGenomeDescription>(*cell.cellFunction);
+        case CellType_Detonator: {
+            auto const& detonator = std::get<DetonatorGenomeDescription>(*cell.cellTypeData);
             writeWord(result, detonator.countdown);
         } break;
         }
@@ -291,7 +291,7 @@ namespace
         }
         
         while (bytePosition < maxBytePosition && nodeIndex < maxEntries) {
-            CellFunction cellFunction = readByte(data, bytePosition) % CellFunction_Count;
+            CellType cellType = readByte(data, bytePosition) % CellType_Count;
 
             CellGenomeDescription cell;
             cell.referenceAngle = readAngle(data, bytePosition);
@@ -299,8 +299,8 @@ namespace
             cell.numRequiredAdditionalConnections = readOptionalByte(data, bytePosition, MAX_CELL_BONDS + 1);
             cell.color = readByte(data, bytePosition) % MAX_COLORS;
 
-            switch (cellFunction) {
-            case CellFunction_Neuron: {
+            switch (cellType) {
+            case CellType_Neuron: {
                 NeuronGenomeDescription neuron;
                 for (int row = 0; row < MAX_CHANNELS; ++row) {
                     for (int col = 0; col < MAX_CHANNELS; ++col) {
@@ -313,68 +313,68 @@ namespace
                 for (int i = 0; i < MAX_CHANNELS; ++i) {
                     neuron.activationFunctions[i] = readByte(data, bytePosition) % NeuronActivationFunction_Count;
                 }
-                cell.cellFunction = neuron;
+                cell.cellTypeData = neuron;
             } break;
-            case CellFunction_Transmitter: {
+            case CellType_Transmitter: {
                 TransmitterGenomeDescription transmitter;
                 transmitter.mode = readByte(data, bytePosition) % EnergyDistributionMode_Count;
-                cell.cellFunction = transmitter;
+                cell.cellTypeData = transmitter;
             } break;
-            case CellFunction_Constructor: {
+            case CellType_Constructor: {
                 ConstructorGenomeDescription constructor;
                 constructor.mode = readByte(data, bytePosition);
                 constructor.constructionActivationTime = readWord(data, bytePosition);
                 constructor.constructionAngle1 = readAngle(data, bytePosition);
                 constructor.constructionAngle2 = readAngle(data, bytePosition);
                 constructor.genome = readGenome(data, bytePosition);
-                cell.cellFunction = constructor;
+                cell.cellTypeData = constructor;
             } break;
-            case CellFunction_Sensor: {
+            case CellType_Sensor: {
                 SensorGenomeDescription sensor;
                 sensor.minDensity = readDensity(data, bytePosition);
                 sensor.restrictToColor = readOptionalByte(data, bytePosition, MAX_COLORS);
                 sensor.restrictToMutants = readByte(data, bytePosition) % SensorRestrictToMutants_Count;
                 sensor.minRange = readOptionalByte(data, bytePosition);
                 sensor.maxRange = readOptionalByte(data, bytePosition);
-                cell.cellFunction = sensor;
+                cell.cellTypeData = sensor;
             } break;
-            case CellFunction_Oscillator: {
+            case CellType_Oscillator: {
                 OscillatorGenomeDescription oscillator;
                 oscillator.pulseMode = readByte(data, bytePosition);
                 oscillator.alternationMode = readByte(data, bytePosition);
-                cell.cellFunction = oscillator;
+                cell.cellTypeData = oscillator;
             } break;
-            case CellFunction_Attacker: {
+            case CellType_Attacker: {
                 AttackerGenomeDescription attacker;
                 attacker.mode = readByte(data, bytePosition) % EnergyDistributionMode_Count;
-                cell.cellFunction = attacker;
+                cell.cellTypeData = attacker;
             } break;
-            case CellFunction_Injector: {
+            case CellType_Injector: {
                 InjectorGenomeDescription injector;
                 injector.mode = readByte(data, bytePosition) % InjectorMode_Count;
                 injector.genome = readGenome(data, bytePosition);
-                cell.cellFunction = injector;
+                cell.cellTypeData = injector;
             } break;
-            case CellFunction_Muscle: {
+            case CellType_Muscle: {
                 MuscleGenomeDescription muscle;
                 muscle.mode = readByte(data, bytePosition) % MuscleMode_Count;
-                cell.cellFunction = muscle;
+                cell.cellTypeData = muscle;
             } break;
-            case CellFunction_Defender: {
+            case CellType_Defender: {
                 DefenderGenomeDescription defender;
                 defender.mode = readByte(data, bytePosition) % DefenderMode_Count;
-                cell.cellFunction = defender;
+                cell.cellTypeData = defender;
             } break;
-            case CellFunction_Reconnector: {
+            case CellType_Reconnector: {
                 ReconnectorGenomeDescription reconnector;
                 reconnector.restrictToColor = readOptionalByte(data, bytePosition, MAX_COLORS);
                 reconnector.restrictToMutants = readByte(data, bytePosition) % ReconnectorRestrictToMutants_Count;
-                cell.cellFunction = reconnector;
+                cell.cellTypeData = reconnector;
             } break;
-            case CellFunction_Detonator: {
+            case CellType_Detonator: {
                 DetonatorGenomeDescription detonator;
                 detonator.countdown = readWord(data, bytePosition);
-                cell.cellFunction = detonator;
+                cell.cellTypeData = detonator;
             } break;
             }
             result.genome.cells.emplace_back(cell);

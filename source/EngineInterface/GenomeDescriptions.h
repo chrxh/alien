@@ -8,7 +8,7 @@
 
 #include "Base/Definitions.h"
 #include "EngineConstants.h"
-#include "CellFunctionConstants.h"
+#include "CellTypeConstants.h"
 
 struct MakeGenomeCopy
 {
@@ -223,7 +223,7 @@ struct DetonatorGenomeDescription
     }
 };
 
-using CellFunctionGenomeDescription = std::optional<std::variant<
+using CellTypeGenomeDescription = std::optional<std::variant<
     NeuronGenomeDescription,
     TransmitterGenomeDescription,
     ConstructorGenomeDescription,
@@ -243,7 +243,7 @@ struct CellGenomeDescription
     int color = 0;
     std::optional<int> numRequiredAdditionalConnections;
 
-    CellFunctionGenomeDescription cellFunction;
+    CellTypeGenomeDescription cellTypeData;
 
     CellGenomeDescription() = default;
     auto operator<=>(CellGenomeDescription const&) const = default;
@@ -265,13 +265,13 @@ struct CellGenomeDescription
     }
     bool hasGenome() const
     {
-        auto cellFunctionType = getCellFunctionType();
-        if (cellFunctionType == CellFunction_Constructor) {
-            auto& constructor = std::get<ConstructorGenomeDescription>(*cellFunction);
+        auto cellType = getCellType();
+        if (cellType == CellType_Constructor) {
+            auto& constructor = std::get<ConstructorGenomeDescription>(*cellTypeData);
             return std::holds_alternative<std::vector<uint8_t>>(constructor.genome);
         }
-        if (cellFunctionType == CellFunction_Injector) {
-            auto& injector = std::get<InjectorGenomeDescription>(*cellFunction);
+        if (cellType == CellType_Injector) {
+            auto& injector = std::get<InjectorGenomeDescription>(*cellTypeData);
             return std::holds_alternative<std::vector<uint8_t>>(injector.genome);
         }
         return false;
@@ -279,15 +279,15 @@ struct CellGenomeDescription
 
     std::vector<uint8_t>& getGenomeRef()
     {
-        auto cellFunctionType = getCellFunctionType();
-        if (cellFunctionType == CellFunction_Constructor) {
-            auto& constructor = std::get<ConstructorGenomeDescription>(*cellFunction);
+        auto cellType = getCellType();
+        if (cellType == CellType_Constructor) {
+            auto& constructor = std::get<ConstructorGenomeDescription>(*cellTypeData);
             if (std::holds_alternative<std::vector<uint8_t>>(constructor.genome)) {
                 return std::get<std::vector<uint8_t>>(constructor.genome);
             }
         }
-        if (cellFunctionType == CellFunction_Injector) {
-            auto& injector = std::get<InjectorGenomeDescription>(*cellFunction);
+        if (cellType == CellType_Injector) {
+            auto& injector = std::get<InjectorGenomeDescription>(*cellTypeData);
             if (std::holds_alternative<std::vector<uint8_t>>(injector.genome)) {
                 return std::get<std::vector<uint8_t>>(injector.genome);
             }
@@ -297,17 +297,17 @@ struct CellGenomeDescription
 
     std::optional<std::vector<uint8_t>> getGenome() const
     {
-        switch (getCellFunctionType()) {
-        case CellFunction_Constructor: {
-            auto const& constructor = std::get<ConstructorGenomeDescription>(*cellFunction);
+        switch (getCellType()) {
+        case CellType_Constructor: {
+            auto const& constructor = std::get<ConstructorGenomeDescription>(*cellTypeData);
             if (!constructor.isMakeGenomeCopy()) {
                 return constructor.getGenomeData();
             } else {
                 return std::nullopt;
             }
         }
-        case CellFunction_Injector: {
-            auto const& injector = std::get<InjectorGenomeDescription>(*cellFunction);
+        case CellType_Injector: {
+            auto const& injector = std::get<InjectorGenomeDescription>(*cellTypeData);
             if (!injector.isMakeGenomeCopy()) {
                 return injector.getGenomeData();
             } else {
@@ -320,15 +320,15 @@ struct CellGenomeDescription
     }
     void setGenome(std::vector<uint8_t> const& genome)
     {
-        switch (getCellFunctionType()) {
-        case CellFunction_Constructor: {
-            auto& constructor = std::get<ConstructorGenomeDescription>(*cellFunction);
+        switch (getCellType()) {
+        case CellType_Constructor: {
+            auto& constructor = std::get<ConstructorGenomeDescription>(*cellTypeData);
             if (!constructor.isMakeGenomeCopy()) {
                 constructor.genome = genome;
             }
         } break;
-        case CellFunction_Injector: {
-            auto& injector = std::get<InjectorGenomeDescription>(*cellFunction);
+        case CellType_Injector: {
+            auto& injector = std::get<InjectorGenomeDescription>(*cellTypeData);
             if (!injector.isMakeGenomeCopy()) {
                 injector.genome = genome;
             }
@@ -337,59 +337,59 @@ struct CellGenomeDescription
     }
     std::optional<bool> isMakeGenomeCopy() const
     {
-        switch (getCellFunctionType()) {
-        case CellFunction_Constructor:
-            return std::get<ConstructorGenomeDescription>(*cellFunction).isMakeGenomeCopy();
-        case CellFunction_Injector:
-            return std::get<InjectorGenomeDescription>(*cellFunction).isMakeGenomeCopy();
+        switch (getCellType()) {
+        case CellType_Constructor:
+            return std::get<ConstructorGenomeDescription>(*cellTypeData).isMakeGenomeCopy();
+        case CellType_Injector:
+            return std::get<InjectorGenomeDescription>(*cellTypeData).isMakeGenomeCopy();
         default:
             return std::nullopt;
         }
     }
-    CellFunction getCellFunctionType() const
+    CellType getCellType() const
     {
-        if (!cellFunction) {
-            return CellFunction_None;
+        if (!cellTypeData) {
+            return CellType_None;
         }
-        if (std::holds_alternative<NeuronGenomeDescription>(*cellFunction)) {
-            return CellFunction_Neuron;
+        if (std::holds_alternative<NeuronGenomeDescription>(*cellTypeData)) {
+            return CellType_Neuron;
         }
-        if (std::holds_alternative<TransmitterGenomeDescription>(*cellFunction)) {
-            return CellFunction_Transmitter;
+        if (std::holds_alternative<TransmitterGenomeDescription>(*cellTypeData)) {
+            return CellType_Transmitter;
         }
-        if (std::holds_alternative<ConstructorGenomeDescription>(*cellFunction)) {
-            return CellFunction_Constructor;
+        if (std::holds_alternative<ConstructorGenomeDescription>(*cellTypeData)) {
+            return CellType_Constructor;
         }
-        if (std::holds_alternative<SensorGenomeDescription>(*cellFunction)) {
-            return CellFunction_Sensor;
+        if (std::holds_alternative<SensorGenomeDescription>(*cellTypeData)) {
+            return CellType_Sensor;
         }
-        if (std::holds_alternative<OscillatorGenomeDescription>(*cellFunction)) {
-            return CellFunction_Oscillator;
+        if (std::holds_alternative<OscillatorGenomeDescription>(*cellTypeData)) {
+            return CellType_Oscillator;
         }
-        if (std::holds_alternative<AttackerGenomeDescription>(*cellFunction)) {
-            return CellFunction_Attacker;
+        if (std::holds_alternative<AttackerGenomeDescription>(*cellTypeData)) {
+            return CellType_Attacker;
         }
-        if (std::holds_alternative<InjectorGenomeDescription>(*cellFunction)) {
-            return CellFunction_Injector;
+        if (std::holds_alternative<InjectorGenomeDescription>(*cellTypeData)) {
+            return CellType_Injector;
         }
-        if (std::holds_alternative<MuscleGenomeDescription>(*cellFunction)) {
-            return CellFunction_Muscle;
+        if (std::holds_alternative<MuscleGenomeDescription>(*cellTypeData)) {
+            return CellType_Muscle;
         }
-        if (std::holds_alternative<DefenderGenomeDescription>(*cellFunction)) {
-            return CellFunction_Defender;
+        if (std::holds_alternative<DefenderGenomeDescription>(*cellTypeData)) {
+            return CellType_Defender;
         }
-        if (std::holds_alternative<ReconnectorGenomeDescription>(*cellFunction)) {
-            return CellFunction_Reconnector;
+        if (std::holds_alternative<ReconnectorGenomeDescription>(*cellTypeData)) {
+            return CellType_Reconnector;
         }
-        if (std::holds_alternative<DetonatorGenomeDescription>(*cellFunction)) {
-            return CellFunction_Detonator;
+        if (std::holds_alternative<DetonatorGenomeDescription>(*cellTypeData)) {
+            return CellType_Detonator;
         }
-        return CellFunction_None;
+        return CellType_None;
     }
-    template <typename CellFunctionDesc>
-    CellGenomeDescription& setCellFunction(CellFunctionDesc const& value)
+    template <typename CellTypeDesc>
+    CellGenomeDescription& setCellTypeData(CellTypeDesc const& value)
     {
-        cellFunction = value;
+        cellTypeData = value;
         return *this;
     }
     CellGenomeDescription& setNumRequiredAdditionalConnections(int const& value)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/CellFunctionConstants.h"
+#include "EngineInterface/CellTypeConstants.h"
 #include "EngineInterface/CellInstruction.h"
 
 #include "SimulationData.cuh"
@@ -35,7 +35,7 @@ __inline__ __device__ void CellComputationProcessor::process(Token* token)
     auto cell = token->cell;
     bool condTable[MAX_CELL_STATIC_BYTES / 3 + 1];
     int condPointer(0);
-    int numStaticBytes = min(static_cast<unsigned char>(cell->staticData[0]), cudaSimulationParameters.cellFunctionComputerMaxInstructions) * 3;
+    int numStaticBytes = min(static_cast<unsigned char>(cell->staticData[0]), cudaSimulationParameters.cellTypeComputerMaxInstructions) * 3;
     for (int instructionPointer = 0; instructionPointer < numStaticBytes; ) {
 
         //decode instruction
@@ -52,7 +52,7 @@ __inline__ __device__ void CellComputationProcessor::process(Token* token)
             opPointer1 = convertToAddress(instruction.operand1, cudaSimulationParameters.tokenMemorySize);
         }
         if (instruction.opType1 == ComputationOpType_Cmem) {
-            opPointer1 = convertToAddress(instruction.operand1, cudaSimulationParameters.cellFunctionComputerCellMemorySize);
+            opPointer1 = convertToAddress(instruction.operand1, cudaSimulationParameters.cellTypeComputerCellMemorySize);
             memType = MemoryType::Cell;
         }
 
@@ -64,7 +64,7 @@ __inline__ __device__ void CellComputationProcessor::process(Token* token)
             instruction.operand2 = token->memory[convertToAddress(instruction.operand2, cudaSimulationParameters.tokenMemorySize)];
         }
         if (instruction.opType2 == ComputationOpType_Cmem)
-            instruction.operand2 = cell->mutableData[convertToAddress(instruction.operand2, cudaSimulationParameters.cellFunctionComputerCellMemorySize)];
+            instruction.operand2 = cell->mutableData[convertToAddress(instruction.operand2, cudaSimulationParameters.cellTypeComputerCellMemorySize)];
 
         //execute instruction
         bool execute = true;

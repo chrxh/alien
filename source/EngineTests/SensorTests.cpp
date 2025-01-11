@@ -32,11 +32,11 @@ TEST_F(SensorTests, scanNeighborhood_noSignal)
         {CellDescription()
              .setId(1)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription()),
+             .setCellType(SensorDescription()),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({0, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -57,11 +57,11 @@ TEST_F(SensorTests, scanNeighborhood_noOtherCell)
         {CellDescription()
              .setId(1)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription()),
+             .setCellType(SensorDescription()),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -81,11 +81,11 @@ TEST_F(SensorTests, scanNeighborhood_densityTooLow)
         {CellDescription()
              .setId(1)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription().setMinDensity(0.3f)),
+             .setCellType(SensorDescription().setMinDensity(0.3f)),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -108,11 +108,11 @@ TEST_F(SensorTests, scanNeighborhood_wrongColor)
         {CellDescription()
              .setId(1)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription().setColor(1)),
+             .setCellType(SensorDescription().setColor(1)),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -134,11 +134,11 @@ TEST_F(SensorTests, scanNeighborhood_foundAtFront)
         {CellDescription()
              .setId(1)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription()),
+             .setCellType(SensorDescription()),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -160,7 +160,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtFront)
 
 TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
 {
-    _parameters.cellFunctionMuscleMovementTowardTargetedObject = false;
+    _parameters.cellTypeMuscleMovementTowardTargetedObject = false;
     _simulationFacade->setSimulationParameters(_parameters);
 
     DataDescription data;
@@ -168,11 +168,11 @@ TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
         {CellDescription()
              .setId(1)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription()),
+             .setCellType(SensorDescription()),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -194,7 +194,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
 
 TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
 {
-    _parameters.cellFunctionMuscleMovementTowardTargetedObject = false;
+    _parameters.cellTypeMuscleMovementTowardTargetedObject = false;
     _simulationFacade->setSimulationParameters(_parameters);
 
     DataDescription data;
@@ -202,11 +202,11 @@ TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
         {CellDescription()
              .setId(1)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription()),
+             .setCellType(SensorDescription()),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -228,7 +228,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
 
 TEST_F(SensorTests, scanNeighborhood_foundAtBack)
 {
-    _parameters.cellFunctionMuscleMovementTowardTargetedObject = false;
+    _parameters.cellTypeMuscleMovementTowardTargetedObject = false;
     _simulationFacade->setSimulationParameters(_parameters);
 
     DataDescription data;
@@ -236,11 +236,11 @@ TEST_F(SensorTests, scanNeighborhood_foundAtBack)
         {CellDescription()
              .setId(1)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription()),
+             .setCellType(SensorDescription()),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -262,7 +262,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtBack)
 
 TEST_F(SensorTests, scanNeighborhood_twoMasses)
 {
-    _parameters.cellFunctionMuscleMovementTowardTargetedObject = false;
+    _parameters.cellTypeMuscleMovementTowardTargetedObject = false;
     _simulationFacade->setSimulationParameters(_parameters);
 
     DataDescription data;
@@ -270,11 +270,11 @@ TEST_F(SensorTests, scanNeighborhood_twoMasses)
         {CellDescription()
              .setId(1)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription().setMinDensity(0.7f)),
+             .setCellType(SensorDescription().setMinDensity(0.7f)),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -297,7 +297,7 @@ TEST_F(SensorTests, scanNeighborhood_twoMasses)
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found)
 {
-    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _parameters.cellTypeAttackerSensorDetectionFactor[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
@@ -305,12 +305,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found)
              .setId(1)
              .setMutationId(6)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
+             .setCellType(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
          CellDescription()
              .setId(2)
              .setMutationId(6)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -333,7 +333,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found)
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found_wallBehind)
 {
-    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _parameters.cellTypeAttackerSensorDetectionFactor[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
@@ -341,12 +341,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found_wallBehi
              .setId(1)
              .setMutationId(6)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
+             .setCellType(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
          CellDescription()
              .setId(2)
              .setMutationId(6)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -367,7 +367,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found_wallBehi
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound)
 {
-    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _parameters.cellTypeAttackerSensorDetectionFactor[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
@@ -375,12 +375,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound)
              .setId(1)
              .setMutationId(7)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
+             .setCellType(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
          CellDescription()
              .setId(2)
              .setMutationId(7)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -398,7 +398,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound)
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound_wallInBetween)
 {
-    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _parameters.cellTypeAttackerSensorDetectionFactor[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
@@ -406,12 +406,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound_wallI
              .setId(1)
              .setMutationId(7)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
+             .setCellType(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
          CellDescription()
              .setId(2)
              .setMutationId(7)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -432,7 +432,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound_wallI
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_found)
 {
-    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _parameters.cellTypeAttackerSensorDetectionFactor[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
@@ -440,12 +440,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_found)
              .setId(1)
              .setMutationId(6)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
+             .setCellType(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
          CellDescription()
              .setId(2)
              .setMutationId(6)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -463,7 +463,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_found)
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_notFound)
 {
-    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _parameters.cellTypeAttackerSensorDetectionFactor[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto const MutantId = 6;
@@ -477,12 +477,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_notFound)
                  .setId(1)
                  .setMutationId(MutantId)
                  .setPos({100.0f, 100.0f})
-                 .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
+                 .setCellType(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
              CellDescription()
                  .setId(2)
                  .setMutationId(MutantId)
                  .setPos({101.0f, 100.0f})
-                 .setCellFunction(OscillatorDescription())
+                 .setCellType(OscillatorDescription())
                  .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
 
@@ -503,7 +503,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_notFound)
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_found)
 {
-    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _parameters.cellTypeAttackerSensorDetectionFactor[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
@@ -511,12 +511,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_found)
              .setId(1)
              .setMutationId(6)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToHandcraftedCells)),
+             .setCellType(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToHandcraftedCells)),
          CellDescription()
              .setId(2)
              .setMutationId(6)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -534,7 +534,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_found)
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_notFound)
 {
-    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _parameters.cellTypeAttackerSensorDetectionFactor[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
@@ -542,12 +542,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_notFound)
              .setId(1)
              .setMutationId(6)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToHandcraftedCells)),
+             .setCellType(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToHandcraftedCells)),
          CellDescription()
              .setId(2)
              .setMutationId(6)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -565,7 +565,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_notFound)
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_found)
 {
-    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _parameters.cellTypeAttackerSensorDetectionFactor[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
@@ -573,12 +573,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_found)
              .setId(1)
              .setMutationId(6)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToFreeCells)),
+             .setCellType(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToFreeCells)),
          CellDescription()
              .setId(2)
              .setMutationId(6)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -596,7 +596,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_found)
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_notFound)
 {
-    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _parameters.cellTypeAttackerSensorDetectionFactor[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
@@ -604,12 +604,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_notFound)
              .setId(1)
              .setMutationId(6)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToFreeCells)),
+             .setCellType(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToFreeCells)),
          CellDescription()
              .setId(2)
              .setMutationId(6)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -627,7 +627,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_notFound)
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_found)
 {
-    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _parameters.cellTypeAttackerSensorDetectionFactor[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
     for (int otherGenomeComplexity = 0; otherGenomeComplexity < 500; ++otherGenomeComplexity) {
@@ -638,12 +638,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_found)
                  .setMutationId(5)
                  .setPos({100.0f, 100.0f})
                  .setGenomeComplexity(1000.0f)
-                 .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
+                 .setCellType(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
              CellDescription()
                  .setId(2)
                  .setMutationId(5)
                  .setPos({101.0f, 100.0f})
-                 .setCellFunction(OscillatorDescription())
+                 .setCellType(OscillatorDescription())
                  .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
 
@@ -669,7 +669,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_found)
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound_otherMutant)
 {
-    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _parameters.cellTypeAttackerSensorDetectionFactor[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
     for (int otherGenomeComplexity = 1000; otherGenomeComplexity < 2001; ++otherGenomeComplexity) {
@@ -680,12 +680,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
                  .setMutationId(5)
                  .setPos({100.0f, 100.0f})
                  .setGenomeComplexity(1000.0f)
-                 .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
+                 .setCellType(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
              CellDescription()
                  .setId(2)
                  .setMutationId(5)
                  .setPos({101.0f, 100.0f})
-                 .setCellFunction(OscillatorDescription())
+                 .setCellType(OscillatorDescription())
                  .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
 
@@ -711,7 +711,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound_zeroMutant)
 {
-    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _parameters.cellTypeAttackerSensorDetectionFactor[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
@@ -720,12 +720,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
              .setMutationId(100)
              .setPos({100.0f, 100.0f})
              .setGenomeComplexity(1000.0f)
-             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
+             .setCellType(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
          CellDescription()
              .setId(2)
              .setMutationId(100)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -743,7 +743,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound_respawnedCell)
 {
-    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _parameters.cellTypeAttackerSensorDetectionFactor[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
@@ -752,12 +752,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
              .setMutationId(100)
              .setGenomeComplexity(1000.0f)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
+             .setCellType(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
          CellDescription()
              .setId(2)
              .setMutationId(100)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -775,7 +775,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_found)
 {
-    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _parameters.cellTypeAttackerSensorDetectionFactor[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
     for (int otherGenomeComplexity = 1000; otherGenomeComplexity < 2001; ++otherGenomeComplexity) {
@@ -786,12 +786,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_found)
                  .setMutationId(5)
                  .setPos({100.0f, 100.0f})
                  .setGenomeComplexity(500.0f)
-                 .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
+                 .setCellType(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
              CellDescription()
                  .setId(2)
                  .setMutationId(5)
                  .setPos({101.0f, 100.0f})
-                 .setCellFunction(OscillatorDescription())
+                 .setCellType(OscillatorDescription())
                  .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
 
@@ -817,7 +817,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_found)
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound_otherMutant)
 {
-    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _parameters.cellTypeAttackerSensorDetectionFactor[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
     for (int otherGenomeComplexity = 0; otherGenomeComplexity < 500; ++otherGenomeComplexity) {
@@ -828,12 +828,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
                  .setMutationId(5)
                  .setPos({100.0f, 100.0f})
                  .setGenomeComplexity(500.0f)
-                 .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
+                 .setCellType(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
              CellDescription()
                  .setId(2)
                  .setMutationId(5)
                  .setPos({101.0f, 100.0f})
-                 .setCellFunction(OscillatorDescription())
+                 .setCellType(OscillatorDescription())
                  .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
 
@@ -859,7 +859,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound_zeroMutant)
 {
-    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _parameters.cellTypeAttackerSensorDetectionFactor[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
@@ -868,12 +868,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
              .setMutationId(100)
              .setGenomeComplexity(100.0f)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
+             .setCellType(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
          CellDescription()
              .setId(2)
              .setMutationId(100)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -891,7 +891,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound_respawnedCell)
 {
-    _parameters.cellFunctionAttackerSensorDetectionFactor[0] = 1.0f;
+    _parameters.cellTypeAttackerSensorDetectionFactor[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
@@ -900,12 +900,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
              .setMutationId(100)
              .setGenomeComplexity(100.0f)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
+             .setCellType(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
          CellDescription()
              .setId(2)
              .setMutationId(100)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -928,11 +928,11 @@ TEST_F(SensorTests, scanNeighborhood_minRange_found)
         {CellDescription()
              .setId(1)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription().setMinRange(50)),
+             .setCellType(SensorDescription().setMinRange(50)),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -955,11 +955,11 @@ TEST_F(SensorTests, scanNeighborhood_minRange_notFound)
         {CellDescription()
              .setId(1)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription().setMinRange(120)),
+             .setCellType(SensorDescription().setMinRange(120)),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -982,11 +982,11 @@ TEST_F(SensorTests, scanNeighborhood_maxRange_found)
         {CellDescription()
              .setId(1)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription().setMaxRange(120)),
+             .setCellType(SensorDescription().setMaxRange(120)),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -1009,11 +1009,11 @@ TEST_F(SensorTests, scanNeighborhood_maxRange_notFound)
         {CellDescription()
              .setId(1)
              .setPos({100.0f, 100.0f})
-             .setCellFunction(SensorDescription().setMaxRange(50)),
+             .setCellType(SensorDescription().setMaxRange(50)),
          CellDescription()
              .setId(2)
              .setPos({101.0f, 100.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 

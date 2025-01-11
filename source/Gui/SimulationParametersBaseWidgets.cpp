@@ -10,7 +10,7 @@
 #include "EngineInterface/SimulationParametersValidationService.h"
 
 #include "AlienImGui.h"
-#include "CellFunctionStrings.h"
+#include "CellTypeStrings.h"
 #include "HelpStrings.h"
 #include "SimulationParametersMainWindow.h"
 
@@ -36,8 +36,8 @@ namespace
 void _SimulationParametersBaseWidgets::init(SimulationFacade const& simulationFacade)
 {
     _simulationFacade = simulationFacade;
-    for (int i = 0; i < CellFunction_Count; ++i) {
-        _cellFunctionStrings.emplace_back(Const::CellFunctionToStringMap.at(i));
+    for (int i = 0; i < CellType_Count; ++i) {
+        _cellTypeStrings.emplace_back(Const::CellTypeToStringMap.at(i));
     }
 }
 
@@ -82,15 +82,15 @@ void _SimulationParametersBaseWidgets::process()
                      "All cell functions"})
                 .tooltip(Const::ColoringParameterTooltip),
             parameters.cellColoring);
-        if (parameters.cellColoring == CellColoring_CellFunction) {
+        if (parameters.cellColoring == CellColoring_CellType) {
             AlienImGui::Switcher(
                 AlienImGui::SwitcherParameters()
                     .name("Highlighted cell function")
                     .textWidth(RightColumnWidth)
-                    .defaultValue(origParameters.highlightedCellFunction)
-                    .values(_cellFunctionStrings)
+                    .defaultValue(origParameters.highlightedCellType)
+                    .values(_cellTypeStrings)
                     .tooltip("The specific cell function type to be highlighted can be selected here."),
-                parameters.highlightedCellFunction);
+                parameters.highlightedCellType);
         }
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -594,12 +594,12 @@ void _SimulationParametersBaseWidgets::process()
                 .format("%.7f")
                 .logarithmic(true)
                 .colorDependence(true)
-                .defaultValue(origParameters.baseValues.cellCopyMutationCellFunction)
+                .defaultValue(origParameters.baseValues.cellCopyMutationCellType)
                 .tooltip("This type of mutation changes the type of cell function. The changed cell function will have random properties. The probability "
                          "of a change is given by the specified value times the number of coded cells in the genome. If the flag 'Preserve "
                          "self-replication' is disabled it can also alter self-replication capabilities by changing a constructor to "
                          "something else or vice versa."),
-            parameters.baseValues.cellCopyMutationCellFunction);
+            parameters.baseValues.cellCopyMutationCellType);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Insertion")
@@ -732,8 +732,8 @@ void _SimulationParametersBaseWidgets::process()
                          "i.e. no energy can be obtained. A value of 1 means that the maximum energy can be obtained in the digestion process.\n\nExample: "
                          "If a "
                          "zero is entered in row 2 (red) and column 3 (green), it means that red cells cannot eat green cells.")
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.baseValues.cellFunctionAttackerFoodChainColorMatrix)),
-            parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix);
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.baseValues.cellTypeAttackerFoodChainColorMatrix)),
+            parameters.baseValues.cellTypeAttackerFoodChainColorMatrix);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Attack strength")
@@ -742,10 +742,10 @@ void _SimulationParametersBaseWidgets::process()
                 .logarithmic(true)
                 .min(0)
                 .max(0.5f)
-                .defaultValue(origParameters.cellFunctionAttackerStrength)
+                .defaultValue(origParameters.cellTypeAttackerStrength)
                 .tooltip("Indicates the portion of energy through which a successfully attacked cell is weakened. However, this energy portion can be "
                          "influenced by other factors adjustable within the attacker's simulation parameters."),
-            parameters.cellFunctionAttackerStrength);
+            parameters.cellTypeAttackerStrength);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Attack radius")
@@ -753,18 +753,18 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(0)
                 .max(3.0f)
-                .defaultValue(origParameters.cellFunctionAttackerRadius)
+                .defaultValue(origParameters.cellTypeAttackerRadius)
                 .tooltip("The maximum distance over which an attacker cell can attack another cell."),
-            parameters.cellFunctionAttackerRadius);
+            parameters.cellTypeAttackerRadius);
         AlienImGui::InputFloatColorMatrix(
             AlienImGui::InputFloatColorMatrixParameters()
                 .name("Complex creature protection")
                 .textWidth(RightColumnWidth)
                 .min(0)
                 .max(20.0f)
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.baseValues.cellFunctionAttackerGenomeComplexityBonus))
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.baseValues.cellTypeAttackerGenomeComplexityBonus))
                 .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with more complex genomes."),
-            parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus);
+            parameters.baseValues.cellTypeAttackerGenomeComplexityBonus);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Energy cost")
@@ -774,16 +774,16 @@ void _SimulationParametersBaseWidgets::process()
                 .max(1.0f)
                 .format("%.5f")
                 .logarithmic(true)
-                .defaultValue(origParameters.baseValues.cellFunctionAttackerEnergyCost)
+                .defaultValue(origParameters.baseValues.cellTypeAttackerEnergyCost)
                 .tooltip("Amount of energy lost by an attempted attack of a cell in form of emitted energy particles."),
-            parameters.baseValues.cellFunctionAttackerEnergyCost);
+            parameters.baseValues.cellTypeAttackerEnergyCost);
         AlienImGui::Checkbox(
             AlienImGui::CheckboxParameters()
                 .name("Destroy cells")
                 .textWidth(RightColumnWidth)
-                .defaultValue(origParameters.cellFunctionAttackerDestroyCells)
+                .defaultValue(origParameters.cellTypeAttackerDestroyCells)
                 .tooltip("If activated, the attacker cell is able to destroy other cells. If deactivated, it only damages them."),
-            parameters.cellFunctionAttackerDestroyCells);
+            parameters.cellTypeAttackerDestroyCells);
     }
     AlienImGui::EndTreeNode();
     ImGui::PopID();
@@ -799,17 +799,17 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(0.1f)
                 .max(3.0f)
-                .defaultValue(origParameters.cellFunctionConstructorConnectingCellMaxDistance)
+                .defaultValue(origParameters.cellTypeConstructorConnectingCellMaxDistance)
                 .tooltip("The constructor can automatically connect constructed cells to other cells in the vicinity within this distance."),
-            parameters.cellFunctionConstructorConnectingCellMaxDistance);
+            parameters.cellTypeConstructorConnectingCellMaxDistance);
         AlienImGui::Checkbox(
             AlienImGui::CheckboxParameters()
                 .name("Completeness check")
                 .textWidth(RightColumnWidth)
-                .defaultValue(origParameters.cellFunctionConstructorCheckCompletenessForSelfReplication)
+                .defaultValue(origParameters.cellTypeConstructorCheckCompletenessForSelfReplication)
                 .tooltip("If activated, a self-replication process can only start when all other non-self-replicating constructors in the cell network are "
                          "finished."),
-            parameters.cellFunctionConstructorCheckCompletenessForSelfReplication);
+            parameters.cellTypeConstructorCheckCompletenessForSelfReplication);
     }
     AlienImGui::EndTreeNode();
 
@@ -824,9 +824,9 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(1.0f)
                 .max(5.0f)
-                .defaultValue(origParameters.cellFunctionDefenderAgainstAttackerStrength)
+                .defaultValue(origParameters.cellTypeDefenderAgainstAttackerStrength)
                 .tooltip("If an attacked cell is connected to defender cells or itself a defender cell the attack strength is reduced by this factor."),
-            parameters.cellFunctionDefenderAgainstAttackerStrength);
+            parameters.cellTypeDefenderAgainstAttackerStrength);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Anti-injector strength")
@@ -834,10 +834,10 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(1.0f)
                 .max(5.0f)
-                .defaultValue(origParameters.cellFunctionDefenderAgainstInjectorStrength)
+                .defaultValue(origParameters.cellTypeDefenderAgainstInjectorStrength)
                 .tooltip("If a constructor cell is attacked by an injector and connected to defender cells, the injection duration is increased by this "
                          "factor."),
-            parameters.cellFunctionDefenderAgainstInjectorStrength);
+            parameters.cellTypeDefenderAgainstInjectorStrength);
     }
     AlienImGui::EndTreeNode();
 
@@ -852,19 +852,19 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(0.1f)
                 .max(4.0f)
-                .defaultValue(origParameters.cellFunctionInjectorRadius)
+                .defaultValue(origParameters.cellTypeInjectorRadius)
                 .tooltip("The maximum distance over which an injector cell can infect another cell."),
-            parameters.cellFunctionInjectorRadius);
+            parameters.cellTypeInjectorRadius);
         AlienImGui::InputIntColorMatrix(
             AlienImGui::InputIntColorMatrixParameters()
                 .name("Injection time")
                 .logarithmic(true)
                 .max(100000)
                 .textWidth(RightColumnWidth)
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.cellFunctionInjectorDurationColorMatrix))
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.cellTypeInjectorDurationColorMatrix))
                 .tooltip("The number of activations an injector cell requires to infect another cell. One activation usually takes 6 time steps. The row "
                          "number determines the color of the injector cell, while the column number corresponds to the color of the infected cell."),
-            parameters.cellFunctionInjectorDurationColorMatrix);
+            parameters.cellTypeInjectorDurationColorMatrix);
     }
     AlienImGui::EndTreeNode();
 
@@ -876,10 +876,10 @@ void _SimulationParametersBaseWidgets::process()
             AlienImGui::CheckboxParameters()
                 .name("Movement toward target")
                 .textWidth(RightColumnWidth)
-                .defaultValue(origParameters.cellFunctionMuscleMovementTowardTargetedObject)
+                .defaultValue(origParameters.cellTypeMuscleMovementTowardTargetedObject)
                 .tooltip("If activated, a muscle cell in movement mode will only move if the triggering signal originates from a sensor cell that has "
                          "targeted an object. The specified angle in the input is interpreted relative to the target."),
-            parameters.cellFunctionMuscleMovementTowardTargetedObject);
+            parameters.cellTypeMuscleMovementTowardTargetedObject);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Energy cost")
@@ -889,9 +889,9 @@ void _SimulationParametersBaseWidgets::process()
                 .max(5.0f)
                 .format("%.5f")
                 .logarithmic(true)
-                .defaultValue(origParameters.cellFunctionMuscleEnergyCost)
+                .defaultValue(origParameters.cellTypeMuscleEnergyCost)
                 .tooltip("Amount of energy lost by a muscle action of a cell in form of emitted energy particles."),
-            parameters.cellFunctionMuscleEnergyCost);
+            parameters.cellTypeMuscleEnergyCost);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Movement acceleration")
@@ -900,10 +900,10 @@ void _SimulationParametersBaseWidgets::process()
                 .min(0)
                 .max(0.4f)
                 .logarithmic(true)
-                .defaultValue(origParameters.cellFunctionMuscleMovementAcceleration)
+                .defaultValue(origParameters.cellTypeMuscleMovementAcceleration)
                 .tooltip("The maximum value by which a muscle cell can modify its velocity during activation. This parameter applies only to muscle cells "
                          "which are in movement mode."),
-            parameters.cellFunctionMuscleMovementAcceleration);
+            parameters.cellTypeMuscleMovementAcceleration);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Contraction and expansion delta")
@@ -911,10 +911,10 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(0)
                 .max(0.1f)
-                .defaultValue(origParameters.cellFunctionMuscleContractionExpansionDelta)
+                .defaultValue(origParameters.cellTypeMuscleContractionExpansionDelta)
                 .tooltip("The maximum length that a muscle cell can shorten or lengthen a cell connection. This parameter applies only to muscle cells "
                          "which are in contraction/expansion mode."),
-            parameters.cellFunctionMuscleContractionExpansionDelta);
+            parameters.cellTypeMuscleContractionExpansionDelta);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Bending angle")
@@ -922,10 +922,10 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(0)
                 .max(10.0f)
-                .defaultValue(origParameters.cellFunctionMuscleBendingAngle)
+                .defaultValue(origParameters.cellTypeMuscleBendingAngle)
                 .tooltip("The maximum value by which a muscle cell can increase/decrease the angle between two cell connections. This parameter applies "
                          "only to muscle cells which are in bending mode."),
-            parameters.cellFunctionMuscleBendingAngle);
+            parameters.cellTypeMuscleBendingAngle);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Bending acceleration")
@@ -933,10 +933,10 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(0)
                 .max(0.5f)
-                .defaultValue(origParameters.cellFunctionMuscleBendingAcceleration)
+                .defaultValue(origParameters.cellTypeMuscleBendingAcceleration)
                 .tooltip("The maximum value by which a muscle cell can modify its velocity during a bending action. This parameter applies "
                          "only to muscle cells which are in bending mode."),
-            parameters.cellFunctionMuscleBendingAcceleration);
+            parameters.cellTypeMuscleBendingAcceleration);
     }
     AlienImGui::EndTreeNode();
 
@@ -951,9 +951,9 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(10.0f)
                 .max(800.0f)
-                .defaultValue(origParameters.cellFunctionSensorRange)
+                .defaultValue(origParameters.cellTypeSensorRange)
                 .tooltip("The maximum radius in which a sensor cell can detect mass concentrations."),
-            parameters.cellFunctionSensorRange);
+            parameters.cellTypeSensorRange);
     }
     AlienImGui::EndTreeNode();
 
@@ -968,9 +968,9 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(0)
                 .max(5.0f)
-                .defaultValue(origParameters.cellFunctionTransmitterEnergyDistributionRadius)
+                .defaultValue(origParameters.cellTypeTransmitterEnergyDistributionRadius)
                 .tooltip("The maximum distance over which a transmitter cell transfers its additional energy to nearby transmitter or constructor cells."),
-            parameters.cellFunctionTransmitterEnergyDistributionRadius);
+            parameters.cellTypeTransmitterEnergyDistributionRadius);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Energy distribution Value")
@@ -978,16 +978,16 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(0)
                 .max(20.0f)
-                .defaultValue(origParameters.cellFunctionTransmitterEnergyDistributionValue)
+                .defaultValue(origParameters.cellTypeTransmitterEnergyDistributionValue)
                 .tooltip("The amount of energy which a transmitter cell can transfer to nearby transmitter or constructor cells or to connected cells."),
-            parameters.cellFunctionTransmitterEnergyDistributionValue);
+            parameters.cellTypeTransmitterEnergyDistributionValue);
         AlienImGui::Checkbox(
             AlienImGui::CheckboxParameters()
                 .name("Same creature energy distribution")
                 .textWidth(RightColumnWidth)
-                .defaultValue(origParameters.cellFunctionTransmitterEnergyDistributionSameCreature)
+                .defaultValue(origParameters.cellTypeTransmitterEnergyDistributionSameCreature)
                 .tooltip("If activated, the transmitter cells can only transfer energy to nearby cells belonging to the same creature."),
-            parameters.cellFunctionTransmitterEnergyDistributionSameCreature);
+            parameters.cellTypeTransmitterEnergyDistributionSameCreature);
     }
     AlienImGui::EndTreeNode();
 
@@ -1002,9 +1002,9 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(0.0f)
                 .max(3.0f)
-                .defaultValue(origParameters.cellFunctionReconnectorRadius)
+                .defaultValue(origParameters.cellTypeReconnectorRadius)
                 .tooltip("The maximum radius in which a reconnector cell can establish or destroy connections to other cells."),
-            parameters.cellFunctionReconnectorRadius);
+            parameters.cellTypeReconnectorRadius);
     }
     AlienImGui::EndTreeNode();
 
@@ -1019,9 +1019,9 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(0.0f)
                 .max(10.0f)
-                .defaultValue(origParameters.cellFunctionDetonatorRadius)
+                .defaultValue(origParameters.cellTypeDetonatorRadius)
                 .tooltip("The radius of the detonation."),
-            parameters.cellFunctionDetonatorRadius);
+            parameters.cellTypeDetonatorRadius);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Chain explosion probability")
@@ -1029,9 +1029,9 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(0.0f)
                 .max(1.0f)
-                .defaultValue(origParameters.cellFunctionDetonatorChainExplosionProbability)
+                .defaultValue(origParameters.cellTypeDetonatorChainExplosionProbability)
                 .tooltip("The probability that the explosion of one detonator will trigger the explosion of other detonators within the blast radius."),
-            parameters.cellFunctionDetonatorChainExplosionProbability);
+            parameters.cellTypeDetonatorChainExplosionProbability);
     }
     AlienImGui::EndTreeNode();
 
@@ -1104,18 +1104,18 @@ void _SimulationParametersBaseWidgets::process()
                 .textWidth(RightColumnWidth)
                 .min(0)
                 .max(1.0f)
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.cellFunctionAttackerSameMutantPenalty))
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.cellTypeAttackerSameMutantPenalty))
                 .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with the same mutation id."),
-            parameters.cellFunctionAttackerSameMutantPenalty);
+            parameters.cellTypeAttackerSameMutantPenalty);
         AlienImGui::InputFloatColorMatrix(
             AlienImGui::InputFloatColorMatrixParameters()
                 .name("New complex mutant protection")
                 .textWidth(RightColumnWidth)
                 .min(0)
                 .max(1.0f)
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.baseValues.cellFunctionAttackerNewComplexMutantPenalty))
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.baseValues.cellTypeAttackerNewComplexMutantPenalty))
                 .tooltip("A high value protects new mutants with equal or greater genome complexity from being attacked."),
-            parameters.baseValues.cellFunctionAttackerNewComplexMutantPenalty);
+            parameters.baseValues.cellTypeAttackerNewComplexMutantPenalty);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Sensor detection factor")
@@ -1123,13 +1123,13 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(0)
                 .max(1.0f)
-                .defaultValue(origParameters.cellFunctionAttackerSensorDetectionFactor)
+                .defaultValue(origParameters.cellTypeAttackerSensorDetectionFactor)
                 .tooltip("This parameter controls whether the target must be previously detected with sensors in order to be attacked. The larger this "
                          "value is, the less energy can be gained during the attack if the target has not already been detected. For this purpose, the "
                          "attacker "
                          "cell searches for connected (or connected-connected) sensor cells to see which cell networks they have detected last time and "
                          "compares them with the attacked target."),
-            parameters.cellFunctionAttackerSensorDetectionFactor);
+            parameters.cellTypeAttackerSensorDetectionFactor);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Geometry penalty")
@@ -1137,10 +1137,10 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(0)
                 .max(5.0f)
-                .defaultValue(origParameters.baseValues.cellFunctionAttackerGeometryDeviationExponent)
+                .defaultValue(origParameters.baseValues.cellTypeAttackerGeometryDeviationExponent)
                 .tooltip("The larger this value is, the less energy a cell can gain from an attack if the local "
                          "geometry of the attacked cell does not match the attacking cell."),
-            parameters.baseValues.cellFunctionAttackerGeometryDeviationExponent);
+            parameters.baseValues.cellTypeAttackerGeometryDeviationExponent);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Connections mismatch penalty")
@@ -1148,9 +1148,9 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(0)
                 .max(1.0f)
-                .defaultValue(origParameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty)
+                .defaultValue(origParameters.baseValues.cellTypeAttackerConnectionsMismatchPenalty)
                 .tooltip("The larger this parameter is, the more difficult it is to attack cells that contain more connections."),
-            parameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty);
+            parameters.baseValues.cellTypeAttackerConnectionsMismatchPenalty);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Color inhomogeneity factor")
@@ -1158,9 +1158,9 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(0)
                 .max(2.0f)
-                .defaultValue(origParameters.cellFunctionAttackerColorInhomogeneityFactor)
+                .defaultValue(origParameters.cellTypeAttackerColorInhomogeneityFactor)
                 .tooltip("If the attacked cell is connected to cells with different colors, this factor affects the energy of the captured energy."),
-            parameters.cellFunctionAttackerColorInhomogeneityFactor);
+            parameters.cellTypeAttackerColorInhomogeneityFactor);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Energy distribution radius")
@@ -1168,10 +1168,10 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(0)
                 .max(5.0f)
-                .defaultValue(origParameters.cellFunctionAttackerEnergyDistributionRadius)
+                .defaultValue(origParameters.cellTypeAttackerEnergyDistributionRadius)
                 .tooltip("The maximum distance over which an attacker cell transfers its energy captured during an attack to nearby transmitter or "
                          "constructor cells."),
-            parameters.cellFunctionAttackerEnergyDistributionRadius);
+            parameters.cellTypeAttackerEnergyDistributionRadius);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Energy distribution Value")
@@ -1179,9 +1179,9 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(0)
                 .max(20.0f)
-                .defaultValue(origParameters.cellFunctionAttackerEnergyDistributionValue)
+                .defaultValue(origParameters.cellTypeAttackerEnergyDistributionValue)
                 .tooltip("The amount of energy which a attacker cell can transfer to nearby transmitter or constructor cells or to connected cells."),
-            parameters.cellFunctionAttackerEnergyDistributionValue);
+            parameters.cellTypeAttackerEnergyDistributionValue);
     }
     AlienImGui::EndTreeNode();
 
@@ -1571,12 +1571,12 @@ void _SimulationParametersBaseWidgets::process()
             AlienImGui::CheckboxParameters()
                 .name("Fetch angle from adjacent sensor")
                 .textWidth(RightColumnWidth)
-                .defaultValue(origParameters.legacyCellFunctionMuscleMovementAngleFromSensor)
+                .defaultValue(origParameters.legacyCellTypeMuscleMovementAngleFromSensor)
                 .tooltip("This parameter changes the behavior of the parameter 'Movement toward target'. If activated, the muscle cell fetches the "
                          "movement angle directly from a connected (or connected-connected) sensor cell that has previously detected a target "
                          "(legacy behavior). If deactivated, the input signal must only originate from a sensor cell and must not be adjacent (new "
                          "behavior)."),
-            parameters.legacyCellFunctionMuscleMovementAngleFromSensor);
+            parameters.legacyCellTypeMuscleMovementAngleFromSensor);
     }
     AlienImGui::EndTreeNode();
 

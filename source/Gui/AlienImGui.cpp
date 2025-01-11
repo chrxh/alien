@@ -15,7 +15,7 @@
 #include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/SimulationParameters.h"
 
-#include "CellFunctionStrings.h"
+#include "CellTypeStrings.h"
 #include "GenericFileDialog.h"
 #include "StyleRepository.h"
 #include "HelpStrings.h"
@@ -1734,18 +1734,18 @@ bool AlienImGui::ShowPreviewDescription(PreviewDescription const& desc, float& z
     return result;
 }
 
-bool AlienImGui::CellFunctionCombo(CellFunctionComboParameters& parameters, int& value)
+bool AlienImGui::CellTypeCombo(CellTypeComboParameters& parameters, int& value)
 {
-    auto modCellFunctionStrings = Const::CellFunctionStrings;
-    auto noneString = modCellFunctionStrings.back();
-    modCellFunctionStrings.pop_back();
-    modCellFunctionStrings.insert(modCellFunctionStrings.begin(), noneString);
+    auto modCellTypeStrings = Const::CellTypeStrings;
+    auto noneString = modCellTypeStrings.back();
+    modCellTypeStrings.pop_back();
+    modCellTypeStrings.insert(modCellTypeStrings.begin(), noneString);
 
-    value = (value + 1) % CellFunction_Count;
+    value = (value + 1) % CellType_Count;
     auto result = AlienImGui::Combo(
-        AlienImGui::ComboParameters().name(parameters._name).values(modCellFunctionStrings).textWidth(parameters._textWidth).tooltip(parameters._tooltip),
+        AlienImGui::ComboParameters().name(parameters._name).values(modCellTypeStrings).textWidth(parameters._textWidth).tooltip(parameters._tooltip),
         value);
-    value = (value + CellFunction_Count - 1) % CellFunction_Count;
+    value = (value + CellType_Count - 1) % CellType_Count;
     return result;
 }
 
@@ -2216,7 +2216,7 @@ void AlienImGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const&
     ImGui::PushID(parameters._name.c_str());
 
     if (enabled) {
-        ImGui::Checkbox("##cellFunctionAttackerGenomeComplexityBonus", enabled);
+        ImGui::Checkbox("##cellTypeAttackerGenomeComplexityBonus", enabled);
         if (!(*enabled)) {
             for (int i = 0; i < MAX_COLORS; ++i) {
                 for (int j = 0; j < MAX_COLORS; ++j) {

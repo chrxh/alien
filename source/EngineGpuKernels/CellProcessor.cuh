@@ -3,7 +3,7 @@
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
-#include "EngineInterface/CellFunctionConstants.h"
+#include "EngineInterface/CellTypeConstants.h"
 
 #include "TOs.cuh"
 #include "Base.cuh"
@@ -653,8 +653,8 @@ __inline__ __device__ void CellProcessor::livingStateTransition_calcFutureState(
             }
         } else if (origLivingState == LivingState_Ready) {
             if (isSameCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences != CellDeathConsquences_None) {
-                if (cudaSimulationParameters.cellDeathConsequences == CellDeathConsquences_DetachedPartsDie && cell->cellFunction == CellFunction_Constructor
-                    && GenomeDecoder::containsSelfReplication(cell->cellFunctionData.constructor)) {
+                if (cudaSimulationParameters.cellDeathConsequences == CellDeathConsquences_DetachedPartsDie && cell->cellType == CellType_Constructor
+                    && GenomeDecoder::containsSelfReplication(cell->cellTypeData.constructor)) {
                     livingState = LivingState_Reviving;
                 } else {
                     livingState = LivingState_Detaching;
@@ -813,10 +813,10 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
 
         auto cellMaxAge = cudaSimulationParameters.cellMaxAge[cell->color];
         if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellInactiveMaxAgeActivated && cell->mutationId != 1
-            && cell->cellFunctionUsed == CellFunctionUsed_No && cell->livingState == LivingState_Ready && cell->activationTime == 0) {
+            && cell->cellTypeUsed == CellTriggered_No && cell->livingState == LivingState_Ready && cell->activationTime == 0) {
             bool adjacentCellsUsed = false;
             for (int i = 0; i < cell->numConnections; ++i) {
-                if (cell->connections[i].cell->cellFunctionUsed == CellFunctionUsed_Yes) {
+                if (cell->connections[i].cell->cellTypeUsed == CellTriggered_Yes) {
                     adjacentCellsUsed = true;
                     break;
                 }

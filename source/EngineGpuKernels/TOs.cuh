@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #include "EngineInterface/EngineConstants.h"
-#include "EngineInterface/CellFunctionConstants.h"
+#include "EngineInterface/CellTypeConstants.h"
 #include "EngineInterface/ArraySizes.h"
 
 struct ParticleTO
@@ -132,7 +132,7 @@ struct DetonatorTO
     int32_t countdown;
 };
 
-union CellFunctionTO
+union CellTypeTO
 {
     NeuronTO neuron;
     TransmitterTO transmitter;
@@ -186,14 +186,14 @@ struct CellTO
     float genomeComplexity;
     uint16_t genomeNodeIndex;
 
-    //cell function
-    CellFunction cellFunction;
-    CellFunctionTO cellFunctionData;
+    //cell type data
+    CellType cellType;
+    CellTypeTO cellTypeData;
     SignalRoutingRestrictionTO signalRoutingRestriction;
     SignalTO signal;
     uint32_t activationTime;
     uint16_t detectedByCreatureId;  //only the first 16 bits from the creature id
-    CellFunctionUsed cellFunctionUsed;
+    CellTriggered cellTypeUsed;
 
     CellMetadataTO metadata;
 

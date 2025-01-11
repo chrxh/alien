@@ -126,7 +126,7 @@ auto PatternAnalysisDialog::getAnalysisDescription(ClusterDescription const& clu
             result.numConnections = cell.connections.size();
             result.constructionState = cell.livingState;
             result.color = cell.color;
-            result.cellFunction = cell.getCellFunctionType();
+            result.cellType = cell.getCellType();
 
             cellAnalysisDescById.insert_or_assign(cell.id, result);
         }

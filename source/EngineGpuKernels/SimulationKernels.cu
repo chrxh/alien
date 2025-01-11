@@ -76,7 +76,7 @@ __global__ void cudaNextTimestep_physics_verletVelocityUpdate(SimulationData dat
     CellProcessor::verletVelocityUpdate(data);
 }
 
-__global__ void cudaNextTimestep_cellFunction_prepare_substep1(SimulationData data)
+__global__ void cudaNextTimestep_cellType_prepare_substep1(SimulationData data)
 {
     CellProcessor::aging(data);
     MutationProcessor::applyRandomMutations(data);
@@ -84,65 +84,65 @@ __global__ void cudaNextTimestep_cellFunction_prepare_substep1(SimulationData da
     CellProcessor::livingStateTransition_calcFutureState(data);
 }
 
-__global__ void cudaNextTimestep_cellFunction_prepare_substep2(SimulationData data)
+__global__ void cudaNextTimestep_cellType_prepare_substep2(SimulationData data)
 {
     CellProcessor::livingStateTransition_applyNextState(data);
-    SignalProcessor::collectCellFunctionOperations(data);
+    SignalProcessor::collectCellTypeOperations(data);
     CellProcessor::updateRenderingData(data);
     SignalProcessor::updateSignals(data);
 }
 
-__global__ void cudaNextTimestep_cellFunction_oscillator(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellType_oscillator(SimulationData data, SimulationStatistics statistics)
 {
     OscillatorProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_neuron(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellType_neuron(SimulationData data, SimulationStatistics statistics)
 {
     NeuronProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_constructor_completenessCheck(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellType_constructor_completenessCheck(SimulationData data, SimulationStatistics statistics)
 {
     ConstructorProcessor::preprocess(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_constructor(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellType_constructor(SimulationData data, SimulationStatistics statistics)
 {
     ConstructorProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_injector(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellType_injector(SimulationData data, SimulationStatistics statistics)
 {
     InjectorProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_attacker(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellType_attacker(SimulationData data, SimulationStatistics statistics)
 {
     AttackerProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_transmitter(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellType_transmitter(SimulationData data, SimulationStatistics statistics)
 {
     TransmitterProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_muscle(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellType_muscle(SimulationData data, SimulationStatistics statistics)
 {
     MuscleProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_sensor(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellType_sensor(SimulationData data, SimulationStatistics statistics)
 {
     SensorProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_reconnector(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellType_reconnector(SimulationData data, SimulationStatistics statistics)
 {
     ReconnectorProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_detonator(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellType_detonator(SimulationData data, SimulationStatistics statistics)
 {
     DetonatorProcessor::process(data, statistics);
 }

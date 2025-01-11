@@ -262,8 +262,8 @@ namespace
             for (auto const& node : genome.cells) {
                 auto cellIntern = processedGenome.previewDescription.cells.at(index);
 
-                if (node.getCellFunctionType() == CellFunction_Constructor) {
-                    auto const& constructor = std::get<ConstructorGenomeDescription>(*node.cellFunction);
+                if (node.getCellType() == CellType_Constructor) {
+                    auto const& constructor = std::get<ConstructorGenomeDescription>(*node.cellTypeData);
                     if (constructor.isMakeGenomeCopy()) {
                         result.cells.at(index + indexOffset).selfReplicator = true;
                         ++index;

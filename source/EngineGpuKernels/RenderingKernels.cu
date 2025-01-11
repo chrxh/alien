@@ -122,7 +122,7 @@ namespace
             }
             }
         }
-        if (cellColoring == CellColoring_MutationId || (cellColoring == CellColoring_MutationId_AllCellFunctions && primary)) {
+        if (cellColoring == CellColoring_MutationId || (cellColoring == CellColoring_MutationId_AllCellTypes && primary)) {
             auto colorNumber = cell->mutationId == 0 ? 30 : (cell->mutationId == 1 ? 18 : cell->mutationId + 17);   //6 for zero mutant color
             auto h = abs(toInt((colorNumber * 12107) % 360));
             auto s = 0.6f + toFloat(abs(toInt(colorNumber * 13111)) % 400) / 1000;
@@ -160,9 +160,9 @@ namespace
             cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
         }
 
-        if (cellColoring == CellColoring_CellFunction) {
-            if (cell->cellFunction == cudaSimulationParameters.highlightedCellFunction) {
-                auto h = (toFloat(cell->cellFunction) / toFloat(CellFunction_Count - 1)) * 360.0f;
+        if (cellColoring == CellColoring_CellType) {
+            if (cell->cellType == cudaSimulationParameters.highlightedCellType) {
+                auto h = (toFloat(cell->cellType) / toFloat(CellType_Count - 1)) * 360.0f;
                 auto rgb = convertHSVtoRGB(toFloat(h), 0.7f, 1.0f);
                 cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
                 factor = 2.0f;
@@ -171,8 +171,8 @@ namespace
             }
         }
 
-        if (cellColoring == CellColoring_AllCellFunctions || (cellColoring == CellColoring_MutationId_AllCellFunctions && !primary)) {
-            auto h = (toFloat(cell->cellFunction) / toFloat(CellFunction_Count - 1)) * 360.0f;
+        if (cellColoring == CellColoring_AllCellTypes || (cellColoring == CellColoring_MutationId_AllCellTypes && !primary)) {
+            auto h = (toFloat(cell->cellType) / toFloat(CellType_Count - 1)) * 360.0f;
             auto rgb = convertHSVtoRGB(toFloat(h), 0.7f, 1.0f);
             cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
         }
@@ -483,7 +483,7 @@ __global__ void cudaDrawCells(
 
         //draw secondary color for cell
         auto secondaryColor =
-            coloring == CellColoring_MutationId_AllCellFunctions ? calcColor(cell, cell->selected, coloring, false) * 0.5f : primaryColor * 0.6f;
+            coloring == CellColoring_MutationId_AllCellTypes ? calcColor(cell, cell->selected, coloring, false) * 0.5f : primaryColor * 0.6f;
         drawCircle(imageData, imageSize, cellImagePos, secondaryColor, cellRadius, shadedCells, true);
 
         //draw signal
@@ -508,9 +508,9 @@ __global__ void cudaDrawCells(
         }
 
         //draw muscle movements
-        if (cudaSimulationParameters.muscleMovementVisualization && cell->cellFunction == CellFunction_Muscle
-            && (cell->cellFunctionData.muscle.lastMovementX != 0 || cell->cellFunctionData.muscle.lastMovementY != 0)) {
-            float2 lastMovement{cell->cellFunctionData.muscle.lastMovementX, cell->cellFunctionData.muscle.lastMovementY};
+        if (cudaSimulationParameters.muscleMovementVisualization && cell->cellType == CellType_Muscle
+            && (cell->cellTypeData.muscle.lastMovementX != 0 || cell->cellTypeData.muscle.lastMovementY != 0)) {
+            float2 lastMovement{cell->cellTypeData.muscle.lastMovementX, cell->cellTypeData.muscle.lastMovementY};
             auto lastMovementLength = Math::length(lastMovement);
             if (lastMovementLength > 0.05f) {
                 lastMovement = lastMovement / lastMovementLength * 0.05f;
@@ -537,12 +537,12 @@ __global__ void cudaDrawCells(
         }
 
         //draw detonation
-        if (cell->cellFunction == CellFunction_Detonator) {
-            auto const& detonator = cell->cellFunctionData.detonator;
+        if (cell->cellType == CellType_Detonator) {
+            auto const& detonator = cell->cellTypeData.detonator;
             if (detonator.state == DetonatorState_Activated && detonator.countdown < 2) {
                 auto radius = toFloat(6 - detonator.countdown * 6);
                 radius *= radius;
-                radius *= cudaSimulationParameters.cellFunctionDetonatorRadius[cell->color] * zoom / 36;
+                radius *= cudaSimulationParameters.cellTypeDetonatorRadius[cell->color] * zoom / 36;
                 drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.0f}, radius, shadedCells);
             }
         }

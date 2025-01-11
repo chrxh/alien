@@ -27,13 +27,13 @@ TEST_F(StatisticsTests, selfReplicatorWithRepetitionsInGenome)
         GenomeDescription()
             .setHeader(GenomeHeaderDescription().setNumRepetitions(2))
             .setCells({
-                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome)),
-                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()),
+                CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setGenome(subGenome)),
+                CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setMakeSelfCopy()),
             }));
 
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(mainGenome)),
+        CellDescription().setId(1).setCellType(ConstructorDescription().setGenome(mainGenome)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -52,13 +52,13 @@ TEST_F(StatisticsTests, selfReplicatorWithInfiniteRepetitionsInGenome)
         GenomeDescription()
             .setHeader(GenomeHeaderDescription().setNumRepetitions(2))
             .setCells({
-                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome)),
-                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()),
+                CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setGenome(subGenome)),
+                CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setMakeSelfCopy()),
             }));
 
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(mainGenome)),
+        CellDescription().setId(1).setCellType(ConstructorDescription().setGenome(mainGenome)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -77,12 +77,12 @@ TEST_F(StatisticsTests, nonSelfReplicatorWithRepetitionsInGenome)
         GenomeDescription()
             .setHeader(GenomeHeaderDescription().setNumRepetitions(2))
             .setCells({
-                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome)),
+                CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setGenome(subGenome)),
             }));
 
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(mainGenome)),
+        CellDescription().setId(1).setCellType(ConstructorDescription().setGenome(mainGenome)),
     });
 
     _simulationFacade->setSimulationData(data);

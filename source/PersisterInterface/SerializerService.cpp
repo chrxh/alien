@@ -100,7 +100,7 @@ namespace
     auto constexpr Id_Cell_ActivationTime = 8;
     auto constexpr Id_Cell_CreatureId = 11;
     auto constexpr Id_Cell_MutationId = 12;
-    auto constexpr Id_Cell_CellFunctionUsed = 15;
+    auto constexpr Id_Cell_CellTypeUsed = 15;
     auto constexpr Id_Cell_AncestorMutationId = 16;
     auto constexpr Id_Cell_GenomeComplexity = 17;
     auto constexpr Id_Cell_DetectedByCreatureId = 19;
@@ -415,7 +415,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_CellGenome_NumRequiredAdditionalConnections, data.numRequiredAdditionalConnections, defaultObject.numRequiredAdditionalConnections);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data.cellFunction);
+        ar(data.cellTypeData);
     }
     SPLIT_SERIALIZATION(CellGenomeDescription)
 
@@ -645,11 +645,11 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_ActivationTime, data.activationTime, defaultObject.activationTime);
         loadSave(task, auxiliaries, Id_Cell_GenomeComplexity, data.genomeComplexity, defaultObject.genomeComplexity);
         loadSave(task, auxiliaries, Id_Cell_DetectedByCreatureId, data.detectedByCreatureId, defaultObject.detectedByCreatureId);
-        loadSave(task, auxiliaries, Id_Cell_CellFunctionUsed, data.cellFunctionUsed, defaultObject.cellFunctionUsed);
+        loadSave(task, auxiliaries, Id_Cell_CellTypeUsed, data.cellTypeUsed, defaultObject.cellTypeUsed);
         loadSave(task, auxiliaries, Id_Cell_GenomeNodeIndex, data.genomeNodeIndex, defaultObject.genomeNodeIndex);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data.id, data.connections, data.pos, data.vel, data.energy, data.cellFunction, data.signal, data.metadata);
+        ar(data.id, data.connections, data.pos, data.vel, data.energy, data.cellTypeData, data.signal, data.metadata);
     }
     SPLIT_SERIALIZATION(CellDescription)
 
@@ -1317,7 +1317,7 @@ void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics,
 bool SerializerService::wrapGenome(ClusteredDataDescription& output, std::vector<uint8_t> const& input)
 {
     output.clear();
-    output.addCluster(ClusterDescription().addCell(CellDescription().setCellFunction(ConstructorDescription().setGenome(input))));
+    output.addCluster(ClusterDescription().addCell(CellDescription().setCellType(ConstructorDescription().setGenome(input))));
     return true;
 }
 
@@ -1332,9 +1332,9 @@ bool SerializerService::unwrapGenome(std::vector<uint8_t>& output, ClusteredData
         return false;
     }
     auto cell = cluster.cells.front();
-    if (cell.getCellFunctionType() != CellFunction_Constructor) {
+    if (cell.getCellType() != CellType_Constructor) {
         return false;
     }
-    output = std::get<ConstructorDescription>(*cell.cellFunction).genome;
+    output = std::get<ConstructorDescription>(*cell.cellTypeData).genome;
     return true;
 }

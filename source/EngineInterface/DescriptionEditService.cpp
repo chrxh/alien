@@ -475,8 +475,8 @@ void DescriptionEditService::randomizeCountdowns(ClusteredDataDescription& data,
     for (auto& cluster : data.clusters) {
         auto countdown = NumberGenerator::get().getRandomReal(toDouble(minValue), toDouble(maxValue));
         for (auto& cell : cluster.cells) {
-            if (cell.getCellFunctionType() == CellFunction_Detonator) {
-                std::get<DetonatorDescription>(*cell.cellFunction).countdown = countdown;
+            if (cell.getCellType() == CellType_Detonator) {
+                std::get<DetonatorDescription>(*cell.cellTypeData).countdown = countdown;
             }
         }
     }
@@ -488,8 +488,8 @@ void DescriptionEditService::randomizeMutationIds(ClusteredDataDescription& data
         auto mutationId = NumberGenerator::get().getRandomInt() % 65536;
         for (auto& cell : cluster.cells) {
             cell.mutationId = toInt(mutationId);
-            if (cell.getCellFunctionType() == CellFunction_Constructor) {
-                std::get<ConstructorDescription>(*cell.cellFunction).offspringMutationId = toInt(mutationId);
+            if (cell.getCellType() == CellType_Constructor) {
+                std::get<ConstructorDescription>(*cell.cellTypeData).offspringMutationId = toInt(mutationId);
             }
         }
     }
@@ -528,8 +528,8 @@ void DescriptionEditService::generateNewCreatureIds(DataDescription& data)
         if (cell.creatureId != 0) {
             cell.creatureId = getNewCreatureId(cell.creatureId, origToNewCreatureIdMap);
         }
-        if (cell.getCellFunctionType() == CellFunction_Constructor) {
-            auto& offspringCreatureId = std::get<ConstructorDescription>(*cell.cellFunction).offspringCreatureId;
+        if (cell.getCellType() == CellType_Constructor) {
+            auto& offspringCreatureId = std::get<ConstructorDescription>(*cell.cellTypeData).offspringCreatureId;
             offspringCreatureId = getNewCreatureId(offspringCreatureId, origToNewCreatureIdMap);
         }
     }
@@ -543,8 +543,8 @@ void DescriptionEditService::generateNewCreatureIds(ClusteredDataDescription& da
             if (cell.creatureId != 0) {
                 cell.creatureId = getNewCreatureId(cell.creatureId, origToNewCreatureIdMap);
             }
-            if (cell.getCellFunctionType() == CellFunction_Constructor) {
-                auto& offspringCreatureId = std::get<ConstructorDescription>(*cell.cellFunction).offspringCreatureId;
+            if (cell.getCellType() == CellType_Constructor) {
+                auto& offspringCreatureId = std::get<ConstructorDescription>(*cell.cellTypeData).offspringCreatureId;
                 offspringCreatureId = getNewCreatureId(offspringCreatureId, origToNewCreatureIdMap);
             }
         }
@@ -648,8 +648,8 @@ std::vector<CellOrParticleDescription> DescriptionEditService::getConstructorToM
 {
     std::map<std::vector<uint8_t>, size_t> genomeToCellIndex;
     for (auto const& [index, cell] : data.cells | boost::adaptors::indexed(0)) {
-        if (cell.getCellFunctionType() == CellFunction_Constructor) {
-            auto const& genome = std::get<ConstructorDescription>(*cell.cellFunction).genome;
+        if (cell.getCellType() == CellType_Constructor) {
+            auto const& genome = std::get<ConstructorDescription>(*cell.cellTypeData).genome;
             if (!genomeToCellIndex.contains(genome) || cell.livingState != LivingState_UnderConstruction) {
                 genomeToCellIndex[genome] = index;
             }

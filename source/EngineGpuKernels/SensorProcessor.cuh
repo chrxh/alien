@@ -39,7 +39,7 @@ private:
 
 __inline__ __device__ void SensorProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
-    auto& operations = data.cellFunctionOperations[CellFunction_Sensor];
+    auto& operations = data.cellTypeOperations[CellType_Sensor];
     auto partition = calcBlockPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         processCell(data, statistics, operations.at(i).cell);
@@ -48,7 +48,7 @@ __inline__ __device__ void SensorProcessor::process(SimulationData& data, Simula
 
 __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    if (abs(cell->signal.channels[0]) > cudaSimulationParameters.cellFunctionSensorSignalThreshold) {
+    if (abs(cell->signal.channels[0]) > cudaSimulationParameters.cellTypeSensorSignalThreshold) {
         statistics.incNumSensorActivities(cell->color);
         searchNeighborhood(data, statistics, cell);
         cell->signal.origin = SignalOrigin_Sensor;
@@ -110,10 +110,10 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
 
     if (threadIdx.x == 0) {
         refScanAngle = Math::angleOfVector(SignalProcessor::calcSignalDirection(data, cell));
-        minDensity = toInt(cell->cellFunctionData.sensor.minDensity * 64);
-        minRange = cell->cellFunctionData.sensor.minRange;
-        restrictToColor = cell->cellFunctionData.sensor.restrictToColor;
-        restrictToMutants = cell->cellFunctionData.sensor.restrictToMutants;
+        minDensity = toInt(cell->cellTypeData.sensor.minDensity * 64);
+        minRange = cell->cellTypeData.sensor.minRange;
+        restrictToColor = cell->cellTypeData.sensor.restrictToColor;
+        restrictToMutants = cell->cellTypeData.sensor.restrictToMutants;
         lookupResult = 0xffffffffffffffff;
     }
     __syncthreads();
@@ -126,9 +126,9 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
     auto const startRadius = calcStartDistanceForScanning(restrictToColor, restrictToMutants, cell->color);
     auto const& densityMap = data.preprocessedSimulationData.densityMap;
 
-    auto maxRange = cudaSimulationParameters.cellFunctionSensorRange[cell->color];
-    if (cell->cellFunctionData.sensor.maxRange >= 0) {
-        maxRange = min(maxRange, toFloat(cell->cellFunctionData.sensor.maxRange));
+    auto maxRange = cudaSimulationParameters.cellTypeSensorRange[cell->color];
+    if (cell->cellTypeData.sensor.maxRange >= 0) {
+        maxRange = min(maxRange, toFloat(cell->cellTypeData.sensor.maxRange));
     }
     for (float radius = startRadius; radius <= maxRange; radius += ScanStep) {
         if (minRange < 0 || minRange <= radius) {
@@ -177,24 +177,24 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
 
             cell->signal.channels[2] = 1.0f - min(1.0f, distance / 256);  //distance: 1 = close, 0 = far away
 
-            auto movementTowardTargetedObject = !cudaSimulationParameters.cellFunctionMuscleMovementTowardTargetedObject;
+            auto movementTowardTargetedObject = !cudaSimulationParameters.cellTypeMuscleMovementTowardTargetedObject;
             cell->signal.channels[3] = movementTowardTargetedObject ? angle / 360.0f : 0;  //angle: between -0.5 and 0.5
-            cell->cellFunctionData.sensor.memoryChannel1 = cell->signal.channels[1];
-            cell->cellFunctionData.sensor.memoryChannel2 = cell->signal.channels[2];
-            cell->cellFunctionData.sensor.memoryChannel3 = cell->signal.channels[3];
+            cell->cellTypeData.sensor.memoryChannel1 = cell->signal.channels[1];
+            cell->cellTypeData.sensor.memoryChannel2 = cell->signal.channels[2];
+            cell->cellTypeData.sensor.memoryChannel3 = cell->signal.channels[3];
             statistics.incNumSensorMatches(cell->color);
             auto delta = data.cellMap.getCorrectedDirection(scanPos - cell->pos);
             cell->signal.targetX = delta.x;
             cell->signal.targetY = delta.y;
-            cell->cellFunctionData.sensor.memoryTargetX = delta.x;
-            cell->cellFunctionData.sensor.memoryTargetY = delta.y;
+            cell->cellTypeData.sensor.memoryTargetX = delta.x;
+            cell->cellTypeData.sensor.memoryTargetY = delta.y;
         } else {
             cell->signal.channels[0] = 0;  //nothing found
-            //signal.channels[1] = cell->cellFunctionData.sensor.memoryChannel1;
-            //signal.channels[2] = cell->cellFunctionData.sensor.memoryChannel2;
-            //signal.channels[3] = cell->cellFunctionData.sensor.memoryChannel3;
-            //signal.targetX = cell->cellFunctionData.sensor.memoryTargetX;
-            //signal.targetY = cell->cellFunctionData.sensor.memoryTargetY;
+            //signal.channels[1] = cell->cellTypeData.sensor.memoryChannel1;
+            //signal.channels[2] = cell->cellTypeData.sensor.memoryChannel2;
+            //signal.channels[3] = cell->cellTypeData.sensor.memoryChannel3;
+            //signal.targetX = cell->cellTypeData.sensor.memoryTargetX;
+            //signal.targetY = cell->cellTypeData.sensor.memoryTargetY;
             cell->signal.targetX = 0;
             cell->signal.targetY = 0;
         }
@@ -204,8 +204,8 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
 
 __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& data, Cell* cell, float2 const& scanPos)
 {
-    auto const& restrictToColor = cell->cellFunctionData.sensor.restrictToColor;
-    auto const& restrictToMutants = cell->cellFunctionData.sensor.restrictToMutants;
+    auto const& restrictToColor = cell->cellTypeData.sensor.restrictToColor;
+    auto const& restrictToMutants = cell->cellTypeData.sensor.restrictToMutants;
 
     for (float dx = -3.0f; dx < 3.0f + NEAR_ZERO; dx += 1.0f) {
         for (float dy = -3.0f; dy < 3.0f + NEAR_ZERO; dy += 1.0f) {

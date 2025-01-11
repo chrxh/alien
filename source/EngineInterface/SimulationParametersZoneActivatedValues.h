@@ -18,16 +18,16 @@ struct SimulationParametersZoneActivatedValues
     bool cellMaxBindingEnergy = false;
     bool cellInactiveMaxAge = false;
     bool cellColorTransition = false;
-    bool cellFunctionAttackerEnergyCost = false;
-    bool cellFunctionAttackerFoodChainColorMatrix = false;
-    bool cellFunctionAttackerGenomeComplexityBonus = false;
-    bool cellFunctionAttackerNewComplexMutantPenalty = false;
-    bool cellFunctionAttackerGeometryDeviationExponent = false;
-    bool cellFunctionAttackerConnectionsMismatchPenalty = false;
+    bool cellTypeAttackerEnergyCost = false;
+    bool cellTypeAttackerFoodChainColorMatrix = false;
+    bool cellTypeAttackerGenomeComplexityBonus = false;
+    bool cellTypeAttackerNewComplexMutantPenalty = false;
+    bool cellTypeAttackerGeometryDeviationExponent = false;
+    bool cellTypeAttackerConnectionsMismatchPenalty = false;
 
     bool cellCopyMutationNeuronData = false;
     bool cellCopyMutationCellProperties = false;
-    bool cellCopyMutationCellFunction = false;
+    bool cellCopyMutationCellType = false;
     bool cellCopyMutationGeometry = false;
     bool cellCopyMutationCustomGeometry = false; 
     bool cellCopyMutationInsertion = false;

@@ -50,21 +50,21 @@ void _SimulationKernelsLauncher::calcTimestep(SettingsForSimulation const& setti
     KERNEL_CALL_MOD(cudaNextTimestep_physics_verletVelocityUpdate, 16, data);
 
     //cell functions
-    KERNEL_CALL(cudaNextTimestep_cellFunction_prepare_substep1, data);
-    KERNEL_CALL(cudaNextTimestep_cellFunction_prepare_substep2, data);
-    KERNEL_CALL(cudaNextTimestep_cellFunction_oscillator, data, statistics);
-    KERNEL_CALL(cudaNextTimestep_cellFunction_neuron, data, statistics);
-    if (settings.simulationParameters.cellFunctionConstructorCheckCompletenessForSelfReplication) {
-        KERNEL_CALL(cudaNextTimestep_cellFunction_constructor_completenessCheck, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep1, data);
+    KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep2, data);
+    KERNEL_CALL(cudaNextTimestep_cellType_oscillator, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellType_neuron, data, statistics);
+    if (settings.simulationParameters.cellTypeConstructorCheckCompletenessForSelfReplication) {
+        KERNEL_CALL(cudaNextTimestep_cellType_constructor_completenessCheck, data, statistics);
     }
-    KERNEL_CALL_MOD(cudaNextTimestep_cellFunction_constructor, 4, data, statistics);
-    KERNEL_CALL(cudaNextTimestep_cellFunction_injector, data, statistics);
-    KERNEL_CALL_MOD(cudaNextTimestep_cellFunction_attacker, 4, data, statistics);
-    KERNEL_CALL_MOD(cudaNextTimestep_cellFunction_transmitter, 4, data, statistics);
-    KERNEL_CALL(cudaNextTimestep_cellFunction_muscle, data, statistics);
-    KERNEL_CALL_MOD(cudaNextTimestep_cellFunction_sensor, 64, data, statistics);
-    KERNEL_CALL(cudaNextTimestep_cellFunction_reconnector, data, statistics);
-    KERNEL_CALL(cudaNextTimestep_cellFunction_detonator, data, statistics);
+    KERNEL_CALL_MOD(cudaNextTimestep_cellType_constructor, 4, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellType_injector, data, statistics);
+    KERNEL_CALL_MOD(cudaNextTimestep_cellType_attacker, 4, data, statistics);
+    KERNEL_CALL_MOD(cudaNextTimestep_cellType_transmitter, 4, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellType_muscle, data, statistics);
+    KERNEL_CALL_MOD(cudaNextTimestep_cellType_sensor, 64, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellType_reconnector, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellType_detonator, data, statistics);
 
     if (considerInnerFriction) {
         KERNEL_CALL_MOD(cudaNextTimestep_physics_applyInnerFriction, 16, data);

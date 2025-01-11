@@ -21,13 +21,13 @@ public:
 
 __inline__ __device__ void OscillatorProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
-    auto& operations = data.cellFunctionOperations[CellFunction_Oscillator];
+    auto& operations = data.cellTypeOperations[CellType_Oscillator];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         auto const& operation = operations.at(i);
         auto const& cell = operation.cell;
 
-        auto const& oscillator = cell->cellFunctionData.oscillator;
+        auto const& oscillator = cell->cellTypeData.oscillator;
         if (oscillator.pulseMode > 0 && cell->age % oscillator.pulseMode == 0) {
             if (!cell->signal.active) {
                 SignalProcessor::createEmptySignal(cell);

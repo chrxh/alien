@@ -3,7 +3,7 @@
 #include <memory>
 #include <optional>
 
-#include "CellFunctionConstants.h"
+#include "CellTypeConstants.h"
 #include "Definitions.h"
 
 struct ShapeGeneratorResult

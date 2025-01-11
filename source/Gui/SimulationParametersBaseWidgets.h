@@ -19,5 +19,5 @@ private:
 
     ZoneColorPalette _zoneColorPalette;
     uint32_t _backupColor = 0;
-    std::vector<std::string> _cellFunctionStrings;
+    std::vector<std::string> _cellTypeStrings;
 };

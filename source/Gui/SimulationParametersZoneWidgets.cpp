@@ -466,10 +466,10 @@ void _SimulationParametersZoneWidgets::process()
                 .format("%.7f")
                 .logarithmic(true)
                 .colorDependence(true)
-                .defaultValue(origZone.values.cellCopyMutationCellFunction)
-                .disabledValue(parameters.baseValues.cellCopyMutationCellFunction),
-            zone.values.cellCopyMutationCellFunction,
-            &zone.activatedValues.cellCopyMutationCellFunction);
+                .defaultValue(origZone.values.cellCopyMutationCellType)
+                .disabledValue(parameters.baseValues.cellCopyMutationCellType),
+            zone.values.cellCopyMutationCellType,
+            &zone.activatedValues.cellCopyMutationCellType);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Cell insertion")
@@ -573,20 +573,20 @@ void _SimulationParametersZoneWidgets::process()
                 .name("Food chain color matrix")
                 .max(1)
                 .textWidth(RightColumnWidth)
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origZone.values.cellFunctionAttackerFoodChainColorMatrix))
-                .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix)),
-            zone.values.cellFunctionAttackerFoodChainColorMatrix,
-            &zone.activatedValues.cellFunctionAttackerFoodChainColorMatrix);
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origZone.values.cellTypeAttackerFoodChainColorMatrix))
+                .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.cellTypeAttackerFoodChainColorMatrix)),
+            zone.values.cellTypeAttackerFoodChainColorMatrix,
+            &zone.activatedValues.cellTypeAttackerFoodChainColorMatrix);
         AlienImGui::InputFloatColorMatrix(
             AlienImGui::InputFloatColorMatrixParameters()
                 .name("Complex creature protection")
                 .textWidth(RightColumnWidth)
                 .min(0)
                 .max(20.0f)
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origZone.values.cellFunctionAttackerGenomeComplexityBonus))
-                .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus)),
-            zone.values.cellFunctionAttackerGenomeComplexityBonus,
-            &zone.activatedValues.cellFunctionAttackerGenomeComplexityBonus);
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origZone.values.cellTypeAttackerGenomeComplexityBonus))
+                .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.cellTypeAttackerGenomeComplexityBonus)),
+            zone.values.cellTypeAttackerGenomeComplexityBonus,
+            &zone.activatedValues.cellTypeAttackerGenomeComplexityBonus);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Energy cost")
@@ -596,10 +596,10 @@ void _SimulationParametersZoneWidgets::process()
                 .max(1.0f)
                 .format("%.5f")
                 .logarithmic(true)
-                .defaultValue(origZone.values.cellFunctionAttackerEnergyCost)
-                .disabledValue(parameters.baseValues.cellFunctionAttackerEnergyCost),
-            zone.values.cellFunctionAttackerEnergyCost,
-            &zone.activatedValues.cellFunctionAttackerEnergyCost);
+                .defaultValue(origZone.values.cellTypeAttackerEnergyCost)
+                .disabledValue(parameters.baseValues.cellTypeAttackerEnergyCost),
+            zone.values.cellTypeAttackerEnergyCost,
+            &zone.activatedValues.cellTypeAttackerEnergyCost);
     }
     AlienImGui::EndTreeNode();
 
@@ -650,10 +650,10 @@ void _SimulationParametersZoneWidgets::process()
                 .textWidth(RightColumnWidth)
                 .min(0)
                 .max(1.0f)
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origZone.values.cellFunctionAttackerNewComplexMutantPenalty))
-                .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.cellFunctionAttackerNewComplexMutantPenalty)),
-            zone.values.cellFunctionAttackerNewComplexMutantPenalty,
-            &zone.activatedValues.cellFunctionAttackerNewComplexMutantPenalty);
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origZone.values.cellTypeAttackerNewComplexMutantPenalty))
+                .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.cellTypeAttackerNewComplexMutantPenalty)),
+            zone.values.cellTypeAttackerNewComplexMutantPenalty,
+            &zone.activatedValues.cellTypeAttackerNewComplexMutantPenalty);
 
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -662,10 +662,10 @@ void _SimulationParametersZoneWidgets::process()
                 .colorDependence(true)
                 .min(0)
                 .max(5.0f)
-                .defaultValue(origZone.values.cellFunctionAttackerGeometryDeviationExponent)
-                .disabledValue(parameters.baseValues.cellFunctionAttackerGeometryDeviationExponent),
-            zone.values.cellFunctionAttackerGeometryDeviationExponent,
-            &zone.activatedValues.cellFunctionAttackerGeometryDeviationExponent);
+                .defaultValue(origZone.values.cellTypeAttackerGeometryDeviationExponent)
+                .disabledValue(parameters.baseValues.cellTypeAttackerGeometryDeviationExponent),
+            zone.values.cellTypeAttackerGeometryDeviationExponent,
+            &zone.activatedValues.cellTypeAttackerGeometryDeviationExponent);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Connections mismatch penalty")
@@ -673,10 +673,10 @@ void _SimulationParametersZoneWidgets::process()
                 .colorDependence(true)
                 .min(0)
                 .max(1.0f)
-                .defaultValue(origZone.values.cellFunctionAttackerConnectionsMismatchPenalty)
-                .disabledValue(parameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty),
-            zone.values.cellFunctionAttackerConnectionsMismatchPenalty,
-            &zone.activatedValues.cellFunctionAttackerConnectionsMismatchPenalty);
+                .defaultValue(origZone.values.cellTypeAttackerConnectionsMismatchPenalty)
+                .disabledValue(parameters.baseValues.cellTypeAttackerConnectionsMismatchPenalty),
+            zone.values.cellTypeAttackerConnectionsMismatchPenalty,
+            &zone.activatedValues.cellTypeAttackerConnectionsMismatchPenalty);
     }
     AlienImGui::EndTreeNode();
 
