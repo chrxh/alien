@@ -46,37 +46,37 @@ struct LegacyFeatures
 
 struct LegacyParametersForBase
 {
-    LegacyProperty<ColorVector<float>> cellFunctionConstructorMutationNeuronDataProbability;
-    LegacyProperty<ColorVector<float>> cellFunctionConstructorMutationPropertiesProbability;
-    LegacyProperty<ColorVector<float>> cellFunctionConstructorMutationCellFunctionProbability;
-    LegacyProperty<ColorVector<float>> cellFunctionConstructorMutationGeometryProbability;
-    LegacyProperty<ColorVector<float>> cellFunctionConstructorMutationCustomGeometryProbability;
-    LegacyProperty<ColorVector<float>> cellFunctionConstructorMutationInsertionProbability;
-    LegacyProperty<ColorVector<float>> cellFunctionConstructorMutationDeletionProbability;
-    LegacyProperty<ColorVector<float>> cellFunctionConstructorMutationTranslationProbability;
-    LegacyProperty<ColorVector<float>> cellFunctionConstructorMutationDuplicationProbability;
-    LegacyProperty<ColorVector<float>> cellFunctionConstructorMutationCellColorProbability;
-    LegacyProperty<ColorVector<float>> cellFunctionConstructorMutationSubgenomeColorProbability;
-    LegacyProperty<ColorVector<float>> cellFunctionConstructorMutationGenomeColorProbability;
-    LegacyProperty<bool> cellFunctionMuscleMovementAngleFromSensor;
+    LegacyProperty<ColorVector<float>> cellTypeConstructorMutationNeuronDataProbability;
+    LegacyProperty<ColorVector<float>> cellTypeConstructorMutationPropertiesProbability;
+    LegacyProperty<ColorVector<float>> cellTypeConstructorMutationCellTypeProbability;
+    LegacyProperty<ColorVector<float>> cellTypeConstructorMutationGeometryProbability;
+    LegacyProperty<ColorVector<float>> cellTypeConstructorMutationCustomGeometryProbability;
+    LegacyProperty<ColorVector<float>> cellTypeConstructorMutationInsertionProbability;
+    LegacyProperty<ColorVector<float>> cellTypeConstructorMutationDeletionProbability;
+    LegacyProperty<ColorVector<float>> cellTypeConstructorMutationTranslationProbability;
+    LegacyProperty<ColorVector<float>> cellTypeConstructorMutationDuplicationProbability;
+    LegacyProperty<ColorVector<float>> cellTypeConstructorMutationCellColorProbability;
+    LegacyProperty<ColorVector<float>> cellTypeConstructorMutationSubgenomeColorProbability;
+    LegacyProperty<ColorVector<float>> cellTypeConstructorMutationGenomeColorProbability;
+    LegacyProperty<bool> cellTypeMuscleMovementAngleFromSensor;
     LegacyProperty<bool> clusterDecay;
     LegacyProperty<ColorVector<float>> clusterDecayProb;
 };
 
 struct LegacyParametersForSpot
 {
-    LegacySpotProperty<ColorVector<float>> cellFunctionConstructorMutationNeuronDataProbability;
-    LegacySpotProperty<ColorVector<float>> cellFunctionConstructorMutationPropertiesProbability;
-    LegacySpotProperty<ColorVector<float>> cellFunctionConstructorMutationCellFunctionProbability;
-    LegacySpotProperty<ColorVector<float>> cellFunctionConstructorMutationGeometryProbability;
-    LegacySpotProperty<ColorVector<float>> cellFunctionConstructorMutationCustomGeometryProbability;
-    LegacySpotProperty<ColorVector<float>> cellFunctionConstructorMutationInsertionProbability;
-    LegacySpotProperty<ColorVector<float>> cellFunctionConstructorMutationDeletionProbability;
-    LegacySpotProperty<ColorVector<float>> cellFunctionConstructorMutationTranslationProbability;
-    LegacySpotProperty<ColorVector<float>> cellFunctionConstructorMutationDuplicationProbability;
-    LegacySpotProperty<ColorVector<float>> cellFunctionConstructorMutationCellColorProbability;
-    LegacySpotProperty<ColorVector<float>> cellFunctionConstructorMutationSubgenomeColorProbability;
-    LegacySpotProperty<ColorVector<float>> cellFunctionConstructorMutationGenomeColorProbability;
+    LegacySpotProperty<ColorVector<float>> cellTypeConstructorMutationNeuronDataProbability;
+    LegacySpotProperty<ColorVector<float>> cellTypeConstructorMutationPropertiesProbability;
+    LegacySpotProperty<ColorVector<float>> cellTypeConstructorMutationCellTypeProbability;
+    LegacySpotProperty<ColorVector<float>> cellTypeConstructorMutationGeometryProbability;
+    LegacySpotProperty<ColorVector<float>> cellTypeConstructorMutationCustomGeometryProbability;
+    LegacySpotProperty<ColorVector<float>> cellTypeConstructorMutationInsertionProbability;
+    LegacySpotProperty<ColorVector<float>> cellTypeConstructorMutationDeletionProbability;
+    LegacySpotProperty<ColorVector<float>> cellTypeConstructorMutationTranslationProbability;
+    LegacySpotProperty<ColorVector<float>> cellTypeConstructorMutationDuplicationProbability;
+    LegacySpotProperty<ColorVector<float>> cellTypeConstructorMutationCellColorProbability;
+    LegacySpotProperty<ColorVector<float>> cellTypeConstructorMutationSubgenomeColorProbability;
+    LegacySpotProperty<ColorVector<float>> cellTypeConstructorMutationGenomeColorProbability;
 };
 
 struct LegacyParameters

@@ -4,7 +4,7 @@
 #include "CellConnectionProcessor.cuh"
 #include "SignalProcessor.cuh"
 #include "ConstantMemory.cuh"
-#include "EngineInterface/CellFunctionConstants.h"
+#include "EngineInterface/CellTypeConstants.h"
 #include "Object.cuh"
 #include "RadiationProcessor.cuh"
 #include "SimulationData.cuh"
@@ -28,7 +28,7 @@ private:
 
 __device__ __inline__ void ReconnectorProcessor::process(SimulationData& data, SimulationStatistics& result)
 {
-    auto& operations = data.cellFunctionOperations[CellFunction_Reconnector];
+    auto& operations = data.cellTypeOperations[CellType_Reconnector];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         processCell(data, result, operations.at(i).cell);
@@ -37,19 +37,19 @@ __device__ __inline__ void ReconnectorProcessor::process(SimulationData& data, S
 
 __device__ __inline__ void ReconnectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    if (cell->signal.channels[0] >= cudaSimulationParameters.cellFunctionReconnectorSignalThreshold) {
+    if (cell->signal.channels[0] >= cudaSimulationParameters.cellTypeReconnectorSignalThreshold) {
         tryCreateConnection(data, statistics, cell);
-    } else if (cell->signal.channels[0] <= -cudaSimulationParameters.cellFunctionReconnectorSignalThreshold) {
+    } else if (cell->signal.channels[0] <= -cudaSimulationParameters.cellTypeReconnectorSignalThreshold) {
         removeConnections(data, statistics, cell);
     }
 }
 
 __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto const& reconnector = cell->cellFunctionData.reconnector;
+    auto const& reconnector = cell->cellTypeData.reconnector;
     Cell* closestCell = nullptr;
     float closestDistance = 0;
-    data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.cellFunctionReconnectorRadius[cell->color], cell->detached, [&](Cell* const& otherCell) {
+    data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.cellTypeReconnectorRadius[cell->color], cell->detached, [&](Cell* const& otherCell) {
         if (cell->creatureId != 0 && otherCell->creatureId == cell->creatureId) {
             return;
         }

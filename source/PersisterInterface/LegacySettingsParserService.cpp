@@ -82,32 +82,32 @@ namespace
     {
         LegacyParametersForBase result;
         readLegacyParameterForBase(
-            result.cellFunctionConstructorMutationNeuronDataProbability, tree, nodeBase + "cell.function.constructor.mutation probability.neuron data");
+            result.cellTypeConstructorMutationNeuronDataProbability, tree, nodeBase + "cell.function.constructor.mutation probability.neuron data");
         readLegacyParameterForBase(
-            result.cellFunctionConstructorMutationPropertiesProbability, tree, nodeBase + "cell.function.constructor.mutation probability.data");
+            result.cellTypeConstructorMutationPropertiesProbability, tree, nodeBase + "cell.function.constructor.mutation probability.data");
         readLegacyParameterForBase(
-            result.cellFunctionConstructorMutationCellFunctionProbability, tree, nodeBase + "cell.function.constructor.mutation probability.cell function");
+            result.cellTypeConstructorMutationCellTypeProbability, tree, nodeBase + "cell.function.constructor.mutation probability.cell function");
         readLegacyParameterForBase(
-            result.cellFunctionConstructorMutationGeometryProbability, tree, nodeBase + "cell.function.constructor.mutation probability.geometry");
+            result.cellTypeConstructorMutationGeometryProbability, tree, nodeBase + "cell.function.constructor.mutation probability.geometry");
         readLegacyParameterForBase(
-            result.cellFunctionConstructorMutationCustomGeometryProbability, tree, nodeBase + "cell.function.constructor.mutation probability.custom geometry");
+            result.cellTypeConstructorMutationCustomGeometryProbability, tree, nodeBase + "cell.function.constructor.mutation probability.custom geometry");
         readLegacyParameterForBase(
-            result.cellFunctionConstructorMutationInsertionProbability, tree, nodeBase + "cell.function.constructor.mutation probability.insertion");
+            result.cellTypeConstructorMutationInsertionProbability, tree, nodeBase + "cell.function.constructor.mutation probability.insertion");
         readLegacyParameterForBase(
-            result.cellFunctionConstructorMutationDeletionProbability, tree, nodeBase + "cell.function.constructor.mutation probability.deletion");
+            result.cellTypeConstructorMutationDeletionProbability, tree, nodeBase + "cell.function.constructor.mutation probability.deletion");
         readLegacyParameterForBase(
-            result.cellFunctionConstructorMutationTranslationProbability, tree, nodeBase + "cell.function.constructor.mutation probability.translation");
+            result.cellTypeConstructorMutationTranslationProbability, tree, nodeBase + "cell.function.constructor.mutation probability.translation");
         readLegacyParameterForBase(
-            result.cellFunctionConstructorMutationDuplicationProbability, tree, nodeBase + "cell.function.constructor.mutation probability.duplication");
+            result.cellTypeConstructorMutationDuplicationProbability, tree, nodeBase + "cell.function.constructor.mutation probability.duplication");
         readLegacyParameterForBase(
-            result.cellFunctionConstructorMutationCellColorProbability, tree, nodeBase + "cell.function.constructor.mutation probability.cell color");
+            result.cellTypeConstructorMutationCellColorProbability, tree, nodeBase + "cell.function.constructor.mutation probability.cell color");
         readLegacyParameterForBase(
-            result.cellFunctionConstructorMutationSubgenomeColorProbability, tree, nodeBase + "cell.function.constructor.mutation probability.color");
+            result.cellTypeConstructorMutationSubgenomeColorProbability, tree, nodeBase + "cell.function.constructor.mutation probability.color");
         readLegacyParameterForBase(
-            result.cellFunctionConstructorMutationGenomeColorProbability, tree, nodeBase + "cell.function.constructor.mutation probability.uniform color");
+            result.cellTypeConstructorMutationGenomeColorProbability, tree, nodeBase + "cell.function.constructor.mutation probability.uniform color");
 
         readLegacyParameterForBase(
-            result.cellFunctionMuscleMovementAngleFromSensor, tree, nodeBase + "cell.function.muscle.movement angle from sensor");
+            result.cellTypeMuscleMovementAngleFromSensor, tree, nodeBase + "cell.function.muscle.movement angle from sensor");
 
         readLegacyParameterForBase(result.clusterDecay, tree, nodeBase + "cluster.decay");
         readLegacyParameterForBase(result.clusterDecayProb, tree, nodeBase + "cluster.decay probability");
@@ -119,29 +119,29 @@ namespace
     {
         LegacyParametersForSpot result;
         readLegacyParameterForSpot(
-            result.cellFunctionConstructorMutationNeuronDataProbability, tree, nodeBase + "cell.function.constructor.mutation probability.neuron data");
+            result.cellTypeConstructorMutationNeuronDataProbability, tree, nodeBase + "cell.function.constructor.mutation probability.neuron data");
         readLegacyParameterForSpot(
-            result.cellFunctionConstructorMutationPropertiesProbability, tree, nodeBase + "cell.function.constructor.mutation probability.data ");
+            result.cellTypeConstructorMutationPropertiesProbability, tree, nodeBase + "cell.function.constructor.mutation probability.data ");
         readLegacyParameterForSpot(
-            result.cellFunctionConstructorMutationCellFunctionProbability, tree, nodeBase + "cell.function.constructor.mutation probability.cell function");
+            result.cellTypeConstructorMutationCellTypeProbability, tree, nodeBase + "cell.function.constructor.mutation probability.cell function");
         readLegacyParameterForSpot(
-            result.cellFunctionConstructorMutationGeometryProbability, tree, nodeBase + "cell.function.constructor.mutation probability.geometry");
+            result.cellTypeConstructorMutationGeometryProbability, tree, nodeBase + "cell.function.constructor.mutation probability.geometry");
         readLegacyParameterForSpot(
-            result.cellFunctionConstructorMutationCustomGeometryProbability, tree, nodeBase + "cell.function.constructor.mutation probability.custom geometry");
+            result.cellTypeConstructorMutationCustomGeometryProbability, tree, nodeBase + "cell.function.constructor.mutation probability.custom geometry");
         readLegacyParameterForSpot(
-            result.cellFunctionConstructorMutationInsertionProbability, tree, nodeBase + "cell.function.constructor.mutation probability.insertion");
+            result.cellTypeConstructorMutationInsertionProbability, tree, nodeBase + "cell.function.constructor.mutation probability.insertion");
         readLegacyParameterForSpot(
-            result.cellFunctionConstructorMutationDeletionProbability, tree, nodeBase + "cell.function.constructor.mutation probability.deletion");
+            result.cellTypeConstructorMutationDeletionProbability, tree, nodeBase + "cell.function.constructor.mutation probability.deletion");
         readLegacyParameterForSpot(
-            result.cellFunctionConstructorMutationTranslationProbability, tree, nodeBase + "cell.function.constructor.mutation probability.translation");
+            result.cellTypeConstructorMutationTranslationProbability, tree, nodeBase + "cell.function.constructor.mutation probability.translation");
         readLegacyParameterForSpot(
-            result.cellFunctionConstructorMutationDuplicationProbability, tree, nodeBase + "cell.function.constructor.mutation probability.duplication");
+            result.cellTypeConstructorMutationDuplicationProbability, tree, nodeBase + "cell.function.constructor.mutation probability.duplication");
         readLegacyParameterForSpot(
-            result.cellFunctionConstructorMutationCellColorProbability, tree, nodeBase + "cell.function.constructor.mutation probability.cell color");
+            result.cellTypeConstructorMutationCellColorProbability, tree, nodeBase + "cell.function.constructor.mutation probability.cell color");
         readLegacyParameterForSpot(
-            result.cellFunctionConstructorMutationSubgenomeColorProbability, tree, nodeBase + "cell.function.constructor.mutation probability.color");
+            result.cellTypeConstructorMutationSubgenomeColorProbability, tree, nodeBase + "cell.function.constructor.mutation probability.color");
         readLegacyParameterForSpot(
-            result.cellFunctionConstructorMutationGenomeColorProbability, tree, nodeBase + "cell.function.constructor.mutation probability.uniform color");
+            result.cellTypeConstructorMutationGenomeColorProbability, tree, nodeBase + "cell.function.constructor.mutation probability.uniform color");
         return result;
     }
 }
@@ -205,17 +205,17 @@ void LegacySettingsParserService::updateParametersAndFeaturesForLegacyFiles(
     //*******************
     //* older conversions
     //*******************
-    //activation of legacyCellFunctionMuscleMovementAngleFromChannel before v4.10.0
+    //activation of legacyCellTypeMuscleMovementAngleFromChannel before v4.10.0
     if (missingFeatures.legacyMode && !legacyFeatures.advancedMuscleControl.existent) {
-        parameters.cellFunctionMuscleMovementTowardTargetedObject = false;
+        parameters.cellTypeMuscleMovementTowardTargetedObject = false;
     }
 
-    //activation of legacyCellFunctionMuscleMovementAngleFromChannel between v4.10.0 and v4.10.1
-    if (legacyFeatures.advancedMuscleControl.existent && legacyParameters.base.cellFunctionMuscleMovementAngleFromSensor.existent) {
+    //activation of legacyCellTypeMuscleMovementAngleFromChannel between v4.10.0 and v4.10.1
+    if (legacyFeatures.advancedMuscleControl.existent && legacyParameters.base.cellTypeMuscleMovementAngleFromSensor.existent) {
         parameters.features.legacyModes = true;
-        parameters.cellFunctionMuscleMovementTowardTargetedObject =
-            legacyFeatures.advancedMuscleControl.parameter && legacyParameters.base.cellFunctionMuscleMovementAngleFromSensor.parameter;
-        parameters.legacyCellFunctionMuscleMovementAngleFromSensor = true;
+        parameters.cellTypeMuscleMovementTowardTargetedObject =
+            legacyFeatures.advancedMuscleControl.parameter && legacyParameters.base.cellTypeMuscleMovementAngleFromSensor.parameter;
+        parameters.legacyCellTypeMuscleMovementAngleFromSensor = true;
     }
 
     //activation of other features
@@ -229,17 +229,17 @@ void LegacySettingsParserService::updateParametersAndFeaturesForLegacyFiles(
         auto advancedAttackerControlForSpot = false;
         for (int i = 0; i < parameters.numZones; ++i) {
             auto const& spotValues = parameters.zone[i].values;
-            if (!equals(spotValues.cellFunctionAttackerGeometryDeviationExponent, 0.0f)
-                || !equals(spotValues.cellFunctionAttackerConnectionsMismatchPenalty, 0.0f)) {
+            if (!equals(spotValues.cellTypeAttackerGeometryDeviationExponent, 0.0f)
+                || !equals(spotValues.cellTypeAttackerConnectionsMismatchPenalty, 0.0f)) {
                 advancedAttackerControlForSpot = true;
             }
         }
         if (advancedAttackerControlForSpot
-            || !equals(parameters.cellFunctionAttackerSameMutantPenalty, 0.0f) || !equals(parameters.cellFunctionAttackerSensorDetectionFactor, 0.0f)
-            || !equals(parameters.baseValues.cellFunctionAttackerGeometryDeviationExponent, 0.0f)
-            || !equals(parameters.baseValues.cellFunctionAttackerConnectionsMismatchPenalty, 0.0f)
-            || !equals(parameters.cellFunctionAttackerColorInhomogeneityFactor, 1.0f) || !equals(parameters.cellFunctionAttackerEnergyDistributionRadius, 3.6f)
-            || !equals(parameters.cellFunctionAttackerEnergyDistributionValue, 10.0f)) {
+            || !equals(parameters.cellTypeAttackerSameMutantPenalty, 0.0f) || !equals(parameters.cellTypeAttackerSensorDetectionFactor, 0.0f)
+            || !equals(parameters.baseValues.cellTypeAttackerGeometryDeviationExponent, 0.0f)
+            || !equals(parameters.baseValues.cellTypeAttackerConnectionsMismatchPenalty, 0.0f)
+            || !equals(parameters.cellTypeAttackerColorInhomogeneityFactor, 1.0f) || !equals(parameters.cellTypeAttackerEnergyDistributionRadius, 3.6f)
+            || !equals(parameters.cellTypeAttackerEnergyDistributionValue, 10.0f)) {
             parameters.features.advancedAttackerControl = true;
         }
     }
@@ -286,34 +286,34 @@ void LegacySettingsParserService::updateParametersAndFeaturesForLegacyFiles(
     if (missingParameters.copyMutations) {
         auto setParametersForBase = [](SimulationParametersZoneValues& target, LegacyParametersForBase const& source) {
             for (int i = 0; i < MAX_COLORS; ++i) {
-                target.cellCopyMutationNeuronData[i] = source.cellFunctionConstructorMutationNeuronDataProbability.parameter[i] * 250;
-                target.cellCopyMutationCellProperties[i] = source.cellFunctionConstructorMutationPropertiesProbability.parameter[i] * 250;
-                target.cellCopyMutationCellFunction[i] = source.cellFunctionConstructorMutationCellFunctionProbability.parameter[i] * 250;
-                target.cellCopyMutationGeometry[i] = source.cellFunctionConstructorMutationGeometryProbability.parameter[i] * 250;
-                target.cellCopyMutationCustomGeometry[i] = source.cellFunctionConstructorMutationCustomGeometryProbability.parameter[i] * 250;
-                target.cellCopyMutationInsertion[i] = source.cellFunctionConstructorMutationInsertionProbability.parameter[i] * 250;
-                target.cellCopyMutationDeletion[i] = source.cellFunctionConstructorMutationDeletionProbability.parameter[i] * 250;
-                target.cellCopyMutationCellColor[i] = source.cellFunctionConstructorMutationCellColorProbability.parameter[i] * 250;
-                target.cellCopyMutationTranslation[i] = source.cellFunctionConstructorMutationTranslationProbability.parameter[i] * 5000;
-                target.cellCopyMutationDuplication[i] = source.cellFunctionConstructorMutationDuplicationProbability.parameter[i] * 5000;
-                target.cellCopyMutationSubgenomeColor[i] = source.cellFunctionConstructorMutationSubgenomeColorProbability.parameter[i] * 5000;
-                target.cellCopyMutationGenomeColor[i] = source.cellFunctionConstructorMutationGenomeColorProbability.parameter[i] * 5000;
+                target.cellCopyMutationNeuronData[i] = source.cellTypeConstructorMutationNeuronDataProbability.parameter[i] * 250;
+                target.cellCopyMutationCellProperties[i] = source.cellTypeConstructorMutationPropertiesProbability.parameter[i] * 250;
+                target.cellCopyMutationCellType[i] = source.cellTypeConstructorMutationCellTypeProbability.parameter[i] * 250;
+                target.cellCopyMutationGeometry[i] = source.cellTypeConstructorMutationGeometryProbability.parameter[i] * 250;
+                target.cellCopyMutationCustomGeometry[i] = source.cellTypeConstructorMutationCustomGeometryProbability.parameter[i] * 250;
+                target.cellCopyMutationInsertion[i] = source.cellTypeConstructorMutationInsertionProbability.parameter[i] * 250;
+                target.cellCopyMutationDeletion[i] = source.cellTypeConstructorMutationDeletionProbability.parameter[i] * 250;
+                target.cellCopyMutationCellColor[i] = source.cellTypeConstructorMutationCellColorProbability.parameter[i] * 250;
+                target.cellCopyMutationTranslation[i] = source.cellTypeConstructorMutationTranslationProbability.parameter[i] * 5000;
+                target.cellCopyMutationDuplication[i] = source.cellTypeConstructorMutationDuplicationProbability.parameter[i] * 5000;
+                target.cellCopyMutationSubgenomeColor[i] = source.cellTypeConstructorMutationSubgenomeColorProbability.parameter[i] * 5000;
+                target.cellCopyMutationGenomeColor[i] = source.cellTypeConstructorMutationGenomeColorProbability.parameter[i] * 5000;
             }
         };
         auto setParametersForSpot = [](SimulationParametersZoneValues& target, LegacyParametersForSpot const& source) {
             for (int i = 0; i < MAX_COLORS; ++i) {
-                target.cellCopyMutationNeuronData[i] = source.cellFunctionConstructorMutationNeuronDataProbability.parameter[i] * 250;
-                target.cellCopyMutationCellProperties[i] = source.cellFunctionConstructorMutationPropertiesProbability.parameter[i] * 250;
-                target.cellCopyMutationCellFunction[i] = source.cellFunctionConstructorMutationCellFunctionProbability.parameter[i] * 250;
-                target.cellCopyMutationGeometry[i] = source.cellFunctionConstructorMutationGeometryProbability.parameter[i] * 250;
-                target.cellCopyMutationCustomGeometry[i] = source.cellFunctionConstructorMutationCustomGeometryProbability.parameter[i] * 250;
-                target.cellCopyMutationInsertion[i] = source.cellFunctionConstructorMutationInsertionProbability.parameter[i] * 250;
-                target.cellCopyMutationDeletion[i] = source.cellFunctionConstructorMutationDeletionProbability.parameter[i] * 250;
-                target.cellCopyMutationCellColor[i] = source.cellFunctionConstructorMutationCellColorProbability.parameter[i] * 250;
-                target.cellCopyMutationTranslation[i] = source.cellFunctionConstructorMutationTranslationProbability.parameter[i] * 5000;
-                target.cellCopyMutationDuplication[i] = source.cellFunctionConstructorMutationDuplicationProbability.parameter[i] * 5000;
-                target.cellCopyMutationSubgenomeColor[i] = source.cellFunctionConstructorMutationSubgenomeColorProbability.parameter[i] * 5000;
-                target.cellCopyMutationGenomeColor[i] = source.cellFunctionConstructorMutationGenomeColorProbability.parameter[i] * 5000;
+                target.cellCopyMutationNeuronData[i] = source.cellTypeConstructorMutationNeuronDataProbability.parameter[i] * 250;
+                target.cellCopyMutationCellProperties[i] = source.cellTypeConstructorMutationPropertiesProbability.parameter[i] * 250;
+                target.cellCopyMutationCellType[i] = source.cellTypeConstructorMutationCellTypeProbability.parameter[i] * 250;
+                target.cellCopyMutationGeometry[i] = source.cellTypeConstructorMutationGeometryProbability.parameter[i] * 250;
+                target.cellCopyMutationCustomGeometry[i] = source.cellTypeConstructorMutationCustomGeometryProbability.parameter[i] * 250;
+                target.cellCopyMutationInsertion[i] = source.cellTypeConstructorMutationInsertionProbability.parameter[i] * 250;
+                target.cellCopyMutationDeletion[i] = source.cellTypeConstructorMutationDeletionProbability.parameter[i] * 250;
+                target.cellCopyMutationCellColor[i] = source.cellTypeConstructorMutationCellColorProbability.parameter[i] * 250;
+                target.cellCopyMutationTranslation[i] = source.cellTypeConstructorMutationTranslationProbability.parameter[i] * 5000;
+                target.cellCopyMutationDuplication[i] = source.cellTypeConstructorMutationDuplicationProbability.parameter[i] * 5000;
+                target.cellCopyMutationSubgenomeColor[i] = source.cellTypeConstructorMutationSubgenomeColorProbability.parameter[i] * 5000;
+                target.cellCopyMutationGenomeColor[i] = source.cellTypeConstructorMutationGenomeColorProbability.parameter[i] * 5000;
             }
         };
 

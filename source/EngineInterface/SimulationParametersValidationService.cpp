@@ -4,21 +4,21 @@ void SimulationParametersValidationService::validateAndCorrect(SimulationParamet
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
-            parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j] =
-                std::max(0.0f, std::min(1.0f, parameters.baseValues.cellFunctionAttackerFoodChainColorMatrix[i][j]));
-            parameters.cellFunctionAttackerSameMutantPenalty[i][j] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerSameMutantPenalty[i][j]));
-            parameters.baseValues.cellFunctionAttackerNewComplexMutantPenalty[i][j] =
-                std::max(0.0f, std::min(1.0f, parameters.baseValues.cellFunctionAttackerNewComplexMutantPenalty[i][j]));
-            parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus[i][j] =
-                std::max(0.0f, parameters.baseValues.cellFunctionAttackerGenomeComplexityBonus[i][j]);
+            parameters.baseValues.cellTypeAttackerFoodChainColorMatrix[i][j] =
+                std::max(0.0f, std::min(1.0f, parameters.baseValues.cellTypeAttackerFoodChainColorMatrix[i][j]));
+            parameters.cellTypeAttackerSameMutantPenalty[i][j] = std::max(0.0f, std::min(1.0f, parameters.cellTypeAttackerSameMutantPenalty[i][j]));
+            parameters.baseValues.cellTypeAttackerNewComplexMutantPenalty[i][j] =
+                std::max(0.0f, std::min(1.0f, parameters.baseValues.cellTypeAttackerNewComplexMutantPenalty[i][j]));
+            parameters.baseValues.cellTypeAttackerGenomeComplexityBonus[i][j] =
+                std::max(0.0f, parameters.baseValues.cellTypeAttackerGenomeComplexityBonus[i][j]);
         }
         parameters.baseValues.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorption[i]));
         parameters.radiationAbsorptionHighVelocityPenalty[i] = std::max(0.0f, parameters.radiationAbsorptionHighVelocityPenalty[i]);
         parameters.radiationAbsorptionLowConnectionPenalty[i] = std::max(0.0f, parameters.radiationAbsorptionLowConnectionPenalty[i]);
         parameters.externalEnergyConditionalInflowFactor[i] = std::max(0.0f, std::min(1.0f, parameters.externalEnergyConditionalInflowFactor[i]));
-        parameters.cellFunctionAttackerSensorDetectionFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellFunctionAttackerSensorDetectionFactor[i]));
-        parameters.cellFunctionDetonatorChainExplosionProbability[i] =
-            std::max(0.0f, std::min(1.0f, parameters.cellFunctionDetonatorChainExplosionProbability[i]));
+        parameters.cellTypeAttackerSensorDetectionFactor[i] = std::max(0.0f, std::min(1.0f, parameters.cellTypeAttackerSensorDetectionFactor[i]));
+        parameters.cellTypeDetonatorChainExplosionProbability[i] =
+            std::max(0.0f, std::min(1.0f, parameters.cellTypeDetonatorChainExplosionProbability[i]));
         parameters.externalEnergyInflowFactor[i] = std::max(0.0f, std::min(1.0f, parameters.externalEnergyInflowFactor[i]));
         parameters.baseValues.cellMinEnergy[i] = std::min(parameters.baseValues.cellMinEnergy[i], parameters.cellNormalEnergy[i] * 0.95f);
         parameters.particleSplitEnergy[i] = std::max(0.0f, parameters.particleSplitEnergy[i]);
@@ -29,7 +29,7 @@ void SimulationParametersValidationService::validateAndCorrect(SimulationParamet
         parameters.genomeComplexitySizeFactor[i] = std::max(0.0f, parameters.genomeComplexitySizeFactor[i]);
         parameters.genomeComplexityRamificationFactor[i] = std::max(0.0f, parameters.genomeComplexityRamificationFactor[i]);
         parameters.genomeComplexityNeuronFactor[i] = std::max(0.0f, parameters.genomeComplexityNeuronFactor[i]);
-        parameters.cellFunctionMuscleEnergyCost[i] = std::max(0.0f, std::min(5.0f, parameters.cellFunctionMuscleEnergyCost[i]));
+        parameters.cellTypeMuscleEnergyCost[i] = std::max(0.0f, std::min(5.0f, parameters.cellTypeMuscleEnergyCost[i]));
     }
     parameters.externalEnergy = std::max(0.0f, parameters.externalEnergy);
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
@@ -65,11 +65,11 @@ void SimulationParametersValidationService::validateAndCorrect(SimulationParamet
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
-            zone.values.cellFunctionAttackerFoodChainColorMatrix[i][j] =
-                std::max(0.0f, std::min(1.0f, zone.values.cellFunctionAttackerFoodChainColorMatrix[i][j]));
-            zone.values.cellFunctionAttackerGenomeComplexityBonus[i][j] = std::max(0.0f, zone.values.cellFunctionAttackerGenomeComplexityBonus[i][j]);
-            zone.values.cellFunctionAttackerNewComplexMutantPenalty[i][j] =
-                std::max(0.0f, std::min(1.0f, zone.values.cellFunctionAttackerNewComplexMutantPenalty[i][j]));
+            zone.values.cellTypeAttackerFoodChainColorMatrix[i][j] =
+                std::max(0.0f, std::min(1.0f, zone.values.cellTypeAttackerFoodChainColorMatrix[i][j]));
+            zone.values.cellTypeAttackerGenomeComplexityBonus[i][j] = std::max(0.0f, zone.values.cellTypeAttackerGenomeComplexityBonus[i][j]);
+            zone.values.cellTypeAttackerNewComplexMutantPenalty[i][j] =
+                std::max(0.0f, std::min(1.0f, zone.values.cellTypeAttackerNewComplexMutantPenalty[i][j]));
         }
         zone.values.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, zone.values.radiationAbsorption[i]));
         zone.values.cellMinEnergy[i] = std::min(parameters.baseValues.cellMinEnergy[i], parameters.cellNormalEnergy[i] * 0.95f);

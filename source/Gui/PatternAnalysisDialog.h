@@ -25,12 +25,12 @@ private:
         int numConnections;
         bool constructionState;
         int color;
-        int cellFunction;
+        int cellType;
 
         bool operator==(CellAnalysisDescription const& other) const
         {
             return numConnections == other.numConnections && constructionState == other.constructionState
-                && cellFunction == other.cellFunction && color == other.color;
+                && cellType == other.cellType && color == other.color;
         }
 
         bool operator!=(CellAnalysisDescription const& other) const { return !operator==(other); }
@@ -43,8 +43,8 @@ private:
             if (constructionState != other.constructionState) {
                 return constructionState < other.constructionState;
             }
-            if (cellFunction != other.cellFunction) {
-                return cellFunction < other.cellFunction;
+            if (cellType != other.cellType) {
+                return cellType < other.cellType;
             }
             if (color != other.color) {
                 return color < other.color;

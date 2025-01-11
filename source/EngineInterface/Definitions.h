@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-#include "CellFunctionConstants.h"
+#include "CellTypeConstants.h"
 
 struct SimulationParameters;
 

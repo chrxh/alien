@@ -23,7 +23,7 @@ public:
         for (int i = 0; i < MAX_COLORS; ++i) {
             _parameters.baseValues.cellCopyMutationNeuronData[i] = 1;
             _parameters.baseValues.cellCopyMutationCellProperties[i] = 1;
-            _parameters.baseValues.cellCopyMutationCellFunction[i] = 1;
+            _parameters.baseValues.cellCopyMutationCellType[i] = 1;
             _parameters.baseValues.cellCopyMutationGeometry[i] = 1;
             _parameters.baseValues.cellCopyMutationCustomGeometry[i] = 1;
             _parameters.baseValues.cellCopyMutationInsertion[i] = 1;
@@ -46,28 +46,28 @@ protected:
         std::vector<uint8_t> subGenome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription());
         for (int i = 0; i < 14; ++i) {
             subGenome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({
-                CellGenomeDescription().setCellFunction(NeuronGenomeDescription()).setColor(genomeCellColors[0]),
-                CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()).setColor(genomeCellColors[1]),
+                CellGenomeDescription().setCellTypeData(NeuronGenomeDescription()).setColor(genomeCellColors[0]),
+                CellGenomeDescription().setCellTypeData(TransmitterGenomeDescription()).setColor(genomeCellColors[1]),
                 CellGenomeDescription().setColor(genomeCellColors[2]),
-                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()).setColor(genomeCellColors[2]),
+                CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setMakeSelfCopy()).setColor(genomeCellColors[2]),
                 CellGenomeDescription()
-                    .setCellFunction(ConstructorGenomeDescription().setGenome(subGenome).setMode(std::rand() % 100))
+                    .setCellTypeData(ConstructorGenomeDescription().setGenome(subGenome).setMode(std::rand() % 100))
                     .setColor(genomeCellColors[0]),
             }));
         }
         return GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({
-            CellGenomeDescription().setCellFunction(NeuronGenomeDescription()).setColor(genomeCellColors[0]),
-            CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()).setColor(genomeCellColors[1]),
+            CellGenomeDescription().setCellTypeData(NeuronGenomeDescription()).setColor(genomeCellColors[0]),
+            CellGenomeDescription().setCellTypeData(TransmitterGenomeDescription()).setColor(genomeCellColors[1]),
             CellGenomeDescription().setColor(genomeCellColors[0]),
-            CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()).setColor(genomeCellColors[1]),
-            CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome)).setColor(genomeCellColors[0]),
-            CellGenomeDescription().setCellFunction(SensorGenomeDescription()).setColor(genomeCellColors[2]),
-            CellGenomeDescription().setCellFunction(OscillatorGenomeDescription()).setColor(genomeCellColors[1]),
-            CellGenomeDescription().setCellFunction(AttackerGenomeDescription()).setColor(genomeCellColors[0]),
-            CellGenomeDescription().setCellFunction(InjectorGenomeDescription().setGenome(subGenome)).setColor(genomeCellColors[0]),
-            CellGenomeDescription().setCellFunction(MuscleGenomeDescription()).setColor(genomeCellColors[2]),
-            CellGenomeDescription().setCellFunction(DefenderGenomeDescription()).setColor(genomeCellColors[2]),
-            CellGenomeDescription().setCellFunction(ReconnectorGenomeDescription()).setColor(genomeCellColors[0]),
+            CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setMakeSelfCopy()).setColor(genomeCellColors[1]),
+            CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setGenome(subGenome)).setColor(genomeCellColors[0]),
+            CellGenomeDescription().setCellTypeData(SensorGenomeDescription()).setColor(genomeCellColors[2]),
+            CellGenomeDescription().setCellTypeData(OscillatorGenomeDescription()).setColor(genomeCellColors[1]),
+            CellGenomeDescription().setCellTypeData(AttackerGenomeDescription()).setColor(genomeCellColors[0]),
+            CellGenomeDescription().setCellTypeData(InjectorGenomeDescription().setGenome(subGenome)).setColor(genomeCellColors[0]),
+            CellGenomeDescription().setCellTypeData(MuscleGenomeDescription()).setColor(genomeCellColors[2]),
+            CellGenomeDescription().setCellTypeData(DefenderGenomeDescription()).setColor(genomeCellColors[2]),
+            CellGenomeDescription().setCellTypeData(ReconnectorGenomeDescription()).setColor(genomeCellColors[0]),
         }));
     }
 
@@ -77,28 +77,28 @@ protected:
         for (int i = 0; i < 15; ++i) {
             auto color = genomeCellColors[i % genomeCellColors.size()];
             subGenome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({
-                CellGenomeDescription().setCellFunction(NeuronGenomeDescription()).setColor(color),
-                CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()).setColor(color),
+                CellGenomeDescription().setCellTypeData(NeuronGenomeDescription()).setColor(color),
+                CellGenomeDescription().setCellTypeData(TransmitterGenomeDescription()).setColor(color),
                 CellGenomeDescription().setColor(color),
-                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()).setColor(color),
+                CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setMakeSelfCopy()).setColor(color),
                 CellGenomeDescription()
-                    .setCellFunction(ConstructorGenomeDescription().setGenome(subGenome).setMode(std::rand() % 100))
+                    .setCellTypeData(ConstructorGenomeDescription().setGenome(subGenome).setMode(std::rand() % 100))
                     .setColor(color),
             }));
         };
         return GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({
-            CellGenomeDescription().setCellFunction(NeuronGenomeDescription()).setColor(genomeCellColors[0]),
-            CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()).setColor(genomeCellColors[0]),
+            CellGenomeDescription().setCellTypeData(NeuronGenomeDescription()).setColor(genomeCellColors[0]),
+            CellGenomeDescription().setCellTypeData(TransmitterGenomeDescription()).setColor(genomeCellColors[0]),
             CellGenomeDescription().setColor(genomeCellColors[0]),
-            CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()).setColor(genomeCellColors[0]),
-            CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome)).setColor(genomeCellColors[0]),
-            CellGenomeDescription().setCellFunction(SensorGenomeDescription()).setColor(genomeCellColors[0]),
-            CellGenomeDescription().setCellFunction(OscillatorGenomeDescription()).setColor(genomeCellColors[0]),
-            CellGenomeDescription().setCellFunction(AttackerGenomeDescription()).setColor(genomeCellColors[0]),
-            CellGenomeDescription().setCellFunction(InjectorGenomeDescription().setGenome(subGenome)).setColor(genomeCellColors[0]),
-            CellGenomeDescription().setCellFunction(MuscleGenomeDescription()).setColor(genomeCellColors[0]),
-            CellGenomeDescription().setCellFunction(DefenderGenomeDescription()).setColor(genomeCellColors[0]),
-            CellGenomeDescription().setCellFunction(ReconnectorGenomeDescription()).setColor(genomeCellColors[0]),
+            CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setMakeSelfCopy()).setColor(genomeCellColors[0]),
+            CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setGenome(subGenome)).setColor(genomeCellColors[0]),
+            CellGenomeDescription().setCellTypeData(SensorGenomeDescription()).setColor(genomeCellColors[0]),
+            CellGenomeDescription().setCellTypeData(OscillatorGenomeDescription()).setColor(genomeCellColors[0]),
+            CellGenomeDescription().setCellTypeData(AttackerGenomeDescription()).setColor(genomeCellColors[0]),
+            CellGenomeDescription().setCellTypeData(InjectorGenomeDescription().setGenome(subGenome)).setColor(genomeCellColors[0]),
+            CellGenomeDescription().setCellTypeData(MuscleGenomeDescription()).setColor(genomeCellColors[0]),
+            CellGenomeDescription().setCellTypeData(DefenderGenomeDescription()).setColor(genomeCellColors[0]),
+            CellGenomeDescription().setCellTypeData(ReconnectorGenomeDescription()).setColor(genomeCellColors[0]),
         }));
     }
 
@@ -108,26 +108,26 @@ protected:
         std::vector<uint8_t> subGenome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription());
         for (int i = 0; i < 15; ++i) {
             subGenome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({
-                CellGenomeDescription().setCellFunction(NeuronGenomeDescription()).setColor(color),
-                CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()).setColor(color),
+                CellGenomeDescription().setCellTypeData(NeuronGenomeDescription()).setColor(color),
+                CellGenomeDescription().setCellTypeData(TransmitterGenomeDescription()).setColor(color),
                 CellGenomeDescription().setColor(color),
-                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()).setColor(color),
-                CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome).setMode(std::rand() % 100)).setColor(color),
+                CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setMakeSelfCopy()).setColor(color),
+                CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setGenome(subGenome).setMode(std::rand() % 100)).setColor(color),
             }));
         };
         return GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({
-            CellGenomeDescription().setCellFunction(NeuronGenomeDescription()).setColor(color),
-            CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()).setColor(color),
+            CellGenomeDescription().setCellTypeData(NeuronGenomeDescription()).setColor(color),
+            CellGenomeDescription().setCellTypeData(TransmitterGenomeDescription()).setColor(color),
             CellGenomeDescription().setColor(color),
-            CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()).setColor(color),
-            CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(subGenome)).setColor(color),
-            CellGenomeDescription().setCellFunction(SensorGenomeDescription()).setColor(color),
-            CellGenomeDescription().setCellFunction(OscillatorGenomeDescription()).setColor(color),
-            CellGenomeDescription().setCellFunction(AttackerGenomeDescription()).setColor(color),
-            CellGenomeDescription().setCellFunction(InjectorGenomeDescription().setGenome(subGenome)).setColor(color),
-            CellGenomeDescription().setCellFunction(MuscleGenomeDescription()).setColor(color),
-            CellGenomeDescription().setCellFunction(DefenderGenomeDescription()).setColor(color),
-            CellGenomeDescription().setCellFunction(ReconnectorGenomeDescription()).setColor(color),
+            CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setMakeSelfCopy()).setColor(color),
+            CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setGenome(subGenome)).setColor(color),
+            CellGenomeDescription().setCellTypeData(SensorGenomeDescription()).setColor(color),
+            CellGenomeDescription().setCellTypeData(OscillatorGenomeDescription()).setColor(color),
+            CellGenomeDescription().setCellTypeData(AttackerGenomeDescription()).setColor(color),
+            CellGenomeDescription().setCellTypeData(InjectorGenomeDescription().setGenome(subGenome)).setColor(color),
+            CellGenomeDescription().setCellTypeData(MuscleGenomeDescription()).setColor(color),
+            CellGenomeDescription().setCellTypeData(DefenderGenomeDescription()).setColor(color),
+            CellGenomeDescription().setCellTypeData(ReconnectorGenomeDescription()).setColor(color),
         }));
     }
 
@@ -161,7 +161,7 @@ protected:
         }
 
         for (auto const& [expectedCell, actualCell] : boost::combine(expectedGenome.cells, actualGenome.cells)) {
-            if (expectedCell.getCellFunctionType() != actualCell.getCellFunctionType()) {
+            if (expectedCell.getCellType() != actualCell.getCellType()) {
                 return false;
             }
             if (expectedCell.color != actualCell.color) {
@@ -173,9 +173,9 @@ protected:
             if (expectedCell.numRequiredAdditionalConnections != actualCell.numRequiredAdditionalConnections) {
                 return false;
             }
-            if (expectedCell.getCellFunctionType() == CellFunction_Constructor) {
-                auto expectedConstructor = std::get<ConstructorGenomeDescription>(*expectedCell.cellFunction);
-                auto actualConstructor = std::get<ConstructorGenomeDescription>(*actualCell.cellFunction);
+            if (expectedCell.getCellType() == CellType_Constructor) {
+                auto expectedConstructor = std::get<ConstructorGenomeDescription>(*expectedCell.cellTypeData);
+                auto actualConstructor = std::get<ConstructorGenomeDescription>(*actualCell.cellTypeData);
                 if (expectedConstructor.constructionAngle1 != actualConstructor.constructionAngle1) {
                     return false;
                 }
@@ -191,9 +191,9 @@ protected:
                     }
                 }
             }
-            if (expectedCell.getCellFunctionType() == CellFunction_Injector) {
-                auto expectedInjector = std::get<InjectorGenomeDescription>(*expectedCell.cellFunction);
-                auto actualInjector = std::get<InjectorGenomeDescription>(*actualCell.cellFunction);
+            if (expectedCell.getCellType() == CellType_Injector) {
+                auto expectedInjector = std::get<InjectorGenomeDescription>(*expectedCell.cellTypeData);
+                auto actualInjector = std::get<InjectorGenomeDescription>(*actualCell.cellTypeData);
                 if (expectedInjector.isMakeGenomeCopy() != actualInjector.isMakeGenomeCopy()) {
                     return false;
                 }
@@ -222,19 +222,19 @@ protected:
         }
 
         for (auto const& [expectedCell, actualCell] : boost::combine(expectedGenome.cells, actualGenome.cells)) {
-            if (expectedCell.getCellFunctionType() != actualCell.getCellFunctionType()) {
+            if (expectedCell.getCellType() != actualCell.getCellType()) {
                 return false;
             }
-            if (expectedCell.getCellFunctionType() != CellFunction_Neuron && expectedCell.getCellFunctionType() != CellFunction_Constructor
-                && expectedCell.getCellFunctionType() != CellFunction_Injector && expectedCell != actualCell) {
+            if (expectedCell.getCellType() != CellType_Neuron && expectedCell.getCellType() != CellType_Constructor
+                && expectedCell.getCellType() != CellType_Injector && expectedCell != actualCell) {
                 return false;
             }
             if (expectedCell.color != actualCell.color) {
                 return false;
             }
-            if (expectedCell.getCellFunctionType() == CellFunction_Constructor) {
-                auto expectedConstructor = std::get<ConstructorGenomeDescription>(*expectedCell.cellFunction);
-                auto actualConstructor = std::get<ConstructorGenomeDescription>(*actualCell.cellFunction);
+            if (expectedCell.getCellType() == CellType_Constructor) {
+                auto expectedConstructor = std::get<ConstructorGenomeDescription>(*expectedCell.cellTypeData);
+                auto actualConstructor = std::get<ConstructorGenomeDescription>(*actualCell.cellTypeData);
                 if (expectedConstructor.isMakeGenomeCopy() != actualConstructor.isMakeGenomeCopy()) {
                     return false;
                 }
@@ -244,9 +244,9 @@ protected:
                     }
                 }
             }
-            if (expectedCell.getCellFunctionType() == CellFunction_Injector) {
-                auto expectedInjector = std::get<InjectorGenomeDescription>(*expectedCell.cellFunction);
-                auto actualInjector = std::get<InjectorGenomeDescription>(*actualCell.cellFunction);
+            if (expectedCell.getCellType() == CellType_Injector) {
+                auto expectedInjector = std::get<InjectorGenomeDescription>(*expectedCell.cellTypeData);
+                auto actualInjector = std::get<InjectorGenomeDescription>(*actualCell.cellTypeData);
                 if (expectedInjector.isMakeGenomeCopy() != actualInjector.isMakeGenomeCopy()) {
                     return false;
                 }
@@ -276,14 +276,14 @@ protected:
             auto clone = cell;
             clone.referenceAngle = 0;
             clone.numRequiredAdditionalConnections = 0;
-            if (clone.getCellFunctionType() == CellFunction_Constructor) {
-                auto& constructor = std::get<ConstructorGenomeDescription>(*clone.cellFunction);
+            if (clone.getCellType() == CellType_Constructor) {
+                auto& constructor = std::get<ConstructorGenomeDescription>(*clone.cellTypeData);
                 if (!constructor.isMakeGenomeCopy()) {
                     constructor.genome = {};
                 }
             }
-            if (clone.getCellFunctionType() == CellFunction_Injector) {
-                auto& injector = std::get<InjectorGenomeDescription>(*clone.cellFunction);
+            if (clone.getCellType() == CellType_Injector) {
+                auto& injector = std::get<InjectorGenomeDescription>(*clone.cellTypeData);
                 if (!injector.isMakeGenomeCopy()) {
                     injector.genome = {};
                 }
@@ -295,9 +295,9 @@ protected:
             if (createCompareClone(expectedCell) != createCompareClone(actualCell)) {
                 return false;
             }
-            if (expectedCell.getCellFunctionType() == CellFunction_Constructor) {
-                auto expectedConstructor = std::get<ConstructorGenomeDescription>(*expectedCell.cellFunction);
-                auto actualConstructor = std::get<ConstructorGenomeDescription>(*actualCell.cellFunction);
+            if (expectedCell.getCellType() == CellType_Constructor) {
+                auto expectedConstructor = std::get<ConstructorGenomeDescription>(*expectedCell.cellTypeData);
+                auto actualConstructor = std::get<ConstructorGenomeDescription>(*actualCell.cellTypeData);
                 if (expectedConstructor.isMakeGenomeCopy() != actualConstructor.isMakeGenomeCopy()) {
                     return false;
                 }
@@ -307,9 +307,9 @@ protected:
                     }
                 }
             }
-            if (expectedCell.getCellFunctionType() == CellFunction_Injector) {
-                auto expectedInjector = std::get<InjectorGenomeDescription>(*expectedCell.cellFunction);
-                auto actualInjector = std::get<InjectorGenomeDescription>(*actualCell.cellFunction);
+            if (expectedCell.getCellType() == CellType_Injector) {
+                auto expectedInjector = std::get<InjectorGenomeDescription>(*expectedCell.cellTypeData);
+                auto actualInjector = std::get<InjectorGenomeDescription>(*actualCell.cellTypeData);
                 if (expectedInjector.isMakeGenomeCopy() != actualInjector.isMakeGenomeCopy()) {
                     return false;
                 }
@@ -343,16 +343,16 @@ protected:
             auto clone = cell;
             clone.referenceAngle = 0;
             clone.numRequiredAdditionalConnections = 0;
-            if (clone.getCellFunctionType() == CellFunction_Constructor) {
-                auto& constructor = std::get<ConstructorGenomeDescription>(*clone.cellFunction);
+            if (clone.getCellType() == CellType_Constructor) {
+                auto& constructor = std::get<ConstructorGenomeDescription>(*clone.cellTypeData);
                 if (!constructor.isMakeGenomeCopy()) {
                     constructor.genome = {};
                 }
                 constructor.constructionAngle1 = 0;
                 constructor.constructionAngle2 = 0;
             }
-            if (clone.getCellFunctionType() == CellFunction_Injector) {
-                auto& injector = std::get<InjectorGenomeDescription>(*clone.cellFunction);
+            if (clone.getCellType() == CellType_Injector) {
+                auto& injector = std::get<InjectorGenomeDescription>(*clone.cellTypeData);
                 if (!injector.isMakeGenomeCopy()) {
                     injector.genome = {};
                 }
@@ -364,9 +364,9 @@ protected:
             if (createCompareClone(expectedCell) != createCompareClone(actualCell)) {
                 return false;
             }
-            if (expectedCell.getCellFunctionType() == CellFunction_Constructor) {
-                auto expectedConstructor = std::get<ConstructorGenomeDescription>(*expectedCell.cellFunction);
-                auto actualConstructor = std::get<ConstructorGenomeDescription>(*actualCell.cellFunction);
+            if (expectedCell.getCellType() == CellType_Constructor) {
+                auto expectedConstructor = std::get<ConstructorGenomeDescription>(*expectedCell.cellTypeData);
+                auto actualConstructor = std::get<ConstructorGenomeDescription>(*actualCell.cellTypeData);
                 if (expectedConstructor.isMakeGenomeCopy() != actualConstructor.isMakeGenomeCopy()) {
                     return false;
                 }
@@ -376,9 +376,9 @@ protected:
                     }
                 }
             }
-            if (expectedCell.getCellFunctionType() == CellFunction_Injector) {
-                auto expectedInjector = std::get<InjectorGenomeDescription>(*expectedCell.cellFunction);
-                auto actualInjector = std::get<InjectorGenomeDescription>(*actualCell.cellFunction);
+            if (expectedCell.getCellType() == CellType_Injector) {
+                auto expectedInjector = std::get<InjectorGenomeDescription>(*expectedCell.cellTypeData);
+                auto actualInjector = std::get<InjectorGenomeDescription>(*actualCell.cellTypeData);
                 if (expectedInjector.isMakeGenomeCopy() != actualInjector.isMakeGenomeCopy()) {
                     return false;
                 }
@@ -392,7 +392,7 @@ protected:
         return true;
     }
 
-    bool compareCellFunctionMutation(std::vector<uint8_t> const& expected, std::vector<uint8_t> const& actual)
+    bool compareCellTypeMutation(std::vector<uint8_t> const& expected, std::vector<uint8_t> const& actual)
     {
         auto expectedGenome = GenomeDescriptionService::get().convertBytesToDescription(expected);
         auto actualGenome = GenomeDescriptionService::get().convertBytesToDescription(actual);
@@ -437,14 +437,14 @@ protected:
             auto matchingAfterCells = afterGenome.cells | std::views::filter([&beforeCell](auto const& afterCell) {
                 auto beforeCellClone = beforeCell;
                 auto afterCellClone = afterCell;
-                beforeCellClone.cellFunction.reset();
-                afterCellClone.cellFunction.reset();
+                beforeCellClone.cellTypeData.reset();
+                afterCellClone.cellTypeData.reset();
                 return beforeCellClone == afterCellClone;
             });
             if (matchingAfterCells.empty()) {
                 return false;
             }
-            if (beforeCell.getCellFunctionType() == CellFunction_Constructor || beforeCell.getCellFunctionType() == CellFunction_Injector) {
+            if (beforeCell.getCellType() == CellType_Constructor || beforeCell.getCellType() == CellType_Injector) {
                 auto matches = false;
                 auto beforeSubGenome = beforeCell.getGenome();
                 auto beforeIsMakeCopyGenome = beforeCell.isMakeGenomeCopy();
@@ -485,14 +485,14 @@ protected:
             auto matchingBeforeCells = beforeGenome.cells | std::views::filter([&afterCell](auto const& beforeCell) {
                                           auto beforeCellClone = beforeCell;
                                           auto afterCellClone = afterCell;
-                                          beforeCellClone.cellFunction.reset();
-                                          afterCellClone.cellFunction.reset();
+                                          beforeCellClone.cellTypeData.reset();
+                                          afterCellClone.cellTypeData.reset();
                                           return beforeCellClone == afterCellClone;
                                       });
             if (matchingBeforeCells.empty()) {
                 return false;
             }
-            if (afterCell.getCellFunctionType() == CellFunction_Constructor || afterCell.getCellFunctionType() == CellFunction_Injector) {
+            if (afterCell.getCellType() == CellType_Constructor || afterCell.getCellType() == CellType_Injector) {
                 auto matches = false;
                 auto afterSubGenome = afterCell.getGenome();
                 auto afterIsMakeCopyGenome = afterCell.isMakeGenomeCopy();
@@ -541,16 +541,16 @@ protected:
             auto beforeCellClone = beforeCell;
             auto afterCellClone = afterCell;
             beforeCellClone.color = 0;
-            beforeCellClone.cellFunction = std::nullopt;
+            beforeCellClone.cellTypeData = std::nullopt;
             afterCellClone.color = 0;
-            afterCellClone.cellFunction = std::nullopt;
+            afterCellClone.cellTypeData = std::nullopt;
             if (beforeCellClone != afterCellClone) {
                 return false;
             }
             if (!allowedColors.contains(afterCell.color)) {
                 return false;
             }
-            if (beforeCell.getCellFunctionType() == CellFunction_Constructor || beforeCell.getCellFunctionType() == CellFunction_Injector) {
+            if (beforeCell.getCellType() == CellType_Constructor || beforeCell.getCellType() == CellType_Injector) {
                 auto beforeSubGenome = beforeCell.getGenome();
                 auto afterSubGenome = afterCell.getGenome();
                 if (beforeSubGenome && afterSubGenome) {
@@ -577,9 +577,9 @@ protected:
             auto beforeCellClone = beforeCell;
             auto afterCellClone = afterCell;
             beforeCellClone.color = 0;
-            beforeCellClone.cellFunction = std::nullopt;
+            beforeCellClone.cellTypeData = std::nullopt;
             afterCellClone.color = 0;
-            afterCellClone.cellFunction = std::nullopt;
+            afterCellClone.cellTypeData = std::nullopt;
             if (beforeCellClone != afterCellClone) {
                 return false;
             }
@@ -590,7 +590,7 @@ protected:
                 return false;
             }
             uniformColor = afterCell.color;
-            if (beforeCell.getCellFunctionType() == CellFunction_Constructor || beforeCell.getCellFunctionType() == CellFunction_Injector) {
+            if (beforeCell.getCellType() == CellType_Constructor || beforeCell.getCellType() == CellType_Injector) {
                 auto beforeSubGenome = beforeCell.getGenome();
                 auto afterSubGenome = afterCell.getGenome();
                 if (beforeSubGenome && afterSubGenome) {
@@ -617,9 +617,9 @@ protected:
             auto beforeCellClone = beforeCell;
             auto afterCellClone = afterCell;
             beforeCellClone.color = 0;
-            beforeCellClone.cellFunction = std::nullopt;
+            beforeCellClone.cellTypeData = std::nullopt;
             afterCellClone.color = 0;
-            afterCellClone.cellFunction = std::nullopt;
+            afterCellClone.cellTypeData = std::nullopt;
             if (beforeCellClone != afterCellClone) {
                 return false;
             }
@@ -627,7 +627,7 @@ protected:
                 return false;
             }
             uniformColor = afterCell.color;
-            if (beforeCell.getCellFunctionType() == CellFunction_Constructor || beforeCell.getCellFunctionType() == CellFunction_Injector) {
+            if (beforeCell.getCellType() == CellType_Constructor || beforeCell.getCellType() == CellType_Injector) {
                 auto beforeSubGenome = beforeCell.getGenome();
                 auto afterSubGenome = afterCell.getGenome();
                 if (beforeSubGenome && afterSubGenome) {
@@ -647,7 +647,7 @@ TEST_F(MutationTests, propertiesMutation)
     int byteIndex = 0;
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(byteIndex))});
+        {CellDescription().setId(1).setCellType(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(byteIndex))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -657,7 +657,7 @@ TEST_F(MutationTests, propertiesMutation)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellTypeData);
     EXPECT_TRUE(comparePropertiesMutation(genome, actualConstructor.genome));
     EXPECT_EQ(byteIndex, actualConstructor.genomeCurrentNodeIndex);
 }
@@ -668,7 +668,7 @@ TEST_F(MutationTests, neuronDataMutation)
     int byteIndex = 0;
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(byteIndex))});
+        {CellDescription().setId(1).setCellType(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(byteIndex))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -678,7 +678,7 @@ TEST_F(MutationTests, neuronDataMutation)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellTypeData);
     EXPECT_TRUE(compareNeuronDataMutation(genome, actualConstructor.genome));
     EXPECT_EQ(byteIndex, actualConstructor.genomeCurrentNodeIndex);
 }
@@ -689,7 +689,7 @@ TEST_F(MutationTests, geometryMutation)
     int byteIndex = 0;
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(byteIndex))});
+        {CellDescription().setId(1).setCellType(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(byteIndex))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -699,7 +699,7 @@ TEST_F(MutationTests, geometryMutation)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellTypeData);
     EXPECT_TRUE(compareGeometryMutation(genome, actualConstructor.genome));
     EXPECT_EQ(byteIndex, actualConstructor.genomeCurrentNodeIndex);
 }
@@ -710,7 +710,7 @@ TEST_F(MutationTests, individualGeometryMutation)
     int byteIndex = 0;
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(byteIndex))});
+        {CellDescription().setId(1).setCellType(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(byteIndex))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -720,28 +720,28 @@ TEST_F(MutationTests, individualGeometryMutation)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellTypeData);
     EXPECT_TRUE(compareIndividualGeometryMutation(genome, actualConstructor.genome));
     EXPECT_EQ(byteIndex, actualConstructor.genomeCurrentNodeIndex);
 }
 
-TEST_F(MutationTests, cellFunctionMutation)
+TEST_F(MutationTests, cellTypeMutation)
 {
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(3))});
+        {CellDescription().setId(1).setCellType(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(3))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
-        _simulationFacade->testOnly_mutate(1, MutationType::CellFunction);
+        _simulationFacade->testOnly_mutate(1, MutationType::CellType);
     }
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
-    EXPECT_TRUE(compareCellFunctionMutation(genome, actualConstructor.genome));
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellTypeData);
+    EXPECT_TRUE(compareCellTypeMutation(genome, actualConstructor.genome));
     EXPECT_EQ(3, actualConstructor.genomeCurrentNodeIndex);
 }
 
@@ -749,7 +749,7 @@ TEST_F(MutationTests, insertMutation_emptyGenome)
 {
     auto cellColor = 3;
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription()).setColor(cellColor)});
+        {CellDescription().setId(1).setCellType(ConstructorDescription()).setColor(cellColor)});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1, MutationType::Insertion);
@@ -757,7 +757,7 @@ TEST_F(MutationTests, insertMutation_emptyGenome)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellTypeData);
 
     auto actualGenomeDescription = GenomeDescriptionService::get().convertBytesToDescription(actualConstructor.genome);
     EXPECT_EQ(1, actualGenomeDescription.cells.size());
@@ -770,7 +770,7 @@ TEST_F(MutationTests, insertMutation)
 
     auto data = DataDescription().addCells({CellDescription()
                                                 .setId(1)
-                                                .setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0))
+                                                .setCellType(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0))
                                                 
                                                 .setColor(genomeCellColors[0])});
 
@@ -782,7 +782,7 @@ TEST_F(MutationTests, insertMutation)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellTypeData);
     EXPECT_TRUE(compareInsertMutation(genome, actualConstructor.genome));
     EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
 }
@@ -790,11 +790,11 @@ TEST_F(MutationTests, insertMutation)
 TEST_F(MutationTests, deleteMutation_eraseSmallGenome)
 {
     auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({
-        CellGenomeDescription().setCellFunction(NeuronGenomeDescription()),
+        CellGenomeDescription().setCellTypeData(NeuronGenomeDescription()),
     }));
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0))});
+        {CellDescription().setId(1).setCellType(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1, MutationType::Deletion);
@@ -802,7 +802,7 @@ TEST_F(MutationTests, deleteMutation_eraseSmallGenome)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellTypeData);
     EXPECT_EQ(GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription()).size(), actualConstructor.genome.size());
     EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
 }
@@ -812,7 +812,7 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_preserveSelfReplication)
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0))});
+        {CellDescription().setId(1).setCellType(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -822,14 +822,14 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_preserveSelfReplication)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellTypeData);
     auto afterGenome = GenomeDescriptionService::get().convertBytesToDescription(actualConstructor.genome);
 
     std::set<CellGenomeDescription> afterGenomeRollout;
     rollout(afterGenome, afterGenomeRollout);
     for (auto const& cell : afterGenomeRollout) {
-        auto cellFunctionType = cell.getCellFunctionType();
-        EXPECT_TRUE(cellFunctionType == CellFunction_Constructor || cellFunctionType == CellFunction_Injector);
+        auto cellType = cell.getCellType();
+        EXPECT_TRUE(cellType == CellType_Constructor || cellType == CellType_Injector);
     }
     EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
 }
@@ -842,7 +842,7 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_changeSelfReplication)
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0))});
+        {CellDescription().setId(1).setCellType(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -852,7 +852,7 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_changeSelfReplication)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellTypeData);
 
     EXPECT_EQ(GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription()).size(), actualConstructor.genome.size());
     EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
@@ -863,7 +863,7 @@ TEST_F(MutationTests, deleteMutation_partiallyEraseGenome)
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0))});
+        {CellDescription().setId(1).setCellType(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -873,7 +873,7 @@ TEST_F(MutationTests, deleteMutation_partiallyEraseGenome)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellTypeData);
     EXPECT_TRUE(compareDeleteMutation(genome, actualConstructor.genome));
     EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
 }
@@ -885,13 +885,13 @@ TEST_F(MutationTests, deleteMutation_selfReplicatorWithGenomeBelowMinSize)
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells(
-        {CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()),
+        {CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setMakeSelfCopy()),
         CellGenomeDescription(),
         CellGenomeDescription(),
     }));
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome)).setLivingState(LivingState_Activating)});
+        {CellDescription().setId(1).setCellType(ConstructorDescription().setGenome(genome)).setLivingState(LivingState_Activating)});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10; ++i) {
@@ -901,7 +901,7 @@ TEST_F(MutationTests, deleteMutation_selfReplicatorWithGenomeBelowMinSize)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellTypeData);
     auto actualGenome = GenomeDescriptionService::get().convertBytesToDescription(actualConstructor.genome);
     
     EXPECT_EQ(3, actualGenome.cells.size());
@@ -914,13 +914,13 @@ TEST_F(MutationTests, deleteMutation_selfReplicatorWithGenomeAboveMinSize)
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({
-        CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()),
+        CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setMakeSelfCopy()),
         CellGenomeDescription(),
         CellGenomeDescription(),
     }));
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome)).setLivingState(LivingState_Activating)});
+        {CellDescription().setId(1).setCellType(ConstructorDescription().setGenome(genome)).setLivingState(LivingState_Activating)});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10; ++i) {
@@ -930,7 +930,7 @@ TEST_F(MutationTests, deleteMutation_selfReplicatorWithGenomeAboveMinSize)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellTypeData);
     auto actualGenome = GenomeDescriptionService::get().convertBytesToDescription(actualConstructor.genome);
 
     EXPECT_EQ(1, actualGenome.cells.size());
@@ -941,7 +941,7 @@ TEST_F(MutationTests, duplicateMutation)
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0))});
+        {CellDescription().setId(1).setCellType(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -951,7 +951,7 @@ TEST_F(MutationTests, duplicateMutation)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellTypeData);
     EXPECT_TRUE(compareInsertMutation(genome, actualConstructor.genome));
     EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
 }
@@ -961,7 +961,7 @@ TEST_F(MutationTests, translateMutation)
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0))});
+        {CellDescription().setId(1).setCellType(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -969,7 +969,7 @@ TEST_F(MutationTests, translateMutation)
     }
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellTypeData);
     EXPECT_TRUE(compareTranslateMutation(genome, actualConstructor.genome));
 }
 
@@ -989,7 +989,7 @@ TEST_F(MutationTests, cellColorMutation)
     auto genome = createGenomeWithUniformColorPerSubgenome();
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0))});
+        {CellDescription().setId(1).setCellType(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -999,7 +999,7 @@ TEST_F(MutationTests, cellColorMutation)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellTypeData);
     EXPECT_TRUE(compareCellColorMutation(genome, actualConstructor.genome, {1, 2, 4, 5}));
 }
 
@@ -1019,7 +1019,7 @@ TEST_F(MutationTests, subgenomeColorMutation)
     auto genome = createGenomeWithUniformColorPerSubgenome();
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0))});
+        {CellDescription().setId(1).setCellType(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -1029,7 +1029,7 @@ TEST_F(MutationTests, subgenomeColorMutation)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellTypeData);
     EXPECT_TRUE(compareSubgenomeColorMutation(genome, actualConstructor.genome, {1, 2, 4, 5}));
 }
 
@@ -1049,7 +1049,7 @@ TEST_F(MutationTests, genomeColorMutation)
     auto genome = createGenomeWithUniformColor();
 
     auto data = DataDescription().addCells(
-        {CellDescription().setId(1).setCellFunction(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0))});
+        {CellDescription().setId(1).setCellType(ConstructorDescription().setGenome(genome).setGenomeCurrentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -1059,6 +1059,6 @@ TEST_F(MutationTests, genomeColorMutation)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellTypeData);
     EXPECT_TRUE(compareGenomeColorMutation(genome, actualConstructor.genome, std::nullopt));
 }

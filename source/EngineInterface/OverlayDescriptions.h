@@ -3,13 +3,13 @@
 #include <vector>
 
 #include "Base/Definitions.h"
-#include "EngineInterface/CellFunctionConstants.h"
+#include "EngineInterface/CellTypeConstants.h"
 
 struct OverlayElementDescription
 {
     uint64_t id;
     bool cell;  //false = energy particle
-    CellFunction cellType;
+    CellType cellType;
     RealVector2D pos;
     int selected;
 };

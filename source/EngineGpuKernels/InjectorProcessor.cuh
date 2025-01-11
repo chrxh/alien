@@ -19,7 +19,7 @@ private:
 
 __device__ __inline__ void InjectorProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
-    auto& operations = data.cellFunctionOperations[CellFunction_Injector];
+    auto& operations = data.cellTypeOperations[CellType_Injector];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         processCell(data, statistics, operations.at(i).cell);
@@ -28,9 +28,9 @@ __device__ __inline__ void InjectorProcessor::process(SimulationData& data, Simu
 
 __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    if (abs(cell->signal.channels[0]) >= cudaSimulationParameters.cellFunctionInjectorSignalThreshold) {
+    if (abs(cell->signal.channels[0]) >= cudaSimulationParameters.cellTypeInjectorSignalThreshold) {
 
-        auto& injector = cell->cellFunctionData.injector;
+        auto& injector = cell->cellTypeData.injector;
 
         bool match = false;
         bool injection = false;
@@ -38,29 +38,29 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
         switch (injector.mode) {
         case InjectorMode_InjectAll: {
             data.cellMap.executeForEach(
-                cell->pos, cudaSimulationParameters.cellFunctionInjectorRadius[cell->color], cell->detached, [&](Cell* const& otherCell) {
+                cell->pos, cudaSimulationParameters.cellTypeInjectorRadius[cell->color], cell->detached, [&](Cell* const& otherCell) {
                     if (cell == otherCell) {
                         return;
                     }
-                    if (otherCell->cellFunction != CellFunction_Constructor && otherCell->cellFunction != CellFunction_Injector) {
+                    if (otherCell->cellType != CellType_Constructor && otherCell->cellType != CellType_Injector) {
                         return;
                     }
                     //if (otherCell->livingState == LivingState_UnderConstruction) {
                     //    return;
                     //}
-                    if (otherCell->cellFunctionData.constructor.genomeCurrentNodeIndex != 0) {
+                    if (otherCell->cellTypeData.constructor.genomeCurrentNodeIndex != 0) {
                         return;
                     }
                     if (!otherCell->tryLock()) {
                         return;
                     }
                     match = true;
-                    auto injectorDuration = cudaSimulationParameters.cellFunctionInjectorDurationColorMatrix[cell->color][otherCell->color];
+                    auto injectorDuration = cudaSimulationParameters.cellTypeInjectorDurationColorMatrix[cell->color][otherCell->color];
 
                     auto numDefenderCells = countAndTrackDefenderCells(statistics, otherCell);
                     float defendStrength = numDefenderCells == 0
                         ? 1.0f
-                        : powf(cudaSimulationParameters.cellFunctionDefenderAgainstInjectorStrength[cell->color], numDefenderCells);
+                        : powf(cudaSimulationParameters.cellTypeDefenderAgainstInjectorStrength[cell->color], numDefenderCells);
                     injectorDuration = toInt(toFloat(injectorDuration) * defendStrength);
                     if (injector.counter < injectorDuration) {
                         otherCell->releaseLock();
@@ -72,13 +72,13 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
                         targetGenome[i] = injector.genome[i];
                     }
 
-                    if (otherCell->cellFunction == CellFunction_Constructor) {
-                        otherCell->cellFunctionData.constructor.genome = targetGenome;
-                        otherCell->cellFunctionData.constructor.genomeSize = injector.genomeSize;
-                        otherCell->cellFunctionData.constructor.numInheritedGenomeNodes = 0;
+                    if (otherCell->cellType == CellType_Constructor) {
+                        otherCell->cellTypeData.constructor.genome = targetGenome;
+                        otherCell->cellTypeData.constructor.genomeSize = injector.genomeSize;
+                        otherCell->cellTypeData.constructor.numInheritedGenomeNodes = 0;
                     } else {
-                        otherCell->cellFunctionData.injector.genome = targetGenome;
-                        otherCell->cellFunctionData.injector.genomeSize = injector.genomeSize;
+                        otherCell->cellTypeData.injector.genome = targetGenome;
+                        otherCell->cellTypeData.injector.genomeSize = injector.genomeSize;
                     }
 
                     injection = true;
@@ -88,15 +88,15 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
 
         case InjectorMode_InjectOnlyEmptyCells: {
             data.cellMap.executeForEach(
-                cell->pos, cudaSimulationParameters.cellFunctionInjectorRadius[cell->color], cell->detached, [&](Cell* const& otherCell) {
+                cell->pos, cudaSimulationParameters.cellTypeInjectorRadius[cell->color], cell->detached, [&](Cell* const& otherCell) {
                     if (cell == otherCell) {
                         return;
                     }
-                    if (otherCell->cellFunction != CellFunction_Constructor && otherCell->cellFunction != CellFunction_Injector) {
+                    if (otherCell->cellType != CellType_Constructor && otherCell->cellType != CellType_Injector) {
                         return;
                     }
-                    auto otherGenomeSize = otherCell->cellFunction == CellFunction_Constructor ? otherCell->cellFunctionData.constructor.genomeSize
-                                                                                               : otherCell->cellFunctionData.injector.genomeSize;
+                    auto otherGenomeSize = otherCell->cellType == CellType_Constructor ? otherCell->cellTypeData.constructor.genomeSize
+                                                                                               : otherCell->cellTypeData.injector.genomeSize;
                     if (otherGenomeSize > Const::GenomeHeaderSize) {
                         return;
                     }
@@ -107,13 +107,13 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
                     for (int i = 0; i < injector.genomeSize; ++i) {
                         targetGenome[i] = injector.genome[i];
                     }
-                    if (otherCell->cellFunction == CellFunction_Constructor) {
-                        otherCell->cellFunctionData.constructor.genome = targetGenome;
-                        otherCell->cellFunctionData.constructor.genomeSize = injector.genomeSize;
-                        otherCell->cellFunctionData.constructor.numInheritedGenomeNodes = 0;
+                    if (otherCell->cellType == CellType_Constructor) {
+                        otherCell->cellTypeData.constructor.genome = targetGenome;
+                        otherCell->cellTypeData.constructor.genomeSize = injector.genomeSize;
+                        otherCell->cellTypeData.constructor.numInheritedGenomeNodes = 0;
                     } else {
-                        otherCell->cellFunctionData.injector.genome = targetGenome;
-                        otherCell->cellFunctionData.injector.genomeSize = injector.genomeSize;
+                        otherCell->cellTypeData.injector.genome = targetGenome;
+                        otherCell->cellTypeData.injector.genomeSize = injector.genomeSize;
                     }
                     match = true;
                     injection = true;
@@ -143,7 +143,7 @@ __inline__ __device__ int InjectorProcessor::countAndTrackDefenderCells(Simulati
     int result = 0;
     for (int i = 0; i < cell->numConnections; ++i) {
         auto connectedCell = cell->connections[i].cell;
-        if (connectedCell->cellFunction == CellFunction_Defender && connectedCell->cellFunctionData.defender.mode == DefenderMode_DefendAgainstInjector) {
+        if (connectedCell->cellType == CellType_Defender && connectedCell->cellTypeData.defender.mode == DefenderMode_DefendAgainstInjector) {
             statistics.incNumDefenderActivities(connectedCell->color);
             ++result;
         }

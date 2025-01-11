@@ -31,7 +31,7 @@ TEST_F(DataTransferTests, singleCell)
                      .setBarrier(true)
                      .setLivingState(false)
                      .setConstructionId(3534)
-                     .setCellFunction(neuron)
+                     .setCellType(neuron)
                      .setSignal({1, 0, -1, 0, 0, 0, 0, 0}));
 
     _simulationFacade->setSimulationData(data);
@@ -71,7 +71,7 @@ TEST_F(DataTransferTests, cellCluster)
             .setColor(2)
             .setBarrier(false)
             .setLivingState(false)
-            .setCellFunction(neuron1),
+            .setCellType(neuron1),
         CellDescription()
             .setId(2)
             .setPos({3.0f, 4.0f})
@@ -80,7 +80,7 @@ TEST_F(DataTransferTests, cellCluster)
             .setColor(4)
             .setBarrier(true)
             .setLivingState(false)
-            .setCellFunction(neuron1),
+            .setCellType(neuron1),
     });
     data.addConnection(1, 2);
 

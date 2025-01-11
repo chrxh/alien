@@ -18,7 +18,7 @@ public:
 TEST_F(OscillatorTests_New, generatePulse_timeBeforeFirstPulse)
 {
     auto data = DataDescription().addCells({
-        CellDescription().setId(1).setCellFunction(OscillatorDescription().setPulseMode(97)),
+        CellDescription().setId(1).setCellType(OscillatorDescription().setPulseMode(97)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -34,7 +34,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeBeforeFirstPulse)
 TEST_F(OscillatorTests_New, generatePulse_timeAtFirstPulse)
 {
     auto data = DataDescription().addCells({
-        CellDescription().setId(1).setCellFunction(OscillatorDescription().setPulseMode(97)),
+        CellDescription().setId(1).setCellType(OscillatorDescription().setPulseMode(97)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -51,7 +51,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeAtFirstPulse)
 TEST_F(OscillatorTests_New, generatePulse_timeAtSecondPulse)
 {
     auto data = DataDescription().addCells({
-        CellDescription().setId(1).setCellFunction(OscillatorDescription().setPulseMode(97 * 2)),
+        CellDescription().setId(1).setCellType(OscillatorDescription().setPulseMode(97 * 2)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -68,7 +68,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeAtSecondPulse)
 TEST_F(OscillatorTests_New, generatePulse_timeAfterFirstPulse)
 {
     auto data = DataDescription().addCells({
-        CellDescription().setId(1).setCellFunction(OscillatorDescription().setPulseMode(97)),
+        CellDescription().setId(1).setCellType(OscillatorDescription().setPulseMode(97)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -84,7 +84,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeAfterFirstPulse)
 TEST_F(OscillatorTests_New, generatePulse_timeBeforeFirstPulseAlternation)
 {
     auto data = DataDescription().addCells({
-        CellDescription().setId(1).setCellFunction(OscillatorDescription().setPulseMode(97).setAlternationMode(3)),
+        CellDescription().setId(1).setCellType(OscillatorDescription().setPulseMode(97).setAlternationMode(3)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -101,7 +101,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeBeforeFirstPulseAlternation)
 TEST_F(OscillatorTests_New, generatePulse_timeAtFirstPulseAlternation)
 {
     auto data = DataDescription().addCells({
-        CellDescription().setId(1).setCellFunction(OscillatorDescription().setPulseMode(97).setAlternationMode(3)),
+        CellDescription().setId(1).setCellType(OscillatorDescription().setPulseMode(97).setAlternationMode(3)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -118,7 +118,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeAtFirstPulseAlternation)
 TEST_F(OscillatorTests_New, generatePulse_timeAtSecondPulseAlternation)
 {
     auto data = DataDescription().addCells({
-        CellDescription().setId(1).setCellFunction(OscillatorDescription().setPulseMode(97).setAlternationMode(3)),
+        CellDescription().setId(1).setCellType(OscillatorDescription().setPulseMode(97).setAlternationMode(3)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -137,7 +137,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeAtSecondPulseAlternation)
 TEST_F(OscillatorTests_New, generatePulse_triangularNetwork)
 {
     auto data = DataDescription().addCells({
-        CellDescription().setId(1).setPos({0, 0}).setCellFunction(OscillatorDescription().setPulseMode(10)),
+        CellDescription().setId(1).setPos({0, 0}).setCellType(OscillatorDescription().setPulseMode(10)),
         CellDescription().setId(2).setPos({1, 0}),
         CellDescription().setId(3).setPos({0.5, 0.5}),
     });

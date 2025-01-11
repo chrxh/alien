@@ -16,51 +16,51 @@ InjectorDescription::InjectorDescription()
     genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription());
 }
 
-CellFunction CellDescription::getCellFunctionType() const
+CellType CellDescription::getCellType() const
 {
-    if (!cellFunction) {
-        return CellFunction_None;
+    if (!cellTypeData) {
+        return CellType_None;
     }
-    if (std::holds_alternative<NeuronDescription>(*cellFunction)) {
-        return CellFunction_Neuron;
+    if (std::holds_alternative<NeuronDescription>(*cellTypeData)) {
+        return CellType_Neuron;
     }
-    if (std::holds_alternative<TransmitterDescription>(*cellFunction)) {
-        return CellFunction_Transmitter;
+    if (std::holds_alternative<TransmitterDescription>(*cellTypeData)) {
+        return CellType_Transmitter;
     }
-    if (std::holds_alternative<ConstructorDescription>(*cellFunction)) {
-        return CellFunction_Constructor;
+    if (std::holds_alternative<ConstructorDescription>(*cellTypeData)) {
+        return CellType_Constructor;
     }
-    if (std::holds_alternative<SensorDescription>(*cellFunction)) {
-        return CellFunction_Sensor;
+    if (std::holds_alternative<SensorDescription>(*cellTypeData)) {
+        return CellType_Sensor;
     }
-    if (std::holds_alternative<OscillatorDescription>(*cellFunction)) {
-        return CellFunction_Oscillator;
+    if (std::holds_alternative<OscillatorDescription>(*cellTypeData)) {
+        return CellType_Oscillator;
     }
-    if (std::holds_alternative<AttackerDescription>(*cellFunction)) {
-        return CellFunction_Attacker;
+    if (std::holds_alternative<AttackerDescription>(*cellTypeData)) {
+        return CellType_Attacker;
     }
-    if (std::holds_alternative<InjectorDescription>(*cellFunction)) {
-        return CellFunction_Injector;
+    if (std::holds_alternative<InjectorDescription>(*cellTypeData)) {
+        return CellType_Injector;
     }
-    if (std::holds_alternative<MuscleDescription>(*cellFunction)) {
-        return CellFunction_Muscle;
+    if (std::holds_alternative<MuscleDescription>(*cellTypeData)) {
+        return CellType_Muscle;
     }
-    if (std::holds_alternative<DefenderDescription>(*cellFunction)) {
-        return CellFunction_Defender;
+    if (std::holds_alternative<DefenderDescription>(*cellTypeData)) {
+        return CellType_Defender;
     }
-    if (std::holds_alternative<ReconnectorDescription>(*cellFunction)) {
-        return CellFunction_Reconnector;
+    if (std::holds_alternative<ReconnectorDescription>(*cellTypeData)) {
+        return CellType_Reconnector;
     }
-    if (std::holds_alternative<DetonatorDescription>(*cellFunction)) {
-        return CellFunction_Detonator;
+    if (std::holds_alternative<DetonatorDescription>(*cellTypeData)) {
+        return CellType_Detonator;
     }
-    return CellFunction_None;
+    return CellType_None;
 }
 
 bool CellDescription::hasGenome() const
 {
-    auto cellFunctionType = getCellFunctionType();
-    if (cellFunctionType == CellFunction_Constructor || cellFunctionType == CellFunction_Injector) {
+    auto cellType = getCellType();
+    if (cellType == CellType_Constructor || cellType == CellType_Injector) {
         return true;
     }
     return false;
@@ -68,12 +68,12 @@ bool CellDescription::hasGenome() const
 
 std::vector<uint8_t>& CellDescription::getGenomeRef()
 {
-    auto cellFunctionType = getCellFunctionType();
-    if (cellFunctionType == CellFunction_Constructor) {
-        return std::get<ConstructorDescription>(*cellFunction).genome;
+    auto cellType = getCellType();
+    if (cellType == CellType_Constructor) {
+        return std::get<ConstructorDescription>(*cellTypeData).genome;
     }
-    if (cellFunctionType == CellFunction_Injector) {
-        return std::get<InjectorDescription>(*cellFunction).genome;
+    if (cellType == CellType_Injector) {
+        return std::get<InjectorDescription>(*cellTypeData).genome;
     }
     THROW_NOT_IMPLEMENTED();
 }

@@ -3,7 +3,7 @@
 #include <nppdefs.h>
 
 #include "EngineInterface/EngineConstants.h"
-#include "EngineInterface/CellFunctionConstants.h"
+#include "EngineInterface/CellTypeConstants.h"
 
 #include "Base.cuh"
 
@@ -177,7 +177,7 @@ struct DetonatorFunction
     int32_t countdown;
 };
 
-union CellFunctionData
+union CellTypeData
 {
     NeuronFunction neuron;
     TransmitterFunction transmitter;
@@ -231,13 +231,13 @@ struct Cell
     float genomeComplexity;
     uint16_t genomeNodeIndex;
 
-    //cell function
+    //cell type data
     SignalRoutingRestriction signalRoutingRestriction;
     Signal signal;
-    CellFunction cellFunction;
-    CellFunctionData cellFunctionData;
+    CellType cellType;
+    CellTypeData cellTypeData;
     uint32_t activationTime;
-    CellFunctionUsed cellFunctionUsed;
+    CellTriggered cellTypeUsed;
 
     //process data
     Signal futureSignal;
@@ -275,11 +275,11 @@ struct Cell
 
     __device__ __inline__ uint8_t* getGenome()
     {
-        if (cellFunction == CellFunction_Constructor) {
-            return cellFunctionData.constructor.genome;
+        if (cellType == CellType_Constructor) {
+            return cellTypeData.constructor.genome;
         }
-        if (cellFunction == CellFunction_Injector) {
-            return cellFunctionData.injector.genome;
+        if (cellType == CellType_Injector) {
+            return cellTypeData.injector.genome;
         }
         CUDA_THROW_NOT_IMPLEMENTED();
         return nullptr;
@@ -287,11 +287,11 @@ struct Cell
 
     __device__ __inline__ int getGenomeSize()
     {
-        if (cellFunction == CellFunction_Constructor) {
-            return cellFunctionData.constructor.genomeSize;
+        if (cellType == CellType_Constructor) {
+            return cellTypeData.constructor.genomeSize;
         }
-        if (cellFunction == CellFunction_Injector) {
-            return cellFunctionData.injector.genomeSize;
+        if (cellType == CellType_Injector) {
+            return cellTypeData.injector.genomeSize;
         }
         CUDA_THROW_NOT_IMPLEMENTED();
         return 0;

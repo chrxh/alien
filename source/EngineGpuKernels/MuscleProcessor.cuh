@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/CellFunctionConstants.h"
+#include "EngineInterface/CellTypeConstants.h"
 
 #include "Object.cuh"
 #include "SimulationData.cuh"
@@ -30,7 +30,7 @@ private:
 /************************************************************************/
 __device__ __inline__ void MuscleProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
-    auto& operations = data.cellFunctionOperations[CellFunction_Muscle];
+    auto& operations = data.cellTypeOperations[CellType_Muscle];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         processCell(data, statistics, operations.at(i).cell);
@@ -39,10 +39,10 @@ __device__ __inline__ void MuscleProcessor::process(SimulationData& data, Simula
 
 __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    cell->cellFunctionData.muscle.lastMovementX = 0;
-    cell->cellFunctionData.muscle.lastMovementY = 0;
+    cell->cellTypeData.muscle.lastMovementX = 0;
+    cell->cellTypeData.muscle.lastMovementY = 0;
 
-    switch (cell->cellFunctionData.muscle.mode) {
+    switch (cell->cellTypeData.muscle.mode) {
     case MuscleMode_Movement: {
         movement(data, statistics, cell);
     } break;
@@ -62,7 +62,7 @@ namespace
     {
         for (int i = 0, j = cell->numConnections; i < j; ++i) {
             auto const& connectedCell = cell->connections[i].cell;
-            if (connectedCell->cellFunction == CellFunction_Sensor) {
+            if (connectedCell->cellType == CellType_Sensor) {
                 return connectedCell;
             }
         }
@@ -70,7 +70,7 @@ namespace
             auto const& connectedCell = cell->connections[i].cell;
             for (int k = 0, l = connectedCell->numConnections; k < l; ++k) {
                 auto const& connectedConnectedCell = connectedCell->connections[k].cell;
-                if (connectedConnectedCell->cellFunction == CellFunction_Sensor) {
+                if (connectedConnectedCell->cellType == CellType_Sensor) {
                     return connectedConnectedCell;
                 }
             }
@@ -90,30 +90,30 @@ __device__ __inline__ void MuscleProcessor::movement(SimulationData& data, Simul
 
     auto direction = float2{0, 0};
     auto acceleration = 0.0f;
-    if (cudaSimulationParameters.cellFunctionMuscleMovementTowardTargetedObject) {
-        if (cudaSimulationParameters.features.legacyModes && cudaSimulationParameters.legacyCellFunctionMuscleMovementAngleFromSensor) {
+    if (cudaSimulationParameters.cellTypeMuscleMovementTowardTargetedObject) {
+        if (cudaSimulationParameters.features.legacyModes && cudaSimulationParameters.legacyCellTypeMuscleMovementAngleFromSensor) {
             if (auto sensorCell = findNearbySensor(cell)) {
-                auto const& sensorData = sensorCell->cellFunctionData.sensor;
+                auto const& sensorData = sensorCell->cellTypeData.sensor;
                 if (sensorData.memoryTargetX != 0 || sensorData.memoryTargetY != 0) {
                     direction = {sensorData.memoryTargetX, sensorData.memoryTargetY};
-                    acceleration = cudaSimulationParameters.cellFunctionMuscleMovementAcceleration[cell->color];
+                    acceleration = cudaSimulationParameters.cellTypeMuscleMovementAcceleration[cell->color];
                 }
             }
         } else {
             if (cell->signal.origin == SignalOrigin_Sensor && (cell->signal.targetX != 0 || cell->signal.targetY != 0)) {
                 direction = {cell->signal.targetX, cell->signal.targetY};
-                acceleration = cudaSimulationParameters.cellFunctionMuscleMovementAcceleration[cell->color];
+                acceleration = cudaSimulationParameters.cellTypeMuscleMovementAcceleration[cell->color];
             }
         }
     } else {
         direction = SignalProcessor::calcSignalDirection(data, cell);
-        acceleration = cudaSimulationParameters.cellFunctionMuscleMovementAcceleration[cell->color];
+        acceleration = cudaSimulationParameters.cellTypeMuscleMovementAcceleration[cell->color];
     }
     float angle = max(-0.5f, min(0.5f, cell->signal.channels[3])) * 360.0f;
     direction = Math::normalized(Math::rotateClockwise(direction, angle)) * acceleration * getTruncatedUnitValue(cell->signal);
     cell->vel += direction;
-    cell->cellFunctionData.muscle.lastMovementX = direction.x;
-    cell->cellFunctionData.muscle.lastMovementY = direction.y;
+    cell->cellTypeData.muscle.lastMovementX = direction.x;
+    cell->cellTypeData.muscle.lastMovementY = direction.y;
     cell->releaseLock();
     statistics.incNumMuscleActivities(cell->color);
     radiate(data, cell);
@@ -136,7 +136,7 @@ __device__ __inline__ void MuscleProcessor::contractionExpansion(SimulationData&
                 continue;
             }
             auto newDistance =
-                connection.distance + cudaSimulationParameters.cellFunctionMuscleContractionExpansionDelta[cell->color] * getTruncatedUnitValue(cell->signal);
+                connection.distance + cudaSimulationParameters.cellTypeMuscleContractionExpansionDelta[cell->color] * getTruncatedUnitValue(cell->signal);
             if (cell->signal.channels[0] > 0 && newDistance >= maxDistance) {
                 continue;
             }
@@ -170,7 +170,7 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
         auto& connection = cell->connections[i];
         //if (connection.cell->executionOrderNumber == cell->inputExecutionOrderNumber) {
         auto intensityChannel0 = getTruncatedUnitValue(cell->signal);
-            auto bendingAngle = cudaSimulationParameters.cellFunctionMuscleBendingAngle[cell->color] * intensityChannel0;
+            auto bendingAngle = cudaSimulationParameters.cellTypeMuscleBendingAngle[cell->color] * intensityChannel0;
 
             if (bendingAngle < 0 && connection.angleFromPrevious <= -bendingAngle) {
                 continue;
@@ -191,22 +191,22 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
                     return MuscleBendingDirection_None;
                 }
             }();
-            if (cell->cellFunctionData.muscle.lastBendingDirection == bendingDirection && cell->cellFunctionData.muscle.lastBendingSourceIndex == i) {
-                cell->cellFunctionData.muscle.consecutiveBendingAngle += abs(bendingAngle);
+            if (cell->cellTypeData.muscle.lastBendingDirection == bendingDirection && cell->cellTypeData.muscle.lastBendingSourceIndex == i) {
+                cell->cellTypeData.muscle.consecutiveBendingAngle += abs(bendingAngle);
             } else {
-                cell->cellFunctionData.muscle.consecutiveBendingAngle = 0;
+                cell->cellTypeData.muscle.consecutiveBendingAngle = 0;
             }
-            cell->cellFunctionData.muscle.lastBendingDirection = bendingDirection;
-            cell->cellFunctionData.muscle.lastBendingSourceIndex = i;
+            cell->cellTypeData.muscle.lastBendingDirection = bendingDirection;
+            cell->cellTypeData.muscle.lastBendingSourceIndex = i;
 
-            if (abs(cell->signal.channels[1]) > cudaSimulationParameters.cellFunctionMuscleBendingAccelerationThreshold
+            if (abs(cell->signal.channels[1]) > cudaSimulationParameters.cellTypeMuscleBendingAccelerationThreshold
                 && !hasTriangularConnection(cell, connection.cell)) {
                 auto delta = Math::normalized(data.cellMap.getCorrectedDirection(connection.cell->pos - cell->pos));
                 Math::rotateQuarterCounterClockwise(delta);
                 auto intensityChannel1 = getTruncatedUnitValue(cell->signal, 1);
                 if ((intensityChannel0 < -NEAR_ZERO && intensityChannel1 < -NEAR_ZERO) || (intensityChannel0 > NEAR_ZERO && intensityChannel1 > NEAR_ZERO)) {
-                    auto acceleration = delta * intensityChannel0 * cudaSimulationParameters.cellFunctionMuscleBendingAcceleration[cell->color]
-                        * sqrtf(cell->cellFunctionData.muscle.consecutiveBendingAngle + 1.0f) / 20 /*abs(bendingAngle) / 10*/;
+                    auto acceleration = delta * intensityChannel0 * cudaSimulationParameters.cellTypeMuscleBendingAcceleration[cell->color]
+                        * sqrtf(cell->cellTypeData.muscle.consecutiveBendingAngle + 1.0f) / 20 /*abs(bendingAngle) / 10*/;
                     atomicAdd(&connection.cell->vel.x, acceleration.x);
                     atomicAdd(&connection.cell->vel.y, acceleration.y);
                 }
@@ -252,8 +252,8 @@ __inline__ __device__ float MuscleProcessor::getTruncatedUnitValue(Signal const&
 
 __inline__ __device__ void MuscleProcessor::radiate(SimulationData& data, Cell* cell)
 {
-    auto cellFunctionMuscleEnergyCost = cudaSimulationParameters.cellFunctionMuscleEnergyCost[cell->color];
-    if (cellFunctionMuscleEnergyCost > 0) {
-        RadiationProcessor::radiate(data, cell, cellFunctionMuscleEnergyCost);
+    auto cellTypeMuscleEnergyCost = cudaSimulationParameters.cellTypeMuscleEnergyCost[cell->color];
+    if (cellTypeMuscleEnergyCost > 0) {
+        RadiationProcessor::radiate(data, cell, cellTypeMuscleEnergyCost);
     }
 }

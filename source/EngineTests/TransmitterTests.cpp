@@ -13,7 +13,7 @@ public:
     static SimulationParameters getParameters()
     {
         SimulationParameters result;
-        result.cellFunctionTransmitterEnergyDistributionSameCreature = true;
+        result.cellTypeTransmitterEnergyDistributionSameCreature = true;
         result.innerFriction = 0;
         result.baseValues.friction = 0;
         for (int i = 0; i < MAX_COLORS; ++i) {
@@ -36,13 +36,13 @@ TEST_F(TransmitterTests, distributeToOtherTransmitter)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
+            .setCellType(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
             .setEnergy(_parameters.cellNormalEnergy[0] * 2),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(OscillatorDescription()),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellFunction(TransmitterDescription()),
+            .setCellType(OscillatorDescription()),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellType(TransmitterDescription()),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -78,14 +78,14 @@ TEST_F(TransmitterTests, distributeToOneOtherTransmitter_forwardSignal)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
+            .setCellType(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
             .setEnergy(_parameters.cellNormalEnergy[0] * 2),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(OscillatorDescription())
+            .setCellType(OscillatorDescription())
             .setSignal(signal),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellFunction(TransmitterDescription()),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellType(TransmitterDescription()),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -120,13 +120,13 @@ TEST_F(TransmitterTests, distributeToConnectedCells)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_ConnectedCells))
+            .setCellType(TransmitterDescription().setMode(EnergyDistributionMode_ConnectedCells))
             .setEnergy(_parameters.cellNormalEnergy[0] * 2),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(OscillatorDescription()),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellFunction(TransmitterDescription()),
+            .setCellType(OscillatorDescription()),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellType(TransmitterDescription()),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -160,10 +160,10 @@ TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
+            .setCellType(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
             .setEnergy(_parameters.cellNormalEnergy[0] * 2),
-        CellDescription().setId(2).setPos({11.0f, 10.0f}).setCellFunction(ConstructorDescription().setGenome(genome)),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellFunction(TransmitterDescription()),
+        CellDescription().setId(2).setPos({11.0f, 10.0f}).setCellType(ConstructorDescription().setGenome(genome)),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellType(TransmitterDescription()),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -197,13 +197,13 @@ TEST_F(TransmitterTests, distributeOnlyToActiveConstructors)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
+            .setCellType(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
             .setEnergy(_parameters.cellNormalEnergy[0] * 2),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(ConstructorDescription().setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(genome))),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellFunction(TransmitterDescription()),
+            .setCellType(ConstructorDescription().setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(genome))),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellType(TransmitterDescription()),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -235,10 +235,10 @@ TEST_F(TransmitterTests, distributeToTwoTransmittersWithDifferentColor)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
+            .setCellType(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
             .setEnergy(_parameters.cellNormalEnergy[0] * 2),
-        CellDescription().setId(2).setPos({11.0f, 10.0f}).setCellFunction(TransmitterDescription()).setColor(1),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellFunction(TransmitterDescription()),
+        CellDescription().setId(2).setPos({11.0f, 10.0f}).setCellType(TransmitterDescription()).setColor(1),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellType(TransmitterDescription()),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -265,15 +265,15 @@ TEST_F(TransmitterTests, distributeToTwoTransmittersWithDifferentColor)
 
 TEST_F(TransmitterTests, distributeNotToNotReadyConstructors)
 {
-    _parameters.cellFunctionConstructorCheckCompletenessForSelfReplication = true;
+    _parameters.cellTypeConstructorCheckCompletenessForSelfReplication = true;
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto subgenome = GenomeDescription().setCells({CellGenomeDescription()});
 
     auto genome = GenomeDescription().setCells({
-        CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()),
-        CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()),
-        CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(subgenome))),
+        CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setMakeSelfCopy()),
+        CellGenomeDescription().setCellTypeData(TransmitterGenomeDescription()),
+        CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(subgenome))),
     });
 
     DataDescription data;
@@ -281,16 +281,16 @@ TEST_F(TransmitterTests, distributeNotToNotReadyConstructors)
         CellDescription()
             .setId(1)
             .setPos({9.0f, 10.0f})
-            .setCellFunction(ConstructorDescription().setNumInheritedGenomeNodes(4).setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(genome))),
+            .setCellType(ConstructorDescription().setNumInheritedGenomeNodes(4).setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(genome))),
         CellDescription()
             .setId(2)
             .setPos({10.0f, 10.0f})
-            .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
+            .setCellType(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
             .setEnergy(_parameters.cellNormalEnergy[0] * 2),
         CellDescription()
             .setId(3)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(ConstructorDescription().setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(subgenome))),
+            .setCellType(ConstructorDescription().setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(subgenome))),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -318,15 +318,15 @@ TEST_F(TransmitterTests, distributeNotToNotReadyConstructors)
 
 TEST_F(TransmitterTests, distributeToReadyConstructors)
 {
-    _parameters.cellFunctionConstructorCheckCompletenessForSelfReplication = true;
+    _parameters.cellTypeConstructorCheckCompletenessForSelfReplication = true;
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto subgenome = GenomeDescription().setCells({CellGenomeDescription()});
 
     auto genome = GenomeDescription().setCells({
-        CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy()),
-        CellGenomeDescription().setCellFunction(TransmitterGenomeDescription()),
-        CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(subgenome))),
+        CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setMakeSelfCopy()),
+        CellGenomeDescription().setCellTypeData(TransmitterGenomeDescription()),
+        CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(subgenome))),
     });
 
     DataDescription data;
@@ -334,16 +334,16 @@ TEST_F(TransmitterTests, distributeToReadyConstructors)
         CellDescription()
             .setId(1)
             .setPos({9.0f, 10.0f})
-            .setCellFunction(ConstructorDescription().setNumInheritedGenomeNodes(4).setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(genome))),
+            .setCellType(ConstructorDescription().setNumInheritedGenomeNodes(4).setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(genome))),
         CellDescription()
             .setId(2)
             .setPos({10.0f, 10.0f})
-            .setCellFunction(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
+            .setCellType(TransmitterDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors))
             .setEnergy(_parameters.cellNormalEnergy[0] * 2),
         CellDescription()
             .setId(3)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(ConstructorDescription().setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(subgenome))),
+            .setCellType(ConstructorDescription().setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(subgenome))),
         CellDescription()
             .setId(4)
             .setPos({12.0f, 10.0f})

@@ -22,7 +22,7 @@ private:
 
 __device__ __inline__ void NeuronProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
-    auto& operations = data.cellFunctionOperations[CellFunction_Neuron];
+    auto& operations = data.cellTypeOperations[CellType_Neuron];
     auto partition = calcPartition(operations.getNumEntries(), blockIdx.x, gridDim.x);
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         processCell(data, statistics, operations.at(i).cell);
@@ -45,13 +45,13 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     __shared__ float sumInput[MAX_CHANNELS];
     auto channelPartition = calcPartition(MAX_CHANNELS, threadIdx.x, blockDim.x);
     for (int i = channelPartition.startIndex; i <= channelPartition.endIndex; ++i) {
-        sumInput[i] = cell->cellFunctionData.neuron.neuronState->biases[i];
+        sumInput[i] = cell->cellTypeData.neuron.neuronState->biases[i];
     }
     __syncthreads();
 
     auto matrixPartition = calcPartition(MAX_CHANNELS * MAX_CHANNELS, threadIdx.x, blockDim.x);
     for (int entry = matrixPartition.startIndex; entry <= matrixPartition.endIndex; ++entry) {
-        auto& neuronsState = cell->cellFunctionData.neuron.neuronState;
+        auto& neuronsState = cell->cellTypeData.neuron.neuronState;
 
         auto row = entry / MAX_CHANNELS;
         auto col = entry % MAX_CHANNELS;
@@ -60,7 +60,7 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     __syncthreads();
 
     for (int i = channelPartition.startIndex; i <= channelPartition.endIndex; ++i) {
-        outputSignal.channels[i] = applyActivationFunction(cell->cellFunctionData.neuron.neuronState->activationFunctions[i], sumInput[i]);  
+        outputSignal.channels[i] = applyActivationFunction(cell->cellTypeData.neuron.neuronState->activationFunctions[i], sumInput[i]);  
     }
     __syncthreads();
     

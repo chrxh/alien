@@ -33,11 +33,11 @@ TEST_F(ReconnectorTests, establishConnection_noRestriction_nothingFound)
         {CellDescription()
              .setId(1)
              .setPos({10.0f, 10.0f})
-             .setCellFunction(ReconnectorDescription()),
+             .setCellType(ReconnectorDescription()),
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
-             .setCellFunction(OscillatorDescription())
+             .setCellType(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -61,11 +61,11 @@ TEST_F(ReconnectorTests, establishConnection_noRestriction_success)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellFunction(ReconnectorDescription()),
+            .setCellType(ReconnectorDescription()),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(OscillatorDescription())
+            .setCellType(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}),
     });
@@ -95,11 +95,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToColor_failed)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellFunction(ReconnectorDescription().setRestrictToColor(1)),
+            .setCellType(ReconnectorDescription().setRestrictToColor(1)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(OscillatorDescription())
+            .setCellType(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}),
     });
@@ -127,11 +127,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToColor_success)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellFunction(ReconnectorDescription()),
+            .setCellType(ReconnectorDescription()),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(OscillatorDescription())
+            .setCellType(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}),
     });
@@ -162,11 +162,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_success)
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
-            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToSameMutants)),
+            .setCellType(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToSameMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(OscillatorDescription())
+            .setCellType(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(5),
     });
@@ -197,11 +197,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_failed)
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
-            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToSameMutants)),
+            .setCellType(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToSameMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(OscillatorDescription())
+            .setCellType(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(4),
     });
@@ -229,11 +229,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_success)
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
-            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
+            .setCellType(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(OscillatorDescription())
+            .setCellType(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(4),
     });
@@ -263,11 +263,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_zeroM
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
-            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
+            .setCellType(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(OscillatorDescription())
+            .setCellType(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(0),
     });
@@ -295,11 +295,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_respa
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
-            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
+            .setCellType(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(OscillatorDescription())
+            .setCellType(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1),
     });
@@ -327,11 +327,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_sameM
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
-            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
+            .setCellType(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(OscillatorDescription())
+            .setCellType(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(5),
     });
@@ -359,11 +359,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_success)
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
-            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToHandcraftedCells)),
+            .setCellType(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToHandcraftedCells)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(OscillatorDescription())
+            .setCellType(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(0),
     });
@@ -393,11 +393,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_failed)
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
-            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToHandcraftedCells)),
+            .setCellType(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToHandcraftedCells)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(OscillatorDescription())
+            .setCellType(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(4),
     });
@@ -425,11 +425,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_success)
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
-            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToFreeCells)),
+            .setCellType(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToFreeCells)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(OscillatorDescription())
+            .setCellType(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1),
     });
@@ -459,11 +459,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_failed)
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
-            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToFreeCells)),
+            .setCellType(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToFreeCells)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(OscillatorDescription())
+            .setCellType(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(0),
     });
@@ -492,11 +492,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_succes
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
             .setGenomeComplexity(1000.0f)
-            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToLessComplexMutants)),
+            .setCellType(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToLessComplexMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(OscillatorDescription())
+            .setCellType(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(999.0f),
     });
@@ -518,11 +518,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_failed
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
             .setGenomeComplexity(1000.0f)
-            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToLessComplexMutants)),
+            .setCellType(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToLessComplexMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(OscillatorDescription())
+            .setCellType(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(1001.0f),
     });
@@ -544,11 +544,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_succes
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
             .setGenomeComplexity(1000.0f)
-            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToMoreComplexMutants)),
+            .setCellType(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToMoreComplexMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(OscillatorDescription())
+            .setCellType(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(1001.0f),
     });
@@ -570,11 +570,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_failed
             .setPos({10.0f, 10.0f})
             .setMutationId(5)
             .setGenomeComplexity(1000.0f)
-            .setCellFunction(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToMoreComplexMutants)),
+            .setCellType(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToMoreComplexMutants)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(OscillatorDescription())
+            .setCellType(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(1000.0f),
     });
@@ -594,12 +594,12 @@ TEST_F(ReconnectorTests, deleteConnections_success)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellFunction(ReconnectorDescription())
+            .setCellType(ReconnectorDescription())
             .setCreatureId(1),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellFunction(OscillatorDescription())
+            .setCellType(OscillatorDescription())
             .setSignal({-1, 0, 0, 0, 0, 0, 0, 0})
             .setCreatureId(1),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setCreatureId(3),

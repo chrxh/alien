@@ -110,13 +110,13 @@ TEST_P(LivingStateTransitionTests, ready_detaching_onSelfReplicator)
     auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(
         GenomeDescription()
             .setHeader(GenomeHeaderDescription())
-            .setCells({CellGenomeDescription().setCellFunction(ConstructorGenomeDescription().setMakeSelfCopy())}));
+            .setCells({CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setMakeSelfCopy())}));
 
     DataDescription data;
     data.addCells({
         CellDescription()
             .setId(1)
-            .setCellFunction(ConstructorDescription().setGenome(genome))
+            .setCellType(ConstructorDescription().setGenome(genome))
             .setPos({10.0f, 10.0f})
             .setLivingState(LivingState_Ready),
         CellDescription()

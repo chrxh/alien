@@ -8,7 +8,7 @@
 #include "Base/Definitions.h"
 #include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/PreviewDescriptions.h"
-#include "EngineInterface/CellFunctionConstants.h"
+#include "EngineInterface/CellTypeConstants.h"
 
 #include "Definitions.h"
 
@@ -389,13 +389,13 @@ public:
 
     static bool ShowPreviewDescription(PreviewDescription const& desc, float& zoom, std::optional<int>& selectedNode);
 
-    struct CellFunctionComboParameters
+    struct CellTypeComboParameters
     {
-        MEMBER_DECLARATION(CellFunctionComboParameters, std::string, name, "");
-        MEMBER_DECLARATION(CellFunctionComboParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(CellFunctionComboParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER_DECLARATION(CellTypeComboParameters, std::string, name, "");
+        MEMBER_DECLARATION(CellTypeComboParameters, float, textWidth, 100);
+        MEMBER_DECLARATION(CellTypeComboParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static bool CellFunctionCombo(CellFunctionComboParameters& parameters, int& value);
+    static bool CellTypeCombo(CellTypeComboParameters& parameters, int& value);
     struct AngleAlignmentComboParameters
     {
         MEMBER_DECLARATION(AngleAlignmentComboParameters, std::string, name, "");

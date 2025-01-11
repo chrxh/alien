@@ -2,7 +2,7 @@
 
 #include <atomic>
 
-#include "EngineInterface/CellFunctionConstants.h"
+#include "EngineInterface/CellTypeConstants.h"
 #include "EngineInterface/GpuSettings.h"
 #include "EngineInterface/Colors.h"
 
@@ -33,7 +33,7 @@ struct SimulationData
 
     //scheduled operations
     UnmanagedArray<StructuralOperation> structuralOperations;
-    UnmanagedArray<CellFunctionOperation> cellFunctionOperations[CellFunction_WithoutNone_Count];
+    UnmanagedArray<CellTypeOperation> cellTypeOperations[CellType_WithoutNone_Count];
 
     //number generators
     CudaNumberGenerator numberGen1;

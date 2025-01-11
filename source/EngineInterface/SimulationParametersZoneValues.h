@@ -39,8 +39,8 @@ struct SimulationParametersZoneValues
         Infinity<int>::value,
         Infinity<int>::value};
     ColorVector<int> cellColorTransitionTargetColor = {0, 1, 2, 3, 4, 5, 6};
-    ColorVector<float> cellFunctionAttackerEnergyCost = {0, 0, 0, 0, 0, 0, 0};
-    ColorMatrix<float> cellFunctionAttackerFoodChainColorMatrix = {
+    ColorVector<float> cellTypeAttackerEnergyCost = {0, 0, 0, 0, 0, 0, 0};
+    ColorMatrix<float> cellTypeAttackerFoodChainColorMatrix = {
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1},
@@ -49,9 +49,9 @@ struct SimulationParametersZoneValues
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1}};
 
-    ColorVector<float> cellFunctionAttackerGeometryDeviationExponent = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellFunctionAttackerConnectionsMismatchPenalty = {0, 0, 0, 0, 0, 0, 0};
-    ColorMatrix<float> cellFunctionAttackerGenomeComplexityBonus = {
+    ColorVector<float> cellTypeAttackerGeometryDeviationExponent = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellTypeAttackerConnectionsMismatchPenalty = {0, 0, 0, 0, 0, 0, 0};
+    ColorMatrix<float> cellTypeAttackerGenomeComplexityBonus = {
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
@@ -59,7 +59,7 @@ struct SimulationParametersZoneValues
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
-    ColorMatrix<float> cellFunctionAttackerNewComplexMutantPenalty = {
+    ColorMatrix<float> cellTypeAttackerNewComplexMutantPenalty = {
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
@@ -70,7 +70,7 @@ struct SimulationParametersZoneValues
 
     ColorVector<float> cellCopyMutationNeuronData = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellCopyMutationCellProperties = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellCopyMutationCellFunction = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> cellCopyMutationCellType = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellCopyMutationGeometry = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellCopyMutationCustomGeometry = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> cellCopyMutationInsertion = {0, 0, 0, 0, 0, 0, 0};

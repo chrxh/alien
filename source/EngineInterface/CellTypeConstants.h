@@ -2,24 +2,24 @@
 
 #include <cstdint>
 
-using CellFunction = int;
-enum CellFunction_
+using CellType = int;
+enum CellType_
 {
-    CellFunction_Neuron,
-    CellFunction_Transmitter,
-    CellFunction_Constructor,
-    CellFunction_Sensor,
-    CellFunction_Oscillator,
-    CellFunction_Attacker,
-    CellFunction_Injector,
-    CellFunction_Muscle,
-    CellFunction_Defender,
-    CellFunction_Reconnector,
-    CellFunction_Detonator,
-    CellFunction_WithoutNone_Count,
+    CellType_Neuron,
+    CellType_Transmitter,
+    CellType_Constructor,
+    CellType_Sensor,
+    CellType_Oscillator,
+    CellType_Attacker,
+    CellType_Injector,
+    CellType_Muscle,
+    CellType_Defender,
+    CellType_Reconnector,
+    CellType_Detonator,
+    CellType_WithoutNone_Count,
 
-    CellFunction_None = CellFunction_WithoutNone_Count,
-    CellFunction_Count,
+    CellType_None = CellType_WithoutNone_Count,
+    CellType_Count,
 };
 
 using LivingState = int;
@@ -156,11 +156,11 @@ enum CellEvent_
     CellEvent_Attacked
 };
 
-using CellFunctionUsed = uint8_t;
-enum CellFunctionUsed_
+using CellTriggered = uint8_t;
+enum CellTriggered_
 {
-    CellFunctionUsed_No,
-    CellFunctionUsed_Yes,
+    CellTriggered_No,
+    CellTriggered_Yes,
 };
 
 using SignalOrigin = uint8_t;

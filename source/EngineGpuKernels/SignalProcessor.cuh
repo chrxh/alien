@@ -9,7 +9,7 @@
 class SignalProcessor
 {
 public:
-    __inline__ __device__ static void collectCellFunctionOperations(SimulationData& data);
+    __inline__ __device__ static void collectCellTypeOperations(SimulationData& data);
     __inline__ __device__ static void calcFutureSignals(SimulationData& data);
     __inline__ __device__ static void updateSignals(SimulationData& data);
 
@@ -21,7 +21,7 @@ public:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void SignalProcessor::collectCellFunctionOperations(SimulationData& data)
+__inline__ __device__ void SignalProcessor::collectCellTypeOperations(SimulationData& data)
 {
     auto& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -29,11 +29,11 @@ __inline__ __device__ void SignalProcessor::collectCellFunctionOperations(Simula
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
-        if (cell->cellFunction != CellFunction_None) {
-            if (cell->cellFunction == CellFunction_Detonator && cell->cellFunctionData.detonator.state == DetonatorState_Activated) {
-                data.cellFunctionOperations[cell->cellFunction].tryAddEntry(CellFunctionOperation{cell});
+        if (cell->cellType != CellType_None) {
+            if (cell->cellType == CellType_Detonator && cell->cellTypeData.detonator.state == DetonatorState_Activated) {
+                data.cellTypeOperations[cell->cellType].tryAddEntry(CellTypeOperation{cell});
             } else if (cell->livingState != LivingState_UnderConstruction && cell->livingState != LivingState_Activating && cell->activationTime == 0) {
-                data.cellFunctionOperations[cell->cellFunction].tryAddEntry(CellFunctionOperation{cell});
+                data.cellTypeOperations[cell->cellType].tryAddEntry(CellTypeOperation{cell});
             }
 
         }
@@ -134,7 +134,7 @@ __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
         auto& cell = cells.at(index);
         cell->signal.active = cell->futureSignal.active;
         if (cell->signal.active) {
-            cell->cellFunctionUsed = CellFunctionUsed_Yes;
+            cell->cellTypeUsed = CellTriggered_Yes;
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 cell->signal.channels[i] = cell->futureSignal.channels[i];
             }

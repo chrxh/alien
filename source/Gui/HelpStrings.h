@@ -5,7 +5,7 @@
 
 #include "Fonts/IconsFontAwesome5.h"
 
-#include "EngineInterface/CellFunctionConstants.h"
+#include "EngineInterface/CellTypeConstants.h"
 
 namespace Const
 {
@@ -90,7 +90,7 @@ namespace Const
     std::string const DetonatorTooltip = "A detonator cell will be activated if it receives an input on channel #0 with abs(value) > threshold. Then its counter "
                                          "is decreasing after each executing until it reaches 0. After that the detonator cell will explode and the surrounding cells are highly accelerated.";
 
-    std::string const CellFunctionTooltip =
+    std::string const CellTypeTooltip =
         "Cells can possess a specific function that enables them to, for example, perceive their environment, process information, or "
         "take action. All cell functions have in common that they obtain the input from connected cells whose execution number matches the input "
         "execution number of the current cell. For this purpose, each channel from #0 to #7 of those cells is summed and the result is written "
@@ -375,33 +375,33 @@ namespace Const
         " Single cell function: A specific type of cell function can be highlighted, which is selected in the next parameter.\n\n" ICON_FA_CHEVRON_RIGHT
         " All cell functions: The cells are colored according to their cell function.";
 
-    inline std::string getCellFunctionTooltip(CellFunction cellFunction)
+    inline std::string getCellTypeTooltip(CellType cellType)
     {
-        switch (cellFunction) {
-        case CellFunction_Neuron:
+        switch (cellType) {
+        case CellType_Neuron:
             return Const::NeuronTooltip;
-        case CellFunction_Transmitter:
+        case CellType_Transmitter:
             return Const::TransmitterTooltip;
-        case CellFunction_Constructor:
+        case CellType_Constructor:
             return Const::ConstructorTooltip;
-        case CellFunction_Sensor:
+        case CellType_Sensor:
             return Const::SensorTooltip;
-        case CellFunction_Oscillator:
+        case CellType_Oscillator:
             return Const::OscillatorTooltip;
-        case CellFunction_Attacker:
+        case CellType_Attacker:
             return Const::AttackerTooltip;
-        case CellFunction_Injector:
+        case CellType_Injector:
             return Const::InjectorTooltip;
-        case CellFunction_Muscle:
+        case CellType_Muscle:
             return Const::MuscleTooltip;
-        case CellFunction_Defender:
+        case CellType_Defender:
             return Const::DefenderTooltip;
-        case CellFunction_Reconnector:
+        case CellType_Reconnector:
             return Const::ReconnectorTooltip;
-        case CellFunction_Detonator:
+        case CellType_Detonator:
             return Const::DetonatorTooltip;
         default:
-            return Const::CellFunctionTooltip;
+            return Const::CellTypeTooltip;
         }
     };
 

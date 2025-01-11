@@ -24,8 +24,8 @@ private:
 
     void processCell(CellDescription cell);
     void processCellBaseTab(CellDescription& cell);
-    void processCellFunctionTab(CellDescription& cell);
-    void processCellFunctionPropertiesTab(CellDescription& cell);
+    void processCellTypeTab(CellDescription& cell);
+    void processCellTypePropertiesTab(CellDescription& cell);
     template <typename Description>
     void processCellGenomeTab(Description& desc);
     void processCellMetadataTab(CellDescription& cell);

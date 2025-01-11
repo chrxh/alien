@@ -22,8 +22,8 @@ void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
     numberGen2.init(1536941);  //some array size for random numbers (~ 1.5 MB)
 
     structuralOperations.init();
-    for (int i = 0; i < CellFunction_WithoutNone_Count; ++i) {
-        cellFunctionOperations[i].init();
+    for (int i = 0; i < CellType_WithoutNone_Count; ++i) {
+        cellTypeOperations[i].init();
     }
 }
 
@@ -34,12 +34,12 @@ __device__ void SimulationData::prepareForNextTimestep()
     processMemory.reset();
 
     auto maxStructureOperations = 1000 + objects.cellPointers.getNumEntries() / 2; //heuristic
-    auto maxCellFunctionOperations = objects.cellPointers.getNumEntries();  //heuristic
+    auto maxCellTypeOperations = objects.cellPointers.getNumEntries();  //heuristic
 
     structuralOperations.setMemory(processMemory.getTypedSubArray<StructuralOperation>(maxStructureOperations), maxStructureOperations);
 
-    for (int i = 0; i < CellFunction_WithoutNone_Count; ++i) {
-        cellFunctionOperations[i].setMemory(processMemory.getTypedSubArray<CellFunctionOperation>(maxCellFunctionOperations), maxCellFunctionOperations);
+    for (int i = 0; i < CellType_WithoutNone_Count; ++i) {
+        cellTypeOperations[i].setMemory(processMemory.getTypedSubArray<CellTypeOperation>(maxCellTypeOperations), maxCellTypeOperations);
     }
     *externalEnergy = cudaSimulationParameters.externalEnergy;
 
@@ -90,7 +90,7 @@ void SimulationData::resizeObjects()
     auto particleArraySize = objects.particles.getSize_host();
     particleMap.resize(particleArraySize);
 
-    int upperBoundDynamicMemory = (sizeof(StructuralOperation) + sizeof(CellFunctionOperation) * CellFunction_Count + 200) * (cellArraySize + 1000); //heuristic
+    int upperBoundDynamicMemory = (sizeof(StructuralOperation) + sizeof(CellTypeOperation) * CellType_Count + 200) * (cellArraySize + 1000); //heuristic
     processMemory.resize(upperBoundDynamicMemory);
 }
 
@@ -112,8 +112,8 @@ void SimulationData::free()
     CudaMemoryManager::getInstance().freeMemory(externalEnergy);
 
     structuralOperations.free();
-    for (int i = 0; i < CellFunction_WithoutNone_Count; ++i) {
-        cellFunctionOperations[i].free();
+    for (int i = 0; i < CellType_WithoutNone_Count; ++i) {
+        cellTypeOperations[i].free();
     }
 }
 

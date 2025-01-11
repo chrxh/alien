@@ -13,7 +13,7 @@ PUBLIC
     AutosaveWindow.h
     BrowserWindow.cpp
     BrowserWindow.h
-    CellFunctionStrings.h
+    CellTypeStrings.h
     ChangeColorDialog.cpp
     ChangeColorDialog.h
     CreateUserDialog.cpp

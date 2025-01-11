@@ -333,7 +333,7 @@ struct DetonatorDescription
     }
 };
 
-using CellFunctionDescription = std::optional<std::variant<
+using CellTypeDescription = std::optional<std::variant<
     NeuronDescription,
     TransmitterDescription,
     ConstructorDescription,
@@ -402,13 +402,13 @@ struct CellDescription
     float genomeComplexity = 0;
     uint16_t genomeNodeIndex = 0;
 
-    //cell function
-    CellFunctionDescription cellFunction;
+    //cell type data
+    CellTypeDescription cellTypeData;
     std::optional<SignalRoutingRestrictionDescription> signalRoutingRestriction;
     std::optional<SignalDescription> signal;
     int activationTime = 0;
     int detectedByCreatureId = 0;   //only the first 16 bits from the creature id
-    CellFunctionUsed cellFunctionUsed = CellFunctionUsed_No;
+    CellTriggered cellTypeUsed = CellTriggered_No;
 
     CellMetadataDescription metadata;
 
@@ -471,11 +471,11 @@ struct CellDescription
         creatureId = value;
         return *this;
     }
-    CellFunction getCellFunctionType() const;
-    template <typename CellFunctionDesc>
-    CellDescription& setCellFunction(CellFunctionDesc const& value)
+    CellType getCellType() const;
+    template <typename CellTypeDesc>
+    CellDescription& setCellType(CellTypeDesc const& value)
     {
-        cellFunction = value;
+        cellTypeData = value;
         return *this;
     }
     CellDescription& setMetadata(CellMetadataDescription const& value)

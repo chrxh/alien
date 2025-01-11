@@ -24,7 +24,7 @@ namespace Const
         IndividualCellColor6,
         IndividualCellColor7};
 
-    uint32_t const CellFunctionInfoColor = 0x404090;
+    uint32_t const CellTypeInfoColor = 0x404090;
     uint32_t const BranchNumberInfoColor = 0x000000;
 
     uint32_t const VoidColor = 0x000000;

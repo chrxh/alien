@@ -637,7 +637,7 @@ __global__ void cudaApplyCataclysm(SimulationData data)
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
-        if (cell->cellFunction == CellFunction_Constructor) {
+        if (cell->cellType == CellType_Constructor) {
             if (data.numberGen1.random() < 0.3f) {
                 for (int j = 0; j < 100; ++j) {
                     MutationProcessor::neuronDataMutation(data, cell);
@@ -647,7 +647,7 @@ __global__ void cudaApplyCataclysm(SimulationData data)
                 }
                 MutationProcessor::geometryMutation(data, cell);
                 MutationProcessor::customGeometryMutation(data, cell);
-                MutationProcessor::cellFunctionMutation(data, cell);
+                MutationProcessor::cellTypeMutation(data, cell);
                 int num = data.numberGen1.random(5);
                 for (int i = 0; i < num; ++i) {
                     MutationProcessor::insertMutation(data, cell);
