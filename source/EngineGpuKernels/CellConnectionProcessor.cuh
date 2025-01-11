@@ -297,29 +297,6 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
         return false;
     }
 
-    //Cell* nearCells[MAX_CELL_BONDS * 4];
-    //int numNearCells;
-    //data.cellMap.getMatchingCells(nearCells, MAX_CELL_BONDS * 4, numNearCells, cell1->pos, desiredDistance, cell1->detached, [&](Cell* const& nearCell) {
-    //    return nearCell != cell1 && nearCell != cell2;
-    //});
-
-    //// evaluate candidates (locking is needed for the evaluation)
-    //bool crossingLinks = false;
-    //for (int j = 0; j < numNearCells; ++j) {
-    //    auto nearCell = nearCells[j];
-    //    if (nearCell->tryLock()) {
-    //        for (int k = 0; k < nearCell->numConnections; ++k) {
-    //            if (Math::crossing(cell1->pos, cell2->pos, nearCell->pos, nearCell->connections[k].cell->pos)) {
-    //                crossingLinks = true;
-    //            }
-    //        }
-    //        nearCell->releas eLock();
-    //    }
-    //}
-    //if (crossingLinks) {
-    //    //return false;
-    //}
-
     angleAlignment %= ConstructorAngleAlignment_Count;
 
     auto newAngle = Math::angleOfVector(posDelta);
@@ -508,27 +485,6 @@ __inline__ __device__ bool CellConnectionProcessor::existCrossingConnections(Sim
         nearCell->releaseLock();
     });
     return result;
-
-
-    //Cell* nearCells[MAX_CELL_BONDS * 4];
-    //int numNearCells;
-    //data.cellMap.getMatchingCells(nearCells, MAX_CELL_BONDS * 4, numNearCells, pos, radius, false, [&](Cell* const&) { return true; });
-
-    //for (int i = 0; i < numNearCells; ++i) {
-    //    auto nearCell = nearCells[i];
-    //    if (!nearCell->tryLock()) {
-    //        continue;
-    //    }
-    //    for (int j = 0; j < nearCell->numConnections; ++j) {
-    //        auto const& connection = nearCell->connections[j];
-    //        if (Math::crossing(pos, nearCell->pos, connection.cell->pos, connection.cell->pos + Math::unitVectorOfAngle(connection.angleFromPrevious))) {
-    //            nearCell->releaseLock();
-    //            return true;
-    //        }
-    //    }
-    //    nearCell->releaseLock();
-    //}
-    //return false;
 }
 
 __inline__ __device__ bool CellConnectionProcessor::checkConnectedCellsForCrossingConnection(Cell* cell1, float2 otherCellPos)
