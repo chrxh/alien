@@ -31,8 +31,8 @@ public:
     __inline__ __device__ static void deleteConnections(Cell* cell1, Cell* cell2);
     __inline__ __device__ static void deleteConnectionOneWay(Cell* cell1, Cell* cell2);
 
-    __inline__ __device__ static bool existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached, int color);
-    __inline__ __device__ static bool wouldResultInOverlappingConnection(Cell* cell1, float2 otherCellPos);
+    __inline__ __device__ static bool existCrossingConnections(SimulationData& data, float2 const& pos, float const& radius, bool detached);
+    __inline__ __device__ static bool checkConnectedCellsForCrossingConnection(Cell* cell1, float2 otherCellPos);
     __inline__ __device__ static bool hasAngleSpace(SimulationData& data, Cell* cell, float angle, ConstructorAngleAlignment angleAlignment);
     __inline__ __device__ static bool isConnectedConnected(Cell* cell, Cell* otherCell);
 
@@ -293,9 +293,32 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
         return false;
     }
 
-    if (wouldResultInOverlappingConnection(cell1, cell2->pos)) {
+    if (checkConnectedCellsForCrossingConnection(cell1, cell2->pos)) {
         return false;
     }
+
+    //Cell* nearCells[MAX_CELL_BONDS * 4];
+    //int numNearCells;
+    //data.cellMap.getMatchingCells(nearCells, MAX_CELL_BONDS * 4, numNearCells, cell1->pos, desiredDistance, cell1->detached, [&](Cell* const& nearCell) {
+    //    return nearCell != cell1 && nearCell != cell2;
+    //});
+
+    //// evaluate candidates (locking is needed for the evaluation)
+    //bool crossingLinks = false;
+    //for (int j = 0; j < numNearCells; ++j) {
+    //    auto nearCell = nearCells[j];
+    //    if (nearCell->tryLock()) {
+    //        for (int k = 0; k < nearCell->numConnections; ++k) {
+    //            if (Math::crossing(cell1->pos, cell2->pos, nearCell->pos, nearCell->connections[k].cell->pos)) {
+    //                crossingLinks = true;
+    //            }
+    //        }
+    //        nearCell->releas eLock();
+    //    }
+    //}
+    //if (crossingLinks) {
+    //    //return false;
+    //}
 
     angleAlignment %= ConstructorAngleAlignment_Count;
 
@@ -467,33 +490,48 @@ __inline__ __device__ void CellConnectionProcessor::deleteConnectionOneWay(Cell*
     }
 }
 
-__inline__ __device__ bool CellConnectionProcessor::existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached, int color)
+__inline__ __device__ bool CellConnectionProcessor::existCrossingConnections(SimulationData& data, float2 const& pos, float const& radius, bool detached)
 {
-    auto distance = Math::length(pos1 - pos2);
-    if (distance > cudaSimulationParameters.cellMaxBindingDistance[color]) {
-        return false;
-    }
-
-    bool result = false;
-    data.cellMap.executeForEach((pos1 + pos2) / 2, distance, detached, [&](auto const& otherCell) {
-        if ((otherCell->pos.x == pos1.x && otherCell->pos.y == pos1.y) || (otherCell->pos.x == pos2.x && otherCell->pos.y == pos2.y)) {
+    auto result = false;
+    data.cellMap.executeForEach(pos, radius, detached, [&](auto const& nearCell) {
+        if (!nearCell->tryLock()) {
             return;
         }
-        if (otherCell->tryLock()) {
-            for (int i = 0; i < otherCell->numConnections; ++i) {
-                if (Math::crossing(pos1, pos2, otherCell->pos, otherCell->connections[i].cell->pos)) {
-                    otherCell->releaseLock();
-                    result = true;
-                    return;
-                }
+        for (int j = 0; j < nearCell->numConnections; ++j) {
+            auto const& connection = nearCell->connections[j];
+            if (Math::crossing(pos, nearCell->pos, connection.cell->pos, connection.cell->pos + Math::unitVectorOfAngle(connection.angleFromPrevious))) {
+                nearCell->releaseLock();
+                result = true;
+                return;
             }
-            otherCell->releaseLock();
         }
+        nearCell->releaseLock();
     });
     return result;
+
+
+    //Cell* nearCells[MAX_CELL_BONDS * 4];
+    //int numNearCells;
+    //data.cellMap.getMatchingCells(nearCells, MAX_CELL_BONDS * 4, numNearCells, pos, radius, false, [&](Cell* const&) { return true; });
+
+    //for (int i = 0; i < numNearCells; ++i) {
+    //    auto nearCell = nearCells[i];
+    //    if (!nearCell->tryLock()) {
+    //        continue;
+    //    }
+    //    for (int j = 0; j < nearCell->numConnections; ++j) {
+    //        auto const& connection = nearCell->connections[j];
+    //        if (Math::crossing(pos, nearCell->pos, connection.cell->pos, connection.cell->pos + Math::unitVectorOfAngle(connection.angleFromPrevious))) {
+    //            nearCell->releaseLock();
+    //            return true;
+    //        }
+    //    }
+    //    nearCell->releaseLock();
+    //}
+    //return false;
 }
 
-__inline__ __device__ bool CellConnectionProcessor::wouldResultInOverlappingConnection(Cell* cell1, float2 otherCellPos)
+__inline__ __device__ bool CellConnectionProcessor::checkConnectedCellsForCrossingConnection(Cell* cell1, float2 otherCellPos)
 {
     auto const& n = cell1->numConnections;
     if (n < 2) {
