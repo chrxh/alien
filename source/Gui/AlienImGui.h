@@ -393,6 +393,7 @@ public:
     {
         MEMBER_DECLARATION(CellTypeComboParameters, std::string, name, "");
         MEMBER_DECLARATION(CellTypeComboParameters, float, textWidth, 100);
+        MEMBER_DECLARATION(CellTypeComboParameters, bool, includeStructureAndFreeCells, false);
         MEMBER_DECLARATION(CellTypeComboParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool CellTypeCombo(CellTypeComboParameters& parameters, int& value);

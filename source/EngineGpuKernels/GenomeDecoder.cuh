@@ -547,9 +547,9 @@ __inline__ __device__ int GenomeDecoder::getNextCellTypeDataSize(uint8_t* genome
 {
     auto cellType = getNextCellType(genome, nodeAddress);
     switch (cellType) {
-    case CellType_Neuron:
+    case CellType_Base:
         return Const::NeuronBytes;
-    case CellType_Transmitter:
+    case CellType_Depot:
         return Const::TransmitterBytes;
     case CellType_Constructor: {
         if (withSubgenome) {
@@ -716,9 +716,9 @@ __inline__ __device__ int GenomeDecoder::getNextSubGenomeSize(uint8_t* genome, i
 __inline__ __device__ int GenomeDecoder::getCellTypeDataSize(CellType cellType, bool makeSelfCopy, int genomeSize)
 {
     switch (cellType) {
-    case CellType_Neuron:
+    case CellType_Base:
         return Const::NeuronBytes;
-    case CellType_Transmitter:
+    case CellType_Depot:
         return Const::TransmitterBytes;
     case CellType_Constructor: {
         return makeSelfCopy ? Const::ConstructorFixedBytes + 1 : Const::ConstructorFixedBytes + 3 + genomeSize;

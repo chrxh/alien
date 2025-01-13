@@ -378,9 +378,9 @@ namespace Const
     inline std::string getCellTypeTooltip(CellType cellType)
     {
         switch (cellType) {
-        case CellType_Neuron:
+        case CellType_Base:
             return Const::NeuronTooltip;
-        case CellType_Transmitter:
+        case CellType_Depot:
             return Const::TransmitterTooltip;
         case CellType_Constructor:
             return Const::ConstructorTooltip;

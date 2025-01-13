@@ -15,28 +15,28 @@ struct MakeGenomeCopy
     auto operator<=>(MakeGenomeCopy const&) const = default;
 };
 
-struct NeuronGenomeDescription
+struct BaseGenomeDescription
 {
     std::vector<std::vector<float>> weights;
     std::vector<float> biases;
     std::vector<NeuronActivationFunction> activationFunctions;
 
-    NeuronGenomeDescription()
+    BaseGenomeDescription()
     {
         weights.resize(MAX_CHANNELS, std::vector<float>(MAX_CHANNELS, 0));
         biases.resize(MAX_CHANNELS, 0);
         activationFunctions.resize(MAX_CHANNELS, 0);
     }
-    auto operator<=>(NeuronGenomeDescription const&) const = default;
+    auto operator<=>(BaseGenomeDescription const&) const = default;
 };
 
-struct TransmitterGenomeDescription
+struct DepotGenomeDescription
 {
     EnergyDistributionMode mode = EnergyDistributionMode_TransmittersAndConstructors;
 
-    auto operator<=>(TransmitterGenomeDescription const&) const = default;
+    auto operator<=>(DepotGenomeDescription const&) const = default;
 
-    TransmitterGenomeDescription& setMode(EnergyDistributionMode value)
+    DepotGenomeDescription& setMode(EnergyDistributionMode value)
     {
         mode = value;
         return *this;
@@ -223,9 +223,9 @@ struct DetonatorGenomeDescription
     }
 };
 
-using CellTypeGenomeDescription = std::optional<std::variant<
-    NeuronGenomeDescription,
-    TransmitterGenomeDescription,
+using CellTypeGenomeDescription = std::variant<
+    BaseGenomeDescription,
+    DepotGenomeDescription,
     ConstructorGenomeDescription,
     SensorGenomeDescription,
     OscillatorGenomeDescription,
@@ -234,7 +234,7 @@ using CellTypeGenomeDescription = std::optional<std::variant<
     MuscleGenomeDescription,
     DefenderGenomeDescription,
     ReconnectorGenomeDescription,
-    DetonatorGenomeDescription>>;
+    DetonatorGenomeDescription>;
 
 struct CellGenomeDescription
 {
@@ -267,11 +267,11 @@ struct CellGenomeDescription
     {
         auto cellType = getCellType();
         if (cellType == CellType_Constructor) {
-            auto& constructor = std::get<ConstructorGenomeDescription>(*cellTypeData);
+            auto& constructor = std::get<ConstructorGenomeDescription>(cellTypeData);
             return std::holds_alternative<std::vector<uint8_t>>(constructor.genome);
         }
         if (cellType == CellType_Injector) {
-            auto& injector = std::get<InjectorGenomeDescription>(*cellTypeData);
+            auto& injector = std::get<InjectorGenomeDescription>(cellTypeData);
             return std::holds_alternative<std::vector<uint8_t>>(injector.genome);
         }
         return false;
@@ -281,13 +281,13 @@ struct CellGenomeDescription
     {
         auto cellType = getCellType();
         if (cellType == CellType_Constructor) {
-            auto& constructor = std::get<ConstructorGenomeDescription>(*cellTypeData);
+            auto& constructor = std::get<ConstructorGenomeDescription>(cellTypeData);
             if (std::holds_alternative<std::vector<uint8_t>>(constructor.genome)) {
                 return std::get<std::vector<uint8_t>>(constructor.genome);
             }
         }
         if (cellType == CellType_Injector) {
-            auto& injector = std::get<InjectorGenomeDescription>(*cellTypeData);
+            auto& injector = std::get<InjectorGenomeDescription>(cellTypeData);
             if (std::holds_alternative<std::vector<uint8_t>>(injector.genome)) {
                 return std::get<std::vector<uint8_t>>(injector.genome);
             }
@@ -299,7 +299,7 @@ struct CellGenomeDescription
     {
         switch (getCellType()) {
         case CellType_Constructor: {
-            auto const& constructor = std::get<ConstructorGenomeDescription>(*cellTypeData);
+            auto const& constructor = std::get<ConstructorGenomeDescription>(cellTypeData);
             if (!constructor.isMakeGenomeCopy()) {
                 return constructor.getGenomeData();
             } else {
@@ -307,7 +307,7 @@ struct CellGenomeDescription
             }
         }
         case CellType_Injector: {
-            auto const& injector = std::get<InjectorGenomeDescription>(*cellTypeData);
+            auto const& injector = std::get<InjectorGenomeDescription>(cellTypeData);
             if (!injector.isMakeGenomeCopy()) {
                 return injector.getGenomeData();
             } else {
@@ -322,13 +322,13 @@ struct CellGenomeDescription
     {
         switch (getCellType()) {
         case CellType_Constructor: {
-            auto& constructor = std::get<ConstructorGenomeDescription>(*cellTypeData);
+            auto& constructor = std::get<ConstructorGenomeDescription>(cellTypeData);
             if (!constructor.isMakeGenomeCopy()) {
                 constructor.genome = genome;
             }
         } break;
         case CellType_Injector: {
-            auto& injector = std::get<InjectorGenomeDescription>(*cellTypeData);
+            auto& injector = std::get<InjectorGenomeDescription>(cellTypeData);
             if (!injector.isMakeGenomeCopy()) {
                 injector.genome = genome;
             }
@@ -339,52 +339,39 @@ struct CellGenomeDescription
     {
         switch (getCellType()) {
         case CellType_Constructor:
-            return std::get<ConstructorGenomeDescription>(*cellTypeData).isMakeGenomeCopy();
+            return std::get<ConstructorGenomeDescription>(cellTypeData).isMakeGenomeCopy();
         case CellType_Injector:
-            return std::get<InjectorGenomeDescription>(*cellTypeData).isMakeGenomeCopy();
+            return std::get<InjectorGenomeDescription>(cellTypeData).isMakeGenomeCopy();
         default:
             return std::nullopt;
         }
     }
     CellType getCellType() const
     {
-        if (!cellTypeData) {
-            return CellType_None;
-        }
-        if (std::holds_alternative<NeuronGenomeDescription>(*cellTypeData)) {
-            return CellType_Neuron;
-        }
-        if (std::holds_alternative<TransmitterGenomeDescription>(*cellTypeData)) {
-            return CellType_Transmitter;
-        }
-        if (std::holds_alternative<ConstructorGenomeDescription>(*cellTypeData)) {
+        if (std::holds_alternative<BaseGenomeDescription>(cellTypeData)) {
+            return CellType_Base;
+        } else if (std::holds_alternative<DepotGenomeDescription>(cellTypeData)) {
+            return CellType_Depot;
+        } else if (std::holds_alternative<ConstructorGenomeDescription>(cellTypeData)) {
             return CellType_Constructor;
-        }
-        if (std::holds_alternative<SensorGenomeDescription>(*cellTypeData)) {
+        } else if (std::holds_alternative<SensorGenomeDescription>(cellTypeData)) {
             return CellType_Sensor;
-        }
-        if (std::holds_alternative<OscillatorGenomeDescription>(*cellTypeData)) {
+        } else if (std::holds_alternative<OscillatorGenomeDescription>(cellTypeData)) {
             return CellType_Oscillator;
-        }
-        if (std::holds_alternative<AttackerGenomeDescription>(*cellTypeData)) {
+        } else if (std::holds_alternative<AttackerGenomeDescription>(cellTypeData)) {
             return CellType_Attacker;
-        }
-        if (std::holds_alternative<InjectorGenomeDescription>(*cellTypeData)) {
+        } else if (std::holds_alternative<InjectorGenomeDescription>(cellTypeData)) {
             return CellType_Injector;
-        }
-        if (std::holds_alternative<MuscleGenomeDescription>(*cellTypeData)) {
+        } else if (std::holds_alternative<MuscleGenomeDescription>(cellTypeData)) {
             return CellType_Muscle;
-        }
-        if (std::holds_alternative<DefenderGenomeDescription>(*cellTypeData)) {
+        } else if (std::holds_alternative<DefenderGenomeDescription>(cellTypeData)) {
             return CellType_Defender;
-        }
-        if (std::holds_alternative<ReconnectorGenomeDescription>(*cellTypeData)) {
+        } else if (std::holds_alternative<ReconnectorGenomeDescription>(cellTypeData)) {
             return CellType_Reconnector;
-        }
-        if (std::holds_alternative<DetonatorGenomeDescription>(*cellTypeData)) {
+        } else if (std::holds_alternative<DetonatorGenomeDescription>(cellTypeData)) {
             return CellType_Detonator;
         }
-        return CellType_None;
+        CHECK(false);
     }
     template <typename CellTypeDesc>
     CellGenomeDescription& setCellTypeData(CellTypeDesc const& value)

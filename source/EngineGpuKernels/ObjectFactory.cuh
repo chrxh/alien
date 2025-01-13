@@ -134,14 +134,14 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
 
     cell->cellType = cellTO.cellType;
     switch (cellTO.cellType) {
-    case CellType_Neuron: {
+    case CellType_Base: {
         createAuxiliaryDataWithFixedSize(
             sizeof(NeuronFunction::NeuronState),
             cellTO.cellTypeData.neuron.neuronDataIndex,
             dataTO.auxiliaryData,
             reinterpret_cast<uint8_t*&>(cell->cellTypeData.neuron.neuronState));
     } break;
-    case CellType_Transmitter: {
+    case CellType_Depot: {
         cell->cellTypeData.transmitter.mode = cellTO.cellTypeData.transmitter.mode;
     } break;
     case CellType_Constructor: {
@@ -292,99 +292,8 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->event = CellEvent_No;
     cell->cellTypeUsed = CellTriggered_No;
     cell->genomeNodeIndex = 0;
+    cell->cellType = CellType_Free;
 
-    if (cudaSimulationParameters.particleTransformationRandomCellType) {
-        cell->cellType = _data->numberGen1.random(CellType_Count - 1);
-        switch (cell->cellType) {
-        case CellType_Neuron: {
-            cell->cellTypeData.neuron.neuronState =
-                reinterpret_cast<NeuronFunction::NeuronState*>(_data->objects.auxiliaryData.getAlignedSubArray(sizeof(NeuronFunction::NeuronState)));
-            for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-                cell->cellTypeData.neuron.neuronState->weights[i] = _data->numberGen1.random(2.0f) - 1.0f;
-            }
-            for (int i = 0; i < MAX_CHANNELS; ++i) {
-                cell->cellTypeData.neuron.neuronState->biases[i] = _data->numberGen1.random(2.0f) - 1.0f;
-                cell->cellTypeData.neuron.neuronState->activationFunctions[i] = NeuronActivationFunction_Sigmoid;
-            }
-        } break;
-        case CellType_Transmitter: {
-            cell->cellTypeData.transmitter.mode = _data->numberGen1.random(EnergyDistributionMode_Count - 1);
-        } break;
-        case CellType_Constructor: {
-            if (_data->numberGen1.randomBool()) {
-                cell->cellTypeData.constructor.activationMode = 0;
-            } else {
-                cell->cellTypeData.constructor.activationMode = _data->numberGen1.random(50);
-            }
-            cell->cellTypeData.constructor.constructionActivationTime = _data->numberGen1.random(10000);
-            cell->cellTypeData.constructor.genomeSize = Const::GenomeHeaderSize;
-            cell->cellTypeData.constructor.numInheritedGenomeNodes = 0;
-            cell->cellTypeData.constructor.genome = _data->objects.auxiliaryData.getAlignedSubArray(cell->cellTypeData.constructor.genomeSize);
-            auto& genome = cell->cellTypeData.constructor.genome;
-            for (int i = 0; i < cell->cellTypeData.constructor.genomeSize; ++i) {
-                genome[i] = _data->numberGen1.randomByte();
-            }
-            cell->cellTypeData.constructor.lastConstructedCellId = 0;
-            cell->cellTypeData.constructor.genomeCurrentNodeIndex = 0;
-            cell->cellTypeData.constructor.genomeCurrentRepetition = 0;
-            cell->cellTypeData.constructor.currentBranch = 0;
-            cell->cellTypeData.constructor.genomeGeneration = 0;
-            cell->cellTypeData.constructor.constructionAngle1 = 0;
-            cell->cellTypeData.constructor.constructionAngle2 = 0;
-            cell->cellTypeData.constructor.isReady = true;
-        } break;
-        case CellType_Sensor: {
-            cell->cellTypeData.sensor.minDensity = _data->numberGen1.random(1.0f);
-            cell->cellTypeData.sensor.minRange = -1;
-            cell->cellTypeData.sensor.maxRange = -1;
-            cell->cellTypeData.sensor.restrictToColor = _data->numberGen1.randomBool() ? _data->numberGen1.random(MAX_COLORS - 1) : 255;
-            cell->cellTypeData.sensor.restrictToMutants = static_cast<uint8_t>(_data->numberGen1.random(SensorRestrictToMutants_Count - 1));
-            cell->cellTypeData.sensor.memoryChannel1 = 0;
-            cell->cellTypeData.sensor.memoryChannel2 = 0;
-            cell->cellTypeData.sensor.memoryChannel3 = 0;
-            cell->cellTypeData.sensor.memoryTargetX = 0;
-            cell->cellTypeData.sensor.memoryTargetY = 0;
-        } break;
-        case CellType_Oscillator: {
-        } break;
-        case CellType_Attacker: {
-            cell->cellTypeData.attacker.mode = _data->numberGen1.random(EnergyDistributionMode_Count - 1);
-        } break;
-        case CellType_Injector: {
-            cell->cellTypeData.injector.mode = _data->numberGen1.random(InjectorMode_Count - 1);
-            cell->cellTypeData.injector.counter = 0;
-            cell->cellTypeData.injector.genomeSize = _data->numberGen1.random(cudaSimulationParameters.particleTransformationMaxGenomeSize);
-            cell->cellTypeData.injector.genome = _data->objects.auxiliaryData.getAlignedSubArray(cell->cellTypeData.injector.genomeSize);
-            auto& genome = cell->cellTypeData.injector.genome;
-            for (int i = 0; i < cell->cellTypeData.injector.genomeSize; ++i) {
-                genome[i] = _data->numberGen1.randomByte();
-            }
-            cell->cellTypeData.injector.genomeGeneration = 0;
-        } break;
-        case CellType_Muscle: {
-            cell->cellTypeData.muscle.mode = _data->numberGen1.random(MuscleMode_Count - 1);
-            cell->cellTypeData.muscle.lastBendingDirection = MuscleBendingDirection_None;
-            cell->cellTypeData.muscle.lastBendingSourceIndex = 0;
-            cell->cellTypeData.muscle.consecutiveBendingAngle = 0;
-            cell->cellTypeData.muscle.lastMovementX = 0;
-            cell->cellTypeData.muscle.lastMovementY = 0;
-        } break;
-        case CellType_Defender: {
-            cell->cellTypeData.defender.mode = _data->numberGen1.random(DefenderMode_Count - 1);
-        } break;
-        case CellType_Reconnector: {
-            cell->cellTypeData.reconnector.restrictToColor = _data->numberGen1.randomBool() ? _data->numberGen1.random(MAX_COLORS - 1) : 255;
-            cell->cellTypeData.reconnector.restrictToMutants = static_cast<uint8_t>(_data->numberGen1.random(ReconnectorRestrictToMutants_Count - 1));
-        } break;
-        case CellType_Detonator: {
-            cell->cellTypeData.detonator.state = DetonatorState_Ready;
-            cell->cellTypeData.detonator.countdown = 10;
-        } break;
-        }
-
-    } else {
-        cell->cellType = CellType_None;
-    }
     return cell;
 }
 

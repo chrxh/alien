@@ -22,7 +22,7 @@ void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
     numberGen2.init(1536941);  //some array size for random numbers (~ 1.5 MB)
 
     structuralOperations.init();
-    for (int i = 0; i < CellType_WithoutNone_Count; ++i) {
+    for (int i = 0; i < CellType_Count; ++i) {
         cellTypeOperations[i].init();
     }
 }
@@ -38,7 +38,7 @@ __device__ void SimulationData::prepareForNextTimestep()
 
     structuralOperations.setMemory(processMemory.getTypedSubArray<StructuralOperation>(maxStructureOperations), maxStructureOperations);
 
-    for (int i = 0; i < CellType_WithoutNone_Count; ++i) {
+    for (int i = CellType_Base; i < CellType_Count; ++i) {
         cellTypeOperations[i].setMemory(processMemory.getTypedSubArray<CellTypeOperation>(maxCellTypeOperations), maxCellTypeOperations);
     }
     *externalEnergy = cudaSimulationParameters.externalEnergy;
@@ -112,7 +112,7 @@ void SimulationData::free()
     CudaMemoryManager::getInstance().freeMemory(externalEnergy);
 
     structuralOperations.free();
-    for (int i = 0; i < CellType_WithoutNone_Count; ++i) {
+    for (int i = 0; i < CellType_Count; ++i) {
         cellTypeOperations[i].free();
     }
 }

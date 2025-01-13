@@ -35,11 +35,11 @@ TEST_F(AttackerTests, nothingFound)
         {CellDescription()
              .setId(1)
              .setPos({10.0f, 10.0f})
-             .setCellType(AttackerDescription()),
+             .setCellTypeData(AttackerDescription()),
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
-             .setCellType(OscillatorDescription())
+             .setCellTypeData(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -61,11 +61,11 @@ TEST_F(AttackerTests, successNoTransmitter)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellType(AttackerDescription()),
+            .setCellTypeData(AttackerDescription()),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellType(OscillatorDescription())
+            .setCellTypeData(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
@@ -97,13 +97,13 @@ TEST_F(AttackerTests, successDistributeToOneTransmitter)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellType(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
+            .setCellTypeData(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellType(OscillatorDescription())
+            .setCellTypeData(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({12.0f, 10.0f}).setCellType(TransmitterDescription()),
+        CellDescription().setId(3).setPos({12.0f, 10.0f}).setCellTypeData(DepotDescription()),
         CellDescription().setId(4).setPos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);
@@ -134,14 +134,14 @@ TEST_F(AttackerTests, successDistributeToTwoTransmitters)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellType(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
+            .setCellTypeData(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellType(OscillatorDescription())
+            .setCellTypeData(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({12.0f, 10.0f}).setCellType(TransmitterDescription()),
-        CellDescription().setId(4).setPos({11.0f, 9.0f}).setCellType(TransmitterDescription()),
+        CellDescription().setId(3).setPos({12.0f, 10.0f}).setCellTypeData(DepotDescription()),
+        CellDescription().setId(4).setPos({11.0f, 9.0f}).setCellTypeData(DepotDescription()),
         CellDescription().setId(5).setPos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);
@@ -171,14 +171,14 @@ TEST_F(AttackerTests, successDistributeToTwoTransmittersWithDifferentColor)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellType(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
+            .setCellTypeData(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellType(OscillatorDescription())
+            .setCellTypeData(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({12.0f, 10.0f}).setCellType(TransmitterDescription()),
-        CellDescription().setId(4).setPos({11.0f, 9.0f}).setCellType(TransmitterDescription()).setColor(1),
+        CellDescription().setId(3).setPos({12.0f, 10.0f}).setCellTypeData(DepotDescription()),
+        CellDescription().setId(4).setPos({11.0f, 9.0f}).setCellTypeData(DepotDescription()).setColor(1),
         CellDescription().setId(5).setPos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);
@@ -211,17 +211,17 @@ TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellType(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
+            .setCellTypeData(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellType(OscillatorDescription())
+            .setCellTypeData(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({12.0f, 10.0f}).setCellType(TransmitterDescription()),
+        CellDescription().setId(3).setPos({12.0f, 10.0f}).setCellTypeData(DepotDescription()),
         CellDescription()
             .setId(4)
             .setPos({11.0f, 9.0f})
-            .setCellType(ConstructorDescription().setGenome(otherGenome)),
+            .setCellTypeData(ConstructorDescription().setGenome(otherGenome)),
         CellDescription().setId(5).setPos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);
@@ -251,13 +251,13 @@ TEST_F(AttackerTests, successDistributeToConnectedCells)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellType(AttackerDescription().setMode(EnergyDistributionMode_ConnectedCells)),
+            .setCellTypeData(AttackerDescription().setMode(EnergyDistributionMode_ConnectedCells)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellType(OscillatorDescription())
+            .setCellTypeData(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({12.0f, 10.0f}).setCellType(OscillatorDescription()),
+        CellDescription().setId(3).setPos({12.0f, 10.0f}).setCellTypeData(OscillatorDescription()),
         CellDescription().setId(4).setPos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);
@@ -288,11 +288,11 @@ TEST_F(AttackerTests, successTwoTargets)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellType(AttackerDescription()),
+            .setCellTypeData(AttackerDescription()),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellType(OscillatorDescription())
+            .setCellTypeData(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}),
         CellDescription().setId(4).setPos({9.0f, 11.0f}),

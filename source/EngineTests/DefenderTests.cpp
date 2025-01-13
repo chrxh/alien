@@ -38,20 +38,20 @@ TEST_F(DefenderTests, attackerVsAntiAttacker)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellType(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
+            .setCellTypeData(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellType(OscillatorDescription().setPulseMode(1))
+            .setCellTypeData(OscillatorDescription().setPulseMode(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
             .setPos({9.0f, 10.0f})
-            .setCellType(OscillatorDescription()),
+            .setCellTypeData(OscillatorDescription()),
         CellDescription()
             .setId(4)
             .setPos({7.0f, 10.0f})
-            .setCellType(DefenderDescription().setMode(DefenderMode_DefendAgainstAttacker)),
+            .setCellTypeData(DefenderDescription().setMode(DefenderMode_DefendAgainstAttacker)),
     });
     data.addConnection(1, 2);
     data.addConnection(3, 4);
@@ -77,17 +77,17 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellType(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
+            .setCellTypeData(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellType(OscillatorDescription().setPulseMode(1))
+            .setCellTypeData(OscillatorDescription().setPulseMode(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellType(OscillatorDescription()),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellTypeData(OscillatorDescription()),
         CellDescription()
             .setId(4)
             .setPos({7.0f, 10.0f})
-            .setCellType(DefenderDescription().setMode(DefenderMode_DefendAgainstInjector)),
+            .setCellTypeData(DefenderDescription().setMode(DefenderMode_DefendAgainstInjector)),
     });
     data.addConnection(1, 2);
     data.addConnection(3, 4);
@@ -115,17 +115,17 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellType(InjectorDescription().setMode(InjectorMode_InjectAll).setGenome(genome)),
+            .setCellTypeData(InjectorDescription().setMode(InjectorMode_InjectAll).setGenome(genome)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellType(OscillatorDescription().setPulseMode(1))
+            .setCellTypeData(OscillatorDescription().setPulseMode(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellType(ConstructorDescription()),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellTypeData(ConstructorDescription()),
         CellDescription()
             .setId(4)
             .setPos({7.0f, 10.0f})
-            .setCellType(DefenderDescription().setMode(DefenderMode_DefendAgainstAttacker)),
+            .setCellTypeData(DefenderDescription().setMode(DefenderMode_DefendAgainstAttacker)),
     });
     data.addConnection(1, 2);
     data.addConnection(3, 4);
@@ -138,13 +138,13 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto actualInjector = getCell(actualData, 1);
-    auto actualInjectorFunc = std::get<InjectorDescription>(*actualInjector.cellTypeData);
+    auto actualInjectorFunc = std::get<InjectorDescription>(actualInjector.cellTypeData);
 
     auto actualTarget = getCell(actualData, 3);
-    auto actualTargetFunc = std::get<ConstructorDescription>(*actualTarget.cellTypeData);
+    auto actualTargetFunc = std::get<ConstructorDescription>(actualTarget.cellTypeData);
 
     auto origInjector = getCell(data, 1);
-    auto origInjectorFunc = std::get<InjectorDescription>(*origInjector.cellTypeData);
+    auto origInjectorFunc = std::get<InjectorDescription>(origInjector.cellTypeData);
 
     EXPECT_TRUE(approxCompare(1.0f, actualInjector.signal->channels[0]));
     EXPECT_EQ(0, actualInjectorFunc.counter);
@@ -160,17 +160,17 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellType(InjectorDescription().setMode(InjectorMode_InjectAll).setGenome(genome)),
+            .setCellTypeData(InjectorDescription().setMode(InjectorMode_InjectAll).setGenome(genome)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellType(OscillatorDescription().setPulseMode(1))
+            .setCellTypeData(OscillatorDescription().setPulseMode(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellType(ConstructorDescription()),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellTypeData(ConstructorDescription()),
         CellDescription()
             .setId(4)
             .setPos({7.0f, 10.0f})
-            .setCellType(DefenderDescription().setMode(DefenderMode_DefendAgainstInjector)),
+            .setCellTypeData(DefenderDescription().setMode(DefenderMode_DefendAgainstInjector)),
     });
     data.addConnection(1, 2);
     data.addConnection(3, 4);
@@ -183,16 +183,16 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto actualInjector = getCell(actualData, 1);
-    auto actualInjectorFunc = std::get<InjectorDescription>(*actualInjector.cellTypeData);
+    auto actualInjectorFunc = std::get<InjectorDescription>(actualInjector.cellTypeData);
 
     auto origTarget = getCell(data, 3);
-    auto origTargetFunc = std::get<ConstructorDescription>(*origTarget.cellTypeData);
+    auto origTargetFunc = std::get<ConstructorDescription>(origTarget.cellTypeData);
 
     auto actualTarget = getCell(actualData, 3);
-    auto actualTargetFunc = std::get<ConstructorDescription>(*actualTarget.cellTypeData);
+    auto actualTargetFunc = std::get<ConstructorDescription>(actualTarget.cellTypeData);
 
     auto origInjector = getCell(data, 1);
-    auto origInjectorFunc = std::get<InjectorDescription>(*origInjector.cellTypeData);
+    auto origInjectorFunc = std::get<InjectorDescription>(origInjector.cellTypeData);
 
     EXPECT_TRUE(approxCompare(1.0f, actualInjector.signal->channels[0]));
     EXPECT_EQ(4, actualInjectorFunc.counter);

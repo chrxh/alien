@@ -244,26 +244,26 @@ namespace cereal
     }
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, NeuronGenomeDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, BaseGenomeDescription& data)
     {
-        NeuronGenomeDescription defaultObject;
+        BaseGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_NeuronGenome_ActivationFunctions, data.activationFunctions, defaultObject.activationFunctions);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.weights, data.biases);
     }
-    SPLIT_SERIALIZATION(NeuronGenomeDescription)
+    SPLIT_SERIALIZATION(BaseGenomeDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, TransmitterGenomeDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, DepotGenomeDescription& data)
     {
-        TransmitterGenomeDescription defaultObject;
+        DepotGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_TransmitterGenome_Mode, data.mode, defaultObject.mode);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(TransmitterGenomeDescription)
+    SPLIT_SERIALIZATION(DepotGenomeDescription)
 
     template <class Archive>
     void serialize(Archive& ar, MakeGenomeCopy& data)
@@ -471,26 +471,26 @@ namespace cereal
     SPLIT_SERIALIZATION(SignalDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, NeuronDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, BaseDescription& data)
     {
-        NeuronDescription defaultObject;
+        BaseDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Neuron_Weights, data.weights, defaultObject.weights);
         loadSave(task, auxiliaries, Id_Neuron_Biases, data.biases, defaultObject.biases);
         loadSave(task, auxiliaries, Id_Neuron_ActivationFunctions, data.activationFunctions, defaultObject.activationFunctions);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(NeuronDescription)
+    SPLIT_SERIALIZATION(BaseDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, TransmitterDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, DepotDescription& data)
     {
-        TransmitterDescription defaultObject;
+        DepotDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Transmitter_Mode, data.mode, defaultObject.mode);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(TransmitterDescription)
+    SPLIT_SERIALIZATION(DepotDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ConstructorDescription& data)
@@ -1317,7 +1317,7 @@ void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics,
 bool SerializerService::wrapGenome(ClusteredDataDescription& output, std::vector<uint8_t> const& input)
 {
     output.clear();
-    output.addCluster(ClusterDescription().addCell(CellDescription().setCellType(ConstructorDescription().setGenome(input))));
+    output.addCluster(ClusterDescription().addCell(CellDescription().setCellTypeData(ConstructorDescription().setGenome(input))));
     return true;
 }
 
@@ -1335,6 +1335,6 @@ bool SerializerService::unwrapGenome(std::vector<uint8_t>& output, ClusteredData
     if (cell.getCellType() != CellType_Constructor) {
         return false;
     }
-    output = std::get<ConstructorDescription>(*cell.cellTypeData).genome;
+    output = std::get<ConstructorDescription>(cell.cellTypeData).genome;
     return true;
 }

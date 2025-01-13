@@ -263,7 +263,7 @@ namespace
                 auto cellIntern = processedGenome.previewDescription.cells.at(index);
 
                 if (node.getCellType() == CellType_Constructor) {
-                    auto const& constructor = std::get<ConstructorGenomeDescription>(*node.cellTypeData);
+                    auto const& constructor = std::get<ConstructorGenomeDescription>(node.cellTypeData);
                     if (constructor.isMakeGenomeCopy()) {
                         result.cells.at(index + indexOffset).selfReplicator = true;
                         ++index;

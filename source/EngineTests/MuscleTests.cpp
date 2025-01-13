@@ -35,11 +35,11 @@ TEST_F(MuscleTests, doNothing)
         {CellDescription()
              .setId(1)
              .setPos({10.0f, 10.0f})
-             .setCellType(MuscleDescription().setMode(MuscleMode_Movement)),
+             .setCellTypeData(MuscleDescription().setMode(MuscleMode_Movement)),
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
-             .setCellType(OscillatorDescription())
+             .setCellTypeData(OscillatorDescription())
              .setSignal({0, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -69,11 +69,11 @@ TEST_F(MuscleTests, moveForward)
         {CellDescription()
              .setId(1)
              .setPos({10.0f, 10.0f})
-             .setCellType(MuscleDescription().setMode(MuscleMode_Movement)),
+             .setCellTypeData(MuscleDescription().setMode(MuscleMode_Movement)),
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
-             .setCellType(OscillatorDescription())
+             .setCellTypeData(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -103,11 +103,11 @@ TEST_F(MuscleTests, moveBackward)
         {CellDescription()
              .setId(1)
              .setPos({10.0f, 10.0f})
-             .setCellType(MuscleDescription().setMode(MuscleMode_Movement)),
+             .setCellTypeData(MuscleDescription().setMode(MuscleMode_Movement)),
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
-             .setCellType(OscillatorDescription())
+             .setCellTypeData(OscillatorDescription())
              .setSignal({-1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -136,16 +136,16 @@ TEST_F(MuscleTests, multipleMovementDirections)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellType(MuscleDescription().setMode(MuscleMode_Movement)),
+            .setCellTypeData(MuscleDescription().setMode(MuscleMode_Movement)),
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellType(OscillatorDescription())
+            .setCellTypeData(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
             .setPos({10.0f, 11.0f})
-            .setCellType(OscillatorDescription())
+            .setCellTypeData(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
     });
     data.addConnection(1, 2);
@@ -171,11 +171,11 @@ TEST_F(MuscleTests, expansion)
         {CellDescription()
              .setId(1)
              .setPos({10.0f, 10.0f})
-             .setCellType(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
+             .setCellTypeData(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
          CellDescription()
              .setId(2)
              .setPos({10.0f + smallDistance, 10.0f})
-             .setCellType(OscillatorDescription())
+             .setCellTypeData(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -203,11 +203,11 @@ TEST_F(MuscleTests, expansionNotPossible)
         {CellDescription()
              .setId(1)
              .setPos({10.0f, 10.0f})
-             .setCellType(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
+             .setCellTypeData(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
          CellDescription()
              .setId(2)
              .setPos({10.0f + largeDistance, 10.0f})
-             .setCellType(OscillatorDescription())
+             .setCellTypeData(OscillatorDescription())
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -231,11 +231,11 @@ TEST_F(MuscleTests, contraction)
         {CellDescription()
              .setId(1)
              .setPos({10.0f, 10.0f})
-             .setCellType(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
+             .setCellTypeData(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
          CellDescription()
              .setId(2)
              .setPos({10.0f + largeDistance, 10.0f})
-             .setCellType(OscillatorDescription())
+             .setCellTypeData(OscillatorDescription())
              .setSignal({-1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -260,16 +260,16 @@ TEST_F(MuscleTests, multipleContraction)
         CellDescription()
             .setId(1)
             .setPos({10.0f, 10.0f})
-            .setCellType(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
+            .setCellTypeData(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
         CellDescription()
             .setId(2)
             .setPos({10.0f + largeDistance, 10.0f})
-            .setCellType(OscillatorDescription())
+            .setCellTypeData(OscillatorDescription())
             .setSignal({-1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
             .setPos({10.0f, 10.0f + largeDistance})
-            .setCellType(OscillatorDescription())
+            .setCellTypeData(OscillatorDescription())
             .setSignal({-1, 0, 0, 0, 0, 0, 0, 0}),
     });
     data.addConnection(1, 2);
@@ -297,11 +297,11 @@ TEST_F(MuscleTests, contractionNotPossible)
         {CellDescription()
              .setId(1)
              .setPos({10.0f, 10.0f})
-             .setCellType(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
+             .setCellTypeData(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
          CellDescription()
              .setId(2)
              .setPos({10.0f + smallDistance, 10.0f})
-             .setCellType(OscillatorDescription())
+             .setCellTypeData(OscillatorDescription())
              .setSignal({-1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -324,11 +324,11 @@ TEST_F(MuscleTests, bendClockwise)
         CellDescription()
             .setId(2)
             .setPos({10.0f, 10.0f})
-            .setCellType(MuscleDescription().setMode(MuscleMode_Bending)),
+            .setCellTypeData(MuscleDescription().setMode(MuscleMode_Bending)),
         CellDescription()
             .setId(3)
             .setPos({11.0f, 10.0f})
-            .setCellType(OscillatorDescription())
+            .setCellTypeData(OscillatorDescription())
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
     });
     data.addConnection(1, 2);
@@ -360,11 +360,11 @@ TEST_F(MuscleTests, bendCounterClockwise)
         CellDescription()
             .setId(2)
             .setPos({10.0f, 10.0f})
-            .setCellType(MuscleDescription().setMode(MuscleMode_Bending)),
+            .setCellTypeData(MuscleDescription().setMode(MuscleMode_Bending)),
         CellDescription()
             .setId(3)
             .setPos({11.0f, 10.0f})
-            .setCellType(OscillatorDescription())
+            .setCellTypeData(OscillatorDescription())
             .setSignal({-1, 0, 0, 0, 0, 0, 0, 0}),
     });
     data.addConnection(1, 2);

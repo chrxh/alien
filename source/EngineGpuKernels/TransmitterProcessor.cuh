@@ -24,7 +24,7 @@ private:
 
 __device__ __inline__ void TransmitterProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
-    auto& operations = data.cellTypeOperations[CellType_Transmitter];
+    auto& operations = data.cellTypeOperations[CellType_Depot];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         auto const& cell = operations.at(i).cell;
@@ -49,7 +49,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
     }
     for (int i = 0; i < cell->numConnections; ++i) {
         auto connectedCell = cell->connections[i].cell;
-        if (connectedCell->cellType == CellType_Transmitter) {
+        if (connectedCell->cellType == CellType_Depot) {
             continue;
         }
         if (connectedCell->cellType == CellType_Constructor) {
@@ -114,7 +114,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
                 return false;
             }
             if (!cudaSimulationParameters.cellTypeTransmitterEnergyDistributionSameCreature || otherCell->creatureId == cell->creatureId) {
-                if (otherCell->cellType == CellType_Transmitter) {
+                if (otherCell->cellType == CellType_Depot) {
                     return true;
                 }
                 if (otherCell->cellType == CellType_Constructor && !otherCell->cellTypeData.constructor.isReady) {

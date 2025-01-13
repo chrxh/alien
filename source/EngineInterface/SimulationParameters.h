@@ -107,8 +107,6 @@ struct SimulationParameters
     bool cellResetAgeAfterActivation = false;
 
     bool particleTransformationAllowed = false;
-    bool particleTransformationRandomCellType = false;
-    int particleTransformationMaxGenomeSize = 300;
     ColorVector<float> particleSplitEnergy = {
         Infinity<float>::value,
         Infinity<float>::value,

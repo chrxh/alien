@@ -5,8 +5,10 @@
 using CellType = int;
 enum CellType_
 {
-    CellType_Neuron,
-    CellType_Transmitter,
+    CellType_Structure,
+    CellType_Free,
+    CellType_Base,
+    CellType_Depot,
     CellType_Constructor,
     CellType_Sensor,
     CellType_Oscillator,
@@ -16,9 +18,6 @@ enum CellType_
     CellType_Defender,
     CellType_Reconnector,
     CellType_Detonator,
-    CellType_WithoutNone_Count,
-
-    CellType_None = CellType_WithoutNone_Count,
     CellType_Count,
 };
 
@@ -52,7 +51,7 @@ enum SensorRestrictToMutants_
     SensorRestrictToMutants_RestrictToSameMutants,
     SensorRestrictToMutants_RestrictToOtherMutants,
     SensorRestrictToMutants_RestrictToFreeCells,
-    SensorRestrictToMutants_RestrictToHandcraftedCells,
+    SensorRestrictToMutants_RestrictToStructures,
     SensorRestrictToMutants_RestrictToLessComplexMutants,
     SensorRestrictToMutants_RestrictToMoreComplexMutants,
     SensorRestrictToMutants_Count
