@@ -31,7 +31,7 @@ public:
     __inline__ __device__ static void deleteConnections(Cell* cell1, Cell* cell2);
     __inline__ __device__ static void deleteConnectionOneWay(Cell* cell1, Cell* cell2);
 
-    __inline__ __device__ static bool existCrossingConnections(SimulationData& data, float2 const& pos, float const& radius, bool detached);
+    __inline__ __device__ static bool existCrossingConnections(SimulationData& data, float2 const& pos1, float2 const& pos2, float const& radius, bool detached);
     __inline__ __device__ static bool checkConnectedCellsForCrossingConnection(Cell* cell1, float2 otherCellPos);
     __inline__ __device__ static bool hasAngleSpace(SimulationData& data, Cell* cell, float angle, ConstructorAngleAlignment angleAlignment);
     __inline__ __device__ static bool isConnectedConnected(Cell* cell, Cell* otherCell);
@@ -467,16 +467,17 @@ __inline__ __device__ void CellConnectionProcessor::deleteConnectionOneWay(Cell*
     }
 }
 
-__inline__ __device__ bool CellConnectionProcessor::existCrossingConnections(SimulationData& data, float2 const& pos, float const& radius, bool detached)
+__inline__ __device__ bool
+CellConnectionProcessor::existCrossingConnections(SimulationData& data, float2 const& pos1, float2 const& pos2, float const& radius, bool detached)
 {
     auto result = false;
-    data.cellMap.executeForEach(pos, radius, detached, [&](auto const& nearCell) {
+    data.cellMap.executeForEach(pos2, radius, detached, [&](auto const& nearCell) {
         if (!nearCell->tryLock()) {
             return;
         }
         for (int j = 0; j < nearCell->numConnections; ++j) {
-            auto const& connection = nearCell->connections[j];
-            if (Math::crossing(pos, nearCell->pos, connection.cell->pos, connection.cell->pos + Math::unitVectorOfAngle(connection.angleFromPrevious))) {
+            auto const& connectedNearCell = nearCell->connections[j].cell;
+            if (Math::crossing(pos1, pos1, nearCell->pos, connectedNearCell->pos)) {
                 nearCell->releaseLock();
                 result = true;
                 return;

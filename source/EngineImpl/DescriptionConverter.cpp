@@ -73,7 +73,7 @@ namespace
     void convertToNeuronData(DataTO const& dataTO, BaseDescription const& neuronDesc, uint64_t& targetIndex)
     {
         targetIndex = *dataTO.numAuxiliaryData;
-        *dataTO.numAuxiliaryData *= NeuronTO::NeuronDataSize;
+        *dataTO.numAuxiliaryData += NeuronTO::NeuronDataSize;
 
         BytesAsFloat bytesAsFloat;
         int bytePos = 0;
