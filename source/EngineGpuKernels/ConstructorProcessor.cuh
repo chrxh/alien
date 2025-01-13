@@ -354,7 +354,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     float2 newCellPos = hostCell->pos + newCellDirection;
 
     if (CellConnectionProcessor::existCrossingConnections(
-            data, newCellPos, cudaSimulationParameters.cellTypeConstructorConnectingCellMaxDistance[hostCell->color], hostCell->detached)) {
+            data, hostCell->pos, newCellPos, cudaSimulationParameters.cellTypeConstructorConnectingCellMaxDistance[hostCell->color], hostCell->detached)) {
         return nullptr;
     }
 

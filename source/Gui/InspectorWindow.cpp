@@ -294,15 +294,17 @@ void _InspectorWindow::processCellTypeTab(CellDescription& cell)
                 ImGui::TreePop();
             }
         }
-        if (ImGui::TreeNodeEx("Signals", TreeNodeFlags)) {
-            int index = 0;
-            for (auto& channel : cell.signal->channels) {
-                AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters().name("Channel #" + std::to_string(index)).format("%.3f").step(0.1f).textWidth(SignalTextWidth),
-                    channel);
-                ++index;
+        if (cell.signal.has_value()) {
+            if (ImGui::TreeNodeEx("Signals", TreeNodeFlags)) {
+                int index = 0;
+                for (auto& channel : cell.signal->channels) {
+                    AlienImGui::InputFloat(
+                        AlienImGui::InputFloatParameters().name("Channel #" + std::to_string(index)).format("%.3f").step(0.1f).textWidth(SignalTextWidth),
+                        channel);
+                    ++index;
+                }
+                ImGui::TreePop();
             }
-            ImGui::TreePop();
         }
 
         ImGui::EndChild();

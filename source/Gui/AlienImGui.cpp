@@ -1738,8 +1738,6 @@ bool AlienImGui::CellTypeCombo(CellTypeComboParameters& parameters, int& value)
 {
     auto modCellTypeStrings = Const::CellTypeStrings;
     auto noneString = modCellTypeStrings.back();
-    modCellTypeStrings.pop_back();
-    modCellTypeStrings.insert(modCellTypeStrings.begin(), noneString);
 
     if (!parameters._includeStructureAndFreeCells) {
         modCellTypeStrings.erase(modCellTypeStrings.begin());

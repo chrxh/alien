@@ -111,8 +111,8 @@ namespace
     auto constexpr Id_Cell_GenomeNodeIndex = 25;
 
     auto constexpr Id_Neuron_Weights = 0;
-    auto constexpr Id_Neuron_Biases = 0;
-    auto constexpr Id_Neuron_ActivationFunctions = 0;
+    auto constexpr Id_Neuron_Biases = 1;
+    auto constexpr Id_Neuron_ActivationFunctions = 2;
 
     auto constexpr Id_Constructor_ActivationMode = 0;
     auto constexpr Id_Constructor_ConstructionActivationTime = 6;
