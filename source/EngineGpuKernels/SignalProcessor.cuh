@@ -29,7 +29,7 @@ __inline__ __device__ void SignalProcessor::collectCellTypeOperations(Simulation
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
-        if (cell->cellType != CellType_None) {
+        if (cell->cellType != CellType_Structure && cell->cellType != CellType_Free) {
             if (cell->cellType == CellType_Detonator && cell->cellTypeData.detonator.state == DetonatorState_Activated) {
                 data.cellTypeOperations[cell->cellType].tryAddEntry(CellTypeOperation{cell});
             } else if (cell->livingState != LivingState_UnderConstruction && cell->livingState != LivingState_Activating && cell->activationTime == 0) {

@@ -50,8 +50,10 @@ namespace
 
 _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimulation const& settings)
 {
+    printf("1\n");
     initCuda();
     CudaMemoryManager::getInstance().reset();
+    printf("2\n");
 
     _settings = settings;
     setSimulationParameters(settings.simulationParameters);
@@ -84,6 +86,7 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
 
     //default array sizes for empty simulation (will be resized later if not sufficient)
     resizeArrays({100000, 100000, 100000});
+    printf("4\n");
 }
 
 _SimulationCudaFacade::~_SimulationCudaFacade()

@@ -742,7 +742,7 @@ ConstructorProcessor::constructCellIntern(
 
     auto genomeCurrentBytePosition = constructionData.genomeCurrentBytePosition;
     switch (constructionData.cellType) {
-    case CellType_Neuron: {
+    case CellType_Base: {
         result->cellTypeData.neuron.neuronState = data.objects.auxiliaryData.getTypedSubArray<NeuronFunction::NeuronState>(1);
         for (int i = 0; i < MAX_CHANNELS *  MAX_CHANNELS; ++i) {
             result->cellTypeData.neuron.neuronState->weights[i] = GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition) * 4;
@@ -755,7 +755,7 @@ ConstructorProcessor::constructCellIntern(
                 GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % NeuronActivationFunction_Count;
         }
     } break;
-    case CellType_Transmitter: {
+    case CellType_Depot: {
         result->cellTypeData.transmitter.mode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % EnergyDistributionMode_Count;
     } break;
     case CellType_Constructor: {
@@ -912,7 +912,7 @@ __inline__ __device__ float ConstructorProcessor::calcGenomeComplexity(int color
     GenomeDecoder::executeForEachNodeRecursively(genome, toInt(genomeSize), false, false, [&](int depth, int nodeAddress, int repetitions) {
         auto ramificationFactor = depth > lastDepth ? genomeComplexityRamificationFactor * toFloat(numRamifications) : 0.0f;
         auto cellType = GenomeDecoder::getNextCellType(genome, nodeAddress);
-        auto neuronFactor = cellType == CellType_Neuron ? cudaSimulationParameters.genomeComplexityNeuronFactor[color] : 0.0f;
+        auto neuronFactor = cellType == CellType_Base ? cudaSimulationParameters.genomeComplexityNeuronFactor[color] : 0.0f;
         if (depth <= depthLevel) {
             result += /* (1.0f + toFloat(depth)) * */ toFloat(repetitions) * (ramificationFactor + sizeFactor + neuronFactor);
         }

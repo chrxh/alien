@@ -184,8 +184,8 @@ std::vector<uint8_t> GenomeDescriptionService::convertDescriptionToBytes(GenomeD
         writeOptionalByte(result, cell.numRequiredAdditionalConnections);
         writeByte(result, cell.color);
         switch (cell.getCellType()) {
-        case CellType_Neuron: {
-            auto const& neuron = std::get<NeuronGenomeDescription>(*cell.cellTypeData);
+        case CellType_Base: {
+            auto const& neuron = std::get<BaseGenomeDescription>(cell.cellTypeData);
             for (int row = 0; row < MAX_CHANNELS; ++row) {
                 for (int col = 0; col < MAX_CHANNELS; ++col) {
                     writeNeuronProperty(result, neuron.weights[row][col]);
@@ -198,12 +198,12 @@ std::vector<uint8_t> GenomeDescriptionService::convertDescriptionToBytes(GenomeD
                 writeByte(result, neuron.activationFunctions[i]);
             }
         } break;
-        case CellType_Transmitter: {
-            auto const& transmitter = std::get<TransmitterGenomeDescription>(*cell.cellTypeData);
+        case CellType_Depot: {
+            auto const& transmitter = std::get<DepotGenomeDescription>(cell.cellTypeData);
             writeByte(result, transmitter.mode);
         } break;
         case CellType_Constructor: {
-            auto const& constructor = std::get<ConstructorGenomeDescription>(*cell.cellTypeData);
+            auto const& constructor = std::get<ConstructorGenomeDescription>(cell.cellTypeData);
             writeByte(result, constructor.mode);
             writeWord(result, constructor.constructionActivationTime);
             writeAngle(result, constructor.constructionAngle1);
@@ -211,7 +211,7 @@ std::vector<uint8_t> GenomeDescriptionService::convertDescriptionToBytes(GenomeD
             writeGenome(result, constructor.genome);
         } break;
         case CellType_Sensor: {
-            auto const& sensor = std::get<SensorGenomeDescription>(*cell.cellTypeData);
+            auto const& sensor = std::get<SensorGenomeDescription>(cell.cellTypeData);
             writeDensity(result, sensor.minDensity);
             writeOptionalByte(result, sensor.restrictToColor);
             writeByte(result, sensor.restrictToMutants);
@@ -219,34 +219,34 @@ std::vector<uint8_t> GenomeDescriptionService::convertDescriptionToBytes(GenomeD
             writeOptionalByte(result, sensor.maxRange);
         } break;
         case CellType_Oscillator: {
-            auto const& oscillator = std::get<OscillatorGenomeDescription>(*cell.cellTypeData);
+            auto const& oscillator = std::get<OscillatorGenomeDescription>(cell.cellTypeData);
             writeByte(result, oscillator.pulseMode);
             writeByte(result, oscillator.alternationMode);
         } break;
         case CellType_Attacker: {
-            auto const& attacker = std::get<AttackerGenomeDescription>(*cell.cellTypeData);
+            auto const& attacker = std::get<AttackerGenomeDescription>(cell.cellTypeData);
             writeByte(result, attacker.mode);
         } break;
         case CellType_Injector: {
-            auto const& injector = std::get<InjectorGenomeDescription>(*cell.cellTypeData);
+            auto const& injector = std::get<InjectorGenomeDescription>(cell.cellTypeData);
             writeByte(result, injector.mode);
             writeGenome(result, injector.genome);
         } break;
         case CellType_Muscle: {
-            auto const& muscle = std::get<MuscleGenomeDescription>(*cell.cellTypeData);
+            auto const& muscle = std::get<MuscleGenomeDescription>(cell.cellTypeData);
             writeByte(result, muscle.mode);
         } break;
         case CellType_Defender: {
-            auto const& defender = std::get<DefenderGenomeDescription>(*cell.cellTypeData);
+            auto const& defender = std::get<DefenderGenomeDescription>(cell.cellTypeData);
             writeByte(result, defender.mode);
         } break;
         case CellType_Reconnector: {
-            auto const& reconnector = std::get<ReconnectorGenomeDescription>(*cell.cellTypeData);
+            auto const& reconnector = std::get<ReconnectorGenomeDescription>(cell.cellTypeData);
             writeOptionalByte(result, reconnector.restrictToColor);
             writeByte(result, reconnector.restrictToMutants);
         } break;
         case CellType_Detonator: {
-            auto const& detonator = std::get<DetonatorGenomeDescription>(*cell.cellTypeData);
+            auto const& detonator = std::get<DetonatorGenomeDescription>(cell.cellTypeData);
             writeWord(result, detonator.countdown);
         } break;
         }
@@ -300,8 +300,8 @@ namespace
             cell.color = readByte(data, bytePosition) % MAX_COLORS;
 
             switch (cellType) {
-            case CellType_Neuron: {
-                NeuronGenomeDescription neuron;
+            case CellType_Base: {
+                BaseGenomeDescription neuron;
                 for (int row = 0; row < MAX_CHANNELS; ++row) {
                     for (int col = 0; col < MAX_CHANNELS; ++col) {
                         neuron.weights[row][col] = readNeuronProperty(data, bytePosition);
@@ -315,8 +315,8 @@ namespace
                 }
                 cell.cellTypeData = neuron;
             } break;
-            case CellType_Transmitter: {
-                TransmitterGenomeDescription transmitter;
+            case CellType_Depot: {
+                DepotGenomeDescription transmitter;
                 transmitter.mode = readByte(data, bytePosition) % EnergyDistributionMode_Count;
                 cell.cellTypeData = transmitter;
             } break;

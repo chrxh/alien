@@ -78,7 +78,7 @@ namespace
         }
 
         switch (cell->cellType) {
-        case CellType_Neuron: {
+        case CellType_Base: {
             int targetSize;    //not used
             copyAuxiliaryData<int>(
                 sizeof(NeuronFunction::NeuronState),
@@ -88,7 +88,7 @@ namespace
                 *dataTO.numAuxiliaryData,
                 dataTO.auxiliaryData);
         } break;
-        case CellType_Transmitter: {
+        case CellType_Depot: {
             cellTO.cellTypeData.transmitter.mode = cell->cellTypeData.transmitter.mode;
         } break;
         case CellType_Constructor: {

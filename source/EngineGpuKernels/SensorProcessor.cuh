@@ -79,10 +79,10 @@ __inline__ __device__ uint32_t SensorProcessor::getCellDensity(
             result = densityMap.getOtherMutantDensity(timestep, scanPos, cell->mutationId);
         }
         if (restrictToMutants == SensorRestrictToMutants_RestrictToFreeCells) {
-            result = densityMap.getEmergentCellDensity(scanPos);
+            result = densityMap.getFreeCellDensity(scanPos);
         }
-        if (restrictToMutants == SensorRestrictToMutants_RestrictToHandcraftedCells) {
-            result = densityMap.getZeroMutantDensity(scanPos);
+        if (restrictToMutants == SensorRestrictToMutants_RestrictToStructures) {
+            result = densityMap.getStructureDensity(scanPos);
         }
         if (restrictToMutants == SensorRestrictToMutants_RestrictToLessComplexMutants) {
             result = densityMap.getLessComplexMutantDensity(scanPos, cell->genomeComplexity);
@@ -141,8 +141,8 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
 
                 uint32_t density = 0;
                 if (!blockedByWall[angleIndex]) {
-                    if (restrictToMutants == SensorRestrictToMutants_NoRestriction || restrictToMutants == SensorRestrictToMutants_RestrictToHandcraftedCells
-                        || densityMap.getZeroMutantDensity(scanPos) == 0) {
+                    if (restrictToMutants == SensorRestrictToMutants_NoRestriction || restrictToMutants == SensorRestrictToMutants_RestrictToStructures
+                        || densityMap.getStructureDensity(scanPos) == 0) {
                         density = getCellDensity(data.timestep, cell, restrictToColor, restrictToMutants, densityMap, scanPos);
                     } else {
                         blockedByWall[angleIndex] = true;
@@ -223,29 +223,26 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
                 continue;
             }
             if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherMutants
-                && (cell->mutationId == otherCell->mutationId || otherCell->mutationId == 0 || otherCell->mutationId == 1
+                && (cell->mutationId == otherCell->mutationId || otherCell->cellType == CellType_Free || otherCell->cellType == CellType_Structure
                     || static_cast<uint8_t>(cell->mutationId & 0xff) == otherCell->ancestorMutationId)) {
                 continue;
             }
-            if (restrictToMutants == SensorRestrictToMutants_RestrictToFreeCells && otherCell->mutationId != 1) {
+            if (restrictToMutants == SensorRestrictToMutants_RestrictToFreeCells && otherCell->cellType != CellType_Free) {
                 continue;
             }
-            if (restrictToMutants == SensorRestrictToMutants_RestrictToHandcraftedCells && otherCell->mutationId != 0) {
+            if (restrictToMutants == SensorRestrictToMutants_RestrictToStructures && otherCell->cellType != CellType_Structure) {
                 continue;
             }
             if (restrictToMutants == SensorRestrictToMutants_RestrictToLessComplexMutants
-                && (otherCell->genomeComplexity >= cell->genomeComplexity || otherCell->mutationId == 0 || otherCell->mutationId == 1)) {
+                && (otherCell->genomeComplexity >= cell->genomeComplexity || otherCell->cellType == CellType_Free
+                    || otherCell->cellType == CellType_Structure)) {
                 continue;
             }
             if (restrictToMutants == SensorRestrictToMutants_RestrictToMoreComplexMutants
-                && (otherCell->genomeComplexity <= cell->genomeComplexity || otherCell->mutationId == 0 || otherCell->mutationId == 1)) {
+                && (otherCell->genomeComplexity <= cell->genomeComplexity || otherCell->cellType == CellType_Free
+                    || otherCell->cellType == CellType_Structure)) {
                 continue;
             }
-            //if (restrictToOtherMutants && otherCell->mutationId != 0
-            //    && ((cell->mutationId <= otherCell->mutationId && cell->genomeComplexity <= otherCell->genomeComplexity)
-            //        || static_cast<uint8_t>(cell->mutationId & 0xff) == otherCell->ancestorMutationId)) {
-            //    continue;
-            //}
 
             otherCell->detectedByCreatureId = static_cast<uint16_t>(cell->creatureId & 0xffff);
         }

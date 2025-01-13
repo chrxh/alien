@@ -31,12 +31,12 @@ private:
     void processCellMetadataTab(CellDescription& cell);
 
     void processOscillatorContent(OscillatorDescription& oscillator);
-    void processNeuronContent(NeuronDescription& neuron);
+    void processNeuronContent(BaseDescription& neuron);
     void processConstructorContent(ConstructorDescription& constructor);
     void processInjectorContent(InjectorDescription& injector);
     void processAttackerContent(AttackerDescription& attacker);
     void processDefenderContent(DefenderDescription& defender);
-    void processTransmitterContent(TransmitterDescription& transmitter);
+    void processTransmitterContent(DepotDescription& transmitter);
     void processMuscleContent(MuscleDescription& muscle);
     void processSensorContent(SensorDescription& sensor);
     void processReconnectorContent(ReconnectorDescription& reconnector);

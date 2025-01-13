@@ -15,7 +15,7 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _otherMutantDensityMap);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _sameMutantDensityMap1);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _sameMutantDensityMap2);
-        CudaMemoryManager::getInstance().acquireMemory<uint32_t>(_densityMapSize.x * _densityMapSize.y, _specificMutantDensityMap);
+        CudaMemoryManager::getInstance().acquireMemory<uint32_t>(_densityMapSize.x * _densityMapSize.y, _specificCellTypeDensityMap);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _lessGenomeComplexityDensityMap1);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _lessGenomeComplexityDensityMap2);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _moreGenomeComplexityDensityMap1);
@@ -29,7 +29,7 @@ public:
         CudaMemoryManager::getInstance().freeMemory(_otherMutantDensityMap);
         CudaMemoryManager::getInstance().freeMemory(_sameMutantDensityMap1);
         CudaMemoryManager::getInstance().freeMemory(_sameMutantDensityMap2);
-        CudaMemoryManager::getInstance().freeMemory(_specificMutantDensityMap);
+        CudaMemoryManager::getInstance().freeMemory(_specificCellTypeDensityMap);
         CudaMemoryManager::getInstance().freeMemory(_lessGenomeComplexityDensityMap1);
         CudaMemoryManager::getInstance().freeMemory(_lessGenomeComplexityDensityMap2);
         CudaMemoryManager::getInstance().freeMemory(_moreGenomeComplexityDensityMap1);
@@ -44,7 +44,7 @@ public:
             _otherMutantDensityMap[index] = 0;
             _sameMutantDensityMap1[index] = 0;
             _sameMutantDensityMap2[index] = 0;
-            _specificMutantDensityMap[index] = 0;
+            _specificCellTypeDensityMap[index] = 0;
             _lessGenomeComplexityDensityMap1[index] = 0;
             _lessGenomeComplexityDensityMap2[index] = 0;
             _moreGenomeComplexityDensityMap1[index] = 0;
@@ -96,20 +96,20 @@ public:
         return 0ul;
     }
 
-    __device__ __inline__ uint32_t getEmergentCellDensity(float2 const& pos) const
+    __device__ __inline__ uint32_t getFreeCellDensity(float2 const& pos) const
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-            return (_specificMutantDensityMap[index] >> 8) & 0xff;
+            return (_specificCellTypeDensityMap[index] >> 8) & 0xff;
         }
         return 0ul;
     }
 
-    __device__ __inline__ uint32_t getZeroMutantDensity(float2 const& pos) const
+    __device__ __inline__ uint32_t getStructureDensity(float2 const& pos) const
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-            return _specificMutantDensityMap[index] & 0xff;
+            return _specificCellTypeDensityMap[index] & 0xff;
         }
         return 0ul;
     }
@@ -149,10 +149,10 @@ public:
             auto color = calcMod(cell->color, MAX_COLORS);
             alienAtomicAdd64(&_colorDensityMap[index], static_cast<uint64_t>((1ull << (color * 8)) | (1ull << 56)));
 
-            if (cell->mutationId == 0) {
-                alienAtomicAdd32(&_specificMutantDensityMap[index], static_cast<uint32_t>(1));
-            } else if (cell->mutationId == 1) {
-                alienAtomicAdd32(&_specificMutantDensityMap[index], static_cast<uint32_t>(0x100));
+            if (cell->cellType == CellType_Structure) {
+                alienAtomicAdd32(&_specificCellTypeDensityMap[index], static_cast<uint32_t>(1));
+            } else if (cell->cellType == CellType_Free) {
+                alienAtomicAdd32(&_specificCellTypeDensityMap[index], static_cast<uint32_t>(0x100));
             } else {
                 {
                     uint64_t bucket = calcOtherMutantsBucket(cell->mutationId, timestep);
@@ -221,7 +221,7 @@ private:
     uint64_t* _sameMutantDensityMap1;
     uint64_t* _sameMutantDensityMap2;
     uint32_t* _respawnedMutantDensityMap;
-    uint32_t* _specificMutantDensityMap;
+    uint32_t* _specificCellTypeDensityMap;
     uint64_t* _lessGenomeComplexityDensityMap1;
     uint64_t* _lessGenomeComplexityDensityMap2;
     uint64_t* _moreGenomeComplexityDensityMap1;

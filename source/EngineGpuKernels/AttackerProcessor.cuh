@@ -257,7 +257,7 @@ __device__ __inline__ void AttackerProcessor::distributeEnergy(SimulationData& d
                 return false;
             }
             if (otherCell->creatureId == cell->creatureId) {
-                if (otherCell->cellType == CellType_Transmitter) {
+                if (otherCell->cellType == CellType_Depot) {
                     return true;
                 }
                 if (otherCell->cellType == CellType_Constructor && !otherCell->cellTypeData.constructor.isReady) {
@@ -328,9 +328,6 @@ __inline__ __device__ float AttackerProcessor::calcOpenAngle(Cell* cell, float2 
 __inline__ __device__ int AttackerProcessor::countAndTrackDefenderCells(SimulationStatistics& statistics, Cell* cell)
 {
     int result = 0;
-    if (cell->cellType == CellType_None) {
-        return result;
-    }
     if (cell->cellType == CellType_Defender && cell->cellTypeData.defender.mode == DefenderMode_DefendAgainstAttacker) {
         ++result;
     }

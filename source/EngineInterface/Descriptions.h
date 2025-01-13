@@ -51,28 +51,38 @@ struct ConnectionDescription
     }
 };
 
-struct NeuronDescription
+struct StructureCellDescription
+{
+    auto operator<=>(StructureCellDescription const&) const = default;
+};
+
+struct FreeCellDescription
+{
+    auto operator<=>(FreeCellDescription const&) const = default;
+};
+
+struct BaseDescription
 {
     std::vector<std::vector<float>> weights;
     std::vector<float> biases;
     std::vector<NeuronActivationFunction> activationFunctions;
 
-    NeuronDescription()
+    BaseDescription()
     {
         weights.resize(MAX_CHANNELS, std::vector<float>(MAX_CHANNELS, 0));
         biases.resize(MAX_CHANNELS, 0);
         activationFunctions.resize(MAX_CHANNELS, 0);
     }
-    auto operator<=>(NeuronDescription const&) const = default;
+    auto operator<=>(BaseDescription const&) const = default;
 };
 
-struct TransmitterDescription
+struct DepotDescription
 {
     EnergyDistributionMode mode = EnergyDistributionMode_TransmittersAndConstructors;
 
-    auto operator<=>(TransmitterDescription const&) const = default;
+    auto operator<=>(DepotDescription const&) const = default;
 
-    TransmitterDescription& setMode(EnergyDistributionMode value)
+    DepotDescription& setMode(EnergyDistributionMode value)
     {
         mode = value;
         return *this;
@@ -333,9 +343,11 @@ struct DetonatorDescription
     }
 };
 
-using CellTypeDescription = std::optional<std::variant<
-    NeuronDescription,
-    TransmitterDescription,
+using CellTypeDescription = std::variant<
+    StructureCellDescription,
+    FreeCellDescription,
+    BaseDescription,
+    DepotDescription,
     ConstructorDescription,
     SensorDescription,
     OscillatorDescription,
@@ -344,7 +356,7 @@ using CellTypeDescription = std::optional<std::variant<
     MuscleDescription,
     DefenderDescription,
     ReconnectorDescription,
-    DetonatorDescription>>;
+    DetonatorDescription>;
 
 struct SignalRoutingRestrictionDescription
 {
@@ -473,7 +485,7 @@ struct CellDescription
     }
     CellType getCellType() const;
     template <typename CellTypeDesc>
-    CellDescription& setCellType(CellTypeDesc const& value)
+    CellDescription& setCellTypeData(CellTypeDesc const& value)
     {
         cellTypeData = value;
         return *this;

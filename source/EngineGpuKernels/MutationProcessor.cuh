@@ -865,7 +865,7 @@ __inline__ __device__ void MutationProcessor::subgenomeColorMutation(SimulationD
 __inline__ __device__ void MutationProcessor::neuronDataMutationNode(SimulationData& data, uint8_t* genome, int nodeAddress)
 {
     auto type = GenomeDecoder::getNextCellType(genome, nodeAddress);
-    if (type == CellType_Neuron) {
+    if (type == CellType_Base) {
         auto cellCopyMutationNeuronDataWeightsPercentage =
             cudaSimulationParameters.features.customizeNeuronMutations ? cudaSimulationParameters.cellCopyMutationNeuronDataWeight : 0.2f;
         auto cellCopyMutationNeuronDataBiasesPercentage =

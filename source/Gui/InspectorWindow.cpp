@@ -130,10 +130,10 @@ void _InspectorWindow::processCell(CellDescription cell)
         processCellTypeTab(cell);
         processCellTypePropertiesTab(cell);
         if (cell.getCellType() == CellType_Constructor) {
-            processCellGenomeTab(std::get<ConstructorDescription>(*cell.cellTypeData));
+            processCellGenomeTab(std::get<ConstructorDescription>(cell.cellTypeData));
         }
         if (cell.getCellType() == CellType_Injector) {
-            processCellGenomeTab(std::get<InjectorDescription>(*cell.cellTypeData));
+            processCellGenomeTab(std::get<InjectorDescription>(cell.cellTypeData));
         }
         processCellMetadataTab(cell);
         validateAndCorrect(cell);
@@ -232,14 +232,21 @@ void _InspectorWindow::processCellTypeTab(CellDescription& cell)
                         AlienImGui::CellTypeComboParameters()
                             .name("Function")
                             .textWidth(CellTypeBaseTabTextWidth)
+                            .includeStructureAndFreeCells(true)
                             .tooltip(Const::getCellTypeTooltip(type)),
                         type)) {
                     switch (type) {
-                    case CellType_Neuron: {
-                        cell.cellTypeData = NeuronDescription();
+                    case CellType_Structure: {
+                        cell.cellTypeData = StructureCellDescription();
                     } break;
-                    case CellType_Transmitter: {
-                        cell.cellTypeData = TransmitterDescription();
+                    case CellType_Free: {
+                        cell.cellTypeData = FreeCellDescription();
+                    } break;
+                    case CellType_Base: {
+                        cell.cellTypeData = BaseDescription();
+                    } break;
+                    case CellType_Depot: {
+                        cell.cellTypeData = DepotDescription();
                     } break;
                     case CellType_Constructor: {
                         cell.cellTypeData = ConstructorDescription();
@@ -267,9 +274,6 @@ void _InspectorWindow::processCellTypeTab(CellDescription& cell)
                     } break;
                     case CellType_Detonator: {
                         cell.cellTypeData = DetonatorDescription();
-                    } break;
-                    case CellType_None: {
-                        cell.cellTypeData.reset();
                     } break;
                     }
                 }
@@ -308,7 +312,7 @@ void _InspectorWindow::processCellTypeTab(CellDescription& cell)
 
 void _InspectorWindow::processCellTypePropertiesTab(CellDescription& cell)
 {
-    if (cell.getCellType() == CellType_None) {
+    if (cell.getCellType() == CellType_Structure || cell.getCellType() == CellType_Free) {
         return;
     }
 
@@ -316,38 +320,38 @@ void _InspectorWindow::processCellTypePropertiesTab(CellDescription& cell)
     if (ImGui::BeginTabItem(title.c_str(), nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
             switch (cell.getCellType()) {
-            case CellType_Neuron: {
-                processNeuronContent(std::get<NeuronDescription>(*cell.cellTypeData));
+            case CellType_Base: {
+                processNeuronContent(std::get<BaseDescription>(cell.cellTypeData));
             } break;
-            case CellType_Transmitter: {
-                processTransmitterContent(std::get<TransmitterDescription>(*cell.cellTypeData));
+            case CellType_Depot: {
+                processTransmitterContent(std::get<DepotDescription>(cell.cellTypeData));
             } break;
             case CellType_Constructor: {
-                processConstructorContent(std::get<ConstructorDescription>(*cell.cellTypeData));
+                processConstructorContent(std::get<ConstructorDescription>(cell.cellTypeData));
             } break;
             case CellType_Sensor: {
-                processSensorContent(std::get<SensorDescription>(*cell.cellTypeData));
+                processSensorContent(std::get<SensorDescription>(cell.cellTypeData));
             } break;
             case CellType_Oscillator: {
-                processOscillatorContent(std::get<OscillatorDescription>(*cell.cellTypeData));
+                processOscillatorContent(std::get<OscillatorDescription>(cell.cellTypeData));
             } break;
             case CellType_Attacker: {
-                processAttackerContent(std::get<AttackerDescription>(*cell.cellTypeData));
+                processAttackerContent(std::get<AttackerDescription>(cell.cellTypeData));
             } break;
             case CellType_Injector: {
-                processInjectorContent(std::get<InjectorDescription>(*cell.cellTypeData));
+                processInjectorContent(std::get<InjectorDescription>(cell.cellTypeData));
             } break;
             case CellType_Muscle: {
-                processMuscleContent(std::get<MuscleDescription>(*cell.cellTypeData));
+                processMuscleContent(std::get<MuscleDescription>(cell.cellTypeData));
             } break;
             case CellType_Defender: {
-                processDefenderContent(std::get<DefenderDescription>(*cell.cellTypeData));
+                processDefenderContent(std::get<DefenderDescription>(cell.cellTypeData));
             } break;
             case CellType_Reconnector: {
-                processReconnectorContent(std::get<ReconnectorDescription>(*cell.cellTypeData));
+                processReconnectorContent(std::get<ReconnectorDescription>(cell.cellTypeData));
             } break;
             case CellType_Detonator: {
-                processDetonatorContent(std::get<DetonatorDescription>(*cell.cellTypeData));
+                processDetonatorContent(std::get<DetonatorDescription>(cell.cellTypeData));
             } break;
             }
         }
@@ -514,7 +518,7 @@ void _InspectorWindow::processOscillatorContent(OscillatorDescription& oscillato
     }
 }
 
-void _InspectorWindow::processNeuronContent(NeuronDescription& neuron)
+void _InspectorWindow::processNeuronContent(BaseDescription& neuron)
 {
     if (ImGui::TreeNodeEx("Neural network", TreeNodeFlags)) {
         AlienImGui::NeuronSelection(
@@ -612,7 +616,7 @@ void _InspectorWindow::processDefenderContent(DefenderDescription& defender)
     }
 }
 
-void _InspectorWindow::processTransmitterContent(TransmitterDescription& transmitter)
+void _InspectorWindow::processTransmitterContent(DepotDescription& transmitter)
 {
     if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
         AlienImGui::Combo(
@@ -734,7 +738,7 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
     cell.energy = std::max(0.0f, cell.energy);
     switch (cell.getCellType()) {
     case CellType_Constructor: {
-        auto& constructor = std::get<ConstructorDescription>(*cell.cellTypeData);
+        auto& constructor = std::get<ConstructorDescription>(cell.cellTypeData);
         auto numNodes = GenomeDescriptionService::get().convertNodeAddressToNodeIndex(constructor.genome, toInt(constructor.genome.size()));
         if (numNodes > 0) {
             constructor.genomeCurrentNodeIndex = ((constructor.genomeCurrentNodeIndex % numNodes) + numNodes) % numNodes;
@@ -759,7 +763,7 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
         constructor.genomeGeneration = std::max(0, constructor.genomeGeneration);
     } break;
     case CellType_Sensor: {
-        auto& sensor = std::get<SensorDescription>(*cell.cellTypeData);
+        auto& sensor = std::get<SensorDescription>(cell.cellTypeData);
         sensor.minDensity = std::max(0.0f, std::min(1.0f, sensor.minDensity));
         if (sensor.minRange) {
             sensor.minRange = std::max(0, std::min(127, *sensor.minRange));
@@ -769,12 +773,12 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
         }
     } break;
     case CellType_Oscillator: {
-        auto& oscillator = std::get<OscillatorDescription>(*cell.cellTypeData);
+        auto& oscillator = std::get<OscillatorDescription>(cell.cellTypeData);
         oscillator.pulseMode = std::max(0, oscillator.pulseMode);
         oscillator.alternationMode = std::max(0, oscillator.alternationMode);
     } break;
     case CellType_Detonator: {
-        auto& detonator = std::get<DetonatorDescription>(*cell.cellTypeData);
+        auto& detonator = std::get<DetonatorDescription>(cell.cellTypeData);
         detonator.countdown = std::min(65535, std::max(0, detonator.countdown));
     } break;
     }

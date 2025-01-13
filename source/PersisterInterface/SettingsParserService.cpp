@@ -646,18 +646,6 @@ namespace
             "simulation parameters.particle.transformation allowed",
             parserTask);
         ParameterParser::encodeDecode(
-            tree,
-            parameters.particleTransformationRandomCellType,
-            defaultParameters.particleTransformationRandomCellType,
-            "simulation parameters.particle.transformation.random cell function",
-            parserTask);
-        ParameterParser::encodeDecode(
-            tree,
-            parameters.particleTransformationMaxGenomeSize,
-            defaultParameters.particleTransformationMaxGenomeSize,
-            "simulation parameters.particle.transformation.max genome size",
-            parserTask);
-        ParameterParser::encodeDecode(
             tree, parameters.particleSplitEnergy, defaultParameters.particleSplitEnergy, "simulation parameters.particle.split energy", parserTask);
 
         ParameterParser::encodeDecode(

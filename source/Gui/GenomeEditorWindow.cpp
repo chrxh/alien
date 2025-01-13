@@ -392,11 +392,11 @@ namespace
     void applyNewCellType(CellGenomeDescription&cell, CellType type)
     {
         switch (type) {
-        case CellType_Neuron: {
-            cell.cellTypeData = NeuronGenomeDescription();
+        case CellType_Base: {
+            cell.cellTypeData = BaseGenomeDescription();
         } break;
-        case CellType_Transmitter: {
-            cell.cellTypeData = TransmitterGenomeDescription();
+        case CellType_Depot: {
+            cell.cellTypeData = DepotGenomeDescription();
         } break;
         case CellType_Constructor: {
             cell.cellTypeData = ConstructorGenomeDescription().setGenome(GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription()));
@@ -424,9 +424,6 @@ namespace
         } break;
         case CellType_Detonator: {
             cell.cellTypeData = DetonatorGenomeDescription();
-        } break;
-        case CellType_None: {
-            cell.cellTypeData.reset();
         } break;
         }
     }
@@ -516,7 +513,12 @@ void GenomeEditorWindow::processNode(
     AlienImGui::DynamicTableLayout table(DynamicTableColumnWidth);
     if (table.begin()) {
         if (AlienImGui::CellTypeCombo(
-                AlienImGui::CellTypeComboParameters().name("Function").textWidth(ContentTextWidth).tooltip(Const::getCellTypeTooltip(type)), type)) {
+                AlienImGui::CellTypeComboParameters()
+                    .name("Function")
+                    .textWidth(ContentTextWidth)
+                    .includeStructureAndFreeCells(false)
+                    .tooltip(Const::getCellTypeTooltip(type)),
+                type)) {
             applyNewCellType(cell, type);
         }
         table.next();
@@ -552,10 +554,10 @@ void GenomeEditorWindow::processNode(
         cell.numRequiredAdditionalConnections = numRequiredAdditionalConnections;
 
         switch (type) {
-        case CellType_Neuron: {
+        case CellType_Base: {
         } break;
-        case CellType_Transmitter: {
-            auto& transmitter = std::get<TransmitterGenomeDescription>(*cell.cellTypeData);
+        case CellType_Depot: {
+            auto& transmitter = std::get<DepotGenomeDescription>(cell.cellTypeData);
 
             table.next();
             AlienImGui::Combo(
@@ -567,7 +569,7 @@ void GenomeEditorWindow::processNode(
                 transmitter.mode);
         } break;
         case CellType_Constructor: {
-            auto& constructor = std::get<ConstructorGenomeDescription>(*cell.cellTypeData);
+            auto& constructor = std::get<ConstructorGenomeDescription>(cell.cellTypeData);
 
             int constructorMode = constructor.mode == 0 ? 0 : 1;
             table.next();
@@ -613,7 +615,7 @@ void GenomeEditorWindow::processNode(
                 constructor.constructionAngle2);
         } break;
         case CellType_Sensor: {
-            auto& sensor = std::get<SensorGenomeDescription>(*cell.cellTypeData);
+            auto& sensor = std::get<SensorGenomeDescription>(cell.cellTypeData);
 
             table.next();
             AlienImGui::ComboOptionalColor(
@@ -645,7 +647,7 @@ void GenomeEditorWindow::processNode(
                 AlienImGui::InputIntParameters().name("Max range").textWidth(ContentTextWidth).tooltip(Const::GenomeSensorMaxRangeTooltip), sensor.maxRange);
         } break;
         case CellType_Oscillator: {
-            auto& oscillator = std::get<OscillatorGenomeDescription>(*cell.cellTypeData);
+            auto& oscillator = std::get<OscillatorGenomeDescription>(cell.cellTypeData);
             bool pulseGeneration = oscillator.pulseMode > 0;
             table.next();
             if (AlienImGui::Checkbox(
@@ -674,7 +676,7 @@ void GenomeEditorWindow::processNode(
             }
         } break;
         case CellType_Attacker: {
-            auto& attacker = std::get<AttackerGenomeDescription>(*cell.cellTypeData);
+            auto& attacker = std::get<AttackerGenomeDescription>(cell.cellTypeData);
             table.next();
             AlienImGui::Combo(
                 AlienImGui::ComboParameters()
@@ -685,7 +687,7 @@ void GenomeEditorWindow::processNode(
                 attacker.mode);
         } break;
         case CellType_Injector: {
-            auto& injector = std::get<InjectorGenomeDescription>(*cell.cellTypeData);
+            auto& injector = std::get<InjectorGenomeDescription>(cell.cellTypeData);
 
             table.next();
             AlienImGui::Combo(
@@ -697,7 +699,7 @@ void GenomeEditorWindow::processNode(
                 injector.mode);
         } break;
         case CellType_Muscle: {
-            auto& muscle = std::get<MuscleGenomeDescription>(*cell.cellTypeData);
+            auto& muscle = std::get<MuscleGenomeDescription>(cell.cellTypeData);
             table.next();
             AlienImGui::Combo(
                 AlienImGui::ComboParameters()
@@ -708,7 +710,7 @@ void GenomeEditorWindow::processNode(
                 muscle.mode);
         } break;
         case CellType_Defender: {
-            auto& defender = std::get<DefenderGenomeDescription>(*cell.cellTypeData);
+            auto& defender = std::get<DefenderGenomeDescription>(cell.cellTypeData);
             table.next();
             AlienImGui::Combo(
                 AlienImGui::ComboParameters()
@@ -719,7 +721,7 @@ void GenomeEditorWindow::processNode(
                 defender.mode);
         } break;
         case CellType_Reconnector: {
-            auto& reconnector = std::get<ReconnectorGenomeDescription>(*cell.cellTypeData);
+            auto& reconnector = std::get<ReconnectorGenomeDescription>(cell.cellTypeData);
             table.next();
             AlienImGui::ComboOptionalColor(
                 AlienImGui::ComboColorParameters().name("Restrict to color").textWidth(ContentTextWidth).tooltip(Const::GenomeReconnectorRestrictToColorTooltip),
@@ -735,7 +737,7 @@ void GenomeEditorWindow::processNode(
         } break;
         case CellType_Detonator: {
             table.next();
-            auto& detonator = std::get<DetonatorGenomeDescription>(*cell.cellTypeData);
+            auto& detonator = std::get<DetonatorGenomeDescription>(cell.cellTypeData);
             AlienImGui::InputInt(
                 AlienImGui::InputIntParameters().name("Countdown").textWidth(ContentTextWidth).tooltip(Const::GenomeDetonatorCountdownTooltip),
                 detonator.countdown);
@@ -746,8 +748,8 @@ void GenomeEditorWindow::processNode(
         table.end();
 
         switch (type) {
-        case CellType_Neuron: {
-            auto& neuron = std::get<NeuronGenomeDescription>(*cell.cellTypeData);
+        case CellType_Base: {
+            auto& neuron = std::get<BaseGenomeDescription>(cell.cellTypeData);
             if (ImGui::TreeNodeEx("Neural network", ImGuiTreeNodeFlags_None)) {
                 AlienImGui::NeuronSelection(
                     AlienImGui::NeuronSelectionParameters().rightMargin(SubWindowRightMargin), neuron.weights, neuron.biases, neuron.activationFunctions);
@@ -755,11 +757,11 @@ void GenomeEditorWindow::processNode(
             }
         } break;
         case CellType_Constructor: {
-            auto& constructor = std::get<ConstructorGenomeDescription>(*cell.cellTypeData);
+            auto& constructor = std::get<ConstructorGenomeDescription>(cell.cellTypeData);
             processSubGenomeWidgets(tab, constructor);
         } break;
         case CellType_Injector: {
-            auto& injector = std::get<InjectorGenomeDescription>(*cell.cellTypeData);
+            auto& injector = std::get<InjectorGenomeDescription>(cell.cellTypeData);
             processSubGenomeWidgets(tab, injector);
         } break;
         }
@@ -927,7 +929,7 @@ void GenomeEditorWindow::onCreateSpore()
                     .setEnergy(energy)
                     .setStiffness(1.0f)
                     .setColor(EditorModel::get().getDefaultColorCode())
-                    .setCellType(ConstructorDescription().setGenome(genome));
+                    .setCellTypeData(ConstructorDescription().setGenome(genome));
     auto data = DataDescription().addCell(cell);
     _simulationFacade->addAndSelectSimulationData(data);
     EditorModel::get().update();
@@ -962,14 +964,14 @@ void GenomeEditorWindow::validateAndCorrect(CellGenomeDescription& cell) const
 
     switch (cell.getCellType()) {
     case CellType_Constructor: {
-        auto& constructor = std::get<ConstructorGenomeDescription>(*cell.cellTypeData);
+        auto& constructor = std::get<ConstructorGenomeDescription>(cell.cellTypeData);
         if (constructor.mode < 0) {
             constructor.mode = 0;
         }
         constructor.constructionActivationTime = ((constructor.constructionActivationTime % Const::MaxActivationTime) + Const::MaxActivationTime) % Const::MaxActivationTime;
     } break;
     case CellType_Sensor: {
-        auto& sensor = std::get<SensorGenomeDescription>(*cell.cellTypeData);
+        auto& sensor = std::get<SensorGenomeDescription>(cell.cellTypeData);
         sensor.minDensity = std::max(0.0f, std::min(1.0f, sensor.minDensity));
         if (sensor.minRange) {
             sensor.minRange = std::max(0, std::min(127, *sensor.minRange));
@@ -979,7 +981,7 @@ void GenomeEditorWindow::validateAndCorrect(CellGenomeDescription& cell) const
         }
     } break;
     case CellType_Oscillator: {
-        auto& oscillator = std::get<OscillatorGenomeDescription>(*cell.cellTypeData);
+        auto& oscillator = std::get<OscillatorGenomeDescription>(cell.cellTypeData);
         oscillator.pulseMode = std::max(0, oscillator.pulseMode);
         oscillator.alternationMode = std::max(0, oscillator.alternationMode);
     } break;

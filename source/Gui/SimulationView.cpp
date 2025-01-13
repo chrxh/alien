@@ -310,21 +310,19 @@ void SimulationView::updateImageFromSimulation()
                 {
                     auto fontSizeUnit = std::min(40.0f, Viewport::get().getZoomFactor()) / 2;
                     auto viewPos = Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.3f}, parameters.borderlessRendering);
-                    if (overlayElement.cellType != CellType_None) {
-                        auto text = Const::CellTypeToStringMap.at(overlayElement.cellType);
-                        drawList->AddText(
-                            StyleRepository::get().getMediumFont(),
-                            fontSizeUnit,
-                            {viewPos.x - 1.7f * fontSizeUnit, viewPos.y},
-                            Const::CellTypeOverlayShadowColor,
-                            text.c_str());
-                        drawList->AddText(
-                            StyleRepository::get().getMediumFont(),
-                            fontSizeUnit,
-                            {viewPos.x - 1.7f * fontSizeUnit + 1, viewPos.y + 1},
-                            Const::CellTypeOverlayColor,
-                            text.c_str());
-                    }
+                    auto text = Const::CellTypeToStringMap.at(overlayElement.cellType);
+                    drawList->AddText(
+                        StyleRepository::get().getMediumFont(),
+                        fontSizeUnit,
+                        {viewPos.x - 1.7f * fontSizeUnit, viewPos.y},
+                        Const::CellTypeOverlayShadowColor,
+                        text.c_str());
+                    drawList->AddText(
+                        StyleRepository::get().getMediumFont(),
+                        fontSizeUnit,
+                        {viewPos.x - 1.7f * fontSizeUnit + 1, viewPos.y + 1},
+                        Const::CellTypeOverlayColor,
+                        text.c_str());
                 }
             }
 

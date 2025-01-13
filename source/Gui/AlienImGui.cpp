@@ -1741,11 +1741,17 @@ bool AlienImGui::CellTypeCombo(CellTypeComboParameters& parameters, int& value)
     modCellTypeStrings.pop_back();
     modCellTypeStrings.insert(modCellTypeStrings.begin(), noneString);
 
-    value = (value + 1) % CellType_Count;
+    if (!parameters._includeStructureAndFreeCells) {
+        modCellTypeStrings.erase(modCellTypeStrings.begin());
+        modCellTypeStrings.erase(modCellTypeStrings.begin());
+        value -= 2;
+    }
     auto result = AlienImGui::Combo(
         AlienImGui::ComboParameters().name(parameters._name).values(modCellTypeStrings).textWidth(parameters._textWidth).tooltip(parameters._tooltip),
         value);
-    value = (value + CellType_Count - 1) % CellType_Count;
+    if (!parameters._includeStructureAndFreeCells) {
+        value += 2;
+    }
     return result;
 }
 

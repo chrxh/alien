@@ -26,9 +26,9 @@ namespace
         }
     }
 
-    NeuronDescription convertToNeuronDescription(DataTO const& dataTO, uint64_t sourceIndex)
+    BaseDescription convertToNeuronDescription(DataTO const& dataTO, uint64_t sourceIndex)
     {
-        NeuronDescription result;
+        BaseDescription result;
 
         BytesAsFloat bytesAsFloat;
         int index = 0;
@@ -70,7 +70,7 @@ namespace
         }
     }
 
-    void convertToNeuronData(DataTO const& dataTO, NeuronDescription const& neuronDesc, uint64_t& targetIndex)
+    void convertToNeuronData(DataTO const& dataTO, BaseDescription const& neuronDesc, uint64_t& targetIndex)
     {
         targetIndex = *dataTO.numAuxiliaryData;
         *dataTO.numAuxiliaryData *= NeuronTO::NeuronDataSize;
@@ -277,13 +277,13 @@ void DescriptionConverter::addAdditionalDataSizeForCell(CellDescription const& c
 {
     additionalDataSize += cell.metadata.name.size() + cell.metadata.description.size();
     switch (cell.getCellType()) {
-    case CellType_Neuron: {
+    case CellType_Base: {
         additionalDataSize += MAX_CHANNELS * (MAX_CHANNELS + 1) * sizeof(float);
     } break;
-    case CellType_Transmitter:
+    case CellType_Depot:
         break;
     case CellType_Constructor:
-        additionalDataSize += std::get<ConstructorDescription>(*cell.cellTypeData).genome.size();
+        additionalDataSize += std::get<ConstructorDescription>(cell.cellTypeData).genome.size();
         break;
     case CellType_Sensor:
         break;
@@ -292,7 +292,7 @@ void DescriptionConverter::addAdditionalDataSizeForCell(CellDescription const& c
     case CellType_Attacker:
         break;
     case CellType_Injector:
-        additionalDataSize += std::get<InjectorDescription>(*cell.cellTypeData).genome.size();
+        additionalDataSize += std::get<InjectorDescription>(cell.cellTypeData).genome.size();
         break;
     case CellType_Muscle:
         break;
@@ -408,11 +408,11 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     result.metadata = metadata;
 
     switch (cellTO.cellType) {
-    case CellType_Neuron: {
+    case CellType_Base: {
         result.cellTypeData = convertToNeuronDescription(dataTO, cellTO.cellTypeData.neuron.neuronDataIndex);
     } break;
-    case CellType_Transmitter: {
-        TransmitterDescription transmitter;
+    case CellType_Depot: {
+        DepotDescription transmitter;
         transmitter.mode = cellTO.cellTypeData.transmitter.mode;
         result.cellTypeData = transmitter;
     } break;
@@ -564,21 +564,21 @@ void DescriptionConverter::addCell(
     cellTO.cellTypeUsed = cellDesc.cellTypeUsed;
     cellTO.genomeNodeIndex = cellDesc.genomeNodeIndex;
     switch (cellDesc.getCellType()) {
-    case CellType_Neuron: {
-        auto const& neuronDesc = std::get<NeuronDescription>(*cellDesc.cellTypeData);
+    case CellType_Base: {
+        auto const& neuronDesc = std::get<BaseDescription>(cellDesc.cellTypeData);
 
         NeuronTO neuronTO;
         convertToNeuronData(dataTO, neuronDesc, neuronTO.neuronDataIndex);
         cellTO.cellTypeData.neuron = neuronTO;
     } break;
-    case CellType_Transmitter: {
-        auto const& transmitterDesc = std::get<TransmitterDescription>(*cellDesc.cellTypeData);
+    case CellType_Depot: {
+        auto const& transmitterDesc = std::get<DepotDescription>(cellDesc.cellTypeData);
         TransmitterTO transmitterTO;
         transmitterTO.mode = transmitterDesc.mode;
         cellTO.cellTypeData.transmitter = transmitterTO;
     } break;
     case CellType_Constructor: {
-        auto const& constructorDesc = std::get<ConstructorDescription>(*cellDesc.cellTypeData);
+        auto const& constructorDesc = std::get<ConstructorDescription>(cellDesc.cellTypeData);
         ConstructorTO constructorTO;
         constructorTO.activationMode = constructorDesc.activationMode;
         constructorTO.constructionActivationTime = constructorDesc.constructionActivationTime;
@@ -597,7 +597,7 @@ void DescriptionConverter::addCell(
         cellTO.cellTypeData.constructor = constructorTO;
     } break;
     case CellType_Sensor: {
-        auto const& sensorDesc = std::get<SensorDescription>(*cellDesc.cellTypeData);
+        auto const& sensorDesc = std::get<SensorDescription>(cellDesc.cellTypeData);
         SensorTO sensorTO;
         sensorTO.restrictToColor = sensorDesc.restrictToColor.value_or(255);
         sensorTO.restrictToMutants = sensorDesc.restrictToMutants;
@@ -612,20 +612,20 @@ void DescriptionConverter::addCell(
         cellTO.cellTypeData.sensor = sensorTO;
     } break;
     case CellType_Oscillator: {
-        auto const& oscillatorDesc = std::get<OscillatorDescription>(*cellDesc.cellTypeData);
+        auto const& oscillatorDesc = std::get<OscillatorDescription>(cellDesc.cellTypeData);
         OscillatorTO oscillatorTO;
         oscillatorTO.pulseMode = oscillatorDesc.pulseMode;
         oscillatorTO.alternationMode = oscillatorDesc.alternationMode;
         cellTO.cellTypeData.oscillator = oscillatorTO;
     } break;
     case CellType_Attacker: {
-        auto const& attackerDesc = std::get<AttackerDescription>(*cellDesc.cellTypeData);
+        auto const& attackerDesc = std::get<AttackerDescription>(cellDesc.cellTypeData);
         AttackerTO attackerTO;
         attackerTO.mode = attackerDesc.mode;
         cellTO.cellTypeData.attacker = attackerTO;
     } break;
     case CellType_Injector: {
-        auto const& injectorDesc = std::get<InjectorDescription>(*cellDesc.cellTypeData);
+        auto const& injectorDesc = std::get<InjectorDescription>(cellDesc.cellTypeData);
         InjectorTO injectorTO;
         injectorTO.mode = injectorDesc.mode;
         injectorTO.counter = injectorDesc.counter;
@@ -635,7 +635,7 @@ void DescriptionConverter::addCell(
         cellTO.cellTypeData.injector = injectorTO;
     } break;
     case CellType_Muscle: {
-        auto const& muscleDesc = std::get<MuscleDescription>(*cellDesc.cellTypeData);
+        auto const& muscleDesc = std::get<MuscleDescription>(cellDesc.cellTypeData);
         MuscleTO muscleTO;
         muscleTO.mode = muscleDesc.mode;
         muscleTO.lastBendingDirection = muscleDesc.lastBendingDirection;
@@ -646,20 +646,20 @@ void DescriptionConverter::addCell(
         cellTO.cellTypeData.muscle = muscleTO;
     } break;
     case CellType_Defender: {
-        auto const& defenderDesc = std::get<DefenderDescription>(*cellDesc.cellTypeData);
+        auto const& defenderDesc = std::get<DefenderDescription>(cellDesc.cellTypeData);
         DefenderTO defenderTO;
         defenderTO.mode = defenderDesc.mode;
         cellTO.cellTypeData.defender = defenderTO;
     } break;
     case CellType_Reconnector: {
-        auto const& reconnectorDesc = std::get<ReconnectorDescription>(*cellDesc.cellTypeData);
+        auto const& reconnectorDesc = std::get<ReconnectorDescription>(cellDesc.cellTypeData);
         ReconnectorTO reconnectorTO;
         reconnectorTO.restrictToColor = toUInt8(reconnectorDesc.restrictToColor.value_or(255));
         reconnectorTO.restrictToMutants = reconnectorDesc.restrictToMutants;
         cellTO.cellTypeData.reconnector = reconnectorTO;
     } break;
     case CellType_Detonator: {
-        auto const& detonatorDesc = std::get<DetonatorDescription>(*cellDesc.cellTypeData);
+        auto const& detonatorDesc = std::get<DetonatorDescription>(cellDesc.cellTypeData);
         DetonatorTO detonatorTO;
         detonatorTO.state = detonatorDesc.state;
         detonatorTO.countdown = detonatorDesc.countdown;
