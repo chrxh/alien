@@ -51,7 +51,7 @@ __inline__ __device__ void MutationProcessor::applyRandomMutations(SimulationDat
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        if (cell->livingState== LivingState_Activating && cell->cellType == CellType_Constructor) {
+        if (cell->livingState == LivingState_Activating && cell->cellType == CellType_Constructor) {
             MutationProcessor::applyRandomMutationsForCell(data, cell);
             MutationProcessor::checkMutationsForCell(data, cell);
         }
