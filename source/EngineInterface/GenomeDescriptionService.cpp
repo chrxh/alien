@@ -186,9 +186,10 @@ std::vector<uint8_t> GenomeDescriptionService::convertDescriptionToBytes(GenomeD
         switch (cell.getCellType()) {
         case CellType_Base: {
             auto const& neuron = std::get<BaseGenomeDescription>(cell.cellTypeData);
+            auto weights = neuron.getWeights();
             for (int row = 0; row < MAX_CHANNELS; ++row) {
                 for (int col = 0; col < MAX_CHANNELS; ++col) {
-                    writeNeuronProperty(result, neuron.weights[row][col]);
+                    writeNeuronProperty(result, weights[row, col]);
                 }
             }
             for (int i = 0; i < MAX_CHANNELS; ++i) {
@@ -268,7 +269,6 @@ namespace
         size_t maxEntries,
         GenomeEncodingSpecification const& spec)
     {
-        SimulationParameters parameters;
         ConversionResult result;
 
         int nodeIndex = 0;
@@ -302,9 +302,10 @@ namespace
             switch (cellType) {
             case CellType_Base: {
                 BaseGenomeDescription neuron;
+                auto weights = neuron.getWeights();
                 for (int row = 0; row < MAX_CHANNELS; ++row) {
                     for (int col = 0; col < MAX_CHANNELS; ++col) {
-                        neuron.weights[row][col] = readNeuronProperty(data, bytePosition);
+                        weights[row, col] = readNeuronProperty(data, bytePosition);
                     }
                 }
                 for (int i = 0; i < MAX_CHANNELS; ++i) {

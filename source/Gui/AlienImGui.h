@@ -414,7 +414,7 @@ public:
     };
     static void NeuronSelection(
         NeuronSelectionParameters const& parameters,
-        std::vector<std::vector<float>>& weights,
+        std::vector<float>& weights,
         std::vector<float>& biases,
         std::vector<NeuronActivationFunction>& activationFunctions);
 

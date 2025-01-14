@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <boost/range/combine.hpp>
+
 #include "Base/Math.h"
 #include "Base/NumberGenerator.h"
 #include "EngineInterface/GenomeConstants.h"
@@ -731,8 +733,8 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle2)
 TEST_F(ConstructorTests, constructNeuronCell)
 {
     auto neuron = BaseGenomeDescription();
-    neuron.weights[1][7] = 3.9f;
-    neuron.weights[7][1] = -1.9f;
+    neuron.setWeight(1, 7, 3.9f);
+    neuron.setWeight(7, 1, -1.9f);
     neuron.biases[3] = 3.8f;
 
     auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setCellTypeData(neuron)}));
@@ -754,10 +756,8 @@ TEST_F(ConstructorTests, constructNeuronCell)
     EXPECT_EQ(CellType_Base, actualConstructedCell.getCellType());
 
     auto actualNeuron = std::get<BaseDescription>(actualConstructedCell.cellTypeData);
-    for (int row = 0; row < MAX_CHANNELS; ++row) {
-        for (int col = 0; col < MAX_CHANNELS; ++col) {
-            EXPECT_TRUE(lowPrecisionCompare(neuron.weights[row][col], actualNeuron.weights[row][col]));
-        }
+    for (auto const& [weight, actualWeight] : boost::combine(neuron.weights, actualNeuron.weights)) {
+        EXPECT_TRUE(lowPrecisionCompare(weight, actualWeight));
     }
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         EXPECT_TRUE(lowPrecisionCompare(neuron.biases[i], actualNeuron.biases[i]));

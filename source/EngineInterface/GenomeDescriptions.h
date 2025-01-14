@@ -5,6 +5,7 @@
 #include <optional>
 #include <variant>
 #include <limits>
+#include <mdspan>
 
 #include "Base/Definitions.h"
 #include "EngineConstants.h"
@@ -17,17 +18,27 @@ struct MakeGenomeCopy
 
 struct BaseGenomeDescription
 {
-    std::vector<std::vector<float>> weights;
+    std::vector<float> weights;
     std::vector<float> biases;
     std::vector<NeuronActivationFunction> activationFunctions;
 
     BaseGenomeDescription()
     {
-        weights.resize(MAX_CHANNELS, std::vector<float>(MAX_CHANNELS, 0));
+        weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
         biases.resize(MAX_CHANNELS, 0);
         activationFunctions.resize(MAX_CHANNELS, 0);
     }
     auto operator<=>(BaseGenomeDescription const&) const = default;
+
+    BaseGenomeDescription& setWeight(int row, int col, float value)
+    {
+        auto md = std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS);
+        md[row, col] = value;
+        return *this;
+    }
+
+    auto getWeights() const { return std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
+    auto getWeights() { return std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
 };
 
 struct DepotGenomeDescription
