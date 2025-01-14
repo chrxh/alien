@@ -74,14 +74,15 @@ __global__ void cudaNextTimestep_physics_calcConnectionForces(SimulationData dat
 __global__ void cudaNextTimestep_physics_verletVelocityUpdate(SimulationData data)
 {
     CellProcessor::verletVelocityUpdate(data);
+    SignalProcessor::calcFutureSignals(data);
 }
 
 __global__ void cudaNextTimestep_cellType_prepare_substep1(SimulationData data)
 {
     CellProcessor::aging(data);
     MutationProcessor::applyRandomMutations(data);
-    SignalProcessor::calcFutureSignals(data);
     CellProcessor::livingStateTransition_calcFutureState(data);
+    SignalProcessor::updateSignals(data);
 }
 
 __global__ void cudaNextTimestep_cellType_prepare_substep2(SimulationData data)
@@ -89,7 +90,6 @@ __global__ void cudaNextTimestep_cellType_prepare_substep2(SimulationData data)
     CellProcessor::livingStateTransition_applyNextState(data);
     SignalProcessor::collectCellTypeOperations(data);
     CellProcessor::updateRenderingData(data);
-    SignalProcessor::updateSignals(data);
 }
 
 __global__ void cudaNextTimestep_cellType_oscillator(SimulationData data, SimulationStatistics statistics)

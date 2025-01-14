@@ -54,6 +54,7 @@ void _SimulationKernelsLauncher::calcTimestep(SettingsForSimulation const& setti
     KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep2, data);
     KERNEL_CALL(cudaNextTimestep_cellType_oscillator, data, statistics);
     KERNEL_CALL(cudaNextTimestep_cellType_neuron, data, statistics);
+
     if (settings.simulationParameters.cellTypeConstructorCheckCompletenessForSelfReplication) {
         KERNEL_CALL(cudaNextTimestep_cellType_constructor_completenessCheck, data, statistics);
     }
