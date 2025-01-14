@@ -31,14 +31,13 @@ __device__ __inline__ void NeuronProcessor::process(SimulationData& data, Simula
 
 __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    __shared__ Signal outputSignal;
-    __shared__ Signal inputSignal;
+    __shared__ Signal signal;
     if (0 == threadIdx.x) {
-        inputSignal = cell->signal;
+        signal = cell->signal;
     }
     __syncthreads();
 
-    if (!inputSignal.active) {
+    if (!signal.active) {
         return;
     }
 
@@ -55,18 +54,18 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
 
         auto row = entry / MAX_CHANNELS;
         auto col = entry % MAX_CHANNELS;
-        atomicAdd(&sumInput[row], neuronsState->weights[entry] * inputSignal.channels[col]);
+        atomicAdd(&sumInput[row], neuronsState->weights[entry] * signal.channels[col]);
     }
     __syncthreads();
 
     for (int i = channelPartition.startIndex; i <= channelPartition.endIndex; ++i) {
-        outputSignal.channels[i] = applyActivationFunction(cell->cellTypeData.neuron.neuronState->activationFunctions[i], sumInput[i]);  
+        signal.channels[i] = applyActivationFunction(cell->cellTypeData.neuron.neuronState->activationFunctions[i], sumInput[i]);  
     }
     __syncthreads();
     
 
     if (0 == threadIdx.x) {
-        cell->signal = outputSignal;
+        cell->signal = signal;
         statistics.incNumNeuronActivities(cell->color);
     }
     __syncthreads();
