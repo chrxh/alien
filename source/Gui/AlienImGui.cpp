@@ -1,6 +1,7 @@
 #include "AlienImGui.h"
 
 #include <chrono>
+#include <mdspan>
 
 #include <boost/algorithm/string.hpp>
 #include <imgui.h>
@@ -1776,10 +1777,11 @@ namespace
 
 void AlienImGui::NeuronSelection(
     NeuronSelectionParameters const& parameters,
-    std::vector<std::vector<float>>& weights,
+    std::vector<float>& weights,
     std::vector<float>& biases,
     std::vector<NeuronActivationFunction>& activationFunctions)
 {
+    auto weights_span = std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS);
     auto& selectedInput = getIdBasedValue(_neuronSelectedInput, 0);
     auto& selectedOutput = getIdBasedValue(_neuronSelectedOutput, 0);
     auto setDefaultColors = [] {
@@ -1836,7 +1838,7 @@ void AlienImGui::NeuronSelection(
     }
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         for (int j = 0; j < MAX_CHANNELS; ++j) {
-            if (std::abs(weights[j][i]) > NEAR_ZERO) {
+            if (std::abs(weights_span[j, i]) > NEAR_ZERO) {
                 continue;
             }
             drawList->AddLine({inputPos[i].x, inputPos[i].y}, {outputPos[j].x, outputPos[j].y}, Const::NeuronEditorConnectionColor, 2.0f);
@@ -1856,11 +1858,11 @@ void AlienImGui::NeuronSelection(
     //visualize weights
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         for (int j = 0; j < MAX_CHANNELS; ++j) {
-            if (std::abs(weights[j][i]) <= NEAR_ZERO) {
+            if (std::abs(weights_span[j, i]) <= NEAR_ZERO) {
                 continue;
             }
-            auto thickness = std::min(4.0f, std::abs(weights[j][i]));
-            drawList->AddLine({inputPos[i].x, inputPos[i].y}, {outputPos[j].x, outputPos[j].y}, calcColor(weights[j][i]), thickness);
+            auto thickness = std::min(4.0f, std::abs(weights_span[j, i]));
+            drawList->AddLine({inputPos[i].x, inputPos[i].y}, {outputPos[j].x, outputPos[j].y}, calcColor(weights_span[j, i]), thickness);
         }
     }
 
@@ -1944,7 +1946,7 @@ void AlienImGui::NeuronSelection(
             table.next();
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters().name("Weight").step(0.05f).textWidth(editorColumnTextWidth).tooltip(Const::GenomeNeuronWeightAndBiasTooltip),
-                weights.at(selectedOutput).at(selectedInput));
+                weights_span[selectedOutput, selectedInput]);
             table.next();
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters().name("Bias").step(0.05f).textWidth(editorColumnTextWidth).tooltip(Const::GenomeNeuronWeightAndBiasTooltip),
@@ -1954,7 +1956,7 @@ void AlienImGui::NeuronSelection(
         if (AlienImGui::Button("Clear")) {
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 for (int j = 0; j < MAX_CHANNELS; ++j) {
-                    weights[i][j] = 0;
+                    weights_span[i, j] = 0;
                 }
                 biases[i] = 0;
                 activationFunctions[i] = NeuronActivationFunction_Sigmoid;
@@ -1964,7 +1966,7 @@ void AlienImGui::NeuronSelection(
         if (AlienImGui::Button("Identity")) {
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 for (int j = 0; j < MAX_CHANNELS; ++j) {
-                    weights[i][j] = i == j ? 1.0f : 0.0f;
+                    weights_span[i, j] = i == j ? 1.0f : 0.0f;
                 }
                 biases[i] = 0.0f;
                 activationFunctions[i] = NeuronActivationFunction_Identity;
@@ -1974,7 +1976,7 @@ void AlienImGui::NeuronSelection(
         if (AlienImGui::Button("Randomize")) {
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 for (int j = 0; j < MAX_CHANNELS; ++j) {
-                    weights[i][j] = NumberGenerator::get().getRandomFloat(-4.0f, 4.0f);
+                    weights_span[i, j] = NumberGenerator::get().getRandomFloat(-4.0f, 4.0f);
                 }
                 biases[i] = NumberGenerator::get().getRandomFloat(-4.0f, 4.0f);
                 activationFunctions[i] = NumberGenerator::get().getRandomInt(NeuronActivationFunction_Count);

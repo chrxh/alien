@@ -39,9 +39,9 @@ TEST_F(NeuronTests, bias)
 TEST_F(NeuronTests, weight)
 {
     BaseDescription neuron;
-    neuron.weights[2][3] = 1;
-    neuron.weights[2][7] = 0.5f;
-    neuron.weights[5][3] = -3.5f;
+    neuron.setWeight(2, 3, 1.0f);
+    neuron.setWeight(2, 7, 0.5f);
+    neuron.setWeight(5, 3, -3.5f);
 
     SignalDescription signal;
     signal.channels = {0, 0, 0, 1, 0, 0, 0, 0.5f};
@@ -68,9 +68,9 @@ TEST_F(NeuronTests, weight)
 TEST_F(NeuronTests, activationFunctionBinaryStep)
 {
     BaseDescription neuron;
-    neuron.weights[2][3] = 1;
-    neuron.weights[2][7] = 0.5f;
-    neuron.weights[5][3] = -3.5f;
+    neuron.setWeight(2, 3, 1.0f);
+    neuron.setWeight(2, 7, 0.5f);
+    neuron.setWeight(5, 3, -3.5f);
     neuron.activationFunctions[2] = NeuronActivationFunction_BinaryStep;
     neuron.activationFunctions[5] = NeuronActivationFunction_BinaryStep;
 

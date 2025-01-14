@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mdspan>
 #include <variant>
 
 #include "Base/Definitions.h"
@@ -63,17 +64,27 @@ struct FreeCellDescription
 
 struct BaseDescription
 {
-    std::vector<std::vector<float>> weights;
+    std::vector<float> weights;
     std::vector<float> biases;
     std::vector<NeuronActivationFunction> activationFunctions;
 
     BaseDescription()
     {
-        weights.resize(MAX_CHANNELS, std::vector<float>(MAX_CHANNELS, 0));
+        weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
         biases.resize(MAX_CHANNELS, 0);
         activationFunctions.resize(MAX_CHANNELS, 0);
     }
     auto operator<=>(BaseDescription const&) const = default;
+
+    BaseDescription& setWeight(int row, int col, float value)
+    {
+        auto md = std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS);
+        md[row, col] = value;
+        return *this;
+    }
+
+    auto getWeights() const { return std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
+    auto getWeights() { return std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
 };
 
 struct DepotDescription
