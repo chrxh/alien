@@ -74,7 +74,22 @@ __global__ void cudaNextTimestep_physics_calcConnectionForces(SimulationData dat
 __global__ void cudaNextTimestep_physics_verletVelocityUpdate(SimulationData data)
 {
     CellProcessor::verletVelocityUpdate(data);
+}
+
+__global__ void cudaNextTimestep_signal_calcFutureSignals(SimulationData data)
+{
     SignalProcessor::calcFutureSignals(data);
+}
+
+__global__ void cudaNextTimestep_signal_updateSignals(SimulationData data)
+{
+    SignalProcessor::updateSignals(data);
+    SignalProcessor::collectCellTypeOperations(data);
+}
+
+__global__ void cudaNextTimestep_signal_neuralNetworks(SimulationData data, SimulationStatistics statistics)
+{
+    NeuronProcessor::process(data, statistics);
 }
 
 __global__ void cudaNextTimestep_cellType_prepare_substep1(SimulationData data)
@@ -82,24 +97,17 @@ __global__ void cudaNextTimestep_cellType_prepare_substep1(SimulationData data)
     CellProcessor::aging(data);
     MutationProcessor::applyRandomMutations(data);
     CellProcessor::livingStateTransition_calcFutureState(data);
-    SignalProcessor::updateSignals(data);
 }
 
 __global__ void cudaNextTimestep_cellType_prepare_substep2(SimulationData data)
 {
     CellProcessor::livingStateTransition_applyNextState(data);
-    SignalProcessor::collectCellTypeOperations(data);
     CellProcessor::updateRenderingData(data);
 }
 
 __global__ void cudaNextTimestep_cellType_oscillator(SimulationData data, SimulationStatistics statistics)
 {
     OscillatorProcessor::process(data, statistics);
-}
-
-__global__ void cudaNextTimestep_cellType_neuron(SimulationData data, SimulationStatistics statistics)
-{
-    NeuronProcessor::process(data, statistics);
 }
 
 __global__ void cudaNextTimestep_cellType_constructor_completenessCheck(SimulationData data, SimulationStatistics statistics)
