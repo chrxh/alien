@@ -77,16 +77,18 @@ namespace
             cellTO.connections[i].angleFromPrevious = cell->connections[i].angleFromPrevious;
         }
 
-        switch (cell->cellType) {
-        case CellType_Base: {
-            int targetSize;    //not used
+        if (cell->cellType != CellType_Structure && cell->cellType != CellType_Free) {
+            int targetSize;  //not used
             copyAuxiliaryData<int>(
                 sizeof(NeuralNetwork),
-                reinterpret_cast<uint8_t*>(cell->cellTypeData.neuron.neuralNetwork),
+                reinterpret_cast<uint8_t*>(cell->neuralNetwork),
                 targetSize,
-                cellTO.cellTypeData.base.neuralNetwork.dataIndex,
+                cellTO.neuralNetwork.dataIndex,
                 *dataTO.numAuxiliaryData,
                 dataTO.auxiliaryData);
+        }
+        switch (cell->cellType) {
+        case CellType_Base: {
         } break;
         case CellType_Depot: {
             cellTO.cellTypeData.transmitter.mode = cell->cellTypeData.transmitter.mode;

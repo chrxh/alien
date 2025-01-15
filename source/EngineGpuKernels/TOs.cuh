@@ -42,7 +42,6 @@ struct NeuralNetworkTO
 
 struct BaseTO
 {
-    NeuralNetworkTO neuralNetwork;
 };
 
 struct TransmitterTO
@@ -192,12 +191,13 @@ struct CellTO
     uint16_t genomeNodeIndex;
 
     //cell type data
+    NeuralNetworkTO neuralNetwork;  // not used for structure and base cells
     CellType cellType;
     CellTypeTO cellTypeData;
     SignalRoutingRestrictionTO signalRoutingRestriction;
     SignalTO signal;
     uint32_t activationTime;
-    uint16_t detectedByCreatureId;  //only the first 16 bits from the creature id
+    uint16_t detectedByCreatureId;  // only the first 16 bits from the creature id
     CellTriggered cellTypeUsed;
 
     CellMetadataTO metadata;

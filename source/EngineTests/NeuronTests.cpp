@@ -22,10 +22,10 @@ protected:
 
 TEST_F(NeuronTests, bias)
 {
-    BaseDescription base;
-    base.neuralNetwork.biases = {0, 0, 1, 0, 0, 0, 0, -1};
+    NeuralNetworkDescription nn;
+    nn.biases = {0, 0, 1, 0, 0, 0, 0, -1};
 
-    auto data = DataDescription().addCells({CellDescription().setId(1).setCellTypeData(base)});
+    auto data = DataDescription().addCells({CellDescription().setId(1).setNeuralNetwork(nn)});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -38,10 +38,10 @@ TEST_F(NeuronTests, bias)
 
 TEST_F(NeuronTests, weight)
 {
-    BaseDescription base;
-    base.neuralNetwork.setWeight(2, 3, 1.0f);
-    base.neuralNetwork.setWeight(2, 7, 0.5f);
-    base.neuralNetwork.setWeight(5, 3, -3.5f);
+    NeuralNetworkDescription nn;
+    nn.setWeight(2, 3, 1.0f);
+    nn.setWeight(2, 7, 0.5f);
+    nn.setWeight(5, 3, -3.5f);
 
     SignalDescription signal;
     signal.channels = {0, 0, 0, 1, 0, 0, 0, 0.5f};
@@ -52,7 +52,7 @@ TEST_F(NeuronTests, weight)
             .setPos({1.0f, 1.0f})
             .setCellTypeData(OscillatorDescription())
             .setSignal(signal),
-        CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellTypeData(base),
+        CellDescription().setId(2).setPos({2.0f, 1.0f}).setNeuralNetwork(nn),
     });
     data.addConnection(1, 2);
 
@@ -67,12 +67,12 @@ TEST_F(NeuronTests, weight)
 
 TEST_F(NeuronTests, activationFunctionBinaryStep)
 {
-    BaseDescription base;
-    base.neuralNetwork.setWeight(2, 3, 1.0f);
-    base.neuralNetwork.setWeight(2, 7, 0.5f);
-    base.neuralNetwork.setWeight(5, 3, -3.5f);
-    base.neuralNetwork.activationFunctions[2] = ActivationFunction_BinaryStep;
-    base.neuralNetwork.activationFunctions[5] = ActivationFunction_BinaryStep;
+    NeuralNetworkDescription nn;
+    nn.setWeight(2, 3, 1.0f);
+    nn.setWeight(2, 7, 0.5f);
+    nn.setWeight(5, 3, -3.5f);
+    nn.activationFunctions[2] = ActivationFunction_BinaryStep;
+    nn.activationFunctions[5] = ActivationFunction_BinaryStep;
 
 
     SignalDescription signal;
@@ -84,7 +84,7 @@ TEST_F(NeuronTests, activationFunctionBinaryStep)
             .setPos({1.0f, 1.0f})
             .setCellTypeData(OscillatorDescription())
             .setSignal(signal),
-        CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellTypeData(base),
+        CellDescription().setId(2).setPos({2.0f, 1.0f}).setNeuralNetwork(nn),
     });
     data.addConnection(1, 2);
 

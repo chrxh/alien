@@ -19,9 +19,10 @@ public:
 TEST_F(DataTransferTests, singleCell)
 {
     DataDescription data;
-    BaseDescription base;
-    base.neuralNetwork.setWeight(2, 1, 1.0f);
+    NeuralNetworkDescription nn;
+    nn.setWeight(2, 1, 1.0f);
     data.addCell(CellDescription()
+                     .setNeuralNetwork(nn)
                      .setId(1)
                      .setPos({2.0f, 4.0f})
                      .setVel({0.5f, 1.0f})
@@ -31,7 +32,6 @@ TEST_F(DataTransferTests, singleCell)
                      .setBarrier(true)
                      .setLivingState(false)
                      .setConstructionId(3534)
-                     .setCellTypeData(base)
                      .setSignal({1, 0, -1, 0, 0, 0, 0, 0}));
 
     _simulationFacade->setSimulationData(data);
@@ -44,8 +44,6 @@ TEST_F(DataTransferTests, singleParticle)
 {
     DataDescription data;
 
-    BaseDescription base;
-    base.neuralNetwork.setWeight(2, 1, 1.0f);
     data.addParticle(ParticleDescription().setId(1).setPos({2.0f, 4.0f}).setVel({0.5f, 1.0f}).setEnergy(100.0f).setColor(2));
 
     _simulationFacade->setSimulationData(data);
@@ -56,31 +54,15 @@ TEST_F(DataTransferTests, singleParticle)
 
 TEST_F(DataTransferTests, cellCluster)
 {
-    BaseDescription base1;
-    base1.neuralNetwork.setWeight(2, 1, 1.0f);
-    BaseDescription base2;
-    base2.neuralNetwork.setWeight(5, 3, 1.0f);
+    NeuralNetworkDescription nn1;
+    nn1.setWeight(2, 1, 1.0f);
+    NeuralNetworkDescription nn2;
+    nn2.setWeight(5, 3, 1.0f);
 
     DataDescription data;
     data.addCells({
-        CellDescription()
-            .setId(1)
-            .setPos({2.0f, 4.0f})
-            .setVel({0.5f, 1.0f})
-            .setAge(1)
-            .setColor(2)
-            .setBarrier(false)
-            .setLivingState(false)
-            .setCellTypeData(base1),
-        CellDescription()
-            .setId(2)
-            .setPos({3.0f, 4.0f})
-            .setVel({0.2f, 1.0f})
-            .setAge(1)
-            .setColor(4)
-            .setBarrier(true)
-            .setLivingState(false)
-            .setCellTypeData(base1),
+        CellDescription().setId(1).setPos({2.0f, 4.0f}).setVel({0.5f, 1.0f}).setAge(1).setColor(2).setBarrier(false).setLivingState(false).setNeuralNetwork(nn1),
+        CellDescription().setId(2).setPos({3.0f, 4.0f}).setVel({0.2f, 1.0f}).setAge(1).setColor(4).setBarrier(true).setLivingState(false).setNeuralNetwork(nn2),
     });
     data.addConnection(1, 2);
 

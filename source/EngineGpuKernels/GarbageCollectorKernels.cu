@@ -73,21 +73,15 @@ __global__ void cudaCleanupAuxiliaryData(Array<Cell*> cellPointers, RawMemory au
         auto& cell = cellPointers.at(index);
         copyAndAssignNewAuxiliaryData(cell->metadata.name, cell->metadata.nameSize, auxiliaryData);
         copyAndAssignNewAuxiliaryData(cell->metadata.description, cell->metadata.descriptionSize, auxiliaryData);
-        switch (cell->cellType) {
-        case CellType_Base:
+        if (cell->cellType != CellType_Structure && cell->cellType != CellType_Free) {
             copyAndAssignNewAuxiliaryData(
-                reinterpret_cast<uint8_t*&>(cell->cellTypeData.neuron.neuralNetwork),
-                sizeof(*cell->cellTypeData.neuron.neuralNetwork),
-                auxiliaryData);
-            break;
-        case CellType_Constructor:
-            copyAndAssignNewAuxiliaryData(
-                cell->cellTypeData.constructor.genome, cell->cellTypeData.constructor.genomeSize, auxiliaryData);
-            break;
-        case CellType_Injector:
-            copyAndAssignNewAuxiliaryData(
-                cell->cellTypeData.injector.genome, cell->cellTypeData.injector.genomeSize, auxiliaryData);
-            break;
+                reinterpret_cast<uint8_t*&>(cell->neuralNetwork), sizeof(*cell->neuralNetwork), auxiliaryData);
+        }
+        if (cell->cellType == CellType_Constructor) {
+            copyAndAssignNewAuxiliaryData(cell->cellTypeData.constructor.genome, cell->cellTypeData.constructor.genomeSize, auxiliaryData);
+        }
+        if (cell->cellType == CellType_Injector) {
+            copyAndAssignNewAuxiliaryData(cell->cellTypeData.injector.genome, cell->cellTypeData.injector.genomeSize, auxiliaryData);
         }
     }
 }

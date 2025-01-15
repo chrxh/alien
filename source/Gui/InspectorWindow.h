@@ -31,7 +31,7 @@ private:
     void processCellMetadataTab(CellDescription& cell);
 
     void processOscillatorContent(OscillatorDescription& oscillator);
-    void processNeuronContent(BaseDescription& base);
+    void processNeuronContent(CellDescription& cell);
     void processConstructorContent(ConstructorDescription& constructor);
     void processInjectorContent(InjectorDescription& injector);
     void processAttackerContent(AttackerDescription& attacker);

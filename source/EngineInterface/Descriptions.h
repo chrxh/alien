@@ -86,8 +86,6 @@ struct NeuralNetworkDescription
 
 struct BaseDescription
 {
-    NeuralNetworkDescription neuralNetwork;
-
     auto operator<=>(BaseDescription const&) const = default;
 };
 
@@ -430,7 +428,8 @@ struct CellDescription
     uint16_t genomeNodeIndex = 0;
 
     //cell type data
-    CellTypeDescription cellTypeData;
+    std::optional<NeuralNetworkDescription> neuralNetwork;
+    CellTypeDescription cellTypeData = BaseDescription();
     std::optional<SignalRoutingRestrictionDescription> signalRoutingRestriction;
     std::optional<SignalDescription> signal;
     int activationTime = 0;
@@ -503,6 +502,11 @@ struct CellDescription
     CellDescription& setCellTypeData(CellTypeDesc const& value)
     {
         cellTypeData = value;
+        return *this;
+    }
+    CellDescription& setNeuralNetwork(NeuralNetworkDescription const& value)
+    {
+        neuralNetwork = value;
         return *this;
     }
     CellDescription& setMetadata(CellMetadataDescription const& value)

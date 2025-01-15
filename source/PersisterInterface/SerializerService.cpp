@@ -521,11 +521,8 @@ namespace cereal
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, BaseDescription& data)
     {
-        BaseDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         processLoadSaveMap(task, ar, auxiliaries);
-
-        ar(data.neuralNetwork);
     }
     SPLIT_SERIALIZATION(BaseDescription)
 
@@ -700,7 +697,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_GenomeNodeIndex, data.genomeNodeIndex, defaultObject.genomeNodeIndex);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data.connections, data.cellTypeData, data.signal, data.metadata);
+        ar(data.connections, data.cellTypeData, data.signal, data.neuralNetwork, data.metadata);
     }
     SPLIT_SERIALIZATION(CellDescription)
 
