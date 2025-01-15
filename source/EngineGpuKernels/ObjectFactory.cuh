@@ -21,7 +21,7 @@ public:
     __inline__ __device__ void changeCellFromTO(DataTO const& dataTO, CellTO const& cellTO, Cell* cell, bool createIds);
     __inline__ __device__ void changeParticleFromTO(ParticleTO const& particleTO, Particle* particle);
     __inline__ __device__ Particle* createParticle(float energy, float2 const& pos, float2 const& vel, int color);
-    __inline__ __device__ Cell* createRandomCell(float energy, float2 const& pos, float2 const& vel);
+    __inline__ __device__ Cell* createFreeCell(float energy, float2 const& pos, float2 const& vel);
     __inline__ __device__ Cell* createCell(uint64_t& cellPointerIndex);
 
 private:
@@ -133,13 +133,15 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     }
 
     cell->cellType = cellTO.cellType;
+
+    if (cellTO.cellType != CellType_Structure && cellTO.cellType != CellType_Free) {
+        createAuxiliaryDataWithFixedSize(
+            sizeof(NeuralNetwork), cellTO.neuralNetwork.dataIndex, dataTO.auxiliaryData, reinterpret_cast<uint8_t*&>(cell->neuralNetwork));
+    } else {
+        cell->neuralNetwork = nullptr;
+    }
     switch (cellTO.cellType) {
     case CellType_Base: {
-        createAuxiliaryDataWithFixedSize(
-            sizeof(NeuralNetwork),
-            cellTO.cellTypeData.base.neuralNetwork.dataIndex,
-            dataTO.auxiliaryData,
-            reinterpret_cast<uint8_t*&>(cell->cellTypeData.neuron.neuralNetwork));
     } break;
     case CellType_Depot: {
         cell->cellTypeData.transmitter.mode = cellTO.cellTypeData.transmitter.mode;
@@ -258,7 +260,7 @@ ObjectFactory::createParticle(float energy, float2 const& pos, float2 const& vel
     return particle;
 }
 
-__inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2 const& pos, float2 const& vel)
+__inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 const& pos, float2 const& vel)
 {
     auto cell = _data->objects.cells.getNewElement();
     auto cellPointers = _data->objects.cellPointers.getNewElement();
@@ -293,6 +295,7 @@ __inline__ __device__ Cell* ObjectFactory::createRandomCell(float energy, float2
     cell->cellTypeUsed = CellTriggered_No;
     cell->genomeNodeIndex = 0;
     cell->cellType = CellType_Free;
+    cell->neuralNetwork = nullptr;
 
     return cell;
 }

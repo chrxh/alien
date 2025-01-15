@@ -321,9 +321,13 @@ void _InspectorWindow::processCellTypePropertiesTab(CellDescription& cell)
     std::string title = Const::CellTypeToStringMap.at(cell.getCellType());
     if (ImGui::BeginTabItem(title.c_str(), nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+
+            if (cell.neuralNetwork.has_value()) {
+                processNeuronContent(cell);
+            }
+
             switch (cell.getCellType()) {
             case CellType_Base: {
-                processNeuronContent(std::get<BaseDescription>(cell.cellTypeData));
             } break;
             case CellType_Depot: {
                 processTransmitterContent(std::get<DepotDescription>(cell.cellTypeData));
@@ -520,14 +524,14 @@ void _InspectorWindow::processOscillatorContent(OscillatorDescription& oscillato
     }
 }
 
-void _InspectorWindow::processNeuronContent(BaseDescription& base)
+void _InspectorWindow::processNeuronContent(CellDescription& cell)
 {
     if (ImGui::TreeNodeEx("Neural network", TreeNodeFlags)) {
         AlienImGui::NeuronSelection(
             AlienImGui::NeuronSelectionParameters().rightMargin(0),
-            base.neuralNetwork.weights,
-            base.neuralNetwork.biases,
-            base.neuralNetwork.activationFunctions);
+            cell.neuralNetwork->weights,
+            cell.neuralNetwork->biases,
+            cell.neuralNetwork->activationFunctions);
         ImGui::TreePop();
     }
 }

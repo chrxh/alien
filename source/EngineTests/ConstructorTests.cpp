@@ -755,12 +755,11 @@ TEST_F(ConstructorTests, constructNeuronCell)
 
     EXPECT_EQ(CellType_Base, actualConstructedCell.getCellType());
 
-    auto actualBase = std::get<BaseDescription>(actualConstructedCell.cellTypeData);
-    for (auto const& [weight, actualWeight] : boost::combine(base.neuralNetwork.weights, actualBase.neuralNetwork.weights)) {
+    for (auto const& [weight, actualWeight] : boost::combine(base.neuralNetwork.weights, actualConstructedCell.neuralNetwork->weights)) {
         EXPECT_TRUE(lowPrecisionCompare(weight, actualWeight));
     }
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        EXPECT_TRUE(lowPrecisionCompare(base.neuralNetwork.biases[i], actualBase.neuralNetwork.biases[i]));
+        EXPECT_TRUE(lowPrecisionCompare(base.neuralNetwork.biases[i], actualConstructedCell.neuralNetwork->biases[i]));
     }
 }
 

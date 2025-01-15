@@ -78,7 +78,6 @@ struct NeuralNetwork
 
 struct BaseType
 {
-    NeuralNetwork* neuralNetwork;
 };
 
 struct TransmitterType
@@ -232,10 +231,11 @@ struct Cell
     uint16_t genomeNodeIndex;
 
     //cell type data
-    SignalRoutingRestriction signalRoutingRestriction;
-    Signal signal;
+    NeuralNetwork* neuralNetwork;
     CellType cellType;
     CellTypeData cellTypeData;
+    SignalRoutingRestriction signalRoutingRestriction;
+    Signal signal;
     uint32_t activationTime;
     CellTriggered cellTypeUsed;
 
