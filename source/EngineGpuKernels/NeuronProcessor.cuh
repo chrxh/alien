@@ -22,10 +22,14 @@ private:
 
 __device__ __inline__ void NeuronProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
-    auto& operations = data.cellTypeOperations[CellType_Base];
-    auto partition = calcPartition(operations.getNumEntries(), blockIdx.x, gridDim.x);
+    auto& cells = data.objects.cellPointers;
+    auto partition = calcPartition(cells.getNumEntries(), blockIdx.x, gridDim.x);
+
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        processCell(data, statistics, operations.at(i).cell);
+        auto& cell = cells.at(i);
+        if (cell->cellType != CellType_Structure && cell->cellType != CellType_Free) {
+            processCell(data, statistics, cell);
+        }
     }
 }
 
