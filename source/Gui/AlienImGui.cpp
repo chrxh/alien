@@ -1779,7 +1779,7 @@ void AlienImGui::NeuronSelection(
     NeuronSelectionParameters const& parameters,
     std::vector<float>& weights,
     std::vector<float>& biases,
-    std::vector<NeuronActivationFunction>& activationFunctions)
+    std::vector<ActivationFunction>& activationFunctions)
 {
     auto weights_span = std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS);
     auto& selectedInput = getIdBasedValue(_neuronSelectedInput, 0);
@@ -1867,22 +1867,22 @@ void AlienImGui::NeuronSelection(
     }
 
     //visualize activation functions
-    auto calcPlotPosition = [&](RealVector2D const& refPos, float x, NeuronActivationFunction activationFunction) {
+    auto calcPlotPosition = [&](RealVector2D const& refPos, float x, ActivationFunction activationFunction) {
         float value = 0;
         switch (activationFunction) {
-        case NeuronActivationFunction_Sigmoid:
+        case ActivationFunction_Sigmoid:
             value = Math::sigmoid(x);
             break;
-        case NeuronActivationFunction_BinaryStep:
+        case ActivationFunction_BinaryStep:
             value = Math::binaryStep(x);
             break;
-        case NeuronActivationFunction_Identity:
+        case ActivationFunction_Identity:
             value = x / 4;
             break;
-        case NeuronActivationFunction_Abs:
+        case ActivationFunction_Abs:
             value = std::abs(x) / 4;
             break;
-        case NeuronActivationFunction_Gaussian:
+        case ActivationFunction_Gaussian:
             value = Math::gaussian(x);
             break;
         }
@@ -1942,7 +1942,7 @@ void AlienImGui::NeuronSelection(
                     .values(Const::ActivationFunctions)
                     .tooltip(Const::GenomeNeuronActivationFunctionTooltip),
                 activationFunction);
-            activationFunctions.at(selectedOutput) = static_cast<NeuronActivationFunction>(activationFunction);
+            activationFunctions.at(selectedOutput) = static_cast<ActivationFunction>(activationFunction);
             table.next();
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters().name("Weight").step(0.05f).textWidth(editorColumnTextWidth).tooltip(Const::GenomeNeuronWeightAndBiasTooltip),
@@ -1959,7 +1959,7 @@ void AlienImGui::NeuronSelection(
                     weights_span[i, j] = 0;
                 }
                 biases[i] = 0;
-                activationFunctions[i] = NeuronActivationFunction_Sigmoid;
+                activationFunctions[i] = ActivationFunction_Sigmoid;
             }
         }
         ImGui::SameLine();
@@ -1969,7 +1969,7 @@ void AlienImGui::NeuronSelection(
                     weights_span[i, j] = i == j ? 1.0f : 0.0f;
                 }
                 biases[i] = 0.0f;
-                activationFunctions[i] = NeuronActivationFunction_Identity;
+                activationFunctions[i] = ActivationFunction_Identity;
             }
         }
         ImGui::SameLine();
@@ -1979,7 +1979,7 @@ void AlienImGui::NeuronSelection(
                     weights_span[i, j] = NumberGenerator::get().getRandomFloat(-4.0f, 4.0f);
                 }
                 biases[i] = NumberGenerator::get().getRandomFloat(-4.0f, 4.0f);
-                activationFunctions[i] = NumberGenerator::get().getRandomInt(NeuronActivationFunction_Count);
+                activationFunctions[i] = NumberGenerator::get().getRandomInt(ActivationFunction_Count);
             }
         }
     }

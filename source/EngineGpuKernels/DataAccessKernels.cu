@@ -81,10 +81,10 @@ namespace
         case CellType_Base: {
             int targetSize;    //not used
             copyAuxiliaryData<int>(
-                sizeof(NeuronFunction::NeuronState),
-                reinterpret_cast<uint8_t*>(cell->cellTypeData.neuron.neuronState),
+                sizeof(NeuralNetwork),
+                reinterpret_cast<uint8_t*>(cell->cellTypeData.neuron.neuralNetwork),
                 targetSize,
-                cellTO.cellTypeData.neuron.neuronDataIndex,
+                cellTO.cellTypeData.base.neuralNetwork.dataIndex,
                 *dataTO.numAuxiliaryData,
                 dataTO.auxiliaryData);
         } break;

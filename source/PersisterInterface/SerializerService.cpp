@@ -59,7 +59,9 @@ namespace
     auto constexpr Id_CellGenome_Color = 2;
     auto constexpr Id_CellGenome_NumRequiredAdditionalConnections = 9;
 
-    auto constexpr Id_NeuronGenome_ActivationFunctions = 0;
+    auto constexpr Id_NeuralNetworkGenome_Weights = 0;
+    auto constexpr Id_NeuralNetworkGenome_Biases = 0;
+    auto constexpr Id_NeuralNetworkGenome_ActivationFunctions = 0;
 
     auto constexpr Id_TransmitterGenome_Mode = 0;
 
@@ -92,27 +94,38 @@ namespace
 
     auto constexpr Id_Particle_Color = 0;
 
-    auto constexpr Id_Cell_Stiffness = 0;
-    auto constexpr Id_Cell_Color = 1;
-    auto constexpr Id_Cell_Barrier = 3;
-    auto constexpr Id_Cell_Age = 4;
-    auto constexpr Id_Cell_LivingState = 5;
-    auto constexpr Id_Cell_ActivationTime = 8;
-    auto constexpr Id_Cell_CreatureId = 11;
-    auto constexpr Id_Cell_MutationId = 12;
-    auto constexpr Id_Cell_CellTypeUsed = 15;
-    auto constexpr Id_Cell_AncestorMutationId = 16;
-    auto constexpr Id_Cell_GenomeComplexity = 17;
-    auto constexpr Id_Cell_DetectedByCreatureId = 19;
-    auto constexpr Id_Cell_Signal_Channels = 21;
-    auto constexpr Id_Cell_Signal_Origin = 22;
-    auto constexpr Id_Cell_Signal_TargetX = 23;
-    auto constexpr Id_Cell_Signal_TargetY = 24;
-    auto constexpr Id_Cell_GenomeNodeIndex = 25;
+    auto constexpr Id_Cell_Id = 0;
+    auto constexpr Id_Cell_Energy = 1;
+    auto constexpr Id_Cell_Pos = 2;
+    auto constexpr Id_Cell_Vel = 3;
+    auto constexpr Id_Cell_Stiffness = 4;
+    auto constexpr Id_Cell_Color = 5;
+    auto constexpr Id_Cell_Barrier = 6;
+    auto constexpr Id_Cell_Age = 7;
+    auto constexpr Id_Cell_LivingState = 8;
+    auto constexpr Id_Cell_ActivationTime = 9;
+    auto constexpr Id_Cell_CreatureId = 10;
+    auto constexpr Id_Cell_MutationId = 11;
+    auto constexpr Id_Cell_CellTypeUsed = 12;
+    auto constexpr Id_Cell_AncestorMutationId = 13;
+    auto constexpr Id_Cell_GenomeComplexity = 14;
+    auto constexpr Id_Cell_DetectedByCreatureId = 15;
+    auto constexpr Id_Cell_Signal_Channels = 16;
+    auto constexpr Id_Cell_Signal_Origin = 17;
+    auto constexpr Id_Cell_Signal_TargetX = 18;
+    auto constexpr Id_Cell_Signal_TargetY = 19;
+    auto constexpr Id_Cell_GenomeNodeIndex = 20;
 
-    auto constexpr Id_Neuron_Weights = 0;
-    auto constexpr Id_Neuron_Biases = 1;
-    auto constexpr Id_Neuron_ActivationFunctions = 2;
+    auto constexpr Id_Connection_CellId = 0;
+    auto constexpr Id_Connection_Distance = 1;
+    auto constexpr Id_Connection_AngleFromPrevious = 2;
+
+    auto constexpr Id_Metadata_Name = 0;
+    auto constexpr Id_Metadata_Description = 1;
+
+    auto constexpr Id_NeuralNetwork_Weights = 0;
+    auto constexpr Id_NeuralNetwork_Biases = 1;
+    auto constexpr Id_NeuralNetwork_ActivationFunctions = 2;
 
     auto constexpr Id_Constructor_ActivationMode = 0;
     auto constexpr Id_Constructor_ConstructionActivationTime = 6;
@@ -177,6 +190,7 @@ namespace cereal
         float,
         bool,
         double,
+        std::string,
         uint64_t,
         uint32_t,
         uint16_t,
@@ -184,6 +198,7 @@ namespace cereal
         int64_t,
         int16_t,
         int8_t,
+        RealVector2D,
         std::optional<bool>,
         std::optional<uint8_t>,
         std::optional<int8_t>,
@@ -244,14 +259,25 @@ namespace cereal
     }
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, NeuralNetworkGenomeDescription& data)
+    {
+        NeuralNetworkGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_NeuralNetworkGenome_Weights, data.weights, defaultObject.weights);
+        loadSave(task, auxiliaries, Id_NeuralNetworkGenome_Biases, data.biases, defaultObject.biases);
+        loadSave(task, auxiliaries, Id_NeuralNetworkGenome_ActivationFunctions, data.activationFunctions, defaultObject.activationFunctions);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(NeuralNetworkGenomeDescription)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, BaseGenomeDescription& data)
     {
         BaseGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_NeuronGenome_ActivationFunctions, data.activationFunctions, defaultObject.activationFunctions);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data.weights, data.biases);
+        ar(data.neuralNetwork);
     }
     SPLIT_SERIALIZATION(BaseGenomeDescription)
 
@@ -445,15 +471,27 @@ namespace cereal
     }
 
     template <class Archive>
-    void serialize(Archive& ar, CellMetadataDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, CellMetadataDescription& data)
     {
-        ar(data.name, data.description);
+        CellMetadataDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_Metadata_Name, data.name, defaultObject.name);
+        loadSave(task, auxiliaries, Id_Metadata_Description, data.description, defaultObject.description);
+        processLoadSaveMap(task, ar, auxiliaries);
     }
+    SPLIT_SERIALIZATION(CellMetadataDescription)
+
     template <class Archive>
-    void serialize(Archive& ar, ConnectionDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, ConnectionDescription& data)
     {
-        ar(data.cellId, data.distance, data.angleFromPrevious);
+        ConnectionDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_Connection_CellId, data.cellId, defaultObject.cellId);
+        loadSave(task, auxiliaries, Id_Connection_Distance, data.distance, defaultObject.distance);
+        loadSave(task, auxiliaries, Id_Connection_AngleFromPrevious, data.angleFromPrevious, defaultObject.angleFromPrevious);
+        processLoadSaveMap(task, ar, auxiliaries);
     }
+    SPLIT_SERIALIZATION(ConnectionDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, SignalDescription& data)
@@ -465,20 +503,29 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_Signal_TargetX, data.targetX, defaultObject.targetX);
         loadSave(task, auxiliaries, Id_Cell_Signal_TargetY, data.targetY, defaultObject.targetY);
         processLoadSaveMap(task, ar, auxiliaries);
-
-        ar(data.channels);
     }
     SPLIT_SERIALIZATION(SignalDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, NeuralNetworkDescription& data)
+    {
+        NeuralNetworkDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_NeuralNetwork_Weights, data.weights, defaultObject.weights);
+        loadSave(task, auxiliaries, Id_NeuralNetwork_Biases, data.biases, defaultObject.biases);
+        loadSave(task, auxiliaries, Id_NeuralNetwork_ActivationFunctions, data.activationFunctions, defaultObject.activationFunctions);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(NeuralNetworkDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, BaseDescription& data)
     {
         BaseDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Neuron_Weights, data.weights, defaultObject.weights);
-        loadSave(task, auxiliaries, Id_Neuron_Biases, data.biases, defaultObject.biases);
-        loadSave(task, auxiliaries, Id_Neuron_ActivationFunctions, data.activationFunctions, defaultObject.activationFunctions);
         processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data.neuralNetwork);
     }
     SPLIT_SERIALIZATION(BaseDescription)
 
@@ -634,6 +681,10 @@ namespace cereal
     {
         CellDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_Cell_Id, data.id, defaultObject.id);
+        loadSave(task, auxiliaries, Id_Cell_Energy, data.energy, defaultObject.energy);
+        loadSave(task, auxiliaries, Id_Cell_Pos, data.pos, defaultObject.pos);
+        loadSave(task, auxiliaries, Id_Cell_Vel, data.vel, defaultObject.vel);
         loadSave(task, auxiliaries, Id_Cell_Stiffness, data.stiffness, defaultObject.stiffness);
         loadSave(task, auxiliaries, Id_Cell_Color, data.color, defaultObject.color);
         loadSave(task, auxiliaries, Id_Cell_Barrier, data.barrier, defaultObject.barrier);
@@ -649,7 +700,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_GenomeNodeIndex, data.genomeNodeIndex, defaultObject.genomeNodeIndex);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data.id, data.connections, data.pos, data.vel, data.energy, data.cellTypeData, data.signal, data.metadata);
+        ar(data.connections, data.cellTypeData, data.signal, data.metadata);
     }
     SPLIT_SERIALIZATION(CellDescription)
 

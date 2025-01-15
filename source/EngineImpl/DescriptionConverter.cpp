@@ -31,7 +31,7 @@ namespace
     BaseDescription convertToNeuronDescription(DataTO const& dataTO, uint64_t sourceIndex)
     {
         BaseDescription result;
-        auto weights_span = std::mdspan(result.weights.data(), MAX_CHANNELS, MAX_CHANNELS);
+        auto weights_span = std::mdspan(result.neuralNetwork.weights.data(), MAX_CHANNELS, MAX_CHANNELS);
 
         BytesAsFloat bytesAsFloat;
         int index = 0;
@@ -49,10 +49,10 @@ namespace
                 bytesAsFloat.b[i] = dataTO.auxiliaryData[sourceIndex + index];
                 ++index;
             }
-            result.biases[channel] = bytesAsFloat.f;
+            result.neuralNetwork.biases[channel] = bytesAsFloat.f;
         }
         for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
-            result.activationFunctions[channel] = dataTO.auxiliaryData[sourceIndex + index];
+            result.neuralNetwork.activationFunctions[channel] = dataTO.auxiliaryData[sourceIndex + index];
             ++index;
         }
 
@@ -76,9 +76,9 @@ namespace
     void convertToNeuronData(DataTO const& dataTO, BaseDescription const& neuronDesc, uint64_t& targetIndex)
     {
         targetIndex = *dataTO.numAuxiliaryData;
-        *dataTO.numAuxiliaryData += NeuronTO::NeuronDataSize;
+        *dataTO.numAuxiliaryData += NeuralNetworkTO::DataSize;
 
-        auto weights_span = std::mdspan(neuronDesc.weights.data(), MAX_CHANNELS, MAX_CHANNELS);
+        auto weights_span = std::mdspan(neuronDesc.neuralNetwork.weights.data(), MAX_CHANNELS, MAX_CHANNELS);
 
         BytesAsFloat bytesAsFloat;
         int bytePos = 0;
@@ -92,14 +92,14 @@ namespace
             }
         }
         for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
-            bytesAsFloat.f = neuronDesc.biases[channel];
+            bytesAsFloat.f = neuronDesc.neuralNetwork.biases[channel];
             for (int i = 0; i < 4; ++i) {
                 dataTO.auxiliaryData[targetIndex + bytePos] = bytesAsFloat.b[i];
                 ++bytePos;
             }
         }
         for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
-            dataTO.auxiliaryData[targetIndex + bytePos] = neuronDesc.activationFunctions[channel];
+            dataTO.auxiliaryData[targetIndex + bytePos] = neuronDesc.neuralNetwork.activationFunctions[channel];
             ++bytePos;
         }
     }
@@ -414,7 +414,7 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
 
     switch (cellTO.cellType) {
     case CellType_Base: {
-        result.cellTypeData = convertToNeuronDescription(dataTO, cellTO.cellTypeData.neuron.neuronDataIndex);
+        result.cellTypeData = convertToNeuronDescription(dataTO, cellTO.cellTypeData.base.neuralNetwork.dataIndex);
     } break;
     case CellType_Depot: {
         DepotDescription transmitter;
@@ -570,11 +570,11 @@ void DescriptionConverter::addCell(
     cellTO.genomeNodeIndex = cellDesc.genomeNodeIndex;
     switch (cellDesc.getCellType()) {
     case CellType_Base: {
-        auto const& neuronDesc = std::get<BaseDescription>(cellDesc.cellTypeData);
+        auto const& baseDesc = std::get<BaseDescription>(cellDesc.cellTypeData);
 
-        NeuronTO neuronTO;
-        convertToNeuronData(dataTO, neuronDesc, neuronTO.neuronDataIndex);
-        cellTO.cellTypeData.neuron = neuronTO;
+        BaseTO baseTO;
+        convertToNeuronData(dataTO, baseDesc, baseTO.neuralNetwork.dataIndex);
+        cellTO.cellTypeData.base = baseTO;
     } break;
     case CellType_Depot: {
         auto const& transmitterDesc = std::get<DepotDescription>(cellDesc.cellTypeData);

@@ -22,10 +22,10 @@ protected:
 
 TEST_F(NeuronTests, bias)
 {
-    BaseDescription neuron;
-    neuron.biases = {0, 0, 1, 0, 0, 0, 0, -1};
+    BaseDescription base;
+    base.neuralNetwork.biases = {0, 0, 1, 0, 0, 0, 0, -1};
 
-    auto data = DataDescription().addCells({CellDescription().setId(1).setCellTypeData(neuron)});
+    auto data = DataDescription().addCells({CellDescription().setId(1).setCellTypeData(base)});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -38,10 +38,10 @@ TEST_F(NeuronTests, bias)
 
 TEST_F(NeuronTests, weight)
 {
-    BaseDescription neuron;
-    neuron.setWeight(2, 3, 1.0f);
-    neuron.setWeight(2, 7, 0.5f);
-    neuron.setWeight(5, 3, -3.5f);
+    BaseDescription base;
+    base.neuralNetwork.setWeight(2, 3, 1.0f);
+    base.neuralNetwork.setWeight(2, 7, 0.5f);
+    base.neuralNetwork.setWeight(5, 3, -3.5f);
 
     SignalDescription signal;
     signal.channels = {0, 0, 0, 1, 0, 0, 0, 0.5f};
@@ -52,7 +52,7 @@ TEST_F(NeuronTests, weight)
             .setPos({1.0f, 1.0f})
             .setCellTypeData(OscillatorDescription())
             .setSignal(signal),
-        CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellTypeData(neuron),
+        CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellTypeData(base),
     });
     data.addConnection(1, 2);
 
@@ -67,12 +67,12 @@ TEST_F(NeuronTests, weight)
 
 TEST_F(NeuronTests, activationFunctionBinaryStep)
 {
-    BaseDescription neuron;
-    neuron.setWeight(2, 3, 1.0f);
-    neuron.setWeight(2, 7, 0.5f);
-    neuron.setWeight(5, 3, -3.5f);
-    neuron.activationFunctions[2] = NeuronActivationFunction_BinaryStep;
-    neuron.activationFunctions[5] = NeuronActivationFunction_BinaryStep;
+    BaseDescription base;
+    base.neuralNetwork.setWeight(2, 3, 1.0f);
+    base.neuralNetwork.setWeight(2, 7, 0.5f);
+    base.neuralNetwork.setWeight(5, 3, -3.5f);
+    base.neuralNetwork.activationFunctions[2] = ActivationFunction_BinaryStep;
+    base.neuralNetwork.activationFunctions[5] = ActivationFunction_BinaryStep;
 
 
     SignalDescription signal;
@@ -84,7 +84,7 @@ TEST_F(NeuronTests, activationFunctionBinaryStep)
             .setPos({1.0f, 1.0f})
             .setCellTypeData(OscillatorDescription())
             .setSignal(signal),
-        CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellTypeData(neuron),
+        CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellTypeData(base),
     });
     data.addConnection(1, 2);
 

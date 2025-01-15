@@ -749,10 +749,13 @@ void GenomeEditorWindow::processNode(
 
         switch (type) {
         case CellType_Base: {
-            auto& neuron = std::get<BaseGenomeDescription>(cell.cellTypeData);
+            auto& base = std::get<BaseGenomeDescription>(cell.cellTypeData);
             if (ImGui::TreeNodeEx("Neural network", ImGuiTreeNodeFlags_None)) {
                 AlienImGui::NeuronSelection(
-                    AlienImGui::NeuronSelectionParameters().rightMargin(SubWindowRightMargin), neuron.weights, neuron.biases, neuron.activationFunctions);
+                    AlienImGui::NeuronSelectionParameters().rightMargin(SubWindowRightMargin),
+                    base.neuralNetwork.weights,
+                    base.neuralNetwork.biases,
+                    base.neuralNetwork.activationFunctions);
                 ImGui::TreePop();
             }
         } break;

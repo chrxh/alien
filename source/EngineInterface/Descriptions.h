@@ -62,29 +62,33 @@ struct FreeCellDescription
     auto operator<=>(FreeCellDescription const&) const = default;
 };
 
-struct BaseDescription
+struct NeuralNetworkDescription
 {
     std::vector<float> weights;
     std::vector<float> biases;
-    std::vector<NeuronActivationFunction> activationFunctions;
-
-    BaseDescription()
+    std::vector<ActivationFunction> activationFunctions;
+    NeuralNetworkDescription()
     {
         weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
         biases.resize(MAX_CHANNELS, 0);
         activationFunctions.resize(MAX_CHANNELS, 0);
     }
-    auto operator<=>(BaseDescription const&) const = default;
-
-    BaseDescription& setWeight(int row, int col, float value)
+    auto operator<=>(NeuralNetworkDescription const&) const = default;
+    NeuralNetworkDescription& setWeight(int row, int col, float value)
     {
         auto md = std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS);
         md[row, col] = value;
         return *this;
     }
-
     auto getWeights() const { return std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
     auto getWeights() { return std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
+};
+
+struct BaseDescription
+{
+    NeuralNetworkDescription neuralNetwork;
+
+    auto operator<=>(BaseDescription const&) const = default;
 };
 
 struct DepotDescription
