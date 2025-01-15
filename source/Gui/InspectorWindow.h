@@ -23,7 +23,7 @@ private:
     std::string generateTitle() const;
 
     void processCell(CellDescription cell);
-    void processCellBaseTab(CellDescription& cell);
+    void processCellGeneralTab(CellDescription& cell);
     void processCellTypeTab(CellDescription& cell);
     void processCellTypePropertiesTab(CellDescription& cell);
     template <typename Description>

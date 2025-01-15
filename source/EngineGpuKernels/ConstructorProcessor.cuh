@@ -741,9 +741,20 @@ ConstructorProcessor::constructCellIntern(
     result->genomeNodeIndex = constructor.genomeCurrentNodeIndex;
 
     auto genomeCurrentBytePosition = constructionData.genomeCurrentBytePosition;
+    result->neuralNetwork = data.objects.auxiliaryData.getTypedSubArray<NeuralNetwork>(1);
+    if (constructionData.cellType == CellType_Structure || constructionData.cellType == CellType_Free) {
+        for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+            result->neuralNetwork->weights[i] = 0;
+        }
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            result->neuralNetwork->biases[i] = 0;
+        }
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            result->neuralNetwork->activationFunctions[i] = ActivationFunction_Sigmoid;
+        }
+    }
     switch (constructionData.cellType) {
     case CellType_Base: {
-        result->neuralNetwork = data.objects.auxiliaryData.getTypedSubArray<NeuralNetwork>(1);
         for (int i = 0; i < MAX_CHANNELS *  MAX_CHANNELS; ++i) {
             result->neuralNetwork->weights[i] = GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition) * 4;
         }
