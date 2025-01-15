@@ -428,7 +428,7 @@ struct CellDescription
     uint16_t genomeNodeIndex = 0;
 
     //cell type data
-    std::optional<NeuralNetworkDescription> neuralNetwork;
+    std::optional<NeuralNetworkDescription> neuralNetwork = NeuralNetworkDescription();
     CellTypeDescription cellTypeData = BaseDescription();
     std::optional<SignalRoutingRestrictionDescription> signalRoutingRestriction;
     std::optional<SignalDescription> signal;
@@ -502,6 +502,12 @@ struct CellDescription
     CellDescription& setCellTypeData(CellTypeDesc const& value)
     {
         cellTypeData = value;
+        auto cellType = getCellType();
+        if (cellType == CellType_Structure || cellType == CellType_Free) {
+            neuralNetwork.reset();
+        } else if (!neuralNetwork.has_value()) {
+            neuralNetwork = NeuralNetworkDescription();
+        }
         return *this;
     }
     CellDescription& setNeuralNetwork(NeuralNetworkDescription const& value)

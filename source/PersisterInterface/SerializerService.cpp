@@ -45,30 +45,30 @@
 namespace
 {
     auto constexpr Id_GenomeHeader_Shape = 0;
-    auto constexpr Id_GenomeHeader_SeparateConstruction = 2;
-    auto constexpr Id_GenomeHeader_AngleAlignment = 3;
-    auto constexpr Id_GenomeHeader_Stiffness = 4;
-    auto constexpr Id_GenomeHeader_ConnectionDistance = 5;
-    auto constexpr Id_GenomeHeader_NumRepetitions = 6;
-    auto constexpr Id_GenomeHeader_ConcatenationAngle1 = 7;
-    auto constexpr Id_GenomeHeader_ConcatenationAngle2 = 8;
-    auto constexpr Id_GenomeHeader_NumBranches = 9;
+    auto constexpr Id_GenomeHeader_SeparateConstruction = 1;
+    auto constexpr Id_GenomeHeader_AngleAlignment = 2;
+    auto constexpr Id_GenomeHeader_Stiffness = 3;
+    auto constexpr Id_GenomeHeader_ConnectionDistance = 4;
+    auto constexpr Id_GenomeHeader_NumRepetitions = 5;
+    auto constexpr Id_GenomeHeader_ConcatenationAngle1 = 6;
+    auto constexpr Id_GenomeHeader_ConcatenationAngle2 = 7;
+    auto constexpr Id_GenomeHeader_NumBranches = 8;
 
-    auto constexpr Id_CellGenome_ReferenceAngle = 1;
-    auto constexpr Id_CellGenome_Energy = 7;
+    auto constexpr Id_CellGenome_ReferenceAngle = 0;
+    auto constexpr Id_CellGenome_Energy = 1;
     auto constexpr Id_CellGenome_Color = 2;
-    auto constexpr Id_CellGenome_NumRequiredAdditionalConnections = 9;
+    auto constexpr Id_CellGenome_NumRequiredAdditionalConnections = 3;
 
     auto constexpr Id_NeuralNetworkGenome_Weights = 0;
-    auto constexpr Id_NeuralNetworkGenome_Biases = 0;
-    auto constexpr Id_NeuralNetworkGenome_ActivationFunctions = 0;
+    auto constexpr Id_NeuralNetworkGenome_Biases = 1;
+    auto constexpr Id_NeuralNetworkGenome_ActivationFunctions = 2;
 
     auto constexpr Id_TransmitterGenome_Mode = 0;
 
     auto constexpr Id_ConstructorGenome_Mode = 0;
-    auto constexpr Id_ConstructorGenome_ConstructionActivationTime = 6;
-    auto constexpr Id_ConstructorGenome_ConstructionAngle1 = 9;
-    auto constexpr Id_ConstructorGenome_ConstructionAngle2 = 10;
+    auto constexpr Id_ConstructorGenome_ConstructionActivationTime = 1;
+    auto constexpr Id_ConstructorGenome_ConstructionAngle1 = 2;
+    auto constexpr Id_ConstructorGenome_ConstructionAngle2 = 3;
 
     auto constexpr Id_DefenderGenome_Mode = 0;
 
@@ -81,14 +81,14 @@ namespace
     auto constexpr Id_OscillatorGenome_PulseMode = 0;
     auto constexpr Id_OscillatorGenome_AlternationMode = 1;
 
-    auto constexpr Id_SensorGenome_MinDensity = 1;
-    auto constexpr Id_SensorGenome_RestrictToColor = 3;
-    auto constexpr Id_SensorGenome_RestrictToMutants = 5;
-    auto constexpr Id_SensorGenome_MinRange = 6;
-    auto constexpr Id_SensorGenome_MaxRange = 7;
+    auto constexpr Id_SensorGenome_MinDensity = 0;
+    auto constexpr Id_SensorGenome_RestrictToColor = 1;
+    auto constexpr Id_SensorGenome_RestrictToMutants = 2;
+    auto constexpr Id_SensorGenome_MinRange = 3;
+    auto constexpr Id_SensorGenome_MaxRange = 4;
 
-    auto constexpr Id_ReconnectorGenome_RestrictToColor = 1;
-    auto constexpr Id_ReconnectorGenome_RestrictToMutants = 2;
+    auto constexpr Id_ReconnectorGenome_RestrictToColor = 0;
+    auto constexpr Id_ReconnectorGenome_RestrictToMutants = 1;
 
     auto constexpr Id_DetonatorGenome_Countdown = 0;
 
@@ -128,26 +128,26 @@ namespace
     auto constexpr Id_NeuralNetwork_ActivationFunctions = 2;
 
     auto constexpr Id_Constructor_ActivationMode = 0;
-    auto constexpr Id_Constructor_ConstructionActivationTime = 6;
-    auto constexpr Id_Constructor_GenomeCurrentNodeIndex = 7;
-    auto constexpr Id_Constructor_GenomeGeneration = 9;
-    auto constexpr Id_Constructor_ConstructionAngle1 = 11;
-    auto constexpr Id_Constructor_ConstructionAngle2 = 12;
-    auto constexpr Id_Constructor_OffspringCreatureId = 13;
-    auto constexpr Id_Constructor_OffspringMutationId = 14;
-    auto constexpr Id_Constructor_GenomeCurrentRepetition = 16;
-    auto constexpr Id_Constructor_LastConstructedCellId = 17;
-    auto constexpr Id_Constructor_NumInheritedGenomeNodes = 19;
-    auto constexpr Id_Constructor_CurrentBranch = 20;
+    auto constexpr Id_Constructor_ConstructionActivationTime = 1;
+    auto constexpr Id_Constructor_GenomeCurrentNodeIndex = 2;
+    auto constexpr Id_Constructor_GenomeGeneration = 3;
+    auto constexpr Id_Constructor_ConstructionAngle1 = 4;
+    auto constexpr Id_Constructor_ConstructionAngle2 = 5;
+    auto constexpr Id_Constructor_OffspringCreatureId = 6;
+    auto constexpr Id_Constructor_OffspringMutationId = 7;
+    auto constexpr Id_Constructor_GenomeCurrentRepetition = 8;
+    auto constexpr Id_Constructor_LastConstructedCellId = 9;
+    auto constexpr Id_Constructor_NumInheritedGenomeNodes = 10;
+    auto constexpr Id_Constructor_CurrentBranch = 11;
 
     auto constexpr Id_Defender_Mode = 0;
 
     auto constexpr Id_Muscle_Mode = 0;
     auto constexpr Id_Muscle_LastBendingDirection = 1;
-    auto constexpr Id_Muscle_LastBendingSourceIndex = 4;
+    auto constexpr Id_Muscle_LastBendingSourceIndex = 2;
     auto constexpr Id_Muscle_ConsecutiveBendingAngle = 3;
-    auto constexpr Id_Muscle_LastMovementX = 5;
-    auto constexpr Id_Muscle_LastMovementY = 6;
+    auto constexpr Id_Muscle_LastMovementX = 4;
+    auto constexpr Id_Muscle_LastMovementY = 5;
 
     auto constexpr Id_Injector_Mode = 0;
     auto constexpr Id_Injector_Counter = 1;
@@ -157,21 +157,21 @@ namespace
     auto constexpr Id_Oscillator_PulseMode = 0;
     auto constexpr Id_Oscillator_AlternationMode = 1;
 
-    auto constexpr Id_Sensor_MinDensity = 1;
-    auto constexpr Id_Sensor_MemoryChannel1 = 4;
-    auto constexpr Id_Sensor_MemoryChannel2 = 5;
-    auto constexpr Id_Sensor_MemoryChannel3 = 6;
-    auto constexpr Id_Sensor_RestrictToColor = 7;
-    auto constexpr Id_Sensor_RestrictToMutants = 9;
-    auto constexpr Id_Sensor_TargetX = 10;
-    auto constexpr Id_Sensor_TargetY = 11;
-    auto constexpr Id_Sensor_MinRange = 12;
-    auto constexpr Id_Sensor_MaxRange = 13;
+    auto constexpr Id_Sensor_MinDensity = 0;
+    auto constexpr Id_Sensor_MemoryChannel1 = 1;
+    auto constexpr Id_Sensor_MemoryChannel2 = 2;
+    auto constexpr Id_Sensor_MemoryChannel3 = 3;
+    auto constexpr Id_Sensor_RestrictToColor = 4;
+    auto constexpr Id_Sensor_RestrictToMutants = 5;
+    auto constexpr Id_Sensor_TargetX = 6;
+    auto constexpr Id_Sensor_TargetY = 7;
+    auto constexpr Id_Sensor_MinRange = 8;
+    auto constexpr Id_Sensor_MaxRange = 9;
 
     auto constexpr Id_Transmitter_Mode = 0;
 
-    auto constexpr Id_Reconnector_RestrictToColor = 1;
-    auto constexpr Id_Reconnector_RestrictToMutants = 2;
+    auto constexpr Id_Reconnector_RestrictToColor = 0;
+    auto constexpr Id_Reconnector_RestrictToMutants = 1;
 
     auto constexpr Id_Detonator_State = 0;
     auto constexpr Id_Detonator_Countdown = 1;

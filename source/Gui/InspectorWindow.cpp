@@ -227,6 +227,11 @@ void _InspectorWindow::processCellTypeTab(CellDescription& cell)
     if (ImGui::BeginTabItem("Function", nullptr, ImGuiTabItemFlags_None)) {
         int type = cell.getCellType();
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+
+            if (cell.neuralNetwork.has_value()) {
+                processNeuronContent(cell);
+            }
+
             if (ImGui::TreeNodeEx("Properties##Function", TreeNodeFlags)) {
                 if (AlienImGui::CellTypeCombo(
                         AlienImGui::CellTypeComboParameters()
@@ -321,11 +326,6 @@ void _InspectorWindow::processCellTypePropertiesTab(CellDescription& cell)
     std::string title = Const::CellTypeToStringMap.at(cell.getCellType());
     if (ImGui::BeginTabItem(title.c_str(), nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-
-            if (cell.neuralNetwork.has_value()) {
-                processNeuronContent(cell);
-            }
-
             switch (cell.getCellType()) {
             case CellType_Base: {
             } break;
