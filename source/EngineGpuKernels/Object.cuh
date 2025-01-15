@@ -178,7 +178,7 @@ struct DetonatorType
 
 union CellTypeData
 {
-    BaseType neuron;
+    BaseType base;
     TransmitterType transmitter;
     ConstructorType constructor;
     SensorType sensor;

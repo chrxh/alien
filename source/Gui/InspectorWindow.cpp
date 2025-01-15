@@ -126,7 +126,7 @@ void _InspectorWindow::processCell(CellDescription cell)
     if (ImGui::BeginTabBar(
             "##CellInspect", /*ImGuiTabBarFlags_AutoSelectNewTabs | */ImGuiTabBarFlags_FittingPolicyResizeDown)) {
         auto origCell = cell;
-        processCellBaseTab(cell);
+        processCellGeneralTab(cell);
         processCellTypeTab(cell);
         processCellTypePropertiesTab(cell);
         if (cell.getCellType() == CellType_Constructor) {
@@ -146,11 +146,11 @@ void _InspectorWindow::processCell(CellDescription cell)
     }
 }
 
-void _InspectorWindow::processCellBaseTab(CellDescription& cell)
+void _InspectorWindow::processCellGeneralTab(CellDescription& cell)
 {
-    if (ImGui::BeginTabItem("Base", nullptr, ImGuiTabItemFlags_None)) {
+    if (ImGui::BeginTabItem("General", nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-            if (ImGui::TreeNodeEx("Properties##Base", TreeNodeFlags)) {
+            if (ImGui::TreeNodeEx("Properties###general", TreeNodeFlags)) {
                 std::stringstream ss;
                 ss << "0x" << std::hex << std::uppercase << cell.id;
                 auto cellId = ss.str();
@@ -232,7 +232,7 @@ void _InspectorWindow::processCellTypeTab(CellDescription& cell)
                 processNeuronContent(cell);
             }
 
-            if (ImGui::TreeNodeEx("Properties##Function", TreeNodeFlags)) {
+            if (ImGui::TreeNodeEx("Properties###type", TreeNodeFlags)) {
                 if (AlienImGui::CellTypeCombo(
                         AlienImGui::CellTypeComboParameters()
                             .name("Function")
@@ -500,7 +500,7 @@ void _InspectorWindow::processCellMetadataTab(CellDescription& cell)
 
 void _InspectorWindow::processOscillatorContent(OscillatorDescription& oscillator)
 {
-    if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
+    if (ImGui::TreeNodeEx("Properties###oscillator", TreeNodeFlags)) {
 
         bool pulseGeneration = oscillator.pulseMode > 0;
         if (AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Generate pulses").textWidth(CellTypeTextWidth).tooltip(Const::GenomeOscillatorGeneratePulsesTooltip), pulseGeneration)) {
@@ -538,7 +538,7 @@ void _InspectorWindow::processNeuronContent(CellDescription& cell)
 
 void _InspectorWindow::processConstructorContent(ConstructorDescription& constructor)
 {
-    if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
+    if (ImGui::TreeNodeEx("Properties###constructor", TreeNodeFlags)) {
         int constructorMode = constructor.activationMode == 0 ? 0 : 1;
         if (AlienImGui::Combo(
                 AlienImGui::ComboParameters()
@@ -581,7 +581,7 @@ void _InspectorWindow::processConstructorContent(ConstructorDescription& constru
 
 void _InspectorWindow::processInjectorContent(InjectorDescription& injector)
 {
-    if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
+    if (ImGui::TreeNodeEx("Properties###injector", TreeNodeFlags)) {
         AlienImGui::Combo(
             AlienImGui::ComboParameters()
                 .name("Mode")
@@ -600,7 +600,7 @@ void _InspectorWindow::processInjectorContent(InjectorDescription& injector)
 
 void _InspectorWindow::processAttackerContent(AttackerDescription& attacker)
 {
-    if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
+    if (ImGui::TreeNodeEx("Properties###attacker", TreeNodeFlags)) {
         AlienImGui::Combo(
             AlienImGui::ComboParameters()
                 .name("Energy distribution")
@@ -613,7 +613,7 @@ void _InspectorWindow::processAttackerContent(AttackerDescription& attacker)
 
 void _InspectorWindow::processDefenderContent(DefenderDescription& defender)
 {
-    if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
+    if (ImGui::TreeNodeEx("Properties###defender", TreeNodeFlags)) {
         AlienImGui::Combo(
             AlienImGui::ComboParameters()
                 .name("Mode")
@@ -627,7 +627,7 @@ void _InspectorWindow::processDefenderContent(DefenderDescription& defender)
 
 void _InspectorWindow::processTransmitterContent(DepotDescription& transmitter)
 {
-    if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
+    if (ImGui::TreeNodeEx("Properties###transmitter", TreeNodeFlags)) {
         AlienImGui::Combo(
             AlienImGui::ComboParameters()
                 .name("Energy distribution")
@@ -641,7 +641,7 @@ void _InspectorWindow::processTransmitterContent(DepotDescription& transmitter)
 
 void _InspectorWindow::processMuscleContent(MuscleDescription& muscle)
 {
-    if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
+    if (ImGui::TreeNodeEx("Properties###muscle", TreeNodeFlags)) {
         AlienImGui::Combo(
             AlienImGui::ComboParameters()
                 .name("Mode")
@@ -655,7 +655,7 @@ void _InspectorWindow::processMuscleContent(MuscleDescription& muscle)
 
 void _InspectorWindow::processSensorContent(SensorDescription& sensor)
 {
-    if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
+    if (ImGui::TreeNodeEx("Properties###sensor", TreeNodeFlags)) {
         AlienImGui::ComboOptionalColor(
             AlienImGui::ComboColorParameters().name("Scan color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeSensorScanColorTooltip), sensor.restrictToColor);
 
@@ -684,7 +684,7 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
 
 void _InspectorWindow::processReconnectorContent(ReconnectorDescription& reconnector)
 {
-    if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
+    if (ImGui::TreeNodeEx("Properties###reconnector", TreeNodeFlags)) {
         AlienImGui::ComboOptionalColor(
             AlienImGui::ComboColorParameters().name("Restrict to color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeReconnectorRestrictToColorTooltip),
             reconnector.restrictToColor);
@@ -702,7 +702,7 @@ void _InspectorWindow::processReconnectorContent(ReconnectorDescription& reconne
 
 void _InspectorWindow::processDetonatorContent(DetonatorDescription& detonator)
 {
-    if (ImGui::TreeNodeEx("Properties", TreeNodeFlags)) {
+    if (ImGui::TreeNodeEx("Properties###detonator", TreeNodeFlags)) {
         AlienImGui::Combo(
             AlienImGui::ComboParameters()
                 .name("State")
