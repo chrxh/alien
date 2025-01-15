@@ -185,18 +185,18 @@ std::vector<uint8_t> GenomeDescriptionService::convertDescriptionToBytes(GenomeD
         writeByte(result, cell.color);
         switch (cell.getCellType()) {
         case CellType_Base: {
-            auto const& neuron = std::get<BaseGenomeDescription>(cell.cellTypeData);
-            auto weights = neuron.getWeights();
+            auto const& base = std::get<BaseGenomeDescription>(cell.cellTypeData);
+            auto weights = base.neuralNetwork.getWeights();
             for (int row = 0; row < MAX_CHANNELS; ++row) {
                 for (int col = 0; col < MAX_CHANNELS; ++col) {
                     writeNeuronProperty(result, weights[row, col]);
                 }
             }
             for (int i = 0; i < MAX_CHANNELS; ++i) {
-                writeNeuronProperty(result, neuron.biases[i]);
+                writeNeuronProperty(result, base.neuralNetwork.biases[i]);
             }
             for (int i = 0; i < MAX_CHANNELS; ++i) {
-                writeByte(result, neuron.activationFunctions[i]);
+                writeByte(result, base.neuralNetwork.activationFunctions[i]);
             }
         } break;
         case CellType_Depot: {
@@ -301,20 +301,20 @@ namespace
 
             switch (cellType) {
             case CellType_Base: {
-                BaseGenomeDescription neuron;
-                auto weights = neuron.getWeights();
+                BaseGenomeDescription base;
+                auto weights = base.neuralNetwork.getWeights();
                 for (int row = 0; row < MAX_CHANNELS; ++row) {
                     for (int col = 0; col < MAX_CHANNELS; ++col) {
                         weights[row, col] = readNeuronProperty(data, bytePosition);
                     }
                 }
                 for (int i = 0; i < MAX_CHANNELS; ++i) {
-                    neuron.biases[i] = readNeuronProperty(data, bytePosition);
+                    base.neuralNetwork.biases[i] = readNeuronProperty(data, bytePosition);
                 }
                 for (int i = 0; i < MAX_CHANNELS; ++i) {
-                    neuron.activationFunctions[i] = readByte(data, bytePosition) % NeuronActivationFunction_Count;
+                    base.neuralNetwork.activationFunctions[i] = readByte(data, bytePosition) % ActivationFunction_Count;
                 }
-                cell.cellTypeData = neuron;
+                cell.cellTypeData = base;
             } break;
             case CellType_Depot: {
                 DepotGenomeDescription transmitter;

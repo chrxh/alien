@@ -520,11 +520,14 @@ void _InspectorWindow::processOscillatorContent(OscillatorDescription& oscillato
     }
 }
 
-void _InspectorWindow::processNeuronContent(BaseDescription& neuron)
+void _InspectorWindow::processNeuronContent(BaseDescription& base)
 {
     if (ImGui::TreeNodeEx("Neural network", TreeNodeFlags)) {
         AlienImGui::NeuronSelection(
-            AlienImGui::NeuronSelectionParameters().rightMargin(0), neuron.weights, neuron.biases, neuron.activationFunctions);
+            AlienImGui::NeuronSelectionParameters().rightMargin(0),
+            base.neuralNetwork.weights,
+            base.neuralNetwork.biases,
+            base.neuralNetwork.activationFunctions);
         ImGui::TreePop();
     }
 }

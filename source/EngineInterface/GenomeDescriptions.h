@@ -16,29 +16,33 @@ struct MakeGenomeCopy
     auto operator<=>(MakeGenomeCopy const&) const = default;
 };
 
-struct BaseGenomeDescription
+struct NeuralNetworkGenomeDescription
 {
     std::vector<float> weights;
     std::vector<float> biases;
-    std::vector<NeuronActivationFunction> activationFunctions;
-
-    BaseGenomeDescription()
+    std::vector<ActivationFunction> activationFunctions;
+    NeuralNetworkGenomeDescription()
     {
         weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
         biases.resize(MAX_CHANNELS, 0);
         activationFunctions.resize(MAX_CHANNELS, 0);
     }
-    auto operator<=>(BaseGenomeDescription const&) const = default;
-
-    BaseGenomeDescription& setWeight(int row, int col, float value)
+    auto operator<=>(NeuralNetworkGenomeDescription const&) const = default;
+    NeuralNetworkGenomeDescription& setWeight(int row, int col, float value)
     {
         auto md = std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS);
         md[row, col] = value;
         return *this;
     }
-
     auto getWeights() const { return std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
     auto getWeights() { return std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
+};
+
+struct BaseGenomeDescription
+{
+    NeuralNetworkGenomeDescription neuralNetwork;
+
+    auto operator<=>(BaseGenomeDescription const&) const = default;
 };
 
 struct DepotGenomeDescription

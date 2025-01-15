@@ -19,8 +19,8 @@ public:
 TEST_F(DataTransferTests, singleCell)
 {
     DataDescription data;
-    BaseDescription neuron;
-    neuron.setWeight(2, 1, 1.0f);
+    BaseDescription base;
+    base.neuralNetwork.setWeight(2, 1, 1.0f);
     data.addCell(CellDescription()
                      .setId(1)
                      .setPos({2.0f, 4.0f})
@@ -31,7 +31,7 @@ TEST_F(DataTransferTests, singleCell)
                      .setBarrier(true)
                      .setLivingState(false)
                      .setConstructionId(3534)
-                     .setCellTypeData(neuron)
+                     .setCellTypeData(base)
                      .setSignal({1, 0, -1, 0, 0, 0, 0, 0}));
 
     _simulationFacade->setSimulationData(data);
@@ -44,8 +44,8 @@ TEST_F(DataTransferTests, singleParticle)
 {
     DataDescription data;
 
-    BaseDescription neuron;
-    neuron.setWeight(2, 1, 1.0f);
+    BaseDescription base;
+    base.neuralNetwork.setWeight(2, 1, 1.0f);
     data.addParticle(ParticleDescription().setId(1).setPos({2.0f, 4.0f}).setVel({0.5f, 1.0f}).setEnergy(100.0f).setColor(2));
 
     _simulationFacade->setSimulationData(data);
@@ -56,10 +56,10 @@ TEST_F(DataTransferTests, singleParticle)
 
 TEST_F(DataTransferTests, cellCluster)
 {
-    BaseDescription neuron1;
-    neuron1.setWeight(2, 1, 1.0f);
-    BaseDescription neuron2;
-    neuron2.setWeight(5, 3, 1.0f);
+    BaseDescription base1;
+    base1.neuralNetwork.setWeight(2, 1, 1.0f);
+    BaseDescription base2;
+    base2.neuralNetwork.setWeight(5, 3, 1.0f);
 
     DataDescription data;
     data.addCells({
@@ -71,7 +71,7 @@ TEST_F(DataTransferTests, cellCluster)
             .setColor(2)
             .setBarrier(false)
             .setLivingState(false)
-            .setCellTypeData(neuron1),
+            .setCellTypeData(base1),
         CellDescription()
             .setId(2)
             .setPos({3.0f, 4.0f})
@@ -80,7 +80,7 @@ TEST_F(DataTransferTests, cellCluster)
             .setColor(4)
             .setBarrier(true)
             .setLivingState(false)
-            .setCellTypeData(neuron1),
+            .setCellTypeData(base1),
     });
     data.addConnection(1, 2);
 

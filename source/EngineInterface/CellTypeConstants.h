@@ -33,15 +33,15 @@ enum LivingState_
     LivingState_Count
 };
 
-using NeuronActivationFunction = uint8_t;
-enum NeuronActivationFunction_
+using ActivationFunction = uint8_t;
+enum ActivationFunction_
 {
-    NeuronActivationFunction_Sigmoid,
-    NeuronActivationFunction_BinaryStep,
-    NeuronActivationFunction_Identity,
-    NeuronActivationFunction_Abs,
-    NeuronActivationFunction_Gaussian,
-    NeuronActivationFunction_Count
+    ActivationFunction_Sigmoid,
+    ActivationFunction_BinaryStep,
+    ActivationFunction_Identity,
+    ActivationFunction_Abs,
+    ActivationFunction_Gaussian,
+    ActivationFunction_Count
 };
 
 using SensorRestrictToMutants = int;

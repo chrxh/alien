@@ -76,8 +76,8 @@ __global__ void cudaCleanupAuxiliaryData(Array<Cell*> cellPointers, RawMemory au
         switch (cell->cellType) {
         case CellType_Base:
             copyAndAssignNewAuxiliaryData(
-                reinterpret_cast<uint8_t*&>(cell->cellTypeData.neuron.neuronState),
-                sizeof(*cell->cellTypeData.neuron.neuronState),
+                reinterpret_cast<uint8_t*&>(cell->cellTypeData.neuron.neuralNetwork),
+                sizeof(*cell->cellTypeData.neuron.neuralNetwork),
                 auxiliaryData);
             break;
         case CellType_Constructor:

@@ -136,10 +136,10 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     switch (cellTO.cellType) {
     case CellType_Base: {
         createAuxiliaryDataWithFixedSize(
-            sizeof(NeuronFunction::NeuronState),
-            cellTO.cellTypeData.neuron.neuronDataIndex,
+            sizeof(NeuralNetwork),
+            cellTO.cellTypeData.base.neuralNetwork.dataIndex,
             dataTO.auxiliaryData,
-            reinterpret_cast<uint8_t*&>(cell->cellTypeData.neuron.neuronState));
+            reinterpret_cast<uint8_t*&>(cell->cellTypeData.neuron.neuralNetwork));
     } break;
     case CellType_Depot: {
         cell->cellTypeData.transmitter.mode = cellTO.cellTypeData.transmitter.mode;

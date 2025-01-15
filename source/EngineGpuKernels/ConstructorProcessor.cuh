@@ -743,16 +743,16 @@ ConstructorProcessor::constructCellIntern(
     auto genomeCurrentBytePosition = constructionData.genomeCurrentBytePosition;
     switch (constructionData.cellType) {
     case CellType_Base: {
-        result->cellTypeData.neuron.neuronState = data.objects.auxiliaryData.getTypedSubArray<NeuronFunction::NeuronState>(1);
+        result->cellTypeData.neuron.neuralNetwork = data.objects.auxiliaryData.getTypedSubArray<NeuralNetwork>(1);
         for (int i = 0; i < MAX_CHANNELS *  MAX_CHANNELS; ++i) {
-            result->cellTypeData.neuron.neuronState->weights[i] = GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition) * 4;
+            result->cellTypeData.neuron.neuralNetwork->weights[i] = GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition) * 4;
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            result->cellTypeData.neuron.neuronState->biases[i] = GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition) * 4;
+            result->cellTypeData.neuron.neuralNetwork->biases[i] = GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition) * 4;
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            result->cellTypeData.neuron.neuronState->activationFunctions[i] =
-                GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % NeuronActivationFunction_Count;
+            result->cellTypeData.neuron.neuralNetwork->activationFunctions[i] =
+                GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % ActivationFunction_Count;
         }
     } break;
     case CellType_Depot: {

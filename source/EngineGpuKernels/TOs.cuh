@@ -34,10 +34,15 @@ struct ConnectionTO
     float angleFromPrevious;
 };
 
-struct NeuronTO
+struct NeuralNetworkTO
 {
-    static auto constexpr NeuronDataSize = sizeof(float) * MAX_CHANNELS * (MAX_CHANNELS + 1) + MAX_CHANNELS;
-    uint64_t neuronDataIndex;
+    static auto constexpr DataSize = sizeof(float) * MAX_CHANNELS * (MAX_CHANNELS + 1) + MAX_CHANNELS;
+    uint64_t dataIndex;
+};
+
+struct BaseTO
+{
+    NeuralNetworkTO neuralNetwork;
 };
 
 struct TransmitterTO
@@ -134,7 +139,7 @@ struct DetonatorTO
 
 union CellTypeTO
 {
-    NeuronTO neuron;
+    BaseTO base;
     TransmitterTO transmitter;
     ConstructorTO constructor;
     SensorTO sensor;

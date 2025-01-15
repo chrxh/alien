@@ -416,7 +416,7 @@ public:
         NeuronSelectionParameters const& parameters,
         std::vector<float>& weights,
         std::vector<float>& biases,
-        std::vector<NeuronActivationFunction>& activationFunctions);
+        std::vector<ActivationFunction>& activationFunctions);
 
     static void OnlineSymbol();
     static void LastDayOnlineSymbol();

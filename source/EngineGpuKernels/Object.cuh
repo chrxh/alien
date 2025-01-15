@@ -69,24 +69,24 @@ struct CellConnection
     float angleFromPrevious;
 };
 
-struct NeuronFunction
+struct NeuralNetwork
 {
-    struct NeuronState
-    {
-        float weights[MAX_CHANNELS * MAX_CHANNELS];
-        float biases[MAX_CHANNELS];
-        NeuronActivationFunction activationFunctions[MAX_CHANNELS];
-    };
-
-    NeuronState* neuronState;
+    float weights[MAX_CHANNELS * MAX_CHANNELS];
+    float biases[MAX_CHANNELS];
+    ActivationFunction activationFunctions[MAX_CHANNELS];
 };
 
-struct TransmitterFunction
+struct BaseType
+{
+    NeuralNetwork* neuralNetwork;
+};
+
+struct TransmitterType
 {
     EnergyDistributionMode mode;
 };
 
-struct ConstructorFunction
+struct ConstructorType
 {
     //settings
     uint32_t activationMode;  //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
@@ -112,7 +112,7 @@ struct ConstructorFunction
     bool isReady;
 };
 
-struct SensorFunction
+struct SensorType
 {
     float minDensity;
     int8_t minRange;          //< 0 = no restriction
@@ -128,18 +128,18 @@ struct SensorFunction
     float memoryTargetY;
 };
 
-struct OscillatorFunction
+struct OscillatorType
 {
     uint8_t pulseMode;   //0 = none, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
     uint8_t alternationMode;  //0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
 };
 
-struct AttackerFunction
+struct AttackerType
 {
     EnergyDistributionMode mode;
 };
 
-struct InjectorFunction
+struct InjectorType
 {
     InjectorMode mode;
     uint32_t counter;
@@ -148,7 +148,7 @@ struct InjectorFunction
     uint32_t genomeGeneration;
 };
 
-struct MuscleFunction
+struct MuscleType
 {
     MuscleMode mode;
     MuscleBendingDirection lastBendingDirection;
@@ -160,18 +160,18 @@ struct MuscleFunction
     float lastMovementY;
 };
 
-struct DefenderFunction
+struct DefenderType
 {
     DefenderMode mode;
 };
 
-struct ReconnectorFunction
+struct ReconnectorType
 {
     uint8_t restrictToColor;  //0 ... 6 = color restriction, 255 = no restriction
     ReconnectorRestrictToMutants restrictToMutants;
 };
 
-struct DetonatorFunction
+struct DetonatorType
 {
     DetonatorState state;
     int32_t countdown;
@@ -179,17 +179,17 @@ struct DetonatorFunction
 
 union CellTypeData
 {
-    NeuronFunction neuron;
-    TransmitterFunction transmitter;
-    ConstructorFunction constructor;
-    SensorFunction sensor;
-    OscillatorFunction oscillator;
-    AttackerFunction attacker;
-    InjectorFunction injector;
-    MuscleFunction muscle;
-    DefenderFunction defender;
-    ReconnectorFunction reconnector;
-    DetonatorFunction detonator;
+    BaseType neuron;
+    TransmitterType transmitter;
+    ConstructorType constructor;
+    SensorType sensor;
+    OscillatorType oscillator;
+    AttackerType attacker;
+    InjectorType injector;
+    MuscleType muscle;
+    DefenderType defender;
+    ReconnectorType reconnector;
+    DetonatorType detonator;
 };
 
 struct SignalRoutingRestriction

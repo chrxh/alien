@@ -13,7 +13,7 @@ public:
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
-    __inline__ __device__ static float applyActivationFunction(NeuronActivationFunction activationFunction, float x);  // maps to [-1, 1]
+    __inline__ __device__ static float applyActivationFunction(ActivationFunction activationFunction, float x);  // maps to [-1, 1]
 };
 
 /************************************************************************/
@@ -44,13 +44,13 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     __shared__ float sumInput[MAX_CHANNELS];
     auto channelPartition = calcPartition(MAX_CHANNELS, threadIdx.x, blockDim.x);
     for (int i = channelPartition.startIndex; i <= channelPartition.endIndex; ++i) {
-        sumInput[i] = cell->cellTypeData.neuron.neuronState->biases[i];
+        sumInput[i] = cell->cellTypeData.neuron.neuralNetwork->biases[i];
     }
     __syncthreads();
 
     auto matrixPartition = calcPartition(MAX_CHANNELS * MAX_CHANNELS, threadIdx.x, blockDim.x);
     for (int entry = matrixPartition.startIndex; entry <= matrixPartition.endIndex; ++entry) {
-        auto& neuronsState = cell->cellTypeData.neuron.neuronState;
+        auto& neuronsState = cell->cellTypeData.neuron.neuralNetwork;
 
         auto row = entry / MAX_CHANNELS;
         auto col = entry % MAX_CHANNELS;
@@ -59,7 +59,7 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     __syncthreads();
 
     for (int i = channelPartition.startIndex; i <= channelPartition.endIndex; ++i) {
-        signal.channels[i] = applyActivationFunction(cell->cellTypeData.neuron.neuronState->activationFunctions[i], sumInput[i]);  
+        signal.channels[i] = applyActivationFunction(cell->cellTypeData.neuron.neuralNetwork->activationFunctions[i], sumInput[i]);  
     }
     __syncthreads();
     
@@ -71,18 +71,18 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     __syncthreads();
 }
 
-__inline__ __device__ float NeuronProcessor::applyActivationFunction(NeuronActivationFunction activationFunction, float x)
+__inline__ __device__ float NeuronProcessor::applyActivationFunction(ActivationFunction activationFunction, float x)
 {
     switch (activationFunction) {
-    case NeuronActivationFunction_Sigmoid:
+    case ActivationFunction_Sigmoid:
         return 2.0f / (1.0f + __expf(-x)) - 1.0f;
-    case NeuronActivationFunction_BinaryStep:
+    case ActivationFunction_BinaryStep:
         return x >= NEAR_ZERO ? 1.0f : 0.0f;
-    case NeuronActivationFunction_Identity:
+    case ActivationFunction_Identity:
         return max(-1.0f, min(1.0f, x));
-    case NeuronActivationFunction_Abs:
+    case ActivationFunction_Abs:
         return min(1.0f, abs(x));
-    case NeuronActivationFunction_Gaussian:
+    case ActivationFunction_Gaussian:
         return __expf(-2 * x * x);
     }
     return 0;
