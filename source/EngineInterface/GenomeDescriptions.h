@@ -21,6 +21,7 @@ struct NeuralNetworkGenomeDescription
     std::vector<float> weights;
     std::vector<float> biases;
     std::vector<ActivationFunction> activationFunctions;
+
     NeuralNetworkGenomeDescription()
     {
         weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
@@ -28,6 +29,7 @@ struct NeuralNetworkGenomeDescription
         activationFunctions.resize(MAX_CHANNELS, 0);
     }
     auto operator<=>(NeuralNetworkGenomeDescription const&) const = default;
+
     NeuralNetworkGenomeDescription& setWeight(int row, int col, float value)
     {
         auto md = std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS);
@@ -40,8 +42,6 @@ struct NeuralNetworkGenomeDescription
 
 struct BaseGenomeDescription
 {
-    NeuralNetworkGenomeDescription neuralNetwork;
-
     auto operator<=>(BaseGenomeDescription const&) const = default;
 };
 
@@ -258,7 +258,8 @@ struct CellGenomeDescription
     int color = 0;
     std::optional<int> numRequiredAdditionalConnections;
 
-    CellTypeGenomeDescription cellTypeData;
+    NeuralNetworkGenomeDescription neuralNetwork;
+    CellTypeGenomeDescription cellTypeData = BaseGenomeDescription();
 
     CellGenomeDescription() = default;
     auto operator<=>(CellGenomeDescription const&) const = default;
@@ -392,6 +393,11 @@ struct CellGenomeDescription
     CellGenomeDescription& setCellTypeData(CellTypeDesc const& value)
     {
         cellTypeData = value;
+        return *this;
+    }
+    CellGenomeDescription& setNeuralNetwork(NeuralNetworkGenomeDescription const& value)
+    {
+        neuralNetwork = value;
         return *this;
     }
     CellGenomeDescription& setNumRequiredAdditionalConnections(int const& value)

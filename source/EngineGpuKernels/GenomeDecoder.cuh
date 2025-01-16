@@ -548,7 +548,7 @@ __inline__ __device__ int GenomeDecoder::getNextCellTypeDataSize(uint8_t* genome
     auto cellType = getNextCellType(genome, nodeAddress);
     switch (cellType) {
     case CellType_Base:
-        return Const::NeuronBytes;
+        return Const::BaseBytes;
     case CellType_Depot:
         return Const::TransmitterBytes;
     case CellType_Constructor: {
@@ -717,7 +717,7 @@ __inline__ __device__ int GenomeDecoder::getCellTypeDataSize(CellType cellType, 
 {
     switch (cellType) {
     case CellType_Base:
-        return Const::NeuronBytes;
+        return Const::BaseBytes;
     case CellType_Depot:
         return Const::TransmitterBytes;
     case CellType_Constructor: {

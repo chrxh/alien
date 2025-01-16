@@ -183,21 +183,22 @@ std::vector<uint8_t> GenomeDescriptionService::convertDescriptionToBytes(GenomeD
         writeEnergy(result, cell.energy);
         writeOptionalByte(result, cell.numRequiredAdditionalConnections);
         writeByte(result, cell.color);
+
+        auto weights = cell.neuralNetwork.getWeights();
+        for (int row = 0; row < MAX_CHANNELS; ++row) {
+            for (int col = 0; col < MAX_CHANNELS; ++col) {
+                writeNeuronProperty(result, weights[row, col]);
+            }
+        }
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            writeNeuronProperty(result, cell.neuralNetwork.biases[i]);
+        }
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            writeByte(result, cell.neuralNetwork.activationFunctions[i]);
+        }
+
         switch (cell.getCellType()) {
         case CellType_Base: {
-            auto const& base = std::get<BaseGenomeDescription>(cell.cellTypeData);
-            auto weights = base.neuralNetwork.getWeights();
-            for (int row = 0; row < MAX_CHANNELS; ++row) {
-                for (int col = 0; col < MAX_CHANNELS; ++col) {
-                    writeNeuronProperty(result, weights[row, col]);
-                }
-            }
-            for (int i = 0; i < MAX_CHANNELS; ++i) {
-                writeNeuronProperty(result, base.neuralNetwork.biases[i]);
-            }
-            for (int i = 0; i < MAX_CHANNELS; ++i) {
-                writeByte(result, base.neuralNetwork.activationFunctions[i]);
-            }
         } break;
         case CellType_Depot: {
             auto const& transmitter = std::get<DepotGenomeDescription>(cell.cellTypeData);
@@ -299,21 +300,22 @@ namespace
             cell.numRequiredAdditionalConnections = readOptionalByte(data, bytePosition, MAX_CELL_BONDS + 1);
             cell.color = readByte(data, bytePosition) % MAX_COLORS;
 
+            auto weights = cell.neuralNetwork.getWeights();
+            for (int row = 0; row < MAX_CHANNELS; ++row) {
+                for (int col = 0; col < MAX_CHANNELS; ++col) {
+                    weights[row, col] = readNeuronProperty(data, bytePosition);
+                }
+            }
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                cell.neuralNetwork.biases[i] = readNeuronProperty(data, bytePosition);
+            }
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                cell.neuralNetwork.activationFunctions[i] = readByte(data, bytePosition) % ActivationFunction_Count;
+            }
+
             switch (cellType) {
             case CellType_Base: {
                 BaseGenomeDescription base;
-                auto weights = base.neuralNetwork.getWeights();
-                for (int row = 0; row < MAX_CHANNELS; ++row) {
-                    for (int col = 0; col < MAX_CHANNELS; ++col) {
-                        weights[row, col] = readNeuronProperty(data, bytePosition);
-                    }
-                }
-                for (int i = 0; i < MAX_CHANNELS; ++i) {
-                    base.neuralNetwork.biases[i] = readNeuronProperty(data, bytePosition);
-                }
-                for (int i = 0; i < MAX_CHANNELS; ++i) {
-                    base.neuralNetwork.activationFunctions[i] = readByte(data, bytePosition) % ActivationFunction_Count;
-                }
                 cell.cellTypeData = base;
             } break;
             case CellType_Depot: {
