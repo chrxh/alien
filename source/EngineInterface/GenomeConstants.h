@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EngineConstants.h"
+
 namespace Const
 {
     auto constexpr GenomeHeaderSize = 9;
@@ -23,10 +25,12 @@ namespace Const
     auto constexpr ConstructorConstructionAngle1Pos = 3;
     auto constexpr ConstructorConstructionAngle2Pos = 4;
 
-    auto constexpr CellBasicBytes = 5;
-    auto constexpr NeuronWeightBytes = 64;
-    auto constexpr NeuronWeightAndBiasBytes = NeuronWeightBytes + 8;
-    auto constexpr NeuronBytes = NeuronWeightAndBiasBytes + 8;
+    auto constexpr NeuronWeightBytes = MAX_CHANNELS * MAX_CHANNELS;
+    auto constexpr NeuronWeightAndBiasBytes = NeuronWeightBytes + MAX_CHANNELS;
+    auto constexpr NeuronBytes = NeuronWeightAndBiasBytes + MAX_CHANNELS;
+    auto constexpr CellBasicBytesWithoutNeuron = 5;
+    auto constexpr CellBasicBytes = CellBasicBytesWithoutNeuron + NeuronBytes;
+    auto constexpr BaseBytes = 0;
     auto constexpr TransmitterBytes = 1;
     auto constexpr ConstructorFixedBytes = 5;
     auto constexpr SensorBytes = 5;

@@ -732,12 +732,12 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle2)
 
 TEST_F(ConstructorTests, constructNeuronCell)
 {
-    auto base = BaseGenomeDescription();
-    base.neuralNetwork.setWeight(1, 7, 3.9f);
-    base.neuralNetwork.setWeight(7, 1, -1.9f);
-    base.neuralNetwork.biases[3] = 3.8f;
+    auto nn = NeuralNetworkGenomeDescription();
+    nn.setWeight(1, 7, 3.9f);
+    nn.setWeight(7, 1, -1.9f);
+    nn.biases[3] = 3.8f;
 
-    auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setCellTypeData(base)}));
+    auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setNeuralNetwork(nn)}));
 
     DataDescription data;
     data.addCell(
@@ -755,11 +755,11 @@ TEST_F(ConstructorTests, constructNeuronCell)
 
     EXPECT_EQ(CellType_Base, actualConstructedCell.getCellType());
 
-    for (auto const& [weight, actualWeight] : boost::combine(base.neuralNetwork.weights, actualConstructedCell.neuralNetwork->weights)) {
+    for (auto const& [weight, actualWeight] : boost::combine(nn.weights, actualConstructedCell.neuralNetwork->weights)) {
         EXPECT_TRUE(lowPrecisionCompare(weight, actualWeight));
     }
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        EXPECT_TRUE(lowPrecisionCompare(base.neuralNetwork.biases[i], actualConstructedCell.neuralNetwork->biases[i]));
+        EXPECT_TRUE(lowPrecisionCompare(nn.biases[i], actualConstructedCell.neuralNetwork->biases[i]));
     }
 }
 

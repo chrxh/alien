@@ -276,8 +276,6 @@ namespace cereal
         BaseGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         processLoadSaveMap(task, ar, auxiliaries);
-
-        ar(data.neuralNetwork);
     }
     SPLIT_SERIALIZATION(BaseGenomeDescription)
 
@@ -441,7 +439,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_CellGenome_NumRequiredAdditionalConnections, data.numRequiredAdditionalConnections, defaultObject.numRequiredAdditionalConnections);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data.cellTypeData);
+        ar(data.neuralNetwork, data.cellTypeData);
     }
     SPLIT_SERIALIZATION(CellGenomeDescription)
 

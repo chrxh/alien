@@ -742,29 +742,17 @@ ConstructorProcessor::constructCellIntern(
 
     auto genomeCurrentBytePosition = constructionData.genomeCurrentBytePosition;
     result->neuralNetwork = data.objects.auxiliaryData.getTypedSubArray<NeuralNetwork>(1);
-    if (constructionData.cellType == CellType_Structure || constructionData.cellType == CellType_Free) {
-        for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-            result->neuralNetwork->weights[i] = 0;
-        }
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
-            result->neuralNetwork->biases[i] = 0;
-        }
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
-            result->neuralNetwork->activationFunctions[i] = ActivationFunction_Sigmoid;
-        }
+    for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+        result->neuralNetwork->weights[i] = GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition) * 4;
+    }
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        result->neuralNetwork->biases[i] = GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition) * 4;
+    }
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        result->neuralNetwork->activationFunctions[i] = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % ActivationFunction_Count;
     }
     switch (constructionData.cellType) {
     case CellType_Base: {
-        for (int i = 0; i < MAX_CHANNELS *  MAX_CHANNELS; ++i) {
-            result->neuralNetwork->weights[i] = GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition) * 4;
-        }
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
-            result->neuralNetwork->biases[i] = GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition) * 4;
-        }
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
-            result->neuralNetwork->activationFunctions[i] =
-                GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % ActivationFunction_Count;
-        }
     } break;
     case CellType_Depot: {
         result->cellTypeData.transmitter.mode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % EnergyDistributionMode_Count;
