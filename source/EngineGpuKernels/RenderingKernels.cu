@@ -344,7 +344,7 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
 
     int2 outsideRectUpperLeft{-min(toInt(rectUpperLeft.x * zoom), 0), -min(toInt(rectUpperLeft.y * zoom), 0)};
     int2 outsideRectLowerRight{
-        imageSize.x - max(toInt((rectLowerRight.x - worldSize.x) * zoom), 0), imageSize.y - max(toInt((rectLowerRight.y - worldSize.y) * zoom), 0)};
+        imageSize.x - max(toInt((rectLowerRight.x - toFloat(worldSize.x)) * zoom), 0), imageSize.y - max(toInt((rectLowerRight.y - toFloat(worldSize.y)) * zoom), 0)};
 
     auto baseColor = colorToFloat3(cudaSimulationParameters.backgroundColor);
     float3 spotColors[MAX_ZONES];
@@ -352,7 +352,7 @@ __global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 wor
         spotColors[i] = colorToFloat3(cudaSimulationParameters.zone[i].color);
     }
 
-    auto const partition = calcAllThreadsPartition(imageSize.x * imageSize.y);
+    auto const partition = calcAllThreadsPartition(imageSize.x * imageSize.y * sizeof(unsigned int));
     auto const viewWidth = max(1.0f, rectLowerRight.x - rectUpperLeft.x);
     auto const PixelInWorldSize = viewWidth / toFloat(worldSize.x);
     auto const gridDistance = powf(10.0f, truncf(log10f(viewWidth))) / 10.0f;
