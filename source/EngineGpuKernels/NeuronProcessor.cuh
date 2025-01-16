@@ -8,7 +8,10 @@
 class NeuronProcessor
 {
 public:
-    __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
+    // needs to be called with MAX_CHANNELS * MAX_CHANNELS threads
+    __inline__ __device__ static void process(
+        SimulationData& data,
+        SimulationStatistics& statistics);
 
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
@@ -52,14 +55,12 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     }
     __syncthreads();
 
-    auto matrixPartition = calcPartition(MAX_CHANNELS * MAX_CHANNELS, threadIdx.x, blockDim.x);
-    for (int entry = matrixPartition.startIndex; entry <= matrixPartition.endIndex; ++entry) {
-        auto& neuronsState = cell->neuralNetwork;
+    auto& neuronsState = cell->neuralNetwork;
 
-        auto row = entry / MAX_CHANNELS;
-        auto col = entry % MAX_CHANNELS;
-        atomicAdd(&sumInput[row], neuronsState->weights[entry] * signal.channels[col]);
-    }
+    auto row = threadIdx.x / MAX_CHANNELS;
+    auto col = threadIdx.x % MAX_CHANNELS;
+    atomicAdd(&sumInput[row], neuronsState->weights[threadIdx.x] * signal.channels[col]);
+
     __syncthreads();
 
     for (int i = channelPartition.startIndex; i <= channelPartition.endIndex; ++i) {
