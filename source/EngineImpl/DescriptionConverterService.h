@@ -10,10 +10,10 @@
 #include "EngineGpuKernels/TOs.cuh"
 #include "Definitions.h"
 
-class DescriptionConverter
+class DescriptionConverterService
 {
 public:
-    DescriptionConverter(SimulationParameters const& parameters);
+    DescriptionConverterService(SimulationParameters const& parameters);
 
     ArraySizes getArraySizes(DataDescription const& data) const;
     ArraySizes getArraySizes(ClusteredDataDescription const& data) const;

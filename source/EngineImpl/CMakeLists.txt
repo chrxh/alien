@@ -2,8 +2,8 @@
 add_library(EngineImpl
     AccessDataTOCache.cpp
     AccessDataTOCache.h
-    DescriptionConverter.cpp
-    DescriptionConverter.h
+    DescriptionConverterService.cpp
+    DescriptionConverterService.h
     Definitions.h
     EngineWorker.cpp
     EngineWorker.h

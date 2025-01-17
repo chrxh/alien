@@ -18,7 +18,7 @@
 #include "Base/Resources.h"
 #include "Base/StringHelper.h"
 #include "Base/VersionParserService.h"
-#include "EngineInterface/GenomeDescriptionService.h"
+#include "EngineInterface/GenomeDescriptionConverterService.h"
 #include "PersisterInterface/SerializerService.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "Network/NetworkResourceService.h"
