@@ -180,10 +180,10 @@ void _InspectorWindow::processCellGeneralTab(CellDescription& cell)
                     AlienImGui::CheckboxParameters().name("Signal routing active").textWidth(BaseTabTextWidth), cell.signalRoutingRestriction.active);
                 if (cell.signalRoutingRestriction.active) {
                     AlienImGui::InputFloat(
-                        AlienImGui::InputFloatParameters().name("Signal base angle").format("%.1f").step(0.5f).textWidth(BaseTabTextWidth),
+                        AlienImGui::InputFloatParameters().name("Signal base angle").format("%.1f").step(2.0f).textWidth(BaseTabTextWidth),
                         cell.signalRoutingRestriction.baseAngle);
                     AlienImGui::InputFloat(
-                        AlienImGui::InputFloatParameters().name("Signal opening angle").format("%.1f").step(0.5f).textWidth(BaseTabTextWidth),
+                        AlienImGui::InputFloatParameters().name("Signal opening angle").format("%.1f").step(2.0f).textWidth(BaseTabTextWidth),
                         cell.signalRoutingRestriction.openingAngle);
                 }
                 ImGui::TreePop();
