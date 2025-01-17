@@ -71,7 +71,11 @@ struct NeuralNetworkDescription
     {
         weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
         biases.resize(MAX_CHANNELS, 0);
-        activationFunctions.resize(MAX_CHANNELS, 0);
+        activationFunctions.resize(MAX_CHANNELS, ActivationFunction_Identity);
+        auto md = std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS);
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            md[i, i] = 1.0f;
+        }
     }
     auto operator<=>(NeuralNetworkDescription const&) const = default;
     NeuralNetworkDescription& setWeight(int row, int col, float value)
