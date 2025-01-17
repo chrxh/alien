@@ -183,6 +183,9 @@ std::vector<uint8_t> GenomeDescriptionService::convertDescriptionToBytes(GenomeD
         writeEnergy(result, cell.energy);
         writeOptionalByte(result, cell.numRequiredAdditionalConnections);
         writeByte(result, cell.color);
+        writeBool(result, cell.signalRoutingRestriction.active);
+        writeAngle(result, cell.signalRoutingRestriction.baseAngle);
+        writeAngle(result, cell.signalRoutingRestriction.openingAngle);
 
         auto weights = cell.neuralNetwork.getWeights();
         for (int row = 0; row < MAX_CHANNELS; ++row) {

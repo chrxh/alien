@@ -373,6 +373,7 @@ using CellTypeDescription = std::variant<
 
 struct SignalRoutingRestrictionDescription
 {
+    bool active = false;
     float baseAngle = 0;
     float openingAngle = 0;
 
@@ -430,7 +431,7 @@ struct CellDescription
     //cell type data
     std::optional<NeuralNetworkDescription> neuralNetwork = NeuralNetworkDescription();
     CellTypeDescription cellTypeData = BaseDescription();
-    std::optional<SignalRoutingRestrictionDescription> signalRoutingRestriction;
+    SignalRoutingRestrictionDescription signalRoutingRestriction;
     std::optional<SignalDescription> signal;
     int activationTime = 0;
     int detectedByCreatureId = 0;   //only the first 16 bits from the creature id
@@ -534,14 +535,10 @@ struct CellDescription
         signal = newSignal;
         return *this;
     }
-    CellDescription& setSignalRoutingRestriction(SignalRoutingRestrictionDescription const& value)
-    {
-        signalRoutingRestriction = value;
-        return *this;
-    }
     CellDescription& setSignalRoutingRestriction(float baseAngle, float openingAngle)
     {
         SignalRoutingRestrictionDescription routingRestriction;
+        routingRestriction.active = true;
         routingRestriction.baseAngle = baseAngle;
         routingRestriction.openingAngle = openingAngle;
         signalRoutingRestriction = routingRestriction;
