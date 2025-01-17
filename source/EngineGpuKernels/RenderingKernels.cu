@@ -272,7 +272,7 @@ namespace
                 for (float y = -outerRadius; y <= outerRadius; y += 1.0f) {
                     auto rSquared = x * x + y * y;
                     if (rSquared <= outerRadiusSquared && rSquared >= innerRadiusSquared) {
-                        auto factor = (1.0f - rSquared / outerRadiusSquared) * 2;
+                        auto factor = (sqrt(rSquared) - innerRadius) / (outerRadius - innerRadius);
                         auto angle = Math::angleOfVector({x, y});
                         if (Math::isAngleInBetween(angle1, angle2, angle)) {
                             drawDot(imageData, imageSize, pos + float2{x, y}, color * factor);
@@ -503,7 +503,7 @@ __global__ void cudaDrawCells(
 
         // draw primary color for cell
         auto primaryColor = calcColor(cell, cell->selected, coloring, true) * 0.85f;
-        drawCircle(imageData, imageSize, cellImagePos, primaryColor * 0.45f, cellRadius * 8 / 5, false, false);
+        drawCircle(imageData, imageSize, cellImagePos, primaryColor * 0.45f, cellRadius * 7 / 5, false, false);
 
         // draw secondary color for cell
         auto secondaryColor =
@@ -526,7 +526,7 @@ __global__ void cudaDrawCells(
                 imageData,
                 imageSize,
                 cellImagePos,
-                secondaryColor,
+                secondaryColor * 1.5f,
                 cellRadius,
                 cellRadius * 8 / 5,
                 refAngle + signalAngleRestrictionStart,
@@ -621,6 +621,9 @@ __global__ void cudaDrawCells(
 
             auto summedAngle = 0.0f;
             for (int i = 0; i < cell->numConnections; ++i) {
+                if (i > 0) {
+                    summedAngle += cell->connections[i].angleFromPrevious;
+                }
                 auto const& otherCell = cell->connections[i].cell;
                 if (!cell->signalRoutingRestriction.active || Math::isAngleInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, summedAngle)) {
                     auto otherCellPos = otherCell->pos;
@@ -645,7 +648,6 @@ __global__ void cudaDrawCells(
                         }
                     }
                 }
-                summedAngle += cell->connections[i].angleFromPrevious;
             }
         }
     }
