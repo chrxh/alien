@@ -6,6 +6,7 @@
 namespace
 {
     auto constexpr ZoomLevelForConnections = 1.0f;
+    auto constexpr ZoomLevelForSignalFlow = 15.0f;
     auto constexpr ZoomLevelForShadedCells = 10.0f;
 
     __device__ __inline__ void drawPixel(uint64_t* imageData, unsigned int index, float3 const& color)
@@ -259,6 +260,29 @@ namespace
         }
     }
 
+    __device__ __inline__ void
+    drawSection(uint64_t* imageData, int2 const& imageSize, float2 pos, float3 color, float innerRadius, float outerRadius, float angle1, float angle2)
+    {
+        if (outerRadius > 2.0 - NEAR_ZERO) {
+            angle1 = Math::normalizedAngle(angle1, 0.0f);
+            angle2 = Math::normalizedAngle(angle2, 0.0f);
+            auto outerRadiusSquared = outerRadius * outerRadius;
+            auto innerRadiusSquared = innerRadius * innerRadius;
+            for (float x = -outerRadius; x <= outerRadius; x += 1.0f) {
+                for (float y = -outerRadius; y <= outerRadius; y += 1.0f) {
+                    auto rSquared = x * x + y * y;
+                    if (rSquared <= outerRadiusSquared && rSquared >= innerRadiusSquared) {
+                        auto factor = (1.0f - rSquared / outerRadiusSquared) * 2;
+                        auto angle = Math::angleOfVector({x, y});
+                        if (Math::isAngleInBetween(angle1, angle2, angle)) {
+                            drawDot(imageData, imageSize, pos + float2{x, y}, color * factor);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     __device__ __inline__ void drawCircle_block(uint64_t* imageData, int2 const& imageSize, float2 pos, float3 color, float radius)
     {
         if (radius > 2.0 - NEAR_ZERO) {
@@ -477,21 +501,44 @@ __global__ void cudaDrawCells(
 
         auto cellRadius = zoom * cudaSimulationParameters.cellRadius;
 
-        //draw primary color for cell
+        // draw primary color for cell
         auto primaryColor = calcColor(cell, cell->selected, coloring, true) * 0.85f;
         drawCircle(imageData, imageSize, cellImagePos, primaryColor * 0.45f, cellRadius * 8 / 5, false, false);
 
-        //draw secondary color for cell
+        // draw secondary color for cell
         auto secondaryColor =
             coloring == CellColoring_MutationId_AllCellTypes ? calcColor(cell, cell->selected, coloring, false) * 0.5f : primaryColor * 0.6f;
         drawCircle(imageData, imageSize, cellImagePos, secondaryColor, cellRadius, shadedCells, true);
 
-        //draw signal
+        // draw signal restrictions
+        if (zoom >= ZoomLevelForSignalFlow and cell->numConnections > 0) {
+            float signalAngleRestrictionStart;
+            float signalAngleRestrictionEnd;
+            if (cell->signalRoutingRestriction.active) {
+                signalAngleRestrictionStart = 180.0f + cell->signalRoutingRestriction.baseAngle - cell->signalRoutingRestriction.openingAngle / 2;
+                signalAngleRestrictionEnd = 180.0f + cell->signalRoutingRestriction.baseAngle + cell->signalRoutingRestriction.openingAngle / 2;
+            } else {
+                signalAngleRestrictionStart = 0;
+                signalAngleRestrictionEnd = 359.0f;
+            }
+            auto refAngle = Math::angleOfVector(cell->connections[0].cell->pos - cell->pos);
+            drawSection(
+                imageData,
+                imageSize,
+                cellImagePos,
+                secondaryColor,
+                cellRadius,
+                cellRadius * 8 / 5,
+                refAngle + signalAngleRestrictionStart,
+                refAngle + signalAngleRestrictionEnd);
+        }
+
+        // draw signal activity
         if (cell->signal.active && zoom >= cudaSimulationParameters.zoomLevelNeuronalActivity) {
             drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, cellRadius, shadedCells);
         }
 
-        //draw events
+        // draw events
         if (cell->eventCounter > 0) {
             if (cudaSimulationParameters.attackVisualization && cell->event == CellEvent_Attacking) {
                 drawDisc(imageData, imageSize, cellImagePos, {0.0f, 0.5f, 0.0f}, cellRadius * 1.4f, cellRadius * 2.0f);
@@ -507,7 +554,7 @@ __global__ void cudaDrawCells(
             }
         }
 
-        //draw muscle movements
+        // draw muscle movements
         if (cudaSimulationParameters.muscleMovementVisualization && cell->cellType == CellType_Muscle
             && (cell->cellTypeData.muscle.lastMovementX != 0 || cell->cellTypeData.muscle.lastMovementY != 0)) {
             float2 lastMovement{cell->cellTypeData.muscle.lastMovementX, cell->cellTypeData.muscle.lastMovementY};
@@ -536,7 +583,7 @@ __global__ void cudaDrawCells(
             }
         }
 
-        //draw detonation
+        // draw detonation
         if (cell->cellType == CellType_Detonator) {
             auto const& detonator = cell->cellTypeData.detonator;
             if (detonator.state == DetonatorState_Activated && detonator.countdown < 2) {
@@ -547,7 +594,7 @@ __global__ void cudaDrawCells(
             }
         }
 
-        //draw connections
+        // draw connections
         auto lineColor = primaryColor * min((zoom - 1.0f) / 3, 1.0f) * 2 * 0.7f;
         if (zoom >= ZoomLevelForConnections) {
             for (int i = 0; i < cell->numConnections; ++i) {
@@ -565,45 +612,42 @@ __global__ void cudaDrawCells(
             }
         }
 
-        //draw arrows
-        //if (zoom >= ZoomLevelForArrows) {
-        //    auto inputExecutionOrderNumber = cell->inputExecutionOrderNumber;
-        //    if (inputExecutionOrderNumber != -1 && inputExecutionOrderNumber != cell->executionOrderNumber) {
-        //        for (int i = 0; i < cell->numConnections; ++i) {
-        //            auto const& otherCell = cell->connections[i].cell;
-        //            if (otherCell->executionOrderNumber == inputExecutionOrderNumber && !otherCell->outputBlocked) {
-        //                auto otherCellPos = otherCell->pos;
-        //                auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
-        //                otherCellPos += topologyCorrection;
+        // draw arrows
+        if (zoom >= ZoomLevelForSignalFlow) {
+            auto signalAngleRestrictionStart = 180.0f + cell->signalRoutingRestriction.baseAngle - cell->signalRoutingRestriction.openingAngle / 2;
+            auto signalAngleRestrictionEnd = 180.0f + cell->signalRoutingRestriction.baseAngle + cell->signalRoutingRestriction.openingAngle / 2;
+            signalAngleRestrictionStart = Math::normalizedAngle(signalAngleRestrictionStart, 0.0f);
+            signalAngleRestrictionEnd = Math::normalizedAngle(signalAngleRestrictionEnd, 0.0f);
 
-        //                auto const otherCellImagePos = mapWorldPosToImagePos(rectUpperLeft, otherCellPos, universeImageSize, zoom);
-        //                if (!isContainedInRect({0, 0}, toFloat2(imageSize), otherCellImagePos)) {
-        //                    continue;
-        //                }
-        //                auto const arrowEnd =
-        //                    mapWorldPosToImagePos(rectUpperLeft, cellPos + Math::normalized(otherCellPos - cellPos) / 4, universeImageSize, zoom);
-        //                if (!isContainedInRect({0, 0}, toFloat2(imageSize), arrowEnd)) {
-        //                    continue;
-        //                }
-        //                auto direction = Math::normalized(arrowEnd - otherCellImagePos);
-        //                {
-        //                    float2 arrowPartStart = {-direction.x + direction.y, -direction.x - direction.y};
-        //                    arrowPartStart = arrowPartStart * zoom / 14 + arrowEnd;
-        //                    if (isLineVisible(arrowPartStart, arrowEnd, universeImageSize)) {
-        //                        drawLine(arrowPartStart, arrowEnd, lineColor, imageData, imageSize, 0.5f);
-        //                    }
-        //                }
-        //                {
-        //                    float2 arrowPartStart = {-direction.x - direction.y, direction.x - direction.y};
-        //                    arrowPartStart = arrowPartStart * zoom / 14 + arrowEnd;
-        //                    if (isLineVisible(arrowPartStart, arrowEnd, universeImageSize)) {
-        //                        drawLine(arrowPartStart, arrowEnd, lineColor, imageData, imageSize, 0.5f);
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
+            auto summedAngle = 0.0f;
+            for (int i = 0; i < cell->numConnections; ++i) {
+                auto const& otherCell = cell->connections[i].cell;
+                if (!cell->signalRoutingRestriction.active || Math::isAngleInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, summedAngle)) {
+                    auto otherCellPos = otherCell->pos;
+                    auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
+                    otherCellPos += topologyCorrection;
+                    auto distFromCellCenter = Math::normalized(otherCellPos - cellPos) / 4;
+                    auto const startImagePos = mapWorldPosToImagePos(rectUpperLeft, cellPos + distFromCellCenter, universeImageSize, zoom);
+                    auto const endImagePos = mapWorldPosToImagePos(rectUpperLeft, otherCellPos - distFromCellCenter, universeImageSize, zoom);
+                    auto direction = Math::normalized(endImagePos - startImagePos);
+                    {
+                        float2 arrowPartStart = {-direction.x + direction.y, -direction.x - direction.y};
+                        arrowPartStart = arrowPartStart * zoom / 14 + endImagePos;
+                        if (isLineVisible(arrowPartStart, endImagePos, universeImageSize)) {
+                            drawLine(arrowPartStart, endImagePos, lineColor, imageData, imageSize);
+                        }
+                    }
+                    {
+                        float2 arrowPartStart = {-direction.x - direction.y, direction.x - direction.y};
+                        arrowPartStart = arrowPartStart * zoom / 14 + endImagePos;
+                        if (isLineVisible(arrowPartStart, endImagePos, universeImageSize)) {
+                            drawLine(arrowPartStart, endImagePos, lineColor, imageData, imageSize);
+                        }
+                    }
+                }
+                summedAngle += cell->connections[i].angleFromPrevious;
+            }
+        }
     }
 }
 

@@ -452,51 +452,50 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
         }
     }
 
+    // connect newCell to lastConstructionCell
+    auto angleFromPreviousForNewCell = 180.0f - constructionData.angle;
+
+    // move connection between lastConstructionCell and hostCell to a connection between lastConstructionCell and newCell
+    auto lastCell = constructionData.lastConstructionCell;
+    for (int i = 0; i < lastCell->numConnections; ++i) {
+        auto& connection = lastCell->connections[i];
+        if (connection.cell == hostCell) {
+            connection.cell = newCell;
+            connection.distance = desiredDistance;
+            connection.angleFromPrevious = angleFromPreviousForUnderConstructionCell;
+            newCell->numConnections = 1;
+            newCell->connections[0].cell = lastCell;
+            newCell->connections[0].distance = desiredDistance;
+            newCell->connections[0].angleFromPrevious = 360.0f;
+            CellConnectionProcessor::deleteConnectionOneWay(hostCell, lastCell);
+            break;
+        }
+    }
+
     // possibly connect newCell to hostCell
     bool adaptReferenceAngle = false;
     if (!constructionData.isLastNodeOfLastRepetition || !constructionData.genomeHeader.separateConstruction) {
 
-        // move connection between lastConstructionCell and hostCell to a connection between newCell and hostCell
         auto distance = constructionData.isLastNodeOfLastRepetition && !constructionData.genomeHeader.separateConstruction
-            ? constructionData.genomeHeader.connectionDistance
-            : constructionData.genomeHeader.connectionDistance + 0.8f;
-        for (int i = 0; i < hostCell->numConnections; ++i) {
-            auto& connection = hostCell->connections[i];
-            if (connection.cell == constructionData.lastConstructionCell) {
-                connection.cell = newCell;
-                connection.distance = distance;
-                newCell->numConnections = 1;
-                newCell->connections[0].cell = hostCell;
-                newCell->connections[0].distance = distance;
-                newCell->connections[0].angleFromPrevious = 360.0f;
-                adaptReferenceAngle = true;
-                CellConnectionProcessor::deleteConnectionOneWay(constructionData.lastConstructionCell, hostCell);
-                break;
+                ? constructionData.genomeHeader.connectionDistance
+                : constructionData.genomeHeader.connectionDistance + 0.8f;
+        if (!CellConnectionProcessor::tryAddConnections(
+                data,
+                newCell,
+                hostCell,
+                /*angleFromPreviousForNewCell*/ 0,
+                angleFromPreviousForUnderConstructionCell,
+                distance)) {
+            CellConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
+            hostCell->livingState = LivingState_Dying;
+            for (int i = 0; i < hostCell->numConnections; ++i) {
+                auto const& connectedCell = hostCell->connections[i].cell;
+                if (connectedCell->creatureId == hostCell->creatureId) {
+                    connectedCell->livingState = LivingState_Detaching;
+                }
             }
-        }
-    } else {
-
-        // cut connections
-        CellConnectionProcessor::deleteConnections(hostCell, constructionData.lastConstructionCell);
-    }
-
-    // connect newCell to lastConstructionCell
-    auto angleFromPreviousForNewCell = 180.0f - constructionData.angle;
-    if (!CellConnectionProcessor::tryAddConnections(
-            data,
-            newCell,
-            constructionData.lastConstructionCell,
-            /*angleFromPreviousForNewCell*/ 0,
-            angleFromPreviousForUnderConstructionCell,
-            desiredDistance)) {
-        adaptReferenceAngle = false;
-        CellConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
-        hostCell->livingState = LivingState_Dying;
-        for (int i = 0; i < hostCell->numConnections; ++i) {
-            auto const& connectedCell = hostCell->connections[i].cell;
-            if (connectedCell->creatureId == hostCell->creatureId) {
-                connectedCell->livingState = LivingState_Detaching;
-            }
+        } else {
+            adaptReferenceAngle = true;
         }
     }
 
