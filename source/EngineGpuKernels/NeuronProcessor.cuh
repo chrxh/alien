@@ -16,7 +16,7 @@ public:
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
-    __inline__ __device__ static float applyActivationFunction(ActivationFunction activationFunction, float x);  // maps to [-1, 1]
+    __inline__ __device__ static float applyActivationFunction(ActivationFunction activationFunction, float x);
 };
 
 /************************************************************************/
@@ -84,9 +84,9 @@ __inline__ __device__ float NeuronProcessor::applyActivationFunction(ActivationF
     case ActivationFunction_BinaryStep:
         return x >= NEAR_ZERO ? 1.0f : 0.0f;
     case ActivationFunction_Identity:
-        return max(-1.0f, min(1.0f, x));
+        return x;
     case ActivationFunction_Abs:
-        return min(1.0f, abs(x));
+        return abs(x);
     case ActivationFunction_Gaussian:
         return __expf(-2 * x * x);
     }
