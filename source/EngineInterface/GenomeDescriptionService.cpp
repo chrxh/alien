@@ -302,6 +302,9 @@ namespace
             cell.energy = readEnergy(data, bytePosition);
             cell.numRequiredAdditionalConnections = readOptionalByte(data, bytePosition, MAX_CELL_BONDS + 1);
             cell.color = readByte(data, bytePosition) % MAX_COLORS;
+            cell.signalRoutingRestriction.active = readBool(data, bytePosition);
+            cell.signalRoutingRestriction.baseAngle = readAngle(data, bytePosition);
+            cell.signalRoutingRestriction.openingAngle = readAngle(data, bytePosition);
 
             auto weights = cell.neuralNetwork.getWeights();
             for (int row = 0; row < MAX_CHANNELS; ++row) {

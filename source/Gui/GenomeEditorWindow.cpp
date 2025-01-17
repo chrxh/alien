@@ -553,6 +553,21 @@ void GenomeEditorWindow::processNode(
         }
         cell.numRequiredAdditionalConnections = numRequiredAdditionalConnections;
 
+        table.next();
+        AlienImGui::Checkbox(
+            AlienImGui::CheckboxParameters().name("Signal routing active").textWidth(ContentTextWidth),
+            cell.signalRoutingRestriction.active);
+        if (cell.signalRoutingRestriction.active) {
+            table.next();
+            AlienImGui::InputFloat(
+                AlienImGui::InputFloatParameters().name("Signal base angle").format("%.1f").step(0.5f).textWidth(ContentTextWidth),
+                cell.signalRoutingRestriction.baseAngle);
+            table.next();
+            AlienImGui::InputFloat(
+                AlienImGui::InputFloatParameters().name("Signal opening angle").format("%.1f").step(0.5f).textWidth(ContentTextWidth),
+                cell.signalRoutingRestriction.openingAngle);
+        }
+
         switch (type) {
         case CellType_Base: {
         } break;

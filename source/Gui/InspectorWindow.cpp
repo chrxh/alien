@@ -174,6 +174,21 @@ void _InspectorWindow::processCellGeneralTab(CellDescription& cell)
                     AlienImGui::InputTextParameters().name("Cell id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true), cellId);
                 ImGui::TreePop();
             }
+
+            if (ImGui::TreeNodeEx("Signal routing", TreeNodeFlags)) {
+                AlienImGui::Checkbox(
+                    AlienImGui::CheckboxParameters().name("Signal routing active").textWidth(BaseTabTextWidth), cell.signalRoutingRestriction.active);
+                if (cell.signalRoutingRestriction.active) {
+                    AlienImGui::InputFloat(
+                        AlienImGui::InputFloatParameters().name("Signal base angle").format("%.1f").step(0.5f).textWidth(BaseTabTextWidth),
+                        cell.signalRoutingRestriction.baseAngle);
+                    AlienImGui::InputFloat(
+                        AlienImGui::InputFloatParameters().name("Signal opening angle").format("%.1f").step(0.5f).textWidth(BaseTabTextWidth),
+                        cell.signalRoutingRestriction.openingAngle);
+                }
+                ImGui::TreePop();
+            }
+
             if (ImGui::TreeNodeEx("Associated creature##Base", TreeNodeFlags)) {
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters().name("Creature id").textWidth(BaseTabTextWidth).tooltip(Const::CellCreatureIdTooltip), cell.creatureId);

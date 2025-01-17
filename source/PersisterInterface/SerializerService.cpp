@@ -54,6 +54,10 @@ namespace
     auto constexpr Id_GenomeHeader_ConcatenationAngle2 = 7;
     auto constexpr Id_GenomeHeader_NumBranches = 8;
 
+    auto constexpr Id_SignalRoutingGenome_Active = 0;
+    auto constexpr Id_SignalRoutingGenome_BaseAngle = 1;
+    auto constexpr Id_SignalRoutingGenome_OpeneningAngle = 2;
+
     auto constexpr Id_CellGenome_ReferenceAngle = 0;
     auto constexpr Id_CellGenome_Energy = 1;
     auto constexpr Id_CellGenome_Color = 2;
@@ -110,11 +114,16 @@ namespace
     auto constexpr Id_Cell_AncestorMutationId = 13;
     auto constexpr Id_Cell_GenomeComplexity = 14;
     auto constexpr Id_Cell_DetectedByCreatureId = 15;
-    auto constexpr Id_Cell_Signal_Channels = 16;
-    auto constexpr Id_Cell_Signal_Origin = 17;
-    auto constexpr Id_Cell_Signal_TargetX = 18;
-    auto constexpr Id_Cell_Signal_TargetY = 19;
     auto constexpr Id_Cell_GenomeNodeIndex = 20;
+
+    auto constexpr Id_Signal_Channels = 0;
+    auto constexpr Id_Signal_Origin = 1;
+    auto constexpr Id_Signal_TargetX = 2;
+    auto constexpr Id_Signal_TargetY = 3;
+
+    auto constexpr Id_SignalRouting_Active = 0;
+    auto constexpr Id_SignalRouting_BaseAngle = 1;
+    auto constexpr Id_SignalRouting_OpeneningAngle = 2;
 
     auto constexpr Id_Connection_CellId = 0;
     auto constexpr Id_Connection_Distance = 1;
@@ -429,6 +438,18 @@ namespace cereal
     SPLIT_SERIALIZATION(DetonatorGenomeDescription)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SignalRoutingRestrictionGenomeDescription& data)
+    {
+        SignalRoutingRestrictionGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SignalRoutingGenome_Active, data.active, defaultObject.active);
+        loadSave(task, auxiliaries, Id_SignalRoutingGenome_BaseAngle, data.baseAngle, defaultObject.baseAngle);
+        loadSave(task, auxiliaries, Id_SignalRoutingGenome_OpeneningAngle, data.openingAngle, defaultObject.openingAngle);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SignalRoutingRestrictionGenomeDescription)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, CellGenomeDescription& data)
     {
         CellGenomeDescription defaultObject;
@@ -439,7 +460,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_CellGenome_NumRequiredAdditionalConnections, data.numRequiredAdditionalConnections, defaultObject.numRequiredAdditionalConnections);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data.neuralNetwork, data.cellTypeData);
+        ar(data.signalRoutingRestriction, data.neuralNetwork, data.cellTypeData);
     }
     SPLIT_SERIALIZATION(CellGenomeDescription)
 
@@ -496,13 +517,25 @@ namespace cereal
     {
         SignalDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Cell_Signal_Channels, data.channels, defaultObject.channels);
-        loadSave(task, auxiliaries, Id_Cell_Signal_Origin, data.origin, defaultObject.origin);
-        loadSave(task, auxiliaries, Id_Cell_Signal_TargetX, data.targetX, defaultObject.targetX);
-        loadSave(task, auxiliaries, Id_Cell_Signal_TargetY, data.targetY, defaultObject.targetY);
+        loadSave(task, auxiliaries, Id_Signal_Channels, data.channels, defaultObject.channels);
+        loadSave(task, auxiliaries, Id_Signal_Origin, data.origin, defaultObject.origin);
+        loadSave(task, auxiliaries, Id_Signal_TargetX, data.targetX, defaultObject.targetX);
+        loadSave(task, auxiliaries, Id_Signal_TargetY, data.targetY, defaultObject.targetY);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SignalRoutingRestrictionDescription& data)
+    {
+        SignalRoutingRestrictionDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SignalRouting_Active, data.active, defaultObject.active);
+        loadSave(task, auxiliaries, Id_SignalRouting_BaseAngle, data.baseAngle, defaultObject.baseAngle);
+        loadSave(task, auxiliaries, Id_SignalRouting_OpeneningAngle, data.openingAngle, defaultObject.openingAngle);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SignalRoutingRestrictionDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, NeuralNetworkDescription& data)
@@ -695,7 +728,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_GenomeNodeIndex, data.genomeNodeIndex, defaultObject.genomeNodeIndex);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data.connections, data.cellTypeData, data.signal, data.neuralNetwork, data.metadata);
+        ar(data.connections, data.cellTypeData, data.signal, data.signalRoutingRestriction, data.neuralNetwork, data.metadata);
     }
     SPLIT_SERIALIZATION(CellDescription)
 

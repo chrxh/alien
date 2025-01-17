@@ -506,13 +506,11 @@ CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO
     } break;
     }
 
-    if (cellTO.signalRoutingRestriction.active) {
-        SignalRoutingRestrictionDescription routingRestriction;
-        routingRestriction.active = cellTO.signalRoutingRestriction.active;
-        routingRestriction.baseAngle = cellTO.signalRoutingRestriction.baseAngle;
-        routingRestriction.openingAngle = cellTO.signalRoutingRestriction.openingAngle;
-        result.signalRoutingRestriction = routingRestriction;
-    }
+    SignalRoutingRestrictionDescription routingRestriction;
+    routingRestriction.active = cellTO.signalRoutingRestriction.active;
+    routingRestriction.baseAngle = cellTO.signalRoutingRestriction.baseAngle;
+    routingRestriction.openingAngle = cellTO.signalRoutingRestriction.openingAngle;
+    result.signalRoutingRestriction = routingRestriction;
     if (cellTO.signal.active) {
         SignalDescription signal;
         for (int i = 0; i < MAX_CHANNELS; ++i) {
