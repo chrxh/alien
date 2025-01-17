@@ -881,7 +881,7 @@ __inline__ __device__ void MutationProcessor::neuronDataMutationNode(SimulationD
     auto neuronMutationType = data.numberGen1.random(3);
     for (int i = 0; i < Const::NeuronWeightBytes; ++i) {
         if (data.numberGen1.random() < cellCopyMutationNeuronDataWeightsPercentage) {
-            auto property = GenomeDecoder::convertByteToFloat(genome[nodeAddress + Const::CellBasicBytesWithoutNeuron + i]);
+            auto property = GenomeDecoder::convertByteToFloat(genome[nodeAddress + Const::CellBasicBytesWithoutNeurons + i]);
             if (neuronMutationType == 0) {
                 property *= cellCopyMutationNeuronDataReinforcement;
             } else if (neuronMutationType == 1) {
@@ -891,12 +891,12 @@ __inline__ __device__ void MutationProcessor::neuronDataMutationNode(SimulationD
             } else if (neuronMutationType == 3) {
                 property -= cellCopyMutationNeuronDataOffset;
             }
-            genome[nodeAddress + Const::CellBasicBytesWithoutNeuron + i] = GenomeDecoder::convertFloatToByte(property);
+            genome[nodeAddress + Const::CellBasicBytesWithoutNeurons + i] = GenomeDecoder::convertFloatToByte(property);
         }
     }
     for (int i = Const::NeuronWeightBytes; i < Const::NeuronWeightAndBiasBytes; ++i) {
         if (data.numberGen1.random() < cellCopyMutationNeuronDataBiasesPercentage) {
-            auto property = GenomeDecoder::convertByteToFloat(genome[nodeAddress + Const::CellBasicBytesWithoutNeuron + i]);
+            auto property = GenomeDecoder::convertByteToFloat(genome[nodeAddress + Const::CellBasicBytesWithoutNeurons + i]);
             if (neuronMutationType == 0) {
                 property *= cellCopyMutationNeuronDataReinforcement;
             } else if (neuronMutationType == 1) {
@@ -906,12 +906,12 @@ __inline__ __device__ void MutationProcessor::neuronDataMutationNode(SimulationD
             } else if (neuronMutationType == 3) {
                 property -= cellCopyMutationNeuronDataOffset;
             }
-            genome[nodeAddress + Const::CellBasicBytesWithoutNeuron + i] = GenomeDecoder::convertFloatToByte(property);
+            genome[nodeAddress + Const::CellBasicBytesWithoutNeurons + i] = GenomeDecoder::convertFloatToByte(property);
         }
     }
     for (int i = Const::NeuronWeightAndBiasBytes; i < Const::NeuronBytes; ++i) {
         if (data.numberGen1.random() < cellCopyMutationNeuronDataActivationFunctionPercentage) {
-            genome[nodeAddress + Const::CellBasicBytesWithoutNeuron + i] = data.numberGen1.randomByte();
+            genome[nodeAddress + Const::CellBasicBytesWithoutNeurons + i] = data.numberGen1.randomByte();
         }
     }
 }
@@ -938,7 +938,7 @@ __inline__ __device__ void MutationProcessor::propertiesMutationNode(SimulationD
             }
             GenomeDecoder::setNextInputExecutionNumber(genome, nodeAddress, randomByte);
         } else {
-            auto randomDelta = data.numberGen1.random(Const::CellBasicBytesWithoutNeuron - 1);
+            auto randomDelta = data.numberGen1.random(Const::CellBasicBytesWithoutNeurons - 1);
             auto randomByte = data.numberGen1.randomByte();
             if (randomDelta == 0) {  //no cell function type change
                 return;

@@ -28,8 +28,8 @@ namespace Const
     auto constexpr NeuronWeightBytes = MAX_CHANNELS * MAX_CHANNELS;
     auto constexpr NeuronWeightAndBiasBytes = NeuronWeightBytes + MAX_CHANNELS;
     auto constexpr NeuronBytes = NeuronWeightAndBiasBytes + MAX_CHANNELS;
-    auto constexpr CellBasicBytesWithoutNeuron = 5;
-    auto constexpr CellBasicBytes = CellBasicBytesWithoutNeuron + NeuronBytes;
+    auto constexpr CellBasicBytesWithoutNeurons = 8;
+    auto constexpr CellBasicBytes = CellBasicBytesWithoutNeurons + NeuronBytes;
     auto constexpr BaseBytes = 0;
     auto constexpr TransmitterBytes = 1;
     auto constexpr ConstructorFixedBytes = 5;
@@ -38,7 +38,7 @@ namespace Const
     auto constexpr AttackerBytes = 1;
     auto constexpr InjectorFixedBytes = 1;
     auto constexpr MuscleBytes = 1;
-    auto constexpr DefenderBytes = 1;
+    auto constexpr DefenderBytes = 1; 
     auto constexpr ReconnectorBytes = 2;
     auto constexpr DetonatorBytes = 2;
 }

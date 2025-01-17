@@ -741,6 +741,11 @@ ConstructorProcessor::constructCellIntern(
     result->genomeNodeIndex = constructor.genomeCurrentNodeIndex;
 
     auto genomeCurrentBytePosition = constructionData.genomeCurrentBytePosition;
+
+    result->signalRoutingRestriction.active = GenomeDecoder::readBool(constructor, genomeCurrentBytePosition);
+    result->signalRoutingRestriction.baseAngle = GenomeDecoder::readAngle(constructor, genomeCurrentBytePosition);
+    result->signalRoutingRestriction.openingAngle = GenomeDecoder::readAngle(constructor, genomeCurrentBytePosition);
+
     result->neuralNetwork = data.objects.auxiliaryData.getTypedSubArray<NeuralNetwork>(1);
     for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
         result->neuralNetwork->weights[i] = GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition) * 4;

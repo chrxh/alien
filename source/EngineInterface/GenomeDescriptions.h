@@ -251,6 +251,15 @@ using CellTypeGenomeDescription = std::variant<
     ReconnectorGenomeDescription,
     DetonatorGenomeDescription>;
 
+struct SignalRoutingRestrictionGenomeDescription
+{
+    bool active = false;
+    float baseAngle = 0;
+    float openingAngle = 0;
+
+    auto operator<=>(SignalRoutingRestrictionGenomeDescription const&) const = default;
+};
+
 struct CellGenomeDescription
 {
     float referenceAngle = 0;
@@ -260,6 +269,7 @@ struct CellGenomeDescription
 
     NeuralNetworkGenomeDescription neuralNetwork;
     CellTypeGenomeDescription cellTypeData = BaseGenomeDescription();
+    SignalRoutingRestrictionGenomeDescription signalRoutingRestriction;
 
     CellGenomeDescription() = default;
     auto operator<=>(CellGenomeDescription const&) const = default;
