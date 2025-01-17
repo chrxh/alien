@@ -26,7 +26,7 @@
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/GenomeConstants.h"
 #include "EngineInterface/GenomeDescriptions.h"
-#include "EngineInterface/GenomeDescriptionService.h"
+#include "EngineInterface/GenomeDescriptionConverterService.h"
 
 #include "SettingsParserService.h"
 
@@ -319,14 +319,14 @@ namespace cereal
             if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
                 data.genome = MakeGenomeCopy();
             } else {
-                data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
+                data.genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
             }
         } else {
             std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
             if (std::holds_alternative<MakeGenomeCopy>(data.genome)) {
                 genomeData = MakeGenomeCopy();
             } else {
-                genomeData = GenomeDescriptionService::get().convertBytesToDescription(std::get<std::vector<uint8_t>>(data.genome));
+                genomeData = GenomeDescriptionConverterService::get().convertBytesToDescription(std::get<std::vector<uint8_t>>(data.genome));
             }
             ar(genomeData);
         }
@@ -382,14 +382,14 @@ namespace cereal
             if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
                 data.genome = MakeGenomeCopy();
             } else {
-                data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
+                data.genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
             }
         } else {
             std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
             if (std::holds_alternative<MakeGenomeCopy>(data.genome)) {
                 genomeData = MakeGenomeCopy();
             } else {
-                genomeData = GenomeDescriptionService::get().convertBytesToDescription(std::get<std::vector<uint8_t>>(data.genome));
+                genomeData = GenomeDescriptionConverterService::get().convertBytesToDescription(std::get<std::vector<uint8_t>>(data.genome));
             }
             ar(genomeData);
         }
@@ -589,9 +589,9 @@ namespace cereal
         if (task == SerializationTask::Load) {
             GenomeDescription genomeDesc;
             ar(genomeDesc);
-            data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(genomeDesc);
+            data.genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(genomeDesc);
         } else {
-            GenomeDescription genomeDesc = GenomeDescriptionService::get().convertBytesToDescription(data.genome);
+            GenomeDescription genomeDesc = GenomeDescriptionConverterService::get().convertBytesToDescription(data.genome);
             ar(genomeDesc);
         }
     }
@@ -649,9 +649,9 @@ namespace cereal
         if (task == SerializationTask::Load) {
             GenomeDescription genomeDesc;
             ar(genomeDesc);
-            data.genome = GenomeDescriptionService::get().convertDescriptionToBytes(genomeDesc);
+            data.genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(genomeDesc);
         } else {
-            GenomeDescription genomeDesc = GenomeDescriptionService::get().convertBytesToDescription(data.genome);
+            GenomeDescription genomeDesc = GenomeDescriptionConverterService::get().convertBytesToDescription(data.genome);
             ar(genomeDesc);
         }
     }

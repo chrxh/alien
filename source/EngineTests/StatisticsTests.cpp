@@ -4,7 +4,7 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/GenomeDescriptionService.h"
+#include "EngineInterface/GenomeDescriptionConverterService.h"
 #include "EngineInterface/StatisticsRawData.h"
 
 #include "IntegrationTestFramework.h"
@@ -21,9 +21,9 @@ public:
 
 TEST_F(StatisticsTests, selfReplicatorWithRepetitionsInGenome)
 {
-    auto subGenome = GenomeDescriptionService::get().convertDescriptionToBytes(
+    auto subGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
         GenomeDescription().setHeader(GenomeHeaderDescription().setNumRepetitions(3)).setCells({CellGenomeDescription()}));
-    auto mainGenome = GenomeDescriptionService::get().convertDescriptionToBytes(
+    auto mainGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
         GenomeDescription()
             .setHeader(GenomeHeaderDescription().setNumRepetitions(2))
             .setCells({
@@ -46,9 +46,9 @@ TEST_F(StatisticsTests, selfReplicatorWithRepetitionsInGenome)
 
 TEST_F(StatisticsTests, selfReplicatorWithInfiniteRepetitionsInGenome)
 {
-    auto subGenome = GenomeDescriptionService::get().convertDescriptionToBytes(
+    auto subGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
         GenomeDescription().setHeader(GenomeHeaderDescription().setInfiniteRepetitions()).setCells({CellGenomeDescription()}));
-    auto mainGenome = GenomeDescriptionService::get().convertDescriptionToBytes(
+    auto mainGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
         GenomeDescription()
             .setHeader(GenomeHeaderDescription().setNumRepetitions(2))
             .setCells({
@@ -71,9 +71,9 @@ TEST_F(StatisticsTests, selfReplicatorWithInfiniteRepetitionsInGenome)
 
 TEST_F(StatisticsTests, nonSelfReplicatorWithRepetitionsInGenome)
 {
-    auto subGenome = GenomeDescriptionService::get().convertDescriptionToBytes(
+    auto subGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
         GenomeDescription().setHeader(GenomeHeaderDescription().setNumRepetitions(3)).setCells({CellGenomeDescription()}));
-    auto mainGenome = GenomeDescriptionService::get().convertDescriptionToBytes(
+    auto mainGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
         GenomeDescription()
             .setHeader(GenomeHeaderDescription().setNumRepetitions(2))
             .setCells({

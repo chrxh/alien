@@ -6,7 +6,7 @@
 #include "GenomeConstants.h"
 #include "ShapeGenerator.h"
 #include "Base/Math.h"
-#include "EngineInterface/GenomeDescriptionService.h"
+#include "EngineInterface/GenomeDescriptionConverterService.h"
 
 namespace
 {
@@ -307,7 +307,7 @@ namespace
                     }
                     targetAngle += constructor.constructionAngle1;
                     auto direction = Math::unitVectorOfAngle(targetAngle);
-                    auto subGenome = GenomeDescriptionService::get().convertBytesToDescription(data);
+                    auto subGenome = GenomeDescriptionConverterService::get().convertBytesToDescription(data);
                     auto previewPart = convertToPreviewDescriptionIntern(
                         subGenome, cellIntern.nodeIndex, constructor.constructionAngle2, cellIntern.pos + direction, targetAngle, parameters);
                     insert(result, previewPart);

@@ -14,9 +14,9 @@ struct GenomeEncodingSpecification
     MEMBER_DECLARATION(GenomeEncodingSpecification, bool, concatenationAngle2, true);
 };
 
-class GenomeDescriptionService
+class GenomeDescriptionConverterService
 {
-    MAKE_SINGLETON(GenomeDescriptionService);
+    MAKE_SINGLETON(GenomeDescriptionConverterService);
 public:
     std::vector<uint8_t> convertDescriptionToBytes(GenomeDescription const& genome, GenomeEncodingSpecification const& spec = GenomeEncodingSpecification());
     GenomeDescription convertBytesToDescription(std::vector<uint8_t> const& data, GenomeEncodingSpecification const& spec = GenomeEncodingSpecification());

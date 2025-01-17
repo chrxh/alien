@@ -1,4 +1,4 @@
-#include "GenomeDescriptionService.h"
+#include "GenomeDescriptionConverterService.h"
 
 #include <variant>
 
@@ -156,7 +156,7 @@ namespace
     }
 }
 
-std::vector<uint8_t> GenomeDescriptionService::convertDescriptionToBytes(GenomeDescription const& genome, GenomeEncodingSpecification const& spec)
+std::vector<uint8_t> GenomeDescriptionConverterService::convertDescriptionToBytes(GenomeDescription const& genome, GenomeEncodingSpecification const& spec)
 {
     auto const& cells = genome.cells;
     std::vector<uint8_t> result;
@@ -394,24 +394,24 @@ namespace
 
 }
 
-GenomeDescription GenomeDescriptionService::convertBytesToDescription(std::vector<uint8_t> const& data, GenomeEncodingSpecification const& spec)
+GenomeDescription GenomeDescriptionConverterService::convertBytesToDescription(std::vector<uint8_t> const& data, GenomeEncodingSpecification const& spec)
 {
     return convertBytesToDescriptionIntern(data, data.size(), data.size(), spec).genome;
 }
 
-int GenomeDescriptionService::convertNodeAddressToNodeIndex(std::vector<uint8_t> const& data, int nodeAddress, GenomeEncodingSpecification const& spec)
+int GenomeDescriptionConverterService::convertNodeAddressToNodeIndex(std::vector<uint8_t> const& data, int nodeAddress, GenomeEncodingSpecification const& spec)
 {
     //wasteful approach but sufficient for GUI
     return convertBytesToDescriptionIntern(data, nodeAddress, data.size(), spec).genome.cells.size();
 }
 
-int GenomeDescriptionService::convertNodeIndexToNodeAddress(std::vector<uint8_t> const& data, int nodeIndex, GenomeEncodingSpecification const& spec)
+int GenomeDescriptionConverterService::convertNodeIndexToNodeAddress(std::vector<uint8_t> const& data, int nodeIndex, GenomeEncodingSpecification const& spec)
 {
     //wasteful approach but sufficient for GUI
     return convertBytesToDescriptionIntern(data, data.size(), nodeIndex, spec).lastBytePosition;
 }
 
-int GenomeDescriptionService::getNumNodesRecursively(std::vector<uint8_t> const& data, bool includeRepetitions, GenomeEncodingSpecification const& spec)
+int GenomeDescriptionConverterService::getNumNodesRecursively(std::vector<uint8_t> const& data, bool includeRepetitions, GenomeEncodingSpecification const& spec)
 {
     auto genome = convertBytesToDescriptionIntern(data, data.size(), data.size(), spec).genome;
     auto result = toInt(genome.cells.size());
@@ -425,7 +425,7 @@ int GenomeDescriptionService::getNumNodesRecursively(std::vector<uint8_t> const&
     return includeRepetitions ? result * numRepetitions * genome.header.getNumBranches() : result;
 }
 
-int GenomeDescriptionService::getNumRepetitions(std::vector<uint8_t> const& data)
+int GenomeDescriptionConverterService::getNumRepetitions(std::vector<uint8_t> const& data)
 {
     return convertByteToByteWithInfinity(data.at(Const::GenomeHeaderNumRepetitionsPos));
 }

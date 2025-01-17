@@ -11,7 +11,7 @@
 #include "PersisterInterface/SerializerService.h"
 #include "PersisterInterface/PersisterRequestResult.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/GenomeDescriptionService.h"
+#include "EngineInterface/GenomeDescriptionConverterService.h"
 #include "Network/NetworkService.h"
 
 _PersisterWorker::_PersisterWorker(SimulationFacade const& simulationFacade)
@@ -362,7 +362,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
                 request->getSenderInfo().senderId,
                 PersisterErrorInfo{"Failed to load genome. Your program version may not match."});
         }
-        resultData.resourceData = GenomeDescriptionService::get().convertBytesToDescription(genome);
+        resultData.resourceData = GenomeDescriptionConverterService::get().convertBytesToDescription(genome);
     }
 
     return std::make_shared<_DownloadNetworkResourceRequestResult>(request->getRequestId(), resultData);
@@ -422,8 +422,8 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The is no valid genome for uploading selected."});
         }
-        auto genomeData = GenomeDescriptionService::get().convertDescriptionToBytes(genome);
-        numObjects = GenomeDescriptionService::get().getNumNodesRecursively(genomeData, true);
+        auto genomeData = GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome);
+        numObjects = GenomeDescriptionConverterService::get().getNumNodesRecursively(genomeData, true);
 
         if (!SerializerService::get().serializeGenomeToString(mainData, genomeData)) {
             return std::make_shared<_PersisterRequestError>(
@@ -510,8 +510,8 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The is no valid genome for replacement selected."});
         }
-        auto genomeData = GenomeDescriptionService::get().convertDescriptionToBytes(genome);
-        numObjects = GenomeDescriptionService::get().getNumNodesRecursively(genomeData, true);
+        auto genomeData = GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome);
+        numObjects = GenomeDescriptionConverterService::get().getNumNodesRecursively(genomeData, true);
 
         if (!SerializerService::get().serializeGenomeToString(mainData, genomeData)) {
             return std::make_shared<_PersisterRequestError>(

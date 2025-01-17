@@ -4,7 +4,7 @@
 #include "Base/NumberGenerator.h"
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/GenomeDescriptionService.h"
+#include "EngineInterface/GenomeDescriptionConverterService.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
@@ -107,7 +107,7 @@ TEST_P(LivingStateTransitionTests, ready_detaching_onSelfReplicator)
     _parameters.cellDeathConsequences = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto genome = GenomeDescriptionService::get().convertDescriptionToBytes(
+    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
         GenomeDescription()
             .setHeader(GenomeHeaderDescription())
             .setCells({CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setMakeSelfCopy())}));

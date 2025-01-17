@@ -1,4 +1,4 @@
-#include "DescriptionConverter.h"
+#include "DescriptionConverterService.h"
 
 #include <cmath>
 #include <algorithm>
@@ -105,11 +105,11 @@ namespace
     }
 }
 
-DescriptionConverter::DescriptionConverter(SimulationParameters const& parameters)
+DescriptionConverterService::DescriptionConverterService(SimulationParameters const& parameters)
     : _parameters(parameters)
 {}
 
-ArraySizes DescriptionConverter::getArraySizes(DataDescription const& data) const
+ArraySizes DescriptionConverterService::getArraySizes(DataDescription const& data) const
 {
     ArraySizes result;
     result.cellArraySize = data.cells.size();
@@ -120,7 +120,7 @@ ArraySizes DescriptionConverter::getArraySizes(DataDescription const& data) cons
     return result;
 }
 
-ArraySizes DescriptionConverter::getArraySizes(ClusteredDataDescription const& data) const
+ArraySizes DescriptionConverterService::getArraySizes(ClusteredDataDescription const& data) const
 {
     ArraySizes result;
     for (auto const& cluster : data.clusters) {
@@ -133,7 +133,7 @@ ArraySizes DescriptionConverter::getArraySizes(ClusteredDataDescription const& d
     return result;
 }
 
-ClusteredDataDescription DescriptionConverter::convertTOtoClusteredDataDescription(DataTO const& dataTO) const
+ClusteredDataDescription DescriptionConverterService::convertTOtoClusteredDataDescription(DataTO const& dataTO) const
 {
 	ClusteredDataDescription result;
 
@@ -177,7 +177,7 @@ ClusteredDataDescription DescriptionConverter::convertTOtoClusteredDataDescripti
     return result;
 }
 
-DataDescription DescriptionConverter::convertTOtoDataDescription(DataTO const& dataTO) const
+DataDescription DescriptionConverterService::convertTOtoDataDescription(DataTO const& dataTO) const
 {
     DataDescription result;
 
@@ -204,7 +204,7 @@ DataDescription DescriptionConverter::convertTOtoDataDescription(DataTO const& d
     return result;
 }
 
-OverlayDescription DescriptionConverter::convertTOtoOverlayDescription(DataTO const& dataTO) const
+OverlayDescription DescriptionConverterService::convertTOtoOverlayDescription(DataTO const& dataTO) const
 {
     OverlayDescription result;
     result.elements.reserve(*dataTO.numCells + *dataTO.numParticles);
@@ -231,7 +231,7 @@ OverlayDescription DescriptionConverter::convertTOtoOverlayDescription(DataTO co
     return result;
 }
 
-void DescriptionConverter::convertDescriptionToTO(DataTO& result, ClusteredDataDescription const& description) const
+void DescriptionConverterService::convertDescriptionToTO(DataTO& result, ClusteredDataDescription const& description) const
 {
     std::unordered_map<uint64_t, int> cellIndexByIds;
     for (auto const& cluster: description.clusters) {
@@ -251,7 +251,7 @@ void DescriptionConverter::convertDescriptionToTO(DataTO& result, ClusteredDataD
     }
 }
 
-void DescriptionConverter::convertDescriptionToTO(DataTO& result, DataDescription const& description) const
+void DescriptionConverterService::convertDescriptionToTO(DataTO& result, DataDescription const& description) const
 {
     std::unordered_map<uint64_t, int> cellIndexByIds;
     for (auto const& cell : description.cells) {
@@ -267,18 +267,18 @@ void DescriptionConverter::convertDescriptionToTO(DataTO& result, DataDescriptio
     }
 }
 
-void DescriptionConverter::convertDescriptionToTO(DataTO& result, CellDescription const& cell) const
+void DescriptionConverterService::convertDescriptionToTO(DataTO& result, CellDescription const& cell) const
 {
     std::unordered_map<uint64_t, int> cellIndexByIds;
     addCell(result, cell, cellIndexByIds);
 }
 
-void DescriptionConverter::convertDescriptionToTO(DataTO& result, ParticleDescription const& particle) const
+void DescriptionConverterService::convertDescriptionToTO(DataTO& result, ParticleDescription const& particle) const
 {
     addParticle(result, particle);
 }
 
-void DescriptionConverter::addAdditionalDataSizeForCell(CellDescription const& cell, uint64_t& additionalDataSize) const
+void DescriptionConverterService::addAdditionalDataSizeForCell(CellDescription const& cell, uint64_t& additionalDataSize) const
 {
     additionalDataSize += cell.metadata.name.size() + cell.metadata.description.size();
     switch (cell.getCellType()) {
@@ -321,7 +321,7 @@ namespace
     }
 }
 
-auto DescriptionConverter::scanAndCreateClusterDescription(
+auto DescriptionConverterService::scanAndCreateClusterDescription(
     DataTO const& dataTO,
     int startCellIndex,
     std::unordered_set<int>& freeCellIndices) const
@@ -363,7 +363,7 @@ auto DescriptionConverter::scanAndCreateClusterDescription(
     return result;
 }
 
-CellDescription DescriptionConverter::createCellDescription(DataTO const& dataTO, int cellIndex) const
+CellDescription DescriptionConverterService::createCellDescription(DataTO const& dataTO, int cellIndex) const
 {
     CellDescription result;
 
@@ -539,7 +539,7 @@ namespace
     }
 }
 
-void DescriptionConverter::addParticle(DataTO const& dataTO, ParticleDescription const& particleDesc) const
+void DescriptionConverterService::addParticle(DataTO const& dataTO, ParticleDescription const& particleDesc) const
 {
     auto particleIndex = (*dataTO.numParticles)++;
 
@@ -552,7 +552,7 @@ void DescriptionConverter::addParticle(DataTO const& dataTO, ParticleDescription
     particleTO.color = particleDesc.color;
 }
 
-void DescriptionConverter::addCell(DataTO const& dataTO, CellDescription const& cellDesc, std::unordered_map<uint64_t, int>& cellIndexTOByIds) const
+void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription const& cellDesc, std::unordered_map<uint64_t, int>& cellIndexTOByIds) const
 {
     int cellIndex = (*dataTO.numCells)++;
     CellTO& cellTO = dataTO.cells[cellIndex];
@@ -702,7 +702,7 @@ void DescriptionConverter::addCell(DataTO const& dataTO, CellDescription const& 
 	cellIndexTOByIds.insert_or_assign(cellTO.id, cellIndex);
 }
 
-void DescriptionConverter::setConnections(DataTO const& dataTO, CellDescription const& cellToAdd, std::unordered_map<uint64_t, int> const& cellIndexByIds) const
+void DescriptionConverterService::setConnections(DataTO const& dataTO, CellDescription const& cellToAdd, std::unordered_map<uint64_t, int> const& cellIndexByIds) const
 {
     int index = 0;
     auto& cellTO = dataTO.cells[cellIndexByIds.at(cellToAdd.id)];

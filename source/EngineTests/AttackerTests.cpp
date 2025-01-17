@@ -3,7 +3,7 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/GenomeDescriptionService.h"
+#include "EngineInterface/GenomeDescriptionConverterService.h"
 #include "EngineInterface/GenomeDescriptions.h"
 
 #include "IntegrationTestFramework.h"
@@ -204,7 +204,7 @@ TEST_F(AttackerTests, successDistributeToTwoTransmittersWithDifferentColor)
 
 TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
 {
-    auto otherGenome = GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+    auto otherGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({

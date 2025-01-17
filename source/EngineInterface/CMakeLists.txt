@@ -13,8 +13,8 @@ add_library(EngineInterface
     EngineConstants.h
     Features.h
     GenomeConstants.h
-    GenomeDescriptionService.cpp
-    GenomeDescriptionService.h
+    GenomeDescriptionConverterService.cpp
+    GenomeDescriptionConverterService.h
     GenomeDescriptions.h
     GpuSettings.h
     InspectedEntityIds.h

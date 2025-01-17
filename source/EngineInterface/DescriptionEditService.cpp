@@ -8,7 +8,7 @@
 #include "Base/Math.h"
 #include "GenomeDescriptions.h"
 #include "SpaceCalculator.h"
-#include "GenomeDescriptionService.h"
+#include "GenomeDescriptionConverterService.h"
 
 DataDescription DescriptionEditService::createRect(CreateRectParameters const& parameters)
 {
@@ -427,14 +427,14 @@ namespace
 {
     void colorizeGenomeNodes(std::vector<uint8_t>& genome, int color)
     {
-        auto desc = GenomeDescriptionService::get().convertBytesToDescription(genome);
+        auto desc = GenomeDescriptionConverterService::get().convertBytesToDescription(genome);
         for (auto& node : desc.cells) {
             node.color = color;
             if (node.hasGenome()) {
                 colorizeGenomeNodes(node.getGenomeRef(), color);
             }
         }
-        genome = GenomeDescriptionService::get().convertDescriptionToBytes(desc);
+        genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(desc);
     }
 }
 

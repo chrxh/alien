@@ -4,7 +4,7 @@
 
 #include "Fonts/IconsFontAwesome5.h"
 
-#include "EngineInterface/GenomeDescriptionService.h"
+#include "EngineInterface/GenomeDescriptionConverterService.h"
 
 #include "AlienImGui.h"
 #include "StyleRepository.h"
@@ -72,9 +72,9 @@ void ChangeColorDialog::onChangeColor(GenomeDescription& genome)
         }
         if (_includeSubGenomes) {
             if (auto subGenome = node.getGenome()) {
-                auto subGenomeDesc = GenomeDescriptionService::get().convertBytesToDescription(*subGenome);
+                auto subGenomeDesc = GenomeDescriptionConverterService::get().convertBytesToDescription(*subGenome);
                 onChangeColor(subGenomeDesc);
-                auto newSubGenome = GenomeDescriptionService::get().convertDescriptionToBytes(subGenomeDesc);
+                auto newSubGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(subGenomeDesc);
                 node.setGenome(newSubGenome);
             }
         }

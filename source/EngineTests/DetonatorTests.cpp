@@ -3,7 +3,7 @@
 #include "Base/Math.h"
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/GenomeDescriptionService.h"
+#include "EngineInterface/GenomeDescriptionConverterService.h"
 #include "EngineInterface/GenomeDescriptions.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
