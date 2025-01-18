@@ -272,10 +272,9 @@ namespace
                 for (float y = -outerRadius; y <= outerRadius; y += 1.0f) {
                     auto rSquared = x * x + y * y;
                     if (rSquared <= outerRadiusSquared && rSquared >= innerRadiusSquared) {
-                        auto factor = (sqrt(rSquared) - innerRadius) / (outerRadius - innerRadius);
                         auto angle = Math::angleOfVector({x, y});
                         if (Math::isAngleInBetween(angle1, angle2, angle)) {
-                            drawDot(imageData, imageSize, pos + float2{x, y}, color * factor);
+                            drawDot(imageData, imageSize, pos + float2{x, y}, color);
                         }
                     }
                 }
@@ -519,7 +518,7 @@ __global__ void cudaDrawCells(
                 signalAngleRestrictionEnd = 180.0f + cell->signalRoutingRestriction.baseAngle + cell->signalRoutingRestriction.openingAngle / 2;
             } else {
                 signalAngleRestrictionStart = 0;
-                signalAngleRestrictionEnd = 359.0f;
+                signalAngleRestrictionEnd = 359.9f;
             }
             auto refAngle = Math::angleOfVector(cell->connections[0].cell->pos - cell->pos);
             drawSection(
@@ -527,15 +526,20 @@ __global__ void cudaDrawCells(
                 imageSize,
                 cellImagePos,
                 secondaryColor * 1.5f,
-                cellRadius,
-                cellRadius * 8 / 5,
+                cellRadius * 11 / 10,
+                cellRadius * 13 / 10,
                 refAngle + signalAngleRestrictionStart,
                 refAngle + signalAngleRestrictionEnd);
         }
 
         // draw signal activity
-        if (cell->signal.active && zoom >= cudaSimulationParameters.zoomLevelNeuronalActivity) {
-            drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, cellRadius, shadedCells);
+        if (zoom >= cudaSimulationParameters.zoomLevelNeuronalActivity) {
+            if (cell->signalRelaxationTime == 2) {
+                drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, cellRadius, shadedCells);
+            }
+            if (cell->signalRelaxationTime == 1) {
+                drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, cellRadius / 2, shadedCells);
+            }
         }
 
         // draw events
@@ -603,7 +607,7 @@ __global__ void cudaDrawCells(
                 auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
                 otherCellPos += topologyCorrection;
 
-                auto distFromCellCenter = Math::normalized(otherCellPos - cellPos) / 4;
+                auto distFromCellCenter = Math::normalized(otherCellPos - cellPos) * cudaSimulationParameters.cellRadius * 6 / 5 * 11 / 10;
                 auto const startImagePos = mapWorldPosToImagePos(rectUpperLeft, cellPos + distFromCellCenter, universeImageSize, zoom);
                 auto const endImagePos = mapWorldPosToImagePos(rectUpperLeft, otherCellPos - distFromCellCenter, universeImageSize, zoom);
                 if (isLineVisible(startImagePos, endImagePos, universeImageSize)) {
@@ -629,7 +633,7 @@ __global__ void cudaDrawCells(
                     auto otherCellPos = otherCell->pos;
                     auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
                     otherCellPos += topologyCorrection;
-                    auto distFromCellCenter = Math::normalized(otherCellPos - cellPos) / 4;
+                    auto distFromCellCenter = Math::normalized(otherCellPos - cellPos) * cudaSimulationParameters.cellRadius * 6 / 5 * 11 / 10;
                     auto const startImagePos = mapWorldPosToImagePos(rectUpperLeft, cellPos + distFromCellCenter, universeImageSize, zoom);
                     auto const endImagePos = mapWorldPosToImagePos(rectUpperLeft, otherCellPos - distFromCellCenter, universeImageSize, zoom);
                     auto direction = Math::normalized(endImagePos - startImagePos);
