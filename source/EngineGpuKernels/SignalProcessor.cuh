@@ -15,6 +15,7 @@ public:
 
     __inline__ __device__ static void createEmptySignal(Cell* cell);
     __inline__ __device__ static float2 calcSignalDirection(SimulationData& data, Cell* cell);
+    __inline__ __device__ static bool isTriggeredAndCreateSignalIfTriggered(SimulationData& data, Cell* cell, uint8_t autoTriggerInterval);
 };
 
 /************************************************************************/
@@ -158,4 +159,25 @@ __inline__ __device__ float2 SignalProcessor::calcSignalDirection(SimulationData
         result = result + Math::normalized(directionDelta);
     }
     return Math::normalized(result);
+}
+
+__inline__ __device__ bool SignalProcessor::isTriggeredAndCreateSignalIfTriggered(SimulationData& data, Cell* cell, uint8_t autoTriggerInterval)
+{
+    if (cell->cellTypeData.sensor.autoTriggerInterval == 0) {
+        if (!cell->signal.active) {
+            return false;
+        }
+        if (cell->signal.active && abs(cell->signal.channels[0]) < TRIGGER_THRESHOLD) {
+            return false;
+        }
+    } else {
+        if (!cell->signal.active) {
+            SignalProcessor::createEmptySignal(cell);
+        }
+        auto activationTime = max(MAX_SIGNAL_RELAXATION_TIME + 1, autoTriggerInterval);
+        if (data.timestep % activationTime != 0) {
+            return false;
+        }
+    }
+    return true;
 }

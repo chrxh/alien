@@ -16,8 +16,6 @@ private:
 
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
-    __inline__ __device__ static bool isTriggeredAndCreateSignalIfTriggered(SimulationData& data, Cell* cell);
-
     __inline__ __device__ static uint32_t getCellDensity(
         uint64_t const& timestep,
         Cell* const& cell,
@@ -51,32 +49,11 @@ __inline__ __device__ void SensorProcessor::process(SimulationData& data, Simula
 
 __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    if (isTriggeredAndCreateSignalIfTriggered(data, cell)) {
+    if (SignalProcessor::isTriggeredAndCreateSignalIfTriggered(data, cell, cell->cellTypeData.sensor.autoTriggerInterval)) {
         statistics.incNumSensorActivities(cell->color);
         searchNeighborhood(data, statistics, cell);
         cell->signal.origin = SignalOrigin_Sensor;
     }
-}
-
-__inline__ __device__ bool SensorProcessor::isTriggeredAndCreateSignalIfTriggered(SimulationData& data, Cell* cell)
-{
-    if (cell->cellTypeData.sensor.autoTriggerInterval == 0) {
-        if (!cell->signal.active) {
-            return false;
-        }
-        if (cell->signal.active && abs(cell->signal.channels[0]) < cudaSimulationParameters.cellTypeSensorSignalThreshold) {
-            return false;
-        }
-    } else {
-        if (!cell->signal.active) {
-            SignalProcessor::createEmptySignal(cell);
-        }
-        auto activationTime = max(MAX_SIGNAL_RELAXATION_TIME + 1, cell->cellTypeData.sensor.autoTriggerInterval);
-        if (data.timestep % activationTime != 0) {
-            return false;
-        }
-    }
-    return true;
 }
 
 __inline__ __device__ uint32_t SensorProcessor::getCellDensity(

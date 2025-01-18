@@ -10,3 +10,4 @@ auto constexpr MAX_HISTOGRAM_SLOTS = 20;
 
 auto constexpr MAX_ACTIVATION_TIME = 256 * 4;
 auto constexpr MAX_SIGNAL_RELAXATION_TIME = 2;
+auto constexpr TRIGGER_THRESHOLD = 0.1f;

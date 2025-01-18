@@ -117,7 +117,6 @@ struct SimulationParameters
         Infinity<float>::value};
 
     ColorVector<float> cellTypeConstructorConnectingCellMaxDistance = {2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f};
-    float cellTypeConstructorSignalThreshold = 0.1f;
     float cellTypeConstructorAdditionalOffspringDistance = 0.8f;
     
     bool cellTypeConstructorCheckCompletenessForSelfReplication = false;
@@ -153,7 +152,6 @@ struct SimulationParameters
         {3, 3, 3, 3, 3, 3, 3},
         {3, 3, 3, 3, 3, 3, 3},
         {3, 3, 3, 3, 3, 3, 3}};
-    float cellTypeInjectorSignalThreshold = 0.1f;
 
     ColorVector<float> cellTypeAttackerRadius = {1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f};
     ColorVector<float> cellTypeAttackerStrength = {0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f};
@@ -169,7 +167,6 @@ struct SimulationParameters
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     ColorVector<float> cellTypeAttackerSensorDetectionFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    float cellTypeAttackerSignalThreshold = 0.1f;
     bool cellTypeAttackerDestroyCells = false;
 
     ColorVector<float> cellTypeDefenderAgainstAttackerStrength = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
@@ -183,19 +180,15 @@ struct SimulationParameters
     ColorVector<float> cellTypeMuscleMovementAcceleration = {0.02f, 0.02f, 0.02f, 0.02f, 0.02f, 0.02f, 0.02f};
     ColorVector<float> cellTypeMuscleBendingAngle = {5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f};
     ColorVector<float> cellTypeMuscleBendingAcceleration = {0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f};
-    float cellTypeMuscleBendingAccelerationThreshold = 0.1f;
     bool cellTypeMuscleMovementTowardTargetedObject = true;
     ColorVector<float> cellTypeMuscleEnergyCost = {0, 0, 0, 0, 0, 0, 0};
 
     ColorVector<float> cellTypeSensorRange = {255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f};
-    float cellTypeSensorSignalThreshold = 0.1f;
 
     ColorVector<float> cellTypeReconnectorRadius = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
-    float cellTypeReconnectorSignalThreshold = 0.1f;
 
     ColorVector<float> cellTypeDetonatorRadius = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
     ColorVector<float> cellTypeDetonatorChainExplosionProbability = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-    float cellTypeDetonatorSignalThreshold = 0.1f;
 
     bool legacyCellTypeMuscleMovementAngleFromSensor = false;
 
