@@ -390,12 +390,10 @@ struct SignalDescription
     SignalOrigin origin = SignalOrigin_Unknown;
     float targetX = 0;
     float targetY = 0;
-    std::vector<uint64_t> prevCellIds;
 
     SignalDescription()
     {
         channels.resize(MAX_CHANNELS, 0);
-        prevCellIds.resize(MAX_CELL_BONDS, 0);
     }
     auto operator<=>(SignalDescription const&) const = default;
 
@@ -405,18 +403,12 @@ struct SignalDescription
         channels = value;
         return *this;
     }
-    SignalDescription& setPrevCellIds(std::vector<uint64_t> const& value)
-    {
-        prevCellIds = value;
-        return *this;
-    }
 };
 
 struct CellDescription
 {
+    // general
     uint64_t id = 0;
-
-    //general
     std::vector<ConnectionDescription> connections;
     RealVector2D pos;
     RealVector2D vel;
@@ -432,10 +424,11 @@ struct CellDescription
     float genomeComplexity = 0;
     uint16_t genomeNodeIndex = 0;
 
-    //cell type data
+    // cell type data
     std::optional<NeuralNetworkDescription> neuralNetwork = NeuralNetworkDescription();
     CellTypeDescription cellTypeData = BaseDescription();
     SignalRoutingRestrictionDescription signalRoutingRestriction;
+    uint8_t signalRelaxationTime = 0;
     std::optional<SignalDescription> signal;
     int activationTime = 0;
     int detectedByCreatureId = 0;   //only the first 16 bits from the creature id
@@ -523,6 +516,11 @@ struct CellDescription
     CellDescription& setMetadata(CellMetadataDescription const& value)
     {
         metadata = value;
+        return *this;
+    }
+    CellDescription& setSignalRelaxationTime(uint8_t value)
+    {
+        signalRelaxationTime = value;
         return *this;
     }
     CellDescription& setSignal(SignalDescription const& value)
