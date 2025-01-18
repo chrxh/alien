@@ -46,7 +46,7 @@ private:
 
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static ConstructionData readConstructionData(Cell* cell);
-    __inline__ __device__ static bool isConstructionTriggered(SimulationData const& data, Cell* cell);
+    __inline__ __device__ static bool isTriggeredAndCreateSignalIfTriggered(SimulationData const& data, Cell* cell);
 
     __inline__ __device__ static Cell* tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
 
@@ -106,7 +106,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
     if (!GenomeDecoder::isFirstNode(constructor)) {
         return;
     }
-    if (!isConstructionTriggered(data, cell)) {
+    if (!isTriggeredAndCreateSignalIfTriggered(data, cell)) {
         return;
     }
 
@@ -153,12 +153,9 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 {
     auto& constructor = cell->cellTypeData.constructor;
     if (!GenomeDecoder::isFinished(constructor)) {
-        if (isConstructionTriggered(data, cell)) {
+        if (isTriggeredAndCreateSignalIfTriggered(data, cell)) {
             auto constructionData = readConstructionData(cell);
             if (tryConstructCell(data, statistics, cell, constructionData)) {
-                if (!cell->signal.active) {
-                    SignalProcessor::createEmptySignal(cell);
-                }
                 cell->signal.active = true;
                 cell->signal.channels[0] = 1;
                 if (GenomeDecoder::isLastNode(constructor)) {
@@ -269,16 +266,19 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
 }
 
 __inline__ __device__ bool
-ConstructorProcessor::isConstructionTriggered(SimulationData const& data, Cell* cell)
+ConstructorProcessor::isTriggeredAndCreateSignalIfTriggered(SimulationData const& data, Cell* cell)
 {
     if (cell->cellTypeData.constructor.autoTriggerInterval == 0) {
         if (!cell->signal.active) {
             return false;
         }
-        if (cell->signal.active && abs(cell->signal.channels[0]) < cudaSimulationParameters.cellTypeConstructorSignalThreshold[cell->color]) {
+        if (cell->signal.active && abs(cell->signal.channels[0]) < cudaSimulationParameters.cellTypeConstructorSignalThreshold) {
             return false;
         }
     } else {
+        if (!cell->signal.active) {
+            SignalProcessor::createEmptySignal(cell);
+        }
         auto activationTime = max(MAX_SIGNAL_RELAXATION_TIME + 1, cell->cellTypeData.constructor.autoTriggerInterval);
         if (data.timestep % activationTime != 0) {
             return false;
