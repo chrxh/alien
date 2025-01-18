@@ -51,9 +51,11 @@ struct TransmitterTO
 
 struct ConstructorTO
 {
-    uint32_t activationMode;  //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
+    // Properties
+    uint32_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
     uint32_t constructionActivationTime;
 
+    // Genome data
     uint16_t genomeSize;
     uint16_t numInheritedGenomeNodes;
     uint16_t origGenomeSize;
@@ -62,7 +64,7 @@ struct ConstructorTO
     float constructionAngle1;
     float constructionAngle2;
 
-    //process data
+    // Process data
     uint64_t lastConstructedCellId;
     uint16_t genomeCurrentNodeIndex;
     uint16_t genomeCurrentRepetition;
@@ -169,9 +171,8 @@ struct SignalTO
 
 struct CellTO
 {
-	uint64_t id;
-
-    //general
+    // General
+    uint64_t id;
     ConnectionTO connections[MAX_CELL_BONDS];
     float2 pos;
     float2 vel;
@@ -188,7 +189,7 @@ struct CellTO
     float genomeComplexity;
     uint16_t genomeNodeIndex;
 
-    //cell type data
+    // Cell type data
     NeuralNetworkTO neuralNetwork;  // not used for structure and base cells
     CellType cellType;
     CellTypeTO cellTypeData;

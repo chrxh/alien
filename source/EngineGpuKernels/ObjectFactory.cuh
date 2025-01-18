@@ -144,7 +144,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellTypeData.transmitter.mode = cellTO.cellTypeData.transmitter.mode;
     } break;
     case CellType_Constructor: {
-        cell->cellTypeData.constructor.activationMode = cellTO.cellTypeData.constructor.activationMode;
+        cell->cellTypeData.constructor.autoTriggerInterval = cellTO.cellTypeData.constructor.autoTriggerInterval;
         cell->cellTypeData.constructor.constructionActivationTime = cellTO.cellTypeData.constructor.constructionActivationTime;
         createAuxiliaryData(
             cellTO.cellTypeData.constructor.genomeSize,

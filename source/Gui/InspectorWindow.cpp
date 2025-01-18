@@ -554,7 +554,7 @@ void _InspectorWindow::processNeuronContent(CellDescription& cell)
 void _InspectorWindow::processConstructorContent(ConstructorDescription& constructor)
 {
     if (ImGui::TreeNodeEx("Properties###constructor", TreeNodeFlags)) {
-        int constructorMode = constructor.activationMode == 0 ? 0 : 1;
+        int constructorMode = constructor.autoTriggerInterval == 0 ? 0 : 1;
         if (AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Activation mode")
@@ -562,12 +562,12 @@ void _InspectorWindow::processConstructorContent(ConstructorDescription& constru
                     .values({"Manual", "Automatic"})
                     .tooltip(Const::GenomeConstructorActivationModeTooltip),
                 constructorMode)) {
-            constructor.activationMode = constructorMode;
+            constructor.autoTriggerInterval = constructorMode;
         }
         if (constructorMode == 1) {
             AlienImGui::InputInt(
                 AlienImGui::InputIntParameters().name("Interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip),
-                constructor.activationMode);
+                constructor.autoTriggerInterval);
         }
         AlienImGui::InputInt(
             AlienImGui::InputIntParameters()
@@ -781,8 +781,8 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
         if (constructor.constructionActivationTime < 0) {
             constructor.constructionActivationTime = 0;
         }
-        if (constructor.activationMode < 0) {
-            constructor.activationMode = 0;
+        if (constructor.autoTriggerInterval < 0) {
+            constructor.autoTriggerInterval = 0;
         }
         constructor.genomeGeneration = std::max(0, constructor.genomeGeneration);
     } break;
