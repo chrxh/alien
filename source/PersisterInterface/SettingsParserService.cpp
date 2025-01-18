@@ -11,8 +11,6 @@ namespace
     void encodeDecodeLatestSimulationParameters(
         boost::property_tree::ptree& tree,
         SimulationParameters& parameters,
-        MissingParameters& missingParameters,
-        MissingFeatures& missingFeatures,
         ParserTask parserTask)
     {
         SimulationParameters defaultParameters;
@@ -274,7 +272,7 @@ namespace
             defaultParameters.externalEnergyConditionalInflowFactor,
             "simulation parameters.cell.function.constructor.pump energy factor",
             parserTask);
-        missingParameters.externalEnergyBackflowFactor = ParameterParser::encodeDecode(
+        ParameterParser::encodeDecode(
             tree,
             parameters.externalEnergyBackflowFactor,
             defaultParameters.externalEnergyBackflowFactor,
@@ -293,7 +291,7 @@ namespace
             "simulation parameters.cell.function.constructor.external energy backflow limit",
             parserTask);
 
-        missingParameters.cellDeathConsequences = ParameterParser::encodeDecode(
+        ParameterParser::encodeDecode(
             tree, parameters.cellDeathConsequences, defaultParameters.cellDeathConsequences, "simulation parameters.cell.death consequences", parserTask);
         ParameterParser::encodeDecode(
             tree,
@@ -321,7 +319,7 @@ namespace
             "simulation parameters.cell.function.constructor.completeness check for self-replication",
             parserTask);
 
-        missingParameters.copyMutations = ParameterParser::encodeDecode(
+        ParameterParser::encodeDecode(
             tree,
             parameters.baseValues.cellCopyMutationNeuronData,
             defaultParameters.baseValues.cellCopyMutationNeuronData,
@@ -657,13 +655,6 @@ namespace
             "simulation parameters.cell.function.detonator.chain explosion probability",
             parserTask);
 
-        ParameterParser::encodeDecode(
-            tree,
-            parameters.legacyCellTypeMuscleMovementAngleFromSensor,
-            defaultParameters.legacyCellTypeMuscleMovementAngleFromSensor,
-            "simulation parameters.legacy.cell.function.muscle.movement angle from sensor",
-            parserTask);
-
         //particle sources
         ParameterParser::encodeDecode(
             tree, parameters.numRadiationSources, defaultParameters.numRadiationSources, "simulation parameters.particle sources.num sources", parserTask);
@@ -994,36 +985,34 @@ namespace
             defaultParameters.features.genomeComplexityMeasurement,
             "simulation parameters.features.genome complexity measurement",
             parserTask);
-        missingFeatures.advancedAbsorptionControl = ParameterParser::encodeDecode(
+        ParameterParser::encodeDecode(
             tree,
             parameters.features.advancedAbsorptionControl,
             defaultParameters.features.advancedAbsorptionControl,
             "simulation parameters.features.additional absorption control",
             parserTask);
-        missingFeatures.advancedAttackerControl = ParameterParser::encodeDecode(
+        ParameterParser::encodeDecode(
             tree,
             parameters.features.advancedAttackerControl,
             defaultParameters.features.advancedAttackerControl,
             "simulation parameters.features.additional attacker control",
             parserTask);
-        missingFeatures.externalEnergyControl = ParameterParser::encodeDecode(
+        ParameterParser::encodeDecode(
             tree,
             parameters.features.externalEnergyControl,
             defaultParameters.features.externalEnergyControl,
             "simulation parameters.features.external energy",
             parserTask);
-        missingFeatures.cellColorTransitionRules = ParameterParser::encodeDecode(
+        ParameterParser::encodeDecode(
             tree,
             parameters.features.cellColorTransitionRules,
             defaultParameters.features.cellColorTransitionRules,
             "simulation parameters.features.cell color transition rules",
             parserTask);
-        missingFeatures.cellAgeLimiter = ParameterParser::encodeDecode(
+        ParameterParser::encodeDecode(
             tree, parameters.features.cellAgeLimiter, defaultParameters.features.cellAgeLimiter, "simulation parameters.features.cell age limiter", parserTask);
         ParameterParser::encodeDecode(
             tree, parameters.features.cellGlow, defaultParameters.features.cellGlow, "simulation parameters.features.cell glow", parserTask);
-        missingFeatures.legacyMode = ParameterParser::encodeDecode(
-            tree, parameters.features.legacyModes, defaultParameters.features.legacyModes, "simulation parameters.features.legacy modes", parserTask);
         ParameterParser::encodeDecode(
             tree,
             parameters.features.customizeNeuronMutations,
@@ -1043,13 +1032,11 @@ namespace
         auto programVersion = Const::ProgramVersion;
         ParameterParser::encodeDecode(tree, programVersion, std::string(), "simulation parameters.version", parserTask);
 
-        MissingParameters missingParameters;
-        MissingFeatures missingFeatures;
-        encodeDecodeLatestSimulationParameters(tree, parameters, missingParameters, missingFeatures, parserTask);
+        encodeDecodeLatestSimulationParameters(tree, parameters, parserTask);
 
         // Compatibility with legacy parameters
         if (parserTask == ParserTask::Decode) {
-            LegacySettingsParserService::get().searchAndApplyLegacyParameters(programVersion, tree, missingFeatures, missingParameters, parameters);
+            LegacySettingsParserService::get().searchAndApplyLegacyParameters(programVersion, tree, parameters);
         }
     }
 

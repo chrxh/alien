@@ -190,7 +190,5 @@ struct SimulationParameters
     ColorVector<float> cellTypeDetonatorRadius = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
     ColorVector<float> cellTypeDetonatorChainExplosionProbability = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
 
-    bool legacyCellTypeMuscleMovementAngleFromSensor = false;
-
     bool operator==(SimulationParameters const&) const = default;
 };

@@ -17,7 +17,6 @@ struct Features
     bool cellColorTransitionRules = false;
     bool cellAgeLimiter = false;
     bool cellGlow = false;
-    bool legacyModes = false;
 
     bool operator==(Features const&) const = default;
 };

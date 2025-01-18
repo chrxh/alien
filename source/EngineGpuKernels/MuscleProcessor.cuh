@@ -56,29 +56,6 @@ __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, Si
 }
 
 
-namespace
-{
-    __device__ Cell* findNearbySensor(Cell* cell)
-    {
-        for (int i = 0, j = cell->numConnections; i < j; ++i) {
-            auto const& connectedCell = cell->connections[i].cell;
-            if (connectedCell->cellType == CellType_Sensor) {
-                return connectedCell;
-            }
-        }
-        for (int i = 0, j = cell->numConnections; i < j; ++i) {
-            auto const& connectedCell = cell->connections[i].cell;
-            for (int k = 0, l = connectedCell->numConnections; k < l; ++k) {
-                auto const& connectedConnectedCell = connectedCell->connections[k].cell;
-                if (connectedConnectedCell->cellType == CellType_Sensor) {
-                    return connectedConnectedCell;
-                }
-            }
-        }
-        return nullptr;
-    }
-}
-
 __device__ __inline__ void MuscleProcessor::movement(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     if (abs(cell->signal.channels[0]) < NEAR_ZERO) {
@@ -91,19 +68,9 @@ __device__ __inline__ void MuscleProcessor::movement(SimulationData& data, Simul
     auto direction = float2{0, 0};
     auto acceleration = 0.0f;
     if (cudaSimulationParameters.cellTypeMuscleMovementTowardTargetedObject) {
-        if (cudaSimulationParameters.features.legacyModes && cudaSimulationParameters.legacyCellTypeMuscleMovementAngleFromSensor) {
-            if (auto sensorCell = findNearbySensor(cell)) {
-                auto const& sensorData = sensorCell->cellTypeData.sensor;
-                if (sensorData.memoryTargetX != 0 || sensorData.memoryTargetY != 0) {
-                    direction = {sensorData.memoryTargetX, sensorData.memoryTargetY};
-                    acceleration = cudaSimulationParameters.cellTypeMuscleMovementAcceleration[cell->color];
-                }
-            }
-        } else {
-            if (cell->signal.origin == SignalOrigin_Sensor && (cell->signal.targetX != 0 || cell->signal.targetY != 0)) {
-                direction = {cell->signal.targetX, cell->signal.targetY};
-                acceleration = cudaSimulationParameters.cellTypeMuscleMovementAcceleration[cell->color];
-            }
+        if (cell->signal.origin == SignalOrigin_Sensor && (cell->signal.targetX != 0 || cell->signal.targetY != 0)) {
+            direction = {cell->signal.targetX, cell->signal.targetY};
+            acceleration = cudaSimulationParameters.cellTypeMuscleMovementAcceleration[cell->color];
         }
     } else {
         direction = SignalProcessor::calcSignalDirection(data, cell);

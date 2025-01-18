@@ -104,7 +104,7 @@ struct ConstructorType
     uint16_t genomeCurrentNodeIndex;
     uint16_t genomeCurrentRepetition;
     uint8_t currentBranch;
-    uint32_t offspringCreatureId;  //will be filled when self-replication starts
+    uint32_t offspringCreatureId;  // Will be filled when self-replication starts
     uint32_t offspringMutationId;
 
     // Temp data
@@ -113,14 +113,15 @@ struct ConstructorType
 
 struct SensorType
 {
+    // Properties
     uint8_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
     float minDensity;
-    int8_t minRange;          //< 0 = no restriction
-    int8_t maxRange;          //< 0 = no restriction
-    uint8_t restrictToColor;  //0 ... 6 = color restriction, 255 = no restriction
+    int8_t minRange;          // < 0 = no restriction
+    int8_t maxRange;          // < 0 = no restriction
+    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
     SensorRestrictToMutants restrictToMutants;
 
-    //process data
+    // Process data
     float memoryChannel1;
     float memoryChannel2;
     float memoryChannel3;
@@ -150,12 +151,13 @@ struct InjectorType
 
 struct MuscleType
 {
+    // Properties
     MuscleMode mode;
     MuscleBendingDirection lastBendingDirection;
     uint8_t lastBendingSourceIndex;
     float consecutiveBendingAngle;
 
-    //additional rendering data
+    // Additional rendering data
     float lastMovementX;
     float lastMovementY;
 };
@@ -167,7 +169,7 @@ struct DefenderType
 
 struct ReconnectorType
 {
-    uint8_t restrictToColor;  //0 ... 6 = color restriction, 255 = no restriction
+    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
     ReconnectorRestrictToMutants restrictToMutants;
 };
 
@@ -210,7 +212,7 @@ struct Signal
 
 struct Cell
 {
-    //general
+    // General
     uint64_t id;
     CellConnection connections[MAX_CELL_BONDS];
     float2 pos;
@@ -224,11 +226,11 @@ struct Cell
     LivingState livingState;
     uint32_t creatureId;
     uint32_t mutationId;
-    uint8_t ancestorMutationId; //only the first 8 bits from ancestor mutation id
+    uint8_t ancestorMutationId; // Only the first 8 bits from ancestor mutation id
     float genomeComplexity;
     uint16_t genomeNodeIndex;
 
-    //cell type data
+    // Cell type data
     NeuralNetwork* neuralNetwork;
     CellType cellType;
     CellTypeData cellTypeData;
@@ -238,34 +240,34 @@ struct Cell
     uint32_t activationTime;
     CellTriggered cellTypeUsed;
 
-    //process data
+    // Process data
     Signal futureSignal;
-    uint16_t detectedByCreatureId;  //only the first 16 bits from the creature id
+    uint16_t detectedByCreatureId;  // Only the first 16 bits from the creature id
 
-    //annotations
+    // Annotations
     CellMetadataDescription metadata;
 
-    //additional rendering data
+    // Additional rendering data
     CellEvent event;
     uint8_t eventCounter;
     float2 eventPos;
 
-    //editing data
-    uint8_t selected;  //0 = no, 1 = selected, 2 = cluster selected
-    uint8_t detached;  //0 = no, 1 = yes
+    // Editing data
+    uint8_t selected;  // 0 = no, 1 = selected, 2 = cluster selected
+    uint8_t detached;  // 0 = no, 1 = yes
 
-    //internal algorithm data
-    int locked;  //0 = unlocked, 1 = locked
+    // Internal algorithm data
+    int locked;  // 0 = unlocked, 1 = locked
     int tag;
     float density;
-    Cell* nextCell; //linked list for finding all overlapping cells
+    Cell* nextCell; // Linked list for finding all overlapping cells
     int32_t scheduledOperationIndex;  // -1 = no operation scheduled
-    float2 shared1; //variable with different meanings depending on context
+    float2 shared1; // Variable with different meanings depending on context
     float2 shared2;
 
-    //cluster data
+    // Cluster data
     uint32_t clusterIndex;
-    int32_t clusterBoundaries;  //1 = cluster occupies left boundary, 2 = cluster occupies upper boundary
+    int32_t clusterBoundaries;  // 1 = cluster occupies left boundary, 2 = cluster occupies upper boundary
     float2 clusterPos;
     float2 clusterVel;
     float clusterAngularMomentum;
