@@ -49,6 +49,9 @@ __inline__ __device__  void SignalProcessor::calcFutureSignals(SimulationData& d
         auto& cell = cells.at(index);
 
         cell->futureSignal.active = false;
+        if (cell->signalRelaxationTime > 0) {
+            continue;
+        }
         cell->futureSignal.origin = SignalOrigin_Unknown;
         cell->futureSignal.targetX = 0;
         cell->futureSignal.targetY = 0;
@@ -58,23 +61,12 @@ __inline__ __device__  void SignalProcessor::calcFutureSignals(SimulationData& d
         }
 
         int numSensorSignals = 0;
-        int numSignalOrigins = 0;
         for (int i = 0, j = cell->numConnections; i < j; ++i) {
             auto connectedCell = cell->connections[i].cell;
             if (connectedCell->livingState == LivingState_UnderConstruction || !connectedCell->signal.active) {
                 continue;
             }
             int skip = false;
-            for (int k = 0, l = connectedCell->signal.numPrevCells; k < l; ++k) {
-                if (connectedCell->signal.prevCellIds[k] == cell->id) {
-                    skip = true;
-                    break;
-                }
-            }
-            if (skip) {
-                continue;
-            }
-
             if (connectedCell->signalRoutingRestriction.active) {
                 float signalAngleRestrictionStart = 0;
                 float signalAngleRestrictionEnd = 0;
@@ -110,14 +102,10 @@ __inline__ __device__  void SignalProcessor::calcFutureSignals(SimulationData& d
                 cell->futureSignal.targetY += connectedCell->signal.targetY;
                 ++numSensorSignals;
             }
-            cell->futureSignal.prevCellIds[numSignalOrigins] = connectedCell->id;
-            ++numSignalOrigins;
-
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             cell->futureSignal.channels[i] = max(-10.0f, min(10.0f, cell->futureSignal.channels[i]));  // truncate value to avoid overflow
         }
-        cell->futureSignal.numPrevCells = numSignalOrigins;
         if (numSensorSignals > 0) {
             cell->futureSignal.targetX /= toFloat(numSensorSignals);
             cell->futureSignal.targetY /= toFloat(numSensorSignals);
@@ -141,10 +129,9 @@ __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
             cell->signal.origin = cell->futureSignal.origin;
             cell->signal.targetX = cell->futureSignal.targetX;
             cell->signal.targetY = cell->futureSignal.targetY;
-            cell->signal.numPrevCells = cell->futureSignal.numPrevCells;
-            for (int i = 0; i < cell->signal.numPrevCells; ++i) {
-                cell->signal.prevCellIds[i] = cell->futureSignal.prevCellIds[i];
-            }
+            cell->signalRelaxationTime = 2;
+        } else {
+            cell->signalRelaxationTime = max(0, cell->signalRelaxationTime - 1);
         }
     }
 }
@@ -158,7 +145,6 @@ __inline__ __device__ void SignalProcessor::createEmptySignal(Cell* cell)
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->signal.channels[i] = 0;
     }
-    cell->signal.numPrevCells = 0;
 }
 
 __inline__ __device__ float2 SignalProcessor::calcSignalDirection(SimulationData& data, Cell* cell)

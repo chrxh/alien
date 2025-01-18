@@ -511,6 +511,7 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
     routingRestriction.baseAngle = cellTO.signalRoutingRestriction.baseAngle;
     routingRestriction.openingAngle = cellTO.signalRoutingRestriction.openingAngle;
     result.signalRoutingRestriction = routingRestriction;
+    result.signalRelaxationTime = cellTO.signalRelaxationTime;
     if (cellTO.signal.active) {
         SignalDescription signal;
         for (int i = 0; i < MAX_CHANNELS; ++i) {
@@ -519,10 +520,6 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
         signal.origin = cellTO.signal.origin;
         signal.targetX = cellTO.signal.targetX;
         signal.targetY = cellTO.signal.targetY;
-        signal.prevCellIds.resize(cellTO.signal.numPrevCells);
-        for (int i = 0; i < cellTO.signal.numPrevCells; ++i) {
-            signal.prevCellIds[i] = cellTO.signal.prevCellIds[i];
-        }
         result.signal = signal;
     }
     result.activationTime = cellTO.activationTime;
@@ -678,6 +675,7 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
     cellTO.signalRoutingRestriction.active = cellDesc.signalRoutingRestriction.active;
     cellTO.signalRoutingRestriction.baseAngle = cellDesc.signalRoutingRestriction.baseAngle;
     cellTO.signalRoutingRestriction.openingAngle = cellDesc.signalRoutingRestriction.openingAngle;
+    cellTO.signalRelaxationTime = cellDesc.signalRelaxationTime;
     cellTO.signal.active = cellDesc.signal.has_value();
     if (cellTO.signal.active) {
         for (int i = 0; i < MAX_CHANNELS; ++i) {
@@ -686,10 +684,6 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
         cellTO.signal.origin = cellDesc.signal->origin;
         cellTO.signal.targetX = cellDesc.signal->targetX;
         cellTO.signal.targetY = cellDesc.signal->targetY;
-        cellTO.signal.numPrevCells = toInt(cellDesc.signal->prevCellIds.size());
-        for (int i = 0; i < cellTO.signal.numPrevCells; ++i) {
-            cellTO.signal.prevCellIds[i] = cellDesc.signal->prevCellIds[i];
-        }
     }
     cellTO.activationTime = cellDesc.activationTime;
     cellTO.numConnections = 0;

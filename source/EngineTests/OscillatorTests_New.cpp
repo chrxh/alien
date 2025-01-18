@@ -152,15 +152,17 @@ TEST_F(OscillatorTests_New, generatePulse_triangularNetwork)
         auto actualData = _simulationFacade->getSimulationData();
         auto actualCellById = getCellById(actualData);
 
-        auto oscillator1 = actualCellById.at(1);
-        EXPECT_TRUE(oscillator1.signal.has_value());
-        EXPECT_TRUE(approxCompare(1.0f, oscillator1.signal->channels.at(0)));
-        EXPECT_TRUE(oscillator1.signal->prevCellIds.empty());
+        auto oscillator = actualCellById.at(1);
+        EXPECT_TRUE(oscillator.signal.has_value());
+        EXPECT_TRUE(approxCompare(1.0f, oscillator.signal->channels.at(0)));
+        EXPECT_EQ(2, oscillator.signalRelaxationTime);
 
-        auto oscillator2 = actualCellById.at(2);
-        EXPECT_FALSE(oscillator2.signal.has_value());
+        auto base1 = actualCellById.at(2);
+        EXPECT_FALSE(base1.signal.has_value());
+        EXPECT_EQ(0, base1.signalRelaxationTime);
 
-        auto oscillator3 = actualCellById.at(3);
-        EXPECT_FALSE(oscillator3.signal.has_value());
+        auto base2 = actualCellById.at(3);
+        EXPECT_FALSE(base2.signal.has_value());
+        EXPECT_EQ(0, base2.signalRelaxationTime);
     }
 }

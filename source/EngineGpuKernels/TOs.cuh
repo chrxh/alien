@@ -165,8 +165,6 @@ struct SignalTO
     SignalOrigin origin;
     float targetX;
     float targetY;
-    int numPrevCells;
-    uint64_t prevCellIds[MAX_CELL_BONDS];
 };
 
 struct CellTO
@@ -195,6 +193,7 @@ struct CellTO
     CellType cellType;
     CellTypeTO cellTypeData;
     SignalRoutingRestrictionTO signalRoutingRestriction;
+    uint8_t signalRelaxationTime;
     SignalTO signal;
     uint32_t activationTime;
     uint16_t detectedByCreatureId;  // only the first 16 bits from the creature id

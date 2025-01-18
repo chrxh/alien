@@ -205,8 +205,6 @@ struct Signal
     SignalOrigin origin;
     float targetX;
     float targetY;
-    int numPrevCells;
-    uint64_t prevCellIds[MAX_CELL_BONDS];
 };
 
 struct Cell
@@ -235,6 +233,7 @@ struct Cell
     CellType cellType;
     CellTypeData cellTypeData;
     SignalRoutingRestriction signalRoutingRestriction;
+    uint8_t signalRelaxationTime;
     Signal signal;
     uint32_t activationTime;
     CellTriggered cellTypeUsed;

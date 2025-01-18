@@ -115,6 +115,7 @@ namespace
     auto constexpr Id_Cell_GenomeComplexity = 14;
     auto constexpr Id_Cell_DetectedByCreatureId = 15;
     auto constexpr Id_Cell_GenomeNodeIndex = 20;
+    auto constexpr Id_Cell_SignalRelaxationTime = 21;
 
     auto constexpr Id_Signal_Channels = 0;
     auto constexpr Id_Signal_Origin = 1;
@@ -726,6 +727,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_DetectedByCreatureId, data.detectedByCreatureId, defaultObject.detectedByCreatureId);
         loadSave(task, auxiliaries, Id_Cell_CellTypeUsed, data.cellTypeUsed, defaultObject.cellTypeUsed);
         loadSave(task, auxiliaries, Id_Cell_GenomeNodeIndex, data.genomeNodeIndex, defaultObject.genomeNodeIndex);
+        loadSave(task, auxiliaries, Id_Cell_SignalRelaxationTime, data.signalRelaxationTime, defaultObject.signalRelaxationTime);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data.connections, data.cellTypeData, data.signal, data.signalRoutingRestriction, data.neuralNetwork, data.metadata);
