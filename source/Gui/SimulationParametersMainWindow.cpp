@@ -433,13 +433,6 @@ void SimulationParametersMainWindow::processExpertSettings()
                      "and 'Advanced attacker control' to favor more complex genomes in natural selection. If it is deactivated, default values are "
                      "used that simply take the genome size into account."),
         parameters.features.genomeComplexityMeasurement);
-    AlienImGui::Checkbox(
-        AlienImGui::CheckboxParameters()
-            .name("Legacy behavior")
-            .textWidth(0)
-            .defaultValue(origFeatures.legacyModes)
-            .tooltip("It contains features for compatibility with older versions."),
-        parameters.features.legacyModes);
 
     if (parameters.features != lastFeatures) {
         _simulationFacade->setSimulationParameters(parameters);

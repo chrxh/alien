@@ -1562,24 +1562,6 @@ void _SimulationParametersBaseWidgets::process()
     }
     AlienImGui::EndTreeNode();
 
-    /**
-     * Expert settings: Legacy behavior
-     */
-    if (AlienImGui::BeginTreeNode(
-            AlienImGui::TreeNodeParameters().name("Expert settings: Legacy behavior").visible(parameters.features.legacyModes).blinkWhenActivated(true))) {
-        AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters()
-                .name("Fetch angle from adjacent sensor")
-                .textWidth(RightColumnWidth)
-                .defaultValue(origParameters.legacyCellTypeMuscleMovementAngleFromSensor)
-                .tooltip("This parameter changes the behavior of the parameter 'Movement toward target'. If activated, the muscle cell fetches the "
-                         "movement angle directly from a connected (or connected-connected) sensor cell that has previously detected a target "
-                         "(legacy behavior). If deactivated, the input signal must only originate from a sensor cell and must not be adjacent (new "
-                         "behavior)."),
-            parameters.legacyCellTypeMuscleMovementAngleFromSensor);
-    }
-    AlienImGui::EndTreeNode();
-
     SimulationParametersValidationService::get().validateAndCorrect(parameters);
 
     if (parameters != lastParameters) {
