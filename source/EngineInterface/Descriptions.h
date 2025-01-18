@@ -526,6 +526,7 @@ struct CellDescription
     CellDescription& setSignal(SignalDescription const& value)
     {
         signal = value;
+        signalRelaxationTime = MAX_SIGNAL_RELAXATION_TIME;
         return *this;
     }
     CellDescription& setSignal(std::vector<float> const& value)
@@ -535,6 +536,7 @@ struct CellDescription
         SignalDescription newSignal;
         newSignal.channels = value;
         signal = newSignal;
+        signalRelaxationTime = MAX_SIGNAL_RELAXATION_TIME;
         return *this;
     }
     CellDescription& setSignalRoutingRestriction(float baseAngle, float openingAngle)
