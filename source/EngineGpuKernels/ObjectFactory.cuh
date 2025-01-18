@@ -165,6 +165,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellTypeData.constructor.isReady = true;
     } break;
     case CellType_Sensor: {
+        cell->cellTypeData.sensor.autoTriggerInterval = cellTO.cellTypeData.sensor.autoTriggerInterval;
         cell->cellTypeData.sensor.minDensity = cellTO.cellTypeData.sensor.minDensity;
         cell->cellTypeData.sensor.minRange = cellTO.cellTypeData.sensor.minRange;
         cell->cellTypeData.sensor.maxRange = cellTO.cellTypeData.sensor.maxRange;

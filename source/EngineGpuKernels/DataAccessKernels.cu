@@ -112,6 +112,7 @@ namespace
             cellTO.cellTypeData.constructor.constructionAngle2 = cell->cellTypeData.constructor.constructionAngle2;
         } break;
         case CellType_Sensor: {
+            cellTO.cellTypeData.sensor.autoTriggerInterval = cell->cellTypeData.sensor.autoTriggerInterval;
             cellTO.cellTypeData.sensor.minDensity = cell->cellTypeData.sensor.minDensity;
             cellTO.cellTypeData.sensor.minRange = cell->cellTypeData.sensor.minRange;
             cellTO.cellTypeData.sensor.maxRange = cell->cellTypeData.sensor.maxRange;
