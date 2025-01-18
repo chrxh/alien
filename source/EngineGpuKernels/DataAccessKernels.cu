@@ -91,7 +91,7 @@ namespace
             cellTO.cellTypeData.transmitter.mode = cell->cellTypeData.transmitter.mode;
         } break;
         case CellType_Constructor: {
-            cellTO.cellTypeData.constructor.activationMode = cell->cellTypeData.constructor.activationMode;
+            cellTO.cellTypeData.constructor.autoTriggerInterval = cell->cellTypeData.constructor.autoTriggerInterval;
             cellTO.cellTypeData.constructor.constructionActivationTime = cell->cellTypeData.constructor.constructionActivationTime;
             copyAuxiliaryData(
                 cell->cellTypeData.constructor.genomeSize,

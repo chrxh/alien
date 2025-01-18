@@ -87,11 +87,11 @@ struct TransmitterType
 
 struct ConstructorType
 {
-    //settings
-    uint32_t activationMode;  //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
+    // Properties
+    uint32_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
     uint32_t constructionActivationTime;
 
-    //genome
+    // Genome data
     uint16_t genomeSize;
     uint16_t numInheritedGenomeNodes;
     uint8_t* genome;
@@ -99,7 +99,7 @@ struct ConstructorType
     float constructionAngle1;
     float constructionAngle2;
 
-    //process data
+    // Process data
     uint64_t lastConstructedCellId;
     uint16_t genomeCurrentNodeIndex;
     uint16_t genomeCurrentRepetition;
@@ -107,7 +107,7 @@ struct ConstructorType
     uint32_t offspringCreatureId;  //will be filled when self-replication starts
     uint32_t offspringMutationId;
 
-    //temp
+    // Temp data
     bool isReady;
 };
 
@@ -209,9 +209,8 @@ struct Signal
 
 struct Cell
 {
-    uint64_t id;
-
     //general
+    uint64_t id;
     CellConnection connections[MAX_CELL_BONDS];
     float2 pos;
     float2 vel;

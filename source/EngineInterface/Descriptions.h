@@ -108,15 +108,18 @@ struct DepotDescription
 
 struct ConstructorDescription
 {
-    int activationMode = 100;   //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third timestep, etc.
+    // Properties
+    int autoTriggerInterval = 100;   // 0 = manual (triggered by signal), > 0 = auto trigger
     int constructionActivationTime = 100;
+
+    // Genome data
     std::vector<uint8_t> genome;
     int numInheritedGenomeNodes = 0;
     int genomeGeneration = 0;
     float constructionAngle1 = 0;
     float constructionAngle2 = 0;
 
-    //process data
+    // Process data
     uint64_t lastConstructedCellId = 0;
     int genomeCurrentNodeIndex = 0;
     int genomeCurrentRepetition = 0;
@@ -129,7 +132,7 @@ struct ConstructorDescription
 
     ConstructorDescription& setActivationMode(int value)
     {
-        activationMode = value;
+        autoTriggerInterval = value;
         return *this;
     }
     ConstructorDescription& setConstructionActivationTime(int value)

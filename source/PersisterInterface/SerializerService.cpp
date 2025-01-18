@@ -137,7 +137,7 @@ namespace
     auto constexpr Id_NeuralNetwork_Biases = 1;
     auto constexpr Id_NeuralNetwork_ActivationFunctions = 2;
 
-    auto constexpr Id_Constructor_ActivationMode = 0;
+    auto constexpr Id_Constructor_AutoTriggerInterval = 0;
     auto constexpr Id_Constructor_ConstructionActivationTime = 1;
     auto constexpr Id_Constructor_GenomeCurrentNodeIndex = 2;
     auto constexpr Id_Constructor_GenomeGeneration = 3;
@@ -573,7 +573,7 @@ namespace cereal
     {
         ConstructorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Constructor_ActivationMode, data.activationMode, defaultObject.activationMode);
+        loadSave(task, auxiliaries, Id_Constructor_AutoTriggerInterval, data.autoTriggerInterval, defaultObject.autoTriggerInterval);
         loadSave(task, auxiliaries, Id_Constructor_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
         loadSave(task, auxiliaries, Id_Constructor_LastConstructedCellId, data.lastConstructedCellId, defaultObject.lastConstructedCellId);
         loadSave(task, auxiliaries, Id_Constructor_GenomeCurrentNodeIndex, data.genomeCurrentNodeIndex, defaultObject.genomeCurrentNodeIndex);

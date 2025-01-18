@@ -787,7 +787,7 @@ TEST_F(ConstructorTests, constructConstructorCell)
     EXPECT_EQ(CellType_Constructor, actualConstructedCell.getCellType());
 
     auto actualConstructor = std::get<ConstructorDescription>(actualConstructedCell.cellTypeData);
-    EXPECT_EQ(constructorGenome.mode, actualConstructor.activationMode);
+    EXPECT_EQ(constructorGenome.mode, actualConstructor.autoTriggerInterval);
     EXPECT_EQ(constructorGenome.constructionActivationTime, actualConstructor.constructionActivationTime);
     EXPECT_EQ(constructorGenome.getGenomeData(), actualConstructor.genome);
 }

@@ -271,7 +271,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
 __inline__ __device__ bool
 ConstructorProcessor::isConstructionTriggered(SimulationData const& data, Cell* cell)
 {
-    if (cell->cellTypeData.constructor.activationMode == 0) {
+    if (cell->cellTypeData.constructor.autoTriggerInterval == 0) {
         if (!cell->signal.active) {
             return false;
         }
@@ -279,7 +279,7 @@ ConstructorProcessor::isConstructionTriggered(SimulationData const& data, Cell* 
             return false;
         }
     } else {
-        auto activationTime = max(MAX_SIGNAL_RELAXATION_TIME + 1, cell->cellTypeData.constructor.activationMode);
+        auto activationTime = max(MAX_SIGNAL_RELAXATION_TIME + 1, cell->cellTypeData.constructor.autoTriggerInterval);
         if (data.timestep % activationTime != 0) {
             return false;
         }
@@ -764,7 +764,7 @@ ConstructorProcessor::constructCellIntern(
     } break;
     case CellType_Constructor: {
         auto& newConstructor = result->cellTypeData.constructor;
-        newConstructor.activationMode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
+        newConstructor.autoTriggerInterval = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
         newConstructor.constructionActivationTime = GenomeDecoder::readWord(constructor, genomeCurrentBytePosition) % MAX_ACTIVATION_TIME;
         newConstructor.lastConstructedCellId = 0;
         newConstructor.currentBranch = 0;
