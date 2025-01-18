@@ -191,18 +191,12 @@ struct ConstructorDescription
 
 struct SensorDescription
 {
+    int autoTriggerInterval = 100;  // 0 = manual (triggered by signal), > 0 = auto trigger
     float minDensity = 0.05f;
     std::optional<int> minRange;
     std::optional<int> maxRange;
     std::optional<int> restrictToColor;
     SensorRestrictToMutants restrictToMutants = SensorRestrictToMutants_NoRestriction;
-
-    //process data
-    float memoryChannel1 = 0;
-    float memoryChannel2 = 0;
-    float memoryChannel3 = 0;
-    float memoryTargetX = 0;
-    float memoryTargetY = 0;
 
     auto operator<=>(SensorDescription const&) const = default;
 

@@ -168,15 +168,11 @@ namespace
     auto constexpr Id_Oscillator_AlternationMode = 1;
 
     auto constexpr Id_Sensor_MinDensity = 0;
-    auto constexpr Id_Sensor_MemoryChannel1 = 1;
-    auto constexpr Id_Sensor_MemoryChannel2 = 2;
-    auto constexpr Id_Sensor_MemoryChannel3 = 3;
     auto constexpr Id_Sensor_RestrictToColor = 4;
     auto constexpr Id_Sensor_RestrictToMutants = 5;
-    auto constexpr Id_Sensor_TargetX = 6;
-    auto constexpr Id_Sensor_TargetY = 7;
     auto constexpr Id_Sensor_MinRange = 8;
     auto constexpr Id_Sensor_MaxRange = 9;
+    auto constexpr Id_Sensor_AutoTriggerInterval = 10;
 
     auto constexpr Id_Transmitter_Mode = 0;
 
@@ -603,14 +599,10 @@ namespace cereal
     {
         SensorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_Sensor_AutoTriggerInterval, data.autoTriggerInterval, defaultObject.autoTriggerInterval);
         loadSave(task, auxiliaries, Id_Sensor_MinDensity, data.minDensity, defaultObject.minDensity);
         loadSave(task, auxiliaries, Id_Sensor_RestrictToColor, data.restrictToColor, defaultObject.restrictToColor);
         loadSave(task, auxiliaries, Id_Sensor_RestrictToMutants, data.restrictToMutants, defaultObject.restrictToMutants);
-        loadSave(task, auxiliaries, Id_Sensor_MemoryChannel1, data.memoryChannel1, defaultObject.memoryChannel1);
-        loadSave(task, auxiliaries, Id_Sensor_MemoryChannel2, data.memoryChannel2, defaultObject.memoryChannel2);
-        loadSave(task, auxiliaries, Id_Sensor_MemoryChannel3, data.memoryChannel3, defaultObject.memoryChannel3);
-        loadSave(task, auxiliaries, Id_Sensor_TargetX, data.memoryTargetX, defaultObject.memoryTargetX);
-        loadSave(task, auxiliaries, Id_Sensor_TargetY, data.memoryTargetY, defaultObject.memoryTargetY);
         loadSave(task, auxiliaries, Id_Sensor_MinRange, data.minRange, defaultObject.minRange);
         loadSave(task, auxiliaries, Id_Sensor_MaxRange, data.maxRange, defaultObject.maxRange);
         processLoadSaveMap(task, ar, auxiliaries);

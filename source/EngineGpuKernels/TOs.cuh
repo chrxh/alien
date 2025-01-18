@@ -75,10 +75,11 @@ struct ConstructorTO
 
 struct SensorTO
 {
+    int autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
     float minDensity;
-    int8_t minRange;          //< 0 = no restriction
-    int8_t maxRange;          //< 0 = no restriction
-    uint8_t restrictToColor;  //0 ... 6 = color restriction, 255 = no restriction
+    int8_t minRange;          // < 0 = no restriction
+    int8_t maxRange;          // < 0 = no restriction
+    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
     SensorRestrictToMutants restrictToMutants;
 
     //process data

@@ -444,17 +444,13 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
     } break;
     case CellType_Sensor: {
         SensorDescription sensor;
+        sensor.autoTriggerInterval = cellTO.cellTypeData.sensor.autoTriggerInterval;
         sensor.minDensity = cellTO.cellTypeData.sensor.minDensity;
         sensor.minRange = cellTO.cellTypeData.sensor.minRange >= 0 ? std::make_optional(cellTO.cellTypeData.sensor.minRange) : std::nullopt;
         sensor.maxRange = cellTO.cellTypeData.sensor.maxRange >= 0 ? std::make_optional(cellTO.cellTypeData.sensor.maxRange) : std::nullopt;
         sensor.restrictToColor =
             cellTO.cellTypeData.sensor.restrictToColor != 255 ? std::make_optional(cellTO.cellTypeData.sensor.restrictToColor) : std::nullopt;
         sensor.restrictToMutants = cellTO.cellTypeData.sensor.restrictToMutants;
-        sensor.memoryChannel1 = cellTO.cellTypeData.sensor.memoryChannel1;
-        sensor.memoryChannel2 = cellTO.cellTypeData.sensor.memoryChannel2;
-        sensor.memoryChannel3 = cellTO.cellTypeData.sensor.memoryChannel3;
-        sensor.memoryTargetX = cellTO.cellTypeData.sensor.memoryTargetX;
-        sensor.memoryTargetY = cellTO.cellTypeData.sensor.memoryTargetY;
         result.cellTypeData = sensor;
     } break;
     case CellType_Oscillator: {
@@ -605,16 +601,12 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
     case CellType_Sensor: {
         auto const& sensorDesc = std::get<SensorDescription>(cellDesc.cellTypeData);
         SensorTO sensorTO;
+        sensorTO.autoTriggerInterval = sensorDesc.autoTriggerInterval;
         sensorTO.restrictToColor = sensorDesc.restrictToColor.value_or(255);
         sensorTO.restrictToMutants = sensorDesc.restrictToMutants;
         sensorTO.minDensity = sensorDesc.minDensity;
         sensorTO.minRange = static_cast<int8_t>(sensorDesc.minRange.value_or(-1));
         sensorTO.maxRange = static_cast<int8_t>(sensorDesc.maxRange.value_or(-1));
-        sensorTO.memoryChannel1 = sensorDesc.memoryChannel1;
-        sensorTO.memoryChannel2 = sensorDesc.memoryChannel2;
-        sensorTO.memoryChannel3 = sensorDesc.memoryChannel3;
-        sensorTO.memoryTargetX = sensorDesc.memoryTargetX;
-        sensorTO.memoryTargetY = sensorDesc.memoryTargetY;
         cellTO.cellTypeData.sensor = sensorTO;
     } break;
     case CellType_Oscillator: {
