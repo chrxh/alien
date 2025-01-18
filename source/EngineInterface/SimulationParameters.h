@@ -117,7 +117,7 @@ struct SimulationParameters
         Infinity<float>::value};
 
     ColorVector<float> cellTypeConstructorConnectingCellMaxDistance = {2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f};
-    ColorVector<float> cellTypeConstructorSignalThreshold = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
+    float cellTypeConstructorSignalThreshold = 0.1f;
     float cellTypeConstructorAdditionalOffspringDistance = 0.8f;
     
     bool cellTypeConstructorCheckCompletenessForSelfReplication = false;
