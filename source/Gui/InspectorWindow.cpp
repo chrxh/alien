@@ -777,7 +777,7 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
             constructor.genomeCurrentRepetition = 0;
         }
 
-        constructor.constructionActivationTime = ((constructor.constructionActivationTime % Const::MaxActivationTime) + Const::MaxActivationTime) % Const::MaxActivationTime;
+        constructor.constructionActivationTime = ((constructor.constructionActivationTime % MAX_ACTIVATION_TIME) + MAX_ACTIVATION_TIME) % MAX_ACTIVATION_TIME;
         if (constructor.constructionActivationTime < 0) {
             constructor.constructionActivationTime = 0;
         }

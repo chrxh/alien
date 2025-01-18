@@ -1,9 +1,12 @@
 #pragma once
 
-#define MAX_CELL_BONDS 6
-#define MAX_CHANNELS 8
-#define MAX_GENOME_BYTES 8000
-#define MAX_COLORS 7
-#define MAX_RADIATION_SOURCES 40
-#define MAX_ZONES 20
-#define MAX_HISTOGRAM_SLOTS 20
+auto constexpr MAX_CELL_BONDS = 6;
+auto constexpr MAX_CHANNELS = 8;
+auto constexpr MAX_GENOME_BYTES = 8000;
+auto constexpr MAX_COLORS = 7;
+auto constexpr MAX_RADIATION_SOURCES = 40;
+auto constexpr MAX_ZONES = 20;
+auto constexpr MAX_HISTOGRAM_SLOTS = 20;
+
+auto constexpr MAX_ACTIVATION_TIME = 256 * 4;
+auto constexpr MAX_SIGNAL_RELAXATION_TIME = 2;

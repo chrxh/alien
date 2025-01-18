@@ -286,7 +286,7 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->signal.active = false;
     cell->density = 1.0f;
     cell->creatureId = 0;
-    cell->mutationId = Const::MutationIdForFreeCell;
+    cell->mutationId = 0;
     cell->ancestorMutationId = 0;
     cell->detectedByCreatureId = 0;
     cell->event = CellEvent_No;
