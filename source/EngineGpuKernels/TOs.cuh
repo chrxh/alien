@@ -52,7 +52,7 @@ struct TransmitterTO
 struct ConstructorTO
 {
     // Properties
-    uint32_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
+    uint8_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
     uint32_t constructionActivationTime;
 
     // Genome data
@@ -75,7 +75,7 @@ struct ConstructorTO
 
 struct SensorTO
 {
-    int autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
+    uint8_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
     float minDensity;
     int8_t minRange;          // < 0 = no restriction
     int8_t maxRange;          // < 0 = no restriction

@@ -28,7 +28,7 @@ __device__ __inline__ void InjectorProcessor::process(SimulationData& data, Simu
 
 __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    if (abs(cell->signal.channels[0]) >= cudaSimulationParameters.cellTypeInjectorSignalThreshold) {
+    if (abs(cell->signal.channels[0]) >= TRIGGER_THRESHOLD) {
 
         auto& injector = cell->cellTypeData.injector;
 

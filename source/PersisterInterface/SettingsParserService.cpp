@@ -316,12 +316,6 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellTypeConstructorSignalThreshold,
-            defaultParameters.cellTypeConstructorSignalThreshold,
-            "simulation parameters.cell.function.constructor.activity threshold",
-            parserTask);
-        ParameterParser::encodeDecode(
-            tree,
             parameters.cellTypeConstructorCheckCompletenessForSelfReplication,
             defaultParameters.cellTypeConstructorCheckCompletenessForSelfReplication,
             "simulation parameters.cell.function.constructor.completeness check for self-replication",
@@ -505,12 +499,6 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellTypeAttackerSignalThreshold,
-            defaultParameters.cellTypeAttackerSignalThreshold,
-            "simulation parameters.cell.function.attacker.activity threshold",
-            parserTask);
-        ParameterParser::encodeDecode(
-            tree,
             parameters.baseValues.cellTypeAttackerEnergyCost,
             defaultParameters.baseValues.cellTypeAttackerEnergyCost,
             "simulation parameters.cell.function.attacker.energy cost",
@@ -622,12 +610,6 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellTypeMuscleBendingAccelerationThreshold,
-            defaultParameters.cellTypeMuscleBendingAccelerationThreshold,
-            "simulation parameters.cell.function.muscle.bending acceleration threshold",
-            parserTask);
-        ParameterParser::encodeDecode(
-            tree,
             parameters.cellTypeMuscleMovementTowardTargetedObject,
             defaultParameters.cellTypeMuscleMovementTowardTargetedObject,
             "simulation parameters.cell.function.muscle.movement toward targeted object",
@@ -654,24 +636,12 @@ namespace
             defaultParameters.cellTypeSensorRange,
             "simulation parameters.cell.function.sensor.range",
             parserTask);
-        ParameterParser::encodeDecode(
-            tree,
-            parameters.cellTypeSensorSignalThreshold,
-            defaultParameters.cellTypeSensorSignalThreshold,
-            "simulation parameters.cell.function.sensor.activity threshold",
-            parserTask);
 
         ParameterParser::encodeDecode(
             tree,
             parameters.cellTypeReconnectorRadius,
             defaultParameters.cellTypeReconnectorRadius,
             "simulation parameters.cell.function.reconnector.radius",
-            parserTask);
-        ParameterParser::encodeDecode(
-            tree,
-            parameters.cellTypeReconnectorSignalThreshold,
-            defaultParameters.cellTypeReconnectorSignalThreshold,
-            "simulation parameters.cell.function.reconnector.activity threshold",
             parserTask);
 
         ParameterParser::encodeDecode(
@@ -685,12 +655,6 @@ namespace
             parameters.cellTypeDetonatorChainExplosionProbability,
             defaultParameters.cellTypeDetonatorChainExplosionProbability,
             "simulation parameters.cell.function.detonator.chain explosion probability",
-            parserTask);
-        ParameterParser::encodeDecode(
-            tree,
-            parameters.cellTypeDetonatorSignalThreshold,
-            defaultParameters.cellTypeDetonatorSignalThreshold,
-            "simulation parameters.cell.function.detonator.activity threshold",
             parserTask);
 
         ParameterParser::encodeDecode(

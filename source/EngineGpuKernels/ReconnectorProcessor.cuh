@@ -37,9 +37,9 @@ __device__ __inline__ void ReconnectorProcessor::process(SimulationData& data, S
 
 __device__ __inline__ void ReconnectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    if (cell->signal.channels[0] >= cudaSimulationParameters.cellTypeReconnectorSignalThreshold) {
+    if (cell->signal.channels[0] >= TRIGGER_THRESHOLD) {
         tryCreateConnection(data, statistics, cell);
-    } else if (cell->signal.channels[0] <= -cudaSimulationParameters.cellTypeReconnectorSignalThreshold) {
+    } else if (cell->signal.channels[0] <= -TRIGGER_THRESHOLD) {
         removeConnections(data, statistics, cell);
     }
 }
