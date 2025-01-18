@@ -279,7 +279,8 @@ ConstructorProcessor::isConstructionTriggered(SimulationData const& data, Cell* 
             return false;
         }
     } else {
-        if (data.timestep % cell->cellTypeData.constructor.activationMode != 0) {
+        auto activationTime = max(MAX_SIGNAL_RELAXATION_TIME + 1, cell->cellTypeData.constructor.activationMode);
+        if (data.timestep % activationTime != 0) {
             return false;
         }
     }
