@@ -129,7 +129,7 @@ __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
             cell->signal.origin = cell->futureSignal.origin;
             cell->signal.targetX = cell->futureSignal.targetX;
             cell->signal.targetY = cell->futureSignal.targetY;
-            cell->signalRelaxationTime = 2;
+            cell->signalRelaxationTime = MAX_SIGNAL_RELAXATION_TIME;
         } else {
             cell->signalRelaxationTime = max(0, cell->signalRelaxationTime - 1);
         }
@@ -145,6 +145,7 @@ __inline__ __device__ void SignalProcessor::createEmptySignal(Cell* cell)
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->signal.channels[i] = 0;
     }
+    cell->signalRelaxationTime = MAX_SIGNAL_RELAXATION_TIME;
 }
 
 __inline__ __device__ float2 SignalProcessor::calcSignalDirection(SimulationData& data, Cell* cell)
