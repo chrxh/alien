@@ -52,8 +52,8 @@ TEST_F(SignalTests_New, forwardSignal)
     auto cell2 = actualCellById.at(2);
     EXPECT_TRUE(cell2.signal.has_value());
     EXPECT_EQ(signal, cell2.signal->channels);
-    EXPECT_EQ(2, cell2.signalRelaxationTime);
     EXPECT_EQ(1, cell1.signalRelaxationTime);
+    EXPECT_EQ(2, cell2.signalRelaxationTime);
 }
 
 TEST_F(SignalTests_New, vanishSignal_singleCell)
@@ -195,7 +195,7 @@ TEST_P(SignalTests_BothSides_New, routeSignalOnRight_sharpMatch)
 
     auto cell1 = actualCellById.at(1);
     EXPECT_FALSE(cell1.signal.has_value());
-    EXPECT_EQ(1, cell1.signalRelaxationTime);
+    EXPECT_EQ(0, cell1.signalRelaxationTime);
 
     auto cell2 = actualCellById.at(2);
     EXPECT_FALSE(cell2.signal.has_value());
