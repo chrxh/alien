@@ -14,7 +14,7 @@ public:
     __inline__ __device__ static void updateSignals(SimulationData& data);
 
     __inline__ __device__ static void createEmptySignal(Cell* cell);
-    __inline__ __device__ static float2 calcSignalDirection(SimulationData& data, Cell* cell);
+    __inline__ __device__ static float2 calcReferenceDirection(SimulationData& data, Cell* cell);
     __inline__ __device__ static bool isTriggeredAndCreateSignalIfTriggered(SimulationData& data, Cell* cell, uint8_t autoTriggerInterval);
 };
 
@@ -149,16 +149,12 @@ __inline__ __device__ void SignalProcessor::createEmptySignal(Cell* cell)
     cell->signalRelaxationTime = MAX_SIGNAL_RELAXATION_TIME;
 }
 
-__inline__ __device__ float2 SignalProcessor::calcSignalDirection(SimulationData& data, Cell* cell)
+__inline__ __device__ float2 SignalProcessor::calcReferenceDirection(SimulationData& data, Cell* cell)
 {
-    float2 result{0, 0};
-    for (int i = 0; i < cell->numConnections; ++i) {
-        auto& connectedCell = cell->connections[i].cell;
-        auto directionDelta = cell->pos - connectedCell->pos;
-        data.cellMap.correctDirection(directionDelta);
-        result = result + Math::normalized(directionDelta);
+    if (cell->numConnections == 0) {
+        return float2{0.0f, -1.0f};
     }
-    return Math::normalized(result);
+    return Math::normalized(data.cellMap.getCorrectedDirection(cell->pos - cell->connections[0].cell->pos));
 }
 
 __inline__ __device__ bool SignalProcessor::isTriggeredAndCreateSignalIfTriggered(SimulationData& data, Cell* cell, uint8_t autoTriggerInterval)

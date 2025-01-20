@@ -110,14 +110,14 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
     __shared__ uint32_t minDensity;
     __shared__ uint8_t restrictToColor;
     __shared__ SensorRestrictToMutants restrictToMutants;
-    __shared__ float refScanAngle;
+    __shared__ float refAngle;
     __shared__ uint64_t lookupResult;
     __shared__ bool blockedByWall[NumScanAngles];
     __shared__ int8_t minRange;
 
     if (threadIdx.x == 0) {
-        refScanAngle = Math::angleOfVector(SignalProcessor::calcSignalDirection(data, cell));
-        minDensity = toInt(cell->cellTypeData.sensor.minDensity * 64);
+        refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, cell));
+        minDensity = toInt(cell->cellTypeData.sensor.minDensity * 64 + 0.5f);
         minRange = cell->cellTypeData.sensor.minRange;
         restrictToColor = cell->cellTypeData.sensor.restrictToColor;
         restrictToMutants = cell->cellTypeData.sensor.restrictToMutants;
@@ -140,7 +140,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
     for (float radius = startRadius; radius <= maxRange; radius += ScanStep) {
         if (minRange < 0 || minRange <= radius) {
             for (int angleIndex = partition.startIndex; angleIndex <= partition.endIndex; ++angleIndex) {
-                float angle = 360.0f / NumScanAngles * angleIndex;
+                float angle = 360.0f / NumScanAngles * toFloat(angleIndex);
 
                 auto delta = Math::unitVectorOfAngle(angle) * radius;
                 auto scanPos = cell->pos + delta;
@@ -158,12 +158,10 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
                 if (density < minDensity) {
                     continue;
                 }
-                float preciseAngle = angle;
                 float preciseDistance = radius;
-                auto relAngle = Math::subtractAngle(preciseAngle, refScanAngle);
-                uint32_t relAngleData = convertAngleToData(relAngle);
+                uint32_t relAngleEncoded = convertAngleToData(Math::subtractAngle(angle, refAngle));
                 uint64_t combined =
-                    static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(density) << 40 | static_cast<uint64_t>(relAngleData) << 32;
+                    static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(density) << 40 | static_cast<uint64_t>(relAngleEncoded) << 32;
                 alienAtomicMin64(&lookupResult, combined);
             }
         }
@@ -173,35 +171,23 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
     if (threadIdx.x == 0) {
         if (lookupResult != 0xffffffffffffffff) {
 
-            auto angle = convertDataToAngle(static_cast<int8_t>((lookupResult >> 32) & 0xff));
+            auto relAngle = convertDataToAngle(static_cast<int8_t>((lookupResult >> 32) & 0xff));
             auto distance = toFloat(lookupResult >> 48);
-            auto scanAngle = refScanAngle + angle;
-            auto scanPos = cell->pos + Math::unitVectorOfAngle(scanAngle) * distance;
+            auto angle = refAngle + relAngle;
+            auto scanPos = cell->pos + Math::unitVectorOfAngle(angle) * distance;
             flagDetectedCells(data, cell, scanPos);
 
             cell->signal.channels[0] = 1;                                    //something found
             cell->signal.channels[1] = toFloat((lookupResult >> 40) & 0xff) / 64;  //density
 
             cell->signal.channels[2] = 1.0f - min(1.0f, distance / 256);  //distance: 1 = close, 0 = far away
-
-            auto movementTowardTargetedObject = !cudaSimulationParameters.cellTypeMuscleMovementTowardTargetedObject;
-            cell->signal.channels[3] = movementTowardTargetedObject ? angle / 360.0f : 0;  //angle: between -0.5 and 0.5
-            cell->cellTypeData.sensor.memoryChannel1 = cell->signal.channels[1];
-            cell->cellTypeData.sensor.memoryChannel2 = cell->signal.channels[2];
-            cell->cellTypeData.sensor.memoryChannel3 = cell->signal.channels[3];
+            cell->signal.channels[3] = cudaSimulationParameters.cellTypeMuscleMovementTowardTargetedObject ? 0.0f : relAngle / 360.0f;  //angle: between -0.5 and 0.5
             statistics.incNumSensorMatches(cell->color);
             auto delta = data.cellMap.getCorrectedDirection(scanPos - cell->pos);
             cell->signal.targetX = delta.x;
             cell->signal.targetY = delta.y;
-            cell->cellTypeData.sensor.memoryTargetX = delta.x;
-            cell->cellTypeData.sensor.memoryTargetY = delta.y;
         } else {
             cell->signal.channels[0] = 0;  //nothing found
-            //signal.channels[1] = cell->cellTypeData.sensor.memoryChannel1;
-            //signal.channels[2] = cell->cellTypeData.sensor.memoryChannel2;
-            //signal.channels[3] = cell->cellTypeData.sensor.memoryChannel3;
-            //signal.targetX = cell->cellTypeData.sensor.memoryTargetX;
-            //signal.targetY = cell->cellTypeData.sensor.memoryTargetY;
             cell->signal.targetX = 0;
             cell->signal.targetY = 0;
         }

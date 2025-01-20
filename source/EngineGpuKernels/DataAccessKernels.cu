@@ -118,11 +118,6 @@ namespace
             cellTO.cellTypeData.sensor.maxRange = cell->cellTypeData.sensor.maxRange;
             cellTO.cellTypeData.sensor.restrictToColor = cell->cellTypeData.sensor.restrictToColor;
             cellTO.cellTypeData.sensor.restrictToMutants = cell->cellTypeData.sensor.restrictToMutants;
-            cellTO.cellTypeData.sensor.memoryChannel1 = cell->cellTypeData.sensor.memoryChannel1;
-            cellTO.cellTypeData.sensor.memoryChannel2 = cell->cellTypeData.sensor.memoryChannel2;
-            cellTO.cellTypeData.sensor.memoryChannel3 = cell->cellTypeData.sensor.memoryChannel3;
-            cellTO.cellTypeData.sensor.memoryTargetX = cell->cellTypeData.sensor.memoryTargetX;
-            cellTO.cellTypeData.sensor.memoryTargetY = cell->cellTypeData.sensor.memoryTargetY;
         } break;
         case CellType_Oscillator: {
             cellTO.cellTypeData.oscillator.pulseMode = cell->cellTypeData.oscillator.pulseMode;

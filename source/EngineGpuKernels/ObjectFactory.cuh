@@ -171,11 +171,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellTypeData.sensor.maxRange = cellTO.cellTypeData.sensor.maxRange;
         cell->cellTypeData.sensor.restrictToColor = cellTO.cellTypeData.sensor.restrictToColor;
         cell->cellTypeData.sensor.restrictToMutants = cellTO.cellTypeData.sensor.restrictToMutants;
-        cell->cellTypeData.sensor.memoryChannel1 = cellTO.cellTypeData.sensor.memoryChannel1;
-        cell->cellTypeData.sensor.memoryChannel2 = cellTO.cellTypeData.sensor.memoryChannel2;
-        cell->cellTypeData.sensor.memoryChannel3 = cellTO.cellTypeData.sensor.memoryChannel3;
-        cell->cellTypeData.sensor.memoryTargetX = cellTO.cellTypeData.sensor.memoryTargetX;
-        cell->cellTypeData.sensor.memoryTargetY = cellTO.cellTypeData.sensor.memoryTargetY;
     } break;
     case CellType_Oscillator: {
         cell->cellTypeData.oscillator.pulseMode = cellTO.cellTypeData.oscillator.pulseMode;

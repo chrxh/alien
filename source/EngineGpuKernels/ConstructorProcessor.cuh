@@ -768,11 +768,6 @@ ConstructorProcessor::constructCellIntern(
             GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % SensorRestrictToMutants_Count;
         result->cellTypeData.sensor.minRange = GenomeDecoder::readOptionalByte(constructor, genomeCurrentBytePosition);
         result->cellTypeData.sensor.maxRange = GenomeDecoder::readOptionalByte(constructor, genomeCurrentBytePosition);
-        result->cellTypeData.sensor.memoryChannel1 = 0;
-        result->cellTypeData.sensor.memoryChannel2 = 0;
-        result->cellTypeData.sensor.memoryChannel3 = 0;
-        result->cellTypeData.sensor.memoryTargetX = 0;
-        result->cellTypeData.sensor.memoryTargetY = 0;
     } break;
     case CellType_Oscillator: {
         result->cellTypeData.oscillator.pulseMode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);

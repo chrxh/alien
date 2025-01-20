@@ -73,7 +73,7 @@ __device__ __inline__ void MuscleProcessor::movement(SimulationData& data, Simul
             acceleration = cudaSimulationParameters.cellTypeMuscleMovementAcceleration[cell->color];
         }
     } else {
-        direction = SignalProcessor::calcSignalDirection(data, cell);
+        direction = SignalProcessor::calcReferenceDirection(data, cell);
         acceleration = cudaSimulationParameters.cellTypeMuscleMovementAcceleration[cell->color];
     }
     float angle = max(-0.5f, min(0.5f, cell->signal.channels[3])) * 360.0f;
