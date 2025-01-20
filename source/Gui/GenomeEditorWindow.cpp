@@ -543,7 +543,7 @@ void GenomeEditorWindow::processNode(
             numRequiredAdditionalConnections = std::min(*numRequiredAdditionalConnections + 1, MAX_CELL_BONDS);
         }
         if (AlienImGui::InputOptionalInt(
-                AlienImGui::InputIntParameters().name("Required connections").textWidth(ContentTextWidth).tooltip(Const::GenomeRequiredConnectionsTooltip),
+                AlienImGui::InputIntParameters<int>().name("Required connections").textWidth(ContentTextWidth).tooltip(Const::GenomeRequiredConnectionsTooltip),
                 numRequiredAdditionalConnections)) {
             updateGeometry(tab.genome, tab.genome.header.shape);
             tab.genome.header.shape = ConstructionShape_Custom;
@@ -586,7 +586,7 @@ void GenomeEditorWindow::processNode(
         case CellType_Constructor: {
             auto& constructor = std::get<ConstructorGenomeDescription>(cell.cellTypeData);
 
-            int constructorMode = constructor.mode == 0 ? 0 : 1;
+            int autoTriggerInterval = constructor.autoTriggerInterval == 0 ? 0 : 1;
             table.next();
             if (AlienImGui::Combo(
                     AlienImGui::ComboParameters()
@@ -594,20 +594,19 @@ void GenomeEditorWindow::processNode(
                         .textWidth(ContentTextWidth)
                         .values({"Manual", "Automatic"})
                         .tooltip(Const::GenomeConstructorActivationModeTooltip),
-                    constructorMode)) {
-                constructor.mode = constructorMode;
+                    autoTriggerInterval)) {
+                constructor.autoTriggerInterval = autoTriggerInterval;
+
             }
-            if (constructorMode == 1) {
+            if (autoTriggerInterval == 1) {
                 table.next();
                 AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters().name("Interval").textWidth(ContentTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip), constructor.mode);
-                if (constructor.mode < 0) {
-                    constructor.mode = 0;
-                }
+                    AlienImGui::InputIntParameters().name("Interval").textWidth(ContentTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip), constructor.autoTriggerInterval);
+                constructor.autoTriggerInterval = std::max(1, constructor.autoTriggerInterval);
             }
             table.next();
             AlienImGui::InputInt(
-                AlienImGui::InputIntParameters()
+                AlienImGui::InputIntParameters<int>()
                     .name("Offspring activation time")
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::GenomeConstructorOffspringActivationTime),
@@ -631,6 +630,25 @@ void GenomeEditorWindow::processNode(
         } break;
         case CellType_Sensor: {
             auto& sensor = std::get<SensorGenomeDescription>(cell.cellTypeData);
+
+            int autoTriggerInterval = sensor.autoTriggerInterval == 0 ? 0 : 1;
+            table.next();
+            if (AlienImGui::Combo(
+                    AlienImGui::ComboParameters()
+                        .name("Activation mode")
+                        .textWidth(ContentTextWidth)
+                        .values({"Manual", "Automatic"})
+                        .tooltip(Const::GenomeConstructorActivationModeTooltip),
+                    autoTriggerInterval)) {
+                sensor.autoTriggerInterval = autoTriggerInterval;
+            }
+            if (autoTriggerInterval == 1) {
+                table.next();
+                AlienImGui::InputInt(
+                    AlienImGui::InputIntParameters().name("Interval").textWidth(ContentTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip),
+                    sensor.autoTriggerInterval);
+                sensor.autoTriggerInterval = std::max(1, sensor.autoTriggerInterval);
+            }
 
             table.next();
             AlienImGui::ComboOptionalColor(
@@ -983,13 +1001,12 @@ void GenomeEditorWindow::validateAndCorrect(CellGenomeDescription& cell) const
     switch (cell.getCellType()) {
     case CellType_Constructor: {
         auto& constructor = std::get<ConstructorGenomeDescription>(cell.cellTypeData);
-        if (constructor.mode < 0) {
-            constructor.mode = 0;
-        }
+        constructor.autoTriggerInterval = std::min(255, std::max(0, constructor.autoTriggerInterval));
         constructor.constructionActivationTime = ((constructor.constructionActivationTime % MAX_ACTIVATION_TIME) + MAX_ACTIVATION_TIME) % MAX_ACTIVATION_TIME;
     } break;
     case CellType_Sensor: {
         auto& sensor = std::get<SensorGenomeDescription>(cell.cellTypeData);
+        sensor.autoTriggerInterval = std::min(255, std::max(0, sensor.autoTriggerInterval));
         sensor.minDensity = std::max(0.0f, std::min(1.0f, sensor.minDensity));
         if (sensor.minRange) {
             sensor.minRange = std::max(0, std::min(127, *sensor.minRange));

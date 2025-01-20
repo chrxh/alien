@@ -568,6 +568,8 @@ void _InspectorWindow::processConstructorContent(ConstructorDescription& constru
             AlienImGui::InputInt(
                 AlienImGui::InputIntParameters().name("Interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip),
                 constructor.autoTriggerInterval);
+            constructor.autoTriggerInterval = std::max(1, constructor.autoTriggerInterval);
+
         }
         AlienImGui::InputInt(
             AlienImGui::InputIntParameters()
@@ -671,6 +673,23 @@ void _InspectorWindow::processMuscleContent(MuscleDescription& muscle)
 void _InspectorWindow::processSensorContent(SensorDescription& sensor)
 {
     if (ImGui::TreeNodeEx("Properties###sensor", TreeNodeFlags)) {
+        int constructorMode = sensor.autoTriggerInterval == 0 ? 0 : 1;
+        if (AlienImGui::Combo(
+                AlienImGui::ComboParameters()
+                    .name("Activation mode")
+                    .textWidth(CellTypeTextWidth)
+                    .values({"Manual", "Automatic"})
+                    .tooltip(Const::GenomeConstructorActivationModeTooltip),
+                constructorMode)) {
+            sensor.autoTriggerInterval = constructorMode;
+        }
+        if (constructorMode == 1) {
+            AlienImGui::InputInt(
+                AlienImGui::InputIntParameters().name("Interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip),
+                sensor.autoTriggerInterval);
+            sensor.autoTriggerInterval = std::max(1, sensor.autoTriggerInterval);
+        }
+
         AlienImGui::ComboOptionalColor(
             AlienImGui::ComboColorParameters().name("Scan color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeSensorScanColorTooltip), sensor.restrictToColor);
 

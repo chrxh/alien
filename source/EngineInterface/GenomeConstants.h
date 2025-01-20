@@ -33,7 +33,7 @@ namespace Const
     auto constexpr BaseBytes = 0;
     auto constexpr TransmitterBytes = 1;
     auto constexpr ConstructorFixedBytes = 5;
-    auto constexpr SensorBytes = 5;
+    auto constexpr SensorBytes = 6;
     auto constexpr OscillatorBytes = 2;
     auto constexpr AttackerBytes = 1;
     auto constexpr InjectorFixedBytes = 1;

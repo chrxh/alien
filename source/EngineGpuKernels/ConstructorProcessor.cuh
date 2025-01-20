@@ -761,6 +761,7 @@ ConstructorProcessor::constructCellIntern(
         newConstructor.isReady = true;
     } break;
     case CellType_Sensor: {
+        result->cellTypeData.sensor.autoTriggerInterval = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
         result->cellTypeData.sensor.minDensity = (GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition) + 1.0f) / 2;
         result->cellTypeData.sensor.restrictToColor = GenomeDecoder::readOptionalByte(constructor, genomeCurrentBytePosition, MAX_COLORS);
         result->cellTypeData.sensor.restrictToMutants =

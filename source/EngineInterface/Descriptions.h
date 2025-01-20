@@ -130,9 +130,9 @@ struct ConstructorDescription
     ConstructorDescription();
     auto operator<=>(ConstructorDescription const&) const = default;
 
-    ConstructorDescription& setActivationMode(int value)
+    ConstructorDescription& setAutoTriggerInterval(int value)
     {
-        autoTriggerInterval = value;
+        autoTriggerInterval = toUInt8(value);
         return *this;
     }
     ConstructorDescription& setConstructionActivationTime(int value)

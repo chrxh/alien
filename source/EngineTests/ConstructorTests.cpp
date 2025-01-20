@@ -131,7 +131,7 @@ TEST_F(ConstructorTests, manualConstruction_noInputSignal)
     data.addCell(CellDescription()
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
-                     .setCellTypeData(ConstructorDescription().setActivationMode(0).setGenome(genome)));
+                     .setCellTypeData(ConstructorDescription().setAutoTriggerInterval(0).setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -156,7 +156,7 @@ TEST_F(ConstructorTests, constructFirstCell_correctCycle)
     data.addCell(CellDescription()
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
-                     .setCellTypeData(ConstructorDescription().setActivationMode(3 * 6).setGenome(genome)));
+                     .setCellTypeData(ConstructorDescription().setAutoTriggerInterval(3 * 6).setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(3 * 6);
@@ -176,7 +176,7 @@ TEST_F(ConstructorTests, constructFirstCell_oneCellGenome_infiniteRepetitions)
     data.addCell(CellDescription()
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
-                     .setCellTypeData(ConstructorDescription().setActivationMode(3 * 6).setGenome(genome)));
+                     .setCellTypeData(ConstructorDescription().setAutoTriggerInterval(3 * 6).setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(3 * 6);
@@ -201,7 +201,7 @@ TEST_F(ConstructorTests, constructFirstCell_twoCellGenome_infiniteRepetitions)
     data.addCell(CellDescription()
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
-                     .setCellTypeData(ConstructorDescription().setActivationMode(3 * 6).setGenome(genome)));
+                     .setCellTypeData(ConstructorDescription().setAutoTriggerInterval(3 * 6).setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -226,7 +226,7 @@ TEST_F(ConstructorTests, constructFirstCell_wrongCycle)
     data.addCell(CellDescription()
                      .setId(1)
                      .setEnergy(_parameters.cellNormalEnergy[0] * 3)
-                     .setCellTypeData(ConstructorDescription().setActivationMode(3 * 6).setGenome(genome)));
+                     .setCellTypeData(ConstructorDescription().setAutoTriggerInterval(3 * 6).setGenome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(3 * 6 - 1);
@@ -641,7 +641,7 @@ TEST_F(ConstructorTests, constructFirstCell_manualConstruction)
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 3)
-            .setCellTypeData(ConstructorDescription().setActivationMode(0).setGenome(genome)),
+            .setCellTypeData(ConstructorDescription().setAutoTriggerInterval(0).setGenome(genome)),
         CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
@@ -678,7 +678,7 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle1)
              .setId(1)
              .setPos({10.0f, 10.0f})
              .setEnergy(_parameters.cellNormalEnergy[0] * 3)
-             .setCellTypeData(ConstructorDescription().setActivationMode(0).setGenome(genome).setConstructionAngle1(90.0f)),
+             .setCellTypeData(ConstructorDescription().setAutoTriggerInterval(0).setGenome(genome).setConstructionAngle1(90.0f)),
         CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
@@ -709,7 +709,7 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle2)
              .setId(1)
              .setPos({10.0f, 10.0f})
              .setEnergy(_parameters.cellNormalEnergy[0] * 3)
-             .setCellTypeData(ConstructorDescription().setActivationMode(0).setGenome(genome).setConstructionAngle1(-90.0f)),
+             .setCellTypeData(ConstructorDescription().setAutoTriggerInterval(0).setGenome(genome).setConstructionAngle1(-90.0f)),
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
@@ -787,7 +787,7 @@ TEST_F(ConstructorTests, constructConstructorCell)
     EXPECT_EQ(CellType_Constructor, actualConstructedCell.getCellType());
 
     auto actualConstructor = std::get<ConstructorDescription>(actualConstructedCell.cellTypeData);
-    EXPECT_EQ(constructorGenome.mode, actualConstructor.autoTriggerInterval);
+    EXPECT_EQ(constructorGenome.autoTriggerInterval, actualConstructor.autoTriggerInterval);
     EXPECT_EQ(constructorGenome.constructionActivationTime, actualConstructor.constructionActivationTime);
     EXPECT_EQ(constructorGenome.getGenomeData(), actualConstructor.genome);
 }
@@ -1818,7 +1818,7 @@ TEST_F(ConstructorTests, repetitionsAndBranches)
             .setId(1)
             .setPos({10.0f, 10.0f})
             .setEnergy(_parameters.cellNormalEnergy[0] * 2 * 3 * 4 * 3)
-            .setCellTypeData(ConstructorDescription().setGenome(genome).setActivationMode(20)),
+            .setCellTypeData(ConstructorDescription().setGenome(genome).setAutoTriggerInterval(20)),
     });
 
     _simulationFacade->setSimulationData(data);
