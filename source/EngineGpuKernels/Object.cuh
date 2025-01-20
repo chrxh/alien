@@ -120,13 +120,6 @@ struct SensorType
     int8_t maxRange;          // < 0 = no restriction
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
     SensorRestrictToMutants restrictToMutants;
-
-    // Process data
-    float memoryChannel1;
-    float memoryChannel2;
-    float memoryChannel3;
-    float memoryTargetX;
-    float memoryTargetY;
 };
 
 struct OscillatorType
