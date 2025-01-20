@@ -10,10 +10,6 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
 private:
-    static int constexpr NumScanAngles = 64;
-    static int constexpr NumScanPoints = 64;
-    static float constexpr ScanStep = 8.0f;
-
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
     __inline__ __device__ static uint32_t getCellDensity(
@@ -32,6 +28,10 @@ private:
 
     __inline__ __device__ static uint8_t convertAngleToData(float angle);
     __inline__ __device__ static float convertDataToAngle(uint8_t b);
+
+    static int constexpr NumScanAngles = 64;
+    static int constexpr NumScanPoints = 64;
+    static float constexpr ScanStep = 8.0f;
 };
 
 /************************************************************************/
@@ -49,7 +49,13 @@ __inline__ __device__ void SensorProcessor::process(SimulationData& data, Simula
 
 __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    if (SignalProcessor::isTriggeredAndCreateSignalIfTriggered(data, cell, cell->cellTypeData.sensor.autoTriggerInterval)) {
+    __shared__ bool isTriggered;
+    if (threadIdx.x == 0) {
+        isTriggered = SignalProcessor::isTriggeredAndCreateSignalIfTriggered(data, cell, cell->cellTypeData.sensor.autoTriggerInterval);
+    }
+    __syncthreads();
+
+    if (isTriggered) {
         statistics.incNumSensorActivities(cell->color);
         searchNeighborhood(data, statistics, cell);
         cell->signal.origin = SignalOrigin_Sensor;

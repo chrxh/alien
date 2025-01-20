@@ -163,7 +163,7 @@ __inline__ __device__ float2 SignalProcessor::calcSignalDirection(SimulationData
 
 __inline__ __device__ bool SignalProcessor::isTriggeredAndCreateSignalIfTriggered(SimulationData& data, Cell* cell, uint8_t autoTriggerInterval)
 {
-    if (cell->cellTypeData.sensor.autoTriggerInterval == 0) {
+    if (autoTriggerInterval == 0) {
         if (!cell->signal.active) {
             return false;
         }
@@ -171,12 +171,12 @@ __inline__ __device__ bool SignalProcessor::isTriggeredAndCreateSignalIfTriggere
             return false;
         }
     } else {
+        auto triggerInterval = max(MAX_SIGNAL_RELAXATION_TIME + 1, autoTriggerInterval);
+        if (data.timestep % triggerInterval != 0) {
+            return false;
+        }
         if (!cell->signal.active) {
             SignalProcessor::createEmptySignal(cell);
-        }
-        auto activationTime = max(MAX_SIGNAL_RELAXATION_TIME + 1, autoTriggerInterval);
-        if (data.timestep % activationTime != 0) {
-            return false;
         }
     }
     return true;
