@@ -200,6 +200,11 @@ struct SensorDescription
 
     auto operator<=>(SensorDescription const&) const = default;
 
+    SensorDescription& setAutoTriggerInterval(int value)
+    {
+        autoTriggerInterval = value;
+        return *this;
+    }
     SensorDescription& setColor(int value)
     {
         restrictToColor = value;
