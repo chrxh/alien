@@ -543,7 +543,7 @@ void GenomeEditorWindow::processNode(
             numRequiredAdditionalConnections = std::min(*numRequiredAdditionalConnections + 1, MAX_CELL_BONDS);
         }
         if (AlienImGui::InputOptionalInt(
-                AlienImGui::InputIntParameters<int>().name("Required connections").textWidth(ContentTextWidth).tooltip(Const::GenomeRequiredConnectionsTooltip),
+                AlienImGui::InputIntParameters().name("Required connections").textWidth(ContentTextWidth).tooltip(Const::GenomeRequiredConnectionsTooltip),
                 numRequiredAdditionalConnections)) {
             updateGeometry(tab.genome, tab.genome.header.shape);
             tab.genome.header.shape = ConstructionShape_Custom;
@@ -606,7 +606,7 @@ void GenomeEditorWindow::processNode(
             }
             table.next();
             AlienImGui::InputInt(
-                AlienImGui::InputIntParameters<int>()
+                AlienImGui::InputIntParameters()
                     .name("Offspring activation time")
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::GenomeConstructorOffspringActivationTime),
