@@ -64,7 +64,7 @@ struct DepotGenomeDescription
 
 struct ConstructorGenomeDescription
 {
-    int mode = 100;   //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third timestep, etc.
+    int autoTriggerInterval = 100;   // 0 = manual (triggered by signal), > 0 = auto trigger
     int constructionActivationTime = 100;
 
     std::variant<MakeGenomeCopy, std::vector<uint8_t>> genome = std::vector<uint8_t>();
@@ -75,7 +75,7 @@ struct ConstructorGenomeDescription
 
     ConstructorGenomeDescription& setMode(int value)
     {
-        mode = value;
+        autoTriggerInterval = value;
         return *this;
     }
     ConstructorGenomeDescription& setConstructionActivationTime(int value)
@@ -99,6 +99,7 @@ struct ConstructorGenomeDescription
 
 struct SensorGenomeDescription
 {
+    int autoTriggerInterval = 10;  // 0 = manual (triggered by signal), > 0 = auto trigger
     float minDensity = 0.05f;
     std::optional<int> minRange;
     std::optional<int> maxRange;

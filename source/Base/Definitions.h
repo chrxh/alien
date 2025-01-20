@@ -50,6 +50,18 @@ inline uint8_t toUInt8(T const& value)
     return static_cast<uint8_t>(value);
 }
 
+template <typename T>
+inline uint16_t toUInt16(T const& value)
+{
+    return static_cast<uint16_t>(value);
+}
+
+template <typename T>
+inline uint32_t toUInt32(T const& value)
+{
+    return static_cast<uint32_t>(value);
+}
+
 #define THROW_NOT_IMPLEMENTED() throw std::runtime_error("not implemented")
 
 #define CHECK(expression) \

@@ -209,7 +209,7 @@ std::vector<uint8_t> GenomeDescriptionConverterService::convertDescriptionToByte
         } break;
         case CellType_Constructor: {
             auto const& constructor = std::get<ConstructorGenomeDescription>(cell.cellTypeData);
-            writeByte(result, constructor.mode);
+            writeByte(result, constructor.autoTriggerInterval);
             writeWord(result, constructor.constructionActivationTime);
             writeAngle(result, constructor.constructionAngle1);
             writeAngle(result, constructor.constructionAngle2);
@@ -217,6 +217,7 @@ std::vector<uint8_t> GenomeDescriptionConverterService::convertDescriptionToByte
         } break;
         case CellType_Sensor: {
             auto const& sensor = std::get<SensorGenomeDescription>(cell.cellTypeData);
+            writeByte(result, sensor.autoTriggerInterval);
             writeDensity(result, sensor.minDensity);
             writeOptionalByte(result, sensor.restrictToColor);
             writeByte(result, sensor.restrictToMutants);
@@ -331,7 +332,7 @@ namespace
             } break;
             case CellType_Constructor: {
                 ConstructorGenomeDescription constructor;
-                constructor.mode = readByte(data, bytePosition);
+                constructor.autoTriggerInterval = readByte(data, bytePosition);
                 constructor.constructionActivationTime = readWord(data, bytePosition);
                 constructor.constructionAngle1 = readAngle(data, bytePosition);
                 constructor.constructionAngle2 = readAngle(data, bytePosition);
@@ -340,6 +341,7 @@ namespace
             } break;
             case CellType_Sensor: {
                 SensorGenomeDescription sensor;
+                sensor.autoTriggerInterval = readByte(data, bytePosition);
                 sensor.minDensity = readDensity(data, bytePosition);
                 sensor.restrictToColor = readOptionalByte(data, bytePosition, MAX_COLORS);
                 sensor.restrictToMutants = readByte(data, bytePosition) % SensorRestrictToMutants_Count;

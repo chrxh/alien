@@ -167,10 +167,9 @@ namespace Const
         "Signal in channel #0 is not necessary.\n\n In both cases, if there is not enough energy available for the cell being "
         "created, the construction process will pause until the next triggering.";
 
-    std::string const GenomeConstructorIntervalTooltip =
-        "This value specifies the time interval for automatic triggering of the constructor cell. It is given in multiples "
-        "of 6 (which is a complete execution cycle). This means that a value of 1 indicates that the constructor cell will be activated "
-        "every 6 time steps.";
+    std::string const GenomeConstructorIntervalTooltip = "This value specifies the time interval for automatic activation of the function of the cell. For "
+                                                         "example a value of 30 indicates that the cell will be automatically triggered "
+                                                         "every 30 time steps. A signal is generated each time.";
 
     std::string const GenomeConstructorOffspringActivationTime =
         "When a new cell network has been fully constructed by a constructor cell, one can define the time steps until activation. Before activation, the cell "

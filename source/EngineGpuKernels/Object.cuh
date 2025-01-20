@@ -89,7 +89,7 @@ struct ConstructorType
 {
     // Properties
     uint8_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
-    uint32_t constructionActivationTime;
+    uint16_t constructionActivationTime;
 
     // Genome data
     uint16_t genomeSize;

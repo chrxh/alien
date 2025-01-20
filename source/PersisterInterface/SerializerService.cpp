@@ -90,6 +90,7 @@ namespace
     auto constexpr Id_SensorGenome_RestrictToMutants = 2;
     auto constexpr Id_SensorGenome_MinRange = 3;
     auto constexpr Id_SensorGenome_MaxRange = 4;
+    auto constexpr Id_SensorGenome_AutoTriggerInterval = 5;
 
     auto constexpr Id_ReconnectorGenome_RestrictToColor = 0;
     auto constexpr Id_ReconnectorGenome_RestrictToMutants = 1;
@@ -304,7 +305,7 @@ namespace cereal
     {
         ConstructorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_ConstructorGenome_Mode, data.mode, defaultObject.mode);
+        loadSave(task, auxiliaries, Id_ConstructorGenome_Mode, data.autoTriggerInterval, defaultObject.autoTriggerInterval);
         loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
         loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle1, data.constructionAngle1, defaultObject.constructionAngle1);
         loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle2, data.constructionAngle2, defaultObject.constructionAngle2);
@@ -335,6 +336,7 @@ namespace cereal
     {
         SensorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SensorGenome_AutoTriggerInterval, data.autoTriggerInterval, defaultObject.autoTriggerInterval);
         loadSave(task, auxiliaries, Id_SensorGenome_MinDensity, data.minDensity, defaultObject.minDensity);
         loadSave(task, auxiliaries, Id_SensorGenome_RestrictToColor, data.restrictToColor, defaultObject.restrictToColor);
         loadSave(task, auxiliaries, Id_SensorGenome_RestrictToMutants, data.restrictToMutants, defaultObject.restrictToMutants);
