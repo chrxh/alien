@@ -160,9 +160,6 @@ TEST_F(SensorTests, scanNeighborhood_foundAtFront)
 
 TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
 {
-    _parameters.cellTypeMuscleMovementTowardTargetedObject = false;
-    _simulationFacade->setSimulationParameters(_parameters);
-
     DataDescription data;
     data.addCells(
         {CellDescription()
@@ -194,9 +191,6 @@ TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
 
 TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
 {
-    _parameters.cellTypeMuscleMovementTowardTargetedObject = false;
-    _simulationFacade->setSimulationParameters(_parameters);
-
     DataDescription data;
     data.addCells(
         {CellDescription()
@@ -228,9 +222,6 @@ TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
 
 TEST_F(SensorTests, scanNeighborhood_foundAtBack)
 {
-    _parameters.cellTypeMuscleMovementTowardTargetedObject = false;
-    _simulationFacade->setSimulationParameters(_parameters);
-
     DataDescription data;
     data.addCells(
         {CellDescription()
@@ -262,9 +253,6 @@ TEST_F(SensorTests, scanNeighborhood_foundAtBack)
 
 TEST_F(SensorTests, scanNeighborhood_twoMasses)
 {
-    _parameters.cellTypeMuscleMovementTowardTargetedObject = false;
-    _simulationFacade->setSimulationParameters(_parameters);
-
     DataDescription data;
     data.addCells(
         {CellDescription()

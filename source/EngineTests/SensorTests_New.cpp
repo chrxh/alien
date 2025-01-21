@@ -121,10 +121,7 @@ TEST_F(SensorTests_New, belowMinDensity)
 
 TEST_F(SensorTests_New, targetAbove)
 {
-    _parameters.cellTypeMuscleMovementTowardTargetedObject = false;
-    _simulationFacade->setSimulationParameters(_parameters);
-
-        DataDescription data;
+    DataDescription data;
     data.addCells({
         CellDescription().setId(1).setPos({100.0f, 100.0f}).setCellTypeData(SensorDescription().setAutoTriggerInterval(3).setMinDensity(0.2f)),
         CellDescription().setId(2).setPos({101.0f, 100.0f}),
@@ -149,9 +146,6 @@ TEST_F(SensorTests_New, targetAbove)
 
 TEST_F(SensorTests_New, targetBelow)
 {
-    _parameters.cellTypeMuscleMovementTowardTargetedObject = false;
-    _simulationFacade->setSimulationParameters(_parameters);
-
     DataDescription data;
     data.addCells({
         CellDescription().setId(1).setPos({100.0f, 100.0f}).setCellTypeData(SensorDescription().setAutoTriggerInterval(3).setMinDensity(0.2f)),
@@ -177,9 +171,6 @@ TEST_F(SensorTests_New, targetBelow)
 
 TEST_F(SensorTests_New, targetConcealed)
 {
-    _parameters.cellTypeMuscleMovementTowardTargetedObject = false;
-    _simulationFacade->setSimulationParameters(_parameters);
-
     DataDescription data;
     data.addCells({
         CellDescription().setId(1).setPos({100.0f, 100.0f}).setCellTypeData(SensorDescription().setAutoTriggerInterval(3).setMinDensity(0.2f)),
@@ -203,9 +194,6 @@ TEST_F(SensorTests_New, targetConcealed)
 
 TEST_F(SensorTests_New, targetNotConcealed)
 {
-    _parameters.cellTypeMuscleMovementTowardTargetedObject = false;
-    _simulationFacade->setSimulationParameters(_parameters);
-
     DataDescription data;
     data.addCells({
         CellDescription().setId(1).setPos({100.0f, 100.0f}).setCellTypeData(SensorDescription().setAutoTriggerInterval(3).setMinDensity(0.2f)),
@@ -229,9 +217,6 @@ TEST_F(SensorTests_New, targetNotConcealed)
 
 TEST_F(SensorTests_New, foundMassWithMatchingDensity)
 {
-    _parameters.cellTypeMuscleMovementTowardTargetedObject = false;
-    _simulationFacade->setSimulationParameters(_parameters);
-
     DataDescription data;
     data.addCells({
         CellDescription().setId(1).setPos({100.0f, 100.0f}).setCellTypeData(SensorDescription().setAutoTriggerInterval(3).setMinDensity(0.7f)),

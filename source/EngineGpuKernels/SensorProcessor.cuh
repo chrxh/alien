@@ -195,7 +195,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             cell->signal.channels[1] = toFloat((lookupResult >> 40) & 0xff) / 64;  //density
 
             cell->signal.channels[2] = 1.0f - min(1.0f, distance / 256);  //distance: 1 = close, 0 = far away
-            cell->signal.channels[3] = cudaSimulationParameters.cellTypeMuscleMovementTowardTargetedObject ? 0.0f : relAngle / 360.0f;  //angle: between -0.5 and 0.5
+            cell->signal.channels[3] = relAngle / 360.0f;  //angle: between -0.5 and 0.5
             statistics.incNumSensorMatches(cell->color);
             auto delta = data.cellMap.getCorrectedDirection(scanPos - cell->pos);
             cell->signal.targetX = delta.x;
@@ -267,12 +267,7 @@ SensorProcessor::calcStartDistanceForScanning(uint8_t const& restrictToColor, Se
 
 __inline__ __device__ uint8_t SensorProcessor::convertAngleToData(float angle)
 {
-    //0 to 180 degree => 0 to 128
-    //-180 to 0 degree => 128 to 256 (= 0)
-    angle = remainderf(remainderf(angle, 360.0f) + 360.0f, 360.0f);  //get angle between 0 and 360
-    if (angle > 180.0f) {
-        angle -= 360.0f;
-    }
+    angle = Math::normalizedAngle(angle, -180.0f);
     int result = static_cast<int>(angle * 128.0f / 180.0f);
     return static_cast<uint8_t>(result);
 }
