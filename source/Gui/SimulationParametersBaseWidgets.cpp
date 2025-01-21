@@ -872,14 +872,6 @@ void _SimulationParametersBaseWidgets::process()
      * Muscle
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Cell function: Muscle"))) {
-        AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters()
-                .name("Movement toward target")
-                .textWidth(RightColumnWidth)
-                .defaultValue(origParameters.cellTypeMuscleMovementTowardTargetedObject)
-                .tooltip("If activated, a muscle cell in movement mode will only move if the triggering signal originates from a sensor cell that has "
-                         "targeted an object. The specified angle in the input is interpreted relative to the target."),
-            parameters.cellTypeMuscleMovementTowardTargetedObject);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Energy cost")

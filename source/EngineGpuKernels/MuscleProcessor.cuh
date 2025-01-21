@@ -65,17 +65,8 @@ __device__ __inline__ void MuscleProcessor::movement(SimulationData& data, Simul
         return;
     }
 
-    auto direction = float2{0, 0};
-    auto acceleration = 0.0f;
-    if (cudaSimulationParameters.cellTypeMuscleMovementTowardTargetedObject) {
-        if (cell->signal.origin == SignalOrigin_Sensor && (cell->signal.targetX != 0 || cell->signal.targetY != 0)) {
-            direction = {cell->signal.targetX, cell->signal.targetY};
-            acceleration = cudaSimulationParameters.cellTypeMuscleMovementAcceleration[cell->color];
-        }
-    } else {
-        direction = SignalProcessor::calcReferenceDirection(data, cell);
-        acceleration = cudaSimulationParameters.cellTypeMuscleMovementAcceleration[cell->color];
-    }
+    auto direction = SignalProcessor::calcReferenceDirection(data, cell);
+    auto acceleration = cudaSimulationParameters.cellTypeMuscleMovementAcceleration[cell->color];
     float angle = max(-0.5f, min(0.5f, cell->signal.channels[3])) * 360.0f;
     direction = Math::normalized(Math::rotateClockwise(direction, angle)) * acceleration * getTruncatedUnitValue(cell->signal);
     cell->vel += direction;
