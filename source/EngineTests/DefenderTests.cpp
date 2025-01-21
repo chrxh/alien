@@ -42,7 +42,7 @@ TEST_F(DefenderTests, attackerVsAntiAttacker)
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription().setPulseMode(1))
+            .setCellTypeData(OscillatorDescription().setAutoTriggerInterval(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
@@ -81,7 +81,7 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription().setPulseMode(1))
+            .setCellTypeData(OscillatorDescription().setAutoTriggerInterval(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellTypeData(OscillatorDescription()),
         CellDescription()
@@ -119,7 +119,7 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription().setPulseMode(1))
+            .setCellTypeData(OscillatorDescription().setAutoTriggerInterval(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellTypeData(ConstructorDescription()),
         CellDescription()
@@ -164,7 +164,7 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription().setPulseMode(1))
+            .setCellTypeData(OscillatorDescription().setAutoTriggerInterval(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellTypeData(ConstructorDescription()),
         CellDescription()

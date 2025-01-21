@@ -42,7 +42,7 @@ TEST_F(InjectorTests, nothingFound)
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
-             .setCellTypeData(OscillatorDescription().setPulseMode(1))
+             .setCellTypeData(OscillatorDescription().setAutoTriggerInterval(1))
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
@@ -73,7 +73,7 @@ TEST_F(InjectorTests, matchButNoInjection)
          CellDescription()
              .setId(2)
              .setPos({11.0f, 10.0f})
-             .setCellTypeData(OscillatorDescription().setPulseMode(1))
+             .setCellTypeData(OscillatorDescription().setAutoTriggerInterval(1))
              .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
@@ -113,7 +113,7 @@ TEST_F(InjectorTests, injection)
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription().setPulseMode(1))
+            .setCellTypeData(OscillatorDescription().setAutoTriggerInterval(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellTypeData(ConstructorDescription().setNumInheritedGenomeNodes(1)),
     });
@@ -153,7 +153,7 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_failed)
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription().setPulseMode(1))
+            .setCellTypeData(OscillatorDescription().setAutoTriggerInterval(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)
@@ -196,7 +196,7 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_success)
         CellDescription()
             .setId(2)
             .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription().setPulseMode(1))
+            .setCellTypeData(OscillatorDescription().setAutoTriggerInterval(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .setId(3)

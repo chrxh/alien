@@ -27,17 +27,20 @@ __inline__ __device__ void OscillatorProcessor::process(SimulationData& data, Si
         auto const& operation = operations.at(i);
         auto const& cell = operation.cell;
 
-        auto const& oscillator = cell->cellTypeData.oscillator;
-        if (oscillator.autoTriggerInterval > 0 && cell->age % oscillator.autoTriggerInterval == 0) {
+        auto& oscillator = cell->cellTypeData.oscillator;
+        if (oscillator.autoTriggerInterval > 0 && SignalProcessor::isAutoTriggered(data, cell, oscillator.autoTriggerInterval)) {
             if (!cell->signal.active) {
                 SignalProcessor::createEmptySignal(cell);
             }
             statistics.incNumOscillatorPulses(cell->color);
-            if (oscillator.alternationMode == 0) {
+            if (oscillator.alternationInterval == 0) {
                 cell->signal.channels[0] += 1.0f;
             } else {
-                auto evenPulse = cell->age % (oscillator.autoTriggerInterval * oscillator.alternationMode * 2) < oscillator.autoTriggerInterval * oscillator.alternationMode;
-                cell->signal.channels[0] += evenPulse ? 1.0f : -1.0f;
+                cell->signal.channels[0] += oscillator.numPulses < oscillator.alternationInterval ? 1.0f : -1.0f;
+            }
+            ++oscillator.numPulses;
+            if (oscillator.alternationInterval > 0 && oscillator.numPulses == oscillator.alternationInterval * 2) {
+                oscillator.numPulses = 0;  
             }
         }
 

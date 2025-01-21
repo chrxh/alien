@@ -128,19 +128,19 @@ struct SensorGenomeDescription
 
 struct OscillatorGenomeDescription
 {
-    int pulseMode = 0;        //0 = none, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
-    int alternationMode = 0;  //0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
+    int autoTriggerInterval = 0;        //0 = none, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
+    int alternationInterval = 0;  //0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
 
     auto operator<=>(OscillatorGenomeDescription const&) const = default;
 
-    OscillatorGenomeDescription& setPulseMode(int value)
+    OscillatorGenomeDescription& setAutoTriggerInterval(int value)
     {
-        pulseMode = value;
+        autoTriggerInterval = value;
         return *this;
     }
-    OscillatorGenomeDescription& setAlternationMode(int value)
+    OscillatorGenomeDescription& setAlternationInterval(int value)
     {
-        alternationMode = value;
+        alternationInterval = value;
         return *this;
     }
 };

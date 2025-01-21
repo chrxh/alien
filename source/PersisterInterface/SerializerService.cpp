@@ -83,7 +83,7 @@ namespace
     auto constexpr Id_AttackerGenome_Mode = 0;
 
     auto constexpr Id_OscillatorGenome_AutoTriggerInterval = 0;
-    auto constexpr Id_OscillatorGenome_AlternationMode = 1;
+    auto constexpr Id_OscillatorGenome_AlternationInterval = 1;
 
     auto constexpr Id_SensorGenome_MinDensity = 0;
     auto constexpr Id_SensorGenome_RestrictToColor = 1;
@@ -351,8 +351,8 @@ namespace cereal
     {
         OscillatorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_OscillatorGenome_AutoTriggerInterval, data.pulseMode, defaultObject.pulseMode);
-        loadSave(task, auxiliaries, Id_OscillatorGenome_AlternationMode, data.alternationMode, defaultObject.alternationMode);
+        loadSave(task, auxiliaries, Id_OscillatorGenome_AutoTriggerInterval, data.autoTriggerInterval, defaultObject.autoTriggerInterval);
+        loadSave(task, auxiliaries, Id_OscillatorGenome_AlternationInterval, data.alternationInterval, defaultObject.alternationInterval);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(OscillatorGenomeDescription)
@@ -617,7 +617,7 @@ namespace cereal
         OscillatorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Oscillator_PulseMode, data.autoTriggerInterval, defaultObject.autoTriggerInterval);
-        loadSave(task, auxiliaries, Id_Oscillator_AlternationMode, data.alternationMode, defaultObject.alternationMode);
+        loadSave(task, auxiliaries, Id_Oscillator_AlternationMode, data.alternationInterval, defaultObject.alternationInterval);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(OscillatorDescription)

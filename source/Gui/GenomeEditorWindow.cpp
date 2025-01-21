@@ -681,30 +681,30 @@ void GenomeEditorWindow::processNode(
         } break;
         case CellType_Oscillator: {
             auto& oscillator = std::get<OscillatorGenomeDescription>(cell.cellTypeData);
-            bool pulseGeneration = oscillator.pulseMode > 0;
+            bool pulseGeneration = oscillator.autoTriggerInterval > 0;
             table.next();
             if (AlienImGui::Checkbox(
                     AlienImGui::CheckboxParameters().name("Generate pulses").textWidth(ContentTextWidth).tooltip(Const::GenomeOscillatorGeneratePulsesTooltip),
                     pulseGeneration)) {
-                oscillator.pulseMode = pulseGeneration ? 1 : 0;
+                oscillator.autoTriggerInterval = pulseGeneration ? 1 : 0;
             }
             if (pulseGeneration) {
                 table.next();
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters().name("Pulse interval").textWidth(ContentTextWidth).tooltip(Const::GenomeOscillatorPulseIntervalTooltip),
-                    oscillator.pulseMode);
-                bool alternation = oscillator.alternationMode > 0;
+                    oscillator.autoTriggerInterval);
+                bool alternation = oscillator.alternationInterval > 0;
                 table.next();
                 if (AlienImGui::Checkbox(
                         AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(ContentTextWidth).tooltip(Const::GenomeOscillatorAlternatingPulsesTooltip),
                         alternation)) {
-                    oscillator.alternationMode = alternation ? 1 : 0;
+                    oscillator.alternationInterval = alternation ? 1 : 0;
                 }
                 if (alternation) {
                     table.next();
                     AlienImGui::InputInt(
                         AlienImGui::InputIntParameters().name("Pulses per phase").textWidth(ContentTextWidth).tooltip(Const::GenomeOscillatorPulsesPerPhaseTooltip),
-                        oscillator.alternationMode);
+                        oscillator.alternationInterval);
                 }
             }
         } break;
@@ -1017,8 +1017,8 @@ void GenomeEditorWindow::validateAndCorrect(CellGenomeDescription& cell) const
     } break;
     case CellType_Oscillator: {
         auto& oscillator = std::get<OscillatorGenomeDescription>(cell.cellTypeData);
-        oscillator.pulseMode = std::max(0, oscillator.pulseMode);
-        oscillator.alternationMode = std::max(0, oscillator.alternationMode);
+        oscillator.autoTriggerInterval = std::max(0, oscillator.autoTriggerInterval);
+        oscillator.alternationInterval = std::max(0, oscillator.alternationInterval);
     } break;
     }
 }

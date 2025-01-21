@@ -794,7 +794,7 @@ TEST_F(ConstructorTests, constructConstructorCell)
 
 TEST_F(ConstructorTests, constructOscillatorCell)
 {
-    auto oscillatorDesc = OscillatorGenomeDescription().setPulseMode(2).setAlternationMode(4);
+    auto oscillatorDesc = OscillatorGenomeDescription().setAutoTriggerInterval(2).setAlternationInterval(4);
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription().setCellTypeData(oscillatorDesc)}));
 
     DataDescription data;
@@ -812,8 +812,8 @@ TEST_F(ConstructorTests, constructOscillatorCell)
     auto actualOscillator = std::get<OscillatorDescription>(actualConstructedCell.cellTypeData);
 
     EXPECT_EQ(CellType_Oscillator, actualConstructedCell.getCellType());
-    EXPECT_EQ(oscillatorDesc.pulseMode, actualOscillator.autoTriggerInterval);
-    EXPECT_EQ(oscillatorDesc.alternationMode, actualOscillator.alternationMode);
+    EXPECT_EQ(oscillatorDesc.autoTriggerInterval, actualOscillator.autoTriggerInterval);
+    EXPECT_EQ(oscillatorDesc.alternationInterval, actualOscillator.alternationInterval);
 }
 
 TEST_F(ConstructorTests, constructAttackerCell)
