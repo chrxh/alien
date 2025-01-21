@@ -343,6 +343,7 @@ void SimulationParametersMainWindow::processLocationTable()
                 if (row > 0) {
                     if (AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH))) {
                         onCenterLocation(row);
+                        _selectedLocationIndex = row;
                     }
                     ImGui::SameLine();
                 }

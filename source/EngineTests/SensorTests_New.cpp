@@ -174,3 +174,86 @@ TEST_F(SensorTests_New, targetBelow)
     EXPECT_TRUE(actualSensor.signal->channels[3] < -70.0f / 365);
     EXPECT_TRUE(actualSensor.signal->channels[3] > -105.0f / 365);
 }
+
+TEST_F(SensorTests_New, targetConcealed)
+{
+    _parameters.cellTypeMuscleMovementTowardTargetedObject = false;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    DataDescription data;
+    data.addCells({
+        CellDescription().setId(1).setPos({100.0f, 100.0f}).setCellTypeData(SensorDescription().setAutoTriggerInterval(3).setMinDensity(0.2f)),
+        CellDescription().setId(2).setPos({101.0f, 101.0f}),
+        CellDescription().setId(3).setPos({101.0f, 99.0f}),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(1, 3);
+    data.addConnection(2, 3);
+    data.add(DescriptionEditService::get().get().createRect(
+        DescriptionEditService::CreateRectParameters().center({190.0f, 100.0f}).width(16).height(16).cellDistance(1.0f)));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = getCell(actualData, 1);
+
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor.signal->channels[0]));
+}
+
+TEST_F(SensorTests_New, targetNotConcealed)
+{
+    _parameters.cellTypeMuscleMovementTowardTargetedObject = false;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    DataDescription data;
+    data.addCells({
+        CellDescription().setId(1).setPos({100.0f, 100.0f}).setCellTypeData(SensorDescription().setAutoTriggerInterval(3).setMinDensity(0.2f)),
+        CellDescription().setId(2).setPos({101.0f, 101.0f}),
+        CellDescription().setId(3).setPos({101.0f, 99.0f}),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(1, 3);
+    data.addConnection(2, 3);
+    data.add(DescriptionEditService::get().get().createRect(
+        DescriptionEditService::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(1.0f)));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = getCell(actualData, 1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.signal->channels[0]));
+}
+
+TEST_F(SensorTests_New, foundMassWithMatchingDensity)
+{
+    _parameters.cellTypeMuscleMovementTowardTargetedObject = false;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    DataDescription data;
+    data.addCells({
+        CellDescription().setId(1).setPos({100.0f, 100.0f}).setCellTypeData(SensorDescription().setAutoTriggerInterval(3).setMinDensity(0.7f)),
+        CellDescription().setId(2).setPos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    data.add(DescriptionEditService::get().createRect(
+        DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(1.5f)));
+    data.add(DescriptionEditService::get().createRect(
+        DescriptionEditService::CreateRectParameters().center({100.0f, 200.0f}).width(16).height(16).cellDistance(1.0f)));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = getCell(actualData, 1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.signal->channels[0]));
+    EXPECT_TRUE(actualSensor.signal->channels[1] > 0.7f);
+    EXPECT_TRUE(actualSensor.signal->channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualSensor.signal->channels[2] > 1.0f - 105.0f / 256);
+    EXPECT_TRUE(actualSensor.signal->channels[3] < -70.0f / 365);
+    EXPECT_TRUE(actualSensor.signal->channels[3] > -105.0f / 365);
+}
