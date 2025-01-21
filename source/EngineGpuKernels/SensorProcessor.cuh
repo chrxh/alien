@@ -112,52 +112,66 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
     __shared__ SensorRestrictToMutants restrictToMutants;
     __shared__ float refAngle;
     __shared__ uint64_t lookupResult;
-    __shared__ bool blockedByWall[NumScanAngles];
-    __shared__ int8_t minRange;
+    __shared__ bool rayBlocked[NumScanAngles];
+
+    __shared__ Cell* nearCreatureCells[9 * 9];
+    __shared__ int numNearCreatureCells;
 
     if (threadIdx.x == 0) {
         refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, cell));
         minDensity = toInt(cell->cellTypeData.sensor.minDensity * 64 + 0.5f);
-        minRange = cell->cellTypeData.sensor.minRange;
         restrictToColor = cell->cellTypeData.sensor.restrictToColor;
         restrictToMutants = cell->cellTypeData.sensor.restrictToMutants;
         lookupResult = 0xffffffffffffffff;
+
+        data.cellMap.getMatchingCells(
+            nearCreatureCells, 9 * 9,
+            numNearCreatureCells,
+            cell->pos,
+            4.0f,
+            cell->detached,
+            [&](Cell* const& otherCell) { return cell->creatureId == otherCell->creatureId; });
     }
-    __syncthreads();
-    auto const partition = calcPartition(NumScanAngles, threadIdx.x, blockDim.x);
-    for (int angleIndex = partition.startIndex; angleIndex <= partition.endIndex; ++angleIndex) {
-        blockedByWall[angleIndex] = false;
-    }
+    auto const angleIndex = threadIdx.x;
+
     __syncthreads();
 
-    auto const startRadius = calcStartDistanceForScanning(restrictToColor, restrictToMutants, cell->color);
     auto const& densityMap = data.preprocessedSimulationData.densityMap;
 
-    auto maxRange = cudaSimulationParameters.cellTypeSensorRange[cell->color];
+    auto const startRadius = max(toFloat(cell->cellTypeData.sensor.minRange), calcStartDistanceForScanning(restrictToColor, restrictToMutants, cell->color));
+    auto endRadius = cudaSimulationParameters.cellTypeSensorRange[cell->color];
     if (cell->cellTypeData.sensor.maxRange >= 0) {
-        maxRange = min(maxRange, toFloat(cell->cellTypeData.sensor.maxRange));
+        endRadius = min(endRadius, toFloat(cell->cellTypeData.sensor.maxRange));
     }
-    for (float radius = startRadius; radius <= maxRange; radius += ScanStep) {
-        if (minRange < 0 || minRange <= radius) {
-            for (int angleIndex = partition.startIndex; angleIndex <= partition.endIndex; ++angleIndex) {
-                float angle = 360.0f / NumScanAngles * toFloat(angleIndex);
 
-                auto delta = Math::unitVectorOfAngle(angle) * radius;
-                auto scanPos = cell->pos + delta;
-                data.cellMap.correctPosition(scanPos);
+    float angle = 360.0f / NumScanAngles * toFloat(angleIndex);
 
-                uint32_t density = 0;
-                if (!blockedByWall[angleIndex]) {
-                    if (restrictToMutants == SensorRestrictToMutants_NoRestriction || restrictToMutants == SensorRestrictToMutants_RestrictToStructures
-                        || densityMap.getStructureDensity(scanPos) == 0) {
-                        density = getCellDensity(data.timestep, cell, restrictToColor, restrictToMutants, densityMap, scanPos);
-                    } else {
-                        blockedByWall[angleIndex] = true;
-                    }
-                }
-                if (density < minDensity) {
-                    continue;
-                }
+    rayBlocked[angleIndex] = false;
+    for (int i = 0; i < numNearCreatureCells; ++i) {
+        auto nearCell = nearCreatureCells[i];
+        for (int j = 0, k = nearCell->numConnections; j < k; ++j) {
+            auto& connectedNearCell = nearCell->connections[j].cell;
+            if (Math::crossing(nearCell->pos, connectedNearCell->pos, cell->pos, cell->pos + Math::unitVectorOfAngle(angle) * 10.0f)) {
+                rayBlocked[angleIndex] = true;
+            }
+        }
+    }
+    for (float radius = startRadius; radius <= endRadius; radius += ScanStep) {
+        if (!rayBlocked[angleIndex]) {
+
+            auto delta = Math::unitVectorOfAngle(angle) * radius;
+            auto scanPos = cell->pos + delta;
+            data.cellMap.correctPosition(scanPos);
+
+            uint32_t density = 0;
+
+            if (restrictToMutants == SensorRestrictToMutants_NoRestriction || restrictToMutants == SensorRestrictToMutants_RestrictToStructures
+                || densityMap.getStructureDensity(scanPos) == 0) {
+                density = getCellDensity(data.timestep, cell, restrictToColor, restrictToMutants, densityMap, scanPos);
+            } else {
+                rayBlocked[angleIndex] = true;
+            }
+            if (density >= minDensity) {
                 float preciseDistance = radius;
                 uint32_t relAngleEncoded = convertAngleToData(Math::subtractAngle(angle, refAngle));
                 uint64_t combined =
