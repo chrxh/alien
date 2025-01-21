@@ -770,7 +770,7 @@ ConstructorProcessor::constructCellIntern(
         result->cellTypeData.sensor.maxRange = GenomeDecoder::readOptionalByte(constructor, genomeCurrentBytePosition);
     } break;
     case CellType_Oscillator: {
-        result->cellTypeData.oscillator.pulseMode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
+        result->cellTypeData.oscillator.autoTriggerInterval = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
         result->cellTypeData.oscillator.alternationMode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
     } break;
     case CellType_Attacker: {

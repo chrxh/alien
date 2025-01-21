@@ -82,7 +82,7 @@ namespace
 
     auto constexpr Id_AttackerGenome_Mode = 0;
 
-    auto constexpr Id_OscillatorGenome_PulseMode = 0;
+    auto constexpr Id_OscillatorGenome_AutoTriggerInterval = 0;
     auto constexpr Id_OscillatorGenome_AlternationMode = 1;
 
     auto constexpr Id_SensorGenome_MinDensity = 0;
@@ -351,7 +351,7 @@ namespace cereal
     {
         OscillatorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_OscillatorGenome_PulseMode, data.pulseMode, defaultObject.pulseMode);
+        loadSave(task, auxiliaries, Id_OscillatorGenome_AutoTriggerInterval, data.pulseMode, defaultObject.pulseMode);
         loadSave(task, auxiliaries, Id_OscillatorGenome_AlternationMode, data.alternationMode, defaultObject.alternationMode);
         processLoadSaveMap(task, ar, auxiliaries);
     }
@@ -616,7 +616,7 @@ namespace cereal
     {
         OscillatorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Oscillator_PulseMode, data.pulseMode, defaultObject.pulseMode);
+        loadSave(task, auxiliaries, Id_Oscillator_PulseMode, data.autoTriggerInterval, defaultObject.autoTriggerInterval);
         loadSave(task, auxiliaries, Id_Oscillator_AlternationMode, data.alternationMode, defaultObject.alternationMode);
         processLoadSaveMap(task, ar, auxiliaries);
     }

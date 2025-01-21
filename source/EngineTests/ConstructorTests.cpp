@@ -812,7 +812,7 @@ TEST_F(ConstructorTests, constructOscillatorCell)
     auto actualOscillator = std::get<OscillatorDescription>(actualConstructedCell.cellTypeData);
 
     EXPECT_EQ(CellType_Oscillator, actualConstructedCell.getCellType());
-    EXPECT_EQ(oscillatorDesc.pulseMode, actualOscillator.pulseMode);
+    EXPECT_EQ(oscillatorDesc.pulseMode, actualOscillator.autoTriggerInterval);
     EXPECT_EQ(oscillatorDesc.alternationMode, actualOscillator.alternationMode);
 }
 
