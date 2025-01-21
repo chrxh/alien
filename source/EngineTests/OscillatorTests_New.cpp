@@ -38,13 +38,13 @@ TEST_F(OscillatorTests_New, generatePulse_timeAtFirstPulse)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(97);
+    _simulationFacade->calcTimesteps(98);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
     auto oscillator = actualCellById.at(1);
-    EXPECT_TRUE(oscillator.signal.has_value());
+    ASSERT_TRUE(oscillator.signal.has_value());
     EXPECT_EQ(1.0f, oscillator.signal->channels.at(0));
 }
 

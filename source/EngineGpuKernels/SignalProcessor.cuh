@@ -15,6 +15,7 @@ public:
 
     __inline__ __device__ static void createEmptySignal(Cell* cell);
     __inline__ __device__ static float2 calcReferenceDirection(SimulationData& data, Cell* cell);
+
     __inline__ __device__ static bool isAutoTriggered(SimulationData& data, Cell* cell, int autoTriggerInterval);
     __inline__ __device__ static bool isTriggeredAndCreateSignalIfTriggered(SimulationData& data, Cell* cell, uint8_t autoTriggerInterval);
 };
