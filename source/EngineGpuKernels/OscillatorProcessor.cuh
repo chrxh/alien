@@ -28,7 +28,7 @@ __inline__ __device__ void OscillatorProcessor::process(SimulationData& data, Si
         auto const& cell = operation.cell;
 
         auto const& oscillator = cell->cellTypeData.oscillator;
-        if (oscillator.pulseMode > 0 && cell->age % oscillator.pulseMode == 0) {
+        if (oscillator.autoTriggerInterval > 0 && cell->age % oscillator.autoTriggerInterval == 0) {
             if (!cell->signal.active) {
                 SignalProcessor::createEmptySignal(cell);
             }
@@ -36,7 +36,7 @@ __inline__ __device__ void OscillatorProcessor::process(SimulationData& data, Si
             if (oscillator.alternationMode == 0) {
                 cell->signal.channels[0] += 1.0f;
             } else {
-                auto evenPulse = cell->age % (oscillator.pulseMode * oscillator.alternationMode * 2) < oscillator.pulseMode * oscillator.alternationMode;
+                auto evenPulse = cell->age % (oscillator.autoTriggerInterval * oscillator.alternationMode * 2) < oscillator.autoTriggerInterval * oscillator.alternationMode;
                 cell->signal.channels[0] += evenPulse ? 1.0f : -1.0f;
             }
         }

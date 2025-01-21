@@ -173,7 +173,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellTypeData.sensor.restrictToMutants = cellTO.cellTypeData.sensor.restrictToMutants;
     } break;
     case CellType_Oscillator: {
-        cell->cellTypeData.oscillator.pulseMode = cellTO.cellTypeData.oscillator.pulseMode;
+        cell->cellTypeData.oscillator.autoTriggerInterval = cellTO.cellTypeData.oscillator.autoTriggerInterval;
         cell->cellTypeData.oscillator.alternationMode = cellTO.cellTypeData.oscillator.alternationMode;
     } break;
     case CellType_Attacker: {

@@ -455,7 +455,7 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
     } break;
     case CellType_Oscillator: {
         OscillatorDescription oscillator;
-        oscillator.pulseMode = cellTO.cellTypeData.oscillator.pulseMode;
+        oscillator.autoTriggerInterval = cellTO.cellTypeData.oscillator.autoTriggerInterval;
         oscillator.alternationMode = cellTO.cellTypeData.oscillator.alternationMode;
         result.cellTypeData = oscillator;
     } break;
@@ -612,7 +612,7 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
     case CellType_Oscillator: {
         auto const& oscillatorDesc = std::get<OscillatorDescription>(cellDesc.cellTypeData);
         OscillatorTO oscillatorTO;
-        oscillatorTO.pulseMode = oscillatorDesc.pulseMode;
+        oscillatorTO.autoTriggerInterval = oscillatorDesc.autoTriggerInterval;
         oscillatorTO.alternationMode = oscillatorDesc.alternationMode;
         cellTO.cellTypeData.oscillator = oscillatorTO;
     } break;

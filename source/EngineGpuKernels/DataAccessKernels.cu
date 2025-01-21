@@ -120,7 +120,7 @@ namespace
             cellTO.cellTypeData.sensor.restrictToMutants = cell->cellTypeData.sensor.restrictToMutants;
         } break;
         case CellType_Oscillator: {
-            cellTO.cellTypeData.oscillator.pulseMode = cell->cellTypeData.oscillator.pulseMode;
+            cellTO.cellTypeData.oscillator.autoTriggerInterval = cell->cellTypeData.oscillator.autoTriggerInterval;
             cellTO.cellTypeData.oscillator.alternationMode = cell->cellTypeData.oscillator.alternationMode;
         } break;
         case CellType_Attacker: {
