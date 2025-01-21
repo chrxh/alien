@@ -235,18 +235,21 @@ struct SensorDescription
 struct OscillatorDescription
 {
     int autoTriggerInterval = 0;  // 0 = no triggering, > 0 = auto trigger
-    int alternationMode = 0;    //0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
+    int alternationInterval = 0;    //0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
+
+    // Process data
+    int numPulses = 0;
 
     auto operator<=>(OscillatorDescription const&) const = default;
 
-    OscillatorDescription& setPulseMode(int value)
+    OscillatorDescription& setAutoTriggerInterval(int value)
     {
         autoTriggerInterval = value;
         return *this;
     }
-    OscillatorDescription& setAlternationMode(int value)
+    OscillatorDescription& setAlternationInterval(int value)
     {
-        alternationMode = value;
+        alternationInterval = value;
         return *this;
     }
 };

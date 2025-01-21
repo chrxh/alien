@@ -125,7 +125,10 @@ struct SensorType
 struct OscillatorType
 {
     uint8_t autoTriggerInterval;  // 0 = no triggering, > 0 = auto trigger
-    uint8_t alternationMode;  //0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
+    uint8_t alternationInterval;  //0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
+
+    // Process data
+    int numPulses;
 };
 
 struct AttackerType

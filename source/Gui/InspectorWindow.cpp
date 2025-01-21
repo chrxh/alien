@@ -523,16 +523,16 @@ void _InspectorWindow::processOscillatorContent(OscillatorDescription& oscillato
         }
         if (pulseGeneration) {
             AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Pulse interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeOscillatorPulseIntervalTooltip), oscillator.autoTriggerInterval);
-            bool alternation = oscillator.alternationMode > 0;
+            bool alternation = oscillator.alternationInterval > 0;
             if (AlienImGui::Checkbox(
                     AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(CellTypeTextWidth).tooltip(Const::GenomeOscillatorAlternatingPulsesTooltip),
                     alternation)) {
-                oscillator.alternationMode = alternation ? 1 : 0;
+                oscillator.alternationInterval = alternation ? 1 : 0;
             }
             if (alternation) {
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters().name("Pulses per phase").textWidth(CellTypeTextWidth).tooltip(Const::GenomeOscillatorPulsesPerPhaseTooltip),
-                    oscillator.alternationMode);
+                    oscillator.alternationInterval);
             }
         }
         ImGui::TreePop();
@@ -818,7 +818,7 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
     case CellType_Oscillator: {
         auto& oscillator = std::get<OscillatorDescription>(cell.cellTypeData);
         oscillator.autoTriggerInterval = std::max(0, oscillator.autoTriggerInterval);
-        oscillator.alternationMode = std::max(0, oscillator.alternationMode);
+        oscillator.alternationInterval = std::max(0, oscillator.alternationInterval);
     } break;
     case CellType_Detonator: {
         auto& detonator = std::get<DetonatorDescription>(cell.cellTypeData);

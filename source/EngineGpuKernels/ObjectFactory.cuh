@@ -174,7 +174,8 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     } break;
     case CellType_Oscillator: {
         cell->cellTypeData.oscillator.autoTriggerInterval = cellTO.cellTypeData.oscillator.autoTriggerInterval;
-        cell->cellTypeData.oscillator.alternationMode = cellTO.cellTypeData.oscillator.alternationMode;
+        cell->cellTypeData.oscillator.alternationInterval = cellTO.cellTypeData.oscillator.alternationInterval;
+        cell->cellTypeData.oscillator.numPulses = cellTO.cellTypeData.oscillator.numPulses;
     } break;
     case CellType_Attacker: {
         cell->cellTypeData.attacker.mode = cellTO.cellTypeData.attacker.mode;

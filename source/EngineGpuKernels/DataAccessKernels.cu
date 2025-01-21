@@ -121,7 +121,8 @@ namespace
         } break;
         case CellType_Oscillator: {
             cellTO.cellTypeData.oscillator.autoTriggerInterval = cell->cellTypeData.oscillator.autoTriggerInterval;
-            cellTO.cellTypeData.oscillator.alternationMode = cell->cellTypeData.oscillator.alternationMode;
+            cellTO.cellTypeData.oscillator.alternationInterval = cell->cellTypeData.oscillator.alternationInterval;
+            cellTO.cellTypeData.oscillator.numPulses = cell->cellTypeData.oscillator.numPulses;
         } break;
         case CellType_Attacker: {
             cellTO.cellTypeData.attacker.mode = cell->cellTypeData.attacker.mode;

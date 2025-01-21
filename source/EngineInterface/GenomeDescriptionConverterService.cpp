@@ -226,8 +226,8 @@ std::vector<uint8_t> GenomeDescriptionConverterService::convertDescriptionToByte
         } break;
         case CellType_Oscillator: {
             auto const& oscillator = std::get<OscillatorGenomeDescription>(cell.cellTypeData);
-            writeByte(result, oscillator.pulseMode);
-            writeByte(result, oscillator.alternationMode);
+            writeByte(result, oscillator.autoTriggerInterval);
+            writeByte(result, oscillator.alternationInterval);
         } break;
         case CellType_Attacker: {
             auto const& attacker = std::get<AttackerGenomeDescription>(cell.cellTypeData);
@@ -351,8 +351,8 @@ namespace
             } break;
             case CellType_Oscillator: {
                 OscillatorGenomeDescription oscillator;
-                oscillator.pulseMode = readByte(data, bytePosition);
-                oscillator.alternationMode = readByte(data, bytePosition);
+                oscillator.autoTriggerInterval = readByte(data, bytePosition);
+                oscillator.alternationInterval = readByte(data, bytePosition);
                 cell.cellTypeData = oscillator;
             } break;
             case CellType_Attacker: {
