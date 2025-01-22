@@ -121,8 +121,8 @@ namespace
         RealVector2D pos;
         std::unordered_map<IntVector2D, std::vector<int>> cellInternIndicesBySlot;
 
-        auto hasInfiniteRepetitions = genome.header.numRepetitions == std::numeric_limits<int>::max();
-        if (MaxRepetitions < genome.header.numRepetitions) {
+        auto hasInfiniteRepetitions = genome._header._numRepetitions == std::numeric_limits<int>::max();
+        if (MaxRepetitions < genome._header._numRepetitions) {
             if (hasInfiniteRepetitions) {
                 result.previewDescription.symbols.emplace_back(SymbolPreviewDescription::Type::Infinity, pos);
                 pos += result.direction;
@@ -134,34 +134,34 @@ namespace
         }
 
         auto index = 0;
-        auto numRepetitionsTruncated = hasInfiniteRepetitions ? 1 : std::min(MaxRepetitions, genome.header.numRepetitions);
+        auto numRepetitionsTruncated = hasInfiniteRepetitions ? 1 : std::min(MaxRepetitions, genome._header._numRepetitions);
         for (auto repetition = 0; repetition < numRepetitionsTruncated; ++repetition) {
 
-            auto shapeGenerator = ShapeGeneratorFactory::create(genome.header.shape);
+            auto shapeGenerator = ShapeGeneratorFactory::create(genome._header._shape);
             auto partIndex = 0;
-            for (auto const& node : genome.cells) {
+            for (auto const& node : genome._cells) {
                 if (index > 0) {
-                    pos += result.direction * genome.header.connectionDistance;
+                    pos += result.direction * genome._header._connectionDistance;
                 }
 
                 ShapeGeneratorResult shapeResult;
-                shapeResult.angle = node.referenceAngle;
-                shapeResult.numRequiredAdditionalConnections = node.numRequiredAdditionalConnections;
-                if (genome.header.shape != ConstructionShape_Custom) {
+                shapeResult.angle = node._referenceAngle;
+                shapeResult.numRequiredAdditionalConnections = node._numRequiredAdditionalConnections;
+                if (genome._header._shape != ConstructionShape_Custom) {
                     shapeResult = shapeGenerator->generateNextConstructionData();
                 }
-                if (lastReferenceAngle.has_value() && partIndex == toInt(genome.cells.size()) - 1 && repetition == genome.header.numRepetitions - 1) {
+                if (lastReferenceAngle.has_value() && partIndex == toInt(genome._cells.size()) - 1 && repetition == genome._header._numRepetitions - 1) {
                     shapeResult.angle = *lastReferenceAngle;
                 }
 
                 if (partIndex == 0 && repetition > 0) {
-                    shapeResult.angle = genome.header.concatenationAngle1;
+                    shapeResult.angle = genome._header._concatenationAngle1;
                 }
-                if (partIndex == toInt(genome.cells.size()) - 1) {
-                    if (lastReferenceAngle.has_value() && repetition == genome.header.numRepetitions - 1) {
+                if (partIndex == toInt(genome._cells.size()) - 1) {
+                    if (lastReferenceAngle.has_value() && repetition == genome._header._numRepetitions - 1) {
                         shapeResult.angle = *lastReferenceAngle;
                     } else {
-                        shapeResult.angle = genome.header.concatenationAngle2;
+                        shapeResult.angle = genome._header._concatenationAngle2;
                     }
                 }
 
@@ -171,19 +171,19 @@ namespace
 
                 //create cell description intern
                 CellPreviewDescriptionIntern cellIntern;
-                cellIntern.color = node.color;
+                cellIntern.color = node._color;
                 cellIntern.nodeIndex = uniformNodeIndex ? *uniformNodeIndex : partIndex;
                 cellIntern.pos = pos;
                 if (index > 0) {
                     cellIntern.connectionIndices.insert(index - 1);
                 }
-                if (index < toInt(genome.cells.size()) * numRepetitionsTruncated - 1) {
+                if (index < toInt(genome._cells.size()) * numRepetitionsTruncated - 1) {
                     cellIntern.connectionIndices.insert(index + 1);
                 }
                 if (partIndex == 0) {
                     cellIntern.partStart = true;
                 }
-                if (partIndex == toInt(genome.cells.size()) - 1) {
+                if (partIndex == toInt(genome._cells.size()) - 1) {
                     cellIntern.partEnd = true;
                 }
 
@@ -245,7 +245,7 @@ namespace
         std::optional<float> const& desiredEndAngle,
         SimulationParameters const& parameters)
     {
-        if (genome.cells.empty()) {
+        if (genome._cells.empty()) {
             return {};
         }
 
@@ -256,14 +256,14 @@ namespace
         //process sub genomes
         size_t indexOffset = 0;
         int index = 0;
-        auto hasInfiniteRepetitions = genome.header.numRepetitions == std::numeric_limits<int>::max();
-        auto numRepetitionsTruncated = hasInfiniteRepetitions ? 1 : std::min(MaxRepetitions, genome.header.numRepetitions);
+        auto hasInfiniteRepetitions = genome._header._numRepetitions == std::numeric_limits<int>::max();
+        auto numRepetitionsTruncated = hasInfiniteRepetitions ? 1 : std::min(MaxRepetitions, genome._header._numRepetitions);
         for (auto repetition = 0; repetition < numRepetitionsTruncated; ++repetition) {
-            for (auto const& node : genome.cells) {
+            for (auto const& node : genome._cells) {
                 auto cellIntern = processedGenome.previewDescription.cells.at(index);
 
                 if (node.getCellType() == CellType_Constructor) {
-                    auto const& constructor = std::get<ConstructorGenomeDescription>(node.cellTypeData);
+                    auto const& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
                     if (constructor.isMakeGenomeCopy()) {
                         result.cells.at(index + indexOffset).selfReplicator = true;
                         ++index;
@@ -305,21 +305,21 @@ namespace
                     if (angles.size() == 1) {
                         targetAngle = angles.front() + 180.0f;
                     }
-                    targetAngle += constructor.constructionAngle1;
+                    targetAngle += constructor._constructionAngle1;
                     auto direction = Math::unitVectorOfAngle(targetAngle);
                     auto subGenome = GenomeDescriptionConverterService::get().convertBytesToDescription(data);
                     auto previewPart = convertToPreviewDescriptionIntern(
-                        subGenome, cellIntern.nodeIndex, constructor.constructionAngle2, cellIntern.pos + direction, targetAngle, parameters);
+                        subGenome, cellIntern.nodeIndex, constructor._constructionAngle2, cellIntern.pos + direction, targetAngle, parameters);
                     insert(result, previewPart);
                     indexOffset += previewPart.cells.size();
 
                     auto cellIndex1 = previewPart.cells.size() - 1;
                     auto cellIndex2 = index + indexOffset;
-                    if (!subGenome.header.separateConstruction) {
+                    if (!subGenome._header._separateConstruction) {
                         result.cells.at(cellIndex1).connectionIndices.insert(toInt(cellIndex2));
                         result.cells.at(cellIndex2).connectionIndices.insert(toInt(cellIndex1));
                     }
-                    if (subGenome.header.numBranches != 1) {
+                    if (subGenome._header._numBranches != 1) {
                         result.cells.at(cellIndex2).multipleConstructor = true;
                     }
                 }

@@ -33,9 +33,9 @@ TEST_F(DetonatorTests, doNothing)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({10.0f, 10.0f})
-            .setCellTypeData(DetonatorDescription().setCountDown(14)),
+             .id(1)
+             .pos({10.0f, 10.0f})
+            .cellType(DetonatorDescription().countDown(14)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -44,11 +44,11 @@ TEST_F(DetonatorTests, doNothing)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDetonatorCell = getCell(actualData, 1);
 
-    EXPECT_EQ(1, actualData.cells.size());
+    EXPECT_EQ(1, actualData._cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(approxCompare(0.0f, actualDetonatorCell.signal->channels[0]));
-    EXPECT_EQ(14, std::get<DetonatorDescription>(actualDetonatorCell.cellTypeData).countdown);
-    EXPECT_EQ(DetonatorState_Ready, std::get<DetonatorDescription>(actualDetonatorCell.cellTypeData).state);
+    EXPECT_TRUE(approxCompare(0.0f, actualDetonatorCell._signal->_channels[0]));
+    EXPECT_EQ(14, std::get<DetonatorDescription>(actualDetonatorCell._cellTypeData)._countdown);
+    EXPECT_EQ(DetonatorState_Ready, std::get<DetonatorDescription>(actualDetonatorCell._cellTypeData)._state);
 }
 
 TEST_F(DetonatorTests, activateDetonator)
@@ -56,14 +56,14 @@ TEST_F(DetonatorTests, activateDetonator)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({10.0f, 10.0f})
-             .setCellTypeData(DetonatorDescription().setCountDown(10)),
+             .id(1)
+             .pos({10.0f, 10.0f})
+             .cellType(DetonatorDescription().countDown(10)),
          CellDescription()
-             .setId(2)
-             .setPos({11.0f, 10.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({11.0f, 10.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -72,19 +72,19 @@ TEST_F(DetonatorTests, activateDetonator)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDetonatorCell = getCell(actualData, 1);
 
-    EXPECT_EQ(2, actualData.cells.size());
+    EXPECT_EQ(2, actualData._cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(approxCompare(1.0f, actualDetonatorCell.signal->channels[0]));
-    EXPECT_EQ(9, std::get<DetonatorDescription>(actualDetonatorCell.cellTypeData).countdown);
-    EXPECT_EQ(DetonatorState_Activated, std::get<DetonatorDescription>(actualDetonatorCell.cellTypeData).state);
+    EXPECT_TRUE(approxCompare(1.0f, actualDetonatorCell._signal->_channels[0]));
+    EXPECT_EQ(9, std::get<DetonatorDescription>(actualDetonatorCell._cellTypeData)._countdown);
+    EXPECT_EQ(DetonatorState_Activated, std::get<DetonatorDescription>(actualDetonatorCell._cellTypeData)._state);
 }
 
 TEST_F(DetonatorTests, explosion)
 {
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setPos({10.0f, 10.0f}).setCellTypeData(DetonatorDescription().setState(DetonatorState_Activated).setCountDown(10)),
-        CellDescription().setId(2).setPos({12.0f, 10.0f}),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(DetonatorDescription().state(DetonatorState_Activated).countDown(10)),
+        CellDescription().id(2).pos({12.0f, 10.0f}),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -94,12 +94,12 @@ TEST_F(DetonatorTests, explosion)
     auto actualDetonatorCell = getCell(actualData, 1);
     auto actualOtherCell = getCell(actualData, 2);
 
-    EXPECT_EQ(2, actualData.cells.size());
+    EXPECT_EQ(2, actualData._cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(approxCompare(0.0f, actualDetonatorCell.signal->channels[0]));
-    EXPECT_EQ(0, std::get<DetonatorDescription>(actualDetonatorCell.cellTypeData).countdown);
-    EXPECT_EQ(DetonatorState_Exploded, std::get<DetonatorDescription>(actualDetonatorCell.cellTypeData).state);
-    EXPECT_TRUE(Math::length(actualOtherCell.vel) > NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(0.0f, actualDetonatorCell._signal->_channels[0]));
+    EXPECT_EQ(0, std::get<DetonatorDescription>(actualDetonatorCell._cellTypeData)._countdown);
+    EXPECT_EQ(DetonatorState_Exploded, std::get<DetonatorDescription>(actualDetonatorCell._cellTypeData)._state);
+    EXPECT_TRUE(Math::length(actualOtherCell._vel) > NEAR_ZERO);
 }
 
 TEST_F(DetonatorTests, chainExplosion)
@@ -107,13 +107,13 @@ TEST_F(DetonatorTests, chainExplosion)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(DetonatorDescription().setState(DetonatorState_Activated).setCountDown(10)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(DetonatorDescription().state(DetonatorState_Activated).countDown(10)),
         CellDescription()
-            .setId(2)
-            .setPos({12.0f, 10.0f})
-            .setCellTypeData(DetonatorDescription().setState(DetonatorState_Ready).setCountDown(10)),
+            .id(2)
+            .pos({12.0f, 10.0f})
+            .cellType(DetonatorDescription().state(DetonatorState_Ready).countDown(10)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -123,9 +123,9 @@ TEST_F(DetonatorTests, chainExplosion)
     auto actualDetonatorCell = getCell(actualData, 1);
     auto actualOtherCell = getCell(actualData, 2);
 
-    EXPECT_EQ(DetonatorState_Exploded, std::get<DetonatorDescription>(actualDetonatorCell.cellTypeData).state);
-    EXPECT_EQ(DetonatorState_Activated, std::get<DetonatorDescription>(actualOtherCell.cellTypeData).state);
-    EXPECT_EQ(0, std::get<DetonatorDescription>(actualOtherCell.cellTypeData).countdown);
+    EXPECT_EQ(DetonatorState_Exploded, std::get<DetonatorDescription>(actualDetonatorCell._cellTypeData)._state);
+    EXPECT_EQ(DetonatorState_Activated, std::get<DetonatorDescription>(actualOtherCell._cellTypeData)._state);
+    EXPECT_EQ(0, std::get<DetonatorDescription>(actualOtherCell._cellTypeData)._countdown);
 }
 
 TEST_F(DetonatorTests, explosionIfDying)
@@ -133,11 +133,11 @@ TEST_F(DetonatorTests, explosionIfDying)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setLivingState(LivingState_Dying)
-            .setActivationTime(100)
-            .setCellTypeData(DetonatorDescription().setState(DetonatorState_Activated).setCountDown(10)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .livingState(LivingState_Dying)
+            .activationTime(100)
+            .cellType(DetonatorDescription().state(DetonatorState_Activated).countDown(10)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -146,6 +146,6 @@ TEST_F(DetonatorTests, explosionIfDying)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDetonatorCell = getCell(actualData, 1);
 
-    EXPECT_EQ(1, actualData.cells.size());
-    EXPECT_EQ(DetonatorState_Exploded, std::get<DetonatorDescription>(actualDetonatorCell.cellTypeData).state);
+    EXPECT_EQ(1, actualData._cells.size());
+    EXPECT_EQ(DetonatorState_Exploded, std::get<DetonatorDescription>(actualDetonatorCell._cellTypeData)._state);
 }

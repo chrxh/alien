@@ -36,22 +36,22 @@ TEST_F(DefenderTests, attackerVsAntiAttacker)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(AttackerDescription().mode(EnergyDistributionMode_TransmittersAndConstructors)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription().setAutoTriggerInterval(1))
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription().autoTriggerInterval(1))
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
-            .setId(3)
-            .setPos({9.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription()),
+            .id(3)
+            .pos({9.0f, 10.0f})
+            .cellType(OscillatorDescription()),
         CellDescription()
-            .setId(4)
-            .setPos({7.0f, 10.0f})
-            .setCellTypeData(DefenderDescription().setMode(DefenderMode_DefendAgainstAttacker)),
+            .id(4)
+            .pos({7.0f, 10.0f})
+            .cellType(DefenderDescription().mode(DefenderMode_DefendAgainstAttacker)),
     });
     data.addConnection(1, 2);
     data.addConnection(3, 4);
@@ -66,8 +66,8 @@ TEST_F(DefenderTests, attackerVsAntiAttacker)
     auto actualTarget = getCell(actualData, 3);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(actualAttacker.signal->channels[0] > NEAR_ZERO);
-    EXPECT_LT(origTarget.energy, actualTarget.energy + 0.1f);
+    EXPECT_TRUE(actualAttacker._signal->_channels[0] > NEAR_ZERO);
+    EXPECT_LT(origTarget._energy, actualTarget._energy + 0.1f);
 }
 
 TEST_F(DefenderTests, attackerVsAntiInjector)
@@ -75,19 +75,19 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(AttackerDescription().mode(EnergyDistributionMode_TransmittersAndConstructors)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription().setAutoTriggerInterval(1))
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellTypeData(OscillatorDescription()),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription().autoTriggerInterval(1))
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(OscillatorDescription()),
         CellDescription()
-            .setId(4)
-            .setPos({7.0f, 10.0f})
-            .setCellTypeData(DefenderDescription().setMode(DefenderMode_DefendAgainstInjector)),
+            .id(4)
+            .pos({7.0f, 10.0f})
+            .cellType(DefenderDescription().mode(DefenderMode_DefendAgainstInjector)),
     });
     data.addConnection(1, 2);
     data.addConnection(3, 4);
@@ -102,30 +102,30 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
     auto actualTarget = getCell(actualData, 3);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(actualAttacker.signal->channels[0] > NEAR_ZERO);
-    EXPECT_GT(origTarget.energy, actualTarget.energy + 0.1f);
+    EXPECT_TRUE(actualAttacker._signal->_channels[0] > NEAR_ZERO);
+    EXPECT_GT(origTarget._energy, actualTarget._energy + 0.1f);
 }
 
 TEST_F(DefenderTests, injectorVsAntiAttacker)
 {
-    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(InjectorDescription().setMode(InjectorMode_InjectAll).setGenome(genome)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(InjectorDescription().mode(InjectorMode_InjectAll).genome(genome)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription().setAutoTriggerInterval(1))
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellTypeData(ConstructorDescription()),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription().autoTriggerInterval(1))
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(ConstructorDescription()),
         CellDescription()
-            .setId(4)
-            .setPos({7.0f, 10.0f})
-            .setCellTypeData(DefenderDescription().setMode(DefenderMode_DefendAgainstAttacker)),
+            .id(4)
+            .pos({7.0f, 10.0f})
+            .cellType(DefenderDescription().mode(DefenderMode_DefendAgainstAttacker)),
     });
     data.addConnection(1, 2);
     data.addConnection(3, 4);
@@ -138,39 +138,39 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto actualInjector = getCell(actualData, 1);
-    auto actualInjectorFunc = std::get<InjectorDescription>(actualInjector.cellTypeData);
+    auto actualInjectorFunc = std::get<InjectorDescription>(actualInjector._cellTypeData);
 
     auto actualTarget = getCell(actualData, 3);
-    auto actualTargetFunc = std::get<ConstructorDescription>(actualTarget.cellTypeData);
+    auto actualTargetFunc = std::get<ConstructorDescription>(actualTarget._cellTypeData);
 
     auto origInjector = getCell(data, 1);
-    auto origInjectorFunc = std::get<InjectorDescription>(origInjector.cellTypeData);
+    auto origInjectorFunc = std::get<InjectorDescription>(origInjector._cellTypeData);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualInjector.signal->channels[0]));
-    EXPECT_EQ(0, actualInjectorFunc.counter);
-    EXPECT_EQ(origInjectorFunc.genome, actualTargetFunc._genome);
+    EXPECT_TRUE(approxCompare(1.0f, actualInjector._signal->_channels[0]));
+    EXPECT_EQ(0, actualInjectorFunc._counter);
+    EXPECT_EQ(origInjectorFunc._genome, actualTargetFunc._genome);
 }
 
 TEST_F(DefenderTests, injectorVsAntiInjector)
 {
-    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(InjectorDescription().setMode(InjectorMode_InjectAll).setGenome(genome)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(InjectorDescription().mode(InjectorMode_InjectAll).genome(genome)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription().setAutoTriggerInterval(1))
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellTypeData(ConstructorDescription()),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription().autoTriggerInterval(1))
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(ConstructorDescription()),
         CellDescription()
-            .setId(4)
-            .setPos({7.0f, 10.0f})
-            .setCellTypeData(DefenderDescription().setMode(DefenderMode_DefendAgainstInjector)),
+            .id(4)
+            .pos({7.0f, 10.0f})
+            .cellType(DefenderDescription().mode(DefenderMode_DefendAgainstInjector)),
     });
     data.addConnection(1, 2);
     data.addConnection(3, 4);
@@ -183,18 +183,18 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto actualInjector = getCell(actualData, 1);
-    auto actualInjectorFunc = std::get<InjectorDescription>(actualInjector.cellTypeData);
+    auto actualInjectorFunc = std::get<InjectorDescription>(actualInjector._cellTypeData);
 
     auto origTarget = getCell(data, 3);
-    auto origTargetFunc = std::get<ConstructorDescription>(origTarget.cellTypeData);
+    auto origTargetFunc = std::get<ConstructorDescription>(origTarget._cellTypeData);
 
     auto actualTarget = getCell(actualData, 3);
-    auto actualTargetFunc = std::get<ConstructorDescription>(actualTarget.cellTypeData);
+    auto actualTargetFunc = std::get<ConstructorDescription>(actualTarget._cellTypeData);
 
     auto origInjector = getCell(data, 1);
-    auto origInjectorFunc = std::get<InjectorDescription>(origInjector.cellTypeData);
+    auto origInjectorFunc = std::get<InjectorDescription>(origInjector._cellTypeData);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualInjector.signal->channels[0]));
-    EXPECT_EQ(4, actualInjectorFunc.counter);
+    EXPECT_TRUE(approxCompare(1.0f, actualInjector._signal->_channels[0]));
+    EXPECT_EQ(4, actualInjectorFunc._counter);
     EXPECT_EQ(origTargetFunc._genome, actualTargetFunc._genome);
 }

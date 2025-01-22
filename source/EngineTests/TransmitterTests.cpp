@@ -34,15 +34,15 @@ TEST_F(TransmitterTests, distributeToOtherTransmitter)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
-            .setEnergy(_parameters.cellNormalEnergy[0] * 2),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
+            .energy(_parameters.cellNormalEnergy[0] * 2),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription()),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellTypeData(DepotDescription()),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription()),
+        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(DepotDescription()),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -61,31 +61,31 @@ TEST_F(TransmitterTests, distributeToOtherTransmitter)
     auto origOscillatorCell = getCell(data, 2);
     auto actualOscillatorCell = getCell(actualData, 2);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualTransmitterCell1.signal->channels[0]));
-    EXPECT_TRUE(actualTransmitterCell1.energy < origTransmitterCell1.energy - NEAR_ZERO);
-    EXPECT_TRUE(actualTransmitterCell2.energy > origTransmitterCell2.energy + NEAR_ZERO);
-    EXPECT_TRUE(approxCompare(origOscillatorCell.energy, actualOscillatorCell.energy));
+    EXPECT_TRUE(approxCompare(0.0f, actualTransmitterCell1._signal->_channels[0]));
+    EXPECT_TRUE(actualTransmitterCell1._energy < origTransmitterCell1._energy - NEAR_ZERO);
+    EXPECT_TRUE(actualTransmitterCell2._energy > origTransmitterCell2._energy + NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(origOscillatorCell._energy, actualOscillatorCell._energy));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
 TEST_F(TransmitterTests, distributeToOneOtherTransmitter_forwardSignal)
 {
     SignalDescription signal;
-    signal.setChannels({0.5f, -0.7f, 0, 0, 0, 0, 0, 0});
+    signal.channels({0.5f, -0.7f, 0, 0, 0, 0, 0, 0});
 
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
-            .setEnergy(_parameters.cellNormalEnergy[0] * 2),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
+            .energy(_parameters.cellNormalEnergy[0] * 2),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal(signal),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellTypeData(DepotDescription()),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal(signal),
+        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(DepotDescription()),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -105,11 +105,11 @@ TEST_F(TransmitterTests, distributeToOneOtherTransmitter_forwardSignal)
     auto actualOscillatorCell = getCell(actualData, 2);
 
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        EXPECT_TRUE(approxCompare(signal.channels[i], actualTransmitterCell1.signal->channels[i]));
+        EXPECT_TRUE(approxCompare(signal._channels[i], actualTransmitterCell1._signal->_channels[i]));
     }
-    EXPECT_TRUE(actualTransmitterCell1.energy < origTransmitterCell1.energy - NEAR_ZERO);
-    EXPECT_TRUE(actualTransmitterCell2.energy > origTransmitterCell2.energy + NEAR_ZERO);
-    EXPECT_TRUE(approxCompare(origOscillatorCell.energy, actualOscillatorCell.energy));
+    EXPECT_TRUE(actualTransmitterCell1._energy < origTransmitterCell1._energy - NEAR_ZERO);
+    EXPECT_TRUE(actualTransmitterCell2._energy > origTransmitterCell2._energy + NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(origOscillatorCell._energy, actualOscillatorCell._energy));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
@@ -118,15 +118,15 @@ TEST_F(TransmitterTests, distributeToConnectedCells)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(DepotDescription().mode(EnergyDistributionMode_ConnectedCells))
-            .setEnergy(_parameters.cellNormalEnergy[0] * 2),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(DepotDescription().mode(EnergyDistributionMode_ConnectedCells))
+            .energy(_parameters.cellNormalEnergy[0] * 2),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription()),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellTypeData(DepotDescription()),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription()),
+        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(DepotDescription()),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -145,25 +145,25 @@ TEST_F(TransmitterTests, distributeToConnectedCells)
     auto origOscillatorCell = getCell(data, 2);
     auto actualOscillatorCell = getCell(actualData, 2);
 
-    EXPECT_TRUE(actualTransmitterCell1.energy < origTransmitterCell1.energy - NEAR_ZERO);
-    EXPECT_TRUE(actualTransmitterCell2.energy > origTransmitterCell2.energy + NEAR_ZERO);
-    EXPECT_TRUE(actualOscillatorCell.energy > origOscillatorCell.energy + NEAR_ZERO);
+    EXPECT_TRUE(actualTransmitterCell1._energy < origTransmitterCell1._energy - NEAR_ZERO);
+    EXPECT_TRUE(actualTransmitterCell2._energy > origTransmitterCell2._energy + NEAR_ZERO);
+    EXPECT_TRUE(actualOscillatorCell._energy > origOscillatorCell._energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
 TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
 {
-    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
-            .setEnergy(_parameters.cellNormalEnergy[0] * 2),
-        CellDescription().setId(2).setPos({11.0f, 10.0f}).setCellTypeData(ConstructorDescription().genome(genome)),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellTypeData(DepotDescription()),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
+            .energy(_parameters.cellNormalEnergy[0] * 2),
+        CellDescription().id(2).pos({11.0f, 10.0f}).cellType(ConstructorDescription().genome(genome)),
+        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(DepotDescription()),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -182,28 +182,28 @@ TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
     auto origOtherTransmitterCell = getCell(data, 3);
     auto actualOtherTransmitterCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(actualTransmitterCell.energy < origTransmitterCell.energy - NEAR_ZERO);
-    EXPECT_TRUE(actualConstructorCell.energy > origConstructorCell.energy + NEAR_ZERO);
-    EXPECT_TRUE(approxCompare(actualOtherTransmitterCell.energy, origOtherTransmitterCell.energy));
+    EXPECT_TRUE(actualTransmitterCell._energy < origTransmitterCell._energy - NEAR_ZERO);
+    EXPECT_TRUE(actualConstructorCell._energy > origConstructorCell._energy + NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(actualOtherTransmitterCell._energy, origOtherTransmitterCell._energy));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
 TEST_F(TransmitterTests, distributeOnlyToActiveConstructors)
 {
-    auto genome = GenomeDescription().setHeader(GenomeHeaderDescription().setNumBranches(1));
+    auto genome = GenomeDescription().header(GenomeHeaderDescription().numBranches(1));
     
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
-            .setEnergy(_parameters.cellNormalEnergy[0] * 2),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
+            .energy(_parameters.cellNormalEnergy[0] * 2),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(ConstructorDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellTypeData(DepotDescription()),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(ConstructorDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))),
+        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(DepotDescription()),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -222,9 +222,9 @@ TEST_F(TransmitterTests, distributeOnlyToActiveConstructors)
     auto origOtherTransmitterCell = getCell(data, 3);
     auto actualOtherTransmitterCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(actualTransmitterCell.energy < origTransmitterCell.energy - NEAR_ZERO);
-    EXPECT_TRUE(approxCompare(actualConstructorCell.energy, origConstructorCell.energy));
-    EXPECT_TRUE(actualOtherTransmitterCell.energy > origOtherTransmitterCell.energy + NEAR_ZERO);
+    EXPECT_TRUE(actualTransmitterCell._energy < origTransmitterCell._energy - NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(actualConstructorCell._energy, origConstructorCell._energy));
+    EXPECT_TRUE(actualOtherTransmitterCell._energy > origOtherTransmitterCell._energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
@@ -233,12 +233,12 @@ TEST_F(TransmitterTests, distributeToTwoTransmittersWithDifferentColor)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
-            .setEnergy(_parameters.cellNormalEnergy[0] * 2),
-        CellDescription().setId(2).setPos({11.0f, 10.0f}).setCellTypeData(DepotDescription()).setColor(1),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellTypeData(DepotDescription()),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
+            .energy(_parameters.cellNormalEnergy[0] * 2),
+        CellDescription().id(2).pos({11.0f, 10.0f}).cellType(DepotDescription()).color(1),
+        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(DepotDescription()),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -257,9 +257,9 @@ TEST_F(TransmitterTests, distributeToTwoTransmittersWithDifferentColor)
     auto origOtherTransmitterCell2 = getCell(data, 3);
     auto actualOtherTransmitterCell2 = getCell(actualData, 3);
 
-    EXPECT_TRUE(actualTransmitterCell.energy < origTransmitterCell.energy - NEAR_ZERO);
-    EXPECT_TRUE(actualOtherTransmitterCell1.energy > origOtherTransmitterCell2.energy + NEAR_ZERO);
-    EXPECT_TRUE(actualOtherTransmitterCell2.energy > origOtherTransmitterCell2.energy + NEAR_ZERO);
+    EXPECT_TRUE(actualTransmitterCell._energy < origTransmitterCell._energy - NEAR_ZERO);
+    EXPECT_TRUE(actualOtherTransmitterCell1._energy > origOtherTransmitterCell2._energy + NEAR_ZERO);
+    EXPECT_TRUE(actualOtherTransmitterCell2._energy > origOtherTransmitterCell2._energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
@@ -268,29 +268,29 @@ TEST_F(TransmitterTests, distributeNotToNotReadyConstructors)
     _parameters.cellTypeConstructorCheckCompletenessForSelfReplication = true;
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto subgenome = GenomeDescription().setCells({CellGenomeDescription()});
+    auto subgenome = GenomeDescription().cells({CellGenomeDescription()});
 
-    auto genome = GenomeDescription().setCells({
-        CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setMakeSelfCopy()),
-        CellGenomeDescription().setCellTypeData(DepotGenomeDescription()),
-        CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setGenome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))),
+    auto genome = GenomeDescription().cells({
+        CellGenomeDescription().cellType(ConstructorGenomeDescription().makeSelfCopy()),
+        CellGenomeDescription().cellType(DepotGenomeDescription()),
+        CellGenomeDescription().cellType(ConstructorGenomeDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))),
     });
 
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({9.0f, 10.0f})
-            .setCellTypeData(ConstructorDescription().numInheritedGenomeNodes(4).genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))),
+            .id(1)
+            .pos({9.0f, 10.0f})
+            .cellType(ConstructorDescription().numInheritedGenomeNodes(4).genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))),
         CellDescription()
-            .setId(2)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
-            .setEnergy(_parameters.cellNormalEnergy[0] * 2),
+            .id(2)
+            .pos({10.0f, 10.0f})
+            .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
+            .energy(_parameters.cellNormalEnergy[0] * 2),
         CellDescription()
-            .setId(3)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(ConstructorDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))),
+            .id(3)
+            .pos({11.0f, 10.0f})
+            .cellType(ConstructorDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -309,9 +309,9 @@ TEST_F(TransmitterTests, distributeNotToNotReadyConstructors)
     auto origConstructor = getCell(data, 3);
     auto actualConstructor = getCell(actualData, 3);
 
-    EXPECT_TRUE(actualTransmitter.energy < origTransmitter.energy - NEAR_ZERO);
-    EXPECT_TRUE(approxCompare(actualReplicator.energy, origReplicator.energy));
-    EXPECT_TRUE(actualConstructor.energy > origConstructor.energy + NEAR_ZERO);
+    EXPECT_TRUE(actualTransmitter._energy < origTransmitter._energy - NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(actualReplicator._energy, origReplicator._energy));
+    EXPECT_TRUE(actualConstructor._energy > origConstructor._energy + NEAR_ZERO);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
@@ -321,32 +321,32 @@ TEST_F(TransmitterTests, distributeToReadyConstructors)
     _parameters.cellTypeConstructorCheckCompletenessForSelfReplication = true;
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto subgenome = GenomeDescription().setCells({CellGenomeDescription()});
+    auto subgenome = GenomeDescription().cells({CellGenomeDescription()});
 
-    auto genome = GenomeDescription().setCells({
-        CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setMakeSelfCopy()),
-        CellGenomeDescription().setCellTypeData(DepotGenomeDescription()),
-        CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setGenome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))),
+    auto genome = GenomeDescription().cells({
+        CellGenomeDescription().cellType(ConstructorGenomeDescription().makeSelfCopy()),
+        CellGenomeDescription().cellType(DepotGenomeDescription()),
+        CellGenomeDescription().cellType(ConstructorGenomeDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))),
     });
 
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({9.0f, 10.0f})
-            .setCellTypeData(ConstructorDescription().numInheritedGenomeNodes(4).genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))),
+            .id(1)
+            .pos({9.0f, 10.0f})
+            .cellType(ConstructorDescription().numInheritedGenomeNodes(4).genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))),
         CellDescription()
-            .setId(2)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
-            .setEnergy(_parameters.cellNormalEnergy[0] * 2),
+            .id(2)
+            .pos({10.0f, 10.0f})
+            .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
+            .energy(_parameters.cellNormalEnergy[0] * 2),
         CellDescription()
-            .setId(3)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(ConstructorDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))),
+            .id(3)
+            .pos({11.0f, 10.0f})
+            .cellType(ConstructorDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))),
         CellDescription()
-            .setId(4)
-            .setPos({12.0f, 10.0f})
+            .id(4)
+            .pos({12.0f, 10.0f})
             ,
     });
     data.addConnection(1, 2);
@@ -367,9 +367,9 @@ TEST_F(TransmitterTests, distributeToReadyConstructors)
     auto origConstructor = getCell(data, 3);
     auto actualConstructor = getCell(actualData, 3);
 
-    EXPECT_TRUE(actualTransmitter.energy < origTransmitter.energy - NEAR_ZERO);
-    EXPECT_TRUE(actualReplicator.energy > origReplicator.energy + NEAR_ZERO);
-    EXPECT_TRUE(actualConstructor.energy > origConstructor.energy + NEAR_ZERO);
+    EXPECT_TRUE(actualTransmitter._energy < origTransmitter._energy - NEAR_ZERO);
+    EXPECT_TRUE(actualReplicator._energy > origReplicator._energy + NEAR_ZERO);
+    EXPECT_TRUE(actualConstructor._energy > origConstructor._energy + NEAR_ZERO);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }

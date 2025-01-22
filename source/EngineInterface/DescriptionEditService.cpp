@@ -17,16 +17,16 @@ DataDescription DescriptionEditService::createRect(CreateRectParameters const& p
     for (int i = 0; i < parameters._width; ++i) {
         for (int j = 0; j < parameters._height; ++j) {
             result.addCell(CellDescription()
-                               .setId(NumberGenerator::get().getId())
-                               .setPos({toFloat(i) * parameters._cellDistance, toFloat(j) * parameters._cellDistance})
-                               .setEnergy(parameters._energy)
-                               .setStiffness(parameters._stiffness)
-                               .setColor(parameters._color)
-                               .setBarrier(parameters._barrier)
-                               .setCreatureId(creatureId)
-                               .setMutationId(parameters._mutationId)
-                               .setGenomeComplexity(parameters._genomeComplexity)
-                               .setCellTypeData(parameters._cellType));
+                               .id(NumberGenerator::get().getId())
+                               .pos({toFloat(i) * parameters._cellDistance, toFloat(j) * parameters._cellDistance})
+                               .energy(parameters._energy)
+                               .stiffness(parameters._stiffness)
+                               .color(parameters._color)
+                               .barrier(parameters._barrier)
+                               .creatureId(creatureId)
+                               .mutationId(parameters._mutationId)
+                               .genomeComplexity(parameters._genomeComplexity)
+                               .cellType(parameters._cellType));
         }
     }
     reconnectCells(result, parameters._cellDistance * 1.1f);
@@ -47,26 +47,26 @@ DataDescription DescriptionEditService::createHex(CreateHexParameters const& par
 
             //create cell: upper layer
             result.addCell(CellDescription()
-                               .setId(NumberGenerator::get().getId())
-                               .setCellTypeData(StructureCellDescription())
-                               .setEnergy(parameters._energy)
-                               .setStiffness(parameters._stiffness)
-                               .setPos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
-                               .setColor(parameters._color)
-                               .setBarrier(parameters._barrier)
-                               .setCreatureId(creatureId));
+                               .id(NumberGenerator::get().getId())
+                               .cellType(StructureCellDescription())
+                               .energy(parameters._energy)
+                               .stiffness(parameters._stiffness)
+                               .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
+                               .color(parameters._color)
+                               .barrier(parameters._barrier)
+                               .creatureId(creatureId));
 
             //create cell: under layer (except for 0-layer)
             if (j > 0) {
                 result.addCell(CellDescription()
-                                 .setId(NumberGenerator::get().getId())
-                                   .setCellTypeData(StructureCellDescription())
-                                   .setEnergy(parameters._energy)
-                                   .setStiffness(parameters._stiffness)
-                                   .setPos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(j * incY)})
-                                   .setColor(parameters._color)
-                                   .setBarrier(parameters._barrier)
-                                   .setCreatureId(creatureId));
+                                 .id(NumberGenerator::get().getId())
+                                   .cellType(StructureCellDescription())
+                                   .energy(parameters._energy)
+                                   .stiffness(parameters._stiffness)
+                                   .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(j * incY)})
+                                   .color(parameters._color)
+                                   .barrier(parameters._barrier)
+                                   .creatureId(creatureId));
             }
         }
     }
@@ -87,14 +87,14 @@ DataDescription DescriptionEditService::createUnconnectedCircle(CreateUnconnecte
 
     if (parameters._radius <= 1 + NEAR_ZERO) {
         result.addCell(CellDescription()
-                           .setId(NumberGenerator::get().getId())
-                           .setCellTypeData(StructureCellDescription())
-                           .setPos(parameters._center)
-                           .setEnergy(parameters._energy)
-                           .setStiffness(parameters._stiffness)
-                           .setColor(parameters._color)
-                           .setBarrier(parameters._barrier)
-                           .setCreatureId(creatureId));
+                           .id(NumberGenerator::get().getId())
+                           .cellType(StructureCellDescription())
+                           .pos(parameters._center)
+                           .energy(parameters._energy)
+                           .stiffness(parameters._stiffness)
+                           .color(parameters._color)
+                           .barrier(parameters._barrier)
+                           .creatureId(creatureId));
         return result;
     }
 
@@ -112,14 +112,14 @@ DataDescription DescriptionEditService::createUnconnectedCircle(CreateUnconnecte
                 continue;
             }
             result.addCell(CellDescription()
-                               .setId(NumberGenerator::get().getId())
-                               .setCellTypeData(StructureCellDescription())
-                               .setEnergy(parameters._energy)
-                               .setStiffness(parameters._stiffness)
-                               .setPos({parameters._center.x + dxMod, parameters._center.y + dy})
-                               .setColor(parameters._color)
-                               .setBarrier(parameters._barrier)
-                               .setCreatureId(creatureId));
+                               .id(NumberGenerator::get().getId())
+                               .cellType(StructureCellDescription())
+                               .energy(parameters._energy)
+                               .stiffness(parameters._stiffness)
+                               .pos({parameters._center.x + dxMod, parameters._center.y + dy})
+                               .color(parameters._color)
+                               .barrier(parameters._barrier)
+                               .creatureId(creatureId));
 
         }
     }
@@ -132,14 +132,14 @@ namespace
     {
         auto& numberGen = NumberGenerator::get();
         std::unordered_map<uint64_t, uint64_t> newByOldIds;
-        for (auto& cell : data.cells) {
+        for (auto& cell : data._cells) {
             uint64_t newId = numberGen.getId();
-            newByOldIds.insert_or_assign(cell.id, newId);
-            cell.id = newId;
+            newByOldIds.insert_or_assign(cell._id, newId);
+            cell._id = newId;
         }
 
-        for (auto& cell : data.cells) {
-            for (auto& connection : cell.connections) {
+        for (auto& cell : data._cells) {
+            for (auto& connection : cell._connections) {
                 connection._cellId = newByOldIds.at(connection._cellId);
             }
         }
@@ -150,14 +150,14 @@ namespace
         auto& numberGen = NumberGenerator::get();
         //cluster.id = numberGen.getId();
         std::unordered_map<uint64_t, uint64_t> newByOldIds;
-        for (auto& cell : cluster.cells) {
+        for (auto& cell : cluster._cells) {
             uint64_t newId = numberGen.getId();
-            newByOldIds.insert_or_assign(cell.id, newId);
-            cell.id = newId;
+            newByOldIds.insert_or_assign(cell._id, newId);
+            cell._id = newId;
         }
 
-        for (auto& cell : cluster.cells) {
-            for (auto& connection : cell.connections) {
+        for (auto& cell : cluster._cells) {
+            for (auto& connection : cell._connections) {
                 connection._cellId = newByOldIds.at(connection._cellId);
             }
         }
@@ -172,12 +172,12 @@ void DescriptionEditService::duplicate(ClusteredDataDescription& data, IntVector
         for (int incY = 0; incY < size.y; incY += origSize.y) {
             generateNewCreatureIds(data);
 
-            for (auto cluster : data.clusters) {
+            for (auto cluster : data._clusters) {
                 auto origPos = cluster.getClusterPosFromCells();
                 RealVector2D clusterPos = {origPos.x + incX, origPos.y + incY};
                 if (clusterPos.x < size.x && clusterPos.y < size.y) {
-                    for (auto& cell : cluster.cells) {
-                        cell.pos = RealVector2D{cell.pos.x + incX, cell.pos.y + incY};
+                    for (auto& cell : cluster._cells) {
+                        cell._pos = RealVector2D{cell._pos.x + incX, cell._pos.y + incY};
                         if (incX > 0 || incY > 0) {
                             removeMetadata(cell);
                         }
@@ -187,11 +187,11 @@ void DescriptionEditService::duplicate(ClusteredDataDescription& data, IntVector
                     result.addCluster(cluster);
                 }
             }
-            for (auto particle : data.particles) {
-                auto origPos = particle.pos;
-                particle.pos = RealVector2D{origPos.x + incX, origPos.y + incY};
-                if (particle.pos.x < size.x && particle.pos.y < size.y) {
-                    particle.setId(NumberGenerator::get().getId());
+            for (auto particle : data._particles) {
+                auto origPos = particle._pos;
+                particle._pos = RealVector2D{origPos.x + incX, origPos.y + incY};
+                if (particle._pos.x < size.x && particle._pos.y < size.y) {
+                    particle.id(NumberGenerator::get().getId());
                     result.addParticle(particle);
                 }
             }
@@ -216,8 +216,8 @@ namespace
                 if (cellIndicesBySlot.find(x) != cellIndicesBySlot.end()) {
                     if (cellIndicesBySlot.at(x).find(y) != cellIndicesBySlot.at(x).end()) {
                         for (auto const& cellIndex : cellIndicesBySlot.at(x).at(y)) {
-                            auto const& cell = data.cells.at(cellIndex);
-                            if (Math::length(cell.pos - pos) <= radius) {
+                            auto const& cell = data._cells.at(cellIndex);
+                            if (Math::length(cell._pos - pos) <= radius) {
                                 result.emplace_back(cellIndex);
                             }
                         }
@@ -226,9 +226,9 @@ namespace
             }
         }
         std::sort(result.begin(), result.end(), [&](int index1, int index2) {
-            auto const& cell1 = data.cells.at(index1);
-            auto const& cell2 = data.cells.at(index2);
-            return Math::length(cell1.pos - pos) < Math::length(cell2.pos - pos);
+            auto const& cell1 = data._cells.at(index1);
+            auto const& cell2 = data._cells.at(index2);
+            return Math::length(cell1._pos - pos) < Math::length(cell2._pos - pos);
         });
         return result;
     }
@@ -277,9 +277,9 @@ DataDescription DescriptionEditService::randomMultiply(
     //create map for overlapping check
     if (parameters._overlappingCheck) {
         int index = 0;
-        for (auto const& cell : existentData.cells) {
-            auto intPos = toIntVector2D(spaceCalculator.getCorrectedPosition(cell.pos));
-            cellPosBySlot[intPos].emplace_back(cell.pos);
+        for (auto const& cell : existentData._cells) {
+            auto intPos = toIntVector2D(spaceCalculator.getCorrectedPosition(cell._pos));
+            cellPosBySlot[intPos].emplace_back(cell._pos);
             ++index;
         }
     }
@@ -305,8 +305,8 @@ DataDescription DescriptionEditService::randomMultiply(
             //overlapping check
             overlapping = false;
             if (parameters._overlappingCheck) {
-                for (auto const& cell : copy.cells) {
-                    auto pos = spaceCalculator.getCorrectedPosition(cell.pos);
+                for (auto const& cell : copy._cells) {
+                    auto pos = spaceCalculator.getCorrectedPosition(cell._pos);
                     if (isCellPresent(cellPosBySlot, spaceCalculator, pos, 2.0f)) {
                         overlapping = true;
                     }
@@ -324,11 +324,11 @@ DataDescription DescriptionEditService::randomMultiply(
 
         //add copy to existentData for overlapping check
         if (parameters._overlappingCheck) {
-            for (auto const& cell : copy.cells) {
-                auto index = toInt(existentData.cells.size());
-                existentData.cells.emplace_back(cell);
-                auto intPos = toIntVector2D(spaceCalculator.getCorrectedPosition(cell.pos));
-                cellPosBySlot[intPos].emplace_back(cell.pos);
+            for (auto const& cell : copy._cells) {
+                auto index = toInt(existentData._cells.size());
+                existentData._cells.emplace_back(cell);
+                auto intPos = toIntVector2D(spaceCalculator.getCorrectedPosition(cell._pos));
+                cellPosBySlot[intPos].emplace_back(cell._pos);
             }
         }
     }
@@ -345,10 +345,10 @@ void DescriptionEditService::addIfSpaceAvailable(
 {
     SpaceCalculator space(worldSize);
 
-    for (auto const& cell : toAdd.cells) {
-        if (!isCellPresent(cellOccupancy, space, cell.pos, distance)) {
+    for (auto const& cell : toAdd._cells) {
+        if (!isCellPresent(cellOccupancy, space, cell._pos, distance)) {
             result.addCell(cell);
-            cellOccupancy[toIntVector2D(cell.pos)].emplace_back(cell.pos);
+            cellOccupancy[toIntVector2D(cell._pos)].emplace_back(cell._pos);
         }
     }
 }
@@ -358,23 +358,23 @@ void DescriptionEditService::reconnectCells(DataDescription& data, float maxDist
     std::unordered_map<int, std::unordered_map<int, std::vector<int>>> cellIndicesBySlot;
 
     int index = 0;
-    for (auto& cell : data.cells) {
-        cell.connections.clear();
-        cellIndicesBySlot[toInt(cell.pos.x)][toInt(cell.pos.y)].emplace_back(toInt(index));
+    for (auto& cell : data._cells) {
+        cell._connections.clear();
+        cellIndicesBySlot[toInt(cell._pos.x)][toInt(cell._pos.y)].emplace_back(toInt(index));
         ++index;
     }
 
     std::unordered_map<uint64_t, int> cache;
-    for (auto const& [index, cell] : data.cells | boost::adaptors::indexed(0)) {
-        cache.emplace(cell.id, static_cast<int>(index));
+    for (auto const& [index, cell] : data._cells | boost::adaptors::indexed(0)) {
+        cache.emplace(cell._id, static_cast<int>(index));
     }
-    for (auto& cell : data.cells) {
-        auto nearbyCellIndices = getCellIndicesWithinRadius(data, cellIndicesBySlot, cell.pos, maxDistance);
+    for (auto& cell : data._cells) {
+        auto nearbyCellIndices = getCellIndicesWithinRadius(data, cellIndicesBySlot, cell._pos, maxDistance);
         for (auto const& nearbyCellIndex : nearbyCellIndices) {
-            auto const& nearbyCell = data.cells.at(nearbyCellIndex);
-            if (cell.id != nearbyCell.id && cell.connections.size() < MAX_CELL_BONDS && nearbyCell.connections.size() < MAX_CELL_BONDS
-                && !cell.isConnectedTo(nearbyCell.id)) {
-                data.addConnection(cell.id, nearbyCell.id, &cache);
+            auto const& nearbyCell = data._cells.at(nearbyCellIndex);
+            if (cell._id != nearbyCell._id && cell._connections.size() < MAX_CELL_BONDS && nearbyCell._connections.size() < MAX_CELL_BONDS
+                && !cell.isConnectedTo(nearbyCell._id)) {
+                data.addConnection(cell._id, nearbyCell._id, &cache);
             }
         }
     }
@@ -382,7 +382,7 @@ void DescriptionEditService::reconnectCells(DataDescription& data, float maxDist
 
 void DescriptionEditService::removeStickiness(DataDescription& data)
 {
-    for (auto& cell : data.cells) {
+    for (auto& cell : data._cells) {
         //#TODO introduce sticky flag
     }
 }
@@ -391,18 +391,18 @@ void DescriptionEditService::correctConnections(ClusteredDataDescription& data, 
 {
     auto threshold = std::min(worldSize.x, worldSize.y) /3;
     std::unordered_map<uint64_t, CellDescription&> cellById;
-    for (auto& cluster : data.clusters) {
-        for (auto& cell : cluster.cells) {
-            cellById.emplace(cell.id, cell);
+    for (auto& cluster : data._clusters) {
+        for (auto& cell : cluster._cells) {
+            cellById.emplace(cell._id, cell);
         }
     }
-    for (auto& cluster : data.clusters) {
-        for (auto& cell: cluster.cells) {
+    for (auto& cluster : data._clusters) {
+        for (auto& cell: cluster._cells) {
             std::vector<ConnectionDescription> newConnections;
             float angleToAdd = 0;
-            for (auto connection : cell.connections) {
+            for (auto connection : cell._connections) {
                 auto& connectingCell = cellById.at(connection._cellId);
-                if (/*spaceCalculator.distance*/Math::length(cell.pos - connectingCell.pos) > threshold) {
+                if (/*spaceCalculator.distance*/Math::length(cell._pos - connectingCell._pos) > threshold) {
                     angleToAdd += connection._angleFromPrevious;
                 } else {
                     connection._angleFromPrevious += angleToAdd;
@@ -413,17 +413,17 @@ void DescriptionEditService::correctConnections(ClusteredDataDescription& data, 
             if (angleToAdd > NEAR_ZERO && !newConnections.empty()) {
                 newConnections.front()._angleFromPrevious += angleToAdd;
             }
-            cell.connections = newConnections;
+            cell._connections = newConnections;
         }
     }
 }
 
 void DescriptionEditService::randomizeCellColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes)
 {
-    for (auto& cluster : data.clusters) {
+    for (auto& cluster : data._clusters) {
         auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
-        for (auto& cell : cluster.cells) {
-            cell.color = newColor;
+        for (auto& cell : cluster._cells) {
+            cell._color = newColor;
         }
     }
 }
@@ -433,8 +433,8 @@ namespace
     void colorizeGenomeNodes(std::vector<uint8_t>& genome, int color)
     {
         auto desc = GenomeDescriptionConverterService::get().convertBytesToDescription(genome);
-        for (auto& node : desc.cells) {
-            node.color = color;
+        for (auto& node : desc._cells) {
+            node._color = color;
             if (node.hasGenome()) {
                 colorizeGenomeNodes(node.getGenomeRef(), color);
             }
@@ -445,9 +445,9 @@ namespace
 
 void DescriptionEditService::randomizeGenomeColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes)
 {
-    for (auto& cluster : data.clusters) {
+    for (auto& cluster : data._clusters) {
         auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
-        for (auto& cell : cluster.cells) {
+        for (auto& cell : cluster._cells) {
             if (cell.hasGenome()) {
                 colorizeGenomeNodes(cell.getGenomeRef(), newColor);
             }
@@ -457,31 +457,31 @@ void DescriptionEditService::randomizeGenomeColors(ClusteredDataDescription& dat
 
 void DescriptionEditService::randomizeEnergies(ClusteredDataDescription& data, float minEnergy, float maxEnergy)
 {
-    for (auto& cluster : data.clusters) {
+    for (auto& cluster : data._clusters) {
         auto energy = NumberGenerator::get().getRandomReal(toDouble(minEnergy), toDouble(maxEnergy));
-        for (auto& cell : cluster.cells) {
-            cell.energy = energy;
+        for (auto& cell : cluster._cells) {
+            cell._energy = energy;
         }
     }
 }
 
 void DescriptionEditService::randomizeAges(ClusteredDataDescription& data, int minAge, int maxAge)
 {
-    for (auto& cluster : data.clusters) {
+    for (auto& cluster : data._clusters) {
         auto age = NumberGenerator::get().getRandomReal(toDouble(minAge), toDouble(maxAge));
-        for (auto& cell : cluster.cells) {
-            cell.age = age;
+        for (auto& cell : cluster._cells) {
+            cell._age = age;
         }
     }
 }
 
 void DescriptionEditService::randomizeCountdowns(ClusteredDataDescription& data, int minValue, int maxValue)
 {
-    for (auto& cluster : data.clusters) {
+    for (auto& cluster : data._clusters) {
         auto countdown = NumberGenerator::get().getRandomReal(toDouble(minValue), toDouble(maxValue));
-        for (auto& cell : cluster.cells) {
+        for (auto& cell : cluster._cells) {
             if (cell.getCellType() == CellType_Detonator) {
-                std::get<DetonatorDescription>(cell.cellTypeData).countdown = countdown;
+                std::get<DetonatorDescription>(cell._cellTypeData)._countdown = countdown;
             }
         }
     }
@@ -489,12 +489,12 @@ void DescriptionEditService::randomizeCountdowns(ClusteredDataDescription& data,
 
 void DescriptionEditService::randomizeMutationIds(ClusteredDataDescription& data)
 {
-    for (auto& cluster : data.clusters) {
+    for (auto& cluster : data._clusters) {
         auto mutationId = NumberGenerator::get().getRandomInt() % 65536;
-        for (auto& cell : cluster.cells) {
-            cell.mutationId = toInt(mutationId);
+        for (auto& cell : cluster._cells) {
+            cell._mutationId = toInt(mutationId);
             if (cell.getCellType() == CellType_Constructor) {
-                std::get<ConstructorDescription>(cell.cellTypeData)._offspringMutationId = toInt(mutationId);
+                std::get<ConstructorDescription>(cell._cellTypeData)._offspringMutationId = toInt(mutationId);
             }
         }
     }
@@ -502,7 +502,7 @@ void DescriptionEditService::randomizeMutationIds(ClusteredDataDescription& data
 
 void DescriptionEditService::removeMetadata(DataDescription& data)
 {
-    for(auto& cell : data.cells) {
+    for(auto& cell : data._cells) {
         removeMetadata(cell);
     }
 }
@@ -529,12 +529,12 @@ namespace
 void DescriptionEditService::generateNewCreatureIds(DataDescription& data)
 {
     std::unordered_map<int, int> origToNewCreatureIdMap;
-    for (auto& cell : data.cells) {
-        if (cell.creatureId != 0) {
-            cell.creatureId = getNewCreatureId(cell.creatureId, origToNewCreatureIdMap);
+    for (auto& cell : data._cells) {
+        if (cell._creatureId != 0) {
+            cell._creatureId = getNewCreatureId(cell._creatureId, origToNewCreatureIdMap);
         }
         if (cell.getCellType() == CellType_Constructor) {
-            auto& offspringCreatureId = std::get<ConstructorDescription>(cell.cellTypeData)._offspringCreatureId;
+            auto& offspringCreatureId = std::get<ConstructorDescription>(cell._cellTypeData)._offspringCreatureId;
             offspringCreatureId = getNewCreatureId(offspringCreatureId, origToNewCreatureIdMap);
         }
     }
@@ -543,13 +543,13 @@ void DescriptionEditService::generateNewCreatureIds(DataDescription& data)
 void DescriptionEditService::generateNewCreatureIds(ClusteredDataDescription& data)
 {
     std::unordered_map<int, int> origToNewCreatureIdMap;
-    for (auto& cluster: data.clusters) {
-        for (auto& cell : cluster.cells) {
-            if (cell.creatureId != 0) {
-                cell.creatureId = getNewCreatureId(cell.creatureId, origToNewCreatureIdMap);
+    for (auto& cluster: data._clusters) {
+        for (auto& cell : cluster._cells) {
+            if (cell._creatureId != 0) {
+                cell._creatureId = getNewCreatureId(cell._creatureId, origToNewCreatureIdMap);
             }
             if (cell.getCellType() == CellType_Constructor) {
-                auto& offspringCreatureId = std::get<ConstructorDescription>(cell.cellTypeData)._offspringCreatureId;
+                auto& offspringCreatureId = std::get<ConstructorDescription>(cell._cellTypeData)._offspringCreatureId;
                 offspringCreatureId = getNewCreatureId(offspringCreatureId, origToNewCreatureIdMap);
             }
         }
@@ -559,8 +559,8 @@ void DescriptionEditService::generateNewCreatureIds(ClusteredDataDescription& da
 
 void DescriptionEditService::removeMetadata(CellDescription& cell)
 {
-    cell.metadata._description.clear();
-    cell.metadata._name.clear();
+    cell._metadata._description.clear();
+    cell._metadata._name.clear();
 }
 
 bool DescriptionEditService::isCellPresent(Occupancy const& cellPosBySlot, SpaceCalculator const& spaceCalculator, RealVector2D const& posToCheck, float distance)
@@ -599,27 +599,27 @@ bool DescriptionEditService::isCellPresent(Occupancy const& cellPosBySlot, Space
 uint64_t DescriptionEditService::getId(CellOrParticleDescription const& entity)
 {
     if (std::holds_alternative<CellDescription>(entity)) {
-        return std::get<CellDescription>(entity).id;
+        return std::get<CellDescription>(entity)._id;
     }
-    return std::get<ParticleDescription>(entity).id;
+    return std::get<ParticleDescription>(entity)._id;
 }
 
 RealVector2D DescriptionEditService::getPos(CellOrParticleDescription const& entity)
 {
     if (std::holds_alternative<CellDescription>(entity)) {
-        return std::get<CellDescription>(entity).pos;
+        return std::get<CellDescription>(entity)._pos;
     }
-    return std::get<ParticleDescription>(entity).pos;
+    return std::get<ParticleDescription>(entity)._pos;
 }
 
 std::vector<CellOrParticleDescription> DescriptionEditService::getObjects(
     DataDescription const& data)
 {
     std::vector<CellOrParticleDescription> result;
-    for (auto const& particle : data.particles) {
+    for (auto const& particle : data._particles) {
         result.emplace_back(particle);
     }
-    for (auto const& cell : data.cells) {
+    for (auto const& cell : data._cells) {
         result.emplace_back(cell);
     }
     return result;
@@ -652,10 +652,10 @@ namespace
 std::vector<CellOrParticleDescription> DescriptionEditService::getConstructorToMainGenomes(DataDescription const& data)
 {
     std::map<std::vector<uint8_t>, size_t> genomeToCellIndex;
-    for (auto const& [index, cell] : data.cells | boost::adaptors::indexed(0)) {
+    for (auto const& [index, cell] : data._cells | boost::adaptors::indexed(0)) {
         if (cell.getCellType() == CellType_Constructor) {
-            auto const& genome = std::get<ConstructorDescription>(cell.cellTypeData)._genome;
-            if (!genomeToCellIndex.contains(genome) || cell.livingState != LivingState_UnderConstruction) {
+            auto const& genome = std::get<ConstructorDescription>(cell._cellTypeData)._genome;
+            if (!genomeToCellIndex.contains(genome) || cell._livingState != LivingState_UnderConstruction) {
                 genomeToCellIndex[genome] = index;
             }
         }
@@ -678,7 +678,7 @@ std::vector<CellOrParticleDescription> DescriptionEditService::getConstructorToM
             }
         }
         if (!alreadyContained) {
-            result.emplace_back(data.cells.at(it->second));
+            result.emplace_back(data._cells.at(it->second));
         }
     }
     return result;

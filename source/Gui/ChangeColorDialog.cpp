@@ -66,16 +66,16 @@ void ChangeColorDialog::processIntern()
 
 void ChangeColorDialog::onChangeColor(GenomeDescription& genome)
 {
-    for (auto& node : genome.cells) {
-        if (node.color == _sourceColor) {
-            node.color = _targetColor;
+    for (auto& node : genome._cells) {
+        if (node._color == _sourceColor) {
+            node._color = _targetColor;
         }
         if (_includeSubGenomes) {
             if (auto subGenome = node.getGenome()) {
                 auto subGenomeDesc = GenomeDescriptionConverterService::get().convertBytesToDescription(*subGenome);
                 onChangeColor(subGenomeDesc);
                 auto newSubGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(subGenomeDesc);
-                node.setGenome(newSubGenome);
+                node.genome(newSubGenome);
             }
         }
     }

@@ -418,7 +418,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         numObjects = deserializedSim.mainData.getNumberOfCellAndParticles();
     } else {
         auto genome = std::get<UploadNetworkResourceRequestData::GenomeData>(requestData.data).description;
-        if (genome.cells.empty()) {
+        if (genome._cells.empty()) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The is no valid genome for uploading selected."});
         }
@@ -506,7 +506,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         numObjects = deserializedSim.mainData.getNumberOfCellAndParticles();
     } else {
         auto genome = std::get<ReplaceNetworkResourceRequestData::GenomeData>(requestData.data).description;
-        if (genome.cells.empty()) {
+        if (genome._cells.empty()) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The is no valid genome for replacement selected."});
         }

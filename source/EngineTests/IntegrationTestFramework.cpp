@@ -29,11 +29,11 @@ IntegrationTestFramework::~IntegrationTestFramework()
 double IntegrationTestFramework::getEnergy(DataDescription const& data) const
 {
     double result = 0;
-    for (auto const& cell : data.cells) {
-        result += cell.energy;
+    for (auto const& cell : data._cells) {
+        result += cell._energy;
     }
-    for (auto const& particle : data.particles) {
-        result += particle.energy;
+    for (auto const& particle : data._particles) {
+        result += particle._energy;
     }
     return result;
 }
@@ -41,16 +41,16 @@ double IntegrationTestFramework::getEnergy(DataDescription const& data) const
 std::unordered_map<uint64_t, CellDescription> IntegrationTestFramework::getCellById(DataDescription const& data) const
 {
     std::unordered_map<uint64_t, CellDescription> result;
-    for(auto const& cell : data.cells) {
-        result.emplace(cell.id, cell);
+    for(auto const& cell : data._cells) {
+        result.emplace(cell._id, cell);
     }
     return result;
 }
 
 CellDescription IntegrationTestFramework::getCell(DataDescription const& data, uint64_t id) const
 {
-    for (auto const& cell : data.cells) {
-        if (cell.id == id) {
+    for (auto const& cell : data._cells) {
+        if (cell._id == id) {
             return cell;
         }
     }
@@ -60,7 +60,7 @@ CellDescription IntegrationTestFramework::getCell(DataDescription const& data, u
 ConnectionDescription IntegrationTestFramework::getConnection(DataDescription const& data, uint64_t id, uint64_t otherId) const
 {
     auto cell = getCell(data, id);
-    for (auto const& connection : cell.connections) {
+    for (auto const& connection : cell._connections) {
         if (connection._cellId == otherId) {
             return connection;
         }
@@ -70,8 +70,8 @@ ConnectionDescription IntegrationTestFramework::getConnection(DataDescription co
 
 ConnectionDescription IntegrationTestFramework::getConnection(CellDescription const& cell1, CellDescription const& cell2) const
 {
-    for (auto const& connection : cell1.connections) {
-        if (connection._cellId == cell2.id) {
+    for (auto const& connection : cell1._connections) {
+        if (connection._cellId == cell2._id) {
             return connection;
         }
     }
@@ -81,7 +81,7 @@ ConnectionDescription IntegrationTestFramework::getConnection(CellDescription co
 bool IntegrationTestFramework::hasConnection(DataDescription const& data, uint64_t id, uint64_t otherId) const
 {
     auto cell = getCell(data, id);
-    for (auto const& connection : cell.connections) {
+    for (auto const& connection : cell._connections) {
         if (connection._cellId == otherId) {
             return true;
         }
@@ -91,8 +91,8 @@ bool IntegrationTestFramework::hasConnection(DataDescription const& data, uint64
 
 CellDescription IntegrationTestFramework::getOtherCell(DataDescription const& data, uint64_t id) const
 {
-    for (auto const& cell : data.cells) {
-        if (cell.id != id) {
+    for (auto const& cell : data._cells) {
+        if (cell._id != id) {
             return cell;
         }
     }
@@ -101,8 +101,8 @@ CellDescription IntegrationTestFramework::getOtherCell(DataDescription const& da
 
 CellDescription IntegrationTestFramework::getOtherCell(DataDescription const& data, std::set<uint64_t> ids) const
 {
-    for (auto const& cell : data.cells) {
-        if (!ids.contains(cell.id)) {
+    for (auto const& cell : data._cells) {
+        if (!ids.contains(cell._id)) {
             return cell;
         }
     }
@@ -143,23 +143,23 @@ bool IntegrationTestFramework::approxCompare(std::vector<float> const& expected,
 
 bool IntegrationTestFramework::compare(DataDescription left, DataDescription right) const
 {
-    std::sort(left.cells.begin(), left.cells.end(), [](auto const& left, auto const& right) { return left.id < right.id; });
-    std::sort(right.cells.begin(), right.cells.end(), [](auto const& left, auto const& right) { return left.id < right.id; });
-    std::sort(left.particles.begin(), left.particles.end(), [](auto const& left, auto const& right) { return left.id < right.id; });
-    std::sort(right.particles.begin(), right.particles.end(), [](auto const& left, auto const& right) { return left.id < right.id; });
+    std::sort(left._cells.begin(), left._cells.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+    std::sort(right._cells.begin(), right._cells.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+    std::sort(left._particles.begin(), left._particles.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+    std::sort(right._particles.begin(), right._particles.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     return left == right;
 }
 
 bool IntegrationTestFramework::compare(CellDescription left, CellDescription right) const
 {
-    left.id = 0;
-    right.id = 0;
+    left._id = 0;
+    right._id = 0;
     return left == right;
 }
 
 bool IntegrationTestFramework::compare(ParticleDescription left, ParticleDescription right) const
 {
-    left.id = 0;
-    right.id = 0;
+    left._id = 0;
+    right._id = 0;
     return left == right;
 }

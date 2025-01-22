@@ -59,17 +59,24 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
         if (reconnector.restrictToColor != 255 && otherCell->color != reconnector.restrictToColor) {
             return;
         }
+        if (reconnector.restrictToMutants == SensorRestrictToMutants_RestrictToSameMutants
+            || reconnector.restrictToMutants == SensorRestrictToMutants_RestrictToOtherMutants
+            || reconnector.restrictToMutants == SensorRestrictToMutants_RestrictToLessComplexMutants
+            || reconnector.restrictToMutants == SensorRestrictToMutants_RestrictToMoreComplexMutants) {
+            if (otherCell->cellType == CellType_Free || otherCell->cellType == CellType_Structure) {
+                return;
+            }
+        }
         if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToSameMutants && otherCell->mutationId != cell->mutationId) {
             return;
         }
-        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToOtherMutants
-            && (otherCell->mutationId == cell->mutationId || otherCell->mutationId == 0 || otherCell->mutationId == 1)) {
+        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToOtherMutants && otherCell->mutationId == cell->mutationId) {
             return;
         }
-        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToHandcraftedCells && otherCell->mutationId != 0) {
+        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToFreeCells && otherCell->cellType != CellType_Free) {
             return;
         }
-        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToFreeCells && otherCell->mutationId != 1) {
+        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToStructures && otherCell->cellType != CellType_Structure) {
             return;
         }
         if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToLessComplexMutants

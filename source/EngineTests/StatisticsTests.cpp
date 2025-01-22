@@ -22,18 +22,18 @@ public:
 TEST_F(StatisticsTests, selfReplicatorWithRepetitionsInGenome)
 {
     auto subGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
-        GenomeDescription().setHeader(GenomeHeaderDescription().setNumRepetitions(3)).setCells({CellGenomeDescription()}));
+        GenomeDescription().header(GenomeHeaderDescription().numRepetitions(3)).cells({CellGenomeDescription()}));
     auto mainGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
         GenomeDescription()
-            .setHeader(GenomeHeaderDescription().setNumRepetitions(2))
-            .setCells({
-                CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setGenome(subGenome)),
-                CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setMakeSelfCopy()),
+            .header(GenomeHeaderDescription().numRepetitions(2))
+            .cells({
+                CellGenomeDescription().cellType(ConstructorGenomeDescription().genome(subGenome)),
+                CellGenomeDescription().cellType(ConstructorGenomeDescription().makeSelfCopy()),
             }));
 
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setCellTypeData(ConstructorDescription().genome(mainGenome)),
+        CellDescription().id(1).cellType(ConstructorDescription().genome(mainGenome)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -47,18 +47,18 @@ TEST_F(StatisticsTests, selfReplicatorWithRepetitionsInGenome)
 TEST_F(StatisticsTests, selfReplicatorWithInfiniteRepetitionsInGenome)
 {
     auto subGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
-        GenomeDescription().setHeader(GenomeHeaderDescription().setInfiniteRepetitions()).setCells({CellGenomeDescription()}));
+        GenomeDescription().header(GenomeHeaderDescription().infiniteRepetitions()).cells({CellGenomeDescription()}));
     auto mainGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
         GenomeDescription()
-            .setHeader(GenomeHeaderDescription().setNumRepetitions(2))
-            .setCells({
-                CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setGenome(subGenome)),
-                CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setMakeSelfCopy()),
+            .header(GenomeHeaderDescription().numRepetitions(2))
+            .cells({
+                CellGenomeDescription().cellType(ConstructorGenomeDescription().genome(subGenome)),
+                CellGenomeDescription().cellType(ConstructorGenomeDescription().makeSelfCopy()),
             }));
 
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setCellTypeData(ConstructorDescription().genome(mainGenome)),
+        CellDescription().id(1).cellType(ConstructorDescription().genome(mainGenome)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -72,17 +72,17 @@ TEST_F(StatisticsTests, selfReplicatorWithInfiniteRepetitionsInGenome)
 TEST_F(StatisticsTests, nonSelfReplicatorWithRepetitionsInGenome)
 {
     auto subGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
-        GenomeDescription().setHeader(GenomeHeaderDescription().setNumRepetitions(3)).setCells({CellGenomeDescription()}));
+        GenomeDescription().header(GenomeHeaderDescription().numRepetitions(3)).cells({CellGenomeDescription()}));
     auto mainGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
         GenomeDescription()
-            .setHeader(GenomeHeaderDescription().setNumRepetitions(2))
-            .setCells({
-                CellGenomeDescription().setCellTypeData(ConstructorGenomeDescription().setGenome(subGenome)),
+            .header(GenomeHeaderDescription().numRepetitions(2))
+            .cells({
+                CellGenomeDescription().cellType(ConstructorGenomeDescription().genome(subGenome)),
             }));
 
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setCellTypeData(ConstructorDescription().genome(mainGenome)),
+        CellDescription().id(1).cellType(ConstructorDescription().genome(mainGenome)),
     });
 
     _simulationFacade->setSimulationData(data);

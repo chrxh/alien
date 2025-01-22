@@ -226,12 +226,18 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
             if (restrictToColor != 255 && otherCell->color != restrictToColor) {
                 continue;
             }
+            if (restrictToMutants == SensorRestrictToMutants_RestrictToSameMutants || restrictToMutants == SensorRestrictToMutants_RestrictToOtherMutants
+                || restrictToMutants == SensorRestrictToMutants_RestrictToLessComplexMutants
+                || restrictToMutants == SensorRestrictToMutants_RestrictToMoreComplexMutants) {
+                if (otherCell->cellType == CellType_Free || otherCell->cellType == CellType_Structure) {
+                    continue;
+                }
+            }
             if (restrictToMutants == SensorRestrictToMutants_RestrictToSameMutants && cell->mutationId != otherCell->mutationId) {
                 continue;
             }
             if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherMutants
-                && (cell->mutationId == otherCell->mutationId || otherCell->cellType == CellType_Free || otherCell->cellType == CellType_Structure
-                    || static_cast<uint8_t>(cell->mutationId & 0xff) == otherCell->ancestorMutationId)) {
+                && (cell->mutationId == otherCell->mutationId || static_cast<uint8_t>(cell->mutationId & 0xff) == otherCell->ancestorMutationId)) {
                 continue;
             }
             if (restrictToMutants == SensorRestrictToMutants_RestrictToFreeCells && otherCell->cellType != CellType_Free) {
@@ -240,14 +246,10 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
             if (restrictToMutants == SensorRestrictToMutants_RestrictToStructures && otherCell->cellType != CellType_Structure) {
                 continue;
             }
-            if (restrictToMutants == SensorRestrictToMutants_RestrictToLessComplexMutants
-                && (otherCell->genomeComplexity >= cell->genomeComplexity || otherCell->cellType == CellType_Free
-                    || otherCell->cellType == CellType_Structure)) {
+            if (restrictToMutants == SensorRestrictToMutants_RestrictToLessComplexMutants && otherCell->genomeComplexity >= cell->genomeComplexity) {
                 continue;
             }
-            if (restrictToMutants == SensorRestrictToMutants_RestrictToMoreComplexMutants
-                && (otherCell->genomeComplexity <= cell->genomeComplexity || otherCell->cellType == CellType_Free
-                    || otherCell->cellType == CellType_Structure)) {
+            if (restrictToMutants == SensorRestrictToMutants_RestrictToMoreComplexMutants && otherCell->genomeComplexity <= cell->genomeComplexity) {
                 continue;
             }
 

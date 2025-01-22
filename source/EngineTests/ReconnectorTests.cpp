@@ -31,14 +31,14 @@ TEST_F(ReconnectorTests, establishConnection_noRestriction_nothingFound)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({10.0f, 10.0f})
-             .setCellTypeData(ReconnectorDescription()),
+             .id(1)
+             .pos({10.0f, 10.0f})
+             .cellType(ReconnectorDescription()),
          CellDescription()
-             .setId(2)
-             .setPos({11.0f, 10.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({11.0f, 10.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -47,11 +47,11 @@ TEST_F(ReconnectorTests, establishConnection_noRestriction_nothingFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualReconnectorCell = getCell(actualData, 1);
 
-    EXPECT_EQ(2, actualData.cells.size());
-    EXPECT_TRUE(std::abs(actualReconnectorCell.signal->channels[0]) < NEAR_ZERO);
+    EXPECT_EQ(2, actualData._cells.size());
+    EXPECT_TRUE(std::abs(actualReconnectorCell._signal->_channels[0]) < NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(approxCompare(0.0f, actualReconnectorCell.signal->channels[0]));
-    EXPECT_EQ(1, actualReconnectorCell.connections.size());
+    EXPECT_TRUE(approxCompare(0.0f, actualReconnectorCell._signal->_channels[0]));
+    EXPECT_EQ(1, actualReconnectorCell._connections.size());
 }
 
 TEST_F(ReconnectorTests, establishConnection_noRestriction_success)
@@ -59,15 +59,15 @@ TEST_F(ReconnectorTests, establishConnection_noRestriction_success)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(ReconnectorDescription()),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(ReconnectorDescription()),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);
 
@@ -75,15 +75,15 @@ TEST_F(ReconnectorTests, establishConnection_noRestriction_success)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(3, actualData.cells.size());
+    ASSERT_EQ(3, actualData._cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
 
     auto actualTargetCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(actualReconnectorCell.signal->channels[0] > NEAR_ZERO);
-    EXPECT_EQ(2, actualReconnectorCell.connections.size());
-    EXPECT_EQ(1, actualTargetCell.connections.size());
+    EXPECT_TRUE(actualReconnectorCell._signal->_channels[0] > NEAR_ZERO);
+    EXPECT_EQ(2, actualReconnectorCell._connections.size());
+    EXPECT_EQ(1, actualTargetCell._connections.size());
     EXPECT_TRUE(hasConnection(actualData, 1, 3));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
@@ -93,15 +93,15 @@ TEST_F(ReconnectorTests, establishConnection_restrictToColor_failed)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(ReconnectorDescription().setRestrictToColor(1)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(ReconnectorDescription().restrictToColor(1)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);
 
@@ -109,14 +109,14 @@ TEST_F(ReconnectorTests, establishConnection_restrictToColor_failed)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(3, actualData.cells.size());
+    ASSERT_EQ(3, actualData._cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
     auto actualTargetCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(std::abs(actualReconnectorCell.signal->channels[0]) < NEAR_ZERO);
-    EXPECT_EQ(1, actualReconnectorCell.connections.size());
-    EXPECT_EQ(0, actualTargetCell.connections.size());
+    EXPECT_TRUE(std::abs(actualReconnectorCell._signal->_channels[0]) < NEAR_ZERO);
+    EXPECT_EQ(1, actualReconnectorCell._connections.size());
+    EXPECT_EQ(0, actualTargetCell._connections.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
@@ -125,15 +125,15 @@ TEST_F(ReconnectorTests, establishConnection_restrictToColor_success)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(ReconnectorDescription()),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(ReconnectorDescription()),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);
 
@@ -141,15 +141,15 @@ TEST_F(ReconnectorTests, establishConnection_restrictToColor_success)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(3, actualData.cells.size());
+    ASSERT_EQ(3, actualData._cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
 
     auto actualTargetCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(actualReconnectorCell.signal->channels[0] > NEAR_ZERO);
-    EXPECT_EQ(2, actualReconnectorCell.connections.size());
-    EXPECT_EQ(1, actualTargetCell.connections.size());
+    EXPECT_TRUE(actualReconnectorCell._signal->_channels[0] > NEAR_ZERO);
+    EXPECT_EQ(2, actualReconnectorCell._connections.size());
+    EXPECT_EQ(1, actualTargetCell._connections.size());
     EXPECT_TRUE(hasConnection(actualData, 1, 3));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
@@ -159,16 +159,16 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_success)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setMutationId(5)
-            .setCellTypeData(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToSameMutants)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .mutationId(5)
+            .cellType(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToSameMutants)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(5),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(5),
     });
     data.addConnection(1, 2);
 
@@ -176,15 +176,15 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_success)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(3, actualData.cells.size());
+    ASSERT_EQ(3, actualData._cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
 
     auto actualTargetCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(actualReconnectorCell.signal->channels[0] > NEAR_ZERO);
-    EXPECT_EQ(2, actualReconnectorCell.connections.size());
-    EXPECT_EQ(1, actualTargetCell.connections.size());
+    EXPECT_TRUE(actualReconnectorCell._signal->_channels[0] > NEAR_ZERO);
+    EXPECT_EQ(2, actualReconnectorCell._connections.size());
+    EXPECT_EQ(1, actualTargetCell._connections.size());
     EXPECT_TRUE(hasConnection(actualData, 1, 3));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
@@ -194,16 +194,16 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_failed)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setMutationId(5)
-            .setCellTypeData(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToSameMutants)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .mutationId(5)
+            .cellType(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToSameMutants)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(4),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(4),
     });
     data.addConnection(1, 2);
 
@@ -211,14 +211,14 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_failed)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(3, actualData.cells.size());
+    ASSERT_EQ(3, actualData._cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
     auto actualTargetCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(std::abs(actualReconnectorCell.signal->channels[0]) < NEAR_ZERO);
-    EXPECT_EQ(1, actualReconnectorCell.connections.size());
-    EXPECT_EQ(0, actualTargetCell.connections.size());
+    EXPECT_TRUE(std::abs(actualReconnectorCell._signal->_channels[0]) < NEAR_ZERO);
+    EXPECT_EQ(1, actualReconnectorCell._connections.size());
+    EXPECT_EQ(0, actualTargetCell._connections.size());
 }
 
 TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_success)
@@ -226,16 +226,16 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_success)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setMutationId(5)
-            .setCellTypeData(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .mutationId(5)
+            .cellType(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(4),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(4),
     });
     data.addConnection(1, 2);
 
@@ -243,14 +243,14 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_success)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(3, actualData.cells.size());
+    ASSERT_EQ(3, actualData._cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
     auto actualTargetCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(actualReconnectorCell.signal->channels[0] > NEAR_ZERO);
-    EXPECT_EQ(2, actualReconnectorCell.connections.size());
-    EXPECT_EQ(1, actualTargetCell.connections.size());
+    EXPECT_TRUE(actualReconnectorCell._signal->_channels[0] > NEAR_ZERO);
+    EXPECT_EQ(2, actualReconnectorCell._connections.size());
+    EXPECT_EQ(1, actualTargetCell._connections.size());
     EXPECT_TRUE(hasConnection(actualData, 1, 3));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
@@ -260,16 +260,16 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_zeroM
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setMutationId(5)
-            .setCellTypeData(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .mutationId(5)
+            .cellType(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(0),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(0),
     });
     data.addConnection(1, 2);
 
@@ -277,14 +277,14 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_zeroM
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(3, actualData.cells.size());
+    ASSERT_EQ(3, actualData._cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
     auto actualTargetCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(std::abs(actualReconnectorCell.signal->channels[0]) < NEAR_ZERO);
-    EXPECT_EQ(1, actualReconnectorCell.connections.size());
-    EXPECT_EQ(0, actualTargetCell.connections.size());
+    EXPECT_TRUE(std::abs(actualReconnectorCell._signal->_channels[0]) < NEAR_ZERO);
+    EXPECT_EQ(1, actualReconnectorCell._connections.size());
+    EXPECT_EQ(0, actualTargetCell._connections.size());
 }
 
 TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_respawnedCell)
@@ -292,16 +292,16 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_respa
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setMutationId(5)
-            .setCellTypeData(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .mutationId(5)
+            .cellType(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(1),
     });
     data.addConnection(1, 2);
 
@@ -309,14 +309,14 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_respa
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(3, actualData.cells.size());
+    ASSERT_EQ(3, actualData._cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
     auto actualTargetCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(std::abs(actualReconnectorCell.signal->channels[0]) < NEAR_ZERO);
-    EXPECT_EQ(1, actualReconnectorCell.connections.size());
-    EXPECT_EQ(0, actualTargetCell.connections.size());
+    EXPECT_TRUE(std::abs(actualReconnectorCell._signal->_channels[0]) < NEAR_ZERO);
+    EXPECT_EQ(1, actualReconnectorCell._connections.size());
+    EXPECT_EQ(0, actualTargetCell._connections.size());
 }
 
 TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_sameMutant)
@@ -324,16 +324,16 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_sameM
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setMutationId(5)
-            .setCellTypeData(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .mutationId(5)
+            .cellType(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(5),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(5),
     });
     data.addConnection(1, 2);
 
@@ -341,14 +341,14 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_sameM
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(3, actualData.cells.size());
+    ASSERT_EQ(3, actualData._cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
     auto actualTargetCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(std::abs(actualReconnectorCell.signal->channels[0]) < NEAR_ZERO);
-    EXPECT_EQ(1, actualReconnectorCell.connections.size());
-    EXPECT_EQ(0, actualTargetCell.connections.size());
+    EXPECT_TRUE(std::abs(actualReconnectorCell._signal->_channels[0]) < NEAR_ZERO);
+    EXPECT_EQ(1, actualReconnectorCell._connections.size());
+    EXPECT_EQ(0, actualTargetCell._connections.size());
 }
 
 TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_success)
@@ -356,16 +356,16 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_success)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setMutationId(5)
-            .setCellTypeData(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToHandcraftedCells)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .mutationId(5)
+            .cellType(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToStructures)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(0),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(0),
     });
     data.addConnection(1, 2);
 
@@ -373,14 +373,14 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_success)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(3, actualData.cells.size());
+    ASSERT_EQ(3, actualData._cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
     auto actualTargetCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(actualReconnectorCell.signal->channels[0] > NEAR_ZERO);
-    EXPECT_EQ(2, actualReconnectorCell.connections.size());
-    EXPECT_EQ(1, actualTargetCell.connections.size());
+    EXPECT_TRUE(actualReconnectorCell._signal->_channels[0] > NEAR_ZERO);
+    EXPECT_EQ(2, actualReconnectorCell._connections.size());
+    EXPECT_EQ(1, actualTargetCell._connections.size());
     EXPECT_TRUE(hasConnection(actualData, 1, 3));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
@@ -390,16 +390,16 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_failed)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setMutationId(5)
-            .setCellTypeData(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToHandcraftedCells)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .mutationId(5)
+            .cellType(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToStructures)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(4),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(4),
     });
     data.addConnection(1, 2);
 
@@ -407,14 +407,14 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_failed)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(3, actualData.cells.size());
+    ASSERT_EQ(3, actualData._cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
     auto actualTargetCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(std::abs(actualReconnectorCell.signal->channels[0]) < NEAR_ZERO);
-    EXPECT_EQ(1, actualReconnectorCell.connections.size());
-    EXPECT_EQ(0, actualTargetCell.connections.size());
+    EXPECT_TRUE(std::abs(actualReconnectorCell._signal->_channels[0]) < NEAR_ZERO);
+    EXPECT_EQ(1, actualReconnectorCell._connections.size());
+    EXPECT_EQ(0, actualTargetCell._connections.size());
 }
 
 TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_success)
@@ -422,16 +422,16 @@ TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_success)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setMutationId(5)
-            .setCellTypeData(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToFreeCells)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .mutationId(5)
+            .cellType(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToFreeCells)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(1),
     });
     data.addConnection(1, 2);
 
@@ -439,14 +439,14 @@ TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_success)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(3, actualData.cells.size());
+    ASSERT_EQ(3, actualData._cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
     auto actualTargetCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(actualReconnectorCell.signal->channels[0] > NEAR_ZERO);
-    EXPECT_EQ(2, actualReconnectorCell.connections.size());
-    EXPECT_EQ(1, actualTargetCell.connections.size());
+    EXPECT_TRUE(actualReconnectorCell._signal->_channels[0] > NEAR_ZERO);
+    EXPECT_EQ(2, actualReconnectorCell._connections.size());
+    EXPECT_EQ(1, actualTargetCell._connections.size());
     EXPECT_TRUE(hasConnection(actualData, 1, 3));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
@@ -456,16 +456,16 @@ TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_failed)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setMutationId(5)
-            .setCellTypeData(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToFreeCells)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .mutationId(5)
+            .cellType(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToFreeCells)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(0),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(0),
     });
     data.addConnection(1, 2);
 
@@ -473,14 +473,14 @@ TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_failed)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(3, actualData.cells.size());
+    ASSERT_EQ(3, actualData._cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
     auto actualTargetCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(std::abs(actualReconnectorCell.signal->channels[0]) < NEAR_ZERO);
-    EXPECT_EQ(1, actualReconnectorCell.connections.size());
-    EXPECT_EQ(0, actualTargetCell.connections.size());
+    EXPECT_TRUE(std::abs(actualReconnectorCell._signal->_channels[0]) < NEAR_ZERO);
+    EXPECT_EQ(1, actualReconnectorCell._connections.size());
+    EXPECT_EQ(0, actualTargetCell._connections.size());
 }
 
 TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_success)
@@ -488,17 +488,17 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_succes
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setMutationId(5)
-            .setGenomeComplexity(1000.0f)
-            .setCellTypeData(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToLessComplexMutants)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .mutationId(5)
+            .genomeComplexity(1000.0f)
+            .cellType(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToLessComplexMutants)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(999.0f),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(1).genomeComplexity(999.0f),
     });
     data.addConnection(1, 2);
 
@@ -514,17 +514,17 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_failed
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setMutationId(5)
-            .setGenomeComplexity(1000.0f)
-            .setCellTypeData(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToLessComplexMutants)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .mutationId(5)
+            .genomeComplexity(1000.0f)
+            .cellType(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToLessComplexMutants)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(1001.0f),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(1).genomeComplexity(1001.0f),
     });
     data.addConnection(1, 2);
 
@@ -540,17 +540,17 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_succes
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setMutationId(5)
-            .setGenomeComplexity(1000.0f)
-            .setCellTypeData(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToMoreComplexMutants)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .mutationId(5)
+            .genomeComplexity(1000.0f)
+            .cellType(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToMoreComplexMutants)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(1001.0f),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(1).genomeComplexity(1001.0f),
     });
     data.addConnection(1, 2);
 
@@ -566,17 +566,17 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_failed
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setMutationId(5)
-            .setGenomeComplexity(1000.0f)
-            .setCellTypeData(ReconnectorDescription().setRestrictToMutants(ReconnectorRestrictToMutants_RestrictToMoreComplexMutants)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .mutationId(5)
+            .genomeComplexity(1000.0f)
+            .cellType(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToMoreComplexMutants)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setMutationId(1).setGenomeComplexity(1000.0f),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(1).genomeComplexity(1000.0f),
     });
     data.addConnection(1, 2);
 
@@ -592,18 +592,18 @@ TEST_F(ReconnectorTests, deleteConnections_success)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(ReconnectorDescription())
-            .setCreatureId(1),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(ReconnectorDescription())
+            .creatureId(1),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({-1, 0, 0, 0, 0, 0, 0, 0})
-            .setCreatureId(1),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCreatureId(3),
-        CellDescription().setId(4).setPos({9.0f, 11.0f}).setCreatureId(4),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({-1, 0, 0, 0, 0, 0, 0, 0})
+            .creatureId(1),
+        CellDescription().id(3).pos({9.0f, 10.0f}).creatureId(3),
+        CellDescription().id(4).pos({9.0f, 11.0f}).creatureId(4),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -613,17 +613,17 @@ TEST_F(ReconnectorTests, deleteConnections_success)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(4, actualData.cells.size());
+    ASSERT_EQ(4, actualData._cells.size());
 
     auto actualReconnectorCell = getCell(actualData, 1);
 
     auto actualTargetCell1 = getCell(actualData, 3);
     auto actualTargetCell2 = getCell(actualData, 4);
 
-    EXPECT_TRUE(actualReconnectorCell.signal->channels[0] > NEAR_ZERO);
-    EXPECT_EQ(1, actualReconnectorCell.connections.size());
-    EXPECT_TRUE(actualTargetCell1.connections.empty());
-    EXPECT_TRUE(actualTargetCell2.connections.empty());
+    EXPECT_TRUE(actualReconnectorCell._signal->_channels[0] > NEAR_ZERO);
+    EXPECT_EQ(1, actualReconnectorCell._connections.size());
+    EXPECT_TRUE(actualTargetCell1._connections.empty());
+    EXPECT_TRUE(actualTargetCell2._connections.empty());
     EXPECT_TRUE(hasConnection(actualData, 1, 2));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
