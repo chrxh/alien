@@ -22,7 +22,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeBeforeFirstPulse)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(96);
+    _simulationFacade->calcTimesteps(97);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
@@ -55,7 +55,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeAtSecondPulse)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(97 * 2);
+    _simulationFacade->calcTimesteps(97 * 2 + 1);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
@@ -72,7 +72,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeAfterFirstPulse)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(98);
+    _simulationFacade->calcTimesteps(99);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
@@ -88,7 +88,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeBeforeFirstPulseAlternation)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(97 * 2);
+    _simulationFacade->calcTimesteps(97 * 2 + 1);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
@@ -105,7 +105,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeAtFirstPulseAlternation)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(97 * 3);
+    _simulationFacade->calcTimesteps(97 * 3 + 1);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
@@ -122,7 +122,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeAtSecondPulseAlternation)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(97 * 6);
+    _simulationFacade->calcTimesteps(97 * 6 + 1);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
@@ -146,7 +146,7 @@ TEST_F(OscillatorTests_New, generatePulse_triangularNetwork)
     data.addConnection(3, 1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(20);
+    _simulationFacade->calcTimesteps(20 + 1);
 
     {
         auto actualData = _simulationFacade->getSimulationData();
