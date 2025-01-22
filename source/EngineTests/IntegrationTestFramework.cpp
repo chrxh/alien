@@ -61,7 +61,7 @@ ConnectionDescription IntegrationTestFramework::getConnection(DataDescription co
 {
     auto cell = getCell(data, id);
     for (auto const& connection : cell.connections) {
-        if (connection.cellId == otherId) {
+        if (connection._cellId == otherId) {
             return connection;
         }
     }
@@ -71,7 +71,7 @@ ConnectionDescription IntegrationTestFramework::getConnection(DataDescription co
 ConnectionDescription IntegrationTestFramework::getConnection(CellDescription const& cell1, CellDescription const& cell2) const
 {
     for (auto const& connection : cell1.connections) {
-        if (connection.cellId == cell2.id) {
+        if (connection._cellId == cell2.id) {
             return connection;
         }
     }
@@ -82,7 +82,7 @@ bool IntegrationTestFramework::hasConnection(DataDescription const& data, uint64
 {
     auto cell = getCell(data, id);
     for (auto const& connection : cell.connections) {
-        if (connection.cellId == otherId) {
+        if (connection._cellId == otherId) {
             return true;
         }
     }

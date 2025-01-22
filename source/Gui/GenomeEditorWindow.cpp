@@ -824,7 +824,7 @@ void GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Description
         AlienImGui::MonospaceText(content);
         AlienImGui::HelpMarker(Const::SubGenomeTooltip);
         if (AlienImGui::Button("Clear")) {
-            desc.setGenome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription()));
+            desc.genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription()));
         }
         ImGui::SameLine();
         if (AlienImGui::Button("Copy")) {
@@ -833,7 +833,7 @@ void GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Description
         ImGui::SameLine();
         ImGui::BeginDisabled(!_copiedGenome.has_value());
         if (AlienImGui::Button("Paste")) {
-            desc.genome = *_copiedGenome;
+            desc._genome = *_copiedGenome;
             printOverlayMessage("Genome pasted");
         }
         ImGui::EndDisabled();
@@ -965,7 +965,7 @@ void GenomeEditorWindow::onCreateSpore()
                     .setEnergy(energy)
                     .setStiffness(1.0f)
                     .setColor(EditorModel::get().getDefaultColorCode())
-                    .setCellTypeData(ConstructorDescription().setGenome(genome));
+                    .setCellTypeData(ConstructorDescription().genome(genome));
     auto data = DataDescription().addCell(cell);
     _simulationFacade->addAndSelectSimulationData(data);
     EditorModel::get().update();

@@ -204,7 +204,7 @@ void _InspectorWindow::processCellGeneralTab(CellDescription& cell)
                 for (auto const& [index, connection] : cell.connections | boost::adaptors::indexed(0)) {
                     if (ImGui::TreeNodeEx(("Connection [" + std::to_string(index) + "]").c_str(), ImGuiTreeNodeFlags_None)) {
                         std::stringstream ss;
-                        ss << "0x" << std::hex << std::uppercase << connection.cellId;
+                        ss << "0x" << std::hex << std::uppercase << connection._cellId;
                         auto cellId = ss.str();
 
                         AlienImGui::InputText(
@@ -217,7 +217,7 @@ void _InspectorWindow::processCellGeneralTab(CellDescription& cell)
                                 .textWidth(BaseTabTextWidth)
                                 .readOnly(true)
                                 .tooltip(Const::CellReferenceDistanceTooltip),
-                            connection.distance);
+                            connection._distance);
                         AlienImGui::InputFloat(
                             AlienImGui::InputFloatParameters()
                                 .name("Reference angle")
@@ -225,7 +225,7 @@ void _InspectorWindow::processCellGeneralTab(CellDescription& cell)
                                 .textWidth(BaseTabTextWidth)
                                 .readOnly(true)
                                 .tooltip(Const::CellReferenceAngleTooltip),
-                            connection.angleFromPrevious);
+                            connection._angleFromPrevious);
                         ImGui::TreePop();
                     }
                 }
@@ -398,30 +398,30 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
             AlienImGui::HelpMarker(Const::GenomePreviewTooltip);
             if (previewNodeResult) {
                 if (ImGui::BeginChild("##child", ImVec2(0, scale(200)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
-                    auto genomDesc = GenomeDescriptionConverterService::get().convertBytesToDescription(desc.genome);
+                    auto genomDesc = GenomeDescriptionConverterService::get().convertBytesToDescription(desc._genome);
                     auto previewDesc = PreviewDescriptionService::get().convert(genomDesc, std::nullopt, parameters);
                     std::optional<int> selectedNodeDummy;
                     AlienImGui::ShowPreviewDescription(previewDesc, _genomeZoom, selectedNodeDummy);
                 }
                 ImGui::EndChild();
                 if (AlienImGui::Button("Edit")) {
-                    GenomeEditorWindow::get().openTab(GenomeDescriptionConverterService::get().convertBytesToDescription(desc.genome));
+                    GenomeEditorWindow::get().openTab(GenomeDescriptionConverterService::get().convertBytesToDescription(desc._genome));
                 }
 
                 ImGui::SameLine();
                 if (AlienImGui::Button(AlienImGui::ButtonParameters().buttonText("Inject from editor").textWidth(ImGui::GetContentRegionAvail().x))) {
                     printOverlayMessage("Genome injected");
-                    desc.genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeEditorWindow::get().getCurrentGenome());
+                    desc._genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeEditorWindow::get().getCurrentGenome());
                     if constexpr (std::is_same<Description, ConstructorDescription>()) {
-                        desc.genomeCurrentNodeIndex = 0;
-                        desc.setNumInheritedGenomeNodes(0);
+                        desc._genomeCurrentNodeIndex = 0;
+                        desc.numInheritedGenomeNodes(0);
                     }
                 }
                 ImGui::TreePop();
             }
 
             if (ImGui::TreeNodeEx("Properties (entire genome)", TreeNodeFlags)) {
-                auto numNodes = toInt(GenomeDescriptionConverterService::get().getNumNodesRecursively(desc.genome, true));
+                auto numNodes = toInt(GenomeDescriptionConverterService::get().getNumNodesRecursively(desc._genome, true));
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters()
                         .name("Number of cells")
@@ -430,7 +430,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                         .tooltip(Const::GenomeNumCellsRecursivelyTooltip),
                     numNodes);
 
-                auto numBytes = toInt(desc.genome.size());
+                auto numBytes = toInt(desc._genome.size());
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters()
                         .name("Bytes")
@@ -441,13 +441,13 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
 
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters().name("Generation").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeGenerationTooltip),
-                    desc.genomeGeneration);
+                    desc._genomeGeneration);
                 ImGui::TreePop();
             }
 
             if (ImGui::TreeNodeEx("Properties (principal genome part)", TreeNodeFlags)) {
 
-                auto genomeDesc = GenomeDescriptionConverterService::get().convertBytesToDescription(desc.genome);
+                auto genomeDesc = GenomeDescriptionConverterService::get().convertBytesToDescription(desc._genome);
                 auto numBranches = genomeDesc.header.getNumBranches();
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters()
@@ -481,16 +481,16 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                         AlienImGui::InputIntParameters()
                             .name("Current branch index")
                             .textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentBranchTooltip),
-                        desc.currentBranch);
+                        desc._currentBranch);
                     AlienImGui::InputInt(
                         AlienImGui::InputIntParameters()
                             .name("Current repetition index")
                             .textWidth(GenomeTabTextWidth)
                             .tooltip(Const::GenomeCurrentRepetitionTooltip),
-                        desc.genomeCurrentRepetition);
+                        desc._genomeCurrentRepetition);
                     AlienImGui::InputInt(
                         AlienImGui::InputIntParameters().name("Current cell index").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentCellTooltip),
-                        desc.genomeCurrentNodeIndex);
+                        desc._genomeCurrentNodeIndex);
                 }
                 ImGui::TreePop();
             }
@@ -504,9 +504,9 @@ void _InspectorWindow::processCellMetadataTab(CellDescription& cell)
 {
     if (ImGui::BeginTabItem("Annotation", nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, 0)) {
-            AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Name").textWidth(0), cell.metadata.name);
+            AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Name").textWidth(0), cell.metadata._name);
 
-            AlienImGui::InputTextMultiline(AlienImGui::InputTextMultilineParameters().hint("Notes").textWidth(0).height(100), cell.metadata.description);
+            AlienImGui::InputTextMultiline(AlienImGui::InputTextMultilineParameters().hint("Notes").textWidth(0).height(100), cell.metadata._description);
         }
         ImGui::EndChild();
         ImGui::EndTabItem();
@@ -544,9 +544,9 @@ void _InspectorWindow::processNeuronContent(CellDescription& cell)
     if (ImGui::TreeNodeEx("Neural network", TreeNodeFlags)) {
         AlienImGui::NeuronSelection(
             AlienImGui::NeuronSelectionParameters().rightMargin(0),
-            cell.neuralNetwork->weights,
-            cell.neuralNetwork->biases,
-            cell.neuralNetwork->activationFunctions);
+            cell.neuralNetwork->_weights,
+            cell.neuralNetwork->_biases,
+            cell.neuralNetwork->_activationFunctions);
         ImGui::TreePop();
     }
 }
@@ -554,7 +554,7 @@ void _InspectorWindow::processNeuronContent(CellDescription& cell)
 void _InspectorWindow::processConstructorContent(ConstructorDescription& constructor)
 {
     if (ImGui::TreeNodeEx("Properties###constructor", TreeNodeFlags)) {
-        int constructorMode = constructor.autoTriggerInterval == 0 ? 0 : 1;
+        int constructorMode = constructor._autoTriggerInterval == 0 ? 0 : 1;
         if (AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Activation mode")
@@ -562,13 +562,13 @@ void _InspectorWindow::processConstructorContent(ConstructorDescription& constru
                     .values({"Manual", "Automatic"})
                     .tooltip(Const::GenomeConstructorActivationModeTooltip),
                 constructorMode)) {
-            constructor.autoTriggerInterval = constructorMode;
+            constructor._autoTriggerInterval = constructorMode;
         }
         if (constructorMode == 1) {
             AlienImGui::InputInt(
                 AlienImGui::InputIntParameters().name("Interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip),
-                constructor.autoTriggerInterval);
-            constructor.autoTriggerInterval = std::max(1, constructor.autoTriggerInterval);
+                constructor._autoTriggerInterval);
+            constructor._autoTriggerInterval = std::max(1, constructor._autoTriggerInterval);
 
         }
         AlienImGui::InputInt(
@@ -576,21 +576,21 @@ void _InspectorWindow::processConstructorContent(ConstructorDescription& constru
                 .name("Offspring activation time")
                 .textWidth(CellTypeTextWidth)
                 .tooltip(Const::GenomeConstructorOffspringActivationTime),
-            constructor.constructionActivationTime);
+            constructor._constructionActivationTime);
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
                 .name("Construction angle #1")
                 .textWidth(CellTypeTextWidth)
                 .format("%.1f")
                 .tooltip(Const::GenomeConstructorAngle1Tooltip),
-            constructor.constructionAngle1);
+            constructor._constructionAngle1);
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
                 .name("Construction angle #2")
                 .textWidth(CellTypeTextWidth)
                 .format("%.1f")
                 .tooltip(Const::GenomeConstructorAngle2Tooltip),
-            constructor.constructionAngle2);
+            constructor._constructionAngle2);
         ImGui::TreePop();
 
     }
@@ -651,7 +651,7 @@ void _InspectorWindow::processTransmitterContent(DepotDescription& transmitter)
                 .values({"Connected cells", "Transmitters and Constructors"})
                 .tooltip(Const::GenomeTransmitterEnergyDistributionTooltip)
                 .textWidth(CellTypeTextWidth),
-            transmitter.mode);
+            transmitter._mode);
         ImGui::TreePop();
     }
 }
@@ -782,28 +782,28 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
     switch (cell.getCellType()) {
     case CellType_Constructor: {
         auto& constructor = std::get<ConstructorDescription>(cell.cellTypeData);
-        auto numNodes = GenomeDescriptionConverterService::get().convertNodeAddressToNodeIndex(constructor.genome, toInt(constructor.genome.size()));
+        auto numNodes = GenomeDescriptionConverterService::get().convertNodeAddressToNodeIndex(constructor._genome, toInt(constructor._genome.size()));
         if (numNodes > 0) {
-            constructor.genomeCurrentNodeIndex = ((constructor.genomeCurrentNodeIndex % numNodes) + numNodes) % numNodes;
+            constructor._genomeCurrentNodeIndex = ((constructor._genomeCurrentNodeIndex % numNodes) + numNodes) % numNodes;
         } else {
-            constructor.genomeCurrentNodeIndex = 0;
+            constructor._genomeCurrentNodeIndex = 0;
         }
 
-        auto numRepetitions = GenomeDescriptionConverterService::get().getNumRepetitions(constructor.genome);
+        auto numRepetitions = GenomeDescriptionConverterService::get().getNumRepetitions(constructor._genome);
         if (numRepetitions != std::numeric_limits<int>::max()) {
-            constructor.genomeCurrentRepetition = ((constructor.genomeCurrentRepetition % numRepetitions) + numRepetitions) % numRepetitions;
+            constructor._genomeCurrentRepetition = ((constructor._genomeCurrentRepetition % numRepetitions) + numRepetitions) % numRepetitions;
         } else {
-            constructor.genomeCurrentRepetition = 0;
+            constructor._genomeCurrentRepetition = 0;
         }
 
-        constructor.constructionActivationTime = ((constructor.constructionActivationTime % MAX_ACTIVATION_TIME) + MAX_ACTIVATION_TIME) % MAX_ACTIVATION_TIME;
-        if (constructor.constructionActivationTime < 0) {
-            constructor.constructionActivationTime = 0;
+        constructor._constructionActivationTime = ((constructor._constructionActivationTime % MAX_ACTIVATION_TIME) + MAX_ACTIVATION_TIME) % MAX_ACTIVATION_TIME;
+        if (constructor._constructionActivationTime < 0) {
+            constructor._constructionActivationTime = 0;
         }
-        if (constructor.autoTriggerInterval < 0) {
-            constructor.autoTriggerInterval = 0;
+        if (constructor._autoTriggerInterval < 0) {
+            constructor._autoTriggerInterval = 0;
         }
-        constructor.genomeGeneration = std::max(0, constructor.genomeGeneration);
+        constructor._genomeGeneration = std::max(0, constructor._genomeGeneration);
     } break;
     case CellType_Sensor: {
         auto& sensor = std::get<SensorDescription>(cell.cellTypeData);

@@ -493,8 +493,8 @@ namespace cereal
     {
         CellMetadataDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Metadata_Name, data.name, defaultObject.name);
-        loadSave(task, auxiliaries, Id_Metadata_Description, data.description, defaultObject.description);
+        loadSave(task, auxiliaries, Id_Metadata_Name, data._name, defaultObject._name);
+        loadSave(task, auxiliaries, Id_Metadata_Description, data._description, defaultObject._description);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(CellMetadataDescription)
@@ -504,9 +504,9 @@ namespace cereal
     {
         ConnectionDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Connection_CellId, data.cellId, defaultObject.cellId);
-        loadSave(task, auxiliaries, Id_Connection_Distance, data.distance, defaultObject.distance);
-        loadSave(task, auxiliaries, Id_Connection_AngleFromPrevious, data.angleFromPrevious, defaultObject.angleFromPrevious);
+        loadSave(task, auxiliaries, Id_Connection_CellId, data._cellId, defaultObject._cellId);
+        loadSave(task, auxiliaries, Id_Connection_Distance, data._distance, defaultObject._distance);
+        loadSave(task, auxiliaries, Id_Connection_AngleFromPrevious, data._angleFromPrevious, defaultObject._angleFromPrevious);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ConnectionDescription)
@@ -541,9 +541,9 @@ namespace cereal
     {
         NeuralNetworkDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_NeuralNetwork_Weights, data.weights, defaultObject.weights);
-        loadSave(task, auxiliaries, Id_NeuralNetwork_Biases, data.biases, defaultObject.biases);
-        loadSave(task, auxiliaries, Id_NeuralNetwork_ActivationFunctions, data.activationFunctions, defaultObject.activationFunctions);
+        loadSave(task, auxiliaries, Id_NeuralNetwork_Weights, data._weights, defaultObject._weights);
+        loadSave(task, auxiliaries, Id_NeuralNetwork_Biases, data._biases, defaultObject._biases);
+        loadSave(task, auxiliaries, Id_NeuralNetwork_ActivationFunctions, data._activationFunctions, defaultObject._activationFunctions);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(NeuralNetworkDescription)
@@ -561,7 +561,7 @@ namespace cereal
     {
         DepotDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Transmitter_Mode, data.mode, defaultObject.mode);
+        loadSave(task, auxiliaries, Id_Transmitter_Mode, data._mode, defaultObject._mode);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(DepotDescription)
@@ -571,26 +571,26 @@ namespace cereal
     {
         ConstructorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Constructor_AutoTriggerInterval, data.autoTriggerInterval, defaultObject.autoTriggerInterval);
-        loadSave(task, auxiliaries, Id_Constructor_ConstructionActivationTime, data.constructionActivationTime, defaultObject.constructionActivationTime);
-        loadSave(task, auxiliaries, Id_Constructor_LastConstructedCellId, data.lastConstructedCellId, defaultObject.lastConstructedCellId);
-        loadSave(task, auxiliaries, Id_Constructor_GenomeCurrentNodeIndex, data.genomeCurrentNodeIndex, defaultObject.genomeCurrentNodeIndex);
-        loadSave(task, auxiliaries, Id_Constructor_GenomeCurrentRepetition, data.genomeCurrentRepetition, defaultObject.genomeCurrentRepetition);
-        loadSave(task, auxiliaries, Id_Constructor_CurrentBranch, data.currentBranch, defaultObject.currentBranch);
-        loadSave(task, auxiliaries, Id_Constructor_OffspringCreatureId, data.offspringCreatureId, defaultObject.offspringCreatureId);
-        loadSave(task, auxiliaries, Id_Constructor_OffspringMutationId, data.offspringMutationId, defaultObject.offspringMutationId);
-        loadSave(task, auxiliaries, Id_Constructor_GenomeGeneration, data.genomeGeneration, defaultObject.genomeGeneration);
-        loadSave(task, auxiliaries, Id_Constructor_ConstructionAngle1, data.constructionAngle1, defaultObject.constructionAngle1);
-        loadSave(task, auxiliaries, Id_Constructor_ConstructionAngle2, data.constructionAngle2, defaultObject.constructionAngle2);
-        loadSave(task, auxiliaries, Id_Constructor_NumInheritedGenomeNodes, data.numInheritedGenomeNodes, defaultObject.numInheritedGenomeNodes);
+        loadSave(task, auxiliaries, Id_Constructor_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
+        loadSave(task, auxiliaries, Id_Constructor_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
+        loadSave(task, auxiliaries, Id_Constructor_LastConstructedCellId, data._lastConstructedCellId, defaultObject._lastConstructedCellId);
+        loadSave(task, auxiliaries, Id_Constructor_GenomeCurrentNodeIndex, data._genomeCurrentNodeIndex, defaultObject._genomeCurrentNodeIndex);
+        loadSave(task, auxiliaries, Id_Constructor_GenomeCurrentRepetition, data._genomeCurrentRepetition, defaultObject._genomeCurrentRepetition);
+        loadSave(task, auxiliaries, Id_Constructor_CurrentBranch, data._currentBranch, defaultObject._currentBranch);
+        loadSave(task, auxiliaries, Id_Constructor_OffspringCreatureId, data._offspringCreatureId, defaultObject._offspringCreatureId);
+        loadSave(task, auxiliaries, Id_Constructor_OffspringMutationId, data._offspringMutationId, defaultObject._offspringMutationId);
+        loadSave(task, auxiliaries, Id_Constructor_GenomeGeneration, data._genomeGeneration, defaultObject._genomeGeneration);
+        loadSave(task, auxiliaries, Id_Constructor_ConstructionAngle1, data._constructionAngle1, defaultObject._constructionAngle1);
+        loadSave(task, auxiliaries, Id_Constructor_ConstructionAngle2, data._constructionAngle2, defaultObject._constructionAngle2);
+        loadSave(task, auxiliaries, Id_Constructor_NumInheritedGenomeNodes, data._numInheritedGenomeNodes, defaultObject._numInheritedGenomeNodes);
         processLoadSaveMap(task, ar, auxiliaries);
 
         if (task == SerializationTask::Load) {
             GenomeDescription genomeDesc;
             ar(genomeDesc);
-            data.genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(genomeDesc);
+            data._genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(genomeDesc);
         } else {
-            GenomeDescription genomeDesc = GenomeDescriptionConverterService::get().convertBytesToDescription(data.genome);
+            GenomeDescription genomeDesc = GenomeDescriptionConverterService::get().convertBytesToDescription(data._genome);
             ar(genomeDesc);
         }
     }
@@ -1392,7 +1392,7 @@ void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics,
 bool SerializerService::wrapGenome(ClusteredDataDescription& output, std::vector<uint8_t> const& input)
 {
     output.clear();
-    output.addCluster(ClusterDescription().addCell(CellDescription().setCellTypeData(ConstructorDescription().setGenome(input))));
+    output.addCluster(ClusterDescription().addCell(CellDescription().setCellTypeData(ConstructorDescription().genome(input))));
     return true;
 }
 
@@ -1410,6 +1410,6 @@ bool SerializerService::unwrapGenome(std::vector<uint8_t>& output, ClusteredData
     if (cell.getCellType() != CellType_Constructor) {
         return false;
     }
-    output = std::get<ConstructorDescription>(cell.cellTypeData).genome;
+    output = std::get<ConstructorDescription>(cell.cellTypeData)._genome;
     return true;
 }

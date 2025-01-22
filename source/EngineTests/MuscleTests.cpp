@@ -53,8 +53,8 @@ TEST_F(MuscleTests, doNothing)
     EXPECT_EQ(2, actualData.cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     EXPECT_TRUE(approxCompare(0, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(actualOscillatorCell.connections.at(0).distance, actualMuscleCell.connections.at(0).distance));
-    EXPECT_TRUE(approxCompare(1.0f , actualMuscleCell.connections.at(0).distance));
+    EXPECT_TRUE(approxCompare(actualOscillatorCell.connections.at(0)._distance, actualMuscleCell.connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(1.0f , actualMuscleCell.connections.at(0)._distance));
     EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.x));
     EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.y));
 }
@@ -84,8 +84,8 @@ TEST_F(MuscleTests, moveForward)
     EXPECT_EQ(2, actualData.cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(actualOscillatorCell.connections.at(0).distance, actualMuscleCell.connections.at(0).distance));
-    EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.connections.at(0).distance));
+    EXPECT_TRUE(approxCompare(actualOscillatorCell.connections.at(0)._distance, actualMuscleCell.connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.connections.at(0)._distance));
     EXPECT_TRUE(approxCompare(-_parameters.cellTypeMuscleMovementAcceleration[0], actualMuscleCell.vel.x));
     EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.y));
 }
@@ -114,8 +114,8 @@ TEST_F(MuscleTests, moveBackward)
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     EXPECT_TRUE(approxCompare(-1.0f, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(actualOscillatorCell.connections.at(0).distance, actualMuscleCell.connections.at(0).distance));
-    EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.connections.at(0).distance));
+    EXPECT_TRUE(approxCompare(actualOscillatorCell.connections.at(0)._distance, actualMuscleCell.connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.connections.at(0)._distance));
     EXPECT_TRUE(approxCompare(_parameters.cellTypeMuscleMovementAcceleration[0], actualMuscleCell.vel.x));
     EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.y));
 }
@@ -179,8 +179,8 @@ TEST_F(MuscleTests, expansion)
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(actualOscillatorCell.connections.at(0).distance, actualMuscleCell.connections.at(0).distance));
-    EXPECT_TRUE(approxCompare(smallDistance + _parameters.cellTypeMuscleContractionExpansionDelta[0], actualMuscleCell.connections.at(0).distance));
+    EXPECT_TRUE(approxCompare(actualOscillatorCell.connections.at(0)._distance, actualMuscleCell.connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(smallDistance + _parameters.cellTypeMuscleContractionExpansionDelta[0], actualMuscleCell.connections.at(0)._distance));
     EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.x));
     EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.y));
 }
@@ -210,7 +210,7 @@ TEST_F(MuscleTests, expansionNotPossible)
     auto actualOscillatorCell = getCell(actualData, 2);
 
     EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(largeDistance, actualMuscleCell.connections.at(0).distance));
+    EXPECT_TRUE(approxCompare(largeDistance, actualMuscleCell.connections.at(0)._distance));
 }
 
 TEST_F(MuscleTests, contraction)
@@ -238,8 +238,8 @@ TEST_F(MuscleTests, contraction)
     auto actualOscillatorCell = getCell(actualData, 2);
 
     EXPECT_TRUE(approxCompare(-1.0f, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(actualOscillatorCell.connections.at(0).distance, actualMuscleCell.connections.at(0).distance));
-    EXPECT_TRUE(approxCompare(largeDistance - _parameters.cellTypeMuscleContractionExpansionDelta[0], actualMuscleCell.connections.at(0).distance));
+    EXPECT_TRUE(approxCompare(actualOscillatorCell.connections.at(0)._distance, actualMuscleCell.connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(largeDistance - _parameters.cellTypeMuscleContractionExpansionDelta[0], actualMuscleCell.connections.at(0)._distance));
 }
 
 TEST_F(MuscleTests, multipleContraction)
@@ -275,8 +275,8 @@ TEST_F(MuscleTests, multipleContraction)
     auto muscleToOscillatorConnection2 = getConnection(actualData, 1, 3);
 
     EXPECT_TRUE(approxCompare(-2.0f, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(largeDistance - _parameters.cellTypeMuscleContractionExpansionDelta[0], muscleToOscillatorConnection1.distance));
-    EXPECT_TRUE(approxCompare(largeDistance - _parameters.cellTypeMuscleContractionExpansionDelta[0], muscleToOscillatorConnection2.distance));
+    EXPECT_TRUE(approxCompare(largeDistance - _parameters.cellTypeMuscleContractionExpansionDelta[0], muscleToOscillatorConnection1._distance));
+    EXPECT_TRUE(approxCompare(largeDistance - _parameters.cellTypeMuscleContractionExpansionDelta[0], muscleToOscillatorConnection2._distance));
 }
 
 TEST_F(MuscleTests, contractionNotPossible)
@@ -304,7 +304,7 @@ TEST_F(MuscleTests, contractionNotPossible)
     auto actualOscillatorCell = getCell(actualData, 2);
 
     EXPECT_TRUE(approxCompare(-1.0f, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(smallDistance, actualMuscleCell.connections.at(0).distance));
+    EXPECT_TRUE(approxCompare(smallDistance, actualMuscleCell.connections.at(0)._distance));
 }
 
 TEST_F(MuscleTests, bendClockwise)
@@ -336,9 +336,9 @@ TEST_F(MuscleTests, bendClockwise)
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(1.0f, connection1.distance));
-    EXPECT_TRUE(approxCompare(1.0f, connection2.distance));
-    EXPECT_TRUE(approxCompare(180.0f + _parameters.cellTypeMuscleBendingAngle[0], connection1.angleFromPrevious));
+    EXPECT_TRUE(approxCompare(1.0f, connection1._distance));
+    EXPECT_TRUE(approxCompare(1.0f, connection2._distance));
+    EXPECT_TRUE(approxCompare(180.0f + _parameters.cellTypeMuscleBendingAngle[0], connection1._angleFromPrevious));
     EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.x));
     EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.y));
 }
@@ -371,9 +371,9 @@ TEST_F(MuscleTests, bendCounterClockwise)
     auto connection2 = getConnection(actualData, 3, 2);
 
     EXPECT_TRUE(approxCompare(-1.0f, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(1.0f, connection1.distance));
-    EXPECT_TRUE(approxCompare(1.0f, connection2.distance));
-    EXPECT_TRUE(approxCompare(180.0f - _parameters.cellTypeMuscleBendingAngle[0], connection1.angleFromPrevious));
+    EXPECT_TRUE(approxCompare(1.0f, connection1._distance));
+    EXPECT_TRUE(approxCompare(1.0f, connection2._distance));
+    EXPECT_TRUE(approxCompare(180.0f - _parameters.cellTypeMuscleBendingAngle[0], connection1._angleFromPrevious));
     EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.x));
     EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.y));
 }

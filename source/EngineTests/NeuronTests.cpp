@@ -23,7 +23,7 @@ protected:
 TEST_F(NeuronTests, bias)
 {
     NeuralNetworkDescription nn;
-    nn.biases = {0, 0, 1, 0, 0, 0, 0, -1};
+    nn._biases = {0, 0, 1, 0, 0, 0, 0, -1};
 
     auto data = DataDescription().addCells({CellDescription().setId(1).setNeuralNetwork(nn)});
 
@@ -39,9 +39,9 @@ TEST_F(NeuronTests, bias)
 TEST_F(NeuronTests, weight)
 {
     NeuralNetworkDescription nn;
-    nn.setWeight(2, 3, 1.0f);
-    nn.setWeight(2, 7, 0.5f);
-    nn.setWeight(5, 3, -3.5f);
+    nn.weight(2, 3, 1.0f);
+    nn.weight(2, 7, 0.5f);
+    nn.weight(5, 3, -3.5f);
 
     SignalDescription signal;
     signal.channels = {0, 0, 0, 1, 0, 0, 0, 0.5f};
@@ -68,11 +68,11 @@ TEST_F(NeuronTests, weight)
 TEST_F(NeuronTests, activationFunctionBinaryStep)
 {
     NeuralNetworkDescription nn;
-    nn.setWeight(2, 3, 1.0f);
-    nn.setWeight(2, 7, 0.5f);
-    nn.setWeight(5, 3, -3.5f);
-    nn.activationFunctions[2] = ActivationFunction_BinaryStep;
-    nn.activationFunctions[5] = ActivationFunction_BinaryStep;
+    nn.weight(2, 3, 1.0f);
+    nn.weight(2, 7, 0.5f);
+    nn.weight(5, 3, -3.5f);
+    nn._activationFunctions[2] = ActivationFunction_BinaryStep;
+    nn._activationFunctions[5] = ActivationFunction_BinaryStep;
 
 
     SignalDescription signal;

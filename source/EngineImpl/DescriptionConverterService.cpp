@@ -31,7 +31,7 @@ namespace
     NeuralNetworkDescription convertToNeuronDescription(DataTO const& dataTO, uint64_t sourceIndex)
     {
         NeuralNetworkDescription result;
-        auto weights_span = std::mdspan(result.weights.data(), MAX_CHANNELS, MAX_CHANNELS);
+        auto weights_span = std::mdspan(result._weights.data(), MAX_CHANNELS, MAX_CHANNELS);
 
         BytesAsFloat bytesAsFloat;
         int index = 0;
@@ -49,10 +49,10 @@ namespace
                 bytesAsFloat.b[i] = dataTO.auxiliaryData[sourceIndex + index];
                 ++index;
             }
-            result.biases[channel] = bytesAsFloat.f;
+            result._biases[channel] = bytesAsFloat.f;
         }
         for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
-            result.activationFunctions[channel] = dataTO.auxiliaryData[sourceIndex + index];
+            result._activationFunctions[channel] = dataTO.auxiliaryData[sourceIndex + index];
             ++index;
         }
 
@@ -78,7 +78,7 @@ namespace
         targetIndex = *dataTO.numAuxiliaryData;
         *dataTO.numAuxiliaryData += NeuralNetworkTO::DataSize;
 
-        auto weights_span = std::mdspan(neuralNetDesc.weights.data(), MAX_CHANNELS, MAX_CHANNELS);
+        auto weights_span = std::mdspan(neuralNetDesc._weights.data(), MAX_CHANNELS, MAX_CHANNELS);
 
         BytesAsFloat bytesAsFloat;
         int bytePos = 0;
@@ -92,14 +92,14 @@ namespace
             }
         }
         for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
-            bytesAsFloat.f = neuralNetDesc.biases[channel];
+            bytesAsFloat.f = neuralNetDesc._biases[channel];
             for (int i = 0; i < 4; ++i) {
                 dataTO.auxiliaryData[targetIndex + bytePos] = bytesAsFloat.b[i];
                 ++bytePos;
             }
         }
         for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
-            dataTO.auxiliaryData[targetIndex + bytePos] = neuralNetDesc.activationFunctions[channel];
+            dataTO.auxiliaryData[targetIndex + bytePos] = neuralNetDesc._activationFunctions[channel];
             ++bytePos;
         }
     }
@@ -280,7 +280,7 @@ void DescriptionConverterService::convertDescriptionToTO(DataTO& result, Particl
 
 void DescriptionConverterService::addAdditionalDataSizeForCell(CellDescription const& cell, uint64_t& additionalDataSize) const
 {
-    additionalDataSize += cell.metadata.name.size() + cell.metadata.description.size();
+    additionalDataSize += cell.metadata._name.size() + cell.metadata._description.size();
     switch (cell.getCellType()) {
     case CellType_Base: {
         additionalDataSize += MAX_CHANNELS * (MAX_CHANNELS + 1) * sizeof(float);
@@ -288,7 +288,7 @@ void DescriptionConverterService::addAdditionalDataSizeForCell(CellDescription c
     case CellType_Depot:
         break;
     case CellType_Constructor:
-        additionalDataSize += std::get<ConstructorDescription>(cell.cellTypeData).genome.size();
+        additionalDataSize += std::get<ConstructorDescription>(cell.cellTypeData)._genome.size();
         break;
     case CellType_Sensor:
         break;
@@ -378,12 +378,12 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
         auto const& connectionTO = cellTO.connections[i];
         ConnectionDescription connection;
         if (connectionTO.cellIndex != -1) {
-            connection.cellId = dataTO.cells[connectionTO.cellIndex].id;
+            connection._cellId = dataTO.cells[connectionTO.cellIndex].id;
         } else {
-            connection.cellId = 0;
+            connection._cellId = 0;
         }
-        connection.distance = connectionTO.distance;
-        connection.angleFromPrevious = connectionTO.angleFromPrevious;
+        connection._distance = connectionTO.distance;
+        connection._angleFromPrevious = connectionTO.angleFromPrevious;
         connections.emplace_back(connection);
     }
     result.connections = connections;
@@ -403,12 +403,12 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
     auto metadata = CellMetadataDescription();
     if (metadataTO.nameSize > 0) {
         auto const name = std::string(reinterpret_cast<char*>(&dataTO.auxiliaryData[metadataTO.nameDataIndex]), metadataTO.nameSize);
-        metadata.setName(name);
+        metadata.name(name);
     }
     if (metadataTO.descriptionSize > 0) {
         auto const description =
             std::string(reinterpret_cast<char*>(&dataTO.auxiliaryData[metadataTO.descriptionDataIndex]), metadataTO.descriptionSize);
-        metadata.setDescription(description);
+        metadata.description(description);
     }
     result.metadata = metadata;
 
@@ -422,24 +422,24 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
     } break;
     case CellType_Depot: {
         DepotDescription transmitter;
-        transmitter.mode = cellTO.cellTypeData.transmitter.mode;
+        transmitter._mode = cellTO.cellTypeData.transmitter.mode;
         result.cellTypeData = transmitter;
     } break;
     case CellType_Constructor: {
         ConstructorDescription constructor;
-        constructor.autoTriggerInterval = cellTO.cellTypeData.constructor.autoTriggerInterval;
-        constructor.constructionActivationTime = cellTO.cellTypeData.constructor.constructionActivationTime;
-        convert(dataTO, cellTO.cellTypeData.constructor.genomeSize, cellTO.cellTypeData.constructor.genomeDataIndex, constructor.genome);
-        constructor.numInheritedGenomeNodes = cellTO.cellTypeData.constructor.numInheritedGenomeNodes;
-        constructor.lastConstructedCellId = cellTO.cellTypeData.constructor.lastConstructedCellId;
-        constructor.genomeCurrentNodeIndex = cellTO.cellTypeData.constructor.genomeCurrentNodeIndex;
-        constructor.genomeCurrentRepetition = cellTO.cellTypeData.constructor.genomeCurrentRepetition;
-        constructor.currentBranch = cellTO.cellTypeData.constructor.currentBranch;
-        constructor.offspringCreatureId = cellTO.cellTypeData.constructor.offspringCreatureId;
-        constructor.offspringMutationId = cellTO.cellTypeData.constructor.offspringMutationId;
-        constructor.genomeGeneration = cellTO.cellTypeData.constructor.genomeGeneration;
-        constructor.constructionAngle1 = cellTO.cellTypeData.constructor.constructionAngle1;
-        constructor.constructionAngle2 = cellTO.cellTypeData.constructor.constructionAngle2;
+        constructor._autoTriggerInterval = cellTO.cellTypeData.constructor.autoTriggerInterval;
+        constructor._constructionActivationTime = cellTO.cellTypeData.constructor.constructionActivationTime;
+        convert(dataTO, cellTO.cellTypeData.constructor.genomeSize, cellTO.cellTypeData.constructor.genomeDataIndex, constructor._genome);
+        constructor._numInheritedGenomeNodes = cellTO.cellTypeData.constructor.numInheritedGenomeNodes;
+        constructor._lastConstructedCellId = cellTO.cellTypeData.constructor.lastConstructedCellId;
+        constructor._genomeCurrentNodeIndex = cellTO.cellTypeData.constructor.genomeCurrentNodeIndex;
+        constructor._genomeCurrentRepetition = cellTO.cellTypeData.constructor.genomeCurrentRepetition;
+        constructor._currentBranch = cellTO.cellTypeData.constructor.currentBranch;
+        constructor._offspringCreatureId = cellTO.cellTypeData.constructor.offspringCreatureId;
+        constructor._offspringMutationId = cellTO.cellTypeData.constructor.offspringMutationId;
+        constructor._genomeGeneration = cellTO.cellTypeData.constructor.genomeGeneration;
+        constructor._constructionAngle1 = cellTO.cellTypeData.constructor.constructionAngle1;
+        constructor._constructionAngle2 = cellTO.cellTypeData.constructor.constructionAngle2;
         result.cellTypeData = constructor;
     } break;
     case CellType_Sensor: {
@@ -577,26 +577,26 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
     case CellType_Depot: {
         auto const& transmitterDesc = std::get<DepotDescription>(cellDesc.cellTypeData);
         TransmitterTO transmitterTO;
-        transmitterTO.mode = transmitterDesc.mode;
+        transmitterTO.mode = transmitterDesc._mode;
         cellTO.cellTypeData.transmitter = transmitterTO;
     } break;
     case CellType_Constructor: {
         auto const& constructorDesc = std::get<ConstructorDescription>(cellDesc.cellTypeData);
         ConstructorTO constructorTO;
-        constructorTO.autoTriggerInterval = constructorDesc.autoTriggerInterval;
-        constructorTO.constructionActivationTime = constructorDesc.constructionActivationTime;
-        CHECK(constructorDesc.genome.size() >= Const::GenomeHeaderSize)
-        convert(dataTO, constructorDesc.genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
-        constructorTO.numInheritedGenomeNodes = static_cast<uint16_t>(constructorDesc.numInheritedGenomeNodes);
-        constructorTO.lastConstructedCellId = constructorDesc.lastConstructedCellId;
-        constructorTO.genomeCurrentNodeIndex = static_cast<uint16_t>(constructorDesc.genomeCurrentNodeIndex);
-        constructorTO.genomeCurrentRepetition = static_cast<uint16_t>(constructorDesc.genomeCurrentRepetition);
-        constructorTO.currentBranch = static_cast<uint8_t>(constructorDesc.currentBranch);
-        constructorTO.offspringCreatureId = constructorDesc.offspringCreatureId;
-        constructorTO.offspringMutationId = constructorDesc.offspringMutationId;
-        constructorTO.genomeGeneration = constructorDesc.genomeGeneration;
-        constructorTO.constructionAngle1 = constructorDesc.constructionAngle1;
-        constructorTO.constructionAngle2 = constructorDesc.constructionAngle2;
+        constructorTO.autoTriggerInterval = constructorDesc._autoTriggerInterval;
+        constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
+        CHECK(constructorDesc._genome.size() >= Const::GenomeHeaderSize)
+        convert(dataTO, constructorDesc._genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
+        constructorTO.numInheritedGenomeNodes = static_cast<uint16_t>(constructorDesc._numInheritedGenomeNodes);
+        constructorTO.lastConstructedCellId = constructorDesc._lastConstructedCellId;
+        constructorTO.genomeCurrentNodeIndex = static_cast<uint16_t>(constructorDesc._genomeCurrentNodeIndex);
+        constructorTO.genomeCurrentRepetition = static_cast<uint16_t>(constructorDesc._genomeCurrentRepetition);
+        constructorTO.currentBranch = static_cast<uint8_t>(constructorDesc._currentBranch);
+        constructorTO.offspringCreatureId = constructorDesc._offspringCreatureId;
+        constructorTO.offspringMutationId = constructorDesc._offspringMutationId;
+        constructorTO.genomeGeneration = constructorDesc._genomeGeneration;
+        constructorTO.constructionAngle1 = constructorDesc._constructionAngle1;
+        constructorTO.constructionAngle2 = constructorDesc._constructionAngle2;
         cellTO.cellTypeData.constructor = constructorTO;
     } break;
     case CellType_Sensor: {
@@ -685,8 +685,8 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
     cellTO.age = cellDesc.age;
     cellTO.color = cellDesc.color;
     cellTO.genomeComplexity = cellDesc.genomeComplexity;
-    convert(dataTO, cellDesc.metadata.name, cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex);
-    convert(dataTO, cellDesc.metadata.description, cellTO.metadata.descriptionSize, cellTO.metadata.descriptionDataIndex);
+    convert(dataTO, cellDesc.metadata._name, cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex);
+    convert(dataTO, cellDesc.metadata._description, cellTO.metadata.descriptionSize, cellTO.metadata.descriptionDataIndex);
 	cellIndexTOByIds.insert_or_assign(cellTO.id, cellIndex);
 }
 
@@ -696,14 +696,14 @@ void DescriptionConverterService::setConnections(DataTO const& dataTO, CellDescr
     auto& cellTO = dataTO.cells[cellIndexByIds.at(cellToAdd.id)];
     float angleOffset = 0;
     for (ConnectionDescription const& connection : cellToAdd.connections) {
-        if (connection.cellId != 0) {
-            cellTO.connections[index].cellIndex = cellIndexByIds.at(connection.cellId);
-            cellTO.connections[index].distance = connection.distance;
-            cellTO.connections[index].angleFromPrevious = connection.angleFromPrevious + angleOffset;
+        if (connection._cellId != 0) {
+            cellTO.connections[index].cellIndex = cellIndexByIds.at(connection._cellId);
+            cellTO.connections[index].distance = connection._distance;
+            cellTO.connections[index].angleFromPrevious = connection._angleFromPrevious + angleOffset;
             ++index;
             angleOffset = 0;
         } else {
-            angleOffset += connection.angleFromPrevious;
+            angleOffset += connection._angleFromPrevious;
         }
     }
     if (angleOffset != 0 && index > 0) {

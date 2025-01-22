@@ -78,7 +78,7 @@ TEST_F(InjectorTests, matchButNoInjection)
         CellDescription()
             .setId(3)
             .setPos({9.0f, 10.0f})
-            .setCellTypeData(ConstructorDescription().setNumInheritedGenomeNodes(1)),
+            .setCellTypeData(ConstructorDescription().numInheritedGenomeNodes(1)),
     });
     data.addConnection(1, 2);
 
@@ -96,7 +96,7 @@ TEST_F(InjectorTests, matchButNoInjection)
     EXPECT_EQ(3, actualData.cells.size());
     EXPECT_TRUE(approxCompare(1.0f, actualCell.signal->channels[0]));
     EXPECT_EQ(1, actualInjector.counter);
-    EXPECT_EQ(origTargetConstructor.genome, actualTargetConstructor.genome);
+    EXPECT_EQ(origTargetConstructor._genome, actualTargetConstructor._genome);
     EXPECT_TRUE(actualTargetConstructor.isGenomeInherited());
 }
 
@@ -115,7 +115,7 @@ TEST_F(InjectorTests, injection)
             .setPos({11.0f, 10.0f})
             .setCellTypeData(OscillatorDescription().setAutoTriggerInterval(1))
             .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellTypeData(ConstructorDescription().setNumInheritedGenomeNodes(1)),
+        CellDescription().setId(3).setPos({9.0f, 10.0f}).setCellTypeData(ConstructorDescription().numInheritedGenomeNodes(1)),
     });
     data.addConnection(1, 2);
 
@@ -135,7 +135,7 @@ TEST_F(InjectorTests, injection)
     EXPECT_EQ(3, actualData.cells.size());
     EXPECT_TRUE(approxCompare(1.0f, actualCell.signal->channels[0]));
     EXPECT_EQ(0, actualInjector.counter);
-    EXPECT_EQ(origInjector.genome, actualTargetConstructor.genome);
+    EXPECT_EQ(origInjector.genome, actualTargetConstructor._genome);
     EXPECT_FALSE(actualTargetConstructor.isGenomeInherited());
 }
 
@@ -158,7 +158,7 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_failed)
         CellDescription()
             .setId(3)
             .setPos({9.0f, 10.0f})
-            .setCellTypeData(ConstructorDescription().setGenome(otherGenome).setNumInheritedGenomeNodes(2)),
+            .setCellTypeData(ConstructorDescription().genome(otherGenome).numInheritedGenomeNodes(2)),
     });
     data.addConnection(1, 2);
 
@@ -178,7 +178,7 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_failed)
     EXPECT_EQ(3, actualData.cells.size());
     EXPECT_TRUE(approxCompare(0.0f, actualCell.signal->channels[0]));
     EXPECT_EQ(0, actualInjector.counter);
-    EXPECT_EQ(origTargetConstructor.genome, actualTargetConstructor.genome);
+    EXPECT_EQ(origTargetConstructor._genome, actualTargetConstructor._genome);
     EXPECT_TRUE(actualTargetConstructor.isGenomeInherited());
 }
 
@@ -201,11 +201,11 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_success)
         CellDescription()
             .setId(3)
             .setPos({9.0f, 10.0f})
-            .setCellTypeData(ConstructorDescription().setGenome(otherGenome)),
+            .setCellTypeData(ConstructorDescription().genome(otherGenome)),
         CellDescription()
             .setId(4)
             .setPos({7.0f, 10.0f})
-            .setCellTypeData(ConstructorDescription().setNumInheritedGenomeNodes(2)),
+            .setCellTypeData(ConstructorDescription().numInheritedGenomeNodes(2)),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -229,7 +229,7 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_success)
     EXPECT_EQ(4, actualData.cells.size());
     EXPECT_TRUE(approxCompare(1.0f, actualCell.signal->channels[0]));
     EXPECT_EQ(0, actualInjector.counter);
-    EXPECT_EQ(actualInjector.genome, actualTargetConstructor.genome);
-    EXPECT_EQ(origOtherConstructor.genome, actualOtherConstructor.genome);
+    EXPECT_EQ(actualInjector.genome, actualTargetConstructor._genome);
+    EXPECT_EQ(origOtherConstructor._genome, actualOtherConstructor._genome);
     EXPECT_FALSE(actualTargetConstructor.isGenomeInherited());
 }

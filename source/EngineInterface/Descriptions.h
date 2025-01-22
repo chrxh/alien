@@ -10,46 +10,46 @@
 
 struct CellMetadataDescription
 {
-    std::string name;
-    std::string description;
-
     auto operator<=>(CellMetadataDescription const&) const = default;
 
-    CellMetadataDescription& setName(std::string const& value)
+    CellMetadataDescription& name(std::string const& value)
     {
-        name = value;
+        _name = value;
         return *this;
     }
-    CellMetadataDescription& setDescription(std::string const& value)
+    CellMetadataDescription& description(std::string const& value)
     {
-        description = value;
+        _description = value;
         return *this;
     }
+
+    std::string _name;
+    std::string _description;
 };
 
 struct ConnectionDescription
 {
-    uint64_t cellId = 0;    //value of 0 means cell not present in DataDescription
-    float distance = 0;
-    float angleFromPrevious = 0;
-
     auto operator<=>(ConnectionDescription const&) const = default;
 
-    ConnectionDescription& setCellId(uint64_t const& value)
+    ConnectionDescription& cellId(uint64_t const& value)
     {
-        cellId = value;
+        _cellId = value;
         return *this;
     }
-    ConnectionDescription& setDistance(float const& value)
+    ConnectionDescription& distance(float const& value)
     {
-        distance = value;
+        _distance = value;
         return *this;
     }
-    ConnectionDescription& setAngleFromPrevious(float const& value)
+    ConnectionDescription& angleFromPrevious(float const& value)
     {
-        angleFromPrevious = value;
+        _angleFromPrevious = value;
         return *this;
     }
+
+    uint64_t _cellId = 0;  //value of 0 means cell not present in DataDescription
+    float _distance = 0;
+    float _angleFromPrevious = 0;
 };
 
 struct StructureCellDescription
@@ -64,28 +64,30 @@ struct FreeCellDescription
 
 struct NeuralNetworkDescription
 {
-    std::vector<float> weights;
-    std::vector<float> biases;
-    std::vector<ActivationFunction> activationFunctions;
     NeuralNetworkDescription()
     {
-        weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
-        biases.resize(MAX_CHANNELS, 0);
-        activationFunctions.resize(MAX_CHANNELS, ActivationFunction_Identity);
-        auto md = std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS);
+        _weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
+        _biases.resize(MAX_CHANNELS, 0);
+        _activationFunctions.resize(MAX_CHANNELS, ActivationFunction_Identity);
+        auto md = std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS);
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             md[i, i] = 1.0f;
         }
     }
     auto operator<=>(NeuralNetworkDescription const&) const = default;
-    NeuralNetworkDescription& setWeight(int row, int col, float value)
+
+    NeuralNetworkDescription& weight(int row, int col, float value)
     {
-        auto md = std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS);
+        auto md = std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS);
         md[row, col] = value;
         return *this;
     }
-    auto getWeights() const { return std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
-    auto getWeights() { return std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
+    auto getWeights() const { return std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
+    auto getWeights() { return std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
+
+    std::vector<float> _weights;
+    std::vector<float> _biases;
+    std::vector<ActivationFunction> _activationFunctions;
 };
 
 struct BaseDescription
@@ -95,98 +97,98 @@ struct BaseDescription
 
 struct DepotDescription
 {
-    EnergyDistributionMode mode = EnergyDistributionMode_TransmittersAndConstructors;
-
     auto operator<=>(DepotDescription const&) const = default;
 
-    DepotDescription& setMode(EnergyDistributionMode value)
+    DepotDescription& mode(EnergyDistributionMode value)
     {
-        mode = value;
+        _mode = value;
         return *this;
     }
+
+    EnergyDistributionMode _mode = EnergyDistributionMode_TransmittersAndConstructors;
 };
 
 struct ConstructorDescription
 {
-    // Properties
-    int autoTriggerInterval = 100;   // 0 = manual (triggered by signal), > 0 = auto trigger
-    int constructionActivationTime = 100;
-
-    // Genome data
-    std::vector<uint8_t> genome;
-    int numInheritedGenomeNodes = 0;
-    int genomeGeneration = 0;
-    float constructionAngle1 = 0;
-    float constructionAngle2 = 0;
-
-    // Process data
-    uint64_t lastConstructedCellId = 0;
-    int genomeCurrentNodeIndex = 0;
-    int genomeCurrentRepetition = 0;
-    int currentBranch = 0;
-    int offspringCreatureId = 0;
-    int offspringMutationId = 0;
-
     ConstructorDescription();
     auto operator<=>(ConstructorDescription const&) const = default;
 
-    ConstructorDescription& setAutoTriggerInterval(int value)
+    ConstructorDescription& autoTriggerInterval(int value)
     {
-        autoTriggerInterval = toUInt8(value);
+        _autoTriggerInterval = toUInt8(value);
         return *this;
     }
-    ConstructorDescription& setConstructionActivationTime(int value)
+    ConstructorDescription& constructionActivationTime(int value)
     {
-        constructionActivationTime = value;
+        _constructionActivationTime = value;
         return *this;
     }
-    ConstructorDescription& setGenome(std::vector<uint8_t> const& value)
+    ConstructorDescription& genome(std::vector<uint8_t> const& value)
     {
-        genome = value;
+        _genome = value;
         return *this;
     }
-    ConstructorDescription& setGenomeCurrentNodeIndex(int value)
+    ConstructorDescription& genomeCurrentNodeIndex(int value)
     {
-        genomeCurrentNodeIndex = value;
+        _genomeCurrentNodeIndex = value;
         return *this;
     }
-    ConstructorDescription& setGenomeCurrentRepetition(int value)
+    ConstructorDescription& genomeCurrentRepetition(int value)
     {
-        genomeCurrentRepetition = value;
+        _genomeCurrentRepetition = value;
         return *this;
     }
-    ConstructorDescription& setCurrentBranch(int value)
+    ConstructorDescription& currentBranch(int value)
     {
-        currentBranch = value;
+        _currentBranch = value;
         return *this;
     }
-    int getNumInheritedGenomeNodes() const { return numInheritedGenomeNodes; }
-    bool isGenomeInherited() const { return numInheritedGenomeNodes != 0; }
-    ConstructorDescription& setNumInheritedGenomeNodes(int value)
+    int getNumInheritedGenomeNodes() const { return _numInheritedGenomeNodes; }
+    bool isGenomeInherited() const { return _numInheritedGenomeNodes != 0; }
+    ConstructorDescription& numInheritedGenomeNodes(int value)
     {
-        numInheritedGenomeNodes = value;
+        _numInheritedGenomeNodes = value;
         return *this;
     }
-    ConstructorDescription& setGenomeGeneration(int value)
+    ConstructorDescription& genomeGeneration(int value)
     {
-        genomeGeneration = value;
+        _genomeGeneration = value;
         return *this;
     }
-    ConstructorDescription& setConstructionAngle1(float value)
+    ConstructorDescription& constructionAngle1(float value)
     {
-        constructionAngle1 = value;
+        _constructionAngle1 = value;
         return *this;
     }
-    ConstructorDescription& setConstructionAngle2(float value)
+    ConstructorDescription& constructionAngle2(float value)
     {
-        constructionAngle2 = value;
+        _constructionAngle2 = value;
         return *this;
     }
-    ConstructorDescription& setLastConstructedCellId(uint64_t value)
+    ConstructorDescription& lastConstructedCellId(uint64_t value)
     {
-        lastConstructedCellId = value;
+        _lastConstructedCellId = value;
         return *this;
     }
+
+    // Properties
+    int _autoTriggerInterval = 100;  // 0 = manual (triggered by signal), > 0 = auto trigger
+    int _constructionActivationTime = 100;
+
+    // Genome data
+    std::vector<uint8_t> _genome;
+    int _numInheritedGenomeNodes = 0;
+    int _genomeGeneration = 0;
+    float _constructionAngle1 = 0;
+    float _constructionAngle2 = 0;
+
+    // Process data
+    uint64_t _lastConstructedCellId = 0;
+    int _genomeCurrentNodeIndex = 0;
+    int _genomeCurrentRepetition = 0;
+    int _currentBranch = 0;
+    int _offspringCreatureId = 0;
+    int _offspringMutationId = 0;
 };
 
 struct SensorDescription
