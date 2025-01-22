@@ -51,13 +51,13 @@ TEST_F(CellConnectionTests_New, addFirstConnection)
 
     auto cell1 = actualCellById.at(1);
     EXPECT_EQ(1, cell1.connections.size());
-    EXPECT_TRUE(approxCompare(360.0f, cell1.connections.front().angleFromPrevious));
-    EXPECT_TRUE(approxCompare(1.0f, cell1.connections.front().distance));
+    EXPECT_TRUE(approxCompare(360.0f, cell1.connections.front()._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(1.0f, cell1.connections.front()._distance));
 
     auto cell2 = actualCellById.at(2);
     EXPECT_EQ(1, cell2.connections.size());
-    EXPECT_TRUE(approxCompare(360.0f, cell2.connections.front().angleFromPrevious));
-    EXPECT_TRUE(approxCompare(1.0f, cell2.connections.front().distance));
+    EXPECT_TRUE(approxCompare(360.0f, cell2.connections.front()._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(1.0f, cell2.connections.front()._distance));
 }
 
 TEST_F(CellConnectionTests_New, addSecondConnection)
@@ -79,12 +79,12 @@ TEST_F(CellConnectionTests_New, addSecondConnection)
     ASSERT_EQ(2, cell.connections.size());
 
     auto connection1 = cell.connections.at(0);
-    EXPECT_TRUE(approxCompare(1.0f, connection1.distance));
-    EXPECT_TRUE(approxCompare(270.0f, connection1.angleFromPrevious));
+    EXPECT_TRUE(approxCompare(1.0f, connection1._distance));
+    EXPECT_TRUE(approxCompare(270.0f, connection1._angleFromPrevious));
 
     auto connection2 = cell.connections.at(1);
-    EXPECT_TRUE(approxCompare(1.0f, connection2.distance));
-    EXPECT_TRUE(approxCompare(90.0f, connection2.angleFromPrevious));
+    EXPECT_TRUE(approxCompare(1.0f, connection2._distance));
+    EXPECT_TRUE(approxCompare(90.0f, connection2._angleFromPrevious));
 }
 
 TEST_F(CellConnectionTests_New, addThirdConnection1)
@@ -109,16 +109,16 @@ TEST_F(CellConnectionTests_New, addThirdConnection1)
     EXPECT_EQ(3, cell.connections.size());
 
     auto connection1 = cell.connections.at(0);
-    EXPECT_TRUE(approxCompare(1.0f, connection1.distance));
-    EXPECT_TRUE(approxCompare(90.0f, connection1.angleFromPrevious));
+    EXPECT_TRUE(approxCompare(1.0f, connection1._distance));
+    EXPECT_TRUE(approxCompare(90.0f, connection1._angleFromPrevious));
 
     auto connection2 = cell.connections.at(1);
-    EXPECT_TRUE(approxCompare(1.0f, connection2.distance));
-    EXPECT_TRUE(approxCompare(90.0f, connection2.angleFromPrevious));
+    EXPECT_TRUE(approxCompare(1.0f, connection2._distance));
+    EXPECT_TRUE(approxCompare(90.0f, connection2._angleFromPrevious));
 
     auto connection3 = cell.connections.at(2);
-    EXPECT_TRUE(approxCompare(1.0f, connection3.distance));
-    EXPECT_TRUE(approxCompare(180.0f, connection3.angleFromPrevious));
+    EXPECT_TRUE(approxCompare(1.0f, connection3._distance));
+    EXPECT_TRUE(approxCompare(180.0f, connection3._angleFromPrevious));
 }
 
 
@@ -144,14 +144,14 @@ TEST_F(CellConnectionTests_New, addThirdConnection2)
     EXPECT_EQ(3, cell.connections.size());
 
     auto connection1 = cell.connections.at(0);
-    EXPECT_TRUE(approxCompare(1.0f, connection1.distance));
-    EXPECT_TRUE(approxCompare(180.0f, connection1.angleFromPrevious));
+    EXPECT_TRUE(approxCompare(1.0f, connection1._distance));
+    EXPECT_TRUE(approxCompare(180.0f, connection1._angleFromPrevious));
 
     auto connection2 = cell.connections.at(1);
-    EXPECT_TRUE(approxCompare(1.0f, connection2.distance));
-    EXPECT_TRUE(approxCompare(90.0f, connection2.angleFromPrevious));
+    EXPECT_TRUE(approxCompare(1.0f, connection2._distance));
+    EXPECT_TRUE(approxCompare(90.0f, connection2._angleFromPrevious));
 
     auto connection3 = cell.connections.at(2);
-    EXPECT_TRUE(approxCompare(1.0f, connection3.distance));
-    EXPECT_TRUE(approxCompare(90.0f, connection3.angleFromPrevious));
+    EXPECT_TRUE(approxCompare(1.0f, connection3._distance));
+    EXPECT_TRUE(approxCompare(90.0f, connection3._angleFromPrevious));
 }

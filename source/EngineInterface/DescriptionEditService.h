@@ -14,6 +14,7 @@ public:
     {
         MEMBER_DECLARATION(CreateRectParameters, int, width, 10);
         MEMBER_DECLARATION(CreateRectParameters, int, height, 10);
+        MEMBER_DECLARATION(CreateRectParameters, CellTypeDescription, cellType, StructureCellDescription());
         MEMBER_DECLARATION(CreateRectParameters, float, cellDistance, 1.0f);
         MEMBER_DECLARATION(CreateRectParameters, float, energy, 100.0f);
         MEMBER_DECLARATION(CreateRectParameters, float, stiffness, 1.0f);

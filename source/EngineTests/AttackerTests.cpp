@@ -221,7 +221,7 @@ TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
         CellDescription()
             .setId(4)
             .setPos({11.0f, 9.0f})
-            .setCellTypeData(ConstructorDescription().setGenome(otherGenome)),
+            .setCellTypeData(ConstructorDescription().genome(otherGenome)),
         CellDescription().setId(5).setPos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);

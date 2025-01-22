@@ -20,7 +20,7 @@ TEST_F(DataTransferTests, singleCell)
 {
     DataDescription data;
     NeuralNetworkDescription nn;
-    nn.setWeight(2, 1, 1.0f);
+    nn.weight(2, 1, 1.0f);
     data.addCell(CellDescription()
                      .setNeuralNetwork(nn)
                      .setId(1)
@@ -55,9 +55,9 @@ TEST_F(DataTransferTests, singleParticle)
 TEST_F(DataTransferTests, cellCluster)
 {
     NeuralNetworkDescription nn1;
-    nn1.setWeight(2, 1, 1.0f);
+    nn1.weight(2, 1, 1.0f);
     NeuralNetworkDescription nn2;
-    nn2.setWeight(5, 3, 1.0f);
+    nn2.weight(5, 3, 1.0f);
 
     DataDescription data;
     data.addCells({

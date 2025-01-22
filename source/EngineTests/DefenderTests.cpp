@@ -148,7 +148,7 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
 
     EXPECT_TRUE(approxCompare(1.0f, actualInjector.signal->channels[0]));
     EXPECT_EQ(0, actualInjectorFunc.counter);
-    EXPECT_EQ(origInjectorFunc.genome, actualTargetFunc.genome);
+    EXPECT_EQ(origInjectorFunc.genome, actualTargetFunc._genome);
 }
 
 TEST_F(DefenderTests, injectorVsAntiInjector)
@@ -196,5 +196,5 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
 
     EXPECT_TRUE(approxCompare(1.0f, actualInjector.signal->channels[0]));
     EXPECT_EQ(4, actualInjectorFunc.counter);
-    EXPECT_EQ(origTargetFunc.genome, actualTargetFunc.genome);
+    EXPECT_EQ(origTargetFunc._genome, actualTargetFunc._genome);
 }

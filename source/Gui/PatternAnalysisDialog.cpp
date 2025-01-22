@@ -140,7 +140,7 @@ auto PatternAnalysisDialog::getAnalysisDescription(ClusterDescription const& clu
     for (auto const& cell : cluster.cells) {
         insertCellAnalysisDescription(cell);
         for (auto const& connection : cell.connections) {
-            auto connectingCellId = connection.cellId;
+            auto connectingCellId = connection._cellId;
             insertCellAnalysisDescription(cluster.cells.at(cellDescIndexById.at(connectingCellId)));
             result.connectedCells.insert(std::set<CellAnalysisDescription>{cellAnalysisDescById.at(cell.id), cellAnalysisDescById.at(connectingCellId)});
         }

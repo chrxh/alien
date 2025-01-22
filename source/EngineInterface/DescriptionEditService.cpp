@@ -25,7 +25,8 @@ DataDescription DescriptionEditService::createRect(CreateRectParameters const& p
                                .setBarrier(parameters._barrier)
                                .setCreatureId(creatureId)
                                .setMutationId(parameters._mutationId)
-                               .setGenomeComplexity(parameters._genomeComplexity));
+                               .setGenomeComplexity(parameters._genomeComplexity)
+                               .setCellTypeData(parameters._cellType));
         }
     }
     reconnectCells(result, parameters._cellDistance * 1.1f);
@@ -47,6 +48,7 @@ DataDescription DescriptionEditService::createHex(CreateHexParameters const& par
             //create cell: upper layer
             result.addCell(CellDescription()
                                .setId(NumberGenerator::get().getId())
+                               .setCellTypeData(StructureCellDescription())
                                .setEnergy(parameters._energy)
                                .setStiffness(parameters._stiffness)
                                .setPos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
@@ -58,6 +60,7 @@ DataDescription DescriptionEditService::createHex(CreateHexParameters const& par
             if (j > 0) {
                 result.addCell(CellDescription()
                                  .setId(NumberGenerator::get().getId())
+                                   .setCellTypeData(StructureCellDescription())
                                    .setEnergy(parameters._energy)
                                    .setStiffness(parameters._stiffness)
                                    .setPos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(j * incY)})
@@ -85,6 +88,7 @@ DataDescription DescriptionEditService::createUnconnectedCircle(CreateUnconnecte
     if (parameters._radius <= 1 + NEAR_ZERO) {
         result.addCell(CellDescription()
                            .setId(NumberGenerator::get().getId())
+                           .setCellTypeData(StructureCellDescription())
                            .setPos(parameters._center)
                            .setEnergy(parameters._energy)
                            .setStiffness(parameters._stiffness)
@@ -109,6 +113,7 @@ DataDescription DescriptionEditService::createUnconnectedCircle(CreateUnconnecte
             }
             result.addCell(CellDescription()
                                .setId(NumberGenerator::get().getId())
+                               .setCellTypeData(StructureCellDescription())
                                .setEnergy(parameters._energy)
                                .setStiffness(parameters._stiffness)
                                .setPos({parameters._center.x + dxMod, parameters._center.y + dy})
@@ -135,7 +140,7 @@ namespace
 
         for (auto& cell : data.cells) {
             for (auto& connection : cell.connections) {
-                connection.cellId = newByOldIds.at(connection.cellId);
+                connection._cellId = newByOldIds.at(connection._cellId);
             }
         }
     }
@@ -153,7 +158,7 @@ namespace
 
         for (auto& cell : cluster.cells) {
             for (auto& connection : cell.connections) {
-                connection.cellId = newByOldIds.at(connection.cellId);
+                connection._cellId = newByOldIds.at(connection._cellId);
             }
         }
     }
@@ -396,17 +401,17 @@ void DescriptionEditService::correctConnections(ClusteredDataDescription& data, 
             std::vector<ConnectionDescription> newConnections;
             float angleToAdd = 0;
             for (auto connection : cell.connections) {
-                auto& connectingCell = cellById.at(connection.cellId);
+                auto& connectingCell = cellById.at(connection._cellId);
                 if (/*spaceCalculator.distance*/Math::length(cell.pos - connectingCell.pos) > threshold) {
-                    angleToAdd += connection.angleFromPrevious;
+                    angleToAdd += connection._angleFromPrevious;
                 } else {
-                    connection.angleFromPrevious += angleToAdd;
+                    connection._angleFromPrevious += angleToAdd;
                     angleToAdd = 0;
                     newConnections.emplace_back(connection);
                 }
             }
             if (angleToAdd > NEAR_ZERO && !newConnections.empty()) {
-                newConnections.front().angleFromPrevious += angleToAdd;
+                newConnections.front()._angleFromPrevious += angleToAdd;
             }
             cell.connections = newConnections;
         }
@@ -489,7 +494,7 @@ void DescriptionEditService::randomizeMutationIds(ClusteredDataDescription& data
         for (auto& cell : cluster.cells) {
             cell.mutationId = toInt(mutationId);
             if (cell.getCellType() == CellType_Constructor) {
-                std::get<ConstructorDescription>(cell.cellTypeData).offspringMutationId = toInt(mutationId);
+                std::get<ConstructorDescription>(cell.cellTypeData)._offspringMutationId = toInt(mutationId);
             }
         }
     }
@@ -529,7 +534,7 @@ void DescriptionEditService::generateNewCreatureIds(DataDescription& data)
             cell.creatureId = getNewCreatureId(cell.creatureId, origToNewCreatureIdMap);
         }
         if (cell.getCellType() == CellType_Constructor) {
-            auto& offspringCreatureId = std::get<ConstructorDescription>(cell.cellTypeData).offspringCreatureId;
+            auto& offspringCreatureId = std::get<ConstructorDescription>(cell.cellTypeData)._offspringCreatureId;
             offspringCreatureId = getNewCreatureId(offspringCreatureId, origToNewCreatureIdMap);
         }
     }
@@ -544,7 +549,7 @@ void DescriptionEditService::generateNewCreatureIds(ClusteredDataDescription& da
                 cell.creatureId = getNewCreatureId(cell.creatureId, origToNewCreatureIdMap);
             }
             if (cell.getCellType() == CellType_Constructor) {
-                auto& offspringCreatureId = std::get<ConstructorDescription>(cell.cellTypeData).offspringCreatureId;
+                auto& offspringCreatureId = std::get<ConstructorDescription>(cell.cellTypeData)._offspringCreatureId;
                 offspringCreatureId = getNewCreatureId(offspringCreatureId, origToNewCreatureIdMap);
             }
         }
@@ -554,8 +559,8 @@ void DescriptionEditService::generateNewCreatureIds(ClusteredDataDescription& da
 
 void DescriptionEditService::removeMetadata(CellDescription& cell)
 {
-    cell.metadata.description.clear();
-    cell.metadata.name.clear();
+    cell.metadata._description.clear();
+    cell.metadata._name.clear();
 }
 
 bool DescriptionEditService::isCellPresent(Occupancy const& cellPosBySlot, SpaceCalculator const& spaceCalculator, RealVector2D const& posToCheck, float distance)
@@ -649,7 +654,7 @@ std::vector<CellOrParticleDescription> DescriptionEditService::getConstructorToM
     std::map<std::vector<uint8_t>, size_t> genomeToCellIndex;
     for (auto const& [index, cell] : data.cells | boost::adaptors::indexed(0)) {
         if (cell.getCellType() == CellType_Constructor) {
-            auto const& genome = std::get<ConstructorDescription>(cell.cellTypeData).genome;
+            auto const& genome = std::get<ConstructorDescription>(cell.cellTypeData)._genome;
             if (!genomeToCellIndex.contains(genome) || cell.livingState != LivingState_UnderConstruction) {
                 genomeToCellIndex[genome] = index;
             }
