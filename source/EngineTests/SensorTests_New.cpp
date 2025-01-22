@@ -20,29 +20,29 @@ TEST_F(SensorTests_New, autoTriggered)
 {
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setPos({100.0f, 100.0f}).setCellTypeData(SensorDescription().setAutoTriggerInterval(15)),
+        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(SensorDescription().autoTriggerInterval(15)),
     });
     _simulationFacade->setSimulationData(data);
 
     {
         _simulationFacade->calcTimesteps(1);
         auto actualSensor = getCell(_simulationFacade->getSimulationData(), 1);
-        EXPECT_TRUE(actualSensor.signal.has_value());
+        EXPECT_TRUE(actualSensor._signal.has_value());
     }
     {
         _simulationFacade->calcTimesteps(1);
         auto actualSensor = getCell(_simulationFacade->getSimulationData(), 1);
-        EXPECT_FALSE(actualSensor.signal.has_value());
+        EXPECT_FALSE(actualSensor._signal.has_value());
     }
     {
         _simulationFacade->calcTimesteps(14);
         auto actualSensor = getCell(_simulationFacade->getSimulationData(), 1);
-        EXPECT_TRUE(actualSensor.signal.has_value());
+        EXPECT_TRUE(actualSensor._signal.has_value());
     }
     {
         _simulationFacade->calcTimesteps(1);
         auto actualSensor = getCell(_simulationFacade->getSimulationData(), 1);
-        EXPECT_FALSE(actualSensor.signal.has_value());
+        EXPECT_FALSE(actualSensor._signal.has_value());
     }
 }
 
@@ -50,14 +50,14 @@ TEST_F(SensorTests_New, manuallyTriggered_noSignal)
 {
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setPos({100.0f, 100.0f}).setCellTypeData(SensorDescription().setAutoTriggerInterval(0)),
+        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(SensorDescription().autoTriggerInterval(0)),
     });
     _simulationFacade->setSimulationData(data);
 
     for(int i = 0; i < 100; ++i) {
         _simulationFacade->calcTimesteps(1);
         auto actualSensor = getCell(_simulationFacade->getSimulationData(), 1);
-        EXPECT_FALSE(actualSensor.signal.has_value());
+        EXPECT_FALSE(actualSensor._signal.has_value());
     }
 }
 
@@ -65,23 +65,23 @@ TEST_F(SensorTests_New, manuallyTriggered_signal)
 {
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setPos({100.0f, 100.0f}).setCellTypeData(SensorDescription().setAutoTriggerInterval(0)),
-        CellDescription().setId(2).setPos({101.0f, 100.0f}).setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(SensorDescription().autoTriggerInterval(0)),
+        CellDescription().id(2).pos({101.0f, 100.0f}).signal({1, 0, 0, 0, 0, 0, 0, 0}),
     });
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
 
     _simulationFacade->calcTimesteps(1);
     auto actualSensor = getCell(_simulationFacade->getSimulationData(), 1);
-    EXPECT_TRUE(actualSensor.signal.has_value());
+    EXPECT_TRUE(actualSensor._signal.has_value());
 }
 
 TEST_F(SensorTests_New, aboveMinDensity)
 {
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setPos({100.0f, 100.0f}).setCellTypeData(SensorDescription().setAutoTriggerInterval(3).setMinDensity(0.2f)),
-        CellDescription().setId(2).setPos({101.0f, 100.0f}),
+        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(SensorDescription().autoTriggerInterval(3).minDensity(0.2f)),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
     data.add(DescriptionEditService::get().get().createRect(
@@ -91,21 +91,21 @@ TEST_F(SensorTests_New, aboveMinDensity)
 
     _simulationFacade->calcTimesteps(1);
     auto actualSensor = getCell(_simulationFacade->getSimulationData(), 1);
-    EXPECT_TRUE(actualSensor.signal.has_value());
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor.signal->channels[0]));
-    EXPECT_TRUE(actualSensor.signal->channels[1] > 0.2f);
-    EXPECT_TRUE(actualSensor.signal->channels[2] < 1.0f - (100.0f - 10.0f - 16.0f) / 256);
-    EXPECT_TRUE(actualSensor.signal->channels[2] > 1.0f - (100.0f - 10.0f + 16.0f) / 256);
-    EXPECT_TRUE(actualSensor.signal->channels[3] > -15.0f / 365);
-    EXPECT_TRUE(actualSensor.signal->channels[3] < 15.0f / 365);
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[0]));
+    EXPECT_TRUE(actualSensor._signal->_channels[1] > 0.2f);
+    EXPECT_TRUE(actualSensor._signal->_channels[2] < 1.0f - (100.0f - 10.0f - 16.0f) / 256);
+    EXPECT_TRUE(actualSensor._signal->_channels[2] > 1.0f - (100.0f - 10.0f + 16.0f) / 256);
+    EXPECT_TRUE(actualSensor._signal->_channels[3] > -15.0f / 365);
+    EXPECT_TRUE(actualSensor._signal->_channels[3] < 15.0f / 365);
 }
 
 TEST_F(SensorTests_New, belowMinDensity)
 {
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setPos({100.0f, 100.0f}).setCellTypeData(SensorDescription().setAutoTriggerInterval(3).setMinDensity(0.1f)),
-        CellDescription().setId(2).setPos({101.0f, 100.0f}),
+        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(SensorDescription().autoTriggerInterval(3).minDensity(0.1f)),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
     data.add(DescriptionEditService::get().get().createRect(
@@ -115,16 +115,16 @@ TEST_F(SensorTests_New, belowMinDensity)
 
     _simulationFacade->calcTimesteps(1);
     auto actualSensor = getCell(_simulationFacade->getSimulationData(), 1);
-    EXPECT_TRUE(actualSensor.signal.has_value());
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor.signal->channels[0]));
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[0]));
 }
 
 TEST_F(SensorTests_New, targetAbove)
 {
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setPos({100.0f, 100.0f}).setCellTypeData(SensorDescription().setAutoTriggerInterval(3).setMinDensity(0.2f)),
-        CellDescription().setId(2).setPos({101.0f, 100.0f}),
+        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(SensorDescription().autoTriggerInterval(3).minDensity(0.2f)),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
     data.add(DescriptionEditService::get().get().createRect(
@@ -136,20 +136,20 @@ TEST_F(SensorTests_New, targetAbove)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor.signal->channels[0]));
-    EXPECT_TRUE(actualSensor.signal->channels[1] > 0.2f);
-    EXPECT_TRUE(actualSensor.signal->channels[2] < 1.0f - (100.0f - 10.0f - 16.0f) / 256);
-    EXPECT_TRUE(actualSensor.signal->channels[2] > 1.0f - (100.0f - 10.0f + 16.0f) / 256);
-    EXPECT_TRUE(actualSensor.signal->channels[3] > 70.0f / 365);
-    EXPECT_TRUE(actualSensor.signal->channels[3] < 105.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[0]));
+    EXPECT_TRUE(actualSensor._signal->_channels[1] > 0.2f);
+    EXPECT_TRUE(actualSensor._signal->_channels[2] < 1.0f - (100.0f - 10.0f - 16.0f) / 256);
+    EXPECT_TRUE(actualSensor._signal->_channels[2] > 1.0f - (100.0f - 10.0f + 16.0f) / 256);
+    EXPECT_TRUE(actualSensor._signal->_channels[3] > 70.0f / 365);
+    EXPECT_TRUE(actualSensor._signal->_channels[3] < 105.0f / 365);
 }
 
 TEST_F(SensorTests_New, targetBelow)
 {
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setPos({100.0f, 100.0f}).setCellTypeData(SensorDescription().setAutoTriggerInterval(3).setMinDensity(0.2f)),
-        CellDescription().setId(2).setPos({101.0f, 100.0f}),
+        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(SensorDescription().autoTriggerInterval(3).minDensity(0.2f)),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
     data.add(DescriptionEditService::get().get().createRect(
@@ -161,21 +161,21 @@ TEST_F(SensorTests_New, targetBelow)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor.signal->channels[0]));
-    EXPECT_TRUE(actualSensor.signal->channels[1] > 0.2f);
-    EXPECT_TRUE(actualSensor.signal->channels[2] < 1.0f - (100.0f - 10.0f - 16.0f) / 256);
-    EXPECT_TRUE(actualSensor.signal->channels[2] > 1.0f - (100.0f - 10.0f + 16.0f) / 256);
-    EXPECT_TRUE(actualSensor.signal->channels[3] < -70.0f / 365);
-    EXPECT_TRUE(actualSensor.signal->channels[3] > -105.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[0]));
+    EXPECT_TRUE(actualSensor._signal->_channels[1] > 0.2f);
+    EXPECT_TRUE(actualSensor._signal->_channels[2] < 1.0f - (100.0f - 10.0f - 16.0f) / 256);
+    EXPECT_TRUE(actualSensor._signal->_channels[2] > 1.0f - (100.0f - 10.0f + 16.0f) / 256);
+    EXPECT_TRUE(actualSensor._signal->_channels[3] < -70.0f / 365);
+    EXPECT_TRUE(actualSensor._signal->_channels[3] > -105.0f / 365);
 }
 
 TEST_F(SensorTests_New, targetConcealed)
 {
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setPos({100.0f, 100.0f}).setCellTypeData(SensorDescription().setAutoTriggerInterval(3).setMinDensity(0.2f)),
-        CellDescription().setId(2).setPos({101.0f, 101.0f}),
-        CellDescription().setId(3).setPos({101.0f, 99.0f}),
+        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(SensorDescription().autoTriggerInterval(3).minDensity(0.2f)),
+        CellDescription().id(2).pos({101.0f, 101.0f}),
+        CellDescription().id(3).pos({101.0f, 99.0f}),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -189,16 +189,16 @@ TEST_F(SensorTests_New, targetConcealed)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[0]));
 }
 
 TEST_F(SensorTests_New, targetNotConcealed)
 {
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setPos({100.0f, 100.0f}).setCellTypeData(SensorDescription().setAutoTriggerInterval(3).setMinDensity(0.2f)),
-        CellDescription().setId(2).setPos({101.0f, 101.0f}),
-        CellDescription().setId(3).setPos({101.0f, 99.0f}),
+        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(SensorDescription().autoTriggerInterval(3).minDensity(0.2f)),
+        CellDescription().id(2).pos({101.0f, 101.0f}),
+        CellDescription().id(3).pos({101.0f, 99.0f}),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -212,15 +212,15 @@ TEST_F(SensorTests_New, targetNotConcealed)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[0]));
 }
 
 TEST_F(SensorTests_New, foundMassWithMatchingDensity)
 {
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setPos({100.0f, 100.0f}).setCellTypeData(SensorDescription().setAutoTriggerInterval(3).setMinDensity(0.7f)),
-        CellDescription().setId(2).setPos({101.0f, 100.0f}),
+        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(SensorDescription().autoTriggerInterval(3).minDensity(0.7f)),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -235,12 +235,12 @@ TEST_F(SensorTests_New, foundMassWithMatchingDensity)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor.signal->channels[0]));
-    EXPECT_TRUE(actualSensor.signal->channels[1] > 0.7f);
-    EXPECT_TRUE(actualSensor.signal->channels[2] < 1.0f - 80.0f / 256);
-    EXPECT_TRUE(actualSensor.signal->channels[2] > 1.0f - 105.0f / 256);
-    EXPECT_TRUE(actualSensor.signal->channels[3] < -70.0f / 365);
-    EXPECT_TRUE(actualSensor.signal->channels[3] > -105.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[0]));
+    EXPECT_TRUE(actualSensor._signal->_channels[1] > 0.7f);
+    EXPECT_TRUE(actualSensor._signal->_channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualSensor._signal->_channels[2] > 1.0f - 105.0f / 256);
+    EXPECT_TRUE(actualSensor._signal->_channels[3] < -70.0f / 365);
+    EXPECT_TRUE(actualSensor._signal->_channels[3] > -105.0f / 365);
 }
 
 TEST_F(SensorTests_New, scanForOtherMutants_found)
@@ -248,11 +248,11 @@ TEST_F(SensorTests_New, scanForOtherMutants_found)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setMutationId(6)
-             .setPos({100.0f, 100.0f})
-            .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
-        CellDescription().setId(2).setMutationId(6).setPos({101.0f, 100.0f}),
+             .id(1)
+             .mutationId(6)
+             .pos({100.0f, 100.0f})
+            .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
+        CellDescription().id(2).mutationId(6).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -270,12 +270,12 @@ TEST_F(SensorTests_New, scanForOtherMutants_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
-    EXPECT_TRUE(actualSensorCell.signal->channels[1] > 0.3f);
-    EXPECT_TRUE(actualSensorCell.signal->channels[2] < 1.0f - 80.0f / 256);
-    EXPECT_TRUE(actualSensorCell.signal->channels[2] > 1.0f - 105.0f / 256);
-    EXPECT_TRUE(actualSensorCell.signal->channels[3] > -15.0f / 365);
-    EXPECT_TRUE(actualSensorCell.signal->channels[3] < 15.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(actualSensorCell._signal->_channels[1] > 0.3f);
+    EXPECT_TRUE(actualSensorCell._signal->_channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualSensorCell._signal->_channels[2] > 1.0f - 105.0f / 256);
+    EXPECT_TRUE(actualSensorCell._signal->_channels[3] > -15.0f / 365);
+    EXPECT_TRUE(actualSensorCell._signal->_channels[3] < 15.0f / 365);
 }
 
 TEST_F(SensorTests_New, scanForOtherMutants_found_wallBehind)
@@ -283,11 +283,11 @@ TEST_F(SensorTests_New, scanForOtherMutants_found_wallBehind)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setMutationId(6)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
-        CellDescription().setId(2).setMutationId(6).setPos({101.0f, 100.0f}),
+             .id(1)
+             .mutationId(6)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
+        CellDescription().id(2).mutationId(6).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -308,7 +308,7 @@ TEST_F(SensorTests_New, scanForOtherMutants_found_wallBehind)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests_New, scanForOtherMutants_notFound_wallInBetween)
@@ -316,11 +316,11 @@ TEST_F(SensorTests_New, scanForOtherMutants_notFound_wallInBetween)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setMutationId(7)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
-         CellDescription().setId(2).setMutationId(7).setPos({101.0f, 100.0f})});
+             .id(1)
+             .mutationId(7)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
+         CellDescription().id(2).mutationId(7).pos({101.0f, 100.0f})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -340,7 +340,7 @@ TEST_F(SensorTests_New, scanForOtherMutants_notFound_wallInBetween)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests_New, scanForOtherMutants_notFound_sameMutationId)
@@ -348,11 +348,11 @@ TEST_F(SensorTests_New, scanForOtherMutants_notFound_sameMutationId)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setMutationId(7)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
-        CellDescription().setId(2).setMutationId(7).setPos({101.0f, 100.0f}),
+             .id(1)
+             .mutationId(7)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
+        CellDescription().id(2).mutationId(7).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -370,7 +370,67 @@ TEST_F(SensorTests_New, scanForOtherMutants_notFound_sameMutationId)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
+}
+
+TEST_F(SensorTests_New, scanForOtherMutants_notFound_structure)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .id(1)
+            .mutationId(7)
+            .pos({100.0f, 100.0f})
+            .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
+        CellDescription().id(2).mutationId(7).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
+                                                          .center({10.0f, 100.0f})
+                                                          .width(16)
+                                                          .height(16)
+                                                          .cellDistance(0.5f)
+                                                          .mutationId(6)
+                                                          .cellType(StructureCellDescription())));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensorCell = getCell(actualData, 1);
+
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
+}
+
+TEST_F(SensorTests_New, scanForOtherMutants_notFound_freeCell)
+{
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .id(1)
+            .mutationId(7)
+            .pos({100.0f, 100.0f})
+            .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
+        CellDescription().id(2).mutationId(7).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
+                                                          .center({10.0f, 100.0f})
+                                                          .width(16)
+                                                          .height(16)
+                                                          .cellDistance(0.5f)
+                                                          .mutationId(6)
+                                                          .cellType(FreeCellDescription())));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensorCell = getCell(actualData, 1);
+
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests_New, scanForSameMutants_found)
@@ -378,11 +438,11 @@ TEST_F(SensorTests_New, scanForSameMutants_found)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setMutationId(6)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
-        CellDescription().setId(2).setMutationId(6).setPos({101.0f, 100.0f}),
+             .id(1)
+             .mutationId(6)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
+        CellDescription().id(2).mutationId(6).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -400,10 +460,10 @@ TEST_F(SensorTests_New, scanForSameMutants_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
 }
 
-TEST_F(SensorTests_New, scanForSameMutants_notFound)
+TEST_F(SensorTests_New, scanForSameMutants_notFound_otherMutationId)
 {
     auto const MutantId = 6;
     for (int otherMutantId = 0; otherMutantId < 100; ++otherMutantId) {
@@ -413,13 +473,13 @@ TEST_F(SensorTests_New, scanForSameMutants_notFound)
         DataDescription data;
         data.addCells(
             {CellDescription()
-                 .setId(1)
-                 .setMutationId(MutantId)
-                 .setPos({100.0f, 100.0f})
-                 .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
+                 .id(1)
+                 .mutationId(MutantId)
+                 .pos({100.0f, 100.0f})
+                 .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
              CellDescription()
-                 .setId(2)
-                 .setMutationId(MutantId).setPos({101.0f, 100.0f}),
+                 .id(2)
+                 .mutationId(MutantId).pos({101.0f, 100.0f}),
         });
         data.addConnection(1, 2);
 
@@ -439,8 +499,74 @@ TEST_F(SensorTests_New, scanForSameMutants_notFound)
         auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
-        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
     }
+}
+
+TEST_F(SensorTests_New, scanForSameMutants_notFound_structure)
+{
+    auto const MutantId = 6;
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .id(1)
+            .mutationId(MutantId)
+            .pos({100.0f, 100.0f})
+            .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
+        CellDescription().id(2).mutationId(MutantId).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
+                                                          .center({10.0f, 100.0f})
+                                                          .width(16)
+                                                          .height(16)
+                                                          .cellDistance(0.5f)
+                                                          .mutationId(MutantId)
+                                                          .cellType(StructureCellDescription())));
+
+    _simulationFacade->clear();
+    _simulationFacade->setCurrentTimestep(0ull);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensorCell = getCell(actualData, 1);
+
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
+}
+
+TEST_F(SensorTests_New, scanForSameMutants_notFound_freeCell)
+{
+    auto const MutantId = 6;
+    DataDescription data;
+    data.addCells({
+        CellDescription()
+            .id(1)
+            .mutationId(MutantId)
+            .pos({100.0f, 100.0f})
+            .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
+        CellDescription().id(2).mutationId(MutantId).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
+                                                          .center({10.0f, 100.0f})
+                                                          .width(16)
+                                                          .height(16)
+                                                          .cellDistance(0.5f)
+                                                          .mutationId(MutantId)
+                                                          .cellType(FreeCellDescription())));
+
+    _simulationFacade->clear();
+    _simulationFacade->setCurrentTimestep(0ull);
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensorCell = getCell(actualData, 1);
+
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests_New, scanForStructures_found)
@@ -448,10 +574,10 @@ TEST_F(SensorTests_New, scanForStructures_found)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToStructures)),
-        CellDescription().setId(2).setPos({101.0f, 100.0f}),
+             .id(1)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToStructures)),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -464,7 +590,7 @@ TEST_F(SensorTests_New, scanForStructures_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests_New, scanForStructures_notFound)
@@ -472,10 +598,10 @@ TEST_F(SensorTests_New, scanForStructures_notFound)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToStructures)),
-        CellDescription().setId(2).setPos({101.0f, 100.0f}),
+             .id(1)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToStructures)),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -488,7 +614,7 @@ TEST_F(SensorTests_New, scanForStructures_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests_New, scanForFreeCells_found)
@@ -496,10 +622,10 @@ TEST_F(SensorTests_New, scanForFreeCells_found)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToFreeCells)),
-        CellDescription().setId(2).setPos({101.0f, 100.0f}),
+             .id(1)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToFreeCells)),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -512,7 +638,7 @@ TEST_F(SensorTests_New, scanForFreeCells_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests_New, scanForFreeCells_notFound)
@@ -520,10 +646,10 @@ TEST_F(SensorTests_New, scanForFreeCells_notFound)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToFreeCells)),
-        CellDescription().setId(2).setPos({101.0f, 100.0f}),
+             .id(1)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToFreeCells)),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -536,7 +662,7 @@ TEST_F(SensorTests_New, scanForFreeCells_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests_New, scanForLessComplexMutants_found)
@@ -545,11 +671,11 @@ TEST_F(SensorTests_New, scanForLessComplexMutants_found)
         DataDescription data;
         data.addCells(
             {CellDescription()
-                 .setId(1)
-                 .setPos({100.0f, 100.0f})
-                 .setGenomeComplexity(1000.0f)
-                 .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
-            CellDescription().setId(2).setPos({101.0f, 100.0f}),
+                 .id(1)
+                 .pos({100.0f, 100.0f})
+                 .genomeComplexity(1000.0f)
+                 .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
+            CellDescription().id(2).pos({101.0f, 100.0f}),
         });
         data.addConnection(1, 2);
 
@@ -569,7 +695,7 @@ TEST_F(SensorTests_New, scanForLessComplexMutants_found)
         auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
-        EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
+        EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
     }
 }
 
@@ -579,11 +705,11 @@ TEST_F(SensorTests_New, scanForLessComplexMutants_notFound_otherMoreComplex)
         DataDescription data;
         data.addCells(
             {CellDescription()
-                 .setId(1)
-                 .setPos({100.0f, 100.0f})
-                 .setGenomeComplexity(1000.0f)
-                 .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
-            CellDescription().setId(2).setMutationId(5).setPos({101.0f, 100.0f}),
+                 .id(1)
+                 .pos({100.0f, 100.0f})
+                 .genomeComplexity(1000.0f)
+                 .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
+            CellDescription().id(2).mutationId(5).pos({101.0f, 100.0f}),
         });
         data.addConnection(1, 2);
 
@@ -603,7 +729,7 @@ TEST_F(SensorTests_New, scanForLessComplexMutants_notFound_otherMoreComplex)
         auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
-        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
     }
 }
 
@@ -612,12 +738,12 @@ TEST_F(SensorTests_New, scanForLessComplexMutants_notFound_structure)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setMutationId(100)
-             .setPos({100.0f, 100.0f})
-             .setGenomeComplexity(1000.0f)
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
-         CellDescription().setId(2).setMutationId(100).setPos({101.0f, 100.0f}).setCellTypeData(OscillatorDescription()).setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(1)
+             .mutationId(100)
+             .pos({100.0f, 100.0f})
+             .genomeComplexity(1000.0f)
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
+         CellDescription().id(2).mutationId(100).pos({101.0f, 100.0f}).cellType(OscillatorDescription()).signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
@@ -634,7 +760,7 @@ TEST_F(SensorTests_New, scanForLessComplexMutants_notFound_structure)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests_New, scanForLessComplexMutants_notFound_freeCell)
@@ -642,12 +768,12 @@ TEST_F(SensorTests_New, scanForLessComplexMutants_notFound_freeCell)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setMutationId(100)
-             .setGenomeComplexity(1000.0f)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
-        CellDescription().setId(2).setMutationId(100).setPos({101.0f, 100.0f}),
+             .id(1)
+             .mutationId(100)
+             .genomeComplexity(1000.0f)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
+        CellDescription().id(2).mutationId(100).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -665,7 +791,7 @@ TEST_F(SensorTests_New, scanForLessComplexMutants_notFound_freeCell)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests_New, scanForMoreComplexMutants_found)
@@ -674,11 +800,11 @@ TEST_F(SensorTests_New, scanForMoreComplexMutants_found)
         DataDescription data;
         data.addCells(
             {CellDescription()
-                 .setId(1)
-                 .setPos({100.0f, 100.0f})
-                 .setGenomeComplexity(500.0f)
-                 .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
-            CellDescription().setId(2).setMutationId(5).setPos({101.0f, 100.0f}),
+                 .id(1)
+                 .pos({100.0f, 100.0f})
+                 .genomeComplexity(500.0f)
+                 .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
+            CellDescription().id(2).mutationId(5).pos({101.0f, 100.0f}),
         });
         data.addConnection(1, 2);
 
@@ -698,7 +824,7 @@ TEST_F(SensorTests_New, scanForMoreComplexMutants_found)
         auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
-        EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
+        EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
     }
 }
 
@@ -708,11 +834,11 @@ TEST_F(SensorTests_New, scanForMoreComplexMutants_notFound_otherLessComplex)
         DataDescription data;
         data.addCells(
             {CellDescription()
-                 .setId(1)
-                 .setPos({100.0f, 100.0f})
-                 .setGenomeComplexity(500.0f)
-                 .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
-            CellDescription().setId(2).setMutationId(5).setPos({101.0f, 100.0f}),
+                 .id(1)
+                 .pos({100.0f, 100.0f})
+                 .genomeComplexity(500.0f)
+                 .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
+            CellDescription().id(2).mutationId(5).pos({101.0f, 100.0f}),
         });
         data.addConnection(1, 2);
 
@@ -732,7 +858,7 @@ TEST_F(SensorTests_New, scanForMoreComplexMutants_notFound_otherLessComplex)
         auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
-        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
     }
 }
 
@@ -741,12 +867,12 @@ TEST_F(SensorTests_New, scanForMoreComplexMutants_notFound_structure)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setMutationId(100)
-             .setGenomeComplexity(100.0f)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
-        CellDescription().setId(2).setMutationId(100).setPos({101.0f, 100.0f}),
+             .id(1)
+             .mutationId(100)
+             .genomeComplexity(100.0f)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
+        CellDescription().id(2).mutationId(100).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -764,7 +890,7 @@ TEST_F(SensorTests_New, scanForMoreComplexMutants_notFound_structure)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests_New, scanForMoreComplexMutants_notFound_freeCell)
@@ -774,12 +900,12 @@ TEST_F(SensorTests_New, scanForMoreComplexMutants_notFound_freeCell)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setMutationId(100)
-             .setGenomeComplexity(100.0f)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
-        CellDescription().setId(2).setMutationId(100).setPos({101.0f, 100.0f}),
+             .id(1)
+             .mutationId(100)
+             .genomeComplexity(100.0f)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
+        CellDescription().id(2).mutationId(100).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -797,15 +923,15 @@ TEST_F(SensorTests_New, scanForMoreComplexMutants_notFound_freeCell)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests_New, minRange_found)
 {
     DataDescription data;
     data.addCells(
-        {CellDescription().setId(1).setPos({100.0f, 100.0f}).setCellTypeData(SensorDescription().setMinRange(50)),
-        CellDescription().setId(2).setPos({101.0f, 100.0f}),
+        {CellDescription().id(1).pos({100.0f, 100.0f}).cellType(SensorDescription().minRange(50)),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -818,15 +944,15 @@ TEST_F(SensorTests_New, minRange_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests_New, minRange_notFound)
 {
     DataDescription data;
     data.addCells(
-        {CellDescription().setId(1).setPos({100.0f, 100.0f}).setCellTypeData(SensorDescription().setMinRange(120)),
-        CellDescription().setId(2).setPos({101.0f, 100.0f}),
+        {CellDescription().id(1).pos({100.0f, 100.0f}).cellType(SensorDescription().minRange(120)),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -839,15 +965,15 @@ TEST_F(SensorTests_New, minRange_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests_New, maxRange_found)
 {
     DataDescription data;
     data.addCells(
-        {CellDescription().setId(1).setPos({100.0f, 100.0f}).setCellTypeData(SensorDescription().setMaxRange(120)),
-        CellDescription().setId(2).setPos({101.0f, 100.0f}),
+        {CellDescription().id(1).pos({100.0f, 100.0f}).cellType(SensorDescription().maxRange(120)),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -860,15 +986,15 @@ TEST_F(SensorTests_New, maxRange_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests_New, maxRange_notFound)
 {
     DataDescription data;
     data.addCells(
-        {CellDescription().setId(1).setPos({100.0f, 100.0f}).setCellTypeData(SensorDescription().setMaxRange(50)),
-        CellDescription().setId(2).setPos({101.0f, 100.0f}),
+        {CellDescription().id(1).pos({100.0f, 100.0f}).cellType(SensorDescription().maxRange(50)),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -881,5 +1007,5 @@ TEST_F(SensorTests_New, maxRange_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
 }

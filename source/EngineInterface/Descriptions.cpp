@@ -13,36 +13,36 @@ ConstructorDescription::ConstructorDescription()
 
 InjectorDescription::InjectorDescription()
 {
-    genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription());
+    _genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription());
 }
 
 CellType CellDescription::getCellType() const
 {
-    if (std::holds_alternative<StructureCellDescription>(cellTypeData)) {
+    if (std::holds_alternative<StructureCellDescription>(_cellTypeData)) {
         return CellType_Structure;
-    } else if (std::holds_alternative<FreeCellDescription>(cellTypeData)) {
+    } else if (std::holds_alternative<FreeCellDescription>(_cellTypeData)) {
         return CellType_Free;
-    } else if (std::holds_alternative<BaseDescription>(cellTypeData)) {
+    } else if (std::holds_alternative<BaseDescription>(_cellTypeData)) {
         return CellType_Base;
-    } else if (std::holds_alternative<DepotDescription>(cellTypeData)) {
+    } else if (std::holds_alternative<DepotDescription>(_cellTypeData)) {
         return CellType_Depot;
-    } else if (std::holds_alternative<ConstructorDescription>(cellTypeData)) {
+    } else if (std::holds_alternative<ConstructorDescription>(_cellTypeData)) {
         return CellType_Constructor;
-    } else if (std::holds_alternative<SensorDescription>(cellTypeData)) {
+    } else if (std::holds_alternative<SensorDescription>(_cellTypeData)) {
         return CellType_Sensor;
-    } else if (std::holds_alternative<OscillatorDescription>(cellTypeData)) {
+    } else if (std::holds_alternative<OscillatorDescription>(_cellTypeData)) {
         return CellType_Oscillator;
-    } else if (std::holds_alternative<AttackerDescription>(cellTypeData)) {
+    } else if (std::holds_alternative<AttackerDescription>(_cellTypeData)) {
         return CellType_Attacker;
-    } else if (std::holds_alternative<InjectorDescription>(cellTypeData)) {
+    } else if (std::holds_alternative<InjectorDescription>(_cellTypeData)) {
         return CellType_Injector;
-    } else if (std::holds_alternative<MuscleDescription>(cellTypeData)) {
+    } else if (std::holds_alternative<MuscleDescription>(_cellTypeData)) {
         return CellType_Muscle;
-    } else if (std::holds_alternative<DefenderDescription>(cellTypeData)) {
+    } else if (std::holds_alternative<DefenderDescription>(_cellTypeData)) {
         return CellType_Defender;
-    } else if (std::holds_alternative<ReconnectorDescription>(cellTypeData)) {
+    } else if (std::holds_alternative<ReconnectorDescription>(_cellTypeData)) {
         return CellType_Reconnector;
-    } else if (std::holds_alternative<DetonatorDescription>(cellTypeData)) {
+    } else if (std::holds_alternative<DetonatorDescription>(_cellTypeData)) {
         return CellType_Detonator;
     }
     CHECK(false);
@@ -50,8 +50,8 @@ CellType CellDescription::getCellType() const
 
 bool CellDescription::hasGenome() const
 {
-    auto cellType = getCellType();
-    if (cellType == CellType_Constructor || cellType == CellType_Injector) {
+    auto cellTypeEnum = getCellType();
+    if (cellTypeEnum == CellType_Constructor || cellTypeEnum == CellType_Injector) {
         return true;
     }
     return false;
@@ -59,28 +59,28 @@ bool CellDescription::hasGenome() const
 
 std::vector<uint8_t>& CellDescription::getGenomeRef()
 {
-    auto cellType = getCellType();
-    if (cellType == CellType_Constructor) {
-        return std::get<ConstructorDescription>(cellTypeData)._genome;
+    auto cellTypeEnum = getCellType();
+    if (cellTypeEnum == CellType_Constructor) {
+        return std::get<ConstructorDescription>(_cellTypeData)._genome;
     }
-    if (cellType == CellType_Injector) {
-        return std::get<InjectorDescription>(cellTypeData).genome;
+    if (cellTypeEnum == CellType_Injector) {
+        return std::get<InjectorDescription>(_cellTypeData)._genome;
     }
     THROW_NOT_IMPLEMENTED();
 }
 
 bool CellDescription::isConnectedTo(uint64_t id) const
 {
-    return std::find_if(connections.begin(), connections.end(), [&id](auto const& connection) { return connection._cellId == id; }) != connections.end();
+    return std::find_if(_connections.begin(), _connections.end(), [&id](auto const& connection) { return connection._cellId == id; }) != _connections.end();
 }
 
 RealVector2D ClusterDescription::getClusterPosFromCells() const
 {
     RealVector2D result;
-    for (auto const& cell : cells) {
-        result += cell.pos;
+    for (auto const& cell : _cells) {
+        result += cell._pos;
     }
-    result /= cells.size();
+    result /= _cells.size();
     return result;
 }
 
@@ -95,14 +95,14 @@ RealVector2D ClusteredDataDescription::calcCenter() const
 {
     RealVector2D result;
     int numEntities = 0;
-    for (auto const& cluster : clusters) {
-        for (auto const& cell : cluster.cells) {
-            result += cell.pos;
+    for (auto const& cluster : _clusters) {
+        for (auto const& cell : cluster._cells) {
+            result += cell._pos;
             ++numEntities;
         }
     }
-    for (auto const& particle : particles) {
-        result += particle.pos;
+    for (auto const& particle : _particles) {
+        result += particle._pos;
         ++numEntities;
     }
     result /= numEntities;
@@ -111,43 +111,43 @@ RealVector2D ClusteredDataDescription::calcCenter() const
 
 void ClusteredDataDescription::shift(RealVector2D const& delta)
 {
-    for (auto& cluster : clusters) {
-        for (auto& cell : cluster.cells) {
-            cell.pos += delta;
+    for (auto& cluster : _clusters) {
+        for (auto& cell : cluster._cells) {
+            cell._pos += delta;
         }
     }
-    for (auto& particle : particles) {
-        particle.pos += delta;
+    for (auto& particle : _particles) {
+        particle._pos += delta;
     }
 }
 
 int ClusteredDataDescription::getNumberOfCellAndParticles() const
 {
-    int result = static_cast<int>(particles.size());
-    for (auto const& cluster : clusters) {
-        result += static_cast<int>(cluster.cells.size());
+    int result = static_cast<int>(_particles.size());
+    for (auto const& cluster : _clusters) {
+        result += static_cast<int>(cluster._cells.size());
     }
     return result;
 }
 
 DataDescription::DataDescription(ClusteredDataDescription const& clusteredData)
 {
-    for (auto const& cluster : clusteredData.clusters) {
-        addCells(cluster.cells);
+    for (auto const& cluster : clusteredData._clusters) {
+        addCells(cluster._cells);
     }
-    particles = clusteredData.particles;
+    _particles = clusteredData._particles;
 }
 
 DataDescription& DataDescription::add(DataDescription const& other)
 {
-    cells.insert(cells.end(), other.cells.begin(), other.cells.end());
-    particles.insert(particles.end(), other.particles.begin(), other.particles.end());
+    _cells.insert(_cells.end(), other._cells.begin(), other._cells.end());
+    _particles.insert(_particles.end(), other._particles.begin(), other._particles.end());
     return *this;
 }
 
 DataDescription& DataDescription::addCells(std::vector<CellDescription> const& value)
 {
-    cells.insert(cells.end(), value.begin(), value.end());
+    _cells.insert(_cells.end(), value.begin(), value.end());
     return *this;
 }
 
@@ -159,7 +159,7 @@ DataDescription& DataDescription::addCell(CellDescription const& value)
 
 DataDescription& DataDescription::addParticles(std::vector<ParticleDescription> const& value)
 {
-    particles.insert(particles.end(), value.begin(), value.end());
+    _particles.insert(_particles.end(), value.begin(), value.end());
     return *this;
 }
 
@@ -171,16 +171,16 @@ DataDescription& DataDescription::addParticle(ParticleDescription const& value)
 
 void DataDescription::clear()
 {
-    cells.clear();
-    particles.clear();
+    _cells.clear();
+    _particles.clear();
 }
 
 bool DataDescription::isEmpty() const
 {
-    if (!cells.empty()) {
+    if (!_cells.empty()) {
         return false;
     }
-    if (!particles.empty()) {
+    if (!_particles.empty()) {
         return false;
     }
     return true;
@@ -196,12 +196,12 @@ void DataDescription::setCenter(RealVector2D const& center)
 RealVector2D DataDescription::calcCenter() const
 {
     RealVector2D result;
-    auto numEntities = cells.size() + particles.size();
-    for (auto const& cell : cells) {
-        result += cell.pos;
+    auto numEntities = _cells.size() + _particles.size();
+    for (auto const& cell : _cells) {
+        result += cell._pos;
     }
-    for (auto const& particle : particles) {
-        result += particle.pos;
+    for (auto const& particle : _particles) {
+        result += particle._pos;
     }
     result /= numEntities;
     return result;
@@ -209,11 +209,11 @@ RealVector2D DataDescription::calcCenter() const
 
 void DataDescription::shift(RealVector2D const& delta)
 {
-    for (auto& cell : cells) {
-        cell.pos += delta;
+    for (auto& cell : _cells) {
+        cell._pos += delta;
     }
-    for (auto& particle : particles) {
-        particle.pos += delta;
+    for (auto& particle : _particles) {
+        particle._pos += delta;
     }
 }
 
@@ -227,11 +227,11 @@ void DataDescription::rotate(float angle)
         auto rotatedRelPos = rotationMatrix * relPos;
         pos = center + rotatedRelPos;
     };
-    for (auto& cell : cells) {
-        rotate(cell.pos);
+    for (auto& cell : _cells) {
+        rotate(cell._pos);
     }
-    for (auto& particle : particles) {
-        rotate(particle.pos);
+    for (auto& particle : _particles) {
+        rotate(particle._pos);
     }
 }
 
@@ -243,19 +243,19 @@ void DataDescription::accelerate(RealVector2D const& velDelta, float angularVelD
         auto relPos = pos - center;
         vel += Physics::tangentialVelocity(relPos, velDelta, angularVelDelta);
     };
-    for (auto& cell : cells) {
-        accelerate(cell.pos, cell.vel);
+    for (auto& cell : _cells) {
+        accelerate(cell._pos, cell._vel);
     }
-    for (auto& particle : particles) {
-        accelerate(particle.pos, particle.vel);
+    for (auto& particle : _particles) {
+        accelerate(particle._pos, particle._vel);
     }
 }
 
 std::unordered_set<uint64_t> DataDescription::getCellIds() const
 {
     std::unordered_set<uint64_t> result;
-    for (auto const& cell : cells) {
-        result.insert(cell.id);
+    for (auto const& cell : _cells) {
+        result.insert(cell._id);
     }
     return result;
 }
@@ -264,7 +264,7 @@ DataDescription&
 DataDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>* cache)
 {
     auto& cell2 = getCellRef(cellId2, cache);
-    return addConnection(cellId1, cellId2, cell2.pos, cache);
+    return addConnection(cellId1, cellId2, cell2._pos, cache);
 }
 
 DataDescription& DataDescription::addConnection(
@@ -278,42 +278,42 @@ DataDescription& DataDescription::addConnection(
 
     auto addConnection = [this,
                           &cache](CellDescription& cell, CellDescription& otherCell, RealVector2D const& cellRefPos, RealVector2D const& otherCellRefPos) {
-        CHECK(cell.connections.size() < MAX_CELL_BONDS);
+        CHECK(cell._connections.size() < MAX_CELL_BONDS);
 
         auto newAngle = Math::angleOfVector(otherCellRefPos - cellRefPos);
 
-        if (cell.connections.empty()) {
+        if (cell._connections.empty()) {
             ConnectionDescription newConnection;
-            newConnection._cellId = otherCell.id;
+            newConnection._cellId = otherCell._id;
             newConnection._distance = toFloat(Math::length(otherCellRefPos - cellRefPos));
             newConnection._angleFromPrevious = 360.0;
-            cell.connections.emplace_back(newConnection);
+            cell._connections.emplace_back(newConnection);
             return;
         }
-        if (1 == cell.connections.size()) {
+        if (1 == cell._connections.size()) {
             ConnectionDescription newConnection;
-            newConnection._cellId = otherCell.id;
+            newConnection._cellId = otherCell._id;
             newConnection._distance = toFloat(Math::length(otherCellRefPos - cellRefPos));
 
-            auto connectedCell = getCellRef(cell.connections.front()._cellId, cache);
-            auto connectedCellDelta = connectedCell.pos - cellRefPos;
+            auto connectedCell = getCellRef(cell._connections.front()._cellId, cache);
+            auto connectedCellDelta = connectedCell._pos - cellRefPos;
             auto prevAngle = Math::angleOfVector(connectedCellDelta);
             auto angleDiff = newAngle - prevAngle;
             if (angleDiff >= 0) {
                 newConnection._angleFromPrevious = toFloat(angleDiff);
-                cell.connections.begin()->_angleFromPrevious = 360.0f - toFloat(angleDiff);
+                cell._connections.begin()->_angleFromPrevious = 360.0f - toFloat(angleDiff);
             } else {
                 newConnection._angleFromPrevious = 360.0f + toFloat(angleDiff);
-                cell.connections.begin()->_angleFromPrevious = toFloat(-angleDiff);
+                cell._connections.begin()->_angleFromPrevious = toFloat(-angleDiff);
             }
-            cell.connections.emplace_back(newConnection);
+            cell._connections.emplace_back(newConnection);
             return;
         }
 
-        auto firstConnectedCell = getCellRef(cell.connections.front()._cellId, cache);
-        auto firstConnectedCellDelta = firstConnectedCell.pos - cellRefPos;
+        auto firstConnectedCell = getCellRef(cell._connections.front()._cellId, cache);
+        auto firstConnectedCellDelta = firstConnectedCell._pos - cellRefPos;
         auto angle = Math::angleOfVector(firstConnectedCellDelta);
-        auto connectionIt = ++cell.connections.begin();
+        auto connectionIt = ++cell._connections.begin();
         while (true) {
             auto nextAngle = angle + connectionIt->_angleFromPrevious;
 
@@ -322,8 +322,8 @@ DataDescription& DataDescription::addConnection(
             }
 
             ++connectionIt;
-            if (connectionIt == cell.connections.end()) {
-                connectionIt = cell.connections.begin();
+            if (connectionIt == cell._connections.end()) {
+                connectionIt = cell._connections.begin();
             }
             angle = nextAngle;
             if (angle > 360.0f) {
@@ -332,7 +332,7 @@ DataDescription& DataDescription::addConnection(
         }
 
         ConnectionDescription newConnection;
-        newConnection._cellId = otherCell.id;
+        newConnection._cellId = otherCell._id;
         newConnection._distance = toFloat(Math::length(otherCellRefPos - cellRefPos));
 
         auto angleDiff1 = newAngle - angle;
@@ -340,22 +340,22 @@ DataDescription& DataDescription::addConnection(
             angleDiff1 += 360.0f;
         }
         auto angleDiff2 = connectionIt->_angleFromPrevious;
-        if (connectionIt == cell.connections.begin()) {
-            connectionIt = cell.connections.end();  // connection at index 0 should be an invariant
+        if (connectionIt == cell._connections.begin()) {
+            connectionIt = cell._connections.end();  // connection at index 0 should be an invariant
         }
 
         auto factor = (angleDiff2 != 0) ? angleDiff1 / angleDiff2 : 0.5f;
         newConnection._angleFromPrevious = toFloat(angleDiff2 * factor);
-        connectionIt = cell.connections.insert(connectionIt, newConnection);
+        connectionIt = cell._connections.insert(connectionIt, newConnection);
         ++connectionIt;
-        if (connectionIt == cell.connections.end()) {
-            connectionIt = cell.connections.begin();
+        if (connectionIt == cell._connections.end()) {
+            connectionIt = cell._connections.begin();
         }
         connectionIt->_angleFromPrevious = toFloat(angleDiff2 * (1 - factor));
     };
 
-    addConnection(cell1, cell2, cell1.pos, refPosCell2);
-    addConnection(cell2, cell1, refPosCell2, cell1.pos);
+    addConnection(cell1, cell2, cell1._pos, refPosCell2);
+    addConnection(cell2, cell1, refPosCell2, cell1._pos);
 
     return *this;
 }
@@ -365,12 +365,12 @@ CellDescription& DataDescription::getCellRef(uint64_t const& cellId, std::unorde
     if (cache) {
         auto findResult = cache->find(cellId);
         if (findResult != cache->end()) {
-            return cells.at(findResult->second);
+            return _cells.at(findResult->second);
         }
     }
-    for (int i = 0; i < cells.size(); ++i) {
-        auto& cell = cells.at(i);
-        if (cell.id == cellId) {
+    for (int i = 0; i < _cells.size(); ++i) {
+        auto& cell = _cells.at(i);
+        if (cell._id == cellId) {
             if (cache) {
                 cache->emplace(cellId, i);
             }

@@ -18,11 +18,11 @@ public:
 protected:
     bool areAngelsCorrect(ClusteredDataDescription const& clusteredData) const
     {
-        for (auto const& cluster : clusteredData.clusters) {
-            for (auto const& cell : cluster.cells) {
-                if (!cell.connections.empty()) {
+        for (auto const& cluster : clusteredData._clusters) {
+            for (auto const& cell : cluster._cells) {
+                if (!cell._connections.empty()) {
                     float sumAngles = 0;
-                    for (auto const& connection : cell.connections) {
+                    for (auto const& connection : cell._connections) {
                         sumAngles += connection._angleFromPrevious;
                     }
                     if (std::abs(sumAngles - 360.0f) > NEAR_ZERO) {
@@ -51,10 +51,10 @@ TEST_F(DescriptionEditTests, correctConnections)
 TEST_F(DescriptionEditTests, addThirdConnection1)
 {
     auto data = DataDescription().addCells({
-        CellDescription().setId(1).setPos({0, 0}),
-        CellDescription().setId(2).setPos({1, 0}),
-        CellDescription().setId(3).setPos({0, 1}),
-        CellDescription().setId(4).setPos({0, -1}),
+        CellDescription().id(1).pos({0, 0}),
+        CellDescription().id(2).pos({1, 0}),
+        CellDescription().id(3).pos({0, 1}),
+        CellDescription().id(4).pos({0, -1}),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -63,17 +63,17 @@ TEST_F(DescriptionEditTests, addThirdConnection1)
     auto cellById = getCellById(data);
     auto cell = cellById.at(1);
 
-    EXPECT_EQ(3, cell.connections.size());
+    EXPECT_EQ(3, cell._connections.size());
 
-    auto connection1 = cell.connections.at(0);
+    auto connection1 = cell._connections.at(0);
     EXPECT_TRUE(approxCompare(1.0f, connection1._distance));
     EXPECT_TRUE(approxCompare(90.0f, connection1._angleFromPrevious));
 
-    auto connection2 = cell.connections.at(1);
+    auto connection2 = cell._connections.at(1);
     EXPECT_TRUE(approxCompare(1.0f, connection2._distance));
     EXPECT_TRUE(approxCompare(90.0f, connection2._angleFromPrevious));
 
-    auto connection3 = cell.connections.at(2);
+    auto connection3 = cell._connections.at(2);
     EXPECT_TRUE(approxCompare(1.0f, connection3._distance));
     EXPECT_TRUE(approxCompare(180.0f, connection3._angleFromPrevious));
 }
@@ -81,10 +81,10 @@ TEST_F(DescriptionEditTests, addThirdConnection1)
 TEST_F(DescriptionEditTests, addThirdConnection2)
 {
     auto data = DataDescription().addCells({
-        CellDescription().setId(1).setPos({0, 0}),
-        CellDescription().setId(2).setPos({1, 0}),
-        CellDescription().setId(3).setPos({-1, 0}),
-        CellDescription().setId(4).setPos({0, 1}),
+        CellDescription().id(1).pos({0, 0}),
+        CellDescription().id(2).pos({1, 0}),
+        CellDescription().id(3).pos({-1, 0}),
+        CellDescription().id(4).pos({0, 1}),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -93,17 +93,17 @@ TEST_F(DescriptionEditTests, addThirdConnection2)
     auto cellById = getCellById(data);
     auto cell = cellById.at(1);
 
-    EXPECT_EQ(3, cell.connections.size());
+    EXPECT_EQ(3, cell._connections.size());
 
-    auto connection1 = cell.connections.at(0);
+    auto connection1 = cell._connections.at(0);
     EXPECT_TRUE(approxCompare(1.0f, connection1._distance));
     EXPECT_TRUE(approxCompare(180.0f, connection1._angleFromPrevious));
 
-    auto connection2 = cell.connections.at(1);
+    auto connection2 = cell._connections.at(1);
     EXPECT_TRUE(approxCompare(1.0f, connection2._distance));
     EXPECT_TRUE(approxCompare(90.0f, connection2._angleFromPrevious));
 
-    auto connection3 = cell.connections.at(2);
+    auto connection3 = cell._connections.at(2);
     EXPECT_TRUE(approxCompare(1.0f, connection3._distance));
     EXPECT_TRUE(approxCompare(90.0f, connection3._angleFromPrevious));
 }

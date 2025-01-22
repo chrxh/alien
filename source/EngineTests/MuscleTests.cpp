@@ -33,14 +33,14 @@ TEST_F(MuscleTests, doNothing)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({10.0f, 10.0f})
-             .setCellTypeData(MuscleDescription().setMode(MuscleMode_Movement)),
+             .id(1)
+             .pos({10.0f, 10.0f})
+             .cellType(MuscleDescription().mode(MuscleMode_Movement)),
          CellDescription()
-             .setId(2)
-             .setPos({11.0f, 10.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({0, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({11.0f, 10.0f})
+             .cellType(OscillatorDescription())
+             .signal({0, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -50,13 +50,13 @@ TEST_F(MuscleTests, doNothing)
     auto actualMuscleCell = getCell(actualData, 1);
     auto actualOscillatorCell = getCell(actualData, 2);
 
-    EXPECT_EQ(2, actualData.cells.size());
+    EXPECT_EQ(2, actualData._cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(approxCompare(0, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(actualOscillatorCell.connections.at(0)._distance, actualMuscleCell.connections.at(0)._distance));
-    EXPECT_TRUE(approxCompare(1.0f , actualMuscleCell.connections.at(0)._distance));
-    EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.x));
-    EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.y));
+    EXPECT_TRUE(approxCompare(0, actualMuscleCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(actualOscillatorCell._connections.at(0)._distance, actualMuscleCell._connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(1.0f , actualMuscleCell._connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(0, actualMuscleCell._vel.x));
+    EXPECT_TRUE(approxCompare(0, actualMuscleCell._vel.y));
 }
 
 TEST_F(MuscleTests, moveForward)
@@ -64,14 +64,14 @@ TEST_F(MuscleTests, moveForward)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({10.0f, 10.0f})
-             .setCellTypeData(MuscleDescription().setMode(MuscleMode_Movement)),
+             .id(1)
+             .pos({10.0f, 10.0f})
+             .cellType(MuscleDescription().mode(MuscleMode_Movement)),
          CellDescription()
-             .setId(2)
-             .setPos({11.0f, 10.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({11.0f, 10.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -81,13 +81,13 @@ TEST_F(MuscleTests, moveForward)
     auto actualMuscleCell = getCell(actualData, 1);
     auto actualOscillatorCell = getCell(actualData, 2);
 
-    EXPECT_EQ(2, actualData.cells.size());
+    EXPECT_EQ(2, actualData._cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(actualOscillatorCell.connections.at(0)._distance, actualMuscleCell.connections.at(0)._distance));
-    EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.connections.at(0)._distance));
-    EXPECT_TRUE(approxCompare(-_parameters.cellTypeMuscleMovementAcceleration[0], actualMuscleCell.vel.x));
-    EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.y));
+    EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(actualOscillatorCell._connections.at(0)._distance, actualMuscleCell._connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell._connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(-_parameters.cellTypeMuscleMovementAcceleration[0], actualMuscleCell._vel.x));
+    EXPECT_TRUE(approxCompare(0, actualMuscleCell._vel.y));
 }
 
 TEST_F(MuscleTests, moveBackward)
@@ -95,14 +95,14 @@ TEST_F(MuscleTests, moveBackward)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({10.0f, 10.0f})
-             .setCellTypeData(MuscleDescription().setMode(MuscleMode_Movement)),
+             .id(1)
+             .pos({10.0f, 10.0f})
+             .cellType(MuscleDescription().mode(MuscleMode_Movement)),
          CellDescription()
-             .setId(2)
-             .setPos({11.0f, 10.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({-1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({11.0f, 10.0f})
+             .cellType(OscillatorDescription())
+             .signal({-1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -113,11 +113,11 @@ TEST_F(MuscleTests, moveBackward)
     auto actualOscillatorCell = getCell(actualData, 2);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(approxCompare(-1.0f, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(actualOscillatorCell.connections.at(0)._distance, actualMuscleCell.connections.at(0)._distance));
-    EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.connections.at(0)._distance));
-    EXPECT_TRUE(approxCompare(_parameters.cellTypeMuscleMovementAcceleration[0], actualMuscleCell.vel.x));
-    EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.y));
+    EXPECT_TRUE(approxCompare(-1.0f, actualMuscleCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(actualOscillatorCell._connections.at(0)._distance, actualMuscleCell._connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell._connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(_parameters.cellTypeMuscleMovementAcceleration[0], actualMuscleCell._vel.x));
+    EXPECT_TRUE(approxCompare(0, actualMuscleCell._vel.y));
 }
 
 TEST_F(MuscleTests, multipleMovementDirections)
@@ -125,19 +125,19 @@ TEST_F(MuscleTests, multipleMovementDirections)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(MuscleDescription().setMode(MuscleMode_Movement)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(MuscleDescription().mode(MuscleMode_Movement)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
-            .setId(3)
-            .setPos({10.0f, 11.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
+            .id(3)
+            .pos({10.0f, 11.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -148,9 +148,9 @@ TEST_F(MuscleTests, multipleMovementDirections)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(2.0f, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(actualMuscleCell.vel.x < -NEAR_ZERO);
-    EXPECT_TRUE(actualMuscleCell.vel.y < -NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(2.0f, actualMuscleCell._signal->_channels[0]));
+    EXPECT_TRUE(actualMuscleCell._vel.x < -NEAR_ZERO);
+    EXPECT_TRUE(actualMuscleCell._vel.y < -NEAR_ZERO);
 }
 
 TEST_F(MuscleTests, expansion)
@@ -160,14 +160,14 @@ TEST_F(MuscleTests, expansion)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({10.0f, 10.0f})
-             .setCellTypeData(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
+             .id(1)
+             .pos({10.0f, 10.0f})
+             .cellType(MuscleDescription().mode(MuscleMode_ContractionExpansion)),
          CellDescription()
-             .setId(2)
-             .setPos({10.0f + smallDistance, 10.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({10.0f + smallDistance, 10.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -178,11 +178,11 @@ TEST_F(MuscleTests, expansion)
     auto actualOscillatorCell = getCell(actualData, 2);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(actualOscillatorCell.connections.at(0)._distance, actualMuscleCell.connections.at(0)._distance));
-    EXPECT_TRUE(approxCompare(smallDistance + _parameters.cellTypeMuscleContractionExpansionDelta[0], actualMuscleCell.connections.at(0)._distance));
-    EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.x));
-    EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.y));
+    EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(actualOscillatorCell._connections.at(0)._distance, actualMuscleCell._connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(smallDistance + _parameters.cellTypeMuscleContractionExpansionDelta[0], actualMuscleCell._connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(0, actualMuscleCell._vel.x));
+    EXPECT_TRUE(approxCompare(0, actualMuscleCell._vel.y));
 }
 
 TEST_F(MuscleTests, expansionNotPossible)
@@ -192,14 +192,14 @@ TEST_F(MuscleTests, expansionNotPossible)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({10.0f, 10.0f})
-             .setCellTypeData(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
+             .id(1)
+             .pos({10.0f, 10.0f})
+             .cellType(MuscleDescription().mode(MuscleMode_ContractionExpansion)),
          CellDescription()
-             .setId(2)
-             .setPos({10.0f + largeDistance, 10.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({10.0f + largeDistance, 10.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -209,8 +209,8 @@ TEST_F(MuscleTests, expansionNotPossible)
     auto actualMuscleCell = getCell(actualData, 1);
     auto actualOscillatorCell = getCell(actualData, 2);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(largeDistance, actualMuscleCell.connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(largeDistance, actualMuscleCell._connections.at(0)._distance));
 }
 
 TEST_F(MuscleTests, contraction)
@@ -220,14 +220,14 @@ TEST_F(MuscleTests, contraction)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({10.0f, 10.0f})
-             .setCellTypeData(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
+             .id(1)
+             .pos({10.0f, 10.0f})
+             .cellType(MuscleDescription().mode(MuscleMode_ContractionExpansion)),
          CellDescription()
-             .setId(2)
-             .setPos({10.0f + largeDistance, 10.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({-1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({10.0f + largeDistance, 10.0f})
+             .cellType(OscillatorDescription())
+             .signal({-1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -237,9 +237,9 @@ TEST_F(MuscleTests, contraction)
     auto actualMuscleCell = getCell(actualData, 1);
     auto actualOscillatorCell = getCell(actualData, 2);
 
-    EXPECT_TRUE(approxCompare(-1.0f, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(actualOscillatorCell.connections.at(0)._distance, actualMuscleCell.connections.at(0)._distance));
-    EXPECT_TRUE(approxCompare(largeDistance - _parameters.cellTypeMuscleContractionExpansionDelta[0], actualMuscleCell.connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(-1.0f, actualMuscleCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(actualOscillatorCell._connections.at(0)._distance, actualMuscleCell._connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(largeDistance - _parameters.cellTypeMuscleContractionExpansionDelta[0], actualMuscleCell._connections.at(0)._distance));
 }
 
 TEST_F(MuscleTests, multipleContraction)
@@ -249,19 +249,19 @@ TEST_F(MuscleTests, multipleContraction)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(MuscleDescription().mode(MuscleMode_ContractionExpansion)),
         CellDescription()
-            .setId(2)
-            .setPos({10.0f + largeDistance, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({-1, 0, 0, 0, 0, 0, 0, 0}),
+            .id(2)
+            .pos({10.0f + largeDistance, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({-1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
-            .setId(3)
-            .setPos({10.0f, 10.0f + largeDistance})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({-1, 0, 0, 0, 0, 0, 0, 0}),
+            .id(3)
+            .pos({10.0f, 10.0f + largeDistance})
+            .cellType(OscillatorDescription())
+            .signal({-1, 0, 0, 0, 0, 0, 0, 0}),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -274,7 +274,7 @@ TEST_F(MuscleTests, multipleContraction)
     auto muscleToOscillatorConnection1 = getConnection(actualData, 1, 2);
     auto muscleToOscillatorConnection2 = getConnection(actualData, 1, 3);
 
-    EXPECT_TRUE(approxCompare(-2.0f, actualMuscleCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(-2.0f, actualMuscleCell._signal->_channels[0]));
     EXPECT_TRUE(approxCompare(largeDistance - _parameters.cellTypeMuscleContractionExpansionDelta[0], muscleToOscillatorConnection1._distance));
     EXPECT_TRUE(approxCompare(largeDistance - _parameters.cellTypeMuscleContractionExpansionDelta[0], muscleToOscillatorConnection2._distance));
 }
@@ -286,14 +286,14 @@ TEST_F(MuscleTests, contractionNotPossible)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({10.0f, 10.0f})
-             .setCellTypeData(MuscleDescription().setMode(MuscleMode_ContractionExpansion)),
+             .id(1)
+             .pos({10.0f, 10.0f})
+             .cellType(MuscleDescription().mode(MuscleMode_ContractionExpansion)),
          CellDescription()
-             .setId(2)
-             .setPos({10.0f + smallDistance, 10.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({-1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({10.0f + smallDistance, 10.0f})
+             .cellType(OscillatorDescription())
+             .signal({-1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -303,24 +303,24 @@ TEST_F(MuscleTests, contractionNotPossible)
     auto actualMuscleCell = getCell(actualData, 1);
     auto actualOscillatorCell = getCell(actualData, 2);
 
-    EXPECT_TRUE(approxCompare(-1.0f, actualMuscleCell.signal->channels[0]));
-    EXPECT_TRUE(approxCompare(smallDistance, actualMuscleCell.connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(-1.0f, actualMuscleCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(smallDistance, actualMuscleCell._connections.at(0)._distance));
 }
 
 TEST_F(MuscleTests, bendClockwise)
 {
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setPos({9.0f, 10.0f}),
+        CellDescription().id(1).pos({9.0f, 10.0f}),
         CellDescription()
-            .setId(2)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(MuscleDescription().setMode(MuscleMode_Bending)),
+            .id(2)
+            .pos({10.0f, 10.0f})
+            .cellType(MuscleDescription().mode(MuscleMode_Bending)),
         CellDescription()
-            .setId(3)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
+            .id(3)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -335,28 +335,28 @@ TEST_F(MuscleTests, bendClockwise)
     auto connection2 = getConnection(actualData, 3, 2);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell._signal->_channels[0]));
     EXPECT_TRUE(approxCompare(1.0f, connection1._distance));
     EXPECT_TRUE(approxCompare(1.0f, connection2._distance));
     EXPECT_TRUE(approxCompare(180.0f + _parameters.cellTypeMuscleBendingAngle[0], connection1._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.x));
-    EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.y));
+    EXPECT_TRUE(approxCompare(0, actualMuscleCell._vel.x));
+    EXPECT_TRUE(approxCompare(0, actualMuscleCell._vel.y));
 }
 
 TEST_F(MuscleTests, bendCounterClockwise)
 {
     DataDescription data;
     data.addCells({
-        CellDescription().setId(1).setPos({9.0f, 10.0f}),
+        CellDescription().id(1).pos({9.0f, 10.0f}),
         CellDescription()
-            .setId(2)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(MuscleDescription().setMode(MuscleMode_Bending)),
+            .id(2)
+            .pos({10.0f, 10.0f})
+            .cellType(MuscleDescription().mode(MuscleMode_Bending)),
         CellDescription()
-            .setId(3)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({-1, 0, 0, 0, 0, 0, 0, 0}),
+            .id(3)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({-1, 0, 0, 0, 0, 0, 0, 0}),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -370,10 +370,10 @@ TEST_F(MuscleTests, bendCounterClockwise)
     auto connection1 = getConnection(actualData, 2, 3);
     auto connection2 = getConnection(actualData, 3, 2);
 
-    EXPECT_TRUE(approxCompare(-1.0f, actualMuscleCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(-1.0f, actualMuscleCell._signal->_channels[0]));
     EXPECT_TRUE(approxCompare(1.0f, connection1._distance));
     EXPECT_TRUE(approxCompare(1.0f, connection2._distance));
     EXPECT_TRUE(approxCompare(180.0f - _parameters.cellTypeMuscleBendingAngle[0], connection1._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.x));
-    EXPECT_TRUE(approxCompare(0, actualMuscleCell.vel.y));
+    EXPECT_TRUE(approxCompare(0, actualMuscleCell._vel.x));
+    EXPECT_TRUE(approxCompare(0, actualMuscleCell._vel.y));
 }

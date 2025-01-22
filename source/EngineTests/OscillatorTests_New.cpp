@@ -18,7 +18,7 @@ public:
 TEST_F(OscillatorTests_New, generatePulse_timeBeforeFirstPulse)
 {
     auto data = DataDescription().addCells({
-        CellDescription().setId(1).setCellTypeData(OscillatorDescription().setAutoTriggerInterval(97)),
+        CellDescription().id(1).cellType(OscillatorDescription().autoTriggerInterval(97)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -28,13 +28,13 @@ TEST_F(OscillatorTests_New, generatePulse_timeBeforeFirstPulse)
     auto actualCellById = getCellById(actualData);
 
     auto oscillator = actualCellById.at(1);
-    EXPECT_FALSE(oscillator.signal.has_value());
+    EXPECT_FALSE(oscillator._signal.has_value());
 }
 
 TEST_F(OscillatorTests_New, generatePulse_timeAtFirstPulse)
 {
     auto data = DataDescription().addCells({
-        CellDescription().setId(1).setCellTypeData(OscillatorDescription().setAutoTriggerInterval(97)),
+        CellDescription().id(1).cellType(OscillatorDescription().autoTriggerInterval(97)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -44,14 +44,14 @@ TEST_F(OscillatorTests_New, generatePulse_timeAtFirstPulse)
     auto actualCellById = getCellById(actualData);
 
     auto oscillator = actualCellById.at(1);
-    ASSERT_TRUE(oscillator.signal.has_value());
-    EXPECT_EQ(1.0f, oscillator.signal->channels.at(0));
+    ASSERT_TRUE(oscillator._signal.has_value());
+    EXPECT_EQ(1.0f, oscillator._signal->_channels.at(0));
 }
 
 TEST_F(OscillatorTests_New, generatePulse_timeAtSecondPulse)
 {
     auto data = DataDescription().addCells({
-        CellDescription().setId(1).setCellTypeData(OscillatorDescription().setAutoTriggerInterval(97 * 2)),
+        CellDescription().id(1).cellType(OscillatorDescription().autoTriggerInterval(97 * 2)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -61,14 +61,14 @@ TEST_F(OscillatorTests_New, generatePulse_timeAtSecondPulse)
     auto actualCellById = getCellById(actualData);
 
     auto oscillator = actualCellById.at(1);
-    EXPECT_TRUE(oscillator.signal.has_value());
-    EXPECT_EQ(1.0f, oscillator.signal->channels.at(0));
+    EXPECT_TRUE(oscillator._signal.has_value());
+    EXPECT_EQ(1.0f, oscillator._signal->_channels.at(0));
 }
 
 TEST_F(OscillatorTests_New, generatePulse_timeAfterFirstPulse)
 {
     auto data = DataDescription().addCells({
-        CellDescription().setId(1).setCellTypeData(OscillatorDescription().setAutoTriggerInterval(97)),
+        CellDescription().id(1).cellType(OscillatorDescription().autoTriggerInterval(97)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -78,13 +78,13 @@ TEST_F(OscillatorTests_New, generatePulse_timeAfterFirstPulse)
     auto actualCellById = getCellById(actualData);
 
     auto oscillator = actualCellById.at(1);
-    EXPECT_FALSE(oscillator.signal.has_value());
+    EXPECT_FALSE(oscillator._signal.has_value());
 }
 
 TEST_F(OscillatorTests_New, generatePulse_timeBeforeFirstPulseAlternation)
 {
     auto data = DataDescription().addCells({
-        CellDescription().setId(1).setCellTypeData(OscillatorDescription().setAutoTriggerInterval(97).setAlternationInterval(3)),
+        CellDescription().id(1).cellType(OscillatorDescription().autoTriggerInterval(97).alternationInterval(3)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -94,14 +94,14 @@ TEST_F(OscillatorTests_New, generatePulse_timeBeforeFirstPulseAlternation)
     auto actualCellById = getCellById(actualData);
 
     auto oscillator = actualCellById.at(1);
-    EXPECT_TRUE(oscillator.signal.has_value());
-    EXPECT_EQ(1.0f, oscillator.signal->channels.at(0));
+    EXPECT_TRUE(oscillator._signal.has_value());
+    EXPECT_EQ(1.0f, oscillator._signal->_channels.at(0));
 }
 
 TEST_F(OscillatorTests_New, generatePulse_timeAtFirstPulseAlternation)
 {
     auto data = DataDescription().addCells({
-        CellDescription().setId(1).setCellTypeData(OscillatorDescription().setAutoTriggerInterval(97).setAlternationInterval(3)),
+        CellDescription().id(1).cellType(OscillatorDescription().autoTriggerInterval(97).alternationInterval(3)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -111,14 +111,14 @@ TEST_F(OscillatorTests_New, generatePulse_timeAtFirstPulseAlternation)
     auto actualCellById = getCellById(actualData);
 
     auto oscillator = actualCellById.at(1);
-    EXPECT_TRUE(oscillator.signal.has_value());
-    EXPECT_EQ(-1.0f, oscillator.signal->channels.at(0));
+    EXPECT_TRUE(oscillator._signal.has_value());
+    EXPECT_EQ(-1.0f, oscillator._signal->_channels.at(0));
 }
 
 TEST_F(OscillatorTests_New, generatePulse_timeAtSecondPulseAlternation)
 {
     auto data = DataDescription().addCells({
-        CellDescription().setId(1).setCellTypeData(OscillatorDescription().setAutoTriggerInterval(97).setAlternationInterval(3)),
+        CellDescription().id(1).cellType(OscillatorDescription().autoTriggerInterval(97).alternationInterval(3)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -130,16 +130,16 @@ TEST_F(OscillatorTests_New, generatePulse_timeAtSecondPulseAlternation)
     auto actualCellById = getCellById(actualData);
 
     auto oscillator = actualCellById.at(1);
-    EXPECT_TRUE(oscillator.signal.has_value());
-    EXPECT_EQ(1.0f, oscillator.signal->channels.at(0));
+    EXPECT_TRUE(oscillator._signal.has_value());
+    EXPECT_EQ(1.0f, oscillator._signal->_channels.at(0));
 }
 
 TEST_F(OscillatorTests_New, generatePulse_triangularNetwork)
 {
     auto data = DataDescription().addCells({
-        CellDescription().setId(1).setPos({0, 0}).setCellTypeData(OscillatorDescription().setAutoTriggerInterval(10)),
-        CellDescription().setId(2).setPos({1, 0}),
-        CellDescription().setId(3).setPos({0.5, 0.5}),
+        CellDescription().id(1).pos({0, 0}).cellType(OscillatorDescription().autoTriggerInterval(10)),
+        CellDescription().id(2).pos({1, 0}),
+        CellDescription().id(3).pos({0.5, 0.5}),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -153,16 +153,16 @@ TEST_F(OscillatorTests_New, generatePulse_triangularNetwork)
         auto actualCellById = getCellById(actualData);
 
         auto oscillator = actualCellById.at(1);
-        EXPECT_TRUE(oscillator.signal.has_value());
-        EXPECT_TRUE(approxCompare(1.0f, oscillator.signal->channels.at(0)));
-        EXPECT_EQ(2, oscillator.signalRelaxationTime);
+        EXPECT_TRUE(oscillator._signal.has_value());
+        EXPECT_TRUE(approxCompare(1.0f, oscillator._signal->_channels.at(0)));
+        EXPECT_EQ(2, oscillator._signalRelaxationTime);
 
         auto base1 = actualCellById.at(2);
-        EXPECT_FALSE(base1.signal.has_value());
-        EXPECT_EQ(0, base1.signalRelaxationTime);
+        EXPECT_FALSE(base1._signal.has_value());
+        EXPECT_EQ(0, base1._signalRelaxationTime);
 
         auto base2 = actualCellById.at(3);
-        EXPECT_FALSE(base2.signal.has_value());
-        EXPECT_EQ(0, base2.signalRelaxationTime);
+        EXPECT_FALSE(base2._signal.has_value());
+        EXPECT_EQ(0, base2._signalRelaxationTime);
     }
 }

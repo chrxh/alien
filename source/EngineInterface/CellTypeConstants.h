@@ -141,7 +141,7 @@ enum ReconnectorRestrictToMutants_
     ReconnectorRestrictToMutants_RestrictToSameMutants,
     ReconnectorRestrictToMutants_RestrictToOtherMutants,
     ReconnectorRestrictToMutants_RestrictToFreeCells,
-    ReconnectorRestrictToMutants_RestrictToHandcraftedCells,
+    ReconnectorRestrictToMutants_RestrictToStructures,
     ReconnectorRestrictToMutants_RestrictToLessComplexMutants,
     ReconnectorRestrictToMutants_RestrictToMoreComplexMutants,
     ReconnectorRestrictToMutants_Count

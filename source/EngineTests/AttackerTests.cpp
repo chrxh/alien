@@ -33,14 +33,14 @@ TEST_F(AttackerTests, nothingFound)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({10.0f, 10.0f})
-             .setCellTypeData(AttackerDescription()),
+             .id(1)
+             .pos({10.0f, 10.0f})
+             .cellType(AttackerDescription()),
          CellDescription()
-             .setId(2)
-             .setPos({11.0f, 10.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({11.0f, 10.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -49,9 +49,9 @@ TEST_F(AttackerTests, nothingFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
-    EXPECT_EQ(2, actualData.cells.size());
+    EXPECT_EQ(2, actualData._cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell._signal->_channels[0]));
 }
 
 TEST_F(AttackerTests, successNoTransmitter)
@@ -59,17 +59,17 @@ TEST_F(AttackerTests, successNoTransmitter)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(AttackerDescription()),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(AttackerDescription()),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
-            .setId(3)
-            .setPos({9.0f, 10.0f}),
+            .id(3)
+            .pos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);
 
@@ -84,9 +84,9 @@ TEST_F(AttackerTests, successNoTransmitter)
     auto origTargetCell = getCell(data, 3);
     auto actualTargetCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(actualAttackCell.signal->channels[0] > NEAR_ZERO);
-    EXPECT_TRUE(actualAttackCell.energy > origAttackCell.energy + NEAR_ZERO);
-    EXPECT_TRUE(actualTargetCell.energy < origTargetCell.energy - NEAR_ZERO);
+    EXPECT_TRUE(actualAttackCell._signal->_channels[0] > NEAR_ZERO);
+    EXPECT_TRUE(actualAttackCell._energy > origAttackCell._energy + NEAR_ZERO);
+    EXPECT_TRUE(actualTargetCell._energy < origTargetCell._energy - NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
@@ -95,16 +95,16 @@ TEST_F(AttackerTests, successDistributeToOneTransmitter)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(AttackerDescription().mode(EnergyDistributionMode_TransmittersAndConstructors)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({12.0f, 10.0f}).setCellTypeData(DepotDescription()),
-        CellDescription().setId(4).setPos({9.0f, 10.0f}),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({12.0f, 10.0f}).cellType(DepotDescription()),
+        CellDescription().id(4).pos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -121,9 +121,9 @@ TEST_F(AttackerTests, successDistributeToOneTransmitter)
     auto origTransmitterCell = getCell(data, 3);
     auto actualTransmitterCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(actualAttackCell.signal->channels[0] > NEAR_ZERO);
-    EXPECT_TRUE(approxCompare(origOscillatorCell.energy, actualOscillatorCell.energy));
-    EXPECT_TRUE(actualTransmitterCell.energy > origTransmitterCell.energy + NEAR_ZERO);
+    EXPECT_TRUE(actualAttackCell._signal->_channels[0] > NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(origOscillatorCell._energy, actualOscillatorCell._energy));
+    EXPECT_TRUE(actualTransmitterCell._energy > origTransmitterCell._energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
@@ -132,17 +132,17 @@ TEST_F(AttackerTests, successDistributeToTwoTransmitters)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(AttackerDescription().mode(EnergyDistributionMode_TransmittersAndConstructors)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({12.0f, 10.0f}).setCellTypeData(DepotDescription()),
-        CellDescription().setId(4).setPos({11.0f, 9.0f}).setCellTypeData(DepotDescription()),
-        CellDescription().setId(5).setPos({9.0f, 10.0f}),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({12.0f, 10.0f}).cellType(DepotDescription()),
+        CellDescription().id(4).pos({11.0f, 9.0f}).cellType(DepotDescription()),
+        CellDescription().id(5).pos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 4);
@@ -158,9 +158,9 @@ TEST_F(AttackerTests, successDistributeToTwoTransmitters)
     auto origTransmitterCell2 = getCell(data, 4);
     auto actualTransmitterCell2 = getCell(actualData, 4);
 
-    EXPECT_TRUE(actualAttackCell.signal->channels[0] > NEAR_ZERO);
-    EXPECT_TRUE(actualTransmitterCell1.energy > origTransmitterCell1.energy + NEAR_ZERO);
-    EXPECT_TRUE(actualTransmitterCell2.energy > origTransmitterCell2.energy + NEAR_ZERO);
+    EXPECT_TRUE(actualAttackCell._signal->_channels[0] > NEAR_ZERO);
+    EXPECT_TRUE(actualTransmitterCell1._energy > origTransmitterCell1._energy + NEAR_ZERO);
+    EXPECT_TRUE(actualTransmitterCell2._energy > origTransmitterCell2._energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
@@ -169,17 +169,17 @@ TEST_F(AttackerTests, successDistributeToTwoTransmittersWithDifferentColor)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(AttackerDescription().mode(EnergyDistributionMode_TransmittersAndConstructors)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({12.0f, 10.0f}).setCellTypeData(DepotDescription()),
-        CellDescription().setId(4).setPos({11.0f, 9.0f}).setCellTypeData(DepotDescription()).setColor(1),
-        CellDescription().setId(5).setPos({9.0f, 10.0f}),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({12.0f, 10.0f}).cellType(DepotDescription()),
+        CellDescription().id(4).pos({11.0f, 9.0f}).cellType(DepotDescription()).color(1),
+        CellDescription().id(5).pos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 4);
@@ -195,34 +195,34 @@ TEST_F(AttackerTests, successDistributeToTwoTransmittersWithDifferentColor)
     auto origTransmitterCell2 = getCell(data, 4);
     auto actualTransmitterCell2 = getCell(actualData, 4);
 
-    EXPECT_TRUE(actualAttackCell.signal->channels[0] > NEAR_ZERO);
-    EXPECT_TRUE(actualTransmitterCell1.energy > origTransmitterCell1.energy + NEAR_ZERO);
-    EXPECT_TRUE(actualTransmitterCell2.energy > origTransmitterCell2.energy + NEAR_ZERO);
+    EXPECT_TRUE(actualAttackCell._signal->_channels[0] > NEAR_ZERO);
+    EXPECT_TRUE(actualTransmitterCell1._energy > origTransmitterCell1._energy + NEAR_ZERO);
+    EXPECT_TRUE(actualTransmitterCell2._energy > origTransmitterCell2._energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
 
 TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
 {
-    auto otherGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().setCells({CellGenomeDescription()}));
+    auto otherGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(AttackerDescription().setMode(EnergyDistributionMode_TransmittersAndConstructors)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(AttackerDescription().mode(EnergyDistributionMode_TransmittersAndConstructors)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({12.0f, 10.0f}).setCellTypeData(DepotDescription()),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({12.0f, 10.0f}).cellType(DepotDescription()),
         CellDescription()
-            .setId(4)
-            .setPos({11.0f, 9.0f})
-            .setCellTypeData(ConstructorDescription().genome(otherGenome)),
-        CellDescription().setId(5).setPos({9.0f, 10.0f}),
+            .id(4)
+            .pos({11.0f, 9.0f})
+            .cellType(ConstructorDescription().genome(otherGenome)),
+        CellDescription().id(5).pos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 4);
@@ -238,9 +238,9 @@ TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
     auto origConstructorCell = getCell(data, 4);
     auto actualConstructorCell = getCell(actualData, 4);
 
-    EXPECT_TRUE(actualAttackCell.signal->channels[0] > NEAR_ZERO);
-    EXPECT_TRUE(approxCompare(actualTransmitterCell.energy, origTransmitterCell.energy));
-    EXPECT_TRUE(actualConstructorCell.energy > origConstructorCell.energy + NEAR_ZERO);
+    EXPECT_TRUE(actualAttackCell._signal->_channels[0] > NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(actualTransmitterCell._energy, origTransmitterCell._energy));
+    EXPECT_TRUE(actualConstructorCell._energy > origConstructorCell._energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
@@ -249,16 +249,16 @@ TEST_F(AttackerTests, successDistributeToConnectedCells)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(AttackerDescription().setMode(EnergyDistributionMode_ConnectedCells)),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(AttackerDescription().mode(EnergyDistributionMode_ConnectedCells)),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({12.0f, 10.0f}).setCellTypeData(OscillatorDescription()),
-        CellDescription().setId(4).setPos({9.0f, 10.0f}),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({12.0f, 10.0f}).cellType(OscillatorDescription()),
+        CellDescription().id(4).pos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -275,9 +275,9 @@ TEST_F(AttackerTests, successDistributeToConnectedCells)
     auto origOscillatorCell2 = getCell(data, 3);
     auto actualOscillatorCell2 = getCell(actualData, 3);
 
-    EXPECT_TRUE(actualAttackCell.signal->channels[0] > NEAR_ZERO);
-    EXPECT_TRUE(actualOscillatorCell1.energy > origOscillatorCell1.energy + NEAR_ZERO);
-    EXPECT_TRUE(actualOscillatorCell2.energy > origOscillatorCell2.energy + NEAR_ZERO);
+    EXPECT_TRUE(actualAttackCell._signal->_channels[0] > NEAR_ZERO);
+    EXPECT_TRUE(actualOscillatorCell1._energy > origOscillatorCell1._energy + NEAR_ZERO);
+    EXPECT_TRUE(actualOscillatorCell2._energy > origOscillatorCell2._energy + NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
@@ -286,16 +286,16 @@ TEST_F(AttackerTests, successTwoTargets)
     DataDescription data;
     data.addCells({
         CellDescription()
-            .setId(1)
-            .setPos({10.0f, 10.0f})
-            .setCellTypeData(AttackerDescription()),
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(AttackerDescription()),
         CellDescription()
-            .setId(2)
-            .setPos({11.0f, 10.0f})
-            .setCellTypeData(OscillatorDescription())
-            .setSignal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().setId(3).setPos({9.0f, 10.0f}),
-        CellDescription().setId(4).setPos({9.0f, 11.0f}),
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(OscillatorDescription())
+            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}),
+        CellDescription().id(4).pos({9.0f, 11.0f}),
     });
     data.addConnection(1, 2);
 
@@ -313,9 +313,9 @@ TEST_F(AttackerTests, successTwoTargets)
     auto origTargetCell2 = getCell(data, 4);
     auto actualTargetCell2 = getCell(actualData, 4);
 
-    EXPECT_TRUE(actualAttackCell.signal->channels[0] > NEAR_ZERO);
-    EXPECT_TRUE(actualAttackCell.energy > origAttackCell.energy + NEAR_ZERO);
-    EXPECT_TRUE(actualTargetCell1.energy < origTargetCell1.energy - NEAR_ZERO);
-    EXPECT_TRUE(actualTargetCell2.energy < origTargetCell2.energy - NEAR_ZERO);
+    EXPECT_TRUE(actualAttackCell._signal->_channels[0] > NEAR_ZERO);
+    EXPECT_TRUE(actualAttackCell._energy > origAttackCell._energy + NEAR_ZERO);
+    EXPECT_TRUE(actualTargetCell1._energy < origTargetCell1._energy - NEAR_ZERO);
+    EXPECT_TRUE(actualTargetCell2._energy < origTargetCell2._energy - NEAR_ZERO);
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }

@@ -18,30 +18,30 @@ struct MakeGenomeCopy
 
 struct NeuralNetworkGenomeDescription
 {
-    std::vector<float> weights;
-    std::vector<float> biases;
-    std::vector<ActivationFunction> activationFunctions;
-
     NeuralNetworkGenomeDescription()
     {
-        weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
-        biases.resize(MAX_CHANNELS, 0);
-        activationFunctions.resize(MAX_CHANNELS, ActivationFunction_Identity);
-        auto md = std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS);
+        _weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
+        _biases.resize(MAX_CHANNELS, 0);
+        _activationFunctions.resize(MAX_CHANNELS, ActivationFunction_Identity);
+        auto md = std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS);
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             md[i, i] = 1.0f;
         }
     }
     auto operator<=>(NeuralNetworkGenomeDescription const&) const = default;
 
-    NeuralNetworkGenomeDescription& setWeight(int row, int col, float value)
+    NeuralNetworkGenomeDescription& weight(int row, int col, float value)
     {
-        auto md = std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS);
+        auto md = std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS);
         md[row, col] = value;
         return *this;
     }
-    auto getWeights() const { return std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
-    auto getWeights() { return std::mdspan(weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
+    auto getWeights() const { return std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
+    auto getWeights() { return std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
+
+    std::vector<float> _weights;
+    std::vector<float> _biases;
+    std::vector<ActivationFunction> _activationFunctions;
 };
 
 struct BaseGenomeDescription
@@ -51,196 +51,196 @@ struct BaseGenomeDescription
 
 struct DepotGenomeDescription
 {
-    EnergyDistributionMode mode = EnergyDistributionMode_TransmittersAndConstructors;
-
     auto operator<=>(DepotGenomeDescription const&) const = default;
 
-    DepotGenomeDescription& setMode(EnergyDistributionMode value)
+    DepotGenomeDescription& mode(EnergyDistributionMode value)
     {
-        mode = value;
+        _mode = value;
         return *this;
     }
+
+    EnergyDistributionMode _mode = EnergyDistributionMode_TransmittersAndConstructors;
 };
 
 struct ConstructorGenomeDescription
 {
-    int autoTriggerInterval = 100;   // 0 = manual (triggered by signal), > 0 = auto trigger
-    int constructionActivationTime = 100;
-
-    std::variant<MakeGenomeCopy, std::vector<uint8_t>> genome = std::vector<uint8_t>();
-    float constructionAngle1 = 0;
-    float constructionAngle2 = 0;
-
     auto operator<=>(ConstructorGenomeDescription const&) const = default;
 
-    ConstructorGenomeDescription& setMode(int value)
+    ConstructorGenomeDescription& mode(int value)
     {
-        autoTriggerInterval = value;
+        _autoTriggerInterval = value;
         return *this;
     }
-    ConstructorGenomeDescription& setConstructionActivationTime(int value)
+    ConstructorGenomeDescription& constructionActivationTime(int value)
     {
-        constructionActivationTime = value;
+        _constructionActivationTime = value;
         return *this;
     }
-    ConstructorGenomeDescription& setGenome(std::vector<uint8_t> const& value)
+    ConstructorGenomeDescription& genome(std::vector<uint8_t> const& value)
     {
-        genome = value;
+        _genome = value;
         return *this;
     }
-    bool isMakeGenomeCopy() const { return std::holds_alternative<MakeGenomeCopy>(genome); }
-    std::vector<uint8_t> getGenomeData() const { return std::get<std::vector<uint8_t>>(genome); }
-    ConstructorGenomeDescription& setMakeSelfCopy()
+    bool isMakeGenomeCopy() const { return std::holds_alternative<MakeGenomeCopy>(_genome); }
+    std::vector<uint8_t> getGenomeData() const { return std::get<std::vector<uint8_t>>(_genome); }
+    ConstructorGenomeDescription& makeSelfCopy()
     {
-        genome = MakeGenomeCopy();
+        _genome = MakeGenomeCopy();
         return *this;
     }
+
+    int _autoTriggerInterval = 100;  // 0 = manual (triggered by signal), > 0 = auto trigger
+    int _constructionActivationTime = 100;
+
+    std::variant<MakeGenomeCopy, std::vector<uint8_t>> _genome = std::vector<uint8_t>();
+    float _constructionAngle1 = 0;
+    float _constructionAngle2 = 0;
 };
 
 struct SensorGenomeDescription
 {
-    int autoTriggerInterval = 10;  // 0 = manual (triggered by signal), > 0 = auto trigger
-    float minDensity = 0.05f;
-    std::optional<int> minRange;
-    std::optional<int> maxRange;
-    std::optional<int> restrictToColor;
-    SensorRestrictToMutants restrictToMutants = SensorRestrictToMutants_NoRestriction;
-
     auto operator<=>(SensorGenomeDescription const&) const = default;
 
-    SensorGenomeDescription& setMinDensity(float const& value)
+    SensorGenomeDescription& minDensity(float const& value)
     {
-        minDensity = value;
+        _minDensity = value;
         return *this;
     }
 
-    SensorGenomeDescription& setColor(int value)
+    SensorGenomeDescription& color(int value)
     {
-        restrictToColor = value;
+        _restrictToColor = value;
         return *this;
     }
-    SensorGenomeDescription& setRestrictToMutants(SensorRestrictToMutants value)
+    SensorGenomeDescription& restrictToMutants(SensorRestrictToMutants value)
     {
-        restrictToMutants = value;
+        _restrictToMutants = value;
         return *this;
     }
+
+    int _autoTriggerInterval = 10;  // 0 = manual (triggered by signal), > 0 = auto trigger
+    float _minDensity = 0.05f;
+    std::optional<int> _minRange;
+    std::optional<int> _maxRange;
+    std::optional<int> _restrictToColor;
+    SensorRestrictToMutants _restrictToMutants = SensorRestrictToMutants_NoRestriction;
 };
 
 struct OscillatorGenomeDescription
 {
-    int autoTriggerInterval = 0;        //0 = none, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
-    int alternationInterval = 0;  //0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
-
     auto operator<=>(OscillatorGenomeDescription const&) const = default;
 
-    OscillatorGenomeDescription& setAutoTriggerInterval(int value)
+    OscillatorGenomeDescription& autoTriggerInterval(int value)
     {
-        autoTriggerInterval = value;
+        _autoTriggerInterval = value;
         return *this;
     }
-    OscillatorGenomeDescription& setAlternationInterval(int value)
+    OscillatorGenomeDescription& alternationInterval(int value)
     {
-        alternationInterval = value;
+        _alternationInterval = value;
         return *this;
     }
+
+    int _autoTriggerInterval = 0;  // 0 = no triggering, > 0 = auto trigger
+    int _alternationInterval = 0;  // 0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
 };
 
 struct AttackerGenomeDescription
 {
-    EnergyDistributionMode mode = EnergyDistributionMode_TransmittersAndConstructors;
-
     auto operator<=>(AttackerGenomeDescription const&) const = default;
 
-    AttackerGenomeDescription& setMode(EnergyDistributionMode value)
+    AttackerGenomeDescription& mode(EnergyDistributionMode value)
     {
-        mode = value;
+        _mode = value;
         return *this;
     }
+
+    EnergyDistributionMode _mode = EnergyDistributionMode_TransmittersAndConstructors;
 };
 
 struct InjectorGenomeDescription
 {
-    InjectorMode mode = InjectorMode_InjectAll;
-    std::variant<MakeGenomeCopy, std::vector<uint8_t>> genome = std::vector<uint8_t>();
-
     auto operator<=>(InjectorGenomeDescription const&) const = default;
 
-    InjectorGenomeDescription& setMode(InjectorMode value)
+    InjectorGenomeDescription& mode(InjectorMode value)
     {
-        mode = value;
+        _mode = value;
         return *this;
     }
 
-    InjectorGenomeDescription& setGenome(std::vector<uint8_t> const& value)
+    InjectorGenomeDescription& genome(std::vector<uint8_t> const& value)
     {
-        genome = value;
+        _genome = value;
         return *this;
     }
-    bool isMakeGenomeCopy() const { return std::holds_alternative<MakeGenomeCopy>(genome); }
-    std::vector<uint8_t> getGenomeData() const { return std::get<std::vector<uint8_t>>(genome); }
-    InjectorGenomeDescription& setMakeSelfCopy()
+    bool isMakeGenomeCopy() const { return std::holds_alternative<MakeGenomeCopy>(_genome); }
+    std::vector<uint8_t> getGenomeData() const { return std::get<std::vector<uint8_t>>(_genome); }
+    InjectorGenomeDescription& makeSelfCopy()
     {
-        genome = MakeGenomeCopy();
+        _genome = MakeGenomeCopy();
         return *this;
     }
+
+    InjectorMode _mode = InjectorMode_InjectAll;
+    std::variant<MakeGenomeCopy, std::vector<uint8_t>> _genome = std::vector<uint8_t>();
 };
 
 struct MuscleGenomeDescription
 {
-    MuscleMode mode = MuscleMode_Movement;
-
     auto operator<=>(MuscleGenomeDescription const&) const = default;
 
-    MuscleGenomeDescription& setMode(MuscleMode value)
+    MuscleGenomeDescription& mode(MuscleMode value)
     {
-        mode = value;
+        _mode = value;
         return *this;
     }
+
+    MuscleMode _mode = MuscleMode_Movement;
 };
 
 struct DefenderGenomeDescription
 {
-    DefenderMode mode = DefenderMode_DefendAgainstAttacker;
-
     auto operator<=>(DefenderGenomeDescription const&) const = default;
 
-    DefenderGenomeDescription& setMode(DefenderMode value)
+    DefenderGenomeDescription& mode(DefenderMode value)
     {
-        mode = value;
+        _mode = value;
         return *this;
     }
+
+    DefenderMode _mode = DefenderMode_DefendAgainstAttacker;
 };
 
 struct ReconnectorGenomeDescription
 {
-    std::optional<int> restrictToColor;
-    ReconnectorRestrictToMutants restrictToMutants = ReconnectorRestrictToMutants_NoRestriction;
-
     auto operator<=>(ReconnectorGenomeDescription const&) const = default;
 
-    ReconnectorGenomeDescription& setRestrictToColor(int value)
+    ReconnectorGenomeDescription& restrictToColor(int value)
     {
-        restrictToColor = value;
+        _restrictToColor = value;
         return *this;
     }
-    ReconnectorGenomeDescription& setRestrictToMutants(ReconnectorRestrictToMutants value)
+    ReconnectorGenomeDescription& restrictToMutants(ReconnectorRestrictToMutants value)
     {
-        restrictToMutants = value;
+        _restrictToMutants = value;
         return *this;
     }
+
+    std::optional<int> _restrictToColor;
+    ReconnectorRestrictToMutants _restrictToMutants = ReconnectorRestrictToMutants_NoRestriction;
 };
 
 struct DetonatorGenomeDescription
 {
-    int countdown = 10;
-
     auto operator<=>(DetonatorGenomeDescription const&) const = default;
 
-    DetonatorGenomeDescription& setCountDown(int value)
+    DetonatorGenomeDescription& countDown(int value)
     {
-        countdown = value;
+        _countdown = value;
         return *this;
     }
+
+    int _countdown = 10;
 };
 
 using CellTypeGenomeDescription = std::variant<
@@ -258,52 +258,43 @@ using CellTypeGenomeDescription = std::variant<
 
 struct SignalRoutingRestrictionGenomeDescription
 {
-    bool active = false;
-    float baseAngle = 0;
-    float openingAngle = 0;
-
     auto operator<=>(SignalRoutingRestrictionGenomeDescription const&) const = default;
+
+    bool _active = false;
+    float _baseAngle = 0;
+    float _openingAngle = 0;
 };
 
 struct CellGenomeDescription
 {
-    float referenceAngle = 0;
-    float energy = 100.0f;
-    int color = 0;
-    std::optional<int> numRequiredAdditionalConnections;
-
-    NeuralNetworkGenomeDescription neuralNetwork;
-    CellTypeGenomeDescription cellTypeData = BaseGenomeDescription();
-    SignalRoutingRestrictionGenomeDescription signalRoutingRestriction;
-
     CellGenomeDescription() = default;
     auto operator<=>(CellGenomeDescription const&) const = default;
 
-    CellGenomeDescription& setReferenceAngle(float value)
+    CellGenomeDescription& referenceAngle(float value)
     {
-        referenceAngle = value;
+        _referenceAngle = value;
         return *this;
     }
-    CellGenomeDescription& setEnergy(float value)
+    CellGenomeDescription& energy(float value)
     {
-        energy = value;
+        _energy = value;
         return *this;
     }
-    CellGenomeDescription& setColor(unsigned char value)
+    CellGenomeDescription& color(unsigned char value)
     {
-        color = value;
+        _color = value;
         return *this;
     }
     bool hasGenome() const
     {
         auto cellType = getCellType();
         if (cellType == CellType_Constructor) {
-            auto& constructor = std::get<ConstructorGenomeDescription>(cellTypeData);
-            return std::holds_alternative<std::vector<uint8_t>>(constructor.genome);
+            auto& constructor = std::get<ConstructorGenomeDescription>(_cellTypeData);
+            return std::holds_alternative<std::vector<uint8_t>>(constructor._genome);
         }
         if (cellType == CellType_Injector) {
-            auto& injector = std::get<InjectorGenomeDescription>(cellTypeData);
-            return std::holds_alternative<std::vector<uint8_t>>(injector.genome);
+            auto& injector = std::get<InjectorGenomeDescription>(_cellTypeData);
+            return std::holds_alternative<std::vector<uint8_t>>(injector._genome);
         }
         return false;
     }
@@ -312,15 +303,15 @@ struct CellGenomeDescription
     {
         auto cellType = getCellType();
         if (cellType == CellType_Constructor) {
-            auto& constructor = std::get<ConstructorGenomeDescription>(cellTypeData);
-            if (std::holds_alternative<std::vector<uint8_t>>(constructor.genome)) {
-                return std::get<std::vector<uint8_t>>(constructor.genome);
+            auto& constructor = std::get<ConstructorGenomeDescription>(_cellTypeData);
+            if (std::holds_alternative<std::vector<uint8_t>>(constructor._genome)) {
+                return std::get<std::vector<uint8_t>>(constructor._genome);
             }
         }
         if (cellType == CellType_Injector) {
-            auto& injector = std::get<InjectorGenomeDescription>(cellTypeData);
-            if (std::holds_alternative<std::vector<uint8_t>>(injector.genome)) {
-                return std::get<std::vector<uint8_t>>(injector.genome);
+            auto& injector = std::get<InjectorGenomeDescription>(_cellTypeData);
+            if (std::holds_alternative<std::vector<uint8_t>>(injector._genome)) {
+                return std::get<std::vector<uint8_t>>(injector._genome);
             }
         }
         THROW_NOT_IMPLEMENTED();
@@ -330,7 +321,7 @@ struct CellGenomeDescription
     {
         switch (getCellType()) {
         case CellType_Constructor: {
-            auto const& constructor = std::get<ConstructorGenomeDescription>(cellTypeData);
+            auto const& constructor = std::get<ConstructorGenomeDescription>(_cellTypeData);
             if (!constructor.isMakeGenomeCopy()) {
                 return constructor.getGenomeData();
             } else {
@@ -338,7 +329,7 @@ struct CellGenomeDescription
             }
         }
         case CellType_Injector: {
-            auto const& injector = std::get<InjectorGenomeDescription>(cellTypeData);
+            auto const& injector = std::get<InjectorGenomeDescription>(_cellTypeData);
             if (!injector.isMakeGenomeCopy()) {
                 return injector.getGenomeData();
             } else {
@@ -349,19 +340,19 @@ struct CellGenomeDescription
             return std::nullopt;
         }
     }
-    void setGenome(std::vector<uint8_t> const& genome)
+    void genome(std::vector<uint8_t> const& genome)
     {
         switch (getCellType()) {
         case CellType_Constructor: {
-            auto& constructor = std::get<ConstructorGenomeDescription>(cellTypeData);
+            auto& constructor = std::get<ConstructorGenomeDescription>(_cellTypeData);
             if (!constructor.isMakeGenomeCopy()) {
-                constructor.genome = genome;
+                constructor._genome = genome;
             }
         } break;
         case CellType_Injector: {
-            auto& injector = std::get<InjectorGenomeDescription>(cellTypeData);
+            auto& injector = std::get<InjectorGenomeDescription>(_cellTypeData);
             if (!injector.isMakeGenomeCopy()) {
-                injector.genome = genome;
+                injector._genome = genome;
             }
         } break;
         }
@@ -370,127 +361,136 @@ struct CellGenomeDescription
     {
         switch (getCellType()) {
         case CellType_Constructor:
-            return std::get<ConstructorGenomeDescription>(cellTypeData).isMakeGenomeCopy();
+            return std::get<ConstructorGenomeDescription>(_cellTypeData).isMakeGenomeCopy();
         case CellType_Injector:
-            return std::get<InjectorGenomeDescription>(cellTypeData).isMakeGenomeCopy();
+            return std::get<InjectorGenomeDescription>(_cellTypeData).isMakeGenomeCopy();
         default:
             return std::nullopt;
         }
     }
     CellType getCellType() const
     {
-        if (std::holds_alternative<BaseGenomeDescription>(cellTypeData)) {
+        if (std::holds_alternative<BaseGenomeDescription>(_cellTypeData)) {
             return CellType_Base;
-        } else if (std::holds_alternative<DepotGenomeDescription>(cellTypeData)) {
+        } else if (std::holds_alternative<DepotGenomeDescription>(_cellTypeData)) {
             return CellType_Depot;
-        } else if (std::holds_alternative<ConstructorGenomeDescription>(cellTypeData)) {
+        } else if (std::holds_alternative<ConstructorGenomeDescription>(_cellTypeData)) {
             return CellType_Constructor;
-        } else if (std::holds_alternative<SensorGenomeDescription>(cellTypeData)) {
+        } else if (std::holds_alternative<SensorGenomeDescription>(_cellTypeData)) {
             return CellType_Sensor;
-        } else if (std::holds_alternative<OscillatorGenomeDescription>(cellTypeData)) {
+        } else if (std::holds_alternative<OscillatorGenomeDescription>(_cellTypeData)) {
             return CellType_Oscillator;
-        } else if (std::holds_alternative<AttackerGenomeDescription>(cellTypeData)) {
+        } else if (std::holds_alternative<AttackerGenomeDescription>(_cellTypeData)) {
             return CellType_Attacker;
-        } else if (std::holds_alternative<InjectorGenomeDescription>(cellTypeData)) {
+        } else if (std::holds_alternative<InjectorGenomeDescription>(_cellTypeData)) {
             return CellType_Injector;
-        } else if (std::holds_alternative<MuscleGenomeDescription>(cellTypeData)) {
+        } else if (std::holds_alternative<MuscleGenomeDescription>(_cellTypeData)) {
             return CellType_Muscle;
-        } else if (std::holds_alternative<DefenderGenomeDescription>(cellTypeData)) {
+        } else if (std::holds_alternative<DefenderGenomeDescription>(_cellTypeData)) {
             return CellType_Defender;
-        } else if (std::holds_alternative<ReconnectorGenomeDescription>(cellTypeData)) {
+        } else if (std::holds_alternative<ReconnectorGenomeDescription>(_cellTypeData)) {
             return CellType_Reconnector;
-        } else if (std::holds_alternative<DetonatorGenomeDescription>(cellTypeData)) {
+        } else if (std::holds_alternative<DetonatorGenomeDescription>(_cellTypeData)) {
             return CellType_Detonator;
         }
         CHECK(false);
     }
     template <typename CellTypeDesc>
-    CellGenomeDescription& setCellTypeData(CellTypeDesc const& value)
+    CellGenomeDescription& cellType(CellTypeDesc const& value)
     {
-        cellTypeData = value;
+        _cellTypeData = value;
         return *this;
     }
-    CellGenomeDescription& setNeuralNetwork(NeuralNetworkGenomeDescription const& value)
+    CellGenomeDescription& neuralNetwork(NeuralNetworkGenomeDescription const& value)
     {
-        neuralNetwork = value;
+        _neuralNetwork = value;
         return *this;
     }
-    CellGenomeDescription& setNumRequiredAdditionalConnections(int const& value)
+    CellGenomeDescription& numRequiredAdditionalConnections(int const& value)
     {
-        numRequiredAdditionalConnections = value;
+        _numRequiredAdditionalConnections = value;
         return *this;
     }
+
+    float _referenceAngle = 0;
+    float _energy = 100.0f;
+    int _color = 0;
+    std::optional<int> _numRequiredAdditionalConnections;
+
+    NeuralNetworkGenomeDescription _neuralNetwork;
+    CellTypeGenomeDescription _cellTypeData = BaseGenomeDescription();
+    SignalRoutingRestrictionGenomeDescription _signalRoutingRestriction;
 };
 
 struct GenomeHeaderDescription
 {
-    ConstructionShape shape = ConstructionShape_Custom;
-    int numBranches = 1;    //between 1 and 6 in modulo
-    bool separateConstruction = true;
-    ConstructorAngleAlignment angleAlignment = ConstructorAngleAlignment_60;
-    float stiffness = 1.0f;
-    float connectionDistance = 1.0f;
-    int numRepetitions = 1;
-    float concatenationAngle1 = 0;
-    float concatenationAngle2 = 0;
-
     auto operator<=>(GenomeHeaderDescription const&) const = default;
 
-    int getNumBranches() const { return separateConstruction ? 1 : (numBranches + 5) % 6 + 1; }
+    int getNumBranches() const { return _separateConstruction ? 1 : (_numBranches + 5) % 6 + 1; }
 
-    GenomeHeaderDescription& setNumBranches(int value)
+    GenomeHeaderDescription& numBranches(int value)
     {
-        numBranches = value;
+        _numBranches = value;
         return *this;
     }
-    GenomeHeaderDescription& setSeparateConstruction(bool value)
+    GenomeHeaderDescription& separateConstruction(bool value)
     {
-        separateConstruction = value;
+        _separateConstruction = value;
         return *this;
     }
-    GenomeHeaderDescription& setAngleAlignment(ConstructorAngleAlignment value)
+    GenomeHeaderDescription& angleAlignment(ConstructorAngleAlignment value)
     {
-        angleAlignment = value;
+        _angleAlignment = value;
         return *this;
     }
-    GenomeHeaderDescription& setStiffness(float value)
+    GenomeHeaderDescription& stiffness(float value)
     {
-        stiffness = value;
+        _stiffness = value;
         return *this;
     }
-    GenomeHeaderDescription& setConnectionDistance(float value)
+    GenomeHeaderDescription& connectionDistance(float value)
     {
-        connectionDistance = value;
+        _connectionDistance = value;
         return *this;
     }
-    GenomeHeaderDescription& setNumRepetitions(int value)
+    GenomeHeaderDescription& numRepetitions(int value)
     {
-        numRepetitions = value;
+        _numRepetitions = value;
         return *this;
     }
-    GenomeHeaderDescription& setInfiniteRepetitions()
+    GenomeHeaderDescription& infiniteRepetitions()
     {
-        numRepetitions = std::numeric_limits<int>::max();
+        _numRepetitions = std::numeric_limits<int>::max();
         return *this;
     }
+
+    ConstructionShape _shape = ConstructionShape_Custom;
+    int _numBranches = 1;  //between 1 and 6 in modulo
+    bool _separateConstruction = true;
+    ConstructorAngleAlignment _angleAlignment = ConstructorAngleAlignment_60;
+    float _stiffness = 1.0f;
+    float _connectionDistance = 1.0f;
+    int _numRepetitions = 1;
+    float _concatenationAngle1 = 0;
+    float _concatenationAngle2 = 0;
 };
 
 struct GenomeDescription
 {
-    GenomeHeaderDescription header;
-    std::vector<CellGenomeDescription> cells;
-
     auto operator<=>(GenomeDescription const&) const = default;
 
-    GenomeDescription& setHeader(GenomeHeaderDescription const& value)
+    GenomeDescription& header(GenomeHeaderDescription const& value)
     {
-        header = value;
+        _header = value;
         return *this;
     }
 
-    GenomeDescription& setCells(std::vector<CellGenomeDescription> const& value)
+    GenomeDescription& cells(std::vector<CellGenomeDescription> const& value)
     {
-        cells = value;
+        _cells = value;
         return *this;
     }
+
+    GenomeHeaderDescription _header;
+    std::vector<CellGenomeDescription> _cells;
 };

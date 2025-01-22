@@ -30,14 +30,14 @@ TEST_F(SensorTests, scanNeighborhood_noSignal)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription()),
+             .id(1)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription()),
          CellDescription()
-             .setId(2)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({0, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({0, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -46,8 +46,8 @@ TEST_F(SensorTests, scanNeighborhood_noSignal)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
-    EXPECT_EQ(2, actualData.cells.size());
-    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.signal->channels[0]));
+    EXPECT_EQ(2, actualData._cells.size());
+    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_noOtherCell)
@@ -55,14 +55,14 @@ TEST_F(SensorTests, scanNeighborhood_noOtherCell)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription()),
+             .id(1)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription()),
          CellDescription()
-             .setId(2)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -71,7 +71,7 @@ TEST_F(SensorTests, scanNeighborhood_noOtherCell)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_densityTooLow)
@@ -79,14 +79,14 @@ TEST_F(SensorTests, scanNeighborhood_densityTooLow)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setMinDensity(0.3f)),
+             .id(1)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().minDensity(0.3f)),
          CellDescription()
-             .setId(2)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().get().createRect(
@@ -98,7 +98,7 @@ TEST_F(SensorTests, scanNeighborhood_densityTooLow)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_wrongColor)
@@ -106,14 +106,14 @@ TEST_F(SensorTests, scanNeighborhood_wrongColor)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setColor(1)),
+             .id(1)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().color(1)),
          CellDescription()
-             .setId(2)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(10).height(10).cellDistance(2.5f)));
@@ -124,7 +124,7 @@ TEST_F(SensorTests, scanNeighborhood_wrongColor)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualAttackCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_foundAtFront)
@@ -132,14 +132,14 @@ TEST_F(SensorTests, scanNeighborhood_foundAtFront)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription()),
+             .id(1)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription()),
          CellDescription()
-             .setId(2)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
@@ -150,12 +150,12 @@ TEST_F(SensorTests, scanNeighborhood_foundAtFront)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
-    EXPECT_TRUE(actualSensorCell.signal->channels[1] > 0.3f);
-    EXPECT_TRUE(actualSensorCell.signal->channels[2] < 1.0f - 80.0f / 256);
-    EXPECT_TRUE(actualSensorCell.signal->channels[2] > 1.0f - 105.0f / 256);
-    EXPECT_TRUE(actualSensorCell.signal->channels[3] > -15.0f / 365);
-    EXPECT_TRUE(actualSensorCell.signal->channels[3] < 15.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(actualSensorCell._signal->_channels[1] > 0.3f);
+    EXPECT_TRUE(actualSensorCell._signal->_channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualSensorCell._signal->_channels[2] > 1.0f - 105.0f / 256);
+    EXPECT_TRUE(actualSensorCell._signal->_channels[3] > -15.0f / 365);
+    EXPECT_TRUE(actualSensorCell._signal->_channels[3] < 15.0f / 365);
 }
 
 TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
@@ -163,14 +163,14 @@ TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription()),
+             .id(1)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription()),
          CellDescription()
-             .setId(2)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(0.5f)));
@@ -181,12 +181,12 @@ TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.signal->channels[0]));
-    EXPECT_TRUE(actualAttackCell.signal->channels[1] > 0.3f);
-    EXPECT_TRUE(actualAttackCell.signal->channels[2] < 1.0f - 80.0f / 256);
-    EXPECT_TRUE(actualAttackCell.signal->channels[2] > 1.0f - 105.0f / 256);
-    EXPECT_TRUE(actualAttackCell.signal->channels[3] > 70.0f / 365);
-    EXPECT_TRUE(actualAttackCell.signal->channels[3] < 105.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell._signal->_channels[0]));
+    EXPECT_TRUE(actualAttackCell._signal->_channels[1] > 0.3f);
+    EXPECT_TRUE(actualAttackCell._signal->_channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualAttackCell._signal->_channels[2] > 1.0f - 105.0f / 256);
+    EXPECT_TRUE(actualAttackCell._signal->_channels[3] > 70.0f / 365);
+    EXPECT_TRUE(actualAttackCell._signal->_channels[3] < 105.0f / 365);
 }
 
 TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
@@ -194,14 +194,14 @@ TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription()),
+             .id(1)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription()),
          CellDescription()
-             .setId(2)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
@@ -212,12 +212,12 @@ TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.signal->channels[0]));
-    EXPECT_TRUE(actualAttackCell.signal->channels[1] > 0.3f);
-    EXPECT_TRUE(actualAttackCell.signal->channels[2] < 1.0f - 80.0f / 256);
-    EXPECT_TRUE(actualAttackCell.signal->channels[2] > 1.0f - 105.0f / 256);
-    EXPECT_TRUE(actualAttackCell.signal->channels[3] < -70.0f / 365);
-    EXPECT_TRUE(actualAttackCell.signal->channels[3] > -105.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell._signal->_channels[0]));
+    EXPECT_TRUE(actualAttackCell._signal->_channels[1] > 0.3f);
+    EXPECT_TRUE(actualAttackCell._signal->_channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualAttackCell._signal->_channels[2] > 1.0f - 105.0f / 256);
+    EXPECT_TRUE(actualAttackCell._signal->_channels[3] < -70.0f / 365);
+    EXPECT_TRUE(actualAttackCell._signal->_channels[3] > -105.0f / 365);
 }
 
 TEST_F(SensorTests, scanNeighborhood_foundAtBack)
@@ -225,14 +225,14 @@ TEST_F(SensorTests, scanNeighborhood_foundAtBack)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription()),
+             .id(1)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription()),
          CellDescription()
-             .setId(2)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({190.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
@@ -243,11 +243,11 @@ TEST_F(SensorTests, scanNeighborhood_foundAtBack)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualAttackCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.signal->channels[0]));
-    EXPECT_TRUE(actualAttackCell.signal->channels[1] > 0.3f);
-    EXPECT_TRUE(actualAttackCell.signal->channels[2] < 1.0f - 80.0f / 256);
-    EXPECT_TRUE(actualAttackCell.signal->channels[2] > 1.0f - 105.0f / 256);
-    EXPECT_TRUE(actualAttackCell.signal->channels[3] < -165.0f / 365 || actualAttackCell.signal->channels[3] > 165.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualAttackCell._signal->_channels[0]));
+    EXPECT_TRUE(actualAttackCell._signal->_channels[1] > 0.3f);
+    EXPECT_TRUE(actualAttackCell._signal->_channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualAttackCell._signal->_channels[2] > 1.0f - 105.0f / 256);
+    EXPECT_TRUE(actualAttackCell._signal->_channels[3] < -165.0f / 365 || actualAttackCell._signal->_channels[3] > 165.0f / 365);
 }
 
 
@@ -256,14 +256,14 @@ TEST_F(SensorTests, scanNeighborhood_twoMasses)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setMinDensity(0.7f)),
+             .id(1)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().minDensity(0.7f)),
          CellDescription()
-             .setId(2)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(1.5f)));
@@ -275,12 +275,12 @@ TEST_F(SensorTests, scanNeighborhood_twoMasses)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
-    EXPECT_TRUE(actualSensorCell.signal->channels[1] > 0.7f);
-    EXPECT_TRUE(actualSensorCell.signal->channels[2] < 1.0f - 80.0f / 256);
-    EXPECT_TRUE(actualSensorCell.signal->channels[2] > 1.0f - 105.0f / 256);
-    EXPECT_TRUE(actualSensorCell.signal->channels[3] < -70.0f / 365);
-    EXPECT_TRUE(actualSensorCell.signal->channels[3] > -105.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(actualSensorCell._signal->_channels[1] > 0.7f);
+    EXPECT_TRUE(actualSensorCell._signal->_channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualSensorCell._signal->_channels[2] > 1.0f - 105.0f / 256);
+    EXPECT_TRUE(actualSensorCell._signal->_channels[3] < -70.0f / 365);
+    EXPECT_TRUE(actualSensorCell._signal->_channels[3] > -105.0f / 365);
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found)
@@ -290,16 +290,16 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setMutationId(6)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
+             .id(1)
+             .mutationId(6)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
          CellDescription()
-             .setId(2)
-             .setMutationId(6)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .mutationId(6)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -311,12 +311,12 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
-    EXPECT_TRUE(actualSensorCell.signal->channels[1] > 0.3f);
-    EXPECT_TRUE(actualSensorCell.signal->channels[2] < 1.0f - 80.0f / 256);
-    EXPECT_TRUE(actualSensorCell.signal->channels[2] > 1.0f - 105.0f / 256);
-    EXPECT_TRUE(actualSensorCell.signal->channels[3] > -15.0f / 365);
-    EXPECT_TRUE(actualSensorCell.signal->channels[3] < 15.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(actualSensorCell._signal->_channels[1] > 0.3f);
+    EXPECT_TRUE(actualSensorCell._signal->_channels[2] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualSensorCell._signal->_channels[2] > 1.0f - 105.0f / 256);
+    EXPECT_TRUE(actualSensorCell._signal->_channels[3] > -15.0f / 365);
+    EXPECT_TRUE(actualSensorCell._signal->_channels[3] < 15.0f / 365);
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found_wallBehind)
@@ -326,16 +326,16 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found_wallBehi
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setMutationId(6)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
+             .id(1)
+             .mutationId(6)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
          CellDescription()
-             .setId(2)
-             .setMutationId(6)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .mutationId(6)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     //data.add(DescriptionEditService::get().createRect(
@@ -350,7 +350,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found_wallBehi
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound)
@@ -360,16 +360,16 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setMutationId(7)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
+             .id(1)
+             .mutationId(7)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
          CellDescription()
-             .setId(2)
-             .setMutationId(7)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .mutationId(7)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -381,7 +381,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound_wallInBetween)
@@ -391,16 +391,16 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound_wallI
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setMutationId(7)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
+             .id(1)
+             .mutationId(7)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
          CellDescription()
-             .setId(2)
-             .setMutationId(7)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .mutationId(7)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -415,7 +415,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound_wallI
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_found)
@@ -425,16 +425,16 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_found)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setMutationId(6)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
+             .id(1)
+             .mutationId(6)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
          CellDescription()
-             .setId(2)
-             .setMutationId(6)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .mutationId(6)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -446,7 +446,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_notFound)
@@ -462,16 +462,16 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_notFound)
         DataDescription data;
         data.addCells(
             {CellDescription()
-                 .setId(1)
-                 .setMutationId(MutantId)
-                 .setPos({100.0f, 100.0f})
-                 .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
+                 .id(1)
+                 .mutationId(MutantId)
+                 .pos({100.0f, 100.0f})
+                 .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
              CellDescription()
-                 .setId(2)
-                 .setMutationId(MutantId)
-                 .setPos({101.0f, 100.0f})
-                 .setCellTypeData(OscillatorDescription())
-                 .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+                 .id(2)
+                 .mutationId(MutantId)
+                 .pos({101.0f, 100.0f})
+                 .cellType(OscillatorDescription())
+                 .signal({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
 
         data.add(DescriptionEditService::get().createRect(
@@ -485,7 +485,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_notFound)
         auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
-        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
     }
 }
 
@@ -496,16 +496,16 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_found)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setMutationId(6)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToStructures)),
+             .id(1)
+             .mutationId(6)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToStructures)),
          CellDescription()
-             .setId(2)
-             .setMutationId(6)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .mutationId(6)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -517,7 +517,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_notFound)
@@ -527,16 +527,16 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_notFound)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setMutationId(6)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToStructures)),
+             .id(1)
+             .mutationId(6)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToStructures)),
          CellDescription()
-             .setId(2)
-             .setMutationId(6)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .mutationId(6)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -548,7 +548,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_found)
@@ -558,16 +558,16 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_found)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setMutationId(6)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToFreeCells)),
+             .id(1)
+             .mutationId(6)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToFreeCells)),
          CellDescription()
-             .setId(2)
-             .setMutationId(6)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .mutationId(6)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -579,7 +579,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_notFound)
@@ -589,16 +589,16 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_notFound)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setMutationId(6)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToFreeCells)),
+             .id(1)
+             .mutationId(6)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToFreeCells)),
          CellDescription()
-             .setId(2)
-             .setMutationId(6)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .mutationId(6)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -610,7 +610,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_found)
@@ -622,17 +622,17 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_found)
         DataDescription data;
         data.addCells(
             {CellDescription()
-                 .setId(1)
-                 .setMutationId(5)
-                 .setPos({100.0f, 100.0f})
-                 .setGenomeComplexity(1000.0f)
-                 .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
+                 .id(1)
+                 .mutationId(5)
+                 .pos({100.0f, 100.0f})
+                 .genomeComplexity(1000.0f)
+                 .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
              CellDescription()
-                 .setId(2)
-                 .setMutationId(5)
-                 .setPos({101.0f, 100.0f})
-                 .setCellTypeData(OscillatorDescription())
-                 .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+                 .id(2)
+                 .mutationId(5)
+                 .pos({101.0f, 100.0f})
+                 .cellType(OscillatorDescription())
+                 .signal({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
 
         data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
@@ -651,7 +651,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_found)
         auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
-        EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
+        EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
     }
 }
 
@@ -664,17 +664,17 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
         DataDescription data;
         data.addCells(
             {CellDescription()
-                 .setId(1)
-                 .setMutationId(5)
-                 .setPos({100.0f, 100.0f})
-                 .setGenomeComplexity(1000.0f)
-                 .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
+                 .id(1)
+                 .mutationId(5)
+                 .pos({100.0f, 100.0f})
+                 .genomeComplexity(1000.0f)
+                 .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
              CellDescription()
-                 .setId(2)
-                 .setMutationId(5)
-                 .setPos({101.0f, 100.0f})
-                 .setCellTypeData(OscillatorDescription())
-                 .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+                 .id(2)
+                 .mutationId(5)
+                 .pos({101.0f, 100.0f})
+                 .cellType(OscillatorDescription())
+                 .signal({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
 
         data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
@@ -693,7 +693,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
         auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
-        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
     }
 }
 
@@ -704,17 +704,17 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setMutationId(100)
-             .setPos({100.0f, 100.0f})
-             .setGenomeComplexity(1000.0f)
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
+             .id(1)
+             .mutationId(100)
+             .pos({100.0f, 100.0f})
+             .genomeComplexity(1000.0f)
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
          CellDescription()
-             .setId(2)
-             .setMutationId(100)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .mutationId(100)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -726,7 +726,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound_respawnedCell)
@@ -736,17 +736,17 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setMutationId(100)
-             .setGenomeComplexity(1000.0f)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
+             .id(1)
+             .mutationId(100)
+             .genomeComplexity(1000.0f)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
          CellDescription()
-             .setId(2)
-             .setMutationId(100)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .mutationId(100)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -758,7 +758,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_found)
@@ -770,17 +770,17 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_found)
         DataDescription data;
         data.addCells(
             {CellDescription()
-                 .setId(1)
-                 .setMutationId(5)
-                 .setPos({100.0f, 100.0f})
-                 .setGenomeComplexity(500.0f)
-                 .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
+                 .id(1)
+                 .mutationId(5)
+                 .pos({100.0f, 100.0f})
+                 .genomeComplexity(500.0f)
+                 .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
              CellDescription()
-                 .setId(2)
-                 .setMutationId(5)
-                 .setPos({101.0f, 100.0f})
-                 .setCellTypeData(OscillatorDescription())
-                 .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+                 .id(2)
+                 .mutationId(5)
+                 .pos({101.0f, 100.0f})
+                 .cellType(OscillatorDescription())
+                 .signal({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
 
         data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
@@ -799,7 +799,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_found)
         auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
-        EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
+        EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
     }
 }
 
@@ -812,17 +812,17 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
         DataDescription data;
         data.addCells(
             {CellDescription()
-                 .setId(1)
-                 .setMutationId(5)
-                 .setPos({100.0f, 100.0f})
-                 .setGenomeComplexity(500.0f)
-                 .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
+                 .id(1)
+                 .mutationId(5)
+                 .pos({100.0f, 100.0f})
+                 .genomeComplexity(500.0f)
+                 .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
              CellDescription()
-                 .setId(2)
-                 .setMutationId(5)
-                 .setPos({101.0f, 100.0f})
-                 .setCellTypeData(OscillatorDescription())
-                 .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+                 .id(2)
+                 .mutationId(5)
+                 .pos({101.0f, 100.0f})
+                 .cellType(OscillatorDescription())
+                 .signal({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
 
         data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
@@ -841,7 +841,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
         auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
-        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
     }
 }
 
@@ -852,17 +852,17 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setMutationId(100)
-             .setGenomeComplexity(100.0f)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
+             .id(1)
+             .mutationId(100)
+             .genomeComplexity(100.0f)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
          CellDescription()
-             .setId(2)
-             .setMutationId(100)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .mutationId(100)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -874,7 +874,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound_respawnedCell)
@@ -884,17 +884,17 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setMutationId(100)
-             .setGenomeComplexity(100.0f)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setRestrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
+             .id(1)
+             .mutationId(100)
+             .genomeComplexity(100.0f)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
          CellDescription()
-             .setId(2)
-             .setMutationId(100)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .mutationId(100)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -906,7 +906,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_minRange_found)
@@ -914,14 +914,14 @@ TEST_F(SensorTests, scanNeighborhood_minRange_found)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setMinRange(50)),
+             .id(1)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().minRange(50)),
          CellDescription()
-             .setId(2)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(
@@ -933,7 +933,7 @@ TEST_F(SensorTests, scanNeighborhood_minRange_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_minRange_notFound)
@@ -941,14 +941,14 @@ TEST_F(SensorTests, scanNeighborhood_minRange_notFound)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setMinRange(120)),
+             .id(1)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().minRange(120)),
          CellDescription()
-             .setId(2)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(
@@ -960,7 +960,7 @@ TEST_F(SensorTests, scanNeighborhood_minRange_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_maxRange_found)
@@ -968,14 +968,14 @@ TEST_F(SensorTests, scanNeighborhood_maxRange_found)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setMaxRange(120)),
+             .id(1)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().maxRange(120)),
          CellDescription()
-             .setId(2)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(
@@ -987,7 +987,7 @@ TEST_F(SensorTests, scanNeighborhood_maxRange_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
 }
 
 TEST_F(SensorTests, scanNeighborhood_maxRange_notFound)
@@ -995,14 +995,14 @@ TEST_F(SensorTests, scanNeighborhood_maxRange_notFound)
     DataDescription data;
     data.addCells(
         {CellDescription()
-             .setId(1)
-             .setPos({100.0f, 100.0f})
-             .setCellTypeData(SensorDescription().setMaxRange(50)),
+             .id(1)
+             .pos({100.0f, 100.0f})
+             .cellType(SensorDescription().maxRange(50)),
          CellDescription()
-             .setId(2)
-             .setPos({101.0f, 100.0f})
-             .setCellTypeData(OscillatorDescription())
-             .setSignal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .id(2)
+             .pos({101.0f, 100.0f})
+             .cellType(OscillatorDescription())
+             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(
@@ -1014,5 +1014,5 @@ TEST_F(SensorTests, scanNeighborhood_maxRange_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal->channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
 }

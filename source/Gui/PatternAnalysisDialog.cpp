@@ -85,7 +85,7 @@ void PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string cons
         clusterFilename /= clusterNameStream.str();
 
         ClusteredDataDescription pattern;
-        pattern.clusters = std::vector<ClusterDescription>{partitionClassData.representant};
+        pattern._clusters = std::vector<ClusterDescription>{partitionClassData.representant};
 
         SerializerService::get().serializeContentToFile(clusterFilename.string(), pattern);
     }
@@ -106,7 +106,7 @@ auto PatternAnalysisDialog::calcPartitionData() const -> std::map<ClusterAnalysi
 
     std::map<ClusterAnalysisDescription, PartitionClassData> result;
 
-    for (auto const& cluster : data.clusters) {
+    for (auto const& cluster : data._clusters) {
         auto const clusterAnalysisData = getAnalysisDescription(cluster);
         auto& partitionData = result[clusterAnalysisData];
         if (1 == ++partitionData.numberOfElements) {
@@ -121,28 +121,28 @@ auto PatternAnalysisDialog::getAnalysisDescription(ClusterDescription const& clu
     ClusterAnalysisDescription result;
     std::map<uint64_t, CellAnalysisDescription> cellAnalysisDescById;
     auto insertCellAnalysisDescription = [&cellAnalysisDescById](CellDescription const& cell) {
-        if (cellAnalysisDescById.find(cell.id) == cellAnalysisDescById.end()) {
+        if (cellAnalysisDescById.find(cell._id) == cellAnalysisDescById.end()) {
             CellAnalysisDescription result;
-            result.numConnections = cell.connections.size();
-            result.constructionState = cell.livingState;
-            result.color = cell.color;
+            result.numConnections = cell._connections.size();
+            result.constructionState = cell._livingState;
+            result.color = cell._color;
             result.cellType = cell.getCellType();
 
-            cellAnalysisDescById.insert_or_assign(cell.id, result);
+            cellAnalysisDescById.insert_or_assign(cell._id, result);
         }
     };
 
     std::map<uint64_t, int> cellDescIndexById;
-    for (auto const& [index, cell] : cluster.cells | boost::adaptors::indexed(0)) {
-        cellDescIndexById.insert_or_assign(cell.id, toInt(index));
+    for (auto const& [index, cell] : cluster._cells | boost::adaptors::indexed(0)) {
+        cellDescIndexById.insert_or_assign(cell._id, toInt(index));
     }
 
-    for (auto const& cell : cluster.cells) {
+    for (auto const& cell : cluster._cells) {
         insertCellAnalysisDescription(cell);
-        for (auto const& connection : cell.connections) {
+        for (auto const& connection : cell._connections) {
             auto connectingCellId = connection._cellId;
-            insertCellAnalysisDescription(cluster.cells.at(cellDescIndexById.at(connectingCellId)));
-            result.connectedCells.insert(std::set<CellAnalysisDescription>{cellAnalysisDescById.at(cell.id), cellAnalysisDescById.at(connectingCellId)});
+            insertCellAnalysisDescription(cluster._cells.at(cellDescIndexById.at(connectingCellId)));
+            result.connectedCells.insert(std::set<CellAnalysisDescription>{cellAnalysisDescById.at(cell._id), cellAnalysisDescById.at(connectingCellId)});
         }
     }
     return result;

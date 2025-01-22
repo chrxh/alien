@@ -236,19 +236,19 @@ void CreatorWindow::createCell()
     auto creatureId = toInt(NumberGenerator::get().getRandomInt(std::numeric_limits<int>::max()));
 
     auto cell = CellDescription()
-                    .setPos(getRandomPos())
-                    .setEnergy(_energy)
-                    .setStiffness(_stiffness)
-                    .setColor(EditorModel::get().getDefaultColorCode())
-                    .setBarrier(_barrier)
-                    .setCreatureId(creatureId);
+                    .pos(getRandomPos())
+                    .energy(_energy)
+                    .stiffness(_stiffness)
+                    .color(EditorModel::get().getDefaultColorCode())
+                    .barrier(_barrier)
+                    .creatureId(creatureId);
     auto data = DataDescription().addCell(cell);
     _simulationFacade->addAndSelectSimulationData(data);
 }
 
 void CreatorWindow::createParticle()
 {
-    auto particle = ParticleDescription().setPos(getRandomPos()).setEnergy(_energy);
+    auto particle = ParticleDescription().pos(getRandomPos()).energy(_energy);
     auto data = DataDescription().addParticle(particle);
     _simulationFacade->addAndSelectSimulationData(data);
 }
@@ -312,12 +312,12 @@ void CreatorWindow::createDisc()
             auto relPos = Math::unitVectorOfAngle(angle) * radius;
 
             data.addCell(CellDescription()
-                             .setId(NumberGenerator::get().getId())
-                             .setEnergy(_energy)
-                             .setStiffness(_stiffness)
-                             .setPos(relPos)
-                             .setColor(EditorModel::get().getDefaultColorCode())
-                             .setBarrier(_barrier));
+                             .id(NumberGenerator::get().getId())
+                             .energy(_energy)
+                             .stiffness(_stiffness)
+                             .pos(relPos)
+                             .color(EditorModel::get().getDefaultColorCode())
+                             .barrier(_barrier));
         }
     }
 

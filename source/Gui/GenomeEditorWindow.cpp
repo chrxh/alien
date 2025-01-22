@@ -68,7 +68,7 @@ void GenomeEditorWindow::openTab(GenomeDescription const& genome, bool openGenom
         setOn(false);
         delayedExecution([this] { setOn(true); });
     }
-    if (_tabDatas.size() == 1 && _tabDatas.front().genome.cells.empty()) {
+    if (_tabDatas.size() == 1 && _tabDatas.front().genome._cells.empty()) {
         _tabDatas.clear();
     }
     std::optional<int> tabIndex;
@@ -99,12 +99,12 @@ namespace
     generateShortDescription(int index, CellGenomeDescription const& cell, std::optional<ShapeGeneratorResult> const& shapeGeneratorResult, bool isFirstOrLast)
     {
         auto result = "No. " + std::to_string(index + 1) + ", Type: " + Const::CellTypeToStringMap.at(cell.getCellType())
-            + ", Color: " + std::to_string(cell.color);
+            + ", Color: " + std::to_string(cell._color);
         if (!isFirstOrLast) {
-            auto referenceAngle = shapeGeneratorResult ? shapeGeneratorResult->angle : cell.referenceAngle;
+            auto referenceAngle = shapeGeneratorResult ? shapeGeneratorResult->angle : cell._referenceAngle;
             result += ", Angle: " + StringHelper::format(referenceAngle, 1);
         }
-        result += ", Energy: " + StringHelper::format(cell.energy, 1);
+        result += ", Energy: " + StringHelper::format(cell._energy, 1);
         return result;
     }
 }
@@ -164,7 +164,7 @@ void GenomeEditorWindow::processToolbar()
     AlienImGui::Tooltip("Add cell");
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(selectedTab.genome.cells.empty());
+    ImGui::BeginDisabled(selectedTab.genome._cells.empty());
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_MINUS))) {
         onDeleteNode();
     }
@@ -184,7 +184,7 @@ void GenomeEditorWindow::processToolbar()
     AlienImGui::Tooltip("Decrease sequence number of selected cell");
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(!(selectedNode && *selectedNode < selectedTab.genome.cells.size() - 1));
+    ImGui::BeginDisabled(!(selectedNode && *selectedNode < selectedTab.genome._cells.size() - 1));
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_CHEVRON_DOWN))) {
         onNodeIncreaseSequenceNumber();
     }
@@ -195,7 +195,7 @@ void GenomeEditorWindow::processToolbar()
     AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(selectedTab.genome.cells.empty());
+    ImGui::BeginDisabled(selectedTab.genome._cells.empty());
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_EXPAND_ARROWS_ALT))) {
         _expandNodes = true;
     }
@@ -203,7 +203,7 @@ void GenomeEditorWindow::processToolbar()
     AlienImGui::Tooltip("Expand all cells");
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(selectedTab.genome.cells.empty());
+    ImGui::BeginDisabled(selectedTab.genome._cells.empty());
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_COMPRESS_ARROWS_ALT))) {
         _expandNodes = false;
     }
@@ -214,7 +214,7 @@ void GenomeEditorWindow::processToolbar()
     AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(selectedTab.genome.cells.empty());
+    ImGui::BeginDisabled(selectedTab.genome._cells.empty());
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PALETTE))) {
         ChangeColorDialog::get().open();
     }
@@ -312,10 +312,10 @@ void GenomeEditorWindow::processGenomeHeader(TabData& tab)
     AlienImGui::DynamicTableLayout table(DynamicTableHeaderColumnWidth);
     if (table.begin()) {
         std::vector ShapeStrings = {"Custom"s, "Segment"s, "Triangle"s, "Rectangle"s, "Hexagon"s, "Loop"s, "Tube"s, "Lolli"s, "Small lolli"s, "Zigzag"s};
-        auto origShape = tab.genome.header.shape;
+        auto origShape = tab.genome._header._shape;
         if (AlienImGui::Combo(
                 AlienImGui::ComboParameters().name("Geometry").values(ShapeStrings).textWidth(ContentHeaderTextWidth).tooltip(Const::GenomeGeometryTooltip),
-                tab.genome.header.shape)) {
+                tab.genome._header._shape)) {
             updateGeometry(tab.genome, origShape);
         }
         table.next();
@@ -326,7 +326,7 @@ void GenomeEditorWindow::processGenomeHeader(TabData& tab)
                 .step(0.05f)
                 .textWidth(ContentHeaderTextWidth)
                 .tooltip(Const::GenomeConnectionDistanceTooltip),
-            tab.genome.header.connectionDistance);
+            tab.genome._header._connectionDistance);
         table.next();
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters()
@@ -335,25 +335,25 @@ void GenomeEditorWindow::processGenomeHeader(TabData& tab)
                 .step(0.05f)
                 .textWidth(ContentHeaderTextWidth)
                 .tooltip(Const::GenomeStiffnessTooltip),
-            tab.genome.header.stiffness);
-        if (tab.genome.header.shape == ConstructionShape_Custom) {
+            tab.genome._header._stiffness);
+        if (tab.genome._header._shape == ConstructionShape_Custom) {
             table.next();
             AlienImGui::AngleAlignmentCombo(
                 AlienImGui::AngleAlignmentComboParameters()
                     .name("Angle alignment")
                     .textWidth(ContentHeaderTextWidth)
                     .tooltip(Const::GenomeAngleAlignmentTooltip),
-                tab.genome.header.angleAlignment);
+                tab.genome._header._angleAlignment);
         }
         table.next();
         AlienImGui::Checkbox(
             AlienImGui::CheckboxParameters().name("Separation").textWidth(ContentHeaderTextWidth).tooltip(Const::GenomeSeparationConstructionTooltip),
-            tab.genome.header.separateConstruction);
+            tab.genome._header._separateConstruction);
         table.next();
-        if (!tab.genome.header.separateConstruction) {
+        if (!tab.genome._header._separateConstruction) {
             AlienImGui::InputInt(
                 AlienImGui::InputIntParameters().name("Number of branches").textWidth(ContentHeaderTextWidth).tooltip(Const::GenomeNumBranchesTooltip),
-                tab.genome.header.numBranches);
+                tab.genome._header._numBranches);
             table.next();
         }
         AlienImGui::InputInt(
@@ -362,8 +362,8 @@ void GenomeEditorWindow::processGenomeHeader(TabData& tab)
                 .infinity(true)
                 .textWidth(ContentHeaderTextWidth)
                 .tooltip(Const::GenomeRepetitionsPerBranchTooltip),
-            tab.genome.header.numRepetitions);
-        if (tab.genome.header.numRepetitions > 1) {
+            tab.genome._header._numRepetitions);
+        if (tab.genome._header._numRepetitions > 1) {
             table.next();
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters()
@@ -372,7 +372,7 @@ void GenomeEditorWindow::processGenomeHeader(TabData& tab)
                     .textWidth(ContentHeaderTextWidth)
                     .tooltip(Const::GenomeConcatenationAngle1)
                 ,
-                tab.genome.header.concatenationAngle1);
+                tab.genome._header._concatenationAngle1);
             table.next();
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters()
@@ -380,11 +380,11 @@ void GenomeEditorWindow::processGenomeHeader(TabData& tab)
                     .format("%.1f")
                     .textWidth(ContentHeaderTextWidth)
                     .tooltip(Const::GenomeConcatenationAngle2),
-                tab.genome.header.concatenationAngle2);
+                tab.genome._header._concatenationAngle2);
         }
         table.end();
     }
-    validateAndCorrect(tab.genome.header);
+    validateAndCorrect(tab.genome._header);
 }
 
 namespace 
@@ -393,37 +393,37 @@ namespace
     {
         switch (type) {
         case CellType_Base: {
-            cell.cellTypeData = BaseGenomeDescription();
+            cell._cellTypeData = BaseGenomeDescription();
         } break;
         case CellType_Depot: {
-            cell.cellTypeData = DepotGenomeDescription();
+            cell._cellTypeData = DepotGenomeDescription();
         } break;
         case CellType_Constructor: {
-            cell.cellTypeData = ConstructorGenomeDescription().setGenome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription()));
+            cell._cellTypeData = ConstructorGenomeDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription()));
         } break;
         case CellType_Sensor: {
-            cell.cellTypeData = SensorGenomeDescription();
+            cell._cellTypeData = SensorGenomeDescription();
         } break;
         case CellType_Oscillator: {
-            cell.cellTypeData = OscillatorGenomeDescription();
+            cell._cellTypeData = OscillatorGenomeDescription();
         } break;
         case CellType_Attacker: {
-            cell.cellTypeData = AttackerGenomeDescription();
+            cell._cellTypeData = AttackerGenomeDescription();
         } break;
         case CellType_Injector: {
-            cell.cellTypeData = InjectorGenomeDescription().setGenome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription()));
+            cell._cellTypeData = InjectorGenomeDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription()));
         } break;
         case CellType_Muscle: {
-            cell.cellTypeData = MuscleGenomeDescription();
+            cell._cellTypeData = MuscleGenomeDescription();
         } break;
         case CellType_Defender: {
-            cell.cellTypeData = DefenderGenomeDescription();
+            cell._cellTypeData = DefenderGenomeDescription();
         } break;
         case CellType_Reconnector: {
-            cell.cellTypeData = ReconnectorGenomeDescription();
+            cell._cellTypeData = ReconnectorGenomeDescription();
         } break;
         case CellType_Detonator: {
-            cell.cellTypeData = DetonatorGenomeDescription();
+            cell._cellTypeData = DetonatorGenomeDescription();
         } break;
         }
     }
@@ -433,10 +433,10 @@ void GenomeEditorWindow::processConstructionSequence(TabData& tab)
 {
     int index = 0;
 
-    auto shapeGenerator = ShapeGeneratorFactory::create(tab.genome.header.shape);
-    for (auto& cell : tab.genome.cells) {
+    auto shapeGenerator = ShapeGeneratorFactory::create(tab.genome._header._shape);
+    for (auto& cell : tab.genome._cells) {
         auto isFirst = index == 0;
-        auto isLast = index == tab.genome.cells.size() - 1;
+        auto isLast = index == tab.genome._cells.size() - 1;
         auto isFirstOrLast = isFirst || isLast;
         std::optional<ShapeGeneratorResult> shapeGeneratorResult =
             shapeGenerator ? std::make_optional(shapeGenerator->generateNextConstructionData()) : std::nullopt;
@@ -444,7 +444,7 @@ void GenomeEditorWindow::processConstructionSequence(TabData& tab)
         ImGui::PushID(index);
 
         float h, s, v;
-        AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
+        AlienImGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell._color], h, s, v);
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(h, s * 0.5f, v));
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_Framed;
 
@@ -522,57 +522,57 @@ void GenomeEditorWindow::processNode(
             applyNewCellType(cell, type);
         }
         table.next();
-        AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(ContentTextWidth).tooltip(Const::GenomeColorTooltip), cell.color);
+        AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(ContentTextWidth).tooltip(Const::GenomeColorTooltip), cell._color);
         if (!isFirstOrLast) {
             table.next();
-            auto referenceAngle = shapeGeneratorResult ? shapeGeneratorResult->angle : cell.referenceAngle;
+            auto referenceAngle = shapeGeneratorResult ? shapeGeneratorResult->angle : cell._referenceAngle;
             if (AlienImGui::InputFloat(
                     AlienImGui::InputFloatParameters().name("Angle").textWidth(ContentTextWidth).format("%.1f").tooltip(Const::GenomeAngleTooltip), referenceAngle)) {
-                updateGeometry(tab.genome, tab.genome.header.shape);
-                tab.genome.header.shape = ConstructionShape_Custom;
+                updateGeometry(tab.genome, tab.genome._header._shape);
+                tab.genome._header._shape = ConstructionShape_Custom;
             }
-            cell.referenceAngle = referenceAngle;
+            cell._referenceAngle = referenceAngle;
         }
         table.next();
         AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters().name("Energy").textWidth(ContentTextWidth).format("%.1f").tooltip(Const::GenomeEnergyTooltip), cell.energy);
+            AlienImGui::InputFloatParameters().name("Energy").textWidth(ContentTextWidth).format("%.1f").tooltip(Const::GenomeEnergyTooltip), cell._energy);
         table.next();
         auto numRequiredAdditionalConnections =
-            shapeGeneratorResult ? shapeGeneratorResult->numRequiredAdditionalConnections : cell.numRequiredAdditionalConnections;
+            shapeGeneratorResult ? shapeGeneratorResult->numRequiredAdditionalConnections : cell._numRequiredAdditionalConnections;
         if (!isFirst && numRequiredAdditionalConnections) {
             numRequiredAdditionalConnections = std::min(*numRequiredAdditionalConnections + 1, MAX_CELL_BONDS);
         }
         if (AlienImGui::InputOptionalInt(
                 AlienImGui::InputIntParameters().name("Required connections").textWidth(ContentTextWidth).tooltip(Const::GenomeRequiredConnectionsTooltip),
                 numRequiredAdditionalConnections)) {
-            updateGeometry(tab.genome, tab.genome.header.shape);
-            tab.genome.header.shape = ConstructionShape_Custom;
+            updateGeometry(tab.genome, tab.genome._header._shape);
+            tab.genome._header._shape = ConstructionShape_Custom;
         }
         if (!isFirst && numRequiredAdditionalConnections) {
             numRequiredAdditionalConnections = *numRequiredAdditionalConnections - 1;
         }
-        cell.numRequiredAdditionalConnections = numRequiredAdditionalConnections;
+        cell._numRequiredAdditionalConnections = numRequiredAdditionalConnections;
 
         table.next();
         AlienImGui::Checkbox(
             AlienImGui::CheckboxParameters().name("Signal routing active").textWidth(ContentTextWidth),
-            cell.signalRoutingRestriction.active);
-        if (cell.signalRoutingRestriction.active) {
+            cell._signalRoutingRestriction._active);
+        if (cell._signalRoutingRestriction._active) {
             table.next();
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters().name("Signal base angle").format("%.1f").step(0.5f).textWidth(ContentTextWidth),
-                cell.signalRoutingRestriction.baseAngle);
+                cell._signalRoutingRestriction._baseAngle);
             table.next();
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters().name("Signal opening angle").format("%.1f").step(0.5f).textWidth(ContentTextWidth),
-                cell.signalRoutingRestriction.openingAngle);
+                cell._signalRoutingRestriction._openingAngle);
         }
 
         switch (type) {
         case CellType_Base: {
         } break;
         case CellType_Depot: {
-            auto& transmitter = std::get<DepotGenomeDescription>(cell.cellTypeData);
+            auto& transmitter = std::get<DepotGenomeDescription>(cell._cellTypeData);
 
             table.next();
             AlienImGui::Combo(
@@ -581,12 +581,12 @@ void GenomeEditorWindow::processNode(
                     .values({"Connected cells", "Transmitters and constructors"})
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::GenomeTransmitterEnergyDistributionTooltip),
-                transmitter.mode);
+                transmitter._mode);
         } break;
         case CellType_Constructor: {
-            auto& constructor = std::get<ConstructorGenomeDescription>(cell.cellTypeData);
+            auto& constructor = std::get<ConstructorGenomeDescription>(cell._cellTypeData);
 
-            int autoTriggerInterval = constructor.autoTriggerInterval == 0 ? 0 : 1;
+            int autoTriggerInterval = constructor._autoTriggerInterval == 0 ? 0 : 1;
             table.next();
             if (AlienImGui::Combo(
                     AlienImGui::ComboParameters()
@@ -595,14 +595,14 @@ void GenomeEditorWindow::processNode(
                         .values({"Manual", "Automatic"})
                         .tooltip(Const::GenomeConstructorActivationModeTooltip),
                     autoTriggerInterval)) {
-                constructor.autoTriggerInterval = autoTriggerInterval;
+                constructor._autoTriggerInterval = autoTriggerInterval;
 
             }
             if (autoTriggerInterval == 1) {
                 table.next();
                 AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters().name("Interval").textWidth(ContentTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip), constructor.autoTriggerInterval);
-                constructor.autoTriggerInterval = std::max(1, constructor.autoTriggerInterval);
+                    AlienImGui::InputIntParameters().name("Interval").textWidth(ContentTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip), constructor._autoTriggerInterval);
+                constructor._autoTriggerInterval = std::max(1, constructor._autoTriggerInterval);
             }
             table.next();
             AlienImGui::InputInt(
@@ -610,7 +610,7 @@ void GenomeEditorWindow::processNode(
                     .name("Offspring activation time")
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::GenomeConstructorOffspringActivationTime),
-                constructor.constructionActivationTime);
+                constructor._constructionActivationTime);
             table.next();
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters()
@@ -618,7 +618,7 @@ void GenomeEditorWindow::processNode(
                     .format("%.1f")
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::GenomeConstructorAngle1Tooltip),
-                constructor.constructionAngle1);
+                constructor._constructionAngle1);
             table.next();
             AlienImGui::InputFloat(
                 AlienImGui::InputFloatParameters()
@@ -626,12 +626,12 @@ void GenomeEditorWindow::processNode(
                     .format("%.1f")
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::GenomeConstructorAngle2Tooltip),
-                constructor.constructionAngle2);
+                constructor._constructionAngle2);
         } break;
         case CellType_Sensor: {
-            auto& sensor = std::get<SensorGenomeDescription>(cell.cellTypeData);
+            auto& sensor = std::get<SensorGenomeDescription>(cell._cellTypeData);
 
-            int autoTriggerInterval = sensor.autoTriggerInterval == 0 ? 0 : 1;
+            int autoTriggerInterval = sensor._autoTriggerInterval == 0 ? 0 : 1;
             table.next();
             if (AlienImGui::Combo(
                     AlienImGui::ComboParameters()
@@ -640,19 +640,19 @@ void GenomeEditorWindow::processNode(
                         .values({"Manual", "Automatic"})
                         .tooltip(Const::GenomeConstructorActivationModeTooltip),
                     autoTriggerInterval)) {
-                sensor.autoTriggerInterval = autoTriggerInterval;
+                sensor._autoTriggerInterval = autoTriggerInterval;
             }
             if (autoTriggerInterval == 1) {
                 table.next();
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters().name("Interval").textWidth(ContentTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip),
-                    sensor.autoTriggerInterval);
-                sensor.autoTriggerInterval = std::max(1, sensor.autoTriggerInterval);
+                    sensor._autoTriggerInterval);
+                sensor._autoTriggerInterval = std::max(1, sensor._autoTriggerInterval);
             }
 
             table.next();
             AlienImGui::ComboOptionalColor(
-                AlienImGui::ComboColorParameters().name("Scan color").textWidth(ContentTextWidth).tooltip(Const::GenomeSensorScanColorTooltip), sensor.restrictToColor);
+                AlienImGui::ComboColorParameters().name("Scan color").textWidth(ContentTextWidth).tooltip(Const::GenomeSensorScanColorTooltip), sensor._restrictToColor);
             table.next();
             AlienImGui::Combo(
                 AlienImGui::ComboParameters()
@@ -660,7 +660,7 @@ void GenomeEditorWindow::processNode(
                     .values({"None", "Same mutants", "Other mutants", "Free cells", "Handcrafted cells", "Less complex mutants", "More complex mutants"})
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::SensorRestrictToMutantsTooltip),
-                sensor.restrictToMutants);
+                sensor._restrictToMutants);
 
 
             table.next();
@@ -671,45 +671,45 @@ void GenomeEditorWindow::processNode(
                     .step(0.05f)
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::GenomeSensorMinDensityTooltip),
-                sensor.minDensity);
+                sensor._minDensity);
             table.next();
             AlienImGui::InputOptionalInt(
-                AlienImGui::InputIntParameters().name("Min range").textWidth(ContentTextWidth).tooltip(Const::GenomeSensorMinRangeTooltip), sensor.minRange);
+                AlienImGui::InputIntParameters().name("Min range").textWidth(ContentTextWidth).tooltip(Const::GenomeSensorMinRangeTooltip), sensor._minRange);
             table.next();
             AlienImGui::InputOptionalInt(
-                AlienImGui::InputIntParameters().name("Max range").textWidth(ContentTextWidth).tooltip(Const::GenomeSensorMaxRangeTooltip), sensor.maxRange);
+                AlienImGui::InputIntParameters().name("Max range").textWidth(ContentTextWidth).tooltip(Const::GenomeSensorMaxRangeTooltip), sensor._maxRange);
         } break;
         case CellType_Oscillator: {
-            auto& oscillator = std::get<OscillatorGenomeDescription>(cell.cellTypeData);
-            bool pulseGeneration = oscillator.autoTriggerInterval > 0;
+            auto& oscillator = std::get<OscillatorGenomeDescription>(cell._cellTypeData);
+            bool pulseGeneration = oscillator._autoTriggerInterval > 0;
             table.next();
             if (AlienImGui::Checkbox(
                     AlienImGui::CheckboxParameters().name("Generate pulses").textWidth(ContentTextWidth).tooltip(Const::GenomeOscillatorGeneratePulsesTooltip),
                     pulseGeneration)) {
-                oscillator.autoTriggerInterval = pulseGeneration ? 1 : 0;
+                oscillator._autoTriggerInterval = pulseGeneration ? 1 : 0;
             }
             if (pulseGeneration) {
                 table.next();
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters().name("Pulse interval").textWidth(ContentTextWidth).tooltip(Const::GenomeOscillatorPulseIntervalTooltip),
-                    oscillator.autoTriggerInterval);
-                bool alternation = oscillator.alternationInterval > 0;
+                    oscillator._autoTriggerInterval);
+                bool alternation = oscillator._alternationInterval > 0;
                 table.next();
                 if (AlienImGui::Checkbox(
                         AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(ContentTextWidth).tooltip(Const::GenomeOscillatorAlternatingPulsesTooltip),
                         alternation)) {
-                    oscillator.alternationInterval = alternation ? 1 : 0;
+                    oscillator._alternationInterval = alternation ? 1 : 0;
                 }
                 if (alternation) {
                     table.next();
                     AlienImGui::InputInt(
                         AlienImGui::InputIntParameters().name("Pulses per phase").textWidth(ContentTextWidth).tooltip(Const::GenomeOscillatorPulsesPerPhaseTooltip),
-                        oscillator.alternationInterval);
+                        oscillator._alternationInterval);
                 }
             }
         } break;
         case CellType_Attacker: {
-            auto& attacker = std::get<AttackerGenomeDescription>(cell.cellTypeData);
+            auto& attacker = std::get<AttackerGenomeDescription>(cell._cellTypeData);
             table.next();
             AlienImGui::Combo(
                 AlienImGui::ComboParameters()
@@ -717,10 +717,10 @@ void GenomeEditorWindow::processNode(
                     .values({"Connected cells", "Transmitters and Constructors"})
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::GenomeAttackerEnergyDistributionTooltip),
-                attacker.mode);
+                attacker._mode);
         } break;
         case CellType_Injector: {
-            auto& injector = std::get<InjectorGenomeDescription>(cell.cellTypeData);
+            auto& injector = std::get<InjectorGenomeDescription>(cell._cellTypeData);
 
             table.next();
             AlienImGui::Combo(
@@ -729,10 +729,10 @@ void GenomeEditorWindow::processNode(
                     .textWidth(ContentTextWidth)
                     .values({"Only empty cells", "All cells"})
                     .tooltip(Const::GenomeInjectorModeTooltip),
-                injector.mode);
+                injector._mode);
         } break;
         case CellType_Muscle: {
-            auto& muscle = std::get<MuscleGenomeDescription>(cell.cellTypeData);
+            auto& muscle = std::get<MuscleGenomeDescription>(cell._cellTypeData);
             table.next();
             AlienImGui::Combo(
                 AlienImGui::ComboParameters()
@@ -740,10 +740,10 @@ void GenomeEditorWindow::processNode(
                     .values({"Movement to sensor target", "Expansion and contraction", "Bending"})
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::GenomeMuscleModeTooltip),
-                muscle.mode);
+                muscle._mode);
         } break;
         case CellType_Defender: {
-            auto& defender = std::get<DefenderGenomeDescription>(cell.cellTypeData);
+            auto& defender = std::get<DefenderGenomeDescription>(cell._cellTypeData);
             table.next();
             AlienImGui::Combo(
                 AlienImGui::ComboParameters()
@@ -751,14 +751,14 @@ void GenomeEditorWindow::processNode(
                     .values({"Anti-attacker", "Anti-injector"})
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::GenomeDefenderModeTooltip),
-                defender.mode);
+                defender._mode);
         } break;
         case CellType_Reconnector: {
-            auto& reconnector = std::get<ReconnectorGenomeDescription>(cell.cellTypeData);
+            auto& reconnector = std::get<ReconnectorGenomeDescription>(cell._cellTypeData);
             table.next();
             AlienImGui::ComboOptionalColor(
                 AlienImGui::ComboColorParameters().name("Restrict to color").textWidth(ContentTextWidth).tooltip(Const::GenomeReconnectorRestrictToColorTooltip),
-                reconnector.restrictToColor);
+                reconnector._restrictToColor);
             table.next();
             AlienImGui::Combo(
                 AlienImGui::ComboParameters()
@@ -766,15 +766,15 @@ void GenomeEditorWindow::processNode(
                     .values({"None", "Same mutants", "Other mutants", "Free cells", "Handcrafted cells", "Less complex mutants", "More complex mutants"})
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::ReconnectorRestrictToMutantsTooltip),
-                reconnector.restrictToMutants);
+                reconnector._restrictToMutants);
         } break;
         case CellType_Detonator: {
             table.next();
-            auto& detonator = std::get<DetonatorGenomeDescription>(cell.cellTypeData);
+            auto& detonator = std::get<DetonatorGenomeDescription>(cell._cellTypeData);
             AlienImGui::InputInt(
                 AlienImGui::InputIntParameters().name("Countdown").textWidth(ContentTextWidth).tooltip(Const::GenomeDetonatorCountdownTooltip),
-                detonator.countdown);
-            detonator.countdown = std::min(65535, std::max(0, detonator.countdown));
+                detonator._countdown);
+            detonator._countdown = std::min(65535, std::max(0, detonator._countdown));
         } break;
         }
 
@@ -783,9 +783,9 @@ void GenomeEditorWindow::processNode(
         if (ImGui::TreeNodeEx("Neural network", ImGuiTreeNodeFlags_None)) {
             AlienImGui::NeuronSelection(
                 AlienImGui::NeuronSelectionParameters().rightMargin(SubWindowRightMargin),
-                cell.neuralNetwork.weights,
-                cell.neuralNetwork.biases,
-                cell.neuralNetwork.activationFunctions);
+                cell._neuralNetwork._weights,
+                cell._neuralNetwork._biases,
+                cell._neuralNetwork._activationFunctions);
             ImGui::TreePop();
         }
 
@@ -793,11 +793,11 @@ void GenomeEditorWindow::processNode(
         case CellType_Base: {
         } break;
         case CellType_Constructor: {
-            auto& constructor = std::get<ConstructorGenomeDescription>(cell.cellTypeData);
+            auto& constructor = std::get<ConstructorGenomeDescription>(cell._cellTypeData);
             processSubGenomeWidgets(tab, constructor);
         } break;
         case CellType_Injector: {
-            auto& injector = std::get<InjectorGenomeDescription>(cell.cellTypeData);
+            auto& injector = std::get<InjectorGenomeDescription>(cell._cellTypeData);
             processSubGenomeWidgets(tab, injector);
         } break;
         }
@@ -846,7 +846,7 @@ void GenomeEditorWindow::processSubGenomeWidgets(TabData const& tab, Description
         }
         ImGui::SameLine();
         if (AlienImGui::Button("Set self-copy")) {
-            desc.setMakeSelfCopy();
+            desc.makeSelfCopy();
         }
     }
     ImGui::EndChild();
@@ -893,16 +893,16 @@ void GenomeEditorWindow::onUploadGenome()
 void GenomeEditorWindow::onAddNode()
 {
     auto& tabData = _tabDatas.at(_selectedTabIndex);
-    auto& cells = tabData.genome.cells;
+    auto& cells = tabData.genome._cells;
 
     CellGenomeDescription newNode;
     if (tabData.selectedNode) {
-        newNode.color = cells.at(*tabData.selectedNode).color;
+        newNode._color = cells.at(*tabData.selectedNode)._color;
         cells.insert(cells.begin() + *tabData.selectedNode + 1, newNode);
         ++(*tabData.selectedNode);
     } else {
         if (!cells.empty()) {
-            newNode.color = cells.back().color;
+            newNode._color = cells.back()._color;
         }
         cells.emplace_back(newNode);
         tabData.selectedNode = toInt(cells.size() - 1);
@@ -912,7 +912,7 @@ void GenomeEditorWindow::onAddNode()
 void GenomeEditorWindow::onDeleteNode()
 {
     auto& tabData = _tabDatas.at(_selectedTabIndex);
-    auto& cells = tabData.genome.cells;
+    auto& cells = tabData.genome._cells;
 
     if (tabData.selectedNode) {
         cells.erase(cells.begin() + *tabData.selectedNode);
@@ -934,7 +934,7 @@ void GenomeEditorWindow::onNodeDecreaseSequenceNumber()
 {
     auto& selectedTab = _tabDatas.at(_selectedTabIndex);
     auto& selectedNode = selectedTab.selectedNode;
-    std::swap(selectedTab.genome.cells.at(*selectedNode), selectedTab.genome.cells.at(*selectedNode - 1));
+    std::swap(selectedTab.genome._cells.at(*selectedNode), selectedTab.genome._cells.at(*selectedNode - 1));
     --(*selectedNode);
     _expandNodes = false;
 }
@@ -943,7 +943,7 @@ void GenomeEditorWindow::onNodeIncreaseSequenceNumber()
 {
     auto& selectedTab = _tabDatas.at(_selectedTabIndex);
     auto& selectedNode = selectedTab.selectedNode;
-    std::swap(selectedTab.genome.cells.at(*selectedNode), selectedTab.genome.cells.at(*selectedNode + 1));
+    std::swap(selectedTab.genome._cells.at(*selectedNode), selectedTab.genome._cells.at(*selectedNode + 1));
     ++(*selectedNode);
     _expandNodes = false;
 }
@@ -961,11 +961,11 @@ void GenomeEditorWindow::onCreateSpore()
     auto numNodes = GenomeDescriptionConverterService::get().getNumNodesRecursively(genome, true);
     auto energy = parameter.cellNormalEnergy[EditorModel::get().getDefaultColorCode()] * toFloat(numNodes * 2 + 1);
     auto cell = CellDescription()
-                    .setPos(pos)
-                    .setEnergy(energy)
-                    .setStiffness(1.0f)
-                    .setColor(EditorModel::get().getDefaultColorCode())
-                    .setCellTypeData(ConstructorDescription().genome(genome));
+                    .pos(pos)
+                    .energy(energy)
+                    .stiffness(1.0f)
+                    .color(EditorModel::get().getDefaultColorCode())
+                    .cellType(ConstructorDescription().genome(genome));
     auto data = DataDescription().addCell(cell);
     _simulationFacade->addAndSelectSimulationData(data);
     EditorModel::get().update();
@@ -984,41 +984,41 @@ void GenomeEditorWindow::showPreview(TabData& tab)
 
 void GenomeEditorWindow::validateAndCorrect(GenomeHeaderDescription& header) const
 {
-    header.stiffness = std::max(0.0f, std::min(1.0f, header.stiffness));
-    header.connectionDistance = std::max(0.5f, std::min(1.5f, header.connectionDistance));
-    header.numRepetitions = std::max(1, header.numRepetitions);
-    header.numBranches = header.getNumBranches();
+    header._stiffness = std::max(0.0f, std::min(1.0f, header._stiffness));
+    header._connectionDistance = std::max(0.5f, std::min(1.5f, header._connectionDistance));
+    header._numRepetitions = std::max(1, header._numRepetitions);
+    header._numBranches = header.getNumBranches();
 }
 
 void GenomeEditorWindow::validateAndCorrect(CellGenomeDescription& cell) const
 {
-    cell.color = (cell.color + MAX_COLORS) % MAX_COLORS;
-    if (cell.numRequiredAdditionalConnections) {
-        cell.numRequiredAdditionalConnections = (*cell.numRequiredAdditionalConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
+    cell._color = (cell._color + MAX_COLORS) % MAX_COLORS;
+    if (cell._numRequiredAdditionalConnections) {
+        cell._numRequiredAdditionalConnections = (*cell._numRequiredAdditionalConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
     }
-    cell.energy = std::min(std::max(cell.energy, 50.0f), 250.0f);
+    cell._energy = std::min(std::max(cell._energy, 50.0f), 250.0f);
 
     switch (cell.getCellType()) {
     case CellType_Constructor: {
-        auto& constructor = std::get<ConstructorGenomeDescription>(cell.cellTypeData);
-        constructor.autoTriggerInterval = std::min(255, std::max(0, constructor.autoTriggerInterval));
-        constructor.constructionActivationTime = ((constructor.constructionActivationTime % MAX_ACTIVATION_TIME) + MAX_ACTIVATION_TIME) % MAX_ACTIVATION_TIME;
+        auto& constructor = std::get<ConstructorGenomeDescription>(cell._cellTypeData);
+        constructor._autoTriggerInterval = std::min(255, std::max(0, constructor._autoTriggerInterval));
+        constructor._constructionActivationTime = ((constructor._constructionActivationTime % MAX_ACTIVATION_TIME) + MAX_ACTIVATION_TIME) % MAX_ACTIVATION_TIME;
     } break;
     case CellType_Sensor: {
-        auto& sensor = std::get<SensorGenomeDescription>(cell.cellTypeData);
-        sensor.autoTriggerInterval = std::min(255, std::max(0, sensor.autoTriggerInterval));
-        sensor.minDensity = std::max(0.0f, std::min(1.0f, sensor.minDensity));
-        if (sensor.minRange) {
-            sensor.minRange = std::max(0, std::min(127, *sensor.minRange));
+        auto& sensor = std::get<SensorGenomeDescription>(cell._cellTypeData);
+        sensor._autoTriggerInterval = std::min(255, std::max(0, sensor._autoTriggerInterval));
+        sensor._minDensity = std::max(0.0f, std::min(1.0f, sensor._minDensity));
+        if (sensor._minRange) {
+            sensor._minRange = std::max(0, std::min(127, *sensor._minRange));
         }
-        if (sensor.maxRange) {
-            sensor.maxRange = std::max(0, std::min(127, *sensor.maxRange));
+        if (sensor._maxRange) {
+            sensor._maxRange = std::max(0, std::min(127, *sensor._maxRange));
         }
     } break;
     case CellType_Oscillator: {
-        auto& oscillator = std::get<OscillatorGenomeDescription>(cell.cellTypeData);
-        oscillator.autoTriggerInterval = std::max(0, oscillator.autoTriggerInterval);
-        oscillator.alternationInterval = std::max(0, oscillator.alternationInterval);
+        auto& oscillator = std::get<OscillatorGenomeDescription>(cell._cellTypeData);
+        oscillator._autoTriggerInterval = std::max(0, oscillator._autoTriggerInterval);
+        oscillator._alternationInterval = std::max(0, oscillator._alternationInterval);
     } break;
     }
 }
@@ -1037,11 +1037,11 @@ void GenomeEditorWindow::updateGeometry(GenomeDescription& genome, ConstructionS
     if (!shapeGenerator) {
         return;
     }
-    genome.header.angleAlignment = shapeGenerator->getConstructorAngleAlignment();
-    for (auto& cell : genome.cells) {
+    genome._header._angleAlignment = shapeGenerator->getConstructorAngleAlignment();
+    for (auto& cell : genome._cells) {
         auto shapeGenerationResult = shapeGenerator->generateNextConstructionData();
-        cell.referenceAngle = shapeGenerationResult.angle;
-        cell.numRequiredAdditionalConnections = shapeGenerationResult.numRequiredAdditionalConnections;
+        cell._referenceAngle = shapeGenerationResult.angle;
+        cell._numRequiredAdditionalConnections = shapeGenerationResult.numRequiredAdditionalConnections;
     }
 }
 
