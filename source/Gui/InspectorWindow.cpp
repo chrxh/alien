@@ -481,7 +481,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                         AlienImGui::InputIntParameters()
                             .name("Current branch index")
                             .textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentBranchTooltip),
-                        desc._currentBranch);
+                        desc._genomeCurrentBranch);
                     AlienImGui::InputInt(
                         AlienImGui::InputIntParameters()
                             .name("Current repetition index")
@@ -517,23 +517,17 @@ void _InspectorWindow::processOscillatorContent(OscillatorDescription& oscillato
 {
     if (ImGui::TreeNodeEx("Properties###oscillator", TreeNodeFlags)) {
 
-        bool pulseGeneration = oscillator._autoTriggerInterval > 0;
-        if (AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Generate pulses").textWidth(CellTypeTextWidth).tooltip(Const::GenomeOscillatorGeneratePulsesTooltip), pulseGeneration)) {
-            oscillator._autoTriggerInterval = pulseGeneration ? 1 : 0;
+        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Pulse interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeOscillatorPulseIntervalTooltip), oscillator._autoTriggerInterval);
+        bool alternation = oscillator._alternationInterval > 0;
+        if (AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(CellTypeTextWidth).tooltip(Const::GenomeOscillatorAlternatingPulsesTooltip),
+                alternation)) {
+            oscillator._alternationInterval = alternation ? 1 : 0;
         }
-        if (pulseGeneration) {
-            AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Pulse interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeOscillatorPulseIntervalTooltip), oscillator._autoTriggerInterval);
-            bool alternation = oscillator._alternationInterval > 0;
-            if (AlienImGui::Checkbox(
-                    AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(CellTypeTextWidth).tooltip(Const::GenomeOscillatorAlternatingPulsesTooltip),
-                    alternation)) {
-                oscillator._alternationInterval = alternation ? 1 : 0;
-            }
-            if (alternation) {
-                AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters().name("Pulses per phase").textWidth(CellTypeTextWidth).tooltip(Const::GenomeOscillatorPulsesPerPhaseTooltip),
-                    oscillator._alternationInterval);
-            }
+        if (alternation) {
+            AlienImGui::InputInt(
+                AlienImGui::InputIntParameters().name("Pulses per phase").textWidth(CellTypeTextWidth).tooltip(Const::GenomeOscillatorPulsesPerPhaseTooltip),
+                oscillator._alternationInterval);
         }
         ImGui::TreePop();
     }

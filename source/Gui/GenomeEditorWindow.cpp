@@ -681,31 +681,22 @@ void GenomeEditorWindow::processNode(
         } break;
         case CellType_Oscillator: {
             auto& oscillator = std::get<OscillatorGenomeDescription>(cell._cellTypeData);
-            bool pulseGeneration = oscillator._autoTriggerInterval > 0;
+            table.next();
+            AlienImGui::InputInt(
+                AlienImGui::InputIntParameters().name("Pulse interval").textWidth(ContentTextWidth).tooltip(Const::GenomeOscillatorPulseIntervalTooltip),
+                oscillator._autoTriggerInterval);
+            bool alternation = oscillator._alternationInterval > 0;
             table.next();
             if (AlienImGui::Checkbox(
-                    AlienImGui::CheckboxParameters().name("Generate pulses").textWidth(ContentTextWidth).tooltip(Const::GenomeOscillatorGeneratePulsesTooltip),
-                    pulseGeneration)) {
-                oscillator._autoTriggerInterval = pulseGeneration ? 1 : 0;
+                    AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(ContentTextWidth).tooltip(Const::GenomeOscillatorAlternatingPulsesTooltip),
+                    alternation)) {
+                oscillator._alternationInterval = alternation ? 1 : 0;
             }
-            if (pulseGeneration) {
+            if (alternation) {
                 table.next();
                 AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters().name("Pulse interval").textWidth(ContentTextWidth).tooltip(Const::GenomeOscillatorPulseIntervalTooltip),
-                    oscillator._autoTriggerInterval);
-                bool alternation = oscillator._alternationInterval > 0;
-                table.next();
-                if (AlienImGui::Checkbox(
-                        AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(ContentTextWidth).tooltip(Const::GenomeOscillatorAlternatingPulsesTooltip),
-                        alternation)) {
-                    oscillator._alternationInterval = alternation ? 1 : 0;
-                }
-                if (alternation) {
-                    table.next();
-                    AlienImGui::InputInt(
-                        AlienImGui::InputIntParameters().name("Pulses per phase").textWidth(ContentTextWidth).tooltip(Const::GenomeOscillatorPulsesPerPhaseTooltip),
-                        oscillator._alternationInterval);
-                }
+                    AlienImGui::InputIntParameters().name("Pulses per phase").textWidth(ContentTextWidth).tooltip(Const::GenomeOscillatorPulsesPerPhaseTooltip),
+                    oscillator._alternationInterval);
             }
         } break;
         case CellType_Attacker: {

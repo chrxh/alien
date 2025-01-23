@@ -92,6 +92,11 @@ __global__ void cudaNextTimestep_signal_neuralNetworks(SimulationData data, Simu
     NeuronProcessor::process(data, statistics);
 }
 
+__global__ void cudaNextTimestep_energyFlow(SimulationData data)
+{
+    CellProcessor::applyEnergyFlow(data);
+}
+
 __global__ void cudaNextTimestep_cellType_prepare_substep1(SimulationData data)
 {
     CellProcessor::aging(data);

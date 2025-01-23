@@ -52,6 +52,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_upperSid
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     ASSERT_EQ(4, actualData._cells.size());
     auto actualHostCell = getCell(actualData, 1);

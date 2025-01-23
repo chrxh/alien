@@ -164,7 +164,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
                         if (constructor.genomeCurrentRepetition == constructionData.genomeHeader.numRepetitions) {
                             constructor.genomeCurrentRepetition = 0;
                             if (!constructionData.genomeHeader.separateConstruction) {
-                                ++constructor.currentBranch;
+                                ++constructor.genomeCurrentBranch;
                             }
                         }
                     }
@@ -744,7 +744,7 @@ ConstructorProcessor::constructCellIntern(
         newConstructor.autoTriggerInterval = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
         newConstructor.constructionActivationTime = GenomeDecoder::readWord(constructor, genomeCurrentBytePosition) % MAX_ACTIVATION_TIME;
         newConstructor.lastConstructedCellId = 0;
-        newConstructor.currentBranch = 0;
+        newConstructor.genomeCurrentBranch = 0;
         newConstructor.genomeCurrentNodeIndex = 0;
         newConstructor.genomeCurrentRepetition = 0;
         newConstructor.constructionAngle1 = GenomeDecoder::readAngle(constructor, genomeCurrentBytePosition);

@@ -68,7 +68,7 @@ struct ConstructorTO
     uint64_t lastConstructedCellId;
     uint16_t genomeCurrentNodeIndex;
     uint16_t genomeCurrentRepetition;
-    uint8_t currentBranch;
+    uint8_t genomeCurrentBranch;
     uint32_t offspringCreatureId;
     uint32_t offspringMutationId;
 };
@@ -85,8 +85,8 @@ struct SensorTO
 
 struct OscillatorTO
 {
-    uint8_t autoTriggerInterval;  // 0 = no triggering, > 0 = auto trigger
-    uint8_t alternationInterval;  //0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
+    uint8_t autoTriggerInterval;
+    uint8_t alternationInterval;  // 0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
 
     // Process data
     int numPulses;

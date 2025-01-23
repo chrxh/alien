@@ -344,7 +344,7 @@ __inline__ __device__ bool GenomeDecoder::isFinished(ConstructorType const& cons
     if (hasEmptyGenome(constructor)) {
         return true;
     }
-    return getNumBranches(constructor.genome) <= constructor.currentBranch;
+    return getNumBranches(constructor.genome) <= constructor.genomeCurrentBranch;
 }
 
 template <typename CellTypeSource, typename CellTypeTarget>

@@ -434,7 +434,7 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
         constructor._lastConstructedCellId = cellTO.cellTypeData.constructor.lastConstructedCellId;
         constructor._genomeCurrentNodeIndex = cellTO.cellTypeData.constructor.genomeCurrentNodeIndex;
         constructor._genomeCurrentRepetition = cellTO.cellTypeData.constructor.genomeCurrentRepetition;
-        constructor._currentBranch = cellTO.cellTypeData.constructor.currentBranch;
+        constructor._genomeCurrentBranch = cellTO.cellTypeData.constructor.genomeCurrentBranch;
         constructor._offspringCreatureId = cellTO.cellTypeData.constructor.offspringCreatureId;
         constructor._offspringMutationId = cellTO.cellTypeData.constructor.offspringMutationId;
         constructor._genomeGeneration = cellTO.cellTypeData.constructor.genomeGeneration;
@@ -591,7 +591,7 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
         constructorTO.lastConstructedCellId = constructorDesc._lastConstructedCellId;
         constructorTO.genomeCurrentNodeIndex = static_cast<uint16_t>(constructorDesc._genomeCurrentNodeIndex);
         constructorTO.genomeCurrentRepetition = static_cast<uint16_t>(constructorDesc._genomeCurrentRepetition);
-        constructorTO.currentBranch = static_cast<uint8_t>(constructorDesc._currentBranch);
+        constructorTO.genomeCurrentBranch = static_cast<uint8_t>(constructorDesc._genomeCurrentBranch);
         constructorTO.offspringCreatureId = constructorDesc._offspringCreatureId;
         constructorTO.offspringMutationId = constructorDesc._offspringMutationId;
         constructorTO.genomeGeneration = constructorDesc._genomeGeneration;

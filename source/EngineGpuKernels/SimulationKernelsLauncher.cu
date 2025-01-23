@@ -27,7 +27,7 @@ void _SimulationKernelsLauncher::calcTimestep(SettingsForSimulation const& setti
     auto const gpuSettings = settings.gpuSettings;
     KERNEL_CALL_1_1(cudaNextTimestep_prepare, data, statistics);
 
-    //not all kernels need to be executed in each time step for performance reasons
+    // Not all kernels need to be executed in each time step for performance reasons
     bool considerForcesFromAngleDifferences = (data.timestep % 3 == 0);
     bool considerInnerFriction = (data.timestep % 3 == 0);
     bool considerRigidityUpdate = (data.timestep % 3 == 0);
@@ -49,12 +49,15 @@ void _SimulationKernelsLauncher::calcTimestep(SettingsForSimulation const& setti
     KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, 16, data, considerForcesFromAngleDifferences);
     KERNEL_CALL_MOD(cudaNextTimestep_physics_verletVelocityUpdate, 16, data);
 
-    // signal processing
+    // Signal processing
     KERNEL_CALL(cudaNextTimestep_signal_calcFutureSignals, data);
     KERNEL_CALL(cudaNextTimestep_signal_updateSignals, data);
     KERNEL_CALL_MOD(cudaNextTimestep_signal_neuralNetworks, MAX_CHANNELS * MAX_CHANNELS, data, statistics);
 
-    // cell type-specific functions
+    // Energy flow
+    KERNEL_CALL_MOD(cudaNextTimestep_energyFlow, 32, data);
+
+    // Cell type-specific functions
     KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep1, data);
     KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep2, data);
     KERNEL_CALL(cudaNextTimestep_cellType_oscillator, data, statistics);

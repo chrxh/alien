@@ -47,6 +47,8 @@ public:
 
     __inline__ __device__ static void updateRenderingData(SimulationData& data);
 
+    __inline__ __device__ static void applyEnergyFlow(SimulationData& data);
+
 private:
     static auto constexpr MaxBarrierCellsForCollision = 10;
 };
@@ -875,6 +877,42 @@ __inline__ __device__ void CellProcessor::updateRenderingData(SimulationData& da
         auto& cell = cells.at(index);
         if (cell->eventCounter > 0) {
             --cell->eventCounter;
+        }
+    }
+}
+
+__inline__ __device__ void CellProcessor::applyEnergyFlow(SimulationData& data)
+{
+    auto& cells = data.objects.cellPointers;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (cell->numConnections == 0) {
+            continue;
+        }
+        auto i = data.timestep % cell->numConnections;
+        auto& connectedCell = cell->connections[i].cell;
+        auto cellMinEnergy = SpotCalculator::calcParameter(
+            &SimulationParametersZoneValues::cellMinEnergy, &SimulationParametersZoneActivatedValues::cellMinEnergy, data, cell->pos, cell->color);
+
+        auto needCellEnergy = cell->cellType == CellType_Constructor && !GenomeDecoder::isFinished(cell->cellTypeData.constructor)
+            && connectedCell->energy > cudaSimulationParameters.cellNormalEnergy[cell->color];
+        auto hasOtherCellMoreEnergy = (connectedCell->cellType != CellType_Constructor || GenomeDecoder::isFinished(connectedCell->cellTypeData.constructor))
+            && connectedCell->energy > cell->energy;
+        float flow = 0;
+        if (needCellEnergy) {
+            flow = connectedCell->energy - cudaSimulationParameters.cellNormalEnergy[cell->color];
+        } else if (hasOtherCellMoreEnergy) {
+            flow = (connectedCell->energy - cell->energy) / 2;
+        }
+        if (flow > 0) {
+            auto orig = atomicAdd(&connectedCell->energy, -flow);
+            if (orig < cellMinEnergy) {
+                atomicAdd(&connectedCell->energy, flow);
+            } else {
+                atomicAdd(&cell->energy, flow);
+            }
         }
     }
 }

@@ -14,6 +14,7 @@ __global__ void cudaNextTimestep_physics_verletVelocityUpdate(SimulationData dat
 __global__ void cudaNextTimestep_signal_calcFutureSignals(SimulationData data);
 __global__ void cudaNextTimestep_signal_updateSignals(SimulationData data);
 __global__ void cudaNextTimestep_signal_neuralNetworks(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_energyFlow(SimulationData data);
 __global__ void cudaNextTimestep_cellType_prepare_substep1(SimulationData data);
 __global__ void cudaNextTimestep_cellType_prepare_substep2(SimulationData data);
 __global__ void cudaNextTimestep_cellType_oscillator(SimulationData data, SimulationStatistics statistics);

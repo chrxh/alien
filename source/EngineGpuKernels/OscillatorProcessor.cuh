@@ -28,7 +28,7 @@ __inline__ __device__ void OscillatorProcessor::process(SimulationData& data, Si
         auto const& cell = operation.cell;
 
         auto& oscillator = cell->cellTypeData.oscillator;
-        if (oscillator.autoTriggerInterval > 0 && SignalProcessor::isAutoTriggered(data, cell, oscillator.autoTriggerInterval)) {
+        if (SignalProcessor::isAutoTriggered(data, cell, max(1, oscillator.autoTriggerInterval))) {
             if (!cell->signal.active) {
                 SignalProcessor::createEmptySignal(cell);
             }

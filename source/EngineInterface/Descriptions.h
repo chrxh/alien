@@ -138,9 +138,9 @@ struct ConstructorDescription
         _genomeCurrentRepetition = value;
         return *this;
     }
-    ConstructorDescription& currentBranch(int value)
+    ConstructorDescription& genomeCurrentBranch(int value)
     {
-        _currentBranch = value;
+        _genomeCurrentBranch = value;
         return *this;
     }
     int getNumInheritedGenomeNodes() const { return _numInheritedGenomeNodes; }
@@ -186,7 +186,7 @@ struct ConstructorDescription
     uint64_t _lastConstructedCellId = 0;
     int _genomeCurrentNodeIndex = 0;
     int _genomeCurrentRepetition = 0;
-    int _currentBranch = 0;
+    int _genomeCurrentBranch = 0;
     int _offspringCreatureId = 0;
     int _offspringMutationId = 0;
 };
@@ -250,8 +250,8 @@ struct OscillatorDescription
     }
 
     // Properties
-    int _autoTriggerInterval = 0;  // 0 = no triggering, > 0 = auto trigger
-    int _alternationInterval = 0;  //0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
+    int _autoTriggerInterval = 0;
+    int _alternationInterval = 0;  // 0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
 
     // Process data
     int _numPulses = 0;
