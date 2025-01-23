@@ -50,7 +50,7 @@ __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, Si
     //    contractionExpansion(data, statistics, cell);
     //} break;
     case MuscleMode_Bending: {
-        bending(data, statistics, cell);
+        //bending(data, statistics, cell);
     } break;
     }
 }
@@ -115,10 +115,41 @@ __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, Si
 
 __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto const& muscle = cell->cellTypeData.muscle;
-    auto const& bending = muscle.modeData.bending;
+    auto& muscle = cell->cellTypeData.muscle;
+    auto& bending = muscle.modeData.bending;
+
+    if (cell->numConnections != 2) {
+        return;
+    }
+    if (bending.bendForwardVel < NEAR_ZERO || bending.bendBackwardVel < NEAR_ZERO) {
+        return;
+    }
 
     if (SignalProcessor::isAutoTriggered(data, cell, max(1, bending.autoTriggerInterval))) {
+        auto bendForwardSteps = toInt(10 / bending.bendForwardVel);
+        auto bendBackwartSteps = toInt(10 / bending.bendBackwardVel);
+
+        auto cycle = (bendForwardSteps + bendBackwartSteps) * 2;
+        auto currentStep = bending.currentStep % cycle;
+
+        bool isForward = currentStep < bendForwardSteps || currentStep > (cycle - bendForwardSteps);
+        auto angleDelta = isForward ? 45.0f / toFloat(bendForwardSteps) : 45.0f / toFloat(bendBackwartSteps);
+        if (isForward) {
+            if (cell->connections[1].angleFromPrevious > angleDelta) {
+                cell->connections[0].angleFromPrevious += angleDelta;
+                cell->connections[1].angleFromPrevious -= angleDelta;
+            }
+        } else {
+            if (cell->connections[0].angleFromPrevious > angleDelta) {
+                cell->connections[0].angleFromPrevious -= angleDelta;
+                cell->connections[1].angleFromPrevious += angleDelta;
+            }
+        }
+
+        ++bending.currentStep;
+
+        statistics.incNumMuscleActivities(cell->color);
+        radiate(data, cell);
     }
     //if (abs(cell->signal.channels[0]) < NEAR_ZERO) {
     //    return;
@@ -176,8 +207,6 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
     //    //}
     //}
     //cell->releaseLock();
-    statistics.incNumMuscleActivities(cell->color);
-    radiate(data, cell);
 }
 
 //__inline__ __device__ int MuscleProcessor::getConnectionIndex(Cell* cell, Cell* otherCell)
