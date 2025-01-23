@@ -189,7 +189,7 @@ struct BendingGenomeDescription
 {
     auto operator<=>(BendingGenomeDescription const&) const = default;
 
-    int _autoTriggerInterval = 0;
+    int _autoTriggerInterval = 20;
     float _bendForwardVel = 0.5f;   // Between 0 and 1
     float _bendBackwardVel = 0.5f;  // Between 0 and 1
 

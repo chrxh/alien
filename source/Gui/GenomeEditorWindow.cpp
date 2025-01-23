@@ -536,22 +536,29 @@ void GenomeEditorWindow::processNode(
         table.next();
         AlienImGui::InputFloat(
             AlienImGui::InputFloatParameters().name("Energy").textWidth(ContentTextWidth).format("%.1f").tooltip(Const::GenomeEnergyTooltip), cell._energy);
-        table.next();
-        auto numRequiredAdditionalConnections =
-            shapeGeneratorResult ? shapeGeneratorResult->numRequiredAdditionalConnections : cell._numRequiredAdditionalConnections;
-        if (!isFirst && numRequiredAdditionalConnections) {
-            numRequiredAdditionalConnections = std::min(*numRequiredAdditionalConnections + 1, MAX_CELL_BONDS);
+        if (!isFirst) {
+            table.next();
+            auto numRequiredAdditionalConnections =
+                shapeGeneratorResult ? shapeGeneratorResult->numRequiredAdditionalConnections : cell._numRequiredAdditionalConnections;
+            if (numRequiredAdditionalConnections) {
+                numRequiredAdditionalConnections = std::min(*numRequiredAdditionalConnections + 1, MAX_CELL_BONDS);
+            }
+            auto origNumRequiredAdditionalConnections = numRequiredAdditionalConnections;
+            if (AlienImGui::InputOptionalInt(
+                    AlienImGui::InputIntParameters()
+                        .name("Required connections")
+                        .disabledValue(1)
+                        .textWidth(ContentTextWidth)
+                        .tooltip(Const::GenomeRequiredConnectionsTooltip),
+                    numRequiredAdditionalConnections)) {
+                updateGeometry(tab.genome, tab.genome._header._shape);
+                tab.genome._header._shape = ConstructionShape_Custom;
+            }
+            if (origNumRequiredAdditionalConnections.has_value() && numRequiredAdditionalConnections.has_value()) {
+                numRequiredAdditionalConnections = *numRequiredAdditionalConnections - 1;
+            }
+            cell._numRequiredAdditionalConnections = numRequiredAdditionalConnections;
         }
-        if (AlienImGui::InputOptionalInt(
-                AlienImGui::InputIntParameters().name("Required connections").textWidth(ContentTextWidth).tooltip(Const::GenomeRequiredConnectionsTooltip),
-                numRequiredAdditionalConnections)) {
-            updateGeometry(tab.genome, tab.genome._header._shape);
-            tab.genome._header._shape = ConstructionShape_Custom;
-        }
-        if (!isFirst && numRequiredAdditionalConnections) {
-            numRequiredAdditionalConnections = *numRequiredAdditionalConnections - 1;
-        }
-        cell._numRequiredAdditionalConnections = numRequiredAdditionalConnections;
 
         table.next();
         AlienImGui::Checkbox(
@@ -985,7 +992,7 @@ void GenomeEditorWindow::validateAndCorrect(CellGenomeDescription& cell) const
 {
     cell._color = (cell._color + MAX_COLORS) % MAX_COLORS;
     if (cell._numRequiredAdditionalConnections) {
-        cell._numRequiredAdditionalConnections = (*cell._numRequiredAdditionalConnections + MAX_CELL_BONDS + 1) % (MAX_CELL_BONDS + 1);
+        cell._numRequiredAdditionalConnections = (*cell._numRequiredAdditionalConnections + MAX_CELL_BONDS) % (MAX_CELL_BONDS);
     }
     cell._energy = std::min(std::max(cell._energy, 50.0f), 250.0f);
 
