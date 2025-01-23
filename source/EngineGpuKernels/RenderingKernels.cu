@@ -510,7 +510,7 @@ __global__ void cudaDrawCells(
         drawCircle(imageData, imageSize, cellImagePos, secondaryColor, cellRadius, shadedCells, true);
 
         // draw signal restrictions
-        if (zoom >= ZoomLevelForSignalFlow and cell->numConnections > 0) {
+        if (zoom >= ZoomLevelForSignalFlow && cell->numConnections > 0 && cell->cellType != CellType_Structure && cell->cellType != CellType_Free) {
             float signalAngleRestrictionStart;
             float signalAngleRestrictionEnd;
             if (cell->signalRoutingRestriction.active) {
