@@ -104,7 +104,7 @@ namespace
             cellTO.cellTypeData.constructor.lastConstructedCellId = cell->cellTypeData.constructor.lastConstructedCellId;
             cellTO.cellTypeData.constructor.genomeCurrentNodeIndex = cell->cellTypeData.constructor.genomeCurrentNodeIndex;
             cellTO.cellTypeData.constructor.genomeCurrentRepetition = cell->cellTypeData.constructor.genomeCurrentRepetition;
-            cellTO.cellTypeData.constructor.currentBranch = cell->cellTypeData.constructor.currentBranch;
+            cellTO.cellTypeData.constructor.genomeCurrentBranch = cell->cellTypeData.constructor.genomeCurrentBranch;
             cellTO.cellTypeData.constructor.offspringCreatureId = cell->cellTypeData.constructor.offspringCreatureId;
             cellTO.cellTypeData.constructor.offspringMutationId = cell->cellTypeData.constructor.offspringMutationId;
             cellTO.cellTypeData.constructor.genomeGeneration = cell->cellTypeData.constructor.genomeGeneration;

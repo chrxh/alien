@@ -79,7 +79,7 @@ TEST_F(ConstructorTests, alreadyFinished)
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
         GenomeDescription().header(GenomeHeaderDescription().numBranches(1)).cells({CellGenomeDescription()}));
 
-    auto constructor = ConstructorDescription().genome(genome).currentBranch(1);
+    auto constructor = ConstructorDescription().genome(genome).genomeCurrentBranch(1);
 
     data.addCell(
         CellDescription()
@@ -186,7 +186,7 @@ TEST_F(ConstructorTests, constructFirstCell_oneCellGenome_infiniteRepetitions)
     auto actualHostCell = getCell(actualData, 1);
     auto actualConstructedCell = getOtherCell(actualData, {1});
     EXPECT_EQ(0, std::get<ConstructorDescription>(actualHostCell._cellTypeData)._genomeCurrentRepetition);
-    EXPECT_EQ(0, std::get<ConstructorDescription>(actualHostCell._cellTypeData)._currentBranch);
+    EXPECT_EQ(0, std::get<ConstructorDescription>(actualHostCell._cellTypeData)._genomeCurrentBranch);
     EXPECT_EQ(LivingState_Activating, actualConstructedCell._livingState);
 }
 
@@ -211,7 +211,7 @@ TEST_F(ConstructorTests, constructFirstCell_twoCellGenome_infiniteRepetitions)
     auto actualHostCell = getCell(actualData, 1);
     auto actualConstructedCell = getOtherCell(actualData, {1});
     EXPECT_EQ(0, std::get<ConstructorDescription>(actualHostCell._cellTypeData)._genomeCurrentRepetition);
-    EXPECT_EQ(0, std::get<ConstructorDescription>(actualHostCell._cellTypeData)._currentBranch);
+    EXPECT_EQ(0, std::get<ConstructorDescription>(actualHostCell._cellTypeData)._genomeCurrentBranch);
     EXPECT_EQ(LivingState_UnderConstruction, actualConstructedCell._livingState);
 }
 
@@ -325,7 +325,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_constructionBuilt)
             .id(3)
             .pos({12.0f, 10.0f})
             .energy(100)
-            .cellType(ConstructorDescription().genome(otherGenome).currentBranch(1)),
+            .cellType(ConstructorDescription().genome(otherGenome).genomeCurrentBranch(1)),
         CellDescription().id(4).pos({10.0f, 11.0f}).energy(100),
     });
     data.addConnection(1, 2);
@@ -363,7 +363,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_infiniteConstructi
             .id(3)
             .pos({12.0f, 10.0f})
             .energy(100)
-            .cellType(ConstructorDescription().genome(otherGenome).currentBranch(1)),
+            .cellType(ConstructorDescription().genome(otherGenome).genomeCurrentBranch(1)),
         CellDescription().id(4).pos({10.0f, 11.0f}).energy(100),
     });
     data.addConnection(1, 2);
@@ -506,13 +506,13 @@ TEST_F(ConstructorTests, DISABLED_constructFirstCell_completenessCheck_underCons
             .id(2)
             .pos({11.0f, 10.0f})
             .energy(100)
-            .cellType(ConstructorDescription().genome(otherGenome).currentBranch(1)),
+            .cellType(ConstructorDescription().genome(otherGenome).genomeCurrentBranch(1)),
         CellDescription()
             .id(3)
             .pos({12.0f, 10.0f})
             .energy(100)
             .livingState(LivingState_UnderConstruction)
-            .cellType(ConstructorDescription().genome(otherGenome).currentBranch(0)),
+            .cellType(ConstructorDescription().genome(otherGenome).genomeCurrentBranch(0)),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -554,7 +554,7 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
     auto const& actualConstructor = std::get<ConstructorDescription>(actualHostCell._cellTypeData);
     EXPECT_EQ(0, actualConstructor._genomeCurrentNodeIndex);
     EXPECT_EQ(0, actualConstructor._genomeCurrentRepetition);
-    EXPECT_EQ(1, actualConstructor._currentBranch);
+    EXPECT_EQ(1, actualConstructor._genomeCurrentBranch);
     EXPECT_TRUE(approxCompare(_parameters.cellNormalEnergy[0] * 2, actualHostCell._energy));
     EXPECT_TRUE(approxCompare(1.0f, actualHostCell._signal->_channels[0]));
     EXPECT_EQ(LivingState_Activating, actualConstructedCell._livingState);
@@ -591,7 +591,7 @@ TEST_F(ConstructorTests, constructFirstCell_notFinished)
     auto const& actualConstructor = std::get<ConstructorDescription>(actualHostCell._cellTypeData);
     EXPECT_EQ(1, actualConstructor._genomeCurrentNodeIndex);
     EXPECT_EQ(0, actualConstructor._genomeCurrentRepetition);
-    EXPECT_EQ(0, actualConstructor._currentBranch);
+    EXPECT_EQ(0, actualConstructor._genomeCurrentBranch);
 
     EXPECT_EQ(1, actualHostCell._connections.size());
     EXPECT_EQ(LivingState_Ready, actualHostCell._livingState);
@@ -624,7 +624,7 @@ TEST_F(ConstructorTests, constructFirstCell_separation)
     auto const& actualConstructor = std::get<ConstructorDescription>(actualHostCell._cellTypeData);
     EXPECT_EQ(0, actualConstructor._genomeCurrentNodeIndex);
     EXPECT_EQ(0, actualConstructor._genomeCurrentRepetition);
-    EXPECT_EQ(0, actualConstructor._currentBranch);
+    EXPECT_EQ(0, actualConstructor._genomeCurrentBranch);
 
     EXPECT_EQ(0, actualConstructedCell._connections.size());
     EXPECT_EQ(LivingState_Activating, actualConstructedCell._livingState);
@@ -1406,7 +1406,7 @@ TEST_F(ConstructorTests, constructSecondCell_twoCellGenome_infiniteRepetitions)
 
     auto actualHostCell = getCell(actualData, 1);
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
-    EXPECT_EQ(0, std::get<ConstructorDescription>(actualHostCell._cellTypeData)._currentBranch);
+    EXPECT_EQ(0, std::get<ConstructorDescription>(actualHostCell._cellTypeData)._genomeCurrentBranch);
     EXPECT_EQ(LivingState_Activating, actualConstructedCell._livingState);
 }
 

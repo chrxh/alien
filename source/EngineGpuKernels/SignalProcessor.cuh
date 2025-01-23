@@ -50,6 +50,9 @@ __inline__ __device__  void SignalProcessor::calcFutureSignals(SimulationData& d
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
+        if (cell->cellType == CellType_Structure || cell->cellType == CellType_Free) {
+            continue;
+        }
 
         cell->futureSignal.active = false;
         if (cell->signalRelaxationTime > 0) {
@@ -123,6 +126,10 @@ __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
+        if (cell->cellType == CellType_Structure || cell->cellType == CellType_Free) {
+            continue;
+        }
+
         cell->signal.active = cell->futureSignal.active;
         if (cell->signal.active) {
             cell->cellTypeUsed = CellTriggered_Yes;

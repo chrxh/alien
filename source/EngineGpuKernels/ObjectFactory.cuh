@@ -156,7 +156,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellTypeData.constructor.lastConstructedCellId = createIds ? 0 : cellTO.cellTypeData.constructor.lastConstructedCellId;
         cell->cellTypeData.constructor.genomeCurrentNodeIndex = cellTO.cellTypeData.constructor.genomeCurrentNodeIndex;
         cell->cellTypeData.constructor.genomeCurrentRepetition = cellTO.cellTypeData.constructor.genomeCurrentRepetition;
-        cell->cellTypeData.constructor.currentBranch = cellTO.cellTypeData.constructor.currentBranch;
+        cell->cellTypeData.constructor.genomeCurrentBranch = cellTO.cellTypeData.constructor.genomeCurrentBranch;
         cell->cellTypeData.constructor.offspringCreatureId = cellTO.cellTypeData.constructor.offspringCreatureId;
         cell->cellTypeData.constructor.offspringMutationId = cellTO.cellTypeData.constructor.offspringMutationId;
         cell->cellTypeData.constructor.genomeGeneration = cellTO.cellTypeData.constructor.genomeGeneration;

@@ -149,7 +149,7 @@ namespace
     auto constexpr Id_Constructor_GenomeCurrentRepetition = 8;
     auto constexpr Id_Constructor_LastConstructedCellId = 9;
     auto constexpr Id_Constructor_NumInheritedGenomeNodes = 10;
-    auto constexpr Id_Constructor_CurrentBranch = 11;
+    auto constexpr Id_Constructor_GenomeCurrentBranch = 11;
 
     auto constexpr Id_Defender_Mode = 0;
 
@@ -576,7 +576,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Constructor_LastConstructedCellId, data._lastConstructedCellId, defaultObject._lastConstructedCellId);
         loadSave(task, auxiliaries, Id_Constructor_GenomeCurrentNodeIndex, data._genomeCurrentNodeIndex, defaultObject._genomeCurrentNodeIndex);
         loadSave(task, auxiliaries, Id_Constructor_GenomeCurrentRepetition, data._genomeCurrentRepetition, defaultObject._genomeCurrentRepetition);
-        loadSave(task, auxiliaries, Id_Constructor_CurrentBranch, data._currentBranch, defaultObject._currentBranch);
+        loadSave(task, auxiliaries, Id_Constructor_GenomeCurrentBranch, data._genomeCurrentBranch, defaultObject._genomeCurrentBranch);
         loadSave(task, auxiliaries, Id_Constructor_OffspringCreatureId, data._offspringCreatureId, defaultObject._offspringCreatureId);
         loadSave(task, auxiliaries, Id_Constructor_OffspringMutationId, data._offspringMutationId, defaultObject._offspringMutationId);
         loadSave(task, auxiliaries, Id_Constructor_GenomeGeneration, data._genomeGeneration, defaultObject._genomeGeneration);
