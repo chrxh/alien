@@ -249,7 +249,7 @@ struct OscillatorDescription
         return *this;
     }
 
-    // Properties
+    // Fixed data
     int _autoTriggerInterval = 0;
     int _alternationInterval = 0;  // 0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
 
@@ -297,21 +297,32 @@ struct InjectorDescription
     int _genomeGeneration = 0;
 };
 
+struct BendingDescription
+{
+    auto operator<=>(BendingDescription const&) const = default;
+
+    // Fixed data
+    int _autoTriggerInterval = 0;
+    float _bendForwardVel = 0.5f;   // Between 0 and 1
+    float _bendBackwardVel = 0.5f;   // Between 0 and 1
+
+    // Process data
+    int _currentStep = 0;
+};
+using MuscleModeDescription = std::variant<BendingDescription>;
+
 struct MuscleDescription
 {
     auto operator<=>(MuscleDescription const&) const = default;
 
-    MuscleDescription& mode(MuscleMode value)
+    MuscleMode getMode() const { return MuscleMode_Bending; }
+    MuscleDescription& mode(MuscleModeDescription const& value)
     {
         _mode = value;
         return *this;
     }
 
-    // Properties
-    MuscleMode _mode = MuscleMode_Movement;
-    MuscleBendingDirection _lastBendingDirection = MuscleBendingDirection_None;
-    int _lastBendingSourceIndex = 0;
-    float _consecutiveBendingAngle = 0;
+    MuscleModeDescription _mode;
 
     // Additional rendering data
     float _lastMovementX = 0;

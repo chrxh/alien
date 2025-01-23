@@ -185,17 +185,44 @@ struct InjectorGenomeDescription
     std::variant<MakeGenomeCopy, std::vector<uint8_t>> _genome = std::vector<uint8_t>();
 };
 
+struct BendingGenomeDescription
+{
+    auto operator<=>(BendingGenomeDescription const&) const = default;
+
+    int _autoTriggerInterval = 0;
+    float _bendForwardVel = 0.5f;   // Between 0 and 1
+    float _bendBackwardVel = 0.5f;  // Between 0 and 1
+
+    BendingGenomeDescription& autoTriggerInterval(int value)
+    {
+        _autoTriggerInterval = value;
+        return *this;
+    }
+    BendingGenomeDescription& bendForwardVel(float value)
+    {
+        _bendForwardVel = value;
+        return *this;
+    }
+    BendingGenomeDescription& bendBackwardVel(float value)
+    {
+        _bendBackwardVel = value;
+        return *this;
+    }
+};
+using MuscleModeGenomeDescription = std::variant<BendingGenomeDescription>;
+
 struct MuscleGenomeDescription
 {
     auto operator<=>(MuscleGenomeDescription const&) const = default;
 
-    MuscleGenomeDescription& mode(MuscleMode value)
+    MuscleMode getMode() const { return MuscleMode_Bending; }
+    MuscleGenomeDescription& mode(MuscleModeGenomeDescription const& value)
     {
-        _mode = value;
+        _muscleMode = value;
         return *this;
     }
 
-    MuscleMode _mode = MuscleMode_Movement;
+    MuscleModeGenomeDescription _muscleMode;
 };
 
 struct DefenderGenomeDescription

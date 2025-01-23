@@ -113,7 +113,6 @@ struct ConstructorType
 
 struct SensorType
 {
-    // Properties
     uint8_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
     float minDensity;
     int8_t minRange;          // < 0 = no restriction
@@ -145,13 +144,27 @@ struct InjectorType
     uint32_t genomeGeneration;
 };
 
+struct Bending
+{
+    // Fixed data
+    uint8_t autoTriggerInterval;
+    float bendForwardVel;   // Between 0 and 1
+    float bendBackwardVel;  // Between 0 and 1
+
+    // Process data
+    uint16_t currentStep;
+};
+
+union MuscleModeData
+{
+    Bending bending;
+};
+
 struct MuscleType
 {
-    // Properties
+    // Fixed data
     MuscleMode mode;
-    MuscleBendingDirection lastBendingDirection;
-    uint8_t lastBendingSourceIndex;
-    float consecutiveBendingAngle;
+    MuscleModeData modeData;
 
     // Additional rendering data
     float lastMovementX;

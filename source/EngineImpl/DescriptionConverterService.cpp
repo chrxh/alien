@@ -475,10 +475,14 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
     } break;
     case CellType_Muscle: {
         MuscleDescription muscle;
-        muscle._mode = cellTO.cellTypeData.muscle.mode;
-        muscle._lastBendingDirection = cellTO.cellTypeData.muscle.lastBendingDirection;
-        muscle._lastBendingSourceIndex = cellTO.cellTypeData.muscle.lastBendingSourceIndex;
-        muscle._consecutiveBendingAngle = cellTO.cellTypeData.muscle.consecutiveBendingAngle;
+        if (cellTO.cellTypeData.muscle.mode == MuscleMode_Bending) {
+            BendingDescription bending;
+            bending._autoTriggerInterval = cellTO.cellTypeData.muscle.modeData.bending.autoTriggerInterval;
+            bending._bendForwardVel = cellTO.cellTypeData.muscle.modeData.bending.bendForwardVel;
+            bending._bendBackwardVel = cellTO.cellTypeData.muscle.modeData.bending.bendBackwardVel;
+            bending._currentStep = cellTO.cellTypeData.muscle.modeData.bending.currentStep;
+            muscle._mode = bending;
+        }
         muscle._lastMovementX = cellTO.cellTypeData.muscle.lastMovementX;
         muscle._lastMovementY = cellTO.cellTypeData.muscle.lastMovementY;
         result._cellTypeData = muscle;
@@ -576,13 +580,12 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
     } break;
     case CellType_Depot: {
         auto const& transmitterDesc = std::get<DepotDescription>(cellDesc._cellTypeData);
-        TransmitterTO transmitterTO;
+        TransmitterTO& transmitterTO = cellTO.cellTypeData.transmitter;
         transmitterTO.mode = transmitterDesc._mode;
-        cellTO.cellTypeData.transmitter = transmitterTO;
     } break;
     case CellType_Constructor: {
         auto const& constructorDesc = std::get<ConstructorDescription>(cellDesc._cellTypeData);
-        ConstructorTO constructorTO;
+        ConstructorTO& constructorTO = cellTO.cellTypeData.constructor;
         constructorTO.autoTriggerInterval = constructorDesc._autoTriggerInterval;
         constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
         CHECK(constructorDesc._genome.size() >= Const::GenomeHeaderSize)
@@ -597,73 +600,69 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
         constructorTO.genomeGeneration = constructorDesc._genomeGeneration;
         constructorTO.constructionAngle1 = constructorDesc._constructionAngle1;
         constructorTO.constructionAngle2 = constructorDesc._constructionAngle2;
-        cellTO.cellTypeData.constructor = constructorTO;
     } break;
     case CellType_Sensor: {
         auto const& sensorDesc = std::get<SensorDescription>(cellDesc._cellTypeData);
-        SensorTO sensorTO;
+        SensorTO& sensorTO = cellTO.cellTypeData.sensor;
         sensorTO.autoTriggerInterval = sensorDesc._autoTriggerInterval;
         sensorTO.restrictToColor = sensorDesc._restrictToColor.value_or(255);
         sensorTO.restrictToMutants = sensorDesc._restrictToMutants;
         sensorTO.minDensity = sensorDesc._minDensity;
         sensorTO.minRange = static_cast<int8_t>(sensorDesc._minRange.value_or(-1));
         sensorTO.maxRange = static_cast<int8_t>(sensorDesc._maxRange.value_or(-1));
-        cellTO.cellTypeData.sensor = sensorTO;
     } break;
     case CellType_Oscillator: {
         auto const& oscillatorDesc = std::get<OscillatorDescription>(cellDesc._cellTypeData);
-        OscillatorTO oscillatorTO;
+        OscillatorTO& oscillatorTO = cellTO.cellTypeData.oscillator;
         oscillatorTO.autoTriggerInterval = oscillatorDesc._autoTriggerInterval;
         oscillatorTO.alternationInterval = oscillatorDesc._alternationInterval;
         oscillatorTO.numPulses = oscillatorDesc._numPulses;
-        cellTO.cellTypeData.oscillator = oscillatorTO;
     } break;
     case CellType_Attacker: {
         auto const& attackerDesc = std::get<AttackerDescription>(cellDesc._cellTypeData);
-        AttackerTO attackerTO;
+        AttackerTO& attackerTO = cellTO.cellTypeData.attacker;
         attackerTO.mode = attackerDesc._mode;
-        cellTO.cellTypeData.attacker = attackerTO;
     } break;
     case CellType_Injector: {
         auto const& injectorDesc = std::get<InjectorDescription>(cellDesc._cellTypeData);
-        InjectorTO injectorTO;
+        InjectorTO& injectorTO = cellTO.cellTypeData.injector;
         injectorTO.mode = injectorDesc._mode;
         injectorTO.counter = injectorDesc._counter;
         CHECK(injectorDesc._genome.size() >= Const::GenomeHeaderSize)
         convert(dataTO, injectorDesc._genome, injectorTO.genomeSize, injectorTO.genomeDataIndex);
         injectorTO.genomeGeneration = injectorDesc._genomeGeneration;
-        cellTO.cellTypeData.injector = injectorTO;
     } break;
     case CellType_Muscle: {
         auto const& muscleDesc = std::get<MuscleDescription>(cellDesc._cellTypeData);
-        MuscleTO muscleTO;
-        muscleTO.mode = muscleDesc._mode;
-        muscleTO.lastBendingDirection = muscleDesc._lastBendingDirection;
-        muscleTO.lastBendingSourceIndex = muscleDesc._lastBendingSourceIndex;
-        muscleTO.consecutiveBendingAngle = muscleDesc._consecutiveBendingAngle;
+        MuscleTO& muscleTO = cellTO.cellTypeData.muscle;
+        muscleTO.mode = muscleDesc.getMode();
+        if (muscleTO.mode == MuscleMode_Bending) {
+            auto const& bendingDesc = std::get<BendingDescription>(muscleDesc._mode);
+            BendingTO& bendingTO = muscleTO.modeData.bending;
+            bendingTO.autoTriggerInterval = bendingDesc._autoTriggerInterval;
+            bendingTO.bendForwardVel = bendingDesc._bendForwardVel;
+            bendingTO.bendBackwardVel = bendingDesc._bendBackwardVel;
+            bendingTO.currentStep = bendingDesc._currentStep;
+        }
         muscleTO.lastMovementX = muscleDesc._lastMovementX;
         muscleTO.lastMovementY = muscleDesc._lastMovementY;
-        cellTO.cellTypeData.muscle = muscleTO;
     } break;
     case CellType_Defender: {
         auto const& defenderDesc = std::get<DefenderDescription>(cellDesc._cellTypeData);
-        DefenderTO defenderTO;
+        DefenderTO& defenderTO = cellTO.cellTypeData.defender;
         defenderTO.mode = defenderDesc._mode;
-        cellTO.cellTypeData.defender = defenderTO;
     } break;
     case CellType_Reconnector: {
         auto const& reconnectorDesc = std::get<ReconnectorDescription>(cellDesc._cellTypeData);
-        ReconnectorTO reconnectorTO;
+        ReconnectorTO& reconnectorTO = cellTO.cellTypeData.reconnector;
         reconnectorTO.restrictToColor = toUInt8(reconnectorDesc._restrictToColor.value_or(255));
         reconnectorTO.restrictToMutants = reconnectorDesc._restrictToMutants;
-        cellTO.cellTypeData.reconnector = reconnectorTO;
     } break;
     case CellType_Detonator: {
         auto const& detonatorDesc = std::get<DetonatorDescription>(cellDesc._cellTypeData);
-        DetonatorTO detonatorTO;
+        DetonatorTO& detonatorTO = cellTO.cellTypeData.detonator;
         detonatorTO.state = detonatorDesc._state;
         detonatorTO.countdown = detonatorDesc._countdown;
-        cellTO.cellTypeData.detonator = detonatorTO;
     } break;
     }
     cellTO.signalRoutingRestriction.active = cellDesc._signalRoutingRestriction._active;

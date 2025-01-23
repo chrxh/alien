@@ -785,8 +785,12 @@ ConstructorProcessor::constructCellIntern(
     } break;
     case CellType_Muscle: {
         result->cellTypeData.muscle.mode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % MuscleMode_Count;
-        result->cellTypeData.muscle.lastBendingDirection = MuscleBendingDirection_None;
-        result->cellTypeData.muscle.consecutiveBendingAngle = 0;
+        if (result->cellTypeData.muscle.mode == MuscleMode_Bending) {
+            result->cellTypeData.muscle.modeData.bending.autoTriggerInterval = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
+            result->cellTypeData.muscle.modeData.bending.bendForwardVel = abs(GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition));
+            result->cellTypeData.muscle.modeData.bending.bendBackwardVel = abs(GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition));
+            result->cellTypeData.muscle.modeData.bending.currentStep = 0;
+        }
         result->cellTypeData.muscle.lastMovementX = 0;
         result->cellTypeData.muscle.lastMovementY = 0;
     } break;
