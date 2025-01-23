@@ -725,13 +725,13 @@ void GenomeEditorWindow::processNode(
         case CellType_Muscle: {
             auto& muscle = std::get<MuscleGenomeDescription>(cell._cellTypeData);
             table.next();
-            AlienImGui::Combo(
-                AlienImGui::ComboParameters()
-                    .name("Mode")
-                    .values({"Movement to sensor target", "Expansion and contraction", "Bending"})
-                    .textWidth(ContentTextWidth)
-                    .tooltip(Const::GenomeMuscleModeTooltip),
-                muscle._mode);
+            //AlienImGui::Combo(
+            //    AlienImGui::ComboParameters()
+            //        .name("Mode")
+            //        .values({"Movement to sensor target", "Expansion and contraction", "Bending"})
+            //        .textWidth(ContentTextWidth)
+            //        .tooltip(Const::GenomeMuscleModeTooltip),
+            //    muscle._mode);
         } break;
         case CellType_Defender: {
             auto& defender = std::get<DefenderGenomeDescription>(cell._cellTypeData);

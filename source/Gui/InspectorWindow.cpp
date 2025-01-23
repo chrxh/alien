@@ -653,13 +653,13 @@ void _InspectorWindow::processTransmitterContent(DepotDescription& transmitter)
 void _InspectorWindow::processMuscleContent(MuscleDescription& muscle)
 {
     if (ImGui::TreeNodeEx("Properties###muscle", TreeNodeFlags)) {
-        AlienImGui::Combo(
-            AlienImGui::ComboParameters()
-                .name("Mode")
-                .values({"Movement to sensor target", "Expansion and contraction", "Bending"})
-                .textWidth(CellTypeTextWidth)
-                .tooltip(Const::GenomeMuscleModeTooltip),
-            muscle._mode);
+        //AlienImGui::Combo(
+        //    AlienImGui::ComboParameters()
+        //        .name("Mode")
+        //        .values({"Movement to sensor target", "Expansion and contraction", "Bending"})
+        //        .textWidth(CellTypeTextWidth)
+        //        .tooltip(Const::GenomeMuscleModeTooltip),
+        //    muscle._mode);
         ImGui::TreePop();
     }
 }

@@ -76,7 +76,9 @@ namespace
 
     auto constexpr Id_DefenderGenome_Mode = 0;
 
-    auto constexpr Id_MuscleGenome_Mode = 0;
+    auto constexpr Id_MuscleModeGenome_AutoTriggerInterval = 0;
+    auto constexpr Id_MuscleModeGenome_BendForwardVel = 1;
+    auto constexpr Id_MuscleModeGenome_BendBackwardVel = 2;
 
     auto constexpr Id_InjectorGenome_Mode = 0;
 
@@ -153,12 +155,13 @@ namespace
 
     auto constexpr Id_Defender_Mode = 0;
 
-    auto constexpr Id_Muscle_Mode = 0;
-    auto constexpr Id_Muscle_LastBendingDirection = 1;
-    auto constexpr Id_Muscle_LastBendingSourceIndex = 2;
-    auto constexpr Id_Muscle_ConsecutiveBendingAngle = 3;
     auto constexpr Id_Muscle_LastMovementX = 4;
     auto constexpr Id_Muscle_LastMovementY = 5;
+
+    auto constexpr Id_MuscleMode_AutoTriggerInterval = 0;
+    auto constexpr Id_MuscleMode_BendForwardVel = 1;
+    auto constexpr Id_MuscleMode_BendBackwardVel = 2;
+    auto constexpr Id_MuscleMode_CurrentStep = 3;
 
     auto constexpr Id_Injector_Mode = 0;
     auto constexpr Id_Injector_Counter = 1;
@@ -396,12 +399,25 @@ namespace cereal
     SPLIT_SERIALIZATION(InjectorGenomeDescription)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, BendingGenomeDescription& data)
+    {
+        BendingGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_MuscleModeGenome_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
+        loadSave(task, auxiliaries, Id_MuscleModeGenome_BendForwardVel, data._bendForwardVel, defaultObject._bendForwardVel);
+        loadSave(task, auxiliaries, Id_MuscleModeGenome_BendBackwardVel, data._bendBackwardVel, defaultObject._bendBackwardVel);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(BendingGenomeDescription)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, MuscleGenomeDescription& data)
     {
         MuscleGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_MuscleGenome_Mode, data._mode, defaultObject._mode);
         processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._muscleMode);
     }
     SPLIT_SERIALIZATION(MuscleGenomeDescription)
 
@@ -653,17 +669,28 @@ namespace cereal
     SPLIT_SERIALIZATION(InjectorDescription)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, BendingDescription& data)
+    {
+        BendingDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
+        loadSave(task, auxiliaries, Id_MuscleMode_BendForwardVel, data._bendForwardVel, defaultObject._bendForwardVel);
+        loadSave(task, auxiliaries, Id_MuscleMode_BendBackwardVel, data._bendBackwardVel, defaultObject._bendBackwardVel);
+        loadSave(task, auxiliaries, Id_MuscleMode_CurrentStep, data._currentStep, defaultObject._currentStep);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(BendingDescription)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, MuscleDescription& data)
     {
         MuscleDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Muscle_Mode, data._mode, defaultObject._mode);
-        loadSave(task, auxiliaries, Id_Muscle_LastBendingDirection, data._lastBendingDirection, defaultObject._lastBendingDirection);
-        loadSave(task, auxiliaries, Id_Muscle_LastBendingSourceIndex, data._lastBendingSourceIndex, defaultObject._lastBendingSourceIndex);
-        loadSave(task, auxiliaries, Id_Muscle_ConsecutiveBendingAngle, data._consecutiveBendingAngle, defaultObject._consecutiveBendingAngle);
         loadSave(task, auxiliaries, Id_Muscle_LastMovementX, data._lastMovementX, defaultObject._lastMovementX);
         loadSave(task, auxiliaries, Id_Muscle_LastMovementY, data._lastMovementY, defaultObject._lastMovementY);
         processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._mode);
     }
     SPLIT_SERIALIZATION(MuscleDescription)
 

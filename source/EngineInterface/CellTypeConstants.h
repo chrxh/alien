@@ -68,18 +68,10 @@ enum EnergyDistributionMode_
 using MuscleMode = int;
 enum MuscleMode_
 {
-    MuscleMode_Movement,
-    MuscleMode_ContractionExpansion,
+    //MuscleMode_Movement,
+    //MuscleMode_ContractionExpansion,
     MuscleMode_Bending,
     MuscleMode_Count
-};
-
-using MuscleBendingDirection = int;
-enum MuscleBendingDirection_
-{
-    MuscleBendingDirection_None,
-    MuscleBendingDirection_Positive,
-    MuscleBendingDirection_Negative
 };
 
 using DefenderMode = int;

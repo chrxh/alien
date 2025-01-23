@@ -37,7 +37,7 @@ namespace Const
     auto constexpr OscillatorBytes = 2;
     auto constexpr AttackerBytes = 1;
     auto constexpr InjectorFixedBytes = 1;
-    auto constexpr MuscleBytes = 1;
+    auto constexpr MuscleBytes = 4;
     auto constexpr DefenderBytes = 1; 
     auto constexpr ReconnectorBytes = 2;
     auto constexpr DetonatorBytes = 2;

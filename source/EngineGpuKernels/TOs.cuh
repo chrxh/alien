@@ -106,12 +106,26 @@ struct InjectorTO
     uint32_t genomeGeneration;
 };
 
+struct BendingTO
+{
+    // Fixed data
+    uint8_t autoTriggerInterval;
+    float bendForwardVel;   // Between 0 and 1
+    float bendBackwardVel;  // Between 0 and 1
+
+    // Process data
+    uint16_t currentStep;
+};
+
+union MuscleModeTO
+{
+    BendingTO bending;
+};
+
 struct MuscleTO
 {
     MuscleMode mode;
-    MuscleBendingDirection lastBendingDirection;
-    uint8_t lastBendingSourceIndex;
-    float consecutiveBendingAngle;
+    MuscleModeTO modeData;
 
     //additional rendering data
     float lastMovementX;

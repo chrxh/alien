@@ -141,9 +141,12 @@ namespace
         } break;
         case CellType_Muscle: {
             cellTO.cellTypeData.muscle.mode = cell->cellTypeData.muscle.mode;
-            cellTO.cellTypeData.muscle.lastBendingDirection = cell->cellTypeData.muscle.lastBendingDirection;
-            cellTO.cellTypeData.muscle.lastBendingSourceIndex = cell->cellTypeData.muscle.lastBendingSourceIndex;
-            cellTO.cellTypeData.muscle.consecutiveBendingAngle = cell->cellTypeData.muscle.consecutiveBendingAngle;
+            if (cellTO.cellTypeData.muscle.mode == MuscleMode_Bending) {
+                cellTO.cellTypeData.muscle.modeData.bending.autoTriggerInterval = cell->cellTypeData.muscle.modeData.bending.autoTriggerInterval;
+                cellTO.cellTypeData.muscle.modeData.bending.bendForwardVel = cell->cellTypeData.muscle.modeData.bending.bendForwardVel;
+                cellTO.cellTypeData.muscle.modeData.bending.bendBackwardVel = cell->cellTypeData.muscle.modeData.bending.bendBackwardVel;
+                cellTO.cellTypeData.muscle.modeData.bending.currentStep = cell->cellTypeData.muscle.modeData.bending.currentStep;
+            }
             cellTO.cellTypeData.muscle.lastMovementX = cell->cellTypeData.muscle.lastMovementX;
             cellTO.cellTypeData.muscle.lastMovementY = cell->cellTypeData.muscle.lastMovementY;
         } break;
