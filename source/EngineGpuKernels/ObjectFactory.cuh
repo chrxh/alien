@@ -194,7 +194,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     case CellType_Muscle: {
         cell->cellTypeData.muscle.mode = cellTO.cellTypeData.muscle.mode;
         if (cellTO.cellTypeData.muscle.mode == MuscleMode_Bending) {
-            cell->cellTypeData.muscle.modeData.bending.autoTriggerInterval = cellTO.cellTypeData.muscle.modeData.bending.autoTriggerInterval;
+            cell->cellTypeData.muscle.modeData.bending.maxAngleDeviation = cellTO.cellTypeData.muscle.modeData.bending.maxAngleDeviation;
             cell->cellTypeData.muscle.modeData.bending.bendForwardVel = cellTO.cellTypeData.muscle.modeData.bending.bendForwardVel;
             cell->cellTypeData.muscle.modeData.bending.bendBackwardVel = cellTO.cellTypeData.muscle.modeData.bending.bendBackwardVel;
             cell->cellTypeData.muscle.modeData.bending.currentStep = cellTO.cellTypeData.muscle.modeData.bending.currentStep;

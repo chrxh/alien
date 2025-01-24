@@ -302,7 +302,7 @@ struct BendingDescription
     auto operator<=>(BendingDescription const&) const = default;
 
     // Fixed data
-    int _autoTriggerInterval = 20;
+    float _maxAngleDeviation = 20.0f; // Between 0 and 180 deg
     float _bendForwardVel = 0.5f;   // Between 0 and 1
     float _bendBackwardVel = 0.5f;   // Between 0 and 1
 

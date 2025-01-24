@@ -109,7 +109,7 @@ struct InjectorTO
 struct BendingTO
 {
     // Fixed data
-    uint8_t autoTriggerInterval;
+    float maxAngleDeviation;  // Between 0 and 180 deg
     float bendForwardVel;   // Between 0 and 1
     float bendBackwardVel;  // Between 0 and 1
 

@@ -244,7 +244,7 @@ std::vector<uint8_t> GenomeDescriptionConverterService::convertDescriptionToByte
             writeByte(result, mode);
             if (mode == MuscleMode_Bending) {
                 auto const& bending = std::get<BendingGenomeDescription>(muscle._muscleMode);
-                writeByte(result, bending._autoTriggerInterval);
+                writeAngle(result, bending._maxAngleDeviation);
                 writeFloat(result, bending._bendForwardVel);
                 writeFloat(result, bending._bendBackwardVel);
             }
@@ -378,7 +378,7 @@ namespace
                 auto mode = readByte(data, bytePosition) % MuscleMode_Count;
                 if (mode == MuscleMode_Bending) {
                     BendingGenomeDescription bending;
-                    bending._autoTriggerInterval = readByte(data, bytePosition);
+                    bending._maxAngleDeviation = readAngle(data, bytePosition);
                     bending._bendForwardVel = readFloat(data, bytePosition);
                     bending._bendBackwardVel = readFloat(data, bytePosition);
                     muscle._muscleMode = bending;

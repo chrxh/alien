@@ -403,7 +403,7 @@ namespace cereal
     {
         BendingGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_MuscleModeGenome_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
+        loadSave(task, auxiliaries, Id_MuscleModeGenome_AutoTriggerInterval, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
         loadSave(task, auxiliaries, Id_MuscleModeGenome_BendForwardVel, data._bendForwardVel, defaultObject._bendForwardVel);
         loadSave(task, auxiliaries, Id_MuscleModeGenome_BendBackwardVel, data._bendBackwardVel, defaultObject._bendBackwardVel);
         processLoadSaveMap(task, ar, auxiliaries);
@@ -673,7 +673,7 @@ namespace cereal
     {
         BendingDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_MuscleMode_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoTriggerInterval, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
         loadSave(task, auxiliaries, Id_MuscleMode_BendForwardVel, data._bendForwardVel, defaultObject._bendForwardVel);
         loadSave(task, auxiliaries, Id_MuscleMode_BendBackwardVel, data._bendBackwardVel, defaultObject._bendBackwardVel);
         loadSave(task, auxiliaries, Id_MuscleMode_CurrentStep, data._currentStep, defaultObject._currentStep);
