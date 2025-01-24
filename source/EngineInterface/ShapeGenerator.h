@@ -9,7 +9,7 @@
 struct ShapeGeneratorResult
 {
     float angle;
-    std::optional<int> numRequiredAdditionalConnections;
+    int numRequiredAdditionalConnections = 0;
 };
 
 class _ShapeGenerator

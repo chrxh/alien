@@ -442,7 +442,7 @@ struct CellGenomeDescription
     float _referenceAngle = 0;
     float _energy = 100.0f;
     int _color = 0;
-    std::optional<int> _numRequiredAdditionalConnections;
+    int _numRequiredAdditionalConnections = 0;  // Applies from second cell in genome sequence
 
     NeuralNetworkGenomeDescription _neuralNetwork;
     CellTypeGenomeDescription _cellTypeData = BaseGenomeDescription();

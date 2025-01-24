@@ -181,7 +181,7 @@ std::vector<uint8_t> GenomeDescriptionConverterService::convertDescriptionToByte
         writeByte(result, cell.getCellType());
         writeAngle(result, cell._referenceAngle);
         writeEnergy(result, cell._energy);
-        writeOptionalByte(result, cell._numRequiredAdditionalConnections);
+        writeByte(result, cell._numRequiredAdditionalConnections);
         writeByte(result, cell._color);
         writeBool(result, cell._signalRoutingRestriction._active);
         writeAngle(result, cell._signalRoutingRestriction._baseAngle);
@@ -308,7 +308,7 @@ namespace
             CellGenomeDescription cell;
             cell._referenceAngle = readAngle(data, bytePosition);
             cell._energy = readEnergy(data, bytePosition);
-            cell._numRequiredAdditionalConnections = readOptionalByte(data, bytePosition, MAX_CELL_BONDS + 1);
+            cell._numRequiredAdditionalConnections = readByte(data, bytePosition) % MAX_CELL_BONDS;
             cell._color = readByte(data, bytePosition) % MAX_COLORS;
             cell._signalRoutingRestriction._active = readBool(data, bytePosition);
             cell._signalRoutingRestriction._baseAngle = readAngle(data, bytePosition);

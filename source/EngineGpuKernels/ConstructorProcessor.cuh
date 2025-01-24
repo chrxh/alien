@@ -233,8 +233,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.cellType = GenomeDecoder::readByte(constructor, result.genomeCurrentBytePosition) % CellType_Count;
     auto angle = GenomeDecoder::readAngle(constructor, result.genomeCurrentBytePosition);
     result.energy = GenomeDecoder::readEnergy(constructor, result.genomeCurrentBytePosition);
-    int numRequiredAdditionalConnections = GenomeDecoder::readByte(constructor, result.genomeCurrentBytePosition);
-    numRequiredAdditionalConnections = numRequiredAdditionalConnections > 127 ? -1 : numRequiredAdditionalConnections % (MAX_CELL_BONDS + 1);
+    int numRequiredAdditionalConnections = GenomeDecoder::readByte(constructor, result.genomeCurrentBytePosition) % MAX_CELL_BONDS;
     result.color = GenomeDecoder::readByte(constructor, result.genomeCurrentBytePosition) % MAX_COLORS;
 
     if (result.genomeHeader.shape == ConstructionShape_Custom) {
@@ -422,15 +421,21 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
         newCell->livingState = LivingState_Activating;
     }
 
-    float angleFromPreviousForUnderConstructionCell;
-    for (int i = 0; i < constructionData.lastConstructionCell->numConnections; ++i) {
-        if (constructionData.lastConstructionCell->connections[i].cell == hostCell) {
-            angleFromPreviousForUnderConstructionCell = constructionData.lastConstructionCell->connections[i].angleFromPrevious;
+    float origAngleFromPreviousOnHostCell;
+    for (int i = 0; i < hostCell->numConnections; ++i) {
+        if (hostCell->connections[i].cell == constructionData.lastConstructionCell) {
+            origAngleFromPreviousOnHostCell = hostCell->connections[i].angleFromPrevious;
             break;
         }
     }
 
-    // connect newCell to lastConstructionCell
+    float origAngleFromPreviousOnLastConstructedCell;
+    for (int i = 0; i < constructionData.lastConstructionCell->numConnections; ++i) {
+        if (constructionData.lastConstructionCell->connections[i].cell == hostCell) {
+            origAngleFromPreviousOnLastConstructedCell = constructionData.lastConstructionCell->connections[i].angleFromPrevious;
+        }
+    }
+     
     auto angleFromPreviousForNewCell = 180.0f - constructionData.angle;
 
     // move connection between lastConstructionCell and hostCell to a connection between lastConstructionCell and newCell
@@ -440,7 +445,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
         if (connection.cell == hostCell) {
             connection.cell = newCell;
             connection.distance = desiredDistance;
-            connection.angleFromPrevious = angleFromPreviousForUnderConstructionCell;
+            connection.angleFromPrevious = origAngleFromPreviousOnLastConstructedCell;
             newCell->numConnections = 1;
             newCell->connections[0].cell = lastCell;
             newCell->connections[0].distance = desiredDistance;
@@ -462,7 +467,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
                 newCell,
                 hostCell,
                 /*angleFromPreviousForNewCell*/ 0,
-                angleFromPreviousForUnderConstructionCell,
+                origAngleFromPreviousOnHostCell,
                 distance)) {
             CellConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
             hostCell->livingState = LivingState_Dying;

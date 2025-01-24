@@ -322,7 +322,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
         auto connectedCellDelta = cell1->connections[0].cell->pos - cell1->pos;
         data.cellMap.correctDirection(connectedCellDelta);
         auto prevAngle = Math::angleOfVector(connectedCellDelta);
-        auto angleDiff = newAngle - prevAngle;
+        auto angleDiff = Math::subtractAngle(newAngle, prevAngle);
         if (0 != desiredAngleOnCell1) {
             angleDiff = desiredAngleOnCell1;
         }
