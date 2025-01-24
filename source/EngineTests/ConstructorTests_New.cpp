@@ -32,7 +32,9 @@ protected:
 TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_upperSide)
 {
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
-        GenomeDescription().header(GenomeHeaderDescription().separateConstruction(false)).cells({CellGenomeDescription(), CellGenomeDescription()}));
+        GenomeDescription()
+            .header(GenomeHeaderDescription().separateConstruction(false))
+            .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(1)}));
 
     DataDescription data;
     data.addCells({
@@ -81,7 +83,9 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_upperSid
 TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_bottomSide)
 {
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
-        GenomeDescription().header(GenomeHeaderDescription().separateConstruction(false)).cells({CellGenomeDescription(), CellGenomeDescription()}));
+        GenomeDescription()
+            .header(GenomeHeaderDescription().separateConstruction(false))
+            .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(1)}));
 
     DataDescription data;
     data.addCells({
@@ -129,7 +133,9 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_bottomSi
 TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_bothSidesPresent)
 {
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
-        GenomeDescription().header(GenomeHeaderDescription().separateConstruction(false)).cells({CellGenomeDescription(), CellGenomeDescription()}));
+        GenomeDescription()
+            .header(GenomeHeaderDescription().separateConstruction(false))
+            .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(1)}));
 
     DataDescription data;
     data.addCells({
@@ -186,7 +192,9 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_bothSide
 TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_threeCellsWithSmallAngles)
 {
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
-        GenomeDescription().header(GenomeHeaderDescription().separateConstruction(false)).cells({CellGenomeDescription(), CellGenomeDescription()}));
+        GenomeDescription()
+            .header(GenomeHeaderDescription().separateConstruction(false))
+            .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(2)}));
 
     auto offset = Math::rotateClockwise({-1.0f, 0.0f}, 60.0f);
 
@@ -246,7 +254,9 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_threeCel
 TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_threeCellsWithSmallAngles2)
 {
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
-        GenomeDescription().header(GenomeHeaderDescription().separateConstruction(false)).cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(2)}));
+        GenomeDescription()
+            .header(GenomeHeaderDescription().separateConstruction(false))
+            .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(2)}));
 
     DataDescription data;
     data.addCells({

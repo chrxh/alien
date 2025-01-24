@@ -217,7 +217,7 @@ namespace
 
                 //add connections
                 for (auto const& [otherIndex, otherCellIndex] : nearbyCellIndices | boost::adaptors::indexed(0)) {
-                    if (shapeResult.numRequiredAdditionalConnections.has_value() && otherIndex >= *shapeResult.numRequiredAdditionalConnections) {
+                    if (shapeResult.numRequiredAdditionalConnections && otherIndex >= shapeResult.numRequiredAdditionalConnections) {
                         continue;
                     }
                     auto& otherCell = result.previewDescription.cells.at(otherCellIndex);
