@@ -477,7 +477,7 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
         MuscleDescription muscle;
         if (cellTO.cellTypeData.muscle.mode == MuscleMode_Bending) {
             BendingDescription bending;
-            bending._autoTriggerInterval = cellTO.cellTypeData.muscle.modeData.bending.autoTriggerInterval;
+            bending._maxAngleDeviation = cellTO.cellTypeData.muscle.modeData.bending.maxAngleDeviation;
             bending._bendForwardVel = cellTO.cellTypeData.muscle.modeData.bending.bendForwardVel;
             bending._bendBackwardVel = cellTO.cellTypeData.muscle.modeData.bending.bendBackwardVel;
             bending._currentStep = cellTO.cellTypeData.muscle.modeData.bending.currentStep;
@@ -639,7 +639,7 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
         if (muscleTO.mode == MuscleMode_Bending) {
             auto const& bendingDesc = std::get<BendingDescription>(muscleDesc._mode);
             BendingTO& bendingTO = muscleTO.modeData.bending;
-            bendingTO.autoTriggerInterval = bendingDesc._autoTriggerInterval;
+            bendingTO.maxAngleDeviation = bendingDesc._maxAngleDeviation;
             bendingTO.bendForwardVel = bendingDesc._bendForwardVel;
             bendingTO.bendBackwardVel = bendingDesc._bendBackwardVel;
             bendingTO.currentStep = bendingDesc._currentStep;

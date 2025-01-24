@@ -50,7 +50,7 @@ __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, Si
     //    contractionExpansion(data, statistics, cell);
     //} break;
     case MuscleMode_Bending: {
-        //bending(data, statistics, cell);
+        bending(data, statistics, cell);
     } break;
     }
 }
@@ -125,28 +125,33 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
         return;
     }
 
-    if (SignalProcessor::isAutoTriggered(data, cell, max(1, bending.autoTriggerInterval))) {
-        auto bendForwardSteps = toInt(10 / bending.bendForwardVel);
-        auto bendBackwartSteps = toInt(10 / bending.bendBackwardVel);
+    if (SignalProcessor::isAutoTriggered(data, cell, 10)) {
+        auto bendForwardSteps = toInt(2.0f / bending.bendForwardVel);
+        auto bendBackwardSteps = toInt(2.0f / bending.bendBackwardVel);
 
-        auto cycle = (bendForwardSteps + bendBackwartSteps) * 2;
+        auto cycle = (bendForwardSteps + bendBackwardSteps) * 2;
         auto currentStep = bending.currentStep % cycle;
 
-        bool isForward = currentStep < bendForwardSteps || currentStep > (cycle - bendForwardSteps);
-        auto angleDelta = isForward ? 45.0f / toFloat(bendForwardSteps) : 45.0f / toFloat(bendBackwartSteps);
+        bool isForward = currentStep < bendForwardSteps || currentStep >= (cycle - bendForwardSteps);
+        auto angleDelta = isForward ? 20.0f / toFloat(bendForwardSteps) : 20.0f / toFloat(bendBackwardSteps);
         if (isForward) {
-            if (cell->connections[1].angleFromPrevious > angleDelta) {
+            if (cell->connections[1].angleFromPrevious > 60.0f + angleDelta) {
                 cell->connections[0].angleFromPrevious += angleDelta;
                 cell->connections[1].angleFromPrevious -= angleDelta;
+            } else {
+                bending.currentStep = bendForwardSteps - 1;
             }
         } else {
-            if (cell->connections[0].angleFromPrevious > angleDelta) {
+            if (cell->connections[0].angleFromPrevious > 60.0f + angleDelta) {
                 cell->connections[0].angleFromPrevious -= angleDelta;
                 cell->connections[1].angleFromPrevious += angleDelta;
+            } else {
+                bending.currentStep = bendForwardSteps + 2 * bendBackwardSteps - 1;
             }
         }
 
-        ++bending.currentStep;
+        bending.currentStep = (bending.currentStep + 1) % cycle; 
+
 
         statistics.incNumMuscleActivities(cell->color);
         radiate(data, cell);
