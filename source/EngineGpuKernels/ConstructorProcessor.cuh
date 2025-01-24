@@ -242,7 +242,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     }
 
     if (genomeNodesPerRepetition == 1) {
-        result.numRequiredAdditionalConnections = -1;
+        result.numRequiredAdditionalConnections = 0;
     }
 
     auto isAtFirstNode = GenomeDecoder::isFirstNode(constructor);
