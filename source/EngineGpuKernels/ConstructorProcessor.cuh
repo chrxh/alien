@@ -362,7 +362,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
         auto distance = constructionData.isLastNodeOfLastRepetition && !constructionData.genomeHeader.separateConstruction
             ? constructionData.genomeHeader.connectionDistance
             : constructionData.genomeHeader.connectionDistance + cudaSimulationParameters.cellTypeConstructorAdditionalOffspringDistance;
-        if(!CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance)) {
+        if (!CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance)) {
             CellConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
         }
     }
@@ -380,11 +380,12 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
     Cell* hostCell,
     ConstructionData const& constructionData)
 {
-    auto const& lastConstructionCell = constructionData.lastConstructionCell;
-    auto posDelta = data.cellMap.getCorrectedDirection(lastConstructionCell->pos - hostCell->pos);
+    auto const& lastCell = constructionData.lastConstructionCell;
+    auto posDelta = data.cellMap.getCorrectedDirection(lastCell->pos - hostCell->pos);
+    auto angleFromPreviousForNewCell = 180.0f - constructionData.angle;
 
     auto desiredDistance = constructionData.genomeHeader.connectionDistance;
-    auto constructionSiteDistance = hostCell->getRefDistance(lastConstructionCell);
+    auto constructionSiteDistance = hostCell->getRefDistance(lastCell);
     posDelta = Math::normalized(posDelta) * (constructionSiteDistance - desiredDistance);
 
     if (Math::length(posDelta) <= cudaSimulationParameters.cellMinDistance
@@ -419,6 +420,9 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
 
     if (constructionData.isLastNodeOfLastRepetition || (constructionData.isLastNode && constructionData.hasInfiniteRepetitions)) {
         newCell->livingState = LivingState_Activating;
+        newCell->absAngleToConnection0 =
+            Math::normalizedAngle(hostCell->absAngleToConnection0 + hostCell->getAngelDifference(hostCell->connections[0].cell, newCell), -180.0f);
+
     }
 
     float origAngleFromPreviousOnHostCell;
@@ -436,10 +440,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
         }
     }
      
-    auto angleFromPreviousForNewCell = 180.0f - constructionData.angle;
-
     // move connection between lastConstructionCell and hostCell to a connection between lastConstructionCell and newCell
-    auto lastCell = constructionData.lastConstructionCell;
     for (int i = 0; i < lastCell->numConnections; ++i) {
         auto& connection = lastCell->connections[i];
         if (connection.cell == hostCell) {
@@ -466,7 +467,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
                 data,
                 newCell,
                 hostCell,
-                /*angleFromPreviousForNewCell*/ 0,
+                0,
                 origAngleFromPreviousOnHostCell,
                 distance)) {
             CellConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
@@ -717,6 +718,7 @@ ConstructorProcessor::constructCellIntern(
     result->ancestorMutationId = static_cast<uint8_t>(hostCell->mutationId & 0xff);
     result->cellType = constructionData.cellType;
     result->color = constructionData.color;
+    result->absAngleToConnection0 = 0;
 
     result->activationTime = constructionData.containsSelfReplication ? constructor.constructionActivationTime : 0;
     result->genomeComplexity = hostCell->genomeComplexity;

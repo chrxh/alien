@@ -394,6 +394,7 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
     result._barrier = cellTO.barrier;
     result._age = cellTO.age;
     result._color = cellTO.color;
+    result._absAngleToConnection0 = cellTO.absAngleToConnection0;
     result._genomeComplexity = cellTO.genomeComplexity;
     result._detectedByCreatureId = cellTO.detectedByCreatureId;
     result._cellTypeUsed = cellTO.cellTypeUsed;
@@ -683,6 +684,7 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
     cellTO.barrier = cellDesc._barrier;
     cellTO.age = cellDesc._age;
     cellTO.color = cellDesc._color;
+    cellTO.absAngleToConnection0 = cellDesc._absAngleToConnection0;
     cellTO.genomeComplexity = cellDesc._genomeComplexity;
     convert(dataTO, cellDesc._metadata._name, cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex);
     convert(dataTO, cellDesc._metadata._description, cellTO.metadata.descriptionSize, cellTO.metadata.descriptionDataIndex);

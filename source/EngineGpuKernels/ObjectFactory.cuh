@@ -101,6 +101,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->barrier = cellTO.barrier;
     cell->age = cellTO.age;
     cell->color = cellTO.color;
+    cell->absAngleToConnection0 = cellTO.absAngleToConnection0;
     cell->activationTime = cellTO.activationTime;
     cell->genomeComplexity = cellTO.genomeComplexity;
     cell->detectedByCreatureId = cellTO.detectedByCreatureId;
@@ -275,6 +276,7 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->detached = 0;
     cell->scheduledOperationIndex = -1;
     cell->color = 0;
+    cell->absAngleToConnection0 = 0;
     cell->metadata.nameSize = 0;
     cell->metadata.descriptionSize = 0;
     cell->barrier = false;

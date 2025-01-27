@@ -461,6 +461,11 @@ struct CellDescription
         _color = value;
         return *this;
     }
+    CellDescription& absAngleToConnection0(float value)
+    {
+        _absAngleToConnection0 = value;
+        return *this;
+    }
     CellDescription& barrier(bool value)
     {
         _barrier = value;
@@ -574,6 +579,7 @@ struct CellDescription
     float _energy = 100.0f;
     float _stiffness = 1.0f;
     int _color = 0;
+    float _absAngleToConnection0 = 0;
     bool _barrier = false;
     int _age = 0;
     LivingState _livingState = LivingState_Ready;

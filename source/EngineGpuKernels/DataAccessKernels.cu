@@ -34,6 +34,7 @@ namespace
         cellTO.genomeComplexity = cell->genomeComplexity;
         cellTO.cellType = cell->cellType;
         cellTO.color = cell->color;
+        cellTO.absAngleToConnection0 = cell->absAngleToConnection0;
         cellTO.age = cell->age;
         cellTO.signalRoutingRestriction.active = cell->signalRoutingRestriction.active;
         cellTO.signalRoutingRestriction.baseAngle = cell->signalRoutingRestriction.baseAngle;

@@ -191,6 +191,7 @@ struct CellTO
     float stiffness;
     uint8_t color;
     uint8_t numConnections;
+    float absAngleToConnection0;
     bool barrier;
     uint32_t age;
     LivingState livingState;

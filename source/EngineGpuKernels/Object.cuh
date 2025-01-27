@@ -6,6 +6,7 @@
 #include "EngineInterface/CellTypeConstants.h"
 
 #include "Base.cuh"
+#include "Math.cuh"
 
 struct Particle
 {
@@ -230,6 +231,7 @@ struct Cell
     float energy;
     float stiffness;
     uint8_t color;
+    float absAngleToConnection0;
     bool barrier;
     uint32_t age;
     LivingState livingState;
@@ -291,7 +293,7 @@ struct Cell
         if (cellType == CellType_Injector) {
             return cellTypeData.injector.genome;
         }
-        CUDA_THROW_NOT_IMPLEMENTED();
+        CUDA_CHECK(false);
         return nullptr;
     }
 
@@ -303,7 +305,7 @@ struct Cell
         if (cellType == CellType_Injector) {
             return cellTypeData.injector.genomeSize;
         }
-        CUDA_THROW_NOT_IMPLEMENTED();
+        CUDA_CHECK(false);
         return 0;
     }
 
@@ -314,8 +316,40 @@ struct Cell
                 return connections[i].distance;
             }
         }
-        CUDA_THROW_NOT_IMPLEMENTED();
+        CUDA_CHECK(false);
         return 0;
+    }
+
+    __device__ __inline__ float getAngelDifference(int connectionIndex1, int connectionIndex2)
+    {
+        auto result = 0.0f;
+        for (int i = connectionIndex1 + 1; i < connectionIndex1 + numConnections; i++) {
+            auto index = i % numConnections;
+            result += connections[index].angleFromPrevious;
+            if (index == connectionIndex2) {
+                break;
+            }
+        }
+        return Math::normalizedAngle(result, -180.0f);
+    }
+
+    __device__ __inline__ float getAngelDifference(Cell* connectedCell1, Cell* connectedCell2)
+    {
+        auto connectionIndex1 = -1;
+        auto connectionIndex2 = -1;
+        for (int i = 0; i < numConnections; i++) {
+            if (connections[i].cell == connectedCell1) {
+                connectionIndex1 = i;
+            }
+            if (connections[i].cell == connectedCell2) {
+                connectionIndex2 = i;
+            }
+        }
+        if (connectionIndex1 == -1 || connectionIndex2 == -1) {
+            CUDA_CHECK(false);
+            return 0;
+        }
+        return getAngelDifference(connectionIndex1, connectionIndex2);
     }
 
     __device__ __inline__ void getLock()
