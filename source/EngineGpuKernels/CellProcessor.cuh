@@ -648,15 +648,16 @@ __inline__ __device__ void CellProcessor::livingStateTransition_calcFutureState(
                 livingState = LivingState_Activating;
                 auto prevCell = cell->connections[activatingCellConnection].cell;
                 auto existsAdjacentUnderConstruction = false;
-                for (int i = 0; i < prevCell->numConnections; ++i) {
-                    if (prevCell->connections[i].cell->livingState == LivingState_UnderConstruction) {
+                for (int i = 0; i < cell->numConnections; ++i) {
+                    if (cell->connections[i].cell->livingState == LivingState_UnderConstruction) {
                         existsAdjacentUnderConstruction = true;
                         break;
                     }
                 }
                 if (existsAdjacentUnderConstruction) {
-                    cell->absAngleToConnection0 = Math::normalizedAngle(
-                        prevCell->absAngleToConnection0 + (180.0f - cell->getAngelDifference(prevCell, cell->connections[0].cell)), -180.0f);
+                    cell->absAngleToConnection0 =
+                        Math::normalizedAngle(
+                        prevCell->absAngleToConnection0 - (180.0f - cell->getAngelSpan(prevCell, cell->connections[0].cell)), -180.0f);
 
                 } else {
                     cell->absAngleToConnection0 = prevCell->absAngleToConnection0;

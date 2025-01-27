@@ -70,6 +70,7 @@ private:
         ConstructionData const& constructionData);
 
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData);
+    __inline__ __device__ static void activateNewCell(Cell* newCell, Cell* hostCell, ConstructionData const& constructionData);
 
     __inline__ __device__ static bool isSelfReplicator(Cell* cell);
     __inline__ __device__ static float calcGenomeComplexity(int color, uint8_t* genome, uint16_t genomeSize);
@@ -366,9 +367,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
             CellConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
         }
     }
-    if (constructionData.isLastNodeOfLastRepetition || (constructionData.isLastNode && constructionData.hasInfiniteRepetitions)) {
-        newCell->livingState = LivingState_Activating;
-    }
+    activateNewCell(newCell, hostCell, constructionData);
 
     newCell->releaseLock();
     return newCell;
@@ -416,13 +415,6 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
     }
     if (constructionData.lastConstructionCell->livingState == LivingState_Dying) {
         newCell->livingState = LivingState_Dying;
-    }
-
-    if (constructionData.isLastNodeOfLastRepetition || (constructionData.isLastNode && constructionData.hasInfiniteRepetitions)) {
-        newCell->livingState = LivingState_Activating;
-        newCell->absAngleToConnection0 =
-            Math::normalizedAngle(hostCell->absAngleToConnection0 + hostCell->getAngelDifference(hostCell->connections[0].cell, newCell), -180.0f);
-
     }
 
     float origAngleFromPreviousOnHostCell;
@@ -551,6 +543,8 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
             newCell->connections[hostIndex].angleFromPrevious = 360.0f - angleFromPreviousForNewCell - consumedAngle2;
         }
     }
+
+    activateNewCell(newCell, hostCell, constructionData);
 
     newCell->releaseLock();
     return newCell;
@@ -877,6 +871,24 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         hostCell->energy -= energyNeededFromHost;
     }
     return true;
+}
+
+__inline__ __device__ void ConstructorProcessor::activateNewCell(Cell* newCell, Cell* hostCell, ConstructionData const& constructionData)
+{
+    if (constructionData.isLastNodeOfLastRepetition || (constructionData.isLastNode && constructionData.hasInfiniteRepetitions)) {
+        newCell->livingState = LivingState_Activating;
+        if (!constructionData.genomeHeader.separateConstruction) {
+            if (hostCell->numConnections > 1) {
+                newCell->absAngleToConnection0 =
+                    Math::normalizedAngle(hostCell->absAngleToConnection0 + hostCell->getAngelSpan(hostCell->connections[0].cell, newCell), -180.0f);
+            }
+            if (newCell->numConnections > 1) {
+                newCell->absAngleToConnection0 =
+                    Math::normalizedAngle(
+                    newCell->absAngleToConnection0 - (180.0f - newCell->getAngelSpan(hostCell, newCell->connections[0].cell)), -180.0f);
+            }
+        }
+    }
 }
 
 __inline__ __device__ bool ConstructorProcessor::isSelfReplicator(Cell* cell)
