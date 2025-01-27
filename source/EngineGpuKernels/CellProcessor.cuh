@@ -609,6 +609,7 @@ __inline__ __device__ void CellProcessor::livingStateTransition_calcFutureState(
         bool isOtherCreatureNeighborDetaching = false;
         bool isSameCreatureNeighborReviving= false;
         bool isNeighborActivating = false;
+        int activatingCellConnection = -1;
         for (int i = 0; i < cell->numConnections; ++i) {
             auto const& connectedCell = cell->connections[i].cell;
             if (connectedCell->creatureId == cell->creatureId) {
@@ -618,7 +619,10 @@ __inline__ __device__ void CellProcessor::livingStateTransition_calcFutureState(
                 } else if (connectedLivingState == LivingState_Reviving) {
                     isSameCreatureNeighborReviving = true;
                 } else if (connectedLivingState == LivingState_Activating) {
-                    isNeighborActivating = true;
+                    if (connectedCell->connections[0].cell == cell) {
+                        isNeighborActivating = true;
+                        activatingCellConnection = i;
+                    }
                 }
             } else {
                 if (connectedCell->livingState == LivingState_Detaching) {
@@ -642,6 +646,22 @@ __inline__ __device__ void CellProcessor::livingStateTransition_calcFutureState(
         } else if (origLivingState == LivingState_UnderConstruction) {
             if (isNeighborActivating) {
                 livingState = LivingState_Activating;
+                auto prevCell = cell->connections[activatingCellConnection].cell;
+                auto existsAdjacentUnderConstruction = false;
+                for (int i = 0; i < prevCell->numConnections; ++i) {
+                    if (prevCell->connections[i].cell->livingState == LivingState_UnderConstruction) {
+                        existsAdjacentUnderConstruction = true;
+                        break;
+                    }
+                }
+                if (existsAdjacentUnderConstruction) {
+                    cell->absAngleToConnection0 = Math::normalizedAngle(
+                        prevCell->absAngleToConnection0 + (180.0f - cell->getAngelDifference(prevCell, cell->connections[0].cell)), -180.0f);
+
+                } else {
+                    cell->absAngleToConnection0 = prevCell->absAngleToConnection0;
+                }
+                cell->absAngleToConnection0 = Math::normalizedAngle(cell->absAngleToConnection0, -180.0f);
             }
             if (isOtherCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences != CellDeathConsquences_None) {
                 livingState = LivingState_Detaching;

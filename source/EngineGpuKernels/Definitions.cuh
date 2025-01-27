@@ -2,7 +2,12 @@
 
 #include <memory>
 
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
+#include <cuda/helper_cuda.h>
+
 #include "EngineInterface/ArraySizes.h"
+#include "EngineInterface/CellTypeConstants.h"
 
 struct Cell;
 struct Token;
