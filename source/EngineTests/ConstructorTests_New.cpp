@@ -597,29 +597,31 @@ TEST_F(ConstructorTests_New, constructFurtherCell_orientation_upperSide)
             .pos({10.0f, 10.0f})
             .energy(getConstructorEnergy())
             .cellType(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
-        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(LivingState_UnderConstruction).absAngleToConnection0(90.0f),
-        CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).livingState(LivingState_UnderConstruction).absAngleToConnection0(0.0f),
+        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(LivingState_UnderConstruction),
+        CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).livingState(LivingState_UnderConstruction),
     });
-    data.addConnection(1, 2);
     data.addConnection(2, 3);
+    data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(3);
 
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(4, actualData._cells.size());
     auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3});
+    auto prevConstructedCell = getCell(actualData, 2);
+    auto prevPrevConstructedCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(approxCompare(90.0f, actualConstructedCell._absAngleToConnection0));
+    EXPECT_TRUE(approxCompare(0.0f, actualConstructedCell._absAngleToConnection0));
+    EXPECT_TRUE(approxCompare(-90.0f, prevConstructedCell._absAngleToConnection0));
+    EXPECT_TRUE(approxCompare(-90.0f, prevPrevConstructedCell._absAngleToConnection0));
 }
 
 TEST_F(ConstructorTests_New, constructFurtherCell_orientation_lowerSide)
 {
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
-        GenomeDescription()
-            .header(GenomeHeaderDescription().separateConstruction(false))
-            .cells({CellGenomeDescription(), CellGenomeDescription()}));
+        GenomeDescription().header(GenomeHeaderDescription().separateConstruction(false)).cells({CellGenomeDescription(), CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
@@ -628,21 +630,30 @@ TEST_F(ConstructorTests_New, constructFurtherCell_orientation_lowerSide)
             .pos({10.0f, 10.0f})
             .energy(getConstructorEnergy())
             .cellType(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
-        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(LivingState_UnderConstruction).absAngleToConnection0(-90.0f),
-        CellDescription().id(3).pos({10.0f + getOffspringDistance(), 11.0f}).livingState(LivingState_UnderConstruction).absAngleToConnection0(0.0f),
+        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(LivingState_UnderConstruction),
+        CellDescription().id(3).pos({10.0f + getOffspringDistance(), 11.0f}).livingState(LivingState_UnderConstruction),
     });
-    data.addConnection(1, 2);
     data.addConnection(2, 3);
+    data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(3);
 
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(4, actualData._cells.size());
     auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3});
+    auto prevConstructedCell = getCell(actualData, 2);
+    auto prevPrevConstructedCell = getCell(actualData, 3);
 
-    EXPECT_TRUE(approxCompare(-90.0f, actualConstructedCell._absAngleToConnection0));
+    EXPECT_EQ(LivingState_Ready, actualConstructedCell._livingState);
+    EXPECT_TRUE(approxCompare(0.0f, actualConstructedCell._absAngleToConnection0));
+
+    EXPECT_EQ(LivingState_Ready, prevConstructedCell._livingState);
+    EXPECT_TRUE(approxCompare(90.0f, prevConstructedCell._absAngleToConnection0));
+
+    EXPECT_EQ(LivingState_Ready, prevPrevConstructedCell._livingState);
+    EXPECT_TRUE(approxCompare(90.0f, prevPrevConstructedCell._absAngleToConnection0));
 }
 
 TEST_F(ConstructorTests_New, constructFirstCell_orientation_leftSide)
@@ -650,29 +661,64 @@ TEST_F(ConstructorTests_New, constructFirstCell_orientation_leftSide)
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
         GenomeDescription()
             .header(GenomeHeaderDescription().separateConstruction(false))
-            .cells({CellGenomeDescription(), CellGenomeDescription()}));
+            .cells({CellGenomeDescription()}));
 
     DataDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).absAngleToConnection0(0),
+        CellDescription().id(1).pos({10.0f, 10.0f}).absAngleToConnection0(90.0f),
         CellDescription()
-            .id(1)
-            .pos({10.0f, 9.0f})
+            .id(2)
+            .pos({9.0f, 10.0f})
             .energy(getConstructorEnergy())
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(0).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2))
+            .cellType(ConstructorDescription().genomeCurrentNodeIndex(0).autoTriggerInterval(1).genome(genome))
             .absAngleToConnection0(90.0f),
-        CellDescription().id(2).pos({11.0f, 9.0f}).absAngleToConnection0(90.0f),
+        CellDescription().id(3).pos({9.0f, 11.0f}).absAngleToConnection0(0.0f),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(2);
 
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(4, actualData._cells.size());
     auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3});
 
-    EXPECT_TRUE(approxCompare(-90.0f, actualConstructedCell._absAngleToConnection0));
+    EXPECT_EQ(LivingState_Ready, actualConstructedCell._livingState);
+    EXPECT_TRUE(approxCompare(-45.0f, actualConstructedCell._absAngleToConnection0));
 }
+
+TEST_F(ConstructorTests_New, constructFirstCell_orientation_rightSide)
+{
+    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
+        GenomeDescription().header(GenomeHeaderDescription().separateConstruction(false)).cells({CellGenomeDescription()}));
+
+    DataDescription data;
+    data.addCells({
+        CellDescription().id(1).pos({8.0f, 10.0f}).absAngleToConnection0(-90.0f),
+        CellDescription()
+            .id(2)
+            .pos({9.0f, 10.0f})
+            .energy(getConstructorEnergy())
+            .cellType(ConstructorDescription().genomeCurrentNodeIndex(0).autoTriggerInterval(1).genome(genome))
+            .absAngleToConnection0(-90.0f),
+        CellDescription().id(3).pos({9.0f, 11.0f}).absAngleToConnection0(0.0f),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(2);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(4, actualData._cells.size());
+    auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3});
+
+    EXPECT_EQ(LivingState_Ready, actualConstructedCell._livingState);
+    EXPECT_TRUE(approxCompare(45.0f, actualConstructedCell._absAngleToConnection0));
+}
+
+
+//TODO tests for activation when construction is not separating and num constructed cells > 1

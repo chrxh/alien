@@ -320,7 +320,7 @@ struct Cell
         return 0;
     }
 
-    __device__ __inline__ float getAngelDifference(int connectionIndex1, int connectionIndex2)
+    __device__ __inline__ float getAngelSpan(int connectionIndex1, int connectionIndex2)
     {
         auto result = 0.0f;
         for (int i = connectionIndex1 + 1; i < connectionIndex1 + numConnections; i++) {
@@ -333,7 +333,7 @@ struct Cell
         return Math::normalizedAngle(result, -180.0f);
     }
 
-    __device__ __inline__ float getAngelDifference(Cell* connectedCell1, Cell* connectedCell2)
+    __device__ __inline__ float getAngelSpan(Cell* connectedCell1, Cell* connectedCell2)
     {
         auto connectionIndex1 = -1;
         auto connectionIndex2 = -1;
@@ -349,7 +349,7 @@ struct Cell
             CUDA_CHECK(false);
             return 0;
         }
-        return getAngelDifference(connectionIndex1, connectionIndex2);
+        return getAngelSpan(connectionIndex1, connectionIndex2);
     }
 
     __device__ __inline__ void getLock()
