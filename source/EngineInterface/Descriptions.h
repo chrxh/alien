@@ -324,6 +324,9 @@ struct MuscleDescription
 
     MuscleModeDescription _mode;
 
+    // Temp
+    float _frontAngle = 0;  // Can be removed in new genome model
+
     // Additional rendering data
     float _lastMovementX = 0;
     float _lastMovementY = 0;

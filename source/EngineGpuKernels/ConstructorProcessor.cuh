@@ -792,6 +792,7 @@ ConstructorProcessor::constructCellIntern(
             result->cellTypeData.muscle.modeData.bending.bendBackwardVel = abs(GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition));
             result->cellTypeData.muscle.modeData.bending.currentStep = 0;
         }
+        result->cellTypeData.muscle.frontAngle = constructionData.genomeHeader.frontAngle;
         result->cellTypeData.muscle.lastMovementX = 0;
         result->cellTypeData.muscle.lastMovementY = 0;
     } break;

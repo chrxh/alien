@@ -490,6 +490,11 @@ struct GenomeHeaderDescription
         _numRepetitions = std::numeric_limits<int>::max();
         return *this;
     }
+    GenomeHeaderDescription& frontAngle(float value)
+    {
+        _frontAngle = value;
+        return *this;
+    }
 
     ConstructionShape _shape = ConstructionShape_Custom;
     int _numBranches = 1;  //between 1 and 6 in modulo
@@ -500,6 +505,7 @@ struct GenomeHeaderDescription
     int _numRepetitions = 1;
     float _concatenationAngle1 = 0;
     float _concatenationAngle2 = 0;
+    float _frontAngle = 0;
 };
 
 struct GenomeDescription

@@ -156,7 +156,7 @@ namespace
     }
 }
 
-std::vector<uint8_t> GenomeDescriptionConverterService::convertDescriptionToBytes(GenomeDescription const& genome, GenomeEncodingSpecification const& spec)
+std::vector<uint8_t> GenomeDescriptionConverterService::convertDescriptionToBytes(GenomeDescription const& genome)
 {
     auto const& cells = genome._cells;
     std::vector<uint8_t> result;
@@ -167,15 +167,10 @@ std::vector<uint8_t> GenomeDescriptionConverterService::convertDescriptionToByte
     writeByte(result, genome._header._angleAlignment);
     writeStiffness(result, genome._header._stiffness);
     writeDistance(result, genome._header._connectionDistance);
-    if (spec._numRepetitions) {
-        writeByteWithInfinity(result, genome._header._numRepetitions);
-    }
-    if (spec._concatenationAngle1) {
-        writeAngle(result, genome._header._concatenationAngle1);
-    }
-    if (spec._concatenationAngle2) {
-        writeAngle(result, genome._header._concatenationAngle2);
-    }
+    writeByteWithInfinity(result, genome._header._numRepetitions);
+    writeAngle(result, genome._header._concatenationAngle1);
+    writeAngle(result, genome._header._concatenationAngle2);
+    writeAngle(result, genome._header._frontAngle);
 
     for (auto const& cell : cells) {
         writeByte(result, cell.getCellType());
@@ -278,8 +273,7 @@ namespace
     ConversionResult convertBytesToDescriptionIntern(
         std::vector<uint8_t> const& data,
         size_t maxBytePosition,
-        size_t maxEntries,
-        GenomeEncodingSpecification const& spec)
+        size_t maxEntries)
     {
         ConversionResult result;
 
@@ -292,15 +286,10 @@ namespace
         result.genome._header._angleAlignment = readByte(data, bytePosition) % ConstructorAngleAlignment_Count;
         result.genome._header._stiffness = readStiffness(data, bytePosition);
         result.genome._header._connectionDistance = readDistance(data, bytePosition);
-        if (spec._numRepetitions) {
-            result.genome._header._numRepetitions = readByteWithInfinity(data, bytePosition);
-        }
-        if (spec._concatenationAngle1) {
-            result.genome._header._concatenationAngle1 = readAngle(data, bytePosition);
-        }
-        if (spec._concatenationAngle2) {
-            result.genome._header._concatenationAngle2 = readAngle(data, bytePosition);
-        }
+        result.genome._header._numRepetitions = readByteWithInfinity(data, bytePosition);
+        result.genome._header._concatenationAngle1 = readAngle(data, bytePosition);
+        result.genome._header._concatenationAngle2 = readAngle(data, bytePosition);
+        result.genome._header._frontAngle= readAngle(data, bytePosition);
         
         while (bytePosition < maxBytePosition && nodeIndex < maxEntries) {
             CellType cellType = readByte(data, bytePosition) % CellType_Count;
@@ -410,30 +399,30 @@ namespace
 
 }
 
-GenomeDescription GenomeDescriptionConverterService::convertBytesToDescription(std::vector<uint8_t> const& data, GenomeEncodingSpecification const& spec)
+GenomeDescription GenomeDescriptionConverterService::convertBytesToDescription(std::vector<uint8_t> const& data)
 {
-    return convertBytesToDescriptionIntern(data, data.size(), data.size(), spec).genome;
+    return convertBytesToDescriptionIntern(data, data.size(), data.size()).genome;
 }
 
-int GenomeDescriptionConverterService::convertNodeAddressToNodeIndex(std::vector<uint8_t> const& data, int nodeAddress, GenomeEncodingSpecification const& spec)
+int GenomeDescriptionConverterService::convertNodeAddressToNodeIndex(std::vector<uint8_t> const& data, int nodeAddress)
 {
     //wasteful approach but sufficient for GUI
-    return convertBytesToDescriptionIntern(data, nodeAddress, data.size(), spec).genome._cells.size();
+    return convertBytesToDescriptionIntern(data, nodeAddress, data.size()).genome._cells.size();
 }
 
-int GenomeDescriptionConverterService::convertNodeIndexToNodeAddress(std::vector<uint8_t> const& data, int nodeIndex, GenomeEncodingSpecification const& spec)
+int GenomeDescriptionConverterService::convertNodeIndexToNodeAddress(std::vector<uint8_t> const& data, int nodeIndex)
 {
     //wasteful approach but sufficient for GUI
-    return convertBytesToDescriptionIntern(data, data.size(), nodeIndex, spec).lastBytePosition;
+    return convertBytesToDescriptionIntern(data, data.size(), nodeIndex).lastBytePosition;
 }
 
-int GenomeDescriptionConverterService::getNumNodesRecursively(std::vector<uint8_t> const& data, bool includeRepetitions, GenomeEncodingSpecification const& spec)
+int GenomeDescriptionConverterService::getNumNodesRecursively(std::vector<uint8_t> const& data, bool includeRepetitions)
 {
-    auto genome = convertBytesToDescriptionIntern(data, data.size(), data.size(), spec).genome;
+    auto genome = convertBytesToDescriptionIntern(data, data.size(), data.size()).genome;
     auto result = toInt(genome._cells.size());
     for (auto const& node : genome._cells) {
         if (auto subgenome = node.getGenome()) {
-            result += getNumNodesRecursively(*subgenome, includeRepetitions, spec);
+            result += getNumNodesRecursively(*subgenome, includeRepetitions);
         }
     }
 

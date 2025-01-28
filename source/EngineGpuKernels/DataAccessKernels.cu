@@ -148,6 +148,7 @@ namespace
                 cellTO.cellTypeData.muscle.modeData.bending.bendBackwardVel = cell->cellTypeData.muscle.modeData.bending.bendBackwardVel;
                 cellTO.cellTypeData.muscle.modeData.bending.currentStep = cell->cellTypeData.muscle.modeData.bending.currentStep;
             }
+            cellTO.cellTypeData.muscle.frontAngle = cell->cellTypeData.muscle.frontAngle;
             cellTO.cellTypeData.muscle.lastMovementX = cell->cellTypeData.muscle.lastMovementX;
             cellTO.cellTypeData.muscle.lastMovementY = cell->cellTypeData.muscle.lastMovementY;
         } break;

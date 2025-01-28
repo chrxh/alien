@@ -417,6 +417,7 @@ __inline__ __device__ GenomeHeader GenomeDecoder::readGenomeHeader(ConstructorTy
     result.numRepetitions = getNumRepetitions(constructor.genome);
     result.concatenationAngle1 = convertByteToAngle(constructor.genome[Const::GenomeHeaderConcatenationAngle1Pos]);
     result.concatenationAngle2 = convertByteToAngle(constructor.genome[Const::GenomeHeaderConcatenationAngle2Pos]);
+    result.frontAngle = convertByteToAngle(constructor.genome[Const::GenomeHeaderFrontAnglePos]);
     return result;
 }
 
