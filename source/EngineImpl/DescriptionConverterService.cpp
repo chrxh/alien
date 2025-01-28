@@ -484,6 +484,7 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
             bending._currentStep = cellTO.cellTypeData.muscle.modeData.bending.currentStep;
             muscle._mode = bending;
         }
+        muscle._frontAngle = cellTO.cellTypeData.muscle.frontAngle;
         muscle._lastMovementX = cellTO.cellTypeData.muscle.lastMovementX;
         muscle._lastMovementY = cellTO.cellTypeData.muscle.lastMovementY;
         result._cellTypeData = muscle;
@@ -645,6 +646,7 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
             bendingTO.bendBackwardVel = bendingDesc._bendBackwardVel;
             bendingTO.currentStep = bendingDesc._currentStep;
         }
+        muscleTO.frontAngle = muscleDesc._frontAngle;
         muscleTO.lastMovementX = muscleDesc._lastMovementX;
         muscleTO.lastMovementY = muscleDesc._lastMovementY;
     } break;

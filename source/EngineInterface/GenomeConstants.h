@@ -4,7 +4,7 @@
 
 namespace Const
 {
-    auto constexpr GenomeHeaderSize = 9;
+    auto constexpr GenomeHeaderSize = 10;
     auto constexpr GenomeHeaderShapePos = 0;
     auto constexpr GenomeHeaderNumBranchesPos = 1;
     auto constexpr GenomeHeaderSeparationPos = 2;
@@ -14,6 +14,7 @@ namespace Const
     auto constexpr GenomeHeaderNumRepetitionsPos = 6;
     auto constexpr GenomeHeaderConcatenationAngle1Pos = 7;
     auto constexpr GenomeHeaderConcatenationAngle2Pos = 8;
+    auto constexpr GenomeHeaderFrontAnglePos = 9;
 
     auto constexpr CellAnglePos = 1;
     auto constexpr CellRequiredConnectionsPos = 3;

@@ -382,6 +382,13 @@ void GenomeEditorWindow::processGenomeHeader(TabData& tab)
                     .tooltip(Const::GenomeConcatenationAngle2),
                 tab.genome._header._concatenationAngle2);
         }
+        table.next();
+        AlienImGui::InputFloat(
+            AlienImGui::InputFloatParameters()
+                .name("Front angle")
+                .format("%.1f")
+                .textWidth(ContentHeaderTextWidth),
+            tab.genome._header._frontAngle);
         table.end();
     }
     validateAndCorrect(tab.genome._header);

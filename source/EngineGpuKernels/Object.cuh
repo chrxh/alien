@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include <nppdefs.h>
 
 #include "EngineInterface/EngineConstants.h"
@@ -50,6 +52,7 @@ struct GenomeHeader
     int numRepetitions;
     float concatenationAngle1;
     float concatenationAngle2;
+    float frontAngle;
 
     __inline__ __device__ bool hasInfiniteRepetitions() const { return numRepetitions == NPP_MAX_32S; }
 };
@@ -166,6 +169,9 @@ struct MuscleType
     // Fixed data
     MuscleMode mode;
     MuscleModeData modeData;
+
+    // Temp
+    float frontAngle;  // Can be removed in new genome model
 
     // Additional rendering data
     float lastMovementX;

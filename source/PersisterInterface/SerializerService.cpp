@@ -53,6 +53,7 @@ namespace
     auto constexpr Id_GenomeHeader_ConcatenationAngle1 = 6;
     auto constexpr Id_GenomeHeader_ConcatenationAngle2 = 7;
     auto constexpr Id_GenomeHeader_NumBranches = 8;
+    auto constexpr Id_GenomeHeader_FrontAngle = 9;
 
     auto constexpr Id_SignalRoutingGenome_Active = 0;
     auto constexpr Id_SignalRoutingGenome_BaseAngle = 1;
@@ -494,6 +495,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_GenomeHeader_NumRepetitions, data._numRepetitions, defaultObject._numRepetitions);
         loadSave(task, auxiliaries, Id_GenomeHeader_ConcatenationAngle1, data._concatenationAngle1, defaultObject._concatenationAngle1);
         loadSave(task, auxiliaries, Id_GenomeHeader_ConcatenationAngle2, data._concatenationAngle2, defaultObject._concatenationAngle2);
+        loadSave(task, auxiliaries, Id_GenomeHeader_FrontAngle, data._frontAngle, defaultObject._frontAngle);
 
         processLoadSaveMap(task, ar, auxiliaries);
     }

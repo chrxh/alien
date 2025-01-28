@@ -133,6 +133,10 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
         auto currentStep = bending.currentStep % cycle;
 
         bool isForward = currentStep < bendForwardSteps || currentStep >= (cycle - bendForwardSteps);
+        auto orientation = Math::normalizedAngle(Math::subtractAngle(cell->absAngleToConnection0, muscle.frontAngle), -180.0f);
+        if (orientation < 0) {
+            isForward = !isForward;
+        }
         auto angleDelta = isForward ? bending.maxAngleDeviation / toFloat(bendForwardSteps) : bending.maxAngleDeviation / toFloat(bendBackwardSteps);
         if (isForward) {
             if (cell->connections[1].angleFromPrevious > 60.0f + angleDelta) {

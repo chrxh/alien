@@ -127,7 +127,10 @@ struct MuscleTO
     MuscleMode mode;
     MuscleModeTO modeData;
 
-    //additional rendering data
+    // Temp
+    float frontAngle;  // Can be removed in new genome model
+
+    // Additional rendering data
     float lastMovementX;
     float lastMovementY;
 };
