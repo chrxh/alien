@@ -256,7 +256,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     }
     if (result.isLastNode && !isAtFirstNode) {
         if (result.isLastNodeOfLastRepetition) {
-            result.angle = constructor.constructionAngle2;
+            result.angle = -constructor.constructionAngle2;
         } else {
             result.angle = result.genomeHeader.concatenationAngle2;
         }

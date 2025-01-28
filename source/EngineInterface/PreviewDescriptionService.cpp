@@ -309,7 +309,7 @@ namespace
                     auto direction = Math::unitVectorOfAngle(targetAngle);
                     auto subGenome = GenomeDescriptionConverterService::get().convertBytesToDescription(data);
                     auto previewPart = convertToPreviewDescriptionIntern(
-                        subGenome, cellIntern.nodeIndex, constructor._constructionAngle2, cellIntern.pos + direction, targetAngle, parameters);
+                        subGenome, cellIntern.nodeIndex, -constructor._constructionAngle2, cellIntern.pos + direction, targetAngle, parameters);
                     insert(result, previewPart);
                     indexOffset += previewPart.cells.size();
 
