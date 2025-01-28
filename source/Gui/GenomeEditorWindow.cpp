@@ -732,13 +732,34 @@ void GenomeEditorWindow::processNode(
         case CellType_Muscle: {
             auto& muscle = std::get<MuscleGenomeDescription>(cell._cellTypeData);
             table.next();
-            //AlienImGui::Combo(
-            //    AlienImGui::ComboParameters()
-            //        .name("Mode")
-            //        .values({"Movement to sensor target", "Expansion and contraction", "Bending"})
-            //        .textWidth(ContentTextWidth)
-            //        .tooltip(Const::GenomeMuscleModeTooltip),
-            //    muscle._mode);
+            auto mode = muscle.getMode();
+            if (AlienImGui::Combo(
+                AlienImGui::ComboParameters()
+                    .name("Mode")
+                    .values({"Bending"})
+                    .textWidth(ContentTextWidth)
+                    .tooltip(Const::GenomeMuscleModeTooltip),
+                mode)) {
+                BendingGenomeDescription bending;
+                muscle.mode(bending);
+            }
+            if (mode == MuscleMode_Bending) {
+                auto& bending = std::get<BendingGenomeDescription>(muscle._muscleMode);
+                table.next();
+                AlienImGui::InputFloat(
+                    AlienImGui::InputFloatParameters()
+                        .name("Max angle deviation")
+                        .format("%.1f")
+                        .textWidth(ContentHeaderTextWidth),
+                    bending._maxAngleDeviation);
+                table.next();
+                AlienImGui::InputFloat(
+                    AlienImGui::InputFloatParameters().name("Bend forward vel").format("%.1f").textWidth(ContentHeaderTextWidth),
+                    bending._bendForwardVel);
+                table.next();
+                AlienImGui::InputFloat(
+                    AlienImGui::InputFloatParameters().name("Bend backward vel").format("%.1f").textWidth(ContentHeaderTextWidth), bending._bendBackwardVel);
+            }
         } break;
         case CellType_Defender: {
             auto& defender = std::get<DefenderGenomeDescription>(cell._cellTypeData);

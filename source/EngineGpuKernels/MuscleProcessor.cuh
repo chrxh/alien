@@ -126,18 +126,23 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
     }
 
     if (SignalProcessor::isAutoTriggered(data, cell, 10)) {
-        auto bendForwardSteps = toInt(2.0f / bending.bendForwardVel);
-        auto bendBackwardSteps = toInt(2.0f / bending.bendBackwardVel);
+
+        auto bendForwardVel = bending.bendForwardVel;
+        auto bendBackwardVel = bending.bendBackwardVel;
+        auto orientation = Math::normalizedAngle(Math::subtractAngle(cell->absAngleToConnection0, muscle.frontAngle), -180.0f);
+
+        auto bendForwardSteps = toInt(2.0f / bendForwardVel);
+        auto bendBackwardSteps = toInt(2.0f / bendBackwardVel);
 
         auto cycle = (bendForwardSteps + bendBackwardSteps) * 2;
         auto currentStep = bending.currentStep % cycle;
-
         bool isForward = currentStep < bendForwardSteps || currentStep >= (cycle - bendForwardSteps);
-        auto orientation = Math::normalizedAngle(Math::subtractAngle(cell->absAngleToConnection0, muscle.frontAngle), -180.0f);
+        auto angleDelta = isForward ? bending.maxAngleDeviation / toFloat(bendForwardSteps) : bending.maxAngleDeviation / toFloat(bendBackwardSteps);
+        auto bendingVel = isForward ? bendForwardVel : bendBackwardVel;
+
         if (orientation < 0) {
             isForward = !isForward;
         }
-        auto angleDelta = isForward ? bending.maxAngleDeviation / toFloat(bendForwardSteps) : bending.maxAngleDeviation / toFloat(bendBackwardSteps);
         if (isForward) {
             if (cell->connections[1].angleFromPrevious > 60.0f + angleDelta) {
                 cell->connections[0].angleFromPrevious += angleDelta;
@@ -154,68 +159,22 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
             }
         }
 
+        auto delta = Math::normalized(data.cellMap.getCorrectedDirection(cell->connections[0].cell->pos - cell->pos));
+        if (isForward) {
+            Math::rotateQuarterCounterClockwise(delta);
+        } else {
+            Math::rotateQuarterClockwise(delta);
+        }
+        auto acceleration = delta * sqrt(sqrt(bendingVel)) * cudaSimulationParameters.cellTypeMuscleBendingAcceleration[cell->color] / 20;
+        atomicAdd(&cell->connections[0].cell->vel.x, acceleration.x);
+        atomicAdd(&cell->connections[0].cell->vel.y, acceleration.y);
+
         bending.currentStep = (bending.currentStep + 1) % cycle; 
 
 
         statistics.incNumMuscleActivities(cell->color);
         radiate(data, cell);
     }
-    //if (abs(cell->signal.channels[0]) < NEAR_ZERO) {
-    //    return;
-    //}
-    //if (cell->numConnections < 2) {
-    //    return;
-    //}
-    //if (!cell->tryLock()) {
-    //    return;
-    //}
-    //for (int i = 0; i < cell->numConnections; ++i) {
-    //    auto& connection = cell->connections[i];
-    //    //if (connection.cell->executionOrderNumber == cell->inputExecutionOrderNumber) {
-    //    auto intensityChannel0 = getTruncatedUnitValue(cell->signal);
-    //        auto bendingAngle = cudaSimulationParameters.cellTypeMuscleBendingAngle[cell->color] * intensityChannel0;
-
-    //        if (bendingAngle < 0 && connection.angleFromPrevious <= -bendingAngle) {
-    //            continue;
-    //        }
-    //        auto& nextConnection = cell->connections[(i + 1) % cell->numConnections];
-    //        if (bendingAngle > 0 && nextConnection.angleFromPrevious <= bendingAngle) {
-    //            continue;
-    //        }
-    //        connection.angleFromPrevious += bendingAngle;
-    //        nextConnection.angleFromPrevious -= bendingAngle;
-
-    //        MuscleBendingDirection bendingDirection = [&] {
-    //            if (intensityChannel0 > NEAR_ZERO) {
-    //                return MuscleBendingDirection_Positive;
-    //            } else if (intensityChannel0 < -NEAR_ZERO) {
-    //                return MuscleBendingDirection_Negative;
-    //            } else {
-    //                return MuscleBendingDirection_None;
-    //            }
-    //        }();
-    //        if (cell->cellTypeData.muscle.lastBendingDirection == bendingDirection && cell->cellTypeData.muscle.lastBendingSourceIndex == i) {
-    //            cell->cellTypeData.muscle.consecutiveBendingAngle += abs(bendingAngle);
-    //        } else {
-    //            cell->cellTypeData.muscle.consecutiveBendingAngle = 0;
-    //        }
-    //        cell->cellTypeData.muscle.lastBendingDirection = bendingDirection;
-    //        cell->cellTypeData.muscle.lastBendingSourceIndex = i;
-
-    //        if (abs(cell->signal.channels[1]) > TRIGGER_THRESHOLD && !hasTriangularConnection(cell, connection.cell)) {
-    //            auto delta = Math::normalized(data.cellMap.getCorrectedDirection(connection.cell->pos - cell->pos));
-    //            Math::rotateQuarterCounterClockwise(delta);
-    //            auto intensityChannel1 = getTruncatedUnitValue(cell->signal, 1);
-    //            if ((intensityChannel0 < -NEAR_ZERO && intensityChannel1 < -NEAR_ZERO) || (intensityChannel0 > NEAR_ZERO && intensityChannel1 > NEAR_ZERO)) {
-    //                auto acceleration = delta * intensityChannel0 * cudaSimulationParameters.cellTypeMuscleBendingAcceleration[cell->color]
-    //                    * sqrtf(cell->cellTypeData.muscle.consecutiveBendingAngle + 1.0f) / 20 /*abs(bendingAngle) / 10*/;
-    //                atomicAdd(&connection.cell->vel.x, acceleration.x);
-    //                atomicAdd(&connection.cell->vel.y, acceleration.y);
-    //            }
-    //        }
-    //    //}
-    //}
-    //cell->releaseLock();
 }
 
 //__inline__ __device__ int MuscleProcessor::getConnectionIndex(Cell* cell, Cell* otherCell)

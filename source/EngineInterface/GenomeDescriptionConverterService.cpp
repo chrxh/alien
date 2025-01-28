@@ -289,7 +289,7 @@ namespace
         result.genome._header._numRepetitions = readByteWithInfinity(data, bytePosition);
         result.genome._header._concatenationAngle1 = readAngle(data, bytePosition);
         result.genome._header._concatenationAngle2 = readAngle(data, bytePosition);
-        result.genome._header._frontAngle= readAngle(data, bytePosition);
+        result.genome._header._frontAngle = readAngle(data, bytePosition);
         
         while (bytePosition < maxBytePosition && nodeIndex < maxEntries) {
             CellType cellType = readByte(data, bytePosition) % CellType_Count;
