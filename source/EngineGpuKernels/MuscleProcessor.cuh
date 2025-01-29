@@ -121,14 +121,18 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
     if (cell->numConnections != 2) {
         return;
     }
-    if (bending.bendForwardVel < NEAR_ZERO || bending.bendBackwardVel < NEAR_ZERO) {
+    if (bending.forwardVel < NEAR_ZERO || bending.backwardVel < NEAR_ZERO) {
         return;
     }
-
     if (SignalProcessor::isAutoTriggered(data, cell, 10)) {
 
-        auto bendForwardVel = bending.bendForwardVel;
-        auto bendBackwardVel = bending.bendBackwardVel;
+        if (bending.offsetCounter < bending.offset) {
+            ++bending.offsetCounter;
+            return;
+        }
+
+        auto bendForwardVel = bending.forwardVel;
+        auto bendBackwardVel = bending.backwardVel;
         auto orientation = Math::normalizedAngle(Math::subtractAngle(cell->absAngleToConnection0, muscle.frontAngle), -180.0f);
 
         auto bendForwardSteps = toInt(2.0f / bendForwardVel);
