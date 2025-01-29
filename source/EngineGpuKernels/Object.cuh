@@ -148,22 +148,20 @@ struct InjectorType
     uint32_t genomeGeneration;
 };
 
-struct Bending
+struct AutoBending
 {
     // Fixed data
     float maxAngleDeviation; // Between 0 and 180 deg
-    float forwardVel;   // Between 0 and 1
-    float backwardVel;  // Between 0 and 1
-    uint8_t offset;             // In time steps
+    float frontBackVelRatio;  // Between 0 and 1
 
     // Process data
-    uint16_t currentStep;
-    uint8_t offsetCounter;
+    float initialAngle;
+    bool forward;  // Current direction
 };
 
 union MuscleModeData
 {
-    Bending bending;
+    AutoBending bending;
 };
 
 struct MuscleType

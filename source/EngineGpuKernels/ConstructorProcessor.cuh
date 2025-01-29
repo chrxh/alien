@@ -788,11 +788,9 @@ ConstructorProcessor::constructCellIntern(
         result->cellTypeData.muscle.mode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % MuscleMode_Count;
         if (result->cellTypeData.muscle.mode == MuscleMode_Bending) {
             result->cellTypeData.muscle.modeData.bending.maxAngleDeviation = abs(GenomeDecoder::readAngle(constructor, genomeCurrentBytePosition));
-            result->cellTypeData.muscle.modeData.bending.forwardVel = abs(GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition));
-            result->cellTypeData.muscle.modeData.bending.backwardVel = abs(GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition));
-            result->cellTypeData.muscle.modeData.bending.offset = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
-            result->cellTypeData.muscle.modeData.bending.currentStep = 0;
-            result->cellTypeData.muscle.modeData.bending.offsetCounter = 0;
+            result->cellTypeData.muscle.modeData.bending.frontBackVelRatio = abs(GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition));
+            result->cellTypeData.muscle.modeData.bending.initialAngle = 0;
+            result->cellTypeData.muscle.modeData.bending.forward = true;
         }
         result->cellTypeData.muscle.frontAngle = constructionData.genomeHeader.frontAngle;
         result->cellTypeData.muscle.lastMovementX = 0;

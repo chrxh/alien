@@ -477,13 +477,11 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
     case CellType_Muscle: {
         MuscleDescription muscle;
         if (cellTO.cellTypeData.muscle.mode == MuscleMode_Bending) {
-            BendingDescription bending;
+            AutoBendingDescription bending;
             bending._maxAngleDeviation = cellTO.cellTypeData.muscle.modeData.bending.maxAngleDeviation;
-            bending._forwardVel = cellTO.cellTypeData.muscle.modeData.bending.forwardVel;
-            bending._backwardVel = cellTO.cellTypeData.muscle.modeData.bending.backwardVel;
-            bending._offset = cellTO.cellTypeData.muscle.modeData.bending.offset;
-            bending._offsetCounter = cellTO.cellTypeData.muscle.modeData.bending.offsetCounter;
-            bending._currentStep = cellTO.cellTypeData.muscle.modeData.bending.currentStep;
+            bending._frontBackVelRatio = cellTO.cellTypeData.muscle.modeData.bending.frontBackVelRatio;
+            bending._initialAngle = cellTO.cellTypeData.muscle.modeData.bending.initialAngle;
+            bending._forward = cellTO.cellTypeData.muscle.modeData.bending.forward;
             muscle._mode = bending;
         }
         muscle._frontAngle = cellTO.cellTypeData.muscle.frontAngle;
@@ -641,14 +639,12 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
         MuscleTO& muscleTO = cellTO.cellTypeData.muscle;
         muscleTO.mode = muscleDesc.getMode();
         if (muscleTO.mode == MuscleMode_Bending) {
-            auto const& bendingDesc = std::get<BendingDescription>(muscleDesc._mode);
-            BendingTO& bendingTO = muscleTO.modeData.bending;
+            auto const& bendingDesc = std::get<AutoBendingDescription>(muscleDesc._mode);
+            AutoBendingTO& bendingTO = muscleTO.modeData.bending;
             bendingTO.maxAngleDeviation = bendingDesc._maxAngleDeviation;
-            bendingTO.forwardVel = bendingDesc._forwardVel;
-            bendingTO.backwardVel = bendingDesc._backwardVel;
-            bendingTO.offset = bendingDesc._offset;
-            bendingTO.offsetCounter = bendingDesc._offsetCounter;
-            bendingTO.currentStep = bendingDesc._currentStep;
+            bendingTO.frontBackVelRatio = bendingDesc._frontBackVelRatio;
+            bendingTO.initialAngle = bendingDesc._initialAngle;
+            bendingTO.forward = bendingDesc._forward;
         }
         muscleTO.frontAngle = muscleDesc._frontAngle;
         muscleTO.lastMovementX = muscleDesc._lastMovementX;
