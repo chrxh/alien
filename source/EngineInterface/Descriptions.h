@@ -297,21 +297,19 @@ struct InjectorDescription
     int _genomeGeneration = 0;
 };
 
-struct BendingDescription
+struct AutoBendingDescription
 {
-    auto operator<=>(BendingDescription const&) const = default;
+    auto operator<=>(AutoBendingDescription const&) const = default;
 
     // Fixed data
     float _maxAngleDeviation = 20.0f; // Between 0 and 180 deg
-    float _forwardVel = 0.5f;   // Between 0 and 1
-    float _backwardVel = 0.5f;   // Between 0 and 1
-    int _offset = 0;            // In time steps
+    float _frontBackVelRatio = 1.0;  // Between 0 and 1
 
     // Process data
-    int _currentStep = 0;
-    int _offsetCounter = 0;
+    float _initialAngle = 0;
+    bool _forward = true;  // Current direction
 };
-using MuscleModeDescription = std::variant<BendingDescription>;
+using MuscleModeDescription = std::variant<AutoBendingDescription>;
 
 struct MuscleDescription
 {

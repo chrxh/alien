@@ -190,23 +190,11 @@ struct BendingGenomeDescription
     auto operator<=>(BendingGenomeDescription const&) const = default;
 
     float _maxAngleDeviation = 20.0f;   // Between 0 and 180 deg
-    float _forwardVel = 0.5f;   // Between 0 and 1
-    float _backwardVel = 0.5f;  // Between 0 and 1
-    int _offset = 0;            // In time steps
+    float _frontBackVelRatio = 0;      // Between 0 and 1
 
     BendingGenomeDescription& maxAngleDeviation(float value)
     {
         _maxAngleDeviation = value;
-        return *this;
-    }
-    BendingGenomeDescription& bendForwardVel(float value)
-    {
-        _forwardVel = value;
-        return *this;
-    }
-    BendingGenomeDescription& bendBackwardVel(float value)
-    {
-        _backwardVel = value;
         return *this;
     }
 };

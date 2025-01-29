@@ -78,9 +78,7 @@ namespace
     auto constexpr Id_DefenderGenome_Mode = 0;
 
     auto constexpr Id_MuscleModeGenome_Bending_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleModeGenome_Bending_ForwardVel = 1;
-    auto constexpr Id_MuscleModeGenome_Bending_BackwardVel = 2;
-    auto constexpr Id_MuscleModeGenome_Bending_Offset = 3;
+    auto constexpr Id_MuscleModeGenome_Bending_FrontBackVelRatio = 4;
 
     auto constexpr Id_InjectorGenome_Mode = 0;
 
@@ -162,11 +160,9 @@ namespace
     auto constexpr Id_Muscle_LastMovementY = 5;
 
     auto constexpr Id_MuscleMode_Bending_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleMode_Bending_ForwardVel = 1;
-    auto constexpr Id_MuscleMode_Bending_BackwardVel = 2;
-    auto constexpr Id_MuscleMode_Bending_Offset = 3;
-    auto constexpr Id_MuscleMode_Bending_CurrentStep = 4;
-    auto constexpr Id_MuscleMode_Bending_OffsetCounter = 5;
+    auto constexpr Id_MuscleMode_Bending_FrontBackVelRatio = 6;
+    auto constexpr Id_MuscleMode_Bending_InitialAngle = 6;
+    auto constexpr Id_MuscleMode_Bending_Forward = 6;
 
     auto constexpr Id_Injector_Mode = 0;
     auto constexpr Id_Injector_Counter = 1;
@@ -409,9 +405,7 @@ namespace cereal
         BendingGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_MuscleModeGenome_Bending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
-        loadSave(task, auxiliaries, Id_MuscleModeGenome_Bending_ForwardVel, data._forwardVel, defaultObject._forwardVel);
-        loadSave(task, auxiliaries, Id_MuscleModeGenome_Bending_BackwardVel, data._backwardVel, defaultObject._backwardVel);
-        loadSave(task, auxiliaries, Id_MuscleModeGenome_Bending_Offset, data._offset, defaultObject._offset);
+        loadSave(task, auxiliaries, Id_MuscleModeGenome_Bending_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(BendingGenomeDescription)
@@ -676,19 +670,17 @@ namespace cereal
     SPLIT_SERIALIZATION(InjectorDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, BendingDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, AutoBendingDescription& data)
     {
-        BendingDescription defaultObject;
+        AutoBendingDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_MuscleMode_Bending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
-        loadSave(task, auxiliaries, Id_MuscleMode_Bending_ForwardVel, data._forwardVel, defaultObject._forwardVel);
-        loadSave(task, auxiliaries, Id_MuscleMode_Bending_BackwardVel, data._backwardVel, defaultObject._backwardVel);
-        loadSave(task, auxiliaries, Id_MuscleMode_Bending_Offset, data._offset, defaultObject._offset);
-        loadSave(task, auxiliaries, Id_MuscleMode_Bending_CurrentStep, data._currentStep, defaultObject._currentStep);
-        loadSave(task, auxiliaries, Id_MuscleMode_Bending_OffsetCounter, data._offsetCounter, defaultObject._offsetCounter);
+        loadSave(task, auxiliaries, Id_MuscleMode_Bending_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
+        loadSave(task, auxiliaries, Id_MuscleMode_Bending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
+        loadSave(task, auxiliaries, Id_MuscleMode_Bending_Forward, data._forward, defaultObject._forward);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(BendingDescription)
+    SPLIT_SERIALIZATION(AutoBendingDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, MuscleDescription& data)
