@@ -303,11 +303,13 @@ struct BendingDescription
 
     // Fixed data
     float _maxAngleDeviation = 20.0f; // Between 0 and 180 deg
-    float _bendForwardVel = 0.5f;   // Between 0 and 1
-    float _bendBackwardVel = 0.5f;   // Between 0 and 1
+    float _forwardVel = 0.5f;   // Between 0 and 1
+    float _backwardVel = 0.5f;   // Between 0 and 1
+    int _offset = 0;            // In time steps
 
     // Process data
     int _currentStep = 0;
+    int _offsetCounter = 0;
 };
 using MuscleModeDescription = std::variant<BendingDescription>;
 

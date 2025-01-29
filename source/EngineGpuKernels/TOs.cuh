@@ -110,11 +110,13 @@ struct BendingTO
 {
     // Fixed data
     float maxAngleDeviation;  // Between 0 and 180 deg
-    float bendForwardVel;   // Between 0 and 1
-    float bendBackwardVel;  // Between 0 and 1
+    float forwardVel;   // Between 0 and 1
+    float backwardVel;  // Between 0 and 1
+    uint8_t offset;     // In time steps
 
     // Process data
     uint16_t currentStep;
+    uint8_t offsetCounter;
 };
 
 union MuscleModeTO

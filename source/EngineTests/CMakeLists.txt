@@ -14,6 +14,7 @@ PUBLIC
     IntegrationTestFramework.h
     LivingStateTransitionTests.cpp
     MuscleTests.cpp
+    MuscleTests_New.cpp
     MutationTests.cpp
     NeuronTests.cpp
     OscillatorTests_New.cpp

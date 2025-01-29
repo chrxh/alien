@@ -77,9 +77,10 @@ namespace
 
     auto constexpr Id_DefenderGenome_Mode = 0;
 
-    auto constexpr Id_MuscleModeGenome_AutoTriggerInterval = 0;
-    auto constexpr Id_MuscleModeGenome_BendForwardVel = 1;
-    auto constexpr Id_MuscleModeGenome_BendBackwardVel = 2;
+    auto constexpr Id_MuscleModeGenome_Bending_MaxAngleDeviation = 0;
+    auto constexpr Id_MuscleModeGenome_Bending_ForwardVel = 1;
+    auto constexpr Id_MuscleModeGenome_Bending_BackwardVel = 2;
+    auto constexpr Id_MuscleModeGenome_Bending_Offset = 3;
 
     auto constexpr Id_InjectorGenome_Mode = 0;
 
@@ -160,10 +161,12 @@ namespace
     auto constexpr Id_Muscle_LastMovementX = 4;
     auto constexpr Id_Muscle_LastMovementY = 5;
 
-    auto constexpr Id_MuscleMode_AutoTriggerInterval = 0;
-    auto constexpr Id_MuscleMode_BendForwardVel = 1;
-    auto constexpr Id_MuscleMode_BendBackwardVel = 2;
-    auto constexpr Id_MuscleMode_CurrentStep = 3;
+    auto constexpr Id_MuscleMode_Bending_MaxAngleDeviation = 0;
+    auto constexpr Id_MuscleMode_Bending_ForwardVel = 1;
+    auto constexpr Id_MuscleMode_Bending_BackwardVel = 2;
+    auto constexpr Id_MuscleMode_Bending_Offset = 3;
+    auto constexpr Id_MuscleMode_Bending_CurrentStep = 4;
+    auto constexpr Id_MuscleMode_Bending_OffsetCounter = 5;
 
     auto constexpr Id_Injector_Mode = 0;
     auto constexpr Id_Injector_Counter = 1;
@@ -405,9 +408,10 @@ namespace cereal
     {
         BendingGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_MuscleModeGenome_AutoTriggerInterval, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
-        loadSave(task, auxiliaries, Id_MuscleModeGenome_BendForwardVel, data._bendForwardVel, defaultObject._bendForwardVel);
-        loadSave(task, auxiliaries, Id_MuscleModeGenome_BendBackwardVel, data._bendBackwardVel, defaultObject._bendBackwardVel);
+        loadSave(task, auxiliaries, Id_MuscleModeGenome_Bending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
+        loadSave(task, auxiliaries, Id_MuscleModeGenome_Bending_ForwardVel, data._forwardVel, defaultObject._forwardVel);
+        loadSave(task, auxiliaries, Id_MuscleModeGenome_Bending_BackwardVel, data._backwardVel, defaultObject._backwardVel);
+        loadSave(task, auxiliaries, Id_MuscleModeGenome_Bending_Offset, data._offset, defaultObject._offset);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(BendingGenomeDescription)
@@ -676,10 +680,12 @@ namespace cereal
     {
         BendingDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_MuscleMode_AutoTriggerInterval, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
-        loadSave(task, auxiliaries, Id_MuscleMode_BendForwardVel, data._bendForwardVel, defaultObject._bendForwardVel);
-        loadSave(task, auxiliaries, Id_MuscleMode_BendBackwardVel, data._bendBackwardVel, defaultObject._bendBackwardVel);
-        loadSave(task, auxiliaries, Id_MuscleMode_CurrentStep, data._currentStep, defaultObject._currentStep);
+        loadSave(task, auxiliaries, Id_MuscleMode_Bending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
+        loadSave(task, auxiliaries, Id_MuscleMode_Bending_ForwardVel, data._forwardVel, defaultObject._forwardVel);
+        loadSave(task, auxiliaries, Id_MuscleMode_Bending_BackwardVel, data._backwardVel, defaultObject._backwardVel);
+        loadSave(task, auxiliaries, Id_MuscleMode_Bending_Offset, data._offset, defaultObject._offset);
+        loadSave(task, auxiliaries, Id_MuscleMode_Bending_CurrentStep, data._currentStep, defaultObject._currentStep);
+        loadSave(task, auxiliaries, Id_MuscleMode_Bending_OffsetCounter, data._offsetCounter, defaultObject._offsetCounter);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(BendingDescription)

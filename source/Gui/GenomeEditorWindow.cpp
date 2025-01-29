@@ -755,10 +755,12 @@ void GenomeEditorWindow::processNode(
                 table.next();
                 AlienImGui::InputFloat(
                     AlienImGui::InputFloatParameters().name("Bend forward vel").format("%.1f").textWidth(ContentHeaderTextWidth),
-                    bending._bendForwardVel);
+                    bending._forwardVel);
                 table.next();
                 AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters().name("Bend backward vel").format("%.1f").textWidth(ContentHeaderTextWidth), bending._bendBackwardVel);
+                    AlienImGui::InputFloatParameters().name("Bend backward vel").format("%.1f").textWidth(ContentHeaderTextWidth), bending._backwardVel);
+                table.next();
+                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Offset").textWidth(ContentTextWidth), bending._offset);
             }
         } break;
         case CellType_Defender: {

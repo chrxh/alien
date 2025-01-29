@@ -479,8 +479,10 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
         if (cellTO.cellTypeData.muscle.mode == MuscleMode_Bending) {
             BendingDescription bending;
             bending._maxAngleDeviation = cellTO.cellTypeData.muscle.modeData.bending.maxAngleDeviation;
-            bending._bendForwardVel = cellTO.cellTypeData.muscle.modeData.bending.bendForwardVel;
-            bending._bendBackwardVel = cellTO.cellTypeData.muscle.modeData.bending.bendBackwardVel;
+            bending._forwardVel = cellTO.cellTypeData.muscle.modeData.bending.forwardVel;
+            bending._backwardVel = cellTO.cellTypeData.muscle.modeData.bending.backwardVel;
+            bending._offset = cellTO.cellTypeData.muscle.modeData.bending.offset;
+            bending._offsetCounter = cellTO.cellTypeData.muscle.modeData.bending.offsetCounter;
             bending._currentStep = cellTO.cellTypeData.muscle.modeData.bending.currentStep;
             muscle._mode = bending;
         }
@@ -642,8 +644,10 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
             auto const& bendingDesc = std::get<BendingDescription>(muscleDesc._mode);
             BendingTO& bendingTO = muscleTO.modeData.bending;
             bendingTO.maxAngleDeviation = bendingDesc._maxAngleDeviation;
-            bendingTO.bendForwardVel = bendingDesc._bendForwardVel;
-            bendingTO.bendBackwardVel = bendingDesc._bendBackwardVel;
+            bendingTO.forwardVel = bendingDesc._forwardVel;
+            bendingTO.backwardVel = bendingDesc._backwardVel;
+            bendingTO.offset = bendingDesc._offset;
+            bendingTO.offsetCounter = bendingDesc._offsetCounter;
             bendingTO.currentStep = bendingDesc._currentStep;
         }
         muscleTO.frontAngle = muscleDesc._frontAngle;
