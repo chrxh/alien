@@ -157,6 +157,9 @@ struct AutoBending
     // Process data
     float initialAngle;
     bool forward;  // Current direction
+    float lastAngle;
+    float activation;
+    int activationCountdown;
 };
 
 union MuscleModeData

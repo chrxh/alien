@@ -163,6 +163,8 @@ namespace
     auto constexpr Id_MuscleMode_Bending_FrontBackVelRatio = 6;
     auto constexpr Id_MuscleMode_Bending_InitialAngle = 6;
     auto constexpr Id_MuscleMode_Bending_Forward = 6;
+    auto constexpr Id_MuscleMode_Bending_Activation = 7;
+    auto constexpr Id_MuscleMode_Bending_ActivationCountdown = 8;
 
     auto constexpr Id_Injector_Mode = 0;
     auto constexpr Id_Injector_Counter = 1;
@@ -678,6 +680,8 @@ namespace cereal
         loadSave(task, auxiliaries, Id_MuscleMode_Bending_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
         loadSave(task, auxiliaries, Id_MuscleMode_Bending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
         loadSave(task, auxiliaries, Id_MuscleMode_Bending_Forward, data._forward, defaultObject._forward);
+        loadSave(task, auxiliaries, Id_MuscleMode_Bending_Activation, data._activation, defaultObject._activation);
+        loadSave(task, auxiliaries, Id_MuscleMode_Bending_ActivationCountdown, data._activationCountdown, defaultObject._activationCountdown);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AutoBendingDescription)

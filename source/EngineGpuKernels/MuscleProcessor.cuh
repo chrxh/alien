@@ -121,6 +121,14 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
     if (cell->numConnections != 2) {
         return;
     }
+    if (cell->signal.active) {
+        bending.activation = max(-1.0f, min(1.0f, cell->signal.channels[0]));
+        bending.activationCountdown = 20;
+    }
+    if (bending.activationCountdown == 0) {
+        return;
+    }
+
     if (SignalProcessor::isAutoTriggered(data, cell, 10)) {
 
         if (bending.initialAngle == 0) {
@@ -136,15 +144,15 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
 
         auto maxAngle = min(bending.initialAngle + bending.maxAngleDeviation, 300.0f);
 
-        if (!bending.forward && (cell->connections[0].angleFromPrevious > maxAngle || cell->connections[1].angleFromPrevious < 60.0f)) {
-            bending.forward = true;
+        if (cell->connections[0].angleFromPrevious > maxAngle || cell->connections[1].angleFromPrevious < 60.0f) {
+            bending.forward = bending.activation >= 0;
         }
-        if (bending.forward && (cell->connections[0].angleFromPrevious < minAngle || cell->connections[1].angleFromPrevious > 300.0f)) {
-            bending.forward = false;
+        if (cell->connections[0].angleFromPrevious < minAngle || cell->connections[1].angleFromPrevious > 300.0f) {
+            bending.forward = bending.activation < 0;
         }
 
         auto angleDelta = bending.forward ? -(0.05f + bending.frontBackVelRatio) : 1.05f - bending.frontBackVelRatio;
-        angleDelta *= 5.0f;
+        angleDelta *= 5.0f * bending.activation;
 
         cell->connections[0].angleFromPrevious += angleDelta;
         cell->connections[1].angleFromPrevious -= angleDelta;
@@ -156,12 +164,13 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
             Math::rotateQuarterCounterClockwise(direction);
         }
         auto acceleration =
-            direction * angleDelta * angleDelta * angleDelta * angleDelta * cudaSimulationParameters.cellTypeMuscleBendingAcceleration[cell->color] / 2000.0f;
+            direction * angleDelta * angleDelta * cudaSimulationParameters.cellTypeMuscleBendingAcceleration[cell->color] / 40.0f;
         atomicAdd(&cell->connections[0].cell->vel.x, acceleration.x);
         atomicAdd(&cell->connections[0].cell->vel.y, acceleration.y);
 
         statistics.incNumMuscleActivities(cell->color);
         radiate(data, cell);
+        --bending.activationCountdown;
     }
 }
 
