@@ -161,10 +161,12 @@ namespace
 
     auto constexpr Id_MuscleMode_Bending_MaxAngleDeviation = 0;
     auto constexpr Id_MuscleMode_Bending_FrontBackVelRatio = 6;
-    auto constexpr Id_MuscleMode_Bending_InitialAngle = 6;
-    auto constexpr Id_MuscleMode_Bending_Forward = 6;
-    auto constexpr Id_MuscleMode_Bending_Activation = 7;
-    auto constexpr Id_MuscleMode_Bending_ActivationCountdown = 8;
+    auto constexpr Id_MuscleMode_Bending_InitialAngle = 7;
+    auto constexpr Id_MuscleMode_Bending_Forward = 8;
+    auto constexpr Id_MuscleMode_Bending_Activation = 9;
+    auto constexpr Id_MuscleMode_Bending_ActivationCountdown = 10;
+    auto constexpr Id_MuscleMode_Bending_LastAngle = 11;
+    auto constexpr Id_MuscleMode_Bending_ImpulseAlreadyApplied = 12;
 
     auto constexpr Id_Injector_Mode = 0;
     auto constexpr Id_Injector_Counter = 1;
@@ -679,9 +681,11 @@ namespace cereal
         loadSave(task, auxiliaries, Id_MuscleMode_Bending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
         loadSave(task, auxiliaries, Id_MuscleMode_Bending_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
         loadSave(task, auxiliaries, Id_MuscleMode_Bending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
+        loadSave(task, auxiliaries, Id_MuscleMode_Bending_LastAngle, data._lastAngle, defaultObject._lastAngle);
         loadSave(task, auxiliaries, Id_MuscleMode_Bending_Forward, data._forward, defaultObject._forward);
         loadSave(task, auxiliaries, Id_MuscleMode_Bending_Activation, data._activation, defaultObject._activation);
         loadSave(task, auxiliaries, Id_MuscleMode_Bending_ActivationCountdown, data._activationCountdown, defaultObject._activationCountdown);
+        loadSave(task, auxiliaries, Id_MuscleMode_Bending_ImpulseAlreadyApplied, data._impulseAlreadyApplied, defaultObject._impulseAlreadyApplied);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AutoBendingDescription)

@@ -156,10 +156,11 @@ struct AutoBending
 
     // Process data
     float initialAngle;
-    bool forward;  // Current direction
     float lastAngle;
+    bool forward;  // Current direction
     float activation;
-    int activationCountdown;
+    uint8_t activationCountdown;
+    bool impulseAlreadyApplied;
 };
 
 union MuscleModeData
@@ -355,7 +356,6 @@ struct Cell
             }
         }
         if (connectionIndex1 == -1 || connectionIndex2 == -1) {
-            CUDA_CHECK(false);
             return 0;
         }
         return getAngelSpan(connectionIndex1, connectionIndex2);

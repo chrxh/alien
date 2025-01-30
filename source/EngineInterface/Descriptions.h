@@ -307,9 +307,11 @@ struct AutoBendingDescription
 
     // Process data
     float _initialAngle = 0;
+    float _lastAngle = 0;
     bool _forward = true;  // Current direction
     float _activation = 0;
     int _activationCountdown = 0;
+    bool _impulseAlreadyApplied = false;
 };
 using MuscleModeDescription = std::variant<AutoBendingDescription>;
 

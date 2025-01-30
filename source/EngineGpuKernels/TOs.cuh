@@ -114,9 +114,11 @@ struct AutoBendingTO
 
     // Process data
     float initialAngle;
+    float lastAngle;
     bool forward;  // Current direction
     float activation;
-    int activationCountdown;
+    uint8_t activationCountdown;
+    bool impulseAlreadyApplied;
 };
 
 union MuscleModeTO
