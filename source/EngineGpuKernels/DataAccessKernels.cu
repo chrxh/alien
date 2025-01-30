@@ -146,9 +146,11 @@ namespace
                 cellTO.cellTypeData.muscle.modeData.bending.maxAngleDeviation = cell->cellTypeData.muscle.modeData.bending.maxAngleDeviation;
                 cellTO.cellTypeData.muscle.modeData.bending.frontBackVelRatio = cell->cellTypeData.muscle.modeData.bending.frontBackVelRatio;
                 cellTO.cellTypeData.muscle.modeData.bending.initialAngle = cell->cellTypeData.muscle.modeData.bending.initialAngle;
+                cellTO.cellTypeData.muscle.modeData.bending.lastAngle = cell->cellTypeData.muscle.modeData.bending.lastAngle;
                 cellTO.cellTypeData.muscle.modeData.bending.forward = cell->cellTypeData.muscle.modeData.bending.forward;
                 cellTO.cellTypeData.muscle.modeData.bending.activation = cell->cellTypeData.muscle.modeData.bending.activation;
                 cellTO.cellTypeData.muscle.modeData.bending.activationCountdown = cell->cellTypeData.muscle.modeData.bending.activationCountdown;
+                cellTO.cellTypeData.muscle.modeData.bending.impulseAlreadyApplied = cell->cellTypeData.muscle.modeData.bending.impulseAlreadyApplied;
             }
             cellTO.cellTypeData.muscle.frontAngle = cell->cellTypeData.muscle.frontAngle;
             cellTO.cellTypeData.muscle.lastMovementX = cell->cellTypeData.muscle.lastMovementX;
