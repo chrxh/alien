@@ -50,12 +50,15 @@ namespace
 
 _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimulation const& settings)
 {
+    printf("A\n");
     initCuda();
+    printf("B\n");
     CudaMemoryManager::getInstance().reset();
+    printf("C\n");
 
     _settings = settings;
     setSimulationParameters(settings.simulationParameters);
-    setGpuConstants(settings.gpuSettings);
+    printf("E\n");
 
     log(Priority::Important, "initialize simulation");
 
@@ -78,12 +81,20 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     _editKernels = std::make_shared<_EditKernelsLauncher>();
     _statisticsKernels = std::make_shared<_StatisticsKernelsLauncher>();
 
+    printf("F\n");
+
     CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _cudaAccessTO->numCells);
     CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _cudaAccessTO->numParticles);
     CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _cudaAccessTO->numAuxiliaryData);
 
+    printf("G\n");
+
     //default array sizes for empty simulation (will be resized later if not sufficient)
     resizeArrays({100000, 100000, 100000});
+
+    printf("D\n");
+    setGpuConstants(settings.gpuSettings);
+    printf("H\n");
 }
 
 _SimulationCudaFacade::~_SimulationCudaFacade()
