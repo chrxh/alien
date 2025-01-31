@@ -109,9 +109,6 @@ __inline__ __device__  void SignalProcessor::calcFutureSignals(SimulationData& d
                 ++numSensorSignals;
             }
         }
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
-            cell->futureSignal.channels[i] = max(-10.0f, min(10.0f, cell->futureSignal.channels[i]));  // truncate value to avoid overflow
-        }
         if (numSensorSignals > 0) {
             cell->futureSignal.targetX /= toFloat(numSensorSignals);
             cell->futureSignal.targetY /= toFloat(numSensorSignals);

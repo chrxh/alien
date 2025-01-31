@@ -49,9 +49,8 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     }
 
     __shared__ float sumInput[MAX_CHANNELS];
-    auto channelPartition = calcPartition(MAX_CHANNELS, threadIdx.x, blockDim.x);
-    for (int i = channelPartition.startIndex; i <= channelPartition.endIndex; ++i) {
-        sumInput[i] = cell->neuralNetwork->biases[i];
+    if (threadIdx.x < MAX_CHANNELS) {
+        sumInput[threadIdx.x] = cell->neuralNetwork->biases[threadIdx.x];
     }
     __syncthreads();
 
@@ -59,12 +58,15 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
 
     auto row = threadIdx.x / MAX_CHANNELS;
     auto col = threadIdx.x % MAX_CHANNELS;
-    atomicAdd(&sumInput[row], neuronsState->weights[threadIdx.x] * signal.channels[col]);
+    atomicAdd_block(&sumInput[row], neuronsState->weights[threadIdx.x] * signal.channels[col]);
 
     __syncthreads();
 
-    for (int i = channelPartition.startIndex; i <= channelPartition.endIndex; ++i) {
-        signal.channels[i] = applyActivationFunction(cell->neuralNetwork->activationFunctions[i], sumInput[i]);  
+    if (threadIdx.x < MAX_CHANNELS) {
+        signal.channels[threadIdx.x] = max(
+            -1.0f,
+            min(1.0f,
+                applyActivationFunction(cell->neuralNetwork->activationFunctions[threadIdx.x], sumInput[threadIdx.x])));  // truncate value to avoid overflow
     }
     __syncthreads();
     
