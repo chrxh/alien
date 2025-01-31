@@ -604,7 +604,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_orientation_upperSide)
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(3);
+    _simulationFacade->calcTimesteps(4);
 
     auto actualData = _simulationFacade->getSimulationData();
 
