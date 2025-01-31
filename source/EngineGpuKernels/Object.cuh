@@ -158,6 +158,7 @@ struct AutoBending
     float initialAngle;
     float lastAngle;
     bool forward;  // Current direction
+    BendingMode bendingMode;
     float activation;
     uint8_t activationCountdown;
     bool impulseAlreadyApplied;

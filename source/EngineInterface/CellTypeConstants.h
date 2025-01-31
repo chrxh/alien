@@ -65,6 +65,13 @@ enum EnergyDistributionMode_
     EnergyDistributionMode_Count
 };
 
+using BendingMode = uint8_t;
+enum BendingMode_
+{
+    BendingMode_BackAndForth,
+    BendingMode_OneDirection
+};
+
 using MuscleMode = int;
 enum MuscleMode_
 {

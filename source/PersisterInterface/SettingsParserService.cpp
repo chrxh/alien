@@ -596,12 +596,6 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellTypeMuscleBendingAngle,
-            defaultParameters.cellTypeMuscleBendingAngle,
-            "simulation parameters.cell.function.muscle.bending angle",
-            parserTask);
-        ParameterParser::encodeDecode(
-            tree,
             parameters.cellTypeMuscleBendingAcceleration,
             defaultParameters.cellTypeMuscleBendingAcceleration,
             "simulation parameters.cell.function.muscle.bending acceleration",

@@ -118,7 +118,6 @@ struct SimulationParameters
 
     ColorVector<float> cellTypeConstructorConnectingCellMaxDistance = {2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f};
     float cellTypeConstructorAdditionalOffspringDistance = 0.8f;
-    
     bool cellTypeConstructorCheckCompletenessForSelfReplication = false;
 
     ColorMatrix<bool> cellCopyMutationColorTransitions = {
@@ -178,9 +177,9 @@ struct SimulationParameters
 
     ColorVector<float> cellTypeMuscleContractionExpansionDelta = {0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f};
     ColorVector<float> cellTypeMuscleMovementAcceleration = {0.02f, 0.02f, 0.02f, 0.02f, 0.02f, 0.02f, 0.02f};
-    ColorVector<float> cellTypeMuscleBendingAngle = {5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f};
     ColorVector<float> cellTypeMuscleBendingAcceleration = {0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f};
     ColorVector<float> cellTypeMuscleEnergyCost = {0, 0, 0, 0, 0, 0, 0};
+    static float constexpr cellTypeMuscleThreshold = 0.2f;
 
     ColorVector<float> cellTypeSensorRange = {255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f};
 

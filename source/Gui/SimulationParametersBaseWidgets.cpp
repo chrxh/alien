@@ -909,17 +909,6 @@ void _SimulationParametersBaseWidgets::process()
             parameters.cellTypeMuscleContractionExpansionDelta);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Bending angle")
-                .textWidth(RightColumnWidth)
-                .colorDependence(true)
-                .min(0)
-                .max(10.0f)
-                .defaultValue(origParameters.cellTypeMuscleBendingAngle)
-                .tooltip("The maximum value by which a muscle cell can increase/decrease the angle between two cell connections. This parameter applies "
-                         "only to muscle cells which are in bending mode."),
-            parameters.cellTypeMuscleBendingAngle);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
                 .name("Bending acceleration")
                 .textWidth(RightColumnWidth)
                 .colorDependence(true)
