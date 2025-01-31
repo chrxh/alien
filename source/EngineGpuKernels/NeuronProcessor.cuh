@@ -64,8 +64,8 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
 
     if (threadIdx.x < MAX_CHANNELS) {
         signal.channels[threadIdx.x] = max(
-            -1.0f,
-            min(1.0f,
+            -2.0f,
+            min(2.0f,
                 applyActivationFunction(cell->neuralNetwork->activationFunctions[threadIdx.x], sumInput[threadIdx.x])));  // truncate value to avoid overflow
     }
     __syncthreads();

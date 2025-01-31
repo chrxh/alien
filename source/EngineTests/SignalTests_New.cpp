@@ -94,8 +94,8 @@ TEST_F(SignalTests_New, vanishSignal_relaxationNeeded)
 
 TEST_F(SignalTests_New, mergeSignals)
 {
-    std::vector<float> signal1 = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
-    std::vector<float> signal2 = {-0.5f, -2.0f, 0.5f, 1.0f, 1.5f, -1.5f, 0.5f, -0.5f};
+    std::vector<float> signal1 = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 1.0f, -1.0f, 0.0f};
+    std::vector<float> signal2 = {-0.5f, -1.0f, 0.5f, 1.0f, 0.7f, -0.7f, 0.5f, -0.5f};
     auto data = DataDescription().addCells({
         CellDescription().id(1).pos({0, 0}).signal(signal1),
         CellDescription().id(2).pos({1, 0}),
