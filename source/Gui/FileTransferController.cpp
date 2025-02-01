@@ -28,7 +28,7 @@ void FileTransferController::onOpenSimulation(std::filesystem::path const& filen
     _openSimulationProcessor->executeTask(
         [&](auto const& senderId) {
             auto senderInfo = SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true};
-            auto readData = ReadSimulationRequestData{filename.string()};
+            auto readData = ReadSimulationRequestData{.filename = filename.string(), .initSimulation = false};
             return _persisterFacade->scheduleReadSimulation(senderInfo, readData);
         },
         [&](auto const& requestId) {

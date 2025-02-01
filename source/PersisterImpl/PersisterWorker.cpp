@@ -255,13 +255,27 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, ReadSi
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The selected file could not be opened."});
         }
+        if (requestData.initSimulation) {
+            try {
+                _simulationFacade->closeSimulation();
+                _simulationFacade->newSimulation(
+                    deserializedData.auxiliaryData.timestep, deserializedData.auxiliaryData.worldSize, deserializedData.auxiliaryData.simulationParameters);
+                _simulationFacade->setClusteredSimulationData(deserializedData.mainData);
+                _simulationFacade->setStatisticsHistory(deserializedData.statistics);
+                _simulationFacade->setRealTime(deserializedData.auxiliaryData.realTime);
+            } catch (CudaMemoryAllocationException const& exception) {
+                return std::make_shared<_PersisterRequestError>(
+                    request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{exception.what()});
+            }
+        }
+
         return std::make_shared<_ReadSimulationRequestResult>(
             request->getRequestId(), ReadSimulationResultData{std::filesystem::path(requestData.filename).filename(), deserializedData});
     } catch (...) {
         return std::make_shared<_PersisterRequestError>(
             request->getRequestId(),
             request->getSenderInfo().senderId,
-            PersisterErrorInfo{"The simulation could not be loaded because an error occurred when deserializing the data from the file."});
+            PersisterErrorInfo{"Failed to load simulation."});
     }
 }
 
