@@ -214,11 +214,13 @@ bool _SimulationFacadeImpl::isSimulationRunning() const
 
 void _SimulationFacadeImpl::closeSimulation()
 {
-    _worker.beginShutdown();
-    _thread->join();
-    delete _thread;
-    _worker.endShutdown();
-    _selectionNeedsUpdate = true;
+    if (_thread) {
+        _worker.beginShutdown();
+        _thread->join();
+        delete _thread;
+        _worker.endShutdown();
+        _selectionNeedsUpdate = true;
+    }
 }
 
 uint64_t _SimulationFacadeImpl::getCurrentTimestep() const

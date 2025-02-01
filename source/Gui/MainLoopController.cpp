@@ -129,7 +129,7 @@ void MainLoopController::processFirstTick()
     drawLoadingScreen();
 
     auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = true};
-    auto readData = ReadSimulationRequestData{Const::AutosaveFile};
+    auto readData = ReadSimulationRequestData{.filename = Const::AutosaveFile, .initSimulation = true};
     _loadSimRequestId = _persisterFacade->scheduleReadSimulation(senderInfo, readData);
     _programState = ProgramState::LoadingScreen;
 
@@ -146,11 +146,6 @@ void MainLoopController::processLoadingScreen()
     if (requestedSimState == PersisterRequestState::Finished) {
         auto const& data = _persisterFacade->fetchReadSimulationData(_loadSimRequestId);
         auto const& deserializedSim = data.deserializedSimulation;
-        _simulationFacade->newSimulation(
-            deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.worldSize, deserializedSim.auxiliaryData.simulationParameters);
-        _simulationFacade->setClusteredSimulationData(deserializedSim.mainData);
-        _simulationFacade->setStatisticsHistory(deserializedSim.statistics);
-        _simulationFacade->setRealTime(deserializedSim.auxiliaryData.realTime);
         Viewport::get().setCenterInWorldPos(deserializedSim.auxiliaryData.center);
         Viewport::get().setZoomFactor(deserializedSim.auxiliaryData.zoom);
         TemporalControlWindow::get().onSnapshot();
