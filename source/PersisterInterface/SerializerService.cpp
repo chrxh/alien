@@ -159,15 +159,25 @@ namespace
     auto constexpr Id_Muscle_LastMovementX = 4;
     auto constexpr Id_Muscle_LastMovementY = 5;
 
-    auto constexpr Id_MuscleMode_Bending_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleMode_Bending_FrontBackVelRatio = 6;
-    auto constexpr Id_MuscleMode_Bending_InitialAngle = 7;
-    auto constexpr Id_MuscleMode_Bending_Forward = 8;
-    auto constexpr Id_MuscleMode_Bending_Activation = 9;
-    auto constexpr Id_MuscleMode_Bending_ActivationCountdown = 10;
-    auto constexpr Id_MuscleMode_Bending_LastAngle = 11;
-    auto constexpr Id_MuscleMode_Bending_ImpulseAlreadyApplied = 12;
-    auto constexpr Id_MuscleMode_Bending_BendingMode = 13;
+    auto constexpr Id_MuscleMode_AutoBending_MaxAngleDeviation = 0;
+    auto constexpr Id_MuscleMode_AutoBending_FrontBackVelRatio = 6;
+    auto constexpr Id_MuscleMode_AutoBending_InitialAngle = 7;
+    auto constexpr Id_MuscleMode_AutoBending_Forward = 8;
+    auto constexpr Id_MuscleMode_AutoBending_Activation = 9;
+    auto constexpr Id_MuscleMode_AutoBending_ActivationCountdown = 10;
+    auto constexpr Id_MuscleMode_AutoBending_LastAngle = 11;
+    auto constexpr Id_MuscleMode_AutoBending_ImpulseAlreadyApplied = 12;
+    auto constexpr Id_MuscleMode_AutoBending_BendingMode = 13;
+
+    auto constexpr Id_MuscleMode_AutoCrawling_MaxAngleDeviation = 0;
+    auto constexpr Id_MuscleMode_AutoCrawling_FrontBackVelRatio = 1;
+    auto constexpr Id_MuscleMode_AutoCrawling_InitialAngle = 2;
+    auto constexpr Id_MuscleMode_AutoCrawling_Forward = 3;
+    auto constexpr Id_MuscleMode_AutoCrawling_Activation = 4;
+    auto constexpr Id_MuscleMode_AutoCrawling_ActivationCountdown = 5;
+    auto constexpr Id_MuscleMode_AutoCrawling_LastAngle = 6;
+    auto constexpr Id_MuscleMode_AutoCrawling_ImpulseAlreadyApplied = 7;
+    auto constexpr Id_MuscleMode_AutoCrawling_BendingMode = 8;
 
     auto constexpr Id_Injector_Mode = 0;
     auto constexpr Id_Injector_Counter = 1;
@@ -679,18 +689,36 @@ namespace cereal
     {
         AutoBendingDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_MuscleMode_Bending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
-        loadSave(task, auxiliaries, Id_MuscleMode_Bending_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
-        loadSave(task, auxiliaries, Id_MuscleMode_Bending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
-        loadSave(task, auxiliaries, Id_MuscleMode_Bending_LastAngle, data._lastAngle, defaultObject._lastAngle);
-        loadSave(task, auxiliaries, Id_MuscleMode_Bending_Forward, data._forward, defaultObject._forward);
-        loadSave(task, auxiliaries, Id_MuscleMode_Bending_BendingMode, data._bendingMode, defaultObject._bendingMode);
-        loadSave(task, auxiliaries, Id_MuscleMode_Bending_Activation, data._activation, defaultObject._activation);
-        loadSave(task, auxiliaries, Id_MuscleMode_Bending_ActivationCountdown, data._activationCountdown, defaultObject._activationCountdown);
-        loadSave(task, auxiliaries, Id_MuscleMode_Bending_ImpulseAlreadyApplied, data._impulseAlreadyApplied, defaultObject._impulseAlreadyApplied);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_LastAngle, data._lastAngle, defaultObject._lastAngle);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_Forward, data._forward, defaultObject._forward);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_BendingMode, data._bendingMode, defaultObject._bendingMode);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_Activation, data._activation, defaultObject._activation);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_ActivationCountdown, data._activationCountdown, defaultObject._activationCountdown);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_ImpulseAlreadyApplied, data._impulseAlreadyApplied, defaultObject._impulseAlreadyApplied);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AutoBendingDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, AutoCrawlingDescription& data)
+    {
+        AutoCrawlingDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_MaxAngleDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_InitialAngle, data._initialAngle, defaultObject._initialAngle);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_LastAngle, data._lastAngle, defaultObject._lastAngle);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_Forward, data._forward, defaultObject._forward);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_BendingMode, data._bendingMode, defaultObject._bendingMode);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_Activation, data._activation, defaultObject._activation);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_ActivationCountdown, data._activationCountdown, defaultObject._activationCountdown);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_ImpulseAlreadyApplied, data._impulseAlreadyApplied, defaultObject._impulseAlreadyApplied);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(AutoCrawlingDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, MuscleDescription& data)

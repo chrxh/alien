@@ -151,7 +151,7 @@ struct InjectorType
 struct AutoBending
 {
     // Fixed data
-    float maxAngleDeviation; // Between 0 and 180 deg
+    float maxAngleDeviation; // Between 0 and 1
     float frontBackVelRatio;  // Between 0 and 1
 
     // Process data

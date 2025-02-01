@@ -749,7 +749,7 @@ void GenomeEditorWindow::processNode(
                 AlienImGui::InputFloat(
                     AlienImGui::InputFloatParameters()
                         .name("Max angle deviation")
-                        .format("%.1f")
+                        .format("%.2f")
                         .textWidth(ContentHeaderTextWidth),
                     bending._maxAngleDeviation);
                 table.next();

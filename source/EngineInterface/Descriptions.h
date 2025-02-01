@@ -308,19 +308,43 @@ struct AutoBendingDescription
     }
 
     // Fixed data
-    float _maxAngleDeviation = 20.0f; // Between 0 and 180 deg
+    float _maxAngleDeviation = 20.0f; // Between 0 and 1
     float _frontBackVelRatio = 0.2f;  // Between 0 and 1
 
     // Process data
+    BendingMode _bendingMode = BendingMode_BackAndForth;
     float _initialAngle = 0;
     float _lastAngle = 0;
     bool _forward = true;  // Current direction
-    BendingMode _bendingMode = BendingMode_BackAndForth;
     float _activation = 0;
     int _activationCountdown = 0;
     bool _impulseAlreadyApplied = false;
 };
-using MuscleModeDescription = std::variant<AutoBendingDescription>;
+
+struct AutoCrawlingDescription
+{
+    auto operator<=>(AutoCrawlingDescription const&) const = default;
+
+    AutoCrawlingDescription& maxDistanceDeviation(float value)
+    {
+        _maxDistanceDeviation = value;
+        return *this;
+    }
+
+    // Fixed data
+    float _maxDistanceDeviation = 20.0f; // Between 0 and 1
+    float _frontBackVelRatio = 0.2f;  // Between 0 and 1
+
+    // Process data
+    CrawlingMode _bendingMode = CrawlingMode_BackAndForth;
+    float _initialAngle = 0;
+    float _lastAngle = 0;
+    bool _forward = true;  // Current direction
+    float _activation = 0;
+    int _activationCountdown = 0;
+    bool _impulseAlreadyApplied = false;
+};
+using MuscleModeDescription = std::variant<AutoBendingDescription, AutoCrawlingDescription>;
 
 struct MuscleDescription
 {
