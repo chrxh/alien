@@ -72,6 +72,13 @@ enum BendingMode_
     BendingMode_OneDirection
 };
 
+using CrawlingMode = uint8_t;
+enum CrawlingMode_
+{
+    CrawlingMode_BackAndForth,
+    CrawlingMode_OneDirection
+};
+
 using MuscleMode = int;
 enum MuscleMode_
 {

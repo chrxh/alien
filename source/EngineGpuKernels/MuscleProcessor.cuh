@@ -169,8 +169,9 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
 
         // Change direction
         bool skipBending = false;
-        auto maxAngle = min(max(bending.initialAngle + bending.maxAngleDeviation, 60.0f), 300.0f);
-        auto minAngle = min(max(bending.initialAngle - bending.maxAngleDeviation, 60.0f), 300.0f);
+        auto maxAngleDeviation = min(bending.initialAngle, 360.0f - bending.initialAngle) * bending.maxAngleDeviation;
+        auto maxAngle = min(max(bending.initialAngle + maxAngleDeviation, 60.0f), 300.0f);
+        auto minAngle = min(max(bending.initialAngle - maxAngleDeviation, 60.0f), 300.0f);
         if (bending.bendingMode == BendingMode_BackAndForth) {
             if (cell->connections[0].angleFromPrevious > maxAngle - NEAR_ZERO) {
                 bending.forward = activation >= 0;
