@@ -169,21 +169,22 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
 
         // Change direction
         bool skipBending = false;
-        auto maxAngle = min(bending.initialAngle + bending.maxAngleDeviation, 300.0f);
-        if (!bending.forward && cell->connections[0].angleFromPrevious > maxAngle - NEAR_ZERO) {
-            if (bending.bendingMode == BendingMode_BackAndForth) {
+        auto maxAngle = min(max(bending.initialAngle + bending.maxAngleDeviation, 60.0f), 300.0f);
+        auto minAngle = min(max(bending.initialAngle - bending.maxAngleDeviation, 60.0f), 300.0f);
+        if (bending.bendingMode == BendingMode_BackAndForth) {
+            if (cell->connections[0].angleFromPrevious > maxAngle - NEAR_ZERO) {
                 bending.forward = activation >= 0;
                 bending.impulseAlreadyApplied = false;
-            } else {
-                skipBending = true;
             }
-        }
-        auto minAngle = max(bending.initialAngle - bending.maxAngleDeviation, 60.0f);
-        if (bending.forward && cell->connections[0].angleFromPrevious < minAngle + NEAR_ZERO) {
-            if (bending.bendingMode == BendingMode_BackAndForth) {
+            if (cell->connections[0].angleFromPrevious < minAngle + NEAR_ZERO) {
                 bending.forward = activation < 0;
                 bending.impulseAlreadyApplied = false;
-            } else {
+            }
+        } else {
+            if (!bending.forward && cell->connections[0].angleFromPrevious > maxAngle - NEAR_ZERO) {
+                skipBending = true;
+            }
+            if (bending.forward && cell->connections[0].angleFromPrevious < minAngle + NEAR_ZERO) {
                 skipBending = true;
             }
         }
