@@ -24,8 +24,6 @@ private:
     //__inline__ __device__ static bool hasTriangularConnection(Cell* cell, Cell* otherCell);
     //__inline__ __device__ static float getTruncatedUnitValue(Signal const& signal, int channel = 0);
     __inline__ __device__ static void radiate(SimulationData& data, Cell* cell);
-
-    static auto constexpr ActivationCountdown = 10;
 };
 
 /************************************************************************/
@@ -128,7 +126,7 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
     // Activation
     if (cell->signal.active) {
         bending.activation = max(-1.0f, min(1.0f, cell->signal.channels[0]));
-        bending.activationCountdown = ActivationCountdown;
+        bending.activationCountdown = cudaSimulationParameters.cellTypeMuscleActivationCountdown;
         if (abs(cell->signal.channels[1]) < SimulationParameters::cellTypeMuscleThreshold) {
             bending.bendingMode = BendingMode_BackAndForth;
         } else {
@@ -155,7 +153,7 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
     if (SignalProcessor::isAutoTriggered(data, cell, 9)) {
 
         auto actualAngle = calcAngle(data, cell);
-        auto activation = bending.activation * toFloat(bending.activationCountdown) / ActivationCountdown;
+        auto activation = bending.activation * toFloat(bending.activationCountdown) / cudaSimulationParameters.cellTypeMuscleActivationCountdown;
 
         if (bending.bendingMode == BendingMode_OneDirection) {
             auto forward = cell->signal.channels[1] >= 0;
@@ -172,7 +170,7 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
         // Change direction
         bool skipBending = false;
         auto maxAngle = min(bending.initialAngle + bending.maxAngleDeviation, 300.0f);
-        if (!bending.forward && cell->connections[0].angleFromPrevious > maxAngle) {
+        if (!bending.forward && cell->connections[0].angleFromPrevious > maxAngle - NEAR_ZERO) {
             if (bending.bendingMode == BendingMode_BackAndForth) {
                 bending.forward = activation >= 0;
                 bending.impulseAlreadyApplied = false;
@@ -181,7 +179,7 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
             }
         }
         auto minAngle = max(bending.initialAngle - bending.maxAngleDeviation, 60.0f);
-        if (bending.forward && cell->connections[0].angleFromPrevious < minAngle) {
+        if (bending.forward && cell->connections[0].angleFromPrevious < minAngle + NEAR_ZERO) {
             if (bending.bendingMode == BendingMode_BackAndForth) {
                 bending.forward = activation < 0;
                 bending.impulseAlreadyApplied = false;
@@ -194,6 +192,12 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
             auto angleDelta = bending.forward ? -(0.05f + bending.frontBackVelRatio) : 1.05f - bending.frontBackVelRatio;
             angleDelta *= 5.0f * activation;
 
+            if (cell->connections[0].angleFromPrevious + angleDelta > maxAngle) {
+                angleDelta = maxAngle - cell->connections[0].angleFromPrevious;
+            }
+            if (cell->connections[0].angleFromPrevious + angleDelta < minAngle) {
+                angleDelta = minAngle - cell->connections[0].angleFromPrevious;
+            }
             cell->connections[0].angleFromPrevious += angleDelta;
             cell->connections[1].angleFromPrevious -= angleDelta;
 

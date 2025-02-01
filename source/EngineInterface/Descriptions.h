@@ -301,9 +301,15 @@ struct AutoBendingDescription
 {
     auto operator<=>(AutoBendingDescription const&) const = default;
 
+    AutoBendingDescription& maxAngleDeviation(float value)
+    {
+        _maxAngleDeviation = value;
+        return *this;
+    }
+
     // Fixed data
     float _maxAngleDeviation = 20.0f; // Between 0 and 180 deg
-    float _frontBackVelRatio = 1.0;  // Between 0 and 1
+    float _frontBackVelRatio = 0.2f;  // Between 0 and 1
 
     // Process data
     float _initialAngle = 0;
@@ -324,6 +330,11 @@ struct MuscleDescription
     MuscleDescription& mode(MuscleModeDescription const& value)
     {
         _mode = value;
+        return *this;
+    }
+    MuscleDescription& frontAngle(float value)
+    {
+        _frontAngle = value;
         return *this;
     }
 

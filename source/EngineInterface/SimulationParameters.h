@@ -116,10 +116,6 @@ struct SimulationParameters
         Infinity<float>::value,
         Infinity<float>::value};
 
-    ColorVector<float> cellTypeConstructorConnectingCellMaxDistance = {2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f};
-    float cellTypeConstructorAdditionalOffspringDistance = 0.8f;
-    bool cellTypeConstructorCheckCompletenessForSelfReplication = false;
-
     ColorMatrix<bool> cellCopyMutationColorTransitions = {
         {true, true, true, true, true, true, true},
         {true, true, true, true, true, true, true},
@@ -131,7 +127,7 @@ struct SimulationParameters
     bool cellCopyMutationPreventDepthIncrease = false;
     bool cellCopyMutationSelfReplication = false;
 
-    // customize neuron mutations setting
+    // Expert settings: Customize neuron mutations setting
     float cellCopyMutationNeuronDataWeight = 0.2f;
     float cellCopyMutationNeuronDataBias = 0.2f;
     float cellCopyMutationNeuronDataActivationFunction = 0.05f;
@@ -139,9 +135,10 @@ struct SimulationParameters
     float cellCopyMutationNeuronDataDamping = 1.05f;
     float cellCopyMutationNeuronDataOffset = 0.05f;
 
-    // customize deletion mutations setting
+    // Expert settings: Customize deletion mutations setting
     int cellCopyMutationDeletionMinSize = 0;
 
+    // Cell type: Injector
     ColorVector<float> cellTypeInjectorRadius = {3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f};
     ColorMatrix<int> cellTypeInjectorDurationColorMatrix = {
         {3, 3, 3, 3, 3, 3, 3},
@@ -152,6 +149,7 @@ struct SimulationParameters
         {3, 3, 3, 3, 3, 3, 3},
         {3, 3, 3, 3, 3, 3, 3}};
 
+    // Cell type: Attacker
     ColorVector<float> cellTypeAttackerRadius = {1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f};
     ColorVector<float> cellTypeAttackerStrength = {0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f};
     ColorVector<float> cellTypeAttackerEnergyDistributionRadius = {3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f};
@@ -168,23 +166,35 @@ struct SimulationParameters
     ColorVector<float> cellTypeAttackerSensorDetectionFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     bool cellTypeAttackerDestroyCells = false;
 
+    // Cell type: Constructor
+    ColorVector<float> cellTypeConstructorConnectingCellMaxDistance = {2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f};
+    float cellTypeConstructorAdditionalOffspringDistance = 0.8f;
+    bool cellTypeConstructorCheckCompletenessForSelfReplication = false;
+
+    // Cell type: Defender
     ColorVector<float> cellTypeDefenderAgainstAttackerStrength = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
     ColorVector<float> cellTypeDefenderAgainstInjectorStrength = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
 
+    // Cell type: Transmitter
     bool cellTypeTransmitterEnergyDistributionSameCreature = true;
     ColorVector<float> cellTypeTransmitterEnergyDistributionRadius = {3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f};
     ColorVector<float> cellTypeTransmitterEnergyDistributionValue = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
 
+    // Cell type: Muscle
     ColorVector<float> cellTypeMuscleContractionExpansionDelta = {0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f};
     ColorVector<float> cellTypeMuscleMovementAcceleration = {0.02f, 0.02f, 0.02f, 0.02f, 0.02f, 0.02f, 0.02f};
     ColorVector<float> cellTypeMuscleBendingAcceleration = {0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f};
     ColorVector<float> cellTypeMuscleEnergyCost = {0, 0, 0, 0, 0, 0, 0};
     static float constexpr cellTypeMuscleThreshold = 0.2f;
+    static int constexpr cellTypeMuscleActivationCountdown = 10;
 
+    // Cell type: Sensor
     ColorVector<float> cellTypeSensorRange = {255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f};
 
+    // Cell type: Reconnector
     ColorVector<float> cellTypeReconnectorRadius = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
 
+    // Cell type: Detonator
     ColorVector<float> cellTypeDetonatorRadius = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
     ColorVector<float> cellTypeDetonatorChainExplosionProbability = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
 
