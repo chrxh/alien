@@ -483,6 +483,7 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
             bending._initialAngle = cellTO.cellTypeData.muscle.modeData.bending.initialAngle;
             bending._lastAngle = cellTO.cellTypeData.muscle.modeData.bending.lastAngle;
             bending._forward = cellTO.cellTypeData.muscle.modeData.bending.forward;
+            bending._bendingMode = cellTO.cellTypeData.muscle.modeData.bending.bendingMode;
             bending._activation = cellTO.cellTypeData.muscle.modeData.bending.activation;
             bending._activationCountdown = cellTO.cellTypeData.muscle.modeData.bending.activationCountdown;
             bending._impulseAlreadyApplied = cellTO.cellTypeData.muscle.modeData.bending.impulseAlreadyApplied;
@@ -650,6 +651,7 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
             bendingTO.initialAngle = bendingDesc._initialAngle;
             bendingTO.lastAngle = bendingDesc._lastAngle;
             bendingTO.forward = bendingDesc._forward;
+            bendingTO.bendingMode = bendingDesc._bendingMode;
             bendingTO.activation = bendingDesc._activation;
             bendingTO.activationCountdown = bendingDesc._activationCountdown;
             bendingTO.impulseAlreadyApplied = bendingDesc._impulseAlreadyApplied;

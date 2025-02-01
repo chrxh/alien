@@ -792,6 +792,7 @@ ConstructorProcessor::constructCellIntern(
             result->cellTypeData.muscle.modeData.bending.initialAngle = 0;
             result->cellTypeData.muscle.modeData.bending.lastAngle = 0;
             result->cellTypeData.muscle.modeData.bending.forward = true;
+            result->cellTypeData.muscle.modeData.bending.bendingMode = BendingMode_BackAndForth;
             result->cellTypeData.muscle.modeData.bending.activation = 0;
             result->cellTypeData.muscle.modeData.bending.activationCountdown = 0;
             result->cellTypeData.muscle.modeData.bending.impulseAlreadyApplied = false;

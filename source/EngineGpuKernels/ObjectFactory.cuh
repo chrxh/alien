@@ -200,6 +200,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
             cell->cellTypeData.muscle.modeData.bending.initialAngle = cellTO.cellTypeData.muscle.modeData.bending.initialAngle;
             cell->cellTypeData.muscle.modeData.bending.lastAngle = cellTO.cellTypeData.muscle.modeData.bending.lastAngle;
             cell->cellTypeData.muscle.modeData.bending.forward = cellTO.cellTypeData.muscle.modeData.bending.forward;
+            cell->cellTypeData.muscle.modeData.bending.bendingMode = cellTO.cellTypeData.muscle.modeData.bending.bendingMode;
             cell->cellTypeData.muscle.modeData.bending.activation = cellTO.cellTypeData.muscle.modeData.bending.activation;
             cell->cellTypeData.muscle.modeData.bending.activationCountdown = cellTO.cellTypeData.muscle.modeData.bending.activationCountdown;
             cell->cellTypeData.muscle.modeData.bending.impulseAlreadyApplied = cellTO.cellTypeData.muscle.modeData.bending.impulseAlreadyApplied;

@@ -25,7 +25,7 @@ private:
     //__inline__ __device__ static float getTruncatedUnitValue(Signal const& signal, int channel = 0);
     __inline__ __device__ static void radiate(SimulationData& data, Cell* cell);
 
-    static auto constexpr ActivationCountdown = 20;
+    static auto constexpr ActivationCountdown = 10;
 };
 
 /************************************************************************/
@@ -152,7 +152,7 @@ __inline__ __device__ void MuscleProcessor::bending(SimulationData& data, Simula
     }
 
     // Process auto bending
-    if (SignalProcessor::isAutoTriggered(data, cell, 10)) {
+    if (SignalProcessor::isAutoTriggered(data, cell, 9)) {
 
         auto actualAngle = calcAngle(data, cell);
         auto activation = bending.activation * toFloat(bending.activationCountdown) / ActivationCountdown;

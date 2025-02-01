@@ -309,6 +309,7 @@ struct AutoBendingDescription
     float _initialAngle = 0;
     float _lastAngle = 0;
     bool _forward = true;  // Current direction
+    BendingMode _bendingMode = BendingMode_BackAndForth;
     float _activation = 0;
     int _activationCountdown = 0;
     bool _impulseAlreadyApplied = false;
