@@ -167,6 +167,7 @@ namespace
     auto constexpr Id_MuscleMode_Bending_ActivationCountdown = 10;
     auto constexpr Id_MuscleMode_Bending_LastAngle = 11;
     auto constexpr Id_MuscleMode_Bending_ImpulseAlreadyApplied = 12;
+    auto constexpr Id_MuscleMode_Bending_BendingMode = 13;
 
     auto constexpr Id_Injector_Mode = 0;
     auto constexpr Id_Injector_Counter = 1;
@@ -683,6 +684,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_MuscleMode_Bending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
         loadSave(task, auxiliaries, Id_MuscleMode_Bending_LastAngle, data._lastAngle, defaultObject._lastAngle);
         loadSave(task, auxiliaries, Id_MuscleMode_Bending_Forward, data._forward, defaultObject._forward);
+        loadSave(task, auxiliaries, Id_MuscleMode_Bending_BendingMode, data._bendingMode, defaultObject._bendingMode);
         loadSave(task, auxiliaries, Id_MuscleMode_Bending_Activation, data._activation, defaultObject._activation);
         loadSave(task, auxiliaries, Id_MuscleMode_Bending_ActivationCountdown, data._activationCountdown, defaultObject._activationCountdown);
         loadSave(task, auxiliaries, Id_MuscleMode_Bending_ImpulseAlreadyApplied, data._impulseAlreadyApplied, defaultObject._impulseAlreadyApplied);
