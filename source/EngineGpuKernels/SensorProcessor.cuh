@@ -173,7 +173,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             }
             if (density >= minDensity) {
                 float preciseDistance = radius;
-                uint32_t relAngleEncoded = convertAngleToData(angle - refAngle + cell->absAngleToConnection0);
+                uint32_t relAngleEncoded = convertAngleToData(angle - refAngle + cell->absAngleToConnection0 - cell->frontAngle);
                 uint64_t combined =
                     static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(density) << 40 | static_cast<uint64_t>(relAngleEncoded) << 32;
                 alienAtomicMin64(&lookupResult, combined);
@@ -187,7 +187,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
 
             auto relAngle = convertDataToAngle(static_cast<int8_t>((lookupResult >> 32) & 0xff));
             auto distance = toFloat(lookupResult >> 48);
-            auto absAngle = refAngle + relAngle - cell->absAngleToConnection0;
+            auto absAngle = refAngle + relAngle - cell->absAngleToConnection0 + cell->frontAngle;
             auto scanPos = cell->pos + Math::unitVectorOfAngle(absAngle) * distance;
             flagDetectedCells(data, cell, scanPos);
 

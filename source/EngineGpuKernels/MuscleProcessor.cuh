@@ -128,7 +128,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     // Activation
     if (cell->signal.active) {
         bending.activation = max(-1.0f, min(1.0f, cell->signal.channels[0]));
-        auto targetAngle = max(-1.0f, min(1.0f, cell->signal.channels[1])) * 180.f + muscle.frontAngle;
+        auto targetAngle = max(-1.0f, min(1.0f, cell->signal.channels[1])) * 180.f + cell->frontAngle;
         auto targetAngleRelToConnection0 = Math::normalizedAngle(Math::subtractAngle(targetAngle, cell->absAngleToConnection0), -180.0f);
         if (isCounterOriented(cell)) {
             targetAngleRelToConnection0 = -targetAngleRelToConnection0;
@@ -247,8 +247,7 @@ __inline__ __device__ float MuscleProcessor::calcAngle(SimulationData& data, Cel
 
 __inline__ __device__ bool MuscleProcessor::isCounterOriented(Cell* cell)
 {
-    auto& muscle = cell->cellTypeData.muscle;
-    return Math::normalizedAngle(Math::subtractAngle(cell->absAngleToConnection0, muscle.frontAngle), -180.0f) < -NEAR_ZERO;
+    return Math::normalizedAngle(Math::subtractAngle(cell->absAngleToConnection0, cell->frontAngle), -180.0f) < -NEAR_ZERO;
 }
 
 //__inline__ __device__ int MuscleProcessor::getConnectionIndex(Cell* cell, Cell* otherCell)

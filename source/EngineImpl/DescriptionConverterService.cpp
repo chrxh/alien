@@ -399,6 +399,7 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
     result._detectedByCreatureId = cellTO.detectedByCreatureId;
     result._cellTypeUsed = cellTO.cellTypeUsed;
     result._genomeNodeIndex = cellTO.genomeNodeIndex;
+    result._frontAngle = cellTO.frontAngle;
 
     auto const& metadataTO = cellTO.metadata;
     auto metadata = CellMetadataDescription();
@@ -488,7 +489,6 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
             bending._impulseAlreadyApplied = cellTO.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied;
             muscle._mode = bending;
         }
-        muscle._frontAngle = cellTO.cellTypeData.muscle.frontAngle;
         muscle._lastMovementX = cellTO.cellTypeData.muscle.lastMovementX;
         muscle._lastMovementY = cellTO.cellTypeData.muscle.lastMovementY;
         result._cellTypeData = muscle;
@@ -574,6 +574,7 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
     cellTO.detectedByCreatureId = cellDesc._detectedByCreatureId;
     cellTO.cellTypeUsed = cellDesc._cellTypeUsed;
     cellTO.genomeNodeIndex = cellDesc._genomeNodeIndex;
+    cellTO.frontAngle = cellDesc._frontAngle;
 
     auto cellType = cellDesc.getCellType();
     if (cellType != CellType_Structure && cellType != CellType_Free) {
@@ -654,7 +655,6 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
             bendingTO.activationCountdown = bendingDesc._activationCountdown;
             bendingTO.impulseAlreadyApplied = bendingDesc._impulseAlreadyApplied;
         }
-        muscleTO.frontAngle = muscleDesc._frontAngle;
         muscleTO.lastMovementX = muscleDesc._lastMovementX;
         muscleTO.lastMovementY = muscleDesc._lastMovementY;
     } break;

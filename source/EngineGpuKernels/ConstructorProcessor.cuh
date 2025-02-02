@@ -717,6 +717,7 @@ ConstructorProcessor::constructCellIntern(
     result->activationTime = constructionData.containsSelfReplication ? constructor.constructionActivationTime : 0;
     result->genomeComplexity = hostCell->genomeComplexity;
     result->genomeNodeIndex = constructor.genomeCurrentNodeIndex;
+    result->frontAngle = constructionData.genomeHeader.frontAngle;
 
     auto genomeCurrentBytePosition = constructionData.genomeCurrentBytePosition;
 
@@ -796,7 +797,6 @@ ConstructorProcessor::constructCellIntern(
             result->cellTypeData.muscle.modeData.autoBending.activationCountdown = 0;
             result->cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied = false;
         }
-        result->cellTypeData.muscle.frontAngle = constructionData.genomeHeader.frontAngle;
         result->cellTypeData.muscle.lastMovementX = 0;
         result->cellTypeData.muscle.lastMovementY = 0;
     } break;
