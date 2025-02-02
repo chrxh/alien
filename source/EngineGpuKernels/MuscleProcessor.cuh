@@ -133,7 +133,16 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
         if (isCounterOriented(cell)) {
             targetAngleRelToConnection0 = -targetAngleRelToConnection0;
         }
-        auto angleFactor = min(1.0f, max(-1.0f, -targetAngleRelToConnection0 / 90.0f));
+
+        auto angleFactor = [&] {
+            if (targetAngleRelToConnection0 >= 0 && targetAngleRelToConnection0 < 90.0f) {
+                return 0.0f;
+            }
+            if (targetAngleRelToConnection0 >= 90) {
+                return 1.0f;
+            }
+            return min(1.0f, max(-1.0f, -targetAngleRelToConnection0 / 90.0f));
+        }();
         bending.activation *= angleFactor * angleFactor * angleFactor;
 
         bending.activationCountdown = cudaSimulationParameters.cellTypeMuscleActivationCountdown;
