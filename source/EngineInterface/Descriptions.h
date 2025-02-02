@@ -250,7 +250,7 @@ struct OscillatorDescription
     }
 
     // Fixed data
-    int _autoTriggerInterval = 0;
+    int _autoTriggerInterval = 100;
     int _alternationInterval = 0;  // 0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
 
     // Process data
