@@ -77,8 +77,8 @@ namespace
 
     auto constexpr Id_DefenderGenome_Mode = 0;
 
-    auto constexpr Id_MuscleModeGenome_Bending_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleModeGenome_Bending_FrontBackVelRatio = 4;
+    auto constexpr Id_MuscleModeGenome_AutoBending_MaxAngleDeviation = 0;
+    auto constexpr Id_MuscleModeGenome_AutoBending_FrontBackVelRatio = 4;
 
     auto constexpr Id_InjectorGenome_Mode = 0;
 
@@ -167,7 +167,6 @@ namespace
     auto constexpr Id_MuscleMode_AutoBending_ActivationCountdown = 10;
     auto constexpr Id_MuscleMode_AutoBending_LastAngle = 11;
     auto constexpr Id_MuscleMode_AutoBending_ImpulseAlreadyApplied = 12;
-    auto constexpr Id_MuscleMode_AutoBending_BendingMode = 13;
 
     auto constexpr Id_MuscleMode_AutoCrawling_MaxAngleDeviation = 0;
     auto constexpr Id_MuscleMode_AutoCrawling_FrontBackVelRatio = 1;
@@ -177,7 +176,6 @@ namespace
     auto constexpr Id_MuscleMode_AutoCrawling_ActivationCountdown = 5;
     auto constexpr Id_MuscleMode_AutoCrawling_LastAngle = 6;
     auto constexpr Id_MuscleMode_AutoCrawling_ImpulseAlreadyApplied = 7;
-    auto constexpr Id_MuscleMode_AutoCrawling_BendingMode = 8;
 
     auto constexpr Id_Injector_Mode = 0;
     auto constexpr Id_Injector_Counter = 1;
@@ -415,15 +413,42 @@ namespace cereal
     SPLIT_SERIALIZATION(InjectorGenomeDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, BendingGenomeDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, AutoBendingGenomeDescription& data)
     {
-        BendingGenomeDescription defaultObject;
+        AutoBendingGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_MuscleModeGenome_Bending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
-        loadSave(task, auxiliaries, Id_MuscleModeGenome_Bending_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
+        loadSave(task, auxiliaries, Id_MuscleModeGenome_AutoBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
+        loadSave(task, auxiliaries, Id_MuscleModeGenome_AutoBending_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(BendingGenomeDescription)
+    SPLIT_SERIALIZATION(AutoBendingGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, ManualBendingGenomeDescription& data)
+    {
+        ManualBendingGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(ManualBendingGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, AngleBendingGenomeDescription& data)
+    {
+        AngleBendingGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(AngleBendingGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, AutoCrawlingGenomeDescription& data)
+    {
+        AutoCrawlingGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(AutoCrawlingGenomeDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, MuscleGenomeDescription& data)
@@ -694,13 +719,30 @@ namespace cereal
         loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_LastAngle, data._lastAngle, defaultObject._lastAngle);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_Forward, data._forward, defaultObject._forward);
-        loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_BendingMode, data._bendingMode, defaultObject._bendingMode);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_Activation, data._activation, defaultObject._activation);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_ActivationCountdown, data._activationCountdown, defaultObject._activationCountdown);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_ImpulseAlreadyApplied, data._impulseAlreadyApplied, defaultObject._impulseAlreadyApplied);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AutoBendingDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, ManualBendingDescription& data)
+    {
+        ManualBendingDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(ManualBendingDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, AngleBendingDescription& data)
+    {
+        AngleBendingDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(AngleBendingDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, AutoCrawlingDescription& data)
@@ -712,7 +754,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_InitialAngle, data._initialAngle, defaultObject._initialAngle);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_LastAngle, data._lastAngle, defaultObject._lastAngle);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_Forward, data._forward, defaultObject._forward);
-        loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_BendingMode, data._bendingMode, defaultObject._bendingMode);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_Activation, data._activation, defaultObject._activation);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_ActivationCountdown, data._activationCountdown, defaultObject._activationCountdown);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_ImpulseAlreadyApplied, data._impulseAlreadyApplied, defaultObject._impulseAlreadyApplied);

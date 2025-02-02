@@ -143,15 +143,14 @@ namespace
         case CellType_Muscle: {
             cellTO.cellTypeData.muscle.mode = cell->cellTypeData.muscle.mode;
             if (cellTO.cellTypeData.muscle.mode == MuscleMode_Bending) {
-                cellTO.cellTypeData.muscle.modeData.bending.maxAngleDeviation = cell->cellTypeData.muscle.modeData.bending.maxAngleDeviation;
-                cellTO.cellTypeData.muscle.modeData.bending.frontBackVelRatio = cell->cellTypeData.muscle.modeData.bending.frontBackVelRatio;
-                cellTO.cellTypeData.muscle.modeData.bending.initialAngle = cell->cellTypeData.muscle.modeData.bending.initialAngle;
-                cellTO.cellTypeData.muscle.modeData.bending.lastAngle = cell->cellTypeData.muscle.modeData.bending.lastAngle;
-                cellTO.cellTypeData.muscle.modeData.bending.forward = cell->cellTypeData.muscle.modeData.bending.forward;
-                cellTO.cellTypeData.muscle.modeData.bending.bendingMode = cell->cellTypeData.muscle.modeData.bending.bendingMode;
-                cellTO.cellTypeData.muscle.modeData.bending.activation = cell->cellTypeData.muscle.modeData.bending.activation;
-                cellTO.cellTypeData.muscle.modeData.bending.activationCountdown = cell->cellTypeData.muscle.modeData.bending.activationCountdown;
-                cellTO.cellTypeData.muscle.modeData.bending.impulseAlreadyApplied = cell->cellTypeData.muscle.modeData.bending.impulseAlreadyApplied;
+                cellTO.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation = cell->cellTypeData.muscle.modeData.autoBending.maxAngleDeviation;
+                cellTO.cellTypeData.muscle.modeData.autoBending.frontBackVelRatio = cell->cellTypeData.muscle.modeData.autoBending.frontBackVelRatio;
+                cellTO.cellTypeData.muscle.modeData.autoBending.initialAngle = cell->cellTypeData.muscle.modeData.autoBending.initialAngle;
+                cellTO.cellTypeData.muscle.modeData.autoBending.lastAngle = cell->cellTypeData.muscle.modeData.autoBending.lastAngle;
+                cellTO.cellTypeData.muscle.modeData.autoBending.forward = cell->cellTypeData.muscle.modeData.autoBending.forward;
+                cellTO.cellTypeData.muscle.modeData.autoBending.activation = cell->cellTypeData.muscle.modeData.autoBending.activation;
+                cellTO.cellTypeData.muscle.modeData.autoBending.activationCountdown = cell->cellTypeData.muscle.modeData.autoBending.activationCountdown;
+                cellTO.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied = cell->cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied;
             }
             cellTO.cellTypeData.muscle.frontAngle = cell->cellTypeData.muscle.frontAngle;
             cellTO.cellTypeData.muscle.lastMovementX = cell->cellTypeData.muscle.lastMovementX;

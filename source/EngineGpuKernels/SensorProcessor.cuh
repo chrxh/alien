@@ -192,10 +192,10 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             flagDetectedCells(data, cell, scanPos);
 
             cell->signal.channels[0] = 1;                                    //something found
-            cell->signal.channels[1] = toFloat((lookupResult >> 40) & 0xff) / 64;  //density
+            cell->signal.channels[1] = relAngle / 360.0f;                          //angle: between -0.5 and 0.5
+            cell->signal.channels[2] = toFloat((lookupResult >> 40) & 0xff) / 64;  //density
 
-            cell->signal.channels[2] = 1.0f - min(1.0f, distance / 256);  //distance: 1 = close, 0 = far away
-            cell->signal.channels[3] = relAngle / 360.0f;  //angle: between -0.5 and 0.5
+            cell->signal.channels[3] = 1.0f - min(1.0f, distance / 256);  //distance: 1 = close, 0 = far away
             statistics.incNumSensorMatches(cell->color);
             auto delta = data.cellMap.getCorrectedDirection(scanPos - cell->pos);
             cell->signal.targetX = delta.x;

@@ -312,13 +312,51 @@ struct AutoBendingDescription
     float _frontBackVelRatio = 0.2f;  // Between 0 and 1
 
     // Process data
-    BendingMode _bendingMode = BendingMode_BackAndForth;
     float _initialAngle = 0;
     float _lastAngle = 0;
     bool _forward = true;  // Current direction
     float _activation = 0;
     int _activationCountdown = 0;
     bool _impulseAlreadyApplied = false;
+};
+
+struct ManualBendingDescription
+{
+    auto operator<=>(ManualBendingDescription const&) const = default;
+
+    //ManualBendingDescription& maxAngleDeviation(float value)
+    //{
+    //    _maxAngleDeviation = value;
+    //    return *this;
+    //}
+
+    //// Fixed data
+    //float _maxAngleDeviation = 20.0f;  // Between 0 and 1
+    //float _frontBackVelRatio = 0.2f;   // Between 0 and 1
+
+    //// Process data
+    //float _initialAngle = 0;
+    //float _lastAngle = 0;
+    //float _activation = 0;
+    //int _activationCountdown = 0;
+    //bool _impulseAlreadyApplied = false;
+};
+
+struct AngleBendingDescription
+{
+    auto operator<=>(AngleBendingDescription const&) const = default;
+
+    //AngleBendingDescription& maxAngleDeviation(float value)
+    //{
+    //    _maxAngleDeviation = value;
+    //    return *this;
+    //}
+
+    //// Fixed data
+    //float _maxAngleDeviation = 20.0f;  // Between 0 and 1
+    //float _frontBackVelRatio = 0.2f;   // Between 0 and 1
+
+    // Process data
 };
 
 struct AutoCrawlingDescription
@@ -336,7 +374,6 @@ struct AutoCrawlingDescription
     float _frontBackVelRatio = 0.2f;  // Between 0 and 1
 
     // Process data
-    CrawlingMode _bendingMode = CrawlingMode_BackAndForth;
     float _initialAngle = 0;
     float _lastAngle = 0;
     bool _forward = true;  // Current direction
@@ -344,7 +381,7 @@ struct AutoCrawlingDescription
     int _activationCountdown = 0;
     bool _impulseAlreadyApplied = false;
 };
-using MuscleModeDescription = std::variant<AutoBendingDescription, AutoCrawlingDescription>;
+using MuscleModeDescription = std::variant<AutoBendingDescription, ManualBendingDescription, AngleBendingDescription, AutoCrawlingDescription>;
 
 struct MuscleDescription
 {
