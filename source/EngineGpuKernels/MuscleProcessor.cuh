@@ -151,15 +151,15 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
         auto activation = bending.activation * toFloat(bending.activationCountdown) / cudaSimulationParameters.cellTypeMuscleActivationCountdown;
 
         // Change direction
-        auto maxAngleDeviation = min(bending.initialAngle, 360.0f - bending.initialAngle) * bending.maxAngleDeviation;
+        auto maxAngleDeviation = min(bending.initialAngle, 360.0f - bending.initialAngle) * bending.maxAngleDeviation / 2;
         auto maxAngle = min(max(bending.initialAngle + maxAngleDeviation, 60.0f), 300.0f);
         auto minAngle = min(max(bending.initialAngle - maxAngleDeviation, 60.0f), 300.0f);
 
-        if (cell->connections[0].angleFromPrevious > maxAngle - NEAR_ZERO) {
+        if (cell->connections[0].angleFromPrevious /*actualAngle */> maxAngle - NEAR_ZERO) {
             bending.forward = activation >= 0;
             bending.impulseAlreadyApplied = false;
         }
-        if (cell->connections[0].angleFromPrevious < minAngle + NEAR_ZERO) {
+        if (cell->connections[0].angleFromPrevious /*actualAngle*/ < minAngle + NEAR_ZERO) {
             bending.forward = activation < 0;
             bending.impulseAlreadyApplied = false;
         }
@@ -189,17 +189,27 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
                 } else {
                     Math::rotateQuarterCounterClockwise(direction);
                 }
-                actualAngleDelta = min(5.0f, abs(actualAngleDelta) / 1);
+                actualAngleDelta = min(5.0f, abs(actualAngleDelta));
                 if (bending.forward) {
-                    actualAngleDelta *= bending.frontBackVelRatio;
+                    actualAngleDelta *= powf(bending.frontBackVelRatio, 4.0f);
                 } else {
-                    actualAngleDelta *= 1.0f - bending.frontBackVelRatio;
+                    actualAngleDelta *= powf(1.0f - bending.frontBackVelRatio, 4.0f);
                 }
-                auto acceleration =
-                    direction * actualAngleDelta * actualAngleDelta * cudaSimulationParameters.cellTypeMuscleBendingAcceleration[cell->color] / 20.0f;
+                auto acceleration = direction * abs(actualAngleDelta) * cudaSimulationParameters.cellTypeMuscleBendingAcceleration[cell->color] / 1.5f;
 
-                atomicAdd(&cell->connections[1].cell->vel.x, min(0.3f, max(-0.3f, acceleration.x)));
-                atomicAdd(&cell->connections[1].cell->vel.y, min(0.3f, max(-0.3f, acceleration.y)));
+                int chainLength = 0;
+                Cell* connectedCell = cell;
+                while (connectedCell->numConnections == 2) {
+                    connectedCell = connectedCell->connections[1].cell;
+                    ++chainLength;
+                }
+                connectedCell = cell;
+                while (connectedCell->numConnections == 2) {
+                    connectedCell = connectedCell->connections[1].cell;
+
+                    atomicAdd(&connectedCell->vel.x, min(0.3f, max(-0.3f, acceleration.x / chainLength)));
+                    atomicAdd(&connectedCell->vel.y, min(0.3f, max(-0.3f, acceleration.y / chainLength)));
+                }
             }
         }
 
