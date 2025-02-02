@@ -393,16 +393,8 @@ struct MuscleDescription
         _mode = value;
         return *this;
     }
-    MuscleDescription& frontAngle(float value)
-    {
-        _frontAngle = value;
-        return *this;
-    }
 
     MuscleModeDescription _mode;
-
-    // Temp
-    float _frontAngle = 0;  // Can be removed in new genome model
 
     // Additional rendering data
     float _lastMovementX = 0;
@@ -681,6 +673,9 @@ struct CellDescription
 
     // Misc
     CellMetadataDescription _metadata;
+
+    // Temp
+    float _frontAngle = 0;  // Can be removed in new genome model
 };
 
 struct ClusterDescription

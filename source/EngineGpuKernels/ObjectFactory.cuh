@@ -107,6 +107,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->detectedByCreatureId = cellTO.detectedByCreatureId;
     cell->cellTypeUsed = cellTO.cellTypeUsed;
     cell->genomeNodeIndex = cellTO.genomeNodeIndex;
+    cell->frontAngle = cellTO.frontAngle;
 
     createAuxiliaryData(cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, dataTO.auxiliaryData, cell->metadata.nameSize, cell->metadata.name);
 
@@ -204,7 +205,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
             cell->cellTypeData.muscle.modeData.autoBending.activationCountdown = cellTO.cellTypeData.muscle.modeData.autoBending.activationCountdown;
             cell->cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied = cellTO.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied;
         }
-        cell->cellTypeData.muscle.frontAngle = cellTO.cellTypeData.muscle.frontAngle;
         cell->cellTypeData.muscle.lastMovementX = cellTO.cellTypeData.muscle.lastMovementX;
         cell->cellTypeData.muscle.lastMovementY = cellTO.cellTypeData.muscle.lastMovementY;
     } break;

@@ -216,9 +216,6 @@ struct MuscleType
     MuscleMode mode;
     MuscleModeData modeData;
 
-    // Temp
-    float frontAngle;  // Can be removed in new genome model
-
     // Additional rendering data
     float lastMovementX;
     float lastMovementY;
@@ -336,6 +333,9 @@ struct Cell
     float clusterAngularMomentum;
     float clusterAngularMass;
     uint32_t numCellsInCluster;
+
+    // Temp
+    float frontAngle;  // Can be removed in new genome model
 
     __device__ __inline__ uint8_t* getGenome()
     {

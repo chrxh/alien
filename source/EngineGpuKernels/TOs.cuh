@@ -172,9 +172,6 @@ struct MuscleTO
     MuscleMode mode;
     MuscleModeTO modeData;
 
-    // Temp
-    float frontAngle;  // Can be removed in new genome model
-
     // Additional rendering data
     float lastMovementX;
     float lastMovementY;
@@ -260,9 +257,14 @@ struct CellTO
     uint16_t detectedByCreatureId;  // only the first 16 bits from the creature id
     CellTriggered cellTypeUsed;
 
+    // Misc
     CellMetadataTO metadata;
 
+    // Editing data
     uint8_t selected;
+
+    // Temp
+    float frontAngle;  // Can be removed in new genome model
 };
 
 struct DataTO

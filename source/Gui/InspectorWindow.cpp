@@ -172,6 +172,8 @@ void _InspectorWindow::processCellGeneralTab(CellDescription& cell)
                     AlienImGui::CheckboxParameters().name("Indestructible wall").textWidth(BaseTabTextWidth).tooltip(Const::CellIndestructibleTooltip), cell._barrier);
                 AlienImGui::InputText(
                     AlienImGui::InputTextParameters().name("Cell id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true), cellId);
+                AlienImGui::InputFloat(
+                    AlienImGui::InputFloatParameters().name("Orientation").format("%.1f").textWidth(BaseTabTextWidth), cell._absAngleToConnection0);
                 ImGui::TreePop();
             }
 

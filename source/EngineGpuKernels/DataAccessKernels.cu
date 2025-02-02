@@ -51,6 +51,7 @@ namespace
         cellTO.detectedByCreatureId = cell->detectedByCreatureId;
         cellTO.cellTypeUsed = cell->cellTypeUsed;
         cellTO.genomeNodeIndex = cell->genomeNodeIndex;
+        cellTO.frontAngle = cell->frontAngle;
 
         copyAuxiliaryData(
             cell->metadata.nameSize,
@@ -152,7 +153,6 @@ namespace
                 cellTO.cellTypeData.muscle.modeData.autoBending.activationCountdown = cell->cellTypeData.muscle.modeData.autoBending.activationCountdown;
                 cellTO.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied = cell->cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied;
             }
-            cellTO.cellTypeData.muscle.frontAngle = cell->cellTypeData.muscle.frontAngle;
             cellTO.cellTypeData.muscle.lastMovementX = cell->cellTypeData.muscle.lastMovementX;
             cellTO.cellTypeData.muscle.lastMovementY = cell->cellTypeData.muscle.lastMovementY;
         } break;
