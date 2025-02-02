@@ -116,7 +116,44 @@ struct AutoBendingTO
     float initialAngle;
     float lastAngle;
     bool forward;  // Current direction
-    BendingMode bendingMode;
+    float activation;
+    uint8_t activationCountdown;
+    bool impulseAlreadyApplied;
+};
+
+struct ManualBendingTO
+{
+    //// Fixed data
+    //float maxAngleDeviation;  // Between 0 and 1
+    //float frontBackVelRatio;  // Between 0 and 1
+
+    //// Process data
+    //float initialAngle;
+    //float lastAngle;
+    //float activation;
+    //uint8_t activationCountdown;
+    //bool impulseAlreadyApplied;
+};
+
+struct AngleBendingTO
+{
+    //// Fixed data
+    //float maxAngleDeviation;  // Between 0 and 1
+    //float frontBackVelRatio;  // Between 0 and 1
+
+    //// Process data
+};
+
+struct AutoCrawlingTO
+{
+    // Fixed data
+    float maxDistanceDeviation;  // Between 0 and 1
+    float frontBackVelRatio;  // Between 0 and 1
+
+    // Process data
+    float initialAngle;
+    float lastAngle;
+    bool forward;  // Current direction
     float activation;
     uint8_t activationCountdown;
     bool impulseAlreadyApplied;
@@ -124,7 +161,10 @@ struct AutoBendingTO
 
 union MuscleModeTO
 {
-    AutoBendingTO bending;
+    AutoBendingTO autoBending;
+    ManualBendingTO manualBending;
+    AngleBendingTO angleBending;
+    AutoCrawlingTO crawling;
 };
 
 struct MuscleTO

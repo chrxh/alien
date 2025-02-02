@@ -787,15 +787,14 @@ ConstructorProcessor::constructCellIntern(
     case CellType_Muscle: {
         result->cellTypeData.muscle.mode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % MuscleMode_Count;
         if (result->cellTypeData.muscle.mode == MuscleMode_Bending) {
-            result->cellTypeData.muscle.modeData.bending.maxAngleDeviation = min(1.0f, max(0.0f, GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition)));
-            result->cellTypeData.muscle.modeData.bending.frontBackVelRatio = abs(GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition));
-            result->cellTypeData.muscle.modeData.bending.initialAngle = 0;
-            result->cellTypeData.muscle.modeData.bending.lastAngle = 0;
-            result->cellTypeData.muscle.modeData.bending.forward = true;
-            result->cellTypeData.muscle.modeData.bending.bendingMode = BendingMode_BackAndForth;
-            result->cellTypeData.muscle.modeData.bending.activation = 0;
-            result->cellTypeData.muscle.modeData.bending.activationCountdown = 0;
-            result->cellTypeData.muscle.modeData.bending.impulseAlreadyApplied = false;
+            result->cellTypeData.muscle.modeData.autoBending.maxAngleDeviation = min(1.0f, max(0.0f, GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition)));
+            result->cellTypeData.muscle.modeData.autoBending.frontBackVelRatio = abs(GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition));
+            result->cellTypeData.muscle.modeData.autoBending.initialAngle = 0;
+            result->cellTypeData.muscle.modeData.autoBending.lastAngle = 0;
+            result->cellTypeData.muscle.modeData.autoBending.forward = true;
+            result->cellTypeData.muscle.modeData.autoBending.activation = 0;
+            result->cellTypeData.muscle.modeData.autoBending.activationCountdown = 0;
+            result->cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied = false;
         }
         result->cellTypeData.muscle.frontAngle = constructionData.genomeHeader.frontAngle;
         result->cellTypeData.muscle.lastMovementX = 0;

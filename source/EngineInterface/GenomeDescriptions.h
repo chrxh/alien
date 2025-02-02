@@ -185,20 +185,64 @@ struct InjectorGenomeDescription
     std::variant<MakeGenomeCopy, std::vector<uint8_t>> _genome = std::vector<uint8_t>();
 };
 
-struct BendingGenomeDescription
+struct AutoBendingGenomeDescription
 {
-    auto operator<=>(BendingGenomeDescription const&) const = default;
+    auto operator<=>(AutoBendingGenomeDescription const&) const = default;
 
-    float _maxAngleDeviation = 20.0f;   // Between 0 and 180 deg
+    float _maxAngleDeviation = 20.0f;   // Between 0 and 1
     float _frontBackVelRatio = 0;      // Between 0 and 1
 
-    BendingGenomeDescription& maxAngleDeviation(float value)
+    AutoBendingGenomeDescription& maxAngleDeviation(float value)
     {
         _maxAngleDeviation = value;
         return *this;
     }
 };
-using MuscleModeGenomeDescription = std::variant<BendingGenomeDescription>;
+
+struct ManualBendingGenomeDescription
+{
+    auto operator<=>(ManualBendingGenomeDescription const&) const = default;
+
+    //float _maxDistanceDeviation = 20.0f;  // Between 0 and 1
+    //float _frontBackVelRatio = 0;      // Between 0 and 1
+
+    //ManualBendingGenomeDescription& maxAngleDeviation(float value)
+    //{
+    //    _maxDistanceDeviation = value;
+    //    return *this;
+    //}
+};
+
+struct AngleBendingGenomeDescription
+{
+    auto operator<=>(AngleBendingGenomeDescription const&) const = default;
+
+    //float _maxDistanceDeviation = 20.0f;  // Between 0 and 1
+    //float _frontBackVelRatio = 0;      // Between 0 and 1
+
+    //AngleBendingGenomeDescription& maxAngleDeviation(float value)
+    //{
+    //    _maxDistanceDeviation = value;
+    //    return *this;
+    //}
+};
+
+struct AutoCrawlingGenomeDescription
+{
+    auto operator<=>(AutoCrawlingGenomeDescription const&) const = default;
+
+    float _maxDistanceDeviation = 20.0f;  // Between 0 and 1
+    float _frontBackVelRatio = 0;         // Between 0 and 1
+
+    AutoCrawlingGenomeDescription& maxAngleDeviation(float value)
+    {
+        _maxDistanceDeviation = value;
+        return *this;
+    }
+};
+
+using MuscleModeGenomeDescription =
+    std::variant<AutoBendingGenomeDescription, ManualBendingGenomeDescription, AngleBendingGenomeDescription, AutoCrawlingGenomeDescription>;
 
 struct MuscleGenomeDescription
 {

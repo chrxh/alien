@@ -740,11 +740,11 @@ void GenomeEditorWindow::processNode(
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::GenomeMuscleModeTooltip),
                 mode)) {
-                BendingGenomeDescription bending;
+                AutoBendingGenomeDescription bending;
                 muscle.mode(bending);
             }
             if (mode == MuscleMode_Bending) {
-                auto& bending = std::get<BendingGenomeDescription>(muscle._muscleMode);
+                auto& bending = std::get<AutoBendingGenomeDescription>(muscle._muscleMode);
                 table.next();
                 AlienImGui::InputFloat(
                     AlienImGui::InputFloatParameters()
