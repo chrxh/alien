@@ -20,6 +20,8 @@ private:
     __inline__ __device__ static void autoBending(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static float calcAngle(SimulationData& data, Cell* cell);
 
+    __inline__ __device__ static bool isCounterOriented(Cell* cell);
+
     //__inline__ __device__ static int getConnectionIndex(Cell* cell, Cell* otherCell);
     //__inline__ __device__ static bool hasTriangularConnection(Cell* cell, Cell* otherCell);
     //__inline__ __device__ static float getTruncatedUnitValue(Signal const& signal, int channel = 0);
@@ -126,17 +128,24 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     // Activation
     if (cell->signal.active) {
         bending.activation = max(-1.0f, min(1.0f, cell->signal.channels[0]));
+        auto targetAngle = max(-1.0f, min(1.0f, cell->signal.channels[1])) * 180.f + muscle.frontAngle;
+        auto targetAngleRelToConnection0 = Math::normalizedAngle(Math::subtractAngle(targetAngle, cell->absAngleToConnection0), -180.0f);
+        if (isCounterOriented(cell)) {
+            targetAngleRelToConnection0 = -targetAngleRelToConnection0;
+        }
+        auto angleFactor = min(1.0f, max(-1.0f, -targetAngleRelToConnection0 / 90.0f));
+        bending.activation *= angleFactor * angleFactor * angleFactor;
+
         bending.activationCountdown = cudaSimulationParameters.cellTypeMuscleActivationCountdown;
     }
     if (bending.activationCountdown == 0) {
         return;
     }
 
-    // Initialization
+    // First Activation
     if (bending.initialAngle == 0) {
         bending.initialAngle = cell->connections[0].angleFromPrevious;
-        auto orientation = Math::normalizedAngle(Math::subtractAngle(cell->absAngleToConnection0, muscle.frontAngle), -180.0f);
-        if (orientation < 0) {
+        if (isCounterOriented(cell)) {
             bending.forward = false;
             bending.frontBackVelRatio = 1.0f - bending.frontBackVelRatio;
         }
@@ -225,6 +234,12 @@ __inline__ __device__ float MuscleProcessor::calcAngle(SimulationData& data, Cel
     auto direction0 = data.cellMap.getCorrectedDirection(cell->connections[0].cell->pos - cell->pos);
     auto direction1 = data.cellMap.getCorrectedDirection(cell->connections[1].cell->pos - cell->pos);
     return Math::subtractAngle(Math::angleOfVector(direction0), Math::angleOfVector(direction1));
+}
+
+__inline__ __device__ bool MuscleProcessor::isCounterOriented(Cell* cell)
+{
+    auto& muscle = cell->cellTypeData.muscle;
+    return Math::normalizedAngle(Math::subtractAngle(cell->absAngleToConnection0, muscle.frontAngle), -180.0f) < -NEAR_ZERO;
 }
 
 //__inline__ __device__ int MuscleProcessor::getConnectionIndex(Cell* cell, Cell* otherCell)
