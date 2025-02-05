@@ -493,9 +493,6 @@ struct SignalDescription
     }
 
     std::vector<float> _channels;
-    SignalOrigin _origin = SignalOrigin_Unknown;
-    float _targetX = 0;
-    float _targetY = 0;
 };
 
 struct CellDescription

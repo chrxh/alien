@@ -220,9 +220,6 @@ struct SignalTO
 {
     bool active;
     float channels[MAX_CHANNELS];
-    SignalOrigin origin;
-    float targetX;
-    float targetY;
 };
 
 struct CellTO

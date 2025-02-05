@@ -127,9 +127,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->signal.channels[i] = cellTO.signal.channels[i];
     }
-    cell->signal.origin = cellTO.signal.origin;
-    cell->signal.targetX = cellTO.signal.targetX;
-    cell->signal.targetY = cellTO.signal.targetY;
 
     cell->cellType = cellTO.cellType;
 

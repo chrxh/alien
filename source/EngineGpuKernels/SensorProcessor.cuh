@@ -58,7 +58,6 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
     if (isTriggered) {
         statistics.incNumSensorActivities(cell->color);
         searchNeighborhood(data, statistics, cell);
-        cell->signal.origin = SignalOrigin_Sensor;
     }
 }
 
@@ -197,13 +196,8 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
 
             cell->signal.channels[3] = 1.0f - min(1.0f, distance / 256);  //distance: 1 = close, 0 = far away
             statistics.incNumSensorMatches(cell->color);
-            auto delta = data.cellMap.getCorrectedDirection(scanPos - cell->pos);
-            cell->signal.targetX = delta.x;
-            cell->signal.targetY = delta.y;
         } else {
             cell->signal.channels[0] = 0;  //nothing found
-            cell->signal.targetX = 0;
-            cell->signal.targetY = 0;
         }
     }
     __syncthreads();
