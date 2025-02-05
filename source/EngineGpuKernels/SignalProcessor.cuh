@@ -58,15 +58,11 @@ __inline__ __device__  void SignalProcessor::calcFutureSignals(SimulationData& d
         if (cell->signalRelaxationTime > 0) {
             continue;
         }
-        cell->futureSignal.origin = SignalOrigin_Unknown;
-        cell->futureSignal.targetX = 0;
-        cell->futureSignal.targetY = 0;
 
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             cell->futureSignal.channels[i] = 0;
         }
 
-        int numSensorSignals = 0;
         for (int i = 0, j = cell->numConnections; i < j; ++i) {
             auto connectedCell = cell->connections[i].cell;
             if (connectedCell->livingState == LivingState_UnderConstruction || !connectedCell->signal.active) {
@@ -102,16 +98,6 @@ __inline__ __device__  void SignalProcessor::calcFutureSignals(SimulationData& d
             for (int k = 0; k < MAX_CHANNELS; ++k) {
                 cell->futureSignal.channels[k] += connectedCell->signal.channels[k];
             }
-            if (connectedCell->signal.origin == SignalOrigin_Sensor) {
-                cell->futureSignal.origin = SignalOrigin_Sensor;
-                cell->futureSignal.targetX += connectedCell->signal.targetX;
-                cell->futureSignal.targetY += connectedCell->signal.targetY;
-                ++numSensorSignals;
-            }
-        }
-        if (numSensorSignals > 0) {
-            cell->futureSignal.targetX /= toFloat(numSensorSignals);
-            cell->futureSignal.targetY /= toFloat(numSensorSignals);
         }
     }
 }
@@ -133,9 +119,6 @@ __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 cell->signal.channels[i] = cell->futureSignal.channels[i];
             }
-            cell->signal.origin = cell->futureSignal.origin;
-            cell->signal.targetX = cell->futureSignal.targetX;
-            cell->signal.targetY = cell->futureSignal.targetY;
             cell->signalRelaxationTime = MAX_SIGNAL_RELAXATION_TIME;
         } else {
             cell->signalRelaxationTime = max(0, cell->signalRelaxationTime - 1);
@@ -146,9 +129,6 @@ __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
 __inline__ __device__ void SignalProcessor::createEmptySignal(Cell* cell)
 {
     cell->signal.active = true;
-    cell->signal.origin = SignalOrigin_Unknown;
-    cell->signal.targetX = 0;
-    cell->signal.targetY = 0;
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->signal.channels[i] = 0;
     }

@@ -122,9 +122,6 @@ namespace
     auto constexpr Id_Cell_OrientationAngle = 22;
 
     auto constexpr Id_Signal_Channels = 0;
-    auto constexpr Id_Signal_Origin = 1;
-    auto constexpr Id_Signal_TargetX = 2;
-    auto constexpr Id_Signal_TargetY = 3;
 
     auto constexpr Id_SignalRouting_Active = 0;
     auto constexpr Id_SignalRouting_BaseAngle = 1;
@@ -574,9 +571,6 @@ namespace cereal
         SignalDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Signal_Channels, data._channels, defaultObject._channels);
-        loadSave(task, auxiliaries, Id_Signal_Origin, data._origin, defaultObject._origin);
-        loadSave(task, auxiliaries, Id_Signal_TargetX, data._targetX, defaultObject._targetX);
-        loadSave(task, auxiliaries, Id_Signal_TargetY, data._targetY, defaultObject._targetY);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalDescription)
