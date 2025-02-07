@@ -136,8 +136,8 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
 
     // Activation
     if (cell->signal.active) {
-        bending.activation = max(-1.0f, min(1.0f, cell->signal.channels[0]));
-        auto targetAngle = max(-1.0f, min(1.0f, cell->signal.channels[1])) * 180.f + cell->frontAngle;
+        bending.activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleTrigger]));
+        auto targetAngle = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleAngle])) * 180.f + cell->frontAngle;
         auto targetAngleRelToConnection0 = Math::normalizedAngle(Math::subtractAngle(targetAngle, cell->absAngleToConnection0), -180.0f);
         if (isCounterOriented(cell)) {
             targetAngleRelToConnection0 = -targetAngleRelToConnection0;
