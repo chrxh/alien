@@ -44,6 +44,25 @@ enum ActivationFunction_
     ActivationFunction_Count
 };
 
+//************************
+//* Oscillator constants *
+//************************
+namespace Channels
+{
+    auto constexpr OscillatorPulse = 0;
+}
+
+//********************
+//* Sensor constants *
+//********************
+namespace Channels
+{
+    auto constexpr SensorFoundResult = 0;
+    auto constexpr SensorAngle = 1;
+    auto constexpr SensorDensity = 2;
+    auto constexpr SensorDistance = 3;
+}
+
 using SensorRestrictToMutants = int;
 enum SensorRestrictToMutants_
 {
@@ -57,13 +76,14 @@ enum SensorRestrictToMutants_
     SensorRestrictToMutants_Count
 };
 
-using EnergyDistributionMode = int;
-enum EnergyDistributionMode_
+//********************
+//* Muscle constants *
+//********************
+namespace Channels
 {
-    EnergyDistributionMode_ConnectedCells,
-    EnergyDistributionMode_TransmittersAndConstructors,
-    EnergyDistributionMode_Count
-};
+    auto constexpr MuscleTrigger = 0;
+    auto constexpr MuscleAngle = 1;
+}
 
 using MuscleMode = int;
 enum MuscleMode_
@@ -74,6 +94,9 @@ enum MuscleMode_
     MuscleMode_Count
 };
 
+//**********************
+//* Defender constants *
+//**********************
 using DefenderMode = int;
 enum DefenderMode_
 {
@@ -82,6 +105,9 @@ enum DefenderMode_
     DefenderMode_Count
 };
 
+//*************************
+//* Constructor constants *
+//*************************
 using ConstructorAngleAlignment = int;
 enum ConstructorAlignment_
 {
@@ -92,14 +118,6 @@ enum ConstructorAlignment_
     ConstructorAngleAlignment_72 = 4,
     ConstructorAngleAlignment_60 = 5,
     ConstructorAngleAlignment_Count = 6
-};
-
-using InjectorMode = int;
-enum InjectorMode_
-{
-    InjectorMode_InjectOnlyEmptyCells,
-    InjectorMode_InjectAll,
-    InjectorMode_Count
 };
 
 using ConstructionShape = int;
@@ -118,6 +136,21 @@ enum ConstructionShape_
     ConstructionShape_Count
 };
 
+
+//**********************
+//* Injector constants *
+//**********************
+using InjectorMode = int;
+enum InjectorMode_
+{
+    InjectorMode_InjectOnlyEmptyCells,
+    InjectorMode_InjectAll,
+    InjectorMode_Count
+};
+
+//***********************
+//* Detonator constants *
+//***********************
 using DetonatorState = int;
 enum DetonatorState_
 {
@@ -126,6 +159,9 @@ enum DetonatorState_
     DetonatorState_Exploded
 };
 
+//*************************
+//* Reconnector constants *
+//*************************
 using ReconnectorRestrictToMutants = int;
 enum ReconnectorRestrictToMutants_
 {
@@ -159,4 +195,12 @@ enum SignalOrigin_
 {
     SignalOrigin_Unknown,
     SignalOrigin_Sensor
+};
+
+using EnergyDistributionMode = int;
+enum EnergyDistributionMode_
+{
+    EnergyDistributionMode_ConnectedCells,
+    EnergyDistributionMode_TransmittersAndConstructors,
+    EnergyDistributionMode_Count
 };

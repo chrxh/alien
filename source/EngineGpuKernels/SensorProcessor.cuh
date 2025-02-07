@@ -190,14 +190,14 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             auto scanPos = cell->pos + Math::unitVectorOfAngle(absAngle) * distance;
             flagDetectedCells(data, cell, scanPos);
 
-            cell->signal.channels[0] = 1;                                    //something found
-            cell->signal.channels[1] = relAngle / 360.0f;                          //angle: between -0.5 and 0.5
-            cell->signal.channels[2] = toFloat((lookupResult >> 40) & 0xff) / 64;  //density
+            cell->signal.channels[Channels::SensorFoundResult] = 1;                //something found
+            cell->signal.channels[Channels::SensorAngle] = relAngle / 360.0f;                          //angle: between -0.5 and 0.5
+            cell->signal.channels[Channels::SensorDensity] = toFloat((lookupResult >> 40) & 0xff) / 64;  //density
 
-            cell->signal.channels[3] = 1.0f - min(1.0f, distance / 256);  //distance: 1 = close, 0 = far away
+            cell->signal.channels[Channels::SensorDistance] = 1.0f - min(1.0f, distance / 256);  //distance: 1 = close, 0 = far away
             statistics.incNumSensorMatches(cell->color);
         } else {
-            cell->signal.channels[0] = 0;  //nothing found
+            cell->signal.channels[Channels::SensorFoundResult] = 0;  //nothing found
         }
     }
     __syncthreads();

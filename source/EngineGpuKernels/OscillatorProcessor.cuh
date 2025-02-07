@@ -34,9 +34,9 @@ __inline__ __device__ void OscillatorProcessor::process(SimulationData& data, Si
             }
             statistics.incNumOscillatorPulses(cell->color);
             if (oscillator.alternationInterval == 0) {
-                cell->signal.channels[0] += 1.0f;
+                cell->signal.channels[Channels::OscillatorPulse] += 1.0f;
             } else {
-                cell->signal.channels[0] += oscillator.numPulses < oscillator.alternationInterval ? 1.0f : -1.0f;
+                cell->signal.channels[Channels::OscillatorPulse] += oscillator.numPulses < oscillator.alternationInterval ? 1.0f : -1.0f;
             }
             ++oscillator.numPulses;
             if (oscillator.alternationInterval > 0 && oscillator.numPulses == oscillator.alternationInterval * 2) {

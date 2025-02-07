@@ -156,8 +156,8 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
         if (SignalProcessor::isAutoTriggered(data, cell, cell->cellTypeData.constructor.autoTriggerInterval)) {
             auto constructionData = readConstructionData(cell);
             if (tryConstructCell(data, statistics, cell, constructionData)) {
-                cell->signal.active = true;
-                cell->signal.channels[0] = 1;
+                //cell->signal.active = true;
+                //cell->signal.channels[0] = 1;
                 if (GenomeDecoder::isLastNode(constructor)) {
                     constructor.genomeCurrentNodeIndex = 0;
                     if (!constructionData.genomeHeader.hasInfiniteRepetitions()) {
@@ -173,10 +173,10 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
                     ++constructor.genomeCurrentNodeIndex;
                 }
             } else {
-                cell->signal.channels[0] = 0;
+                //cell->signal.channels[0] = 0;
             }
         } else {
-            cell->signal.active = false;
+            //cell->signal.active = false;
         }
     }
 }
