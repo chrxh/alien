@@ -140,7 +140,7 @@ namespace
         } break;
         case CellType_Muscle: {
             cellTO.cellTypeData.muscle.mode = cell->cellTypeData.muscle.mode;
-            if (cellTO.cellTypeData.muscle.mode == MuscleMode_Bending) {
+            if (cellTO.cellTypeData.muscle.mode == MuscleMode_AutoBending) {
                 cellTO.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation = cell->cellTypeData.muscle.modeData.autoBending.maxAngleDeviation;
                 cellTO.cellTypeData.muscle.modeData.autoBending.frontBackVelRatio = cell->cellTypeData.muscle.modeData.autoBending.frontBackVelRatio;
                 cellTO.cellTypeData.muscle.modeData.autoBending.initialAngle = cell->cellTypeData.muscle.modeData.autoBending.initialAngle;

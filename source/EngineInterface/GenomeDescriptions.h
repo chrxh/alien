@@ -248,7 +248,7 @@ struct MuscleGenomeDescription
 {
     auto operator<=>(MuscleGenomeDescription const&) const = default;
 
-    MuscleMode getMode() const { return MuscleMode_Bending; }
+    MuscleMode getMode() const { return MuscleMode_AutoBending; }
     MuscleGenomeDescription& mode(MuscleModeGenomeDescription const& value)
     {
         _muscleMode = value;

@@ -787,7 +787,7 @@ ConstructorProcessor::constructCellIntern(
     } break;
     case CellType_Muscle: {
         result->cellTypeData.muscle.mode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % MuscleMode_Count;
-        if (result->cellTypeData.muscle.mode == MuscleMode_Bending) {
+        if (result->cellTypeData.muscle.mode == MuscleMode_AutoBending) {
             result->cellTypeData.muscle.modeData.autoBending.maxAngleDeviation = min(1.0f, max(0.0f, GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition)));
             result->cellTypeData.muscle.modeData.autoBending.frontBackVelRatio = abs(GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition));
             result->cellTypeData.muscle.modeData.autoBending.initialAngle = 0;
