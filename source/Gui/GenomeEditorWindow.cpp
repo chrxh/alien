@@ -743,7 +743,7 @@ void GenomeEditorWindow::processNode(
                 AutoBendingGenomeDescription bending;
                 muscle.mode(bending);
             }
-            if (mode == MuscleMode_Bending) {
+            if (mode == MuscleMode_AutoBending) {
                 auto& bending = std::get<AutoBendingGenomeDescription>(muscle._muscleMode);
                 table.next();
                 AlienImGui::InputFloat(

@@ -90,7 +90,8 @@ enum MuscleMode_
 {
     //MuscleMode_Movement,
     //MuscleMode_ContractionExpansion,
-    MuscleMode_Bending,
+    MuscleMode_AutoBending,
+    MuscleMode_ManualBending,
     MuscleMode_Count
 };
 

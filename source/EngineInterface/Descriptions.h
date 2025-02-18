@@ -387,7 +387,7 @@ struct MuscleDescription
 {
     auto operator<=>(MuscleDescription const&) const = default;
 
-    MuscleMode getMode() const { return MuscleMode_Bending; }
+    MuscleMode getMode() const { return MuscleMode_AutoBending; }
     MuscleDescription& mode(MuscleModeDescription const& value)
     {
         _mode = value;

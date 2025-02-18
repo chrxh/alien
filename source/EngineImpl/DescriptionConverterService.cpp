@@ -477,7 +477,7 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
     } break;
     case CellType_Muscle: {
         MuscleDescription muscle;
-        if (cellTO.cellTypeData.muscle.mode == MuscleMode_Bending) {
+        if (cellTO.cellTypeData.muscle.mode == MuscleMode_AutoBending) {
             AutoBendingDescription bending;
             bending._maxAngleDeviation = cellTO.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation;
             bending._frontBackVelRatio = cellTO.cellTypeData.muscle.modeData.autoBending.frontBackVelRatio;
@@ -640,7 +640,7 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
         auto const& muscleDesc = std::get<MuscleDescription>(cellDesc._cellTypeData);
         MuscleTO& muscleTO = cellTO.cellTypeData.muscle;
         muscleTO.mode = muscleDesc.getMode();
-        if (muscleTO.mode == MuscleMode_Bending) {
+        if (muscleTO.mode == MuscleMode_AutoBending) {
             auto const& bendingDesc = std::get<AutoBendingDescription>(muscleDesc._mode);
             AutoBendingTO& bendingTO = muscleTO.modeData.autoBending;
             bendingTO.maxAngleDeviation = bendingDesc._maxAngleDeviation;

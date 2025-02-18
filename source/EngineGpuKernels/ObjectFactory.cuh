@@ -192,7 +192,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     } break;
     case CellType_Muscle: {
         cell->cellTypeData.muscle.mode = cellTO.cellTypeData.muscle.mode;
-        if (cellTO.cellTypeData.muscle.mode == MuscleMode_Bending) {
+        if (cellTO.cellTypeData.muscle.mode == MuscleMode_AutoBending) {
             cell->cellTypeData.muscle.modeData.autoBending.maxAngleDeviation = cellTO.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation;
             cell->cellTypeData.muscle.modeData.autoBending.frontBackVelRatio = cellTO.cellTypeData.muscle.modeData.autoBending.frontBackVelRatio;
             cell->cellTypeData.muscle.modeData.autoBending.initialAngle = cellTO.cellTypeData.muscle.modeData.autoBending.initialAngle;
