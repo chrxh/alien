@@ -149,6 +149,12 @@ namespace
                 cellTO.cellTypeData.muscle.modeData.autoBending.activation = cell->cellTypeData.muscle.modeData.autoBending.activation;
                 cellTO.cellTypeData.muscle.modeData.autoBending.activationCountdown = cell->cellTypeData.muscle.modeData.autoBending.activationCountdown;
                 cellTO.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied = cell->cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied;
+            } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_ManualBending) {
+                cellTO.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation = cell->cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
+                cellTO.cellTypeData.muscle.modeData.manualBending.frontBackVelRatio = cell->cellTypeData.muscle.modeData.manualBending.frontBackVelRatio;
+                cellTO.cellTypeData.muscle.modeData.manualBending.initialAngle = cell->cellTypeData.muscle.modeData.manualBending.initialAngle;
+                cellTO.cellTypeData.muscle.modeData.manualBending.lastAngle = cell->cellTypeData.muscle.modeData.manualBending.lastAngle;
+                cellTO.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied = cell->cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied;
             }
             cellTO.cellTypeData.muscle.lastMovementX = cell->cellTypeData.muscle.lastMovementX;
             cellTO.cellTypeData.muscle.lastMovementY = cell->cellTypeData.muscle.lastMovementY;

@@ -488,6 +488,14 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
             bending._activationCountdown = cellTO.cellTypeData.muscle.modeData.autoBending.activationCountdown;
             bending._impulseAlreadyApplied = cellTO.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied;
             muscle._mode = bending;
+        } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_ManualBending) {
+            ManualBendingDescription bending;
+            bending._maxAngleDeviation = cellTO.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
+            bending._frontBackVelRatio = cellTO.cellTypeData.muscle.modeData.manualBending.frontBackVelRatio;
+            bending._initialAngle = cellTO.cellTypeData.muscle.modeData.manualBending.initialAngle;
+            bending._lastAngle = cellTO.cellTypeData.muscle.modeData.manualBending.lastAngle;
+            bending._impulseAlreadyApplied = cellTO.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied;
+            muscle._mode = bending;
         }
         muscle._lastMovementX = cellTO.cellTypeData.muscle.lastMovementX;
         muscle._lastMovementY = cellTO.cellTypeData.muscle.lastMovementY;
@@ -650,6 +658,14 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
             bendingTO.forward = bendingDesc._forward;
             bendingTO.activation = bendingDesc._activation;
             bendingTO.activationCountdown = bendingDesc._activationCountdown;
+            bendingTO.impulseAlreadyApplied = bendingDesc._impulseAlreadyApplied;
+        } else if (muscleTO.mode == MuscleMode_ManualBending) {
+            auto const& bendingDesc = std::get<ManualBendingDescription>(muscleDesc._mode);
+            ManualBendingTO& bendingTO = muscleTO.modeData.manualBending;
+            bendingTO.maxAngleDeviation = bendingDesc._maxAngleDeviation;
+            bendingTO.frontBackVelRatio = bendingDesc._frontBackVelRatio;
+            bendingTO.initialAngle = bendingDesc._initialAngle;
+            bendingTO.lastAngle = bendingDesc._lastAngle;
             bendingTO.impulseAlreadyApplied = bendingDesc._impulseAlreadyApplied;
         }
         muscleTO.lastMovementX = muscleDesc._lastMovementX;
