@@ -189,8 +189,8 @@ struct AutoBendingGenomeDescription
 {
     auto operator<=>(AutoBendingGenomeDescription const&) const = default;
 
-    float _maxAngleDeviation = 20.0f;   // Between 0 and 1
-    float _frontBackVelRatio = 0;      // Between 0 and 1
+    float _maxAngleDeviation = 0.2f;   // Between 0 and 1
+    float _frontBackVelRatio = 0.2f;      // Between 0 and 1
 
     AutoBendingGenomeDescription& maxAngleDeviation(float value)
     {
@@ -203,14 +203,8 @@ struct ManualBendingGenomeDescription
 {
     auto operator<=>(ManualBendingGenomeDescription const&) const = default;
 
-    //float _maxDistanceDeviation = 20.0f;  // Between 0 and 1
-    //float _frontBackVelRatio = 0;      // Between 0 and 1
-
-    //ManualBendingGenomeDescription& maxAngleDeviation(float value)
-    //{
-    //    _maxDistanceDeviation = value;
-    //    return *this;
-    //}
+    float _maxAngleDeviation = 0.2f;  // Between 0 and 1
+    float _frontBackVelRatio = 0.2f;      // Between 0 and 1
 };
 
 struct AngleBendingGenomeDescription

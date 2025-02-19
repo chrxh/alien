@@ -796,6 +796,13 @@ ConstructorProcessor::constructCellIntern(
             result->cellTypeData.muscle.modeData.autoBending.activation = 0;
             result->cellTypeData.muscle.modeData.autoBending.activationCountdown = 0;
             result->cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied = false;
+        } else if (result->cellTypeData.muscle.mode == MuscleMode_ManualBending) {
+            result->cellTypeData.muscle.modeData.autoBending.maxAngleDeviation =
+                min(1.0f, max(0.0f, GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition)));
+            result->cellTypeData.muscle.modeData.manualBending.frontBackVelRatio = abs(GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition));
+            result->cellTypeData.muscle.modeData.manualBending.initialAngle = 0;
+            result->cellTypeData.muscle.modeData.manualBending.lastAngle = 0;
+            result->cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied = false;
         }
         result->cellTypeData.muscle.lastMovementX = 0;
         result->cellTypeData.muscle.lastMovementY = 0;

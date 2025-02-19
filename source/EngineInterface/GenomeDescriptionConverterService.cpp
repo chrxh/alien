@@ -241,6 +241,10 @@ std::vector<uint8_t> GenomeDescriptionConverterService::convertDescriptionToByte
                 auto const& bending = std::get<AutoBendingGenomeDescription>(muscle._muscleMode);
                 writeFloat(result, bending._maxAngleDeviation);
                 writeFloat(result, bending._frontBackVelRatio);
+            } else if (mode == MuscleMode_ManualBending) {
+                auto const& bending = std::get<ManualBendingGenomeDescription>(muscle._muscleMode);
+                writeFloat(result, bending._maxAngleDeviation);
+                writeFloat(result, bending._frontBackVelRatio);
             }
         } break;
         case CellType_Defender: {
@@ -366,6 +370,11 @@ namespace
                 auto mode = readByte(data, bytePosition) % MuscleMode_Count;
                 if (mode == MuscleMode_AutoBending) {
                     AutoBendingGenomeDescription bending;
+                    bending._maxAngleDeviation = readFloat(data, bytePosition);
+                    bending._frontBackVelRatio = readFloat(data, bytePosition);
+                    muscle._muscleMode = bending;
+                } else if (mode == MuscleMode_ManualBending) {
+                    ManualBendingGenomeDescription bending;
                     bending._maxAngleDeviation = readFloat(data, bytePosition);
                     bending._frontBackVelRatio = readFloat(data, bytePosition);
                     muscle._muscleMode = bending;

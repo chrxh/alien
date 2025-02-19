@@ -123,16 +123,14 @@ struct AutoBendingTO
 
 struct ManualBendingTO
 {
-    //// Fixed data
-    //float maxAngleDeviation;  // Between 0 and 1
-    //float frontBackVelRatio;  // Between 0 and 1
+    // Fixed data
+    float maxAngleDeviation;  // Between 0 and 1
+    float frontBackVelRatio;  // Between 0 and 1
 
-    //// Process data
-    //float initialAngle;
-    //float lastAngle;
-    //float activation;
-    //uint8_t activationCountdown;
-    //bool impulseAlreadyApplied;
+    // Process data
+    float initialAngle;
+    float lastAngle;
+    bool impulseAlreadyApplied;
 };
 
 struct AngleBendingTO
