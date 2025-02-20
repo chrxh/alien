@@ -736,15 +736,18 @@ void GenomeEditorWindow::processNode(
             if (AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Mode")
-                    .values({"Bending"})
+                    .values({"Auto bending", "Manual bending"})
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::GenomeMuscleModeTooltip),
                 mode)) {
-                AutoBendingGenomeDescription bending;
-                muscle.mode(bending);
+                if (mode == MuscleMode_AutoBending) {
+                    muscle.mode(AutoBendingGenomeDescription());
+                } else if (mode == MuscleMode_ManualBending) {
+                    muscle.mode(ManualBendingGenomeDescription());
+                }
             }
             if (mode == MuscleMode_AutoBending) {
-                auto& bending = std::get<AutoBendingGenomeDescription>(muscle._muscleMode);
+                auto& bending = std::get<AutoBendingGenomeDescription>(muscle._mode);
                 table.next();
                 AlienImGui::InputFloat(
                     AlienImGui::InputFloatParameters()
@@ -754,7 +757,17 @@ void GenomeEditorWindow::processNode(
                     bending._maxAngleDeviation);
                 table.next();
                 AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters().name("Fort back ratio").format("%.1f").textWidth(ContentHeaderTextWidth), bending._frontBackVelRatio);
+                    AlienImGui::InputFloatParameters().name("Front back ratio").format("%.2f").textWidth(ContentHeaderTextWidth), bending._frontBackVelRatio);
+            }
+            if (mode == MuscleMode_ManualBending) {
+                auto& bending = std::get<ManualBendingGenomeDescription>(muscle._mode);
+                table.next();
+                AlienImGui::InputFloat(
+                    AlienImGui::InputFloatParameters().name("Max angle deviation").format("%.2f").textWidth(ContentHeaderTextWidth),
+                    bending._maxAngleDeviation);
+                table.next();
+                AlienImGui::InputFloat(
+                    AlienImGui::InputFloatParameters().name("Front back ratio").format("%.2f").textWidth(ContentHeaderTextWidth), bending._frontBackVelRatio);
             }
         } break;
         case CellType_Defender: {
