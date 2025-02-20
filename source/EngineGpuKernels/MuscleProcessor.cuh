@@ -37,6 +37,7 @@ private:
     __inline__ __device__ static bool isCounterOriented(Cell* cell);
 
     static auto constexpr AccelerationLimit = 0.3f;
+    static auto constexpr AutoTriggerInterval = 9;
 };
 
 /************************************************************************/
@@ -175,7 +176,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     }
 
     // Process auto bending
-    if (SignalProcessor::isAutoTriggered(data, cell, 9)) {
+    if (SignalProcessor::isAutoTriggered(data, cell, AutoTriggerInterval)) {
 
         auto frontBackVelRatio = isCounterOriented(cell) ? 1.0f - bending.frontBackVelRatio : bending.frontBackVelRatio;
 
@@ -281,7 +282,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
     }
 
     // Process auto bending
-    if (SignalProcessor::isAutoTriggered(data, cell, 9)) {
+    if (SignalProcessor::isManuallyTriggered(data, cell)) {
 
         auto bendingInfo = getBendingInfo(data, cell);
         auto actualAngle = calcActualAngle(data, bendingInfo);

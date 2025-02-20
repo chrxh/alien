@@ -17,6 +17,7 @@ public:
     __inline__ __device__ static float2 calcReferenceDirection(SimulationData& data, Cell* cell);
 
     __inline__ __device__ static bool isAutoTriggered(SimulationData& data, Cell* cell, uint8_t autoTriggerInterval);
+    __inline__ __device__ static bool isManuallyTriggered(SimulationData& data, Cell* cell);
     __inline__ __device__ static bool isTriggeredAndCreateSignalIfTriggered(SimulationData& data, Cell* cell, uint8_t autoTriggerInterval);
 };
 
@@ -149,15 +150,21 @@ __inline__ __device__ bool SignalProcessor::isAutoTriggered(SimulationData& data
     return (data.timestep + cell->creatureId) % triggerInterval == 0;
 }
 
+__inline__ __device__ bool SignalProcessor::isManuallyTriggered(SimulationData& data, Cell* cell)
+{
+    if (!cell->signal.active) {
+        return false;
+    }
+    if (cell->signal.active && abs(cell->signal.channels[0]) < TRIGGER_THRESHOLD) {
+        return false;
+    }
+    return true;
+}
+
 __inline__ __device__ bool SignalProcessor::isTriggeredAndCreateSignalIfTriggered(SimulationData& data, Cell* cell, uint8_t autoTriggerInterval)
 {
     if (autoTriggerInterval == 0) {
-        if (!cell->signal.active) {
-            return false;
-        }
-        if (cell->signal.active && abs(cell->signal.channels[0]) < TRIGGER_THRESHOLD) {
-            return false;
-        }
+        return isManuallyTriggered(data, cell);
     } else {
         if (!isAutoTriggered(data, cell, autoTriggerInterval)) {
             return false;

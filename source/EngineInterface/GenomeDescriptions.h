@@ -242,14 +242,22 @@ struct MuscleGenomeDescription
 {
     auto operator<=>(MuscleGenomeDescription const&) const = default;
 
-    MuscleMode getMode() const { return MuscleMode_AutoBending; }
+    MuscleMode getMode() const
+    {
+        if (std::holds_alternative<AutoBendingGenomeDescription>(_mode)) {
+            return MuscleMode_AutoBending;
+        } else if (std::holds_alternative<ManualBendingGenomeDescription>(_mode)) {
+            return MuscleMode_ManualBending;
+        }
+        THROW_NOT_IMPLEMENTED();
+    }
     MuscleGenomeDescription& mode(MuscleModeGenomeDescription const& value)
     {
-        _muscleMode = value;
+        _mode = value;
         return *this;
     }
 
-    MuscleModeGenomeDescription _muscleMode;
+    MuscleModeGenomeDescription _mode;
 };
 
 struct DefenderGenomeDescription

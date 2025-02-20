@@ -465,7 +465,7 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._muscleMode);
+        ar(data._mode);
     }
     SPLIT_SERIALIZATION(MuscleGenomeDescription)
 

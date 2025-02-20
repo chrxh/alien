@@ -301,23 +301,17 @@ struct AutoBendingDescription
 {
     auto operator<=>(AutoBendingDescription const&) const = default;
 
-    AutoBendingDescription& maxAngleDeviation(float value)
-    {
-        _maxAngleDeviation = value;
-        return *this;
-    }
-
     // Fixed data
-    float _maxAngleDeviation = 0.2f; // Between 0 and 1
-    float _frontBackVelRatio = 0.2f;  // Between 0 and 1
+    MEMBER_DECLARATION(AutoBendingDescription, float, maxAngleDeviation, 0.2f);    // Between 0 and 1
+    MEMBER_DECLARATION(AutoBendingDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
 
     // Process data
-    float _initialAngle = 0;
-    float _lastAngle = 0;
-    bool _forward = true;  // Current direction
-    float _activation = 0;
-    int _activationCountdown = 0;
-    bool _impulseAlreadyApplied = false;
+    MEMBER_DECLARATION(AutoBendingDescription, float, initialAngle, 0.0f);
+    MEMBER_DECLARATION(AutoBendingDescription, float, lastAngle, 0.0f);
+    MEMBER_DECLARATION(AutoBendingDescription, bool, forward, true);    // Current direction
+    MEMBER_DECLARATION(AutoBendingDescription, float, activation, 0);
+    MEMBER_DECLARATION(AutoBendingDescription, int, activationCountdown, 0);
+    MEMBER_DECLARATION(AutoBendingDescription, bool, impulseAlreadyApplied, false);
 };
 
 struct ManualBendingDescription
@@ -325,13 +319,13 @@ struct ManualBendingDescription
     auto operator<=>(ManualBendingDescription const&) const = default;
 
     // Fixed data
-    float _maxAngleDeviation = 0.2f;  // Between 0 and 1
-    float _frontBackVelRatio = 0.2f;  // Between 0 and 1
+    MEMBER_DECLARATION(ManualBendingDescription, float, maxAngleDeviation, 0.2f);   // Between 0 and 1
+    MEMBER_DECLARATION(ManualBendingDescription, float, frontBackVelRatio, 0.2f);   // Between 0 and 1
 
     // Process data
-    float _initialAngle = 0;
-    float _lastAngle = 0;
-    bool _impulseAlreadyApplied = false;
+    MEMBER_DECLARATION(ManualBendingDescription, float, initialAngle, 0.0f);
+    MEMBER_DECLARATION(ManualBendingDescription, float, lastAngle, 0.0f);
+    MEMBER_DECLARATION(ManualBendingDescription, bool, impulseAlreadyApplied, false);
 };
 
 struct AngleBendingDescription
@@ -379,7 +373,15 @@ struct MuscleDescription
 {
     auto operator<=>(MuscleDescription const&) const = default;
 
-    MuscleMode getMode() const { return MuscleMode_AutoBending; }
+    MuscleMode getMode() const
+    {
+        if (std::holds_alternative<AutoBendingDescription>(_mode)) {
+            return MuscleMode_AutoBending;
+        } else if (std::holds_alternative<ManualBendingDescription>(_mode)) {
+            return MuscleMode_ManualBending;
+        }
+        THROW_NOT_IMPLEMENTED();
+    }
     MuscleDescription& mode(MuscleModeDescription const& value)
     {
         _mode = value;
