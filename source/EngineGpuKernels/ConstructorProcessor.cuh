@@ -791,7 +791,7 @@ ConstructorProcessor::constructCellIntern(
             result->cellTypeData.muscle.modeData.autoBending.maxAngleDeviation = min(1.0f, max(0.0f, GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition)));
             result->cellTypeData.muscle.modeData.autoBending.frontBackVelRatio = abs(GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition));
             result->cellTypeData.muscle.modeData.autoBending.initialAngle = 0;
-            result->cellTypeData.muscle.modeData.autoBending.lastAngle = 0;
+            result->cellTypeData.muscle.modeData.autoBending.lastActualAngle = 0;
             result->cellTypeData.muscle.modeData.autoBending.forward = true;
             result->cellTypeData.muscle.modeData.autoBending.activation = 0;
             result->cellTypeData.muscle.modeData.autoBending.activationCountdown = 0;
@@ -801,7 +801,8 @@ ConstructorProcessor::constructCellIntern(
                 min(1.0f, max(0.0f, GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition)));
             result->cellTypeData.muscle.modeData.manualBending.frontBackVelRatio = abs(GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition));
             result->cellTypeData.muscle.modeData.manualBending.initialAngle = 0;
-            result->cellTypeData.muscle.modeData.manualBending.lastAngle = 0;
+            result->cellTypeData.muscle.modeData.manualBending.lastActualAngle = 0;
+            result->cellTypeData.muscle.modeData.manualBending.lastAngleDelta = 0;
             result->cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied = false;
         }
         result->cellTypeData.muscle.lastMovementX = 0;
