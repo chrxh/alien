@@ -307,7 +307,7 @@ struct AutoBendingDescription
 
     // Process data
     MEMBER_DECLARATION(AutoBendingDescription, float, initialAngle, 0.0f);
-    MEMBER_DECLARATION(AutoBendingDescription, float, lastAngle, 0.0f);
+    MEMBER_DECLARATION(AutoBendingDescription, float, lastActualAngle, 0.0f);
     MEMBER_DECLARATION(AutoBendingDescription, bool, forward, true);    // Current direction
     MEMBER_DECLARATION(AutoBendingDescription, float, activation, 0);
     MEMBER_DECLARATION(AutoBendingDescription, int, activationCountdown, 0);
@@ -324,7 +324,8 @@ struct ManualBendingDescription
 
     // Process data
     MEMBER_DECLARATION(ManualBendingDescription, float, initialAngle, 0.0f);
-    MEMBER_DECLARATION(ManualBendingDescription, float, lastAngle, 0.0f);
+    MEMBER_DECLARATION(ManualBendingDescription, float, lastActualAngle, 0.0f);
+    MEMBER_DECLARATION(ManualBendingDescription, float, lastAngleDelta, 0.0f);
     MEMBER_DECLARATION(ManualBendingDescription, bool, impulseAlreadyApplied, false);
 };
 
@@ -361,7 +362,7 @@ struct AutoCrawlingDescription
 
     // Process data
     float _initialAngle = 0;
-    float _lastAngle = 0;
+    float _lastActualAngle = 0;
     bool _forward = true;  // Current direction
     float _activation = 0;
     int _activationCountdown = 0;

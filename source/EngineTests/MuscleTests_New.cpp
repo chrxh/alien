@@ -15,6 +15,19 @@ public:
     {}
 
     ~MuscleTests_New() = default;
+
+protected:
+    template <typename Channel>
+    float getValue(Channel channel)
+    {
+        if (channel == Channel::Positive) {
+            return 1.0f;
+        } else if (channel == Channel::Negative) {
+            return -1.0f;
+        } else {
+            return 0.0f;
+        }
+    }
 };
 
 enum class Side
@@ -41,18 +54,6 @@ class MuscleTests_AutoBending_New
     : public MuscleTests_New
     , public testing::WithParamInterface<std::tuple<Side, Channel0, Channel1>>
 {
-protected:
-    template <typename Channel>
-    float getValue(Channel channel)
-    {
-        if (channel == Channel::Positive) {
-            return 1.0f;
-        } else if (channel == Channel::Negative) {
-            return -1.0f;
-        } else {
-            return 0.0f;
-        }
-    }
 };
 
 INSTANTIATE_TEST_SUITE_P(
@@ -244,18 +245,6 @@ class MuscleTests_ManualBending_New
     : public MuscleTests_New
     , public testing::WithParamInterface<std::tuple<Side, Channel0>>
 {
-protected:
-    template <typename Channel>
-    float getValue(Channel channel)
-    {
-        if (channel == Channel::Positive) {
-            return 1.0f;
-        } else if (channel == Channel::Negative) {
-            return -1.0f;
-        } else {
-            return 0.0f;
-        }
-    }
 };
 
 INSTANTIATE_TEST_SUITE_P(
@@ -294,7 +283,8 @@ TEST_P(MuscleTests_ManualBending_New, numConnectionsEquals2)
 
     auto minAngle = 180.0f;
     auto maxAngle = 180.0f;
-    auto sumAngleChanges = 0.0f;
+    auto numPositiveAngleChanges = 0;
+    auto numNegativeAngleChanges = 0;
     std::optional<float> lastAngle;
     for (int i = 0; i < 200; ++i) {
         _simulationFacade->calcTimesteps(10);
@@ -315,7 +305,12 @@ TEST_P(MuscleTests_ManualBending_New, numConnectionsEquals2)
         minAngle = std::min(minAngle, angle);
         maxAngle = std::max(maxAngle, angle);
         if (lastAngle.has_value()) {
-            sumAngleChanges += std::abs(angle - lastAngle.value());
+            auto angleChange = angle - lastAngle.value();
+            if (angleChange > 0) {
+                ++numPositiveAngleChanges;
+            } else if (angleChange < 0) {
+                ++numNegativeAngleChanges;
+            }
         }
         lastAngle = angle;
         if (i == 0) {
@@ -330,6 +325,22 @@ TEST_P(MuscleTests_ManualBending_New, numConnectionsEquals2)
         }
     }
 
+    if (channel0 == Channel0::Positive && side == Side::Left) {
+        EXPECT_TRUE(numPositiveAngleChanges > 10);
+        EXPECT_EQ(0, numNegativeAngleChanges);
+    }
+    if (channel0 == Channel0::Positive && side == Side::Right) {
+        EXPECT_EQ(0, numPositiveAngleChanges);
+        EXPECT_TRUE(numNegativeAngleChanges > 10);
+    }
+    if (channel0 == Channel0::Negative && side == Side::Left) {
+        EXPECT_EQ(0, numPositiveAngleChanges);
+        EXPECT_TRUE(numNegativeAngleChanges < 10);
+    }
+    if (channel0 == Channel0::Negative && side == Side::Right) {
+        EXPECT_TRUE(numPositiveAngleChanges < 10);
+        EXPECT_EQ(0, numNegativeAngleChanges);
+    }
     if (channel0 == Channel0::Zero) {
         EXPECT_TRUE(minAngle < 180.0f + AnglePrecision);
         EXPECT_TRUE(minAngle > 180.0f - AnglePrecision);
@@ -364,7 +375,7 @@ TEST_P(MuscleTests_ManualBending_New, numConnectionsEquals1)
             .id(4)
             .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
             .absAngleToConnection0(side == Side::Left ? -90.0f : 90.0f)
-            .cellType(MuscleDescription().mode(ManualBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f)))
+            .cellType(MuscleDescription().mode(ManualBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).frontBackVelRatio(0.2f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0))),
     });
     data.addConnection(1, 2);
@@ -375,7 +386,8 @@ TEST_P(MuscleTests_ManualBending_New, numConnectionsEquals1)
 
     auto minAngle = 90.0f;
     auto maxAngle = 90.0f;
-    auto sumAngleChanges = 0.0f;
+    auto numPositiveAngleChanges = 0;
+    auto numNegativeAngleChanges = 0;
     std::optional<float> lastAngle;
     for (int i = 0; i < 200; ++i) {
         _simulationFacade->calcTimesteps(10);
@@ -398,7 +410,12 @@ TEST_P(MuscleTests_ManualBending_New, numConnectionsEquals1)
         minAngle = std::min(minAngle, angle);
         maxAngle = std::max(maxAngle, angle);
         if (lastAngle.has_value()) {
-            sumAngleChanges += std::abs(angle - lastAngle.value());
+            auto angleChange = angle - lastAngle.value();
+            if (angleChange > 0) {
+                ++numPositiveAngleChanges;
+            } else if (angleChange < 0) {
+                ++numNegativeAngleChanges;
+            }
         }
         lastAngle = angle;
         if (i == 0) {
@@ -412,7 +429,22 @@ TEST_P(MuscleTests_ManualBending_New, numConnectionsEquals1)
             }
         }
     }
-
+    if (channel0 == Channel0::Positive && side == Side::Left) {
+        EXPECT_TRUE(numPositiveAngleChanges > 10);
+        EXPECT_EQ(0, numNegativeAngleChanges);
+    }
+    if (channel0 == Channel0::Positive && side == Side::Right) {
+        EXPECT_EQ(0, numPositiveAngleChanges);
+        EXPECT_TRUE(numNegativeAngleChanges > 10);
+    }
+    if (channel0 == Channel0::Negative && side == Side::Left) {
+        EXPECT_EQ(0, numPositiveAngleChanges);
+        EXPECT_TRUE(numNegativeAngleChanges < 10);
+    }
+    if (channel0 == Channel0::Negative && side == Side::Right) {
+        EXPECT_TRUE(numPositiveAngleChanges < 10);
+        EXPECT_EQ(0, numNegativeAngleChanges);
+    }
     if (channel0 == Channel0::Zero) {
         EXPECT_TRUE(minAngle < 90.0f + AnglePrecision);
         EXPECT_TRUE(minAngle > 90.0f - AnglePrecision);
@@ -423,10 +455,12 @@ TEST_P(MuscleTests_ManualBending_New, numConnectionsEquals1)
         EXPECT_TRUE(minAngle > 90.0f - AnglePrecision);
         EXPECT_TRUE(maxAngle > 90.0f + MaxAngleDeviation - AnglePrecision);
         EXPECT_TRUE(maxAngle < 90.0f + MaxAngleDeviation + AnglePrecision);
+        //EXPECT_TRUE(numPositiveAngleChanges > 10);
     } else {
         EXPECT_TRUE(maxAngle < 90.0f + AnglePrecision);
         EXPECT_TRUE(maxAngle > 90.0f - AnglePrecision);
         EXPECT_TRUE(minAngle > 90.0f - MaxAngleDeviation - AnglePrecision);
         EXPECT_TRUE(minAngle < 90.0f - MaxAngleDeviation + AnglePrecision);
+        //EXPECT_TRUE(numNegativeAngleChanges < 10);
     }
 }
