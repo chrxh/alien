@@ -736,7 +736,7 @@ void GenomeEditorWindow::processNode(
             if (AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Mode")
-                    .values({"Auto bending", "Manual bending"})
+                    .values({"Auto bending", "Manual bending", "Angle bending"})
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::GenomeMuscleModeTooltip),
                 mode)) {
@@ -744,6 +744,8 @@ void GenomeEditorWindow::processNode(
                     muscle.mode(AutoBendingGenomeDescription());
                 } else if (mode == MuscleMode_ManualBending) {
                     muscle.mode(ManualBendingGenomeDescription());
+                } else if (mode == MuscleMode_AngleBending) {
+                    muscle.mode(AngleBendingGenomeDescription());
                 }
             }
             if (mode == MuscleMode_AutoBending) {
@@ -758,9 +760,17 @@ void GenomeEditorWindow::processNode(
                 table.next();
                 AlienImGui::InputFloat(
                     AlienImGui::InputFloatParameters().name("Front back ratio").format("%.2f").textWidth(ContentHeaderTextWidth), bending._frontBackVelRatio);
-            }
-            if (mode == MuscleMode_ManualBending) {
+            } else if (mode == MuscleMode_ManualBending) {
                 auto& bending = std::get<ManualBendingGenomeDescription>(muscle._mode);
+                table.next();
+                AlienImGui::InputFloat(
+                    AlienImGui::InputFloatParameters().name("Max angle deviation").format("%.2f").textWidth(ContentHeaderTextWidth),
+                    bending._maxAngleDeviation);
+                table.next();
+                AlienImGui::InputFloat(
+                    AlienImGui::InputFloatParameters().name("Front back ratio").format("%.2f").textWidth(ContentHeaderTextWidth), bending._frontBackVelRatio);
+            } else if (mode == MuscleMode_AngleBending) {
+                auto& bending = std::get<AngleBendingGenomeDescription>(muscle._mode);
                 table.next();
                 AlienImGui::InputFloat(
                     AlienImGui::InputFloatParameters().name("Max angle deviation").format("%.2f").textWidth(ContentHeaderTextWidth),

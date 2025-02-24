@@ -175,6 +175,10 @@ namespace
     auto constexpr Id_MuscleMode_ManualBending_ImpulseAlreadyApplied = 4;
     auto constexpr Id_MuscleMode_ManualBending_LastAngleDelta = 5;
 
+    auto constexpr Id_MuscleMode_AngleBending_MaxAngleDeviation = 0;
+    auto constexpr Id_MuscleMode_AngleBending_FrontBackVelRatio = 1;
+    auto constexpr Id_MuscleMode_AngleBending_InitialAngle = 2;
+
     auto constexpr Id_MuscleMode_AutoCrawling_MaxAngleDeviation = 0;
     auto constexpr Id_MuscleMode_AutoCrawling_FrontBackVelRatio = 1;
     auto constexpr Id_MuscleMode_AutoCrawling_InitialAngle = 2;
@@ -752,6 +756,9 @@ namespace cereal
     {
         AngleBendingDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_MuscleMode_AngleBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
+        loadSave(task, auxiliaries, Id_MuscleMode_AngleBending_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
+        loadSave(task, auxiliaries, Id_MuscleMode_AngleBending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AngleBendingDescription)

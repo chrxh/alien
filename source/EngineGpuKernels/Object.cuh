@@ -178,11 +178,12 @@ struct ManualBending
 
 struct AngleBending
 {
-    //// Fixed data
-    //float maxAngleDeviation;  // Between 0 and 1
-    //float frontBackVelRatio;  // Between 0 and 1
+    // Fixed data
+    float maxAngleDeviation;  // Between 0 and 1
+    float frontBackVelRatio;  // Between 0 and 1
 
-    //// Process data
+    // Process data
+    float initialAngle;
 };
 
 struct AutoCrawling
