@@ -19,6 +19,7 @@ private:
     //__inline__ __device__ static void contractionExpansion(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void autoBending(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void manualBending(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void angleBending(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
     //__inline__ __device__ static int getConnectionIndex(Cell* cell, Cell* otherCell);
     //__inline__ __device__ static bool hasTriangularConnection(Cell* cell, Cell* otherCell);
@@ -38,6 +39,7 @@ private:
 
     static auto constexpr AccelerationLimit = 0.3f;
     static auto constexpr AutoTriggerInterval = 9;
+    static auto constexpr AngleDistance = 30.0f;
 };
 
 /************************************************************************/
@@ -69,6 +71,9 @@ __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, Si
     } break;
     case MuscleMode_ManualBending: {
         manualBending(data, statistics, cell);
+    } break;
+    case MuscleMode_AngleBending: {
+        angleBending(data, statistics, cell);
     } break;
     }
 }
@@ -187,8 +192,8 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
         // Change bending direction
         auto sumAngle = bendingInfo.connection->angleFromPrevious + bendingInfo.connectionNext->angleFromPrevious;  // Sum will not change
         auto maxAngleDeviation = min(bending.initialAngle, sumAngle - bending.initialAngle) * bending.maxAngleDeviation / 2;
-        auto maxAngle = min(max(bending.initialAngle + maxAngleDeviation, 60.0f), 300.0f);
-        auto minAngle = min(max(bending.initialAngle - maxAngleDeviation, 60.0f), 300.0f);
+        auto maxAngle = min(max(bending.initialAngle + maxAngleDeviation, AngleDistance), sumAngle - AngleDistance);
+        auto minAngle = min(max(bending.initialAngle - maxAngleDeviation, AngleDistance), sumAngle - AngleDistance);
 
         if (bendingInfo.connection->angleFromPrevious /*actualAngle */ > maxAngle - NEAR_ZERO) {
             bending.forward = activation >= 0;
@@ -292,8 +297,8 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
         // Change bending direction
         auto sumAngle = bendingInfo.connection->angleFromPrevious + bendingInfo.connectionNext->angleFromPrevious;  // Sum will not change
         auto maxAngleDeviation = min(bending.initialAngle, sumAngle - bending.initialAngle) * bending.maxAngleDeviation / 2;
-        auto maxAngle = min(max(bending.initialAngle + maxAngleDeviation, 60.0f), 300.0f);
-        auto minAngle = min(max(bending.initialAngle - maxAngleDeviation, 60.0f), 300.0f);
+        auto maxAngle = min(max(bending.initialAngle + maxAngleDeviation, AngleDistance), sumAngle - AngleDistance);
+        auto minAngle = min(max(bending.initialAngle - maxAngleDeviation, AngleDistance), sumAngle - AngleDistance);
 
         // Modify angle
         auto angleDelta = activation > 0 ? -(0.05f + bending.frontBackVelRatio) : -(1.05f - bending.frontBackVelRatio);
@@ -362,6 +367,61 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
         }
 
         bending.lastActualAngle = actualAngle;
+        statistics.incNumMuscleActivities(cell->color);
+        radiate(data, cell);
+    }
+}
+
+__inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+{
+    auto& muscle = cell->cellTypeData.muscle;
+    auto& bending = muscle.modeData.angleBending;
+
+    if (cell->numConnections != 1 && cell->numConnections != 2) {
+        return;
+    }
+
+    // Initialization
+    if (bending.initialAngle == 0) {
+        auto bendingInfo = getBendingInfo(data, cell);
+        bending.initialAngle = bendingInfo.connection->angleFromPrevious;
+    }
+
+    // Process auto bending
+    if (SignalProcessor::isManuallyTriggered(data, cell)) {
+
+        auto bendingInfo = getBendingInfo(data, cell);
+        auto activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleTrigger]));
+        auto targetAngle = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleAngle])) * 180.f + cell->frontAngle;
+        auto targetAngleRelToConnection0 = Math::normalizedAngle(Math::subtractAngle(targetAngle, cell->absAngleToConnection0), -180.0f);
+
+        // Change bending direction
+        auto sumAngle = bendingInfo.connection->angleFromPrevious + bendingInfo.connectionNext->angleFromPrevious;  // Sum will not change
+        auto maxAngleDeviation = min(bending.initialAngle, sumAngle - bending.initialAngle) * bending.maxAngleDeviation / 2;
+        auto maxAngle = min(max(bending.initialAngle + maxAngleDeviation, AngleDistance), sumAngle - AngleDistance);
+        auto minAngle = min(max(bending.initialAngle - maxAngleDeviation, AngleDistance), sumAngle - AngleDistance);
+
+        // Modify angle
+        auto angleDelta = activation > 0 ? (0.05f + bending.frontBackVelRatio) : (1.05f - bending.frontBackVelRatio);
+        angleDelta *= 5.0f * activation;
+
+        if (targetAngleRelToConnection0 > 0) {
+            angleDelta = -angleDelta;
+        }
+        if (isCounterOriented(cell)) {
+            angleDelta = -angleDelta;
+        }
+
+        if (bendingInfo.connection->angleFromPrevious + angleDelta > maxAngle) {
+            angleDelta = maxAngle - bendingInfo.connection->angleFromPrevious;
+        }
+        if (bendingInfo.connection->angleFromPrevious + angleDelta < minAngle) {
+            angleDelta = minAngle - bendingInfo.connection->angleFromPrevious;
+        }
+        bendingInfo.connection->angleFromPrevious += angleDelta;
+        bendingInfo.connectionNext->angleFromPrevious -= angleDelta;
+        bendingInfo.pivotCell->absAngleToConnection0 += angleDelta;
+
         statistics.incNumMuscleActivities(cell->color);
         radiate(data, cell);
     }

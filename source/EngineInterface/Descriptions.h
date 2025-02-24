@@ -333,17 +333,12 @@ struct AngleBendingDescription
 {
     auto operator<=>(AngleBendingDescription const&) const = default;
 
-    //AngleBendingDescription& maxAngleDeviation(float value)
-    //{
-    //    _maxAngleDeviation = value;
-    //    return *this;
-    //}
-
-    //// Fixed data
-    //float _maxAngleDeviation = 20.0f;  // Between 0 and 1
-    //float _frontBackVelRatio = 0.2f;   // Between 0 and 1
+    // Fixed data
+    MEMBER_DECLARATION(AngleBendingDescription, float, maxAngleDeviation, 0.2f);   // Between 0 and 1
+    MEMBER_DECLARATION(AngleBendingDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
 
     // Process data
+    MEMBER_DECLARATION(AngleBendingDescription, float, initialAngle, 0.0f);
 };
 
 struct AutoCrawlingDescription
@@ -380,6 +375,8 @@ struct MuscleDescription
             return MuscleMode_AutoBending;
         } else if (std::holds_alternative<ManualBendingDescription>(_mode)) {
             return MuscleMode_ManualBending;
+        } else if (std::holds_alternative<AngleBendingDescription>(_mode)) {
+            return MuscleMode_AngleBending;
         }
         THROW_NOT_IMPLEMENTED();
     }

@@ -497,7 +497,14 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
             bending._lastAngleDelta = cellTO.cellTypeData.muscle.modeData.manualBending.lastAngleDelta;
             bending._impulseAlreadyApplied = cellTO.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied;
             muscle._mode = bending;
+        } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_AngleBending) {
+            AngleBendingDescription bending;
+            bending._maxAngleDeviation = cellTO.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
+            bending._frontBackVelRatio = cellTO.cellTypeData.muscle.modeData.angleBending.frontBackVelRatio;
+            bending._initialAngle = cellTO.cellTypeData.muscle.modeData.angleBending.initialAngle;
+            muscle._mode = bending;
         }
+
         muscle._lastMovementX = cellTO.cellTypeData.muscle.lastMovementX;
         muscle._lastMovementY = cellTO.cellTypeData.muscle.lastMovementY;
         result._cellTypeData = muscle;
@@ -669,6 +676,12 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
             bendingTO.lastActualAngle = bendingDesc._lastActualAngle;
             bendingTO.lastAngleDelta = bendingDesc._lastAngleDelta;
             bendingTO.impulseAlreadyApplied = bendingDesc._impulseAlreadyApplied;
+        } else if (muscleTO.mode == MuscleMode_AngleBending) {
+            auto const& bendingDesc = std::get<AngleBendingDescription>(muscleDesc._mode);
+            AngleBendingTO& bendingTO = muscleTO.modeData.angleBending;
+            bendingTO.maxAngleDeviation = bendingDesc._maxAngleDeviation;
+            bendingTO.frontBackVelRatio = bendingDesc._frontBackVelRatio;
+            bendingTO.initialAngle = bendingDesc._initialAngle;
         }
         muscleTO.lastMovementX = muscleDesc._lastMovementX;
         muscleTO.lastMovementY = muscleDesc._lastMovementY;
