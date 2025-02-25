@@ -79,7 +79,7 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple(Side::Left, Channel0::Negative, Channel1::Negative),
         std::make_tuple(Side::Right, Channel0::Negative, Channel1::Negative)));
 
-TEST_P(MuscleTests_AutoBending_New, numConnectionsEquals2)
+TEST_P(MuscleTests_AutoBending_New, muscleWithTwoConnections)
 {
     auto constexpr MaxAngleDeviation = 30.0f;
     auto constexpr AnglePrecision = NEAR_ZERO;
@@ -158,7 +158,7 @@ TEST_P(MuscleTests_AutoBending_New, numConnectionsEquals2)
     }
 }
 
-TEST_P(MuscleTests_AutoBending_New, numConnectionsEquals1)
+TEST_P(MuscleTests_AutoBending_New, muscleWithOneConnection)
 {
     auto constexpr MaxAngleDeviation = 30.0f;
     auto constexpr AnglePrecision = NEAR_ZERO;
@@ -258,7 +258,7 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple(Side::Left, Channel0::Negative),
         std::make_tuple(Side::Right, Channel0::Negative)));
 
-TEST_P(MuscleTests_ManualBending_New, numConnectionsEquals2)
+TEST_P(MuscleTests_ManualBending_New, muscleWithTwoConnections)
 {
     auto constexpr MaxAngleDeviation = 30.0f;
     auto constexpr AnglePrecision = NEAR_ZERO;
@@ -359,7 +359,7 @@ TEST_P(MuscleTests_ManualBending_New, numConnectionsEquals2)
     }
 }
 
-TEST_P(MuscleTests_ManualBending_New, numConnectionsEquals1)
+TEST_P(MuscleTests_ManualBending_New, muscleWithOneConnection)
 {
     auto constexpr MaxAngleDeviation = 30.0f;
     auto constexpr AnglePrecision = NEAR_ZERO;
@@ -420,12 +420,12 @@ TEST_P(MuscleTests_ManualBending_New, numConnectionsEquals1)
         lastAngle = angle;
         if (i == 0) {
             if (channel0 == Channel0::Zero) {
-                EXPECT_TRUE(angle < 90.0f + NEAR_ZERO);
-                EXPECT_TRUE(angle > 90.0f - NEAR_ZERO);
+                EXPECT_TRUE(angle < 90.0f + AnglePrecision);
+                EXPECT_TRUE(angle > 90.0f - AnglePrecision);
             } else if ((side == Side::Left && channel0 == Channel0::Positive) || (side == Side::Right && channel0 == Channel0::Negative)) {
-                EXPECT_TRUE(angle > 90.0f + NEAR_ZERO);
+                EXPECT_TRUE(angle > 90.0f + AnglePrecision);
             } else {
-                EXPECT_TRUE(angle < 90.0f - NEAR_ZERO);
+                EXPECT_TRUE(angle < 90.0f - AnglePrecision);
             }
         }
     }
@@ -455,12 +455,71 @@ TEST_P(MuscleTests_ManualBending_New, numConnectionsEquals1)
         EXPECT_TRUE(minAngle > 90.0f - AnglePrecision);
         EXPECT_TRUE(maxAngle > 90.0f + MaxAngleDeviation - AnglePrecision);
         EXPECT_TRUE(maxAngle < 90.0f + MaxAngleDeviation + AnglePrecision);
-        //EXPECT_TRUE(numPositiveAngleChanges > 10);
     } else {
         EXPECT_TRUE(maxAngle < 90.0f + AnglePrecision);
         EXPECT_TRUE(maxAngle > 90.0f - AnglePrecision);
         EXPECT_TRUE(minAngle > 90.0f - MaxAngleDeviation - AnglePrecision);
         EXPECT_TRUE(minAngle < 90.0f - MaxAngleDeviation + AnglePrecision);
-        //EXPECT_TRUE(numNegativeAngleChanges < 10);
     }
+}
+
+class MuscleTests_AngleBending_New
+    : public MuscleTests_New
+    , public testing::WithParamInterface<std::tuple<Side, float>>
+{};
+
+INSTANTIATE_TEST_SUITE_P(
+    MuscleTests_AngleBending_New,
+    MuscleTests_AngleBending_New,
+    ::testing::Values(
+        std::make_tuple(Side::Left, 0.0f),
+        std::make_tuple(Side::Left, 30.0f),
+        std::make_tuple(Side::Left, 60.0f),
+        std::make_tuple(Side::Left, 90.0f),
+        std::make_tuple(Side::Left, 120.0f),
+        std::make_tuple(Side::Left, 150.0f),
+        std::make_tuple(Side::Left, 180.0f)));
+
+TEST_P(MuscleTests_AngleBending_New, muscleWithTwoConnections)
+{
+    auto constexpr MaxAngleDeviation = 120.0f;
+    auto constexpr AnglePrecision = 2.0f;
+
+    auto [side, targetAngle] = GetParam();
+
+    DataDescription data;
+    data.addCells({
+        CellDescription().id(1).pos({12.0f, 10.0f}).cellType(OscillatorDescription().autoTriggerInterval(10)),
+        CellDescription()
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .absAngleToConnection0(90.0f)
+            .cellType(MuscleDescription().mode(AngleBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
+            .neuralNetwork(NeuralNetworkDescription().weight(0, 0, 1.0f).weight(1, 0, targetAngle / 180.0f)),
+        CellDescription().id(3).pos({10.0f, 10.0f}),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->calcTimesteps(10);
+    }
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualMuscleCell = getCell(actualData, 2);
+    auto actualCell1 = getCell(actualData, 1);
+    auto actualCell3 = getCell(actualData, 3);
+
+    ASSERT_EQ(3, actualData._cells.size());
+
+    EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell._connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell._connections.at(1)._distance));
+    EXPECT_TRUE(approxCompare(1.0f, actualCell1._connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(1.0f, actualCell3._connections.at(0)._distance));
+
+    auto angle = actualMuscleCell._connections.at(0)._angleFromPrevious;
+    EXPECT_TRUE(abs(angle - 90.0f - targetAngle) < AnglePrecision);
+
 }
