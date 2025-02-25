@@ -405,7 +405,7 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
         auto angleDelta = activation > 0 ? (0.05f + bending.frontBackVelRatio) : (1.05f - bending.frontBackVelRatio);
         angleDelta *= 5.0f * activation;
 
-        if (targetAngleRelToConnection0 > 0) {
+        if (targetAngleRelToConnection0 < 0) {
             angleDelta = -angleDelta;
         }
         if (isCounterOriented(cell)) {
