@@ -473,12 +473,19 @@ INSTANTIATE_TEST_SUITE_P(
     MuscleTests_AngleBending_New,
     ::testing::Values(
         std::make_tuple(Side::Left, 0.0f),
-        std::make_tuple(Side::Left, 30.0f),
-        std::make_tuple(Side::Left, 60.0f),
-        std::make_tuple(Side::Left, 90.0f),
-        std::make_tuple(Side::Left, 120.0f),
-        std::make_tuple(Side::Left, 150.0f),
-        std::make_tuple(Side::Left, 180.0f)));
+        std::make_tuple(Side::Left, -30.0f),
+        std::make_tuple(Side::Left, -60.0f),
+        std::make_tuple(Side::Left, -90.0f),
+        std::make_tuple(Side::Left, -120.0f),
+        std::make_tuple(Side::Left, -150.0f),
+        std::make_tuple(Side::Left, -180.0f),
+        std::make_tuple(Side::Right, 0.0f),
+        std::make_tuple(Side::Right, 30.0f),
+        std::make_tuple(Side::Right, 60.0f),
+        std::make_tuple(Side::Right, 90.0f),
+        std::make_tuple(Side::Right, 120.0f),
+        std::make_tuple(Side::Right, 150.0f),
+        std::make_tuple(Side::Right, 180.0f)));
 
 TEST_P(MuscleTests_AngleBending_New, muscleWithTwoConnections)
 {
@@ -489,14 +496,14 @@ TEST_P(MuscleTests_AngleBending_New, muscleWithTwoConnections)
 
     DataDescription data;
     data.addCells({
-        CellDescription().id(1).pos({12.0f, 10.0f}).cellType(OscillatorDescription().autoTriggerInterval(10)),
+        CellDescription().id(1).pos({side == Side::Left ? 10.0f : 12.0f, 10.0f}).cellType(OscillatorDescription().autoTriggerInterval(10)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .absAngleToConnection0(90.0f)
+            .absAngleToConnection0(side == Side::Left ? -90.0f : 90.0f)
             .cellType(MuscleDescription().mode(AngleBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, 1.0f).weight(1, 0, targetAngle / 180.0f)),
-        CellDescription().id(3).pos({10.0f, 10.0f}),
+        CellDescription().id(3).pos({side == Side::Left ? 12.0f : 10.0f, 10.0f}),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -520,6 +527,9 @@ TEST_P(MuscleTests_AngleBending_New, muscleWithTwoConnections)
     EXPECT_TRUE(approxCompare(1.0f, actualCell3._connections.at(0)._distance));
 
     auto angle = actualMuscleCell._connections.at(0)._angleFromPrevious;
-    EXPECT_TRUE(abs(angle - 90.0f - targetAngle) < AnglePrecision);
-
+    if (side == Side::Left) {
+        EXPECT_TRUE(abs(270.0f - angle + targetAngle) < AnglePrecision);
+    } else {
+        EXPECT_TRUE(abs(angle - 90.0f - targetAngle) < AnglePrecision);
+    }
 }
