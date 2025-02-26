@@ -20,6 +20,7 @@ PUBLIC
     OscillatorTests_New.cpp
     ReconnectorTests.cpp
     SensorTests.cpp
+    SensorTests_New.cpp
     SignalTests_New.cpp
     StatisticsTests.cpp
     Testsuite.cpp
