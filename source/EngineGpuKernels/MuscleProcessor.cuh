@@ -408,9 +408,6 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
         if (targetAngleRelToConnection0 < 0) {
             angleDelta = -angleDelta;
         }
-        if (isCounterOriented(cell)) {
-            angleDelta = -angleDelta;
-        }
 
         if (bendingInfo.connection->angleFromPrevious + angleDelta > maxAngle) {
             angleDelta = maxAngle - bendingInfo.connection->angleFromPrevious;
