@@ -640,7 +640,8 @@ struct CellDescription
     float _energy = 100.0f;
     float _stiffness = 1.0f;
     int _color = 0;
-    float _absAngleToConnection0 = 0;
+    float _absAngleToConnection0 =
+        0;  // Angle between [cell, cell->connection[0]] and [cell0, cell0->connection[0]] where cell0 is the last constructed cell
     bool _barrier = false;
     int _age = 0;
     LivingState _livingState = LivingState_Ready;

@@ -191,7 +191,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             flagDetectedCells(data, cell, scanPos);
 
             cell->signal.channels[Channels::SensorFoundResult] = 1;                //something found
-            cell->signal.channels[Channels::SensorAngle] = relAngle / 360.0f;                          //angle: between -0.5 and 0.5
+            cell->signal.channels[Channels::SensorAngle] = relAngle / 180.0f;                          //angle: between -1.0 and 1.0
             cell->signal.channels[Channels::SensorDensity] = toFloat((lookupResult >> 40) & 0xff) / 64;  //density
 
             cell->signal.channels[Channels::SensorDistance] = 1.0f - min(1.0f, distance / 256);  //distance: 1 = close, 0 = far away
