@@ -141,7 +141,7 @@ __inline__ __device__ float2 SignalProcessor::calcReferenceDirection(SimulationD
     if (cell->numConnections == 0) {
         return float2{0.0f, -1.0f};
     }
-    return Math::normalized(data.cellMap.getCorrectedDirection(cell->pos - cell->connections[0].cell->pos));
+    return Math::normalized(data.cellMap.getCorrectedDirection(cell->connections[0].cell->pos - cell->pos));
 }
 
 __inline__ __device__ bool SignalProcessor::isAutoTriggered(SimulationData& data, Cell* cell, uint8_t autoTriggerInterval)

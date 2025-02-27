@@ -85,19 +85,19 @@ TEST_F(SensorTests_New, aboveMinDensity)
     });
     data.addConnection(1, 2);
     data.add(DescriptionEditService::get().get().createRect(
-        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(1.0f)));
+        DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(1.0f)));
 
     _simulationFacade->setSimulationData(data);
 
     _simulationFacade->calcTimesteps(1);
     auto actualSensor = getCell(_simulationFacade->getSimulationData(), 1);
     EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[0]));
-    EXPECT_TRUE(actualSensor._signal->_channels[1] > 0.2f);
-    EXPECT_TRUE(actualSensor._signal->_channels[2] < 1.0f - (100.0f - 10.0f - 16.0f) / 256);
-    EXPECT_TRUE(actualSensor._signal->_channels[2] > 1.0f - (100.0f - 10.0f + 16.0f) / 256);
-    EXPECT_TRUE(actualSensor._signal->_channels[3] > -15.0f / 365);
-    EXPECT_TRUE(actualSensor._signal->_channels[3] < 15.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.2f);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] < 1.0f - (100.0f - 10.0f - 16.0f) / 256);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 1.0f - (100.0f - 10.0f + 16.0f) / 256);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] > (- 90.0f - 15.0f) / 180);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] < (- 90.0f + 15.0f) / 180);
 }
 
 TEST_F(SensorTests_New, belowMinDensity)
@@ -109,14 +109,14 @@ TEST_F(SensorTests_New, belowMinDensity)
     });
     data.addConnection(1, 2);
     data.add(DescriptionEditService::get().get().createRect(
-        DescriptionEditService::CreateRectParameters().center({2.0f, 2.0f}).width(10).height(10).cellDistance(2.5f)));
+        DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(2.5f)));
 
     _simulationFacade->setSimulationData(data);
 
     _simulationFacade->calcTimesteps(1);
     auto actualSensor = getCell(_simulationFacade->getSimulationData(), 1);
     EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests_New, targetAbove)
@@ -136,12 +136,12 @@ TEST_F(SensorTests_New, targetAbove)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[0]));
-    EXPECT_TRUE(actualSensor._signal->_channels[1] > 0.2f);
-    EXPECT_TRUE(actualSensor._signal->_channels[2] < 1.0f - (100.0f - 10.0f - 16.0f) / 256);
-    EXPECT_TRUE(actualSensor._signal->_channels[2] > 1.0f - (100.0f - 10.0f + 16.0f) / 256);
-    EXPECT_TRUE(actualSensor._signal->_channels[3] > 70.0f / 365);
-    EXPECT_TRUE(actualSensor._signal->_channels[3] < 105.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.2f);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] < 1.0f - (100.0f - 10.0f - 16.0f) / 256);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 1.0f - (100.0f - 10.0f + 16.0f) / 256);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] > (-90.0f - 15.0f) / 180);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] < (-90.0f + 15.0f) / 180);
 }
 
 TEST_F(SensorTests_New, targetBelow)
@@ -161,12 +161,12 @@ TEST_F(SensorTests_New, targetBelow)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[0]));
-    EXPECT_TRUE(actualSensor._signal->_channels[1] > 0.2f);
-    EXPECT_TRUE(actualSensor._signal->_channels[2] < 1.0f - (100.0f - 10.0f - 16.0f) / 256);
-    EXPECT_TRUE(actualSensor._signal->_channels[2] > 1.0f - (100.0f - 10.0f + 16.0f) / 256);
-    EXPECT_TRUE(actualSensor._signal->_channels[3] < -70.0f / 365);
-    EXPECT_TRUE(actualSensor._signal->_channels[3] > -105.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.2f);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] < 1.0f - (100.0f - 10.0f - 16.0f) / 256);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 1.0f - (100.0f - 10.0f + 16.0f) / 256);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] > (90.0f - 15.0f) / 180);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] < (90.0f + 15.0f) / 180);
 }
 
 TEST_F(SensorTests_New, targetConcealed)
@@ -189,7 +189,7 @@ TEST_F(SensorTests_New, targetConcealed)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests_New, targetNotConcealed)
@@ -212,7 +212,7 @@ TEST_F(SensorTests_New, targetNotConcealed)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests_New, foundMassWithMatchingDensity)
@@ -235,12 +235,12 @@ TEST_F(SensorTests_New, foundMassWithMatchingDensity)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[0]));
-    EXPECT_TRUE(actualSensor._signal->_channels[1] > 0.7f);
-    EXPECT_TRUE(actualSensor._signal->_channels[2] < 1.0f - 80.0f / 256);
-    EXPECT_TRUE(actualSensor._signal->_channels[2] > 1.0f - 105.0f / 256);
-    EXPECT_TRUE(actualSensor._signal->_channels[3] < -70.0f / 365);
-    EXPECT_TRUE(actualSensor._signal->_channels[3] > -105.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.7f);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 1.0f - 105.0f / 256);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] > (90.0f - 15.0f) / 180);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] < (90.0f + 15.0f) / 180);
 }
 
 TEST_F(SensorTests_New, scanForOtherMutants_found)
@@ -257,7 +257,7 @@ TEST_F(SensorTests_New, scanForOtherMutants_found)
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
-                                                          .center({10.0f, 100.0f})
+                                                          .center({100.0f, 10.0f})
                                                           .width(16)
                                                           .height(16)
                                                           .cellDistance(0.5f)
@@ -270,12 +270,12 @@ TEST_F(SensorTests_New, scanForOtherMutants_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
-    EXPECT_TRUE(actualSensorCell._signal->_channels[1] > 0.3f);
-    EXPECT_TRUE(actualSensorCell._signal->_channels[2] < 1.0f - 80.0f / 256);
-    EXPECT_TRUE(actualSensorCell._signal->_channels[2] > 1.0f - 105.0f / 256);
-    EXPECT_TRUE(actualSensorCell._signal->_channels[3] > -15.0f / 365);
-    EXPECT_TRUE(actualSensorCell._signal->_channels[3] < 15.0f / 365);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensorCell._signal->_channels[Channels::SensorDensity] > 0.3f);
+    EXPECT_TRUE(actualSensorCell._signal->_channels[Channels::SensorDistance] < 1.0f - 80.0f / 256);
+    EXPECT_TRUE(actualSensorCell._signal->_channels[Channels::SensorDistance] > 1.0f - 105.0f / 256);
+    EXPECT_TRUE(actualSensorCell._signal->_channels[Channels::SensorAngle] > (-90.0f - 15.0f) / 180);
+    EXPECT_TRUE(actualSensorCell._signal->_channels[Channels::SensorAngle] < (-90.0f + 15.0f) / 180);
 }
 
 TEST_F(SensorTests_New, scanForOtherMutants_found_wallBehind)
@@ -292,10 +292,10 @@ TEST_F(SensorTests_New, scanForOtherMutants_found_wallBehind)
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
-        DescriptionEditService::CreateRectParameters().center({0.0f, 100.0f}).width(1).height(16).cellDistance(0.5f).cellType(StructureCellDescription())));
+        DescriptionEditService::CreateRectParameters().center({220.0f, 100.0f}).width(1).height(16).cellDistance(0.5f).cellType(StructureCellDescription())));
 
     data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
-                                                          .center({10.0f, 100.0f})
+                                                          .center({200.0f, 100.0f})
                                                           .width(16)
                                                           .height(16)
                                                           .cellDistance(0.5f)
@@ -308,7 +308,7 @@ TEST_F(SensorTests_New, scanForOtherMutants_found_wallBehind)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests_New, scanForOtherMutants_notFound_wallInBetween)
@@ -324,10 +324,10 @@ TEST_F(SensorTests_New, scanForOtherMutants_notFound_wallInBetween)
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
-        DescriptionEditService::CreateRectParameters().center({50.0f, 100.0f}).width(1).height(16).cellDistance(0.5f).cellType(StructureCellDescription())));
+        DescriptionEditService::CreateRectParameters().center({150.0f, 100.0f}).width(1).height(16).cellDistance(0.5f).cellType(StructureCellDescription())));
 
     data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
-                                                          .center({10.0f, 100.0f})
+                                                          .center({200.0f, 100.0f})
                                                           .width(16)
                                                           .height(16)
                                                           .cellDistance(0.5f)
@@ -340,7 +340,7 @@ TEST_F(SensorTests_New, scanForOtherMutants_notFound_wallInBetween)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests_New, scanForOtherMutants_notFound_sameMutationId)
@@ -370,7 +370,7 @@ TEST_F(SensorTests_New, scanForOtherMutants_notFound_sameMutationId)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests_New, scanForOtherMutants_notFound_structure)
@@ -400,7 +400,7 @@ TEST_F(SensorTests_New, scanForOtherMutants_notFound_structure)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests_New, scanForOtherMutants_notFound_freeCell)
@@ -430,7 +430,7 @@ TEST_F(SensorTests_New, scanForOtherMutants_notFound_freeCell)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests_New, scanForSameMutants_found)
@@ -460,7 +460,7 @@ TEST_F(SensorTests_New, scanForSameMutants_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests_New, scanForSameMutants_notFound_otherMutationId)
@@ -499,7 +499,7 @@ TEST_F(SensorTests_New, scanForSameMutants_notFound_otherMutationId)
         auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
-        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
+        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
     }
 }
 
@@ -533,7 +533,7 @@ TEST_F(SensorTests_New, scanForSameMutants_notFound_structure)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests_New, scanForSameMutants_notFound_freeCell)
@@ -566,7 +566,7 @@ TEST_F(SensorTests_New, scanForSameMutants_notFound_freeCell)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests_New, scanForStructures_found)
@@ -590,7 +590,7 @@ TEST_F(SensorTests_New, scanForStructures_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests_New, scanForStructures_notFound)
@@ -614,7 +614,7 @@ TEST_F(SensorTests_New, scanForStructures_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests_New, scanForFreeCells_found)
@@ -638,7 +638,7 @@ TEST_F(SensorTests_New, scanForFreeCells_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests_New, scanForFreeCells_notFound)
@@ -662,7 +662,7 @@ TEST_F(SensorTests_New, scanForFreeCells_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests_New, scanForLessComplexMutants_found)
@@ -695,7 +695,7 @@ TEST_F(SensorTests_New, scanForLessComplexMutants_found)
         auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
-        EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
+        EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
     }
 }
 
@@ -729,7 +729,7 @@ TEST_F(SensorTests_New, scanForLessComplexMutants_notFound_otherMoreComplex)
         auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
-        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
+        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
     }
 }
 
@@ -760,7 +760,7 @@ TEST_F(SensorTests_New, scanForLessComplexMutants_notFound_structure)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests_New, scanForLessComplexMutants_notFound_freeCell)
@@ -791,7 +791,7 @@ TEST_F(SensorTests_New, scanForLessComplexMutants_notFound_freeCell)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests_New, scanForMoreComplexMutants_found)
@@ -824,7 +824,7 @@ TEST_F(SensorTests_New, scanForMoreComplexMutants_found)
         auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
-        EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
+        EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
     }
 }
 
@@ -858,7 +858,7 @@ TEST_F(SensorTests_New, scanForMoreComplexMutants_notFound_otherLessComplex)
         auto actualData = _simulationFacade->getSimulationData();
         auto actualSensorCell = getCell(actualData, 1);
 
-        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
+        EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
     }
 }
 
@@ -890,7 +890,7 @@ TEST_F(SensorTests_New, scanForMoreComplexMutants_notFound_structure)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests_New, scanForMoreComplexMutants_notFound_freeCell)
@@ -923,7 +923,7 @@ TEST_F(SensorTests_New, scanForMoreComplexMutants_notFound_freeCell)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests_New, minRange_found)
@@ -944,7 +944,7 @@ TEST_F(SensorTests_New, minRange_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests_New, minRange_notFound)
@@ -965,7 +965,7 @@ TEST_F(SensorTests_New, minRange_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests_New, maxRange_found)
@@ -986,7 +986,7 @@ TEST_F(SensorTests_New, maxRange_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests_New, maxRange_notFound)
@@ -1007,5 +1007,5 @@ TEST_F(SensorTests_New, maxRange_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensorCell = getCell(actualData, 1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
