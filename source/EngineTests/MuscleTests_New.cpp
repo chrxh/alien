@@ -533,3 +533,56 @@ TEST_P(MuscleTests_AngleBending_New, muscleWithTwoConnections)
         EXPECT_TRUE(abs(angle - 90.0f - targetAngle) < AnglePrecision);
     }
 }
+
+TEST_P(MuscleTests_AngleBending_New, muscleWithOneConnection)
+{
+    auto constexpr MaxAngleDeviation = 120.0f;
+    auto constexpr AnglePrecision = 2.0f;
+
+    auto [side, targetAngle] = GetParam();
+
+    DataDescription data;
+    data.addCells({
+        CellDescription().id(1).pos({10.0f, 10.0f}),
+        CellDescription().id(2).pos({10.0f, 11.0f}).cellType(OscillatorDescription().autoTriggerInterval(10)),
+        CellDescription().id(3).pos({10.0f, 12.0f}),
+        CellDescription()
+            .id(4)
+            .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
+            .absAngleToConnection0(side == Side::Left ? -90.0f : 90.0f)
+            .cellType(MuscleDescription().mode(AngleBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).frontBackVelRatio(0.2f)))
+            .neuralNetwork(NeuralNetworkDescription().weight(0, 0, 1.0f).weight(1, 0, targetAngle / 180.0f)),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+    data.addConnection(4, 2);
+
+    _simulationFacade->setSimulationData(data);
+
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->calcTimesteps(10);
+    }
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualMuscleCell = getCell(actualData, 4);
+    auto actualCell1 = getCell(actualData, 1);
+    auto actualCell2 = getCell(actualData, 2);
+    auto actualCell3 = getCell(actualData, 3);
+
+    ASSERT_EQ(4, actualData._cells.size());
+
+    EXPECT_TRUE(approxCompare(1.0f, actualCell1._connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(1.0f, actualCell2._connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(1.0f, actualCell2._connections.at(1)._distance));
+    EXPECT_TRUE(approxCompare(1.0f, actualCell3._connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell._connections.at(0)._distance));
+
+    auto angle = actualCell2._connections.at(side == Side::Left ? 2 : 1)._angleFromPrevious;
+    printf("angle: %f\n", angle);
+
+    //if (side == Side::Left) {
+    //    EXPECT_TRUE(abs(270.0f - angle + targetAngle) < AnglePrecision);
+    //} else {
+    //    EXPECT_TRUE(abs(angle - 90.0f - targetAngle) < AnglePrecision);
+    //}
+}

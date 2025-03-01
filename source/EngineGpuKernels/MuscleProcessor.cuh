@@ -404,7 +404,6 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
         // Modify angle
         auto angleDelta = activation > 0 ? (0.05f + bending.frontBackVelRatio) : (1.05f - bending.frontBackVelRatio);
         angleDelta *= 5.0f * activation;
-
         if (targetAngleRelToConnection0 < 0) {
             angleDelta = -angleDelta;
         }
@@ -417,7 +416,7 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
         }
         bendingInfo.connection->angleFromPrevious += angleDelta;
         bendingInfo.connectionNext->angleFromPrevious -= angleDelta;
-        bendingInfo.pivotCell->absAngleToConnection0 += angleDelta;
+        cell->absAngleToConnection0 += angleDelta;
 
         statistics.incNumMuscleActivities(cell->color);
         radiate(data, cell);
