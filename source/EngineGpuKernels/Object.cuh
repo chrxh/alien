@@ -276,7 +276,7 @@ struct Cell
     float energy;
     float stiffness;
     uint8_t color;
-    float absAngleToConnection0;
+    float angleToFront;
     bool barrier;
     uint32_t age;
     LivingState livingState;
@@ -329,9 +329,6 @@ struct Cell
     float clusterAngularMomentum;
     float clusterAngularMass;
     uint32_t numCellsInCluster;
-
-    // Temp
-    float frontAngle;  // Can be removed in new genome model
 
     __device__ __inline__ uint8_t* getGenome()
     {

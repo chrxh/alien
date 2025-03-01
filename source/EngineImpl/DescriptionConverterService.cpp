@@ -394,12 +394,11 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
     result._barrier = cellTO.barrier;
     result._age = cellTO.age;
     result._color = cellTO.color;
-    result._absAngleToConnection0 = cellTO.absAngleToConnection0;
+    result._angleToFront = cellTO.angleToFront;
     result._genomeComplexity = cellTO.genomeComplexity;
     result._detectedByCreatureId = cellTO.detectedByCreatureId;
     result._cellTypeUsed = cellTO.cellTypeUsed;
     result._genomeNodeIndex = cellTO.genomeNodeIndex;
-    result._frontAngle = cellTO.frontAngle;
 
     auto const& metadataTO = cellTO.metadata;
     auto metadata = CellMetadataDescription();
@@ -587,7 +586,7 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
     cellTO.detectedByCreatureId = cellDesc._detectedByCreatureId;
     cellTO.cellTypeUsed = cellDesc._cellTypeUsed;
     cellTO.genomeNodeIndex = cellDesc._genomeNodeIndex;
-    cellTO.frontAngle = cellDesc._frontAngle;
+    cellTO.angleToFront = cellDesc._angleToFront;
 
     auto cellType = cellDesc.getCellType();
     if (cellType != CellType_Structure && cellType != CellType_Free) {
@@ -719,7 +718,6 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
     cellTO.barrier = cellDesc._barrier;
     cellTO.age = cellDesc._age;
     cellTO.color = cellDesc._color;
-    cellTO.absAngleToConnection0 = cellDesc._absAngleToConnection0;
     cellTO.genomeComplexity = cellDesc._genomeComplexity;
     convert(dataTO, cellDesc._metadata._name, cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex);
     convert(dataTO, cellDesc._metadata._description, cellTO.metadata.descriptionSize, cellTO.metadata.descriptionDataIndex);

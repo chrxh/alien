@@ -712,12 +712,11 @@ ConstructorProcessor::constructCellIntern(
     result->ancestorMutationId = static_cast<uint8_t>(hostCell->mutationId & 0xff);
     result->cellType = constructionData.cellType;
     result->color = constructionData.color;
-    result->absAngleToConnection0 = 0;
+    result->angleToFront = 0;
 
     result->activationTime = constructionData.containsSelfReplication ? constructor.constructionActivationTime : 0;
     result->genomeComplexity = hostCell->genomeComplexity;
     result->genomeNodeIndex = constructor.genomeCurrentNodeIndex;
-    result->frontAngle = constructionData.genomeHeader.frontAngle;
 
     auto genomeCurrentBytePosition = constructionData.genomeCurrentBytePosition;
 
@@ -895,15 +894,20 @@ __inline__ __device__ void ConstructorProcessor::activateNewCell(Cell* newCell, 
 {
     if (constructionData.isLastNodeOfLastRepetition || (constructionData.isLastNode && constructionData.hasInfiniteRepetitions)) {
         newCell->livingState = LivingState_Activating;
-        if (!constructionData.genomeHeader.separateConstruction) {
+
+        if (constructionData.genomeHeader.separateConstruction || constructionData.containsSelfReplication) {
+            newCell->angleToFront = constructionData.genomeHeader.frontAngle;
+        } else {
             if (hostCell->numConnections > 1) {
-                newCell->absAngleToConnection0 =
-                    Math::normalizedAngle(hostCell->absAngleToConnection0 + hostCell->getAngelSpan(hostCell->connections[0].cell, newCell), -180.0f);
+                newCell->angleToFront =
+                    Math::normalizedAngle(hostCell->angleToFront + hostCell->getAngelSpan(hostCell->connections[0].cell, newCell), -180.0f);
+            } else {
+                newCell->angleToFront = -hostCell->angleToFront;
             }
             if (newCell->numConnections > 1) {
-                newCell->absAngleToConnection0 =
+                newCell->angleToFront =
                     Math::normalizedAngle(
-                    newCell->absAngleToConnection0 - (180.0f - newCell->getAngelSpan(hostCell, newCell->connections[0].cell)), -180.0f);
+                    newCell->angleToFront + newCell->getAngelSpan(hostCell, newCell->connections[0].cell), -180.0f);
             }
         }
     }

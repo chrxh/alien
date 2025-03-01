@@ -648,14 +648,14 @@ __inline__ __device__ void CellProcessor::livingStateTransition_calcFutureState(
                 livingState = LivingState_Activating;
                 auto prevCell = cell->connections[activatingCellConnection].cell;
                 if (prevCell != cell->connections[0].cell) {
-                    cell->absAngleToConnection0 =
+                    cell->angleToFront =
                         Math::normalizedAngle(
-                        prevCell->absAngleToConnection0 - (180.0f - cell->getAngelSpan(prevCell, cell->connections[0].cell)), -180.0f);
+                        prevCell->angleToFront + (180.0f - cell->getAngelSpan(prevCell, cell->connections[0].cell)), -180.0f);
 
                 } else {
-                    cell->absAngleToConnection0 = prevCell->absAngleToConnection0;
+                    cell->angleToFront = Math::normalizedAngle(prevCell->angleToFront + 180.0f, -180.0f);
                 }
-                cell->absAngleToConnection0 = Math::normalizedAngle(cell->absAngleToConnection0, -180.0f);
+                cell->angleToFront = Math::normalizedAngle(cell->angleToFront, -180.0f);
             }
             if (isOtherCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences != CellDeathConsquences_None) {
                 livingState = LivingState_Detaching;

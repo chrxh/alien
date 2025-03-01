@@ -614,13 +614,13 @@ TEST_F(ConstructorTests_New, constructFurtherCell_orientation_upperSide)
     auto prevPrevConstructedCell = getCell(actualData, 3);
 
     EXPECT_EQ(LivingState_Ready, actualConstructedCell._livingState);
-    EXPECT_TRUE(approxCompare(0.0f, actualConstructedCell._absAngleToConnection0));
+    EXPECT_TRUE(approxCompare(0.0f, actualConstructedCell._angleToFront));
 
     EXPECT_EQ(LivingState_Ready, prevConstructedCell._livingState);
-    EXPECT_TRUE(approxCompare(-90.0f, prevConstructedCell._absAngleToConnection0));
+    EXPECT_TRUE(approxCompare(-90.0f, prevConstructedCell._angleToFront));
 
     EXPECT_EQ(LivingState_Ready, prevPrevConstructedCell._livingState);
-    EXPECT_TRUE(approxCompare(-90.0f, prevPrevConstructedCell._absAngleToConnection0));
+    EXPECT_TRUE(approxCompare(-90.0f, prevPrevConstructedCell._angleToFront));
 }
 
 TEST_F(ConstructorTests_New, constructFurtherCell_orientation_lowerSide)
@@ -652,13 +652,13 @@ TEST_F(ConstructorTests_New, constructFurtherCell_orientation_lowerSide)
     auto prevPrevConstructedCell = getCell(actualData, 3);
 
     EXPECT_EQ(LivingState_Ready, actualConstructedCell._livingState);
-    EXPECT_TRUE(approxCompare(0.0f, actualConstructedCell._absAngleToConnection0));
+    EXPECT_TRUE(approxCompare(0.0f, actualConstructedCell._angleToFront));
 
     EXPECT_EQ(LivingState_Ready, prevConstructedCell._livingState);
-    EXPECT_TRUE(approxCompare(90.0f, prevConstructedCell._absAngleToConnection0));
+    EXPECT_TRUE(approxCompare(90.0f, prevConstructedCell._angleToFront));
 
     EXPECT_EQ(LivingState_Ready, prevPrevConstructedCell._livingState);
-    EXPECT_TRUE(approxCompare(90.0f, prevPrevConstructedCell._absAngleToConnection0));
+    EXPECT_TRUE(approxCompare(90.0f, prevPrevConstructedCell._angleToFront));
 }
 
 TEST_F(ConstructorTests_New, constructFirstCell_orientation_leftSide)
@@ -670,14 +670,14 @@ TEST_F(ConstructorTests_New, constructFirstCell_orientation_leftSide)
 
     DataDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).absAngleToConnection0(90.0f),
+        CellDescription().id(1).pos({10.0f, 10.0f}).angleToFront(90.0f),
         CellDescription()
             .id(2)
             .pos({9.0f, 10.0f})
             .energy(getConstructorEnergy())
             .cellType(ConstructorDescription().genomeCurrentNodeIndex(0).autoTriggerInterval(1).genome(genome))
-            .absAngleToConnection0(90.0f),
-        CellDescription().id(3).pos({9.0f, 11.0f}).absAngleToConnection0(0.0f),
+            .angleToFront(90.0f),
+        CellDescription().id(3).pos({9.0f, 11.0f}).angleToFront(0.0f),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -691,7 +691,7 @@ TEST_F(ConstructorTests_New, constructFirstCell_orientation_leftSide)
     auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3});
 
     EXPECT_EQ(LivingState_Ready, actualConstructedCell._livingState);
-    EXPECT_TRUE(approxCompare(-45.0f, actualConstructedCell._absAngleToConnection0));
+    EXPECT_TRUE(approxCompare(-45.0f, actualConstructedCell._angleToFront));
 }
 
 TEST_F(ConstructorTests_New, constructFirstCell_orientation_rightSide)
@@ -701,14 +701,14 @@ TEST_F(ConstructorTests_New, constructFirstCell_orientation_rightSide)
 
     DataDescription data;
     data.addCells({
-        CellDescription().id(1).pos({8.0f, 10.0f}).absAngleToConnection0(-90.0f),
+        CellDescription().id(1).pos({8.0f, 10.0f}).angleToFront(-90.0f),
         CellDescription()
             .id(2)
             .pos({9.0f, 10.0f})
             .energy(getConstructorEnergy())
             .cellType(ConstructorDescription().genomeCurrentNodeIndex(0).autoTriggerInterval(1).genome(genome))
-            .absAngleToConnection0(-90.0f),
-        CellDescription().id(3).pos({9.0f, 11.0f}).absAngleToConnection0(0.0f),
+            .angleToFront(-90.0f),
+        CellDescription().id(3).pos({9.0f, 11.0f}).angleToFront(0.0f),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -722,7 +722,7 @@ TEST_F(ConstructorTests_New, constructFirstCell_orientation_rightSide)
     auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3});
 
     EXPECT_EQ(LivingState_Ready, actualConstructedCell._livingState);
-    EXPECT_TRUE(approxCompare(45.0f, actualConstructedCell._absAngleToConnection0));
+    EXPECT_TRUE(approxCompare(45.0f, actualConstructedCell._angleToFront));
 }
 
 TEST_F(ConstructorTests_New, constructFurtherCell_orientation_leftSide)
@@ -734,15 +734,15 @@ TEST_F(ConstructorTests_New, constructFurtherCell_orientation_leftSide)
 
     DataDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).absAngleToConnection0(90.0f),
+        CellDescription().id(1).pos({10.0f, 10.0f}).angleToFront(90.0f),
         CellDescription()
             .id(2)
             .pos({9.0f, 10.0f})
             .energy(getConstructorEnergy())
             .cellType(
                 ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).constructionAngle2(30.0f))
-            .absAngleToConnection0(90.0f),
-        CellDescription().id(3).pos({9.0f, 11.0f}).absAngleToConnection0(0.0f),
+            .angleToFront(90.0f),
+        CellDescription().id(3).pos({9.0f, 11.0f}).angleToFront(0.0f),
         CellDescription().id(4).pos({8.0f, 9.0f}).livingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -758,7 +758,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_orientation_leftSide)
     auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3, 4});
 
     EXPECT_EQ(LivingState_Ready, actualConstructedCell._livingState);
-    EXPECT_TRUE(approxCompare(-15.0f, actualConstructedCell._absAngleToConnection0));
+    EXPECT_TRUE(approxCompare(-15.0f, actualConstructedCell._angleToFront));
 }
 
 TEST_F(ConstructorTests_New, constructFurtherCell_orientation_rightSide)
@@ -770,14 +770,14 @@ TEST_F(ConstructorTests_New, constructFurtherCell_orientation_rightSide)
 
     DataDescription data;
     data.addCells({
-        CellDescription().id(1).pos({8.0f, 10.0f}).absAngleToConnection0(-90.0f),
+        CellDescription().id(1).pos({8.0f, 10.0f}).angleToFront(-90.0f),
         CellDescription()
             .id(2)
             .pos({9.0f, 10.0f})
             .energy(getConstructorEnergy())
             .cellType(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).constructionAngle2(-30.0f))
-            .absAngleToConnection0(-90.0f),
-        CellDescription().id(3).pos({9.0f, 11.0f}).absAngleToConnection0(0.0f),
+            .angleToFront(-90.0f),
+        CellDescription().id(3).pos({9.0f, 11.0f}).angleToFront(0.0f),
         CellDescription().id(4).pos({10.0f, 9.0f}).livingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -793,5 +793,5 @@ TEST_F(ConstructorTests_New, constructFurtherCell_orientation_rightSide)
     auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3, 4});
 
     EXPECT_EQ(LivingState_Ready, actualConstructedCell._livingState);
-    EXPECT_TRUE(approxCompare(15.0f, actualConstructedCell._absAngleToConnection0));
+    EXPECT_TRUE(approxCompare(15.0f, actualConstructedCell._angleToFront));
 }
