@@ -522,9 +522,9 @@ struct CellDescription
         _color = value;
         return *this;
     }
-    CellDescription& absAngleToConnection0(float value)
+    CellDescription& angleToFront(float value)
     {
-        _absAngleToConnection0 = value;
+        _angleToFront = value;
         return *this;
     }
     CellDescription& barrier(bool value)
@@ -640,8 +640,7 @@ struct CellDescription
     float _energy = 100.0f;
     float _stiffness = 1.0f;
     int _color = 0;
-    float _absAngleToConnection0 =
-        0;  // Angle between [cell, cell->connection[0]] and [cell0, cell0->connection[0]] where cell0 is the last constructed cell
+    float _angleToFront = 0;  // Angle between [cell, cell->connection[0]] and front direction in reference configuration
     bool _barrier = false;
     int _age = 0;
     LivingState _livingState = LivingState_Ready;
@@ -663,9 +662,6 @@ struct CellDescription
 
     // Misc
     CellMetadataDescription _metadata;
-
-    // Temp
-    float _frontAngle = 0;  // Can be removed in new genome model
 };
 
 struct ClusterDescription

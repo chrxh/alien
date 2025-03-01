@@ -122,7 +122,7 @@ namespace
     auto constexpr Id_Cell_DetectedByCreatureId = 15;
     auto constexpr Id_Cell_GenomeNodeIndex = 20;
     auto constexpr Id_Cell_SignalRelaxationTime = 21;
-    auto constexpr Id_Cell_OrientationAngle = 22;
+    auto constexpr Id_Cell_AngleToFront = 22;
 
     auto constexpr Id_Signal_Channels = 0;
 
@@ -836,7 +836,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_Vel, data._vel, defaultObject._vel);
         loadSave(task, auxiliaries, Id_Cell_Stiffness, data._stiffness, defaultObject._stiffness);
         loadSave(task, auxiliaries, Id_Cell_Color, data._color, defaultObject._color);
-        loadSave(task, auxiliaries, Id_Cell_OrientationAngle, data._absAngleToConnection0, defaultObject._absAngleToConnection0);
+        loadSave(task, auxiliaries, Id_Cell_AngleToFront, data._angleToFront, defaultObject._angleToFront);
         loadSave(task, auxiliaries, Id_Cell_Barrier, data._barrier, defaultObject._barrier);
         loadSave(task, auxiliaries, Id_Cell_Age, data._age, defaultObject._age);
         loadSave(task, auxiliaries, Id_Cell_LivingState, data._livingState, defaultObject._livingState);

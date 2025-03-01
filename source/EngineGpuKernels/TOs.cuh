@@ -233,7 +233,7 @@ struct CellTO
     float stiffness;
     uint8_t color;
     uint8_t numConnections;
-    float absAngleToConnection0;
+    float angleToFront;
     bool barrier;
     uint32_t age;
     LivingState livingState;
@@ -259,9 +259,6 @@ struct CellTO
 
     // Editing data
     uint8_t selected;
-
-    // Temp
-    float frontAngle;  // Can be removed in new genome model
 };
 
 struct DataTO

@@ -34,7 +34,7 @@ namespace
         cellTO.genomeComplexity = cell->genomeComplexity;
         cellTO.cellType = cell->cellType;
         cellTO.color = cell->color;
-        cellTO.absAngleToConnection0 = cell->absAngleToConnection0;
+        cellTO.angleToFront = cell->angleToFront;
         cellTO.age = cell->age;
         cellTO.signalRoutingRestriction.active = cell->signalRoutingRestriction.active;
         cellTO.signalRoutingRestriction.baseAngle = cell->signalRoutingRestriction.baseAngle;
@@ -48,7 +48,6 @@ namespace
         cellTO.detectedByCreatureId = cell->detectedByCreatureId;
         cellTO.cellTypeUsed = cell->cellTypeUsed;
         cellTO.genomeNodeIndex = cell->genomeNodeIndex;
-        cellTO.frontAngle = cell->frontAngle;
 
         copyAuxiliaryData(
             cell->metadata.nameSize,
