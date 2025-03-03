@@ -154,7 +154,6 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
         auto angleFactor = [&] {
             if (isCounterOriented(cell)) {
                 targetAngleRelToConnection0 = -targetAngleRelToConnection0;
-                //targetAngleRelToConnection0 = Math::normalizedAngle(targetAngleRelToConnection0 + 180.0f, -180.0f);
             }
             if (cell->numConnections == 1) {
                 targetAngleRelToConnection0 = Math::normalizedAngle(targetAngleRelToConnection0 + 180.0f, -180.0f);
