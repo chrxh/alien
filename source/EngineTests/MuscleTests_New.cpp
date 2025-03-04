@@ -500,7 +500,7 @@ TEST_P(MuscleTests_AngleBending_New, muscleWithTwoConnections)
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .angleToFront(side == Side::Left ? -90.0f : 90.0f)
+            .angleToFront(side == Side::Left ? 90.0f : -90.0f)
             .cellType(MuscleDescription().mode(AngleBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, 1.0f).weight(1, 0, targetAngle / 180.0f)),
         CellDescription().id(3).pos({side == Side::Left ? 12.0f : 10.0f, 10.0f}),
@@ -510,9 +510,7 @@ TEST_P(MuscleTests_AngleBending_New, muscleWithTwoConnections)
 
     _simulationFacade->setSimulationData(data);
 
-    for (int i = 0; i < 100; ++i) {
-        _simulationFacade->calcTimesteps(10);
-    }
+    _simulationFacade->calcTimesteps(1000);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 2);
@@ -537,6 +535,7 @@ TEST_P(MuscleTests_AngleBending_New, muscleWithTwoConnections)
 TEST_P(MuscleTests_AngleBending_New, muscleWithOneConnection)
 {
     auto constexpr MaxAngleDeviation = 120.0f;
+    auto constexpr AngleMinDistance = 30.0f;
     auto constexpr AnglePrecision = 2.0f;
 
     auto [side, targetAngle] = GetParam();
@@ -559,9 +558,7 @@ TEST_P(MuscleTests_AngleBending_New, muscleWithOneConnection)
 
     _simulationFacade->setSimulationData(data);
 
-    for (int i = 0; i < 100; ++i) {
-        _simulationFacade->calcTimesteps(10);
-    }
+    _simulationFacade->calcTimesteps(1000);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = getCell(actualData, 4);
@@ -578,11 +575,11 @@ TEST_P(MuscleTests_AngleBending_New, muscleWithOneConnection)
     EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell._connections.at(0)._distance));
 
     auto angle = actualCell2._connections.at(side == Side::Left ? 2 : 1)._angleFromPrevious;
-    printf("angle: %f\n", angle);
-
-    //if (side == Side::Left) {
-    //    EXPECT_TRUE(abs(270.0f - angle + targetAngle) < AnglePrecision);
-    //} else {
-    //    EXPECT_TRUE(abs(angle - 90.0f - targetAngle) < AnglePrecision);
-    //}
+    if (side == Side::Left) {
+        targetAngle = std::min(-AngleMinDistance, std::max(-180.0f + AngleMinDistance, targetAngle));
+        EXPECT_TRUE(abs(angle - targetAngle - 180.0f) < AnglePrecision);
+    } else {
+        targetAngle = std::min(180.0f - AngleMinDistance, std::max(AngleMinDistance, targetAngle));
+        EXPECT_TRUE(abs(angle - targetAngle) < AnglePrecision);
+    }
 }

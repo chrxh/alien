@@ -900,14 +900,14 @@ __inline__ __device__ void ConstructorProcessor::activateNewCell(Cell* newCell, 
         } else {
             if (hostCell->numConnections > 1) {
                 newCell->angleToFront =
-                    Math::normalizedAngle(hostCell->angleToFront + hostCell->getAngelSpan(hostCell->connections[0].cell, newCell), -180.0f);
+                    Math::normalizedAngle(hostCell->angleToFront + (180.0f - hostCell->getAngelSpan(hostCell->connections[0].cell, newCell)), -180.0f);
             } else {
                 newCell->angleToFront = -hostCell->angleToFront;
             }
             if (newCell->numConnections > 1) {
                 newCell->angleToFront =
                     Math::normalizedAngle(
-                    newCell->angleToFront + newCell->getAngelSpan(hostCell, newCell->connections[0].cell), -180.0f);
+                    newCell->angleToFront - newCell->getAngelSpan(hostCell, newCell->connections[0].cell), -180.0f);
             }
         }
     }
