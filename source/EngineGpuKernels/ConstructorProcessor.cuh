@@ -153,7 +153,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 {
     auto& constructor = cell->cellTypeData.constructor;
     if (!GenomeDecoder::isFinished(constructor)) {
-        if (SignalProcessor::isAutoTriggered(data, cell, cell->cellTypeData.constructor.autoTriggerInterval)) {
+        if (SignalProcessor::isAutoOrManuallyTriggered(data, cell, cell->cellTypeData.constructor.autoTriggerInterval)) {
             auto constructionData = readConstructionData(cell);
             if (tryConstructCell(data, statistics, cell, constructionData)) {
                 //cell->signal.active = true;

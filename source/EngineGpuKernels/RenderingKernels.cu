@@ -629,7 +629,8 @@ __global__ void cudaDrawCells(
                     summedAngle += cell->connections[i].angleFromPrevious;
                 }
                 auto const& otherCell = cell->connections[i].cell;
-                if (!cell->signalRoutingRestriction.active || Math::isAngleInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, summedAngle)) {
+                if (!cell->signalRoutingRestriction.active
+                    || Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, summedAngle)) {
                     auto otherCellPos = otherCell->pos;
                     auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
                     otherCellPos += topologyCorrection;
