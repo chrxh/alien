@@ -562,7 +562,7 @@ void GenomeEditorWindow::processNode(
 
         table.next();
         AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters().name("Signal routing active").textWidth(ContentTextWidth),
+            AlienImGui::CheckboxParameters().name("Signal routing restriction").textWidth(ContentTextWidth),
             cell._signalRoutingRestriction._active);
         if (cell._signalRoutingRestriction._active) {
             table.next();

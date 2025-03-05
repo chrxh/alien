@@ -24,6 +24,7 @@ public:
     __inline__ __device__ static void angleCorrection(int& angle);
     __inline__ __device__ static bool isInBetweenModulo(float value1, float value2, float candidate, float size);
     __inline__ __device__ static bool isAngleInBetween(float angle1, float angle2, float angleBetweenCandidate);
+    __inline__ __device__ static bool isAngleStrictInBetween(float angle1, float angle2, float angleBetweenCandidate);
     __inline__ __device__ static void rotateQuarterClockwise(float2& v);
     __inline__ __device__ static void rotateQuarterCounterClockwise(float2& v);
     __inline__ __device__ static float angleOfVector(float2 const& v);  //0 DEG corresponds to (0,-1)
@@ -234,6 +235,23 @@ __inline__ __device__ bool Math::isAngleInBetween(float angle1, float angle2, fl
         angle2 += 360.0f;
     }
     return angle2 - angle1 < 360.0f;
+}
+
+__inline__ __device__ bool Math::isAngleStrictInBetween(float angle1, float angle2, float angleBetweenCandidate)
+{
+    if (abs(angle1 - angleBetweenCandidate) < NEAR_ZERO) {
+        return false;
+    }
+    if (abs(angle1 - angleBetweenCandidate) > 360.0 - NEAR_ZERO) {
+        return false;
+    }
+    if (abs(angle2 - angleBetweenCandidate) < NEAR_ZERO) {
+        return false;
+    }
+    if (abs(angle2 - angleBetweenCandidate) > 360.0 - NEAR_ZERO) {
+        return false;
+    }
+    return isAngleInBetween(angle1, angle2, angleBetweenCandidate);
 }
 
 __inline__ __device__ void Math::angleCorrection(float &angle)

@@ -83,7 +83,7 @@ __inline__ __device__  void SignalProcessor::calcFutureSignals(SimulationData& d
                 float connectionAngle = 0;
                 for (int k = 0, l = connectedCell->numConnections; k < l; ++k) {
                     if (connectedCell->connections[k].cell == cell) {
-                        if (connectionAngle < signalAngleRestrictionStart - NEAR_ZERO || connectionAngle > signalAngleRestrictionEnd + NEAR_ZERO) {
+                        if (!Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, connectionAngle)) {
                             skip = true;
                         }
                         break;
