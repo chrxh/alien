@@ -18,7 +18,7 @@ public:
 
     __inline__ __device__ static bool isAutoTriggered(SimulationData& data, Cell* cell, uint8_t autoTriggerInterval);
     __inline__ __device__ static bool isManuallyTriggered(SimulationData& data, Cell* cell);
-    __inline__ __device__ static bool isTriggeredAndCreateSignalIfTriggered(SimulationData& data, Cell* cell, uint8_t autoTriggerInterval);
+    __inline__ __device__ static bool isAutoOrManuallyTriggered(SimulationData& data, Cell* cell, uint8_t autoTriggerInterval);
 };
 
 /************************************************************************/
@@ -161,16 +161,13 @@ __inline__ __device__ bool SignalProcessor::isManuallyTriggered(SimulationData& 
     return true;
 }
 
-__inline__ __device__ bool SignalProcessor::isTriggeredAndCreateSignalIfTriggered(SimulationData& data, Cell* cell, uint8_t autoTriggerInterval)
+__inline__ __device__ bool SignalProcessor::isAutoOrManuallyTriggered(SimulationData& data, Cell* cell, uint8_t autoTriggerInterval)
 {
     if (autoTriggerInterval == 0) {
         return isManuallyTriggered(data, cell);
     } else {
         if (!isAutoTriggered(data, cell, autoTriggerInterval)) {
             return false;
-        }
-        if (!cell->signal.active) {
-            SignalProcessor::createEmptySignal(cell);
         }
     }
     return true;

@@ -51,7 +51,10 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
 {
     __shared__ bool isTriggered;
     if (threadIdx.x == 0) {
-        isTriggered = SignalProcessor::isTriggeredAndCreateSignalIfTriggered(data, cell, cell->cellTypeData.sensor.autoTriggerInterval);
+        isTriggered = SignalProcessor::isAutoOrManuallyTriggered(data, cell, cell->cellTypeData.sensor.autoTriggerInterval);
+        if (isTriggered && !cell->signal.active) {
+            SignalProcessor::createEmptySignal(cell);
+        }
     }
     __syncthreads();
 

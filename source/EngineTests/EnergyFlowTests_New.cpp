@@ -67,7 +67,9 @@ TEST_F(EnergyFlowTests_New, energyFlowsToActiveConstructor)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-        for (int i = 1; i < 21; ++i) {
+    ASSERT_EQ(20, actualData._cells.size());
+
+    for (int i = 1; i < 21; ++i) {
         if (i == 20) {
             EXPECT_TRUE(actualCellById.at(i)._energy > 10000.0f - 400.0f);
         } else {
