@@ -345,23 +345,17 @@ struct AutoCrawlingDescription
 {
     auto operator<=>(AutoCrawlingDescription const&) const = default;
 
-    AutoCrawlingDescription& maxDistanceDeviation(float value)
-    {
-        _maxDistanceDeviation = value;
-        return *this;
-    }
-
     // Fixed data
-    float _maxDistanceDeviation = 20.0f; // Between 0 and 1
-    float _frontBackVelRatio = 0.2f;  // Between 0 and 1
+    MEMBER_DECLARATION(AutoCrawlingDescription, float, maxDistanceDeviation, 0.2f); // Between 0 and 1
+    MEMBER_DECLARATION(AutoCrawlingDescription, float, frontBackVelRatio, 0.2f);    // Between 0 and 1
 
     // Process data
-    float _initialAngle = 0;
-    float _lastActualAngle = 0;
-    bool _forward = true;  // Current direction
-    float _activation = 0;
-    int _activationCountdown = 0;
-    bool _impulseAlreadyApplied = false;
+    MEMBER_DECLARATION(AutoCrawlingDescription, float, initialDistance, 0.0f);
+    MEMBER_DECLARATION(AutoCrawlingDescription, float, lastActualDistance, 0.0f);
+    MEMBER_DECLARATION(AutoCrawlingDescription, bool, forward, true);               // Current direction
+    MEMBER_DECLARATION(AutoCrawlingDescription, float, activation, 0.0f);
+    MEMBER_DECLARATION(AutoCrawlingDescription, int, activationCountdown, 0);
+    MEMBER_DECLARATION(AutoCrawlingDescription, bool, impulseAlreadyApplied, false);
 };
 using MuscleModeDescription = std::variant<AutoBendingDescription, ManualBendingDescription, AngleBendingDescription, AutoCrawlingDescription>;
 

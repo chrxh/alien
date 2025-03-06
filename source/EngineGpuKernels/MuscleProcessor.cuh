@@ -20,6 +20,7 @@ private:
     __inline__ __device__ static void autoBending(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void manualBending(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void angleBending(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void autoCrawling(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
     //__inline__ __device__ static int getConnectionIndex(Cell* cell, Cell* otherCell);
     //__inline__ __device__ static bool hasTriangularConnection(Cell* cell, Cell* otherCell);
@@ -39,7 +40,8 @@ private:
 
     static auto constexpr AccelerationLimit = 0.3f;
     static auto constexpr AutoTriggerInterval = 9;
-    static auto constexpr AngleMinDistance = 30.0f;
+    static auto constexpr MinAngle = 30.0f;
+    static auto constexpr MinDistance = 0.1f;
 };
 
 /************************************************************************/
@@ -74,6 +76,9 @@ __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, Si
     } break;
     case MuscleMode_AngleBending: {
         angleBending(data, statistics, cell);
+    } break;
+    case MuscleMode_AutoCrawling: {
+        autoCrawling(data, statistics, cell);
     } break;
     }
 }
@@ -195,8 +200,8 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
         // Change bending direction
         auto sumAngle = bendingInfo.connection->angleFromPrevious + bendingInfo.connectionNext->angleFromPrevious;  // Sum will not change
         auto maxAngleDeviation = min(bending.initialAngle, sumAngle - bending.initialAngle) * bending.maxAngleDeviation / 2;
-        auto maxAngle = min(max(bending.initialAngle + maxAngleDeviation, AngleMinDistance), sumAngle - AngleMinDistance);
-        auto minAngle = min(max(bending.initialAngle - maxAngleDeviation, AngleMinDistance), sumAngle - AngleMinDistance);
+        auto maxAngle = min(max(bending.initialAngle + maxAngleDeviation, MinAngle), sumAngle - MinAngle);
+        auto minAngle = min(max(bending.initialAngle - maxAngleDeviation, MinAngle), sumAngle - MinAngle);
 
         if (bendingInfo.connection->angleFromPrevious /*actualAngle */ > maxAngle - NEAR_ZERO) {
             bending.forward = activation >= 0;
@@ -300,8 +305,8 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
         // Change bending direction
         auto sumAngle = bendingInfo.connection->angleFromPrevious + bendingInfo.connectionNext->angleFromPrevious;  // Sum will not change
         auto maxAngleDeviation = min(bending.initialAngle, sumAngle - bending.initialAngle) * bending.maxAngleDeviation / 2;
-        auto maxAngle = min(max(bending.initialAngle + maxAngleDeviation, AngleMinDistance), sumAngle - AngleMinDistance);
-        auto minAngle = min(max(bending.initialAngle - maxAngleDeviation, AngleMinDistance), sumAngle - AngleMinDistance);
+        auto maxAngle = min(max(bending.initialAngle + maxAngleDeviation, MinAngle), sumAngle - MinAngle);
+        auto minAngle = min(max(bending.initialAngle - maxAngleDeviation, MinAngle), sumAngle - MinAngle);
 
         // Modify angle
         auto angleDelta = activation > 0 ? -(0.05f + bending.frontBackVelRatio) : -(1.05f - bending.frontBackVelRatio);
@@ -401,8 +406,8 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
         // Change bending direction
         auto sumAngle = bendingInfo.connection->angleFromPrevious + bendingInfo.connectionNext->angleFromPrevious;  // Sum will not change
         auto maxAngleDeviation = min(bending.initialAngle, sumAngle - bending.initialAngle) * bending.maxAngleDeviation / 2;
-        auto maxAngle = min(max(bending.initialAngle + maxAngleDeviation, AngleMinDistance), sumAngle - AngleMinDistance);
-        auto minAngle = min(max(bending.initialAngle - maxAngleDeviation, AngleMinDistance), sumAngle - AngleMinDistance);
+        auto maxAngle = min(max(bending.initialAngle + maxAngleDeviation, MinAngle), sumAngle - MinAngle);
+        auto minAngle = min(max(bending.initialAngle - maxAngleDeviation, MinAngle), sumAngle - MinAngle);
 
         // Modify angle
         auto angleDelta = activation > 0 ? (0.05f + bending.frontBackVelRatio) : (1.05f - bending.frontBackVelRatio);
@@ -426,6 +431,123 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
 
         statistics.incNumMuscleActivities(cell->color);
         radiate(data, cell);
+    }
+}
+
+__inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+{
+    auto& muscle = cell->cellTypeData.muscle;
+    auto& crawling = muscle.modeData.autoCrawling;
+
+    if (cell->numConnections != 1 && cell->numConnections != 2) {
+        return;
+    }
+
+    // Activation
+    if (cell->signal.active) {
+        crawling.activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleTrigger]));
+        crawling.activationCountdown = cudaSimulationParameters.cellTypeMuscleActivationCountdown;
+    }
+    if (crawling.activationCountdown == 0) {
+        return;
+    }
+
+    // Initialization
+    if (crawling.initialDistance == 0) {
+        crawling.initialDistance = cell->connections[0].distance;
+        crawling.forward = true;
+        crawling.lastActualDistance = data.cellMap.getDistance(cell->connections[0].cell->pos, cell->pos);
+        crawling.impulseAlreadyApplied = true;
+    }
+
+    // Process auto bending
+    if (SignalProcessor::isAutoTriggered(data, cell, AutoTriggerInterval)) {
+
+        auto actualDistance = data.cellMap.getDistance(cell->connections[0].cell->pos, cell->pos);
+        auto activation = crawling.activation * toFloat(crawling.activationCountdown) / cudaSimulationParameters.cellTypeMuscleActivationCountdown;
+
+        // Change bending direction
+        auto maxDistanceDeviation = max(0.0f, min(1.0f, crawling.maxDistanceDeviation));
+        auto maxDistance = max(crawling.initialDistance * (1.0f + maxDistanceDeviation), MinDistance);
+        auto minDistance = min(max(crawling.initialDistance * (1.0f - maxDistanceDeviation), MinDistance), crawling.initialDistance);
+
+        if (cell->connections[0].distance > maxDistance - NEAR_ZERO) {
+            crawling.forward = activation >= 0;
+            crawling.impulseAlreadyApplied = false;
+        }
+        if (cell->connections[0].distance < minDistance + NEAR_ZERO) {
+            crawling.forward = activation < 0;
+            crawling.impulseAlreadyApplied = false;
+        }
+
+        // Modify angle
+        auto distanceDelta = crawling.forward ? -(0.05f + crawling.frontBackVelRatio) : 1.05f - crawling.frontBackVelRatio;
+        distanceDelta *= 0.1f * activation;
+
+        if (cell->connections[0].distance + distanceDelta > maxDistance) {
+            distanceDelta = maxDistance - cell->connections[0].distance;
+        }
+        if (cell->connections[0].distance + distanceDelta < minDistance) {
+            distanceDelta = minDistance - cell->connections[0].distance;
+        }
+        cell->connections[0].distance += distanceDelta;
+        auto& connectedCell = cell->connections[0].cell;
+        for (int i = 0; i < connectedCell->numConnections; ++i) {
+            if (connectedCell->connections[i].cell == cell) {
+                connectedCell->connections[i].distance += distanceDelta;
+                break;
+            }
+        }
+
+        // Apply impulse
+        //auto actualAngleDelta = actualDistance - crawling.lastActualAngle;
+        //if (!crawling.impulseAlreadyApplied) {
+        //    if ((distanceDelta < 0 && actualDistance < crawling.initialDistance && bendingInfo.connection->angleFromPrevious < crawling.initialDistance)
+        //        || (distanceDelta > 0 && actualDistance > crawling.initialDistance && bendingInfo.connection->angleFromPrevious > crawling.initialDistance)) {
+        //        crawling.impulseAlreadyApplied = true;
+
+        //        auto direction = Math::normalized(data.cellMap.getCorrectedDirection(bendingInfo.connection->cell->pos - bendingInfo.pivotCell->pos));
+        //        if (actualAngleDelta < 0) {
+        //            Math::rotateQuarterClockwise(direction);
+        //        } else {
+        //            Math::rotateQuarterCounterClockwise(direction);
+        //        }
+        //        actualAngleDelta = min(5.0f, abs(actualAngleDelta));
+        //        if (crawling.forward) {
+        //            actualAngleDelta *= powf(crawling.frontBackVelRatio, 4.0f);
+        //        } else {
+        //            actualAngleDelta *= powf(1.0f - crawling.frontBackVelRatio, 4.0f);
+        //        }
+        //        auto acceleration = direction * actualAngleDelta * cudaSimulationParameters.cellTypeMuscleBendingAcceleration[cell->color] / 1.5f;
+
+        //        if (cell->numConnections == 2) {
+        //            int chainLength = 0;
+        //            Cell* connectedCell = cell;
+        //            while (connectedCell->numConnections == 2 && chainLength < 20) {
+        //                connectedCell = connectedCell->connections[1].cell;
+        //                ++chainLength;
+        //            }
+        //            connectedCell = cell;
+        //            float2 accPerCell{
+        //                min(AccelerationLimit, max(-AccelerationLimit, acceleration.x / chainLength)),
+        //                min(AccelerationLimit, max(-AccelerationLimit, acceleration.y / chainLength))};
+        //            while (connectedCell->numConnections == 2 && chainLength < 20) {
+        //                connectedCell = connectedCell->connections[1].cell;
+
+        //                atomicAdd(&connectedCell->vel.x, accPerCell.x);
+        //                atomicAdd(&connectedCell->vel.y, accPerCell.y);
+        //            }
+        //        } else {
+        //            atomicAdd(&bendingInfo.pivotCell->vel.x, min(AccelerationLimit, max(-AccelerationLimit, acceleration.x)));
+        //            atomicAdd(&bendingInfo.pivotCell->vel.y, min(AccelerationLimit, max(-AccelerationLimit, acceleration.y)));
+        //        }
+        //    }
+        //}
+
+        crawling.lastActualDistance = actualDistance;
+        statistics.incNumMuscleActivities(cell->color);
+        radiate(data, cell);
+        --crawling.activationCountdown;
     }
 }
 

@@ -181,11 +181,11 @@ namespace
 
     auto constexpr Id_MuscleMode_AutoCrawling_MaxAngleDeviation = 0;
     auto constexpr Id_MuscleMode_AutoCrawling_FrontBackVelRatio = 1;
-    auto constexpr Id_MuscleMode_AutoCrawling_InitialAngle = 2;
+    auto constexpr Id_MuscleMode_AutoCrawling_InitialDistance = 2;
     auto constexpr Id_MuscleMode_AutoCrawling_Forward = 3;
     auto constexpr Id_MuscleMode_AutoCrawling_Activation = 4;
     auto constexpr Id_MuscleMode_AutoCrawling_ActivationCountdown = 5;
-    auto constexpr Id_MuscleMode_AutoCrawling_LastAngle = 6;
+    auto constexpr Id_MuscleMode_AutoCrawling_LastActualDistance = 6;
     auto constexpr Id_MuscleMode_AutoCrawling_ImpulseAlreadyApplied = 7;
 
     auto constexpr Id_Injector_Mode = 0;
@@ -770,8 +770,8 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_MaxAngleDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
-        loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_InitialAngle, data._initialAngle, defaultObject._initialAngle);
-        loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_LastAngle, data._lastActualAngle, defaultObject._lastActualAngle);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_InitialDistance, data._initialDistance, defaultObject._initialDistance);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_LastActualDistance, data._lastActualDistance, defaultObject._lastActualDistance);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_Forward, data._forward, defaultObject._forward);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_Activation, data._activation, defaultObject._activation);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_ActivationCountdown, data._activationCountdown, defaultObject._activationCountdown);

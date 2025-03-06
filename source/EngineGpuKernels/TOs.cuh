@@ -151,8 +151,8 @@ struct AutoCrawlingTO
     float frontBackVelRatio;  // Between 0 and 1
 
     // Process data
-    float initialAngle;
-    float lastAngle;
+    float initialDistance;
+    float lastActualDistance;
     bool forward;  // Current direction
     float activation;
     uint8_t activationCountdown;
@@ -164,7 +164,7 @@ union MuscleModeTO
     AutoBendingTO autoBending;
     ManualBendingTO manualBending;
     AngleBendingTO angleBending;
-    AutoCrawlingTO crawling;
+    AutoCrawlingTO autoCrawling;
 };
 
 struct MuscleTO
