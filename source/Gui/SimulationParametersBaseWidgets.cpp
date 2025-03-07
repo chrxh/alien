@@ -903,10 +903,10 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(0)
                 .max(0.1f)
-                .defaultValue(origParameters.cellTypeMuscleContractionExpansionDelta)
+                .defaultValue(origParameters.cellTypeMuscleCrawlingAcceleration)
                 .tooltip("The maximum length that a muscle cell can shorten or lengthen a cell connection. This parameter applies only to muscle cells "
                          "which are in contraction/expansion mode."),
-            parameters.cellTypeMuscleContractionExpansionDelta);
+            parameters.cellTypeMuscleCrawlingAcceleration);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Bending acceleration")

@@ -584,9 +584,9 @@ namespace
 
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellTypeMuscleContractionExpansionDelta,
-            defaultParameters.cellTypeMuscleContractionExpansionDelta,
-            "simulation parameters.cell.function.muscle.contraction expansion delta",
+            parameters.cellTypeMuscleCrawlingAcceleration,
+            defaultParameters.cellTypeMuscleCrawlingAcceleration,
+            "simulation parameters.cell.function.muscle.crawling acceleration",
             parserTask);
         ParameterParser::encodeDecode(
             tree,

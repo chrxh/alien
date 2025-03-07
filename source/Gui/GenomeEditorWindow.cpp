@@ -736,7 +736,7 @@ void GenomeEditorWindow::processNode(
             if (AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Mode")
-                    .values({"Auto bending", "Manual bending", "Angle bending"})
+                    .values({"Auto bending", "Manual bending", "Angle bending", "Auto crawling"})
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::GenomeMuscleModeTooltip),
                 mode)) {
@@ -746,6 +746,8 @@ void GenomeEditorWindow::processNode(
                     muscle.mode(ManualBendingGenomeDescription());
                 } else if (mode == MuscleMode_AngleBending) {
                     muscle.mode(AngleBendingGenomeDescription());
+                } else if (mode == MuscleMode_AutoCrawling) {
+                    muscle.mode(AutoCrawlingGenomeDescription());
                 }
             }
             if (mode == MuscleMode_AutoBending) {
@@ -759,25 +761,38 @@ void GenomeEditorWindow::processNode(
                     bending._maxAngleDeviation);
                 table.next();
                 AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters().name("Front back ratio").format("%.2f").textWidth(ContentHeaderTextWidth), bending._frontBackVelRatio);
+                    AlienImGui::InputFloatParameters().name("Front back ratio").format("%.2f").step(0.05f).textWidth(ContentHeaderTextWidth),
+                    bending._frontBackVelRatio);
             } else if (mode == MuscleMode_ManualBending) {
                 auto& bending = std::get<ManualBendingGenomeDescription>(muscle._mode);
                 table.next();
                 AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters().name("Max angle deviation").format("%.2f").textWidth(ContentHeaderTextWidth),
+                    AlienImGui::InputFloatParameters().name("Max angle deviation").format("%.2f").step(0.05f).textWidth(ContentHeaderTextWidth),
                     bending._maxAngleDeviation);
                 table.next();
                 AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters().name("Front back ratio").format("%.2f").textWidth(ContentHeaderTextWidth), bending._frontBackVelRatio);
+                    AlienImGui::InputFloatParameters().name("Front back ratio").format("%.2f").step(0.05f).textWidth(ContentHeaderTextWidth),
+                    bending._frontBackVelRatio);
             } else if (mode == MuscleMode_AngleBending) {
                 auto& bending = std::get<AngleBendingGenomeDescription>(muscle._mode);
                 table.next();
                 AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters().name("Max angle deviation").format("%.2f").textWidth(ContentHeaderTextWidth),
+                    AlienImGui::InputFloatParameters().name("Max angle deviation").format("%.2f").step(0.05f).textWidth(ContentHeaderTextWidth),
                     bending._maxAngleDeviation);
                 table.next();
                 AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters().name("Front back ratio").format("%.2f").textWidth(ContentHeaderTextWidth), bending._frontBackVelRatio);
+                    AlienImGui::InputFloatParameters().name("Front back ratio").format("%.2f").step(0.05f).textWidth(ContentHeaderTextWidth),
+                    bending._frontBackVelRatio);
+            } else if (mode == MuscleMode_AutoCrawling) {
+                auto& crawling = std::get<AutoCrawlingGenomeDescription>(muscle._mode);
+                table.next();
+                AlienImGui::InputFloat(
+                    AlienImGui::InputFloatParameters().name("Max distance deviation").format("%.2f").step(0.05f).textWidth(ContentHeaderTextWidth),
+                    crawling._maxDistanceDeviation);
+                table.next();
+                AlienImGui::InputFloat(
+                    AlienImGui::InputFloatParameters().name("Front back ratio").format("%.2f").step(0.05f).textWidth(ContentHeaderTextWidth),
+                    crawling._frontBackVelRatio);
             }
         } break;
         case CellType_Defender: {
