@@ -189,48 +189,32 @@ struct AutoBendingGenomeDescription
 {
     auto operator<=>(AutoBendingGenomeDescription const&) const = default;
 
-    float _maxAngleDeviation = 0.2f;   // Between 0 and 1
-    float _frontBackVelRatio = 0.2f;      // Between 0 and 1
-
-    AutoBendingGenomeDescription& maxAngleDeviation(float value)
-    {
-        _maxAngleDeviation = value;
-        return *this;
-    }
+    MEMBER_DECLARATION(AutoBendingGenomeDescription, float, maxAngleDeviation, 0.2f);    // Between 0 and 1
+    MEMBER_DECLARATION(AutoBendingGenomeDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
 };
 
 struct ManualBendingGenomeDescription
 {
     auto operator<=>(ManualBendingGenomeDescription const&) const = default;
 
-    float _maxAngleDeviation = 0.2f;  // Between 0 and 1
-    float _frontBackVelRatio = 0.2f;      // Between 0 and 1
+    MEMBER_DECLARATION(ManualBendingGenomeDescription, float, maxAngleDeviation, 0.2f);  // Between 0 and 1
+    MEMBER_DECLARATION(ManualBendingGenomeDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
 };
 
 struct AngleBendingGenomeDescription
 {
     auto operator<=>(AngleBendingGenomeDescription const&) const = default;
 
-    // Fixed data
     MEMBER_DECLARATION(AngleBendingGenomeDescription, float, maxAngleDeviation, 0.2f);  // Between 0 and 1
     MEMBER_DECLARATION(AngleBendingGenomeDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
-
-    // Process data
-    MEMBER_DECLARATION(AngleBendingGenomeDescription, float, initialAngle, 0.0f);
 };
 
 struct AutoCrawlingGenomeDescription
 {
     auto operator<=>(AutoCrawlingGenomeDescription const&) const = default;
 
-    float _maxDistanceDeviation = 20.0f;  // Between 0 and 1
-    float _frontBackVelRatio = 0;         // Between 0 and 1
-
-    AutoCrawlingGenomeDescription& maxAngleDeviation(float value)
-    {
-        _maxDistanceDeviation = value;
-        return *this;
-    }
+    MEMBER_DECLARATION(AutoCrawlingGenomeDescription, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
+    MEMBER_DECLARATION(AutoCrawlingGenomeDescription, float, frontBackVelRatio, 0.2f);      // Between 0 and 1
 };
 
 using MuscleModeGenomeDescription =
@@ -248,6 +232,8 @@ struct MuscleGenomeDescription
             return MuscleMode_ManualBending;
         } else if (std::holds_alternative<AngleBendingGenomeDescription>(_mode)) {
             return MuscleMode_AngleBending;
+        } else if (std::holds_alternative<AutoCrawlingGenomeDescription>(_mode)) {
+            return MuscleMode_AutoCrawling;
         }
         THROW_NOT_IMPLEMENTED();
     }

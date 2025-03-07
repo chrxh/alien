@@ -83,6 +83,12 @@ namespace
     auto constexpr Id_MuscleModeGenome_ManualBending_MaxAngleDeviation = 0;
     auto constexpr Id_MuscleModeGenome_ManualBending_FrontBackVelRatio = 1;
 
+    auto constexpr Id_MuscleModeGenome_AngleBending_MaxAngleDeviation = 0;
+    auto constexpr Id_MuscleModeGenome_AngleBending_FrontBackVelRatio = 1;
+
+    auto constexpr Id_MuscleModeGenome_AutoCrawling_MaxDistanceDeviation = 0;
+    auto constexpr Id_MuscleModeGenome_AutoCrawling_FrontBackVelRatio = 1;
+
     auto constexpr Id_InjectorGenome_Mode = 0;
 
     auto constexpr Id_AttackerGenome_Mode = 0;
@@ -450,6 +456,8 @@ namespace cereal
     {
         AngleBendingGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_MuscleModeGenome_AngleBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
+        loadSave(task, auxiliaries, Id_MuscleModeGenome_AngleBending_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AngleBendingGenomeDescription)
@@ -459,6 +467,8 @@ namespace cereal
     {
         AutoCrawlingGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_MuscleModeGenome_AutoCrawling_MaxDistanceDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
+        loadSave(task, auxiliaries, Id_MuscleModeGenome_AutoCrawling_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AutoCrawlingGenomeDescription)

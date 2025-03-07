@@ -181,9 +181,9 @@ struct SimulationParameters
     ColorVector<float> cellTypeTransmitterEnergyDistributionValue = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
 
     // Cell type: Muscle
-    ColorVector<float> cellTypeMuscleContractionExpansionDelta = {0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f};
+    ColorVector<float> cellTypeMuscleBendingAcceleration = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+    ColorVector<float> cellTypeMuscleCrawlingAcceleration = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     ColorVector<float> cellTypeMuscleMovementAcceleration = {0.02f, 0.02f, 0.02f, 0.02f, 0.02f, 0.02f, 0.02f};
-    ColorVector<float> cellTypeMuscleBendingAcceleration = {0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f};
     ColorVector<float> cellTypeMuscleEnergyCost = {0, 0, 0, 0, 0, 0, 0};
     static float constexpr cellTypeMuscleThreshold = 0.2f;
     static int constexpr cellTypeMuscleActivationCountdown = 10;

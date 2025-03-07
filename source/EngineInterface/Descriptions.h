@@ -346,7 +346,7 @@ struct AutoCrawlingDescription
     auto operator<=>(AutoCrawlingDescription const&) const = default;
 
     // Fixed data
-    MEMBER_DECLARATION(AutoCrawlingDescription, float, maxDistanceDeviation, 0.2f); // Between 0 and 1
+    MEMBER_DECLARATION(AutoCrawlingDescription, float, maxDistanceDeviation, 0.8f); // Between 0 and 1
     MEMBER_DECLARATION(AutoCrawlingDescription, float, frontBackVelRatio, 0.2f);    // Between 0 and 1
 
     // Process data
@@ -371,6 +371,8 @@ struct MuscleDescription
             return MuscleMode_ManualBending;
         } else if (std::holds_alternative<AngleBendingDescription>(_mode)) {
             return MuscleMode_AngleBending;
+        } else if (std::holds_alternative<AutoCrawlingDescription>(_mode)) {
+            return MuscleMode_AutoCrawling;
         }
         THROW_NOT_IMPLEMENTED();
     }
