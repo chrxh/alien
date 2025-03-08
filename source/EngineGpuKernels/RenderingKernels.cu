@@ -360,72 +360,6 @@ namespace
 /************************************************************************/
 /* Main      															*/
 /************************************************************************/
-__global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 worldSize, float zoom, float2 rectUpperLeft, float2 rectLowerRight)
-{
-    BaseMap map;
-    map.init(worldSize);
-
-    int2 outsideRectUpperLeft{-min(toInt(rectUpperLeft.x * zoom), 0), -min(toInt(rectUpperLeft.y * zoom), 0)};
-    int2 outsideRectLowerRight{
-        imageSize.x - max(toInt((rectLowerRight.x - toFloat(worldSize.x)) * zoom), 0), imageSize.y - max(toInt((rectLowerRight.y - toFloat(worldSize.y)) * zoom), 0)};
-
-    auto baseColor = colorToFloat3(cudaSimulationParameters.backgroundColor);
-    float3 spotColors[MAX_ZONES];
-    for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
-        spotColors[i] = colorToFloat3(cudaSimulationParameters.zone[i].color);
-    }
-
-    auto const partition = calcAllThreadsPartition(imageSize.x * imageSize.y * sizeof(unsigned int));
-    auto const viewWidth = max(1.0f, rectLowerRight.x - rectUpperLeft.x);
-    auto const PixelInWorldSize = viewWidth / toFloat(worldSize.x);
-    auto const gridDistance = powf(10.0f, truncf(log10f(viewWidth))) / 10.0f;
-    auto const maxGridDistance = viewWidth / 10;
-    auto const gridRemainder = (maxGridDistance - gridDistance) / maxGridDistance;
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto x = index % imageSize.x;
-        auto y = index / imageSize.x;
-        float2 worldPos = {toFloat(x) / zoom + rectUpperLeft.x, toFloat(y) / zoom + rectUpperLeft.y};
-
-        if (!cudaSimulationParameters.borderlessRendering && (x < outsideRectUpperLeft.x || y < outsideRectUpperLeft.y || x >= outsideRectLowerRight.x || y >= outsideRectLowerRight.y)) {
-            imageData[index] = 0;
-        } else {
-            auto color = SpotCalculator::calcResultingValue(map, worldPos, baseColor, spotColors);
-            drawPixel(imageData, index, color);
-        }
-
-        if (cudaSimulationParameters.gridLines) {
-            {
-                auto distanceX = Math::modulo(worldPos.x + gridDistance / 2, gridDistance) - gridDistance / 2;
-                auto distanceY = Math::modulo(worldPos.y + gridDistance / 2, gridDistance) - gridDistance / 2;
-                if (abs(distanceX) <= PixelInWorldSize * 8) {
-
-                    auto viewDistance = max(0.0f, 0.1f - abs(distanceX) * zoom / 10) * gridRemainder * 0.7f;
-                    drawAddingPixel(imageData, imageSize.x * imageSize.y, index, {viewDistance, viewDistance, viewDistance});
-                }
-                if (abs(distanceY) <= PixelInWorldSize * 8) {
-
-                    auto viewDistance = max(0.0f, 0.1f - abs(distanceY) * zoom / 10) * gridRemainder * 0.7f;
-                    drawAddingPixel(imageData, imageSize.x * imageSize.y, index, {viewDistance, viewDistance, viewDistance});
-                }
-            }
-            {
-                auto distanceX = Math::modulo(worldPos.x + gridDistance / 20, gridDistance / 10) - gridDistance / 20;
-                auto distanceY = Math::modulo(worldPos.y + gridDistance / 20, gridDistance / 10) - gridDistance / 20;
-                if (abs(distanceX) <= PixelInWorldSize * 8) {
-
-                    auto viewDistance = max(0.0f, 0.1f - abs(distanceX) * zoom / 10) * (1.0f - gridRemainder) * 0.7f;
-                    drawAddingPixel(imageData, imageSize.x * imageSize.y, index, {viewDistance, viewDistance, viewDistance});
-                }
-                if (abs(distanceY) <= PixelInWorldSize * 8) {
-
-                    auto viewDistance = max(0.0f, 0.1f - abs(distanceY) * zoom / 10) * (1.0f - gridRemainder) * 0.7f;
-                    drawAddingPixel(imageData, imageSize.x * imageSize.y, index, {viewDistance, viewDistance, viewDistance});
-                }
-            }
-        }
-    }
-}
-
 __global__ void cudaPrepareFilteringForRendering(Array<Cell*> filteredCells, Array<Particle*> filteredParticles)
 {
     filteredCells.reset();
@@ -767,3 +701,70 @@ __global__ void cudaDrawRepetition(int2 worldSize, int2 imageSize, float2 rectUp
     }
 }
 
+__global__ void cudaDrawSpotsAndGridlines(uint64_t* imageData, int2 imageSize, int2 worldSize, float zoom, float2 rectUpperLeft, float2 rectLowerRight)
+{
+    BaseMap map;
+    map.init(worldSize);
+
+    int2 outsideRectUpperLeft{-min(toInt(rectUpperLeft.x * zoom), 0), -min(toInt(rectUpperLeft.y * zoom), 0)};
+    int2 outsideRectLowerRight{
+        imageSize.x - max(toInt((rectLowerRight.x - toFloat(worldSize.x)) * zoom), 0),
+        imageSize.y - max(toInt((rectLowerRight.y - toFloat(worldSize.y)) * zoom), 0)};
+
+    auto baseColor = colorToFloat3(cudaSimulationParameters.backgroundColor);
+    float3 spotColors[MAX_ZONES];
+    for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
+        spotColors[i] = colorToFloat3(cudaSimulationParameters.zone[i].color);
+    }
+
+    auto const partition = calcAllThreadsPartition(imageSize.x * imageSize.y * sizeof(unsigned int));
+    auto const viewWidth = max(1.0f, rectLowerRight.x - rectUpperLeft.x);
+    auto const PixelInWorldSize = viewWidth / toFloat(worldSize.x);
+    auto const gridDistance = powf(10.0f, truncf(log10f(viewWidth))) / 10.0f;
+    auto const maxGridDistance = viewWidth / 10;
+    auto const gridRemainder = (maxGridDistance - gridDistance) / maxGridDistance;
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto x = index % imageSize.x;
+        auto y = index / imageSize.x;
+        float2 worldPos = {toFloat(x) / zoom + rectUpperLeft.x, toFloat(y) / zoom + rectUpperLeft.y};
+
+        if (!cudaSimulationParameters.borderlessRendering
+            && (x < outsideRectUpperLeft.x || y < outsideRectUpperLeft.y || x >= outsideRectLowerRight.x || y >= outsideRectLowerRight.y)) {
+            imageData[index] = 0;
+        } else {
+            auto color = SpotCalculator::calcResultingValue(map, worldPos, baseColor, spotColors);
+            drawPixel(imageData, index, color);
+        }
+
+        if (cudaSimulationParameters.gridLines) {
+            {
+                auto distanceX = Math::modulo(worldPos.x + gridDistance / 2, gridDistance) - gridDistance / 2;
+                auto distanceY = Math::modulo(worldPos.y + gridDistance / 2, gridDistance) - gridDistance / 2;
+                if (abs(distanceX) <= PixelInWorldSize * 8) {
+
+                    auto viewDistance = max(0.0f, 0.1f - abs(distanceX) * zoom / 10) * gridRemainder * 0.7f;
+                    drawAddingPixel(imageData, imageSize.x * imageSize.y, index, {viewDistance, viewDistance, viewDistance});
+                }
+                if (abs(distanceY) <= PixelInWorldSize * 8) {
+
+                    auto viewDistance = max(0.0f, 0.1f - abs(distanceY) * zoom / 10) * gridRemainder * 0.7f;
+                    drawAddingPixel(imageData, imageSize.x * imageSize.y, index, {viewDistance, viewDistance, viewDistance});
+                }
+            }
+            {
+                auto distanceX = Math::modulo(worldPos.x + gridDistance / 20, gridDistance / 10) - gridDistance / 20;
+                auto distanceY = Math::modulo(worldPos.y + gridDistance / 20, gridDistance / 10) - gridDistance / 20;
+                if (abs(distanceX) <= PixelInWorldSize * 8) {
+
+                    auto viewDistance = max(0.0f, 0.1f - abs(distanceX) * zoom / 10) * (1.0f - gridRemainder) * 0.7f;
+                    drawAddingPixel(imageData, imageSize.x * imageSize.y, index, {viewDistance, viewDistance, viewDistance});
+                }
+                if (abs(distanceY) <= PixelInWorldSize * 8) {
+
+                    auto viewDistance = max(0.0f, 0.1f - abs(distanceY) * zoom / 10) * (1.0f - gridRemainder) * 0.7f;
+                    drawAddingPixel(imageData, imageSize.x * imageSize.y, index, {viewDistance, viewDistance, viewDistance});
+                }
+            }
+        }
+    }
+}

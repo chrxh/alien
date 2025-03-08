@@ -38,8 +38,6 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
     _scrollbarY = std::make_shared<_SimulationScrollbar>(
         "SimScrollbarY", _SimulationScrollbar::Orientation::Vertical, _simulationFacade);
 
-    // set up vertex data (and buffer(s)) and configure vertex attributes
-    // ------------------------------------------------------------------
     float vertices[] = {
         // positions        // texture coordinates
         1.0f,  1.0f,  0.0f, 1.0f, 1.0f,  // top right
@@ -155,14 +153,14 @@ void SimulationView::draw()
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFbo);
 
         glBindFramebuffer(GL_FRAMEBUFFER, _fbo1);
-        _shader->setInt("phase", 0);
+        _shader->setInt("phase", 10);
         glBindVertexArray(_vao);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _textureSimulationId);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glBindFramebuffer(GL_FRAMEBUFFER, _fbo2);
-        _shader->setInt("phase", 1);
+        _shader->setInt("phase", 11);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _textureSimulationId);
         glActiveTexture(GL_TEXTURE1);
@@ -172,7 +170,7 @@ void SimulationView::draw()
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
-        _shader->setInt("phase", 2);
+        _shader->setInt("phase", 12);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

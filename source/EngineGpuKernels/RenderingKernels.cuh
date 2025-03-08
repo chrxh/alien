@@ -14,7 +14,7 @@
 #include <cuda_runtime_api.h>
 #include <cuda_runtime.h>
 
-__global__ void cudaDrawBackground(uint64_t* imageData, int2 imageSize, int2 worldSize, float zoom, float2 rectUpperLeft, float2 rectLowerRight);
+__global__ void cudaDrawSpotsAndGridlines(uint64_t* imageData, int2 imageSize, int2 worldSize, float zoom, float2 rectUpperLeft, float2 rectLowerRight);
 __global__ void cudaPrepareFilteringForRendering(Array<Cell*> filteredCells, Array<Particle*> filteredParticles);
 __global__ void cudaFilterCellsForRendering(
     int2 worldSize,

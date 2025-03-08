@@ -15,7 +15,7 @@ void _RenderingKernelsLauncher::drawImage(
     uint64_t* targetImage = renderingData.imageData;
     auto const& gpuSettings = settings.gpuSettings;
 
-    KERNEL_CALL(cudaDrawBackground, targetImage, imageSize, data.worldSize, zoom, rectUpperLeft, rectLowerRight);
+    KERNEL_CALL(cudaDrawSpotsAndGridlines, targetImage, imageSize, data.worldSize, zoom, rectUpperLeft, rectLowerRight);
     KERNEL_CALL_1_1(cudaPrepareFilteringForRendering, data.tempObjects.cellPointers, data.tempObjects.particlePointers);
     KERNEL_CALL(cudaFilterCellsForRendering, data.worldSize, rectUpperLeft, data.objects.cellPointers, data.tempObjects.cellPointers, imageSize, zoom);
     KERNEL_CALL(cudaFilterParticlesForRendering, data.worldSize, rectUpperLeft, data.objects.particlePointers, data.tempObjects.particlePointers, imageSize, zoom);
