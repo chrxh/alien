@@ -608,10 +608,72 @@ TEST_P(MuscleTests_AutoCrawling_New, muscleWithTwoConnections)
 
         ASSERT_EQ(3, actualData._cells.size());
 
+        EXPECT_TRUE(approxCompare(180.0f, actualMuscleCell._connections.at(0)._angleFromPrevious));
+        EXPECT_TRUE(approxCompare(180.0f, actualMuscleCell._connections.at(1)._angleFromPrevious));
         EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell._connections.at(1)._distance));
         EXPECT_TRUE(approxCompare(1.0f, actualCell3._connections.at(0)._distance));
 
         auto distance = actualMuscleCell._connections.at(0)._distance;
+        minDistance = std::min(minDistance, distance);
+        maxDistance = std::max(maxDistance, distance);
+        if (i == 0) {
+            if (channel0 == Channel0::Zero) {
+                EXPECT_TRUE(distance < 1.0f + NEAR_ZERO);
+                EXPECT_TRUE(distance > 1.0f - NEAR_ZERO);
+            } else if (channel0 == Channel0::Positive) {
+                EXPECT_TRUE(distance < 1.0f - NEAR_ZERO);
+            } else {
+                EXPECT_TRUE(distance > 1.0f + NEAR_ZERO);
+            }
+        }
+    }
+
+    if (channel0 == Channel0::Zero) {
+        EXPECT_TRUE(minDistance < 1.0f + NEAR_ZERO);
+        EXPECT_TRUE(minDistance > 1.0f - NEAR_ZERO);
+        EXPECT_TRUE(maxDistance < 1.0f + NEAR_ZERO);
+        EXPECT_TRUE(maxDistance > 1.0f - NEAR_ZERO);
+    } else {
+        EXPECT_TRUE(minDistance < 1.0f - MaxDistanceDeviation + NEAR_ZERO);
+        EXPECT_TRUE(minDistance > 1.0f - MaxDistanceDeviation - NEAR_ZERO);
+        EXPECT_TRUE(maxDistance > 1.0f + MaxDistanceDeviation - NEAR_ZERO);
+        EXPECT_TRUE(maxDistance < 1.0f + MaxDistanceDeviation + NEAR_ZERO);
+    }
+}
+
+TEST_P(MuscleTests_AutoCrawling_New, muscleWithOneConnection)
+{
+    auto constexpr MaxDistanceDeviation = 0.8f;
+
+    auto channel0 = GetParam();
+
+    DataDescription data;
+    data.addCells({
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(OscillatorDescription().autoTriggerInterval(10)),
+        CellDescription()
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(MuscleDescription().mode(AutoCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation)))
+            .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0))),
+    });
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+
+    auto minDistance = 1.0f;
+    auto maxDistance = 1.0f;
+    for (int i = 0; i < 200; ++i) {
+        _simulationFacade->calcTimesteps(10);
+
+        auto actualData = _simulationFacade->getSimulationData();
+        auto actualMuscleCell = getCell(actualData, 2);
+        auto actualCell1 = getCell(actualData, 1);
+
+        ASSERT_EQ(2, actualData._cells.size());
+
+        auto distance = actualMuscleCell._connections.at(0)._distance;
+        EXPECT_TRUE(approxCompare(distance, actualCell1._connections.at(0)._distance));
+
         minDistance = std::min(minDistance, distance);
         maxDistance = std::max(maxDistance, distance);
         if (i == 0) {
