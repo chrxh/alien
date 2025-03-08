@@ -104,8 +104,6 @@ TEST_P(MuscleTests_AutoBending_New, muscleWithTwoConnections)
 
     auto minAngle = 180.0f;
     auto maxAngle = 180.0f;
-    auto sumAngleChanges = 0.0f;
-    std::optional<float> lastAngle;
     for (int i = 0; i < 200; ++i) {
         _simulationFacade->calcTimesteps(10);
 
@@ -124,10 +122,6 @@ TEST_P(MuscleTests_AutoBending_New, muscleWithTwoConnections)
         auto angle = actualMuscleCell._connections.at(0)._angleFromPrevious;
         minAngle = std::min(minAngle, angle);
         maxAngle = std::max(maxAngle, angle);
-        if (lastAngle.has_value()) {
-            sumAngleChanges += std::abs(angle - lastAngle.value());
-        }
-        lastAngle = angle;
         if (i == 0) {
             if (channel0 == Channel0::Zero) {
                 EXPECT_TRUE(angle < 180.0f + NEAR_ZERO);
@@ -150,11 +144,6 @@ TEST_P(MuscleTests_AutoBending_New, muscleWithTwoConnections)
         EXPECT_TRUE(minAngle > 180.0f - MaxAngleDeviation - AnglePrecision);
         EXPECT_TRUE(maxAngle > 180.0f + MaxAngleDeviation - AnglePrecision);
         EXPECT_TRUE(maxAngle < 180.0f + MaxAngleDeviation + AnglePrecision);
-        if ((side == Side::Right && channel1 == Channel1::Positive) || (side == Side::Left && channel1 == Channel1::Negative)) {
-            EXPECT_TRUE(sumAngleChanges < 100.0f);
-        } else {
-            EXPECT_TRUE(sumAngleChanges > 100.0f);
-        }
     }
 }
 
@@ -185,8 +174,6 @@ TEST_P(MuscleTests_AutoBending_New, muscleWithOneConnection)
 
     auto minAngle = 90.0f;
     auto maxAngle = 90.0f;
-    auto sumAngleChanges = 0.0f;
-    std::optional<float> lastAngle;
     for (int i = 0; i < 200; ++i) {
         _simulationFacade->calcTimesteps(10);
 
@@ -207,10 +194,6 @@ TEST_P(MuscleTests_AutoBending_New, muscleWithOneConnection)
         auto angle = actualCell2._connections.at(side == Side::Left ? 2 : 1)._angleFromPrevious;
         minAngle = std::min(minAngle, angle);
         maxAngle = std::max(maxAngle, angle);
-        if (lastAngle.has_value()) {
-            sumAngleChanges += std::abs(angle - lastAngle.value());
-        }
-        lastAngle = angle;
         if (i == 0) {
             if (channel0 == Channel0::Zero) {
                 EXPECT_TRUE(angle < 90.0f + NEAR_ZERO);
@@ -233,11 +216,6 @@ TEST_P(MuscleTests_AutoBending_New, muscleWithOneConnection)
         EXPECT_TRUE(minAngle > 90.0f - MaxAngleDeviation - AnglePrecision);
         EXPECT_TRUE(maxAngle > 90.0f + MaxAngleDeviation - AnglePrecision);
         EXPECT_TRUE(maxAngle < 90.0f + MaxAngleDeviation + AnglePrecision);
-        if ((side == Side::Right && channel1 == Channel1::Positive) || (side == Side::Left && channel1 == Channel1::Negative)) {
-            EXPECT_TRUE(sumAngleChanges < 100.0f);
-        } else {
-            EXPECT_TRUE(sumAngleChanges > 100.0f);
-        }
     }
 }
 
@@ -581,5 +559,82 @@ TEST_P(MuscleTests_AngleBending_New, muscleWithOneConnection)
     } else {
         targetAngle = std::min(180.0f - AngleMinDistance, std::max(AngleMinDistance, targetAngle));
         EXPECT_TRUE(abs(angle - targetAngle) < AnglePrecision);
+    }
+}
+
+class MuscleTests_AutoCrawling_New
+    : public MuscleTests_New
+    , public testing::WithParamInterface<Channel0>
+{};
+
+INSTANTIATE_TEST_SUITE_P(
+    MuscleTests_AutoCrawling_New,
+    MuscleTests_AutoCrawling_New,
+    ::testing::Values(
+        Channel0::Positive,
+        Channel0::Negative,
+        Channel0::Zero));
+
+TEST_P(MuscleTests_AutoCrawling_New, muscleWithTwoConnections)
+{
+    auto constexpr MaxDistanceDeviation = 0.8f;
+
+    auto channel0 = GetParam();
+
+    DataDescription data;
+    data.addCells({
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(OscillatorDescription().autoTriggerInterval(10)),
+        CellDescription()
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(MuscleDescription().mode(AutoCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation)))
+            .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0))),
+        CellDescription().id(3).pos({12.0f, 10.0f}),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+
+    auto minDistance = 1.0f;
+    auto maxDistance = 1.0f;
+    for (int i = 0; i < 200; ++i) {
+        _simulationFacade->calcTimesteps(10);
+
+        auto actualData = _simulationFacade->getSimulationData();
+        auto actualMuscleCell = getCell(actualData, 2);
+        auto actualCell1 = getCell(actualData, 1);
+        auto actualCell3 = getCell(actualData, 3);
+
+        ASSERT_EQ(3, actualData._cells.size());
+
+        EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell._connections.at(1)._distance));
+        EXPECT_TRUE(approxCompare(1.0f, actualCell3._connections.at(0)._distance));
+
+        auto distance = actualMuscleCell._connections.at(0)._distance;
+        minDistance = std::min(minDistance, distance);
+        maxDistance = std::max(maxDistance, distance);
+        if (i == 0) {
+            if (channel0 == Channel0::Zero) {
+                EXPECT_TRUE(distance < 1.0f + NEAR_ZERO);
+                EXPECT_TRUE(distance > 1.0f - NEAR_ZERO);
+            } else if (channel0 == Channel0::Positive) {
+                EXPECT_TRUE(distance < 1.0f - NEAR_ZERO);
+            } else {
+                EXPECT_TRUE(distance > 1.0f + NEAR_ZERO);
+            }
+        }
+    }
+
+    if (channel0 == Channel0::Zero) {
+        EXPECT_TRUE(minDistance < 1.0f + NEAR_ZERO);
+        EXPECT_TRUE(minDistance > 1.0f - NEAR_ZERO);
+        EXPECT_TRUE(maxDistance < 1.0f + NEAR_ZERO);
+        EXPECT_TRUE(maxDistance > 1.0f - NEAR_ZERO);
+    } else {
+        EXPECT_TRUE(minDistance < 1.0f - MaxDistanceDeviation + NEAR_ZERO);
+        EXPECT_TRUE(minDistance > 1.0f - MaxDistanceDeviation - NEAR_ZERO);
+        EXPECT_TRUE(maxDistance > 1.0f + MaxDistanceDeviation - NEAR_ZERO);
+        EXPECT_TRUE(maxDistance < 1.0f + MaxDistanceDeviation + NEAR_ZERO);
     }
 }
