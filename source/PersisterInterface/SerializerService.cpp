@@ -89,6 +89,9 @@ namespace
     auto constexpr Id_MuscleModeGenome_AutoCrawling_MaxDistanceDeviation = 0;
     auto constexpr Id_MuscleModeGenome_AutoCrawling_FrontBackVelRatio = 1;
 
+    auto constexpr Id_MuscleModeGenome_ManualCrawling_MaxDistanceDeviation = 0;
+    auto constexpr Id_MuscleModeGenome_ManualCrawling_FrontBackVelRatio = 1;
+
     auto constexpr Id_InjectorGenome_Mode = 0;
 
     auto constexpr Id_AttackerGenome_Mode = 0;
@@ -193,6 +196,13 @@ namespace
     auto constexpr Id_MuscleMode_AutoCrawling_ActivationCountdown = 5;
     auto constexpr Id_MuscleMode_AutoCrawling_LastActualDistance = 6;
     auto constexpr Id_MuscleMode_AutoCrawling_ImpulseAlreadyApplied = 7;
+
+    auto constexpr Id_MuscleMode_ManualCrawling_MaxAngleDeviation = 0;
+    auto constexpr Id_MuscleMode_ManualCrawling_FrontBackVelRatio = 1;
+    auto constexpr Id_MuscleMode_ManualCrawling_InitialDistance = 2;
+    auto constexpr Id_MuscleMode_ManualCrawling_LastActualDistance = 3;
+    auto constexpr Id_MuscleMode_ManualCrawling_LastDistanceDelta = 4;
+    auto constexpr Id_MuscleMode_ManualCrawling_ImpulseAlreadyApplied = 5;
 
     auto constexpr Id_Injector_Mode = 0;
     auto constexpr Id_Injector_Counter = 1;
@@ -472,6 +482,17 @@ namespace cereal
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AutoCrawlingGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, ManualCrawlingGenomeDescription& data)
+    {
+        ManualCrawlingGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_MuscleModeGenome_ManualCrawling_MaxDistanceDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
+        loadSave(task, auxiliaries, Id_MuscleModeGenome_ManualCrawling_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(ManualCrawlingGenomeDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, MuscleGenomeDescription& data)
@@ -789,6 +810,21 @@ namespace cereal
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AutoCrawlingDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, ManualCrawlingDescription& data)
+    {
+        ManualCrawlingDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_MuscleMode_ManualCrawling_MaxAngleDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
+        loadSave(task, auxiliaries, Id_MuscleMode_ManualCrawling_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
+        loadSave(task, auxiliaries, Id_MuscleMode_ManualCrawling_InitialDistance, data._initialDistance, defaultObject._initialDistance);
+        loadSave(task, auxiliaries, Id_MuscleMode_ManualCrawling_LastActualDistance, data._lastActualDistance, defaultObject._lastActualDistance);
+        loadSave(task, auxiliaries, Id_MuscleMode_ManualCrawling_LastDistanceDelta, data._lastDistanceDelta, defaultObject._lastDistanceDelta);
+        loadSave(task, auxiliaries, Id_MuscleMode_ManualCrawling_ImpulseAlreadyApplied, data._impulseAlreadyApplied, defaultObject._impulseAlreadyApplied);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(ManualCrawlingDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, MuscleDescription& data)

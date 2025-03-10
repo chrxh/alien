@@ -818,6 +818,14 @@ ConstructorProcessor::constructCellIntern(
             result->cellTypeData.muscle.modeData.autoCrawling.activation = 0;
             result->cellTypeData.muscle.modeData.autoCrawling.activationCountdown = 0;
             result->cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied = false;
+        } else if (result->cellTypeData.muscle.mode == MuscleMode_ManualCrawling) {
+            result->cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation =
+                min(1.0f, max(0.0f, GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition)));
+            result->cellTypeData.muscle.modeData.manualCrawling.frontBackVelRatio = abs(GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition));
+            result->cellTypeData.muscle.modeData.manualCrawling.initialDistance = 0;
+            result->cellTypeData.muscle.modeData.manualCrawling.lastActualDistance = 0;
+            result->cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta = 0;
+            result->cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied = false;
         }
         result->cellTypeData.muscle.lastMovementX = 0;
         result->cellTypeData.muscle.lastMovementY = 0;

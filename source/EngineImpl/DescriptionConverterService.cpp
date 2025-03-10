@@ -513,6 +513,15 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
             crawling._activationCountdown = cellTO.cellTypeData.muscle.modeData.autoCrawling.activationCountdown;
             crawling._impulseAlreadyApplied = cellTO.cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied;
             muscle._mode = crawling;
+        } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_ManualCrawling) {
+            ManualCrawlingDescription crawling;
+            crawling._maxDistanceDeviation = cellTO.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation;
+            crawling._frontBackVelRatio = cellTO.cellTypeData.muscle.modeData.manualCrawling.frontBackVelRatio;
+            crawling._initialDistance = cellTO.cellTypeData.muscle.modeData.manualCrawling.initialDistance;
+            crawling._lastActualDistance = cellTO.cellTypeData.muscle.modeData.manualCrawling.lastActualDistance;
+            crawling._lastDistanceDelta = cellTO.cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta;
+            crawling._impulseAlreadyApplied = cellTO.cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied;
+            muscle._mode = crawling;
         }
 
         muscle._lastMovementX = cellTO.cellTypeData.muscle.lastMovementX;
@@ -702,6 +711,15 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
             crawlingTO.forward = crawlingDesc._forward;
             crawlingTO.activation = crawlingDesc._activation;
             crawlingTO.activationCountdown = crawlingDesc._activationCountdown;
+            crawlingTO.impulseAlreadyApplied = crawlingDesc._impulseAlreadyApplied;
+        } else if (muscleTO.mode == MuscleMode_ManualCrawling) {
+            auto const& crawlingDesc = std::get<ManualCrawlingDescription>(muscleDesc._mode);
+            ManualCrawlingTO& crawlingTO = muscleTO.modeData.manualCrawling;
+            crawlingTO.maxDistanceDeviation = crawlingDesc._maxDistanceDeviation;
+            crawlingTO.frontBackVelRatio = crawlingDesc._frontBackVelRatio;
+            crawlingTO.initialDistance = crawlingDesc._initialDistance;
+            crawlingTO.lastActualDistance = crawlingDesc._lastActualDistance;
+            crawlingTO.lastDistanceDelta = crawlingDesc._lastDistanceDelta;
             crawlingTO.impulseAlreadyApplied = crawlingDesc._impulseAlreadyApplied;
         }
         muscleTO.lastMovementX = muscleDesc._lastMovementX;
