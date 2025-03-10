@@ -516,7 +516,7 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
         auto minDistance = min(max(crawling.initialDistance * (1.0f - maxDistanceDeviation), MinDistance), crawling.initialDistance);
 
         // Calc and apply distance delta
-        auto distanceDelta = activation > 0 ? -(0.05f + crawling.frontBackVelRatio) : 1.05f - crawling.frontBackVelRatio;
+        auto distanceDelta = activation > 0 ? -(0.05f + crawling.frontBackVelRatio) : -(1.05f - crawling.frontBackVelRatio);
         distanceDelta *= 0.25f * activation;
         if (cell->connections[0].distance + distanceDelta > maxDistance) {
             distanceDelta = maxDistance - cell->connections[0].distance;
