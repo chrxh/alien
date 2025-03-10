@@ -357,7 +357,22 @@ struct AutoCrawlingDescription
     MEMBER_DECLARATION(AutoCrawlingDescription, int, activationCountdown, 0);
     MEMBER_DECLARATION(AutoCrawlingDescription, bool, impulseAlreadyApplied, false);
 };
-using MuscleModeDescription = std::variant<AutoBendingDescription, ManualBendingDescription, AngleBendingDescription, AutoCrawlingDescription>;
+
+struct ManualCrawlingDescription
+{
+    auto operator<=>(ManualCrawlingDescription const&) const = default;
+
+    // Fixed data
+    MEMBER_DECLARATION(ManualCrawlingDescription, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
+    MEMBER_DECLARATION(ManualCrawlingDescription, float, frontBackVelRatio, 0.2f);   // Between 0 and 1
+
+    // Process data
+    MEMBER_DECLARATION(ManualCrawlingDescription, float, initialDistance, 0.0f);
+    MEMBER_DECLARATION(ManualCrawlingDescription, float, lastActualDistance, 0.0f);
+    MEMBER_DECLARATION(ManualCrawlingDescription, float, lastDistanceDelta, 0.0f);
+    MEMBER_DECLARATION(ManualCrawlingDescription, bool, impulseAlreadyApplied, false);
+};
+using MuscleModeDescription = std::variant<AutoBendingDescription, ManualBendingDescription, AngleBendingDescription, AutoCrawlingDescription, ManualCrawlingDescription>;
 
 struct MuscleDescription
 {
@@ -373,6 +388,8 @@ struct MuscleDescription
             return MuscleMode_AngleBending;
         } else if (std::holds_alternative<AutoCrawlingDescription>(_mode)) {
             return MuscleMode_AutoCrawling;
+        } else if (std::holds_alternative<ManualCrawlingDescription>(_mode)) {
+            return MuscleMode_ManualCrawling;
         }
         THROW_NOT_IMPLEMENTED();
     }

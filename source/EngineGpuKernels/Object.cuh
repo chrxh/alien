@@ -201,12 +201,26 @@ struct AutoCrawling
     bool impulseAlreadyApplied;
 };
 
+struct ManualCrawling
+{
+    // Fixed data
+    float maxDistanceDeviation;  // Between 0 and 1
+    float frontBackVelRatio;     // Between 0 and 1
+
+    // Process data
+    float initialDistance;
+    float lastActualDistance;
+    float lastDistanceDelta;
+    bool impulseAlreadyApplied;
+};
+
 union MuscleModeData
 {
     AutoBending autoBending;
     ManualBending manualBending;
     AngleBending angleBending;
     AutoCrawling autoCrawling;
+    ManualCrawling manualCrawling;
 };
 
 struct MuscleType

@@ -85,13 +85,14 @@ namespace Channels
     auto constexpr MuscleAngle = 1;
 }
 
-using MuscleMode = int;
+using MuscleMode = uint8_t;
 enum MuscleMode_
 {
     MuscleMode_AutoBending,
     MuscleMode_ManualBending,
     MuscleMode_AngleBending,
     MuscleMode_AutoCrawling,
+    MuscleMode_ManualCrawling,
     MuscleMode_Count
 };
 

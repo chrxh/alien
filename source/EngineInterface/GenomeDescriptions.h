@@ -217,8 +217,19 @@ struct AutoCrawlingGenomeDescription
     MEMBER_DECLARATION(AutoCrawlingGenomeDescription, float, frontBackVelRatio, 0.2f);      // Between 0 and 1
 };
 
-using MuscleModeGenomeDescription =
-    std::variant<AutoBendingGenomeDescription, ManualBendingGenomeDescription, AngleBendingGenomeDescription, AutoCrawlingGenomeDescription>;
+struct ManualCrawlingGenomeDescription
+{
+    auto operator<=>(ManualCrawlingGenomeDescription const&) const = default;
+
+    MEMBER_DECLARATION(ManualCrawlingGenomeDescription, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
+    MEMBER_DECLARATION(ManualCrawlingGenomeDescription, float, frontBackVelRatio, 0.2f);     // Between 0 and 1
+};
+using MuscleModeGenomeDescription = std::variant<
+    AutoBendingGenomeDescription,
+    ManualBendingGenomeDescription,
+    AngleBendingGenomeDescription,
+    AutoCrawlingGenomeDescription,
+    ManualCrawlingGenomeDescription>;
 
 struct MuscleGenomeDescription
 {
@@ -234,6 +245,8 @@ struct MuscleGenomeDescription
             return MuscleMode_AngleBending;
         } else if (std::holds_alternative<AutoCrawlingGenomeDescription>(_mode)) {
             return MuscleMode_AutoCrawling;
+        } else if (std::holds_alternative<ManualCrawlingGenomeDescription>(_mode)) {
+            return MuscleMode_ManualCrawling;
         }
         THROW_NOT_IMPLEMENTED();
     }

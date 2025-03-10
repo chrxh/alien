@@ -253,6 +253,10 @@ std::vector<uint8_t> GenomeDescriptionConverterService::convertDescriptionToByte
                 auto const& crawling = std::get<AutoCrawlingGenomeDescription>(muscle._mode);
                 writeFloat(result, crawling._maxDistanceDeviation);
                 writeFloat(result, crawling._frontBackVelRatio);
+            } else if (mode == MuscleMode_ManualCrawling) {
+                auto const& crawling = std::get<ManualCrawlingGenomeDescription>(muscle._mode);
+                writeFloat(result, crawling._maxDistanceDeviation);
+                writeFloat(result, crawling._frontBackVelRatio);
             }
         } break;
         case CellType_Defender: {
@@ -393,6 +397,11 @@ namespace
                     muscle._mode = bending;
                 } else if (mode == MuscleMode_AutoCrawling) {
                     AutoCrawlingGenomeDescription crawling;
+                    crawling._maxDistanceDeviation = readFloat(data, bytePosition);
+                    crawling._frontBackVelRatio = readFloat(data, bytePosition);
+                    muscle._mode = crawling;
+                } else if (mode == MuscleMode_ManualCrawling) {
+                    ManualCrawlingGenomeDescription crawling;
                     crawling._maxDistanceDeviation = readFloat(data, bytePosition);
                     crawling._frontBackVelRatio = readFloat(data, bytePosition);
                     muscle._mode = crawling;

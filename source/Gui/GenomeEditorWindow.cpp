@@ -732,11 +732,11 @@ void GenomeEditorWindow::processNode(
         case CellType_Muscle: {
             auto& muscle = std::get<MuscleGenomeDescription>(cell._cellTypeData);
             table.next();
-            auto mode = muscle.getMode();
+            auto mode = toInt(muscle.getMode());
             if (AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Mode")
-                    .values({"Auto bending", "Manual bending", "Angle bending", "Auto crawling"})
+                        .values({"Auto bending", "Manual bending", "Angle bending", "Auto crawling", "Manual crawling"})
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::GenomeMuscleModeTooltip),
                 mode)) {
@@ -748,6 +748,8 @@ void GenomeEditorWindow::processNode(
                     muscle.mode(AngleBendingGenomeDescription());
                 } else if (mode == MuscleMode_AutoCrawling) {
                     muscle.mode(AutoCrawlingGenomeDescription());
+                } else if (mode == MuscleMode_ManualCrawling) {
+                    muscle.mode(ManualCrawlingGenomeDescription());
                 }
             }
             if (mode == MuscleMode_AutoBending) {
@@ -785,6 +787,16 @@ void GenomeEditorWindow::processNode(
                     bending._frontBackVelRatio);
             } else if (mode == MuscleMode_AutoCrawling) {
                 auto& crawling = std::get<AutoCrawlingGenomeDescription>(muscle._mode);
+                table.next();
+                AlienImGui::InputFloat(
+                    AlienImGui::InputFloatParameters().name("Max distance deviation").format("%.2f").step(0.05f).textWidth(ContentHeaderTextWidth),
+                    crawling._maxDistanceDeviation);
+                table.next();
+                AlienImGui::InputFloat(
+                    AlienImGui::InputFloatParameters().name("Front back ratio").format("%.2f").step(0.05f).textWidth(ContentHeaderTextWidth),
+                    crawling._frontBackVelRatio);
+            } else if (mode == MuscleMode_ManualCrawling) {
+                auto& crawling = std::get<ManualCrawlingGenomeDescription>(muscle._mode);
                 table.next();
                 AlienImGui::InputFloat(
                     AlienImGui::InputFloatParameters().name("Max distance deviation").format("%.2f").step(0.05f).textWidth(ContentHeaderTextWidth),
