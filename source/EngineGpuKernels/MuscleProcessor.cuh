@@ -257,7 +257,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
         bending.lastAngleDelta = 0;
     }
 
-    // Process auto bending
+    // Process manual bending
     if (SignalProcessor::isManuallyTriggered(data, cell)) {
 
         auto bendingInfo = getBendingInfo(data, cell);
@@ -357,7 +357,7 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
         bending.initialAngle = bendingInfo.connection->angleFromPrevious;
     }
 
-    // Process auto bending
+    // Process angle bending
     if (SignalProcessor::isManuallyTriggered(data, cell)) {
 
         auto bendingInfo = getBendingInfo(data, cell);
@@ -422,7 +422,7 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
         crawling.impulseAlreadyApplied = true;
     }
 
-    // Process auto bending
+    // Process auto crawling
     if (SignalProcessor::isAutoTriggered(data, cell, AutoTriggerInterval)) {
 
         auto actualDistance = data.cellMap.getDistance(cell->connections[0].cell->pos, cell->pos);
@@ -474,6 +474,25 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
                     actualDistanceDelta *= -powf(1.0f - crawling.frontBackVelRatio, 4.0f);
                 }
                 auto direction = Math::normalized(data.cellMap.getCorrectedDirection(cell->connections[0].cell->pos - cell->pos));
+
+                // Forward movement?
+                if (actualDistanceDelta > 0) {
+                    if (cell->angleToFront > 0) {
+                        actualDistanceDelta = abs(actualDistanceDelta);
+                    }
+                    else {
+                        actualDistanceDelta = -abs(actualDistanceDelta);
+                    }
+                }
+
+                // backward movement?
+                else {
+                    if (cell->angleToFront > 0) {
+                        actualDistanceDelta = -abs(actualDistanceDelta);
+                    } else {
+                        actualDistanceDelta = abs(actualDistanceDelta);
+                    }
+                }
                 auto acceleration = direction * actualDistanceDelta * cudaSimulationParameters.cellTypeMuscleCrawlingAcceleration[cell->color] * 20;
                 atomicAdd(&cell->vel.x, min(AccelerationLimit, max(-AccelerationLimit, acceleration.x)));
                 atomicAdd(&cell->vel.y, min(AccelerationLimit, max(-AccelerationLimit, acceleration.y)));
@@ -504,10 +523,10 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
         crawling.impulseAlreadyApplied = true;
     }
 
-    // Process auto bending
+    // Process manual crawling
     if (SignalProcessor::isManuallyTriggered(data, cell)) {
 
-        //auto actualDistance = data.cellMap.getDistance(cell->connections[0].cell->pos, cell->pos);
+        auto actualDistance = data.cellMap.getDistance(cell->connections[0].cell->pos, cell->pos);
         auto activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleTrigger]));
 
         // Calc min and max distance
@@ -539,51 +558,44 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
         crawling.lastDistanceDelta = distanceDelta;
 
         // Apply impulse
-        //auto actualAngleDelta = actualAngle - crawling.lastActualAngle;
-        //if (!crawling.impulseAlreadyApplied) {
-        //    if ((angleDelta < 0 && actualAngle < crawling.initialAngle && bendingInfo.connection->angleFromPrevious < crawling.initialAngle)
-        //        || (angleDelta > 0 && actualAngle > crawling.initialAngle && bendingInfo.connection->angleFromPrevious > crawling.initialAngle)) {
-        //        crawling.impulseAlreadyApplied = true;
+        auto actualDistanceDelta = actualDistance - crawling.lastActualDistance;
+        if (!crawling.impulseAlreadyApplied) {
+            if ((distanceDelta < 0 && actualDistance < crawling.initialDistance && cell->connections[0].distance < crawling.initialDistance)
+                || (distanceDelta > 0 && actualDistance > crawling.initialDistance && cell->connections[0].distance > crawling.initialDistance)) {
+                crawling.impulseAlreadyApplied = true;
 
-        //        auto direction = Math::normalized(data.cellMap.getCorrectedDirection(bendingInfo.connection->cell->pos - bendingInfo.pivotCell->pos));
-        //        if (actualAngleDelta < 0) {
-        //            Math::rotateQuarterClockwise(direction);
-        //        } else {
-        //            Math::rotateQuarterCounterClockwise(direction);
-        //        }
-        //        actualAngleDelta = min(5.0f, abs(actualAngleDelta));
-        //        if (activation > 0) {
-        //            actualAngleDelta *= powf(crawling.frontBackVelRatio, 4.0f);
-        //        } else {
-        //            actualAngleDelta *= powf(1.0f - crawling.frontBackVelRatio, 4.0f);
-        //        }
-        //        auto acceleration = direction * actualAngleDelta * cudaSimulationParameters.cellTypeMuscleBendingAcceleration[cell->color] / 9.0f;
+                actualDistanceDelta = min(5.0f, abs(actualDistanceDelta));
+                if (activation > 0) {
+                    actualDistanceDelta *= powf(crawling.frontBackVelRatio, 4.0f);
+                } else {
+                    actualDistanceDelta *= -powf(1.0f - crawling.frontBackVelRatio, 4.0f);
+                }
+                auto direction = Math::normalized(data.cellMap.getCorrectedDirection(cell->connections[0].cell->pos - cell->pos));
 
-        //        if (cell->numConnections == 2) {
-        //            int chainLength = 0;
-        //            Cell* connectedCell = cell;
-        //            while (connectedCell->numConnections == 2 && chainLength < 20) {
-        //                connectedCell = connectedCell->connections[1].cell;
-        //                ++chainLength;
-        //            }
-        //            connectedCell = cell;
-        //            float2 accPerCell{
-        //                min(AccelerationLimit, max(-AccelerationLimit, acceleration.x / chainLength)),
-        //                min(AccelerationLimit, max(-AccelerationLimit, acceleration.y / chainLength))};
-        //            while (connectedCell->numConnections == 2 && chainLength < 20) {
-        //                connectedCell = connectedCell->connections[1].cell;
+                // Forward movement?
+                if (actualDistanceDelta > 0) {
+                    if (cell->angleToFront > 0) {
+                        actualDistanceDelta = abs(actualDistanceDelta);
+                    } else {
+                        actualDistanceDelta = -abs(actualDistanceDelta);
+                    }
+                }
 
-        //                atomicAdd(&connectedCell->vel.x, accPerCell.x);
-        //                atomicAdd(&connectedCell->vel.y, accPerCell.y);
-        //            }
-        //        } else {
-        //            atomicAdd(&bendingInfo.pivotCell->vel.x, min(AccelerationLimit, max(-AccelerationLimit, acceleration.x)));
-        //            atomicAdd(&bendingInfo.pivotCell->vel.y, min(AccelerationLimit, max(-AccelerationLimit, acceleration.y)));
-        //        }
-        //    }
-        //}
+                // backward movement?
+                else {
+                    if (cell->angleToFront > 0) {
+                        actualDistanceDelta = -abs(actualDistanceDelta);
+                    } else {
+                        actualDistanceDelta = abs(actualDistanceDelta);
+                    }
+                }
+                auto acceleration = direction * actualDistanceDelta * cudaSimulationParameters.cellTypeMuscleCrawlingAcceleration[cell->color] * 20;
+                atomicAdd(&cell->vel.x, min(AccelerationLimit, max(-AccelerationLimit, acceleration.x)));
+                atomicAdd(&cell->vel.y, min(AccelerationLimit, max(-AccelerationLimit, acceleration.y)));
+            }
+        }
 
-        //crawling.lastActualAngle = actualAngle;
+        crawling.lastActualDistance = actualDistance;
         statistics.incNumMuscleActivities(cell->color);
         radiate(data, cell);
     }
