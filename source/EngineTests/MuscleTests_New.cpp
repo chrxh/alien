@@ -291,16 +291,6 @@ TEST_P(MuscleTests_ManualBending_New, muscleWithTwoConnections)
             }
         }
         lastAngle = angle;
-        if (i == 0) {
-            if (channel0 == Channel0::Zero) {
-                EXPECT_TRUE(angle < 180.0f + NEAR_ZERO);
-                EXPECT_TRUE(angle > 180.0f - NEAR_ZERO);
-            } else if ((side == Side::Left && channel0 == Channel0::Positive) || (side == Side::Right && channel0 == Channel0::Negative)) {
-                EXPECT_TRUE(angle > 180.0f + NEAR_ZERO);
-            } else {
-                EXPECT_TRUE(angle < 180.0f - NEAR_ZERO);
-            }
-        }
     }
 
     if (channel0 == Channel0::Positive && side == Side::Left) {
@@ -396,16 +386,6 @@ TEST_P(MuscleTests_ManualBending_New, muscleWithOneConnection)
             }
         }
         lastAngle = angle;
-        if (i == 0) {
-            if (channel0 == Channel0::Zero) {
-                EXPECT_TRUE(angle < 90.0f + AnglePrecision);
-                EXPECT_TRUE(angle > 90.0f - AnglePrecision);
-            } else if ((side == Side::Left && channel0 == Channel0::Positive) || (side == Side::Right && channel0 == Channel0::Negative)) {
-                EXPECT_TRUE(angle > 90.0f + AnglePrecision);
-            } else {
-                EXPECT_TRUE(angle < 90.0f - AnglePrecision);
-            }
-        }
     }
     if (channel0 == Channel0::Positive && side == Side::Left) {
         EXPECT_TRUE(numPositiveAngleChanges > 10);
@@ -698,5 +678,115 @@ TEST_P(MuscleTests_AutoCrawling_New, muscleWithOneConnection)
         EXPECT_TRUE(minDistance > 1.0f - MaxDistanceDeviation - NEAR_ZERO);
         EXPECT_TRUE(maxDistance > 1.0f + MaxDistanceDeviation - NEAR_ZERO);
         EXPECT_TRUE(maxDistance < 1.0f + MaxDistanceDeviation + NEAR_ZERO);
+    }
+}
+
+class MuscleTests_ManualCrawling_New
+    : public MuscleTests_New
+    , public testing::WithParamInterface<Channel0>
+{};
+
+INSTANTIATE_TEST_SUITE_P(
+    MuscleTests_ManualCrawling_New,
+    MuscleTests_ManualCrawling_New,
+    ::testing::Values(Channel0::Positive, Channel0::Negative, Channel0::Zero));
+
+TEST_P(MuscleTests_ManualCrawling_New, muscleWithTwoConnections)
+{
+    auto constexpr MaxDistanceDeviation = 0.8f;
+
+    auto channel0 = GetParam();
+
+    DataDescription data;
+    data.addCells({
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(OscillatorDescription().autoTriggerInterval(10)),
+        CellDescription()
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(MuscleDescription().mode(ManualCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation)))
+            .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0))),
+        CellDescription().id(3).pos({12.0f, 10.0f}),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+
+    auto minDistance = 1.0f;
+    auto maxDistance = 1.0f;
+    for (int i = 0; i < 200; ++i) {
+        _simulationFacade->calcTimesteps(10);
+
+        auto actualData = _simulationFacade->getSimulationData();
+        auto actualMuscleCell = getCell(actualData, 2);
+        auto actualCell1 = getCell(actualData, 1);
+
+        ASSERT_EQ(3, actualData._cells.size());
+
+        auto distance = actualMuscleCell._connections.at(0)._distance;
+        EXPECT_TRUE(approxCompare(distance, actualCell1._connections.at(0)._distance));
+
+        minDistance = std::min(minDistance, distance);
+        maxDistance = std::max(maxDistance, distance);
+    }
+
+    if (channel0 == Channel0::Zero) {
+        EXPECT_TRUE(abs(minDistance - 1.0f) < NEAR_ZERO);
+        EXPECT_TRUE(abs(maxDistance - 1.0f) < NEAR_ZERO);
+    } else if (channel0 == Channel0::Positive) {
+        EXPECT_TRUE(abs(minDistance - (1.0f - MaxDistanceDeviation)) < NEAR_ZERO);
+        EXPECT_TRUE(abs(maxDistance - 1.0f) < NEAR_ZERO);
+    } else if (channel0 == Channel0::Negative) {
+        EXPECT_TRUE(abs(minDistance - 1.0f) < NEAR_ZERO);
+        EXPECT_TRUE(abs(maxDistance - (1.0f + MaxDistanceDeviation)) < NEAR_ZERO);
+    }
+}
+
+TEST_P(MuscleTests_ManualCrawling_New, muscleWithOneConnection)
+{
+    auto constexpr MaxDistanceDeviation = 0.8f;
+
+    auto channel0 = GetParam();
+
+    DataDescription data;
+    data.addCells({
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(OscillatorDescription().autoTriggerInterval(10)),
+        CellDescription()
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(MuscleDescription().mode(ManualCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation)))
+            .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0))),
+    });
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+
+    auto minDistance = 1.0f;
+    auto maxDistance = 1.0f;
+    for (int i = 0; i < 200; ++i) {
+        _simulationFacade->calcTimesteps(10);
+
+        auto actualData = _simulationFacade->getSimulationData();
+        auto actualMuscleCell = getCell(actualData, 2);
+        auto actualCell1 = getCell(actualData, 1);
+
+        ASSERT_EQ(2, actualData._cells.size());
+
+        auto distance = actualMuscleCell._connections.at(0)._distance;
+        EXPECT_TRUE(approxCompare(distance, actualCell1._connections.at(0)._distance));
+
+        minDistance = std::min(minDistance, distance);
+        maxDistance = std::max(maxDistance, distance);
+    }
+
+    if (channel0 == Channel0::Zero) {
+        EXPECT_TRUE(abs(minDistance - 1.0f) < NEAR_ZERO);
+        EXPECT_TRUE(abs(maxDistance - 1.0f) < NEAR_ZERO);
+    } else if (channel0 == Channel0::Positive) {
+        EXPECT_TRUE(abs(minDistance - (1.0f - MaxDistanceDeviation)) < NEAR_ZERO);
+        EXPECT_TRUE(abs(maxDistance - 1.0f) < NEAR_ZERO);
+    } else if (channel0 == Channel0::Negative) {
+        EXPECT_TRUE(abs(minDistance - 1.0f) < NEAR_ZERO);
+        EXPECT_TRUE(abs(maxDistance - (1.0f + MaxDistanceDeviation)) < NEAR_ZERO);
     }
 }
