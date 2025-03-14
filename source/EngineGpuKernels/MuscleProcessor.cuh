@@ -15,16 +15,13 @@ public:
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
-    //__inline__ __device__ static void movement(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void autoBending(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void manualBending(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void angleBending(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void autoCrawling(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void manualCrawling(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void directMovement(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
-    //__inline__ __device__ static int getConnectionIndex(Cell* cell, Cell* otherCell);
-    //__inline__ __device__ static bool hasTriangularConnection(Cell* cell, Cell* otherCell);
-    //__inline__ __device__ static float getTruncatedUnitValue(Signal const& signal, int channel = 0);
     __inline__ __device__ static void radiate(SimulationData& data, Cell* cell);
 
     struct BendingInfo
@@ -77,31 +74,11 @@ __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, Si
     case MuscleMode_ManualCrawling: {
         manualCrawling(data, statistics, cell);
     } break;
+    case MuscleMode_DirectMovement: {
+        directMovement(data, statistics, cell);
+    } break;
     }
 }
-
-
-//__device__ __inline__ void MuscleProcessor::movement(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
-//{
-//    if (abs(cell->signal.channels[0]) < NEAR_ZERO) {
-//        return;
-//    }
-//    if (!cell->tryLock()) {
-//        return;
-//    }
-//
-//    auto direction = SignalProcessor::calcReferenceDirection(data, cell);
-//    auto acceleration = cudaSimulationParameters.cellTypeMuscleMovementAcceleration[cell->color];
-//    float angle = max(-0.5f, min(0.5f, cell->signal.channels[3])) * 360.0f;
-//    direction = Math::normalized(Math::rotateClockwise(direction, angle)) * acceleration * getTruncatedUnitValue(cell->signal);
-//    cell->vel += direction;
-//    cell->cellTypeData.muscle.lastMovementX = direction.x;
-//    cell->cellTypeData.muscle.lastMovementY = direction.y;
-//    cell->releaseLock();
-//    statistics.incNumMuscleActivities(cell->color);
-//    radiate(data, cell);
-//}
-//
 
 __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
@@ -596,6 +573,23 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
         }
 
         crawling.lastActualDistance = actualDistance;
+        statistics.incNumMuscleActivities(cell->color);
+        radiate(data, cell);
+    }
+}
+
+__inline__ __device__ void MuscleProcessor::directMovement(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+{
+    if (SignalProcessor::isManuallyTriggered(data, cell)) {
+        auto direction = SignalProcessor::calcReferenceDirection(data, cell);
+        auto angle = Math::normalizedAngle(cell->angleToFront + max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleAngle])) * 180.0f, -180.0f);
+        direction = Math::rotateClockwise(direction, angle);
+
+        auto activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleTrigger]));
+        direction = direction * cudaSimulationParameters.cellTypeMuscleMovementAcceleration[cell->color] * activation;
+        cell->vel += direction;
+        cell->cellTypeData.muscle.lastMovementX = direction.x;
+        cell->cellTypeData.muscle.lastMovementY = direction.y;
         statistics.incNumMuscleActivities(cell->color);
         radiate(data, cell);
     }

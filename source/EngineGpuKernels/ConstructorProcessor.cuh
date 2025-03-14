@@ -826,6 +826,10 @@ ConstructorProcessor::constructCellIntern(
             result->cellTypeData.muscle.modeData.manualCrawling.lastActualDistance = 0;
             result->cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta = 0;
             result->cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied = false;
+        } else if (result->cellTypeData.muscle.mode == MuscleMode_DirectMovement) {
+            // Read dummy bytes
+            GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition);
+            GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition);
         }
         result->cellTypeData.muscle.lastMovementX = 0;
         result->cellTypeData.muscle.lastMovementY = 0;

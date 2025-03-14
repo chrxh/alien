@@ -173,6 +173,9 @@ struct ManualCrawlingTO
     bool impulseAlreadyApplied;
 };
 
+struct DirectMovementTO
+{};
+
 union MuscleModeTO
 {
     AutoBendingTO autoBending;
@@ -180,6 +183,7 @@ union MuscleModeTO
     AngleBendingTO angleBending;
     AutoCrawlingTO autoCrawling;
     ManualCrawlingTO manualCrawling;
+    DirectMovementTO directMovement;
 };
 
 struct MuscleTO

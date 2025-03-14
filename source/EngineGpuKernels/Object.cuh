@@ -214,6 +214,9 @@ struct ManualCrawling
     bool impulseAlreadyApplied;
 };
 
+struct DirectMovement
+{};
+
 union MuscleModeData
 {
     AutoBending autoBending;
@@ -221,6 +224,7 @@ union MuscleModeData
     AngleBending angleBending;
     AutoCrawling autoCrawling;
     ManualCrawling manualCrawling;
+    DirectMovement directMovement;
 };
 
 struct MuscleType

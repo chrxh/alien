@@ -372,7 +372,19 @@ struct ManualCrawlingDescription
     MEMBER_DECLARATION(ManualCrawlingDescription, float, lastDistanceDelta, 0.0f);
     MEMBER_DECLARATION(ManualCrawlingDescription, bool, impulseAlreadyApplied, false);
 };
-using MuscleModeDescription = std::variant<AutoBendingDescription, ManualBendingDescription, AngleBendingDescription, AutoCrawlingDescription, ManualCrawlingDescription>;
+
+struct DirectMovementDescription
+{
+    auto operator<=>(DirectMovementDescription const&) const = default;
+};
+
+using MuscleModeDescription = std::variant<
+    AutoBendingDescription,
+    ManualBendingDescription,
+    AngleBendingDescription,
+    AutoCrawlingDescription,
+    ManualCrawlingDescription,
+    DirectMovementDescription>;
 
 struct MuscleDescription
 {
@@ -390,6 +402,8 @@ struct MuscleDescription
             return MuscleMode_AutoCrawling;
         } else if (std::holds_alternative<ManualCrawlingDescription>(_mode)) {
             return MuscleMode_ManualCrawling;
+        } else if (std::holds_alternative<DirectMovementDescription>(_mode)) {
+            return MuscleMode_DirectMovement;
         }
         THROW_NOT_IMPLEMENTED();
     }

@@ -178,6 +178,7 @@ namespace
                 cellTO.cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta = cell->cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta;
                 cellTO.cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied =
                     cell->cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied;
+            } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_DirectMovement) {
             }
             cellTO.cellTypeData.muscle.lastMovementX = cell->cellTypeData.muscle.lastMovementX;
             cellTO.cellTypeData.muscle.lastMovementY = cell->cellTypeData.muscle.lastMovementY;

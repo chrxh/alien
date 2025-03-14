@@ -93,6 +93,7 @@ enum MuscleMode_
     MuscleMode_AngleBending,
     MuscleMode_AutoCrawling,
     MuscleMode_ManualCrawling,
+    MuscleMode_DirectMovement,
     MuscleMode_Count
 };
 
