@@ -522,6 +522,9 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
             crawling._lastDistanceDelta = cellTO.cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta;
             crawling._impulseAlreadyApplied = cellTO.cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied;
             muscle._mode = crawling;
+        } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_DirectMovement) {
+            DirectMovementDescription movement;
+            muscle._mode = movement;
         }
 
         muscle._lastMovementX = cellTO.cellTypeData.muscle.lastMovementX;
@@ -721,6 +724,7 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
             crawlingTO.lastActualDistance = crawlingDesc._lastActualDistance;
             crawlingTO.lastDistanceDelta = crawlingDesc._lastDistanceDelta;
             crawlingTO.impulseAlreadyApplied = crawlingDesc._impulseAlreadyApplied;
+        } else if (muscleTO.mode == MuscleMode_DirectMovement) {
         }
         muscleTO.lastMovementX = muscleDesc._lastMovementX;
         muscleTO.lastMovementY = muscleDesc._lastMovementY;

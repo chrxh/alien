@@ -736,7 +736,7 @@ void GenomeEditorWindow::processNode(
             if (AlienImGui::Combo(
                 AlienImGui::ComboParameters()
                     .name("Mode")
-                        .values({"Auto bending", "Manual bending", "Angle bending", "Auto crawling", "Manual crawling"})
+                        .values({"Auto bending", "Manual bending", "Angle bending", "Auto crawling", "Manual crawling", "Direct movement"})
                     .textWidth(ContentTextWidth)
                     .tooltip(Const::GenomeMuscleModeTooltip),
                 mode)) {
@@ -750,6 +750,8 @@ void GenomeEditorWindow::processNode(
                     muscle.mode(AutoCrawlingGenomeDescription());
                 } else if (mode == MuscleMode_ManualCrawling) {
                     muscle.mode(ManualCrawlingGenomeDescription());
+                } else if (mode == MuscleMode_DirectMovement) {
+                    muscle.mode(DirectMovementGenomeDescription());
                 }
             }
             if (mode == MuscleMode_AutoBending) {

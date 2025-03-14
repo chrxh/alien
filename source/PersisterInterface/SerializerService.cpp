@@ -495,6 +495,15 @@ namespace cereal
     SPLIT_SERIALIZATION(ManualCrawlingGenomeDescription)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DirectMovementGenomeDescription& data)
+    {
+        DirectMovementGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(DirectMovementGenomeDescription)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, MuscleGenomeDescription& data)
     {
         MuscleGenomeDescription defaultObject;
@@ -825,6 +834,15 @@ namespace cereal
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ManualCrawlingDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DirectMovementDescription& data)
+    {
+        DirectMovementDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(DirectMovementDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, MuscleDescription& data)

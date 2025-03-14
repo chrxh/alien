@@ -224,12 +224,19 @@ struct ManualCrawlingGenomeDescription
     MEMBER_DECLARATION(ManualCrawlingGenomeDescription, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
     MEMBER_DECLARATION(ManualCrawlingGenomeDescription, float, frontBackVelRatio, 0.2f);     // Between 0 and 1
 };
+
+struct DirectMovementGenomeDescription
+{
+    auto operator<=>(DirectMovementGenomeDescription const&) const = default;
+};
+
 using MuscleModeGenomeDescription = std::variant<
     AutoBendingGenomeDescription,
     ManualBendingGenomeDescription,
     AngleBendingGenomeDescription,
     AutoCrawlingGenomeDescription,
-    ManualCrawlingGenomeDescription>;
+    ManualCrawlingGenomeDescription,
+    DirectMovementGenomeDescription>;
 
 struct MuscleGenomeDescription
 {
@@ -247,6 +254,8 @@ struct MuscleGenomeDescription
             return MuscleMode_AutoCrawling;
         } else if (std::holds_alternative<ManualCrawlingGenomeDescription>(_mode)) {
             return MuscleMode_ManualCrawling;
+        } else if (std::holds_alternative<DirectMovementGenomeDescription>(_mode)) {
+            return MuscleMode_DirectMovement;
         }
         THROW_NOT_IMPLEMENTED();
     }
