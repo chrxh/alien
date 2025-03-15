@@ -15,11 +15,11 @@ public:
         result.innerFriction = 0;
         result.baseValues.friction = 1;
         for (int i = 0; i < MAX_COLORS; ++i) {
-            result.cellTypeDefenderAgainstAttackerStrength[i] = 1000.0f;
+            result.defenderAntiAttackerStrength[i] = 1000.0f;
             result.baseValues.radiationCellAgeStrength[i] = 0;
-            result.highRadiationFactor[i] = 0;
+            result.radiationType2_strength[i] = 0;
             for (int j = 0; j < MAX_COLORS; ++j) {
-                result.cellTypeInjectorDurationColorMatrix[i][j] = 3;
+                result.injectorInjectionTime[i][j] = 3;
             }
         }
         return result;

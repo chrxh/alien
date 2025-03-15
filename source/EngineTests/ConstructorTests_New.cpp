@@ -23,10 +23,10 @@ public:
 protected:
     float getOffspringDistance() const
     {
-        return 1.0f + _parameters.cellTypeConstructorAdditionalOffspringDistance;
+        return 1.0f + _parameters.constructorAdditionalOffspringDistance;
     }
 
-    float getConstructorEnergy() const { return _parameters.cellNormalEnergy[0] * 2.5f; }
+    float getConstructorEnergy() const { return _parameters.normalCellEnergy[0] * 2.5f; }
 };
 
 TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_upperSide)

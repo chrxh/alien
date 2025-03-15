@@ -43,10 +43,10 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         float energyDelta = 0;
         auto cellMinEnergy = SpotCalculator::calcParameter(
             &SimulationParametersZoneValues::cellMinEnergy, &SimulationParametersZoneActivatedValues::cellMinEnergy, data, cell->pos, cell->color);
-        auto baseValue = cudaSimulationParameters.cellTypeAttackerDestroyCells ? cellMinEnergy * 0.1f : cellMinEnergy;
+        auto baseValue = cudaSimulationParameters.attackerDestroyCells ? cellMinEnergy * 0.1f : cellMinEnergy;
 
         Cell* someOtherCell = nullptr;
-        data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.cellTypeAttackerRadius[cell->color], cell->detached, [&](auto const& otherCell) {
+        data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.attackerRadius[cell->color], cell->detached, [&](auto const& otherCell) {
             if (cell->creatureId != 0 && otherCell->creatureId == cell->creatureId) {
                 return;
             }
@@ -58,7 +58,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             }
 
             // Only attack cells with energy above base value
-            auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - baseValue) * cudaSimulationParameters.cellTypeAttackerStrength[cell->color];
+            auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - baseValue) * cudaSimulationParameters.attackerStrength[cell->color];
             if (energyToTransfer < 0) {
                 return;
             }
@@ -68,7 +68,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
             // Evaluate sensor detection factor
             if (cudaSimulationParameters.features.advancedAttackerControl && otherCell->detectedByCreatureId != (cell->creatureId & 0xffff)) {
-                energyToTransfer *= (1.0f - cudaSimulationParameters.cellTypeAttackerSensorDetectionFactor[color]);
+                energyToTransfer *= (1.0f - cudaSimulationParameters.attackerSensorDetectionFactor[color]);
             }
 
             // Evaluate genome complexity bonus
@@ -88,7 +88,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (cudaSimulationParameters.features.advancedAttackerControl
                 && ((otherCell->mutationId == cell->mutationId) || (otherCell->ancestorMutationId == static_cast<uint8_t>(cell->mutationId & 0xff)))
                 && cell->mutationId != 0) {
-                energyToTransfer *= (1.0f - cudaSimulationParameters.cellTypeAttackerSameMutantPenalty[color][otherColor]);
+                energyToTransfer *= (1.0f - cudaSimulationParameters.attackerSameMutantPenalty[color][otherColor]);
             }
 
             // Evaluate new complex mutant penalty
@@ -107,12 +107,12 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             // Evaluate defender strength
             auto numDefenderCells = countAndTrackDefenderCells(statistics, otherCell);
             float defendStrength =
-                numDefenderCells == 0 ? 1.0f : powf(cudaSimulationParameters.cellTypeDefenderAgainstAttackerStrength[color], numDefenderCells);
+                numDefenderCells == 0 ? 1.0f : powf(cudaSimulationParameters.defenderAntiAttackerStrength[color], numDefenderCells);
             energyToTransfer /= defendStrength;
 
             // Evaluate color inhomogeneity factor
             if (!isHomogene(otherCell)) {
-                energyToTransfer *= cudaSimulationParameters.cellTypeAttackerColorInhomogeneityFactor[color];
+                energyToTransfer *= cudaSimulationParameters.attackerColorInhomogeneityFactor[color];
             }
 
             // Evaluate geometry deviation

@@ -329,12 +329,12 @@ __inline__ __device__ void MutationProcessor::cellTypeMutation(SimulationData& d
     auto nodeAddress = GenomeDecoder::getRandomGenomeNodeAddress(data, genome, genomeSize, false, subGenomesSizeIndices, &numSubGenomesSizeIndices);
 
     auto newCellType = data.numberGen1.random(CellType_Count - 3) + 2;
-    auto makeSelfCopy = cudaSimulationParameters.cellCopyMutationSelfReplication ? data.numberGen1.randomBool() : false;
+    auto makeSelfCopy = cudaSimulationParameters.copyMutationSelfReplication ? data.numberGen1.randomBool() : false;
     if (newCellType == CellType_Injector) {      //not injection mutation allowed at the moment
         return;
     }
     if ((newCellType == CellType_Constructor || newCellType == CellType_Injector) && !makeSelfCopy) {
-        if (cudaSimulationParameters.cellCopyMutationPreventDepthIncrease
+        if (cudaSimulationParameters.copyMutationPreventDepthIncrease
             && GenomeDecoder::getGenomeDepth(genome, genomeSize) <= numSubGenomesSizeIndices) {
             return;
         }
@@ -350,7 +350,7 @@ __inline__ __device__ void MutationProcessor::cellTypeMutation(SimulationData& d
     auto origCellTypeSize = GenomeDecoder::getNextCellTypeDataSize(genome, genomeSize, nodeAddress);
     auto sizeDelta = newCellTypeSize - origCellTypeSize;
 
-    if (!cudaSimulationParameters.cellCopyMutationSelfReplication) {
+    if (!cudaSimulationParameters.copyMutationSelfReplication) {
         if (GenomeDecoder::containsSectionSelfReplication(genome + nodeAddress, Const::CellBasicBytes + origCellTypeSize)) {
             return;
         }
@@ -434,12 +434,12 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
         nextExecutionNumber = GenomeDecoder::getNextExecutionNumber(genome, nodeAddress);
     }
     auto newCellType = data.numberGen1.random(CellType_Count - 3) + 2;
-    auto makeSelfCopy = cudaSimulationParameters.cellCopyMutationSelfReplication ? data.numberGen1.randomBool() : false;
+    auto makeSelfCopy = cudaSimulationParameters.copyMutationSelfReplication ? data.numberGen1.randomBool() : false;
     if (newCellType == CellType_Injector) {  //not injection mutation allowed at the moment
         return;
     }
     if ((newCellType == CellType_Constructor || newCellType == CellType_Injector) && !makeSelfCopy) {
-        if (cudaSimulationParameters.cellCopyMutationPreventDepthIncrease
+        if (cudaSimulationParameters.copyMutationPreventDepthIncrease
             && GenomeDecoder::getGenomeDepth(genome, genomeSize) <= numSubGenomesSizeIndices) {
             return;
         }
@@ -509,7 +509,7 @@ __inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& dat
     auto origCellTypeSize = GenomeDecoder::getNextCellTypeDataSize(genome, genomeSize, nodeAddress);
     auto deleteSize = Const::CellBasicBytes + origCellTypeSize;
 
-    if (!cudaSimulationParameters.cellCopyMutationSelfReplication) {
+    if (!cudaSimulationParameters.copyMutationSelfReplication) {
         if (GenomeDecoder::containsSectionSelfReplication(genome + nodeAddress, deleteSize)) {
             return;
         }
@@ -565,7 +565,7 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
         return;
     }
     auto sourceRangeSize = endSourceIndex - startSourceIndex;
-    if (!cudaSimulationParameters.cellCopyMutationSelfReplication) {
+    if (!cudaSimulationParameters.copyMutationSelfReplication) {
         if (GenomeDecoder::containsSectionSelfReplication(genome + startSourceIndex, sourceRangeSize)) {
             return;
         }
@@ -580,7 +580,7 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
         return;
     }
     auto sourceRangeDepth = GenomeDecoder::getGenomeDepth(subGenome, subGenomeSize);
-    if (cudaSimulationParameters.cellCopyMutationPreventDepthIncrease) {
+    if (cudaSimulationParameters.copyMutationPreventDepthIncrease) {
         auto genomeDepth = GenomeDecoder::getGenomeDepth(genome, genomeSize);
         if (genomeDepth < sourceRangeDepth + numSubGenomesSizeIndices2) {
             return;
@@ -701,7 +701,7 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
     auto sizeDelta = endSourceIndex - startSourceIndex;
     auto nodeAddressForSelfReplication = -1;
     auto duplicatedSegmentContainsSelfReplicator = false;
-    if (!cudaSimulationParameters.cellCopyMutationSelfReplication) {
+    if (!cudaSimulationParameters.copyMutationSelfReplication) {
         nodeAddressForSelfReplication =
             GenomeDecoder::getNodeAddressForSelfReplication(genome + startSourceIndex, sizeDelta, duplicatedSegmentContainsSelfReplicator) + startSourceIndex;
         if (duplicatedSegmentContainsSelfReplicator) {
@@ -746,7 +746,7 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
     }
 
     auto sourceRangeDepth = GenomeDecoder::getGenomeDepth(subGenome, subGenomeSize);
-    if (cudaSimulationParameters.cellCopyMutationPreventDepthIncrease) {
+    if (cudaSimulationParameters.copyMutationPreventDepthIncrease) {
         auto genomeDepth = GenomeDecoder::getGenomeDepth(genome, genomeSize);
         if (genomeDepth < sourceRangeDepth + numSubGenomesSizeIndices) {
             return;
@@ -1032,7 +1032,7 @@ __inline__ __device__ int MutationProcessor::getNewColorFromTransition(Simulatio
 {
     int numAllowedColors = 0;
     for (int i = 0; i < MAX_COLORS; ++i) {
-        if (cudaSimulationParameters.cellCopyMutationColorTransitions[origColor][i]) {
+        if (cudaSimulationParameters.copyMutationColorTransitions[origColor][i]) {
             ++numAllowedColors;
         }
     }
@@ -1043,7 +1043,7 @@ __inline__ __device__ int MutationProcessor::getNewColorFromTransition(Simulatio
     int allowedColorIndex = 0;
     int result = 0;
     for (int i = 0; i < MAX_COLORS; ++i) {
-        if (cudaSimulationParameters.cellCopyMutationColorTransitions[origColor][i]) {
+        if (cudaSimulationParameters.copyMutationColorTransitions[origColor][i]) {
             if (allowedColorIndex == randomAllowedColorIndex) {
                 result = i;
                 break;

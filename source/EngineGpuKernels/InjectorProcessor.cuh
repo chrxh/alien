@@ -38,7 +38,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
         switch (injector.mode) {
         case InjectorMode_InjectAll: {
             data.cellMap.executeForEach(
-                cell->pos, cudaSimulationParameters.cellTypeInjectorRadius[cell->color], cell->detached, [&](Cell* const& otherCell) {
+                cell->pos, cudaSimulationParameters.injectorInjectionRadius[cell->color], cell->detached, [&](Cell* const& otherCell) {
                     if (cell == otherCell) {
                         return;
                     }
@@ -55,12 +55,12 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
                         return;
                     }
                     match = true;
-                    auto injectorDuration = cudaSimulationParameters.cellTypeInjectorDurationColorMatrix[cell->color][otherCell->color];
+                    auto injectorDuration = cudaSimulationParameters.injectorInjectionTime[cell->color][otherCell->color];
 
                     auto numDefenderCells = countAndTrackDefenderCells(statistics, otherCell);
                     float defendStrength = numDefenderCells == 0
                         ? 1.0f
-                        : powf(cudaSimulationParameters.cellTypeDefenderAgainstInjectorStrength[cell->color], numDefenderCells);
+                        : powf(cudaSimulationParameters.defenderAntiInjectorStrength[cell->color], numDefenderCells);
                     injectorDuration = toInt(toFloat(injectorDuration) * defendStrength);
                     if (injector.counter < injectorDuration) {
                         otherCell->releaseLock();
@@ -88,7 +88,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
 
         case InjectorMode_InjectOnlyEmptyCells: {
             data.cellMap.executeForEach(
-                cell->pos, cudaSimulationParameters.cellTypeInjectorRadius[cell->color], cell->detached, [&](Cell* const& otherCell) {
+                cell->pos, cudaSimulationParameters.injectorInjectionRadius[cell->color], cell->detached, [&](Cell* const& otherCell) {
                     if (cell == otherCell) {
                         return;
                     }

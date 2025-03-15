@@ -189,9 +189,9 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
                 if (cell != otherCell) {
 
                     //overlap correction
-                    if (!cell->barrier && distance < cudaSimulationParameters.cellMinDistance) {
-                        atomicAdd_block(&cellPosDelta.x, posDelta.x * cudaSimulationParameters.cellMinDistance / 5);
-                        atomicAdd_block(&cellPosDelta.y, posDelta.y * cudaSimulationParameters.cellMinDistance / 5);
+                    if (!cell->barrier && distance < cudaSimulationParameters.minCellDistance) {
+                        atomicAdd_block(&cellPosDelta.x, posDelta.x * cudaSimulationParameters.minCellDistance / 5);
+                        atomicAdd_block(&cellPosDelta.y, posDelta.y * cudaSimulationParameters.minCellDistance / 5);
                     }
 
                     bool isConnected = false;
@@ -306,8 +306,8 @@ __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctO
 
                 //overlap correction
                 if (!cell->barrier) {
-                    if (distance < cudaSimulationParameters.cellMinDistance) {
-                        cell->pos += posDelta * cudaSimulationParameters.cellMinDistance / 5;
+                    if (distance < cudaSimulationParameters.minCellDistance) {
+                        cell->pos += posDelta * cudaSimulationParameters.minCellDistance / 5;
                     }
                 }
 
@@ -402,8 +402,8 @@ __inline__ __device__ void CellProcessor::applyForces(SimulationData& data)
         }
 
         cell->vel += cell->shared1;
-        if (Math::length(cell->vel) > cudaSimulationParameters.cellMaxVelocity) {
-            cell->vel = Math::normalized(cell->vel) * cudaSimulationParameters.cellMaxVelocity;
+        if (Math::length(cell->vel) > cudaSimulationParameters.maxVelocity) {
+            cell->vel = Math::normalized(cell->vel) * cudaSimulationParameters.maxVelocity;
         }
         cell->shared1 = {0, 0};
     }
@@ -463,11 +463,11 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
 
                     auto strength = abs(referenceAngleFromPrevious - actualAngleFromPrevious) / 2000 * cellStiffnessSquared;
 
-                    auto force1 = Math::normalized(displacement) / max(Math::length(displacement), cudaSimulationParameters.cellMinDistance) * strength;
+                    auto force1 = Math::normalized(displacement) / max(Math::length(displacement), cudaSimulationParameters.minCellDistance) * strength;
                     Math::rotateQuarterClockwise(force1);
 
                     auto force2 =
-                        Math::normalized(prevDisplacement) / max(Math::length(prevDisplacement), cudaSimulationParameters.cellMinDistance) * strength;
+                        Math::normalized(prevDisplacement) / max(Math::length(prevDisplacement), cudaSimulationParameters.minCellDistance) * strength;
                     Math::rotateQuarterCounterClockwise(force2);
 
                     if (referenceAngleFromPrevious < actualAngleFromPrevious) {
@@ -512,7 +512,7 @@ __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
             auto displacement = connectedCell->pos - cell->pos;
             data.cellMap.correctDirection(displacement);
             auto actualDistance = Math::length(displacement);
-            if (actualDistance > cudaSimulationParameters.cellMaxBindingDistance[cell->color]) {
+            if (actualDistance > cudaSimulationParameters.maxBindingDistance[cell->color]) {
                 scheduleForDestruction = true;
             }
         }
@@ -754,10 +754,10 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
         if (data.numberGen1.random() < cudaSimulationParameters.radiationProb) {
 
             auto radiationFactor = 0.0f;
-            if (cell->energy > cudaSimulationParameters.highRadiationMinCellEnergy[cell->color]) {
-                radiationFactor += cudaSimulationParameters.highRadiationFactor[cell->color];
+            if (cell->energy > cudaSimulationParameters.radiationType2_energyThreshold[cell->color]) {
+                radiationFactor += cudaSimulationParameters.radiationType2_strength[cell->color];
             }
-            if (cell->age > cudaSimulationParameters.radiationMinCellAge[cell->color]) {
+            if (cell->age > cudaSimulationParameters.radiationType1_minimumAge[cell->color]) {
                 radiationFactor += SpotCalculator::calcParameter(
                     &SimulationParametersZoneValues::radiationCellAgeStrength,
                     &SimulationParametersZoneActivatedValues::radiationCellAgeStrength,
@@ -827,7 +827,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             cellDestruction = true;
         }
 
-        auto cellMaxAge = cudaSimulationParameters.cellMaxAge[cell->color];
+        auto cellMaxAge = cudaSimulationParameters.maxCellAge[cell->color];
         if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellInactiveMaxAgeActivated && cell->mutationId != 1
             && cell->cellTypeUsed == CellTriggered_No && cell->livingState == LivingState_Ready && cell->activationTime == 0) {
             bool adjacentCellsUsed = false;
@@ -911,12 +911,12 @@ __inline__ __device__ void CellProcessor::applyEnergyFlow(SimulationData& data)
             &SimulationParametersZoneValues::cellMinEnergy, &SimulationParametersZoneActivatedValues::cellMinEnergy, data, cell->pos, cell->color);
 
         auto needCellEnergy = cell->cellType == CellType_Constructor && !GenomeDecoder::isFinished(cell->cellTypeData.constructor)
-            && connectedCell->energy > cudaSimulationParameters.cellNormalEnergy[cell->color];
+            && connectedCell->energy > cudaSimulationParameters.normalCellEnergy[cell->color];
         auto hasOtherCellMoreEnergy = (connectedCell->cellType != CellType_Constructor || GenomeDecoder::isFinished(connectedCell->cellTypeData.constructor))
             && connectedCell->energy > cell->energy;
         float flow = 0;
         if (needCellEnergy) {
-            flow = connectedCell->energy - cudaSimulationParameters.cellNormalEnergy[cell->color];
+            flow = connectedCell->energy - cudaSimulationParameters.normalCellEnergy[cell->color];
         } else if (hasOtherCellMoreEnergy) {
             flow = (connectedCell->energy - cell->energy) / 2;
         }
