@@ -148,14 +148,6 @@ struct OscillatorGenomeDescription
 struct AttackerGenomeDescription
 {
     auto operator<=>(AttackerGenomeDescription const&) const = default;
-
-    AttackerGenomeDescription& mode(EnergyDistributionMode value)
-    {
-        _mode = value;
-        return *this;
-    }
-
-    EnergyDistributionMode _mode = EnergyDistributionMode_TransmittersAndConstructors;
 };
 
 struct InjectorGenomeDescription

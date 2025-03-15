@@ -707,15 +707,7 @@ void GenomeEditorWindow::processNode(
             }
         } break;
         case CellType_Attacker: {
-            auto& attacker = std::get<AttackerGenomeDescription>(cell._cellTypeData);
-            table.next();
-            AlienImGui::Combo(
-                AlienImGui::ComboParameters()
-                    .name("Energy distribution")
-                    .values({"Connected cells", "Transmitters and Constructors"})
-                    .textWidth(ContentTextWidth)
-                    .tooltip(Const::GenomeAttackerEnergyDistributionTooltip),
-                attacker._mode);
+            //auto& attacker = std::get<AttackerGenomeDescription>(cell._cellTypeData);
         } break;
         case CellType_Injector: {
             auto& injector = std::get<InjectorGenomeDescription>(cell._cellTypeData);

@@ -94,7 +94,6 @@ struct OscillatorTO
 
 struct AttackerTO
 {
-    EnergyDistributionMode mode;
 };
 
 struct InjectorTO

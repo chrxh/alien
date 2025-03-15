@@ -614,12 +614,6 @@ void _InspectorWindow::processInjectorContent(InjectorDescription& injector)
 void _InspectorWindow::processAttackerContent(AttackerDescription& attacker)
 {
     if (ImGui::TreeNodeEx("Properties###attacker", TreeNodeFlags)) {
-        AlienImGui::Combo(
-            AlienImGui::ComboParameters()
-                .name("Energy distribution")
-                .values({"Connected cells", "Transmitters and Constructors"}).tooltip(Const::GenomeAttackerEnergyDistributionTooltip)
-                .textWidth(CellTypeTextWidth),
-            attacker._mode);
         ImGui::TreePop();
     }
 }

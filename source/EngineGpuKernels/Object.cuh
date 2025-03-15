@@ -136,7 +136,6 @@ struct OscillatorType
 
 struct AttackerType
 {
-    EnergyDistributionMode mode;
 };
 
 struct InjectorType

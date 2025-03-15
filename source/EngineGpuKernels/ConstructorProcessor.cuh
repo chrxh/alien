@@ -776,7 +776,6 @@ ConstructorProcessor::constructCellIntern(
         result->cellTypeData.oscillator.numPulses = 0;
     } break;
     case CellType_Attacker: {
-        result->cellTypeData.attacker.mode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % EnergyDistributionMode_Count;
     } break;
     case CellType_Injector: {
         result->cellTypeData.injector.mode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % InjectorMode_Count;
