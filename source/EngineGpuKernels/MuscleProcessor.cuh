@@ -586,7 +586,7 @@ __inline__ __device__ void MuscleProcessor::directMovement(SimulationData& data,
         direction = Math::rotateClockwise(direction, angle);
 
         auto activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleTrigger]));
-        direction = direction * cudaSimulationParameters.cellTypeMuscleMovementAcceleration[cell->color] * activation;
+        direction = direction * cudaSimulationParameters.cellTypeMuscleMovementAcceleration[cell->color] * activation * 0.1f;
         cell->vel += direction;
         cell->cellTypeData.muscle.lastMovementX = direction.x;
         cell->cellTypeData.muscle.lastMovementY = direction.y;

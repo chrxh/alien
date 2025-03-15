@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 
+#include "Base/Math.h"
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationFacade.h"
@@ -731,14 +732,14 @@ TEST_P(MuscleTests_ManualCrawling_New, muscleWithTwoConnections)
     }
 
     if (channel0 == Channel0::Zero) {
-        EXPECT_TRUE(abs(minDistance - 1.0f) < NEAR_ZERO);
-        EXPECT_TRUE(abs(maxDistance - 1.0f) < NEAR_ZERO);
+        EXPECT_TRUE(approxCompare(1.0f, minDistance));
+        EXPECT_TRUE(approxCompare(1.0f, maxDistance));
     } else if (channel0 == Channel0::Positive) {
-        EXPECT_TRUE(abs(minDistance - (1.0f - MaxDistanceDeviation)) < NEAR_ZERO);
-        EXPECT_TRUE(abs(maxDistance - 1.0f) < NEAR_ZERO);
+        EXPECT_TRUE(approxCompare(1.0f - MaxDistanceDeviation, minDistance));
+        EXPECT_TRUE(approxCompare(1.0f, maxDistance));
     } else if (channel0 == Channel0::Negative) {
-        EXPECT_TRUE(abs(minDistance - 1.0f) < NEAR_ZERO);
-        EXPECT_TRUE(abs(maxDistance - (1.0f + MaxDistanceDeviation)) < NEAR_ZERO);
+        EXPECT_TRUE(approxCompare(1.0f, minDistance));
+        EXPECT_TRUE(approxCompare(1.0f + MaxDistanceDeviation, maxDistance));
     }
 }
 
@@ -780,13 +781,100 @@ TEST_P(MuscleTests_ManualCrawling_New, muscleWithOneConnection)
     }
 
     if (channel0 == Channel0::Zero) {
-        EXPECT_TRUE(abs(minDistance - 1.0f) < NEAR_ZERO);
-        EXPECT_TRUE(abs(maxDistance - 1.0f) < NEAR_ZERO);
+        EXPECT_TRUE(approxCompare(1.0f, minDistance));
+        EXPECT_TRUE(approxCompare(1.0f, maxDistance));
     } else if (channel0 == Channel0::Positive) {
-        EXPECT_TRUE(abs(minDistance - (1.0f - MaxDistanceDeviation)) < NEAR_ZERO);
-        EXPECT_TRUE(abs(maxDistance - 1.0f) < NEAR_ZERO);
+        EXPECT_TRUE(approxCompare(1.0f - MaxDistanceDeviation, minDistance));
+        EXPECT_TRUE(approxCompare(1.0f, maxDistance));
     } else if (channel0 == Channel0::Negative) {
-        EXPECT_TRUE(abs(minDistance - 1.0f) < NEAR_ZERO);
-        EXPECT_TRUE(abs(maxDistance - (1.0f + MaxDistanceDeviation)) < NEAR_ZERO);
+        EXPECT_TRUE(approxCompare(1.0f, minDistance));
+        EXPECT_TRUE(approxCompare(1.0f + MaxDistanceDeviation, maxDistance));
+    }
+}
+
+class MuscleTests_DirectMovement_New
+    : public MuscleTests_New
+    , public testing::WithParamInterface<std::tuple<Channel0, Channel1>>
+{};
+
+INSTANTIATE_TEST_SUITE_P(
+    MuscleTests_DirectMovement_New,
+    MuscleTests_DirectMovement_New,
+    ::testing::Values(
+        std::make_tuple(Channel0::Positive, Channel1::Zero),
+        std::make_tuple(Channel0::Negative, Channel1::Zero),
+        std::make_tuple(Channel0::Zero, Channel1::Zero),
+        std::make_tuple(Channel0::Positive, Channel1::Positive),
+        std::make_tuple(Channel0::Negative, Channel1::Positive),
+        std::make_tuple(Channel0::Zero, Channel1::Positive),
+        std::make_tuple(Channel0::Positive, Channel1::Negative),
+        std::make_tuple(Channel0::Negative, Channel1::Negative),
+        std::make_tuple(Channel0::Zero, Channel1::Negative)));
+
+TEST_P(MuscleTests_DirectMovement_New, muscleWithTwoConnections)
+{
+    auto constexpr AnglePrecision = 1.0f;
+    auto [channel0, channel1] = GetParam();
+
+    DataDescription data;
+    data.addCells({
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(OscillatorDescription().autoTriggerInterval(3)),
+        CellDescription()
+            .id(2)
+            .pos({11.0f, 10.0f})
+            .cellType(MuscleDescription().mode(DirectMovementDescription()))
+            .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)).weight(1, 0, getValue(channel1) / 2)),
+        CellDescription().id(3).pos({12.0f, 10.0f}),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+
+    _simulationFacade->calcTimesteps(3);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    ASSERT_EQ(3, actualData._cells.size());
+
+    auto actualCell1 = getCell(actualData, 1);
+    auto actualCell2 = getCell(actualData, 2);
+    auto actualCell3 = getCell(actualData, 3);
+
+    ASSERT_EQ(1, actualCell1._connections.size());
+    ASSERT_EQ(2, actualCell2._connections.size());
+    ASSERT_EQ(1, actualCell3._connections.size());
+
+    EXPECT_TRUE(approxCompare(1.0f, actualCell1._connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(1.0f, actualCell2._connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(1.0f, actualCell2._connections.at(1)._distance));
+    EXPECT_TRUE(approxCompare(1.0f, actualCell3._connections.at(0)._distance));
+    EXPECT_TRUE(approxCompare(180.0f, actualCell2._connections.at(0)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(180.0f, actualCell2._connections.at(1)._angleFromPrevious));
+
+    auto angleVel = Math::angleOfVector(actualCell2._vel);
+    if (channel1 == Channel1::Zero) {
+        if (channel0 == Channel0::Positive) {
+            EXPECT_TRUE(approxCompare(270.0f, angleVel, AnglePrecision));
+        } else if (channel0 == Channel0::Negative) {
+            EXPECT_TRUE(approxCompare(90.0f, angleVel, AnglePrecision));
+        } else {
+            EXPECT_TRUE(approxCompare(0.0f, Math::length(actualCell2._vel), 0.01f));
+        }
+    } else if (channel1 == Channel1::Positive) {
+        if (channel0 == Channel0::Positive) {
+            EXPECT_TRUE(approxCompare(0.0f, Math::normalizedAngle(angleVel, -180.0f), AnglePrecision));
+        } else if (channel0 == Channel0::Negative) {
+            EXPECT_TRUE(approxCompare(180.0f, angleVel, AnglePrecision));
+        } else {
+            EXPECT_TRUE(approxCompare(0.0f, Math::length(actualCell2._vel), 0.01f));
+        }
+    } else {
+        if (channel0 == Channel0::Positive) {
+            EXPECT_TRUE(approxCompare(180.0f, angleVel, AnglePrecision));
+        } else if (channel0 == Channel0::Negative) {
+            EXPECT_TRUE(approxCompare(0.0f, Math::normalizedAngle(angleVel, -180.0f), AnglePrecision));
+        } else {
+            EXPECT_TRUE(approxCompare(0.0f, Math::length(actualCell2._vel), 0.01f));
+        }
     }
 }

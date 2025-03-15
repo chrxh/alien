@@ -88,6 +88,18 @@ bool Math::isAngleInBetween(float angle1, float angle2, float angleBetweenCandid
     return angle2 - angle1 < 360.0f;
 }
 
+float Math::normalizedAngle(float angle, float base)
+{
+    angle = Math::modulo(angle, 360.0f);
+    if (angle < base) {
+        angle += 360.0f;
+    }
+    if (angle >= base + 360.0f) {
+        angle -= 360.0f;
+    }
+    return angle;
+}
+
 bool Math::crossing(
     RealVector2D const& segmentStart,
     RealVector2D const& segmentEnd,

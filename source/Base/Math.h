@@ -21,6 +21,8 @@ public:
     static void normalize(RealVector2D& v);
     static float subtractAngle(float angleMinuend, float angleSubtrahend);
     static bool isAngleInBetween(float angle1, float angle2, float angleBetweenCandidate);
+    static float normalizedAngle(float angle, float base);
+    
     static bool crossing(RealVector2D const& segmentStart, RealVector2D const& segmentEnd, RealVector2D const& otherSegmentStart, RealVector2D const& otherSegmentEnd);
     static float modulo(float value, float size);
 
