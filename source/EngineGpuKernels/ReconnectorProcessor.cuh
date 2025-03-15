@@ -49,7 +49,7 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
     auto const& reconnector = cell->cellTypeData.reconnector;
     Cell* closestCell = nullptr;
     float closestDistance = 0;
-    data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.cellTypeReconnectorRadius[cell->color], cell->detached, [&](Cell* const& otherCell) {
+    data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.reconnectorRadius[cell->color], cell->detached, [&](Cell* const& otherCell) {
         if (cell->creatureId != 0 && otherCell->creatureId == cell->creatureId) {
             return;
         }

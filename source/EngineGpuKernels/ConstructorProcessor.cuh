@@ -99,7 +99,7 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 
 __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    if (!cudaSimulationParameters.cellTypeConstructorCheckCompletenessForSelfReplication) {
+    if (!cudaSimulationParameters.constructorCompletenessCheck) {
         return;
     }
     auto& constructor = cell->cellTypeData.constructor;
@@ -332,11 +332,11 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     float2 newCellPos = hostCell->pos + newCellDirection;
 
     if (CellConnectionProcessor::existCrossingConnections(
-            data, hostCell->pos, newCellPos, cudaSimulationParameters.cellTypeConstructorConnectingCellMaxDistance[hostCell->color], hostCell->detached)) {
+            data, hostCell->pos, newCellPos, cudaSimulationParameters.constructorConnectingCellDistance[hostCell->color], hostCell->detached)) {
         return nullptr;
     }
 
-    if (cudaSimulationParameters.cellTypeConstructorCheckCompletenessForSelfReplication && !constructor.isReady) {
+    if (cudaSimulationParameters.constructorCompletenessCheck && !constructor.isReady) {
         return nullptr;
     }
 
@@ -362,7 +362,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     if (!constructionData.isLastNodeOfLastRepetition || !constructionData.genomeHeader.separateConstruction) {
         auto distance = constructionData.isLastNodeOfLastRepetition && !constructionData.genomeHeader.separateConstruction
             ? constructionData.genomeHeader.connectionDistance
-            : constructionData.genomeHeader.connectionDistance + cudaSimulationParameters.cellTypeConstructorAdditionalOffspringDistance;
+            : constructionData.genomeHeader.connectionDistance + cudaSimulationParameters.constructorAdditionalOffspringDistance;
         if (!CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance)) {
             CellConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
         }
@@ -387,8 +387,8 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
     auto constructionSiteDistance = hostCell->getRefDistance(lastCell);
     posDelta = Math::normalized(posDelta) * (constructionSiteDistance - desiredDistance);
 
-    if (Math::length(posDelta) <= cudaSimulationParameters.cellMinDistance
-        || constructionSiteDistance - desiredDistance < cudaSimulationParameters.cellMinDistance) {
+    if (Math::length(posDelta) <= cudaSimulationParameters.minCellDistance
+        || constructionSiteDistance - desiredDistance < cudaSimulationParameters.minCellDistance) {
         return nullptr;
     }
 
@@ -571,7 +571,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
         MAX_CELL_BONDS * 4,
         numNearCells,
         newCellPos,
-        cudaSimulationParameters.cellTypeConstructorConnectingCellMaxDistance[hostCell->color],
+        cudaSimulationParameters.constructorConnectingCellDistance[hostCell->color],
         hostCell->detached,
         [&](Cell* const& otherCell) { return otherCell != hostCell && otherCell != constructionData.lastConstructionCell; });
 
@@ -599,7 +599,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
             MAX_CELL_BONDS * 2,
             numOtherCellCandidates,
             newCellPos,
-            cudaSimulationParameters.cellTypeConstructorConnectingCellMaxDistance[hostCell->color],
+            cudaSimulationParameters.constructorConnectingCellDistance[hostCell->color],
             hostCell->detached,
             [&](Cell* const& otherCell) {
                 if (otherCell == constructionData.lastConstructionCell || otherCell == hostCell
@@ -630,7 +630,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
             MAX_CELL_BONDS * 2,
             numOtherCellCandidates,
             newCellPos,
-            cudaSimulationParameters.cellTypeConstructorConnectingCellMaxDistance[hostCell->color],
+            cudaSimulationParameters.constructorConnectingCellDistance[hostCell->color],
             hostCell->detached,
             [&](Cell* const& otherCell) {
                 if (otherCell->livingState != LivingState_UnderConstruction
@@ -853,7 +853,7 @@ ConstructorProcessor::constructCellIntern(
 
 __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData)
 {
-    if (cudaSimulationParameters.features.externalEnergyControl && hostCell->energy < constructionData.energy + cudaSimulationParameters.cellNormalEnergy[hostCell->color]
+    if (cudaSimulationParameters.features.externalEnergyControl && hostCell->energy < constructionData.energy + cudaSimulationParameters.normalCellEnergy[hostCell->color]
         && cudaSimulationParameters.externalEnergyInflowFactor[hostCell->color] > 0) {
         auto externalEnergyPortion = [&] {
             if (cudaSimulationParameters.externalEnergyInflowOnlyForNonSelfReplicators) {
@@ -891,17 +891,17 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         }
     }();
 
-    auto energyNeededFromHost = max(0.0f, constructionData.energy - cudaSimulationParameters.cellNormalEnergy[hostCell->color])
-        + min(constructionData.energy, cudaSimulationParameters.cellNormalEnergy[hostCell->color]) * (1.0f - externalEnergyConditionalInflowFactor);
+    auto energyNeededFromHost = max(0.0f, constructionData.energy - cudaSimulationParameters.normalCellEnergy[hostCell->color])
+        + min(constructionData.energy, cudaSimulationParameters.normalCellEnergy[hostCell->color]) * (1.0f - externalEnergyConditionalInflowFactor);
 
-    if (externalEnergyConditionalInflowFactor < 1.0f && hostCell->energy < cudaSimulationParameters.cellNormalEnergy[hostCell->color] + energyNeededFromHost) {
+    if (externalEnergyConditionalInflowFactor < 1.0f && hostCell->energy < cudaSimulationParameters.normalCellEnergy[hostCell->color] + energyNeededFromHost) {
         return false;
     }
     auto energyNeededFromExternalSource = constructionData.energy - energyNeededFromHost;
     auto orig = atomicAdd(data.externalEnergy, -energyNeededFromExternalSource);
     if (orig < energyNeededFromExternalSource) {
         atomicAdd(data.externalEnergy, energyNeededFromExternalSource);
-        if (hostCell->energy < cudaSimulationParameters.cellNormalEnergy[hostCell->color] + constructionData.energy) {
+        if (hostCell->energy < cudaSimulationParameters.normalCellEnergy[hostCell->color] + constructionData.energy) {
             return false;
         }
         hostCell->energy -= constructionData.energy;

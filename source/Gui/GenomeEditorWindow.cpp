@@ -1018,7 +1018,7 @@ void GenomeEditorWindow::onCreateSpore()
 
     auto parameter = _simulationFacade->getSimulationParameters();
     auto numNodes = GenomeDescriptionConverterService::get().getNumNodesRecursively(genome, true);
-    auto energy = parameter.cellNormalEnergy[EditorModel::get().getDefaultColorCode()] * toFloat(numNodes * 2 + 1);
+    auto energy = parameter.normalCellEnergy[EditorModel::get().getDefaultColorCode()] * toFloat(numNodes * 2 + 1);
     auto cell = CellDescription()
                     .pos(pos)
                     .energy(energy)

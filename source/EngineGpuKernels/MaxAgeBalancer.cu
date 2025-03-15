@@ -30,7 +30,7 @@ void _MaxAgeBalancer::initializeIfNecessary(SimulationParameters const& paramete
 {
     auto needsInitialization = false;
     for (int i = 0; i < MAX_COLORS; ++i) {
-        if (parameters.cellMaxAge[i] != _lastCellMaxAge[i]) {
+        if (parameters.maxCellAge[i] != _lastCellMaxAge[i]) {
             needsInitialization = true;
         }
     }
@@ -40,7 +40,7 @@ void _MaxAgeBalancer::initializeIfNecessary(SimulationParameters const& paramete
 
     if (needsInitialization) {
         for (int i = 0; i < MAX_COLORS; ++i) {
-            _cellMaxAge[i] = parameters.cellMaxAge[i];
+            _cellMaxAge[i] = parameters.maxCellAge[i];
         }
         startNewMeasurement(timestep);
     }
@@ -85,7 +85,7 @@ bool _MaxAgeBalancer::doAdaptionIfNecessary(SimulationParameters& parameters, St
             }
 
             for (int i = 0; i < MAX_COLORS; ++i) {
-                parameters.cellMaxAge[i] = toInt(_cellMaxAge[i]);
+                parameters.maxCellAge[i] = toInt(_cellMaxAge[i]);
             }
             result = true;
         }
@@ -106,7 +106,7 @@ void _MaxAgeBalancer::startNewMeasurement(uint64_t timestep)
 void _MaxAgeBalancer::saveLastState(SimulationParameters const& parameters)
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
-        _lastCellMaxAge[i] = parameters.cellMaxAge[i];
+        _lastCellMaxAge[i] = parameters.maxCellAge[i];
     }
     _lastAdaptiveCellMaxAge = parameters.cellMaxAgeBalancer;
 }

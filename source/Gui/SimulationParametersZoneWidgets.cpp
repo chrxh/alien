@@ -567,7 +567,7 @@ void _SimulationParametersZoneWidgets::process()
     /**
      * Attacker
      */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Cell function: Attacker"))) {
+    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Cell type: Attacker"))) {
         AlienImGui::InputFloatColorMatrix(
             AlienImGui::InputFloatColorMatrixParameters()
                 .name("Food chain color matrix")

@@ -13,7 +13,7 @@ public:
     static SimulationParameters getParameters()
     {
         SimulationParameters result;
-        result.cellTypeTransmitterEnergyDistributionSameCreature = true;
+        result.transmitterEnergyDistributionSameCreature = true;
         result.innerFriction = 0;
         result.baseValues.friction = 0;
         for (int i = 0; i < MAX_COLORS; ++i) {
@@ -37,7 +37,7 @@ TEST_F(TransmitterTests, distributeToOtherTransmitter)
             .id(1)
             .pos({10.0f, 10.0f})
             .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
-            .energy(_parameters.cellNormalEnergy[0] * 2),
+            .energy(_parameters.normalCellEnergy[0] * 2),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
@@ -79,7 +79,7 @@ TEST_F(TransmitterTests, distributeToOneOtherTransmitter_forwardSignal)
             .id(1)
             .pos({10.0f, 10.0f})
             .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
-            .energy(_parameters.cellNormalEnergy[0] * 2),
+            .energy(_parameters.normalCellEnergy[0] * 2),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
@@ -121,7 +121,7 @@ TEST_F(TransmitterTests, distributeToConnectedCells)
             .id(1)
             .pos({10.0f, 10.0f})
             .cellType(DepotDescription().mode(EnergyDistributionMode_ConnectedCells))
-            .energy(_parameters.cellNormalEnergy[0] * 2),
+            .energy(_parameters.normalCellEnergy[0] * 2),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
@@ -161,7 +161,7 @@ TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
             .id(1)
             .pos({10.0f, 10.0f})
             .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
-            .energy(_parameters.cellNormalEnergy[0] * 2),
+            .energy(_parameters.normalCellEnergy[0] * 2),
         CellDescription().id(2).pos({11.0f, 10.0f}).cellType(ConstructorDescription().genome(genome)),
         CellDescription().id(3).pos({9.0f, 10.0f}).cellType(DepotDescription()),
     });
@@ -198,7 +198,7 @@ TEST_F(TransmitterTests, distributeOnlyToActiveConstructors)
             .id(1)
             .pos({10.0f, 10.0f})
             .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
-            .energy(_parameters.cellNormalEnergy[0] * 2),
+            .energy(_parameters.normalCellEnergy[0] * 2),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
@@ -236,7 +236,7 @@ TEST_F(TransmitterTests, distributeToTwoTransmittersWithDifferentColor)
             .id(1)
             .pos({10.0f, 10.0f})
             .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
-            .energy(_parameters.cellNormalEnergy[0] * 2),
+            .energy(_parameters.normalCellEnergy[0] * 2),
         CellDescription().id(2).pos({11.0f, 10.0f}).cellType(DepotDescription()).color(1),
         CellDescription().id(3).pos({9.0f, 10.0f}).cellType(DepotDescription()),
     });
@@ -265,7 +265,7 @@ TEST_F(TransmitterTests, distributeToTwoTransmittersWithDifferentColor)
 
 TEST_F(TransmitterTests, distributeNotToNotReadyConstructors)
 {
-    _parameters.cellTypeConstructorCheckCompletenessForSelfReplication = true;
+    _parameters.constructorCompletenessCheck = true;
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto subgenome = GenomeDescription().cells({CellGenomeDescription()});
@@ -286,7 +286,7 @@ TEST_F(TransmitterTests, distributeNotToNotReadyConstructors)
             .id(2)
             .pos({10.0f, 10.0f})
             .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
-            .energy(_parameters.cellNormalEnergy[0] * 2),
+            .energy(_parameters.normalCellEnergy[0] * 2),
         CellDescription()
             .id(3)
             .pos({11.0f, 10.0f})
@@ -318,7 +318,7 @@ TEST_F(TransmitterTests, distributeNotToNotReadyConstructors)
 
 TEST_F(TransmitterTests, distributeToReadyConstructors)
 {
-    _parameters.cellTypeConstructorCheckCompletenessForSelfReplication = true;
+    _parameters.constructorCompletenessCheck = true;
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto subgenome = GenomeDescription().cells({CellGenomeDescription()});
@@ -339,7 +339,7 @@ TEST_F(TransmitterTests, distributeToReadyConstructors)
             .id(2)
             .pos({10.0f, 10.0f})
             .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
-            .energy(_parameters.cellNormalEnergy[0] * 2),
+            .energy(_parameters.normalCellEnergy[0] * 2),
         CellDescription()
             .id(3)
             .pos({11.0f, 10.0f})

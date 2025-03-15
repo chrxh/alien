@@ -895,7 +895,7 @@ TEST_F(SensorTests_New, scanForMoreComplexMutants_notFound_structure)
 
 TEST_F(SensorTests_New, scanForMoreComplexMutants_notFound_freeCell)
 {
-    _parameters.cellTypeAttackerSensorDetectionFactor[0] = 1.0f;
+    _parameters.attackerSensorDetectionFactor[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
     DataDescription data;
     data.addCells(
