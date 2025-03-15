@@ -20,8 +20,6 @@ public:
     __inline__ __device__ static void rotationMatrix(float angle, Matrix& rotMatrix);
     __inline__ __device__ static void inverseRotationMatrix(float angle, Matrix& rotMatrix);
     __inline__ __device__ static float2 applyMatrix(float2 const& vec, Matrix const& matrix);
-    __inline__ __device__ static void angleCorrection(float& angle);
-    __inline__ __device__ static void angleCorrection(int& angle);
     __inline__ __device__ static bool isInBetweenModulo(float value1, float value2, float candidate, float size);
     __inline__ __device__ static bool isAngleInBetween(float angle1, float angle2, float angleBetweenCandidate);
     __inline__ __device__ static bool isAngleStrictInBetween(float angle1, float angle2, float angleBetweenCandidate);
@@ -195,11 +193,6 @@ __inline__ __device__ float2 Math::applyMatrix(float2 const & vec, Matrix const 
     return{ vec.x * matrix[0][0] + vec.y * matrix[0][1],  vec.x * matrix[1][0] + vec.y * matrix[1][1] };
 }
 
-__inline__ __device__ void Math::angleCorrection(int &angle)
-{
-    angle = ((angle % 360) + 360) % 360;
-}
-
 __inline__ __device__ bool Math::isInBetweenModulo(float value1, float value2, float candidate, float size)
 {
     if (value2 - value1 >= size) {
@@ -252,14 +245,6 @@ __inline__ __device__ bool Math::isAngleStrictInBetween(float angle1, float angl
         return false;
     }
     return isAngleInBetween(angle1, angle2, angleBetweenCandidate);
-}
-
-__inline__ __device__ void Math::angleCorrection(float &angle)
-{
-    int intPart = (int)angle;
-    float fracPart = angle - intPart;
-    angleCorrection(intPart);
-    angle = (float)intPart + fracPart;
 }
 
 __device__ __inline__ void Math::normalize(float2 &vec)

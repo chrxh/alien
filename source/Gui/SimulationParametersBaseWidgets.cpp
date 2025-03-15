@@ -890,7 +890,7 @@ void _SimulationParametersBaseWidgets::process()
                 .textWidth(RightColumnWidth)
                 .colorDependence(true)
                 .min(0)
-                .max(0.4f)
+                .max(2.0f)
                 .logarithmic(true)
                 .defaultValue(origParameters.cellTypeMuscleMovementAcceleration)
                 .tooltip("The maximum value by which a muscle cell can modify its velocity during activation. This parameter applies only to muscle cells "
@@ -902,7 +902,7 @@ void _SimulationParametersBaseWidgets::process()
                 .textWidth(RightColumnWidth)
                 .colorDependence(true)
                 .min(0)
-                .max(0.1f)
+                .max(2.0f)
                 .defaultValue(origParameters.cellTypeMuscleCrawlingAcceleration)
                 .tooltip("The maximum length that a muscle cell can shorten or lengthen a cell connection. This parameter applies only to muscle cells "
                          "which are in contraction/expansion mode."),
@@ -913,7 +913,7 @@ void _SimulationParametersBaseWidgets::process()
                 .textWidth(RightColumnWidth)
                 .colorDependence(true)
                 .min(0)
-                .max(0.5f)
+                .max(2.0f)
                 .defaultValue(origParameters.cellTypeMuscleBendingAcceleration)
                 .tooltip("The maximum value by which a muscle cell can modify its velocity during a bending action. This parameter applies "
                          "only to muscle cells which are in bending mode."),
