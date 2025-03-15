@@ -260,14 +260,6 @@ struct OscillatorDescription
 struct AttackerDescription
 {
     auto operator<=>(AttackerDescription const&) const = default;
-
-    AttackerDescription& mode(EnergyDistributionMode value)
-    {
-        _mode = value;
-        return *this;
-    }
-
-    EnergyDistributionMode _mode = EnergyDistributionMode_TransmittersAndConstructors;
 };
 
 struct InjectorDescription

@@ -176,7 +176,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         cell->cellTypeData.oscillator.numPulses = cellTO.cellTypeData.oscillator.numPulses;
     } break;
     case CellType_Attacker: {
-        cell->cellTypeData.attacker.mode = cellTO.cellTypeData.attacker.mode;
     } break;
     case CellType_Injector: {
         cell->cellTypeData.injector.mode = cellTO.cellTypeData.injector.mode;

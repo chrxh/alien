@@ -225,8 +225,7 @@ std::vector<uint8_t> GenomeDescriptionConverterService::convertDescriptionToByte
             writeByte(result, oscillator._alternationInterval);
         } break;
         case CellType_Attacker: {
-            auto const& attacker = std::get<AttackerGenomeDescription>(cell._cellTypeData);
-            writeByte(result, attacker._mode);
+            //auto const& attacker = std::get<AttackerGenomeDescription>(cell._cellTypeData);
         } break;
         case CellType_Injector: {
             auto const& injector = std::get<InjectorGenomeDescription>(cell._cellTypeData);
@@ -372,7 +371,6 @@ namespace
             } break;
             case CellType_Attacker: {
                 AttackerGenomeDescription attacker;
-                attacker._mode = readByte(data, bytePosition) % EnergyDistributionMode_Count;
                 cell._cellTypeData = attacker;
             } break;
             case CellType_Injector: {

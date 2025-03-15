@@ -38,7 +38,7 @@ TEST_F(DefenderTests, attackerVsAntiAttacker)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(AttackerDescription().mode(EnergyDistributionMode_TransmittersAndConstructors)),
+            .cellType(AttackerDescription()),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
@@ -77,7 +77,7 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(AttackerDescription().mode(EnergyDistributionMode_TransmittersAndConstructors)),
+            .cellType(AttackerDescription()),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})

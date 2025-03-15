@@ -818,7 +818,7 @@ TEST_F(ConstructorTests, constructOscillatorCell)
 
 TEST_F(ConstructorTests, constructAttackerCell)
 {
-    auto attackerDesc = AttackerGenomeDescription().mode(EnergyDistributionMode_TransmittersAndConstructors);
+    auto attackerDesc = AttackerGenomeDescription();
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription().cellType(attackerDesc)}));
 
     DataDescription data;
@@ -835,9 +835,6 @@ TEST_F(ConstructorTests, constructAttackerCell)
     auto actualConstructedCell = getOtherCell(actualData, 1);
 
     EXPECT_EQ(CellType_Attacker, actualConstructedCell.getCellType());
-
-    auto actualAttacker = std::get<AttackerDescription>(actualConstructedCell._cellTypeData);
-    EXPECT_EQ(attackerDesc._mode, actualAttacker._mode);
 }
 
 TEST_F(ConstructorTests, constructDefenderCell)

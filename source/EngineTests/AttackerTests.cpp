@@ -97,7 +97,7 @@ TEST_F(AttackerTests, successDistributeToOneTransmitter)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(AttackerDescription().mode(EnergyDistributionMode_TransmittersAndConstructors)),
+            .cellType(AttackerDescription()),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
@@ -134,7 +134,7 @@ TEST_F(AttackerTests, successDistributeToTwoTransmitters)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(AttackerDescription().mode(EnergyDistributionMode_TransmittersAndConstructors)),
+            .cellType(AttackerDescription()),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
@@ -171,7 +171,7 @@ TEST_F(AttackerTests, successDistributeToTwoTransmittersWithDifferentColor)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(AttackerDescription().mode(EnergyDistributionMode_TransmittersAndConstructors)),
+            .cellType(AttackerDescription()),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
@@ -211,7 +211,7 @@ TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(AttackerDescription().mode(EnergyDistributionMode_TransmittersAndConstructors)),
+            .cellType(AttackerDescription()),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
@@ -251,7 +251,7 @@ TEST_F(AttackerTests, successDistributeToConnectedCells)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(AttackerDescription().mode(EnergyDistributionMode_ConnectedCells)),
+            .cellType(AttackerDescription()),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})

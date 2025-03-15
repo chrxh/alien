@@ -164,7 +164,7 @@ struct SimulationParameters
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     ColorVector<float> cellTypeAttackerSensorDetectionFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    bool cellTypeAttackerDestroyCells = false;
+    bool cellTypeAttackerDestroyCells = true;
 
     // Cell type: Constructor
     ColorVector<float> cellTypeConstructorConnectingCellMaxDistance = {2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f};

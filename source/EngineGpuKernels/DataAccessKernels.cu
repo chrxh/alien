@@ -123,7 +123,6 @@ namespace
             cellTO.cellTypeData.oscillator.numPulses = cell->cellTypeData.oscillator.numPulses;
         } break;
         case CellType_Attacker: {
-            cellTO.cellTypeData.attacker.mode = cell->cellTypeData.attacker.mode;
         } break;
         case CellType_Injector: {
             cellTO.cellTypeData.injector.mode = cell->cellTypeData.injector.mode;

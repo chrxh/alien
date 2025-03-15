@@ -94,8 +94,6 @@ namespace
 
     auto constexpr Id_InjectorGenome_Mode = 0;
 
-    auto constexpr Id_AttackerGenome_Mode = 0;
-
     auto constexpr Id_OscillatorGenome_AutoTriggerInterval = 0;
     auto constexpr Id_OscillatorGenome_AlternationInterval = 1;
 
@@ -206,8 +204,6 @@ namespace
 
     auto constexpr Id_Injector_Mode = 0;
     auto constexpr Id_Injector_Counter = 1;
-
-    auto constexpr Id_Attacker_Mode = 0;
 
     auto constexpr Id_Oscillator_PulseMode = 0;
     auto constexpr Id_Oscillator_AlternationMode = 1;
@@ -404,9 +400,7 @@ namespace cereal
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, AttackerGenomeDescription& data)
     {
-        AttackerGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_AttackerGenome_Mode, data._mode, defaultObject._mode);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AttackerGenomeDescription)
@@ -732,9 +726,7 @@ namespace cereal
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, AttackerDescription& data)
     {
-        AttackerDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Attacker_Mode, data._mode, defaultObject._mode);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AttackerDescription)

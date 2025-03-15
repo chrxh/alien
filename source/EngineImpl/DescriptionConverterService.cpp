@@ -463,7 +463,6 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
     } break;
     case CellType_Attacker: {
         AttackerDescription attacker;
-        attacker._mode = cellTO.cellTypeData.attacker.mode;
         result._cellTypeData = attacker;
     } break;
     case CellType_Injector: {
@@ -663,7 +662,6 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
     case CellType_Attacker: {
         auto const& attackerDesc = std::get<AttackerDescription>(cellDesc._cellTypeData);
         AttackerTO& attackerTO = cellTO.cellTypeData.attacker;
-        attackerTO.mode = attackerDesc._mode;
     } break;
     case CellType_Injector: {
         auto const& injectorDesc = std::get<InjectorDescription>(cellDesc._cellTypeData);

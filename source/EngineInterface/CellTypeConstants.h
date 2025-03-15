@@ -81,6 +81,9 @@ enum SensorRestrictToMutants_
 //********************
 namespace Channels
 {
+    auto constexpr AttackerNotify = 7;
+    auto constexpr AttackerSuccess = 2;
+
     auto constexpr MuscleTrigger = 0;
     auto constexpr MuscleAngle = 1;
 }
