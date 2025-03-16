@@ -54,6 +54,7 @@ struct SimulationParameters
     // Physics: Thresholds
     float maxVelocity = 2.0f;
     float minCellDistance = 0.3f;
+    static float constexpr maxForceDecayProbability = 0.2f;
 
     // Physics: Binding
     ColorVector<float> maxBindingDistance = {3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f};
@@ -72,7 +73,9 @@ struct SimulationParameters
         Infinity<float>::value,
         Infinity<float>::value};
     bool particleTransformationAllowed = false;
-    static float constexpr radiationProb = 0.03f;
+    static float constexpr radiationProbability = 0.03f;
+    static float constexpr radiationVelocityMultiplier = 1.0f;
+    static float constexpr radiationVelocityPerturbation = 0.5f;
 
     // Cell life cycle
     ColorVector<int> maxCellAge = {
@@ -109,8 +112,8 @@ struct SimulationParameters
     static float constexpr constructorAdditionalOffspringDistance = 0.8f;
 
     // Cell type: Defender
-    ColorVector<float> defenderAntiAttackerStrength = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
-    ColorVector<float> defenderAntiInjectorStrength = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
+    ColorVector<float> defenderAntiAttackerStrength = {0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f};
+    ColorVector<float> defenderAntiInjectorStrength = {0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f};
 
     // Cell type: Injector
     ColorVector<float> injectorInjectionRadius = {3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f};
@@ -150,8 +153,7 @@ struct SimulationParameters
     ColorVector<float> radiationAbsorptionLowConnectionPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> radiationAbsorptionHighVelocityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
-
-    ColorVector<float> attackerColorInhomogeneityFactor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+    // Expert settings: Advanced attacker control
     ColorMatrix<float> attackerSameMutantPenalty = {
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
@@ -161,19 +163,12 @@ struct SimulationParameters
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     ColorVector<float> attackerSensorDetectionFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    static float constexpr attackerColorInhomogeneityFactor = 1.0f;
 
-    float cellMaxForceDecayProb = 0.2f;
-
-    ColorVector<float> genomeComplexitySizeFactor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-    ColorVector<float> genomeComplexityRamificationFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    ColorVector<float> genomeComplexityNeuronFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    ColorVector<int> genomeComplexityDepthLevel = {3, 3, 3, 3, 3, 3, 3};
-
-    float radiationVelocityMultiplier = 1.0f;
-    float radiationVelocityPerturbation = 0.5f;
-    bool cellInactiveMaxAgeActivated = false;
-    bool cellEmergentMaxAgeActivated = false;
-    ColorVector<int> cellEmergentMaxAge = {
+    // Expert settings: Cell age limiter
+    bool maxAgeForInactiveCellsActivated = false;  // Candidate for deletion
+    bool freeCellMaxAgeActivated = false;
+    ColorVector<int> freeCellMaxAge = {
         Infinity<int>::value,
         Infinity<int>::value,
         Infinity<int>::value,
@@ -181,15 +176,17 @@ struct SimulationParameters
         Infinity<int>::value,
         Infinity<int>::value,
         Infinity<int>::value};
-
-    bool cellMaxAgeBalancer = false;
-    int cellMaxAgeBalancerInterval = 10000;
-    bool cellResetAgeAfterActivation = false;
+    bool resetCellAgeAfterActivation = false;   // Candidate for deletion
+    bool maxCellAgeBalancerActivated = false;
+    int maxCellAgeBalancerInterval = 10000;
 
     // Expert settings: Cell glow
     CellColoring cellGlowColoring = CellColoring_CellColor;
     float cellGlowRadius = 4.0f;
     float cellGlowStrength = 0.1f;
+
+    // Expert settings: Customize deletion mutations setting
+    int cellCopyMutationDeletionMinSize = 0;
 
     // Expert settings: Customize neuron mutations setting
     float cellCopyMutationNeuronDataWeight = 0.2f;
@@ -199,16 +196,18 @@ struct SimulationParameters
     float cellCopyMutationNeuronDataDamping = 1.05f;
     float cellCopyMutationNeuronDataOffset = 0.05f;
 
-    // Expert settings: Customize deletion mutations setting
-    int cellCopyMutationDeletionMinSize = 0;
-
     // Expert settings: External energy settings
     float externalEnergy = 0.0f;
     ColorVector<float> externalEnergyInflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> externalEnergyConditionalInflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    ColorVector<float> externalEnergyBackflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     bool externalEnergyInflowOnlyForNonSelfReplicators = false;
+    ColorVector<float> externalEnergyBackflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     float externalEnergyBackflowLimit = Infinity<float>::value;
+
+    // Expert settings: Genome complexity measurement
+    ColorVector<float> genomeComplexitySizeFactor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+    ColorVector<float> genomeComplexityRamificationFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    ColorVector<int> genomeComplexityDepthLevel = {3, 3, 3, 3, 3, 3, 3};
 
     // All other parameters
     SimulationParametersZoneValues baseValues;

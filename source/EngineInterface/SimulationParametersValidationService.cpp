@@ -30,11 +30,13 @@ void SimulationParametersValidationService::validateAndCorrect(SimulationParamet
         parameters.genomeComplexityRamificationFactor[i] = std::max(0.0f, parameters.genomeComplexityRamificationFactor[i]);
         parameters.genomeComplexityNeuronFactor[i] = std::max(0.0f, parameters.genomeComplexityNeuronFactor[i]);
         parameters.muscleEnergyCost[i] = std::max(0.0f, std::min(5.0f, parameters.muscleEnergyCost[i]));
+        parameters.defenderAntiAttackerStrength[i] = std::max(0.0f, parameters.defenderAntiAttackerStrength[i]);
+        parameters.defenderAntiInjectorStrength[i] = std::max(0.0f, parameters.defenderAntiInjectorStrength[i]);
     }
     parameters.externalEnergy = std::max(0.0f, parameters.externalEnergy);
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
     parameters.timestepSize = std::max(0.0f, parameters.timestepSize);
-    parameters.cellMaxAgeBalancerInterval = std::max(1000, std::min(1000000, parameters.cellMaxAgeBalancerInterval));
+    parameters.maxCellAgeBalancerInterval = std::max(1000, std::min(1000000, parameters.maxCellAgeBalancerInterval));
     parameters.cellGlowRadius = std::max(1.0f, std::min(8.0f, parameters.cellGlowRadius));
     parameters.cellGlowStrength = std::max(0.0f, std::min(1.0f, parameters.cellGlowStrength));
 

@@ -382,7 +382,7 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
 
         if (Math::length(cell->shared1) > SpotCalculator::calcParameter(
                 &SimulationParametersZoneValues::cellMaxForce, &SimulationParametersZoneActivatedValues::cellMaxForce, data, cell->pos, cell->color)) {
-            if (data.numberGen1.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
+            if (data.numberGen1.random() < cudaSimulationParameters.maxForceDecayProbability) {
                 CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
             }
         }
@@ -638,7 +638,7 @@ __inline__ __device__ void CellProcessor::livingStateTransition_calcFutureState(
             livingState = LivingState_Ready;
         } else if (origLivingState == LivingState_Activating) {
             livingState = LivingState_Ready;
-            if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellResetAgeAfterActivation) {
+            if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.resetCellAgeAfterActivation) {
                 atomicExch(&cell->age, 0);
             }
         } else if (origLivingState == LivingState_Reviving) {
@@ -751,7 +751,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
         if (cell->barrier) {
             continue;
         }
-        if (data.numberGen1.random() < cudaSimulationParameters.radiationProb) {
+        if (data.numberGen1.random() < cudaSimulationParameters.radiationProbability) {
 
             auto radiationFactor = 0.0f;
             if (cell->energy > cudaSimulationParameters.radiationType2_energyThreshold[cell->color]) {
@@ -770,7 +770,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
 
                 auto const& cellEnergy = cell->energy;
                 auto energyLoss = cellEnergy * radiationFactor;
-                energyLoss = energyLoss / cudaSimulationParameters.radiationProb;
+                energyLoss = energyLoss / cudaSimulationParameters.radiationProbability;
                 energyLoss = 2 * energyLoss * data.numberGen1.random();
                 if (cellEnergy > 1) {
 
@@ -828,7 +828,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         }
 
         auto cellMaxAge = cudaSimulationParameters.maxCellAge[cell->color];
-        if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellInactiveMaxAgeActivated && cell->mutationId != 1
+        if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.maxAgeForInactiveCellsActivated && cell->mutationId != 1
             && cell->cellTypeUsed == CellTriggered_No && cell->livingState == LivingState_Ready && cell->activationTime == 0) {
             bool adjacentCellsUsed = false;
             for (int i = 0; i < cell->numConnections; ++i) {
@@ -839,7 +839,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             }
             if (!adjacentCellsUsed) {
                 auto cellInactiveMaxAge = SpotCalculator::calcParameter(
-                    &SimulationParametersZoneValues::cellInactiveMaxAge,
+                    &SimulationParametersZoneValues::maxAgeForInactiveCells,
                     &SimulationParametersZoneActivatedValues::cellInactiveMaxAge,
                     data,
                     cell->pos,
@@ -848,8 +848,8 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
                 cellMaxAge = toInt(cellInactiveMaxAge);
             }
         }
-        if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellEmergentMaxAgeActivated && cell->mutationId == 1) {
-            cellMaxAge = cudaSimulationParameters.cellEmergentMaxAge[cell->color];
+        if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.freeCellMaxAgeActivated && cell->cellType == CellType_Free) {
+            cellMaxAge = cudaSimulationParameters.freeCellMaxAge[cell->color];
         }
         if (cellMaxAge > 0 && cell->age > cellMaxAge) {
             cellDestruction = true;

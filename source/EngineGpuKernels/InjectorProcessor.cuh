@@ -60,7 +60,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
                     auto numDefenderCells = countAndTrackDefenderCells(statistics, otherCell);
                     float defendStrength = numDefenderCells == 0
                         ? 1.0f
-                        : powf(cudaSimulationParameters.defenderAntiInjectorStrength[cell->color], numDefenderCells);
+                        : powf(cudaSimulationParameters.defenderAntiInjectorStrength[cell->color] + 1.0f, numDefenderCells);
                     injectorDuration = toInt(toFloat(injectorDuration) * defendStrength);
                     if (injector.counter < injectorDuration) {
                         otherCell->releaseLock();

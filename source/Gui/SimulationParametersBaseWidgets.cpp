@@ -823,7 +823,7 @@ void _SimulationParametersBaseWidgets::process()
                 .name("Anti-attacker strength")
                 .textWidth(RightColumnWidth)
                 .colorDependence(true)
-                .min(1.0f)
+                .min(0.0f)
                 .max(5.0f)
                 .defaultValue(origParameters.defenderAntiAttackerStrength)
                 .tooltip("If an attacked cell is connected to defender cells or itself a defender cell the attack strength is reduced by this factor."),
@@ -833,7 +833,7 @@ void _SimulationParametersBaseWidgets::process()
                 .name("Anti-injector strength")
                 .textWidth(RightColumnWidth)
                 .colorDependence(true)
-                .min(1.0f)
+                .min(0.0f)
                 .max(5.0f)
                 .defaultValue(origParameters.defenderAntiInjectorStrength)
                 .tooltip("If a constructor cell is attacked by an injector and connected to defender cells, the injection duration is increased by this "
@@ -1135,16 +1135,6 @@ void _SimulationParametersBaseWidgets::process()
                 .defaultValue(origParameters.baseValues.cellTypeAttackerConnectionsMismatchPenalty)
                 .tooltip("The larger this parameter is, the more difficult it is to attack cells that contain more connections."),
             parameters.baseValues.cellTypeAttackerConnectionsMismatchPenalty);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Color inhomogeneity factor")
-                .textWidth(RightColumnWidth)
-                .colorDependence(true)
-                .min(0)
-                .max(2.0f)
-                .defaultValue(origParameters.attackerColorInhomogeneityFactor)
-                .tooltip("If the attacked cell is connected to cells with different colors, this factor affects the energy of the captured energy."),
-            parameters.attackerColorInhomogeneityFactor);
     }
     AlienImGui::EndTreeNode();
 
@@ -1194,39 +1184,39 @@ void _SimulationParametersBaseWidgets::process()
                 .format("%.0f")
                 .logarithmic(true)
                 .infinity(true)
-                .disabledValue(parameters.baseValues.cellInactiveMaxAge)
-                .defaultEnabledValue(&origParameters.cellInactiveMaxAgeActivated)
-                .defaultValue(origParameters.baseValues.cellInactiveMaxAge)
+                .disabledValue(parameters.baseValues.maxAgeForInactiveCells)
+                .defaultEnabledValue(&origParameters.maxAgeForInactiveCellsActivated)
+                .defaultValue(origParameters.baseValues.maxAgeForInactiveCells)
                 .tooltip("Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered. Cells which "
                          "are in state 'Under construction' are not affected by this option."),
-            parameters.baseValues.cellInactiveMaxAge,
-            &parameters.cellInactiveMaxAgeActivated);
+            parameters.baseValues.maxAgeForInactiveCells,
+            &parameters.maxAgeForInactiveCellsActivated);
         AlienImGui::SliderInt(
             AlienImGui::SliderIntParameters()
-                .name("Maximum emergent cell age")
+                .name("Maximum free cell age")
                 .textWidth(RightColumnWidth)
                 .colorDependence(true)
                 .min(1)
                 .max(10000000)
                 .logarithmic(true)
                 .infinity(true)
-                .disabledValue(parameters.cellEmergentMaxAge)
-                .defaultEnabledValue(&origParameters.cellEmergentMaxAgeActivated)
-                .defaultValue(origParameters.cellEmergentMaxAge)
+                .disabledValue(parameters.freeCellMaxAge)
+                .defaultEnabledValue(&origParameters.freeCellMaxAgeActivated)
+                .defaultValue(origParameters.freeCellMaxAge)
                 .tooltip("The maximal age of cells that arise from energy particles can be set here."),
-            parameters.cellEmergentMaxAge,
-            &parameters.cellEmergentMaxAgeActivated);
+            parameters.freeCellMaxAge,
+            &parameters.freeCellMaxAgeActivated);
         AlienImGui::Checkbox(
             AlienImGui::CheckboxParameters()
                 .name("Reset age after construction")
                 .textWidth(RightColumnWidth)
-                .defaultValue(origParameters.cellResetAgeAfterActivation)
+                .defaultValue(origParameters.resetCellAgeAfterActivation)
                 .tooltip("If this option is activated, the age of the cells is reset to 0 after the construction of their cell network is completed, "
                          "i.e. when the state of the cells changes from 'Under construction' to 'Ready'. This option is particularly useful if a low "
                          "'Maximum "
                          "inactive cell age' is set, as cell networks that are under construction are inactive and could die immediately after "
                          "completion if their construction takes a long time."),
-            parameters.cellResetAgeAfterActivation);
+            parameters.resetCellAgeAfterActivation);
         AlienImGui::SliderInt(
             AlienImGui::SliderIntParameters()
                 .name("Maximum age balancing")
@@ -1234,14 +1224,14 @@ void _SimulationParametersBaseWidgets::process()
                 .logarithmic(true)
                 .min(1000)
                 .max(1000000)
-                .disabledValue(&parameters.cellMaxAgeBalancerInterval)
-                .defaultEnabledValue(&origParameters.cellMaxAgeBalancer)
-                .defaultValue(&origParameters.cellMaxAgeBalancerInterval)
+                .disabledValue(&parameters.maxCellAgeBalancerInterval)
+                .defaultEnabledValue(&origParameters.maxCellAgeBalancerActivated)
+                .defaultValue(&origParameters.maxCellAgeBalancerInterval)
                 .tooltip("Adjusts the maximum age at regular intervals. It increases the maximum age for the cell color where the fewest "
                          "replicators exist. "
                          "Conversely, the maximum age is decreased for the cell color with the most replicators."),
-            &parameters.cellMaxAgeBalancerInterval,
-            &parameters.cellMaxAgeBalancer);
+            &parameters.maxCellAgeBalancerInterval,
+            &parameters.maxCellAgeBalancerActivated);
     }
     AlienImGui::EndTreeNode();
 
@@ -1511,17 +1501,6 @@ void _SimulationParametersBaseWidgets::process()
                 .tooltip("This allows to specify up to which level of the sub-genomes the complexity calculation should be carried out. For example, a "
                          "value of 2 means that the sub- and sub-sub-genomes are taken into account in addition to the main genome."),
             parameters.genomeComplexityDepthLevel);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Neuron factor")
-                .textWidth(RightColumnWidth)
-                .colorDependence(true)
-                .min(0.0f)
-                .max(4.0f)
-                .format("%.2f")
-                .defaultValue(origParameters.genomeComplexityNeuronFactor)
-                .tooltip("This parameter takes into account the number of encoded neurons in the genome for the complexity value."),
-            parameters.genomeComplexityNeuronFactor);
     }
     AlienImGui::EndTreeNode();
 
