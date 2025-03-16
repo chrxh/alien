@@ -107,12 +107,12 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             // Evaluate defender strength
             auto numDefenderCells = countAndTrackDefenderCells(statistics, otherCell);
             float defendStrength =
-                numDefenderCells == 0 ? 1.0f : powf(cudaSimulationParameters.defenderAntiAttackerStrength[color], numDefenderCells);
+                numDefenderCells == 0 ? 1.0f : powf(cudaSimulationParameters.defenderAntiAttackerStrength[color] + 1.0f, numDefenderCells);
             energyToTransfer /= defendStrength;
 
             // Evaluate color inhomogeneity factor
             if (!isHomogene(otherCell)) {
-                energyToTransfer *= cudaSimulationParameters.attackerColorInhomogeneityFactor[color];
+                energyToTransfer *= cudaSimulationParameters.attackerColorInhomogeneityFactor;
             }
 
             // Evaluate geometry deviation

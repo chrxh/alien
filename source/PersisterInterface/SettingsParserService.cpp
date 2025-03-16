@@ -101,12 +101,6 @@ namespace
         ParameterParser::encodeDecode(
             tree, parameters.baseValues.cellMaxForce, defaultParameters.baseValues.cellMaxForce, "simulation parameters.cell.max force", parserTask);
         ParameterParser::encodeDecode(
-            tree,
-            parameters.cellMaxForceDecayProb,
-            defaultParameters.cellMaxForceDecayProb,
-            "simulation parameters.cell.max force decay probability",
-            parserTask);
-        ParameterParser::encodeDecode(
             tree, parameters.baseValues.cellMinEnergy, defaultParameters.baseValues.cellMinEnergy, "simulation parameters.cell.min energy", parserTask);
         ParameterParser::encodeDecode(
             tree,
@@ -181,12 +175,6 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.genomeComplexityNeuronFactor,
-            defaultParameters.genomeComplexityNeuronFactor,
-            "simulation parameters.genome complexity.genome complexity neuron factor",
-            parserTask);
-        ParameterParser::encodeDecode(
-            tree,
             parameters.genomeComplexityDepthLevel,
             defaultParameters.genomeComplexityDepthLevel,
             "simulation parameters.genome complexity.genome complexity depth level",
@@ -196,18 +184,6 @@ namespace
             parameters.baseValues.radiationCellAgeStrength,
             defaultParameters.baseValues.radiationCellAgeStrength,
             "simulation parameters.radiation.factor",
-            parserTask);
-        ParameterParser::encodeDecode(
-            tree,
-            parameters.radiationVelocityMultiplier,
-            defaultParameters.radiationVelocityMultiplier,
-            "simulation parameters.radiation.velocity multiplier",
-            parserTask);
-        ParameterParser::encodeDecode(
-            tree,
-            parameters.radiationVelocityPerturbation,
-            defaultParameters.radiationVelocityPerturbation,
-            "simulation parameters.radiation.velocity perturbation",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
@@ -269,6 +245,12 @@ namespace
             parameters.externalEnergyConditionalInflowFactor,
             defaultParameters.externalEnergyConditionalInflowFactor,
             "simulation parameters.cell.function.constructor.pump energy factor",
+            parserTask);
+        ParameterParser::encodeDecode(
+            tree,
+            parameters.externalEnergyInflowOnlyForNonSelfReplicators,
+            defaultParameters.externalEnergyInflowOnlyForNonSelfReplicators,
+            "simulation parameters.cell.function.constructor.externalEnergyInflowOnlyForNonSelfReplicators",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
