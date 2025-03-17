@@ -28,6 +28,18 @@ struct SimulationParameters
     int numZones = 0;
     SimulationParametersZone zone[MAX_ZONES];
 
+
+    // Parameter Data
+    using ColorFloat = int;
+    enum ColorFloat_
+    {
+        ColorFloat_MaxBindingDistance,
+        ColorFloat_Count
+    };
+    ColorVector<float> colorFloat[ColorFloat_Count] = {
+        {3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f},     // ColorFloat_MaxBindingDistance
+    };
+
     // General
     Char64 projectName = "<unnamed>";
 

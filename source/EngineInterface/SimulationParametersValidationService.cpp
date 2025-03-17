@@ -28,7 +28,6 @@ void SimulationParametersValidationService::validateAndCorrect(SimulationParamet
             std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorptionLowVelocityPenalty[i]));
         parameters.genomeComplexitySizeFactor[i] = std::max(0.0f, parameters.genomeComplexitySizeFactor[i]);
         parameters.genomeComplexityRamificationFactor[i] = std::max(0.0f, parameters.genomeComplexityRamificationFactor[i]);
-        parameters.genomeComplexityNeuronFactor[i] = std::max(0.0f, parameters.genomeComplexityNeuronFactor[i]);
         parameters.muscleEnergyCost[i] = std::max(0.0f, std::min(5.0f, parameters.muscleEnergyCost[i]));
         parameters.defenderAntiAttackerStrength[i] = std::max(0.0f, parameters.defenderAntiAttackerStrength[i]);
         parameters.defenderAntiInjectorStrength[i] = std::max(0.0f, parameters.defenderAntiInjectorStrength[i]);
