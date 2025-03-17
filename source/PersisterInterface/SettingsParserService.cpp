@@ -116,37 +116,37 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(tree, parameters.maxCellAge, defaultParameters.maxCellAge, "simulation parameters.cell.max age", parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.cellMaxAgeBalancer, defaultParameters.cellMaxAgeBalancer, "simulation parameters.cell.max age.balance.enabled", parserTask);
+            tree, parameters.maxCellAgeBalancerActivated, defaultParameters.maxCellAgeBalancerActivated, "simulation parameters.cell.max age.balance.enabled", parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellMaxAgeBalancerInterval,
-            defaultParameters.cellMaxAgeBalancerInterval,
+            parameters.maxCellAgeBalancerInterval,
+            defaultParameters.maxCellAgeBalancerInterval,
             "simulation parameters.cell.max age.balance.interval",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellInactiveMaxAgeActivated,
-            defaultParameters.cellInactiveMaxAgeActivated,
+            parameters.maxAgeForInactiveCellsActivated,
+            defaultParameters.maxAgeForInactiveCellsActivated,
             "simulation parameters.cell.inactive max age activated",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.cellInactiveMaxAge,
-            defaultParameters.baseValues.cellInactiveMaxAge,
+            parameters.baseValues.maxAgeForInactiveCells,
+            defaultParameters.baseValues.maxAgeForInactiveCells,
             "simulation parameters.cell.inactive max age",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellEmergentMaxAgeActivated,
-            defaultParameters.cellEmergentMaxAgeActivated,
+            parameters.freeCellMaxAgeActivated,
+            defaultParameters.freeCellMaxAgeActivated,
             "simulation parameters.cell.nutrient max age activated",
             parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.cellEmergentMaxAge, defaultParameters.cellEmergentMaxAge, "simulation parameters.cell.nutrient max age", parserTask);
+            tree, parameters.freeCellMaxAge, defaultParameters.freeCellMaxAge, "simulation parameters.cell.nutrient max age", parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellResetAgeAfterActivation,
-            defaultParameters.cellResetAgeAfterActivation,
+            parameters.resetCellAgeAfterActivation,
+            defaultParameters.resetCellAgeAfterActivation,
             "simulation parameters.cell.reset age after activation",
             parserTask);
         ParameterParser::encodeDecode(
@@ -453,12 +453,6 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.attackerColorInhomogeneityFactor,
-            defaultParameters.attackerColorInhomogeneityFactor,
-            "simulation parameters.cell.function.attacker.color inhomogeneity factor",
-            parserTask);
-        ParameterParser::encodeDecode(
-            tree,
             parameters.baseValues.cellTypeAttackerEnergyCost,
             defaultParameters.baseValues.cellTypeAttackerEnergyCost,
             "simulation parameters.cell.function.attacker.energy cost",
@@ -527,45 +521,45 @@ namespace
 
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellTypeTransmitterEnergyDistributionSameCreature,
-            defaultParameters.cellTypeTransmitterEnergyDistributionSameCreature,
+            parameters.transmitterEnergyDistributionSameCreature,
+            defaultParameters.transmitterEnergyDistributionSameCreature,
             "simulation parameters.cell.function.transmitter.energy distribution same creature",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellTypeTransmitterEnergyDistributionRadius,
-            defaultParameters.cellTypeTransmitterEnergyDistributionRadius,
+            parameters.transmitterEnergyDistributionRadius,
+            defaultParameters.transmitterEnergyDistributionRadius,
             "simulation parameters.cell.function.transmitter.energy distribution radius",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellTypeTransmitterEnergyDistributionValue,
-            defaultParameters.cellTypeTransmitterEnergyDistributionValue,
+            parameters.transmitterEnergyDistributionValue,
+            defaultParameters.transmitterEnergyDistributionValue,
             "simulation parameters.cell.function.transmitter.energy distribution value",
             parserTask);
 
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellTypeMuscleCrawlingAcceleration,
-            defaultParameters.cellTypeMuscleCrawlingAcceleration,
+            parameters.muscleCrawlingAcceleration,
+            defaultParameters.muscleCrawlingAcceleration,
             "simulation parameters.cell.function.muscle.crawling acceleration",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellTypeMuscleMovementAcceleration,
-            defaultParameters.cellTypeMuscleMovementAcceleration,
+            parameters.muscleMovementAcceleration,
+            defaultParameters.muscleMovementAcceleration,
             "simulation parameters.cell.function.muscle.movement acceleration",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellTypeMuscleBendingAcceleration,
-            defaultParameters.cellTypeMuscleBendingAcceleration,
+            parameters.muscleBendingAcceleration,
+            defaultParameters.muscleBendingAcceleration,
             "simulation parameters.cell.function.muscle.bending acceleration",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellTypeMuscleEnergyCost,
-            defaultParameters.cellTypeMuscleEnergyCost,
+            parameters.muscleEnergyCost,
+            defaultParameters.muscleEnergyCost,
             "simulation parameters.cell.function.muscle.energy cost",
             parserTask);
 
@@ -580,28 +574,28 @@ namespace
 
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellTypeSensorRange,
-            defaultParameters.cellTypeSensorRange,
+            parameters.sensorRadius,
+            defaultParameters.sensorRadius,
             "simulation parameters.cell.function.sensor.range",
             parserTask);
 
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellTypeReconnectorRadius,
-            defaultParameters.cellTypeReconnectorRadius,
+            parameters.reconnectorRadius,
+            defaultParameters.reconnectorRadius,
             "simulation parameters.cell.function.reconnector.radius",
             parserTask);
 
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellTypeDetonatorRadius,
-            defaultParameters.cellTypeDetonatorRadius,
+            parameters.detonatorRadius,
+            defaultParameters.detonatorRadius,
             "simulation parameters.cell.function.detonator.radius",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.cellTypeDetonatorChainExplosionProbability,
-            defaultParameters.cellTypeDetonatorChainExplosionProbability,
+            parameters.detonatorChainExplosionProbability,
+            defaultParameters.detonatorChainExplosionProbability,
             "simulation parameters.cell.function.detonator.chain explosion probability",
             parserTask);
 
@@ -778,9 +772,9 @@ namespace
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.cellInactiveMaxAge,
+                spot.values.maxAgeForInactiveCells,
                 spot.activatedValues.cellInactiveMaxAge,
-                defaultSpot.values.cellInactiveMaxAge,
+                defaultSpot.values.maxAgeForInactiveCells,
                 base + "cell.inactive max age",
                 parserTask);
 

@@ -55,7 +55,6 @@ void _SimulationParametersBaseWidgets::process()
             AlienImGui::InputTextParameters().name("Project name").textWidth(RightColumnWidth).defaultValue(origParameters.projectName),
             parameters.projectName,
             sizeof(Char64) / sizeof(char));
-            sizeof(Char64) / sizeof(char));
     }
     AlienImGui::EndTreeNode();
     /**

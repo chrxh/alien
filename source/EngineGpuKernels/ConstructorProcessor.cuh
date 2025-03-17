@@ -955,10 +955,8 @@ __inline__ __device__ float ConstructorProcessor::calcGenomeComplexity(int color
     auto depthLevel = cudaSimulationParameters.features.genomeComplexityMeasurement ? cudaSimulationParameters.genomeComplexityDepthLevel[color] : 3;
     GenomeDecoder::executeForEachNodeRecursively(genome, toInt(genomeSize), false, false, [&](int depth, int nodeAddress, int repetitions) {
         auto ramificationFactor = depth > lastDepth ? genomeComplexityRamificationFactor * toFloat(numRamifications) : 0.0f;
-        auto cellType = GenomeDecoder::getNextCellType(genome, nodeAddress);
-        auto neuronFactor = cellType == CellType_Base ? cudaSimulationParameters.genomeComplexityNeuronFactor[color] : 0.0f;
         if (depth <= depthLevel) {
-            result += /* (1.0f + toFloat(depth)) * */ toFloat(repetitions) * (ramificationFactor + sizeFactor + neuronFactor);
+            result += /* (1.0f + toFloat(depth)) * */ toFloat(repetitions) * (ramificationFactor + sizeFactor);
         }
         lastDepth = depth;
         if (ramificationFactor > 0) {
