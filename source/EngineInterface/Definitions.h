@@ -35,3 +35,5 @@ using ShapeGenerator = std::shared_ptr<_ShapeGenerator>;
 class ShapeGeneratorResult;
 
 class StatisticsHistory;
+
+class SimulationParametersService;

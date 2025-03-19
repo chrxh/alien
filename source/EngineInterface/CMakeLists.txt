@@ -32,10 +32,6 @@ add_library(EngineInterface
     ShapeGenerator.h
     SimulationFacade.h
     SimulationParameters.h
-    SimulationParametersDescription.cpp
-    SimulationParametersDescription.h
-    SimulationParametersDescriptionService.cpp
-    SimulationParametersDescriptionService.h
     SimulationParametersEditService.cpp
     SimulationParametersEditService.h
     SimulationParametersTypes.h
@@ -45,6 +41,9 @@ add_library(EngineInterface
     SimulationParametersZone.h
     SimulationParametersZoneActivatedValues.h
     SimulationParametersZoneValues.h
+    SimulationParametersSpecification.h
+    SimulationParametersSpecificationService.cpp
+    SimulationParametersSpecificationService.h
     SpaceCalculator.cpp
     SpaceCalculator.h
     StatisticsConverterService.cpp
