@@ -98,6 +98,8 @@ PUBLIC
     OpenGLHelper.h
     OverlayController.cpp
     OverlayController.h
+    ParametersSpecGuiService.cpp
+    ParametersSpecGuiService.h
     PatternAnalysisDialog.cpp
     PatternAnalysisDialog.h
     PatternEditorWindow.cpp

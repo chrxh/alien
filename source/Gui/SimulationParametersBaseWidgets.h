@@ -4,6 +4,7 @@
 
 #include "LocationWidgets.h"
 #include "ZoneColorPalette.h"
+#include "EngineInterface/SimulationParametersSpecification.h"
 
 class _SimulationParametersBaseWidgets : public _LocationWidgets
 {
@@ -20,4 +21,6 @@ private:
     ZoneColorPalette _zoneColorPalette;
     uint32_t _backupColor = 0;
     std::vector<std::string> _cellTypeStrings;
+
+    ParametersSpec _parametersSpecs;
 };
