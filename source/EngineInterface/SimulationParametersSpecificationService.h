@@ -12,4 +12,5 @@ public:
     ParametersSpec createParametersSpec() const;
 
     float& getValueRef(FloatParameterSpec const& spec, SimulationParameters& parameters) const;
+    bool& getValueRef(BoolParameterSpec const& spec, SimulationParameters& parameters) const;
 };
