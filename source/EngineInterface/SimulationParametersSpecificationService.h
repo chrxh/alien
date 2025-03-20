@@ -10,4 +10,6 @@ class SimulationParametersSpecificationService
 
 public:
     ParametersSpec createParametersSpec() const;
+
+    float& getValueRef(FloatParameterSpec const& spec, SimulationParameters& parameters) const;
 };

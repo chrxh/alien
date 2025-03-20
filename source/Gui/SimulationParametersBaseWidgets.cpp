@@ -8,10 +8,12 @@
 #include "EngineInterface/SimulationParametersTypes.h"
 #include "EngineInterface/SimulationParametersUpdateConfig.h"
 #include "EngineInterface/SimulationParametersValidationService.h"
+#include "EngineInterface/SimulationParametersSpecificationService.h"
 
 #include "AlienImGui.h"
 #include "CellTypeStrings.h"
 #include "HelpStrings.h"
+#include "ParametersSpecGuiService.h"
 #include "SimulationParametersMainWindow.h"
 
 namespace
@@ -39,6 +41,7 @@ void _SimulationParametersBaseWidgets::init(SimulationFacade const& simulationFa
     for (int i = 0; i < CellType_Count; ++i) {
         _cellTypeStrings.emplace_back(Const::CellTypeToStringMap.at(i));
     }
+    _parametersSpecs = SimulationParametersSpecificationService::get().createParametersSpec();
 }
 
 void _SimulationParametersBaseWidgets::process()
@@ -46,6 +49,8 @@ void _SimulationParametersBaseWidgets::process()
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
     auto lastParameters = parameters;
+
+    ParametersSpecGuiService::get().createWidgetsFromSpec(_parametersSpecs, ParametersSpecGuiService::LocationType::Base, parameters, origParameters);
 
     /**
      * General
@@ -57,8 +62,9 @@ void _SimulationParametersBaseWidgets::process()
             sizeof(Char64) / sizeof(char));
     }
     AlienImGui::EndTreeNode();
+
     /**
-     * Rendering
+     * Visualization
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Visualization"))) {
         AlienImGui::ColorButtonWithPicker(
@@ -103,7 +109,7 @@ void _SimulationParametersBaseWidgets::process()
             &parameters.cellRadius);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
-                .name("Zoom level for cell activity")
+                .name("Zoom level for neural activity")
                 .textWidth(RightColumnWidth)
                 .min(0)
                 .max(32.0f)
