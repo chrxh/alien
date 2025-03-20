@@ -32,9 +32,6 @@ void ParametersSpecGuiService::createWidgetsFromSpec(
                     auto const& parameter = std::get<ParameterSpec>(parameterOrAlternative);
                     if (std::holds_alternative<FloatParameterSpec>(parameter)) {
                         auto const& floatParameter = std::get<FloatParameterSpec>(parameter);
-                        if (!floatParameter._visibleInBase) {
-                            continue;
-                        }
                         auto& value = specService.getValueRef(floatParameter, parameters);
                         auto& origValue = specService.getValueRef(floatParameter, origParameters);
                         AlienImGui::SliderFloat(
@@ -45,8 +42,19 @@ void ParametersSpecGuiService::createWidgetsFromSpec(
                                 .max(floatParameter._max)
                                 .infinity(floatParameter._infinity)
                                 .defaultValue(&origValue)
-                                .tooltip(""),
+                                .tooltip(floatParameter._tooltip),
                             &value);
+                    } else if (std::holds_alternative<BoolParameterSpec>(parameter)) {
+                        auto const& boolParameter = std::get<BoolParameterSpec>(parameter);
+                        auto& value = specService.getValueRef(boolParameter, parameters);
+                        auto& origValue = specService.getValueRef(boolParameter, origParameters);
+                        AlienImGui::Checkbox(
+                            AlienImGui::CheckboxParameters()
+                                .name(boolParameter._name)
+                                .textWidth(RightColumnWidth)
+                                .defaultValue(origValue)
+                                .tooltip(boolParameter._tooltip),
+                            value);
                     }
                 }
             }
@@ -80,6 +88,8 @@ bool ParametersSpecGuiService::isVisible(ParameterOrAlternativeSpec const& param
         auto const& parameter = std::get<ParameterSpec>(parameterOrAlternativeSpec);
         if (std::holds_alternative<FloatParameterSpec>(parameter)) {
             return isVisible(std::get<FloatParameterSpec>(parameter));
+        } else if (std::holds_alternative<BoolParameterSpec>(parameter)) {
+            return isVisible(std::get<BoolParameterSpec>(parameter));
         } else {
             CHECK(false);
         }

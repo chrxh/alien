@@ -9,28 +9,43 @@
 
 #include "Definitions.h"
 
-struct AbstractParameterSpec
+struct BoolParameterSpec
 {
-    MEMBER_DECLARATION(AbstractParameterSpec, bool, visibleInBase, true);
-    MEMBER_DECLARATION(AbstractParameterSpec, bool, visibleInSpot, false);
-    MEMBER_DECLARATION(AbstractParameterSpec, bool, visibleInSource, false);
+    MEMBER_DECLARATION(BoolParameterSpec, bool, visibleInBase, true);
+    MEMBER_DECLARATION(BoolParameterSpec, bool, visibleInSpot, false);
+    MEMBER_DECLARATION(BoolParameterSpec, bool, visibleInSource, false);
+    MEMBER_DECLARATION(BoolParameterSpec, std::string, name, std::string());
+    MEMBER_DECLARATION(BoolParameterSpec, int, valueAddress, 0);
+    MEMBER_DECLARATION(BoolParameterSpec, std::optional<std::string>, tooltip, std::nullopt);
+    MEMBER_DECLARATION(BoolParameterSpec, std::optional<int>, valueActivationAddress, std::nullopt);
 };
 
-struct FloatParameterSpec : public AbstractParameterSpec
+struct FloatParameterSpec
 {
+    MEMBER_DECLARATION(FloatParameterSpec, bool, visibleInBase, true);
+    MEMBER_DECLARATION(FloatParameterSpec, bool, visibleInSpot, false);
+    MEMBER_DECLARATION(FloatParameterSpec, bool, visibleInSource, false);
     MEMBER_DECLARATION(FloatParameterSpec, std::string, name, std::string());
     MEMBER_DECLARATION(FloatParameterSpec, int, valueAddress, 0);
+    MEMBER_DECLARATION(FloatParameterSpec, std::optional<std::string>, tooltip, std::nullopt);
+    MEMBER_DECLARATION(FloatParameterSpec, std::optional<int>, valueActivationAddress, std::nullopt);
+
     MEMBER_DECLARATION(FloatParameterSpec, float, min, 0);
     MEMBER_DECLARATION(FloatParameterSpec, float, max, 0);
     MEMBER_DECLARATION(FloatParameterSpec, bool, infinity, false);
-    MEMBER_DECLARATION(FloatParameterSpec, std::optional<int>, valueActivationAddress, std::nullopt);
 };
-using ParameterSpec = std::variant<FloatParameterSpec>;
 
-struct ParameterAlternativeSpec : public AbstractParameterSpec
+using ParameterSpec = std::variant<BoolParameterSpec, FloatParameterSpec>;
+
+struct ParameterAlternativeSpec
 {
+    MEMBER_DECLARATION(ParameterAlternativeSpec, bool, visibleInBase, true);
+    MEMBER_DECLARATION(ParameterAlternativeSpec, bool, visibleInSpot, false);
+    MEMBER_DECLARATION(ParameterAlternativeSpec, bool, visibleInSource, false);
     MEMBER_DECLARATION(ParameterAlternativeSpec, std::string, name, std::string());
     MEMBER_DECLARATION(ParameterAlternativeSpec, int, valueAddress, 0);
+    MEMBER_DECLARATION(ParameterAlternativeSpec, std::optional<std::string>, tooltip, std::nullopt);
+
     MEMBER_DECLARATION(ParameterAlternativeSpec, std::vector<std::vector<ParameterSpec>>, parameter, {});
 };
 
