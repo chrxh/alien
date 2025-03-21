@@ -15,6 +15,7 @@ struct BoolParameterSpec
     MEMBER_DECLARATION(BoolParameterSpec, bool, visibleInSpot, false);
     MEMBER_DECLARATION(BoolParameterSpec, bool, visibleInSource, false);
     MEMBER_DECLARATION(BoolParameterSpec, std::string, name, std::string());
+    MEMBER_DECLARATION(BoolParameterSpec, int, refTypeId, 0);
     MEMBER_DECLARATION(BoolParameterSpec, int, valueAddress, 0);
     MEMBER_DECLARATION(BoolParameterSpec, std::optional<std::string>, tooltip, std::nullopt);
     MEMBER_DECLARATION(BoolParameterSpec, std::optional<int>, valueActivationAddress, std::nullopt);
@@ -32,6 +33,8 @@ struct FloatParameterSpec
 
     MEMBER_DECLARATION(FloatParameterSpec, float, min, 0);
     MEMBER_DECLARATION(FloatParameterSpec, float, max, 0);
+    MEMBER_DECLARATION(FloatParameterSpec, bool, logarithmic, false);
+    MEMBER_DECLARATION(FloatParameterSpec, std::string, format, "%.3f");
     MEMBER_DECLARATION(FloatParameterSpec, bool, infinity, false);
 };
 
