@@ -32,22 +32,24 @@ void ParametersSpecGuiService::createWidgetsFromSpec(
                     auto const& parameter = std::get<ParameterSpec>(parameterOrAlternative);
                     if (std::holds_alternative<FloatParameterSpec>(parameter)) {
                         auto const& floatParameter = std::get<FloatParameterSpec>(parameter);
-                        auto& value = specService.getValueRef(floatParameter, parameters);
-                        auto& origValue = specService.getValueRef(floatParameter, origParameters);
+                        auto& value = specService.getValueRef(floatParameter, parameters, 0);
+                        auto& origValue = specService.getValueRef(floatParameter, origParameters, 0);
                         AlienImGui::SliderFloat(
                             AlienImGui::SliderFloatParameters()
                                 .name(floatParameter._name)
                                 .textWidth(RightColumnWidth)
                                 .min(floatParameter._min)
                                 .max(floatParameter._max)
+                                .logarithmic(floatParameter._logarithmic)
+                                .format(floatParameter._format)
                                 .infinity(floatParameter._infinity)
                                 .defaultValue(&origValue)
                                 .tooltip(floatParameter._tooltip),
                             &value);
                     } else if (std::holds_alternative<BoolParameterSpec>(parameter)) {
                         auto const& boolParameter = std::get<BoolParameterSpec>(parameter);
-                        auto& value = specService.getValueRef(boolParameter, parameters);
-                        auto& origValue = specService.getValueRef(boolParameter, origParameters);
+                        auto& value = specService.getValueRef(boolParameter, parameters, 0);
+                        auto& origValue = specService.getValueRef(boolParameter, origParameters, 0);
                         AlienImGui::Checkbox(
                             AlienImGui::CheckboxParameters()
                                 .name(boolParameter._name)

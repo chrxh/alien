@@ -51,6 +51,7 @@ void _SimulationParametersBaseWidgets::process()
     auto lastParameters = parameters;
 
     ParametersSpecGuiService::get().createWidgetsFromSpec(_parametersSpecs, ParametersSpecGuiService::LocationType::Base, parameters, origParameters);
+    AlienImGui::Separator();
 
     /**
      * General
