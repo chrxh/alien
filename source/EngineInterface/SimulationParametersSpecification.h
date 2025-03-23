@@ -9,67 +9,53 @@
 
 #include "Definitions.h"
 
-struct BoolParameterSpec
+
+struct BoolSpec
 {
-    MEMBER_DECLARATION(BoolParameterSpec, bool, visibleInBase, true);
-    MEMBER_DECLARATION(BoolParameterSpec, bool, visibleInZone, false);
-    MEMBER_DECLARATION(BoolParameterSpec, bool, visibleInSource, false);
-    MEMBER_DECLARATION(BoolParameterSpec, std::string, name, std::string());
-    MEMBER_DECLARATION(BoolParameterSpec, int, refTypeId, 0);
-    MEMBER_DECLARATION(BoolParameterSpec, int, valueAddress, 0);
-    MEMBER_DECLARATION(BoolParameterSpec, std::optional<std::string>, tooltip, std::nullopt);
-    MEMBER_DECLARATION(BoolParameterSpec, std::optional<int>, valueActivationAddress, std::nullopt);
 };
 
-struct FloatParameterSpec
+struct FloatSpec
 {
-    MEMBER_DECLARATION(FloatParameterSpec, bool, visibleInBase, true);
-    MEMBER_DECLARATION(FloatParameterSpec, bool, visibleInZone, false);
-    MEMBER_DECLARATION(FloatParameterSpec, bool, visibleInSource, false);
-    MEMBER_DECLARATION(FloatParameterSpec, std::string, name, std::string());
-    MEMBER_DECLARATION(FloatParameterSpec, int, valueAddress, 0);
-    MEMBER_DECLARATION(FloatParameterSpec, std::optional<std::string>, tooltip, std::nullopt);
-    MEMBER_DECLARATION(FloatParameterSpec, std::optional<int>, valueActivationAddress, std::nullopt);
-
-    MEMBER_DECLARATION(FloatParameterSpec, float, min, 0);
-    MEMBER_DECLARATION(FloatParameterSpec, float, max, 0);
-    MEMBER_DECLARATION(FloatParameterSpec, bool, logarithmic, false);
-    MEMBER_DECLARATION(FloatParameterSpec, std::string, format, "%.3f");
-    MEMBER_DECLARATION(FloatParameterSpec, bool, infinity, false);
+    MEMBER_DECLARATION(FloatSpec, float, min, 0);
+    MEMBER_DECLARATION(FloatSpec, float, max, 0);
+    MEMBER_DECLARATION(FloatSpec, bool, logarithmic, false);
+    MEMBER_DECLARATION(FloatSpec, std::string, format, "%.3f");
+    MEMBER_DECLARATION(FloatSpec, bool, infinity, false);
 };
 
-struct Char64ParameterSpec
+struct Char64Spec
 {
-    MEMBER_DECLARATION(Char64ParameterSpec, bool, visibleInBase, true);
-    MEMBER_DECLARATION(Char64ParameterSpec, bool, visibleInZone, false);
-    MEMBER_DECLARATION(Char64ParameterSpec, bool, visibleInSource, false);
-    MEMBER_DECLARATION(Char64ParameterSpec, std::string, name, std::string());
-    MEMBER_DECLARATION(Char64ParameterSpec, int, refTypeId, 0);
-    MEMBER_DECLARATION(Char64ParameterSpec, int, valueAddress, 0);
-    MEMBER_DECLARATION(Char64ParameterSpec, std::optional<std::string>, tooltip, std::nullopt);
-    MEMBER_DECLARATION(Char64ParameterSpec, std::optional<int>, valueActivationAddress, std::nullopt);
 };
 
-using ParameterSpec = std::variant<BoolParameterSpec, FloatParameterSpec, Char64ParameterSpec>;
-
-struct ParameterAlternativeSpec
+struct ParameterSpec;
+struct AlternativeSpec
 {
-    MEMBER_DECLARATION(ParameterAlternativeSpec, bool, visibleInBase, true);
-    MEMBER_DECLARATION(ParameterAlternativeSpec, bool, visibleInZone, false);
-    MEMBER_DECLARATION(ParameterAlternativeSpec, bool, visibleInSource, false);
-    MEMBER_DECLARATION(ParameterAlternativeSpec, std::string, name, std::string());
-    MEMBER_DECLARATION(ParameterAlternativeSpec, int, valueAddress, 0);
-    MEMBER_DECLARATION(ParameterAlternativeSpec, std::optional<std::string>, tooltip, std::nullopt);
-
-    MEMBER_DECLARATION(ParameterAlternativeSpec, std::vector<std::vector<ParameterSpec>>, parameter, {});
+    using AlternativeToParameters = std::map<std::string, std::vector<ParameterSpec>>;
+    MEMBER_DECLARATION(AlternativeSpec, AlternativeToParameters, alternativeToParameters, {});
 };
 
-using ParameterOrAlternativeSpec = std::variant<ParameterSpec, ParameterAlternativeSpec>;
+struct ColorSpec
+{
+};
+
+using TypeSpec = std::variant<BoolSpec, FloatSpec, Char64Spec, AlternativeSpec, ColorSpec>;
+
+struct ParameterSpec
+{
+    MEMBER_DECLARATION(ParameterSpec, bool, visibleInBase, true);
+    MEMBER_DECLARATION(ParameterSpec, bool, visibleInZone, false);
+    MEMBER_DECLARATION(ParameterSpec, bool, visibleInSource, false);
+    MEMBER_DECLARATION(ParameterSpec, std::string, name, std::string());
+    MEMBER_DECLARATION(ParameterSpec, int, valueAddress, 0);
+    MEMBER_DECLARATION(ParameterSpec, std::optional<std::string>, tooltip, std::nullopt);
+    MEMBER_DECLARATION(ParameterSpec, std::optional<int>, valueActivationAddress, std::nullopt);
+    MEMBER_DECLARATION(ParameterSpec, TypeSpec, type, FloatSpec());
+};
 
 struct ParameterGroupSpec
 {
     MEMBER_DECLARATION(ParameterGroupSpec, std::string, name, std::string());
-    MEMBER_DECLARATION(ParameterGroupSpec, std::vector<ParameterOrAlternativeSpec>, parameters, {});
+    MEMBER_DECLARATION(ParameterGroupSpec, std::vector<ParameterSpec>, parameters, {});
     MEMBER_DECLARATION(ParameterGroupSpec, std::optional<int>, featureAddress, std::nullopt);
 };
 

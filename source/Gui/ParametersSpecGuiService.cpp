@@ -27,52 +27,39 @@ void ParametersSpecGuiService::createWidgetsFromSpec(
             continue;
         }
         if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name(group._name))) {
-            for (auto const& parameterOrAlternative : group._parameters) {
-                if (!isVisible(parameterOrAlternative, locationType)) {
+            for (auto const& parameter : group._parameters) {
+                if (!isVisible(parameter, locationType)) {
                     continue;
                 }
-                if (std::holds_alternative<ParameterSpec>(parameterOrAlternative)) {
-                    auto const& parameter = std::get<ParameterSpec>(parameterOrAlternative);
-                    if (std::holds_alternative<FloatParameterSpec>(parameter)) {
-                        auto const& floatParameter = std::get<FloatParameterSpec>(parameter);
-                        auto& value = specService.getValueRef(floatParameter, parameters, locationIndex);
-                        auto& origValue = specService.getValueRef(floatParameter, origParameters, locationIndex);
-                        AlienImGui::SliderFloat(
-                            AlienImGui::SliderFloatParameters()
-                                .name(floatParameter._name)
-                                .textWidth(RightColumnWidth)
-                                .min(floatParameter._min)
-                                .max(floatParameter._max)
-                                .logarithmic(floatParameter._logarithmic)
-                                .format(floatParameter._format)
-                                .infinity(floatParameter._infinity)
-                                .defaultValue(&origValue)
-                                .tooltip(floatParameter._tooltip),
-                            &value);
-                    } else if (std::holds_alternative<BoolParameterSpec>(parameter)) {
-                        auto const& boolParameter = std::get<BoolParameterSpec>(parameter);
-                        auto& value = specService.getValueRef(boolParameter, parameters, locationIndex);
-                        auto& origValue = specService.getValueRef(boolParameter, origParameters, locationIndex);
-                        AlienImGui::Checkbox(
-                            AlienImGui::CheckboxParameters()
-                                .name(boolParameter._name)
-                                .textWidth(RightColumnWidth)
-                                .defaultValue(origValue)
-                                .tooltip(boolParameter._tooltip),
-                            value);
-                    } else if (std::holds_alternative<Char64ParameterSpec>(parameter)) {
-                        auto const& char64_parameter = std::get<Char64ParameterSpec>(parameter);
-                        auto& value = specService.getValueRef(char64_parameter, parameters, locationIndex);
-                        auto& origValue = specService.getValueRef(char64_parameter, origParameters, locationIndex);
-                        AlienImGui::InputText(
-                            AlienImGui::InputTextParameters()
-                                .name(char64_parameter._name)
-                                .textWidth(RightColumnWidth)
-                                .defaultValue(origValue)
-                                .tooltip(char64_parameter._tooltip),
-                            value,
-                            sizeof(Char64) / sizeof(char));
-                    }
+                if (std::holds_alternative<FloatSpec>(parameter._type)) {
+                    auto const& floatSpec = std::get<FloatSpec>(parameter._type);
+                    auto& value = specService.getValueRef<float>(parameter, parameters, locationIndex);
+                    auto& origValue = specService.getValueRef<float>(parameter, origParameters, locationIndex);
+                    AlienImGui::SliderFloat(
+                        AlienImGui::SliderFloatParameters()
+                            .name(parameter._name)
+                            .textWidth(RightColumnWidth)
+                            .min(floatSpec._min)
+                            .max(floatSpec._max)
+                            .logarithmic(floatSpec._logarithmic)
+                            .format(floatSpec._format)
+                            .infinity(floatSpec._infinity)
+                            .defaultValue(&origValue)
+                            .tooltip(parameter._tooltip),
+                        &value);
+                } else if (std::holds_alternative<BoolSpec>(parameter._type)) {
+                    auto& value = specService.getValueRef<bool>(parameter, parameters, locationIndex);
+                    auto& origValue = specService.getValueRef<bool>(parameter, origParameters, locationIndex);
+                    AlienImGui::Checkbox(
+                        AlienImGui::CheckboxParameters().name(parameter._name).textWidth(RightColumnWidth).defaultValue(origValue).tooltip(parameter._tooltip),
+                        value);
+                } else if (std::holds_alternative<Char64Spec>(parameter._type)) {
+                    auto& value = specService.getValueRef<Char64>(parameter, parameters, locationIndex);
+                    auto& origValue = specService.getValueRef<Char64>(parameter, origParameters, locationIndex);
+                    AlienImGui::InputText(
+                        AlienImGui::InputTextParameters().name(parameter._name).textWidth(RightColumnWidth).defaultValue(origValue).tooltip(parameter._tooltip),
+                        value,
+                        sizeof(Char64) / sizeof(char));
                 }
             }
         }
@@ -101,37 +88,20 @@ ParametersSpecGuiService::LocationType ParametersSpecGuiService::getLocationType
 
 bool ParametersSpecGuiService::isVisible(ParameterGroupSpec const& groupSpec, LocationType locationType) const
 {
-    return std::any_of(groupSpec._parameters.begin(), groupSpec._parameters.end(), [&](auto const& parameterOrAlternative) {
-        return isVisible(parameterOrAlternative, locationType);
+    return std::any_of(groupSpec._parameters.begin(), groupSpec._parameters.end(), [&](auto const& parameterSpec) {
+        return isVisible(parameterSpec, locationType);
     });
 }
 
-bool ParametersSpecGuiService::isVisible(ParameterOrAlternativeSpec const& parameterOrAlternativeSpec, LocationType locationType) const
+bool ParametersSpecGuiService::isVisible(ParameterSpec const& parameterSpec, LocationType locationType) const
 {
-    auto isVisible = [&locationType](auto const& parameterOrAlternative) {
-        switch (locationType) {
-        case LocationType::Base:
-            return parameterOrAlternative._visibleInBase;
-        case LocationType::Zone:
-            return parameterOrAlternative._visibleInZone;
-        case LocationType::Source:
-            return parameterOrAlternative._visibleInSource;
-        }
-        CHECK(false);
-    };
-
-    if (std::holds_alternative<ParameterSpec>(parameterOrAlternativeSpec)) {
-        auto const& parameter = std::get<ParameterSpec>(parameterOrAlternativeSpec);
-        if (std::holds_alternative<FloatParameterSpec>(parameter)) {
-            return isVisible(std::get<FloatParameterSpec>(parameter));
-        } else if (std::holds_alternative<BoolParameterSpec>(parameter)) {
-            return isVisible(std::get<BoolParameterSpec>(parameter));
-        } else if (std::holds_alternative<Char64ParameterSpec>(parameter)) {
-            return isVisible(std::get<Char64ParameterSpec>(parameter));
-        } else {
-            CHECK(false);
-        }
-    } else {
-        return isVisible(std::get<ParameterAlternativeSpec>(parameterOrAlternativeSpec));
+    switch (locationType) {
+    case LocationType::Base:
+        return parameterSpec._visibleInBase;
+    case LocationType::Zone:
+        return parameterSpec._visibleInZone;
+    case LocationType::Source:
+        return parameterSpec._visibleInSource;
     }
+    CHECK(false);
 }
