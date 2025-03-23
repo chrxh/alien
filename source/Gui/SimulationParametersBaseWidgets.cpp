@@ -50,19 +50,10 @@ void _SimulationParametersBaseWidgets::process()
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
     auto lastParameters = parameters;
 
-    ParametersSpecGuiService::get().createWidgetsFromSpec(_parametersSpecs, ParametersSpecGuiService::LocationType::Base, parameters, origParameters);
+    ImGui::PushID(1);
+    ParametersSpecGuiService::get().createWidgetsFromSpec(_parametersSpecs, 0, parameters, origParameters);
+    ImGui::PopID();
     AlienImGui::Separator();
-
-    /**
-     * General
-     */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("General"))) {
-        AlienImGui::InputText(
-            AlienImGui::InputTextParameters().name("Project name").textWidth(RightColumnWidth).defaultValue(origParameters.projectName),
-            parameters.projectName,
-            sizeof(Char64) / sizeof(char));
-    }
-    AlienImGui::EndTreeNode();
 
     /**
      * Visualization

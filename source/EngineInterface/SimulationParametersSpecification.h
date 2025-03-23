@@ -12,7 +12,7 @@
 struct BoolParameterSpec
 {
     MEMBER_DECLARATION(BoolParameterSpec, bool, visibleInBase, true);
-    MEMBER_DECLARATION(BoolParameterSpec, bool, visibleInSpot, false);
+    MEMBER_DECLARATION(BoolParameterSpec, bool, visibleInZone, false);
     MEMBER_DECLARATION(BoolParameterSpec, bool, visibleInSource, false);
     MEMBER_DECLARATION(BoolParameterSpec, std::string, name, std::string());
     MEMBER_DECLARATION(BoolParameterSpec, int, refTypeId, 0);
@@ -24,7 +24,7 @@ struct BoolParameterSpec
 struct FloatParameterSpec
 {
     MEMBER_DECLARATION(FloatParameterSpec, bool, visibleInBase, true);
-    MEMBER_DECLARATION(FloatParameterSpec, bool, visibleInSpot, false);
+    MEMBER_DECLARATION(FloatParameterSpec, bool, visibleInZone, false);
     MEMBER_DECLARATION(FloatParameterSpec, bool, visibleInSource, false);
     MEMBER_DECLARATION(FloatParameterSpec, std::string, name, std::string());
     MEMBER_DECLARATION(FloatParameterSpec, int, valueAddress, 0);
@@ -38,12 +38,24 @@ struct FloatParameterSpec
     MEMBER_DECLARATION(FloatParameterSpec, bool, infinity, false);
 };
 
-using ParameterSpec = std::variant<BoolParameterSpec, FloatParameterSpec>;
+struct Char64ParameterSpec
+{
+    MEMBER_DECLARATION(Char64ParameterSpec, bool, visibleInBase, true);
+    MEMBER_DECLARATION(Char64ParameterSpec, bool, visibleInZone, false);
+    MEMBER_DECLARATION(Char64ParameterSpec, bool, visibleInSource, false);
+    MEMBER_DECLARATION(Char64ParameterSpec, std::string, name, std::string());
+    MEMBER_DECLARATION(Char64ParameterSpec, int, refTypeId, 0);
+    MEMBER_DECLARATION(Char64ParameterSpec, int, valueAddress, 0);
+    MEMBER_DECLARATION(Char64ParameterSpec, std::optional<std::string>, tooltip, std::nullopt);
+    MEMBER_DECLARATION(Char64ParameterSpec, std::optional<int>, valueActivationAddress, std::nullopt);
+};
+
+using ParameterSpec = std::variant<BoolParameterSpec, FloatParameterSpec, Char64ParameterSpec>;
 
 struct ParameterAlternativeSpec
 {
     MEMBER_DECLARATION(ParameterAlternativeSpec, bool, visibleInBase, true);
-    MEMBER_DECLARATION(ParameterAlternativeSpec, bool, visibleInSpot, false);
+    MEMBER_DECLARATION(ParameterAlternativeSpec, bool, visibleInZone, false);
     MEMBER_DECLARATION(ParameterAlternativeSpec, bool, visibleInSource, false);
     MEMBER_DECLARATION(ParameterAlternativeSpec, std::string, name, std::string());
     MEMBER_DECLARATION(ParameterAlternativeSpec, int, valueAddress, 0);
