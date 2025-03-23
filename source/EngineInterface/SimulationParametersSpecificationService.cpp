@@ -7,8 +7,15 @@
 
 ParametersSpec SimulationParametersSpecificationService::createParametersSpec() const
 {
-    return ParametersSpec().groups(
-        {ParameterGroupSpec()
+    return ParametersSpec().groups({
+        ParameterGroupSpec()
+            .name("General")
+            .parameters({
+                Char64ParameterSpec()
+                    .name("Project name")
+                    .valueAddress(BASE_VALUE_OFFSET(projectName)),
+            }),
+        ParameterGroupSpec()
              .name("Visualization")
             .parameters({
                 FloatParameterSpec()
@@ -66,7 +73,7 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 FloatParameterSpec()
                     .name("Friction")
                     .valueAddress(ZONE_VALUE_OFFSET(friction))
-                    .visibleInSpot(true)
+                    .visibleInZone(true)
                     .min(0.0f)
                     .max(1.0f)
                     .format("%.4f")
@@ -76,26 +83,38 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
     });
 }
 
-float& SimulationParametersSpecificationService::getValueRef(FloatParameterSpec const& spec, SimulationParameters& parameters, int locationIndex) const
+namespace
 {
-    if (spec._visibleInBase && !spec._visibleInSpot && !spec._visibleInSource) {
-        return *(reinterpret_cast<float*>(reinterpret_cast<char*>(&parameters) + spec._valueAddress));
-    }
-    if (spec._visibleInBase && spec._visibleInSpot && !spec._visibleInSource) {
-        if (locationIndex == 0) {
-            return *(reinterpret_cast<float*>(reinterpret_cast<char*>(&parameters.baseValues) + spec._valueAddress));
-        }
-        for (int i = 0; i < parameters.numZones; ++i) {
-            if (parameters.zone[i].locationIndex == locationIndex) {
-                return *(reinterpret_cast<float*>(reinterpret_cast<char*>(&parameters.zone[i].values) + spec._valueAddress));
+    template<typename T>
+    T& getValueRefIntern(bool visibleInBase, bool visibleInZone, bool visibleInSource, int address, SimulationParameters& parameters, int locationIndex)
+    {
+        if (visibleInBase && !visibleInZone && !visibleInSource) {
+            return *(reinterpret_cast<T*>(reinterpret_cast<char*>(&parameters) + address));
+        } else if (visibleInBase && visibleInZone && !visibleInSource) {
+            if (locationIndex == 0) {
+                return *(reinterpret_cast<T*>(reinterpret_cast<char*>(&parameters.baseValues) + address));
+            }
+            for (int i = 0; i < parameters.numZones; ++i) {
+                if (parameters.zone[i].locationIndex == locationIndex) {
+                    return *(reinterpret_cast<T*>(reinterpret_cast<char*>(&parameters.zone[i].values) + address));
+                }
             }
         }
+        CHECK(false);
     }
+}
 
-    CHECK(false);
+float& SimulationParametersSpecificationService::getValueRef(FloatParameterSpec const& spec, SimulationParameters& parameters, int locationIndex) const
+{
+    return getValueRefIntern<float>(spec._visibleInBase, spec._visibleInZone, spec._visibleInSource, spec._valueAddress, parameters, locationIndex);
 }
 
 bool& SimulationParametersSpecificationService::getValueRef(BoolParameterSpec const& spec, SimulationParameters& parameters, int locationIndex) const
 {
-    return *(reinterpret_cast<bool*>(reinterpret_cast<char*>(&parameters) + spec._valueAddress));
+    return getValueRefIntern<bool>(spec._visibleInBase, spec._visibleInZone, spec._visibleInSource, spec._valueAddress, parameters, locationIndex);
+}
+
+Char64& SimulationParametersSpecificationService::getValueRef(Char64ParameterSpec const& spec, SimulationParameters& parameters, int locationIndex) const
+{
+    return getValueRefIntern<Char64>(spec._visibleInBase, spec._visibleInZone, spec._visibleInSource, spec._valueAddress, parameters, locationIndex);
 }
