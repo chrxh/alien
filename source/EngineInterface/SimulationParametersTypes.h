@@ -8,11 +8,11 @@ enum CellColoring_
     CellColoring_None,
     CellColoring_CellColor,
     CellColoring_MutationId,
-    CellColoring_MutationId_AllCellTypes,
+    CellColoring_MutationId_EveryCellType,
     CellColoring_LivingState,
     CellColoring_GenomeSize,
-    CellColoring_CellType,
-    CellColoring_AllCellTypes
+    CellColoring_SpecificCellType,
+    CellColoring_EveryCellType
 };
 
 using CellDeathConsquences = int;

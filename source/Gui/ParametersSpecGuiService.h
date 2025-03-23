@@ -15,6 +15,12 @@ public:
         SimulationParameters& origParameters) const;
 
 private:
+    void createWidgetsFromParameterSpecs(
+        std::vector<ParameterSpec> const& parameterSpecs,
+        int locationIndex,
+        SimulationParameters& parameters,
+        SimulationParameters& origParameters) const;
+
     enum class LocationType
     {
         Base,
