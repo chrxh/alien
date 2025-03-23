@@ -307,7 +307,7 @@ public:
         MEMBER_DECLARATION(ColorButtonWithPickerParameters, std::optional<uint32_t>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(ColorButtonWithPickerParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static void ColorButtonWithPicker(ColorButtonWithPickerParameters const& parameters, uint32_t& color, uint32_t& backupColor, uint32_t (&savedPalette)[32]);
+    static void ColorButtonWithPicker(ColorButtonWithPickerParameters const& parameters, uint32_t& color);
 
     static void NegativeSpacing();
     static void Separator();

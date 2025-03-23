@@ -22,22 +22,22 @@ void ParametersSpecGuiService::createWidgetsFromSpec(
     auto& specService = SimulationParametersSpecificationService::get();
     auto locationType = getLocationType(locationIndex, parameters);
 
-    for (auto const& group : parametersSpecs._groups) {
-        if (!isVisible(group, locationType)) {
+    for (auto const& groupSpec : parametersSpecs._groups) {
+        if (!isVisible(groupSpec, locationType)) {
             continue;
         }
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name(group._name))) {
-            for (auto const& parameter : group._parameters) {
-                if (!isVisible(parameter, locationType)) {
+        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name(groupSpec._name))) {
+            for (auto const& parameterSpec : groupSpec._parameters) {
+                if (!isVisible(parameterSpec, locationType)) {
                     continue;
                 }
-                if (std::holds_alternative<FloatSpec>(parameter._type)) {
-                    auto const& floatSpec = std::get<FloatSpec>(parameter._type);
-                    auto& value = specService.getValueRef<float>(parameter, parameters, locationIndex);
-                    auto& origValue = specService.getValueRef<float>(parameter, origParameters, locationIndex);
+                if (std::holds_alternative<FloatSpec>(parameterSpec._type)) {
+                    auto const& floatSpec = std::get<FloatSpec>(parameterSpec._type);
+                    auto& value = specService.getValueRef<float>(parameterSpec, parameters, locationIndex);
+                    auto& origValue = specService.getValueRef<float>(parameterSpec, origParameters, locationIndex);
                     AlienImGui::SliderFloat(
                         AlienImGui::SliderFloatParameters()
-                            .name(parameter._name)
+                            .name(parameterSpec._name)
                             .textWidth(RightColumnWidth)
                             .min(floatSpec._min)
                             .max(floatSpec._max)
@@ -45,21 +45,35 @@ void ParametersSpecGuiService::createWidgetsFromSpec(
                             .format(floatSpec._format)
                             .infinity(floatSpec._infinity)
                             .defaultValue(&origValue)
-                            .tooltip(parameter._tooltip),
+                            .tooltip(parameterSpec._tooltip),
                         &value);
-                } else if (std::holds_alternative<BoolSpec>(parameter._type)) {
-                    auto& value = specService.getValueRef<bool>(parameter, parameters, locationIndex);
-                    auto& origValue = specService.getValueRef<bool>(parameter, origParameters, locationIndex);
+                } else if (std::holds_alternative<BoolSpec>(parameterSpec._type)) {
+                    auto& value = specService.getValueRef<bool>(parameterSpec, parameters, locationIndex);
+                    auto& origValue = specService.getValueRef<bool>(parameterSpec, origParameters, locationIndex);
                     AlienImGui::Checkbox(
-                        AlienImGui::CheckboxParameters().name(parameter._name).textWidth(RightColumnWidth).defaultValue(origValue).tooltip(parameter._tooltip),
+                        AlienImGui::CheckboxParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(origValue).tooltip(parameterSpec._tooltip),
                         value);
-                } else if (std::holds_alternative<Char64Spec>(parameter._type)) {
-                    auto& value = specService.getValueRef<Char64>(parameter, parameters, locationIndex);
-                    auto& origValue = specService.getValueRef<Char64>(parameter, origParameters, locationIndex);
+                } else if (std::holds_alternative<Char64Spec>(parameterSpec._type)) {
+                    auto& value = specService.getValueRef<Char64>(parameterSpec, parameters, locationIndex);
+                    auto& origValue = specService.getValueRef<Char64>(parameterSpec, origParameters, locationIndex);
                     AlienImGui::InputText(
-                        AlienImGui::InputTextParameters().name(parameter._name).textWidth(RightColumnWidth).defaultValue(origValue).tooltip(parameter._tooltip),
+                        AlienImGui::InputTextParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(origValue).tooltip(parameterSpec._tooltip),
                         value,
                         sizeof(Char64) / sizeof(char));
+                } else if (std::holds_alternative<ColorSpec>(parameterSpec._type)) {
+                    auto& value = specService.getValueRef<uint32_t>(parameterSpec, parameters, locationIndex);
+                    auto& origValue = specService.getValueRef<uint32_t>(parameterSpec, origParameters, locationIndex);
+
+                    AlienImGui::ColorButtonWithPicker(
+                        AlienImGui::ColorButtonWithPickerParameters()
+                            .name("Background color")
+                            .textWidth(RightColumnWidth).defaultValue(origValue),
+                        value);
+
+                    //AlienImGui::InputText(
+                    //    AlienImGui::InputTextParameters().name(parameter._name).textWidth(RightColumnWidth).defaultValue(origValue).tooltip(parameter._tooltip),
+                    //    value,
+                    //    sizeof(Char64) / sizeof(char));
                 }
             }
         }

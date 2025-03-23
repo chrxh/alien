@@ -142,7 +142,6 @@ struct SimulationParametersZone
     Char64 name = "<unnamed>";
     int locationIndex = -1;
 
-    uint32_t color = 0;
     float posX = 0;
     float posY = 0;
     float velX= 0;

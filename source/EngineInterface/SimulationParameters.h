@@ -31,7 +31,6 @@ struct SimulationParameters
     Char64 projectName = "<unnamed>";
 
     // Visualization
-    uint32_t backgroundColor = 0x1b0000;
     CellColoring primaryCellColoring = CellColoring_CellColor;
     CellType highlightedCellType = CellType_Constructor;
     float cellRadius = 0.25f;

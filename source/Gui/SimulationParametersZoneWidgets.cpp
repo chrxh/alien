@@ -58,17 +58,8 @@ void _SimulationParametersZoneWidgets::process()
     AlienImGui::EndTreeNode();
 
     /**
-     * Visualization and location
+     * Location
      */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Visualization"))) {
-        AlienImGui::ColorButtonWithPicker(
-            AlienImGui::ColorButtonWithPickerParameters().name("Background color").textWidth(RightColumnWidth).defaultValue(origZone.color),
-            zone.color,
-            _backupColor,
-            _zoneColorPalette.getReference());
-    }
-    AlienImGui::EndTreeNode();
-
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Location"))) {
         if (AlienImGui::Switcher(
                 AlienImGui::SwitcherParameters().name("Shape").values({"Circular", "Rectangular"}).textWidth(RightColumnWidth).defaultValue(origZone.shape.type),

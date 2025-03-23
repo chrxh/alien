@@ -59,11 +59,12 @@ void _SimulationParametersBaseWidgets::process()
      * Visualization
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Visualization"))) {
-        AlienImGui::ColorButtonWithPicker(
-            AlienImGui::ColorButtonWithPickerParameters().name("Background color").textWidth(RightColumnWidth).defaultValue(origParameters.backgroundColor),
-            parameters.backgroundColor,
-            _backupColor,
-            _zoneColorPalette.getReference());
+        //AlienImGui::ColorButtonWithPicker(
+        //    AlienImGui::ColorButtonWithPickerParameters()
+        //        .name("Background color")
+        //        .textWidth(RightColumnWidth)
+        //        .defaultValue(origParameters.baseValues.backgroundColor),
+        //    parameters.baseValues.backgroundColor);
         AlienImGui::Switcher(
             AlienImGui::SwitcherParameters()
                 .name("Primary cell coloring")
