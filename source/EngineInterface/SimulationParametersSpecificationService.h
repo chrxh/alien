@@ -12,7 +12,6 @@ class SimulationParametersSpecificationService
 public:
     ParametersSpec createParametersSpec() const;
 
-    float& getValueRef(FloatParameterSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
-    bool& getValueRef(BoolParameterSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
-    Char64& getValueRef(Char64ParameterSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
+    template<typename T>
+    T& getValueRef(ParameterSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
 };

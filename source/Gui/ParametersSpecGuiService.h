@@ -24,5 +24,5 @@ private:
     LocationType getLocationType(int locationIndex, SimulationParameters const& parameters) const;
 
     bool isVisible(ParameterGroupSpec const& groupSpec, LocationType locationType) const;
-    bool isVisible(ParameterOrAlternativeSpec const& parameterOrAlternativeSpec, LocationType locationType) const;
+    bool isVisible(ParameterSpec const& parameterSpec, LocationType locationType) const;
 };
