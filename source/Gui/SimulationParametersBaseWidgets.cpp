@@ -9,9 +9,9 @@
 #include "EngineInterface/SimulationParametersUpdateConfig.h"
 #include "EngineInterface/SimulationParametersValidationService.h"
 #include "EngineInterface/SimulationParametersSpecificationService.h"
+#include "EngineInterface/CellTypeStrings.h"
 
 #include "AlienImGui.h"
-#include "CellTypeStrings.h"
 #include "HelpStrings.h"
 #include "ParametersSpecGuiService.h"
 #include "SimulationParametersMainWindow.h"
@@ -59,12 +59,6 @@ void _SimulationParametersBaseWidgets::process()
      * Visualization
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Visualization"))) {
-        //AlienImGui::ColorButtonWithPicker(
-        //    AlienImGui::ColorButtonWithPickerParameters()
-        //        .name("Background color")
-        //        .textWidth(RightColumnWidth)
-        //        .defaultValue(origParameters.baseValues.backgroundColor),
-        //    parameters.baseValues.backgroundColor);
         AlienImGui::Switcher(
             AlienImGui::SwitcherParameters()
                 .name("Primary cell coloring")
@@ -81,7 +75,7 @@ void _SimulationParametersBaseWidgets::process()
                      "All cell functions"})
                 .tooltip(Const::ColoringParameterTooltip),
             parameters.primaryCellColoring);
-        if (parameters.primaryCellColoring == CellColoring_CellType) {
+        if (parameters.primaryCellColoring == CellColoring_SpecificCellType) {
             AlienImGui::Switcher(
                 AlienImGui::SwitcherParameters()
                     .name("Highlighted cell function")

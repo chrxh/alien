@@ -2,6 +2,7 @@
 add_library(EngineInterface
     ArraySizes.h
     CellTypeConstants.h
+    CellTypeStrings.h
     Colors.h
     DataPointCollection.cpp
     DataPointCollection.h

@@ -28,17 +28,17 @@ struct Char64Spec
 };
 
 struct ParameterSpec;
-struct AlternativeSpec
+struct SwitcherSpec
 {
-    using AlternativeToParameters = std::map<std::string, std::vector<ParameterSpec>>;
-    MEMBER_DECLARATION(AlternativeSpec, AlternativeToParameters, alternativeToParameters, {});
+    using AlternativeToParameters = std::vector<std::pair<std::string, std::vector<ParameterSpec>>>;
+    MEMBER_DECLARATION(SwitcherSpec, AlternativeToParameters, alternativeToParameters, {});
 };
 
 struct ColorSpec
 {
 };
 
-using TypeSpec = std::variant<BoolSpec, FloatSpec, Char64Spec, AlternativeSpec, ColorSpec>;
+using TypeSpec = std::variant<BoolSpec, FloatSpec, Char64Spec, SwitcherSpec, ColorSpec>;
 
 struct ParameterSpec
 {
@@ -56,7 +56,7 @@ struct ParameterGroupSpec
 {
     MEMBER_DECLARATION(ParameterGroupSpec, std::string, name, std::string());
     MEMBER_DECLARATION(ParameterGroupSpec, std::vector<ParameterSpec>, parameters, {});
-    MEMBER_DECLARATION(ParameterGroupSpec, std::optional<int>, enabledAddress, std::nullopt);
+    MEMBER_DECLARATION(ParameterGroupSpec, bool, expertSetting, false);  // name field must match with ExpertSettingSpec::name
 };
 
 struct ExpertSettingSpec

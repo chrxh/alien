@@ -1,10 +1,19 @@
 #include "SimulationParametersSpecificationService.h"
 
+#include <Fonts/IconsFontAwesome5.h>
+
+#include "CellTypeStrings.h"
+
 #define BASE_VALUE_OFFSET(X) offsetof(SimulationParameters, X)
 #define ZONE_VALUE_OFFSET(X) offsetof(SimulationParametersZoneValues, X)
 
 ParametersSpec SimulationParametersSpecificationService::createParametersSpec() const
 {
+    std::vector<std::pair<std::string, std::vector<ParameterSpec>>> cellTypeStrings;
+    for (int i = 0; i < CellType_Count; ++i) {
+        cellTypeStrings.emplace_back(std::make_pair(Const::CellTypeToStringMap.at(i), std::vector<ParameterSpec>()));
+    }
+
     return ParametersSpec().groups({
         ParameterGroupSpec().name("General").parameters({
             ParameterSpec().name("Project name").valueAddress(BASE_VALUE_OFFSET(projectName)).type(Char64Spec()),
@@ -13,6 +22,39 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
              .name("Visualization")
             .parameters({
                 ParameterSpec().name("Background color").visibleInZone(true).valueAddress(ZONE_VALUE_OFFSET(backgroundColor)).type(ColorSpec()),
+                ParameterSpec()
+                    .name("Primary cell coloring")
+                    .valueAddress(BASE_VALUE_OFFSET(primaryCellColoring))
+                    .tooltip(
+                        "Here, one can set how the cells are to be colored during rendering. \n\n" ICON_FA_CHEVRON_RIGHT
+                        " Energy: The more energy a cell has, the brighter it is displayed. A grayscale is used.\n\n" ICON_FA_CHEVRON_RIGHT
+                        " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n" ICON_FA_CHEVRON_RIGHT
+                        " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or "
+                        "duplications are taken into account).\n\n" ICON_FA_CHEVRON_RIGHT
+                        " Mutant and cell function: Combination of mutants and cell function coloring.\n\n" ICON_FA_CHEVRON_RIGHT
+                        " Cell state: blue = ready, green = under construction, white = activating, pink = detached, pale blue = reviving, red = "
+                        "dying\n\n" ICON_FA_CHEVRON_RIGHT
+                        " Genome complexity: This property can be utilized by attacker cells when the parameter 'Complex creature protection' is "
+                        "activated (see tooltip there). The coloring is as follows: blue = creature with low bonus (usually small or simple genome structure), "
+                        "red = large bonus\n\n" ICON_FA_CHEVRON_RIGHT " Specific cell function: A specific type of cell function can be highlighted, which is "
+                                                                      "selected in the next parameter.\n\n" ICON_FA_CHEVRON_RIGHT
+                        " Every cell function: The cells are colored according to their cell function.")
+                    .type(SwitcherSpec().alternativeToParameters({
+                        {std::string("Energy"), {}},
+                        {std::string("Standard cell color"), {}},
+                        {std::string("Mutant"), {}},
+                        {std::string("Mutant and cell function"), {}},
+                        {std::string("Cell state"), {}},
+                        {std::string("Genome complexity"), {}},
+                        {std::string("Specific cell function"),
+                         {ParameterSpec()
+                              .name("Highlighted cell function")
+                              .valueAddress(BASE_VALUE_OFFSET(highlightedCellType))
+                              .tooltip("The specific cell function type to be highlighted can be selected here.")
+                              .type(SwitcherSpec().alternativeToParameters(cellTypeStrings))
+                         }},
+                        {std::string("Every cell function"), {}},
+                    })),
                 ParameterSpec()
                     .name("Cell radius")
                     .valueAddress(BASE_VALUE_OFFSET(cellRadius))
