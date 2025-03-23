@@ -496,8 +496,8 @@ void SimulationParametersMainWindow::onAddZone()
     auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
     zone.shape.type = ZoneShapeType_Circular;
     zone.fadeoutRadius = maxRadius / 3;
-    zone.color = _zoneColorPalette.getColor((2 + parameters.numZones) * 8);
     zone.values = parameters.baseValues;
+    zone.values.backgroundColor = _zoneColorPalette.getColor((2 + parameters.numZones) * 8);
 
     setDefaultShapeDataForZone(zone);
 

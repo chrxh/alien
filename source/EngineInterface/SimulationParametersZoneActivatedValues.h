@@ -4,6 +4,7 @@
 
 struct SimulationParametersZoneActivatedValues
 {
+    bool backgroundColor = true;
     bool friction = false;
     bool rigidity = false;
     bool radiationAbsorption = false;

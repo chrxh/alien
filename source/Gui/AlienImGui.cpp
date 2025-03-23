@@ -21,6 +21,7 @@
 #include "StyleRepository.h"
 #include "HelpStrings.h"
 #include "OverlayController.h"
+#include "ZoneColorPalette.h"
 
 namespace
 {
@@ -1009,11 +1010,16 @@ void AlienImGui::EndMenuBar()
     }
 }
 
-void AlienImGui::ColorButtonWithPicker(ColorButtonWithPickerParameters const& parameters, uint32_t& color, uint32_t& backupColor, uint32_t(& savedPalette)[32])
+void AlienImGui::ColorButtonWithPicker(ColorButtonWithPickerParameters const& parameters, uint32_t& color)
 {
     if (!matchWithFilter(parameters._name)) {
         return;
     }
+
+    static uint32_t backupColor = 0;
+    static ZoneColorPalette zoneColorPalette;
+
+    auto savedPalette = zoneColorPalette.getReference();
 
     ImVec4 imGuiColor = ImColor(color);
     ImVec4 imGuiBackupColor = ImColor(backupColor);

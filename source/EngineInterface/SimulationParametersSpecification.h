@@ -48,7 +48,7 @@ struct ParameterSpec
     MEMBER_DECLARATION(ParameterSpec, std::string, name, std::string());
     MEMBER_DECLARATION(ParameterSpec, int, valueAddress, 0);
     MEMBER_DECLARATION(ParameterSpec, std::optional<std::string>, tooltip, std::nullopt);
-    MEMBER_DECLARATION(ParameterSpec, std::optional<int>, valueActivationAddress, std::nullopt);
+    MEMBER_DECLARATION(ParameterSpec, std::optional<int>, valueActivatedAddress, std::nullopt);
     MEMBER_DECLARATION(ParameterSpec, TypeSpec, type, FloatSpec());
 };
 
@@ -56,17 +56,17 @@ struct ParameterGroupSpec
 {
     MEMBER_DECLARATION(ParameterGroupSpec, std::string, name, std::string());
     MEMBER_DECLARATION(ParameterGroupSpec, std::vector<ParameterSpec>, parameters, {});
-    MEMBER_DECLARATION(ParameterGroupSpec, std::optional<int>, featureAddress, std::nullopt);
+    MEMBER_DECLARATION(ParameterGroupSpec, std::optional<int>, enabledAddress, std::nullopt);
 };
 
-struct FeatureSpec
+struct ExpertSettingSpec
 {
-    MEMBER_DECLARATION(FeatureSpec, std::string, name, std::string());
-    MEMBER_DECLARATION(FeatureSpec, int, featureAddress, 0);
+    MEMBER_DECLARATION(ExpertSettingSpec, std::string, name, std::string());
+    MEMBER_DECLARATION(ExpertSettingSpec, int, enabledAddress, 0);
 };
 
 struct ParametersSpec
 {
     MEMBER_DECLARATION(ParametersSpec, std::vector<ParameterGroupSpec>, groups, {});
-    MEMBER_DECLARATION(ParametersSpec, std::vector<FeatureSpec>, features, {});
+    MEMBER_DECLARATION(ParametersSpec, std::vector<ExpertSettingSpec>, expertSettings, {});
 };

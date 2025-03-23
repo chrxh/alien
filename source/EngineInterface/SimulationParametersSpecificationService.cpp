@@ -1,7 +1,5 @@
 #include "SimulationParametersSpecificationService.h"
 
-#include "SimulationParameters.h"
-
 #define BASE_VALUE_OFFSET(X) offsetof(SimulationParameters, X)
 #define ZONE_VALUE_OFFSET(X) offsetof(SimulationParametersZoneValues, X)
 
@@ -14,6 +12,7 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
         ParameterGroupSpec()
              .name("Visualization")
             .parameters({
+                ParameterSpec().name("Background color").visibleInZone(true).valueAddress(ZONE_VALUE_OFFSET(backgroundColor)).type(ColorSpec()),
                 ParameterSpec()
                     .name("Cell radius")
                     .valueAddress(BASE_VALUE_OFFSET(cellRadius))
@@ -76,29 +75,4 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.4f").logarithmic(true)),
             }),
     });
-}
-
-template float& SimulationParametersSpecificationService::getValueRef<float>(ParameterSpec const& spec, SimulationParameters& parameters, int locationIndex)
-    const;
-template bool& SimulationParametersSpecificationService::getValueRef<bool>(ParameterSpec const& spec, SimulationParameters& parameters, int locationIndex)
-    const;
-template Char64& SimulationParametersSpecificationService::getValueRef<Char64>(ParameterSpec const& spec, SimulationParameters& parameters, int locationIndex)
-    const;
-
-template <typename T>
-T& SimulationParametersSpecificationService::getValueRef(ParameterSpec const& spec, SimulationParameters& parameters, int locationIndex) const
-{
-    if (spec._visibleInBase && !spec._visibleInZone && !spec._visibleInSource) {
-        return *(reinterpret_cast<T*>(reinterpret_cast<char*>(&parameters) + spec._valueAddress));
-    } else if (spec._visibleInBase && spec._visibleInZone && !spec._visibleInSource) {
-        if (locationIndex == 0) {
-            return *(reinterpret_cast<T*>(reinterpret_cast<char*>(&parameters.baseValues) + spec._valueAddress));
-        }
-        for (int i = 0; i < parameters.numZones; ++i) {
-            if (parameters.zone[i].locationIndex == locationIndex) {
-                return *(reinterpret_cast<T*>(reinterpret_cast<char*>(&parameters.zone[i].values) + spec._valueAddress));
-            }
-        }
-    }
-    CHECK(false);
 }

@@ -16,7 +16,7 @@ namespace
         SimulationParameters defaultParameters;
         ParameterParser::encodeDecode(tree, parameters.projectName, defaultParameters.projectName, "simulation parameters.project name", parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.backgroundColor, defaultParameters.backgroundColor, "simulation parameters.background color", parserTask);
+            tree, parameters.baseValues.backgroundColor, defaultParameters.baseValues.backgroundColor, "simulation parameters.background color", parserTask);
         ParameterParser::encodeDecode(tree, parameters.primaryCellColoring, defaultParameters.primaryCellColoring, "simulation parameters.cell colorization", parserTask);
         ParameterParser::encodeDecode(
             tree, parameters.cellGlowColoring, defaultParameters.cellGlowColoring, "simulation parameters.cell glow.coloring", parserTask);
@@ -655,7 +655,7 @@ namespace
             auto& defaultSpot = defaultParameters.zone[index];
             ParameterParser::encodeDecode(tree, spot.name, defaultSpot.name, base + "name", parserTask);
             ParameterParser::encodeDecode(tree, spot.locationIndex, defaultSpot.locationIndex, base + "location index", parserTask);
-            ParameterParser::encodeDecode(tree, spot.color, defaultSpot.color, base + "color", parserTask);
+            ParameterParser::encodeDecode(tree, spot.values.backgroundColor, defaultSpot.values.backgroundColor, base + "color", parserTask);
             ParameterParser::encodeDecode(tree, spot.posX, defaultSpot.posX, base + "pos.x", parserTask);
             ParameterParser::encodeDecode(tree, spot.posY, defaultSpot.posY, base + "pos.y", parserTask);
             ParameterParser::encodeDecode(tree, spot.velX, defaultSpot.velX, base + "vel.x", parserTask);
