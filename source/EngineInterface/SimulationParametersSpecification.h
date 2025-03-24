@@ -30,8 +30,8 @@ struct Char64Spec
 struct ParameterSpec;
 struct SwitcherSpec
 {
-    using AlternativeToParameters = std::vector<std::pair<std::string, std::vector<ParameterSpec>>>;
-    MEMBER_DECLARATION(SwitcherSpec, AlternativeToParameters, alternativeToParameters, {});
+    using Alternatives = std::vector<std::pair<std::string, std::vector<ParameterSpec>>>;
+    MEMBER_DECLARATION(SwitcherSpec, Alternatives, alternatives, {});
 };
 
 struct ColorSpec

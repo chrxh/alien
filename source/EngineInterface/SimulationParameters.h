@@ -5,7 +5,6 @@
 
 #include "CellTypeConstants.h"
 #include "Features.h"
-#include "Motion.h"
 #include "RadiationSource.h"
 #include "SimulationParametersTypes.h"
 #include "SimulationParametersZone.h"
@@ -46,7 +45,13 @@ struct SimulationParameters
     float timestepSize = 1.0f;
 
     // Physics: Motion
-    Motion motionData;
+    MotionType motionType = MotionType_Fluid;
+    float smoothingLength = 0.8f;   // MotionType_Fluid
+    float viscosityStrength = 0.1f;  // MotionType_Fluid
+    float pressureStrength = 0.1f;   // MotionType_Fluid
+    float maxCollisionDistance = 1.3f;  // MotionType_Collision
+    float repulsionStrength = 0.08f;    // MotionType_Collision
+
     float innerFriction = 0.3f;
 
     // Physics: Thresholds

@@ -85,8 +85,8 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
             auto& value = specService.getValueRef<int>(parameterSpec, parameters, locationIndex);
             auto& origValue = specService.getValueRef<int>(parameterSpec, origParameters, locationIndex);
             std::vector<std::string> values;
-            values.reserve(switcherSpec._alternativeToParameters.size());
-            for (auto const& name : switcherSpec._alternativeToParameters | std::views::keys) {
+            values.reserve(switcherSpec._alternatives.size());
+            for (auto const& name : switcherSpec._alternatives | std::views::keys) {
                 values.emplace_back(name);
             }
             AlienImGui::Switcher(
@@ -97,7 +97,7 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
                     .values(values)
                     .tooltip(parameterSpec._tooltip),
                 value);
-            createWidgetsFromParameterSpecs(switcherSpec._alternativeToParameters.at(value).second, locationIndex, parameters, origParameters);
+            createWidgetsFromParameterSpecs(switcherSpec._alternatives.at(value).second, locationIndex, parameters, origParameters);
         }
     }
 }

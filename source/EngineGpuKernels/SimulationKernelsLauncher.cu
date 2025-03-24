@@ -17,7 +17,7 @@ namespace
 {
     int calcOptimalThreadsForFluidKernel(SimulationParameters const& parameters)
     {
-        auto scanRectLength = ceilf(parameters.motionData.alternatives.fluidMotion.smoothingLength * 2) * 2 + 1;
+        auto scanRectLength = ceilf(parameters.smoothingLength * 2) * 2 + 1;
         return scanRectLength * scanRectLength;
     }
 }
@@ -34,7 +34,7 @@ void _SimulationKernelsLauncher::calcTimestep(SettingsForSimulation const& setti
 
     KERNEL_CALL(cudaNextTimestep_physics_init, data);
     KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, 64, data);
-    if (settings.simulationParameters.motionData.type == MotionType_Fluid) {
+    if (settings.simulationParameters.motionType == MotionType_Fluid) {
         auto threadBlockSize = calcOptimalThreadsForFluidKernel(settings.simulationParameters);
         KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, threadBlockSize, data);
     } else {
