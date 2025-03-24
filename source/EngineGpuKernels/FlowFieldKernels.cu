@@ -3,7 +3,7 @@
 #include "EngineInterface/SimulationParameters.h"
 
 #include "ConstantMemory.cuh"
-#include "SpotCalculator.cuh"
+#include "ZoneCalculator.cuh"
 
 namespace
 {
@@ -65,7 +65,7 @@ __global__ void cudaApplyFlowFieldSettings(SimulationData data)
                     ++numFlowFields;
                 }
             }
-            auto resultingAcceleration = SpotCalculator::calcResultingFlowField(data.cellMap, cell->pos, float2{0, 0}, accelerations);
+            auto resultingAcceleration = ZoneCalculator::calcResultingFlowField(data.cellMap, cell->pos, float2{0, 0}, accelerations);
             cell->shared1 += resultingAcceleration;
         }
     }
@@ -82,7 +82,7 @@ __global__ void cudaApplyFlowFieldSettings(SimulationData data)
                     ++numFlowFields;
                 }
             }
-            auto resultingAcceleration = SpotCalculator::calcResultingFlowField(data.cellMap, particle->absPos, float2{0, 0}, accelerations);
+            auto resultingAcceleration = ZoneCalculator::calcResultingFlowField(data.cellMap, particle->absPos, float2{0, 0}, accelerations);
             particle->vel += resultingAcceleration;
         }
     }

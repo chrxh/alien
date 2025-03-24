@@ -21,6 +21,9 @@ struct FloatSpec
     MEMBER_DECLARATION(FloatSpec, bool, logarithmic, false);
     MEMBER_DECLARATION(FloatSpec, std::string, format, "%.3f");
     MEMBER_DECLARATION(FloatSpec, bool, infinity, false);
+    MEMBER_DECLARATION(FloatSpec, std::optional<std::function<float(SimulationParameters const&, int)>>, valueGetter, std::nullopt);  // int for locationIndex
+    MEMBER_DECLARATION(FloatSpec, std::optional<std::function<void(float, SimulationParameters&, int)>>, valueSetter, std::nullopt);  // int for locationIndex
+    MEMBER_DECLARATION(FloatSpec, std::optional<size_t>, pinnedAddress, std::nullopt);
 };
 
 struct Char64Spec
@@ -46,27 +49,21 @@ struct ParameterSpec
     MEMBER_DECLARATION(ParameterSpec, bool, visibleInZone, false);
     MEMBER_DECLARATION(ParameterSpec, bool, visibleInSource, false);
     MEMBER_DECLARATION(ParameterSpec, std::string, name, std::string());
-    MEMBER_DECLARATION(ParameterSpec, int, valueAddress, 0);
+    MEMBER_DECLARATION(ParameterSpec, std::optional<size_t>, valueAddress, std::nullopt);
     MEMBER_DECLARATION(ParameterSpec, std::optional<std::string>, tooltip, std::nullopt);
-    MEMBER_DECLARATION(ParameterSpec, std::optional<int>, valueActivatedAddress, std::nullopt);
+    MEMBER_DECLARATION(ParameterSpec, std::optional<size_t>, valueActivatedAddress, std::nullopt);
     MEMBER_DECLARATION(ParameterSpec, TypeSpec, type, FloatSpec());
+    MEMBER_DECLARATION(ParameterSpec, bool, colorDependence, false);
 };
 
 struct ParameterGroupSpec
 {
     MEMBER_DECLARATION(ParameterGroupSpec, std::string, name, std::string());
     MEMBER_DECLARATION(ParameterGroupSpec, std::vector<ParameterSpec>, parameters, {});
-    MEMBER_DECLARATION(ParameterGroupSpec, bool, expertSetting, false);  // name field must match with ExpertSettingSpec::name
-};
-
-struct ExpertSettingSpec
-{
-    MEMBER_DECLARATION(ExpertSettingSpec, std::string, name, std::string());
-    MEMBER_DECLARATION(ExpertSettingSpec, int, enabledAddress, 0);
+    MEMBER_DECLARATION(ParameterGroupSpec, std::optional<size_t>, expertSettingAddress, std::nullopt);
 };
 
 struct ParametersSpec
 {
     MEMBER_DECLARATION(ParametersSpec, std::vector<ParameterGroupSpec>, groups, {});
-    MEMBER_DECLARATION(ParametersSpec, std::vector<ExpertSettingSpec>, expertSettings, {});
 };

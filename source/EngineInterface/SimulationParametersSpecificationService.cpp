@@ -3,6 +3,8 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include "CellTypeStrings.h"
+#include "SimulationParametersEditService.h"
+#include "LocationHelper.h"
 
 #define BASE_VALUE_OFFSET(X) offsetof(SimulationParameters, X)
 #define ZONE_VALUE_OFFSET(X) offsetof(SimulationParametersZoneValues, X)
@@ -13,6 +15,40 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
     for (int i = 0; i < CellType_Count; ++i) {
         cellTypeStrings.emplace_back(std::make_pair(Const::CellTypeToStringMap.at(i), std::vector<ParameterSpec>()));
     }
+
+    auto radiationStrengthGetter = [](SimulationParameters const& parameters, int locationIndex) {
+        auto strength = SimulationParametersEditService::get().getRadiationStrengths(parameters);
+        if (locationIndex == 0) {
+            return strength.values.at(0);
+        } else {
+            auto sourceIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+            return parameters.radiationSource[sourceIndex].strength;
+        }
+    };
+
+    auto radiationStrengthSetter = [](float value, SimulationParameters& parameters, int locationIndex) {
+        auto& editService = SimulationParametersEditService::get();
+        auto strength = SimulationParametersEditService::get().getRadiationStrengths(parameters);
+        auto editedStrength = strength;
+        int strengthIndex = locationIndex == 0 ? 0 : LocationHelper::findLocationArrayIndex(parameters, locationIndex) + 1;
+        editedStrength.values.at(strengthIndex) = value;
+        editService.adaptRadiationStrengths(editedStrength, strength, strengthIndex);
+        editService.applyRadiationStrengths(parameters, editedStrength);
+    };
+
+    auto coloringTooltip = std::string(
+        "Here, one can set how the cells are to be colored during rendering. \n\n" ICON_FA_CHEVRON_RIGHT
+        " Energy: The more energy a cell has, the brighter it is displayed. A grayscale is used.\n\n" ICON_FA_CHEVRON_RIGHT
+        " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n" ICON_FA_CHEVRON_RIGHT
+        " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or "
+        "duplications are taken into account).\n\n" ICON_FA_CHEVRON_RIGHT
+        " Mutant and cell function: Combination of mutants and cell function coloring.\n\n" ICON_FA_CHEVRON_RIGHT
+        " Cell state: blue = ready, green = under construction, white = activating, pink = detached, pale blue = reviving, red = "
+        "dying\n\n" ICON_FA_CHEVRON_RIGHT
+        " Genome complexity: This property can be utilized by attacker cells when the parameter 'Complex creature protection' is "
+        "activated (see tooltip there). The coloring is as follows: blue = creature with low bonus (usually small or simple genome structure), "
+        "red = large bonus\n\n" ICON_FA_CHEVRON_RIGHT " Specific cell function: A specific type of cell function can be highlighted, which is "
+        "selected in the next parameter.\n\n" ICON_FA_CHEVRON_RIGHT " Every cell function: The cells are colored according to their cell function.");
 
     return ParametersSpec().groups({
         ParameterGroupSpec().name("General").parameters({
@@ -25,20 +61,7 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Primary cell coloring")
                     .valueAddress(BASE_VALUE_OFFSET(primaryCellColoring))
-                    .tooltip(
-                        "Here, one can set how the cells are to be colored during rendering. \n\n" ICON_FA_CHEVRON_RIGHT
-                        " Energy: The more energy a cell has, the brighter it is displayed. A grayscale is used.\n\n" ICON_FA_CHEVRON_RIGHT
-                        " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n" ICON_FA_CHEVRON_RIGHT
-                        " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or "
-                        "duplications are taken into account).\n\n" ICON_FA_CHEVRON_RIGHT
-                        " Mutant and cell function: Combination of mutants and cell function coloring.\n\n" ICON_FA_CHEVRON_RIGHT
-                        " Cell state: blue = ready, green = under construction, white = activating, pink = detached, pale blue = reviving, red = "
-                        "dying\n\n" ICON_FA_CHEVRON_RIGHT
-                        " Genome complexity: This property can be utilized by attacker cells when the parameter 'Complex creature protection' is "
-                        "activated (see tooltip there). The coloring is as follows: blue = creature with low bonus (usually small or simple genome structure), "
-                        "red = large bonus\n\n" ICON_FA_CHEVRON_RIGHT " Specific cell function: A specific type of cell function can be highlighted, which is "
-                                                                      "selected in the next parameter.\n\n" ICON_FA_CHEVRON_RIGHT
-                        " Every cell function: The cells are colored according to their cell function.")
+                    .tooltip(coloringTooltip)
                     .type(SwitcherSpec().alternatives({
                         {std::string("Energy"), {}},
                         {std::string("Standard cell color"), {}},
@@ -170,19 +193,54 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                     .valueAddress(BASE_VALUE_OFFSET(maxVelocity))
                     .tooltip("Maximum velocity that a cell can reach.")
                     .type(FloatSpec().min(0.0f).max(6.0f)),
-
-                //#TODO Color-dependence
                 ParameterSpec() 
                     .name("Maximum force")
                     .visibleInZone(true)
                     .valueAddress(ZONE_VALUE_OFFSET(cellMaxForce))
                     .tooltip("Maximum force that can be applied to a cell without causing it to disintegrate.")
-                    .type(FloatSpec().min(0.0f).max(3.0f)),
+                    .type(FloatSpec().min(0.0f).max(3.0f))
+                    .colorDependence(true),
                 ParameterSpec()
                     .name("Minimum distance")
                     .valueAddress(BASE_VALUE_OFFSET(minCellDistance))
                     .tooltip("Minimum distance between two cells.")
                     .type(FloatSpec().min(0.0f).max(1.0f)),
+            }),
+        ParameterGroupSpec()
+            .name("Physics: Binding")
+            .parameters({
+                ParameterSpec()
+                    .name("Maximum distance")
+                    .valueAddress(BASE_VALUE_OFFSET(maxBindingDistance))
+                    .tooltip("Maximum distance up to which a connection of two cells is possible.")
+                    .type(FloatSpec().min(0.0f).max(5.0f))
+                    .colorDependence(true),
+                ParameterSpec()
+                    .name("Fusion velocity")
+                    .visibleInZone(true)
+                    .valueAddress(ZONE_VALUE_OFFSET(cellFusionVelocity))
+                    .tooltip("Maximum force that can be applied to a cell without causing it to disintegrate.")
+                    .type(FloatSpec().min(0.0f).max(2.0f)),
+                ParameterSpec()
+                    .name("Maximum energy")
+                    .visibleInZone(true)
+                    .valueAddress(ZONE_VALUE_OFFSET(cellMaxBindingEnergy))
+                    .tooltip("Maximum energy of a cell at which it can contain bonds to adjacent cells. If the energy of a cell exceeds this "
+                                     "value, all bonds will be destroyed.")
+                    .type(FloatSpec().min(50.0f).max(10000000.0f).logarithmic(true).infinity(true).format("%.0f")),
+            }),
+        ParameterGroupSpec()
+            .name("Physics: Radiation")
+            .parameters({
+                ParameterSpec()
+                    .name("Relative strength")
+                    .tooltip("Maximum distance up to which a connection of two cells is possible.")
+                    .type(FloatSpec()
+                              .min(0.0f)
+                              .max(1.0f)
+                              .pinnedAddress(BASE_VALUE_OFFSET(baseStrengthRatioPinned))
+                              .valueGetter(radiationStrengthGetter)
+                              .valueSetter(radiationStrengthSetter)),
             }),
     });
 }

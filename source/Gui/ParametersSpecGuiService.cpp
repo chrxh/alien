@@ -48,20 +48,56 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
         }
         if (std::holds_alternative<FloatSpec>(parameterSpec._type)) {
             auto const& floatSpec = std::get<FloatSpec>(parameterSpec._type);
-            auto& value = specService.getValueRef<float>(parameterSpec, parameters, locationIndex);
-            auto& origValue = specService.getValueRef<float>(parameterSpec, origParameters, locationIndex);
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name(parameterSpec._name)
-                    .textWidth(RightColumnWidth)
-                    .min(floatSpec._min)
-                    .max(floatSpec._max)
-                    .logarithmic(floatSpec._logarithmic)
-                    .format(floatSpec._format)
-                    .infinity(floatSpec._infinity)
-                    .defaultValue(&origValue)
-                    .tooltip(parameterSpec._tooltip),
-                &value);
+            bool* pinned = floatSpec._pinnedAddress.has_value() ? &specService.getValueRef<bool>(
+                                                                      parameterSpec._visibleInBase,
+                                                                      parameterSpec._visibleInZone,
+                                                                      parameterSpec._visibleInSource,
+                                                                      floatSpec._pinnedAddress.value(),
+                                                                      parameters,
+                                                                      locationIndex)
+                                                                : nullptr;
+            if (parameterSpec._valueAddress.has_value()) {
+                auto& value = specService.getValueRef<float>(parameterSpec, parameters, locationIndex);
+                auto& origValue = specService.getValueRef<float>(parameterSpec, origParameters, locationIndex);
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name(parameterSpec._name)
+                        .textWidth(RightColumnWidth)
+                        .min(floatSpec._min)
+                        .max(floatSpec._max)
+                        .logarithmic(floatSpec._logarithmic)
+                        .format(floatSpec._format)
+                        .infinity(floatSpec._infinity)
+                        .defaultValue(&origValue)
+                        .tooltip(parameterSpec._tooltip)
+                        .colorDependence(parameterSpec._colorDependence),
+                    &value,
+                    nullptr,
+                    pinned);
+            } else {
+                auto getter = floatSpec._valueGetter.value();
+                auto setter = floatSpec._valueSetter.value();
+                auto value = getter(parameters, locationIndex);
+                auto origValue = getter(origParameters, locationIndex);
+
+                AlienImGui::SliderFloat(
+                    AlienImGui::SliderFloatParameters()
+                        .name(parameterSpec._name)
+                        .textWidth(RightColumnWidth)
+                        .min(floatSpec._min)
+                        .max(floatSpec._max)
+                        .logarithmic(floatSpec._logarithmic)
+                        .format(floatSpec._format)
+                        .infinity(floatSpec._infinity)
+                        .defaultValue(&origValue)
+                        .tooltip(parameterSpec._tooltip)
+                        .colorDependence(parameterSpec._colorDependence),
+                    &value,
+                    nullptr,
+                    pinned);
+
+                setter(value, parameters, locationIndex);
+            }
         } else if (std::holds_alternative<BoolSpec>(parameterSpec._type)) {
             auto& value = specService.getValueRef<bool>(parameterSpec, parameters, locationIndex);
             auto& origValue = specService.getValueRef<bool>(parameterSpec, origParameters, locationIndex);

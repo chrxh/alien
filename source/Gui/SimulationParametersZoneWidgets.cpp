@@ -1,11 +1,11 @@
 #include "SimulationParametersZoneWidgets.h"
 
+#include "EngineInterface/LocationHelper.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/SimulationParametersValidationService.h"
 #include "EngineInterface/SimulationParametersZone.h"
 
 #include "AlienImGui.h"
-#include "LocationHelper.h"
 #include "LoginDialog.h"
 #include "SimulationInteractionController.h"
 
