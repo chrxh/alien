@@ -759,7 +759,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
             }
             if (cell->age > cudaSimulationParameters.radiationType1_minimumAge[cell->color]) {
                 radiationFactor += ZoneCalculator::calcParameter(
-                    &SimulationParametersZoneValues::radiationCellAgeStrength,
+                    &SimulationParametersZoneValues::radiationType1_strength,
                     &SimulationParametersZoneActivatedValues::radiationCellAgeStrength,
                     data,
                     cell->pos,
@@ -808,7 +808,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         }
 
         auto cellMinEnergy = ZoneCalculator::calcParameter(
-            &SimulationParametersZoneValues::cellMinEnergy, &SimulationParametersZoneActivatedValues::cellMinEnergy, data, cell->pos, cell->color);
+            &SimulationParametersZoneValues::minCellEnergy, &SimulationParametersZoneActivatedValues::cellMinEnergy, data, cell->pos, cell->color);
 
         if (cell->livingState == LivingState_Dying || cell->livingState == LivingState_Detaching) {
             auto cellDeathProbability = ZoneCalculator::calcParameter(
@@ -908,7 +908,7 @@ __inline__ __device__ void CellProcessor::applyEnergyFlow(SimulationData& data)
         auto i = data.timestep % cell->numConnections;
         auto& connectedCell = cell->connections[i].cell;
         auto cellMinEnergy = ZoneCalculator::calcParameter(
-            &SimulationParametersZoneValues::cellMinEnergy, &SimulationParametersZoneActivatedValues::cellMinEnergy, data, cell->pos, cell->color);
+            &SimulationParametersZoneValues::minCellEnergy, &SimulationParametersZoneActivatedValues::cellMinEnergy, data, cell->pos, cell->color);
 
         auto needCellEnergy = cell->cellType == CellType_Constructor && !GenomeDecoder::isFinished(cell->cellTypeData.constructor)
             && connectedCell->energy > cudaSimulationParameters.normalCellEnergy[cell->color];

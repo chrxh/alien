@@ -15,10 +15,10 @@ struct SimulationParametersZoneValues
     ColorVector<float> radiationAbsorption = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     ColorVector<float> radiationAbsorptionLowVelocityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> radiationAbsorptionLowGenomeComplexityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    ColorVector<float> radiationCellAgeStrength = {0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f};
+    ColorVector<float> radiationType1_strength = {0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f};
     bool radiationDisableSources = false;
     ColorVector<float> cellMaxForce = {0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f};
-    ColorVector<float> cellMinEnergy = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f};
+    ColorVector<float> minCellEnergy = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f};
     ColorVector<float> cellDeathProbability = {0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f};
 
     float cellFusionVelocity = 2.0f;
@@ -69,18 +69,18 @@ struct SimulationParametersZoneValues
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
 
-    ColorVector<float> cellCopyMutationNeuronData = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellCopyMutationCellProperties = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellCopyMutationCellType = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellCopyMutationGeometry = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellCopyMutationCustomGeometry = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellCopyMutationInsertion = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellCopyMutationDeletion = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellCopyMutationTranslation = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellCopyMutationDuplication = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellCopyMutationCellColor = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellCopyMutationSubgenomeColor = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellCopyMutationGenomeColor = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> copyMutationNeuronData = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> copyMutationCellProperties = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> copyMutationCellType = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> copyMutationGeometry = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> copyMutationCustomGeometry = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> copyMutationInsertion = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> copyMutationDeletion = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> copyMutationTranslation = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> copyMutationDuplication = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> copyMutationCellColor = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> copyMutationSubgenomeColor = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> copyMutationGenomeColor = {0, 0, 0, 0, 0, 0, 0};
 
     bool operator==(SimulationParametersZoneValues const&) const = default;
 };

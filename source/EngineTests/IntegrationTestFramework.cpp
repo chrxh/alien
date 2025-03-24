@@ -14,7 +14,7 @@ IntegrationTestFramework::IntegrationTestFramework(std::optional<SimulationParam
         parameters = *parameters_;
     } else {
         for (int i = 0; i < MAX_COLORS; ++i) {
-            parameters.baseValues.radiationCellAgeStrength[i] = 0;
+            parameters.baseValues.radiationType1_strength[i] = 0;
         }
     }
     _simulationFacade->newSimulation(0, universeSize, parameters);

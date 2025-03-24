@@ -21,18 +21,18 @@ public:
         : IntegrationTestFramework()
     {
         for (int i = 0; i < MAX_COLORS; ++i) {
-            _parameters.baseValues.cellCopyMutationNeuronData[i] = 1;
-            _parameters.baseValues.cellCopyMutationCellProperties[i] = 1;
-            _parameters.baseValues.cellCopyMutationCellType[i] = 1;
-            _parameters.baseValues.cellCopyMutationGeometry[i] = 1;
-            _parameters.baseValues.cellCopyMutationCustomGeometry[i] = 1;
-            _parameters.baseValues.cellCopyMutationInsertion[i] = 1;
-            _parameters.baseValues.cellCopyMutationDeletion[i] = 1;
-            _parameters.baseValues.cellCopyMutationTranslation[i] = 1;
-            _parameters.baseValues.cellCopyMutationDuplication[i] = 1;
-            _parameters.baseValues.cellCopyMutationCellColor[i] = 1;
-            _parameters.baseValues.cellCopyMutationSubgenomeColor[i] = 1;
-            _parameters.baseValues.cellCopyMutationGenomeColor[i] = 1;
+            _parameters.baseValues.copyMutationNeuronData[i] = 1;
+            _parameters.baseValues.copyMutationCellProperties[i] = 1;
+            _parameters.baseValues.copyMutationCellType[i] = 1;
+            _parameters.baseValues.copyMutationGeometry[i] = 1;
+            _parameters.baseValues.copyMutationCustomGeometry[i] = 1;
+            _parameters.baseValues.copyMutationInsertion[i] = 1;
+            _parameters.baseValues.copyMutationDeletion[i] = 1;
+            _parameters.baseValues.copyMutationTranslation[i] = 1;
+            _parameters.baseValues.copyMutationDuplication[i] = 1;
+            _parameters.baseValues.copyMutationCellColor[i] = 1;
+            _parameters.baseValues.copyMutationSubgenomeColor[i] = 1;
+            _parameters.baseValues.copyMutationGenomeColor[i] = 1;
         }
         _simulationFacade->setSimulationParameters(_parameters);
     }
