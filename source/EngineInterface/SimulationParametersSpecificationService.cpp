@@ -39,7 +39,7 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                         "red = large bonus\n\n" ICON_FA_CHEVRON_RIGHT " Specific cell function: A specific type of cell function can be highlighted, which is "
                                                                       "selected in the next parameter.\n\n" ICON_FA_CHEVRON_RIGHT
                         " Every cell function: The cells are colored according to their cell function.")
-                    .type(SwitcherSpec().alternativeToParameters({
+                    .type(SwitcherSpec().alternatives({
                         {std::string("Energy"), {}},
                         {std::string("Standard cell color"), {}},
                         {std::string("Mutant"), {}},
@@ -51,7 +51,7 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                               .name("Highlighted cell function")
                               .valueAddress(BASE_VALUE_OFFSET(highlightedCellType))
                               .tooltip("The specific cell function type to be highlighted can be selected here.")
-                              .type(SwitcherSpec().alternativeToParameters(cellTypeStrings))
+                              .type(SwitcherSpec().alternatives(cellTypeStrings))
                          }},
                         {std::string("Every cell function"), {}},
                     })),
@@ -110,11 +110,79 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
             .name("Physics: Motion")
             .parameters({
                 ParameterSpec()
+                    .name("Motion type")
+                    .valueAddress(BASE_VALUE_OFFSET(motionType))
+                    .tooltip(std::string(
+                        "The algorithm for the particle motions is defined here. If 'Fluid dynamics' is selected, an SPH fluid solver is used for the "
+                        "calculation of the forces. The particles then behave like (compressible) liquids or gases. The other option 'Collision-based' "
+                        "calculates the forces based on particle collisions and should be preferred for mechanical simulation with solids."))
+                    .type(SwitcherSpec().alternatives(
+                        {{std::string("Fluid solver"),
+                          {ParameterSpec()
+                               .name("Smoothing length")
+                               .valueAddress(BASE_VALUE_OFFSET(smoothingLength))
+                               .tooltip("The smoothing length determines the region of influence of the neighboring particles for the calculation of "
+                                        "density, pressure and viscosity. Values that are too small lead to numerical instabilities, while values that "
+                                        "are too large cause the particles to drift apart.")
+                                  .type(FloatSpec().min(0).max(3.0f)),
+                              ParameterSpec()
+                                  .name("Pressure")
+                                  .valueAddress(BASE_VALUE_OFFSET(pressureStrength))
+                                  .tooltip("This parameter allows to control the strength of the pressure.")
+                                  .type(FloatSpec().min(0).max(0.3f)),
+                              ParameterSpec()
+                                  .name("Viscosity")
+                                  .valueAddress(BASE_VALUE_OFFSET(viscosityStrength))
+                                  .tooltip("This parameter be used to control the strength of the viscosity. Larger values lead to a smoother movement.")
+                                  .type(FloatSpec().min(0).max(0.3f)),
+                          }},
+                         {std::string("Collision-based solver"),
+                          {
+                              ParameterSpec()
+                                  .name("Repulsion strength")
+                                  .valueAddress(BASE_VALUE_OFFSET(repulsionStrength))
+                                  .tooltip("The strength of the repulsive forces, between two cells that are not connected.")
+                                  .type(FloatSpec().min(0).max(0.3f)),
+                              ParameterSpec()
+                                  .name("Maximum collision distance")
+                                  .valueAddress(BASE_VALUE_OFFSET(maxCollisionDistance))
+                                  .tooltip("Maximum distance up to which a collision of two cells is possible.")
+                                  .type(FloatSpec().min(0).max(3.0f)),
+                          }}})),
+                ParameterSpec()
                     .name("Friction")
-                    .valueAddress(ZONE_VALUE_OFFSET(friction))
                     .visibleInZone(true)
+                    .valueAddress(ZONE_VALUE_OFFSET(friction))
                     .tooltip("This specifies the fraction of the velocity that is slowed down per time step.")
-                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.4f").logarithmic(true)),
+                    .type(FloatSpec().min(0).max(1.0f).logarithmic(true).format("%.4f")),
+                ParameterSpec()
+                    .name("Rigidity")
+                    .visibleInZone(true)
+                    .valueAddress(ZONE_VALUE_OFFSET(rigidity))
+                    .tooltip("Controls the rigidity of connected cells. A higher value will cause connected cells to move more uniformly as a rigid body.")
+                    .type(FloatSpec().min(0).max(3.0f)),
+            }),
+        ParameterGroupSpec()
+            .name("Physics: Thresholds")
+            .parameters({
+                ParameterSpec()
+                    .name("Maximum velocity")
+                    .valueAddress(BASE_VALUE_OFFSET(maxVelocity))
+                    .tooltip("Maximum velocity that a cell can reach.")
+                    .type(FloatSpec().min(0.0f).max(6.0f)),
+
+                //#TODO Color-dependence
+                ParameterSpec() 
+                    .name("Maximum force")
+                    .visibleInZone(true)
+                    .valueAddress(ZONE_VALUE_OFFSET(cellMaxForce))
+                    .tooltip("Maximum force that can be applied to a cell without causing it to disintegrate.")
+                    .type(FloatSpec().min(0.0f).max(3.0f)),
+                ParameterSpec()
+                    .name("Minimum distance")
+                    .valueAddress(BASE_VALUE_OFFSET(minCellDistance))
+                    .tooltip("Minimum distance between two cells.")
+                    .type(FloatSpec().min(0.0f).max(1.0f)),
             }),
     });
 }

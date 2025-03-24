@@ -19,7 +19,6 @@ add_library(EngineInterface
     GenomeDescriptions.h
     GpuSettings.h
     InspectedEntityIds.h
-    Motion.h
     MutationType.h
     OverlayDescriptions.h
     PreviewDescriptionService.cpp

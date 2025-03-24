@@ -22,3 +22,10 @@ enum CellDeathConsquences_
     CellDeathConsquences_CreatureDies,
     CellDeathConsquences_DetachedPartsDie
 };
+
+using MotionType = int;
+enum MotionType_
+{
+    MotionType_Fluid,
+    MotionType_Collision
+};
