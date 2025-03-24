@@ -19,7 +19,7 @@ public:
         result.innerFriction = 0;
         result.baseValues.friction = 0;
         for (int i = 0; i < MAX_COLORS; ++i) {
-            result.baseValues.radiationCellAgeStrength[i] = 0;
+            result.baseValues.radiationType1_strength[i] = 0;
         }
         return result;
     }

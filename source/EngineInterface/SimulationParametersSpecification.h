@@ -14,6 +14,14 @@ struct BoolSpec
 {
 };
 
+struct IntSpec
+{
+    MEMBER_DECLARATION(IntSpec, int, min, 0);
+    MEMBER_DECLARATION(IntSpec, int, max, 0);
+    MEMBER_DECLARATION(IntSpec, bool, logarithmic, false);
+    MEMBER_DECLARATION(IntSpec, bool, infinity, false);
+};
+
 struct FloatSpec
 {
     MEMBER_DECLARATION(FloatSpec, float, min, 0);
@@ -31,17 +39,17 @@ struct Char64Spec
 };
 
 struct ParameterSpec;
-struct SwitcherSpec
+struct AlternativeSpec
 {
     using Alternatives = std::vector<std::pair<std::string, std::vector<ParameterSpec>>>;
-    MEMBER_DECLARATION(SwitcherSpec, Alternatives, alternatives, {});
+    MEMBER_DECLARATION(AlternativeSpec, Alternatives, alternatives, {});
 };
 
 struct ColorSpec
 {
 };
 
-using TypeSpec = std::variant<BoolSpec, FloatSpec, Char64Spec, SwitcherSpec, ColorSpec>;
+using TypeSpec = std::variant<BoolSpec, IntSpec, FloatSpec, Char64Spec, AlternativeSpec, ColorSpec>;
 
 struct ParameterSpec
 {

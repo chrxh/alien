@@ -26,9 +26,11 @@ void ParametersSpecGuiService::createWidgetsFromSpec(
         if (!isVisible(groupSpec, locationType)) {
             continue;
         }
+        ImGui::PushID(groupSpec._name.c_str());
         if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name(groupSpec._name))) {
             createWidgetsFromParameterSpecs(groupSpec._parameters, locationIndex, parameters, origParameters);
         }
+        ImGui::PopID();
         AlienImGui::EndTreeNode();
     }
 }
@@ -80,24 +82,41 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
                 auto value = getter(parameters, locationIndex);
                 auto origValue = getter(origParameters, locationIndex);
 
-                AlienImGui::SliderFloat(
-                    AlienImGui::SliderFloatParameters()
-                        .name(parameterSpec._name)
-                        .textWidth(RightColumnWidth)
-                        .min(floatSpec._min)
-                        .max(floatSpec._max)
-                        .logarithmic(floatSpec._logarithmic)
-                        .format(floatSpec._format)
-                        .infinity(floatSpec._infinity)
-                        .defaultValue(&origValue)
-                        .tooltip(parameterSpec._tooltip)
-                        .colorDependence(parameterSpec._colorDependence),
-                    &value,
-                    nullptr,
-                    pinned);
+                if (AlienImGui::SliderFloat(
+                        AlienImGui::SliderFloatParameters()
+                            .name(parameterSpec._name)
+                            .textWidth(RightColumnWidth)
+                            .min(floatSpec._min)
+                            .max(floatSpec._max)
+                            .logarithmic(floatSpec._logarithmic)
+                            .format(floatSpec._format)
+                            .infinity(floatSpec._infinity)
+                            .defaultValue(&origValue)
+                            .tooltip(parameterSpec._tooltip)
+                            .colorDependence(parameterSpec._colorDependence),
+                        &value,
+                        nullptr,
+                        pinned)) {
 
-                setter(value, parameters, locationIndex);
+                    setter(value, parameters, locationIndex);
+                }
             }
+        } else if (std::holds_alternative<IntSpec>(parameterSpec._type)) {
+            auto const& intSpec = std::get<IntSpec>(parameterSpec._type);
+            auto& value = specService.getValueRef<int>(parameterSpec, parameters, locationIndex);
+            auto& origValue = specService.getValueRef<int>(parameterSpec, origParameters, locationIndex);
+            AlienImGui::SliderInt(
+                AlienImGui::SliderIntParameters()
+                    .name(parameterSpec._name)
+                    .textWidth(RightColumnWidth)
+                    .min(intSpec._min)
+                    .max(intSpec._max)
+                    .logarithmic(intSpec._logarithmic)
+                    .infinity(intSpec._infinity)
+                    .defaultValue(&origValue)
+                    .tooltip(parameterSpec._tooltip)
+                    .colorDependence(parameterSpec._colorDependence),
+                &value);
         } else if (std::holds_alternative<BoolSpec>(parameterSpec._type)) {
             auto& value = specService.getValueRef<bool>(parameterSpec, parameters, locationIndex);
             auto& origValue = specService.getValueRef<bool>(parameterSpec, origParameters, locationIndex);
@@ -116,8 +135,8 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
             auto& origValue = specService.getValueRef<uint32_t>(parameterSpec, origParameters, locationIndex);
             AlienImGui::ColorButtonWithPicker(
                 AlienImGui::ColorButtonWithPickerParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(origValue), value);
-        } else if (std::holds_alternative<SwitcherSpec>(parameterSpec._type)) {
-            auto switcherSpec = std::get<SwitcherSpec>(parameterSpec._type);
+        } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._type)) {
+            auto switcherSpec = std::get<AlternativeSpec>(parameterSpec._type);
             auto& value = specService.getValueRef<int>(parameterSpec, parameters, locationIndex);
             auto& origValue = specService.getValueRef<int>(parameterSpec, origParameters, locationIndex);
             std::vector<std::string> values;
