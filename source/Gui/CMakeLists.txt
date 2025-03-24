@@ -61,8 +61,6 @@ PUBLIC
     LastSessionBrowserData.h
     LocationController.cpp
     LocationController.h
-    LocationHelper.cpp
-    LocationHelper.h
     LocationWidgets.h
     LocationWindow.cpp
     LocationWindow.h

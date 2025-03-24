@@ -5,6 +5,7 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/StringHelper.h"
+#include "EngineInterface/LocationHelper.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/SimulationParametersEditService.h"
 #include "PersisterInterface/SerializerService.h"
@@ -12,7 +13,6 @@
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
 #include "LocationController.h"
-#include "LocationHelper.h"
 #include "OverlayController.h"
 #include "SimulationParametersSourceWidgets.h"
 #include "SimulationParametersZoneWidgets.h"

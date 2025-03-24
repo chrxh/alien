@@ -6,7 +6,7 @@
 #include "EngineInterface/SimulationParametersEditService.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/SimulationParametersValidationService.h"
-#include "LocationHelper.h"
+#include "EngineInterface/LocationHelper.h"
 #include "SimulationInteractionController.h"
 
 namespace

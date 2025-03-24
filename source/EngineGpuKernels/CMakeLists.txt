@@ -78,7 +78,6 @@ add_library(EngineGpuKernels
     SimulationParametersUpdateService.cu
     SimulationParametersUpdateService.cuh
     SimulationStatistics.cuh
-    SpotCalculator.cuh
     StatisticsService.cu
     StatisticsService.cuh
     StatisticsKernelsLauncher.cu
@@ -92,6 +91,7 @@ add_library(EngineGpuKernels
     TransmitterProcessor.cuh
     TOs.cuh
     Util.cuh
+    ZoneCalculator.cuh
     )
 
 target_link_libraries(EngineGpuKernels Base)

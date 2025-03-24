@@ -1,8 +1,8 @@
 #include "LocationController.h"
 
 #include "EngineInterface/SimulationFacade.h"
+#include "EngineInterface/LocationHelper.h"
 
-#include "LocationHelper.h"
 #include "SimulationParametersBaseWidgets.h"
 #include "SimulationParametersSourceWidgets.h"
 #include "SimulationParametersZoneWidgets.h"

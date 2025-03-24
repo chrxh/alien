@@ -9,7 +9,7 @@
 #include "Map.cuh"
 #include "SimulationData.cuh"
 
-class SpotCalculator
+class ZoneCalculator
 {
 public:
     template <typename T>

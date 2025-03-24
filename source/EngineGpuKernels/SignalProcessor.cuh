@@ -4,7 +4,7 @@
 #include "Base.cuh"
 #include "Map.cuh"
 #include "ObjectFactory.cuh"
-#include "SpotCalculator.cuh"
+#include "ZoneCalculator.cuh"
 
 class SignalProcessor
 {
