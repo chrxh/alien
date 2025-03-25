@@ -197,7 +197,7 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                     .name("Maximum force")
                     .visibleInZone(true)
                     .valueAddress(ZONE_VALUE_OFFSET(cellMaxForce))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(3.0f))
                     .tooltip("Maximum force that can be applied to a cell without causing it to disintegrate."),
                 ParameterSpec()
@@ -212,7 +212,7 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Maximum distance")
                     .valueAddress(BASE_VALUE_OFFSET(maxBindingDistance))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(5.0f))
                     .tooltip("Maximum distance up to which a connection of two cells is possible."),
                 ParameterSpec()
@@ -247,38 +247,38 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                     .name("Absorption factor")
                     .visibleInZone(true)
                     .valueAddress(ZONE_VALUE_OFFSET(radiationAbsorption))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).logarithmic(true).format("%.4f"))
                     .tooltip("The fraction of energy that a cell can absorb from an incoming energy particle can be specified here."),
                 ParameterSpec()
                     .name("Radiation type I: Strength")
                     .visibleInZone(true)
                     .valueAddress(ZONE_VALUE_OFFSET(radiationType1_strength))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(0.01f).logarithmic(true).format("%.6f"))
                     .tooltip("Indicates how energetic the emitted particles of aged cells are."),
                 ParameterSpec()
                     .name("Radiation type I: Minimum age")
                     .valueAddress(BASE_VALUE_OFFSET(radiationType1_minimumAge))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(IntSpec().min(0).max(10000000).logarithmic(true).infinity(true))
                     .tooltip("The minimum age of a cell can be defined here, from which it emits energy particles."),
                 ParameterSpec()
                     .name("Radiation type II: Strength")
                     .valueAddress(BASE_VALUE_OFFSET(radiationType2_strength))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(0.01f).logarithmic(true).format("%.6f"))
                     .tooltip("Indicates how energetic the emitted particles of high energy cells are."),
                 ParameterSpec()
                     .name("Radiation type II: Energy threshold")
                     .valueAddress(BASE_VALUE_OFFSET(radiationType2_energyThreshold))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(100000.0f).logarithmic(true).infinity(true).format("%.1f"))
                     .tooltip("The minimum energy of a cell can be defined here, from which it emits energy particles."),
                 ParameterSpec()
                     .name("Minimum split energy")
                     .valueAddress(BASE_VALUE_OFFSET(particleSplitEnergy))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(1.0f).max(10000.0f).logarithmic(true).infinity(true).format("%.0f"))
                     .tooltip("The minimum energy of an energy particle after which it can split into two particles, whereby it receives a small momentum. The "
                              "splitting does not occur immediately, but only after a certain time."),
@@ -294,20 +294,20 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Maximum age")
                     .valueAddress(BASE_VALUE_OFFSET(maxCellAge))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(IntSpec().min(1).max(1e7).logarithmic(true).infinity(true))
                     .tooltip("Defines the maximum age of a cell. If a cell exceeds this age it will be transformed to an energy particle."),
                 ParameterSpec()
                     .name("Minimum energy")
                     .visibleInZone(true)
                     .valueAddress(ZONE_VALUE_OFFSET(minCellEnergy))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(10.0f).max(200.0f))
                     .tooltip("Minimum energy a cell needs to exist."),
                 ParameterSpec()
                     .name("Normal energy")
                     .valueAddress(BASE_VALUE_OFFSET(normalCellEnergy))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(10.0f).max(200.0f))
                     .tooltip(
                         "The normal energy value of a cell is defined here. This is used as a reference value in various contexts: "
@@ -322,7 +322,7 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                     .name("Decay rate of dying cells")
                     .visibleInZone(true)
                     .valueAddress(ZONE_VALUE_OFFSET(cellDeathProbability))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(1e-6f).max(1e-1f).format("%.6f").logarithmic(true))
                     .tooltip("The probability per time step with which a cell will disintegrate (i.e. transform into an energy particle) when it is in the "
                              "state 'Dying'. This can occur when one of the following conditions is satisfied:\n\n" ICON_FA_CHEVRON_RIGHT
@@ -344,97 +344,145 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                     .name("Neural nets")
                     .visibleInZone(true)
                     .valueAddress(ZONE_VALUE_OFFSET(copyMutationNeuronData))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                    .tooltip("This type of mutation can change the weights, biases and activation functions of neural networks of each neuron cell encoded in the "
-                         "genome."),
+                    .tooltip(
+                        "This type of mutation can change the weights, biases and activation functions of neural networks of each neuron cell encoded in the "
+                        "genome."),
                 ParameterSpec()
                     .name("Cell properties")
                     .visibleInZone(true)
                     .valueAddress(ZONE_VALUE_OFFSET(copyMutationCellProperties))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation changes a random property (e.g. (input) execution order number, required energy, block output and "
-                         "function-specific properties such as minimum density for sensors, neural net weights etc.). The spatial structure, color, cell "
-                         "function type and self-replication capabilities are not changed. This mutation is applied to each encoded cell in the genome."),
+                             "function-specific properties such as minimum density for sensors, neural net weights etc.). The spatial structure, color, cell "
+                             "function type and self-replication capabilities are not changed. This mutation is applied to each encoded cell in the genome."),
                 ParameterSpec()
                     .name("Geometry")
                     .visibleInZone(true)
                     .valueAddress(ZONE_VALUE_OFFSET(copyMutationGeometry))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation changes the geometry type, connection distance, stiffness and single construction flag. The probability of "
-                         "a change is given by the specified value times the number of coded cells in the genome."),
+                             "a change is given by the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Custom geometry")
                     .visibleInZone(true)
                     .valueAddress(ZONE_VALUE_OFFSET(copyMutationCustomGeometry))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation only changes angles and required connections of custom geometries. The probability of a change is given by "
-                         "the specified value times the number of coded cells in the genome."),
+                             "the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Cell function type")
                     .visibleInZone(true)
                     .valueAddress(ZONE_VALUE_OFFSET(copyMutationCellType))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation changes the type of cell function. The changed cell function will have random properties. The probability "
-                         "of a change is given by the specified value times the number of coded cells in the genome. If the flag 'Preserve "
-                         "self-replication' is disabled it can also alter self-replication capabilities by changing a constructor to "
-                         "something else or vice versa."),
+                             "of a change is given by the specified value times the number of coded cells in the genome. If the flag 'Preserve "
+                             "self-replication' is disabled it can also alter self-replication capabilities by changing a constructor to "
+                             "something else or vice versa."),
                 ParameterSpec()
                     .name("Insertion")
                     .visibleInZone(true)
                     .valueAddress(ZONE_VALUE_OFFSET(copyMutationInsertion))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation inserts a new cell description to the genome at a random position. The probability of a change is given by "
-                         "the specified value times the number of coded cells in the genome."),
+                             "the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Deletion")
                     .visibleInZone(true)
                     .valueAddress(ZONE_VALUE_OFFSET(copyMutationDeletion))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation deletes a cell description from the genome at a random position. The probability of a change is given by "
-                         "the specified value times the number of coded cells in the genome."),
+                             "the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Translation")
                     .visibleInZone(true)
                     .valueAddress(ZONE_VALUE_OFFSET(copyMutationTranslation))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation moves a block of cell descriptions from the genome at a random position to a new random position."),
                 ParameterSpec()
                     .name("Duplication")
                     .visibleInZone(true)
                     .valueAddress(ZONE_VALUE_OFFSET(copyMutationDuplication))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation copies a block of cell descriptions from the genome at a random position to a new random position."),
                 ParameterSpec()
                     .name("Individual cell color")
                     .visibleInZone(true)
                     .valueAddress(ZONE_VALUE_OFFSET(copyMutationCellColor))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation alters the color of a single cell descriptions in a genome by using the specified color transitions. The "
-                         "probability of a change is given by the specified value times the number of coded cells in the genome."),
+                             "probability of a change is given by the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Sub-genome color")
                     .visibleInZone(true)
                     .valueAddress(ZONE_VALUE_OFFSET(copyMutationSubgenomeColor))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation alters the color of all cell descriptions in a sub-genome by using the specified color transitions."),
                 ParameterSpec()
                     .name("Genome color")
                     .visibleInZone(true)
                     .valueAddress(ZONE_VALUE_OFFSET(copyMutationGenomeColor))
-                    .colorDependence(true)
+                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation alters the color of all cell descriptions in a genome by using the specified color transitions."),
+                ParameterSpec()
+                    .name("Color transitions")
+                    .valueAddress(BASE_VALUE_OFFSET(copyMutationColorTransitions))
+                    .colorDependence(ColorDependence::Matrix)
+                    .type(BoolSpec())
+                    .tooltip("The color transitions are used for color mutations. The row index indicates the source color and the column index the target "
+                             "color."),
+                ParameterSpec()
+                    .name("Prevent genome depth increase")
+                    .valueAddress(BASE_VALUE_OFFSET(copyMutationPreventDepthIncrease))
+                    .type(BoolSpec())
+                    .tooltip("A genome has a tree-like structure because it can contain sub-genomes. If this flag is activated, the mutations will "
+                             "not increase the depth of the genome structure."),
+                ParameterSpec()
+                    .name("Mutate self-replication")
+                    .valueAddress(BASE_VALUE_OFFSET(copyMutationSelfReplication))
+                    .type(BoolSpec())
+                    .tooltip("If activated, a mutation can also alter self-replication capabilities in the genome by changing a constructor cell to "
+                             "something else or vice versa."),
+            }),
+        ParameterGroupSpec()
+            .name("Cell type: Attacker")
+            .parameters({
+                ParameterSpec()
+                    .name("Food chain color matrix")
+                    .visibleInZone(true)
+                    .valueAddress(ZONE_VALUE_OFFSET(attackerFoodChainColorMatrix))
+                    .colorDependence(ColorDependence::Matrix)
+                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.2f"))
+                    .tooltip(
+                        "This matrix can be used to determine how well one cell can attack another cell. The color of the attacking cell correspond to the "
+                        "row number and the color of the attacked cell to the column number. A value of 0 means that the attacked cell cannot be digested, "
+                        "i.e. no energy can be obtained. A value of 1 means that the maximum energy can be obtained in the digestion process.\n\nExample: If "
+                        "a zero is entered in row 2 (red) and column 3 (green), it means that red cells cannot eat green cells."),
+                ParameterSpec()
+                    .name("Attack strength")
+                    .valueAddress(BASE_VALUE_OFFSET(attackerStrength))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0).max(0.5f).logarithmic(true))
+                    .tooltip("Indicates the portion of energy through which a successfully attacked cell is weakened. However, this energy portion can be "
+                             "influenced by other factors adjustable within the attacker's simulation parameters."),
+                ParameterSpec()
+                    .name("Attack radius")
+                    .valueAddress(BASE_VALUE_OFFSET(attackerRadius))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0).max(3.0f))
+                    .tooltip("The maximum distance over which an attacker cell can attack another cell."),
             }),
     });
 }

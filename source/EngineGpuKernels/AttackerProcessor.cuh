@@ -74,7 +74,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             // Evaluate genome complexity bonus
             if (otherCell->genomeComplexity > cell->genomeComplexity) {
                 auto cellTypeAttackerGenomeComplexityBonus = ZoneCalculator::calcParameter(
-                    &SimulationParametersZoneValues::cellTypeAttackerGenomeComplexityBonus,
+                    &SimulationParametersZoneValues::attackerGenomeComplexityBonus,
                     &SimulationParametersZoneActivatedValues::cellTypeAttackerGenomeComplexityBonus,
                     data,
                     cell->pos,
@@ -95,7 +95,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (cudaSimulationParameters.features.advancedAttackerControl && cell->mutationId < otherCell->mutationId
                 && cell->genomeComplexity <= otherCell->genomeComplexity) {
                 auto cellTypeAttackerArisingComplexMutantPenalty = ZoneCalculator::calcParameter(
-                    &SimulationParametersZoneValues::cellTypeAttackerNewComplexMutantPenalty,
+                    &SimulationParametersZoneValues::attackerNewComplexMutantPenalty,
                     &SimulationParametersZoneActivatedValues::cellTypeAttackerNewComplexMutantPenalty,
                     data,
                     cell->pos,
@@ -118,7 +118,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             // Evaluate geometry deviation
             if (cudaSimulationParameters.features.advancedAttackerControl) {
                 auto cellTypeAttackerGeometryDeviationExponent = ZoneCalculator::calcParameter(
-                    &SimulationParametersZoneValues::cellTypeAttackerGeometryDeviationExponent,
+                    &SimulationParametersZoneValues::attackerGeometryDeviationExponent,
                     &SimulationParametersZoneActivatedValues::cellTypeAttackerGeometryDeviationExponent,
                     data,
                     cell->pos,
@@ -136,7 +136,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             // Evaluate attacker connections mismatch penalty
             if (cudaSimulationParameters.features.advancedAttackerControl) {
                 auto cellTypeAttackerConnectionsMismatchPenalty = ZoneCalculator::calcParameter(
-                    &SimulationParametersZoneValues::cellTypeAttackerConnectionsMismatchPenalty,
+                    &SimulationParametersZoneValues::attackerConnectionsMismatchPenalty,
                     &SimulationParametersZoneActivatedValues::cellTypeAttackerConnectionsMismatchPenalty,
                     data,
                     cell->pos,
@@ -151,7 +151,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
             // Evaluate food chain color matrix
             energyToTransfer *= ZoneCalculator::calcParameter(
-                &SimulationParametersZoneValues::cellTypeAttackerFoodChainColorMatrix,
+                &SimulationParametersZoneValues::attackerFoodChainColorMatrix,
                 &SimulationParametersZoneActivatedValues::cellTypeAttackerFoodChainColorMatrix,
                 data,
                 cell->pos,
@@ -203,7 +203,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
         // Radiation
         auto cellTypeWeaponEnergyCost = ZoneCalculator::calcParameter(
-            &SimulationParametersZoneValues::cellTypeAttackerEnergyCost,
+            &SimulationParametersZoneValues::attackerEnergyCost,
             &SimulationParametersZoneActivatedValues::cellTypeAttackerEnergyCost,
             data,
             cell->pos,

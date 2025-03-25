@@ -57,57 +57,10 @@ void _SimulationParametersBaseWidgets::process()
     AlienImGui::Separator();
 
     /**
-     * Mutations
-     */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Genome copy mutations"))) {
-        //----
-        AlienImGui::CheckboxColorMatrix(
-            AlienImGui::CheckboxColorMatrixParameters()
-                .name("Color transitions")
-                .textWidth(RightColumnWidth)
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.copyMutationColorTransitions))
-                .tooltip("The color transitions are used for color mutations. The row index indicates the source color and the column index the target "
-                         "color."),
-            parameters.copyMutationColorTransitions);
-        AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters()
-                .name("Prevent genome depth increase")
-                .textWidth(RightColumnWidth)
-                .defaultValue(origParameters.copyMutationPreventDepthIncrease)
-                .tooltip(std::string("A genome has a tree-like structure because it can contain sub-genomes. If this flag is activated, the mutations will "
-                                     "not increase the depth of the genome structure.")),
-            parameters.copyMutationPreventDepthIncrease);
-        auto preserveSelfReplication = !parameters.copyMutationSelfReplication;
-        AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters()
-                .name("Preserve self-replication")
-                .textWidth(RightColumnWidth)
-                .defaultValue(!origParameters.copyMutationSelfReplication)
-                .tooltip("If deactivated, a mutation can also alter self-replication capabilities in the genome by changing a constructor cell to "
-                         "something else or vice versa."),
-            preserveSelfReplication);
-        parameters.copyMutationSelfReplication = !preserveSelfReplication;
-    }
-    AlienImGui::EndTreeNode();
-
-    /**
      * Attacker
      */
     ImGui::PushID("Attacker");
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Cell type: Attacker"))) {
-        AlienImGui::InputFloatColorMatrix(
-            AlienImGui::InputFloatColorMatrixParameters()
-                .name("Food chain color matrix")
-                .max(1)
-                .textWidth(RightColumnWidth)
-                .tooltip("This matrix can be used to determine how well one cell can attack another cell. The color of the attacking cell correspond to the "
-                         "row "
-                         "number and the color of the attacked cell to the column number. A value of 0 means that the attacked cell cannot be digested, "
-                         "i.e. no energy can be obtained. A value of 1 means that the maximum energy can be obtained in the digestion process.\n\nExample: "
-                         "If a "
-                         "zero is entered in row 2 (red) and column 3 (green), it means that red cells cannot eat green cells.")
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.baseValues.cellTypeAttackerFoodChainColorMatrix)),
-            parameters.baseValues.cellTypeAttackerFoodChainColorMatrix);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Attack strength")
@@ -136,9 +89,9 @@ void _SimulationParametersBaseWidgets::process()
                 .textWidth(RightColumnWidth)
                 .min(0)
                 .max(20.0f)
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.baseValues.cellTypeAttackerGenomeComplexityBonus))
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.baseValues.attackerGenomeComplexityBonus))
                 .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with more complex genomes."),
-            parameters.baseValues.cellTypeAttackerGenomeComplexityBonus);
+            parameters.baseValues.attackerGenomeComplexityBonus);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Energy cost")
@@ -148,9 +101,9 @@ void _SimulationParametersBaseWidgets::process()
                 .max(1.0f)
                 .format("%.5f")
                 .logarithmic(true)
-                .defaultValue(origParameters.baseValues.cellTypeAttackerEnergyCost)
+                .defaultValue(origParameters.baseValues.attackerEnergyCost)
                 .tooltip("Amount of energy lost by an attempted attack of a cell in form of emitted energy particles."),
-            parameters.baseValues.cellTypeAttackerEnergyCost);
+            parameters.baseValues.attackerEnergyCost);
         AlienImGui::Checkbox(
             AlienImGui::CheckboxParameters()
                 .name("Destroy cells")
@@ -470,9 +423,9 @@ void _SimulationParametersBaseWidgets::process()
                 .textWidth(RightColumnWidth)
                 .min(0)
                 .max(1.0f)
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.baseValues.cellTypeAttackerNewComplexMutantPenalty))
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.baseValues.attackerNewComplexMutantPenalty))
                 .tooltip("A high value protects new mutants with equal or greater genome complexity from being attacked."),
-            parameters.baseValues.cellTypeAttackerNewComplexMutantPenalty);
+            parameters.baseValues.attackerNewComplexMutantPenalty);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Sensor detection factor")
@@ -494,10 +447,10 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(0)
                 .max(5.0f)
-                .defaultValue(origParameters.baseValues.cellTypeAttackerGeometryDeviationExponent)
+                .defaultValue(origParameters.baseValues.attackerGeometryDeviationExponent)
                 .tooltip("The larger this value is, the less energy a cell can gain from an attack if the local "
                          "geometry of the attacked cell does not match the attacking cell."),
-            parameters.baseValues.cellTypeAttackerGeometryDeviationExponent);
+            parameters.baseValues.attackerGeometryDeviationExponent);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Connections mismatch penalty")
@@ -505,9 +458,9 @@ void _SimulationParametersBaseWidgets::process()
                 .colorDependence(true)
                 .min(0)
                 .max(1.0f)
-                .defaultValue(origParameters.baseValues.cellTypeAttackerConnectionsMismatchPenalty)
+                .defaultValue(origParameters.baseValues.attackerConnectionsMismatchPenalty)
                 .tooltip("The larger this parameter is, the more difficult it is to attack cells that contain more connections."),
-            parameters.baseValues.cellTypeAttackerConnectionsMismatchPenalty);
+            parameters.baseValues.attackerConnectionsMismatchPenalty);
     }
     AlienImGui::EndTreeNode();
 

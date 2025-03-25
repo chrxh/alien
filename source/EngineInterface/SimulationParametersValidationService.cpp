@@ -4,13 +4,13 @@ void SimulationParametersValidationService::validateAndCorrect(SimulationParamet
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
-            parameters.baseValues.cellTypeAttackerFoodChainColorMatrix[i][j] =
-                std::max(0.0f, std::min(1.0f, parameters.baseValues.cellTypeAttackerFoodChainColorMatrix[i][j]));
+            parameters.baseValues.attackerFoodChainColorMatrix[i][j] =
+                std::max(0.0f, std::min(1.0f, parameters.baseValues.attackerFoodChainColorMatrix[i][j]));
             parameters.attackerSameMutantPenalty[i][j] = std::max(0.0f, std::min(1.0f, parameters.attackerSameMutantPenalty[i][j]));
-            parameters.baseValues.cellTypeAttackerNewComplexMutantPenalty[i][j] =
-                std::max(0.0f, std::min(1.0f, parameters.baseValues.cellTypeAttackerNewComplexMutantPenalty[i][j]));
-            parameters.baseValues.cellTypeAttackerGenomeComplexityBonus[i][j] =
-                std::max(0.0f, parameters.baseValues.cellTypeAttackerGenomeComplexityBonus[i][j]);
+            parameters.baseValues.attackerNewComplexMutantPenalty[i][j] =
+                std::max(0.0f, std::min(1.0f, parameters.baseValues.attackerNewComplexMutantPenalty[i][j]));
+            parameters.baseValues.attackerGenomeComplexityBonus[i][j] =
+                std::max(0.0f, parameters.baseValues.attackerGenomeComplexityBonus[i][j]);
         }
         parameters.baseValues.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorption[i]));
         parameters.radiationAbsorptionHighVelocityPenalty[i] = std::max(0.0f, parameters.radiationAbsorptionHighVelocityPenalty[i]);
@@ -66,11 +66,11 @@ void SimulationParametersValidationService::validateAndCorrect(SimulationParamet
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
-            zone.values.cellTypeAttackerFoodChainColorMatrix[i][j] =
-                std::max(0.0f, std::min(1.0f, zone.values.cellTypeAttackerFoodChainColorMatrix[i][j]));
-            zone.values.cellTypeAttackerGenomeComplexityBonus[i][j] = std::max(0.0f, zone.values.cellTypeAttackerGenomeComplexityBonus[i][j]);
-            zone.values.cellTypeAttackerNewComplexMutantPenalty[i][j] =
-                std::max(0.0f, std::min(1.0f, zone.values.cellTypeAttackerNewComplexMutantPenalty[i][j]));
+            zone.values.attackerFoodChainColorMatrix[i][j] =
+                std::max(0.0f, std::min(1.0f, zone.values.attackerFoodChainColorMatrix[i][j]));
+            zone.values.attackerGenomeComplexityBonus[i][j] = std::max(0.0f, zone.values.attackerGenomeComplexityBonus[i][j]);
+            zone.values.attackerNewComplexMutantPenalty[i][j] =
+                std::max(0.0f, std::min(1.0f, zone.values.attackerNewComplexMutantPenalty[i][j]));
         }
         zone.values.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, zone.values.radiationAbsorption[i]));
         zone.values.minCellEnergy[i] = std::min(parameters.baseValues.minCellEnergy[i], parameters.normalCellEnergy[i] * 0.95f);

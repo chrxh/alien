@@ -40,8 +40,8 @@ struct SimulationParametersZoneValues
         Infinity<int>::value,
         Infinity<int>::value};
     ColorVector<int> cellColorTransitionTargetColor = {0, 1, 2, 3, 4, 5, 6};
-    ColorVector<float> cellTypeAttackerEnergyCost = {0, 0, 0, 0, 0, 0, 0};
-    ColorMatrix<float> cellTypeAttackerFoodChainColorMatrix = {
+    ColorVector<float> attackerEnergyCost = {0, 0, 0, 0, 0, 0, 0};
+    ColorMatrix<float> attackerFoodChainColorMatrix = {
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1},
@@ -50,9 +50,9 @@ struct SimulationParametersZoneValues
         {1, 1, 1, 1, 1, 1, 1},
         {1, 1, 1, 1, 1, 1, 1}};
 
-    ColorVector<float> cellTypeAttackerGeometryDeviationExponent = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> cellTypeAttackerConnectionsMismatchPenalty = {0, 0, 0, 0, 0, 0, 0};
-    ColorMatrix<float> cellTypeAttackerGenomeComplexityBonus = {
+    ColorVector<float> attackerGeometryDeviationExponent = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<float> attackerConnectionsMismatchPenalty = {0, 0, 0, 0, 0, 0, 0};
+    ColorMatrix<float> attackerGenomeComplexityBonus = {
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
@@ -60,7 +60,7 @@ struct SimulationParametersZoneValues
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
-    ColorMatrix<float> cellTypeAttackerNewComplexMutantPenalty = {
+    ColorMatrix<float> attackerNewComplexMutantPenalty = {
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},

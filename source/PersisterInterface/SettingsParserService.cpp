@@ -453,32 +453,32 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.cellTypeAttackerEnergyCost,
-            defaultParameters.baseValues.cellTypeAttackerEnergyCost,
+            parameters.baseValues.attackerEnergyCost,
+            defaultParameters.baseValues.attackerEnergyCost,
             "simulation parameters.cell.function.attacker.energy cost",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.cellTypeAttackerGeometryDeviationExponent,
-            defaultParameters.baseValues.cellTypeAttackerGeometryDeviationExponent,
+            parameters.baseValues.attackerGeometryDeviationExponent,
+            defaultParameters.baseValues.attackerGeometryDeviationExponent,
             "simulation parameters.cell.function.attacker.geometry deviation exponent",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.cellTypeAttackerFoodChainColorMatrix,
-            defaultParameters.baseValues.cellTypeAttackerFoodChainColorMatrix,
+            parameters.baseValues.attackerFoodChainColorMatrix,
+            defaultParameters.baseValues.attackerFoodChainColorMatrix,
             "simulation parameters.cell.function.attacker.food chain color matrix",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.cellTypeAttackerConnectionsMismatchPenalty,
-            defaultParameters.baseValues.cellTypeAttackerConnectionsMismatchPenalty,
+            parameters.baseValues.attackerConnectionsMismatchPenalty,
+            defaultParameters.baseValues.attackerConnectionsMismatchPenalty,
             "simulation parameters.cell.function.attacker.connections mismatch penalty",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.cellTypeAttackerGenomeComplexityBonus,
-            defaultParameters.baseValues.cellTypeAttackerGenomeComplexityBonus,
+            parameters.baseValues.attackerGenomeComplexityBonus,
+            defaultParameters.baseValues.attackerGenomeComplexityBonus,
             "simulation parameters.cell.function.attacker.genome size bonus",
             parserTask);
         ParameterParser::encodeDecode(
@@ -489,8 +489,8 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.cellTypeAttackerNewComplexMutantPenalty,
-            defaultParameters.baseValues.cellTypeAttackerNewComplexMutantPenalty,
+            parameters.baseValues.attackerNewComplexMutantPenalty,
+            defaultParameters.baseValues.attackerNewComplexMutantPenalty,
             "simulation parameters.cell.function.attacker.new complex mutant penalty",
             parserTask);
         ParameterParser::encodeDecode(
@@ -794,45 +794,45 @@ namespace
 
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.cellTypeAttackerEnergyCost,
+                spot.values.attackerEnergyCost,
                 spot.activatedValues.cellTypeAttackerEnergyCost,
-                defaultSpot.values.cellTypeAttackerEnergyCost,
+                defaultSpot.values.attackerEnergyCost,
                 base + "cell.function.attacker.energy cost",
                 parserTask);
 
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.cellTypeAttackerFoodChainColorMatrix,
+                spot.values.attackerFoodChainColorMatrix,
                 spot.activatedValues.cellTypeAttackerFoodChainColorMatrix,
-                defaultSpot.values.cellTypeAttackerFoodChainColorMatrix,
+                defaultSpot.values.attackerFoodChainColorMatrix,
                 base + "cell.function.attacker.food chain color matrix",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.cellTypeAttackerGenomeComplexityBonus,
+                spot.values.attackerGenomeComplexityBonus,
                 spot.activatedValues.cellTypeAttackerGenomeComplexityBonus,
-                defaultSpot.values.cellTypeAttackerGenomeComplexityBonus,
+                defaultSpot.values.attackerGenomeComplexityBonus,
                 base + "cell.function.attacker.genome size bonus",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.cellTypeAttackerNewComplexMutantPenalty,
+                spot.values.attackerNewComplexMutantPenalty,
                 spot.activatedValues.cellTypeAttackerNewComplexMutantPenalty,
-                defaultSpot.values.cellTypeAttackerNewComplexMutantPenalty,
+                defaultSpot.values.attackerNewComplexMutantPenalty,
                 base + "cell.function.attacker.new complex mutant penalty",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.cellTypeAttackerGeometryDeviationExponent,
+                spot.values.attackerGeometryDeviationExponent,
                 spot.activatedValues.cellTypeAttackerGeometryDeviationExponent,
-                defaultSpot.values.cellTypeAttackerGeometryDeviationExponent,
+                defaultSpot.values.attackerGeometryDeviationExponent,
                 base + "cell.function.attacker.geometry deviation exponent",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.cellTypeAttackerConnectionsMismatchPenalty,
+                spot.values.attackerConnectionsMismatchPenalty,
                 spot.activatedValues.cellTypeAttackerConnectionsMismatchPenalty,
-                defaultSpot.values.cellTypeAttackerConnectionsMismatchPenalty,
+                defaultSpot.values.attackerConnectionsMismatchPenalty,
                 base + "cell.function.attacker.connections mismatch penalty",
                 parserTask);
 
