@@ -51,6 +51,12 @@ struct ColorSpec
 
 using TypeSpec = std::variant<BoolSpec, IntSpec, FloatSpec, Char64Spec, AlternativeSpec, ColorSpec>;
 
+enum class ColorDependence
+{
+    None,
+    Vector,
+    Matrix
+};
 struct ParameterSpec
 {
     MEMBER_DECLARATION(ParameterSpec, bool, visibleInBase, true);
@@ -61,7 +67,7 @@ struct ParameterSpec
     MEMBER_DECLARATION(ParameterSpec, std::optional<std::string>, tooltip, std::nullopt);
     MEMBER_DECLARATION(ParameterSpec, std::optional<size_t>, valueActivatedAddress, std::nullopt);
     MEMBER_DECLARATION(ParameterSpec, TypeSpec, type, FloatSpec());
-    MEMBER_DECLARATION(ParameterSpec, bool, colorDependence, false);
+    MEMBER_DECLARATION(ParameterSpec, ColorDependence, colorDependence, ColorDependence::None);
 };
 
 struct ParameterGroupSpec
