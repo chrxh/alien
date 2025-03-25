@@ -74,7 +74,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             // Evaluate genome complexity bonus
             if (otherCell->genomeComplexity > cell->genomeComplexity) {
                 auto cellTypeAttackerGenomeComplexityBonus = ZoneCalculator::calcParameter(
-                    &SimulationParametersZoneValues::attackerGenomeComplexityBonus,
+                    &SimulationParametersZoneValues::attackerCreatureProtection,
                     &SimulationParametersZoneActivatedValues::cellTypeAttackerGenomeComplexityBonus,
                     data,
                     cell->pos,

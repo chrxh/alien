@@ -477,8 +477,8 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.attackerGenomeComplexityBonus,
-            defaultParameters.baseValues.attackerGenomeComplexityBonus,
+            parameters.baseValues.attackerCreatureProtection,
+            defaultParameters.baseValues.attackerCreatureProtection,
             "simulation parameters.cell.function.attacker.genome size bonus",
             parserTask);
         ParameterParser::encodeDecode(
@@ -809,9 +809,9 @@ namespace
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.attackerGenomeComplexityBonus,
+                spot.values.attackerCreatureProtection,
                 spot.activatedValues.cellTypeAttackerGenomeComplexityBonus,
-                defaultSpot.values.attackerGenomeComplexityBonus,
+                defaultSpot.values.attackerCreatureProtection,
                 base + "cell.function.attacker.genome size bonus",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(

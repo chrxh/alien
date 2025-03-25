@@ -460,6 +460,13 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
             .name("Cell type: Attacker")
             .parameters({
                 ParameterSpec()
+                    .name("Energy cost")
+                    .visibleInZone(true)
+                    .valueAddress(ZONE_VALUE_OFFSET(attackerEnergyCost))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0).max(1.0f).logarithmic(true).format("%.5f"))
+                    .tooltip("Amount of energy lost by an attempted attack of a cell in form of emitted energy particles."),
+                ParameterSpec()
                     .name("Food chain color matrix")
                     .visibleInZone(true)
                     .valueAddress(ZONE_VALUE_OFFSET(attackerFoodChainColorMatrix))
@@ -483,6 +490,108 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                     .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0).max(3.0f))
                     .tooltip("The maximum distance over which an attacker cell can attack another cell."),
+                ParameterSpec()
+                    .name("Complex creature protection")
+                    .visibleInZone(true)
+                    .valueAddress(ZONE_VALUE_OFFSET(attackerCreatureProtection))
+                    .colorDependence(ColorDependence::Matrix)
+                    .type(FloatSpec().min(0).max(20.0f).format("%.2f"))
+                    .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with more complex genomes."),
+                ParameterSpec()
+                    .name("Destroy cells")
+                    .valueAddress(BASE_VALUE_OFFSET(attackerDestroyCells))
+                    .type(BoolSpec())
+                    .tooltip("If activated, the attacker cell is able to destroy other cells. If deactivated, it only damages them."),
+            }),
+        ParameterGroupSpec()
+            .name("Cell type: Constructor")
+            .parameters({
+                ParameterSpec()
+                    .name("Connection distance")
+                    .valueAddress(BASE_VALUE_OFFSET(constructorConnectingCellDistance))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0.1f).max(3.0f))
+                    .tooltip("The constructor can automatically connect constructed cells to other cells in the vicinity within this distance."),
+                ParameterSpec()
+                    .name("Completeness check")
+                    .valueAddress(BASE_VALUE_OFFSET(constructorCompletenessCheck))
+                    .type(BoolSpec())
+                    .tooltip("If activated, a self-replication process can only start when all other non-self-replicating constructors in the cell network are "
+                         "finished."),
+            }),
+        ParameterGroupSpec()
+            .name("Cell type: Defender")
+            .parameters({
+                ParameterSpec()
+                    .name("Anti-attacker strength")
+                    .valueAddress(BASE_VALUE_OFFSET(defenderAntiAttackerStrength))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0.0f).max(5.0f))
+                    .tooltip("If an attacked cell is connected to defender cells or itself a defender cell the attack strength is reduced by this factor."),
+                ParameterSpec()
+                    .name("Anti-injector strength")
+                    .valueAddress(BASE_VALUE_OFFSET(defenderAntiInjectorStrength))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0.0f).max(5.0f))
+                    .tooltip("If a constructor cell is attacked by an injector and connected to defender cells, the injection duration is increased by this "
+                         "factor."),
+            }),
+        ParameterGroupSpec()
+            .name("Cell type: Injector")
+            .parameters({
+                ParameterSpec()
+                    .name("Injection radius")
+                    .valueAddress(BASE_VALUE_OFFSET(injectorInjectionRadius))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0.1f).max(4.0f))
+                    .tooltip("The maximum distance over which an injector cell can infect another cell."),
+                ParameterSpec()
+                    .name("Injection time")
+                    .valueAddress(BASE_VALUE_OFFSET(injectorInjectionTime))
+                    .colorDependence(ColorDependence::Matrix)
+                    .type(IntSpec().min(0).max(100000).logarithmic(true))
+                    .tooltip("The number of activations an injector cell requires to infect another cell. One activation usually takes 6 time steps. The row "
+                         "number determines the color of the injector cell, while the column number corresponds to the color of the infected cell."),
+            }),
+        ParameterGroupSpec()
+            .name("Cell type: Muscle")
+            .parameters({
+                ParameterSpec()
+                    .name("Energy cost")
+                    .valueAddress(BASE_VALUE_OFFSET(muscleEnergyCost))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0).max(5.0f).format("%.5f").logarithmic(true))
+                    .tooltip("Amount of energy lost by a muscle action of a cell in form of emitted energy particles."),
+                ParameterSpec()
+                    .name("Movement acceleration")
+                    .valueAddress(BASE_VALUE_OFFSET(muscleMovementAcceleration))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0).max(10.0f).logarithmic(true))
+                    .tooltip("The maximum value by which a muscle cell can modify its velocity during activation. This parameter applies only to muscle cells "
+                         "which are in movement mode."),
+                ParameterSpec()
+                    .name("Crawling acceleration")
+                    .valueAddress(BASE_VALUE_OFFSET(muscleCrawlingAcceleration))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0).max(10.0f).logarithmic(true))
+                    .tooltip("Amount of energy lost by a muscle action of a cell in form of emitted energy particles."),
+                ParameterSpec()
+                    .name("Bending acceleration")
+                    .valueAddress(BASE_VALUE_OFFSET(muscleBendingAcceleration))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0).max(10.0f).logarithmic(true))
+                    .tooltip("The maximum value by which a muscle cell can modify its velocity during a bending action. This parameter applies "
+                         "only to muscle cells which are in bending mode."),
+            }),
+        ParameterGroupSpec()
+            .name("Cell type: Sensor")
+            .parameters({
+                ParameterSpec()
+                    .name("Radius")
+                    .valueAddress(BASE_VALUE_OFFSET(sensorRadius))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(10.0f).max(800.0f))
+                    .tooltip("The maximum radius in which a sensor cell can detect mass concentrations."),
             }),
     });
 }

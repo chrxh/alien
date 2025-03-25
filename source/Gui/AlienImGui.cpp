@@ -328,11 +328,12 @@ void AlienImGui::InputIntColorMatrix(InputIntColorMatrixParameters const& parame
     basicParameters._name = parameters._name;
     basicParameters._min = parameters._min;
     basicParameters._max = parameters._max;
+    basicParameters._format = "%d";
     basicParameters._logarithmic = parameters._logarithmic;
     basicParameters._textWidth = parameters._textWidth;
     basicParameters._defaultValue = parameters._defaultValue;
     basicParameters._tooltip = parameters._tooltip;
-    BasicInputColorMatrix(basicParameters, value);
+    BasicInputColorMatrix<int>(basicParameters, value);
 }
 
 void AlienImGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS], bool* enabled)
@@ -347,7 +348,7 @@ void AlienImGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& pa
     basicParameters._defaultValue = parameters._defaultValue;
     basicParameters._tooltip = parameters._tooltip;
     basicParameters._disabledValue = parameters._disabledValue;
-    BasicInputColorMatrix(basicParameters, value, enabled);
+    BasicInputColorMatrix<float>(basicParameters, value, enabled);
 }
 
 bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, int bufferSize)

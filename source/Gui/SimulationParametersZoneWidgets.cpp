@@ -574,9 +574,9 @@ void _SimulationParametersZoneWidgets::process()
                 .textWidth(RightColumnWidth)
                 .min(0)
                 .max(20.0f)
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origZone.values.attackerGenomeComplexityBonus))
-                .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.attackerGenomeComplexityBonus)),
-            zone.values.attackerGenomeComplexityBonus,
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origZone.values.attackerCreatureProtection))
+                .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.attackerCreatureProtection)),
+            zone.values.attackerCreatureProtection,
             &zone.activatedValues.cellTypeAttackerGenomeComplexityBonus);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()

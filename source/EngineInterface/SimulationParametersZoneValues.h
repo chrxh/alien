@@ -52,7 +52,7 @@ struct SimulationParametersZoneValues
 
     ColorVector<float> attackerGeometryDeviationExponent = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> attackerConnectionsMismatchPenalty = {0, 0, 0, 0, 0, 0, 0};
-    ColorMatrix<float> attackerGenomeComplexityBonus = {
+    ColorMatrix<float> attackerCreatureProtection = {
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},

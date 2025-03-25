@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <ranges>
 
+#include <boost/range/adaptors.hpp>
+
 #include "EngineInterface/SimulationParametersSpecificationService.h"
 #include "EngineInterface/SimulationParametersTypes.h"
 #include "EngineInterface/SimulationParameters.h"
@@ -61,7 +63,8 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
     auto& specService = SimulationParametersSpecificationService::get();
     auto locationType = getLocationType(locationIndex, parameters);
 
-    for (auto const& parameterSpec : parameterSpecs) {
+    for (auto const& [index, parameterSpec] : parameterSpecs | boost::adaptors::indexed(0)) {
+        ImGui::PushID(toInt(index));
         if (!isVisible(parameterSpec, locationType)) {
             continue;
         }
@@ -72,7 +75,7 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
                 auto& origValue = *reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(&specService.getValueRef<float>(parameterSpec, origParameters, locationIndex));
                 AlienImGui::InputFloatColorMatrix(
                     AlienImGui::InputFloatColorMatrixParameters()
-                        .name("Food chain color matrix")
+                        .name(parameterSpec._name)
                         .max(floatSpec._min)
                         .max(floatSpec._max)
                         .logarithmic(floatSpec._logarithmic)
@@ -81,7 +84,20 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
                         .tooltip(parameterSpec._tooltip)
                         .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origValue)),
                     value);
-
+            } else if (std::holds_alternative<IntSpec>(parameterSpec._type)) {
+                auto const& intSpec = std::get<IntSpec>(parameterSpec._type);
+                auto& value = *reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(&specService.getValueRef<int>(parameterSpec, parameters, locationIndex));
+                auto& origValue = *reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(&specService.getValueRef<int>(parameterSpec, origParameters, locationIndex));
+                AlienImGui::InputIntColorMatrix(
+                    AlienImGui::InputIntColorMatrixParameters()
+                        .name(parameterSpec._name)
+                        .max(intSpec._min)
+                        .max(intSpec._max)
+                        .logarithmic(intSpec._logarithmic)
+                        .textWidth(RightColumnWidth)
+                        .tooltip(parameterSpec._tooltip)
+                        .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origValue)),
+                    value);
             } else if (std::holds_alternative<BoolSpec>(parameterSpec._type)) {
                 auto& value = *reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(&specService.getValueRef<bool>(parameterSpec, parameters, locationIndex));
                 auto& origValue = *reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(&specService.getValueRef<bool>(parameterSpec, origParameters, locationIndex));
@@ -209,6 +225,7 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
                 createWidgetsFromParameterSpecs(switcherSpec._alternatives.at(value).second, locationIndex, parameters, origParameters);
             }
         }
+        ImGui::PopID();
     }
 }
 
