@@ -599,7 +599,7 @@ void _SimulationParametersZoneWidgets::process()
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
                                       .name("Expert settings: Advanced energy absorption control")
-                                      .visible(parameters.features.advancedAbsorptionControl)
+                                      .visible(parameters.expertSettingsToggles.advancedAbsorptionControl)
                                       .blinkWhenActivated(true))) {
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -633,7 +633,7 @@ void _SimulationParametersZoneWidgets::process()
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
                                       .name("Expert settings: Advanced attacker control")
-                                      .visible(parameters.features.advancedAttackerControl)
+                                      .visible(parameters.expertSettingsToggles.advancedAttackerControl)
                                       .blinkWhenActivated(true))) {
         AlienImGui::InputFloatColorMatrix(
             AlienImGui::InputFloatColorMatrixParameters()
@@ -641,9 +641,9 @@ void _SimulationParametersZoneWidgets::process()
                 .textWidth(RightColumnWidth)
                 .min(0)
                 .max(1.0f)
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origZone.values.attackerNewComplexMutantPenalty))
-                .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.attackerNewComplexMutantPenalty)),
-            zone.values.attackerNewComplexMutantPenalty,
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origZone.values.attackerNewComplexMutantProtection))
+                .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.attackerNewComplexMutantProtection)),
+            zone.values.attackerNewComplexMutantProtection,
             &zone.activatedValues.cellTypeAttackerNewComplexMutantPenalty);
 
         AlienImGui::SliderFloat(
@@ -653,9 +653,9 @@ void _SimulationParametersZoneWidgets::process()
                 .colorDependence(true)
                 .min(0)
                 .max(5.0f)
-                .defaultValue(origZone.values.attackerGeometryDeviationExponent)
-                .disabledValue(parameters.baseValues.attackerGeometryDeviationExponent),
-            zone.values.attackerGeometryDeviationExponent,
+                .defaultValue(origZone.values.attackerGeometryDeviationProtection)
+                .disabledValue(parameters.baseValues.attackerGeometryDeviationProtection),
+            zone.values.attackerGeometryDeviationProtection,
             &zone.activatedValues.cellTypeAttackerGeometryDeviationExponent);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -664,9 +664,9 @@ void _SimulationParametersZoneWidgets::process()
                 .colorDependence(true)
                 .min(0)
                 .max(1.0f)
-                .defaultValue(origZone.values.attackerConnectionsMismatchPenalty)
-                .disabledValue(parameters.baseValues.attackerConnectionsMismatchPenalty),
-            zone.values.attackerConnectionsMismatchPenalty,
+                .defaultValue(origZone.values.attackerConnectionsMismatchProtection)
+                .disabledValue(parameters.baseValues.attackerConnectionsMismatchProtection),
+            zone.values.attackerConnectionsMismatchProtection,
             &zone.activatedValues.cellTypeAttackerConnectionsMismatchPenalty);
     }
     AlienImGui::EndTreeNode();
@@ -676,7 +676,7 @@ void _SimulationParametersZoneWidgets::process()
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
                                       .name("Expert settings: Cell age limiter")
-                                      .visible(parameters.features.cellAgeLimiter)
+                                      .visible(parameters.expertSettingsToggles.cellAgeLimiter)
                                       .blinkWhenActivated(true))) {
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -700,7 +700,7 @@ void _SimulationParametersZoneWidgets::process()
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
                                       .name("Expert settings: Cell color transition rules")
-                                      .visible(parameters.features.cellColorTransitionRules)
+                                      .visible(parameters.expertSettingsToggles.cellColorTransitionRules)
                                       .blinkWhenActivated(true))) {
         ImGui::Checkbox("##cellColorTransition", &zone.activatedValues.cellColorTransition);
         ImGui::SameLine();

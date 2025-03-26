@@ -6,9 +6,9 @@ void SimulationParametersValidationService::validateAndCorrect(SimulationParamet
         for (int j = 0; j < MAX_COLORS; ++j) {
             parameters.baseValues.attackerFoodChainColorMatrix[i][j] =
                 std::max(0.0f, std::min(1.0f, parameters.baseValues.attackerFoodChainColorMatrix[i][j]));
-            parameters.attackerSameMutantPenalty[i][j] = std::max(0.0f, std::min(1.0f, parameters.attackerSameMutantPenalty[i][j]));
-            parameters.baseValues.attackerNewComplexMutantPenalty[i][j] =
-                std::max(0.0f, std::min(1.0f, parameters.baseValues.attackerNewComplexMutantPenalty[i][j]));
+            parameters.attackerSameMutantProtection[i][j] = std::max(0.0f, std::min(1.0f, parameters.attackerSameMutantProtection[i][j]));
+            parameters.baseValues.attackerNewComplexMutantProtection[i][j] =
+                std::max(0.0f, std::min(1.0f, parameters.baseValues.attackerNewComplexMutantProtection[i][j]));
             parameters.baseValues.attackerCreatureProtection[i][j] =
                 std::max(0.0f, parameters.baseValues.attackerCreatureProtection[i][j]);
         }
@@ -69,8 +69,8 @@ void SimulationParametersValidationService::validateAndCorrect(SimulationParamet
             zone.values.attackerFoodChainColorMatrix[i][j] =
                 std::max(0.0f, std::min(1.0f, zone.values.attackerFoodChainColorMatrix[i][j]));
             zone.values.attackerCreatureProtection[i][j] = std::max(0.0f, zone.values.attackerCreatureProtection[i][j]);
-            zone.values.attackerNewComplexMutantPenalty[i][j] =
-                std::max(0.0f, std::min(1.0f, zone.values.attackerNewComplexMutantPenalty[i][j]));
+            zone.values.attackerNewComplexMutantProtection[i][j] =
+                std::max(0.0f, std::min(1.0f, zone.values.attackerNewComplexMutantProtection[i][j]));
         }
         zone.values.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, zone.values.radiationAbsorption[i]));
         zone.values.minCellEnergy[i] = std::min(parameters.baseValues.minCellEnergy[i], parameters.normalCellEnergy[i] * 0.95f);

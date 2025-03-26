@@ -493,7 +493,7 @@ __inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& dat
     }
 
     auto numNonSeparatedNodes = GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, false);
-    if (cudaSimulationParameters.features.customizeDeletionMutations
+    if (cudaSimulationParameters.expertSettingsToggles.customizeDeletionMutations
         && numNonSeparatedNodes <= cudaSimulationParameters.cellCopyMutationDeletionMinSize) {
         return;
     }
@@ -865,18 +865,18 @@ __inline__ __device__ void MutationProcessor::subgenomeColorMutation(SimulationD
 __inline__ __device__ void MutationProcessor::neuronDataMutationNode(SimulationData& data, uint8_t* genome, int nodeAddress)
 {
     auto cellCopyMutationNeuronDataWeightsPercentage =
-        cudaSimulationParameters.features.customizeNeuronMutations ? cudaSimulationParameters.cellCopyMutationNeuronDataWeight : 0.2f;
+        cudaSimulationParameters.expertSettingsToggles.customizeNeuronMutations ? cudaSimulationParameters.cellCopyMutationNeuronDataWeight : 0.2f;
     auto cellCopyMutationNeuronDataBiasesPercentage =
-        cudaSimulationParameters.features.customizeNeuronMutations ? cudaSimulationParameters.cellCopyMutationNeuronDataBias : 0.2f;
-    auto cellCopyMutationNeuronDataActivationFunctionPercentage = cudaSimulationParameters.features.customizeNeuronMutations
+        cudaSimulationParameters.expertSettingsToggles.customizeNeuronMutations ? cudaSimulationParameters.cellCopyMutationNeuronDataBias : 0.2f;
+    auto cellCopyMutationNeuronDataActivationFunctionPercentage = cudaSimulationParameters.expertSettingsToggles.customizeNeuronMutations
         ? cudaSimulationParameters.cellCopyMutationNeuronDataActivationFunction
         : 0.05f;
     auto cellCopyMutationNeuronDataReinforcement =
-        cudaSimulationParameters.features.customizeNeuronMutations ? cudaSimulationParameters.cellCopyMutationNeuronDataReinforcement : 1.05f;
+        cudaSimulationParameters.expertSettingsToggles.customizeNeuronMutations ? cudaSimulationParameters.cellCopyMutationNeuronDataReinforcement : 1.05f;
     auto cellCopyMutationNeuronDataDamping =
-        cudaSimulationParameters.features.customizeNeuronMutations ? cudaSimulationParameters.cellCopyMutationNeuronDataDamping : 1.05f;
+        cudaSimulationParameters.expertSettingsToggles.customizeNeuronMutations ? cudaSimulationParameters.cellCopyMutationNeuronDataDamping : 1.05f;
     auto cellCopyMutationNeuronDataOffset =
-        cudaSimulationParameters.features.customizeNeuronMutations ? cudaSimulationParameters.cellCopyMutationNeuronDataOffset : 0.05f;
+        cudaSimulationParameters.expertSettingsToggles.customizeNeuronMutations ? cudaSimulationParameters.cellCopyMutationNeuronDataOffset : 0.05f;
 
     auto neuronMutationType = data.numberGen1.random(3);
     for (int i = 0; i < Const::NeuronWeightBytes; ++i) {

@@ -57,255 +57,10 @@ void _SimulationParametersBaseWidgets::process()
     AlienImGui::Separator();
 
     /**
-     * Transmitter
-     */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Cell type: Transmitter"))) {
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Energy distribution radius")
-                .textWidth(RightColumnWidth)
-                .colorDependence(true)
-                .min(0)
-                .max(5.0f)
-                .defaultValue(origParameters.transmitterEnergyDistributionRadius)
-                .tooltip("The maximum distance over which a transmitter cell transfers its additional energy to nearby transmitter or constructor cells."),
-            parameters.transmitterEnergyDistributionRadius);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Energy distribution Value")
-                .textWidth(RightColumnWidth)
-                .colorDependence(true)
-                .min(0)
-                .max(20.0f)
-                .defaultValue(origParameters.transmitterEnergyDistributionValue)
-                .tooltip("The amount of energy which a transmitter cell can transfer to nearby transmitter or constructor cells or to connected cells."),
-            parameters.transmitterEnergyDistributionValue);
-        AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters()
-                .name("Same creature energy distribution")
-                .textWidth(RightColumnWidth)
-                .defaultValue(origParameters.transmitterEnergyDistributionSameCreature)
-                .tooltip("If activated, the transmitter cells can only transfer energy to nearby cells belonging to the same creature."),
-            parameters.transmitterEnergyDistributionSameCreature);
-    }
-    AlienImGui::EndTreeNode();
-
-    /**
-     * Reconnector
-     */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Cell type: Reconnector"))) {
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Radius")
-                .textWidth(RightColumnWidth)
-                .colorDependence(true)
-                .min(0.0f)
-                .max(3.0f)
-                .defaultValue(origParameters.reconnectorRadius)
-                .tooltip("The maximum radius in which a reconnector cell can establish or destroy connections to other cells."),
-            parameters.reconnectorRadius);
-    }
-    AlienImGui::EndTreeNode();
-
-    /**
-     * Detonator
-     */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Cell type: Detonator"))) {
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Blast radius")
-                .textWidth(RightColumnWidth)
-                .colorDependence(true)
-                .min(0.0f)
-                .max(10.0f)
-                .defaultValue(origParameters.detonatorRadius)
-                .tooltip("The radius of the detonation."),
-            parameters.detonatorRadius);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Chain explosion probability")
-                .textWidth(RightColumnWidth)
-                .colorDependence(true)
-                .min(0.0f)
-                .max(1.0f)
-                .defaultValue(origParameters.detonatorChainExplosionProbability)
-                .tooltip("The probability that the explosion of one detonator will trigger the explosion of other detonators within the blast radius."),
-            parameters.detonatorChainExplosionProbability);
-    }
-    AlienImGui::EndTreeNode();
-
-    /**
-     * Expert settings: Advanced absorption control
-     */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
-                                      .name("Expert settings: Advanced energy absorption control")
-                                      .visible(parameters.features.advancedAbsorptionControl)
-                                      .blinkWhenActivated(true))) {
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Low genome complexity penalty")
-                .textWidth(RightColumnWidth)
-                .colorDependence(true)
-                .min(0)
-                .max(1.0f)
-                .format("%.2f")
-                .defaultValue(origParameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty)
-                .tooltip(Const::ParameterRadiationAbsorptionLowGenomeComplexityPenaltyTooltip),
-            parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Low connection penalty")
-                .textWidth(RightColumnWidth)
-                .colorDependence(true)
-                .min(0)
-                .max(5.0f)
-                .format("%.1f")
-                .defaultValue(origParameters.radiationAbsorptionLowConnectionPenalty)
-                .tooltip("When this parameter is increased, cells with fewer cell connections will absorb less energy from an incoming energy "
-                         "particle."),
-            parameters.radiationAbsorptionLowConnectionPenalty);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("High velocity penalty")
-                .textWidth(RightColumnWidth)
-                .colorDependence(true)
-                .min(0)
-                .max(30.0f)
-                .logarithmic(true)
-                .format("%.2f")
-                .defaultValue(origParameters.radiationAbsorptionHighVelocityPenalty)
-                .tooltip("When this parameter is increased, fast moving cells will absorb less energy from an incoming energy particle."),
-            parameters.radiationAbsorptionHighVelocityPenalty);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Low velocity penalty")
-                .textWidth(RightColumnWidth)
-                .colorDependence(true)
-                .min(0)
-                .max(1.0f)
-                .format("%.2f")
-                .defaultValue(origParameters.baseValues.radiationAbsorptionLowVelocityPenalty)
-                .tooltip("When this parameter is increased, slowly moving cells will absorb less energy from an incoming energy particle."),
-            parameters.baseValues.radiationAbsorptionLowVelocityPenalty);
-    }
-    AlienImGui::EndTreeNode();
-
-    /**
-     * Expert settings: Advanced attacker control
-     */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
-                                      .name("Expert settings: Advanced attacker control")
-                                      .visible(parameters.features.advancedAttackerControl)
-                                      .blinkWhenActivated(true))) {
-        AlienImGui::InputFloatColorMatrix(
-            AlienImGui::InputFloatColorMatrixParameters()
-                .name("Same mutant protection")
-                .textWidth(RightColumnWidth)
-                .min(0)
-                .max(1.0f)
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.attackerSameMutantPenalty))
-                .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with the same mutation id."),
-            parameters.attackerSameMutantPenalty);
-        AlienImGui::InputFloatColorMatrix(
-            AlienImGui::InputFloatColorMatrixParameters()
-                .name("New complex mutant protection")
-                .textWidth(RightColumnWidth)
-                .min(0)
-                .max(1.0f)
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.baseValues.attackerNewComplexMutantPenalty))
-                .tooltip("A high value protects new mutants with equal or greater genome complexity from being attacked."),
-            parameters.baseValues.attackerNewComplexMutantPenalty);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Sensor detection factor")
-                .textWidth(RightColumnWidth)
-                .colorDependence(true)
-                .min(0)
-                .max(1.0f)
-                .defaultValue(origParameters.attackerSensorDetectionFactor)
-                .tooltip("This parameter controls whether the target must be previously detected with sensors in order to be attacked. The larger this "
-                         "value is, the less energy can be gained during the attack if the target has not already been detected. For this purpose, the "
-                         "attacker "
-                         "cell searches for connected (or connected-connected) sensor cells to see which cell networks they have detected last time and "
-                         "compares them with the attacked target."),
-            parameters.attackerSensorDetectionFactor);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Geometry penalty")
-                .textWidth(RightColumnWidth)
-                .colorDependence(true)
-                .min(0)
-                .max(5.0f)
-                .defaultValue(origParameters.baseValues.attackerGeometryDeviationExponent)
-                .tooltip("The larger this value is, the less energy a cell can gain from an attack if the local "
-                         "geometry of the attacked cell does not match the attacking cell."),
-            parameters.baseValues.attackerGeometryDeviationExponent);
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Connections mismatch penalty")
-                .textWidth(RightColumnWidth)
-                .colorDependence(true)
-                .min(0)
-                .max(1.0f)
-                .defaultValue(origParameters.baseValues.attackerConnectionsMismatchPenalty)
-                .tooltip("The larger this parameter is, the more difficult it is to attack cells that contain more connections."),
-            parameters.baseValues.attackerConnectionsMismatchPenalty);
-    }
-    AlienImGui::EndTreeNode();
-
-    /**
-     * Expert settings: Cell color transition rules
-     */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
-                                      .name("Expert settings: Cell color transition rules")
-                                      .visible(parameters.features.cellColorTransitionRules)
-                                      .blinkWhenActivated(true))) {
-        for (int color = 0; color < MAX_COLORS; ++color) {
-            ImGui::PushID(color);
-            auto widgetParameters = AlienImGui::InputColorTransitionParameters()
-                                        .textWidth(RightColumnWidth)
-                                        .color(color)
-                                        .defaultTargetColor(origParameters.baseValues.cellColorTransitionTargetColor[color])
-                                        .defaultTransitionAge(origParameters.baseValues.cellColorTransitionDuration[color])
-                                        .logarithmic(true)
-                                        .infinity(true);
-            if (0 == color) {
-                widgetParameters.name("Target color and duration")
-                    .tooltip("Rules can be defined that describe how the colors of cells will change over time. For this purpose, a subsequent "
-                             "color can "
-                             "be defined for each cell color. In addition, durations must be specified that define how many time steps the "
-                             "corresponding "
-                             "color are kept.");
-            }
-            AlienImGui::InputColorTransition(
-                widgetParameters, color, parameters.baseValues.cellColorTransitionTargetColor[color], parameters.baseValues.cellColorTransitionDuration[color]);
-            ImGui::PopID();
-        }
-    }
-    AlienImGui::EndTreeNode();
-
-    /**
      * Expert settings: Cell age limiter
      */
     if (AlienImGui::BeginTreeNode(
-            AlienImGui::TreeNodeParameters().name("Expert settings: Cell age limiter").visible(parameters.features.cellAgeLimiter).blinkWhenActivated(true))) {
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Maximum inactive cell age")
-                .textWidth(RightColumnWidth)
-                .colorDependence(true)
-                .min(1.0f)
-                .max(10000000.0f)
-                .format("%.0f")
-                .logarithmic(true)
-                .infinity(true)
-                .disabledValue(parameters.baseValues.maxAgeForInactiveCells)
-                .defaultEnabledValue(&origParameters.maxAgeForInactiveCellsActivated)
-                .defaultValue(origParameters.baseValues.maxAgeForInactiveCells)
-                .tooltip("Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered. Cells which "
-                         "are in state 'Under construction' are not affected by this option."),
-            parameters.baseValues.maxAgeForInactiveCells,
-            &parameters.maxAgeForInactiveCellsActivated);
+            AlienImGui::TreeNodeParameters().name("Expert settings: Cell age limiter").visible(parameters.expertSettingsToggles.cellAgeLimiter).blinkWhenActivated(true))) {
         AlienImGui::SliderInt(
             AlienImGui::SliderIntParameters()
                 .name("Maximum free cell age")
@@ -354,7 +109,7 @@ void _SimulationParametersBaseWidgets::process()
      * Expert settings: Cell glow
      */
     if (AlienImGui::BeginTreeNode(
-            AlienImGui::TreeNodeParameters().name("Expert settings: Cell glow").visible(parameters.features.cellGlow).blinkWhenActivated(true))) {
+            AlienImGui::TreeNodeParameters().name("Expert settings: Cell glow").visible(parameters.expertSettingsToggles.cellGlow).blinkWhenActivated(true))) {
         AlienImGui::Switcher(
             AlienImGui::SwitcherParameters()
                 .name("Coloring")
@@ -397,7 +152,7 @@ void _SimulationParametersBaseWidgets::process()
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
                                       .name("Expert settings: Customize deletion mutations")
-                                      .visible(parameters.features.customizeDeletionMutations)
+                                      .visible(parameters.expertSettingsToggles.customizeDeletionMutations)
                                       .blinkWhenActivated(true))) {
         AlienImGui::SliderInt(
             AlienImGui::SliderIntParameters()
@@ -418,7 +173,7 @@ void _SimulationParametersBaseWidgets::process()
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
                                       .name("Expert settings: Customize neuron mutations")
-                                      .visible(parameters.features.customizeNeuronMutations)
+                                      .visible(parameters.expertSettingsToggles.customizeNeuronMutations)
                                       .blinkWhenActivated(true))) {
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -491,7 +246,7 @@ void _SimulationParametersBaseWidgets::process()
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
                                       .name("Expert settings: External energy control")
-                                      .visible(parameters.features.externalEnergyControl)
+                                      .visible(parameters.expertSettingsToggles.externalEnergyControl)
                                       .blinkWhenActivated(true))) {
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -578,7 +333,7 @@ void _SimulationParametersBaseWidgets::process()
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
                                       .name("Expert settings: Genome complexity measurement")
-                                      .visible(parameters.features.genomeComplexityMeasurement)
+                                      .visible(parameters.expertSettingsToggles.genomeComplexityMeasurement)
                                       .blinkWhenActivated(true))) {
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()

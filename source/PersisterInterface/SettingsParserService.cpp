@@ -459,8 +459,8 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.attackerGeometryDeviationExponent,
-            defaultParameters.baseValues.attackerGeometryDeviationExponent,
+            parameters.baseValues.attackerGeometryDeviationProtection,
+            defaultParameters.baseValues.attackerGeometryDeviationProtection,
             "simulation parameters.cell.function.attacker.geometry deviation exponent",
             parserTask);
         ParameterParser::encodeDecode(
@@ -471,8 +471,8 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.attackerConnectionsMismatchPenalty,
-            defaultParameters.baseValues.attackerConnectionsMismatchPenalty,
+            parameters.baseValues.attackerConnectionsMismatchProtection,
+            defaultParameters.baseValues.attackerConnectionsMismatchProtection,
             "simulation parameters.cell.function.attacker.connections mismatch penalty",
             parserTask);
         ParameterParser::encodeDecode(
@@ -483,14 +483,14 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.attackerSameMutantPenalty,
-            defaultParameters.attackerSameMutantPenalty,
+            parameters.attackerSameMutantProtection,
+            defaultParameters.attackerSameMutantProtection,
             "simulation parameters.cell.function.attacker.same mutant penalty",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.attackerNewComplexMutantPenalty,
-            defaultParameters.baseValues.attackerNewComplexMutantPenalty,
+            parameters.baseValues.attackerNewComplexMutantProtection,
+            defaultParameters.baseValues.attackerNewComplexMutantProtection,
             "simulation parameters.cell.function.attacker.new complex mutant penalty",
             parserTask);
         ParameterParser::encodeDecode(
@@ -816,23 +816,23 @@ namespace
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.attackerNewComplexMutantPenalty,
+                spot.values.attackerNewComplexMutantProtection,
                 spot.activatedValues.cellTypeAttackerNewComplexMutantPenalty,
-                defaultSpot.values.attackerNewComplexMutantPenalty,
+                defaultSpot.values.attackerNewComplexMutantProtection,
                 base + "cell.function.attacker.new complex mutant penalty",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.attackerGeometryDeviationExponent,
+                spot.values.attackerGeometryDeviationProtection,
                 spot.activatedValues.cellTypeAttackerGeometryDeviationExponent,
-                defaultSpot.values.attackerGeometryDeviationExponent,
+                defaultSpot.values.attackerGeometryDeviationProtection,
                 base + "cell.function.attacker.geometry deviation exponent",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.attackerConnectionsMismatchPenalty,
+                spot.values.attackerConnectionsMismatchProtection,
                 spot.activatedValues.cellTypeAttackerConnectionsMismatchPenalty,
-                defaultSpot.values.attackerConnectionsMismatchPenalty,
+                defaultSpot.values.attackerConnectionsMismatchProtection,
                 base + "cell.function.attacker.connections mismatch penalty",
                 parserTask);
 
@@ -925,48 +925,48 @@ namespace
         //features
         ParameterParser::encodeDecode(
             tree,
-            parameters.features.genomeComplexityMeasurement,
-            defaultParameters.features.genomeComplexityMeasurement,
+            parameters.expertSettingsToggles.genomeComplexityMeasurement,
+            defaultParameters.expertSettingsToggles.genomeComplexityMeasurement,
             "simulation parameters.features.genome complexity measurement",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.features.advancedAbsorptionControl,
-            defaultParameters.features.advancedAbsorptionControl,
+            parameters.expertSettingsToggles.advancedAbsorptionControl,
+            defaultParameters.expertSettingsToggles.advancedAbsorptionControl,
             "simulation parameters.features.additional absorption control",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.features.advancedAttackerControl,
-            defaultParameters.features.advancedAttackerControl,
+            parameters.expertSettingsToggles.advancedAttackerControl,
+            defaultParameters.expertSettingsToggles.advancedAttackerControl,
             "simulation parameters.features.additional attacker control",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.features.externalEnergyControl,
-            defaultParameters.features.externalEnergyControl,
+            parameters.expertSettingsToggles.externalEnergyControl,
+            defaultParameters.expertSettingsToggles.externalEnergyControl,
             "simulation parameters.features.external energy",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.features.cellColorTransitionRules,
-            defaultParameters.features.cellColorTransitionRules,
+            parameters.expertSettingsToggles.cellColorTransitionRules,
+            defaultParameters.expertSettingsToggles.cellColorTransitionRules,
             "simulation parameters.features.cell color transition rules",
             parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.features.cellAgeLimiter, defaultParameters.features.cellAgeLimiter, "simulation parameters.features.cell age limiter", parserTask);
+            tree, parameters.expertSettingsToggles.cellAgeLimiter, defaultParameters.expertSettingsToggles.cellAgeLimiter, "simulation parameters.features.cell age limiter", parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.features.cellGlow, defaultParameters.features.cellGlow, "simulation parameters.features.cell glow", parserTask);
+            tree, parameters.expertSettingsToggles.cellGlow, defaultParameters.expertSettingsToggles.cellGlow, "simulation parameters.features.cell glow", parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.features.customizeNeuronMutations,
-            defaultParameters.features.customizeNeuronMutations,
+            parameters.expertSettingsToggles.customizeNeuronMutations,
+            defaultParameters.expertSettingsToggles.customizeNeuronMutations,
             "simulation parameters.features.customize neuron mutations",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.features.customizeDeletionMutations,
-            defaultParameters.features.customizeDeletionMutations,
+            parameters.expertSettingsToggles.customizeDeletionMutations,
+            defaultParameters.expertSettingsToggles.customizeDeletionMutations,
             "simulation parameters.features.customize deletion mutations",
             parserTask);
     }
