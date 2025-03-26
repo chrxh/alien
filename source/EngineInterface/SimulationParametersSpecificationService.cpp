@@ -8,6 +8,7 @@
 
 #define BASE_VALUE_OFFSET(X) offsetof(SimulationParameters, X)
 #define ZONE_VALUE_OFFSET(X) offsetof(SimulationParametersZoneValues, X)
+#define EXPERT_VALUE_OFFSET(X) offsetof(ExpertSettingsToggles, X)
 
 ParametersSpec SimulationParametersSpecificationService::createParametersSpec() const
 {
@@ -57,7 +58,7 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
         ParameterGroupSpec()
             .name("Visualization")
             .parameters({
-                ParameterSpec().name("Background color").visibleInZone(true).valueAddress(ZONE_VALUE_OFFSET(backgroundColor)).type(ColorSpec()),
+                ParameterSpec().name("Background color").visibleInZone(true).valueAddress(ZONE_VALUE_OFFSET(backgroundColor)).type(ColorPickerSpec()),
                 ParameterSpec()
                     .name("Primary cell coloring")
                     .valueAddress(BASE_VALUE_OFFSET(primaryCellColoring))
@@ -593,5 +594,158 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                     .type(FloatSpec().min(10.0f).max(800.0f))
                     .tooltip("The maximum radius in which a sensor cell can detect mass concentrations."),
             }),
+        ParameterGroupSpec()
+            .name("Cell type: Transmitter")
+            .parameters({
+                ParameterSpec()
+                    .name("Energy distribution radius")
+                    .valueAddress(BASE_VALUE_OFFSET(transmitterEnergyDistributionRadius))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0).max(5.0f))
+                    .tooltip("The maximum distance over which a transmitter cell transfers its additional energy to nearby transmitter or constructor cells."),
+                ParameterSpec()
+                    .name("Energy distribution Value")
+                    .valueAddress(BASE_VALUE_OFFSET(transmitterEnergyDistributionValue))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0).max(20.0f))
+                    .tooltip("The amount of energy which a transmitter cell can transfer to nearby transmitter or constructor cells or to connected cells."),
+                ParameterSpec()
+                    .name("Same creature energy distribution")
+                    .valueAddress(BASE_VALUE_OFFSET(transmitterEnergyDistributionSameCreature))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(BoolSpec())
+                    .tooltip("If activated, the transmitter cells can only transfer energy to nearby cells belonging to the same creature."),
+            }),
+        ParameterGroupSpec()
+            .name("Cell type: Reconnector")
+            .parameters({
+                ParameterSpec()
+                    .name("Radius")
+                    .valueAddress(BASE_VALUE_OFFSET(reconnectorRadius))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0).max(3.0f))
+                    .tooltip("The maximum radius in which a reconnector cell can establish or destroy connections to other cells."),
+            }),
+        ParameterGroupSpec()
+            .name("Cell type: Detonator")
+            .parameters({
+                ParameterSpec()
+                    .name("Blast radius")
+                    .valueAddress(BASE_VALUE_OFFSET(detonatorRadius))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0).max(10.0f))
+                    .tooltip("The radius of the detonation."),
+                ParameterSpec()
+                    .name("Chain explosion probability")
+                    .valueAddress(BASE_VALUE_OFFSET(detonatorChainExplosionProbability))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0).max(1.0f))
+                    .tooltip("The probability that the explosion of one detonator will trigger the explosion of other detonators within the blast radius."),
+            }),
+        ParameterGroupSpec()
+            .name("Expert settings: Advanced energy absorption control")
+            .expertSettingAddress(EXPERT_VALUE_OFFSET(advancedAbsorptionControl))
+            .parameters({
+                ParameterSpec()
+                    .name("Low genome complexity penalty")
+                    .visibleInZone(true)
+                    .valueAddress(ZONE_VALUE_OFFSET(radiationAbsorptionLowGenomeComplexityPenalty))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0).max(1.0f).format("%.2f"))
+                    .tooltip("When this parameter is increased, cells with fewer genome complexity will absorb less energy from an incoming energy particle."),
+                ParameterSpec()
+                    .name("Low connection penalty")
+                    .valueAddress(BASE_VALUE_OFFSET(radiationAbsorptionLowConnectionPenalty))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0).max(5.0f).format("%.1f"))
+                    .tooltip("When this parameter is increased, cells with fewer cell connections will absorb less energy from an incoming energy particle."),
+                ParameterSpec()
+                    .name("High velocity penalty")
+                    .valueAddress(BASE_VALUE_OFFSET(radiationAbsorptionHighVelocityPenalty))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0).max(30.0f).logarithmic(true).format("%.2f"))
+                    .tooltip("When this parameter is increased, fast moving cells will absorb less energy from an incoming energy particle."),
+                ParameterSpec()
+                    .name("Low velocity penalty")
+                    .visibleInZone(true)
+                    .valueAddress(ZONE_VALUE_OFFSET(radiationAbsorptionLowVelocityPenalty))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0).max(1.0f).format("%.2f"))
+                    .tooltip("When this parameter is increased, slowly moving cells will absorb less energy from an incoming energy particle."),
+            }),
+        ParameterGroupSpec()
+            .name("Expert settings: Advanced attacker control")
+            .expertSettingAddress(EXPERT_VALUE_OFFSET(advancedAttackerControl))
+            .parameters({
+                ParameterSpec()
+                    .name("Same mutant protection")
+                    .valueAddress(BASE_VALUE_OFFSET(attackerSameMutantProtection))
+                    .colorDependence(ColorDependence::Matrix)
+                    .type(FloatSpec().min(0).max(1.0f).format("%.2f"))
+                    .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with the same mutation id."),
+                ParameterSpec()
+                    .name("New complex mutant protection")
+                    .visibleInZone(true)
+                    .valueAddress(ZONE_VALUE_OFFSET(attackerNewComplexMutantProtection))
+                    .colorDependence(ColorDependence::Matrix)
+                    .type(FloatSpec().min(0).max(1.0f))
+                    .tooltip("A high value protects new mutants with equal or greater genome complexity from being attacked."),
+                ParameterSpec()
+                    .name("Sensor detection factor")
+                    .valueAddress(BASE_VALUE_OFFSET(attackerSensorDetectionFactor))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0).max(1.0f))
+                    .tooltip("This parameter controls whether the target must be previously detected with sensors in order to be attacked. The larger this "
+                         "value is, the less energy can be gained during the attack if the target has not already been detected. For this purpose, the "
+                         "attacker cell searches for connected (or connected-connected) sensor cells to see which cell networks they have detected last time and "
+                         "compares them with the attacked target."),
+                ParameterSpec()
+                    .name("Geometry deviation protection")
+                    .visibleInZone(true)
+                    .valueAddress(ZONE_VALUE_OFFSET(attackerGeometryDeviationProtection))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0).max(5.0f))
+                    .tooltip("The larger this value is, the less energy a cell can gain from an attack if the local geometry of the attacked cell does not "
+                             "match the attacking cell."),
+                ParameterSpec()
+                    .name("Connections mismatch protection")
+                    .visibleInZone(true)
+                    .valueAddress(ZONE_VALUE_OFFSET(attackerConnectionsMismatchProtection))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0).max(1.0f))
+                    .tooltip("The larger this parameter is, the more difficult it is to attack cells that contain more connections."),
+            }),
+        ParameterGroupSpec()
+            .name("Expert settings: Cell age limiter")
+            .expertSettingAddress(EXPERT_VALUE_OFFSET(cellAgeLimiter))
+            .parameters({
+                ParameterSpec()
+                    .name("Maximum inactive cell age")
+                    .visibleInZone(true)
+                    .valueAddress(ZONE_VALUE_OFFSET(maxAgeForInactiveCells))
+                    .enabledValueBaseAddress(BASE_VALUE_OFFSET(maxAgeForInactiveCellsActivated))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(1.0f).max(10000000.0f).format("%.0f").logarithmic(true).infinity(true))
+                    .tooltip("Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered. Cells which "
+                         "are in state 'Under construction' are not affected by this option."),
+            }),
+        ParameterGroupSpec()
+            .name("Expert settings: Cell color transition rules")
+            .expertSettingAddress(EXPERT_VALUE_OFFSET(cellColorTransitionRules))
+            .parameters({
+                ParameterSpec()
+                    .name("Target color and duration")
+                    .visibleInZone(true)
+                    .valueAddress(ZONE_VALUE_OFFSET(cellColorTransitionTargetColor))
+                    .type(ColorTransitionSpec().transitionDurationAddress(ZONE_VALUE_OFFSET(cellColorTransitionDuration)))
+                    .tooltip("Rules can be defined that describe how the colors of cells will change over time. For this purpose, a subsequent "
+                             "color can be defined for each cell color. In addition, durations must be specified that define how many time steps the "
+                             "corresponding color are kept."),
+            }),
     });
+}
+
+bool& SimulationParametersSpecificationService::getExpertSettingsToggleRef(ParameterGroupSpec const& spec, SimulationParameters& parameters) const
+{
+    return *(reinterpret_cast<bool*>(reinterpret_cast<char*>(&parameters.expertSettingsToggles) + spec._expertSettingAddress.value()));
 }

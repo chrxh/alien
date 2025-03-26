@@ -45,11 +45,16 @@ struct AlternativeSpec
     MEMBER_DECLARATION(AlternativeSpec, Alternatives, alternatives, {});
 };
 
-struct ColorSpec
+struct ColorPickerSpec
 {
 };
 
-using TypeSpec = std::variant<BoolSpec, IntSpec, FloatSpec, Char64Spec, AlternativeSpec, ColorSpec>;
+struct ColorTransitionSpec
+{
+    MEMBER_DECLARATION(ColorTransitionSpec, std::optional<size_t>, transitionDurationAddress, std::nullopt);
+};
+
+using TypeSpec = std::variant<BoolSpec, IntSpec, FloatSpec, Char64Spec, AlternativeSpec, ColorPickerSpec, ColorTransitionSpec>;
 
 enum class ColorDependence
 {
@@ -64,8 +69,9 @@ struct ParameterSpec
     MEMBER_DECLARATION(ParameterSpec, bool, visibleInSource, false);
     MEMBER_DECLARATION(ParameterSpec, std::string, name, std::string());
     MEMBER_DECLARATION(ParameterSpec, std::optional<size_t>, valueAddress, std::nullopt);
+    MEMBER_DECLARATION(ParameterSpec, std::optional<size_t>, enabledValueBaseAddress, std::nullopt);
+    MEMBER_DECLARATION(ParameterSpec, std::optional<size_t>, enabledValueZoneAddress, std::nullopt);
     MEMBER_DECLARATION(ParameterSpec, std::optional<std::string>, tooltip, std::nullopt);
-    MEMBER_DECLARATION(ParameterSpec, std::optional<size_t>, valueActivatedAddress, std::nullopt);
     MEMBER_DECLARATION(ParameterSpec, TypeSpec, type, FloatSpec());
     MEMBER_DECLARATION(ParameterSpec, ColorDependence, colorDependence, ColorDependence::None);
 };

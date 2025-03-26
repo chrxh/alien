@@ -363,8 +363,8 @@ void SimulationParametersMainWindow::processLocationTable()
 void SimulationParametersMainWindow::processExpertSettings()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
-    auto origFeatures = _simulationFacade->getOriginalSimulationParameters().features;
-    auto lastFeatures = parameters.features;
+    auto origFeatures = _simulationFacade->getOriginalSimulationParameters().expertSettingsToggles;
+    auto lastFeatures = parameters.expertSettingsToggles;
 
     AlienImGui::Checkbox(
         AlienImGui::CheckboxParameters()
@@ -372,49 +372,49 @@ void SimulationParametersMainWindow::processExpertSettings()
             .textWidth(0)
             .defaultValue(origFeatures.advancedAbsorptionControl)
             .tooltip("These settings offer extended possibilities for controlling the absorption of energy particles by cells."),
-        parameters.features.advancedAbsorptionControl);
+        parameters.expertSettingsToggles.advancedAbsorptionControl);
     AlienImGui::Checkbox(
         AlienImGui::CheckboxParameters()
             .name("Advanced attacker control")
             .textWidth(0)
             .defaultValue(origFeatures.advancedAttackerControl)
             .tooltip("It contains further settings that influence how much energy can be obtained from an attack by attacker cells."),
-        parameters.features.advancedAttackerControl);
+        parameters.expertSettingsToggles.advancedAttackerControl);
     AlienImGui::Checkbox(
         AlienImGui::CheckboxParameters()
             .name("Cell age limiter")
             .textWidth(0)
             .defaultValue(origFeatures.cellAgeLimiter)
             .tooltip("It enables additional possibilities to control the maximal cell age."),
-        parameters.features.cellAgeLimiter);
+        parameters.expertSettingsToggles.cellAgeLimiter);
     AlienImGui::Checkbox(
         AlienImGui::CheckboxParameters()
             .name("Cell color transition rules")
             .textWidth(0)
             .defaultValue(origFeatures.cellColorTransitionRules)
             .tooltip("This can be used to define color transitions for cells depending on their age."),
-        parameters.features.cellColorTransitionRules);
+        parameters.expertSettingsToggles.cellColorTransitionRules);
     AlienImGui::Checkbox(
         AlienImGui::CheckboxParameters()
             .name("Cell glow")
             .textWidth(0)
             .defaultValue(origFeatures.cellGlow)
             .tooltip("It enables an additional rendering step that makes the cells glow."),
-        parameters.features.cellGlow);
+        parameters.expertSettingsToggles.cellGlow);
     AlienImGui::Checkbox(
         AlienImGui::CheckboxParameters()
             .name("Customize deletion mutations")
             .textWidth(0)
             .defaultValue(origFeatures.customizeDeletionMutations)
             .tooltip("It enables further settings for deletion mutations. If disabled, defaults are used (displayed in the tooltip of the specific parameters)."),
-        parameters.features.customizeDeletionMutations);
+        parameters.expertSettingsToggles.customizeDeletionMutations);
     AlienImGui::Checkbox(
         AlienImGui::CheckboxParameters()
             .name("Customize neuron mutations")
             .textWidth(0)
             .defaultValue(origFeatures.customizeNeuronMutations)
             .tooltip("It enables further settings for neuron mutations. If disabled, defaults are used (displayed in the tooltip of the specific parameters)."),
-        parameters.features.customizeNeuronMutations);
+        parameters.expertSettingsToggles.customizeNeuronMutations);
     AlienImGui::Checkbox(
         AlienImGui::CheckboxParameters()
             .name("External energy control")
@@ -423,7 +423,7 @@ void SimulationParametersMainWindow::processExpertSettings()
             .tooltip(
                 "These settings are used to add and control an external energy source. Its energy can be gradually transferred to the constructor cells in the "
                 "simulation. Vice versa, the energy from radiation and dying cells can also be transferred back to the external source."),
-        parameters.features.externalEnergyControl);
+        parameters.expertSettingsToggles.externalEnergyControl);
     AlienImGui::Checkbox(
         AlienImGui::CheckboxParameters()
             .name("Genome complexity measurement")
@@ -433,9 +433,9 @@ void SimulationParametersMainWindow::processExpertSettings()
                      "absorption control' "
                      "and 'Advanced attacker control' to favor more complex genomes in natural selection. If it is deactivated, default values are "
                      "used that simply take the genome size into account."),
-        parameters.features.genomeComplexityMeasurement);
+        parameters.expertSettingsToggles.genomeComplexityMeasurement);
 
-    if (parameters.features != lastFeatures) {
+    if (parameters.expertSettingsToggles != lastFeatures) {
         _simulationFacade->setSimulationParameters(parameters);
     }
 }

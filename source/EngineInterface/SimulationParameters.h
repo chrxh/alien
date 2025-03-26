@@ -4,7 +4,7 @@
 #include <cstring>
 
 #include "CellTypeConstants.h"
-#include "Features.h"
+#include "ExpertSettingsToggles.h"
 #include "RadiationSource.h"
 #include "SimulationParametersTypes.h"
 #include "SimulationParametersZone.h"
@@ -15,8 +15,8 @@
  */
 struct SimulationParameters
 {
-    // Expert feature flags
-    Features features;
+    // Expert settings toggles
+    ExpertSettingsToggles expertSettingsToggles;
 
     // Particle sources
     int numRadiationSources = 0;
@@ -157,7 +157,7 @@ struct SimulationParameters
     ColorVector<float> radiationAbsorptionHighVelocityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
     // Expert settings: Advanced attacker control
-    ColorMatrix<float> attackerSameMutantPenalty = {
+    ColorMatrix<float> attackerSameMutantProtection = {
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
