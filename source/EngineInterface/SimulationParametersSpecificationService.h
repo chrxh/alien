@@ -14,60 +14,33 @@ public:
     ParametersSpec createParametersSpec() const;
 
     template <typename T>
-    T& getBaseParameterRef(size_t valueAddress, SimulationParameters& parameters) const;
-    template <typename T>
-    T& getZoneParameterRef(size_t valueAddress, SimulationParameters& parameters, int locationIndex) const;
-
-    template <typename T>
-    T& getParameterRef(ParameterSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
-    template <typename T>
-    T& getParameterRef(bool visibleInBase, bool visibleInZone, bool visibleInSource, size_t valueAddress, SimulationParameters& parameters, int locationIndex) const;
-
-    bool& getExpertSettingsToggleRef(ParameterGroupSpec const& spec, SimulationParameters& parameters) const;
+    T* getValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
+    bool* getEnabledValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
+    bool* getExpertSettingsToggleRef(ParameterGroupSpec const& spec, SimulationParameters& parameters) const;
 };
 
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
 template <typename T>
-T& SimulationParametersSpecificationService::getBaseParameterRef(size_t valueAddress, SimulationParameters& parameters) const
+T* SimulationParametersSpecificationService::getValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const
 {
-    return *(reinterpret_cast<T*>(reinterpret_cast<char*>(&parameters) + valueAddress));
-}
+    if (std::holds_alternative<BaseValueSpec>(spec)) {
+        auto baseValueSpec = std::get<BaseValueSpec>(spec);
+        if (baseValueSpec._valueAddress.has_value()) {
+            return reinterpret_cast<T*>(reinterpret_cast<char*>(&parameters) + baseValueSpec._valueAddress.value());
+        }
+    } else if (std::holds_alternative<BaseZoneValueSpec>(spec)) {
+        auto baseZoneValueSpec = std::get<BaseZoneValueSpec>(spec);
 
-template <typename T>
-T& SimulationParametersSpecificationService::getZoneParameterRef(size_t valueAddress, SimulationParameters& parameters, int locationIndex) const
-{
-    if (locationIndex == 0) {
-        return *(reinterpret_cast<T*>(reinterpret_cast<char*>(&parameters.baseValues) + valueAddress));
-    }
-    for (int i = 0; i < parameters.numZones; ++i) {
-        if (parameters.zone[i].locationIndex == locationIndex) {
-            return *(reinterpret_cast<T*>(reinterpret_cast<char*>(&parameters.zone[i].values) + valueAddress));
+        if (locationIndex == 0 && baseZoneValueSpec._valueAddress.has_value()) {
+            return reinterpret_cast<T*>(reinterpret_cast<char*>(&parameters.baseValues) + baseZoneValueSpec._valueAddress.value());
+        }
+        for (int i = 0; i < parameters.numZones; ++i) {
+            if (parameters.zone[i].locationIndex == locationIndex && baseZoneValueSpec._valueAddress.has_value()) {
+                return reinterpret_cast<T*>(reinterpret_cast<char*>(&parameters.zone[i].values) + baseZoneValueSpec._valueAddress.value());
+            }
         }
     }
-    CHECK(false);
-}
-
-template <typename T>
-T& SimulationParametersSpecificationService::getParameterRef(ParameterSpec const& spec, SimulationParameters& parameters, int locationIndex) const
-{
-    return getParameterRef<T>(spec._visibleInBase, spec._visibleInZone, spec._visibleInSource, spec._valueAddress.value(), parameters, locationIndex);
-}
-
-template <typename T>
-T& SimulationParametersSpecificationService::getParameterRef(
-    bool visibleInBase,
-    bool visibleInZone,
-    bool visibleInSource,
-    size_t valueAddress,
-    SimulationParameters& parameters,
-    int locationIndex) const
-{
-    if (visibleInBase && !visibleInZone && !visibleInSource) {
-        return getBaseParameterRef<T>(valueAddress, parameters);
-    } else if (visibleInBase && visibleInZone && !visibleInSource) {
-        return getZoneParameterRef<T>(valueAddress, parameters, locationIndex);
-    }
-    CHECK(false);
+    return nullptr;
 }
