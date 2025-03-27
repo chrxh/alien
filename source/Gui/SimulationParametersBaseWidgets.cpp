@@ -61,6 +61,23 @@ void _SimulationParametersBaseWidgets::process()
      */
     if (AlienImGui::BeginTreeNode(
             AlienImGui::TreeNodeParameters().name("Expert settings: Cell age limiter").visible(parameters.expertSettingsToggles.cellAgeLimiter).blinkWhenActivated(true))) {
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name("Maximum inactive cell age")
+                .textWidth(RightColumnWidth)
+                .colorDependence(true)
+                .min(1.0f)
+                .max(10000000.0f)
+                .format("%.0f")
+                .logarithmic(true)
+                .infinity(true)
+                .disabledValue(parameters.baseValues.maxAgeForInactiveCells)
+                .defaultEnabledValue(&origParameters.maxAgeForInactiveCellsActivated)
+                .defaultValue(origParameters.baseValues.maxAgeForInactiveCells)
+                .tooltip("Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered. Cells which "
+                         "are in state 'Under construction' are not affected by this option."),
+            parameters.baseValues.maxAgeForInactiveCells,
+            &parameters.maxAgeForInactiveCellsActivated);
         AlienImGui::SliderInt(
             AlienImGui::SliderIntParameters()
                 .name("Maximum free cell age")

@@ -29,8 +29,6 @@ struct FloatSpec
     MEMBER_DECLARATION(FloatSpec, bool, logarithmic, false);
     MEMBER_DECLARATION(FloatSpec, std::string, format, "%.3f");
     MEMBER_DECLARATION(FloatSpec, bool, infinity, false);
-    MEMBER_DECLARATION(FloatSpec, std::optional<std::function<float(SimulationParameters const&, int)>>, valueGetter, std::nullopt);  // int for locationIndex
-    MEMBER_DECLARATION(FloatSpec, std::optional<std::function<void(float, SimulationParameters&, int)>>, valueSetter, std::nullopt);  // int for locationIndex
     MEMBER_DECLARATION(FloatSpec, std::optional<size_t>, pinnedAddress, std::nullopt);
 };
 
@@ -56,6 +54,23 @@ struct ColorTransitionSpec
 
 using TypeSpec = std::variant<BoolSpec, IntSpec, FloatSpec, Char64Spec, AlternativeSpec, ColorPickerSpec, ColorTransitionSpec>;
 
+struct BaseValueSpec
+{
+    MEMBER_DECLARATION(BaseValueSpec, std::optional<size_t>, valueAddress, std::nullopt);
+    MEMBER_DECLARATION(BaseValueSpec, std::optional<size_t>, enabledValueAddress, std::nullopt);
+    MEMBER_DECLARATION(BaseValueSpec, std::optional<std::function<float(SimulationParameters const&, int)>>, valueGetter, std::nullopt);  // int for locationIndex
+    MEMBER_DECLARATION(BaseValueSpec, std::optional<std::function<void(float, SimulationParameters&, int)>>, valueSetter, std::nullopt);  // int for locationIndex
+};
+
+struct BaseZoneValueSpec
+{
+    MEMBER_DECLARATION(BaseZoneValueSpec, std::optional<size_t>, valueAddress, std::nullopt);
+    MEMBER_DECLARATION(BaseZoneValueSpec, std::optional<size_t>, enabledBaseValueAddress, std::nullopt);
+    MEMBER_DECLARATION(BaseZoneValueSpec, std::optional<size_t>, enabledZoneValueAddress, std::nullopt);
+};
+
+using ValueSpec = std::variant<BaseValueSpec, BaseZoneValueSpec>;
+
 enum class ColorDependence
 {
     None,
@@ -64,13 +79,8 @@ enum class ColorDependence
 };
 struct ParameterSpec
 {
-    MEMBER_DECLARATION(ParameterSpec, bool, visibleInBase, true);
-    MEMBER_DECLARATION(ParameterSpec, bool, visibleInZone, false);
-    MEMBER_DECLARATION(ParameterSpec, bool, visibleInSource, false);
     MEMBER_DECLARATION(ParameterSpec, std::string, name, std::string());
-    MEMBER_DECLARATION(ParameterSpec, std::optional<size_t>, valueAddress, std::nullopt);
-    MEMBER_DECLARATION(ParameterSpec, std::optional<size_t>, enabledValueBaseAddress, std::nullopt);
-    MEMBER_DECLARATION(ParameterSpec, std::optional<size_t>, enabledValueZoneAddress, std::nullopt);
+    MEMBER_DECLARATION(ParameterSpec, ValueSpec, value, ValueSpec());
     MEMBER_DECLARATION(ParameterSpec, std::optional<std::string>, tooltip, std::nullopt);
     MEMBER_DECLARATION(ParameterSpec, TypeSpec, type, FloatSpec());
     MEMBER_DECLARATION(ParameterSpec, ColorDependence, colorDependence, ColorDependence::None);
