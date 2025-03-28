@@ -395,33 +395,33 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Duplication")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationDuplication)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation copies a block of cell descriptions from the genome at a random position to a new random position."),
                 ParameterSpec()
                     .name("Individual cell color")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationCellColor)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation alters the color of a single cell descriptions in a genome by using the specified color transitions. The "
                              "probability of a change is given by the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Sub-genome color")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationSubgenomeColor)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation alters the color of all cell descriptions in a sub-genome by using the specified color transitions."),
                 ParameterSpec()
                     .name("Genome color")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationGenomeColor)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation alters the color of all cell descriptions in a genome by using the specified color transitions."),
                 ParameterSpec()
                     .name("Color transitions")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(copyMutationColorTransitions)))
-                    .colorDependence(ColorDependence::Matrix)
                     .type(BoolSpec())
+                    .colorDependence(ColorDependence::Matrix)
                     .tooltip("The color transitions are used for color mutations. The row index indicates the source color and the column index the target "
                              "color."),
                 ParameterSpec()
@@ -443,14 +443,14 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Energy cost")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(attackerEnergyCost)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0).max(1.0f).logarithmic(true).format("%.5f"))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Amount of energy lost by an attempted attack of a cell in form of emitted energy particles."),
                 ParameterSpec()
                     .name("Food chain color matrix")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(attackerFoodChainColorMatrix)))
-                    .colorDependence(ColorDependence::Matrix)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.2f"))
+                    .colorDependence(ColorDependence::Matrix)
                     .tooltip(
                         "This matrix can be used to determine how well one cell can attack another cell. The color of the attacking cell correspond to the "
                         "row number and the color of the attacked cell to the column number. A value of 0 means that the attacked cell cannot be digested, "
@@ -459,21 +459,21 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Attack strength")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(attackerStrength)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0).max(0.5f).logarithmic(true))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Indicates the portion of energy through which a successfully attacked cell is weakened. However, this energy portion can be "
                              "influenced by other factors adjustable within the attacker's simulation parameters."),
                 ParameterSpec()
                     .name("Attack radius")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(attackerRadius)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0).max(3.0f))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The maximum distance over which an attacker cell can attack another cell."),
                 ParameterSpec()
                     .name("Complex creature protection")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(attackerCreatureProtection)))
-                    .colorDependence(ColorDependence::Matrix)
                     .type(FloatSpec().min(0).max(20.0f).format("%.2f"))
+                    .colorDependence(ColorDependence::Matrix)
                     .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with more complex genomes."),
                 ParameterSpec()
                     .name("Destroy cells")
@@ -487,8 +487,8 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Connection distance")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(constructorConnectingCellDistance)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.1f).max(3.0f))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The constructor can automatically connect constructed cells to other cells in the vicinity within this distance."),
                 ParameterSpec()
                     .name("Completeness check")
@@ -503,14 +503,14 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Anti-attacker strength")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(defenderAntiAttackerStrength)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(5.0f))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("If an attacked cell is connected to defender cells or itself a defender cell the attack strength is reduced by this factor."),
                 ParameterSpec()
                     .name("Anti-injector strength")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(defenderAntiInjectorStrength)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(5.0f))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("If a constructor cell is attacked by an injector and connected to defender cells, the injection duration is increased by this "
                              "factor."),
             }),
@@ -520,14 +520,14 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Injection radius")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(injectorInjectionRadius)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.1f).max(4.0f))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The maximum distance over which an injector cell can infect another cell."),
                 ParameterSpec()
                     .name("Injection time")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(injectorInjectionTime)))
-                    .colorDependence(ColorDependence::Matrix)
                     .type(IntSpec().min(0).max(100000).logarithmic(true))
+                    .colorDependence(ColorDependence::Matrix)
                     .tooltip("The number of activations an injector cell requires to infect another cell. One activation usually takes 6 time steps. The row "
                              "number determines the color of the injector cell, while the column number corresponds to the color of the infected cell."),
             }),
@@ -537,27 +537,27 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Energy cost")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(muscleEnergyCost)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0).max(5.0f).format("%.5f").logarithmic(true))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Amount of energy lost by a muscle action of a cell in form of emitted energy particles."),
                 ParameterSpec()
                     .name("Movement acceleration")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(muscleMovementAcceleration)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0).max(10.0f).logarithmic(true))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The maximum value by which a muscle cell can modify its velocity during activation. This parameter applies only to muscle cells "
                              "which are in movement mode."),
                 ParameterSpec()
                     .name("Crawling acceleration")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(muscleCrawlingAcceleration)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0).max(10.0f).logarithmic(true))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Amount of energy lost by a muscle action of a cell in form of emitted energy particles."),
                 ParameterSpec()
                     .name("Bending acceleration")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(muscleBendingAcceleration)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0).max(10.0f).logarithmic(true))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The maximum value by which a muscle cell can modify its velocity during a bending action. This parameter applies "
                              "only to muscle cells which are in bending mode."),
             }),
@@ -567,8 +567,8 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Radius")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(sensorRadius)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(10.0f).max(800.0f))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The maximum radius in which a sensor cell can detect mass concentrations."),
             }),
         ParameterGroupSpec()
@@ -577,14 +577,14 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Energy distribution radius")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(transmitterEnergyDistributionRadius)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0).max(5.0f))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The maximum distance over which a transmitter cell transfers its additional energy to nearby transmitter or constructor cells."),
                 ParameterSpec()
                     .name("Energy distribution Value")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(transmitterEnergyDistributionValue)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0).max(20.0f))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The amount of energy which a transmitter cell can transfer to nearby transmitter or constructor cells or to connected cells."),
                 ParameterSpec()
                     .name("Same creature energy distribution")
@@ -598,8 +598,8 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Radius")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(reconnectorRadius)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0).max(3.0f))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The maximum radius in which a reconnector cell can establish or destroy connections to other cells."),
             }),
         ParameterGroupSpec()
@@ -608,14 +608,14 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Blast radius")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(detonatorRadius)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0).max(10.0f))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The radius of the detonation."),
                 ParameterSpec()
                     .name("Chain explosion probability")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(detonatorChainExplosionProbability)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0).max(1.0f))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The probability that the explosion of one detonator will trigger the explosion of other detonators within the blast radius."),
             }),
         ParameterGroupSpec()
@@ -625,26 +625,26 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Low genome complexity penalty")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(radiationAbsorptionLowGenomeComplexityPenalty)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0).max(1.0f).format("%.2f"))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("When this parameter is increased, cells with fewer genome complexity will absorb less energy from an incoming energy particle."),
                 ParameterSpec()
                     .name("Low connection penalty")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(radiationAbsorptionLowConnectionPenalty)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0).max(5.0f).format("%.1f"))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("When this parameter is increased, cells with fewer cell connections will absorb less energy from an incoming energy particle."),
                 ParameterSpec()
                     .name("High velocity penalty")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(radiationAbsorptionHighVelocityPenalty)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0).max(30.0f).logarithmic(true).format("%.2f"))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("When this parameter is increased, fast moving cells will absorb less energy from an incoming energy particle."),
                 ParameterSpec()
                     .name("Low velocity penalty")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(radiationAbsorptionLowVelocityPenalty)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0).max(1.0f).format("%.2f"))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("When this parameter is increased, slowly moving cells will absorb less energy from an incoming energy particle."),
             }),
         ParameterGroupSpec()
@@ -654,20 +654,20 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Same mutant protection")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(attackerSameMutantProtection)))
-                    .colorDependence(ColorDependence::Matrix)
                     .type(FloatSpec().min(0).max(1.0f).format("%.2f"))
+                    .colorDependence(ColorDependence::Matrix)
                     .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with the same mutation id."),
                 ParameterSpec()
                     .name("New complex mutant protection")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(attackerNewComplexMutantProtection)))
-                    .colorDependence(ColorDependence::Matrix)
                     .type(FloatSpec().min(0).max(1.0f))
+                    .colorDependence(ColorDependence::Matrix)
                     .tooltip("A high value protects new mutants with equal or greater genome complexity from being attacked."),
                 ParameterSpec()
                     .name("Sensor detection factor")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(attackerSensorDetectionFactor)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0).max(1.0f))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This parameter controls whether the target must be previously detected with sensors in order to be attacked. The larger this "
                              "value is, the less energy can be gained during the attack if the target has not already been detected. For this purpose, the "
                              "attacker cell searches for connected (or connected-connected) sensor cells to see which cell networks they have detected last "
@@ -676,15 +676,15 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Geometry deviation protection")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(attackerGeometryDeviationProtection)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0).max(5.0f))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The larger this value is, the less energy a cell can gain from an attack if the local geometry of the attacked cell does not "
                              "match the attacking cell."),
                 ParameterSpec()
                     .name("Connections mismatch protection")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(attackerConnectionsMismatchProtection)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0).max(1.0f))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The larger this parameter is, the more difficult it is to attack cells that contain more connections."),
             }),
         ParameterGroupSpec()
@@ -696,15 +696,15 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                     .value(BaseZoneValueSpec()
                                .valueAddress(ZONE_VALUE_OFFSET(inactiveCellsMaxAge))
                                .enabledBaseValueAddress(BASE_VALUE_OFFSET(maxAgeForInactiveCellsEnabled)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(1.0f).max(1e7f).format("%.0f").logarithmic(true).infinity(true))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered. Cells which "
                              "are in state 'Under construction' are not affected by this option."),
                 ParameterSpec()
                     .name("Maximum free cell age")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(freeCellMaxAge)).enabledValueAddress(BASE_VALUE_OFFSET(freeCellMaxAgeEnabled)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(IntSpec().min(1).max(1e7).logarithmic(true).infinity(true))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The maximal age of free cells (= cells that arise from energy particles) can be set here."),
                 ParameterSpec()
                     .name("Reset age after construction")
@@ -760,20 +760,134 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Strength")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(cellGlowStrength)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The strength of the glow."),
             }),
         ParameterGroupSpec()
             .name("Expert settings: Customize deletion mutations")
-            .expertSettingAddress(EXPERT_VALUE_OFFSET(cellGlow))
+            .expertSettingAddress(EXPERT_VALUE_OFFSET(customizeDeletionMutations))
             .parameters({
                 ParameterSpec()
                     .name("Minimum size")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(cellCopyMutationDeletionMinSize)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(IntSpec().min(0).max(1000).logarithmic(true))
-                    .tooltip("The minimum size of genomes (on the basis of the coded cells) is determined here that can result from delete mutations. The default is 0."),
+                    .tooltip("The minimum size of genomes (on the basis of the coded cells) is determined here that can result from delete mutations. The "
+                             "default is 0."),
+            }),
+        ParameterGroupSpec()
+            .name("Expert settings: Customize neuron mutations")
+            .expertSettingAddress(EXPERT_VALUE_OFFSET(customizeNeuronMutations))
+            .parameters({
+                ParameterSpec()
+                    .name("Affected weights")
+                    .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(cellCopyMutationNeuronDataWeight)))
+                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.3f"))
+                    .tooltip("The proportion of weights in the neuronal network of a cell that are changed within a neuron mutation. The default is 0.2."),
+                ParameterSpec()
+                    .name("Affected biases")
+                    .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(cellCopyMutationNeuronDataBias)))
+                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.3f"))
+                    .tooltip("The proportion of biases in the neuronal network of a cell that are changed within a neuron mutation. The default is 0.2."),
+                ParameterSpec()
+                    .name("Affected activation functions")
+                    .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(cellCopyMutationNeuronDataActivationFunction)))
+                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.3f"))
+                    .tooltip("The proportion of activation functions in the neuronal network of a cell that are changed within a neuron mutation. The default is 0.05."),
+                ParameterSpec()
+                    .name("Reinforcement factor")
+                    .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(cellCopyMutationNeuronDataReinforcement)))
+                    .type(FloatSpec().min(1.0f).max(1.2f).format("%.3f"))
+                    .tooltip("If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an offset. "
+                         "The factor that is used for reinforcement is defined here. The default is 1.05."),
+                ParameterSpec()
+                    .name("Damping factor")
+                    .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(cellCopyMutationNeuronDataDamping)))
+                    .type(FloatSpec().min(1.0f).max(1.2f).format("%.3f"))
+                    .tooltip("If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an offset. "
+                         "The factor that is used for weakening is defined here. The default is 1.05."),
+                ParameterSpec()
+                    .name("Offset")
+                    .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(cellCopyMutationNeuronDataOffset)))
+                    .type(FloatSpec().min(0.0f).max(0.2f).format("%.3f"))
+                    .tooltip(
+                        "If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an offset. "
+                         "The value that is used for the offset is defined here. The default is 0.05."),
+            }),
+        ParameterGroupSpec()
+            .name("Expert settings: External energy control")
+            .expertSettingAddress(EXPERT_VALUE_OFFSET(externalEnergyControl))
+            .parameters({
+                ParameterSpec()
+                    .name("External energy amount")
+                    .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(externalEnergy)))
+                    .type(FloatSpec().min(0.0f).max(100000000.0f).format("%.0f").logarithmic(true).infinity(true))
+                    .tooltip("This parameter can be used to set the amount of energy of an external energy pool. This type of energy can then be "
+                         "transferred to all constructor cells at a certain rate (see inflow settings).\n\nWarning: Too much external energy can result in a "
+                         "massive production of cells and slow down or even crash the simulation."),
+                ParameterSpec()
+                    .name("Inflow")
+                    .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(externalEnergyInflowFactor)))
+                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.5f").logarithmic(true))
+                    .colorDependence(ColorDependence::Vector)
+                    .tooltip("Here one can specify the fraction of energy transferred to constructor cells.\n\nFor example, a value of 0.05 means that "
+                         "each time a constructor cell tries to build a new cell, 5% of the required energy is transferred for free from the external energy "
+                         "source."),
+                ParameterSpec()
+                    .name("Conditional inflow")
+                    .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(externalEnergyConditionalInflowFactor)))
+                    .type(FloatSpec().min(0.00f).max(1.0f).format("%.5f").logarithmic(true))
+                    .colorDependence(ColorDependence::Vector)
+                    .tooltip("Here one can specify the fraction of energy transferred to constructor cells if they can provide the remaining energy for the "
+                             "construction process.\n\nFor example, a value of 0.6 means that a constructor cell receives 60% of the energy required to "
+                             "build the new cell for free from the external energy source. However, it must provide 40% of the energy required by itself. "
+                             "Otherwise, no energy will be transferred."),
+                ParameterSpec()
+                    .name("Inflow only for non-replicators")
+                    .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(externalEnergyInflowOnlyForNonSelfReplicators)))
+                    .type(BoolSpec())
+                    .tooltip("If activated, external energy can only be transferred to constructor cells that are not self-replicators. "
+                         "This option can be used to foster the evolution of additional body parts."),
+                ParameterSpec()
+                    .name("Backflow")
+                    .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(externalEnergyBackflowFactor)))
+                    .type(FloatSpec().min(0.0f).max(1.0f))
+                    .colorDependence(ColorDependence::Vector)
+                    .tooltip("The proportion of energy that flows back from the simulation to the external energy pool. Each time a cell loses energy "
+                         "or dies a fraction of its energy will be taken. The remaining "
+                         "fraction of the energy stays in the simulation and will be used to create a new energy particle."),
+                ParameterSpec()
+                    .name("Backflow limit")
+                    .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(externalEnergyBackflowLimit)))
+                    .type(FloatSpec().min(0.0f).max(1e8f).format("%.0f").logarithmic(true).infinity(true))
+                    .tooltip("Energy from the simulation can only flow back into the external energy pool as long as the amount of external energy is "
+                         "below this value."),
+            }),
+        ParameterGroupSpec()
+            .name("Expert settings: Genome complexity measurement")
+            .expertSettingAddress(EXPERT_VALUE_OFFSET(genomeComplexityMeasurement))
+            .parameters({
+                ParameterSpec()
+                    .name("Size factor")
+                    .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(genomeComplexitySizeFactor)))
+                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.2f"))
+                    .colorDependence(ColorDependence::Vector)
+                    .tooltip("This parameter controls how the number of encoded cells in the genome influences the calculation of its complexity."),
+                ParameterSpec()
+                    .name("Ramification factor")
+                    .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(genomeComplexityRamificationFactor)))
+                    .type(FloatSpec().min(0.0f).max(20.0f).format("%.2f"))
+                    .colorDependence(ColorDependence::Vector)
+                    .tooltip("With this parameter, the number of ramifications of the cell structure to the genome is taken into account for the "
+                         "calculation of the genome complexity. For instance, genomes that contain many sub-genomes or many construction branches will "
+                         "then have a high complexity value."),
+                ParameterSpec()
+                    .name("Depth level")
+                    .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(genomeComplexityDepthLevel)))
+                    .type(IntSpec().min(1).max(20).infinity(true))
+                    .colorDependence(ColorDependence::Vector)
+                    .tooltip("This allows to specify up to which level of the sub-genomes the complexity calculation should be carried out. For example, a "
+                         "value of 2 means that the sub- and sub-sub-genomes are taken into account in addition to the main genome."),
             }),
     });
 }
