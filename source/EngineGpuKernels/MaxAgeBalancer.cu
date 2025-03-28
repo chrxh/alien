@@ -16,7 +16,7 @@ namespace
 bool _MaxAgeBalancer::balance(SimulationParameters& parameters, StatisticsRawData const& statistics, uint64_t timestep)
 {
     auto result = false;
-    if (parameters.expertSettingsToggles.cellAgeLimiter && parameters.maxCellAgeBalancerActivated) {
+    if (parameters.expertSettingsToggles.cellAgeLimiter && parameters.maxCellAgeBalancerEnabled) {
         initializeIfNecessary(parameters, timestep);
         result |= doAdaptionIfNecessary(parameters, statistics, timestep);
     }
@@ -34,7 +34,7 @@ void _MaxAgeBalancer::initializeIfNecessary(SimulationParameters const& paramete
             needsInitialization = true;
         }
     }
-    if (parameters.maxCellAgeBalancerActivated != _lastAdaptiveCellMaxAge) {
+    if (parameters.maxCellAgeBalancerEnabled != _lastAdaptiveCellMaxAge) {
         needsInitialization = true;
     }
 
@@ -108,5 +108,5 @@ void _MaxAgeBalancer::saveLastState(SimulationParameters const& parameters)
     for (int i = 0; i < MAX_COLORS; ++i) {
         _lastCellMaxAge[i] = parameters.maxCellAge[i];
     }
-    _lastAdaptiveCellMaxAge = parameters.maxCellAgeBalancerActivated;
+    _lastAdaptiveCellMaxAge = parameters.maxCellAgeBalancerEnabled;
 }

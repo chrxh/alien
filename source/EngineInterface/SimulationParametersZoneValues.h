@@ -38,7 +38,7 @@ struct SimulationParametersZoneValues
 
     float cellFusionVelocity = 2.0f;
     float cellMaxBindingEnergy = Infinity<float>::value;
-    ColorVector<float> maxAgeForInactiveCells = {   // Candidate for deletion
+    ColorVector<float> inactiveCellsMaxAge = {   // Candidate for deletion
         Infinity<float>::value,
         Infinity<float>::value,
         Infinity<float>::value,

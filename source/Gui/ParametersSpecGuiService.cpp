@@ -172,6 +172,8 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
                 auto const& intSpec = std::get<IntSpec>(parameterSpec._type);
                 auto value = specService.getValueRef<int>(parameterSpec._value, parameters, locationIndex);
                 auto origValue = specService.getValueRef<int>(parameterSpec._value, origParameters, locationIndex);
+                auto enabledValue = specService.getEnabledValueRef(parameterSpec._value, parameters, locationIndex);
+                auto origEnabledValue = specService.getEnabledValueRef(parameterSpec._value, origParameters, locationIndex);
                 AlienImGui::SliderInt(
                     AlienImGui::SliderIntParameters()
                         .name(parameterSpec._name)
@@ -180,10 +182,13 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
                         .max(intSpec._max)
                         .logarithmic(intSpec._logarithmic)
                         .infinity(intSpec._infinity)
+                        .disabledValue(value)
                         .defaultValue(origValue)
+                        .defaultEnabledValue(origEnabledValue)
                         .tooltip(parameterSpec._tooltip)
                         .colorDependence(parameterSpec._colorDependence == ColorDependence::Vector),
-                    value);
+                    value,
+                    enabledValue);
             } else if (std::holds_alternative<BoolSpec>(parameterSpec._type)) {
                 auto value = specService.getValueRef<bool>(parameterSpec._value, parameters, locationIndex);
                 auto origValue = specService.getValueRef<bool>(parameterSpec._value, origParameters, locationIndex);

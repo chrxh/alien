@@ -361,19 +361,6 @@ namespace Const
         "its organism where the constructor cell for self-replication is located. However, if a non-dying cell for self-replication is still present, a detached cell will "
         "transition into the 'Reviving' state and then into 'Ready' state shortly after.";
 
-    std::string const ColoringParameterTooltip =
-        "Here, one can set how the cells are to be colored during rendering. \n\n" ICON_FA_CHEVRON_RIGHT
-        " Energy: The more energy a cell has, the brighter it is displayed. A grayscale is used.\n\n" ICON_FA_CHEVRON_RIGHT
-        " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n" ICON_FA_CHEVRON_RIGHT
-        " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or duplications are taken into "
-        "account).\n\n" ICON_FA_CHEVRON_RIGHT " Mutants and cell functions: Combination of mutants and cell function coloring.\n\n" ICON_FA_CHEVRON_RIGHT
-        " Cell states: blue = ready, green = under construction, white = activating, pink = detached, pale blue = reviving, red = dying\n\n" ICON_FA_CHEVRON_RIGHT
-        " Genome complexities: This property can be utilized by attacker cells when the parameter 'Complex creature protection' is "
-        "activated (see tooltip there). The coloring is as follows: blue = creature with low bonus (usually small or simple genome structure), red = large "
-        "bonus\n\n" ICON_FA_CHEVRON_RIGHT
-        " Single cell function: A specific type of cell function can be highlighted, which is selected in the next parameter.\n\n" ICON_FA_CHEVRON_RIGHT
-        " All cell functions: The cells are colored according to their cell function.";
-
     inline std::string getCellTypeTooltip(CellType cellType)
     {
         switch (cellType) {

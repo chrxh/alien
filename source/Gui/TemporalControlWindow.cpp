@@ -241,7 +241,7 @@ void TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
     }
 
     parameters.externalEnergy = origParameters.externalEnergy;
-    if (parameters.maxCellAgeBalancerActivated || origParameters.maxCellAgeBalancerActivated) {
+    if (parameters.maxCellAgeBalancerEnabled || origParameters.maxCellAgeBalancerEnabled) {
         for (int i = 0; i < MAX_COLORS; ++i) {
             parameters.maxCellAge[i] = origParameters.maxCellAge[i];
         }
