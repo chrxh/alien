@@ -46,7 +46,7 @@ __inline__ __device__ void RadiationProcessor::calcActiveSources(SimulationData&
         for (int i = 0; i < cudaSimulationParameters.numRadiationSources; ++i) {
             auto sourceActive = !ZoneCalculator::calcParameter(
                 &SimulationParametersZoneValues::radiationDisableSources,
-                &SimulationParametersZoneActivatedValues::radiationDisableSources,
+                &SimulationParametersZoneEnabledValues::radiationDisableSources,
                 data,
                 {cudaSimulationParameters.radiationSource[i].posX, cudaSimulationParameters.radiationSource[i].posY});
             if (sourceActive) {
@@ -110,7 +110,7 @@ __inline__ __device__ void RadiationProcessor::collision(SimulationData& data)
                     }
                     auto radiationAbsorption = ZoneCalculator::calcParameter(
                         &SimulationParametersZoneValues::radiationAbsorption,
-                        &SimulationParametersZoneActivatedValues::radiationAbsorption,
+                        &SimulationParametersZoneEnabledValues::radiationAbsorption,
                         data,
                         cell->pos,
                         cell->color);
@@ -130,7 +130,7 @@ __inline__ __device__ void RadiationProcessor::collision(SimulationData& data)
 
                             auto radiationAbsorptionLowVelocityPenalty = ZoneCalculator::calcParameter(
                                 &SimulationParametersZoneValues::radiationAbsorptionLowVelocityPenalty,
-                                &SimulationParametersZoneActivatedValues::radiationAbsorptionLowVelocityPenalty,
+                                &SimulationParametersZoneEnabledValues::radiationAbsorptionLowVelocityPenalty,
                                 data,
                                 cell->pos,
                                 cell->color);
@@ -140,7 +140,7 @@ __inline__ __device__ void RadiationProcessor::collision(SimulationData& data)
 
                             auto radiationAbsorptionLowGenomeComplexityPenalty = ZoneCalculator::calcParameter(
                                 &SimulationParametersZoneValues::radiationAbsorptionLowGenomeComplexityPenalty,
-                                &SimulationParametersZoneActivatedValues::radiationAbsorptionLowGenomeComplexityPenalty,
+                                &SimulationParametersZoneEnabledValues::radiationAbsorptionLowGenomeComplexityPenalty,
                                 data,
                                 cell->pos,
                                 cell->color);

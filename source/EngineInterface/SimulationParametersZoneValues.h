@@ -38,7 +38,7 @@ struct SimulationParametersZoneValues
 
     float cellFusionVelocity = 2.0f;
     float cellMaxBindingEnergy = Infinity<float>::value;
-    ColorVector<float> inactiveCellsMaxAge = {   // Candidate for deletion
+    ColorVector<float> maxAgeForInactiveCells = {   // Candidate for deletion
         Infinity<float>::value,
         Infinity<float>::value,
         Infinity<float>::value,
@@ -59,7 +59,7 @@ struct SimulationParametersZoneValues
 
     ColorVector<float> attackerGeometryDeviationProtection = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> attackerConnectionsMismatchProtection = {0, 0, 0, 0, 0, 0, 0};
-    ColorMatrix<float> attackerCreatureProtection = {
+    ColorMatrix<float> attackerComplexCreatureProtection = {
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
