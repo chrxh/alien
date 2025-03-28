@@ -15,6 +15,7 @@ public:
 
     template <typename T>
     T* getValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
+    bool* getPinnedValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
     bool* getEnabledValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
     bool* getExpertSettingsToggleRef(ParameterGroupSpec const& spec, SimulationParameters& parameters) const;
 };
@@ -22,6 +23,7 @@ public:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
+
 template <typename T>
 T* SimulationParametersSpecificationService::getValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const
 {

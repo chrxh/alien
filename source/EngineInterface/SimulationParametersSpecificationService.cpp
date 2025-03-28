@@ -230,11 +230,13 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
             .parameters({
                 ParameterSpec()
                     .name("Relative strength")
-                    .value(BaseValueSpec().valueGetter(radiationStrengthGetter).valueSetter(radiationStrengthSetter))
+                    .value(BaseValueSpec()
+                               .pinnedAddress(BASE_VALUE_OFFSET(baseStrengthRatioPinned))
+                               .valueGetter(radiationStrengthGetter)
+                               .valueSetter(radiationStrengthSetter))
                     .type(FloatSpec()
                               .min(0.0f)
-                              .max(1.0f)
-                              .pinnedAddress(BASE_VALUE_OFFSET(baseStrengthRatioPinned)))
+                              .max(1.0f))
                     .tooltip("Cells can emit energy particles over time. A portion of this energy can be released directly near the cell, while the rest is "
                              "utilized by one of the available radiation sources. This parameter determines the fraction of energy assigned to the emitted "
                              "energy particle in the vicinity of the cell. Values between 0 and 1 are permitted."),
@@ -706,13 +708,24 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
             .parameters({
                 ParameterSpec()
                     .name("Target color and duration")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(cellColorTransitionTargetColor)))
-                    .type(ColorTransitionSpec().transitionDurationAddress(ZONE_VALUE_OFFSET(cellColorTransitionDuration)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(colorTransitionRules)))
+                    .type(ColorTransitionSpec())
                     .tooltip("Rules can be defined that describe how the colors of cells will change over time. For this purpose, a subsequent "
                              "color can be defined for each cell color. In addition, durations must be specified that define how many time steps the "
                              "corresponding color are kept."),
             }),
     });
+}
+
+bool* SimulationParametersSpecificationService::getPinnedValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const
+{
+    if (std::holds_alternative<BaseValueSpec>(spec)) {
+        auto baseValueSpec = std::get<BaseValueSpec>(spec);
+        if (baseValueSpec._pinnedAddress.has_value()) {
+            return reinterpret_cast<bool*>(reinterpret_cast<char*>(&parameters) + baseValueSpec._pinnedAddress.value());
+        }
+    }
+    return nullptr;
 }
 
 bool* SimulationParametersSpecificationService::getEnabledValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const
@@ -730,7 +743,8 @@ bool* SimulationParametersSpecificationService::getEnabledValueRef(ValueSpec con
         }
         for (int i = 0; i < parameters.numZones; ++i) {
             if (parameters.zone[i].locationIndex == locationIndex && baseZoneValueSpec._enabledZoneValueAddress.has_value()) {
-                return reinterpret_cast<bool*>(reinterpret_cast<char*>(&parameters.zone[i].values) + baseZoneValueSpec._enabledZoneValueAddress.value());
+                return reinterpret_cast<bool*>(
+                    reinterpret_cast<char*>(&parameters.zone[i].activatedValues) + baseZoneValueSpec._enabledZoneValueAddress.value());
             }
         }
     }

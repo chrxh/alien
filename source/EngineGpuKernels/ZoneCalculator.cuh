@@ -164,7 +164,7 @@ public:
 
     //return -1 for base
     __device__ __inline__ static int
-    getFirstMatchingSpotOrBase(SimulationData const& data, float2 const& worldPos, bool SimulationParametersZoneActivatedValues::*valueActivated)
+    getFirstMatchingZoneOrBase(SimulationData const& data, float2 const& worldPos, bool SimulationParametersZoneActivatedValues::*valueActivated)
     {
         if (0 == cudaSimulationParameters.numZones) {
             return -1;

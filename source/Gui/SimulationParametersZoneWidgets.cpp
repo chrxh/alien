@@ -712,22 +712,27 @@ void _SimulationParametersZoneWidgets::process()
             auto parameters = AlienImGui::InputColorTransitionParameters()
                                   .textWidth(RightColumnWidth)
                                   .color(color)
-                                  .defaultTargetColor(origZone.values.cellColorTransitionTargetColor[color])
-                                  .defaultTransitionAge(origZone.values.cellColorTransitionDuration[color])
+                                  .defaultTargetColor(origZone.values.colorTransitionRules.cellColorTransitionTargetColor[color])
+                                  .defaultTransitionAge(origZone.values.colorTransitionRules.cellColorTransitionDuration[color])
                                   .logarithmic(true)
                                   .infinity(true);
             if (0 == color) {
                 parameters.name("Target color and duration");
             }
             AlienImGui::InputColorTransition(
-                parameters, color, zone.values.cellColorTransitionTargetColor[color], zone.values.cellColorTransitionDuration[color]);
+                parameters,
+                color,
+                zone.values.colorTransitionRules.cellColorTransitionTargetColor[color],
+                zone.values.colorTransitionRules.cellColorTransitionDuration[color]);
             ImGui::PopID();
         }
         ImGui::EndDisabled();
         if (!zone.activatedValues.cellColorTransition) {
             for (int color = 0; color < MAX_COLORS; ++color) {
-                zone.values.cellColorTransitionTargetColor[color] = parameters.baseValues.cellColorTransitionTargetColor[color];
-                zone.values.cellColorTransitionDuration[color] = parameters.baseValues.cellColorTransitionDuration[color];
+                zone.values.colorTransitionRules.cellColorTransitionTargetColor[color] =
+                    parameters.baseValues.colorTransitionRules.cellColorTransitionTargetColor[color];
+                zone.values.colorTransitionRules.cellColorTransitionDuration[color] =
+                    parameters.baseValues.colorTransitionRules.cellColorTransitionDuration[color];
             }
         }
     }

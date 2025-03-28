@@ -577,13 +577,13 @@ __inline__ __device__ void CellProcessor::aging(SimulationData& data)
             int transitionDuration;
             int targetColor;
             auto color = calcMod(cell->color, MAX_COLORS);
-            auto spotIndex = ZoneCalculator::getFirstMatchingSpotOrBase(data, cell->pos, &SimulationParametersZoneActivatedValues::cellColorTransition);
-            if (spotIndex == -1) {
-                transitionDuration = cudaSimulationParameters.baseValues.cellColorTransitionDuration[color];
-                targetColor = cudaSimulationParameters.baseValues.cellColorTransitionTargetColor[color];
+            auto zoneIndex = ZoneCalculator::getFirstMatchingZoneOrBase(data, cell->pos, &SimulationParametersZoneActivatedValues::cellColorTransition);
+            if (zoneIndex == -1) {
+                transitionDuration = cudaSimulationParameters.baseValues.colorTransitionRules.cellColorTransitionDuration[color];
+                targetColor = cudaSimulationParameters.baseValues.colorTransitionRules.cellColorTransitionTargetColor[color];
             } else {
-                transitionDuration = cudaSimulationParameters.zone[spotIndex].values.cellColorTransitionDuration[color];
-                targetColor = cudaSimulationParameters.zone[spotIndex].values.cellColorTransitionTargetColor[color];
+                transitionDuration = cudaSimulationParameters.zone[zoneIndex].values.colorTransitionRules.cellColorTransitionDuration[color];
+                targetColor = cudaSimulationParameters.zone[zoneIndex].values.colorTransitionRules.cellColorTransitionTargetColor[color];
             }
             if (transitionDuration > 0 && cell->age > transitionDuration) {
                 cell->color = targetColor;
