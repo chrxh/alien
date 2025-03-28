@@ -151,14 +151,14 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.cellColorTransitionDuration,
-            defaultParameters.baseValues.cellColorTransitionDuration,
+            parameters.baseValues.colorTransitionRules.cellColorTransitionDuration,
+            defaultParameters.baseValues.colorTransitionRules.cellColorTransitionDuration,
             "simulation parameters.cell.color transition rules.duration",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.cellColorTransitionTargetColor,
-            defaultParameters.baseValues.cellColorTransitionTargetColor,
+            parameters.baseValues.colorTransitionRules.cellColorTransitionTargetColor,
+            defaultParameters.baseValues.colorTransitionRules.cellColorTransitionTargetColor,
             "simulation parameters.cell.color transition rules.target color",
             parserTask);
         ParameterParser::encodeDecode(
@@ -781,14 +781,14 @@ namespace
             ParameterParser::encodeDecode(tree, spot.activatedValues.cellColorTransition, false, base + "cell.color transition rules.activated", parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                spot.values.cellColorTransitionDuration,
-                defaultSpot.values.cellColorTransitionDuration,
+                spot.values.colorTransitionRules.cellColorTransitionDuration,
+                defaultSpot.values.colorTransitionRules.cellColorTransitionDuration,
                 base + "cell.color transition rules.duration",
                 parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                spot.values.cellColorTransitionTargetColor,
-                defaultSpot.values.cellColorTransitionTargetColor,
+                spot.values.colorTransitionRules.cellColorTransitionTargetColor,
+                defaultSpot.values.colorTransitionRules.cellColorTransitionTargetColor,
                 base + "cell.color transition rules.target color",
                 parserTask);
 
