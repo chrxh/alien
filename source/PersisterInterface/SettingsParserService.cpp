@@ -116,7 +116,7 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(tree, parameters.maxCellAge, defaultParameters.maxCellAge, "simulation parameters.cell.max age", parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.maxCellAgeBalancerActivated, defaultParameters.maxCellAgeBalancerActivated, "simulation parameters.cell.max age.balance.enabled", parserTask);
+            tree, parameters.maxCellAgeBalancerEnabled, defaultParameters.maxCellAgeBalancerEnabled, "simulation parameters.cell.max age.balance.enabled", parserTask);
         ParameterParser::encodeDecode(
             tree,
             parameters.maxCellAgeBalancerInterval,
@@ -125,20 +125,20 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.maxAgeForInactiveCellsActivated,
-            defaultParameters.maxAgeForInactiveCellsActivated,
+            parameters.maxAgeForInactiveCellsEnabled,
+            defaultParameters.maxAgeForInactiveCellsEnabled,
             "simulation parameters.cell.inactive max age activated",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.maxAgeForInactiveCells,
-            defaultParameters.baseValues.maxAgeForInactiveCells,
+            parameters.baseValues.inactiveCellsMaxAge,
+            defaultParameters.baseValues.inactiveCellsMaxAge,
             "simulation parameters.cell.inactive max age",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.freeCellMaxAgeActivated,
-            defaultParameters.freeCellMaxAgeActivated,
+            parameters.freeCellMaxAgeEnabled,
+            defaultParameters.freeCellMaxAgeEnabled,
             "simulation parameters.cell.nutrient max age activated",
             parserTask);
         ParameterParser::encodeDecode(
@@ -772,9 +772,9 @@ namespace
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.maxAgeForInactiveCells,
+                spot.values.inactiveCellsMaxAge,
                 spot.activatedValues.cellInactiveMaxAge,
-                defaultSpot.values.maxAgeForInactiveCells,
+                defaultSpot.values.inactiveCellsMaxAge,
                 base + "cell.inactive max age",
                 parserTask);
 

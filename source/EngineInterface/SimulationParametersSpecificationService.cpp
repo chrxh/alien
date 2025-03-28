@@ -37,7 +37,7 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
         editService.applyRadiationStrengths(parameters, editedStrength);
     };
 
-    auto coloringTooltip = std::string(
+    std::string const coloringTooltip = 
         "Here, one can set how the cells are to be colored during rendering. \n\n" ICON_FA_CHEVRON_RIGHT
         " Energy: The more energy a cell has, the brighter it is displayed. A grayscale is used.\n\n" ICON_FA_CHEVRON_RIGHT
         " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n" ICON_FA_CHEVRON_RIGHT
@@ -49,7 +49,7 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
         " Genome complexity: This property can be utilized by attacker cells when the parameter 'Complex creature protection' is "
         "activated (see tooltip there). The coloring is as follows: blue = creature with low bonus (usually small or simple genome structure), "
         "red = large bonus\n\n" ICON_FA_CHEVRON_RIGHT " Specific cell function: A specific type of cell function can be highlighted, which is "
-        "selected in the next parameter.\n\n" ICON_FA_CHEVRON_RIGHT " Every cell function: The cells are colored according to their cell function.");
+        "selected in the next parameter.\n\n" ICON_FA_CHEVRON_RIGHT " Every cell function: The cells are colored according to their cell function.";
 
     return ParametersSpec().groups({
         ParameterGroupSpec().name("General").parameters({
@@ -195,8 +195,8 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Maximum force")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(cellMaxForce)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(3.0f))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Maximum force that can be applied to a cell without causing it to disintegrate."),
                 ParameterSpec()
                     .name("Minimum distance")
@@ -210,8 +210,8 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Maximum distance")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(maxBindingDistance)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(5.0f))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Maximum distance up to which a connection of two cells is possible."),
                 ParameterSpec()
                     .name("Fusion velocity")
@@ -243,38 +243,38 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Absorption factor")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(radiationAbsorption)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).logarithmic(true).format("%.4f"))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The fraction of energy that a cell can absorb from an incoming energy particle can be specified here."),
                 ParameterSpec()
                     .name("Radiation type I: Strength")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(radiationType1_strength)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(0.01f).logarithmic(true).format("%.6f"))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Indicates how energetic the emitted particles of aged cells are."),
                 ParameterSpec()
                     .name("Radiation type I: Minimum age")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(radiationType1_minimumAge)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(IntSpec().min(0).max(10000000).logarithmic(true).infinity(true))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The minimum age of a cell can be defined here, from which it emits energy particles."),
                 ParameterSpec()
                     .name("Radiation type II: Strength")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(radiationType2_strength)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(0.01f).logarithmic(true).format("%.6f"))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Indicates how energetic the emitted particles of high energy cells are."),
                 ParameterSpec()
                     .name("Radiation type II: Energy threshold")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(radiationType2_energyThreshold)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(100000.0f).logarithmic(true).infinity(true).format("%.1f"))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The minimum energy of a cell can be defined here, from which it emits energy particles."),
                 ParameterSpec()
                     .name("Minimum split energy")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(particleSplitEnergy)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(1.0f).max(10000.0f).logarithmic(true).infinity(true).format("%.0f"))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The minimum energy of an energy particle after which it can split into two particles, whereby it receives a small momentum. The "
                              "splitting does not occur immediately, but only after a certain time."),
                 ParameterSpec()
@@ -289,20 +289,20 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Maximum age")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(maxCellAge)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(IntSpec().min(1).max(1e7).logarithmic(true).infinity(true))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Defines the maximum age of a cell. If a cell exceeds this age it will be transformed to an energy particle."),
                 ParameterSpec()
                     .name("Minimum energy")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(minCellEnergy)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(10.0f).max(200.0f))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Minimum energy a cell needs to exist."),
                 ParameterSpec()
                     .name("Normal energy")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(normalCellEnergy)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(10.0f).max(200.0f))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip(
                         "The normal energy value of a cell is defined here. This is used as a reference value in various contexts: "
                         "\n\n" ICON_FA_CHEVRON_RIGHT
@@ -315,8 +315,8 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Decay rate of dying cells")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(cellDeathProbability)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(1e-6f).max(1e-1f).format("%.6f").logarithmic(true))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The probability per time step with which a cell will disintegrate (i.e. transform into an energy particle) when it is in the "
                              "state 'Dying'. This can occur when one of the following conditions is satisfied:\n\n" ICON_FA_CHEVRON_RIGHT
                              " The cell has too low energy.\n\n" ICON_FA_CHEVRON_RIGHT " The cell has exceeded its maximum age."),
@@ -336,38 +336,38 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Neural nets")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationNeuronData)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip(
                         "This type of mutation can change the weights, biases and activation functions of neural networks of each neuron cell encoded in the "
                         "genome."),
                 ParameterSpec()
                     .name("Cell properties")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationCellProperties)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation changes a random property (e.g. (input) execution order number, required energy, block output and "
                              "function-specific properties such as minimum density for sensors, neural net weights etc.). The spatial structure, color, cell "
                              "function type and self-replication capabilities are not changed. This mutation is applied to each encoded cell in the genome."),
                 ParameterSpec()
                     .name("Geometry")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationGeometry)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation changes the geometry type, connection distance, stiffness and single construction flag. The probability of "
                              "a change is given by the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Custom geometry")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationCustomGeometry)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation only changes angles and required connections of custom geometries. The probability of a change is given by "
                              "the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Cell function type")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationCellType)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation changes the type of cell function. The changed cell function will have random properties. The probability "
                              "of a change is given by the specified value times the number of coded cells in the genome. If the flag 'Preserve "
                              "self-replication' is disabled it can also alter self-replication capabilities by changing a constructor to "
@@ -375,22 +375,22 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Insertion")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationInsertion)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation inserts a new cell description to the genome at a random position. The probability of a change is given by "
                              "the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Deletion")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationDeletion)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation deletes a cell description from the genome at a random position. The probability of a change is given by "
                              "the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Translation")
                     .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationTranslation)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation moves a block of cell descriptions from the genome at a random position to a new random position."),
                 ParameterSpec()
                     .name("Duplication")
@@ -589,7 +589,6 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Same creature energy distribution")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(transmitterEnergyDistributionSameCreature)))
-                    .colorDependence(ColorDependence::Vector)
                     .type(BoolSpec())
                     .tooltip("If activated, the transmitter cells can only transfer energy to nearby cells belonging to the same creature."),
             }),
@@ -695,12 +694,34 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                 ParameterSpec()
                     .name("Maximum inactive cell age")
                     .value(BaseZoneValueSpec()
-                               .valueAddress(ZONE_VALUE_OFFSET(maxAgeForInactiveCells))
-                               .enabledBaseValueAddress(BASE_VALUE_OFFSET(maxAgeForInactiveCellsActivated)))
+                               .valueAddress(ZONE_VALUE_OFFSET(inactiveCellsMaxAge))
+                               .enabledBaseValueAddress(BASE_VALUE_OFFSET(maxAgeForInactiveCellsEnabled)))
                     .colorDependence(ColorDependence::Vector)
-                    .type(FloatSpec().min(1.0f).max(10000000.0f).format("%.0f").logarithmic(true).infinity(true))
+                    .type(FloatSpec().min(1.0f).max(1e7f).format("%.0f").logarithmic(true).infinity(true))
                     .tooltip("Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered. Cells which "
                              "are in state 'Under construction' are not affected by this option."),
+                ParameterSpec()
+                    .name("Maximum free cell age")
+                    .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(freeCellMaxAge)).enabledValueAddress(BASE_VALUE_OFFSET(freeCellMaxAgeEnabled)))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(IntSpec().min(1).max(1e7).logarithmic(true).infinity(true))
+                    .tooltip("The maximal age of free cells (= cells that arise from energy particles) can be set here."),
+                ParameterSpec()
+                    .name("Reset age after construction")
+                    .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(resetCellAgeAfterActivation)))
+                    .type(BoolSpec())
+                    .tooltip("If this option is activated, the age of the cells is reset to 0 after the construction of their cell network is completed, "
+                         "i.e. when the state of the cells changes from 'Under construction' to 'Ready'. This option is particularly useful if a low "
+                         "'Maximum inactive cell age' is set, as cell networks that are under construction are inactive and could die immediately after "
+                         "completion if their construction takes a long time."),
+                ParameterSpec()
+                    .name("Maximum age balancing")
+                    .value(BaseValueSpec()
+                               .valueAddress(BASE_VALUE_OFFSET(maxCellAgeBalancerInterval))
+                               .enabledValueAddress(BASE_VALUE_OFFSET(maxCellAgeBalancerEnabled)))
+                    .type(IntSpec().min(1e3).max(1e6).logarithmic(true))
+                    .tooltip("Adjusts the maximum age at regular intervals. It increases the maximum age for the cell color where the fewest "
+                         "replicators exist. Conversely, the maximum age is decreased for the cell color with the most replicators."),
             }),
         ParameterGroupSpec()
             .name("Expert settings: Cell color transition rules")
@@ -713,6 +734,46 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                     .tooltip("Rules can be defined that describe how the colors of cells will change over time. For this purpose, a subsequent "
                              "color can be defined for each cell color. In addition, durations must be specified that define how many time steps the "
                              "corresponding color are kept."),
+            }),
+        ParameterGroupSpec()
+            .name("Expert settings: Cell glow")
+            .expertSettingAddress(EXPERT_VALUE_OFFSET(cellGlow))
+            .parameters({
+                ParameterSpec()
+                    .name("Coloring")
+                    .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(cellGlowColoring)))
+                    .type(AlternativeSpec().alternatives(
+                        {{"Energy", {}},
+                         {"Standard cell colors", {}},
+                         {"Mutants", {}},
+                         {"Mutants and cell functions", {}},
+                         {"Cell states", {}},
+                         {"Genome complexities", {}},
+                         {"Single cell function", {}},
+                         {"All cell functions", {}}}))
+                    .tooltip(coloringTooltip),
+                ParameterSpec()
+                    .name("Radius")
+                    .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(cellGlowRadius)))
+                    .type(FloatSpec().min(1.0f).max(8.0f))
+                    .tooltip("The radius of the glow. Please note that a large radius affects the performance."),
+                ParameterSpec()
+                    .name("Strength")
+                    .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(cellGlowStrength)))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(FloatSpec().min(0.0f).max(1.0f))
+                    .tooltip("The strength of the glow."),
+            }),
+        ParameterGroupSpec()
+            .name("Expert settings: Customize deletion mutations")
+            .expertSettingAddress(EXPERT_VALUE_OFFSET(cellGlow))
+            .parameters({
+                ParameterSpec()
+                    .name("Minimum size")
+                    .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(cellCopyMutationDeletionMinSize)))
+                    .colorDependence(ColorDependence::Vector)
+                    .type(IntSpec().min(0).max(1000).logarithmic(true))
+                    .tooltip("The minimum size of genomes (on the basis of the coded cells) is determined here that can result from delete mutations. The default is 0."),
             }),
     });
 }

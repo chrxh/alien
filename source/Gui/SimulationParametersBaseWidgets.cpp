@@ -57,92 +57,10 @@ void _SimulationParametersBaseWidgets::process()
     AlienImGui::Separator();
 
     /**
-     * Expert settings: Cell age limiter
-     */
-    if (AlienImGui::BeginTreeNode(
-            AlienImGui::TreeNodeParameters().name("Expert settings: Cell age limiter").visible(parameters.expertSettingsToggles.cellAgeLimiter).blinkWhenActivated(true))) {
-        AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name("Maximum inactive cell age")
-                .textWidth(RightColumnWidth)
-                .colorDependence(true)
-                .min(1.0f)
-                .max(10000000.0f)
-                .format("%.0f")
-                .logarithmic(true)
-                .infinity(true)
-                .disabledValue(parameters.baseValues.maxAgeForInactiveCells)
-                .defaultEnabledValue(&origParameters.maxAgeForInactiveCellsActivated)
-                .defaultValue(origParameters.baseValues.maxAgeForInactiveCells)
-                .tooltip("Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered. Cells which "
-                         "are in state 'Under construction' are not affected by this option."),
-            parameters.baseValues.maxAgeForInactiveCells,
-            &parameters.maxAgeForInactiveCellsActivated);
-        AlienImGui::SliderInt(
-            AlienImGui::SliderIntParameters()
-                .name("Maximum free cell age")
-                .textWidth(RightColumnWidth)
-                .colorDependence(true)
-                .min(1)
-                .max(10000000)
-                .logarithmic(true)
-                .infinity(true)
-                .disabledValue(parameters.freeCellMaxAge)
-                .defaultEnabledValue(&origParameters.freeCellMaxAgeActivated)
-                .defaultValue(origParameters.freeCellMaxAge)
-                .tooltip("The maximal age of cells that arise from energy particles can be set here."),
-            parameters.freeCellMaxAge,
-            &parameters.freeCellMaxAgeActivated);
-        AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters()
-                .name("Reset age after construction")
-                .textWidth(RightColumnWidth)
-                .defaultValue(origParameters.resetCellAgeAfterActivation)
-                .tooltip("If this option is activated, the age of the cells is reset to 0 after the construction of their cell network is completed, "
-                         "i.e. when the state of the cells changes from 'Under construction' to 'Ready'. This option is particularly useful if a low "
-                         "'Maximum "
-                         "inactive cell age' is set, as cell networks that are under construction are inactive and could die immediately after "
-                         "completion if their construction takes a long time."),
-            parameters.resetCellAgeAfterActivation);
-        AlienImGui::SliderInt(
-            AlienImGui::SliderIntParameters()
-                .name("Maximum age balancing")
-                .textWidth(RightColumnWidth)
-                .logarithmic(true)
-                .min(1000)
-                .max(1000000)
-                .disabledValue(&parameters.maxCellAgeBalancerInterval)
-                .defaultEnabledValue(&origParameters.maxCellAgeBalancerActivated)
-                .defaultValue(&origParameters.maxCellAgeBalancerInterval)
-                .tooltip("Adjusts the maximum age at regular intervals. It increases the maximum age for the cell color where the fewest "
-                         "replicators exist. "
-                         "Conversely, the maximum age is decreased for the cell color with the most replicators."),
-            &parameters.maxCellAgeBalancerInterval,
-            &parameters.maxCellAgeBalancerActivated);
-    }
-    AlienImGui::EndTreeNode();
-
-    /**
      * Expert settings: Cell glow
      */
     if (AlienImGui::BeginTreeNode(
             AlienImGui::TreeNodeParameters().name("Expert settings: Cell glow").visible(parameters.expertSettingsToggles.cellGlow).blinkWhenActivated(true))) {
-        AlienImGui::Switcher(
-            AlienImGui::SwitcherParameters()
-                .name("Coloring")
-                .textWidth(RightColumnWidth)
-                .defaultValue(origParameters.cellGlowColoring)
-                .values(
-                    {"Energy",
-                     "Standard cell colors",
-                     "Mutants",
-                     "Mutants and cell functions",
-                     "Cell states",
-                     "Genome complexities",
-                     "Single cell function",
-                     "All cell functions"})
-                .tooltip(Const::ColoringParameterTooltip),
-            parameters.cellGlowColoring);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Radius")
@@ -158,9 +76,9 @@ void _SimulationParametersBaseWidgets::process()
                 .textWidth(RightColumnWidth)
                 .min(0)
                 .max(1.0f)
-                .defaultValue(&origParameters.cellGlowStrength)
+                .defaultValue(origParameters.cellGlowStrength)
                 .tooltip("The strength of the glow."),
-            &parameters.cellGlowStrength);
+            parameters.cellGlowStrength);
     }
     AlienImGui::EndTreeNode();
 

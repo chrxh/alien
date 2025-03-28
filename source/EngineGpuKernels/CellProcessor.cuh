@@ -828,7 +828,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         }
 
         auto cellMaxAge = cudaSimulationParameters.maxCellAge[cell->color];
-        if (cudaSimulationParameters.expertSettingsToggles.cellAgeLimiter && cudaSimulationParameters.maxAgeForInactiveCellsActivated && cell->mutationId != 1
+        if (cudaSimulationParameters.expertSettingsToggles.cellAgeLimiter && cudaSimulationParameters.maxAgeForInactiveCellsEnabled && cell->mutationId != 1
             && cell->cellTypeUsed == CellTriggered_No && cell->livingState == LivingState_Ready && cell->activationTime == 0) {
             bool adjacentCellsUsed = false;
             for (int i = 0; i < cell->numConnections; ++i) {
@@ -839,7 +839,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             }
             if (!adjacentCellsUsed) {
                 auto cellInactiveMaxAge = ZoneCalculator::calcParameter(
-                    &SimulationParametersZoneValues::maxAgeForInactiveCells,
+                    &SimulationParametersZoneValues::inactiveCellsMaxAge,
                     &SimulationParametersZoneActivatedValues::cellInactiveMaxAge,
                     data,
                     cell->pos,
@@ -848,7 +848,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
                 cellMaxAge = toInt(cellInactiveMaxAge);
             }
         }
-        if (cudaSimulationParameters.expertSettingsToggles.cellAgeLimiter && cudaSimulationParameters.freeCellMaxAgeActivated && cell->cellType == CellType_Free) {
+        if (cudaSimulationParameters.expertSettingsToggles.cellAgeLimiter && cudaSimulationParameters.freeCellMaxAgeEnabled && cell->cellType == CellType_Free) {
             cellMaxAge = cudaSimulationParameters.freeCellMaxAge[cell->color];
         }
         if (cellMaxAge > 0 && cell->age > cellMaxAge) {

@@ -55,10 +55,10 @@ using TypeSpec = std::variant<BoolSpec, IntSpec, FloatSpec, Char64Spec, Alternat
 struct BaseValueSpec
 {
     MEMBER_DECLARATION(BaseValueSpec, std::optional<size_t>, valueAddress, std::nullopt);
-    MEMBER_DECLARATION(BaseValueSpec, std::optional<size_t>, pinnedAddress, std::nullopt);
-    MEMBER_DECLARATION(BaseValueSpec, std::optional<size_t>, enabledValueAddress, std::nullopt);
     MEMBER_DECLARATION(BaseValueSpec, std::optional<std::function<float(SimulationParameters const&, int)>>, valueGetter, std::nullopt);  // int for locationIndex
     MEMBER_DECLARATION(BaseValueSpec, std::optional<std::function<void(float, SimulationParameters&, int)>>, valueSetter, std::nullopt);  // int for locationIndex
+    MEMBER_DECLARATION(BaseValueSpec, std::optional<size_t>, pinnedAddress, std::nullopt);
+    MEMBER_DECLARATION(BaseValueSpec, std::optional<size_t>, enabledValueAddress, std::nullopt);
 };
 
 struct BaseZoneValueSpec

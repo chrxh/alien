@@ -169,8 +169,8 @@ struct SimulationParameters
     static float constexpr attackerColorInhomogeneityFactor = 1.0f;
 
     // Expert settings: Cell age limiter
-    bool maxAgeForInactiveCellsActivated = false;  // Candidate for deletion
-    bool freeCellMaxAgeActivated = false;
+    bool maxAgeForInactiveCellsEnabled = false;  // Candidate for deletion
+    bool freeCellMaxAgeEnabled = false;
     ColorVector<int> freeCellMaxAge = {
         Infinity<int>::value,
         Infinity<int>::value,
@@ -180,13 +180,13 @@ struct SimulationParameters
         Infinity<int>::value,
         Infinity<int>::value};
     bool resetCellAgeAfterActivation = false;   // Candidate for deletion
-    bool maxCellAgeBalancerActivated = false;
+    bool maxCellAgeBalancerEnabled = false;
     int maxCellAgeBalancerInterval = 10000;
 
     // Expert settings: Cell glow
     CellColoring cellGlowColoring = CellColoring_CellColor;
     float cellGlowRadius = 4.0f;
-    float cellGlowStrength = 0.1f;
+    ColorVector<float> cellGlowStrength = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
 
     // Expert settings: Customize deletion mutations setting
     int cellCopyMutationDeletionMinSize = 0;

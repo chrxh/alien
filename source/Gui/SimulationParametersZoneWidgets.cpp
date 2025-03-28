@@ -688,9 +688,9 @@ void _SimulationParametersZoneWidgets::process()
                 .logarithmic(true)
                 .infinity(true)
                 .format("%.0f")
-                .disabledValue(parameters.baseValues.maxAgeForInactiveCells)
-                .defaultValue(origZone.values.maxAgeForInactiveCells),
-            zone.values.maxAgeForInactiveCells,
+                .disabledValue(parameters.baseValues.inactiveCellsMaxAge)
+                .defaultValue(origZone.values.inactiveCellsMaxAge),
+            zone.values.inactiveCellsMaxAge,
             &zone.activatedValues.cellInactiveMaxAge);
     }
     AlienImGui::EndTreeNode();
