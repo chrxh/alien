@@ -10,7 +10,54 @@
 #define ZONE_VALUE_OFFSET(X) offsetof(SimulationParametersZoneValues, X)
 #define EXPERT_VALUE_OFFSET(X) offsetof(ExpertSettingsToggles, X)
 
-ParametersSpec SimulationParametersSpecificationService::createParametersSpec() const
+ParametersSpec const& SimulationParametersSpecificationService::getSpec()
+{
+    if (!_parametersSpec.has_value()) {
+        createSpec();
+    }
+    return _parametersSpec.value();
+}
+
+bool* SimulationParametersSpecificationService::getPinnedValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const
+{
+    if (std::holds_alternative<BaseValueSpec>(spec)) {
+        auto baseValueSpec = std::get<BaseValueSpec>(spec);
+        if (baseValueSpec._pinnedAddress.has_value()) {
+            return reinterpret_cast<bool*>(reinterpret_cast<char*>(&parameters) + baseValueSpec._pinnedAddress.value());
+        }
+    }
+    return nullptr;
+}
+
+bool* SimulationParametersSpecificationService::getEnabledValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const
+{
+    if (std::holds_alternative<BaseValueSpec>(spec)) {
+        auto baseValueSpec = std::get<BaseValueSpec>(spec);
+        if (baseValueSpec._enabledValueAddress.has_value()) {
+            return reinterpret_cast<bool*>(reinterpret_cast<char*>(&parameters) + baseValueSpec._enabledValueAddress.value());
+        }
+    } else if (std::holds_alternative<BaseZoneValueSpec>(spec)) {
+        auto baseZoneValueSpec = std::get<BaseZoneValueSpec>(spec);
+
+        if (locationIndex == 0 && baseZoneValueSpec._enabledBaseValueAddress.has_value()) {
+            return reinterpret_cast<bool*>(reinterpret_cast<char*>(&parameters) + baseZoneValueSpec._enabledBaseValueAddress.value());
+        }
+        for (int i = 0; i < parameters.numZones; ++i) {
+            if (parameters.zone[i].locationIndex == locationIndex && baseZoneValueSpec._enabledZoneValueAddress.has_value()) {
+                return reinterpret_cast<bool*>(
+                    reinterpret_cast<char*>(&parameters.zone[i].activatedValues) + baseZoneValueSpec._enabledZoneValueAddress.value());
+            }
+        }
+    }
+    return nullptr;
+}
+
+bool* SimulationParametersSpecificationService::getExpertToggleValueRef(ParameterGroupSpec const& spec, SimulationParameters& parameters) const
+{
+    return reinterpret_cast<bool*>(reinterpret_cast<char*>(&parameters.expertSettingsToggles) + spec._expertToggleAddress.value());
+}
+
+void SimulationParametersSpecificationService::createSpec()
 {
     std::vector<std::pair<std::string, std::vector<ParameterSpec>>> cellTypeStrings;
     for (int i = 0; i < CellType_Count; ++i) {
@@ -37,7 +84,7 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
         editService.applyRadiationStrengths(parameters, editedStrength);
     };
 
-    std::string const coloringTooltip = 
+    std::string const coloringTooltip =
         "Here, one can set how the cells are to be colored during rendering. \n\n" ICON_FA_CHEVRON_RIGHT
         " Energy: The more energy a cell has, the brighter it is displayed. A grayscale is used.\n\n" ICON_FA_CHEVRON_RIGHT
         " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n" ICON_FA_CHEVRON_RIGHT
@@ -51,7 +98,7 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
         "red = large bonus\n\n" ICON_FA_CHEVRON_RIGHT " Specific cell function: A specific type of cell function can be highlighted, which is "
         "selected in the next parameter.\n\n" ICON_FA_CHEVRON_RIGHT " Every cell function: The cells are colored according to their cell function.";
 
-    return ParametersSpec().groups({
+    _parametersSpec =  ParametersSpec().groups({
         ParameterGroupSpec().name("General").parameters({
             ParameterSpec().name("Project name").value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(projectName))).type(Char64Spec()),
         }),
@@ -234,9 +281,7 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                                .pinnedAddress(BASE_VALUE_OFFSET(baseStrengthRatioPinned))
                                .valueGetter(radiationStrengthGetter)
                                .valueSetter(radiationStrengthSetter))
-                    .type(FloatSpec()
-                              .min(0.0f)
-                              .max(1.0f))
+                    .type(FloatSpec().min(0.0f).max(1.0f))
                     .tooltip("Cells can emit energy particles over time. A portion of this energy can be released directly near the cell, while the rest is "
                              "utilized by one of the available radiation sources. This parameter determines the fraction of energy assigned to the emitted "
                              "energy particle in the vicinity of the cell. Values between 0 and 1 are permitted."),
@@ -619,8 +664,8 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                     .tooltip("The probability that the explosion of one detonator will trigger the explosion of other detonators within the blast radius."),
             }),
         ParameterGroupSpec()
-            .name("Expert settings: Advanced energy absorption control")
-            .expertSettingAddress(EXPERT_VALUE_OFFSET(advancedAbsorptionControl))
+            .name("Advanced energy absorption control")
+            .expertToggleAddress(EXPERT_VALUE_OFFSET(advancedAbsorptionControl))
             .parameters({
                 ParameterSpec()
                     .name("Low genome complexity penalty")
@@ -648,8 +693,8 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                     .tooltip("When this parameter is increased, slowly moving cells will absorb less energy from an incoming energy particle."),
             }),
         ParameterGroupSpec()
-            .name("Expert settings: Advanced attacker control")
-            .expertSettingAddress(EXPERT_VALUE_OFFSET(advancedAttackerControl))
+            .name("Advanced attacker control")
+            .expertToggleAddress(EXPERT_VALUE_OFFSET(advancedAttackerControl))
             .parameters({
                 ParameterSpec()
                     .name("Same mutant protection")
@@ -688,8 +733,8 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                     .tooltip("The larger this parameter is, the more difficult it is to attack cells that contain more connections."),
             }),
         ParameterGroupSpec()
-            .name("Expert settings: Cell age limiter")
-            .expertSettingAddress(EXPERT_VALUE_OFFSET(cellAgeLimiter))
+            .name("Cell age limiter")
+            .expertToggleAddress(EXPERT_VALUE_OFFSET(cellAgeLimiter))
             .parameters({
                 ParameterSpec()
                     .name("Maximum inactive cell age")
@@ -711,9 +756,9 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(resetCellAgeAfterActivation)))
                     .type(BoolSpec())
                     .tooltip("If this option is activated, the age of the cells is reset to 0 after the construction of their cell network is completed, "
-                         "i.e. when the state of the cells changes from 'Under construction' to 'Ready'. This option is particularly useful if a low "
-                         "'Maximum inactive cell age' is set, as cell networks that are under construction are inactive and could die immediately after "
-                         "completion if their construction takes a long time."),
+                             "i.e. when the state of the cells changes from 'Under construction' to 'Ready'. This option is particularly useful if a low "
+                             "'Maximum inactive cell age' is set, as cell networks that are under construction are inactive and could die immediately after "
+                             "completion if their construction takes a long time."),
                 ParameterSpec()
                     .name("Maximum age balancing")
                     .value(BaseValueSpec()
@@ -721,11 +766,11 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                                .enabledValueAddress(BASE_VALUE_OFFSET(maxCellAgeBalancerEnabled)))
                     .type(IntSpec().min(1e3).max(1e6).logarithmic(true))
                     .tooltip("Adjusts the maximum age at regular intervals. It increases the maximum age for the cell color where the fewest "
-                         "replicators exist. Conversely, the maximum age is decreased for the cell color with the most replicators."),
+                             "replicators exist. Conversely, the maximum age is decreased for the cell color with the most replicators."),
             }),
         ParameterGroupSpec()
-            .name("Expert settings: Cell color transition rules")
-            .expertSettingAddress(EXPERT_VALUE_OFFSET(cellColorTransitionRules))
+            .name("Cell color transition rules")
+            .expertToggleAddress(EXPERT_VALUE_OFFSET(cellColorTransitionRules))
             .parameters({
                 ParameterSpec()
                     .name("Target color and duration")
@@ -736,8 +781,8 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                              "corresponding color are kept."),
             }),
         ParameterGroupSpec()
-            .name("Expert settings: Cell glow")
-            .expertSettingAddress(EXPERT_VALUE_OFFSET(cellGlow))
+            .name("Cell glow")
+            .expertToggleAddress(EXPERT_VALUE_OFFSET(cellGlow))
             .parameters({
                 ParameterSpec()
                     .name("Coloring")
@@ -765,8 +810,8 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                     .tooltip("The strength of the glow."),
             }),
         ParameterGroupSpec()
-            .name("Expert settings: Customize deletion mutations")
-            .expertSettingAddress(EXPERT_VALUE_OFFSET(customizeDeletionMutations))
+            .name("Customize deletion mutations")
+            .expertToggleAddress(EXPERT_VALUE_OFFSET(customizeDeletionMutations))
             .parameters({
                 ParameterSpec()
                     .name("Minimum size")
@@ -776,8 +821,8 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                              "default is 0."),
             }),
         ParameterGroupSpec()
-            .name("Expert settings: Customize neuron mutations")
-            .expertSettingAddress(EXPERT_VALUE_OFFSET(customizeNeuronMutations))
+            .name("Customize neuron mutations")
+            .expertToggleAddress(EXPERT_VALUE_OFFSET(customizeNeuronMutations))
             .parameters({
                 ParameterSpec()
                     .name("Affected weights")
@@ -793,46 +838,51 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                     .name("Affected activation functions")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(cellCopyMutationNeuronDataActivationFunction)))
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.3f"))
-                    .tooltip("The proportion of activation functions in the neuronal network of a cell that are changed within a neuron mutation. The default is 0.05."),
+                    .tooltip("The proportion of activation functions in the neuronal network of a cell that are changed within a neuron mutation. The default "
+                             "is 0.05."),
                 ParameterSpec()
                     .name("Reinforcement factor")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(cellCopyMutationNeuronDataReinforcement)))
                     .type(FloatSpec().min(1.0f).max(1.2f).format("%.3f"))
-                    .tooltip("If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an offset. "
-                         "The factor that is used for reinforcement is defined here. The default is 1.05."),
+                    .tooltip(
+                        "If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an offset. "
+                        "The factor that is used for reinforcement is defined here. The default is 1.05."),
                 ParameterSpec()
                     .name("Damping factor")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(cellCopyMutationNeuronDataDamping)))
                     .type(FloatSpec().min(1.0f).max(1.2f).format("%.3f"))
-                    .tooltip("If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an offset. "
-                         "The factor that is used for weakening is defined here. The default is 1.05."),
+                    .tooltip(
+                        "If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an offset. "
+                        "The factor that is used for weakening is defined here. The default is 1.05."),
                 ParameterSpec()
                     .name("Offset")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(cellCopyMutationNeuronDataOffset)))
                     .type(FloatSpec().min(0.0f).max(0.2f).format("%.3f"))
                     .tooltip(
                         "If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an offset. "
-                         "The value that is used for the offset is defined here. The default is 0.05."),
+                        "The value that is used for the offset is defined here. The default is 0.05."),
             }),
         ParameterGroupSpec()
-            .name("Expert settings: External energy control")
-            .expertSettingAddress(EXPERT_VALUE_OFFSET(externalEnergyControl))
+            .name("External energy control")
+            .expertToggleAddress(EXPERT_VALUE_OFFSET(externalEnergyControl))
             .parameters({
                 ParameterSpec()
                     .name("External energy amount")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(externalEnergy)))
                     .type(FloatSpec().min(0.0f).max(100000000.0f).format("%.0f").logarithmic(true).infinity(true))
-                    .tooltip("This parameter can be used to set the amount of energy of an external energy pool. This type of energy can then be "
-                         "transferred to all constructor cells at a certain rate (see inflow settings).\n\nWarning: Too much external energy can result in a "
-                         "massive production of cells and slow down or even crash the simulation."),
+                    .tooltip(
+                        "This parameter can be used to set the amount of energy of an external energy pool. This type of energy can then be "
+                        "transferred to all constructor cells at a certain rate (see inflow settings).\n\nWarning: Too much external energy can result in a "
+                        "massive production of cells and slow down or even crash the simulation."),
                 ParameterSpec()
                     .name("Inflow")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(externalEnergyInflowFactor)))
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.5f").logarithmic(true))
                     .colorDependence(ColorDependence::Vector)
-                    .tooltip("Here one can specify the fraction of energy transferred to constructor cells.\n\nFor example, a value of 0.05 means that "
-                         "each time a constructor cell tries to build a new cell, 5% of the required energy is transferred for free from the external energy "
-                         "source."),
+                    .tooltip(
+                        "Here one can specify the fraction of energy transferred to constructor cells.\n\nFor example, a value of 0.05 means that "
+                        "each time a constructor cell tries to build a new cell, 5% of the required energy is transferred for free from the external energy "
+                        "source."),
                 ParameterSpec()
                     .name("Conditional inflow")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(externalEnergyConditionalInflowFactor)))
@@ -847,25 +897,25 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(externalEnergyInflowOnlyForNonSelfReplicators)))
                     .type(BoolSpec())
                     .tooltip("If activated, external energy can only be transferred to constructor cells that are not self-replicators. "
-                         "This option can be used to foster the evolution of additional body parts."),
+                             "This option can be used to foster the evolution of additional body parts."),
                 ParameterSpec()
                     .name("Backflow")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(externalEnergyBackflowFactor)))
                     .type(FloatSpec().min(0.0f).max(1.0f))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("The proportion of energy that flows back from the simulation to the external energy pool. Each time a cell loses energy "
-                         "or dies a fraction of its energy will be taken. The remaining "
-                         "fraction of the energy stays in the simulation and will be used to create a new energy particle."),
+                             "or dies a fraction of its energy will be taken. The remaining "
+                             "fraction of the energy stays in the simulation and will be used to create a new energy particle."),
                 ParameterSpec()
                     .name("Backflow limit")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(externalEnergyBackflowLimit)))
                     .type(FloatSpec().min(0.0f).max(1e8f).format("%.0f").logarithmic(true).infinity(true))
                     .tooltip("Energy from the simulation can only flow back into the external energy pool as long as the amount of external energy is "
-                         "below this value."),
+                             "below this value."),
             }),
         ParameterGroupSpec()
-            .name("Expert settings: Genome complexity measurement")
-            .expertSettingAddress(EXPERT_VALUE_OFFSET(genomeComplexityMeasurement))
+            .name("Genome complexity measurement")
+            .expertToggleAddress(EXPERT_VALUE_OFFSET(genomeComplexityMeasurement))
             .parameters({
                 ParameterSpec()
                     .name("Size factor")
@@ -879,54 +929,15 @@ ParametersSpec SimulationParametersSpecificationService::createParametersSpec() 
                     .type(FloatSpec().min(0.0f).max(20.0f).format("%.2f"))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("With this parameter, the number of ramifications of the cell structure to the genome is taken into account for the "
-                         "calculation of the genome complexity. For instance, genomes that contain many sub-genomes or many construction branches will "
-                         "then have a high complexity value."),
+                             "calculation of the genome complexity. For instance, genomes that contain many sub-genomes or many construction branches will "
+                             "then have a high complexity value."),
                 ParameterSpec()
                     .name("Depth level")
                     .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(genomeComplexityDepthLevel)))
                     .type(IntSpec().min(1).max(20).infinity(true))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("This allows to specify up to which level of the sub-genomes the complexity calculation should be carried out. For example, a "
-                         "value of 2 means that the sub- and sub-sub-genomes are taken into account in addition to the main genome."),
+                             "value of 2 means that the sub- and sub-sub-genomes are taken into account in addition to the main genome."),
             }),
     });
-}
-
-bool* SimulationParametersSpecificationService::getPinnedValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const
-{
-    if (std::holds_alternative<BaseValueSpec>(spec)) {
-        auto baseValueSpec = std::get<BaseValueSpec>(spec);
-        if (baseValueSpec._pinnedAddress.has_value()) {
-            return reinterpret_cast<bool*>(reinterpret_cast<char*>(&parameters) + baseValueSpec._pinnedAddress.value());
-        }
-    }
-    return nullptr;
-}
-
-bool* SimulationParametersSpecificationService::getEnabledValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const
-{
-    if (std::holds_alternative<BaseValueSpec>(spec)) {
-        auto baseValueSpec = std::get<BaseValueSpec>(spec);
-        if (baseValueSpec._enabledValueAddress.has_value()) {
-            return reinterpret_cast<bool*>(reinterpret_cast<char*>(&parameters) + baseValueSpec._enabledValueAddress.value());
-        }
-    } else if (std::holds_alternative<BaseZoneValueSpec>(spec)) {
-        auto baseZoneValueSpec = std::get<BaseZoneValueSpec>(spec);
-
-        if (locationIndex == 0 && baseZoneValueSpec._enabledBaseValueAddress.has_value()) {
-            return reinterpret_cast<bool*>(reinterpret_cast<char*>(&parameters) + baseZoneValueSpec._enabledBaseValueAddress.value());
-        }
-        for (int i = 0; i < parameters.numZones; ++i) {
-            if (parameters.zone[i].locationIndex == locationIndex && baseZoneValueSpec._enabledZoneValueAddress.has_value()) {
-                return reinterpret_cast<bool*>(
-                    reinterpret_cast<char*>(&parameters.zone[i].activatedValues) + baseZoneValueSpec._enabledZoneValueAddress.value());
-            }
-        }
-    }
-    return nullptr;
-}
-
-bool* SimulationParametersSpecificationService::getExpertSettingsToggleRef(ParameterGroupSpec const& spec, SimulationParameters& parameters) const
-{
-    return reinterpret_cast<bool*>(reinterpret_cast<char*>(&parameters.expertSettingsToggles) + spec._expertSettingAddress.value());
 }

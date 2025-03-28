@@ -186,7 +186,7 @@ struct SimulationParameters
     // Expert settings: Cell glow
     CellColoring cellGlowColoring = CellColoring_CellColor;
     float cellGlowRadius = 4.0f;
-    ColorVector<float> cellGlowStrength = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
+    ColorVector<float> cellGlowStrength = {0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f};
 
     // Expert settings: Customize deletion mutations setting
     int cellCopyMutationDeletionMinSize = 0;

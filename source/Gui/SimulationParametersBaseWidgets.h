@@ -19,6 +19,4 @@ private:
     SimulationFacade _simulationFacade;
 
     std::vector<std::string> _cellTypeStrings;
-
-    ParametersSpec _parametersSpecs;
 };

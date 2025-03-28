@@ -16,31 +16,49 @@ namespace
     auto constexpr RightColumnWidth = 285.0f;
 }
 
-void ParametersSpecGuiService::createWidgetsFromSpec(
-    ParametersSpec const& parametersSpecs,
-    int locationIndex,
-    SimulationParameters& parameters,
-    SimulationParameters& origParameters) const
+void ParametersSpecGuiService::createWidgetsForParameters(int locationIndex, SimulationParameters& parameters, SimulationParameters& origParameters) const
 {
     auto& specService = SimulationParametersSpecificationService::get();
+    auto const& parametersSpecs = specService.getSpec();
     auto locationType = getLocationType(locationIndex, parameters);
 
     for (auto const& groupSpec : parametersSpecs._groups) {
         if (!isVisible(groupSpec, locationType)) {
             continue;
         }
-        auto isExpertSettings = groupSpec._expertSettingAddress.has_value();
+        auto isExpertSettings = groupSpec._expertToggleAddress.has_value();
         auto isGroupVisibleActive = true;
+        auto name = groupSpec._name;
         if (isExpertSettings) {
-            isGroupVisibleActive = *specService.getExpertSettingsToggleRef(groupSpec, parameters);
+            isGroupVisibleActive = *specService.getExpertToggleValueRef(groupSpec, parameters);
+            name = "Expert settings: " + name;
         }
-        ImGui::PushID(groupSpec._name.c_str());
-        if (AlienImGui::BeginTreeNode(
-                AlienImGui::TreeNodeParameters().name(groupSpec._name).visible(isGroupVisibleActive).blinkWhenActivated(isExpertSettings))) {
+        ImGui::PushID(name.c_str());
+        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name(name).visible(isGroupVisibleActive).blinkWhenActivated(isExpertSettings))) {
             createWidgetsFromParameterSpecs(groupSpec._parameters, locationIndex, parameters, origParameters);
         }
         ImGui::PopID();
         AlienImGui::EndTreeNode();
+    }
+}
+
+void ParametersSpecGuiService::createWidgetsForExpertToggles(SimulationParameters& parameters, SimulationParameters& origParameters) const
+{
+    auto& specService = SimulationParametersSpecificationService::get();
+    auto const& parametersSpecs = specService.getSpec();
+
+    for (auto const& groupSpec : parametersSpecs._groups) {
+        if (groupSpec._expertToggleAddress.has_value()) {
+            auto expertToggleValue = specService.getExpertToggleValueRef(groupSpec, parameters);
+            auto origExpertToggleValue = specService.getExpertToggleValueRef(groupSpec, origParameters);
+            AlienImGui::Checkbox(
+                AlienImGui::CheckboxParameters()
+                    .name(groupSpec._name)
+                    .textWidth(0)
+                    .defaultValue(*origExpertToggleValue)
+                    .tooltip(groupSpec._tooltip),
+                *expertToggleValue);
+        }
     }
 }
 

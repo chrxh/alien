@@ -80,16 +80,17 @@ struct ParameterSpec
 {
     MEMBER_DECLARATION(ParameterSpec, std::string, name, std::string());
     MEMBER_DECLARATION(ParameterSpec, ValueSpec, value, ValueSpec());
-    MEMBER_DECLARATION(ParameterSpec, std::optional<std::string>, tooltip, std::nullopt);
     MEMBER_DECLARATION(ParameterSpec, TypeSpec, type, FloatSpec());
     MEMBER_DECLARATION(ParameterSpec, ColorDependence, colorDependence, ColorDependence::None);
+    MEMBER_DECLARATION(ParameterSpec, std::optional<std::string>, tooltip, std::nullopt);
 };
 
 struct ParameterGroupSpec
 {
     MEMBER_DECLARATION(ParameterGroupSpec, std::string, name, std::string());
     MEMBER_DECLARATION(ParameterGroupSpec, std::vector<ParameterSpec>, parameters, {});
-    MEMBER_DECLARATION(ParameterGroupSpec, std::optional<size_t>, expertSettingAddress, std::nullopt);
+    MEMBER_DECLARATION(ParameterGroupSpec, std::optional<size_t>, expertToggleAddress, std::nullopt);
+    MEMBER_DECLARATION(ParameterGroupSpec, std::optional<std::string>, tooltip, std::nullopt);
 };
 
 struct ParametersSpec
