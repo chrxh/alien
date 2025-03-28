@@ -11,13 +11,17 @@ class SimulationParametersSpecificationService
     MAKE_SINGLETON(SimulationParametersSpecificationService);
 
 public:
-    ParametersSpec createParametersSpec() const;
+    ParametersSpec const& getSpec();
 
     template <typename T>
     T* getValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
     bool* getPinnedValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
     bool* getEnabledValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
-    bool* getExpertSettingsToggleRef(ParameterGroupSpec const& spec, SimulationParameters& parameters) const;
+    bool* getExpertToggleValueRef(ParameterGroupSpec const& spec, SimulationParameters& parameters) const;
+
+private:
+    void createSpec();
+    std::optional<ParametersSpec> _parametersSpec;
 };
 
 /************************************************************************/

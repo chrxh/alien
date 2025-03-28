@@ -8,11 +8,9 @@ class ParametersSpecGuiService
     MAKE_SINGLETON(ParametersSpecGuiService);
 
 public:
-    void createWidgetsFromSpec(
-        ParametersSpec const& parametersSpecs,
-        int locationIndex,
-        SimulationParameters& parameters,
-        SimulationParameters& origParameters) const;
+    void createWidgetsForParameters(int locationIndex, SimulationParameters& parameters, SimulationParameters& origParameters) const;
+
+    void createWidgetsForExpertToggles(SimulationParameters& parameters, SimulationParameters& origParameters) const;
 
 private:
     void createWidgetsFromParameterSpecs(
