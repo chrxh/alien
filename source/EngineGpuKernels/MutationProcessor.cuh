@@ -64,61 +64,61 @@ __inline__ __device__ void MutationProcessor::applyRandomMutationsForCell(Simula
     auto numNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, true));
     auto cellCopyMutationGeometry = ZoneCalculator::calcParameter(
         &SimulationParametersZoneValues::copyMutationGeometry,
-        &SimulationParametersZoneActivatedValues::cellCopyMutationGeometry,
+        &SimulationParametersZoneEnabledValues::copyMutationGeometry,
         data,
         cell->pos,
         cell->color) * numNodes;
     auto cellCopyMutationCustomGeometry = ZoneCalculator::calcParameter(
         &SimulationParametersZoneValues::copyMutationCustomGeometry,
-        &SimulationParametersZoneActivatedValues::cellCopyMutationCustomGeometry,
+        &SimulationParametersZoneEnabledValues::copyMutationCustomGeometry,
         data,
         cell->pos,
         cell->color) * numNodes;
     auto cellCopyMutationCellType = ZoneCalculator::calcParameter(
         &SimulationParametersZoneValues::copyMutationCellType,
-        &SimulationParametersZoneActivatedValues::cellCopyMutationCellType,
+        &SimulationParametersZoneEnabledValues::copyMutationCellType,
         data,
         cell->pos,
         cell->color) * numNodes;
     auto cellCopyMutationInsertion = ZoneCalculator::calcParameter(
         &SimulationParametersZoneValues::copyMutationInsertion,
-        &SimulationParametersZoneActivatedValues::cellCopyMutationInsertion,
+        &SimulationParametersZoneEnabledValues::copyMutationInsertion,
         data,
         cell->pos,
         cell->color) * numNodes;
     auto cellCopyMutationDeletion = ZoneCalculator::calcParameter(
         &SimulationParametersZoneValues::copyMutationDeletion,
-        &SimulationParametersZoneActivatedValues::cellCopyMutationDeletion,
+        &SimulationParametersZoneEnabledValues::copyMutationDeletion,
         data,
         cell->pos,
         cell->color) * numNodes;
     auto cellCopyMutationCellColor = ZoneCalculator::calcParameter(
         &SimulationParametersZoneValues::copyMutationCellColor,
-        &SimulationParametersZoneActivatedValues::cellCopyMutationCellColor,
+        &SimulationParametersZoneEnabledValues::copyMutationCellColor,
         data,
         cell->pos,
         cell->color) * numNodes;
     auto cellCopyMutationTranslation = ZoneCalculator::calcParameter(
         &SimulationParametersZoneValues::copyMutationTranslation,
-        &SimulationParametersZoneActivatedValues::cellCopyMutationTranslation,
+        &SimulationParametersZoneEnabledValues::copyMutationTranslation,
         data,
         cell->pos,
         cell->color);
     auto cellCopyMutationDuplication = ZoneCalculator::calcParameter(
         &SimulationParametersZoneValues::copyMutationDuplication,
-        &SimulationParametersZoneActivatedValues::cellCopyMutationDuplication,
+        &SimulationParametersZoneEnabledValues::copyMutationDuplication,
         data,
         cell->pos,
         cell->color);
     auto cellCopyMutationSubgenomeColor = ZoneCalculator::calcParameter(
         &SimulationParametersZoneValues::copyMutationSubgenomeColor,
-        &SimulationParametersZoneActivatedValues::cellCopyMutationSubgenomeColor,
+        &SimulationParametersZoneEnabledValues::copyMutationSubgenomeColor,
         data,
         cell->pos,
         cell->color);
     auto cellCopyMutationGenomeColor = ZoneCalculator::calcParameter(
         &SimulationParametersZoneValues::copyMutationGenomeColor,
-        &SimulationParametersZoneActivatedValues::cellCopyMutationGenomeColor,
+        &SimulationParametersZoneEnabledValues::copyMutationGenomeColor,
         data,
         cell->pos,
         cell->color);
@@ -169,7 +169,7 @@ __inline__ __device__ void MutationProcessor::neuronDataMutation(SimulationData&
 
     auto cellCopyMutationNeuronData = ZoneCalculator::calcParameter(
         &SimulationParametersZoneValues::copyMutationNeuronData,
-        &SimulationParametersZoneActivatedValues::cellCopyMutationNeuronData,
+        &SimulationParametersZoneEnabledValues::copyMutationNeuronData,
         data,
         cell->pos,
         cell->color);
@@ -193,7 +193,7 @@ __inline__ __device__ void MutationProcessor::propertiesMutation(SimulationData&
 
     auto cellCopyMutationCellProperties = ZoneCalculator::calcParameter(
         &SimulationParametersZoneValues::copyMutationCellProperties,
-        &SimulationParametersZoneActivatedValues::cellCopyMutationCellProperties,
+        &SimulationParametersZoneEnabledValues::copyMutationCellProperties,
         data,
         cell->pos,
         cell->color);

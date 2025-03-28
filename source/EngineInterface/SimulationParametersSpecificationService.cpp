@@ -8,6 +8,7 @@
 
 #define BASE_VALUE_OFFSET(X) offsetof(SimulationParameters, X)
 #define ZONE_VALUE_OFFSET(X) offsetof(SimulationParametersZoneValues, X)
+#define ZONE_ENABLED_VALUE_OFFSET(X) offsetof(SimulationParametersZoneEnabledValues, X)
 #define EXPERT_VALUE_OFFSET(X) offsetof(ExpertSettingsToggles, X)
 
 ParametersSpec const& SimulationParametersSpecificationService::getSpec()
@@ -45,7 +46,7 @@ bool* SimulationParametersSpecificationService::getEnabledValueRef(ValueSpec con
         for (int i = 0; i < parameters.numZones; ++i) {
             if (parameters.zone[i].locationIndex == locationIndex && baseZoneValueSpec._enabledZoneValueAddress.has_value()) {
                 return reinterpret_cast<bool*>(
-                    reinterpret_cast<char*>(&parameters.zone[i].activatedValues) + baseZoneValueSpec._enabledZoneValueAddress.value());
+                    reinterpret_cast<char*>(&parameters.zone[i].enabledValues) + baseZoneValueSpec._enabledZoneValueAddress.value());
             }
         }
     }
@@ -222,12 +223,12 @@ void SimulationParametersSpecificationService::createSpec()
                         "calculates the forces based on particle collisions and should be preferred for mechanical simulation with solids.")),
                 ParameterSpec()
                     .name("Friction")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(friction)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(friction)).enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(friction)))
                     .type(FloatSpec().min(0).max(1.0f).logarithmic(true).format("%.4f"))
                     .tooltip("This specifies the fraction of the velocity that is slowed down per time step."),
                 ParameterSpec()
                     .name("Rigidity")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(rigidity)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(rigidity)).enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(rigidity)))
                     .type(FloatSpec().min(0).max(3.0f))
                     .tooltip("Controls the rigidity of connected cells. A higher value will cause connected cells to move more uniformly as a rigid body."),
             }),
@@ -241,7 +242,7 @@ void SimulationParametersSpecificationService::createSpec()
                     .tooltip("Maximum velocity that a cell can reach."),
                 ParameterSpec()
                     .name("Maximum force")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(cellMaxForce)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(cellMaxForce)).enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(cellMaxForce)))
                     .type(FloatSpec().min(0.0f).max(3.0f))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("Maximum force that can be applied to a cell without causing it to disintegrate."),
@@ -262,12 +263,14 @@ void SimulationParametersSpecificationService::createSpec()
                     .tooltip("Maximum distance up to which a connection of two cells is possible."),
                 ParameterSpec()
                     .name("Fusion velocity")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(cellFusionVelocity)))
+                    .value(BaseZoneValueSpec()
+                               .valueAddress(ZONE_VALUE_OFFSET(cellFusionVelocity))
+                               .enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(cellFusionVelocity)))
                     .type(FloatSpec().min(0.0f).max(2.0f))
                     .tooltip("Maximum force that can be applied to a cell without causing it to disintegrate."),
                 ParameterSpec()
                     .name("Maximum energy")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(cellMaxBindingEnergy)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(cellMaxBindingEnergy)).enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(cellMaxBindingEnergy)))
                     .type(FloatSpec().min(50.0f).max(10000000.0f).logarithmic(true).infinity(true).format("%.0f"))
                     .tooltip("Maximum energy of a cell at which it can contain bonds to adjacent cells. If the energy of a cell exceeds this "
                              "value, all bonds will be destroyed."),
@@ -287,13 +290,13 @@ void SimulationParametersSpecificationService::createSpec()
                              "energy particle in the vicinity of the cell. Values between 0 and 1 are permitted."),
                 ParameterSpec()
                     .name("Absorption factor")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(radiationAbsorption)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(radiationAbsorption)).enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(radiationAbsorption)))
                     .type(FloatSpec().min(0.0f).max(1.0f).logarithmic(true).format("%.4f"))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("The fraction of energy that a cell can absorb from an incoming energy particle can be specified here."),
                 ParameterSpec()
                     .name("Radiation type I: Strength")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(radiationType1_strength)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(radiationType1_strength)).enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(radiationType1_strength)))
                     .type(FloatSpec().min(0.0f).max(0.01f).logarithmic(true).format("%.6f"))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("Indicates how energetic the emitted particles of aged cells are."),
@@ -339,7 +342,7 @@ void SimulationParametersSpecificationService::createSpec()
                     .tooltip("Defines the maximum age of a cell. If a cell exceeds this age it will be transformed to an energy particle."),
                 ParameterSpec()
                     .name("Minimum energy")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(minCellEnergy)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(minCellEnergy)).enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(minCellEnergy)))
                     .type(FloatSpec().min(10.0f).max(200.0f))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("Minimum energy a cell needs to exist."),
@@ -359,7 +362,7 @@ void SimulationParametersSpecificationService::createSpec()
                         "cells is activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal value."),
                 ParameterSpec()
                     .name("Decay rate of dying cells")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(cellDeathProbability)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(cellDeathProbability)).enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(cellDeathProbability)))
                     .type(FloatSpec().min(1e-6f).max(1e-1f).format("%.6f").logarithmic(true))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("The probability per time step with which a cell will disintegrate (i.e. transform into an energy particle) when it is in the "
@@ -380,7 +383,7 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Neural nets")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationNeuronData)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationNeuronData)).enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(copyMutationNeuronData)))
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip(
@@ -388,7 +391,7 @@ void SimulationParametersSpecificationService::createSpec()
                         "genome."),
                 ParameterSpec()
                     .name("Cell properties")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationCellProperties)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationCellProperties)).enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(copyMutationCellProperties)))
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation changes a random property (e.g. (input) execution order number, required energy, block output and "
@@ -396,21 +399,21 @@ void SimulationParametersSpecificationService::createSpec()
                              "function type and self-replication capabilities are not changed. This mutation is applied to each encoded cell in the genome."),
                 ParameterSpec()
                     .name("Geometry")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationGeometry)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationGeometry)).enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(copyMutationGeometry)))
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation changes the geometry type, connection distance, stiffness and single construction flag. The probability of "
                              "a change is given by the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Custom geometry")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationCustomGeometry)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationCustomGeometry)).enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(copyMutationCustomGeometry)))
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation only changes angles and required connections of custom geometries. The probability of a change is given by "
                              "the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Cell function type")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationCellType)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationCellType)).enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(copyMutationCellType)))
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation changes the type of cell function. The changed cell function will have random properties. The probability "
@@ -419,46 +422,46 @@ void SimulationParametersSpecificationService::createSpec()
                              "something else or vice versa."),
                 ParameterSpec()
                     .name("Insertion")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationInsertion)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationInsertion)).enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(copyMutationInsertion)))
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation inserts a new cell description to the genome at a random position. The probability of a change is given by "
                              "the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Deletion")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationDeletion)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationDeletion)).enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(copyMutationDeletion)))
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation deletes a cell description from the genome at a random position. The probability of a change is given by "
                              "the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Translation")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationTranslation)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationTranslation)).enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(copyMutationTranslation)))
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation moves a block of cell descriptions from the genome at a random position to a new random position."),
                 ParameterSpec()
                     .name("Duplication")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationDuplication)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationDuplication)).enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(copyMutationDuplication)))
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation copies a block of cell descriptions from the genome at a random position to a new random position."),
                 ParameterSpec()
                     .name("Individual cell color")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationCellColor)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationCellColor)).enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(copyMutationCellColor)))
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation alters the color of a single cell descriptions in a genome by using the specified color transitions. The "
                              "probability of a change is given by the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Sub-genome color")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationSubgenomeColor)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationSubgenomeColor)).enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(copyMutationSubgenomeColor)))
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation alters the color of all cell descriptions in a sub-genome by using the specified color transitions."),
                 ParameterSpec()
                     .name("Genome color")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationGenomeColor)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(copyMutationGenomeColor)).enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(copyMutationGenomeColor)))
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation alters the color of all cell descriptions in a genome by using the specified color transitions."),
@@ -487,13 +490,13 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Energy cost")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(attackerEnergyCost)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(attackerEnergyCost)).enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(attackerEnergyCost)))
                     .type(FloatSpec().min(0).max(1.0f).logarithmic(true).format("%.5f"))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("Amount of energy lost by an attempted attack of a cell in form of emitted energy particles."),
                 ParameterSpec()
                     .name("Food chain color matrix")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(attackerFoodChainColorMatrix)))
+                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(attackerFoodChainColorMatrix)).enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(attackerFoodChainColorMatrix)))
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.2f"))
                     .colorDependence(ColorDependence::Matrix)
                     .tooltip(
@@ -516,7 +519,9 @@ void SimulationParametersSpecificationService::createSpec()
                     .tooltip("The maximum distance over which an attacker cell can attack another cell."),
                 ParameterSpec()
                     .name("Complex creature protection")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(attackerCreatureProtection)))
+                    .value(BaseZoneValueSpec()
+                               .valueAddress(ZONE_VALUE_OFFSET(attackerComplexCreatureProtection))
+                               .enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(attackerComplexCreatureProtection)))
                     .type(FloatSpec().min(0).max(20.0f).format("%.2f"))
                     .colorDependence(ColorDependence::Matrix)
                     .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with more complex genomes."),
@@ -669,7 +674,9 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Low genome complexity penalty")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(radiationAbsorptionLowGenomeComplexityPenalty)))
+                    .value(BaseZoneValueSpec()
+                               .valueAddress(ZONE_VALUE_OFFSET(radiationAbsorptionLowGenomeComplexityPenalty))
+                               .enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(radiationAbsorptionLowGenomeComplexityPenalty)))
                     .type(FloatSpec().min(0).max(1.0f).format("%.2f"))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("When this parameter is increased, cells with fewer genome complexity will absorb less energy from an incoming energy particle."),
@@ -687,7 +694,9 @@ void SimulationParametersSpecificationService::createSpec()
                     .tooltip("When this parameter is increased, fast moving cells will absorb less energy from an incoming energy particle."),
                 ParameterSpec()
                     .name("Low velocity penalty")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(radiationAbsorptionLowVelocityPenalty)))
+                    .value(BaseZoneValueSpec()
+                               .valueAddress(ZONE_VALUE_OFFSET(radiationAbsorptionLowVelocityPenalty))
+                               .enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(radiationAbsorptionLowVelocityPenalty)))
                     .type(FloatSpec().min(0).max(1.0f).format("%.2f"))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("When this parameter is increased, slowly moving cells will absorb less energy from an incoming energy particle."),
@@ -704,7 +713,9 @@ void SimulationParametersSpecificationService::createSpec()
                     .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with the same mutation id."),
                 ParameterSpec()
                     .name("New complex mutant protection")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(attackerNewComplexMutantProtection)))
+                    .value(BaseZoneValueSpec()
+                               .valueAddress(ZONE_VALUE_OFFSET(attackerNewComplexMutantProtection))
+                               .enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(attackerNewComplexMutantProtection)))
                     .type(FloatSpec().min(0).max(1.0f))
                     .colorDependence(ColorDependence::Matrix)
                     .tooltip("A high value protects new mutants with equal or greater genome complexity from being attacked."),
@@ -720,14 +731,18 @@ void SimulationParametersSpecificationService::createSpec()
                              "compares them with the attacked target."),
                 ParameterSpec()
                     .name("Geometry deviation protection")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(attackerGeometryDeviationProtection)))
+                    .value(BaseZoneValueSpec()
+                               .valueAddress(ZONE_VALUE_OFFSET(attackerGeometryDeviationProtection))
+                               .enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(attackerGeometryDeviationProtection)))
                     .type(FloatSpec().min(0).max(5.0f))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("The larger this value is, the less energy a cell can gain from an attack if the local geometry of the attacked cell does not "
                              "match the attacking cell."),
                 ParameterSpec()
                     .name("Connections mismatch protection")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(attackerConnectionsMismatchProtection)))
+                    .value(BaseZoneValueSpec()
+                               .valueAddress(ZONE_VALUE_OFFSET(attackerConnectionsMismatchProtection))
+                               .enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(attackerConnectionsMismatchProtection)))
                     .type(FloatSpec().min(0).max(1.0f))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("The larger this parameter is, the more difficult it is to attack cells that contain more connections."),
@@ -739,8 +754,9 @@ void SimulationParametersSpecificationService::createSpec()
                 ParameterSpec()
                     .name("Maximum inactive cell age")
                     .value(BaseZoneValueSpec()
-                               .valueAddress(ZONE_VALUE_OFFSET(inactiveCellsMaxAge))
-                               .enabledBaseValueAddress(BASE_VALUE_OFFSET(maxAgeForInactiveCellsEnabled)))
+                               .valueAddress(ZONE_VALUE_OFFSET(maxAgeForInactiveCells))
+                               .enabledBaseValueAddress(BASE_VALUE_OFFSET(maxAgeForInactiveCellsEnabled))
+                               .enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(maxAgeForInactiveCellsEnabled)))
                     .type(FloatSpec().min(1.0f).max(1e7f).format("%.0f").logarithmic(true).infinity(true))
                     .colorDependence(ColorDependence::Vector)
                     .tooltip("Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered. Cells which "
@@ -774,7 +790,9 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Target color and duration")
-                    .value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(colorTransitionRules)))
+                    .value(BaseZoneValueSpec()
+                               .valueAddress(ZONE_VALUE_OFFSET(colorTransitionRules))
+                               .enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(colorTransitionRules)))
                     .type(ColorTransitionSpec())
                     .tooltip("Rules can be defined that describe how the colors of cells will change over time. For this purpose, a subsequent "
                              "color can be defined for each cell color. In addition, durations must be specified that define how many time steps the "

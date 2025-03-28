@@ -42,7 +42,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     if (SignalProcessor::isManuallyTriggered(data, cell)) {
         float energyDelta = 0;
         auto cellMinEnergy = ZoneCalculator::calcParameter(
-            &SimulationParametersZoneValues::minCellEnergy, &SimulationParametersZoneActivatedValues::cellMinEnergy, data, cell->pos, cell->color);
+            &SimulationParametersZoneValues::minCellEnergy, &SimulationParametersZoneEnabledValues::minCellEnergy, data, cell->pos, cell->color);
         auto baseValue = cudaSimulationParameters.attackerDestroyCells ? cellMinEnergy * 0.1f : cellMinEnergy;
 
         Cell* someOtherCell = nullptr;
@@ -74,8 +74,8 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             // Evaluate genome complexity bonus
             if (otherCell->genomeComplexity > cell->genomeComplexity) {
                 auto cellTypeAttackerGenomeComplexityBonus = ZoneCalculator::calcParameter(
-                    &SimulationParametersZoneValues::attackerCreatureProtection,
-                    &SimulationParametersZoneActivatedValues::cellTypeAttackerGenomeComplexityBonus,
+                    &SimulationParametersZoneValues::attackerComplexCreatureProtection,
+                    &SimulationParametersZoneEnabledValues::attackerComplexCreatureProtection,
                     data,
                     cell->pos,
                     color,
@@ -96,7 +96,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 && cell->genomeComplexity <= otherCell->genomeComplexity) {
                 auto cellTypeAttackerArisingComplexMutantPenalty = ZoneCalculator::calcParameter(
                     &SimulationParametersZoneValues::attackerNewComplexMutantProtection,
-                    &SimulationParametersZoneActivatedValues::cellTypeAttackerNewComplexMutantPenalty,
+                    &SimulationParametersZoneEnabledValues::attackerNewComplexMutantProtection,
                     data,
                     cell->pos,
                     color,
@@ -119,7 +119,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (cudaSimulationParameters.expertSettingsToggles.advancedAttackerControl) {
                 auto cellTypeAttackerGeometryDeviationExponent = ZoneCalculator::calcParameter(
                     &SimulationParametersZoneValues::attackerGeometryDeviationProtection,
-                    &SimulationParametersZoneActivatedValues::cellTypeAttackerGeometryDeviationExponent,
+                    &SimulationParametersZoneEnabledValues::attackerGeometryDeviationProtection,
                     data,
                     cell->pos,
                     cell->color);
@@ -137,7 +137,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (cudaSimulationParameters.expertSettingsToggles.advancedAttackerControl) {
                 auto cellTypeAttackerConnectionsMismatchPenalty = ZoneCalculator::calcParameter(
                     &SimulationParametersZoneValues::attackerConnectionsMismatchProtection,
-                    &SimulationParametersZoneActivatedValues::cellTypeAttackerConnectionsMismatchPenalty,
+                    &SimulationParametersZoneEnabledValues::attackerConnectionsMismatchProtection,
                     data,
                     cell->pos,
                     cell->color);
@@ -152,7 +152,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             // Evaluate food chain color matrix
             energyToTransfer *= ZoneCalculator::calcParameter(
                 &SimulationParametersZoneValues::attackerFoodChainColorMatrix,
-                &SimulationParametersZoneActivatedValues::cellTypeAttackerFoodChainColorMatrix,
+                &SimulationParametersZoneEnabledValues::attackerFoodChainColorMatrix,
                 data,
                 cell->pos,
                 color,
@@ -204,7 +204,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         // Radiation
         auto cellTypeWeaponEnergyCost = ZoneCalculator::calcParameter(
             &SimulationParametersZoneValues::attackerEnergyCost,
-            &SimulationParametersZoneActivatedValues::cellTypeAttackerEnergyCost,
+            &SimulationParametersZoneEnabledValues::attackerEnergyCost,
             data,
             cell->pos,
             cell->color);

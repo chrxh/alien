@@ -41,7 +41,7 @@ add_library(EngineInterface
     SimulationParametersValidationService.cpp
     SimulationParametersValidationService.h
     SimulationParametersZone.h
-    SimulationParametersZoneActivatedValues.h
+    SimulationParametersZoneEnabledValues.h
     SimulationParametersZoneValues.h
     SimulationParametersSpecification.h
     SimulationParametersSpecificationService.cpp

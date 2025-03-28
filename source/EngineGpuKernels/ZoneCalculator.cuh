@@ -18,7 +18,7 @@ public:
         float2 const& worldPos,
         T const& baseValue,
         T (&spotValues)[MAX_ZONES],
-        bool SimulationParametersZoneActivatedValues::*valueActivated)
+        bool SimulationParametersZoneEnabledValues::*valueActivated)
     {
         if (0 == cudaSimulationParameters.numZones) {
             return baseValue;
@@ -26,7 +26,7 @@ public:
             float spotWeights[MAX_ZONES];
             int numValues = 0;
             for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
-                if (cudaSimulationParameters.zone[i].activatedValues.*valueActivated) {
+                if (cudaSimulationParameters.zone[i].enabledValues.*valueActivated) {
                     float2 spotPos = {cudaSimulationParameters.zone[i].posX, cudaSimulationParameters.zone[i].posY};
                     auto delta = map.getCorrectedDirection(spotPos - worldPos);
                     spotWeights[numValues++] = calcWeight(delta, i);
@@ -77,14 +77,14 @@ public:
 
     __device__ __inline__ static float calcParameter(
         float SimulationParametersZoneValues::*value,
-        bool SimulationParametersZoneActivatedValues::*valueActivated,
+        bool SimulationParametersZoneEnabledValues::*valueActivated,
         SimulationData const& data,
         float2 const& worldPos)
     {
         float spotValues[MAX_ZONES];
         int numValues = 0;
         for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
-            if (cudaSimulationParameters.zone[i].activatedValues.*valueActivated) {
+            if (cudaSimulationParameters.zone[i].enabledValues.*valueActivated) {
                 spotValues[numValues++] = cudaSimulationParameters.zone[i].values.*value;
             }
         }
@@ -94,7 +94,7 @@ public:
 
     __device__ __inline__ static float calcParameter(
         ColorVector<float> SimulationParametersZoneValues::*value,
-        bool SimulationParametersZoneActivatedValues::*valueActivated,
+        bool SimulationParametersZoneEnabledValues::*valueActivated,
         SimulationData const& data,
         float2 const& worldPos,
         int color)
@@ -102,7 +102,7 @@ public:
         float spotValues[MAX_ZONES];
         int numValues = 0;
         for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
-            if (cudaSimulationParameters.zone[i].activatedValues.*valueActivated) {
+            if (cudaSimulationParameters.zone[i].enabledValues.*valueActivated) {
                 spotValues[numValues++] = (cudaSimulationParameters.zone[i].values.*value)[color];
             }
         }
@@ -112,14 +112,14 @@ public:
 
     __device__ __inline__ static int calcParameter(
         int SimulationParametersZoneValues::*value,
-        bool SimulationParametersZoneActivatedValues::*valueActivated,
+        bool SimulationParametersZoneEnabledValues::*valueActivated,
         SimulationData const& data,
         float2 const& worldPos)
     {
         float spotValues[MAX_ZONES];
         int numValues = 0;
         for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
-            if (cudaSimulationParameters.zone[i].activatedValues.*valueActivated) {
+            if (cudaSimulationParameters.zone[i].enabledValues.*valueActivated) {
                 spotValues[numValues++] = toFloat(cudaSimulationParameters.zone[i].values.*value);
             }
         }
@@ -129,14 +129,14 @@ public:
 
     __device__ __inline__ static bool calcParameter(
         bool SimulationParametersZoneValues::*value,
-        bool SimulationParametersZoneActivatedValues::*valueActivated,
+        bool SimulationParametersZoneEnabledValues::*valueActivated,
         SimulationData const& data,
         float2 const& worldPos)
     {
         float spotValues[MAX_ZONES];
         int numValues = 0;
         for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
-            if (cudaSimulationParameters.zone[i].activatedValues.*valueActivated) {
+            if (cudaSimulationParameters.zone[i].enabledValues.*valueActivated) {
                 spotValues[numValues++] = cudaSimulationParameters.zone[i].values.*value ? 1.0f : 0.0f;
             }
         }
@@ -145,7 +145,7 @@ public:
 
     __device__ __inline__ static float calcParameter(
         ColorMatrix<float> SimulationParametersZoneValues::*value,
-        bool SimulationParametersZoneActivatedValues::*valueActivated,
+        bool SimulationParametersZoneEnabledValues::*valueActivated,
         SimulationData const& data,
         float2 const& worldPos,
         int color1,
@@ -154,7 +154,7 @@ public:
         float spotValues[MAX_ZONES];
         int numValues = 0;
         for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
-            if (cudaSimulationParameters.zone[i].activatedValues.*valueActivated) {
+            if (cudaSimulationParameters.zone[i].enabledValues.*valueActivated) {
                 spotValues[numValues++] = (cudaSimulationParameters.zone[i].values.*value)[color1][color2];
             }
         }
@@ -164,14 +164,14 @@ public:
 
     //return -1 for base
     __device__ __inline__ static int
-    getFirstMatchingZoneOrBase(SimulationData const& data, float2 const& worldPos, bool SimulationParametersZoneActivatedValues::*valueActivated)
+    getFirstMatchingZoneOrBase(SimulationData const& data, float2 const& worldPos, bool SimulationParametersZoneEnabledValues::*valueActivated)
     {
         if (0 == cudaSimulationParameters.numZones) {
             return -1;
         } else {
             auto const& map = data.cellMap;
             for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
-                if (cudaSimulationParameters.zone[i].activatedValues.*valueActivated) {
+                if (cudaSimulationParameters.zone[i].enabledValues.*valueActivated) {
                     float2 spotPos = {cudaSimulationParameters.zone[i].posX, cudaSimulationParameters.zone[i].posY};
                     auto delta = map.getCorrectedDirection(spotPos - worldPos);
                     if(calcWeight(delta, i) < NEAR_ZERO) {

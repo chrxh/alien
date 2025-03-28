@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-#include "SimulationParametersZoneActivatedValues.h"
+#include "SimulationParametersZoneEnabledValues.h"
 #include "SimulationParametersZoneValues.h"
 #include "SimulationParametersTypes.h"
 
@@ -154,7 +154,7 @@ struct SimulationParametersZone
     Flow flow;
 
     SimulationParametersZoneValues values;
-    SimulationParametersZoneActivatedValues activatedValues;
+    SimulationParametersZoneEnabledValues enabledValues;
 
     bool operator==(SimulationParametersZone const&) const = default;
 };

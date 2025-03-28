@@ -131,8 +131,8 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.inactiveCellsMaxAge,
-            defaultParameters.baseValues.inactiveCellsMaxAge,
+            parameters.baseValues.maxAgeForInactiveCells,
+            defaultParameters.baseValues.maxAgeForInactiveCells,
             "simulation parameters.cell.inactive max age",
             parserTask);
         ParameterParser::encodeDecode(
@@ -477,8 +477,8 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.attackerCreatureProtection,
-            defaultParameters.baseValues.attackerCreatureProtection,
+            parameters.baseValues.attackerComplexCreatureProtection,
+            defaultParameters.baseValues.attackerComplexCreatureProtection,
             "simulation parameters.cell.function.attacker.genome size bonus",
             parserTask);
         ParameterParser::encodeDecode(
@@ -706,52 +706,52 @@ namespace
             ParameterParser::encodeDecode(tree, spot.fadeoutRadius, defaultSpot.fadeoutRadius, base + "fadeout radius", parserTask);
 
             ParameterParser::encodeDecodeWithEnabled(
-                tree, spot.values.friction, spot.activatedValues.friction, defaultSpot.values.friction, base + "friction", parserTask);
+                tree, spot.values.friction, spot.enabledValues.friction, defaultSpot.values.friction, base + "friction", parserTask);
             ParameterParser::encodeDecodeWithEnabled(
-                tree, spot.values.rigidity, spot.activatedValues.rigidity, defaultSpot.values.rigidity, base + "rigidity", parserTask);
+                tree, spot.values.rigidity, spot.enabledValues.rigidity, defaultSpot.values.rigidity, base + "rigidity", parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.radiationDisableSources,
-                spot.activatedValues.radiationDisableSources,
+                spot.enabledValues.radiationDisableSources,
                 defaultSpot.values.radiationDisableSources,
                 base + "radiation.disable sources",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.radiationAbsorption,
-                spot.activatedValues.radiationAbsorption,
+                spot.enabledValues.radiationAbsorption,
                 defaultSpot.values.radiationAbsorption,
                 base + "radiation.absorption",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.radiationAbsorptionLowVelocityPenalty,
-                spot.activatedValues.radiationAbsorptionLowVelocityPenalty,
+                spot.enabledValues.radiationAbsorptionLowVelocityPenalty,
                 defaultSpot.values.radiationAbsorptionLowVelocityPenalty,
                 base + "radiation.absorption low velocity penalty",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.radiationAbsorptionLowGenomeComplexityPenalty,
-                spot.activatedValues.radiationAbsorptionLowGenomeComplexityPenalty,
+                spot.enabledValues.radiationAbsorptionLowGenomeComplexityPenalty,
                 defaultSpot.values.radiationAbsorptionLowGenomeComplexityPenalty,
                 base + "radiation.absorption low genome complexity penalty",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.radiationType1_strength,
-                spot.activatedValues.radiationCellAgeStrength,
+                spot.enabledValues.radiationType1_strength,
                 defaultSpot.values.radiationType1_strength,
                 base + "radiation.factor",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
-                tree, spot.values.cellMaxForce, spot.activatedValues.cellMaxForce, defaultSpot.values.cellMaxForce, base + "cell.max force", parserTask);
+                tree, spot.values.cellMaxForce, spot.enabledValues.cellMaxForce, defaultSpot.values.cellMaxForce, base + "cell.max force", parserTask);
             ParameterParser::encodeDecodeWithEnabled(
-                tree, spot.values.minCellEnergy, spot.activatedValues.cellMinEnergy, defaultSpot.values.minCellEnergy, base + "cell.min energy", parserTask);
+                tree, spot.values.minCellEnergy, spot.enabledValues.minCellEnergy, defaultSpot.values.minCellEnergy, base + "cell.min energy", parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellDeathProbability,
-                spot.activatedValues.cellDeathProbability,
+                spot.enabledValues.cellDeathProbability,
                 defaultSpot.values.cellDeathProbability,
                 base + "cell.death probability",
                 parserTask);
@@ -759,26 +759,26 @@ namespace
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellFusionVelocity,
-                spot.activatedValues.cellFusionVelocity,
+                spot.enabledValues.cellFusionVelocity,
                 defaultSpot.values.cellFusionVelocity,
                 base + "cell.fusion velocity",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.cellMaxBindingEnergy,
-                spot.activatedValues.cellMaxBindingEnergy,
+                spot.enabledValues.cellMaxBindingEnergy,
                 defaultSpot.values.cellMaxBindingEnergy,
                 base + "cell.max binding energy",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.inactiveCellsMaxAge,
-                spot.activatedValues.cellInactiveMaxAge,
-                defaultSpot.values.inactiveCellsMaxAge,
+                spot.values.maxAgeForInactiveCells,
+                spot.enabledValues.maxAgeForInactiveCellsEnabled,
+                defaultSpot.values.maxAgeForInactiveCells,
                 base + "cell.inactive max age",
                 parserTask);
 
-            ParameterParser::encodeDecode(tree, spot.activatedValues.cellColorTransition, false, base + "cell.color transition rules.activated", parserTask);
+            ParameterParser::encodeDecode(tree, spot.enabledValues.colorTransitionRules, false, base + "cell.color transition rules.activated", parserTask);
             ParameterParser::encodeDecode(
                 tree,
                 spot.values.colorTransitionRules.cellColorTransitionDuration,
@@ -795,7 +795,7 @@ namespace
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.attackerEnergyCost,
-                spot.activatedValues.cellTypeAttackerEnergyCost,
+                spot.enabledValues.attackerEnergyCost,
                 defaultSpot.values.attackerEnergyCost,
                 base + "cell.function.attacker.energy cost",
                 parserTask);
@@ -803,35 +803,35 @@ namespace
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.attackerFoodChainColorMatrix,
-                spot.activatedValues.cellTypeAttackerFoodChainColorMatrix,
+                spot.enabledValues.attackerFoodChainColorMatrix,
                 defaultSpot.values.attackerFoodChainColorMatrix,
                 base + "cell.function.attacker.food chain color matrix",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.attackerCreatureProtection,
-                spot.activatedValues.cellTypeAttackerGenomeComplexityBonus,
-                defaultSpot.values.attackerCreatureProtection,
+                spot.values.attackerComplexCreatureProtection,
+                spot.enabledValues.attackerComplexCreatureProtection,
+                defaultSpot.values.attackerComplexCreatureProtection,
                 base + "cell.function.attacker.genome size bonus",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.attackerNewComplexMutantProtection,
-                spot.activatedValues.cellTypeAttackerNewComplexMutantPenalty,
+                spot.enabledValues.attackerNewComplexMutantProtection,
                 defaultSpot.values.attackerNewComplexMutantProtection,
                 base + "cell.function.attacker.new complex mutant penalty",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.attackerGeometryDeviationProtection,
-                spot.activatedValues.cellTypeAttackerGeometryDeviationExponent,
+                spot.enabledValues.attackerGeometryDeviationProtection,
                 defaultSpot.values.attackerGeometryDeviationProtection,
                 base + "cell.function.attacker.geometry deviation exponent",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.attackerConnectionsMismatchProtection,
-                spot.activatedValues.cellTypeAttackerConnectionsMismatchPenalty,
+                spot.enabledValues.attackerConnectionsMismatchProtection,
                 defaultSpot.values.attackerConnectionsMismatchProtection,
                 base + "cell.function.attacker.connections mismatch penalty",
                 parserTask);
@@ -839,84 +839,84 @@ namespace
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.copyMutationNeuronData,
-                spot.activatedValues.cellCopyMutationNeuronData,
+                spot.enabledValues.copyMutationNeuronData,
                 defaultSpot.values.copyMutationNeuronData,
                 base + "cell.copy mutation.neuron data",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.copyMutationCellProperties,
-                spot.activatedValues.cellCopyMutationCellProperties,
+                spot.enabledValues.copyMutationCellProperties,
                 defaultSpot.values.copyMutationCellProperties,
                 base + "cell.copy mutation.cell properties",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.copyMutationGeometry,
-                spot.activatedValues.cellCopyMutationGeometry,
+                spot.enabledValues.copyMutationGeometry,
                 defaultSpot.values.copyMutationGeometry,
                 base + "cell.copy mutation.geometry",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.copyMutationCustomGeometry,
-                spot.activatedValues.cellCopyMutationCustomGeometry,
+                spot.enabledValues.copyMutationCustomGeometry,
                 defaultSpot.values.copyMutationCustomGeometry,
                 base + "cell.copy mutation.custom geometry",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.copyMutationCellType,
-                spot.activatedValues.cellCopyMutationCellType,
+                spot.enabledValues.copyMutationCellType,
                 defaultSpot.values.copyMutationCellType,
                 base + "cell.copy mutation.cell function",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.copyMutationInsertion,
-                spot.activatedValues.cellCopyMutationInsertion,
+                spot.enabledValues.copyMutationInsertion,
                 defaultSpot.values.copyMutationInsertion,
                 base + "cell.copy mutation.insertion",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.copyMutationDeletion,
-                spot.activatedValues.cellCopyMutationDeletion,
+                spot.enabledValues.copyMutationDeletion,
                 defaultSpot.values.copyMutationDeletion,
                 base + "cell.copy mutation.deletion",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.copyMutationTranslation,
-                spot.activatedValues.cellCopyMutationTranslation,
+                spot.enabledValues.copyMutationTranslation,
                 defaultSpot.values.copyMutationTranslation,
                 base + "cell.copy mutation.translation",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.copyMutationDuplication,
-                spot.activatedValues.cellCopyMutationDuplication,
+                spot.enabledValues.copyMutationDuplication,
                 defaultSpot.values.copyMutationDuplication,
                 base + "cell.copy mutation.duplication",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.copyMutationCellColor,
-                spot.activatedValues.cellCopyMutationCellColor,
+                spot.enabledValues.copyMutationCellColor,
                 defaultSpot.values.copyMutationCellColor,
                 base + "cell.copy mutation.cell color",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.copyMutationSubgenomeColor,
-                spot.activatedValues.cellCopyMutationSubgenomeColor,
+                spot.enabledValues.copyMutationSubgenomeColor,
                 defaultSpot.values.copyMutationSubgenomeColor,
                 base + "cell.copy mutation.subgenome color",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.copyMutationGenomeColor,
-                spot.activatedValues.cellCopyMutationGenomeColor,
+                spot.enabledValues.copyMutationGenomeColor,
                 defaultSpot.values.copyMutationGenomeColor,
                 base + "cell.copy mutation.genome color",
                 parserTask);
