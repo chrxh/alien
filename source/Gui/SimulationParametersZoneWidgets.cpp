@@ -7,6 +7,7 @@
 
 #include "AlienImGui.h"
 #include "LoginDialog.h"
+#include "ParametersSpecGuiService.h"
 #include "SimulationInteractionController.h"
 
 namespace
@@ -46,6 +47,11 @@ void _SimulationParametersZoneWidgets::process()
     _zoneName = std::string(zone.name);
 
     auto worldSize = _simulationFacade->getWorldSize();
+
+    ParametersSpecGuiService::get().createWidgetsForParameters(_locationIndex, parameters, origParameters);
+    AlienImGui::Separator();
+    AlienImGui::Separator();
+    AlienImGui::Separator();
 
     /**
      * General
