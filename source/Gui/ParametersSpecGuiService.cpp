@@ -89,10 +89,10 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
     auto locationType = getLocationType(locationIndex, parameters);
 
     for (auto const& [index, parameterSpec] : parameterSpecs | boost::adaptors::indexed(0)) {
-        ImGui::PushID(toInt(index));
         if (!isVisible(parameterSpec, locationType)) {
             continue;
         }
+        ImGui::PushID(toInt(index));
         if (parameterSpec._colorDependence == ColorDependence::Matrix) {
             if (std::holds_alternative<FloatSpec>(parameterSpec._type)) {
                 auto const& floatSpec = std::get<FloatSpec>(parameterSpec._type);
