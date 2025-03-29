@@ -53,7 +53,6 @@ struct ColorTransitionSpec
 
 using TypeSpec = std::variant<BoolSpec, IntSpec, FloatSpec, Char64Spec, AlternativeSpec, ColorPickerSpec, ColorTransitionSpec>;
 
-using Char64Member = Char64 SimulationParameters::*;
 using BoolMember = bool SimulationParameters::*;
 using IntMember = int SimulationParameters::*;
 using FloatMember = float SimulationParameters::*;
@@ -69,12 +68,14 @@ using ColorVectorFloatZoneMember = ColorVector<float> SimulationParametersZoneVa
 using ColorMatrixFloatZoneValuesMember = ColorMatrix<float> SimulationParametersZoneValues::*;
 using ColorTransitionRulesMember = ColorTransitionRules SimulationParametersZoneValues::*;
 
+using Char64Member = Char64 SimulationParameters::*;
+using FloatColorRGBZoneMember = FloatColorRGB SimulationParametersZoneValues::*;
+
 using FloatGetterSetter =
     std::pair<std::function<float(SimulationParameters const&, int)>, std::function<void(float, SimulationParameters&, int)>>;  // int for locationIndex
 
 using MemberSpec = std::variant<
     std::monostate,
-    Char64Member,
     BoolMember,
     IntMember,
     FloatMember,
@@ -88,7 +89,9 @@ using MemberSpec = std::variant<
     ColorVectorFloatZoneMember,
     ColorMatrixFloatZoneValuesMember,
     ColorTransitionRulesMember,
-    FloatGetterSetter>;
+    FloatGetterSetter,
+    Char64Member,
+    FloatColorRGBZoneMember>;
 
 struct BaseValueSpec
 {

@@ -2,16 +2,18 @@
 
 #include <cstdint>
 
+#include "EngineInterface/SimulationParametersTypes.h"
+
 class ZoneColorPalette
 {
 public:
     ZoneColorPalette();
 
-    uint32_t getColor(int index) const;
+    FloatColorRGB getColor(int index) const;
 
-    using Palette = uint32_t[32];
+    using Palette = FloatColorRGB[32];
     Palette& getReference();
 
 private:
-    uint32_t _palette[32] = {};
+    FloatColorRGB _palette[32] = {};
 };

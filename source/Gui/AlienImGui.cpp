@@ -1011,22 +1011,25 @@ void AlienImGui::EndMenuBar()
     }
 }
 
-void AlienImGui::ColorButtonWithPicker(ColorButtonWithPickerParameters const& parameters, uint32_t& color)
+void AlienImGui::ColorButtonWithPicker(ColorButtonWithPickerParameters const& parameters, FloatColorRGB& color)
 {
     if (!matchWithFilter(parameters._name)) {
         return;
     }
 
-    static uint32_t backupColor = 0;
+    static FloatColorRGB backupColor;
     static ZoneColorPalette zoneColorPalette;
 
     auto savedPalette = zoneColorPalette.getReference();
 
-    ImVec4 imGuiColor = ImColor(color);
-    ImVec4 imGuiBackupColor = ImColor(backupColor);
+    ImVec4 imGuiColor = ImColor(color.r, color.g, color.b);
+    ImVec4 imGuiBackupColor = ImColor(backupColor.r, backupColor.g, backupColor.b);
     ImVec4 imGuiSavedPalette[32];
     for (int i = 0; i < IM_ARRAYSIZE(imGuiSavedPalette); ++i) {
-        imGuiSavedPalette[i] = ImColor(savedPalette[i]);
+        imGuiSavedPalette[i].x = savedPalette[i].r;
+        imGuiSavedPalette[i].y = savedPalette[i].g;
+        imGuiSavedPalette[i].z = savedPalette[i].b;
+        imGuiSavedPalette[i].w = 1.0f;
     }
 
     bool openColorPicker = ImGui::ColorButton(
@@ -1078,10 +1081,16 @@ void AlienImGui::ColorButtonWithPicker(ColorButtonWithPickerParameters const& pa
         ImGui::EndGroup();
         ImGui::EndPopup();
     }
-    color = static_cast<ImU32>(ImColor(imGuiColor));
-    backupColor = static_cast<ImU32>(ImColor(imGuiBackupColor));
-    for (int i = 0; i < 32; ++i) {
-        savedPalette[i] = static_cast<ImU32>(ImColor(imGuiSavedPalette[i]));
+    color.r = ImColor(imGuiColor).Value.x;
+    color.g = ImColor(imGuiColor).Value.y;
+    color.b = ImColor(imGuiColor).Value.z;
+    backupColor.r = ImColor(imGuiBackupColor).Value.x;
+    backupColor.g = ImColor(imGuiBackupColor).Value.y;
+    backupColor.b = ImColor(imGuiBackupColor).Value.z;
+    for (int i = 0; i < IM_ARRAYSIZE(imGuiSavedPalette); ++i) {
+        savedPalette[i].r = ImColor(imGuiSavedPalette[i]).Value.x;
+        savedPalette[i].g = ImColor(imGuiSavedPalette[i]).Value.y;
+        savedPalette[i].b = ImColor(imGuiSavedPalette[i]).Value.z;
     }
 
     ImGui::SameLine();

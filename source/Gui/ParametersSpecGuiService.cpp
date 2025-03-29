@@ -93,33 +93,20 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
         }
         ImGui::PushID(toInt(index));
 
-        if (std::holds_alternative<Char64Member>(parameterSpec._type)) {
-            createWidgetsFromChar64ParameterSpecs(parameterSpec, parameters, origParameters, locationIndex);
-
-        } else if (std::holds_alternative<BoolSpec>(parameterSpec._type)) {
-            createWidgetsFromBoolParameterSpecs(parameterSpec, parameters, origParameters, locationIndex);
+        if (std::holds_alternative<BoolSpec>(parameterSpec._type)) {
+            createWidgetsForBoolValues(parameterSpec, parameters, origParameters, locationIndex);
 
         } else if (std::holds_alternative<IntSpec>(parameterSpec._type)) {
-            createWidgetsFromIntParameterSpecs(parameterSpec, parameters, origParameters, locationIndex);
+            createWidgetsForIntValues(parameterSpec, parameters, origParameters, locationIndex);
 
         } else if (std::holds_alternative<FloatSpec>(parameterSpec._type)) {
-            createWidgetsFromFloatParameterSpecs(parameterSpec, parameters, origParameters, locationIndex);
+            createWidgetsForFloatValues(parameterSpec, parameters, origParameters, locationIndex);
 
-        } else if (std::holds_alternative<ColorVector<int> SimulationParameters::*>(parameterSpec._member)) {
+        } else if (std::holds_alternative<Char64Spec>(parameterSpec._type)) {
+            createWidgetsForChar64Values(parameterSpec, parameters, origParameters, locationIndex);
 
-        } else if (std::holds_alternative<ColorVector<float> SimulationParameters::*>(parameterSpec._member)) {
-
-        } else if (std::holds_alternative<ColorMatrix<bool> SimulationParameters::*>(parameterSpec._member)) {
-
-        } else if (std::holds_alternative<ColorMatrix<float> SimulationParameters::*>(parameterSpec._member)) {
-
-        } else if (std::holds_alternative<bool SimulationParametersZoneValues::*>(parameterSpec._member)) {
-
-        } else if (std::holds_alternative<float SimulationParametersZoneValues::*>(parameterSpec._member)) {
-
-        } else if (std::holds_alternative<ColorMatrix<float> SimulationParametersZoneValues::*>(parameterSpec._member)) {
-
-        } else if (std::holds_alternative<FloatGetterSetter>(parameterSpec._member)) {
+        } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._type)) {
+            createWidgetsForFloatColorRGBValues(parameterSpec, parameters, origParameters, locationIndex);
         }
 
         //if (parameterSpec._colorDependence == ColorDependence::Matrix) {
@@ -132,16 +119,6 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
         //    } else if (std::holds_alternative<IntSpec>(parameterSpec._type)) {
         //    } else if (std::holds_alternative<BoolSpec>(parameterSpec._type)) {
         //    } else if (std::holds_alternative<Char64Spec>(parameterSpec._type)) {
-        //        auto value = specService.getValueRef<Char64>(parameterSpec._value, parameters, locationIndex);
-        //        auto origValue = specService.getValueRef<Char64>(parameterSpec._value, origParameters, locationIndex);
-        //        AlienImGui::InputText(
-        //            AlienImGui::InputTextParameters()
-        //                .name(parameterSpec._name)
-        //                .textWidth(RightColumnWidth)
-        //                .defaultValue(*origValue)
-        //                .tooltip(parameterSpec._tooltip),
-        //            *value,
-        //            sizeof(Char64) / sizeof(char));
         //    } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._type)) {
         //        auto value = specService.getValueRef<uint32_t>(parameterSpec._value, parameters, locationIndex);
         //        auto origValue = specService.getValueRef<uint32_t>(parameterSpec._value, origParameters, locationIndex);
@@ -190,23 +167,7 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
     }
 }
 
-void ParametersSpecGuiService::createWidgetsFromChar64ParameterSpecs(
-    ParameterSpec const& parameterSpec,
-    SimulationParameters& parameters,
-    SimulationParameters& origParameters,
-    int locationIndex) const
-{
-    auto& specService = SimulationParametersSpecificationService::get();
-
-    auto value = specService.getChar64Ref(parameterSpec._member, parameters, locationIndex);
-    auto origValue = specService.getChar64Ref(parameterSpec._member, origParameters, locationIndex);
-    AlienImGui::InputText(
-        AlienImGui::InputTextParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue).tooltip(parameterSpec._tooltip),
-        *value,
-        sizeof(Char64) / sizeof(char));
-}
-
-void ParametersSpecGuiService::createWidgetsFromBoolParameterSpecs(
+void ParametersSpecGuiService::createWidgetsForBoolValues(
     ParameterSpec const& parameterSpec,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
@@ -237,7 +198,7 @@ void ParametersSpecGuiService::createWidgetsFromBoolParameterSpecs(
     }
 }
 
-void ParametersSpecGuiService::createWidgetsFromIntParameterSpecs(
+void ParametersSpecGuiService::createWidgetsForIntValues(
     ParameterSpec const& parameterSpec,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
@@ -288,7 +249,7 @@ void ParametersSpecGuiService::createWidgetsFromIntParameterSpecs(
     }
 }
 
-void ParametersSpecGuiService::createWidgetsFromFloatParameterSpecs(
+void ParametersSpecGuiService::createWidgetsForFloatValues(
     ParameterSpec const& parameterSpec,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
@@ -371,6 +332,37 @@ void ParametersSpecGuiService::createWidgetsFromFloatParameterSpecs(
     }
 }
 
+void ParametersSpecGuiService::createWidgetsForChar64Values(
+    ParameterSpec const& parameterSpec,
+    SimulationParameters& parameters,
+    SimulationParameters& origParameters,
+    int locationIndex) const
+{
+    auto& specService = SimulationParametersSpecificationService::get();
+
+    auto value = specService.getChar64Ref(parameterSpec._member, parameters, locationIndex);
+    auto origValue = specService.getChar64Ref(parameterSpec._member, origParameters, locationIndex);
+    AlienImGui::InputText(
+        AlienImGui::InputTextParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue).tooltip(parameterSpec._tooltip),
+        *value,
+        sizeof(Char64) / sizeof(char));
+}
+
+void ParametersSpecGuiService::createWidgetsForFloatColorRGBValues(
+    ParameterSpec const& parameterSpec,
+    SimulationParameters& parameters,
+    SimulationParameters& origParameters,
+    int locationIndex) const
+{
+    auto& specService = SimulationParametersSpecificationService::get();
+
+    auto value = specService.getFloatColorRGBRef(parameterSpec._member, parameters, locationIndex);
+    auto origValue = specService.getFloatColorRGBRef(parameterSpec._member, origParameters, locationIndex);
+    
+    AlienImGui::ColorButtonWithPicker(
+        AlienImGui::ColorButtonWithPickerParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue), *value);
+}
+
 ParametersSpecGuiService::LocationType ParametersSpecGuiService::getLocationType(int locationIndex, SimulationParameters const& parameters) const
 {
     if (locationIndex == 0) {
@@ -407,7 +399,8 @@ bool ParametersSpecGuiService::isVisible(ParameterSpec const& parameterSpec, Loc
             || std::holds_alternative<BoolZoneValuesMember>(parameterSpec._member) || std::holds_alternative<FloatZoneValuesMember>(parameterSpec._member)
             || std::holds_alternative<ColorVectorFloatZoneMember>(parameterSpec._member)
             || std::holds_alternative<ColorMatrixFloatZoneValuesMember>(parameterSpec._member)
-            || std::holds_alternative<ColorTransitionRulesMember>(parameterSpec._member) || std::holds_alternative<FloatGetterSetter>(parameterSpec._member)) {
+            || std::holds_alternative<ColorTransitionRulesMember>(parameterSpec._member) || std::holds_alternative<FloatGetterSetter>(parameterSpec._member)
+            || std::holds_alternative<Char64Member>(parameterSpec._member) || std::holds_alternative<FloatColorRGBZoneMember>(parameterSpec._member)) {
             return true;
         }
     }
@@ -415,7 +408,8 @@ bool ParametersSpecGuiService::isVisible(ParameterSpec const& parameterSpec, Loc
         if (std::holds_alternative<BoolZoneValuesMember>(parameterSpec._member) || std::holds_alternative<FloatZoneValuesMember>(parameterSpec._member)
             || std::holds_alternative<ColorVectorFloatZoneMember>(parameterSpec._member)
             || std::holds_alternative<ColorMatrixFloatZoneValuesMember>(parameterSpec._member)
-            || std::holds_alternative<ColorTransitionRulesMember>(parameterSpec._member) || std::holds_alternative<FloatGetterSetter>(parameterSpec._member)) {
+            || std::holds_alternative<ColorTransitionRulesMember>(parameterSpec._member)
+            || std::holds_alternative<FloatColorRGBZoneMember>(parameterSpec._member)) {
             return true;
         }
     }
