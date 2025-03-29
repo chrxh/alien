@@ -277,7 +277,7 @@ void SimulationParametersSpecificationService::createSpec()
                 ParameterSpec()
                     .name("Time step size")
                     .member(&SimulationParameters::timestepSize)
-                    .type(FloatSpec().min(0.0f).max(1.0f))
+                    .type(FloatSpec().min(0.05f).max(1.0f))
                     .tooltip("The time duration calculated in a single simulation step. Smaller values increase the accuracy of the simulation while larger "
                              "values can lead to numerical instabilities."),
             }),
@@ -348,7 +348,6 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Maximum force")
                     .member(&SimulationParametersZoneValues::cellMaxForce)
                     .type(FloatSpec().min(0.0f).max(3.0f))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Maximum force that can be applied to a cell without causing it to disintegrate."),
                 ParameterSpec()
                     .name("Minimum distance")
@@ -363,7 +362,6 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Maximum distance")
                     .member(&SimulationParameters::maxBindingDistance)
                     .type(FloatSpec().min(0.0f).max(5.0f))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Maximum distance up to which a connection of two cells is possible."),
                 ParameterSpec()
                     .name("Fusion velocity")
@@ -391,37 +389,31 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Absorption factor")
                     .member(&SimulationParametersZoneValues::radiationAbsorption)
                     .type(FloatSpec().min(0.0f).max(1.0f).logarithmic(true).format("%.4f"))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The fraction of energy that a cell can absorb from an incoming energy particle can be specified here."),
                 ParameterSpec()
                     .name("Radiation type I: Strength")
                     .member(&SimulationParametersZoneValues::radiationType1_strength)
                     .type(FloatSpec().min(0.0f).max(0.01f).logarithmic(true).format("%.6f"))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Indicates how energetic the emitted particles of aged cells are."),
                 ParameterSpec()
                     .name("Radiation type I: Minimum age")
                     .member(&SimulationParameters::radiationType1_minimumAge)
                     .type(IntSpec().min(0).max(10000000).logarithmic(true).infinity(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The minimum age of a cell can be defined here, from which it emits energy particles."),
                 ParameterSpec()
                     .name("Radiation type II: Strength")
                     .member(&SimulationParameters::radiationType2_strength)
                     .type(FloatSpec().min(0.0f).max(0.01f).logarithmic(true).format("%.6f"))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Indicates how energetic the emitted particles of high energy cells are."),
                 ParameterSpec()
                     .name("Radiation type II: Energy threshold")
                     .member(&SimulationParameters::radiationType2_energyThreshold)
                     .type(FloatSpec().min(0.0f).max(100000.0f).logarithmic(true).infinity(true).format("%.1f"))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The minimum energy of a cell can be defined here, from which it emits energy particles."),
                 ParameterSpec()
                     .name("Minimum split energy")
                     .member(&SimulationParameters::particleSplitEnergy)
                     .type(FloatSpec().min(1.0f).max(10000.0f).logarithmic(true).infinity(true).format("%.0f"))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The minimum energy of an energy particle after which it can split into two particles, whereby it receives a small momentum. The "
                              "splitting does not occur immediately, but only after a certain time."),
                 ParameterSpec()
@@ -437,19 +429,16 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Maximum age")
                     .member(&SimulationParameters::maxCellAge)
                     .type(IntSpec().min(1).max(1e7).logarithmic(true).infinity(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Defines the maximum age of a cell. If a cell exceeds this age it will be transformed to an energy particle."),
                 ParameterSpec()
                     .name("Minimum energy")
                     .member(&SimulationParametersZoneValues::minCellEnergy)
                     .type(FloatSpec().min(10.0f).max(200.0f))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Minimum energy a cell needs to exist."),
                 ParameterSpec()
                     .name("Normal energy")
                     .member(&SimulationParameters::normalCellEnergy)
                     .type(FloatSpec().min(10.0f).max(200.0f))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip(
                         "The normal energy value of a cell is defined here. This is used as a reference value in various contexts: "
                         "\n\n" ICON_FA_CHEVRON_RIGHT
@@ -463,7 +452,6 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Decay rate of dying cells")
                     .member(&SimulationParametersZoneValues::cellDeathProbability)
                     .type(FloatSpec().min(1e-6f).max(1e-1f).format("%.6f").logarithmic(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The probability per time step with which a cell will disintegrate (i.e. transform into an energy particle) when it is in the "
                              "state 'Dying'. This can occur when one of the following conditions is satisfied:\n\n" ICON_FA_CHEVRON_RIGHT
                              " The cell has too low energy.\n\n" ICON_FA_CHEVRON_RIGHT " The cell has exceeded its maximum age."),
@@ -484,7 +472,6 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Neural nets")
                     .member(&SimulationParametersZoneValues::copyMutationNeuronData)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip(
                         "This type of mutation can change the weights, biases and activation functions of neural networks of each neuron cell encoded in the "
                         "genome."),
@@ -492,7 +479,6 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Cell properties")
                     .member(&SimulationParametersZoneValues::copyMutationCellProperties)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation changes a random property (e.g. (input) execution order number, required energy, block output and "
                              "function-specific properties such as minimum density for sensors, neural net weights etc.). The spatial structure, color, cell "
                              "function type and self-replication capabilities are not changed. This mutation is applied to each encoded cell in the genome."),
@@ -500,21 +486,18 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Geometry")
                     .member(&SimulationParametersZoneValues::copyMutationGeometry)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation changes the geometry type, connection distance, stiffness and single construction flag. The probability of "
                              "a change is given by the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Custom geometry")
                     .member(&SimulationParametersZoneValues::copyMutationCustomGeometry)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation only changes angles and required connections of custom geometries. The probability of a change is given by "
                              "the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Cell function type")
                     .member(&SimulationParametersZoneValues::copyMutationCellType)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation changes the type of cell function. The changed cell function will have random properties. The probability "
                              "of a change is given by the specified value times the number of coded cells in the genome. If the flag 'Preserve "
                              "self-replication' is disabled it can also alter self-replication capabilities by changing a constructor to "
@@ -523,52 +506,44 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Insertion")
                     .member(&SimulationParametersZoneValues::copyMutationInsertion)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation inserts a new cell description to the genome at a random position. The probability of a change is given by "
                              "the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Deletion")
                     .member(&SimulationParametersZoneValues::copyMutationDeletion)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation deletes a cell description from the genome at a random position. The probability of a change is given by "
                              "the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Translation")
                     .member(&SimulationParametersZoneValues::copyMutationTranslation)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation moves a block of cell descriptions from the genome at a random position to a new random position."),
                 ParameterSpec()
                     .name("Duplication")
                     .member(&SimulationParametersZoneValues::copyMutationDuplication)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation copies a block of cell descriptions from the genome at a random position to a new random position."),
                 ParameterSpec()
                     .name("Individual cell color")
                     .member(&SimulationParametersZoneValues::copyMutationCellColor)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation alters the color of a single cell descriptions in a genome by using the specified color transitions. The "
                              "probability of a change is given by the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Sub-genome color")
                     .member(&SimulationParametersZoneValues::copyMutationSubgenomeColor)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation alters the color of all cell descriptions in a sub-genome by using the specified color transitions."),
                 ParameterSpec()
                     .name("Genome color")
                     .member(&SimulationParametersZoneValues::copyMutationGenomeColor)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This type of mutation alters the color of all cell descriptions in a genome by using the specified color transitions."),
                 ParameterSpec()
                     .name("Color transitions")
                     .member(&SimulationParameters::copyMutationColorTransitions)
                     .type(BoolSpec())
-                    .colorDependence(ColorDependence::Matrix)
                     .tooltip("The color transitions are used for color mutations. The row index indicates the source color and the column index the target "
                              "color."),
                 ParameterSpec()
@@ -591,13 +566,11 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Energy cost")
                     .member(&SimulationParametersZoneValues::attackerEnergyCost)
                     .type(FloatSpec().min(0).max(1.0f).logarithmic(true).format("%.5f"))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Amount of energy lost by an attempted attack of a cell in form of emitted energy particles."),
                 ParameterSpec()
                     .name("Food chain color matrix")
                     .member(&SimulationParametersZoneValues::attackerFoodChainColorMatrix)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.2f"))
-                    .colorDependence(ColorDependence::Matrix)
                     .tooltip(
                         "This matrix can be used to determine how well one cell can attack another cell. The color of the attacking cell correspond to the "
                         "row number and the color of the attacked cell to the column number. A value of 0 means that the attacked cell cannot be digested, "
@@ -607,20 +580,17 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Attack strength")
                     .member(&SimulationParameters::attackerStrength)
                     .type(FloatSpec().min(0).max(0.5f).logarithmic(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Indicates the portion of energy through which a successfully attacked cell is weakened. However, this energy portion can be "
                              "influenced by other factors adjustable within the attacker's simulation parameters."),
                 ParameterSpec()
                     .name("Attack radius")
                     .member(&SimulationParameters::attackerRadius)
                     .type(FloatSpec().min(0).max(3.0f))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The maximum distance over which an attacker cell can attack another cell."),
                 ParameterSpec()
                     .name("Complex creature protection")
                     .member(&SimulationParametersZoneValues::attackerComplexCreatureProtection)
                     .type(FloatSpec().min(0).max(20.0f).format("%.2f"))
-                    .colorDependence(ColorDependence::Matrix)
                     .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with more complex genomes."),
                 ParameterSpec()
                     .name("Destroy cells")
@@ -635,7 +605,6 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Connection distance")
                     .member(&SimulationParameters::constructorConnectingCellDistance)
                     .type(FloatSpec().min(0.1f).max(3.0f))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The constructor can automatically connect constructed cells to other cells in the vicinity within this distance."),
                 ParameterSpec()
                     .name("Completeness check")
@@ -651,13 +620,11 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Anti-attacker strength")
                     .member(&SimulationParameters::defenderAntiAttackerStrength)
                     .type(FloatSpec().min(0.0f).max(5.0f))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("If an attacked cell is connected to defender cells or itself a defender cell the attack strength is reduced by this factor."),
                 ParameterSpec()
                     .name("Anti-injector strength")
                     .member(&SimulationParameters::defenderAntiInjectorStrength)
                     .type(FloatSpec().min(0.0f).max(5.0f))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("If a constructor cell is attacked by an injector and connected to defender cells, the injection duration is increased by this "
                              "factor."),
             }),
@@ -668,13 +635,11 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Injection radius")
                     .member(&SimulationParameters::injectorInjectionRadius)
                     .type(FloatSpec().min(0.1f).max(4.0f))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The maximum distance over which an injector cell can infect another cell."),
                 ParameterSpec()
                     .name("Injection time")
                     .member(&SimulationParameters::injectorInjectionTime)
                     .type(IntSpec().min(0).max(100000).logarithmic(true))
-                    .colorDependence(ColorDependence::Matrix)
                     .tooltip("The number of activations an injector cell requires to infect another cell. One activation usually takes 6 time steps. The row "
                              "number determines the color of the injector cell, while the column number corresponds to the color of the infected cell."),
             }),
@@ -685,26 +650,22 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Energy cost")
                     .member(&SimulationParameters::muscleEnergyCost)
                     .type(FloatSpec().min(0).max(5.0f).format("%.5f").logarithmic(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Amount of energy lost by a muscle action of a cell in form of emitted energy particles."),
                 ParameterSpec()
                     .name("Movement acceleration")
                     .member(&SimulationParameters::muscleMovementAcceleration)
                     .type(FloatSpec().min(0).max(10.0f).logarithmic(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The maximum value by which a muscle cell can modify its velocity during activation. This parameter applies only to muscle cells "
                              "which are in movement mode."),
                 ParameterSpec()
                     .name("Crawling acceleration")
                     .member(&SimulationParameters::muscleCrawlingAcceleration)
                     .type(FloatSpec().min(0).max(10.0f).logarithmic(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Amount of energy lost by a muscle action of a cell in form of emitted energy particles."),
                 ParameterSpec()
                     .name("Bending acceleration")
                     .member(&SimulationParameters::muscleBendingAcceleration)
                     .type(FloatSpec().min(0).max(10.0f).logarithmic(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The maximum value by which a muscle cell can modify its velocity during a bending action. This parameter applies "
                              "only to muscle cells which are in bending mode."),
             }),
@@ -715,7 +676,6 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Radius")
                     .member(&SimulationParameters::sensorRadius)
                     .type(FloatSpec().min(10.0f).max(800.0f))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The maximum radius in which a sensor cell can detect mass concentrations."),
             }),
         ParameterGroupSpec()
@@ -725,13 +685,11 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Energy distribution radius")
                     .member(&SimulationParameters::transmitterEnergyDistributionRadius)
                     .type(FloatSpec().min(0).max(5.0f))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The maximum distance over which a transmitter cell transfers its additional energy to nearby transmitter or constructor cells."),
                 ParameterSpec()
                     .name("Energy distribution Value")
                     .member(&SimulationParameters::transmitterEnergyDistributionValue)
                     .type(FloatSpec().min(0).max(20.0f))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The amount of energy which a transmitter cell can transfer to nearby transmitter or constructor cells or to connected cells."),
                 ParameterSpec()
                     .name("Same creature energy distribution")
@@ -746,7 +704,6 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Radius")
                     .member(&SimulationParameters::reconnectorRadius)
                     .type(FloatSpec().min(0).max(3.0f))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The maximum radius in which a reconnector cell can establish or destroy connections to other cells."),
             }),
         ParameterGroupSpec()
@@ -756,13 +713,11 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Blast radius")
                     .member(&SimulationParameters::detonatorRadius)
                     .type(FloatSpec().min(0).max(10.0f))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The radius of the detonation."),
                 ParameterSpec()
                     .name("Chain explosion probability")
                     .member(&SimulationParameters::detonatorChainExplosionProbability)
                     .type(FloatSpec().min(0).max(1.0f))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The probability that the explosion of one detonator will trigger the explosion of other detonators within the blast radius."),
             }),
         ParameterGroupSpec()
@@ -773,25 +728,21 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Low genome complexity penalty")
                     .member(&SimulationParametersZoneValues::radiationAbsorptionLowGenomeComplexityPenalty)
                     .type(FloatSpec().min(0).max(1.0f).format("%.2f"))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("When this parameter is increased, cells with fewer genome complexity will absorb less energy from an incoming energy particle."),
                 ParameterSpec()
                     .name("Low connection penalty")
                     .member(&SimulationParameters::radiationAbsorptionLowConnectionPenalty)
                     .type(FloatSpec().min(0).max(5.0f).format("%.1f"))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("When this parameter is increased, cells with fewer cell connections will absorb less energy from an incoming energy particle."),
                 ParameterSpec()
                     .name("High velocity penalty")
                     .member(&SimulationParameters::radiationAbsorptionHighVelocityPenalty)
                     .type(FloatSpec().min(0).max(30.0f).logarithmic(true).format("%.2f"))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("When this parameter is increased, fast moving cells will absorb less energy from an incoming energy particle."),
                 ParameterSpec()
                     .name("Low velocity penalty")
                     .member(&SimulationParametersZoneValues::radiationAbsorptionLowVelocityPenalty)
                     .type(FloatSpec().min(0).max(1.0f).format("%.2f"))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("When this parameter is increased, slowly moving cells will absorb less energy from an incoming energy particle."),
             }),
         ParameterGroupSpec()
@@ -802,19 +753,16 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Same mutant protection")
                     .member(&SimulationParameters::attackerSameMutantProtection)
                     .type(FloatSpec().min(0).max(1.0f).format("%.2f"))
-                    .colorDependence(ColorDependence::Matrix)
                     .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with the same mutation id."),
                 ParameterSpec()
                     .name("New complex mutant protection")
                     .member(&SimulationParametersZoneValues::attackerNewComplexMutantProtection)
                     .type(FloatSpec().min(0).max(1.0f))
-                    .colorDependence(ColorDependence::Matrix)
                     .tooltip("A high value protects new mutants with equal or greater genome complexity from being attacked."),
                 ParameterSpec()
                     .name("Sensor detection factor")
                     .member(&SimulationParameters::attackerSensorDetectionFactor)
                     .type(FloatSpec().min(0).max(1.0f))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This parameter controls whether the target must be previously detected with sensors in order to be attacked. The larger this "
                              "value is, the less energy can be gained during the attack if the target has not already been detected. For this purpose, the "
                              "attacker cell searches for connected (or connected-connected) sensor cells to see which cell networks they have detected last "
@@ -824,14 +772,12 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Geometry deviation protection")
                     .member(&SimulationParametersZoneValues::attackerGeometryDeviationProtection)
                     .type(FloatSpec().min(0).max(5.0f))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The larger this value is, the less energy a cell can gain from an attack if the local geometry of the attacked cell does not "
                              "match the attacking cell."),
                 ParameterSpec()
                     .name("Connections mismatch protection")
                     .member(&SimulationParametersZoneValues::attackerConnectionsMismatchProtection)
                     .type(FloatSpec().min(0).max(1.0f))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The larger this parameter is, the more difficult it is to attack cells that contain more connections."),
             }),
         ParameterGroupSpec()
@@ -846,7 +792,6 @@ void SimulationParametersSpecificationService::createSpec()
                     //           .enabledBaseValueAddress(BASE_VALUE_OFFSET(maxAgeForInactiveCellsEnabled))
                     //           .enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(maxAgeForInactiveCellsEnabled)))
                     .type(FloatSpec().min(1.0f).max(1e7f).format("%.0f").logarithmic(true).infinity(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered. Cells which "
                              "are in state 'Under construction' are not affected by this option."),
                 ParameterSpec()
@@ -854,7 +799,6 @@ void SimulationParametersSpecificationService::createSpec()
                     .member(&SimulationParameters::freeCellMaxAge)
                     //.value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(freeCellMaxAge)).enabledValueAddress(BASE_VALUE_OFFSET(freeCellMaxAgeEnabled)))
                     .type(IntSpec().min(1).max(1e7).logarithmic(true).infinity(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The maximal age of free cells (= cells that arise from energy particles) can be set here."),
                 ParameterSpec()
                     .name("Reset age after construction")
@@ -912,7 +856,6 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Strength")
                     .member(&SimulationParameters::cellGlowStrength)
                     .type(FloatSpec().min(0.0f).max(1.0f))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The strength of the glow."),
             }),
         ParameterGroupSpec()
@@ -984,7 +927,6 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Inflow")
                     .member(&SimulationParameters::externalEnergyInflowFactor)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.5f").logarithmic(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip(
                         "Here one can specify the fraction of energy transferred to constructor cells.\n\nFor example, a value of 0.05 means that "
                         "each time a constructor cell tries to build a new cell, 5% of the required energy is transferred for free from the external energy "
@@ -993,7 +935,6 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Conditional inflow")
                     .member(&SimulationParameters::externalEnergyConditionalInflowFactor)
                     .type(FloatSpec().min(0.00f).max(1.0f).format("%.5f").logarithmic(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("Here one can specify the fraction of energy transferred to constructor cells if they can provide the remaining energy for the "
                              "construction process.\n\nFor example, a value of 0.6 means that a constructor cell receives 60% of the energy required to "
                              "build the new cell for free from the external energy source. However, it must provide 40% of the energy required by itself. "
@@ -1008,7 +949,6 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Backflow")
                     .member(&SimulationParameters::externalEnergyBackflowFactor)
                     .type(FloatSpec().min(0.0f).max(1.0f))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("The proportion of energy that flows back from the simulation to the external energy pool. Each time a cell loses energy "
                              "or dies a fraction of its energy will be taken. The remaining "
                              "fraction of the energy stays in the simulation and will be used to create a new energy particle."),
@@ -1027,13 +967,11 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Size factor")
                     .member(&SimulationParameters::genomeComplexitySizeFactor)
                     .type(FloatSpec().min(0.0f).max(1.0f).format("%.2f"))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This parameter controls how the number of encoded cells in the genome influences the calculation of its complexity."),
                 ParameterSpec()
                     .name("Ramification factor")
                     .member(&SimulationParameters::genomeComplexityRamificationFactor)
                     .type(FloatSpec().min(0.0f).max(20.0f).format("%.2f"))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("With this parameter, the number of ramifications of the cell structure to the genome is taken into account for the "
                              "calculation of the genome complexity. For instance, genomes that contain many sub-genomes or many construction branches will "
                              "then have a high complexity value."),
@@ -1041,7 +979,6 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Depth level")
                     .member(&SimulationParameters::genomeComplexityDepthLevel)
                     .type(IntSpec().min(1).max(20).infinity(true))
-                    .colorDependence(ColorDependence::Vector)
                     .tooltip("This allows to specify up to which level of the sub-genomes the complexity calculation should be carried out. For example, a "
                              "value of 2 means that the sub- and sub-sub-genomes are taken into account in addition to the main genome."),
             }),
