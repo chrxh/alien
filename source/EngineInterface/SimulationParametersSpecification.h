@@ -8,7 +8,8 @@
 #include "Base/Definitions.h"
 
 #include "Definitions.h"
-
+#include "SimulationParametersTypes.h"
+#include "Colors.h"
 
 struct BoolSpec
 {
@@ -52,6 +53,43 @@ struct ColorTransitionSpec
 
 using TypeSpec = std::variant<BoolSpec, IntSpec, FloatSpec, Char64Spec, AlternativeSpec, ColorPickerSpec, ColorTransitionSpec>;
 
+using Char64Member = Char64 SimulationParameters::*;
+using BoolMember = bool SimulationParameters::*;
+using IntMember = int SimulationParameters::*;
+using FloatMember = float SimulationParameters::*;
+using ColorVectorIntMember = ColorVector<int> SimulationParameters::*;
+using ColorVectorFloatMember = ColorVector<float> SimulationParameters::*;
+using ColorMatrixBoolMember = ColorMatrix<bool> SimulationParameters::*;
+using ColorMatrixIntMember = ColorMatrix<int> SimulationParameters::*;
+using ColorMatrixFloatMember = ColorMatrix<float> SimulationParameters::*;
+
+using BoolZoneValuesMember = bool SimulationParametersZoneValues::*;
+using FloatZoneValuesMember = float SimulationParametersZoneValues::*;
+using ColorVectorFloatZoneMember = ColorVector<float> SimulationParametersZoneValues::*;
+using ColorMatrixFloatZoneValuesMember = ColorMatrix<float> SimulationParametersZoneValues::*;
+using ColorTransitionRulesMember = ColorTransitionRules SimulationParametersZoneValues::*;
+
+using FloatGetterSetter =
+    std::pair<std::function<float(SimulationParameters const&, int)>, std::function<void(float, SimulationParameters&, int)>>;  // int for locationIndex
+
+using MemberSpec = std::variant<
+    std::monostate,
+    Char64Member,
+    BoolMember,
+    IntMember,
+    FloatMember,
+    ColorVectorIntMember,
+    ColorVectorFloatMember,
+    ColorMatrixBoolMember,
+    ColorMatrixIntMember,
+    ColorMatrixFloatMember,
+    BoolZoneValuesMember,
+    FloatZoneValuesMember,
+    ColorVectorFloatZoneMember,
+    ColorMatrixFloatZoneValuesMember,
+    ColorTransitionRulesMember,
+    FloatGetterSetter>;
+
 struct BaseValueSpec
 {
     MEMBER_DECLARATION(BaseValueSpec, std::optional<size_t>, valueAddress, std::nullopt);
@@ -78,6 +116,7 @@ enum class ColorDependence
 };
 struct ParameterSpec
 {
+    MEMBER_DECLARATION(ParameterSpec, MemberSpec, member, std::monostate());
     MEMBER_DECLARATION(ParameterSpec, std::string, name, std::string());
     MEMBER_DECLARATION(ParameterSpec, ValueSpec, value, ValueSpec());
     MEMBER_DECLARATION(ParameterSpec, TypeSpec, type, FloatSpec());

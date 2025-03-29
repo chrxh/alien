@@ -16,7 +16,7 @@ namespace
     auto constexpr RightColumnWidth = 285.0f;
 }
 
-void ParametersSpecGuiService::createWidgetsForParameters(int locationIndex, SimulationParameters& parameters, SimulationParameters& origParameters) const
+void ParametersSpecGuiService::createWidgetsForParameters(SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const
 {
     auto& specService = SimulationParametersSpecificationService::get();
     auto const& parametersSpecs = specService.getSpec();
@@ -35,7 +35,7 @@ void ParametersSpecGuiService::createWidgetsForParameters(int locationIndex, Sim
         }
         ImGui::PushID(name.c_str());
         if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name(name).visible(isGroupVisibleActive).blinkWhenActivated(isExpertSettings))) {
-            createWidgetsFromParameterSpecs(groupSpec._parameters, locationIndex, parameters, origParameters);
+            createWidgetsFromParameterSpecs(groupSpec._parameters, parameters, origParameters, locationIndex);
         }
         ImGui::PopID();
         AlienImGui::EndTreeNode();
@@ -81,11 +81,10 @@ namespace
 
 void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
     std::vector<ParameterSpec> const& parameterSpecs,
-    int locationIndex,
     SimulationParameters& parameters,
-    SimulationParameters& origParameters) const
+    SimulationParameters& origParameters,
+    int locationIndex) const
 {
-    auto& specService = SimulationParametersSpecificationService::get();
     auto locationType = getLocationType(locationIndex, parameters);
 
     for (auto const& [index, parameterSpec] : parameterSpecs | boost::adaptors::indexed(0)) {
@@ -93,186 +92,282 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
             continue;
         }
         ImGui::PushID(toInt(index));
-        if (parameterSpec._colorDependence == ColorDependence::Matrix) {
-            if (std::holds_alternative<FloatSpec>(parameterSpec._type)) {
-                auto const& floatSpec = std::get<FloatSpec>(parameterSpec._type);
-                auto value = reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(specService.getValueRef<float>(parameterSpec._value, parameters, locationIndex));
-                auto origValue = reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(specService.getValueRef<float>(parameterSpec._value, origParameters, locationIndex));
-                AlienImGui::InputFloatColorMatrix(
-                    AlienImGui::InputFloatColorMatrixParameters()
-                        .name(parameterSpec._name)
-                        .max(floatSpec._min)
-                        .max(floatSpec._max)
-                        .logarithmic(floatSpec._logarithmic)
-                        .format(floatSpec._format)
-                        .textWidth(RightColumnWidth)
-                        .tooltip(parameterSpec._tooltip)
-                        .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*origValue)),
-                    *value);
-            } else if (std::holds_alternative<IntSpec>(parameterSpec._type)) {
-                auto const& intSpec = std::get<IntSpec>(parameterSpec._type);
-                auto value = reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(specService.getValueRef<int>(parameterSpec._value, parameters, locationIndex));
-                auto origValue = reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(specService.getValueRef<int>(parameterSpec._value, origParameters, locationIndex));
-                AlienImGui::InputIntColorMatrix(
-                    AlienImGui::InputIntColorMatrixParameters()
-                        .name(parameterSpec._name)
-                        .max(intSpec._min)
-                        .max(intSpec._max)
-                        .logarithmic(intSpec._logarithmic)
-                        .textWidth(RightColumnWidth)
-                        .tooltip(parameterSpec._tooltip)
-                        .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*origValue)),
-                    *value);
-            } else if (std::holds_alternative<BoolSpec>(parameterSpec._type)) {
-                auto value = reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(specService.getValueRef<bool>(parameterSpec._value, parameters, locationIndex));
-                auto origValue = reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(specService.getValueRef<bool>(parameterSpec._value, origParameters, locationIndex));
-                AlienImGui::CheckboxColorMatrix(
-                    AlienImGui::CheckboxColorMatrixParameters()
-                        .name("Color transitions")
-                        .textWidth(RightColumnWidth)
-                        .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*origValue))
-                        .tooltip(parameterSpec._tooltip),
-                    *value);
-            }
-        } else {
-            if (std::holds_alternative<FloatSpec>(parameterSpec._type)) {
-                auto const& floatSpec = std::get<FloatSpec>(parameterSpec._type);
-                bool* pinnedValue = specService.getPinnedValueRef(parameterSpec._value, parameters, locationIndex);
-                auto value = specService.getValueRef<float>(parameterSpec._value, parameters, locationIndex);
-                auto origValue = specService.getValueRef<float>(parameterSpec._value, origParameters, locationIndex);
-                auto enabledValue = specService.getEnabledValueRef(parameterSpec._value, parameters, locationIndex);
-                auto origEnabledValue = specService.getEnabledValueRef(parameterSpec._value, origParameters, locationIndex);
-                if (value != nullptr) {
-                    AlienImGui::SliderFloat(
-                        AlienImGui::SliderFloatParameters()
-                            .name(parameterSpec._name)
-                            .textWidth(RightColumnWidth)
-                            .min(floatSpec._min)
-                            .max(floatSpec._max)
-                            .logarithmic(floatSpec._logarithmic)
-                            .format(floatSpec._format)
-                            .infinity(floatSpec._infinity)
-                            .disabledValue(value)
-                            .defaultValue(origValue)
-                            .defaultEnabledValue(origEnabledValue)
-                            .tooltip(parameterSpec._tooltip)
-                            .colorDependence(parameterSpec._colorDependence == ColorDependence::Vector),
-                        value,
-                        enabledValue,
-                        pinnedValue);
-                } else {
-                    auto baseValueSpec = std::get<BaseValueSpec>(parameterSpec._value);
-                    auto getter = baseValueSpec._valueGetter.value();
-                    auto setter = baseValueSpec._valueSetter.value();
-                    auto value = getter(parameters, locationIndex);
-                    auto origValue = getter(origParameters, locationIndex);
 
-                    if (AlienImGui::SliderFloat(
-                            AlienImGui::SliderFloatParameters()
-                                .name(parameterSpec._name)
-                                .textWidth(RightColumnWidth)
-                                .min(floatSpec._min)
-                                .max(floatSpec._max)
-                                .logarithmic(floatSpec._logarithmic)
-                                .format(floatSpec._format)
-                                .infinity(floatSpec._infinity)
-                                .defaultValue(&origValue)
-                                .tooltip(parameterSpec._tooltip)
-                                .colorDependence(parameterSpec._colorDependence == ColorDependence::Vector),
-                            &value,
-                            nullptr,
-                            pinnedValue)) {
+        if (std::holds_alternative<Char64Member>(parameterSpec._type)) {
+            createWidgetsFromChar64ParameterSpecs(parameterSpec, parameters, origParameters, locationIndex);
 
-                        setter(value, parameters, locationIndex);
-                    }
-                }
-            } else if (std::holds_alternative<IntSpec>(parameterSpec._type)) {
-                auto const& intSpec = std::get<IntSpec>(parameterSpec._type);
-                auto value = specService.getValueRef<int>(parameterSpec._value, parameters, locationIndex);
-                auto origValue = specService.getValueRef<int>(parameterSpec._value, origParameters, locationIndex);
-                auto enabledValue = specService.getEnabledValueRef(parameterSpec._value, parameters, locationIndex);
-                auto origEnabledValue = specService.getEnabledValueRef(parameterSpec._value, origParameters, locationIndex);
-                AlienImGui::SliderInt(
-                    AlienImGui::SliderIntParameters()
-                        .name(parameterSpec._name)
-                        .textWidth(RightColumnWidth)
-                        .min(intSpec._min)
-                        .max(intSpec._max)
-                        .logarithmic(intSpec._logarithmic)
-                        .infinity(intSpec._infinity)
-                        .disabledValue(value)
-                        .defaultValue(origValue)
-                        .defaultEnabledValue(origEnabledValue)
-                        .tooltip(parameterSpec._tooltip)
-                        .colorDependence(parameterSpec._colorDependence == ColorDependence::Vector),
-                    value,
-                    enabledValue);
-            } else if (std::holds_alternative<BoolSpec>(parameterSpec._type)) {
-                auto value = specService.getValueRef<bool>(parameterSpec._value, parameters, locationIndex);
-                auto origValue = specService.getValueRef<bool>(parameterSpec._value, origParameters, locationIndex);
-                AlienImGui::Checkbox(
-                    AlienImGui::CheckboxParameters()
-                        .name(parameterSpec._name)
-                        .textWidth(RightColumnWidth)
-                        .defaultValue(*origValue)
-                        .tooltip(parameterSpec._tooltip),
-                    *value);
-            } else if (std::holds_alternative<Char64Spec>(parameterSpec._type)) {
-                auto value = specService.getValueRef<Char64>(parameterSpec._value, parameters, locationIndex);
-                auto origValue = specService.getValueRef<Char64>(parameterSpec._value, origParameters, locationIndex);
-                AlienImGui::InputText(
-                    AlienImGui::InputTextParameters()
-                        .name(parameterSpec._name)
-                        .textWidth(RightColumnWidth)
-                        .defaultValue(*origValue)
-                        .tooltip(parameterSpec._tooltip),
-                    *value,
-                    sizeof(Char64) / sizeof(char));
-            } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._type)) {
-                auto value = specService.getValueRef<uint32_t>(parameterSpec._value, parameters, locationIndex);
-                auto origValue = specService.getValueRef<uint32_t>(parameterSpec._value, origParameters, locationIndex);
-                AlienImGui::ColorButtonWithPicker(
-                    AlienImGui::ColorButtonWithPickerParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue), *value);
-            } else if (std::holds_alternative<ColorTransitionSpec>(parameterSpec._type)) {
-                auto value = specService.getValueRef<ColorTransitionRules>(parameterSpec._value, parameters, locationIndex);
-                auto origValue = specService.getValueRef<ColorTransitionRules>(parameterSpec._value, origParameters, locationIndex);
-                for (int color = 0; color < MAX_COLORS; ++color) {
-                    ImGui::PushID(color);
-                    auto widgetParameters = AlienImGui::InputColorTransitionParameters()
-                                                .textWidth(RightColumnWidth)
-                                                .color(color)
-                                                .defaultTargetColor(origValue->cellColorTransitionTargetColor[color])
-                                                .defaultTransitionAge(origValue->cellColorTransitionDuration[color])
-                                                .logarithmic(true)
-                                                .infinity(true);
-                    if (0 == color) {
-                        widgetParameters.name(parameterSpec._name).tooltip(parameterSpec._tooltip);
-                    }
-                    AlienImGui::InputColorTransition(
-                        widgetParameters, color, value->cellColorTransitionTargetColor[color], value->cellColorTransitionDuration[color]);
-                    ImGui::PopID();
-                }
-            } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._type)) {
-                auto switcherSpec = std::get<AlternativeSpec>(parameterSpec._type);
-                auto value = specService.getValueRef<int>(parameterSpec._value, parameters, locationIndex);
-                auto origValue = specService.getValueRef<int>(parameterSpec._value, origParameters, locationIndex);
-                std::vector<std::string> values;
-                values.reserve(switcherSpec._alternatives.size());
-                for (auto const& name : switcherSpec._alternatives | std::views::keys) {
-                    values.emplace_back(name);
-                }
-                AlienImGui::Switcher(
-                    AlienImGui::SwitcherParameters()
-                        .name(parameterSpec._name)
-                        .textWidth(RightColumnWidth)
-                        .defaultValue(*origValue)
-                        .values(values)
-                        .tooltip(parameterSpec._tooltip),
-                    *value);
-                createWidgetsFromParameterSpecs(switcherSpec._alternatives.at(*value).second, locationIndex, parameters, origParameters);
-            }
+        } else if (std::holds_alternative<BoolSpec>(parameterSpec._type)) {
+            createWidgetsFromBoolParameterSpecs(parameterSpec, parameters, origParameters, locationIndex);
+
+        } else if (std::holds_alternative<IntSpec>(parameterSpec._type)) {
+            createWidgetsFromIntParameterSpecs(parameterSpec, parameters, origParameters, locationIndex);
+
+        } else if (std::holds_alternative<FloatSpec>(parameterSpec._type)) {
+            createWidgetsFromFloatParameterSpecs(parameterSpec, parameters, origParameters, locationIndex);
+
+        } else if (std::holds_alternative<ColorVector<int> SimulationParameters::*>(parameterSpec._member)) {
+
+        } else if (std::holds_alternative<ColorVector<float> SimulationParameters::*>(parameterSpec._member)) {
+
+        } else if (std::holds_alternative<ColorMatrix<bool> SimulationParameters::*>(parameterSpec._member)) {
+
+        } else if (std::holds_alternative<ColorMatrix<float> SimulationParameters::*>(parameterSpec._member)) {
+
+        } else if (std::holds_alternative<bool SimulationParametersZoneValues::*>(parameterSpec._member)) {
+
+        } else if (std::holds_alternative<float SimulationParametersZoneValues::*>(parameterSpec._member)) {
+
+        } else if (std::holds_alternative<ColorMatrix<float> SimulationParametersZoneValues::*>(parameterSpec._member)) {
+
+        } else if (std::holds_alternative<FloatGetterSetter>(parameterSpec._member)) {
         }
+
+        //if (parameterSpec._colorDependence == ColorDependence::Matrix) {
+        //    if (std::holds_alternative<FloatSpec>(parameterSpec._type)) {
+        //    } else if (std::holds_alternative<IntSpec>(parameterSpec._type)) {
+        //    } else if (std::holds_alternative<BoolSpec>(parameterSpec._type)) {
+        //    }
+        //} else {
+        //    if (std::holds_alternative<FloatSpec>(parameterSpec._type)) {
+        //    } else if (std::holds_alternative<IntSpec>(parameterSpec._type)) {
+        //    } else if (std::holds_alternative<BoolSpec>(parameterSpec._type)) {
+        //    } else if (std::holds_alternative<Char64Spec>(parameterSpec._type)) {
+        //        auto value = specService.getValueRef<Char64>(parameterSpec._value, parameters, locationIndex);
+        //        auto origValue = specService.getValueRef<Char64>(parameterSpec._value, origParameters, locationIndex);
+        //        AlienImGui::InputText(
+        //            AlienImGui::InputTextParameters()
+        //                .name(parameterSpec._name)
+        //                .textWidth(RightColumnWidth)
+        //                .defaultValue(*origValue)
+        //                .tooltip(parameterSpec._tooltip),
+        //            *value,
+        //            sizeof(Char64) / sizeof(char));
+        //    } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._type)) {
+        //        auto value = specService.getValueRef<uint32_t>(parameterSpec._value, parameters, locationIndex);
+        //        auto origValue = specService.getValueRef<uint32_t>(parameterSpec._value, origParameters, locationIndex);
+        //        AlienImGui::ColorButtonWithPicker(
+        //            AlienImGui::ColorButtonWithPickerParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue), *value);
+        //    } else if (std::holds_alternative<ColorTransitionSpec>(parameterSpec._type)) {
+        //        auto value = specService.getValueRef<ColorTransitionRules>(parameterSpec._value, parameters, locationIndex);
+        //        auto origValue = specService.getValueRef<ColorTransitionRules>(parameterSpec._value, origParameters, locationIndex);
+        //        for (int color = 0; color < MAX_COLORS; ++color) {
+        //            ImGui::PushID(color);
+        //            auto widgetParameters = AlienImGui::InputColorTransitionParameters()
+        //                                        .textWidth(RightColumnWidth)
+        //                                        .color(color)
+        //                                        .defaultTargetColor(origValue->cellColorTransitionTargetColor[color])
+        //                                        .defaultTransitionAge(origValue->cellColorTransitionDuration[color])
+        //                                        .logarithmic(true)
+        //                                        .infinity(true);
+        //            if (0 == color) {
+        //                widgetParameters.name(parameterSpec._name).tooltip(parameterSpec._tooltip);
+        //            }
+        //            AlienImGui::InputColorTransition(
+        //                widgetParameters, color, value->cellColorTransitionTargetColor[color], value->cellColorTransitionDuration[color]);
+        //            ImGui::PopID();
+        //        }
+        //    } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._type)) {
+        //        auto switcherSpec = std::get<AlternativeSpec>(parameterSpec._type);
+        //        auto value = specService.getValueRef<int>(parameterSpec._value, parameters, locationIndex);
+        //        auto origValue = specService.getValueRef<int>(parameterSpec._value, origParameters, locationIndex);
+        //        std::vector<std::string> values;
+        //        values.reserve(switcherSpec._alternatives.size());
+        //        for (auto const& name : switcherSpec._alternatives | std::views::keys) {
+        //            values.emplace_back(name);
+        //        }
+        //        AlienImGui::Switcher(
+        //            AlienImGui::SwitcherParameters()
+        //                .name(parameterSpec._name)
+        //                .textWidth(RightColumnWidth)
+        //                .defaultValue(*origValue)
+        //                .values(values)
+        //                .tooltip(parameterSpec._tooltip),
+        //            *value);
+        //        createWidgetsFromParameterSpecs(switcherSpec._alternatives.at(*value).second, locationIndex, parameters, origParameters);
+        //    }
+        //}
         ImGui::PopID();
+    }
+}
+
+void ParametersSpecGuiService::createWidgetsFromChar64ParameterSpecs(
+    ParameterSpec const& parameterSpec,
+    SimulationParameters& parameters,
+    SimulationParameters& origParameters,
+    int locationIndex) const
+{
+    auto& specService = SimulationParametersSpecificationService::get();
+
+    auto value = specService.getChar64Ref(parameterSpec._member, parameters, locationIndex);
+    auto origValue = specService.getChar64Ref(parameterSpec._member, origParameters, locationIndex);
+    AlienImGui::InputText(
+        AlienImGui::InputTextParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue).tooltip(parameterSpec._tooltip),
+        *value,
+        sizeof(Char64) / sizeof(char));
+}
+
+void ParametersSpecGuiService::createWidgetsFromBoolParameterSpecs(
+    ParameterSpec const& parameterSpec,
+    SimulationParameters& parameters,
+    SimulationParameters& origParameters,
+    int locationIndex) const
+{
+    auto& specService = SimulationParametersSpecificationService::get();
+
+    if (std::holds_alternative<ColorMatrixBoolMember>(parameterSpec._member)) {
+
+        auto value = reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(specService.getBoolRef(parameterSpec._member, parameters, locationIndex));
+        auto origValue = reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(specService.getBoolRef(parameterSpec._member, origParameters, locationIndex));
+        AlienImGui::CheckboxColorMatrix(
+            AlienImGui::CheckboxColorMatrixParameters()
+                .name(parameterSpec._name)
+                .textWidth(RightColumnWidth)
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*origValue))
+                .tooltip(parameterSpec._tooltip),
+            *value);
+
+    } else {
+
+        auto value = specService.getBoolRef(parameterSpec._member, parameters, locationIndex);
+        auto origValue = specService.getBoolRef(parameterSpec._member, origParameters, locationIndex);
+        AlienImGui::Checkbox(
+            AlienImGui::CheckboxParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue).tooltip(parameterSpec._tooltip),
+            *value);
+
+    }
+}
+
+void ParametersSpecGuiService::createWidgetsFromIntParameterSpecs(
+    ParameterSpec const& parameterSpec,
+    SimulationParameters& parameters,
+    SimulationParameters& origParameters,
+    int locationIndex) const
+{
+    auto& specService = SimulationParametersSpecificationService::get();
+    auto const& intSpec = std::get<IntSpec>(parameterSpec._type);
+
+    if (std::holds_alternative<ColorMatrixIntMember>(parameterSpec._member)) {
+
+        auto const& intSpec = std::get<IntSpec>(parameterSpec._type);
+        auto value = reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(specService.getIntRef(parameterSpec._member, parameters, locationIndex));
+        auto origValue = reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(specService.getIntRef(parameterSpec._member, origParameters, locationIndex));
+        AlienImGui::InputIntColorMatrix(
+            AlienImGui::InputIntColorMatrixParameters()
+                .name(parameterSpec._name)
+                .max(intSpec._min)
+                .max(intSpec._max)
+                .logarithmic(intSpec._logarithmic)
+                .textWidth(RightColumnWidth)
+                .tooltip(parameterSpec._tooltip)
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*origValue)),
+            *value);
+
+    } else {
+
+        auto value = specService.getIntRef(parameterSpec._member, parameters, locationIndex);
+        auto origValue = specService.getIntRef(parameterSpec._member, origParameters, locationIndex);
+        auto enabledValue = nullptr;
+        //specService.getEnabledValueRef(parameterSpec._value, parameters, locationIndex);
+        auto origEnabledValue = nullptr;
+        //specService.getEnabledValueRef(parameterSpec._value, origParameters, locationIndex);
+        AlienImGui::SliderInt(
+            AlienImGui::SliderIntParameters()
+                .name(parameterSpec._name)
+                .textWidth(RightColumnWidth)
+                .min(intSpec._min)
+                .max(intSpec._max)
+                .logarithmic(intSpec._logarithmic)
+                .infinity(intSpec._infinity)
+                .disabledValue(value)
+                .defaultValue(origValue)
+                .defaultEnabledValue(origEnabledValue)
+                .tooltip(parameterSpec._tooltip)
+                .colorDependence(std::holds_alternative<ColorVectorFloatMember>(parameterSpec._member)),
+            value,
+            enabledValue);
+    }
+}
+
+void ParametersSpecGuiService::createWidgetsFromFloatParameterSpecs(
+    ParameterSpec const& parameterSpec,
+    SimulationParameters& parameters,
+    SimulationParameters& origParameters,
+    int locationIndex) const
+{
+    auto& specService = SimulationParametersSpecificationService::get();
+    auto const& floatSpec = std::get<FloatSpec>(parameterSpec._type);
+
+    if (std::holds_alternative<ColorMatrixFloatMember>(parameterSpec._member)
+        || std::holds_alternative<ColorMatrixFloatZoneValuesMember>(parameterSpec._member)) {
+
+        auto value = reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(specService.getFloatRef(parameterSpec._member, parameters, locationIndex));
+        auto origValue = reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(specService.getFloatRef(parameterSpec._member, origParameters, locationIndex));
+        AlienImGui::InputFloatColorMatrix(
+            AlienImGui::InputFloatColorMatrixParameters()
+                .name(parameterSpec._name)
+                .max(floatSpec._min)
+                .max(floatSpec._max)
+                .logarithmic(floatSpec._logarithmic)
+                .format(floatSpec._format)
+                .textWidth(RightColumnWidth)
+                .tooltip(parameterSpec._tooltip)
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*origValue)),
+            *value);
+
+    } else if (std::holds_alternative<FloatGetterSetter>(parameterSpec._member)) {
+
+        auto [getter, setter] = std::get<FloatGetterSetter>(parameterSpec._member);
+        auto value = getter(parameters, locationIndex);
+        auto origValue = getter(origParameters, locationIndex);
+        bool* pinnedValue = nullptr;
+        //specService.getPinnedValueRef(parameterSpec._value, parameters, locationIndex);
+
+        if (AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name(parameterSpec._name)
+                    .textWidth(RightColumnWidth)
+                    .min(floatSpec._min)
+                    .max(floatSpec._max)
+                    .logarithmic(floatSpec._logarithmic)
+                    .format(floatSpec._format)
+                    .infinity(floatSpec._infinity)
+                    .defaultValue(&origValue)
+                    .tooltip(parameterSpec._tooltip)
+                    .colorDependence(parameterSpec._colorDependence == ColorDependence::Vector),
+                &value,
+                nullptr,
+                pinnedValue)) {
+
+            setter(value, parameters, locationIndex);
+        }
+
+    } else {
+
+        bool* pinnedValue = nullptr;
+        //specService.getPinnedValueRef(parameterSpec._value, parameters, locationIndex);
+        auto value = specService.getFloatRef(parameterSpec._member, parameters, locationIndex);
+        auto origValue = specService.getFloatRef(parameterSpec._member, origParameters, locationIndex);
+        auto enabledValue = nullptr;
+        //specService.getEnabledValueRef(parameterSpec._value, parameters, locationIndex);
+        auto origEnabledValue = nullptr;
+        //specService.getEnabledValueRef(parameterSpec._value, origParameters, locationIndex);
+        AlienImGui::SliderFloat(
+            AlienImGui::SliderFloatParameters()
+                .name(parameterSpec._name)
+                .textWidth(RightColumnWidth)
+                .min(floatSpec._min)
+                .max(floatSpec._max)
+                .logarithmic(floatSpec._logarithmic)
+                .format(floatSpec._format)
+                .infinity(floatSpec._infinity)
+                .disabledValue(value)
+                .defaultValue(origValue)
+                .defaultEnabledValue(origEnabledValue)
+                .colorDependence(std::holds_alternative<ColorVectorFloatMember>(parameterSpec._member))
+                .tooltip(parameterSpec._tooltip),
+            value,
+            enabledValue,
+            pinnedValue);
     }
 }
 
@@ -304,12 +399,25 @@ bool ParametersSpecGuiService::isVisible(ParameterGroupSpec const& groupSpec, Lo
 
 bool ParametersSpecGuiService::isVisible(ParameterSpec const& parameterSpec, LocationType locationType) const
 {
-    if (std::holds_alternative<BaseValueSpec>(parameterSpec._value) && locationType == LocationType::Base) {
-        return true;
+    if (locationType == LocationType::Base) {
+        if (std::holds_alternative<BoolMember>(parameterSpec._member) || std::holds_alternative<IntMember>(parameterSpec._member)
+            || std::holds_alternative<FloatMember>(parameterSpec._member) || std::holds_alternative<ColorVectorIntMember>(parameterSpec._member)
+            || std::holds_alternative<ColorVectorFloatMember>(parameterSpec._member) || std::holds_alternative<ColorMatrixBoolMember>(parameterSpec._member)
+            || std::holds_alternative<ColorMatrixIntMember>(parameterSpec._member) || std::holds_alternative<ColorMatrixFloatMember>(parameterSpec._member)
+            || std::holds_alternative<BoolZoneValuesMember>(parameterSpec._member) || std::holds_alternative<FloatZoneValuesMember>(parameterSpec._member)
+            || std::holds_alternative<ColorVectorFloatZoneMember>(parameterSpec._member)
+            || std::holds_alternative<ColorMatrixFloatZoneValuesMember>(parameterSpec._member)
+            || std::holds_alternative<ColorTransitionRulesMember>(parameterSpec._member) || std::holds_alternative<FloatGetterSetter>(parameterSpec._member)) {
+            return true;
+        }
     }
-    if (std::holds_alternative<BaseZoneValueSpec>(parameterSpec._value) && locationType != LocationType::Source) {
-        return true;
+    if (locationType == LocationType::Zone) {
+        if (std::holds_alternative<BoolZoneValuesMember>(parameterSpec._member) || std::holds_alternative<FloatZoneValuesMember>(parameterSpec._member)
+            || std::holds_alternative<ColorVectorFloatZoneMember>(parameterSpec._member)
+            || std::holds_alternative<ColorMatrixFloatZoneValuesMember>(parameterSpec._member)
+            || std::holds_alternative<ColorTransitionRulesMember>(parameterSpec._member) || std::holds_alternative<FloatGetterSetter>(parameterSpec._member)) {
+            return true;
+        }
     }
-
     return false;
 }

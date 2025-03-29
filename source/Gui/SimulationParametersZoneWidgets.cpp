@@ -48,7 +48,7 @@ void _SimulationParametersZoneWidgets::process()
 
     auto worldSize = _simulationFacade->getWorldSize();
 
-    ParametersSpecGuiService::get().createWidgetsForParameters(_locationIndex, parameters, origParameters);
+    ParametersSpecGuiService::get().createWidgetsForParameters(parameters, origParameters, _locationIndex);
     AlienImGui::Separator();
     AlienImGui::Separator();
     AlienImGui::Separator();

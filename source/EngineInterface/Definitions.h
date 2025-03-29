@@ -9,6 +9,8 @@
 #include "CellTypeConstants.h"
 
 struct SimulationParameters;
+struct SimulationParametersZoneValues;
+struct ColorTransitionRules;
 
 struct ClusteredDataDescription;
 struct DataDescription;

@@ -8,16 +8,21 @@ class ParametersSpecGuiService
     MAKE_SINGLETON(ParametersSpecGuiService);
 
 public:
-    void createWidgetsForParameters(int locationIndex, SimulationParameters& parameters, SimulationParameters& origParameters) const;
+    void createWidgetsForParameters(SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
 
     void createWidgetsForExpertToggles(SimulationParameters& parameters, SimulationParameters& origParameters) const;
 
 private:
     void createWidgetsFromParameterSpecs(
         std::vector<ParameterSpec> const& parameterSpecs,
-        int locationIndex,
         SimulationParameters& parameters,
-        SimulationParameters& origParameters) const;
+        SimulationParameters& origParameters,
+        int locationIndex) const;
+
+    void createWidgetsFromChar64ParameterSpecs(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
+    void createWidgetsFromBoolParameterSpecs(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
+    void createWidgetsFromIntParameterSpecs(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
+    void createWidgetsFromFloatParameterSpecs(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
 
     enum class LocationType
     {
