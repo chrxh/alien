@@ -2,6 +2,7 @@
 
 #include "EngineConstants.h"
 #include "Colors.h"
+#include "SimulationParametersTypes.h"
 
 /**
  * NOTE: header is also included in kernel code
@@ -24,7 +25,7 @@ struct ColorTransitionRules
 
 struct SimulationParametersZoneValues
 {
-    uint32_t backgroundColor = 0x1b0000;
+    FloatColorRGB backgroundColor = {0.0f, 0.0f, 0.106f};
     float friction = 0.001f;
     float rigidity = 0.0f;
     ColorVector<float> radiationAbsorption = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};

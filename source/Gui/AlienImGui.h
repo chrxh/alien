@@ -9,6 +9,7 @@
 #include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/PreviewDescriptions.h"
 #include "EngineInterface/CellTypeConstants.h"
+#include "EngineInterface/SimulationParametersTypes.h"
 
 #include "Definitions.h"
 
@@ -304,10 +305,10 @@ public:
     {
         MEMBER_DECLARATION(ColorButtonWithPickerParameters, std::string, name, "");
         MEMBER_DECLARATION(ColorButtonWithPickerParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(ColorButtonWithPickerParameters, std::optional<uint32_t>, defaultValue, std::nullopt);
+        MEMBER_DECLARATION(ColorButtonWithPickerParameters, std::optional<FloatColorRGB>, defaultValue, std::nullopt);
         MEMBER_DECLARATION(ColorButtonWithPickerParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
-    static void ColorButtonWithPicker(ColorButtonWithPickerParameters const& parameters, uint32_t& color);
+    static void ColorButtonWithPicker(ColorButtonWithPickerParameters const& parameters, FloatColorRGB& color);
 
     static void NegativeSpacing();
     static void Separator();

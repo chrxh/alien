@@ -14,10 +14,11 @@ class SimulationParametersSpecificationService
 public:
     ParametersSpec const& getSpec();
 
-    Char64* getChar64Ref(MemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const;
     bool* getBoolRef(MemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const;
     int* getIntRef(MemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const;
     float* getFloatRef(MemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const;
+    Char64* getChar64Ref(MemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const;
+    FloatColorRGB* getFloatColorRGBRef(MemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const;
 
     //template <typename T>
     //T* getValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const;

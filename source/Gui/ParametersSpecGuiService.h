@@ -19,10 +19,11 @@ private:
         SimulationParameters& origParameters,
         int locationIndex) const;
 
-    void createWidgetsFromChar64ParameterSpecs(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
-    void createWidgetsFromBoolParameterSpecs(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
-    void createWidgetsFromIntParameterSpecs(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
-    void createWidgetsFromFloatParameterSpecs(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
+    void createWidgetsForBoolValues(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
+    void createWidgetsForIntValues(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
+    void createWidgetsForFloatValues(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
+    void createWidgetsForChar64Values(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
+    void createWidgetsForFloatColorRGBValues(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
 
     enum class LocationType
     {

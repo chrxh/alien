@@ -19,14 +19,6 @@ ParametersSpec const& SimulationParametersSpecificationService::getSpec()
     return _parametersSpec.value();
 }
 
-Char64* SimulationParametersSpecificationService::getChar64Ref(MemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const
-{
-    if (std::holds_alternative<Char64Member>(memberSpec)) {
-        return &(parameters.*std::get<Char64Member>(memberSpec));
-    }
-    CHECK(false);
-}
-
 bool* SimulationParametersSpecificationService::getBoolRef(MemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const
 {
     // Single value
@@ -102,6 +94,30 @@ float* SimulationParametersSpecificationService::getFloatRef(MemberSpec const& m
         } else {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
             return reinterpret_cast<float*>(parameters.zone[index].values.*std::get<ColorMatrixFloatZoneValuesMember>(memberSpec));
+        }
+    }
+    CHECK(false);
+}
+
+Char64* SimulationParametersSpecificationService::getChar64Ref(MemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const
+{
+    if (std::holds_alternative<Char64Member>(memberSpec)) {
+        return &(parameters.*std::get<Char64Member>(memberSpec));
+    }
+    CHECK(false);
+}
+
+FloatColorRGB* SimulationParametersSpecificationService::getFloatColorRGBRef(
+    MemberSpec const& memberSpec,
+    SimulationParameters& parameters,
+    int locationIndex) const
+{
+    if (std::holds_alternative<FloatColorRGBZoneMember>(memberSpec)) {
+        if (locationIndex == 0) {
+            return &(parameters.baseValues.*std::get<FloatColorRGBZoneMember>(memberSpec));
+        } else {
+            auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+            return &(parameters.zone[index].values.*std::get<FloatColorRGBZoneMember>(memberSpec));
         }
     }
     CHECK(false);
@@ -194,7 +210,7 @@ void SimulationParametersSpecificationService::createSpec()
         ParameterGroupSpec()
             .name("Visualization")
             .parameters({
-                ParameterSpec().name("Background color").value(BaseZoneValueSpec().valueAddress(ZONE_VALUE_OFFSET(backgroundColor))).type(ColorPickerSpec()),
+                ParameterSpec().name("Background color").member(&SimulationParametersZoneValues::backgroundColor).type(ColorPickerSpec()),
                 ParameterSpec()
                     .name("Primary cell coloring")
                     .member(&SimulationParameters::primaryCellColoring)
