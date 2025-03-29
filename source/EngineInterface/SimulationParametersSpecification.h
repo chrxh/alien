@@ -123,7 +123,6 @@ struct ParameterSpec
     MEMBER_DECLARATION(ParameterSpec, std::string, name, std::string());
     MEMBER_DECLARATION(ParameterSpec, ValueSpec, value, ValueSpec());
     MEMBER_DECLARATION(ParameterSpec, TypeSpec, type, FloatSpec());
-    MEMBER_DECLARATION(ParameterSpec, ColorDependence, colorDependence, ColorDependence::None);
     MEMBER_DECLARATION(ParameterSpec, std::optional<std::string>, tooltip, std::nullopt);
 };
 

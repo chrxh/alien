@@ -94,19 +94,19 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
         ImGui::PushID(toInt(index));
 
         if (std::holds_alternative<BoolSpec>(parameterSpec._type)) {
-            createWidgetsForBoolValues(parameterSpec, parameters, origParameters, locationIndex);
+            createWidgetsForBoolSpec(parameterSpec, parameters, origParameters, locationIndex);
 
         } else if (std::holds_alternative<IntSpec>(parameterSpec._type)) {
-            createWidgetsForIntValues(parameterSpec, parameters, origParameters, locationIndex);
+            createWidgetsForIntSpec(parameterSpec, parameters, origParameters, locationIndex);
 
         } else if (std::holds_alternative<FloatSpec>(parameterSpec._type)) {
-            createWidgetsForFloatValues(parameterSpec, parameters, origParameters, locationIndex);
+            createWidgetsForFloatSpec(parameterSpec, parameters, origParameters, locationIndex);
 
         } else if (std::holds_alternative<Char64Spec>(parameterSpec._type)) {
-            createWidgetsForChar64Values(parameterSpec, parameters, origParameters, locationIndex);
+            createWidgetsForChar64Spec(parameterSpec, parameters, origParameters, locationIndex);
 
         } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._type)) {
-            createWidgetsForFloatColorRGBValues(parameterSpec, parameters, origParameters, locationIndex);
+            createWidgetsForColorPickerSpec(parameterSpec, parameters, origParameters, locationIndex);
         }
 
         //if (parameterSpec._colorDependence == ColorDependence::Matrix) {
@@ -120,10 +120,6 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
         //    } else if (std::holds_alternative<BoolSpec>(parameterSpec._type)) {
         //    } else if (std::holds_alternative<Char64Spec>(parameterSpec._type)) {
         //    } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._type)) {
-        //        auto value = specService.getValueRef<uint32_t>(parameterSpec._value, parameters, locationIndex);
-        //        auto origValue = specService.getValueRef<uint32_t>(parameterSpec._value, origParameters, locationIndex);
-        //        AlienImGui::ColorButtonWithPicker(
-        //            AlienImGui::ColorButtonWithPickerParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue), *value);
         //    } else if (std::holds_alternative<ColorTransitionSpec>(parameterSpec._type)) {
         //        auto value = specService.getValueRef<ColorTransitionRules>(parameterSpec._value, parameters, locationIndex);
         //        auto origValue = specService.getValueRef<ColorTransitionRules>(parameterSpec._value, origParameters, locationIndex);
@@ -167,7 +163,7 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
     }
 }
 
-void ParametersSpecGuiService::createWidgetsForBoolValues(
+void ParametersSpecGuiService::createWidgetsForBoolSpec(
     ParameterSpec const& parameterSpec,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
@@ -198,7 +194,7 @@ void ParametersSpecGuiService::createWidgetsForBoolValues(
     }
 }
 
-void ParametersSpecGuiService::createWidgetsForIntValues(
+void ParametersSpecGuiService::createWidgetsForIntSpec(
     ParameterSpec const& parameterSpec,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
@@ -249,7 +245,7 @@ void ParametersSpecGuiService::createWidgetsForIntValues(
     }
 }
 
-void ParametersSpecGuiService::createWidgetsForFloatValues(
+void ParametersSpecGuiService::createWidgetsForFloatSpec(
     ParameterSpec const& parameterSpec,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
@@ -293,8 +289,7 @@ void ParametersSpecGuiService::createWidgetsForFloatValues(
                     .format(floatSpec._format)
                     .infinity(floatSpec._infinity)
                     .defaultValue(&origValue)
-                    .tooltip(parameterSpec._tooltip)
-                    .colorDependence(parameterSpec._colorDependence == ColorDependence::Vector),
+                    .tooltip(parameterSpec._tooltip),
                 &value,
                 nullptr,
                 pinnedValue)) {
@@ -332,7 +327,7 @@ void ParametersSpecGuiService::createWidgetsForFloatValues(
     }
 }
 
-void ParametersSpecGuiService::createWidgetsForChar64Values(
+void ParametersSpecGuiService::createWidgetsForChar64Spec(
     ParameterSpec const& parameterSpec,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
@@ -348,7 +343,7 @@ void ParametersSpecGuiService::createWidgetsForChar64Values(
         sizeof(Char64) / sizeof(char));
 }
 
-void ParametersSpecGuiService::createWidgetsForFloatColorRGBValues(
+void ParametersSpecGuiService::createWidgetsForColorPickerSpec(
     ParameterSpec const& parameterSpec,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
