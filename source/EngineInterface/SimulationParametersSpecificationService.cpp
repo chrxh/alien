@@ -1,12 +1,12 @@
 #include "SimulationParametersSpecificationService.h"
 
 #include <Fonts/IconsFontAwesome5.h>
+#include <boost/variant.hpp>
 
 #include "CellTypeStrings.h"
 #include "LocationHelper.h"
 #include "SimulationParametersEditService.h"
 
-#define BASE_VALUE_OFFSET(X) offsetof(SimulationParameters, X)
 #define ZONE_VALUE_OFFSET(X) offsetof(SimulationParametersZoneValues, X)
 #define ZONE_ENABLED_VALUE_OFFSET(X) offsetof(SimulationParametersZoneEnabledValues, X)
 #define EXPERT_VALUE_OFFSET(X) offsetof(ExpertSettingsToggles, X)
@@ -19,114 +19,119 @@ ParametersSpec const& SimulationParametersSpecificationService::getSpec()
     return _parametersSpec.value();
 }
 
-bool* SimulationParametersSpecificationService::getBoolRef(MemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const
+bool* SimulationParametersSpecificationService::getBoolRef(BoolMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const
 {
     // Single value
-    if (std::holds_alternative<BoolMember>(memberSpec)) {
-        return &(parameters.*std::get<BoolMember>(memberSpec));
-    } else if (std::holds_alternative<BoolZoneValuesMember>(memberSpec)) {
+    if (boost::get<BoolMember>(&memberSpec)) {
+        return &(parameters.*boost::get<BoolMember>(memberSpec));
+    } else if (boost::get<BoolZoneValuesMember>(&memberSpec)) {
         if (locationIndex == 0) {
-            return &(parameters.baseValues.*std::get<BoolZoneValuesMember>(memberSpec));
+            return &(parameters.baseValues.*boost::get<BoolZoneValuesMember>(memberSpec));
         } else {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return &(parameters.zone[index].values.*std::get<BoolZoneValuesMember>(memberSpec));
+            return &(parameters.zone[index].values.*boost::get<BoolZoneValuesMember>(memberSpec));
         }
     }
 
     // Color matrix
-    else if (std::holds_alternative<ColorMatrixBoolMember>(memberSpec)) {
-        return reinterpret_cast<bool*>(parameters.*std::get<ColorMatrixBoolMember>(memberSpec));
+    else if (boost::get<ColorMatrixBoolMember>(&memberSpec)) {
+        return reinterpret_cast<bool*>(parameters.*boost::get<ColorMatrixBoolMember>(memberSpec));
     }
+
     CHECK(false);
 }
 
-int* SimulationParametersSpecificationService::getIntRef(MemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const
+int* SimulationParametersSpecificationService::getIntRef(IntMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const
 {
     // Single value
-    if (std::holds_alternative<IntMember>(memberSpec)) {
-        return &(parameters.*std::get<IntMember>(memberSpec));
+    if (boost::get<IntMember>(&memberSpec)) {
+        return &(parameters.*boost::get<IntMember>(memberSpec));
     }
 
     // Color vector
-    else if (std::holds_alternative<ColorVectorIntMember>(memberSpec)) {
-        return parameters.*std::get<ColorVectorIntMember>(memberSpec);
+    else if (boost::get<ColorVectorIntMember>(&memberSpec)) {
+        return parameters.*boost::get<ColorVectorIntMember>(memberSpec);
     }
 
     // Color matrix
-    else if (std::holds_alternative<ColorMatrixIntMember>(memberSpec)) {
-        return reinterpret_cast<int*>(parameters.*std::get<ColorMatrixIntMember>(memberSpec));
+    else if (boost::get<ColorMatrixIntMember>(&memberSpec)) {
+        return reinterpret_cast<int*>(parameters.*boost::get<ColorMatrixIntMember>(memberSpec));
     }
+
     CHECK(false);
 }
 
-float* SimulationParametersSpecificationService::getFloatRef(MemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const
+float* SimulationParametersSpecificationService::getFloatRef(FloatMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const
 {
     // Single value
-    if (std::holds_alternative<FloatMember>(memberSpec)) {
-        return &(parameters.*std::get<FloatMember>(memberSpec));
-    } else if (std::holds_alternative<FloatZoneValuesMember>(memberSpec)) {
+    if (boost::get<FloatMember>(&memberSpec)) {
+        return &(parameters.*boost::get<FloatMember>(memberSpec));
+    } else if (boost::get<FloatZoneValuesMember>(&memberSpec)) {
         if (locationIndex == 0) {
-            return &(parameters.baseValues.*std::get<FloatZoneValuesMember>(memberSpec));
+            return &(parameters.baseValues.*boost::get<FloatZoneValuesMember>(memberSpec));
         } else {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return &(parameters.zone[index].values.*std::get<FloatZoneValuesMember>(memberSpec));
+            return &(parameters.zone[index].values.*boost::get<FloatZoneValuesMember>(memberSpec));
         }
     }
 
     // Color vector
-    else if (std::holds_alternative<ColorVectorFloatMember>(memberSpec)) {
-        return parameters.*std::get<ColorVectorFloatMember>(memberSpec);
-    } else if (std::holds_alternative<ColorVectorFloatZoneMember>(memberSpec)) {
+    else if (boost::get<ColorVectorFloatMember>(&memberSpec)) {
+        return parameters.*boost::get<ColorVectorFloatMember>(memberSpec);
+    } else if (boost::get<ColorVectorFloatZoneValuesMember>(&memberSpec)) {
         if (locationIndex == 0) {
-            return parameters.baseValues.*std::get<ColorVectorFloatZoneMember>(memberSpec);
+            return parameters.baseValues.*boost::get<ColorVectorFloatZoneValuesMember>(memberSpec);
         } else {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return parameters.zone[index].values.*std::get<ColorVectorFloatZoneMember>(memberSpec);
+            return parameters.zone[index].values.*boost::get<ColorVectorFloatZoneValuesMember>(memberSpec);
         }
     }
 
     // Color matrix
-    else if (std::holds_alternative<ColorMatrixFloatMember>(memberSpec)) {
-        return reinterpret_cast<float*>(parameters.*std::get<ColorMatrixFloatMember>(memberSpec));
-    } else if (std::holds_alternative<ColorMatrixFloatZoneValuesMember>(memberSpec)) {
+    else if (boost::get<ColorMatrixFloatMember>(&memberSpec)) {
+        return reinterpret_cast<float*>(parameters.*boost::get<ColorMatrixFloatMember>(memberSpec));
+    } else if (boost::get<ColorMatrixFloatZoneValuesMember>(&memberSpec)) {
         if (locationIndex == 0) {
-            return reinterpret_cast<float*>(parameters.baseValues.*std::get<ColorMatrixFloatZoneValuesMember>(memberSpec));
+            return reinterpret_cast<float*>(parameters.baseValues.*boost::get<ColorMatrixFloatZoneValuesMember>(memberSpec));
         } else {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return reinterpret_cast<float*>(parameters.zone[index].values.*std::get<ColorMatrixFloatZoneValuesMember>(memberSpec));
+            return reinterpret_cast<float*>(parameters.zone[index].values.*boost::get<ColorMatrixFloatZoneValuesMember>(memberSpec));
         }
     }
+
     CHECK(false);
 }
 
-Char64* SimulationParametersSpecificationService::getChar64Ref(MemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const
+char* SimulationParametersSpecificationService::getChar64Ref(Char64MemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const
 {
-    if (std::holds_alternative<Char64Member>(memberSpec)) {
-        return &(parameters.*std::get<Char64Member>(memberSpec));
+    if (boost::get<Char64Member>(&memberSpec)) {
+        return parameters.*boost::get<Char64Member>(memberSpec);
     }
+
     CHECK(false);
-}
+}   
 
 FloatColorRGB* SimulationParametersSpecificationService::getFloatColorRGBRef(
-    MemberSpec const& memberSpec,
+    ColorPickerMemberSpec const& memberSpec,
     SimulationParameters& parameters,
     int locationIndex) const
 {
-    if (std::holds_alternative<FloatColorRGBZoneMember>(memberSpec)) {
+    if (boost::get<FloatColorRGBZoneMember>(&memberSpec)) {
         if (locationIndex == 0) {
-            return &(parameters.baseValues.*std::get<FloatColorRGBZoneMember>(memberSpec));
+            return &(parameters.baseValues.*boost::get<FloatColorRGBZoneMember>(memberSpec));
         } else {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return &(parameters.zone[index].values.*std::get<FloatColorRGBZoneMember>(memberSpec));
+            return &(parameters.zone[index].values.*boost::get<FloatColorRGBZoneMember>(memberSpec));
         }
     }
+
     CHECK(false);
 }
 
 bool* SimulationParametersSpecificationService::getPinnedValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const
 {
-    if (std::holds_alternative<BaseValueSpec>(spec)) {
-        auto baseValueSpec = std::get<BaseValueSpec>(spec);
+    if (boost::get<BaseValueSpec>(&spec)) {
+        auto baseValueSpec = boost::get<BaseValueSpec>(spec);
         if (baseValueSpec._pinnedAddress.has_value()) {
             return reinterpret_cast<bool*>(reinterpret_cast<char*>(&parameters) + baseValueSpec._pinnedAddress.value());
         }
@@ -136,13 +141,13 @@ bool* SimulationParametersSpecificationService::getPinnedValueRef(ValueSpec cons
 
 bool* SimulationParametersSpecificationService::getEnabledValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const
 {
-    if (std::holds_alternative<BaseValueSpec>(spec)) {
-        auto baseValueSpec = std::get<BaseValueSpec>(spec);
+    if (boost::get<BaseValueSpec>(&spec)) {
+        auto baseValueSpec = boost::get<BaseValueSpec>(spec);
         if (baseValueSpec._enabledValueAddress.has_value()) {
             return reinterpret_cast<bool*>(reinterpret_cast<char*>(&parameters) + baseValueSpec._enabledValueAddress.value());
         }
-    } else if (std::holds_alternative<BaseZoneValueSpec>(spec)) {
-        auto baseZoneValueSpec = std::get<BaseZoneValueSpec>(spec);
+    } else if (boost::get<BaseZoneValueSpec>(&spec)) {
+        auto baseZoneValueSpec = boost::get<BaseZoneValueSpec>(spec);
 
         if (locationIndex == 0 && baseZoneValueSpec._enabledBaseValueAddress.has_value()) {
             return reinterpret_cast<bool*>(reinterpret_cast<char*>(&parameters) + baseZoneValueSpec._enabledBaseValueAddress.value());
@@ -205,70 +210,65 @@ void SimulationParametersSpecificationService::createSpec()
 
     _parametersSpec = ParametersSpec().groups({
         ParameterGroupSpec().name("General").parameters({
-            ParameterSpec().name("Project name").member(&SimulationParameters::projectName).type(Char64Spec()),
+            ParameterSpec().name("Project name").reference(Char64Spec().member(Char64Member(&SimulationParameters::projectName))),
         }),
         ParameterGroupSpec()
             .name("Visualization")
             .parameters({
-                ParameterSpec().name("Background color").member(&SimulationParametersZoneValues::backgroundColor).type(ColorPickerSpec()),
+                ParameterSpec().name("Background color").reference(ColorPickerSpec().member(&SimulationParametersZoneValues::backgroundColor)),
                 ParameterSpec()
                     .name("Primary cell coloring")
-                    .member(&SimulationParameters::primaryCellColoring)
-                    .type(AlternativeSpec().alternatives({
-                        {"Energy", {}},
-                        {"Standard cell color", {}},
-                        {"Mutant", {}},
-                        {"Mutant and cell function", {}},
-                        {"Cell state", {}},
-                        {"Genome complexity", {}},
-                        {"Specific cell function",
-                         {ParameterSpec()
-                              .name("Highlighted cell function")
-                              .value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(highlightedCellType)))
-                              .tooltip("The specific cell function type to be highlighted can be selected here.")
-                              .type(AlternativeSpec().alternatives(cellTypeStrings))}},
-                        {"Every cell function", {}},
-                    }))
+                    .reference(AlternativeSpec()
+                                   .member(std::make_shared<AlternativeMemberSpec>(&SimulationParameters::primaryCellColoring))
+                        .alternatives({{"Energy", {}}})
+                                   .alternatives({
+                                       {"Energy", {}},
+                                       {"Standard cell color", {}},
+                                       {"Mutant", {}},
+                                       {"Mutant and cell function", {}},
+                                       {"Cell state", {}},
+                                       {"Genome complexity", {}},
+                                       {"Specific cell function",
+                                        {ParameterSpec()
+                                             .name("Highlighted cell function")
+                                             .reference(AlternativeSpec()
+                                                            .member(std::make_shared<AlternativeMemberSpec>(&SimulationParameters::highlightedCellType))
+                                                            .alternatives(cellTypeStrings))
+                                             .tooltip("The specific cell function type to be highlighted can be selected here.")}},
+                                       {"Every cell function", {}},
+                                   }))
                     .tooltip(coloringTooltip),
                 ParameterSpec()
                     .name("Cell radius")
-                    .member(&SimulationParameters::cellRadius)
-                    .type(FloatSpec().min(0.0f).max(0.5f))
+                    .reference(FloatSpec().member(&SimulationParameters::cellRadius).min(0.0f).max(0.5f))
                     .tooltip("Specifies the radius of the drawn cells in unit length."),
                 ParameterSpec()
                     .name("Zoom level for neural activity")
-                    .member(&SimulationParameters::zoomLevelForNeuronVisualization)
-                    .type(FloatSpec().min(0.0f).max(32.f).infinity(true))
+                    .reference(FloatSpec().member(&SimulationParameters::zoomLevelForNeuronVisualization).min(0.0f).max(32.f).infinity(true))
                     .tooltip("The zoom level from which the neuronal activities become visible."),
                 ParameterSpec()
                     .name("Attack visualization")
-                    .member(&SimulationParameters::attackVisualization)
-                    .type(BoolSpec())
+                    .reference(BoolSpec().member(&SimulationParameters::attackVisualization))
                     .tooltip("If activated, successful attacks of attacker cells are visualized."),
                 ParameterSpec()
                     .name("Muscle movement visualization")
-                    .member(&SimulationParameters::muscleMovementVisualization)
-                    .type(BoolSpec())
+                    .reference(BoolSpec().member(&SimulationParameters::muscleMovementVisualization))
                     .tooltip("If activated, the direction in which muscle cells are moving are visualized."),
                 ParameterSpec()
                     .name("Borderless rendering")
-                    .member(&SimulationParameters::borderlessRendering)
-                    .type(BoolSpec())
+                    .reference(BoolSpec().member(&SimulationParameters::borderlessRendering))
                     .tooltip("If activated, the simulation is rendered periodically in the view port."),
                 ParameterSpec()
                     .name("Grid lines")
-                    .member(&SimulationParameters::gridLines)
-                    .type(BoolSpec())
+                    .reference(BoolSpec().member(&SimulationParameters::gridLines))
                     .tooltip("This option draws a suitable grid in the background depending on the zoom level."),
                 ParameterSpec()
                     .name("Mark reference domain")
-                    .member(&SimulationParameters::markReferenceDomain)
-                    .type(BoolSpec())
+                    .reference(BoolSpec().member(&SimulationParameters::markReferenceDomain))
                     .tooltip("This option draws a suitable grid in the background depending on the zoom level."),
                 ParameterSpec()
                     .name("Show radiation sources")
-                    .member(&SimulationParameters::showRadiationSources)
-                    .type(BoolSpec())
+                    .reference(BoolSpec().member(&SimulationParameters::showRadiationSources))
                     .tooltip("This option draws red crosses in the center of radiation sources."),
             }),
         ParameterGroupSpec()
@@ -276,8 +276,7 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Time step size")
-                    .member(&SimulationParameters::timestepSize)
-                    .type(FloatSpec().min(0.05f).max(1.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::timestepSize).min(0.05f).max(1.0f))
                     .tooltip("The time duration calculated in a single simulation step. Smaller values increase the accuracy of the simulation while larger "
                              "values can lead to numerical instabilities."),
             }),
@@ -286,54 +285,51 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Motion type")
-                    .member(&SimulationParameters::motionType)
-                    .type(AlternativeSpec().alternatives(
-                        {{"Fluid solver",
-                          {
-                              ParameterSpec()
-                                  .name("Smoothing length")
-                                  .member(&SimulationParameters::smoothingLength)
-                                  .tooltip("The smoothing length determines the region of influence of the neighboring particles for the calculation of "
-                                           "density, pressure and viscosity. Values that are too small lead to numerical instabilities, while values that "
-                                           "are too large cause the particles to drift apart.")
-                                  .type(FloatSpec().min(0).max(3.0f)),
-                              ParameterSpec()
-                                  .name("Pressure")
-                                  .member(&SimulationParameters::pressureStrength)
-                                  .tooltip("This parameter allows to control the strength of the pressure.")
-                                  .type(FloatSpec().min(0).max(0.3f)),
-                              ParameterSpec()
-                                  .name("Viscosity")
-                                  .member(&SimulationParameters::viscosityStrength)
-                                  .tooltip("This parameter be used to control the strength of the viscosity. Larger values lead to a smoother movement.")
-                                  .type(FloatSpec().min(0).max(0.3f)),
-                          }},
-                         {"Collision-based solver",
-                          {
-                              ParameterSpec()
-                                  .name("Repulsion strength")
-                                  .member(&SimulationParameters::repulsionStrength)
-                                  .tooltip("The strength of the repulsive forces, between two cells that are not connected.")
-                                  .type(FloatSpec().min(0).max(0.3f)),
-                              ParameterSpec()
-                                  .name("Maximum collision distance")
-                                  .member(&SimulationParameters::maxCollisionDistance)
-                                  .tooltip("Maximum distance up to which a collision of two cells is possible.")
-                                  .type(FloatSpec().min(0).max(3.0f)),
-                          }}}))
+                    .reference(
+                        AlternativeSpec()
+                            .member(std::make_shared<AlternativeMemberSpec>(&SimulationParameters::motionType))
+                            .alternatives(
+                                {{"Fluid solver",
+                                  {
+                                      ParameterSpec()
+                                          .name("Smoothing length")
+                                          .reference(FloatSpec().member(&SimulationParameters::smoothingLength).min(0).max(3.0f))
+                                          .tooltip(
+                                              "The smoothing length determines the region of influence of the neighboring particles for the calculation of "
+                                              "density, pressure and viscosity. Values that are too small lead to numerical instabilities, while values that "
+                                              "are too large cause the particles to drift apart."),
+                                      ParameterSpec()
+                                          .name("Pressure")
+                                          .reference(FloatSpec().member(&SimulationParameters::pressureStrength).min(0).max(0.3f))
+                                          .tooltip("This parameter allows to control the strength of the pressure."),
+                                      ParameterSpec()
+                                          .name("Viscosity")
+                                          .reference(FloatSpec().member(&SimulationParameters::viscosityStrength).min(0).max(0.3f))
+                                          .tooltip(
+                                              "This parameter be used to control the strength of the viscosity. Larger values lead to a smoother movement."),
+                                  }},
+                                 {"Collision-based solver",
+                                  {
+                                      ParameterSpec()
+                                          .name("Repulsion strength")
+                                          .reference(FloatSpec().member(&SimulationParameters::repulsionStrength).min(0).max(0.3f))
+                                          .tooltip("The strength of the repulsive forces, between two cells that are not connected."),
+                                      ParameterSpec()
+                                          .name("Maximum collision distance")
+                                          .reference(FloatSpec().member(&SimulationParameters::maxCollisionDistance).min(0).max(3.0f))
+                                          .tooltip("Maximum distance up to which a collision of two cells is possible."),
+                                  }}}))
                     .tooltip(std::string(
                         "The algorithm for the particle motions is defined here. If 'Fluid dynamics' is selected, an SPH fluid solver is used for the "
                         "calculation of the forces. The particles then behave like (compressible) liquids or gases. The other option 'Collision-based' "
                         "calculates the forces based on particle collisions and should be preferred for mechanical simulation with solids.")),
                 ParameterSpec()
                     .name("Friction")
-                    .member(&SimulationParametersZoneValues::friction)
-                    .type(FloatSpec().min(0).max(1.0f).logarithmic(true).format("%.4f"))
+                    .reference(FloatSpec().member(&SimulationParametersZoneValues::friction).min(0).max(1.0f).logarithmic(true).format("%.4f"))
                     .tooltip("This specifies the fraction of the velocity that is slowed down per time step."),
                 ParameterSpec()
                     .name("Rigidity")
-                    .member(&SimulationParametersZoneValues::rigidity)
-                    .type(FloatSpec().min(0).max(3.0f))
+                    .reference(FloatSpec().member(&SimulationParametersZoneValues::rigidity).min(0).max(3.0f))
                     .tooltip("Controls the rigidity of connected cells. A higher value will cause connected cells to move more uniformly as a rigid body."),
             }),
         ParameterGroupSpec()
@@ -341,18 +337,15 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Maximum velocity")
-                    .member(&SimulationParameters::maxVelocity)
-                    .type(FloatSpec().min(0.0f).max(6.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::maxVelocity).min(0.0f).max(6.0f))
                     .tooltip("Maximum velocity that a cell can reach."),
                 ParameterSpec()
                     .name("Maximum force")
-                    .member(&SimulationParametersZoneValues::cellMaxForce)
-                    .type(FloatSpec().min(0.0f).max(3.0f))
+                    .reference(FloatSpec().member(&SimulationParametersZoneValues::cellMaxForce).min(0.0f).max(3.0f))
                     .tooltip("Maximum force that can be applied to a cell without causing it to disintegrate."),
                 ParameterSpec()
                     .name("Minimum distance")
-                    .member(&SimulationParameters::minCellDistance)
-                    .type(FloatSpec().min(0.0f).max(1.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::minCellDistance).min(0.0f).max(1.0f))
                     .tooltip("Minimum distance between two cells."),
             }),
         ParameterGroupSpec()
@@ -360,18 +353,22 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Maximum distance")
-                    .member(&SimulationParameters::maxBindingDistance)
-                    .type(FloatSpec().min(0.0f).max(5.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::maxBindingDistance).min(0.0f).max(5.0f))
                     .tooltip("Maximum distance up to which a connection of two cells is possible."),
                 ParameterSpec()
                     .name("Fusion velocity")
-                    .member(&SimulationParametersZoneValues::cellFusionVelocity)
-                    .type(FloatSpec().min(0.0f).max(2.0f))
+                    .reference(FloatSpec().member(&SimulationParametersZoneValues::cellFusionVelocity).min(0.0f).max(2.0f))
                     .tooltip("Maximum force that can be applied to a cell without causing it to disintegrate."),
                 ParameterSpec()
                     .name("Maximum energy")
-                    .member(&SimulationParametersZoneValues::cellMaxBindingEnergy)
-                    .type(FloatSpec().min(50.0f).max(10000000.0f).logarithmic(true).infinity(true).format("%.0f"))
+                    .reference(
+                        FloatSpec()
+                            .member(&SimulationParametersZoneValues::cellMaxBindingEnergy)
+                            .min(50.0f)
+                            .max(10000000.0f)
+                            .logarithmic(true)
+                            .infinity(true)
+                            .format("%.0f"))
                     .tooltip("Maximum energy of a cell at which it can contain bonds to adjacent cells. If the energy of a cell exceeds this "
                              "value, all bonds will be destroyed."),
             }),
@@ -380,46 +377,47 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Relative strength")
-                    .member(FloatGetterSetter{radiationStrengthGetter, radiationStrengthSetter})
-                    .type(FloatSpec().min(0.0f).max(1.0f))
+                    .reference(FloatSpec().member(FloatGetterSetter{radiationStrengthGetter, radiationStrengthSetter}).min(0.0f).max(1.0f))
                     .tooltip("Cells can emit energy particles over time. A portion of this energy can be released directly near the cell, while the rest is "
                              "utilized by one of the available radiation sources. This parameter determines the fraction of energy assigned to the emitted "
                              "energy particle in the vicinity of the cell. Values between 0 and 1 are permitted."),
                 ParameterSpec()
                     .name("Absorption factor")
-                    .member(&SimulationParametersZoneValues::radiationAbsorption)
-                    .type(FloatSpec().min(0.0f).max(1.0f).logarithmic(true).format("%.4f"))
+                    .reference(FloatSpec().member(&SimulationParametersZoneValues::radiationAbsorption).min(0.0f).max(1.0f).logarithmic(true).format("%.4f"))
                     .tooltip("The fraction of energy that a cell can absorb from an incoming energy particle can be specified here."),
                 ParameterSpec()
                     .name("Radiation type I: Strength")
-                    .member(&SimulationParametersZoneValues::radiationType1_strength)
-                    .type(FloatSpec().min(0.0f).max(0.01f).logarithmic(true).format("%.6f"))
+                    .reference(
+                        FloatSpec().member(&SimulationParametersZoneValues::radiationType1_strength).min(0.0f).max(0.01f).logarithmic(true).format("%.6f"))
                     .tooltip("Indicates how energetic the emitted particles of aged cells are."),
                 ParameterSpec()
                     .name("Radiation type I: Minimum age")
-                    .member(&SimulationParameters::radiationType1_minimumAge)
-                    .type(IntSpec().min(0).max(10000000).logarithmic(true).infinity(true))
+                    .reference(IntSpec().member(&SimulationParameters::radiationType1_minimumAge).min(0).max(10000000).logarithmic(true).infinity(true))
                     .tooltip("The minimum age of a cell can be defined here, from which it emits energy particles."),
                 ParameterSpec()
                     .name("Radiation type II: Strength")
-                    .member(&SimulationParameters::radiationType2_strength)
-                    .type(FloatSpec().min(0.0f).max(0.01f).logarithmic(true).format("%.6f"))
+                    .reference(FloatSpec().member(&SimulationParameters::radiationType2_strength).min(0.0f).max(0.01f).logarithmic(true).format("%.6f"))
                     .tooltip("Indicates how energetic the emitted particles of high energy cells are."),
                 ParameterSpec()
                     .name("Radiation type II: Energy threshold")
-                    .member(&SimulationParameters::radiationType2_energyThreshold)
-                    .type(FloatSpec().min(0.0f).max(100000.0f).logarithmic(true).infinity(true).format("%.1f"))
+                    .reference(
+                        FloatSpec()
+                            .member(&SimulationParameters::radiationType2_energyThreshold)
+                            .min(0.0f)
+                            .max(100000.0f)
+                            .logarithmic(true)
+                            .infinity(true)
+                            .format("%.1f"))
                     .tooltip("The minimum energy of a cell can be defined here, from which it emits energy particles."),
                 ParameterSpec()
                     .name("Minimum split energy")
-                    .member(&SimulationParameters::particleSplitEnergy)
-                    .type(FloatSpec().min(1.0f).max(10000.0f).logarithmic(true).infinity(true).format("%.0f"))
+                    .reference(
+                        FloatSpec().member(&SimulationParameters::particleSplitEnergy).min(1.0f).max(10000.0f).logarithmic(true).infinity(true).format("%.0f"))
                     .tooltip("The minimum energy of an energy particle after which it can split into two particles, whereby it receives a small momentum. The "
                              "splitting does not occur immediately, but only after a certain time."),
                 ParameterSpec()
                     .name("Energy to cell transformation")
-                    .member(&SimulationParameters::particleTransformationAllowed)
-                    .type(BoolSpec())
+                    .reference(BoolSpec().member(&SimulationParameters::particleTransformationAllowed))
                     .tooltip("If activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal energy value."),
             }),
         ParameterGroupSpec()
@@ -427,18 +425,15 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Maximum age")
-                    .member(&SimulationParameters::maxCellAge)
-                    .type(IntSpec().min(1).max(1e7).logarithmic(true).infinity(true))
+                    .reference(IntSpec().member(&SimulationParameters::maxCellAge).min(1).max(1e7).logarithmic(true).infinity(true))
                     .tooltip("Defines the maximum age of a cell. If a cell exceeds this age it will be transformed to an energy particle."),
                 ParameterSpec()
                     .name("Minimum energy")
-                    .member(&SimulationParametersZoneValues::minCellEnergy)
-                    .type(FloatSpec().min(10.0f).max(200.0f))
+                    .reference(FloatSpec().member(&SimulationParametersZoneValues::minCellEnergy).min(10.0f).max(200.0f))
                     .tooltip("Minimum energy a cell needs to exist."),
                 ParameterSpec()
                     .name("Normal energy")
-                    .member(&SimulationParameters::normalCellEnergy)
-                    .type(FloatSpec().min(10.0f).max(200.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::normalCellEnergy).min(10.0f).max(200.0f))
                     .tooltip(
                         "The normal energy value of a cell is defined here. This is used as a reference value in various contexts: "
                         "\n\n" ICON_FA_CHEVRON_RIGHT
@@ -450,15 +445,15 @@ void SimulationParametersSpecificationService::createSpec()
                         "cells is activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal value."),
                 ParameterSpec()
                     .name("Decay rate of dying cells")
-                    .member(&SimulationParametersZoneValues::cellDeathProbability)
-                    .type(FloatSpec().min(1e-6f).max(1e-1f).format("%.6f").logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParametersZoneValues::cellDeathProbability).min(1e-6f).max(1e-1f).format("%.6f").logarithmic(true))
                     .tooltip("The probability per time step with which a cell will disintegrate (i.e. transform into an energy particle) when it is in the "
                              "state 'Dying'. This can occur when one of the following conditions is satisfied:\n\n" ICON_FA_CHEVRON_RIGHT
                              " The cell has too low energy.\n\n" ICON_FA_CHEVRON_RIGHT " The cell has exceeded its maximum age."),
                 ParameterSpec()
                     .name("Cell death consequences")
-                    .member(&SimulationParameters::cellDeathConsequences)
-                    .type(AlternativeSpec().alternatives({{"None", {}}, {"Entire creature dies", {}}, {"Detached creature parts die", {}}}))
+                    .reference(AlternativeSpec()
+                                   .member(std::make_shared<AlternativeMemberSpec>(&SimulationParameters::cellDeathConsequences))
+                                   .alternatives({{"None", {}}, {"Entire creature dies", {}}, {"Detached creature parts die", {}}}))
                     .tooltip("Here one can define what happens to the organism when one of its cells is in the 'Dying' state.\n\n" ICON_FA_CHEVRON_RIGHT
                              " None: Only the cell dies.\n\n" ICON_FA_CHEVRON_RIGHT
                              " Entire creature dies: All the cells of the organism will also die.\n\n" ICON_FA_CHEVRON_RIGHT
@@ -470,92 +465,83 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Neural nets")
-                    .member(&SimulationParametersZoneValues::copyMutationNeuronData)
-                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParametersZoneValues::copyMutationNeuronData).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip(
                         "This type of mutation can change the weights, biases and activation functions of neural networks of each neuron cell encoded in the "
                         "genome."),
                 ParameterSpec()
                     .name("Cell properties")
-                    .member(&SimulationParametersZoneValues::copyMutationCellProperties)
-                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(
+                        FloatSpec().member(&SimulationParametersZoneValues::copyMutationCellProperties).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation changes a random property (e.g. (input) execution order number, required energy, block output and "
                              "function-specific properties such as minimum density for sensors, neural net weights etc.). The spatial structure, color, cell "
                              "function type and self-replication capabilities are not changed. This mutation is applied to each encoded cell in the genome."),
                 ParameterSpec()
                     .name("Geometry")
-                    .member(&SimulationParametersZoneValues::copyMutationGeometry)
-                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParametersZoneValues::copyMutationGeometry).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation changes the geometry type, connection distance, stiffness and single construction flag. The probability of "
                              "a change is given by the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Custom geometry")
-                    .member(&SimulationParametersZoneValues::copyMutationCustomGeometry)
-                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(
+                        FloatSpec().member(&SimulationParametersZoneValues::copyMutationCustomGeometry).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation only changes angles and required connections of custom geometries. The probability of a change is given by "
                              "the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Cell function type")
-                    .member(&SimulationParametersZoneValues::copyMutationCellType)
-                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParametersZoneValues::copyMutationCellType).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation changes the type of cell function. The changed cell function will have random properties. The probability "
                              "of a change is given by the specified value times the number of coded cells in the genome. If the flag 'Preserve "
                              "self-replication' is disabled it can also alter self-replication capabilities by changing a constructor to "
                              "something else or vice versa."),
                 ParameterSpec()
                     .name("Insertion")
-                    .member(&SimulationParametersZoneValues::copyMutationInsertion)
-                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParametersZoneValues::copyMutationInsertion).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation inserts a new cell description to the genome at a random position. The probability of a change is given by "
                              "the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Deletion")
-                    .member(&SimulationParametersZoneValues::copyMutationDeletion)
-                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParametersZoneValues::copyMutationDeletion).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation deletes a cell description from the genome at a random position. The probability of a change is given by "
                              "the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Translation")
-                    .member(&SimulationParametersZoneValues::copyMutationTranslation)
-                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(
+                        FloatSpec().member(&SimulationParametersZoneValues::copyMutationTranslation).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation moves a block of cell descriptions from the genome at a random position to a new random position."),
                 ParameterSpec()
                     .name("Duplication")
-                    .member(&SimulationParametersZoneValues::copyMutationDuplication)
-                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(
+                        FloatSpec().member(&SimulationParametersZoneValues::copyMutationDuplication).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation copies a block of cell descriptions from the genome at a random position to a new random position."),
                 ParameterSpec()
                     .name("Individual cell color")
-                    .member(&SimulationParametersZoneValues::copyMutationCellColor)
-                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParametersZoneValues::copyMutationCellColor).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation alters the color of a single cell descriptions in a genome by using the specified color transitions. The "
                              "probability of a change is given by the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Sub-genome color")
-                    .member(&SimulationParametersZoneValues::copyMutationSubgenomeColor)
-                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(
+                        FloatSpec().member(&SimulationParametersZoneValues::copyMutationSubgenomeColor).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation alters the color of all cell descriptions in a sub-genome by using the specified color transitions."),
                 ParameterSpec()
                     .name("Genome color")
-                    .member(&SimulationParametersZoneValues::copyMutationGenomeColor)
-                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(
+                        FloatSpec().member(&SimulationParametersZoneValues::copyMutationGenomeColor).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation alters the color of all cell descriptions in a genome by using the specified color transitions."),
                 ParameterSpec()
                     .name("Color transitions")
-                    .member(&SimulationParameters::copyMutationColorTransitions)
-                    .type(BoolSpec())
+                    .reference(BoolSpec().member(&SimulationParameters::copyMutationColorTransitions))
                     .tooltip("The color transitions are used for color mutations. The row index indicates the source color and the column index the target "
                              "color."),
                 ParameterSpec()
                     .name("Prevent genome depth increase")
-                    .member(&SimulationParameters::copyMutationPreventDepthIncrease)
-                    .type(BoolSpec())
+                    .reference(BoolSpec().member(&SimulationParameters::copyMutationPreventDepthIncrease))
                     .tooltip("A genome has a tree-like structure because it can contain sub-genomes. If this flag is activated, the mutations will "
                              "not increase the depth of the genome structure."),
                 ParameterSpec()
                     .name("Mutate self-replication")
-                    .member(&SimulationParameters::copyMutationSelfReplication)
-                    .type(BoolSpec())
+                    .reference(BoolSpec().member(&SimulationParameters::copyMutationSelfReplication))
                     .tooltip("If activated, a mutation can also alter self-replication capabilities in the genome by changing a constructor cell to "
                              "something else or vice versa."),
             }),
@@ -564,13 +550,11 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Energy cost")
-                    .member(&SimulationParametersZoneValues::attackerEnergyCost)
-                    .type(FloatSpec().min(0).max(1.0f).logarithmic(true).format("%.5f"))
+                    .reference(FloatSpec().member(&SimulationParametersZoneValues::attackerEnergyCost).min(0).max(1.0f).logarithmic(true).format("%.5f"))
                     .tooltip("Amount of energy lost by an attempted attack of a cell in form of emitted energy particles."),
                 ParameterSpec()
                     .name("Food chain color matrix")
-                    .member(&SimulationParametersZoneValues::attackerFoodChainColorMatrix)
-                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.2f"))
+                    .reference(FloatSpec().member(&SimulationParametersZoneValues::attackerFoodChainColorMatrix).min(0.0f).max(1.0f).format("%.2f"))
                     .tooltip(
                         "This matrix can be used to determine how well one cell can attack another cell. The color of the attacking cell correspond to the "
                         "row number and the color of the attacked cell to the column number. A value of 0 means that the attacked cell cannot be digested, "
@@ -578,24 +562,20 @@ void SimulationParametersSpecificationService::createSpec()
                         "a zero is entered in row 2 (red) and column 3 (green), it means that red cells cannot eat green cells."),
                 ParameterSpec()
                     .name("Attack strength")
-                    .member(&SimulationParameters::attackerStrength)
-                    .type(FloatSpec().min(0).max(0.5f).logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::attackerStrength).min(0).max(0.5f).logarithmic(true))
                     .tooltip("Indicates the portion of energy through which a successfully attacked cell is weakened. However, this energy portion can be "
                              "influenced by other factors adjustable within the attacker's simulation parameters."),
                 ParameterSpec()
                     .name("Attack radius")
-                    .member(&SimulationParameters::attackerRadius)
-                    .type(FloatSpec().min(0).max(3.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::attackerRadius).min(0).max(3.0f))
                     .tooltip("The maximum distance over which an attacker cell can attack another cell."),
                 ParameterSpec()
                     .name("Complex creature protection")
-                    .member(&SimulationParametersZoneValues::attackerComplexCreatureProtection)
-                    .type(FloatSpec().min(0).max(20.0f).format("%.2f"))
+                    .reference(FloatSpec().member(&SimulationParametersZoneValues::attackerComplexCreatureProtection).min(0).max(20.0f).format("%.2f"))
                     .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with more complex genomes."),
                 ParameterSpec()
                     .name("Destroy cells")
-                    .member(&SimulationParameters::attackerDestroyCells)
-                    .type(BoolSpec())
+                    .reference(BoolSpec().member(&SimulationParameters::attackerDestroyCells))
                     .tooltip("If activated, the attacker cell is able to destroy other cells. If deactivated, it only damages them."),
             }),
         ParameterGroupSpec()
@@ -603,13 +583,11 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Connection distance")
-                    .member(&SimulationParameters::constructorConnectingCellDistance)
-                    .type(FloatSpec().min(0.1f).max(3.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::constructorConnectingCellDistance).min(0.1f).max(3.0f))
                     .tooltip("The constructor can automatically connect constructed cells to other cells in the vicinity within this distance."),
                 ParameterSpec()
                     .name("Completeness check")
-                    .member(&SimulationParameters::constructorCompletenessCheck)
-                    .type(BoolSpec())
+                    .reference(BoolSpec().member(&SimulationParameters::constructorCompletenessCheck))
                     .tooltip("If activated, a self-replication process can only start when all other non-self-replicating constructors in the cell network are "
                              "finished."),
             }),
@@ -618,13 +596,11 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Anti-attacker strength")
-                    .member(&SimulationParameters::defenderAntiAttackerStrength)
-                    .type(FloatSpec().min(0.0f).max(5.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::defenderAntiAttackerStrength).min(0.0f).max(5.0f))
                     .tooltip("If an attacked cell is connected to defender cells or itself a defender cell the attack strength is reduced by this factor."),
                 ParameterSpec()
                     .name("Anti-injector strength")
-                    .member(&SimulationParameters::defenderAntiInjectorStrength)
-                    .type(FloatSpec().min(0.0f).max(5.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::defenderAntiInjectorStrength).min(0.0f).max(5.0f))
                     .tooltip("If a constructor cell is attacked by an injector and connected to defender cells, the injection duration is increased by this "
                              "factor."),
             }),
@@ -633,13 +609,11 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Injection radius")
-                    .member(&SimulationParameters::injectorInjectionRadius)
-                    .type(FloatSpec().min(0.1f).max(4.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::injectorInjectionRadius).min(0.1f).max(4.0f))
                     .tooltip("The maximum distance over which an injector cell can infect another cell."),
                 ParameterSpec()
                     .name("Injection time")
-                    .member(&SimulationParameters::injectorInjectionTime)
-                    .type(IntSpec().min(0).max(100000).logarithmic(true))
+                    .reference(IntSpec().member(&SimulationParameters::injectorInjectionTime).min(0).max(100000).logarithmic(true))
                     .tooltip("The number of activations an injector cell requires to infect another cell. One activation usually takes 6 time steps. The row "
                              "number determines the color of the injector cell, while the column number corresponds to the color of the infected cell."),
             }),
@@ -648,24 +622,20 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Energy cost")
-                    .member(&SimulationParameters::muscleEnergyCost)
-                    .type(FloatSpec().min(0).max(5.0f).format("%.5f").logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::muscleEnergyCost).min(0).max(5.0f).format("%.5f").logarithmic(true))
                     .tooltip("Amount of energy lost by a muscle action of a cell in form of emitted energy particles."),
                 ParameterSpec()
                     .name("Movement acceleration")
-                    .member(&SimulationParameters::muscleMovementAcceleration)
-                    .type(FloatSpec().min(0).max(10.0f).logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::muscleMovementAcceleration).min(0).max(10.0f).logarithmic(true))
                     .tooltip("The maximum value by which a muscle cell can modify its velocity during activation. This parameter applies only to muscle cells "
                              "which are in movement mode."),
                 ParameterSpec()
                     .name("Crawling acceleration")
-                    .member(&SimulationParameters::muscleCrawlingAcceleration)
-                    .type(FloatSpec().min(0).max(10.0f).logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::muscleCrawlingAcceleration).min(0).max(10.0f).logarithmic(true))
                     .tooltip("Amount of energy lost by a muscle action of a cell in form of emitted energy particles."),
                 ParameterSpec()
                     .name("Bending acceleration")
-                    .member(&SimulationParameters::muscleBendingAcceleration)
-                    .type(FloatSpec().min(0).max(10.0f).logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::muscleBendingAcceleration).min(0).max(10.0f).logarithmic(true))
                     .tooltip("The maximum value by which a muscle cell can modify its velocity during a bending action. This parameter applies "
                              "only to muscle cells which are in bending mode."),
             }),
@@ -674,8 +644,7 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Radius")
-                    .member(&SimulationParameters::sensorRadius)
-                    .type(FloatSpec().min(10.0f).max(800.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::sensorRadius).min(10.0f).max(800.0f))
                     .tooltip("The maximum radius in which a sensor cell can detect mass concentrations."),
             }),
         ParameterGroupSpec()
@@ -683,18 +652,15 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Energy distribution radius")
-                    .member(&SimulationParameters::transmitterEnergyDistributionRadius)
-                    .type(FloatSpec().min(0).max(5.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::transmitterEnergyDistributionRadius).min(0).max(5.0f))
                     .tooltip("The maximum distance over which a transmitter cell transfers its additional energy to nearby transmitter or constructor cells."),
                 ParameterSpec()
                     .name("Energy distribution Value")
-                    .member(&SimulationParameters::transmitterEnergyDistributionValue)
-                    .type(FloatSpec().min(0).max(20.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::transmitterEnergyDistributionValue).min(0).max(20.0f))
                     .tooltip("The amount of energy which a transmitter cell can transfer to nearby transmitter or constructor cells or to connected cells."),
                 ParameterSpec()
                     .name("Same creature energy distribution")
-                    .member(&SimulationParameters::transmitterEnergyDistributionSameCreature)
-                    .type(BoolSpec())
+                    .reference(BoolSpec().member(&SimulationParameters::transmitterEnergyDistributionSameCreature))
                     .tooltip("If activated, the transmitter cells can only transfer energy to nearby cells belonging to the same creature."),
             }),
         ParameterGroupSpec()
@@ -702,8 +668,7 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Radius")
-                    .member(&SimulationParameters::reconnectorRadius)
-                    .type(FloatSpec().min(0).max(3.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::reconnectorRadius).min(0).max(3.0f))
                     .tooltip("The maximum radius in which a reconnector cell can establish or destroy connections to other cells."),
             }),
         ParameterGroupSpec()
@@ -711,13 +676,11 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Blast radius")
-                    .member(&SimulationParameters::detonatorRadius)
-                    .type(FloatSpec().min(0).max(10.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::detonatorRadius).min(0).max(10.0f))
                     .tooltip("The radius of the detonation."),
                 ParameterSpec()
                     .name("Chain explosion probability")
-                    .member(&SimulationParameters::detonatorChainExplosionProbability)
-                    .type(FloatSpec().min(0).max(1.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::detonatorChainExplosionProbability).min(0).max(1.0f))
                     .tooltip("The probability that the explosion of one detonator will trigger the explosion of other detonators within the blast radius."),
             }),
         ParameterGroupSpec()
@@ -726,23 +689,21 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Low genome complexity penalty")
-                    .member(&SimulationParametersZoneValues::radiationAbsorptionLowGenomeComplexityPenalty)
-                    .type(FloatSpec().min(0).max(1.0f).format("%.2f"))
+                    .reference(
+                        FloatSpec().member(&SimulationParametersZoneValues::radiationAbsorptionLowGenomeComplexityPenalty).min(0).max(1.0f).format("%.2f"))
                     .tooltip("When this parameter is increased, cells with fewer genome complexity will absorb less energy from an incoming energy particle."),
                 ParameterSpec()
                     .name("Low connection penalty")
-                    .member(&SimulationParameters::radiationAbsorptionLowConnectionPenalty)
-                    .type(FloatSpec().min(0).max(5.0f).format("%.1f"))
+                    .reference(FloatSpec().member(&SimulationParameters::radiationAbsorptionLowConnectionPenalty).min(0).max(5.0f).format("%.1f"))
                     .tooltip("When this parameter is increased, cells with fewer cell connections will absorb less energy from an incoming energy particle."),
                 ParameterSpec()
                     .name("High velocity penalty")
-                    .member(&SimulationParameters::radiationAbsorptionHighVelocityPenalty)
-                    .type(FloatSpec().min(0).max(30.0f).logarithmic(true).format("%.2f"))
+                    .reference(
+                        FloatSpec().member(&SimulationParameters::radiationAbsorptionHighVelocityPenalty).min(0).max(30.0f).logarithmic(true).format("%.2f"))
                     .tooltip("When this parameter is increased, fast moving cells will absorb less energy from an incoming energy particle."),
                 ParameterSpec()
                     .name("Low velocity penalty")
-                    .member(&SimulationParametersZoneValues::radiationAbsorptionLowVelocityPenalty)
-                    .type(FloatSpec().min(0).max(1.0f).format("%.2f"))
+                    .reference(FloatSpec().member(&SimulationParametersZoneValues::radiationAbsorptionLowVelocityPenalty).min(0).max(1.0f).format("%.2f"))
                     .tooltip("When this parameter is increased, slowly moving cells will absorb less energy from an incoming energy particle."),
             }),
         ParameterGroupSpec()
@@ -751,18 +712,15 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Same mutant protection")
-                    .member(&SimulationParameters::attackerSameMutantProtection)
-                    .type(FloatSpec().min(0).max(1.0f).format("%.2f"))
+                    .reference(FloatSpec().member(&SimulationParameters::attackerSameMutantProtection).min(0).max(1.0f).format("%.2f"))
                     .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with the same mutation id."),
                 ParameterSpec()
                     .name("New complex mutant protection")
-                    .member(&SimulationParametersZoneValues::attackerNewComplexMutantProtection)
-                    .type(FloatSpec().min(0).max(1.0f))
+                    .reference(FloatSpec().member(&SimulationParametersZoneValues::attackerNewComplexMutantProtection).min(0).max(1.0f))
                     .tooltip("A high value protects new mutants with equal or greater genome complexity from being attacked."),
                 ParameterSpec()
                     .name("Sensor detection factor")
-                    .member(&SimulationParameters::attackerSensorDetectionFactor)
-                    .type(FloatSpec().min(0).max(1.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::attackerSensorDetectionFactor).min(0).max(1.0f))
                     .tooltip("This parameter controls whether the target must be previously detected with sensors in order to be attacked. The larger this "
                              "value is, the less energy can be gained during the attack if the target has not already been detected. For this purpose, the "
                              "attacker cell searches for connected (or connected-connected) sensor cells to see which cell networks they have detected last "
@@ -770,14 +728,12 @@ void SimulationParametersSpecificationService::createSpec()
                              "compares them with the attacked target."),
                 ParameterSpec()
                     .name("Geometry deviation protection")
-                    .member(&SimulationParametersZoneValues::attackerGeometryDeviationProtection)
-                    .type(FloatSpec().min(0).max(5.0f))
+                    .reference(FloatSpec().member(&SimulationParametersZoneValues::attackerGeometryDeviationProtection).min(0).max(5.0f))
                     .tooltip("The larger this value is, the less energy a cell can gain from an attack if the local geometry of the attacked cell does not "
                              "match the attacking cell."),
                 ParameterSpec()
                     .name("Connections mismatch protection")
-                    .member(&SimulationParametersZoneValues::attackerConnectionsMismatchProtection)
-                    .type(FloatSpec().min(0).max(1.0f))
+                    .reference(FloatSpec().member(&SimulationParametersZoneValues::attackerConnectionsMismatchProtection).min(0).max(1.0f))
                     .tooltip("The larger this parameter is, the more difficult it is to attack cells that contain more connections."),
             }),
         ParameterGroupSpec()
@@ -786,35 +742,38 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Maximum inactive cell age")
-                    .member(&SimulationParametersZoneValues::maxAgeForInactiveCells)
                     //.value(BaseZoneValueSpec()
                     //           .valueAddress(ZONE_VALUE_OFFSET(maxAgeForInactiveCells))
                     //           .enabledBaseValueAddress(BASE_VALUE_OFFSET(maxAgeForInactiveCellsEnabled))
                     //           .enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(maxAgeForInactiveCellsEnabled)))
-                    .type(FloatSpec().min(1.0f).max(1e7f).format("%.0f").logarithmic(true).infinity(true))
+                    .reference(
+                        FloatSpec()
+                            .member(&SimulationParametersZoneValues::maxAgeForInactiveCells)
+                            .min(1.0f)
+                            .max(1e7f)
+                            .format("%.0f")
+                            .logarithmic(true)
+                            .infinity(true))
                     .tooltip("Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered. Cells which "
                              "are in state 'Under construction' are not affected by this option."),
                 ParameterSpec()
                     .name("Maximum free cell age")
-                    .member(&SimulationParameters::freeCellMaxAge)
                     //.value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(freeCellMaxAge)).enabledValueAddress(BASE_VALUE_OFFSET(freeCellMaxAgeEnabled)))
-                    .type(IntSpec().min(1).max(1e7).logarithmic(true).infinity(true))
+                    .reference(IntSpec().member(&SimulationParameters::freeCellMaxAge).min(1).max(1e7).logarithmic(true).infinity(true))
                     .tooltip("The maximal age of free cells (= cells that arise from energy particles) can be set here."),
                 ParameterSpec()
                     .name("Reset age after construction")
-                    .member(&SimulationParameters::resetCellAgeAfterActivation)
-                    .type(BoolSpec())
+                    .reference(BoolSpec().member(&SimulationParameters::resetCellAgeAfterActivation))
                     .tooltip("If this option is activated, the age of the cells is reset to 0 after the construction of their cell network is completed, "
                              "i.e. when the state of the cells changes from 'Under construction' to 'Ready'. This option is particularly useful if a low "
                              "'Maximum inactive cell age' is set, as cell networks that are under construction are inactive and could die immediately after "
                              "completion if their construction takes a long time."),
                 ParameterSpec()
                     .name("Maximum age balancing")
-                    .member(&SimulationParameters::maxCellAgeBalancerInterval)
                     //.value(BaseValueSpec()
                     //           .valueAddress(BASE_VALUE_OFFSET(maxCellAgeBalancerInterval))
                     //           .enabledValueAddress(BASE_VALUE_OFFSET(maxCellAgeBalancerEnabled)))
-                    .type(IntSpec().min(1e3).max(1e6).logarithmic(true))
+                    .reference(IntSpec().member(&SimulationParameters::maxCellAgeBalancerInterval).min(1e3).max(1e6).logarithmic(true))
                     .tooltip("Adjusts the maximum age at regular intervals. It increases the maximum age for the cell color where the fewest "
                              "replicators exist. Conversely, the maximum age is decreased for the cell color with the most replicators."),
             }),
@@ -824,8 +783,7 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Target color and duration")
-                    .member(&SimulationParametersZoneValues::colorTransitionRules)
-                    .type(ColorTransitionSpec())
+                    .reference(ColorTransitionRulesSpec().member(&SimulationParametersZoneValues::colorTransitionRules))
                     .tooltip("Rules can be defined that describe how the colors of cells will change over time. For this purpose, a subsequent "
                              "color can be defined for each cell color. In addition, durations must be specified that define how many time steps the "
                              "corresponding color are kept."),
@@ -836,26 +794,25 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Coloring")
-                    .member(&SimulationParameters::cellGlowColoring)
-                    .type(AlternativeSpec().alternatives(
-                        {{"Energy", {}},
-                         {"Standard cell colors", {}},
-                         {"Mutants", {}},
-                         {"Mutants and cell functions", {}},
-                         {"Cell states", {}},
-                         {"Genome complexities", {}},
-                         {"Single cell function", {}},
-                         {"All cell functions", {}}}))
+                    .reference(AlternativeSpec()
+                                   .member(std::make_shared<AlternativeMemberSpec>(&SimulationParameters::cellGlowColoring))
+                                   .alternatives(
+                                       {{"Energy", {}},
+                                        {"Standard cell colors", {}},
+                                        {"Mutants", {}},
+                                        {"Mutants and cell functions", {}},
+                                        {"Cell states", {}},
+                                        {"Genome complexities", {}},
+                                        {"Single cell function", {}},
+                                        {"All cell functions", {}}}))
                     .tooltip(coloringTooltip),
                 ParameterSpec()
                     .name("Radius")
-                    .member(&SimulationParameters::cellGlowRadius)
-                    .type(FloatSpec().min(1.0f).max(8.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::cellGlowRadius).min(1.0f).max(8.0f))
                     .tooltip("The radius of the glow. Please note that a large radius affects the performance."),
                 ParameterSpec()
                     .name("Strength")
-                    .member(&SimulationParameters::cellGlowStrength)
-                    .type(FloatSpec().min(0.0f).max(1.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::cellGlowStrength).min(0.0f).max(1.0f))
                     .tooltip("The strength of the glow."),
             }),
         ParameterGroupSpec()
@@ -864,8 +821,7 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Minimum size")
-                    .member(&SimulationParameters::cellCopyMutationDeletionMinSize)
-                    .type(IntSpec().min(0).max(1000).logarithmic(true))
+                    .reference(IntSpec().member(&SimulationParameters::cellCopyMutationDeletionMinSize).min(0).max(1000).logarithmic(true))
                     .tooltip("The minimum size of genomes (on the basis of the coded cells) is determined here that can result from delete mutations. The "
                              "default is 0."),
             }),
@@ -875,38 +831,32 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Affected weights")
-                    .member(&SimulationParameters::cellCopyMutationNeuronDataWeight)
-                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.3f"))
+                    .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataWeight).min(0.0f).max(1.0f).format("%.3f"))
                     .tooltip("The proportion of weights in the neuronal network of a cell that are changed within a neuron mutation. The default is 0.2."),
                 ParameterSpec()
                     .name("Affected biases")
-                    .member(&SimulationParameters::cellCopyMutationNeuronDataBias)
-                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.3f"))
+                    .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataBias).min(0.0f).max(1.0f).format("%.3f"))
                     .tooltip("The proportion of biases in the neuronal network of a cell that are changed within a neuron mutation. The default is 0.2."),
                 ParameterSpec()
                     .name("Affected activation functions")
-                    .member(&SimulationParameters::cellCopyMutationNeuronDataActivationFunction)
-                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.3f"))
+                    .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataActivationFunction).min(0.0f).max(1.0f).format("%.3f"))
                     .tooltip("The proportion of activation functions in the neuronal network of a cell that are changed within a neuron mutation. The default "
                              "is 0.05."),
                 ParameterSpec()
                     .name("Reinforcement factor")
-                    .member(&SimulationParameters::cellCopyMutationNeuronDataReinforcement)
-                    .type(FloatSpec().min(1.0f).max(1.2f).format("%.3f"))
+                    .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataReinforcement).min(1.0f).max(1.2f).format("%.3f"))
                     .tooltip(
                         "If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an offset. "
                         "The factor that is used for reinforcement is defined here. The default is 1.05."),
                 ParameterSpec()
                     .name("Damping factor")
-                    .member(&SimulationParameters::cellCopyMutationNeuronDataDamping)
-                    .type(FloatSpec().min(1.0f).max(1.2f).format("%.3f"))
+                    .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataDamping).min(1.0f).max(1.2f).format("%.3f"))
                     .tooltip(
                         "If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an offset. "
                         "The factor that is used for weakening is defined here. The default is 1.05."),
                 ParameterSpec()
                     .name("Offset")
-                    .member(&SimulationParameters::cellCopyMutationNeuronDataOffset)
-                    .type(FloatSpec().min(0.0f).max(0.2f).format("%.3f"))
+                    .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataOffset).min(0.0f).max(0.2f).format("%.3f"))
                     .tooltip(
                         "If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an offset. "
                         "The value that is used for the offset is defined here. The default is 0.05."),
@@ -917,45 +867,48 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("External energy amount")
-                    .member(&SimulationParameters::externalEnergy)
-                    .type(FloatSpec().min(0.0f).max(100000000.0f).format("%.0f").logarithmic(true).infinity(true))
+                    .reference(
+                        FloatSpec().member(&SimulationParameters::externalEnergy).min(0.0f).max(100000000.0f).format("%.0f").logarithmic(true).infinity(true))
                     .tooltip(
                         "This parameter can be used to set the amount of energy of an external energy pool. This type of energy can then be "
                         "transferred to all constructor cells at a certain rate (see inflow settings).\n\nWarning: Too much external energy can result in a "
                         "massive production of cells and slow down or even crash the simulation."),
                 ParameterSpec()
                     .name("Inflow")
-                    .member(&SimulationParameters::externalEnergyInflowFactor)
-                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.5f").logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::externalEnergyInflowFactor).min(0.0f).max(1.0f).format("%.5f").logarithmic(true))
                     .tooltip(
                         "Here one can specify the fraction of energy transferred to constructor cells.\n\nFor example, a value of 0.05 means that "
                         "each time a constructor cell tries to build a new cell, 5% of the required energy is transferred for free from the external energy "
                         "source."),
                 ParameterSpec()
                     .name("Conditional inflow")
-                    .member(&SimulationParameters::externalEnergyConditionalInflowFactor)
-                    .type(FloatSpec().min(0.00f).max(1.0f).format("%.5f").logarithmic(true))
+                    .reference(
+                        FloatSpec().member(&SimulationParameters::externalEnergyConditionalInflowFactor).min(0.00f).max(1.0f).format("%.5f").logarithmic(true))
                     .tooltip("Here one can specify the fraction of energy transferred to constructor cells if they can provide the remaining energy for the "
                              "construction process.\n\nFor example, a value of 0.6 means that a constructor cell receives 60% of the energy required to "
                              "build the new cell for free from the external energy source. However, it must provide 40% of the energy required by itself. "
                              "Otherwise, no energy will be transferred."),
                 ParameterSpec()
                     .name("Inflow only for non-replicators")
-                    .member(&SimulationParameters::externalEnergyInflowOnlyForNonSelfReplicators)
-                    .type(BoolSpec())
+                    .reference(BoolSpec().member(&SimulationParameters::externalEnergyInflowOnlyForNonSelfReplicators))
                     .tooltip("If activated, external energy can only be transferred to constructor cells that are not self-replicators. "
                              "This option can be used to foster the evolution of additional body parts."),
                 ParameterSpec()
                     .name("Backflow")
-                    .member(&SimulationParameters::externalEnergyBackflowFactor)
-                    .type(FloatSpec().min(0.0f).max(1.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::externalEnergyBackflowFactor).min(0.0f).max(1.0f))
                     .tooltip("The proportion of energy that flows back from the simulation to the external energy pool. Each time a cell loses energy "
                              "or dies a fraction of its energy will be taken. The remaining "
                              "fraction of the energy stays in the simulation and will be used to create a new energy particle."),
                 ParameterSpec()
                     .name("Backflow limit")
-                    .member(&SimulationParameters::externalEnergyBackflowLimit)
-                    .type(FloatSpec().min(0.0f).max(1e8f).format("%.0f").logarithmic(true).infinity(true))
+                    .reference(
+                        FloatSpec()
+                            .member(&SimulationParameters::externalEnergyBackflowLimit)
+                            .min(0.0f)
+                            .max(1e8f)
+                            .format("%.0f")
+                            .logarithmic(true)
+                            .infinity(true))
                     .tooltip("Energy from the simulation can only flow back into the external energy pool as long as the amount of external energy is "
                              "below this value."),
             }),
@@ -965,20 +918,17 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Size factor")
-                    .member(&SimulationParameters::genomeComplexitySizeFactor)
-                    .type(FloatSpec().min(0.0f).max(1.0f).format("%.2f"))
+                    .reference(FloatSpec().member(&SimulationParameters::genomeComplexitySizeFactor).min(0.0f).max(1.0f).format("%.2f"))
                     .tooltip("This parameter controls how the number of encoded cells in the genome influences the calculation of its complexity."),
                 ParameterSpec()
                     .name("Ramification factor")
-                    .member(&SimulationParameters::genomeComplexityRamificationFactor)
-                    .type(FloatSpec().min(0.0f).max(20.0f).format("%.2f"))
+                    .reference(FloatSpec().member(&SimulationParameters::genomeComplexityRamificationFactor).min(0.0f).max(20.0f).format("%.2f"))
                     .tooltip("With this parameter, the number of ramifications of the cell structure to the genome is taken into account for the "
                              "calculation of the genome complexity. For instance, genomes that contain many sub-genomes or many construction branches will "
                              "then have a high complexity value."),
                 ParameterSpec()
                     .name("Depth level")
-                    .member(&SimulationParameters::genomeComplexityDepthLevel)
-                    .type(IntSpec().min(1).max(20).infinity(true))
+                    .reference(IntSpec().member(&SimulationParameters::genomeComplexityDepthLevel).min(1).max(20).infinity(true))
                     .tooltip("This allows to specify up to which level of the sub-genomes the complexity calculation should be carried out. For example, a "
                              "value of 2 means that the sub- and sub-sub-genomes are taken into account in addition to the main genome."),
             }),
