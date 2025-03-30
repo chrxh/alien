@@ -28,6 +28,7 @@ struct SimulationParameters
 
     // General
     Char64 projectName = "<unnamed>";
+    char test = '0';
 
     // Visualization
     CellColoring primaryCellColoring = CellColoring_CellColor;
@@ -160,7 +161,7 @@ struct SimulationParameters
     ColorMatrix<float> attackerSameMutantProtection = {
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},

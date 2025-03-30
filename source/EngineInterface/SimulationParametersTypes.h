@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Colors.h"
+
 struct FloatColorRGB
 {
     float r = 0;
