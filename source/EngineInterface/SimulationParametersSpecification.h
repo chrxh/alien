@@ -46,7 +46,7 @@ using FloatMemberSpec = boost::variant<
     ColorMatrixFloatZoneValuesMember,
     FloatGetterSetter>;
 using Char64MemberSpec = boost::variant<std::monostate, Char64Member>;
-using AlternativeMemberSpec = boost::variant<std::monostate, IntMember/*, FloatMember*/>;
+using AlternativeMemberSpec = boost::variant<std::monostate, IntMember>;
 using ColorPickerMemberSpec = boost::variant<std::monostate, FloatColorRGBZoneMember>;
 using ColorTransitionRulesMemberSpec = boost::variant<std::monostate, ColorTransitionRulesZoneMember>;
 
@@ -82,7 +82,11 @@ struct Char64Spec
 struct ParameterSpec;
 struct AlternativeSpec
 {
-    MEMBER_DECLARATION(AlternativeSpec, std::shared_ptr<AlternativeMemberSpec>, member, /*std::monostate()*/nullptr);
+    MEMBER_DECLARATION(
+        AlternativeSpec,
+        std::shared_ptr<AlternativeMemberSpec>,
+        member,
+        nullptr);  // Workaround: shared_ptr to avoid aligned delete on memory coming from an unaligned allocation
 
     using Alternatives = std::vector<std::pair<std::string, std::vector<ParameterSpec>>>;
     MEMBER_DECLARATION(AlternativeSpec, Alternatives, alternatives, {});
