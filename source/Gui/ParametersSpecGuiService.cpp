@@ -93,25 +93,25 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
         }
         ImGui::PushID(toInt(index));
 
-        if (boost::get<BoolSpec>(&parameterSpec._reference)) {
+        if (std::holds_alternative<BoolSpec>(parameterSpec._reference)) {
             createWidgetsForBoolSpec(parameterSpec, parameters, origParameters, locationIndex);
 
-        } else if (boost::get<IntSpec>(&parameterSpec._reference)) {
+        } else if (std::holds_alternative<IntSpec>(parameterSpec._reference)) {
             createWidgetsForIntSpec(parameterSpec, parameters, origParameters, locationIndex);
 
-        } else if (boost::get<FloatSpec>(&parameterSpec._reference)) {
+        } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
             createWidgetsForFloatSpec(parameterSpec, parameters, origParameters, locationIndex);
 
-        } else if (boost::get<Char64Spec>(&parameterSpec._reference)) {
+        } else if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {
             createWidgetsForChar64Spec(parameterSpec, parameters, origParameters, locationIndex);
 
-        } else if (boost::get<AlternativeSpec>(&parameterSpec._reference)) {
+        } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._reference)) {
             createWidgetsForAlternativeSpec(parameterSpec, parameters, origParameters, locationIndex);
 
-        } else if (boost::get<ColorPickerSpec>(&parameterSpec._reference)) {
+        } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._reference)) {
             createWidgetsForColorPickerSpec(parameterSpec, parameters, origParameters, locationIndex);
 
-        } else if (boost::get<ColorTransitionRulesSpec>(&parameterSpec._reference)) {
+        } else if (std::holds_alternative<ColorTransitionRulesSpec>(parameterSpec._reference)) {
             createWidgetsForColorTransitionRulesSpec(parameterSpec, parameters, origParameters, locationIndex);
         }
 
@@ -126,9 +126,9 @@ void ParametersSpecGuiService::createWidgetsForBoolSpec(
     int locationIndex) const
 {
     auto& specService = SimulationParametersSpecificationService::get();
-    auto const& boolSpec = boost::get<BoolSpec>(parameterSpec._reference);
+    auto const& boolSpec = std::get<BoolSpec>(parameterSpec._reference);
 
-    if (boost::get<ColorMatrixBoolMember>(&boolSpec._member)) {
+    if (std::holds_alternative<ColorMatrixBoolMember>(boolSpec._member)) {
 
         auto value = reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(specService.getBoolRef(boolSpec._member, parameters, locationIndex));
         auto origValue = reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(specService.getBoolRef(boolSpec._member, origParameters, locationIndex));
@@ -158,9 +158,9 @@ void ParametersSpecGuiService::createWidgetsForIntSpec(
     int locationIndex) const
 {
     auto& specService = SimulationParametersSpecificationService::get();
-    auto const& intSpec = boost::get<IntSpec>(parameterSpec._reference);
+    auto const& intSpec = std::get<IntSpec>(parameterSpec._reference);
 
-    if (boost::get<ColorMatrixIntMember>(&intSpec._member)) {
+    if (std::holds_alternative<ColorMatrixIntMember>(intSpec._member)) {
 
         auto value = reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(specService.getIntRef(intSpec._member, parameters, locationIndex));
         auto origValue = reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(specService.getIntRef(intSpec._member, origParameters, locationIndex));
@@ -195,7 +195,7 @@ void ParametersSpecGuiService::createWidgetsForIntSpec(
                 .defaultValue(origValue)
                 .defaultEnabledValue(origEnabledValue)
                 .tooltip(parameterSpec._tooltip)
-                .colorDependence(boost::get<ColorVectorIntMember>(&intSpec._member) != nullptr),
+                .colorDependence(std::holds_alternative<ColorVectorIntMember>(intSpec._member)),
             value,
             enabledValue);
     }
@@ -208,9 +208,9 @@ void ParametersSpecGuiService::createWidgetsForFloatSpec(
     int locationIndex) const
 {
     auto& specService = SimulationParametersSpecificationService::get();
-    auto const& floatSpec = boost::get<FloatSpec>(parameterSpec._reference);
+    auto const& floatSpec = std::get<FloatSpec>(parameterSpec._reference);
 
-    if (boost::get<ColorMatrixFloatMember>(&floatSpec._member) || boost::get<ColorMatrixFloatZoneValuesMember>(&floatSpec._member)) {
+    if (std::holds_alternative<ColorMatrixFloatMember>(floatSpec._member) || std::holds_alternative<ColorMatrixFloatZoneValuesMember>(floatSpec._member)) {
 
         auto value = reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(specService.getFloatRef(floatSpec._member, parameters, locationIndex));
         auto origValue = reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(specService.getFloatRef(floatSpec._member, origParameters, locationIndex));
@@ -226,9 +226,9 @@ void ParametersSpecGuiService::createWidgetsForFloatSpec(
                 .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*origValue)),
             *value);
 
-    } else if (boost::get<FloatGetterSetter>(&floatSpec._member)) {
+    } else if (std::holds_alternative<FloatGetterSetter>(floatSpec._member)) {
 
-        auto [getter, setter] = boost::get<FloatGetterSetter>(floatSpec._member);
+        auto [getter, setter] = std::get<FloatGetterSetter>(floatSpec._member);
         auto value = getter(parameters, locationIndex);
         auto origValue = getter(origParameters, locationIndex);
         bool* pinnedValue = nullptr;
@@ -273,8 +273,8 @@ void ParametersSpecGuiService::createWidgetsForFloatSpec(
                 .defaultValue(origValue)
                 .defaultEnabledValue(origEnabledValue)
                 .colorDependence(
-                    boost::get<ColorVectorFloatMember>(&floatSpec._member)
-                    || boost::get<ColorVectorFloatZoneValuesMember>(&floatSpec._member))
+                    std::holds_alternative<ColorVectorFloatMember>(floatSpec._member)
+                    || std::holds_alternative<ColorVectorFloatZoneValuesMember>(floatSpec._member))
                 .tooltip(parameterSpec._tooltip),
             value,
             enabledValue,
@@ -289,7 +289,7 @@ void ParametersSpecGuiService::createWidgetsForChar64Spec(
     int locationIndex) const
 {
     auto& specService = SimulationParametersSpecificationService::get();
-    auto const& char64Spec = boost::get<Char64Spec>(parameterSpec._reference);
+    auto const& char64Spec = std::get<Char64Spec>(parameterSpec._reference);
 
     auto value = specService.getChar64Ref(char64Spec._member, parameters, locationIndex);
     auto origValue = specService.getChar64Ref(char64Spec._member, origParameters, locationIndex);
@@ -306,7 +306,7 @@ void ParametersSpecGuiService::createWidgetsForAlternativeSpec(
     int locationIndex) const
 {
     auto& specService = SimulationParametersSpecificationService::get();
-    auto alternativeSpec = boost::get<AlternativeSpec>(parameterSpec._reference);
+    auto alternativeSpec = std::get<AlternativeSpec>(parameterSpec._reference);
 
     auto value = specService.getAlternativeRef(alternativeSpec._member, parameters, locationIndex);
     auto origValue = specService.getAlternativeRef(alternativeSpec._member, origParameters, locationIndex);
@@ -333,7 +333,7 @@ void ParametersSpecGuiService::createWidgetsForColorPickerSpec(
     int locationIndex) const
 {
     auto& specService = SimulationParametersSpecificationService::get();
-    auto const& colorPickerSpec = boost::get<ColorPickerSpec>(parameterSpec._reference);
+    auto const& colorPickerSpec = std::get<ColorPickerSpec>(parameterSpec._reference);
 
     auto value = specService.getFloatColorRGBRef(colorPickerSpec._member, parameters, locationIndex);
     auto origValue = specService.getFloatColorRGBRef(colorPickerSpec._member, origParameters, locationIndex);
@@ -349,7 +349,7 @@ void ParametersSpecGuiService::createWidgetsForColorTransitionRulesSpec(
     int locationIndex) const
 {
     auto& specService = SimulationParametersSpecificationService::get();
-    auto const& colorTransitionRulesSpec = boost::get<ColorTransitionRulesSpec>(parameterSpec._reference);
+    auto const& colorTransitionRulesSpec = std::get<ColorTransitionRulesSpec>(parameterSpec._reference);
 
     auto value = specService.getColorTransitionRulesRef(colorTransitionRulesSpec._member, parameters, locationIndex);
     auto origValue = specService.getColorTransitionRulesRef(colorTransitionRulesSpec._member, origParameters, locationIndex);
@@ -399,69 +399,69 @@ bool ParametersSpecGuiService::isVisible(ParameterGroupSpec const& groupSpec, Lo
 bool ParametersSpecGuiService::isVisible(ParameterSpec const& parameterSpec, LocationType locationType) const
 {
     if (locationType == LocationType::Base) {
-        if (boost::get<BoolSpec>(&parameterSpec._reference)) {
-            auto const& boolSpec = boost::get<BoolSpec>(parameterSpec._reference);
-            if (boost::get<BoolMember>(&boolSpec._member) || boost::get<ColorMatrixBoolMember>(&boolSpec._member)
-                || boost::get<BoolZoneValuesMember>(&boolSpec._member)) {
+        if (std::holds_alternative<BoolSpec>(parameterSpec._reference)) {
+            auto const& boolSpec = std::get<BoolSpec>(parameterSpec._reference);
+            if (std::holds_alternative<BoolMember>(boolSpec._member) || std::holds_alternative<ColorMatrixBoolMember>(boolSpec._member)
+                || std::holds_alternative<BoolZoneValuesMember>(boolSpec._member)) {
                 return true;
             }
-        } else if (boost::get<IntSpec>(&parameterSpec._reference)) {
-            auto const& intSpec = boost::get<IntSpec>(parameterSpec._reference);
-            if (boost::get<IntMember>(&intSpec._member) || boost::get<ColorVectorIntMember>(&intSpec._member)
-                || boost::get<ColorMatrixIntMember>(&intSpec._member)) {
+        } else if (std::holds_alternative<IntSpec>(parameterSpec._reference)) {
+            auto const& intSpec = std::get<IntSpec>(parameterSpec._reference);
+            if (std::holds_alternative<IntMember>(intSpec._member) || std::holds_alternative<ColorVectorIntMember>(intSpec._member)
+                || std::holds_alternative<ColorMatrixIntMember>(intSpec._member)) {
                 return true;
             }
-        } else if (boost::get<FloatSpec>(&parameterSpec._reference)) {
-            auto const& floatSpec = boost::get<FloatSpec>(parameterSpec._reference);
-            if (boost::get<FloatMember>(&floatSpec._member) || boost::get<ColorVectorFloatMember>(&floatSpec._member)
-                || boost::get<ColorMatrixFloatMember>(&floatSpec._member) || boost::get<FloatZoneValuesMember>(&floatSpec._member)
-                || boost::get<ColorVectorFloatZoneValuesMember>(&floatSpec._member)
-                || boost::get<ColorMatrixFloatZoneValuesMember>(&floatSpec._member)
-                || boost::get<FloatGetterSetter>(&floatSpec._member)) {
+        } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
+            auto const& floatSpec = std::get<FloatSpec>(parameterSpec._reference);
+            if (std::holds_alternative<FloatMember>(floatSpec._member) || std::holds_alternative<ColorVectorFloatMember>(floatSpec._member)
+                || std::holds_alternative<ColorMatrixFloatMember>(floatSpec._member) || std::holds_alternative<FloatZoneValuesMember>(floatSpec._member)
+                || std::holds_alternative<ColorVectorFloatZoneValuesMember>(floatSpec._member)
+                || std::holds_alternative<ColorMatrixFloatZoneValuesMember>(floatSpec._member)
+                || std::holds_alternative<FloatGetterSetter>(floatSpec._member)) {
                 return true;
             }
-        } else if (boost::get<Char64Spec>(&parameterSpec._reference)) {
-            auto const& char64Spec = boost::get<Char64Spec>(parameterSpec._reference);
-            if (boost::get<Char64Member>(&char64Spec._member)) {
+        } else if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {
+            auto const& char64Spec = std::get<Char64Spec>(parameterSpec._reference);
+            if (std::holds_alternative<Char64Member>(char64Spec._member)) {
                 return true;
             }
-        } else if (boost::get<AlternativeSpec>(&parameterSpec._reference)) {
-            auto const& alternativeSpec = boost::get<AlternativeSpec>(parameterSpec._reference);
-            if (boost::get<IntMember>(&alternativeSpec._member)) {
+        } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._reference)) {
+            auto const& alternativeSpec = std::get<AlternativeSpec>(parameterSpec._reference);
+            if (std::holds_alternative<IntMember>(alternativeSpec._member)) {
                 return true;
             }
-        } else if (boost::get<ColorPickerSpec>(&parameterSpec._reference)) {
-            auto const& colorPickerSpec = boost::get<ColorPickerSpec>(parameterSpec._reference);
-            if (boost::get<FloatColorRGBZoneMember>(&colorPickerSpec._member)) {
+        } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._reference)) {
+            auto const& colorPickerSpec = std::get<ColorPickerSpec>(parameterSpec._reference);
+            if (std::holds_alternative<FloatColorRGBZoneMember>(colorPickerSpec._member)) {
                 return true;
             }
-        } else if (boost::get<ColorTransitionRulesSpec>(&parameterSpec._reference)) {
-            auto const& colorTransitionRulesSpec = boost::get<ColorTransitionRulesSpec>(parameterSpec._reference);
-            if (boost::get<ColorTransitionRulesZoneMember>(&colorTransitionRulesSpec._member)) {
+        } else if (std::holds_alternative<ColorTransitionRulesSpec>(parameterSpec._reference)) {
+            auto const& colorTransitionRulesSpec = std::get<ColorTransitionRulesSpec>(parameterSpec._reference);
+            if (std::holds_alternative<ColorTransitionRulesZoneMember>(colorTransitionRulesSpec._member)) {
                 return true;
             }
         }
     }
     if (locationType == LocationType::Zone) {
-        if (boost::get<BoolSpec>(&parameterSpec._reference)) {
-            auto const& boolSpec = boost::get<BoolSpec>(parameterSpec._reference);
-            if (boost::get<BoolZoneValuesMember>(&boolSpec._member)) {
+        if (std::holds_alternative<BoolSpec>(parameterSpec._reference)) {
+            auto const& boolSpec = std::get<BoolSpec>(parameterSpec._reference);
+            if (std::holds_alternative<BoolZoneValuesMember>(boolSpec._member)) {
                 return true;
             }
-        } else if (boost::get<FloatSpec>(&parameterSpec._reference)) {
-            auto const& floatSpec = boost::get<FloatSpec>(parameterSpec._reference);
-            if (boost::get<ColorVectorFloatZoneValuesMember>(&floatSpec._member)
-                || boost::get<ColorMatrixFloatZoneValuesMember>(&floatSpec._member)) {
+        } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
+            auto const& floatSpec = std::get<FloatSpec>(parameterSpec._reference);
+            if (std::holds_alternative<ColorVectorFloatZoneValuesMember>(floatSpec._member)
+                || std::holds_alternative<ColorMatrixFloatZoneValuesMember>(floatSpec._member)) {
                 return true;
             }
-        } else if (boost::get<ColorPickerSpec>(&parameterSpec._reference)) {
-            auto const& colorPickerSpec = boost::get<ColorPickerSpec>(parameterSpec._reference);
-            if (boost::get<FloatColorRGBZoneMember>(&colorPickerSpec._member)) {
+        } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._reference)) {
+            auto const& colorPickerSpec = std::get<ColorPickerSpec>(parameterSpec._reference);
+            if (std::holds_alternative<FloatColorRGBZoneMember>(colorPickerSpec._member)) {
                 return true;
             }
-        } else if (boost::get<ColorTransitionRulesSpec>(&parameterSpec._reference)) {
-            auto const& colorTransitionRulesSpec = boost::get<ColorTransitionRulesSpec>(parameterSpec._reference);
-            if (boost::get<ColorTransitionRulesZoneMember>(&colorTransitionRulesSpec._member)) {
+        } else if (std::holds_alternative<ColorTransitionRulesSpec>(parameterSpec._reference)) {
+            auto const& colorTransitionRulesSpec = std::get<ColorTransitionRulesSpec>(parameterSpec._reference);
+            if (std::holds_alternative<ColorTransitionRulesZoneMember>(colorTransitionRulesSpec._member)) {
                 return true;
             }
         }
