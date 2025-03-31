@@ -5,9 +5,6 @@
 #include <variant>
 #include <vector>
 
-#include <boost/variant.hpp>
-#include <boost/optional.hpp>
-
 #include "Base/Definitions.h"
 
 #include "Definitions.h"
@@ -62,13 +59,13 @@ using ColorTransitionRulesZoneMember = std::shared_ptr<_ColorTransitionRulesZone
 using FloatGetterSetter =
     std::pair<std::function<float(SimulationParameters const&, int)>, std::function<void(float, SimulationParameters&, int)>>;  // int for locationIndex
 
-using BoolMemberSpec = boost::variant<std::monostate, BoolMember, BoolZoneValuesMember, ColorMatrixBoolMember>;
-using IntMemberSpec = boost::variant<std::monostate, IntMember, ColorVectorIntMember, ColorMatrixIntMember>;
-using FloatMemberSpec = boost::variant<std::monostate, FloatMember, ColorVectorFloatMember, ColorMatrixFloatMember, FloatZoneValuesMember, ColorVectorFloatZoneValuesMember, ColorMatrixFloatZoneValuesMember, FloatGetterSetter>;
-using Char64MemberSpec = boost::variant<std::monostate, Char64Member>;
-using AlternativeMemberSpec = boost::variant<std::monostate, IntMember>;
-using ColorPickerMemberSpec = boost::variant<std::monostate, FloatColorRGBZoneMember>;
-using ColorTransitionRulesMemberSpec = boost::variant<std::monostate, ColorTransitionRulesZoneMember>;
+using BoolMemberSpec = std::variant<std::monostate, BoolMember, BoolZoneValuesMember, ColorMatrixBoolMember>;
+using IntMemberSpec = std::variant<std::monostate, IntMember, ColorVectorIntMember, ColorMatrixIntMember>;
+using FloatMemberSpec = std::variant<std::monostate, FloatMember, ColorVectorFloatMember, ColorMatrixFloatMember, FloatZoneValuesMember, ColorVectorFloatZoneValuesMember, ColorMatrixFloatZoneValuesMember, FloatGetterSetter>;
+using Char64MemberSpec = std::variant<std::monostate, Char64Member>;
+using AlternativeMemberSpec = std::variant<std::monostate, IntMember>;
+using ColorPickerMemberSpec = std::variant<std::monostate, FloatColorRGBZoneMember>;
+using ColorTransitionRulesMemberSpec = std::variant<std::monostate, ColorTransitionRulesZoneMember>;
 
 struct BoolSpec
 {
@@ -137,13 +134,13 @@ struct ColorTransitionRulesSpec
     ColorTransitionRulesMemberSpec _member = std::monostate();
 };
 
-using ReferenceSpec = boost::variant<BoolSpec, IntSpec, FloatSpec, Char64Spec, AlternativeSpec, ColorPickerSpec, ColorTransitionRulesSpec>;
+using ReferenceSpec = std::variant<BoolSpec, IntSpec, FloatSpec, Char64Spec, AlternativeSpec, ColorPickerSpec, ColorTransitionRulesSpec>;
 
 using BaseEnabledMember = std::shared_ptr<bool SimulationParameters::*>;
 using ZoneEnabledMember = std::shared_ptr<bool SimulationParametersZoneEnabledValues::*>;
 using SourceEnabledMember = std::shared_ptr<bool RadiationSource::*>;
 
-using EnabledMember = boost::variant<std::monostate, BaseEnabledMember>;
+using EnabledMember = std::variant<std::monostate, BaseEnabledMember>;
 struct EnabledSpec
 {
     MEMBER_DECLARATION(EnabledSpec, BaseEnabledMember, base, nullptr);
