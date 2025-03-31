@@ -10,6 +10,8 @@
 
 struct SimulationParameters;
 struct SimulationParametersZoneValues;
+struct SimulationParametersZoneEnabledValues;
+struct RadiationSource;
 struct ColorTransitionRules;
 
 struct ClusteredDataDescription;

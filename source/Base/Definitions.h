@@ -81,3 +81,17 @@ inline uint32_t toUInt32(T const& value)
         _##name = std::move(name); \
         return *this; \
     }
+
+#define SETTER_SHARED_PTR(className, type, name) \
+    className& name(_##type const& name) \
+    { \
+        _##name = std::make_shared<_##type>(name); \
+        return *this; \
+    }
+
+#define SETTER(className, type, name) \
+    className& name(type const& name) \
+    { \
+        _##name = name; \
+        return *this; \
+    }

@@ -23,105 +23,103 @@ bool* SimulationParametersSpecificationService::getBoolRef(BoolMemberSpec const&
 {
     // Single value
     if (boost::get<BoolMember>(&memberSpec)) {
-        return &(parameters.*boost::get<BoolMember>(memberSpec));
+        return &(parameters.**boost::get<BoolMember>(memberSpec));
     } else if (boost::get<BoolZoneValuesMember>(&memberSpec)) {
         if (locationIndex == 0) {
-            return &(parameters.baseValues.*boost::get<BoolZoneValuesMember>(memberSpec));
+            return &(parameters.baseValues.**boost::get<BoolZoneValuesMember>(memberSpec));
         } else {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return &(parameters.zone[index].values.*boost::get<BoolZoneValuesMember>(memberSpec));
+            return &(parameters.zone[index].values.**boost::get<BoolZoneValuesMember>(memberSpec));
         }
     }
 
     // Color matrix
     else if (boost::get<ColorMatrixBoolMember>(&memberSpec)) {
-        return reinterpret_cast<bool*>(parameters.*boost::get<ColorMatrixBoolMember>(memberSpec));
+        return reinterpret_cast<bool*>(parameters.**boost::get<ColorMatrixBoolMember>(memberSpec));
     }
 
-    CHECK(false);
+    return nullptr;
 }
 
 int* SimulationParametersSpecificationService::getIntRef(IntMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const
 {
     // Single value
     if (boost::get<IntMember>(&memberSpec)) {
-        return &(parameters.*boost::get<IntMember>(memberSpec));
+        return &(parameters.**boost::get<IntMember>(memberSpec));
     }
 
     // Color vector
     else if (boost::get<ColorVectorIntMember>(&memberSpec)) {
-        return parameters.*boost::get<ColorVectorIntMember>(memberSpec);
+        return parameters.**boost::get<ColorVectorIntMember>(memberSpec);
     }
 
     // Color matrix
     else if (boost::get<ColorMatrixIntMember>(&memberSpec)) {
-        return reinterpret_cast<int*>(parameters.*boost::get<ColorMatrixIntMember>(memberSpec));
+        return reinterpret_cast<int*>(parameters.**boost::get<ColorMatrixIntMember>(memberSpec));
     }
 
-    CHECK(false);
+    return nullptr;
 }
 
 float* SimulationParametersSpecificationService::getFloatRef(FloatMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const
 {
     // Single value
     if (boost::get<FloatMember>(&memberSpec)) {
-        return &(parameters.*boost::get<FloatMember>(memberSpec));
+        return &(parameters.**boost::get<FloatMember>(memberSpec));
     } else if (boost::get<FloatZoneValuesMember>(&memberSpec)) {
         if (locationIndex == 0) {
-            return &(parameters.baseValues.*boost::get<FloatZoneValuesMember>(memberSpec));
+            return &(parameters.baseValues.**boost::get<FloatZoneValuesMember>(memberSpec));
         } else {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return &(parameters.zone[index].values.*boost::get<FloatZoneValuesMember>(memberSpec));
+            return &(parameters.zone[index].values.**boost::get<FloatZoneValuesMember>(memberSpec));
         }
     }
 
     // Color vector
     else if (boost::get<ColorVectorFloatMember>(&memberSpec)) {
-        return parameters.*boost::get<ColorVectorFloatMember>(memberSpec);
+        return parameters.**boost::get<ColorVectorFloatMember>(memberSpec);
     } else if (boost::get<ColorVectorFloatZoneValuesMember>(&memberSpec)) {
         if (locationIndex == 0) {
-            return parameters.baseValues.*boost::get<ColorVectorFloatZoneValuesMember>(memberSpec);
+            return parameters.baseValues.**boost::get<ColorVectorFloatZoneValuesMember>(memberSpec);
         } else {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return parameters.zone[index].values.*boost::get<ColorVectorFloatZoneValuesMember>(memberSpec);
+            return parameters.zone[index].values.**boost::get<ColorVectorFloatZoneValuesMember>(memberSpec);
         }
     }
 
     // Color matrix
     else if (boost::get<ColorMatrixFloatMember>(&memberSpec)) {
-        return reinterpret_cast<float*>(parameters.*boost::get<ColorMatrixFloatMember>(memberSpec));
+        return reinterpret_cast<float*>(parameters.**boost::get<ColorMatrixFloatMember>(memberSpec));
     } else if (boost::get<ColorMatrixFloatZoneValuesMember>(&memberSpec)) {
         if (locationIndex == 0) {
-            return reinterpret_cast<float*>(parameters.baseValues.*boost::get<ColorMatrixFloatZoneValuesMember>(memberSpec));
+            return reinterpret_cast<float*>(parameters.baseValues.**boost::get<ColorMatrixFloatZoneValuesMember>(memberSpec));
         } else {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return reinterpret_cast<float*>(parameters.zone[index].values.*boost::get<ColorMatrixFloatZoneValuesMember>(memberSpec));
+            return reinterpret_cast<float*>(parameters.zone[index].values.**boost::get<ColorMatrixFloatZoneValuesMember>(memberSpec));
         }
     }
 
-    CHECK(false);
+    return nullptr;
 }
 
 char* SimulationParametersSpecificationService::getChar64Ref(Char64MemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const
 {
     if (boost::get<Char64Member>(&memberSpec)) {
-        return parameters.*boost::get<Char64Member>(memberSpec);
+        return parameters.**boost::get<Char64Member>(memberSpec);
     }
 
-    CHECK(false);
+    return nullptr;
 }
 
-int* SimulationParametersSpecificationService::getAlternativeRef(
-    AlternativeMemberSpec const& memberSpec,
-    SimulationParameters& parameters,
-    int locationIndex) const
+int* SimulationParametersSpecificationService::getAlternativeRef(AlternativeMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex)
+    const
 {
     // Single value
     if (boost::get<IntMember>(&memberSpec)) {
-        return &(parameters.*boost::get<IntMember>(memberSpec));
+        return &(parameters.**boost::get<IntMember>(memberSpec));
     }
 
-    CHECK(false);
+    return nullptr;
 }
 
 FloatColorRGB* SimulationParametersSpecificationService::getFloatColorRGBRef(
@@ -131,14 +129,14 @@ FloatColorRGB* SimulationParametersSpecificationService::getFloatColorRGBRef(
 {
     if (boost::get<FloatColorRGBZoneMember>(&memberSpec)) {
         if (locationIndex == 0) {
-            return &(parameters.baseValues.*boost::get<FloatColorRGBZoneMember>(memberSpec));
+            return &(parameters.baseValues.**boost::get<FloatColorRGBZoneMember>(memberSpec));
         } else {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return &(parameters.zone[index].values.*boost::get<FloatColorRGBZoneMember>(memberSpec));
+            return &(parameters.zone[index].values.**boost::get<FloatColorRGBZoneMember>(memberSpec));
         }
     }
 
-    CHECK(false);
+    return nullptr;
 }
 
 ColorTransitionRules* SimulationParametersSpecificationService::getColorTransitionRulesRef(
@@ -148,49 +146,41 @@ ColorTransitionRules* SimulationParametersSpecificationService::getColorTransiti
 {
     if (boost::get<ColorTransitionRulesZoneMember>(&memberSpec)) {
         if (locationIndex == 0) {
-            return &(parameters.baseValues.*boost::get<ColorTransitionRulesZoneMember>(memberSpec));
+            return &(parameters.baseValues.**boost::get<ColorTransitionRulesZoneMember>(memberSpec));
         } else {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return &(parameters.zone[index].values.*boost::get<ColorTransitionRulesZoneMember>(memberSpec));
+            return &(parameters.zone[index].values.**boost::get<ColorTransitionRulesZoneMember>(memberSpec));
         }
     }
 
-    CHECK(false);
-}
-
-bool* SimulationParametersSpecificationService::getPinnedValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const
-{
-    if (boost::get<BaseValueSpec>(&spec)) {
-        auto baseValueSpec = boost::get<BaseValueSpec>(spec);
-        if (baseValueSpec._pinnedAddress.has_value()) {
-            return reinterpret_cast<bool*>(reinterpret_cast<char*>(&parameters) + baseValueSpec._pinnedAddress.value());
-        }
-    }
     return nullptr;
 }
 
-bool* SimulationParametersSpecificationService::getEnabledValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const
+bool* SimulationParametersSpecificationService::getEnabledRef(EnabledSpec const& spec, SimulationParameters& parameters, int locationIndex) const
 {
-    if (boost::get<BaseValueSpec>(&spec)) {
-        auto baseValueSpec = boost::get<BaseValueSpec>(spec);
-        if (baseValueSpec._enabledValueAddress.has_value()) {
-            return reinterpret_cast<bool*>(reinterpret_cast<char*>(&parameters) + baseValueSpec._enabledValueAddress.value());
-        }
-    } else if (boost::get<BaseZoneValueSpec>(&spec)) {
-        auto baseZoneValueSpec = boost::get<BaseZoneValueSpec>(spec);
-
-        if (locationIndex == 0 && baseZoneValueSpec._enabledBaseValueAddress.has_value()) {
-            return reinterpret_cast<bool*>(reinterpret_cast<char*>(&parameters) + baseZoneValueSpec._enabledBaseValueAddress.value());
-        }
-        for (int i = 0; i < parameters.numZones; ++i) {
-            if (parameters.zone[i].locationIndex == locationIndex && baseZoneValueSpec._enabledZoneValueAddress.has_value()) {
-                return reinterpret_cast<bool*>(
-                    reinterpret_cast<char*>(&parameters.zone[i].enabledValues) + baseZoneValueSpec._enabledZoneValueAddress.value());
-            }
-        }
-    }
+    //if (locationIndex == 0) {
+    //    if (spec._base.has_value()) {
+    //        return &(parameters.*spec._base.get());
+    //    }
+    //} else {
+    //    if (spec._zone.has_value()) {
+    //        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+    //        return &(parameters.zone[index].enabledValues.*spec._zone.get());
+    //    }
+    //}
     return nullptr;
 }
+
+//bool* SimulationParametersSpecificationService::getPinnedValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const
+//{
+//    if (boost::get<BaseValueSpec>(&spec)) {
+//        auto baseValueSpec = boost::get<BaseValueSpec>(spec);
+//        if (baseValueSpec._pinnedAddress.has_value()) {
+//            return reinterpret_cast<bool*>(reinterpret_cast<char*>(&parameters) + baseValueSpec._pinnedAddress.value());
+//        }
+//    }
+//    return nullptr;
+//}
 
 bool* SimulationParametersSpecificationService::getExpertToggleValueRef(ParameterGroupSpec const& spec, SimulationParameters& parameters) const
 {
@@ -240,7 +230,9 @@ void SimulationParametersSpecificationService::createSpec()
 
     _parametersSpec = ParametersSpec().groups({
         ParameterGroupSpec().name("General").parameters({
-            ParameterSpec().name("Project name").reference(Char64Spec().member(Char64Member(&SimulationParameters::projectName))),
+            ParameterSpec()
+                .name("Project name")
+                .reference(Char64Spec().member(&SimulationParameters::projectName)),
         }),
         ParameterGroupSpec()
             .name("Visualization")
@@ -772,10 +764,6 @@ void SimulationParametersSpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Maximum inactive cell age")
-                    //.value(BaseZoneValueSpec()
-                    //           .valueAddress(ZONE_VALUE_OFFSET(maxAgeForInactiveCells))
-                    //           .enabledBaseValueAddress(BASE_VALUE_OFFSET(maxAgeForInactiveCellsEnabled))
-                    //           .enabledZoneValueAddress(ZONE_ENABLED_VALUE_OFFSET(maxAgeForInactiveCellsEnabled)))
                     .reference(
                         FloatSpec()
                             .member(&SimulationParametersZoneValues::maxAgeForInactiveCells)
@@ -784,6 +772,9 @@ void SimulationParametersSpecificationService::createSpec()
                             .format("%.0f")
                             .logarithmic(true)
                             .infinity(true))
+                    //.enabled(EnabledSpec()
+                    //             .base(&SimulationParameters::maxAgeForInactiveCellsEnabled)
+                    //             .zone(&SimulationParametersZoneEnabledValues::maxAgeForInactiveCellsEnabled))
                     .tooltip("Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered. Cells which "
                              "are in state 'Under construction' are not affected by this option."),
                 ParameterSpec()
