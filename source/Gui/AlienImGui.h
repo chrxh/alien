@@ -39,99 +39,99 @@ public:
 
     struct SliderFloatParameters
     {
-        MEMBER_DECLARATION(SliderFloatParameters, std::string, name, "");
-        MEMBER_DECLARATION(SliderFloatParameters, float, min, 0);
-        MEMBER_DECLARATION(SliderFloatParameters, float, max, 0);
-        MEMBER_DECLARATION(SliderFloatParameters, std::string, format, "%.3f");
-        MEMBER_DECLARATION(SliderFloatParameters, bool, logarithmic, false);
-        MEMBER_DECLARATION(SliderFloatParameters, bool, infinity, false);
-        MEMBER_DECLARATION(SliderFloatParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(SliderFloatParameters, bool, colorDependence, false);
-        MEMBER_DECLARATION(SliderFloatParameters, float const*, defaultValue, nullptr);
-        MEMBER_DECLARATION(SliderFloatParameters, float const*, disabledValue, nullptr);
-        MEMBER_DECLARATION(SliderFloatParameters, bool const*, defaultEnabledValue, nullptr);
-        MEMBER_DECLARATION(SliderFloatParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(SliderFloatParameters, std::string, name, "");
+        MEMBER(SliderFloatParameters, float, min, 0);
+        MEMBER(SliderFloatParameters, float, max, 0);
+        MEMBER(SliderFloatParameters, std::string, format, "%.3f");
+        MEMBER(SliderFloatParameters, bool, logarithmic, false);
+        MEMBER(SliderFloatParameters, bool, infinity, false);
+        MEMBER(SliderFloatParameters, float, textWidth, 100);
+        MEMBER(SliderFloatParameters, bool, colorDependence, false);
+        MEMBER(SliderFloatParameters, float const*, defaultValue, nullptr);
+        MEMBER(SliderFloatParameters, float const*, disabledValue, nullptr);
+        MEMBER(SliderFloatParameters, bool const*, defaultEnabledValue, nullptr);
+        MEMBER(SliderFloatParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool SliderFloat(SliderFloatParameters const& parameters, float* value, bool* enabled = nullptr, bool* pinned = nullptr);
 
     struct SliderIntParameters
     {
-        MEMBER_DECLARATION(SliderIntParameters, std::string, name, "");
-        MEMBER_DECLARATION(SliderIntParameters, int, min, 0);
-        MEMBER_DECLARATION(SliderIntParameters, int, max, 0);
-        MEMBER_DECLARATION(SliderIntParameters, std::string, format, "%d");
-        MEMBER_DECLARATION(SliderIntParameters, bool, logarithmic, false);
-        MEMBER_DECLARATION(SliderIntParameters, bool, infinity, false);
-        MEMBER_DECLARATION(SliderIntParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(SliderIntParameters, bool, colorDependence, false);
-        MEMBER_DECLARATION(SliderIntParameters, int const*, defaultValue, nullptr);
-        MEMBER_DECLARATION(SliderIntParameters, int const*, disabledValue, nullptr);
-        MEMBER_DECLARATION(SliderIntParameters, bool const*, defaultEnabledValue, nullptr);
-        MEMBER_DECLARATION(SliderIntParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(SliderIntParameters, std::string, name, "");
+        MEMBER(SliderIntParameters, int, min, 0);
+        MEMBER(SliderIntParameters, int, max, 0);
+        MEMBER(SliderIntParameters, std::string, format, "%d");
+        MEMBER(SliderIntParameters, bool, logarithmic, false);
+        MEMBER(SliderIntParameters, bool, infinity, false);
+        MEMBER(SliderIntParameters, float, textWidth, 100);
+        MEMBER(SliderIntParameters, bool, colorDependence, false);
+        MEMBER(SliderIntParameters, int const*, defaultValue, nullptr);
+        MEMBER(SliderIntParameters, int const*, disabledValue, nullptr);
+        MEMBER(SliderIntParameters, bool const*, defaultEnabledValue, nullptr);
+        MEMBER(SliderIntParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool SliderInt(SliderIntParameters const& parameters, int* value, bool* enabled = nullptr, bool* pinned = nullptr);
 
     struct SliderFloat2Parameters
     {
-        MEMBER_DECLARATION(SliderFloat2Parameters, std::string, name, "");
-        MEMBER_DECLARATION(SliderFloat2Parameters, RealVector2D, min, RealVector2D());
-        MEMBER_DECLARATION(SliderFloat2Parameters, RealVector2D, max, RealVector2D());
-        MEMBER_DECLARATION(SliderFloat2Parameters, std::string, format, "%.3f");
-        MEMBER_DECLARATION(SliderFloat2Parameters, float, textWidth, 100);
-        MEMBER_DECLARATION(SliderFloat2Parameters, std::optional<RealVector2D>, defaultValue, std::nullopt);
-        MEMBER_DECLARATION(SliderFloat2Parameters, std::optional<std::string>, tooltip, std::nullopt);
-        MEMBER_DECLARATION(SliderFloat2Parameters, std::optional<std::function<bool(void)>>, getMousePickerEnabledFunc, std::nullopt);
-        MEMBER_DECLARATION(SliderFloat2Parameters, std::optional<std::function<void(bool)>>, setMousePickerEnabledFunc, std::nullopt);
-        MEMBER_DECLARATION(SliderFloat2Parameters, std::optional<std::function<std::optional<RealVector2D>(void)>>, getMousePickerPositionFunc, std::nullopt);
+        MEMBER(SliderFloat2Parameters, std::string, name, "");
+        MEMBER(SliderFloat2Parameters, RealVector2D, min, RealVector2D());
+        MEMBER(SliderFloat2Parameters, RealVector2D, max, RealVector2D());
+        MEMBER(SliderFloat2Parameters, std::string, format, "%.3f");
+        MEMBER(SliderFloat2Parameters, float, textWidth, 100);
+        MEMBER(SliderFloat2Parameters, std::optional<RealVector2D>, defaultValue, std::nullopt);
+        MEMBER(SliderFloat2Parameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(SliderFloat2Parameters, std::optional<std::function<bool(void)>>, getMousePickerEnabledFunc, std::nullopt);
+        MEMBER(SliderFloat2Parameters, std::optional<std::function<void(bool)>>, setMousePickerEnabledFunc, std::nullopt);
+        MEMBER(SliderFloat2Parameters, std::optional<std::function<std::optional<RealVector2D>(void)>>, getMousePickerPositionFunc, std::nullopt);
     };
     static bool SliderFloat2(SliderFloat2Parameters const& parameters, float& valueX, float& valueY);
 
     struct SliderInputFloatParameters
     {
-        MEMBER_DECLARATION(SliderInputFloatParameters, std::string, name, "");
-        MEMBER_DECLARATION(SliderInputFloatParameters, float, min, 0);
-        MEMBER_DECLARATION(SliderInputFloatParameters, float, max, 0);
-        MEMBER_DECLARATION(SliderInputFloatParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(SliderInputFloatParameters, float, inputWidth, 50);
-        MEMBER_DECLARATION(SliderInputFloatParameters, std::string, format, "%.3f");
+        MEMBER(SliderInputFloatParameters, std::string, name, "");
+        MEMBER(SliderInputFloatParameters, float, min, 0);
+        MEMBER(SliderInputFloatParameters, float, max, 0);
+        MEMBER(SliderInputFloatParameters, float, textWidth, 100);
+        MEMBER(SliderInputFloatParameters, float, inputWidth, 50);
+        MEMBER(SliderInputFloatParameters, std::string, format, "%.3f");
     };
     static void SliderInputFloat(SliderInputFloatParameters const& parameters, float& value);
 
     struct InputIntParameters
     {
-        MEMBER_DECLARATION(InputIntParameters, std::string, name, "");
-        MEMBER_DECLARATION(InputIntParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(InputIntParameters, bool, keepTextEnabled, false);
-        MEMBER_DECLARATION(InputIntParameters, std::optional<int>, defaultValue, std::nullopt);
-        MEMBER_DECLARATION(InputIntParameters, bool, infinity, false);
-        MEMBER_DECLARATION(InputIntParameters, std::optional<std::string>, tooltip, std::nullopt);
-        MEMBER_DECLARATION(InputIntParameters, std::optional<int>, disabledValue, std::nullopt);
-        MEMBER_DECLARATION(InputIntParameters, bool, readOnly, false);
+        MEMBER(InputIntParameters, std::string, name, "");
+        MEMBER(InputIntParameters, float, textWidth, 100);
+        MEMBER(InputIntParameters, bool, keepTextEnabled, false);
+        MEMBER(InputIntParameters, std::optional<int>, defaultValue, std::nullopt);
+        MEMBER(InputIntParameters, bool, infinity, false);
+        MEMBER(InputIntParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(InputIntParameters, std::optional<int>, disabledValue, std::nullopt);
+        MEMBER(InputIntParameters, bool, readOnly, false);
     };
     static bool InputInt(InputIntParameters const& parameters, int& value, bool* enabled = nullptr);
     static bool InputOptionalInt(InputIntParameters const& parameters, std::optional<int>& value);
 
     struct InputFloatParameters
     {
-        MEMBER_DECLARATION(InputFloatParameters, std::string, name, "");
-        MEMBER_DECLARATION(InputFloatParameters, float, step, 1.0f);
-        MEMBER_DECLARATION(InputFloatParameters, std::string, format, "%.3f");
-        MEMBER_DECLARATION(InputFloatParameters, float, textWidth, 100.0f);
-        MEMBER_DECLARATION(InputFloatParameters, std::optional<float>, defaultValue, std::nullopt);
-        MEMBER_DECLARATION(InputFloatParameters, std::optional<std::string>, tooltip, std::nullopt);
-        MEMBER_DECLARATION(InputFloatParameters, bool, readOnly, false);
+        MEMBER(InputFloatParameters, std::string, name, "");
+        MEMBER(InputFloatParameters, float, step, 1.0f);
+        MEMBER(InputFloatParameters, std::string, format, "%.3f");
+        MEMBER(InputFloatParameters, float, textWidth, 100.0f);
+        MEMBER(InputFloatParameters, std::optional<float>, defaultValue, std::nullopt);
+        MEMBER(InputFloatParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(InputFloatParameters, bool, readOnly, false);
     };
     static bool InputFloat(InputFloatParameters const& parameters, float& value);
 
     struct InputFloat2Parameters
     {
-        MEMBER_DECLARATION(InputFloat2Parameters, std::string, name, "");
-        MEMBER_DECLARATION(InputFloat2Parameters, std::string, format, "%.3f");
-        MEMBER_DECLARATION(InputFloat2Parameters, float, textWidth, 100);
-        MEMBER_DECLARATION(InputFloat2Parameters, std::optional<float>, defaultValue1, std::nullopt);
-        MEMBER_DECLARATION(InputFloat2Parameters, std::optional<float>, defaultValue2, std::nullopt);
-        MEMBER_DECLARATION(InputFloat2Parameters, std::optional<std::string>, tooltip, std::nullopt);
-        MEMBER_DECLARATION(InputFloat2Parameters, bool, readOnly, false);
+        MEMBER(InputFloat2Parameters, std::string, name, "");
+        MEMBER(InputFloat2Parameters, std::string, format, "%.3f");
+        MEMBER(InputFloat2Parameters, float, textWidth, 100);
+        MEMBER(InputFloat2Parameters, std::optional<float>, defaultValue1, std::nullopt);
+        MEMBER(InputFloat2Parameters, std::optional<float>, defaultValue2, std::nullopt);
+        MEMBER(InputFloat2Parameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(InputFloat2Parameters, bool, readOnly, false);
     };
     static void InputFloat2(InputFloat2Parameters const& parameters, float& value1, float& value2);
 
@@ -139,143 +139,143 @@ public:
 
     struct CheckboxColorMatrixParameters
     {
-        MEMBER_DECLARATION(CheckboxColorMatrixParameters, std::string, name, "");
-        MEMBER_DECLARATION(CheckboxColorMatrixParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(CheckboxColorMatrixParameters, std::optional<std::vector<std::vector<bool>>>, defaultValue, std::nullopt);
-        MEMBER_DECLARATION(CheckboxColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(CheckboxColorMatrixParameters, std::string, name, "");
+        MEMBER(CheckboxColorMatrixParameters, float, textWidth, 100);
+        MEMBER(CheckboxColorMatrixParameters, std::optional<std::vector<std::vector<bool>>>, defaultValue, std::nullopt);
+        MEMBER(CheckboxColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static void CheckboxColorMatrix(CheckboxColorMatrixParameters const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS]);
 
     struct InputIntColorMatrixParameters
     {
-        MEMBER_DECLARATION(InputIntColorMatrixParameters, std::string, name, "");
-        MEMBER_DECLARATION(InputIntColorMatrixParameters, int, min, 0);
-        MEMBER_DECLARATION(InputIntColorMatrixParameters, int, max, 0);
-        MEMBER_DECLARATION(InputIntColorMatrixParameters, bool, logarithmic, false);
-        MEMBER_DECLARATION(InputIntColorMatrixParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(InputIntColorMatrixParameters, std::optional<std::vector<std::vector<int>>>, defaultValue, std::nullopt);
-        MEMBER_DECLARATION(InputIntColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(InputIntColorMatrixParameters, std::string, name, "");
+        MEMBER(InputIntColorMatrixParameters, int, min, 0);
+        MEMBER(InputIntColorMatrixParameters, int, max, 0);
+        MEMBER(InputIntColorMatrixParameters, bool, logarithmic, false);
+        MEMBER(InputIntColorMatrixParameters, float, textWidth, 100);
+        MEMBER(InputIntColorMatrixParameters, std::optional<std::vector<std::vector<int>>>, defaultValue, std::nullopt);
+        MEMBER(InputIntColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static void InputIntColorMatrix(InputIntColorMatrixParameters const& parameters, int (&value)[MAX_COLORS][MAX_COLORS]);
 
     struct InputFloatColorMatrixParameters
     {
-        MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::string, name, "");
-        MEMBER_DECLARATION(InputFloatColorMatrixParameters, float, min, 0);
-        MEMBER_DECLARATION(InputFloatColorMatrixParameters, float, max, 0);
-        MEMBER_DECLARATION(InputFloatColorMatrixParameters, bool, logarithmic, false);
-        MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::string, format, "%.2f");
-        MEMBER_DECLARATION(InputFloatColorMatrixParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::optional<std::vector<std::vector<float>>>, defaultValue, std::nullopt);
-        MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
-        MEMBER_DECLARATION(InputFloatColorMatrixParameters, std::optional<std::vector<std::vector<float>>>, disabledValue, std::nullopt);
+        MEMBER(InputFloatColorMatrixParameters, std::string, name, "");
+        MEMBER(InputFloatColorMatrixParameters, float, min, 0);
+        MEMBER(InputFloatColorMatrixParameters, float, max, 0);
+        MEMBER(InputFloatColorMatrixParameters, bool, logarithmic, false);
+        MEMBER(InputFloatColorMatrixParameters, std::string, format, "%.2f");
+        MEMBER(InputFloatColorMatrixParameters, float, textWidth, 100);
+        MEMBER(InputFloatColorMatrixParameters, std::optional<std::vector<std::vector<float>>>, defaultValue, std::nullopt);
+        MEMBER(InputFloatColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(InputFloatColorMatrixParameters, std::optional<std::vector<std::vector<float>>>, disabledValue, std::nullopt);
     };
     static void InputFloatColorMatrix(InputFloatColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS], bool* enabled = nullptr);
 
     struct InputTextParameters
     {
-        MEMBER_DECLARATION(InputTextParameters, std::string, name, "");
-        MEMBER_DECLARATION(InputTextParameters, std::string, hint, "");
-        MEMBER_DECLARATION(InputTextParameters, float, width, 0);
-        MEMBER_DECLARATION(InputTextParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(InputTextParameters, bool, monospaceFont, false);
-        MEMBER_DECLARATION(InputTextParameters, bool, bold, false);
-        MEMBER_DECLARATION(InputTextParameters, bool, readOnly, false);
-        MEMBER_DECLARATION(InputTextParameters, bool, password, false);
-        MEMBER_DECLARATION(InputTextParameters, bool, folderButton, false);
-        MEMBER_DECLARATION(InputTextParameters, std::optional<std::string>, defaultValue, std::nullopt);
-        MEMBER_DECLARATION(InputTextParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(InputTextParameters, std::string, name, "");
+        MEMBER(InputTextParameters, std::string, hint, "");
+        MEMBER(InputTextParameters, float, width, 0);
+        MEMBER(InputTextParameters, float, textWidth, 100);
+        MEMBER(InputTextParameters, bool, monospaceFont, false);
+        MEMBER(InputTextParameters, bool, bold, false);
+        MEMBER(InputTextParameters, bool, readOnly, false);
+        MEMBER(InputTextParameters, bool, password, false);
+        MEMBER(InputTextParameters, bool, folderButton, false);
+        MEMBER(InputTextParameters, std::optional<std::string>, defaultValue, std::nullopt);
+        MEMBER(InputTextParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool InputText(InputTextParameters const& parameters, char* buffer, int bufferSize);
     static bool InputText(InputTextParameters const& parameters, std::string& text);
 
     struct InputFilterParameters
     {
-        MEMBER_DECLARATION(InputFilterParameters, float, width, 0);
+        MEMBER(InputFilterParameters, float, width, 0);
     };
     static bool InputFilter(InputFilterParameters const& parameters, std::string& filter);
 
     struct InputTextMultilineParameters
     {
-        MEMBER_DECLARATION(InputTextMultilineParameters, std::string, name, "");
-        MEMBER_DECLARATION(InputTextMultilineParameters, std::string, hint, "");
-        MEMBER_DECLARATION(InputTextMultilineParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(InputTextMultilineParameters, float, height, 100.0f);
+        MEMBER(InputTextMultilineParameters, std::string, name, "");
+        MEMBER(InputTextMultilineParameters, std::string, hint, "");
+        MEMBER(InputTextMultilineParameters, float, textWidth, 100);
+        MEMBER(InputTextMultilineParameters, float, height, 100.0f);
     };
     static void InputTextMultiline(InputTextMultilineParameters const& parameters, std::string& text);
 
     struct ComboParameters
     {
-        MEMBER_DECLARATION(ComboParameters, std::string, name, "");
-        MEMBER_DECLARATION(ComboParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(ComboParameters, bool, disabled, false);
-        MEMBER_DECLARATION(ComboParameters, std::optional<int>, defaultValue, std::nullopt);
-        MEMBER_DECLARATION(ComboParameters, bool const*, defaultEnabledValue, nullptr);
-        MEMBER_DECLARATION(ComboParameters, std::vector<std::string>, values, std::vector<std::string>());
-        MEMBER_DECLARATION(ComboParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(ComboParameters, std::string, name, "");
+        MEMBER(ComboParameters, float, textWidth, 100);
+        MEMBER(ComboParameters, bool, disabled, false);
+        MEMBER(ComboParameters, std::optional<int>, defaultValue, std::nullopt);
+        MEMBER(ComboParameters, bool const*, defaultEnabledValue, nullptr);
+        MEMBER(ComboParameters, std::vector<std::string>, values, std::vector<std::string>());
+        MEMBER(ComboParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool Combo(ComboParameters& parameters, int& value, bool* enabled = nullptr);
 
     struct SwitcherParameters
     {
-        MEMBER_DECLARATION(SwitcherParameters, std::string, name, "");
-        MEMBER_DECLARATION(SwitcherParameters, float, width, 0);
-        MEMBER_DECLARATION(SwitcherParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(SwitcherParameters, bool, disabled, false);
-        MEMBER_DECLARATION(SwitcherParameters, std::optional<int>, defaultValue, std::nullopt);
-        MEMBER_DECLARATION(SwitcherParameters, std::vector<std::string>, values, std::vector<std::string>());
-        MEMBER_DECLARATION(SwitcherParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(SwitcherParameters, std::string, name, "");
+        MEMBER(SwitcherParameters, float, width, 0);
+        MEMBER(SwitcherParameters, float, textWidth, 100);
+        MEMBER(SwitcherParameters, bool, disabled, false);
+        MEMBER(SwitcherParameters, std::optional<int>, defaultValue, std::nullopt);
+        MEMBER(SwitcherParameters, std::vector<std::string>, values, std::vector<std::string>());
+        MEMBER(SwitcherParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool Switcher(SwitcherParameters& parameters, int& value, bool* enabled = nullptr);
 
     struct ComboColorParameters
     {
-        MEMBER_DECLARATION(ComboColorParameters, std::string, name, "");
-        MEMBER_DECLARATION(ComboColorParameters, float, width, 0);
-        MEMBER_DECLARATION(ComboColorParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(ComboColorParameters, bool, keepTextEnabled, false);
-        MEMBER_DECLARATION(ComboColorParameters, std::optional<int>, defaultValue, std::nullopt);
-        MEMBER_DECLARATION(ComboColorParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(ComboColorParameters, std::string, name, "");
+        MEMBER(ComboColorParameters, float, width, 0);
+        MEMBER(ComboColorParameters, float, textWidth, 100);
+        MEMBER(ComboColorParameters, bool, keepTextEnabled, false);
+        MEMBER(ComboColorParameters, std::optional<int>, defaultValue, std::nullopt);
+        MEMBER(ComboColorParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool ComboColor(ComboColorParameters const& parameters, int& value, bool* enabled = nullptr);
     static bool ComboOptionalColor(ComboColorParameters const& parameters, std::optional<int>& value);
 
     struct InputColorTransitionParameters
     {
-        MEMBER_DECLARATION(InputColorTransitionParameters, std::string, name, "");
-        MEMBER_DECLARATION(InputColorTransitionParameters, int, color, 0);
-        MEMBER_DECLARATION(InputColorTransitionParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(InputColorTransitionParameters, int, min, 1);
-        MEMBER_DECLARATION(InputColorTransitionParameters, int, max, 10000000);
-        MEMBER_DECLARATION(InputColorTransitionParameters, bool, logarithmic, false);
-        MEMBER_DECLARATION(InputColorTransitionParameters, bool, infinity, false);
-        MEMBER_DECLARATION(InputColorTransitionParameters, std::optional<int>, defaultTargetColor, std::nullopt);
-        MEMBER_DECLARATION(InputColorTransitionParameters, std::optional<int>, defaultTransitionAge, std::nullopt);
-        MEMBER_DECLARATION(InputColorTransitionParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(InputColorTransitionParameters, std::string, name, "");
+        MEMBER(InputColorTransitionParameters, int, color, 0);
+        MEMBER(InputColorTransitionParameters, float, textWidth, 100);
+        MEMBER(InputColorTransitionParameters, int, min, 1);
+        MEMBER(InputColorTransitionParameters, int, max, 10000000);
+        MEMBER(InputColorTransitionParameters, bool, logarithmic, false);
+        MEMBER(InputColorTransitionParameters, bool, infinity, false);
+        MEMBER(InputColorTransitionParameters, std::optional<int>, defaultTargetColor, std::nullopt);
+        MEMBER(InputColorTransitionParameters, std::optional<int>, defaultTransitionAge, std::nullopt);
+        MEMBER(InputColorTransitionParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static void InputColorTransition(InputColorTransitionParameters const& parameters, int sourceColor, int& targetColor, int& transitionAge);
 
     struct CheckboxParameters
     {
-        MEMBER_DECLARATION(CheckboxParameters, std::string, name, "");
-        MEMBER_DECLARATION(CheckboxParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(CheckboxParameters, std::optional<bool>, defaultValue, std::nullopt);
-        MEMBER_DECLARATION(CheckboxParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(CheckboxParameters, std::string, name, "");
+        MEMBER(CheckboxParameters, float, textWidth, 100);
+        MEMBER(CheckboxParameters, std::optional<bool>, defaultValue, std::nullopt);
+        MEMBER(CheckboxParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool Checkbox(CheckboxParameters const& parameters, bool& value);
 
     struct ToggleButtonParameters
     {
-        MEMBER_DECLARATION(ToggleButtonParameters, std::string, name, "");
-        MEMBER_DECLARATION(ToggleButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(ToggleButtonParameters, std::string, name, "");
+        MEMBER(ToggleButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool ToggleButton(ToggleButtonParameters const& parameters, bool& value);
 
     struct SelectableButtonParameters 
     {
-        MEMBER_DECLARATION(SelectableButtonParameters, std::string, name, "");
-        MEMBER_DECLARATION(SelectableButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
-        MEMBER_DECLARATION(SelectableButtonParameters, float, width, 0);
+        MEMBER(SelectableButtonParameters, std::string, name, "");
+        MEMBER(SelectableButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(SelectableButtonParameters, float, width, 0);
     };
     static bool SelectableButton(SelectableButtonParameters const& parameters, bool& value);
 
@@ -287,13 +287,13 @@ public:
     static void BeginMenu(std::string const& text, bool& toggled, float focus = true);
     struct MenuItemParameters
     {
-        MEMBER_DECLARATION(MenuItemParameters, std::string, name, "");
-        MEMBER_DECLARATION(MenuItemParameters, bool, keyCtrl, false);
-        MEMBER_DECLARATION(MenuItemParameters, bool, keyAlt, false);
-        MEMBER_DECLARATION(MenuItemParameters, std::optional<ImGuiKey>, key, std::nullopt);
-        MEMBER_DECLARATION(MenuItemParameters, bool, disabled, false);
-        MEMBER_DECLARATION(MenuItemParameters, bool, selected, false);
-        MEMBER_DECLARATION(MenuItemParameters, bool, closeMenuWhenItemClicked, true);
+        MEMBER(MenuItemParameters, std::string, name, "");
+        MEMBER(MenuItemParameters, bool, keyCtrl, false);
+        MEMBER(MenuItemParameters, bool, keyAlt, false);
+        MEMBER(MenuItemParameters, std::optional<ImGuiKey>, key, std::nullopt);
+        MEMBER(MenuItemParameters, bool, disabled, false);
+        MEMBER(MenuItemParameters, bool, selected, false);
+        MEMBER(MenuItemParameters, bool, closeMenuWhenItemClicked, true);
     };
     static void MenuItem(MenuItemParameters const& parameters, std::function<void()> const& action);
     static void MenuSeparator();
@@ -303,10 +303,10 @@ public:
 
     struct ColorButtonWithPickerParameters
     {
-        MEMBER_DECLARATION(ColorButtonWithPickerParameters, std::string, name, "");
-        MEMBER_DECLARATION(ColorButtonWithPickerParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(ColorButtonWithPickerParameters, std::optional<FloatColorRGB>, defaultValue, std::nullopt);
-        MEMBER_DECLARATION(ColorButtonWithPickerParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(ColorButtonWithPickerParameters, std::string, name, "");
+        MEMBER(ColorButtonWithPickerParameters, float, textWidth, 100);
+        MEMBER(ColorButtonWithPickerParameters, std::optional<FloatColorRGB>, defaultValue, std::nullopt);
+        MEMBER(ColorButtonWithPickerParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static void ColorButtonWithPicker(ColorButtonWithPickerParameters const& parameters, FloatColorRGB& color);
 
@@ -315,7 +315,7 @@ public:
 
     struct MovableSeparatorParameters
     {
-        MEMBER_DECLARATION(MovableSeparatorParameters, bool, additive, true);
+        MEMBER(MovableSeparatorParameters, bool, additive, true);
     };
     static void MovableSeparator(MovableSeparatorParameters const& parameters, float& height);
 
@@ -323,12 +323,12 @@ public:
 
     struct ToolbarButtonParameters
     {
-        MEMBER_DECLARATION(ToolbarButtonParameters, std::string, text, std::string());
-        MEMBER_DECLARATION(ToolbarButtonParameters, std::optional<std::string>, secondText, std::nullopt);
-        MEMBER_DECLARATION(ToolbarButtonParameters, RealVector2D, secondTextOffset, (RealVector2D{25.0f, 25.0f}));
-        MEMBER_DECLARATION(ToolbarButtonParameters, float, secondTextScale, 0.5f);
-        MEMBER_DECLARATION(ToolbarButtonParameters, bool, disabled, false);
-        MEMBER_DECLARATION(ToolbarButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(ToolbarButtonParameters, std::string, text, std::string());
+        MEMBER(ToolbarButtonParameters, std::optional<std::string>, secondText, std::nullopt);
+        MEMBER(ToolbarButtonParameters, RealVector2D, secondTextOffset, (RealVector2D{25.0f, 25.0f}));
+        MEMBER(ToolbarButtonParameters, float, secondTextScale, 0.5f);
+        MEMBER(ToolbarButtonParameters, bool, disabled, false);
+        MEMBER(ToolbarButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool ToolbarButton(ToolbarButtonParameters const& parameters);
     static bool SelectableToolbarButton(std::string const& text, int& value, int selectionValue, int deselectionValue);
@@ -346,11 +346,11 @@ public:
     };
     struct TreeNodeParameters
     {
-        MEMBER_DECLARATION(TreeNodeParameters, std::string, name, "");
-        MEMBER_DECLARATION(TreeNodeParameters, TreeNodeRank, rank, TreeNodeRank::Default);
-        MEMBER_DECLARATION(TreeNodeParameters, bool, defaultOpen, true);
-        MEMBER_DECLARATION(TreeNodeParameters, bool, visible, true);
-        MEMBER_DECLARATION(TreeNodeParameters, bool, blinkWhenActivated, false);
+        MEMBER(TreeNodeParameters, std::string, name, "");
+        MEMBER(TreeNodeParameters, TreeNodeRank, rank, TreeNodeRank::Default);
+        MEMBER(TreeNodeParameters, bool, defaultOpen, true);
+        MEMBER(TreeNodeParameters, bool, visible, true);
+        MEMBER(TreeNodeParameters, bool, blinkWhenActivated, false);
     };
     static bool BeginTreeNode(TreeNodeParameters const& parameters);
     static void EndTreeNode();
@@ -360,24 +360,24 @@ public:
 
     struct ButtonParameters
     {
-        MEMBER_DECLARATION(ButtonParameters, std::string, buttonText, "");
-        MEMBER_DECLARATION(ButtonParameters, std::string, name, "");
-        MEMBER_DECLARATION(ButtonParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(ButtonParameters, bool, showDisabledRevertButton, false);
-        MEMBER_DECLARATION(ButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(ButtonParameters, std::string, buttonText, "");
+        MEMBER(ButtonParameters, std::string, name, "");
+        MEMBER(ButtonParameters, float, textWidth, 100);
+        MEMBER(ButtonParameters, bool, showDisabledRevertButton, false);
+        MEMBER(ButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool Button(ButtonParameters const& parameters);
 
     struct ActionButtonParameters
     {
-        MEMBER_DECLARATION(ActionButtonParameters, std::string, buttonText, "");
-        MEMBER_DECLARATION(ActionButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(ActionButtonParameters, std::string, buttonText, "");
+        MEMBER(ActionButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool ActionButton(ActionButtonParameters const& parameters);
 
     struct SpinnerParameters
     {
-        MEMBER_DECLARATION(SpinnerParameters, RealVector2D, pos, RealVector2D());
+        MEMBER(SpinnerParameters, RealVector2D, pos, RealVector2D());
     };
     static void Spinner(SpinnerParameters const& parameters);
 
@@ -392,26 +392,26 @@ public:
 
     struct CellTypeComboParameters
     {
-        MEMBER_DECLARATION(CellTypeComboParameters, std::string, name, "");
-        MEMBER_DECLARATION(CellTypeComboParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(CellTypeComboParameters, bool, includeStructureAndFreeCells, false);
-        MEMBER_DECLARATION(CellTypeComboParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(CellTypeComboParameters, std::string, name, "");
+        MEMBER(CellTypeComboParameters, float, textWidth, 100);
+        MEMBER(CellTypeComboParameters, bool, includeStructureAndFreeCells, false);
+        MEMBER(CellTypeComboParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool CellTypeCombo(CellTypeComboParameters& parameters, int& value);
     struct AngleAlignmentComboParameters
     {
-        MEMBER_DECLARATION(AngleAlignmentComboParameters, std::string, name, "");
-        MEMBER_DECLARATION(AngleAlignmentComboParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(AngleAlignmentComboParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(AngleAlignmentComboParameters, std::string, name, "");
+        MEMBER(AngleAlignmentComboParameters, float, textWidth, 100);
+        MEMBER(AngleAlignmentComboParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool AngleAlignmentCombo(AngleAlignmentComboParameters& parameters, int& value);
 
     struct NeuronSelectionParameters
     {
-        MEMBER_DECLARATION(NeuronSelectionParameters, std::string, name, "");
-        MEMBER_DECLARATION(NeuronSelectionParameters, float, step, 0.05f);
-        MEMBER_DECLARATION(NeuronSelectionParameters, std::string, format, "%.2f");
-        MEMBER_DECLARATION(NeuronSelectionParameters, float, rightMargin, 0);
+        MEMBER(NeuronSelectionParameters, std::string, name, "");
+        MEMBER(NeuronSelectionParameters, float, step, 0.05f);
+        MEMBER(NeuronSelectionParameters, std::string, format, "%.2f");
+        MEMBER(NeuronSelectionParameters, float, rightMargin, 0);
     };
     static void NeuronSelection(
         NeuronSelectionParameters const& parameters,
@@ -451,15 +451,15 @@ private:
     template<typename T>
     struct BasicInputColorMatrixParameters
     {
-        MEMBER_DECLARATION(BasicInputColorMatrixParameters, std::string, name, "");
-        MEMBER_DECLARATION(BasicInputColorMatrixParameters, T, min, static_cast<T>(0));
-        MEMBER_DECLARATION(BasicInputColorMatrixParameters, T, max, static_cast<T>(0));
-        MEMBER_DECLARATION(BasicInputColorMatrixParameters, bool, logarithmic, false);
-        MEMBER_DECLARATION(BasicInputColorMatrixParameters, std::string, format, "%.2f");
-        MEMBER_DECLARATION(BasicInputColorMatrixParameters, float, textWidth, 100);
-        MEMBER_DECLARATION(BasicInputColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, defaultValue, std::nullopt);
-        MEMBER_DECLARATION(BasicInputColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
-        MEMBER_DECLARATION(BasicInputColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, disabledValue, std::nullopt);
+        MEMBER(BasicInputColorMatrixParameters, std::string, name, "");
+        MEMBER(BasicInputColorMatrixParameters, T, min, static_cast<T>(0));
+        MEMBER(BasicInputColorMatrixParameters, T, max, static_cast<T>(0));
+        MEMBER(BasicInputColorMatrixParameters, bool, logarithmic, false);
+        MEMBER(BasicInputColorMatrixParameters, std::string, format, "%.2f");
+        MEMBER(BasicInputColorMatrixParameters, float, textWidth, 100);
+        MEMBER(BasicInputColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, defaultValue, std::nullopt);
+        MEMBER(BasicInputColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(BasicInputColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, disabledValue, std::nullopt);
     };
     template <typename T>
     static void BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], bool* enabled = nullptr);
