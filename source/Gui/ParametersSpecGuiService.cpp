@@ -258,10 +258,8 @@ void ParametersSpecGuiService::createWidgetsForFloatSpec(
         //specService.getPinnedValueRef(parameterSpec._value, parameters, locationIndex);
         auto value = specService.getFloatRef(floatSpec._member, parameters, locationIndex);
         auto origValue = specService.getFloatRef(floatSpec._member, origParameters, locationIndex);
-        auto enabledValue = nullptr;
-        //specService.getEnabledValueRef(parameterSpec._value, parameters, locationIndex);
-        auto origEnabledValue = nullptr;
-        //specService.getEnabledValueRef(parameterSpec._value, origParameters, locationIndex);
+        auto enabledValue = specService.getEnabledRef(parameterSpec._enabled, parameters, locationIndex);
+        auto origEnabledValue = specService.getEnabledRef(parameterSpec._enabled, origParameters, locationIndex);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name(parameterSpec._name)
@@ -310,8 +308,8 @@ void ParametersSpecGuiService::createWidgetsForAlternativeSpec(
     auto& specService = SimulationParametersSpecificationService::get();
     auto alternativeSpec = boost::get<AlternativeSpec>(parameterSpec._reference);
 
-    auto value = specService.getAlternativeRef(*alternativeSpec._member, parameters, locationIndex);
-    auto origValue = specService.getAlternativeRef(*alternativeSpec._member, origParameters, locationIndex);
+    auto value = specService.getAlternativeRef(alternativeSpec._member, parameters, locationIndex);
+    auto origValue = specService.getAlternativeRef(alternativeSpec._member, origParameters, locationIndex);
     std::vector<std::string> values;
     values.reserve(alternativeSpec._alternatives.size());
     for (auto const& name : alternativeSpec._alternatives | std::views::keys) {
@@ -429,7 +427,7 @@ bool ParametersSpecGuiService::isVisible(ParameterSpec const& parameterSpec, Loc
             }
         } else if (boost::get<AlternativeSpec>(&parameterSpec._reference)) {
             auto const& alternativeSpec = boost::get<AlternativeSpec>(parameterSpec._reference);
-            if (boost::get<IntMember>(&(*alternativeSpec._member))) {
+            if (boost::get<IntMember>(&alternativeSpec._member)) {
                 return true;
             }
         } else if (boost::get<ColorPickerSpec>(&parameterSpec._reference)) {

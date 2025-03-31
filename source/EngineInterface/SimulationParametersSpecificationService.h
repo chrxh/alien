@@ -22,10 +22,9 @@ public:
     FloatColorRGB* getFloatColorRGBRef(ColorPickerMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const;
     ColorTransitionRules* getColorTransitionRulesRef(ColorTransitionRulesMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const;
 
-    //template <typename T>
-    //T* getValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
-    bool* getPinnedValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
-    bool* getEnabledValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
+    bool* getEnabledRef(EnabledSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
+
+    //bool* getPinnedValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
     bool* getExpertToggleValueRef(ParameterGroupSpec const& spec, SimulationParameters& parameters) const;
 
 private:
