@@ -105,60 +105,16 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
         } else if (boost::get<Char64Spec>(&parameterSpec._reference)) {
             createWidgetsForChar64Spec(parameterSpec, parameters, origParameters, locationIndex);
 
+        } else if (boost::get<AlternativeSpec>(&parameterSpec._reference)) {
+            createWidgetsForAlternativeSpec(parameterSpec, parameters, origParameters, locationIndex);
+
         } else if (boost::get<ColorPickerSpec>(&parameterSpec._reference)) {
             createWidgetsForColorPickerSpec(parameterSpec, parameters, origParameters, locationIndex);
+
+        } else if (boost::get<ColorTransitionRulesSpec>(&parameterSpec._reference)) {
+            createWidgetsForColorTransitionRulesSpec(parameterSpec, parameters, origParameters, locationIndex);
         }
 
-        //if (parameterSpec._colorDependence == ColorDependence::Matrix) {
-        //    if (boost::get<FloatSpec>(parameterSpec._type)) {
-        //    } else if (boost::get<IntSpec>(parameterSpec._type)) {
-        //    } else if (boost::get<BoolSpec>(parameterSpec._type)) {
-        //    }
-        //} else {
-        //    if (boost::get<FloatSpec>(parameterSpec._type)) {
-        //    } else if (boost::get<IntSpec>(parameterSpec._type)) {
-        //    } else if (boost::get<BoolSpec>(parameterSpec._type)) {
-        //    } else if (boost::get<Char64Spec>(parameterSpec._type)) {
-        //    } else if (boost::get<ColorPickerSpec>(parameterSpec._type)) {
-        //    } else if (boost::get<ColorTransitionSpec>(parameterSpec._type)) {
-        //        auto value = specService.getValueRef<ColorTransitionRules>(parameterSpec._value, parameters, locationIndex);
-        //        auto origValue = specService.getValueRef<ColorTransitionRules>(parameterSpec._value, origParameters, locationIndex);
-        //        for (int color = 0; color < MAX_COLORS; ++color) {
-        //            ImGui::PushID(color);
-        //            auto widgetParameters = AlienImGui::InputColorTransitionParameters()
-        //                                        .textWidth(RightColumnWidth)
-        //                                        .color(color)
-        //                                        .defaultTargetColor(origValue->cellColorTransitionTargetColor[color])
-        //                                        .defaultTransitionAge(origValue->cellColorTransitionDuration[color])
-        //                                        .logarithmic(true)
-        //                                        .infinity(true);
-        //            if (0 == color) {
-        //                widgetParameters.name(parameterSpec._name).tooltip(parameterSpec._tooltip);
-        //            }
-        //            AlienImGui::InputColorTransition(
-        //                widgetParameters, color, value->cellColorTransitionTargetColor[color], value->cellColorTransitionDuration[color]);
-        //            ImGui::PopID();
-        //        }
-        //    } else if (boost::get<AlternativeSpec>(parameterSpec._type)) {
-        //        auto switcherSpec = boost::get<AlternativeSpec>(parameterSpec._type);
-        //        auto value = specService.getValueRef<int>(parameterSpec._value, parameters, locationIndex);
-        //        auto origValue = specService.getValueRef<int>(parameterSpec._value, origParameters, locationIndex);
-        //        std::vector<std::string> values;
-        //        values.reserve(switcherSpec._alternatives.size());
-        //        for (auto const& name : switcherSpec._alternatives | std::views::keys) {
-        //            values.emplace_back(name);
-        //        }
-        //        AlienImGui::Switcher(
-        //            AlienImGui::SwitcherParameters()
-        //                .name(parameterSpec._name)
-        //                .textWidth(RightColumnWidth)
-        //                .defaultValue(*origValue)
-        //                .values(values)
-        //                .tooltip(parameterSpec._tooltip),
-        //            *value);
-        //        createWidgetsFromParameterSpecs(switcherSpec._alternatives.at(*value).second, locationIndex, parameters, origParameters);
-        //    }
-        //}
         ImGui::PopID();
     }
 }
@@ -345,6 +301,33 @@ void ParametersSpecGuiService::createWidgetsForChar64Spec(
         sizeof(Char64) / sizeof(char));
 }
 
+void ParametersSpecGuiService::createWidgetsForAlternativeSpec(
+    ParameterSpec const& parameterSpec,
+    SimulationParameters& parameters,
+    SimulationParameters& origParameters,
+    int locationIndex) const
+{
+    auto& specService = SimulationParametersSpecificationService::get();
+    auto alternativeSpec = boost::get<AlternativeSpec>(parameterSpec._reference);
+
+    auto value = specService.getAlternativeRef(*alternativeSpec._member, parameters, locationIndex);
+    auto origValue = specService.getAlternativeRef(*alternativeSpec._member, origParameters, locationIndex);
+    std::vector<std::string> values;
+    values.reserve(alternativeSpec._alternatives.size());
+    for (auto const& name : alternativeSpec._alternatives | std::views::keys) {
+        values.emplace_back(name);
+    }
+    AlienImGui::Switcher(
+        AlienImGui::SwitcherParameters()
+            .name(parameterSpec._name)
+            .textWidth(RightColumnWidth)
+            .defaultValue(*origValue)
+            .values(values)
+            .tooltip(parameterSpec._tooltip),
+        *value);
+    createWidgetsFromParameterSpecs(alternativeSpec._alternatives.at(*value).second, parameters, origParameters, locationIndex);
+}
+
 void ParametersSpecGuiService::createWidgetsForColorPickerSpec(
     ParameterSpec const& parameterSpec,
     SimulationParameters& parameters,
@@ -361,11 +344,39 @@ void ParametersSpecGuiService::createWidgetsForColorPickerSpec(
         AlienImGui::ColorButtonWithPickerParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue), *value);
 }
 
+void ParametersSpecGuiService::createWidgetsForColorTransitionRulesSpec(
+    ParameterSpec const& parameterSpec,
+    SimulationParameters& parameters,
+    SimulationParameters& origParameters,
+    int locationIndex) const
+{
+    auto& specService = SimulationParametersSpecificationService::get();
+    auto const& colorTransitionRulesSpec = boost::get<ColorTransitionRulesSpec>(parameterSpec._reference);
+
+    auto value = specService.getColorTransitionRulesRef(colorTransitionRulesSpec._member, parameters, locationIndex);
+    auto origValue = specService.getColorTransitionRulesRef(colorTransitionRulesSpec._member, origParameters, locationIndex);
+    for (int color = 0; color < MAX_COLORS; ++color) {
+        ImGui::PushID(color);
+        auto widgetParameters = AlienImGui::InputColorTransitionParameters()
+                                    .textWidth(RightColumnWidth)
+                                    .color(color)
+                                    .defaultTargetColor(origValue->cellColorTransitionTargetColor[color])
+                                    .defaultTransitionAge(origValue->cellColorTransitionDuration[color])
+                                    .logarithmic(true)
+                                    .infinity(true);
+        if (0 == color) {
+            widgetParameters.name(parameterSpec._name).tooltip(parameterSpec._tooltip);
+        }
+        AlienImGui::InputColorTransition(widgetParameters, color, value->cellColorTransitionTargetColor[color], value->cellColorTransitionDuration[color]);
+        ImGui::PopID();
+    }
+}
+
 ParametersSpecGuiService::LocationType ParametersSpecGuiService::getLocationType(int locationIndex, SimulationParameters const& parameters) const
 {
     if (locationIndex == 0) {
         return LocationType::Base;
-    } else  {
+    } else {
         for (int i = 0; i < parameters.numZones; ++i) {
             if (parameters.zone[i].locationIndex == locationIndex) {
                 return LocationType::Zone;

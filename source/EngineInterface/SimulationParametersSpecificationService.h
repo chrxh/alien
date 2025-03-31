@@ -18,7 +18,9 @@ public:
     int* getIntRef(IntMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const;
     float* getFloatRef(FloatMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const;
     char* getChar64Ref(Char64MemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const;
+    int* getAlternativeRef(AlternativeMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const;
     FloatColorRGB* getFloatColorRGBRef(ColorPickerMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const;
+    ColorTransitionRules* getColorTransitionRulesRef(ColorTransitionRulesMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const;
 
     //template <typename T>
     //T* getValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
