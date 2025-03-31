@@ -82,11 +82,12 @@ struct Char64Spec
 struct ParameterSpec;
 struct AlternativeSpec
 {
-    MEMBER_DECLARATION(
-        AlternativeSpec,
-        std::shared_ptr<AlternativeMemberSpec>,
-        member,
-        nullptr);  // Workaround: shared_ptr to avoid aligned delete on memory coming from an unaligned allocation
+    AlternativeSpec& member(AlternativeMemberSpec const& member)
+    {
+        _member = std::make_shared<AlternativeMemberSpec>(member);
+        return *this;
+    }
+    std::shared_ptr<AlternativeMemberSpec> _member; // Workaround: shared_ptr to avoid aligned delete on memory coming from an unaligned allocation
 
     using Alternatives = std::vector<std::pair<std::string, std::vector<ParameterSpec>>>;
     MEMBER_DECLARATION(AlternativeSpec, Alternatives, alternatives, {});

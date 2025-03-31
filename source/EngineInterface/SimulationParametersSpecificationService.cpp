@@ -249,7 +249,7 @@ void SimulationParametersSpecificationService::createSpec()
                 ParameterSpec()
                     .name("Primary cell coloring")
                     .reference(AlternativeSpec()
-                                   .member(std::make_shared<AlternativeMemberSpec>(&SimulationParameters::primaryCellColoring))
+                                   .member(&SimulationParameters::primaryCellColoring)
                         .alternatives({{"Energy", {}}})
                                    .alternatives({
                                        {"Energy", {}},
@@ -262,7 +262,7 @@ void SimulationParametersSpecificationService::createSpec()
                                         {ParameterSpec()
                                              .name("Highlighted cell function")
                                              .reference(AlternativeSpec()
-                                                            .member(std::make_shared<AlternativeMemberSpec>(&SimulationParameters::highlightedCellType))
+                                                            .member(&SimulationParameters::highlightedCellType)
                                                             .alternatives(cellTypeStrings))
                                              .tooltip("The specific cell function type to be highlighted can be selected here.")}},
                                        {"Every cell function", {}},
@@ -317,7 +317,7 @@ void SimulationParametersSpecificationService::createSpec()
                     .name("Motion type")
                     .reference(
                         AlternativeSpec()
-                            .member(std::make_shared<AlternativeMemberSpec>(&SimulationParameters::motionType))
+                            .member(&SimulationParameters::motionType)
                             .alternatives(
                                 {{"Fluid solver",
                                   {
@@ -482,7 +482,7 @@ void SimulationParametersSpecificationService::createSpec()
                 ParameterSpec()
                     .name("Cell death consequences")
                     .reference(AlternativeSpec()
-                                   .member(std::make_shared<AlternativeMemberSpec>(&SimulationParameters::cellDeathConsequences))
+                                   .member(&SimulationParameters::cellDeathConsequences)
                                    .alternatives({{"None", {}}, {"Entire creature dies", {}}, {"Detached creature parts die", {}}}))
                     .tooltip("Here one can define what happens to the organism when one of its cells is in the 'Dying' state.\n\n" ICON_FA_CHEVRON_RIGHT
                              " None: Only the cell dies.\n\n" ICON_FA_CHEVRON_RIGHT
@@ -825,7 +825,7 @@ void SimulationParametersSpecificationService::createSpec()
                 ParameterSpec()
                     .name("Coloring")
                     .reference(AlternativeSpec()
-                                   .member(std::make_shared<AlternativeMemberSpec>(&SimulationParameters::cellGlowColoring))
+                                   .member(&SimulationParameters::cellGlowColoring)
                                    .alternatives(
                                        {{"Energy", {}},
                                         {"Standard cell colors", {}},
