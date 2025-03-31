@@ -12,46 +12,46 @@ class DescriptionEditService
 public:
     struct CreateRectParameters
     {
-        MEMBER_DECLARATION(CreateRectParameters, int, width, 10);
-        MEMBER_DECLARATION(CreateRectParameters, int, height, 10);
-        MEMBER_DECLARATION(CreateRectParameters, CellTypeDescription, cellType, StructureCellDescription());
-        MEMBER_DECLARATION(CreateRectParameters, float, cellDistance, 1.0f);
-        MEMBER_DECLARATION(CreateRectParameters, float, energy, 100.0f);
-        MEMBER_DECLARATION(CreateRectParameters, float, stiffness, 1.0f);
-        MEMBER_DECLARATION(CreateRectParameters, RealVector2D, center, RealVector2D({0, 0}));
-        MEMBER_DECLARATION(CreateRectParameters, bool, removeStickiness, false);
-        MEMBER_DECLARATION(CreateRectParameters, int, color, 0);
-        MEMBER_DECLARATION(CreateRectParameters, bool, barrier, false);
-        MEMBER_DECLARATION(CreateRectParameters, bool, randomCreatureId, true);
-        MEMBER_DECLARATION(CreateRectParameters, int, mutationId, 0);
-        MEMBER_DECLARATION(CreateRectParameters, float, genomeComplexity, 0);
+        MEMBER(CreateRectParameters, int, width, 10);
+        MEMBER(CreateRectParameters, int, height, 10);
+        MEMBER(CreateRectParameters, CellTypeDescription, cellType, StructureCellDescription());
+        MEMBER(CreateRectParameters, float, cellDistance, 1.0f);
+        MEMBER(CreateRectParameters, float, energy, 100.0f);
+        MEMBER(CreateRectParameters, float, stiffness, 1.0f);
+        MEMBER(CreateRectParameters, RealVector2D, center, RealVector2D({0, 0}));
+        MEMBER(CreateRectParameters, bool, removeStickiness, false);
+        MEMBER(CreateRectParameters, int, color, 0);
+        MEMBER(CreateRectParameters, bool, barrier, false);
+        MEMBER(CreateRectParameters, bool, randomCreatureId, true);
+        MEMBER(CreateRectParameters, int, mutationId, 0);
+        MEMBER(CreateRectParameters, float, genomeComplexity, 0);
     };
     DataDescription createRect(CreateRectParameters const& parameters);
 
     struct CreateHexParameters
     {
-        MEMBER_DECLARATION(CreateHexParameters, int, layers, 10);
-        MEMBER_DECLARATION(CreateHexParameters, float, cellDistance, 1.0f);
-        MEMBER_DECLARATION(CreateHexParameters, float, energy, 100.0f);
-        MEMBER_DECLARATION(CreateHexParameters, float, stiffness, 1.0f);
-        MEMBER_DECLARATION(CreateHexParameters, RealVector2D, center, RealVector2D({0, 0}));
-        MEMBER_DECLARATION(CreateHexParameters, bool, removeStickiness, false);
-        MEMBER_DECLARATION(CreateHexParameters, int, color, 0);
-        MEMBER_DECLARATION(CreateHexParameters, bool, barrier, false);
-        MEMBER_DECLARATION(CreateHexParameters, bool, randomCreatureId, true);
+        MEMBER(CreateHexParameters, int, layers, 10);
+        MEMBER(CreateHexParameters, float, cellDistance, 1.0f);
+        MEMBER(CreateHexParameters, float, energy, 100.0f);
+        MEMBER(CreateHexParameters, float, stiffness, 1.0f);
+        MEMBER(CreateHexParameters, RealVector2D, center, RealVector2D({0, 0}));
+        MEMBER(CreateHexParameters, bool, removeStickiness, false);
+        MEMBER(CreateHexParameters, int, color, 0);
+        MEMBER(CreateHexParameters, bool, barrier, false);
+        MEMBER(CreateHexParameters, bool, randomCreatureId, true);
     };
     DataDescription createHex(CreateHexParameters const& parameters);
 
     struct CreateUnconnectedCircleParameters
     {
-        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, float, radius, 3.0f);
-        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, float, cellDistance, 1.0f);
-        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, float, energy, 100.0f);
-        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, float, stiffness, 1.0f);
-        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, RealVector2D, center, RealVector2D({0, 0}));
-        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, int, color, 0);
-        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, bool, barrier, false);
-        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, bool, randomCreatureId, true);
+        MEMBER(CreateUnconnectedCircleParameters, float, radius, 3.0f);
+        MEMBER(CreateUnconnectedCircleParameters, float, cellDistance, 1.0f);
+        MEMBER(CreateUnconnectedCircleParameters, float, energy, 100.0f);
+        MEMBER(CreateUnconnectedCircleParameters, float, stiffness, 1.0f);
+        MEMBER(CreateUnconnectedCircleParameters, RealVector2D, center, RealVector2D({0, 0}));
+        MEMBER(CreateUnconnectedCircleParameters, int, color, 0);
+        MEMBER(CreateUnconnectedCircleParameters, bool, barrier, false);
+        MEMBER(CreateUnconnectedCircleParameters, bool, randomCreatureId, true);
     };
     DataDescription createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters);
 
@@ -59,33 +59,33 @@ public:
 
     struct GridMultiplyParameters
     {
-        MEMBER_DECLARATION(GridMultiplyParameters, int, horizontalNumber, 10);
-        MEMBER_DECLARATION(GridMultiplyParameters, float, horizontalDistance, 50.0f);
-        MEMBER_DECLARATION(GridMultiplyParameters, float, horizontalAngleInc, 0);
-        MEMBER_DECLARATION(GridMultiplyParameters, float, horizontalVelXinc, 0);
-        MEMBER_DECLARATION(GridMultiplyParameters, float, horizontalVelYinc, 0);
-        MEMBER_DECLARATION(GridMultiplyParameters, float, horizontalAngularVelInc, 0);
-        MEMBER_DECLARATION(GridMultiplyParameters, int, verticalNumber, 10);
-        MEMBER_DECLARATION(GridMultiplyParameters, float, verticalDistance, 50.0f);
-        MEMBER_DECLARATION(GridMultiplyParameters, float, verticalAngleInc, 0);
-        MEMBER_DECLARATION(GridMultiplyParameters, float, verticalVelXinc, 0);
-        MEMBER_DECLARATION(GridMultiplyParameters, float, verticalVelYinc, 0);
-        MEMBER_DECLARATION(GridMultiplyParameters, float, verticalAngularVelInc, 0);
+        MEMBER(GridMultiplyParameters, int, horizontalNumber, 10);
+        MEMBER(GridMultiplyParameters, float, horizontalDistance, 50.0f);
+        MEMBER(GridMultiplyParameters, float, horizontalAngleInc, 0);
+        MEMBER(GridMultiplyParameters, float, horizontalVelXinc, 0);
+        MEMBER(GridMultiplyParameters, float, horizontalVelYinc, 0);
+        MEMBER(GridMultiplyParameters, float, horizontalAngularVelInc, 0);
+        MEMBER(GridMultiplyParameters, int, verticalNumber, 10);
+        MEMBER(GridMultiplyParameters, float, verticalDistance, 50.0f);
+        MEMBER(GridMultiplyParameters, float, verticalAngleInc, 0);
+        MEMBER(GridMultiplyParameters, float, verticalVelXinc, 0);
+        MEMBER(GridMultiplyParameters, float, verticalVelYinc, 0);
+        MEMBER(GridMultiplyParameters, float, verticalAngularVelInc, 0);
     };
     DataDescription gridMultiply(DataDescription const& input, GridMultiplyParameters const& parameters);
 
     struct RandomMultiplyParameters
     {
-        MEMBER_DECLARATION(RandomMultiplyParameters, int, number, 100);
-        MEMBER_DECLARATION(RandomMultiplyParameters, float, minAngle, 0);
-        MEMBER_DECLARATION(RandomMultiplyParameters, float, maxAngle, 360.0f);
-        MEMBER_DECLARATION(RandomMultiplyParameters, float, minVelX, 0);
-        MEMBER_DECLARATION(RandomMultiplyParameters, float, maxVelX, 0);
-        MEMBER_DECLARATION(RandomMultiplyParameters, float, minVelY, 0);
-        MEMBER_DECLARATION(RandomMultiplyParameters, float, maxVelY, 0);
-        MEMBER_DECLARATION(RandomMultiplyParameters, float, minAngularVel, 0);
-        MEMBER_DECLARATION(RandomMultiplyParameters, float, maxAngularVel, 0);
-        MEMBER_DECLARATION(RandomMultiplyParameters, bool, overlappingCheck, false);
+        MEMBER(RandomMultiplyParameters, int, number, 100);
+        MEMBER(RandomMultiplyParameters, float, minAngle, 0);
+        MEMBER(RandomMultiplyParameters, float, maxAngle, 360.0f);
+        MEMBER(RandomMultiplyParameters, float, minVelX, 0);
+        MEMBER(RandomMultiplyParameters, float, maxVelX, 0);
+        MEMBER(RandomMultiplyParameters, float, minVelY, 0);
+        MEMBER(RandomMultiplyParameters, float, maxVelY, 0);
+        MEMBER(RandomMultiplyParameters, float, minAngularVel, 0);
+        MEMBER(RandomMultiplyParameters, float, maxAngularVel, 0);
+        MEMBER(RandomMultiplyParameters, bool, overlappingCheck, false);
     };
     DataDescription randomMultiply(
         DataDescription const& input,

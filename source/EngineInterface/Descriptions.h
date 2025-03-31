@@ -294,16 +294,16 @@ struct AutoBendingDescription
     auto operator<=>(AutoBendingDescription const&) const = default;
 
     // Fixed data
-    MEMBER_DECLARATION(AutoBendingDescription, float, maxAngleDeviation, 0.2f);    // Between 0 and 1
-    MEMBER_DECLARATION(AutoBendingDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
+    MEMBER(AutoBendingDescription, float, maxAngleDeviation, 0.2f);    // Between 0 and 1
+    MEMBER(AutoBendingDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
 
     // Process data
-    MEMBER_DECLARATION(AutoBendingDescription, float, initialAngle, 0.0f);
-    MEMBER_DECLARATION(AutoBendingDescription, float, lastActualAngle, 0.0f);
-    MEMBER_DECLARATION(AutoBendingDescription, bool, forward, true);    // Current direction
-    MEMBER_DECLARATION(AutoBendingDescription, float, activation, 0);
-    MEMBER_DECLARATION(AutoBendingDescription, int, activationCountdown, 0);
-    MEMBER_DECLARATION(AutoBendingDescription, bool, impulseAlreadyApplied, false);
+    MEMBER(AutoBendingDescription, float, initialAngle, 0.0f);
+    MEMBER(AutoBendingDescription, float, lastActualAngle, 0.0f);
+    MEMBER(AutoBendingDescription, bool, forward, true);    // Current direction
+    MEMBER(AutoBendingDescription, float, activation, 0);
+    MEMBER(AutoBendingDescription, int, activationCountdown, 0);
+    MEMBER(AutoBendingDescription, bool, impulseAlreadyApplied, false);
 };
 
 struct ManualBendingDescription
@@ -311,14 +311,14 @@ struct ManualBendingDescription
     auto operator<=>(ManualBendingDescription const&) const = default;
 
     // Fixed data
-    MEMBER_DECLARATION(ManualBendingDescription, float, maxAngleDeviation, 0.2f);   // Between 0 and 1
-    MEMBER_DECLARATION(ManualBendingDescription, float, frontBackVelRatio, 0.2f);   // Between 0 and 1
+    MEMBER(ManualBendingDescription, float, maxAngleDeviation, 0.2f);   // Between 0 and 1
+    MEMBER(ManualBendingDescription, float, frontBackVelRatio, 0.2f);   // Between 0 and 1
 
     // Process data
-    MEMBER_DECLARATION(ManualBendingDescription, float, initialAngle, 0.0f);
-    MEMBER_DECLARATION(ManualBendingDescription, float, lastActualAngle, 0.0f);
-    MEMBER_DECLARATION(ManualBendingDescription, float, lastAngleDelta, 0.0f);
-    MEMBER_DECLARATION(ManualBendingDescription, bool, impulseAlreadyApplied, false);
+    MEMBER(ManualBendingDescription, float, initialAngle, 0.0f);
+    MEMBER(ManualBendingDescription, float, lastActualAngle, 0.0f);
+    MEMBER(ManualBendingDescription, float, lastAngleDelta, 0.0f);
+    MEMBER(ManualBendingDescription, bool, impulseAlreadyApplied, false);
 };
 
 struct AngleBendingDescription
@@ -326,11 +326,11 @@ struct AngleBendingDescription
     auto operator<=>(AngleBendingDescription const&) const = default;
 
     // Fixed data
-    MEMBER_DECLARATION(AngleBendingDescription, float, maxAngleDeviation, 0.2f);   // Between 0 and 1
-    MEMBER_DECLARATION(AngleBendingDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
+    MEMBER(AngleBendingDescription, float, maxAngleDeviation, 0.2f);   // Between 0 and 1
+    MEMBER(AngleBendingDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
 
     // Process data
-    MEMBER_DECLARATION(AngleBendingDescription, float, initialAngle, 0.0f);
+    MEMBER(AngleBendingDescription, float, initialAngle, 0.0f);
 };
 
 struct AutoCrawlingDescription
@@ -338,16 +338,16 @@ struct AutoCrawlingDescription
     auto operator<=>(AutoCrawlingDescription const&) const = default;
 
     // Fixed data
-    MEMBER_DECLARATION(AutoCrawlingDescription, float, maxDistanceDeviation, 0.8f); // Between 0 and 1
-    MEMBER_DECLARATION(AutoCrawlingDescription, float, frontBackVelRatio, 0.2f);    // Between 0 and 1
+    MEMBER(AutoCrawlingDescription, float, maxDistanceDeviation, 0.8f); // Between 0 and 1
+    MEMBER(AutoCrawlingDescription, float, frontBackVelRatio, 0.2f);    // Between 0 and 1
 
     // Process data
-    MEMBER_DECLARATION(AutoCrawlingDescription, float, initialDistance, 0.0f);
-    MEMBER_DECLARATION(AutoCrawlingDescription, float, lastActualDistance, 0.0f);
-    MEMBER_DECLARATION(AutoCrawlingDescription, bool, forward, true);               // Current direction
-    MEMBER_DECLARATION(AutoCrawlingDescription, float, activation, 0.0f);
-    MEMBER_DECLARATION(AutoCrawlingDescription, int, activationCountdown, 0);
-    MEMBER_DECLARATION(AutoCrawlingDescription, bool, impulseAlreadyApplied, false);
+    MEMBER(AutoCrawlingDescription, float, initialDistance, 0.0f);
+    MEMBER(AutoCrawlingDescription, float, lastActualDistance, 0.0f);
+    MEMBER(AutoCrawlingDescription, bool, forward, true);               // Current direction
+    MEMBER(AutoCrawlingDescription, float, activation, 0.0f);
+    MEMBER(AutoCrawlingDescription, int, activationCountdown, 0);
+    MEMBER(AutoCrawlingDescription, bool, impulseAlreadyApplied, false);
 };
 
 struct ManualCrawlingDescription
@@ -355,14 +355,14 @@ struct ManualCrawlingDescription
     auto operator<=>(ManualCrawlingDescription const&) const = default;
 
     // Fixed data
-    MEMBER_DECLARATION(ManualCrawlingDescription, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
-    MEMBER_DECLARATION(ManualCrawlingDescription, float, frontBackVelRatio, 0.2f);   // Between 0 and 1
+    MEMBER(ManualCrawlingDescription, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
+    MEMBER(ManualCrawlingDescription, float, frontBackVelRatio, 0.2f);   // Between 0 and 1
 
     // Process data
-    MEMBER_DECLARATION(ManualCrawlingDescription, float, initialDistance, 0.0f);
-    MEMBER_DECLARATION(ManualCrawlingDescription, float, lastActualDistance, 0.0f);
-    MEMBER_DECLARATION(ManualCrawlingDescription, float, lastDistanceDelta, 0.0f);
-    MEMBER_DECLARATION(ManualCrawlingDescription, bool, impulseAlreadyApplied, false);
+    MEMBER(ManualCrawlingDescription, float, initialDistance, 0.0f);
+    MEMBER(ManualCrawlingDescription, float, lastActualDistance, 0.0f);
+    MEMBER(ManualCrawlingDescription, float, lastDistanceDelta, 0.0f);
+    MEMBER(ManualCrawlingDescription, bool, impulseAlreadyApplied, false);
 };
 
 struct DirectMovementDescription

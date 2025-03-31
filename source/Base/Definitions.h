@@ -69,7 +69,7 @@ inline uint32_t toUInt32(T const& value)
         throw std::runtime_error("check failed"); \
     }
 
-#define MEMBER_DECLARATION(className, type, name, initialValue) \
+#define MEMBER(className, type, name, initialValue) \
     type _##name = initialValue; \
     className& name(type const& name) \
     { \

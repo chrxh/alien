@@ -181,40 +181,40 @@ struct AutoBendingGenomeDescription
 {
     auto operator<=>(AutoBendingGenomeDescription const&) const = default;
 
-    MEMBER_DECLARATION(AutoBendingGenomeDescription, float, maxAngleDeviation, 0.2f);    // Between 0 and 1
-    MEMBER_DECLARATION(AutoBendingGenomeDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
+    MEMBER(AutoBendingGenomeDescription, float, maxAngleDeviation, 0.2f);    // Between 0 and 1
+    MEMBER(AutoBendingGenomeDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
 };
 
 struct ManualBendingGenomeDescription
 {
     auto operator<=>(ManualBendingGenomeDescription const&) const = default;
 
-    MEMBER_DECLARATION(ManualBendingGenomeDescription, float, maxAngleDeviation, 0.2f);  // Between 0 and 1
-    MEMBER_DECLARATION(ManualBendingGenomeDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
+    MEMBER(ManualBendingGenomeDescription, float, maxAngleDeviation, 0.2f);  // Between 0 and 1
+    MEMBER(ManualBendingGenomeDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
 };
 
 struct AngleBendingGenomeDescription
 {
     auto operator<=>(AngleBendingGenomeDescription const&) const = default;
 
-    MEMBER_DECLARATION(AngleBendingGenomeDescription, float, maxAngleDeviation, 0.2f);  // Between 0 and 1
-    MEMBER_DECLARATION(AngleBendingGenomeDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
+    MEMBER(AngleBendingGenomeDescription, float, maxAngleDeviation, 0.2f);  // Between 0 and 1
+    MEMBER(AngleBendingGenomeDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
 };
 
 struct AutoCrawlingGenomeDescription
 {
     auto operator<=>(AutoCrawlingGenomeDescription const&) const = default;
 
-    MEMBER_DECLARATION(AutoCrawlingGenomeDescription, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
-    MEMBER_DECLARATION(AutoCrawlingGenomeDescription, float, frontBackVelRatio, 0.2f);      // Between 0 and 1
+    MEMBER(AutoCrawlingGenomeDescription, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
+    MEMBER(AutoCrawlingGenomeDescription, float, frontBackVelRatio, 0.2f);      // Between 0 and 1
 };
 
 struct ManualCrawlingGenomeDescription
 {
     auto operator<=>(ManualCrawlingGenomeDescription const&) const = default;
 
-    MEMBER_DECLARATION(ManualCrawlingGenomeDescription, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
-    MEMBER_DECLARATION(ManualCrawlingGenomeDescription, float, frontBackVelRatio, 0.2f);     // Between 0 and 1
+    MEMBER(ManualCrawlingGenomeDescription, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
+    MEMBER(ManualCrawlingGenomeDescription, float, frontBackVelRatio, 0.2f);     // Between 0 and 1
 };
 
 struct DirectMovementGenomeDescription

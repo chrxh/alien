@@ -82,10 +82,10 @@ struct IntSpec
     SETTER_SHARED_PTR(IntSpec, ColorMatrixIntMember, member);
     IntMemberSpec _member = std::monostate();
 
-    MEMBER_DECLARATION(IntSpec, int, min, 0);
-    MEMBER_DECLARATION(IntSpec, int, max, 0);
-    MEMBER_DECLARATION(IntSpec, bool, logarithmic, false);
-    MEMBER_DECLARATION(IntSpec, bool, infinity, false);
+    MEMBER(IntSpec, int, min, 0);
+    MEMBER(IntSpec, int, max, 0);
+    MEMBER(IntSpec, bool, logarithmic, false);
+    MEMBER(IntSpec, bool, infinity, false);
 };
 
 struct FloatSpec
@@ -99,11 +99,11 @@ struct FloatSpec
     SETTER(FloatSpec, FloatGetterSetter, member);
     FloatMemberSpec _member = std::monostate();
 
-    MEMBER_DECLARATION(FloatSpec, float, min, 0);
-    MEMBER_DECLARATION(FloatSpec, float, max, 0);
-    MEMBER_DECLARATION(FloatSpec, bool, logarithmic, false);
-    MEMBER_DECLARATION(FloatSpec, std::string, format, "%.3f");
-    MEMBER_DECLARATION(FloatSpec, bool, infinity, false);
+    MEMBER(FloatSpec, float, min, 0);
+    MEMBER(FloatSpec, float, max, 0);
+    MEMBER(FloatSpec, bool, logarithmic, false);
+    MEMBER(FloatSpec, std::string, format, "%.3f");
+    MEMBER(FloatSpec, bool, infinity, false);
 };
 
 struct Char64Spec
@@ -119,7 +119,7 @@ struct AlternativeSpec
     AlternativeMemberSpec _member = std::monostate();
 
     using Alternatives = std::vector<std::pair<std::string, std::vector<ParameterSpec>>>;
-    MEMBER_DECLARATION(AlternativeSpec, Alternatives, alternatives, {});
+    MEMBER(AlternativeSpec, Alternatives, alternatives, {});
 };
 
 struct ColorPickerSpec
@@ -143,28 +143,28 @@ using SourceEnabledMember = std::shared_ptr<bool RadiationSource::*>;
 using EnabledMember = std::variant<std::monostate, BaseEnabledMember>;
 struct EnabledSpec
 {
-    MEMBER_DECLARATION(EnabledSpec, BaseEnabledMember, base, nullptr);
-    MEMBER_DECLARATION(EnabledSpec, ZoneEnabledMember, zone, nullptr);
-    MEMBER_DECLARATION(EnabledSpec, SourceEnabledMember, source, nullptr);
+    MEMBER(EnabledSpec, BaseEnabledMember, base, nullptr);
+    MEMBER(EnabledSpec, ZoneEnabledMember, zone, nullptr);
+    MEMBER(EnabledSpec, SourceEnabledMember, source, nullptr);
 };
 
 struct ParameterSpec
 {
-    MEMBER_DECLARATION(ParameterSpec, std::string, name, std::string());
-    MEMBER_DECLARATION(ParameterSpec, ReferenceSpec, reference, FloatSpec());
-    MEMBER_DECLARATION(ParameterSpec, EnabledSpec, enabled, EnabledSpec());
-    MEMBER_DECLARATION(ParameterSpec, std::optional<std::string>, tooltip, std::nullopt);
+    MEMBER(ParameterSpec, std::string, name, std::string());
+    MEMBER(ParameterSpec, ReferenceSpec, reference, FloatSpec());
+    MEMBER(ParameterSpec, EnabledSpec, enabled, EnabledSpec());
+    MEMBER(ParameterSpec, std::optional<std::string>, tooltip, std::nullopt);
 };
 
 struct ParameterGroupSpec
 {
-    MEMBER_DECLARATION(ParameterGroupSpec, std::string, name, std::string());
-    MEMBER_DECLARATION(ParameterGroupSpec, std::vector<ParameterSpec>, parameters, {});
-    MEMBER_DECLARATION(ParameterGroupSpec, std::optional<size_t>, expertToggleAddress, std::nullopt);
-    MEMBER_DECLARATION(ParameterGroupSpec, std::optional<std::string>, tooltip, std::nullopt);
+    MEMBER(ParameterGroupSpec, std::string, name, std::string());
+    MEMBER(ParameterGroupSpec, std::vector<ParameterSpec>, parameters, {});
+    MEMBER(ParameterGroupSpec, std::optional<size_t>, expertToggleAddress, std::nullopt);
+    MEMBER(ParameterGroupSpec, std::optional<std::string>, tooltip, std::nullopt);
 };
 
 struct ParametersSpec
 {
-    MEMBER_DECLARATION(ParametersSpec, std::vector<ParameterGroupSpec>, groups, {});
+    MEMBER(ParametersSpec, std::vector<ParameterGroupSpec>, groups, {});
 };
