@@ -109,7 +109,20 @@ char* SimulationParametersSpecificationService::getChar64Ref(Char64MemberSpec co
     }
 
     CHECK(false);
-}   
+}
+
+int* SimulationParametersSpecificationService::getAlternativeRef(
+    AlternativeMemberSpec const& memberSpec,
+    SimulationParameters& parameters,
+    int locationIndex) const
+{
+    // Single value
+    if (boost::get<IntMember>(&memberSpec)) {
+        return &(parameters.*boost::get<IntMember>(memberSpec));
+    }
+
+    CHECK(false);
+}
 
 FloatColorRGB* SimulationParametersSpecificationService::getFloatColorRGBRef(
     ColorPickerMemberSpec const& memberSpec,
@@ -122,6 +135,23 @@ FloatColorRGB* SimulationParametersSpecificationService::getFloatColorRGBRef(
         } else {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
             return &(parameters.zone[index].values.*boost::get<FloatColorRGBZoneMember>(memberSpec));
+        }
+    }
+
+    CHECK(false);
+}
+
+ColorTransitionRules* SimulationParametersSpecificationService::getColorTransitionRulesRef(
+    ColorTransitionRulesMemberSpec const& memberSpec,
+    SimulationParameters& parameters,
+    int locationIndex) const
+{
+    if (boost::get<ColorTransitionRulesZoneMember>(&memberSpec)) {
+        if (locationIndex == 0) {
+            return &(parameters.baseValues.*boost::get<ColorTransitionRulesZoneMember>(memberSpec));
+        } else {
+            auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+            return &(parameters.zone[index].values.*boost::get<ColorTransitionRulesZoneMember>(memberSpec));
         }
     }
 
