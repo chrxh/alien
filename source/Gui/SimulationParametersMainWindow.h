@@ -25,16 +25,10 @@ private:
     void processExpertWidget();
     void processStatusBar();
 
-    enum class LocationType
-    {
-        Base,
-        ParameterZone,
-        RadiationSource
-    };
     struct Location
     {
         std::string name;
-        LocationType type = LocationType::ParameterZone;
+        LocationType type = LocationType::Zone;
         std::string position;
         std::string strength;
     };

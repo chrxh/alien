@@ -2,6 +2,13 @@
 
 #include "Colors.h"
 
+enum class LocationType
+{
+    Base,
+    Zone,
+    Source
+};
+
 struct FloatColorRGB
 {
     float r = 0;

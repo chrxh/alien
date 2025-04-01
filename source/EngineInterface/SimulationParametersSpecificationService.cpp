@@ -25,11 +25,13 @@ bool* SimulationParametersSpecificationService::getBoolRef(BoolMemberSpec const&
     if (std::holds_alternative<BoolMember>(memberSpec)) {
         return &(parameters.**std::get<BoolMember>(memberSpec));
     } else if (std::holds_alternative<BoolZoneValuesMember>(memberSpec)) {
-        if (locationIndex == 0) {
+        switch (LocationHelper::getLocationType(locationIndex, parameters)) {
+        case LocationType::Base:
             return &(parameters.baseValues.**std::get<BoolZoneValuesMember>(memberSpec));
-        } else {
+        case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
             return &(parameters.zone[index].values.**std::get<BoolZoneValuesMember>(memberSpec));
+        }
         }
     }
 
@@ -79,11 +81,13 @@ float* SimulationParametersSpecificationService::getFloatRef(FloatMemberSpec con
     else if (std::holds_alternative<ColorVectorFloatMember>(memberSpec)) {
         return parameters.**std::get<ColorVectorFloatMember>(memberSpec);
     } else if (std::holds_alternative<ColorVectorFloatZoneValuesMember>(memberSpec)) {
-        if (locationIndex == 0) {
+        switch (LocationHelper::getLocationType(locationIndex, parameters)) {
+        case LocationType::Base:
             return parameters.baseValues.**std::get<ColorVectorFloatZoneValuesMember>(memberSpec);
-        } else {
+        case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
             return parameters.zone[index].values.**std::get<ColorVectorFloatZoneValuesMember>(memberSpec);
+        }
         }
     }
 
@@ -91,11 +95,13 @@ float* SimulationParametersSpecificationService::getFloatRef(FloatMemberSpec con
     else if (std::holds_alternative<ColorMatrixFloatMember>(memberSpec)) {
         return reinterpret_cast<float*>(parameters.**std::get<ColorMatrixFloatMember>(memberSpec));
     } else if (std::holds_alternative<ColorMatrixFloatZoneValuesMember>(memberSpec)) {
-        if (locationIndex == 0) {
+        switch (LocationHelper::getLocationType(locationIndex, parameters)) {
+        case LocationType::Base:
             return reinterpret_cast<float*>(parameters.baseValues.**std::get<ColorMatrixFloatZoneValuesMember>(memberSpec));
-        } else {
+        case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
             return reinterpret_cast<float*>(parameters.zone[index].values.**std::get<ColorMatrixFloatZoneValuesMember>(memberSpec));
+        }
         }
     }
 
@@ -128,11 +134,13 @@ FloatColorRGB* SimulationParametersSpecificationService::getFloatColorRGBRef(
     int locationIndex) const
 {
     if (std::holds_alternative<FloatColorRGBZoneMember>(memberSpec)) {
-        if (locationIndex == 0) {
+        switch (LocationHelper::getLocationType(locationIndex, parameters)) {
+        case LocationType::Base:
             return &(parameters.baseValues.**std::get<FloatColorRGBZoneMember>(memberSpec));
-        } else {
+        case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
             return &(parameters.zone[index].values.**std::get<FloatColorRGBZoneMember>(memberSpec));
+        }
         }
     }
 
@@ -145,11 +153,13 @@ ColorTransitionRules* SimulationParametersSpecificationService::getColorTransiti
     int locationIndex) const
 {
     if (std::holds_alternative<ColorTransitionRulesZoneMember>(memberSpec)) {
-        if (locationIndex == 0) {
+        switch (LocationHelper::getLocationType(locationIndex, parameters)) {
+        case LocationType::Base:
             return &(parameters.baseValues.**std::get<ColorTransitionRulesZoneMember>(memberSpec));
-        } else {
+        case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
             return &(parameters.zone[index].values.**std::get<ColorTransitionRulesZoneMember>(memberSpec));
+        }
         }
     }
 
@@ -158,16 +168,14 @@ ColorTransitionRules* SimulationParametersSpecificationService::getColorTransiti
 
 bool* SimulationParametersSpecificationService::getEnabledRef(EnabledSpec const& spec, SimulationParameters& parameters, int locationIndex) const
 {
-    //if (locationIndex == 0) {
-    //    if (spec._base.has_value()) {
-    //        return &(parameters.*spec._base.get());
-    //    }
-    //} else {
-    //    if (spec._zone.has_value()) {
-    //        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-    //        return &(parameters.zone[index].enabledValues.*spec._zone.get());
-    //    }
-    //}
+    auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
+    if (spec._base && locationType == LocationType::Base) {
+        return &(parameters.**spec._base.get());
+    }
+    if (spec._zone && locationType == LocationType::Zone) {
+        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+        return &(parameters.zone[index].enabledValues.**spec._zone.get());
+    }
     return nullptr;
 }
 
@@ -772,15 +780,15 @@ void SimulationParametersSpecificationService::createSpec()
                             .format("%.0f")
                             .logarithmic(true)
                             .infinity(true))
-                    //.enabled(EnabledSpec()
-                    //             .base(&SimulationParameters::maxAgeForInactiveCellsEnabled)
-                    //             .zone(&SimulationParametersZoneEnabledValues::maxAgeForInactiveCellsEnabled))
+                    .enabled(EnabledSpec()
+                                 .base(&SimulationParameters::maxAgeForInactiveCellsEnabled)
+                                 .zone(&SimulationParametersZoneEnabledValues::maxAgeForInactiveCellsEnabled))
                     .tooltip("Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered. Cells which "
                              "are in state 'Under construction' are not affected by this option."),
                 ParameterSpec()
                     .name("Maximum free cell age")
-                    //.value(BaseValueSpec().valueAddress(BASE_VALUE_OFFSET(freeCellMaxAge)).enabledValueAddress(BASE_VALUE_OFFSET(freeCellMaxAgeEnabled)))
                     .reference(IntSpec().member(&SimulationParameters::freeCellMaxAge).min(1).max(1e7).logarithmic(true).infinity(true))
+                    .enabled(EnabledSpec().base(&SimulationParameters::freeCellMaxAgeEnabled))
                     .tooltip("The maximal age of free cells (= cells that arise from energy particles) can be set here."),
                 ParameterSpec()
                     .name("Reset age after construction")

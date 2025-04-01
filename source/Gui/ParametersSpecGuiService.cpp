@@ -20,7 +20,7 @@ void ParametersSpecGuiService::createWidgetsForParameters(SimulationParameters& 
 {
     auto& specService = SimulationParametersSpecificationService::get();
     auto const& parametersSpecs = specService.getSpec();
-    auto locationType = getLocationType(locationIndex, parameters);
+    auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
 
     for (auto const& groupSpec : parametersSpecs._groups) {
         if (!isVisible(groupSpec, locationType)) {
@@ -85,7 +85,7 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
     SimulationParameters& origParameters,
     int locationIndex) const
 {
-    auto locationType = getLocationType(locationIndex, parameters);
+    auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
 
     for (auto const& [index, parameterSpec] : parameterSpecs | boost::adaptors::indexed(0)) {
         if (!isVisible(parameterSpec, locationType)) {
@@ -179,10 +179,8 @@ void ParametersSpecGuiService::createWidgetsForIntSpec(
 
         auto value = specService.getIntRef(intSpec._member, parameters, locationIndex);
         auto origValue = specService.getIntRef(intSpec._member, origParameters, locationIndex);
-        auto enabledValue = nullptr;
-        //specService.getEnabledValueRef(parameterSpec._value, parameters, locationIndex);
-        auto origEnabledValue = nullptr;
-        //specService.getEnabledValueRef(parameterSpec._value, origParameters, locationIndex);
+        auto enabledValue = specService.getEnabledRef(parameterSpec._enabled, parameters, locationIndex);
+        auto origEnabledValue = specService.getEnabledRef(parameterSpec._enabled, origParameters, locationIndex);
         AlienImGui::SliderInt(
             AlienImGui::SliderIntParameters()
                 .name(parameterSpec._name)
@@ -368,25 +366,6 @@ void ParametersSpecGuiService::createWidgetsForColorTransitionRulesSpec(
         AlienImGui::InputColorTransition(widgetParameters, color, value->cellColorTransitionTargetColor[color], value->cellColorTransitionDuration[color]);
         ImGui::PopID();
     }
-}
-
-ParametersSpecGuiService::LocationType ParametersSpecGuiService::getLocationType(int locationIndex, SimulationParameters const& parameters) const
-{
-    if (locationIndex == 0) {
-        return LocationType::Base;
-    } else {
-        for (int i = 0; i < parameters.numZones; ++i) {
-            if (parameters.zone[i].locationIndex == locationIndex) {
-                return LocationType::Zone;
-            }
-        }
-        for (int i = 0; i < parameters.numRadiationSources; ++i) {
-            if (parameters.radiationSource[i].locationIndex == locationIndex) {
-                return LocationType::Source;
-            }
-        }
-    }
-    CHECK(false);
 }
 
 bool ParametersSpecGuiService::isVisible(ParameterGroupSpec const& groupSpec, LocationType locationType) const

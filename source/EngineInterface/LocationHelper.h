@@ -9,7 +9,9 @@
 class LocationHelper
 {
 public:
-    static std::variant<SimulationParametersZone*, RadiationSource*> findLocation(SimulationParameters& parameters, int locationIndex);
+    static LocationType getLocationType(int locationIndex, SimulationParameters const& parameters);
+
+    static std::variant<SimulationParameters*, SimulationParametersZone*, RadiationSource*> findLocation(SimulationParameters& parameters, int locationIndex);
     static int findLocationArrayIndex(SimulationParameters const& parameters, int locationIndex);
 
     // returns new by old location index
