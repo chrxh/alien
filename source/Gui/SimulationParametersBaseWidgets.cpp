@@ -10,7 +10,7 @@
 #include "EngineInterface/SpecificationService.h"
 
 #include "AlienImGui.h"
-#include "ParametersSpecGuiService.h"
+#include "SpecificationGuiService.h"
 
 void _SimulationParametersBaseWidgets::init(SimulationFacade const& simulationFacade)
 {
@@ -23,7 +23,7 @@ void _SimulationParametersBaseWidgets::process()
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
     auto lastParameters = parameters;
 
-    ParametersSpecGuiService::get().createWidgetsForParameters(parameters, origParameters, 0);
+    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, 0);
 
     ParametersValidationService::get().validateAndCorrect(parameters);
 

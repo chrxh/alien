@@ -95,8 +95,6 @@ PUBLIC
     OpenGLHelper.h
     OverlayController.cpp
     OverlayController.h
-    ParametersSpecGuiService.cpp
-    ParametersSpecGuiService.h
     PatternAnalysisDialog.cpp
     PatternAnalysisDialog.h
     PatternEditorWindow.cpp
@@ -127,6 +125,8 @@ PUBLIC
     SimulationView.h
     SpatialControlWindow.cpp
     SpatialControlWindow.h
+    SpecificationGuiService.cpp
+    SpecificationGuiService.h
     StartupCheckService.cpp
     StartupCheckService.h
     StatisticsWindow.cpp

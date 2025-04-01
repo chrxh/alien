@@ -17,7 +17,7 @@
 #include "SimulationParametersSourceWidgets.h"
 #include "SimulationParametersZoneWidgets.h"
 #include "AlienImGui.h"
-#include "ParametersSpecGuiService.h"
+#include "SpecificationGuiService.h"
 #include "Viewport.h"
 
 namespace
@@ -367,7 +367,7 @@ void SimulationParametersMainWindow::processExpertSettings()
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
     auto lastFeatures = parameters.expertSettingsToggles;
 
-    ParametersSpecGuiService::get().createWidgetsForExpertToggles(parameters, origParameters);
+    SpecificationGuiService::get().createWidgetsForExpertToggles(parameters, origParameters);
 
     if (parameters.expertSettingsToggles != lastFeatures) {
         _simulationFacade->setSimulationParameters(parameters);

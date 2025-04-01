@@ -3,9 +3,9 @@
 #include "Base/Singleton.h"
 #include "EngineInterface/SimulationParametersSpecification.h"
 
-class ParametersSpecGuiService
+class SpecificationGuiService
 {
-    MAKE_SINGLETON(ParametersSpecGuiService);
+    MAKE_SINGLETON(SpecificationGuiService);
 
 public:
     void createWidgetsForParameters(SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
