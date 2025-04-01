@@ -7,7 +7,7 @@
 #include "Base/StringHelper.h"
 #include "EngineInterface/LocationHelper.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/SimulationParametersEditService.h"
+#include "EngineInterface/ParametersEditService.h"
 #include "PersisterInterface/SerializerService.h"
 
 #include "GenericFileDialog.h"
@@ -446,7 +446,7 @@ void SimulationParametersMainWindow::onAddZone()
 
 void SimulationParametersMainWindow::onAddSource()
 {
-    auto& editService = SimulationParametersEditService::get();
+    auto& editService = ParametersEditService::get();
 
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
@@ -520,7 +520,7 @@ void SimulationParametersMainWindow::onCloneLocation()
         auto source = std::get<RadiationSource*>(location);
         auto clone = *source;
 
-        auto& editService = SimulationParametersEditService::get();
+        auto& editService = ParametersEditService::get();
         auto strengths = editService.getRadiationStrengths(parameters);
         auto newStrengths = editService.calcRadiationStrengthsForAddingZone(strengths);
 
@@ -651,7 +651,7 @@ void SimulationParametersMainWindow::updateLocations()
     auto parameters = _simulationFacade->getSimulationParameters();
 
     _locations = std::vector<Location>(1 + parameters.numZones + parameters.numRadiationSources);
-    auto strength = SimulationParametersEditService::get().getRadiationStrengths(parameters);
+    auto strength = ParametersEditService::get().getRadiationStrengths(parameters);
     auto pinnedString = strength.pinned.contains(0) ? ICON_FA_THUMBTACK " " : " ";
     _locations.at(0) = Location{"Base", LocationType::Base, "-", pinnedString + StringHelper::format(strength.values.front() * 100 + 0.05f, 1) + "%"};
     for (int i = 0; i < parameters.numZones; ++i) {

@@ -13,9 +13,9 @@ struct RadiationStrengths
     std::set<int> pinned;
 };
 
-class SimulationParametersEditService
+class ParametersEditService
 {
-    MAKE_SINGLETON(SimulationParametersEditService);
+    MAKE_SINGLETON(ParametersEditService);
 
 public:
     RadiationStrengths getRadiationStrengths(SimulationParameters const& parameters) const;

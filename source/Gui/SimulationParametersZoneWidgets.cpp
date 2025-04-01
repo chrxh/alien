@@ -2,7 +2,7 @@
 
 #include "EngineInterface/LocationHelper.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/SimulationParametersValidationService.h"
+#include "EngineInterface/ParametersValidationService.h"
 #include "EngineInterface/SimulationParametersZone.h"
 
 #include "AlienImGui.h"
@@ -744,7 +744,7 @@ void _SimulationParametersZoneWidgets::process()
     }
     AlienImGui::EndTreeNode();
 
-    SimulationParametersValidationService::get().validateAndCorrect(zone, parameters);
+    ParametersValidationService::get().validateAndCorrect(zone, parameters);
 
     if (zone != lastZone) {
         auto isRunning = _simulationFacade->isSimulationRunning();

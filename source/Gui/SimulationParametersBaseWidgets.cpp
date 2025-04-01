@@ -4,10 +4,10 @@
 
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/SimulationParametersEditService.h"
+#include "EngineInterface/ParametersEditService.h"
 #include "EngineInterface/SimulationParametersUpdateConfig.h"
-#include "EngineInterface/SimulationParametersValidationService.h"
-#include "EngineInterface/SimulationParametersSpecificationService.h"
+#include "EngineInterface/ParametersValidationService.h"
+#include "EngineInterface/SpecificationService.h"
 
 #include "AlienImGui.h"
 #include "ParametersSpecGuiService.h"
@@ -25,7 +25,7 @@ void _SimulationParametersBaseWidgets::process()
 
     ParametersSpecGuiService::get().createWidgetsForParameters(parameters, origParameters, 0);
 
-    SimulationParametersValidationService::get().validateAndCorrect(parameters);
+    ParametersValidationService::get().validateAndCorrect(parameters);
 
     if (parameters != lastParameters) {
         _simulationFacade->setSimulationParameters(parameters, SimulationParametersUpdateConfig::AllExceptChangingPositions);
