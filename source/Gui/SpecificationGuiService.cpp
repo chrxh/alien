@@ -129,7 +129,7 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& boolSpec = std::get<BoolSpec>(parameterSpec._reference);
 
-    if (std::holds_alternative<ColorMatrixBoolMember>(boolSpec._member)) {
+    if (std::holds_alternative<ColorMatrixBoolMember>(boolSpec._member) || std::holds_alternative<ColorMatrixBoolMemberNew>(boolSpec._member)) {
 
         auto value = reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(evaluationService.getBoolRef(boolSpec._member, parameters, locationIndex));
         auto origValue = reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(evaluationService.getBoolRef(boolSpec._member, origParameters, locationIndex));
@@ -161,7 +161,7 @@ void SpecificationGuiService::createWidgetsForIntSpec(
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& intSpec = std::get<IntSpec>(parameterSpec._reference);
 
-    if (std::holds_alternative<ColorMatrixIntMember>(intSpec._member)) {
+    if (std::holds_alternative<ColorMatrixIntMember>(intSpec._member) || std::holds_alternative<ColorMatrixIntMemberNew>(intSpec._member)) {
 
         auto value = reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(evaluationService.getIntRef(intSpec._member, parameters, locationIndex));
         auto origValue = reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(evaluationService.getIntRef(intSpec._member, origParameters, locationIndex));
@@ -194,7 +194,8 @@ void SpecificationGuiService::createWidgetsForIntSpec(
                 .defaultValue(origValue)
                 .defaultEnabledValue(origEnabledValue)
                 .tooltip(parameterSpec._tooltip)
-                .colorDependence(std::holds_alternative<ColorVectorIntMember>(intSpec._member)),
+                .colorDependence(
+                    std::holds_alternative<ColorVectorIntMember>(intSpec._member) || std::holds_alternative<ColorVectorIntMemberNew>(intSpec._member)),
             value,
             enabledValue);
     }
@@ -209,7 +210,8 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& floatSpec = std::get<FloatSpec>(parameterSpec._reference);
 
-    if (std::holds_alternative<ColorMatrixFloatMember>(floatSpec._member) || std::holds_alternative<ColorMatrixFloatZoneValuesMember>(floatSpec._member)) {
+    if (std::holds_alternative<ColorMatrixFloatMember>(floatSpec._member) || std::holds_alternative<ColorMatrixFloatZoneValuesMember>(floatSpec._member)
+        || std::holds_alternative<ColorMatrixFloatMemberNew>(floatSpec._member) || std::holds_alternative<ColorMatrixFloatZoneValuesMemberNew>(floatSpec._member)) {
 
         auto value = reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(evaluationService.getFloatRef(floatSpec._member, parameters, locationIndex));
         auto origValue = reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(evaluationService.getFloatRef(floatSpec._member, origParameters, locationIndex));
@@ -273,7 +275,9 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
                 .defaultEnabledValue(origEnabledValue)
                 .colorDependence(
                     std::holds_alternative<ColorVectorFloatMember>(floatSpec._member)
-                    || std::holds_alternative<ColorVectorFloatZoneValuesMember>(floatSpec._member))
+                    || std::holds_alternative<ColorVectorFloatZoneValuesMember>(floatSpec._member)
+                    || std::holds_alternative<ColorVectorFloatMemberNew>(floatSpec._member)
+                    || std::holds_alternative<ColorVectorFloatZoneValuesMemberNew >(floatSpec._member))
                 .tooltip(parameterSpec._tooltip),
             value,
             enabledValue,
@@ -447,10 +451,11 @@ bool SpecificationGuiService::isVisible(ParameterSpec const& parameterSpec, Loca
         }
     }
 
+    // NEW
     if (locationType == LocationType::Base) {
         if (std::holds_alternative<BoolSpec>(parameterSpec._reference)) {
             auto const& boolSpec = std::get<BoolSpec>(parameterSpec._reference);
-            if (std::holds_alternative<BoolMember>(boolSpec._member) || std::holds_alternative<ColorMatrixBoolMember>(boolSpec._member)
+            if (std::holds_alternative<BoolMemberNew>(boolSpec._member) || std::holds_alternative<ColorMatrixBoolMemberNew>(boolSpec._member)
                 || std::holds_alternative<BoolZoneValuesMemberNew>(boolSpec._member)) {
                 return true;
             }

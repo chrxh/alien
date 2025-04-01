@@ -27,6 +27,7 @@ struct ZoneValue
 
     bool operator==(ZoneValue<T> const&) const = default;
 };
+
 template <typename T>
 struct BaseZoneParameter
 {

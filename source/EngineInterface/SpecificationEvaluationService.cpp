@@ -28,6 +28,26 @@ bool* SpecificationEvaluationService::getBoolRef(BoolMemberSpec const& memberSpe
         return reinterpret_cast<bool*>(parameters.**std::get<ColorMatrixBoolMember>(memberSpec));
     }
 
+    // NEW
+    // Single value
+    if (std::holds_alternative<BoolMemberNew>(memberSpec)) {
+        return &(parameters.**std::get<BoolMemberNew>(memberSpec)).value;
+    } else if (std::holds_alternative<BoolZoneValuesMemberNew>(memberSpec)) {
+        switch (LocationHelper::getLocationType(locationIndex, parameters)) {
+        case LocationType::Base:
+            return &(parameters.**std::get<BoolZoneValuesMemberNew>(memberSpec)).baseValue;
+        case LocationType::Zone: {
+            auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+            return &(parameters.**std::get<BoolZoneValuesMemberNew>(memberSpec)).zoneValues[index].value;
+        }
+        }
+    }
+
+    // Color matrix
+    else if (std::holds_alternative<ColorMatrixBoolMemberNew>(memberSpec)) {
+        return reinterpret_cast<bool*>((parameters.**std::get<ColorMatrixBoolMemberNew>(memberSpec)).value);
+    }
+
     return nullptr;
 }
 
@@ -49,10 +69,20 @@ int* SpecificationEvaluationService::getIntRef(IntMemberSpec const& memberSpec, 
     }
 
     // NEW
+    // Single value
     if (std::holds_alternative<IntMemberNew>(memberSpec)) {
         return &(parameters.**std::get<IntMemberNew>(memberSpec)).value;
     }
 
+    // Color vector
+    else if (std::holds_alternative<ColorVectorIntMemberNew>(memberSpec)) {
+        return (parameters.**std::get<ColorVectorIntMemberNew>(memberSpec)).value;
+    }
+
+    // Color matrix
+    else if (std::holds_alternative<ColorMatrixIntMemberNew>(memberSpec)) {
+        return reinterpret_cast<int*>((parameters.**std::get<ColorMatrixIntMemberNew>(memberSpec)).value);
+    }
     return nullptr;
 }
 
@@ -62,11 +92,13 @@ float* SpecificationEvaluationService::getFloatRef(FloatMemberSpec const& member
     if (std::holds_alternative<FloatMember>(memberSpec)) {
         return &(parameters.**std::get<FloatMember>(memberSpec));
     } else if (std::holds_alternative<FloatZoneValuesMember>(memberSpec)) {
-        if (locationIndex == 0) {
+        switch (LocationHelper::getLocationType(locationIndex, parameters)) {
+        case LocationType::Base:
             return &(parameters.baseValues.**std::get<FloatZoneValuesMember>(memberSpec));
-        } else {
+        case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
             return &(parameters.zone[index].values.**std::get<FloatZoneValuesMember>(memberSpec));
+        }
         }
     }
 
@@ -103,11 +135,27 @@ float* SpecificationEvaluationService::getFloatRef(FloatMemberSpec const& member
     if (std::holds_alternative<FloatMemberNew>(memberSpec)) {
         return &(parameters.**std::get<FloatMemberNew>(memberSpec)).value;
     } else if (std::holds_alternative<FloatZoneValuesMemberNew>(memberSpec)) {
-        if (locationIndex == 0) {
+        switch (LocationHelper::getLocationType(locationIndex, parameters)) {
+        case LocationType::Base:
             return &(parameters.**std::get<FloatZoneValuesMemberNew>(memberSpec)).baseValue;
-        } else {
+        case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
             return &(parameters.**std::get<FloatZoneValuesMemberNew>(memberSpec)).zoneValues[index].value;
+        }
+        }
+    }
+    
+    // Color vector
+    else if (std::holds_alternative<ColorVectorFloatMemberNew>(memberSpec)) {
+        return (parameters.**std::get<ColorVectorFloatMemberNew>(memberSpec)).value;
+    } else if (std::holds_alternative<ColorVectorFloatZoneValuesMemberNew>(memberSpec)) {
+        switch (LocationHelper::getLocationType(locationIndex, parameters)) {
+        case LocationType::Base:
+            return (parameters.**std::get<ColorVectorFloatZoneValuesMemberNew>(memberSpec)).baseValue;
+        case LocationType::Zone: {
+            auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+            return (parameters.**std::get<ColorVectorFloatZoneValuesMemberNew>(memberSpec)).zoneValues[index].value;
+        }
         }
     }
 
@@ -136,6 +184,7 @@ int* SpecificationEvaluationService::getAlternativeRef(AlternativeMemberSpec con
     }
 
     // NEW
+    // Single value
     if (std::holds_alternative<IntMemberNew>(memberSpec)) {
         return &(parameters.**std::get<IntMemberNew>(memberSpec)).value;
     }
@@ -156,6 +205,17 @@ FloatColorRGB* SpecificationEvaluationService::getFloatColorRGBRef(ColorPickerMe
         }
     }
 
+    // NEW
+    if (std::holds_alternative<FloatColorRGBZoneMemberNew>(memberSpec)) {
+        switch (LocationHelper::getLocationType(locationIndex, parameters)) {
+        case LocationType::Base:
+            return &(parameters.**std::get<FloatColorRGBZoneMemberNew>(memberSpec)).baseValue;
+        case LocationType::Zone: {
+            auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+            return &(parameters.**std::get<FloatColorRGBZoneMemberNew>(memberSpec)).zoneValues[index].value;
+        }
+        }
+    }
     return nullptr;
 }
 
@@ -173,6 +233,17 @@ SpecificationEvaluationService::getColorTransitionRulesRef(ColorTransitionRulesM
         }
     }
 
+    // NEW
+    if (std::holds_alternative<ColorTransitionRulesZoneMemberNew>(memberSpec)) {
+        switch (LocationHelper::getLocationType(locationIndex, parameters)) {
+        case LocationType::Base:
+            return &(parameters.**std::get<ColorTransitionRulesZoneMemberNew>(memberSpec)).baseValue;
+        case LocationType::Zone: {
+            auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+            return &(parameters.**std::get<ColorTransitionRulesZoneMemberNew>(memberSpec)).zoneValues[index].value;
+        }
+        }
+    }
     return nullptr;
 }
 

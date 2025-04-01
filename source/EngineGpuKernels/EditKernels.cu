@@ -614,7 +614,7 @@ __global__ void cudaGetSelectionShallowData(SimulationData data, int refCellInde
 
 __global__ void cudaFinalizeSelectionResult(SelectionResult result, BaseMap map)
 {
-    result.finalize(map, !cudaSimulationParameters.borderlessRendering);
+    result.finalize(map, !cudaSimulationParameters.borderlessRendering.value);
 }
 
 __global__ void cudaSetDetached(SimulationData data, bool value)

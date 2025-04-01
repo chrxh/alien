@@ -102,7 +102,7 @@ void EditorController::onInspectObjects(std::vector<CellOrParticleDescription> c
     if (entities.empty()) {
         return;
     }
-    auto borderlessRendering = _simulationFacade->getSimulationParameters().borderlessRendering;
+    auto borderlessRendering = _simulationFacade->getSimulationParameters().borderlessRendering.value;
 
     std::set<uint64_t> inspectedIds;
     for (auto const& inspectorWindow : _inspectorWindows) {

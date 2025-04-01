@@ -45,26 +45,30 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.zoomLevelForNeuronVisualization,
-            defaultParameters.zoomLevelForNeuronVisualization,
+            parameters.zoomLevelForNeuronVisualization.value,
+            defaultParameters.zoomLevelForNeuronVisualization.value,
             "simulation parameters.zoom level.neural activity",
             parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.borderlessRendering, defaultParameters.borderlessRendering, "simulation parameters.borderless rendering", parserTask);
+            tree, parameters.borderlessRendering.value, defaultParameters.borderlessRendering.value, "simulation parameters.borderless rendering", parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.markReferenceDomain, defaultParameters.markReferenceDomain, "simulation parameters.mark reference domain", parserTask);
-        ParameterParser::encodeDecode(
-            tree, parameters.showRadiationSources, defaultParameters.showRadiationSources, "simulation parameters.show radiation sources", parserTask);
-        ParameterParser::encodeDecode(tree, parameters.gridLines, defaultParameters.gridLines, "simulation parameters.grid lines", parserTask);
-        ParameterParser::encodeDecode(
-            tree, parameters.attackVisualization, defaultParameters.attackVisualization, "simulation parameters.attack visualization", parserTask);
+            tree, parameters.markReferenceDomain.value, defaultParameters.markReferenceDomain.value, "simulation parameters.mark reference domain", parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.muscleMovementVisualization,
-            defaultParameters.muscleMovementVisualization,
+            parameters.showRadiationSources.value,
+            defaultParameters.showRadiationSources.value,
+            "simulation parameters.show radiation sources",
+            parserTask);
+        ParameterParser::encodeDecode(tree, parameters.gridLines.value, defaultParameters.gridLines.value, "simulation parameters.grid lines", parserTask);
+        ParameterParser::encodeDecode(
+            tree, parameters.attackVisualization.value, defaultParameters.attackVisualization.value, "simulation parameters.attack visualization", parserTask);
+        ParameterParser::encodeDecode(
+            tree,
+            parameters.muscleMovementVisualization.value,
+            defaultParameters.muscleMovementVisualization.value,
             "simulation parameters.muscle movement visualization",
             parserTask);
-        ParameterParser::encodeDecode(tree, parameters.cellRadius, defaultParameters.cellRadius, "simulation parameters.cek", parserTask);
+        ParameterParser::encodeDecode(tree, parameters.cellRadius.value, defaultParameters.cellRadius.value, "simulation parameters.cek", parserTask);
 
         ParameterParser::encodeDecode(tree, parameters.timestepSize, defaultParameters.timestepSize, "simulation parameters.time step size", parserTask);
 
