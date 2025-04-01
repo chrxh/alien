@@ -124,7 +124,7 @@ __inline__ __device__ void RadiationProcessor::collision(SimulationData& data)
                     if (particle->tryLock()) {
 
                         auto energyToTransfer = particle->energy * radiationAbsorption;
-                        if (cudaSimulationParameters.expertSettingsToggles.advancedAbsorptionControl) {
+                        if (cudaSimulationParameters.expertToggles.advancedAbsorptionControl) {
                             energyToTransfer *=
                                 max(0.0f, 1.0f - Math::length(cell->vel) * cudaSimulationParameters.radiationAbsorptionHighVelocityPenalty[cell->color]);
 
@@ -343,7 +343,7 @@ __inline__ __device__ void RadiationProcessor::createEnergyParticle(SimulationDa
     data.cellMap.correctPosition(pos);
 
     auto externalEnergyBackflowFactor = 0.0f;
-    if (cudaSimulationParameters.expertSettingsToggles.externalEnergyControl && cudaSimulationParameters.externalEnergyBackflowFactor[color] > 0) {
+    if (cudaSimulationParameters.expertToggles.externalEnergyControl && cudaSimulationParameters.externalEnergyBackflowFactor[color] > 0) {
         auto energyToAdd = toDouble(energy * cudaSimulationParameters.externalEnergyBackflowFactor[color]);
         auto origExternalEnergy = atomicAdd(data.externalEnergy, energyToAdd);
         if (origExternalEnergy + energyToAdd > cudaSimulationParameters.externalEnergyBackflowLimit) {

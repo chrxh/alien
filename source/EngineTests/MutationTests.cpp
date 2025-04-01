@@ -875,7 +875,7 @@ TEST_F(MutationTests, deleteMutation_partiallyEraseGenome)
 
 TEST_F(MutationTests, deleteMutation_selfReplicatorWithGenomeBelowMinSize)
 {
-    _parameters.expertSettingsToggles.customizeDeletionMutations = true;
+    _parameters.expertToggles.customizeDeletionMutations = true;
     _parameters.cellCopyMutationDeletionMinSize = 3;
     _simulationFacade->setSimulationParameters(_parameters);
 
@@ -904,7 +904,7 @@ TEST_F(MutationTests, deleteMutation_selfReplicatorWithGenomeBelowMinSize)
 
 TEST_F(MutationTests, deleteMutation_selfReplicatorWithGenomeAboveMinSize)
 {
-    _parameters.expertSettingsToggles.customizeDeletionMutations = true;
+    _parameters.expertToggles.customizeDeletionMutations = true;
     _parameters.cellCopyMutationDeletionMinSize = 1;
     _simulationFacade->setSimulationParameters(_parameters);
 

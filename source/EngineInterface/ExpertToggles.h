@@ -6,7 +6,7 @@
  * NOTE: header is also included in kernel code
  */
 
-struct ExpertSettingsToggles
+struct ExpertToggles
 {
     bool advancedAbsorptionControl = false;
     bool advancedAttackerControl = false;
@@ -18,5 +18,5 @@ struct ExpertSettingsToggles
     bool cellGlow = false;
     bool genomeComplexityMeasurement = false;
 
-    bool operator==(ExpertSettingsToggles const&) const = default;
+    bool operator==(ExpertToggles const&) const = default;
 };

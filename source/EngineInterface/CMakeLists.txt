@@ -12,7 +12,7 @@ add_library(EngineInterface
     Descriptions.cpp
     Descriptions.h
     EngineConstants.h
-    ExpertSettingsToggles.h
+    ExpertToggles.h
     GenomeConstants.h
     GenomeDescriptionConverterService.cpp
     GenomeDescriptionConverterService.h

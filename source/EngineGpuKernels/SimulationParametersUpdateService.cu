@@ -84,7 +84,7 @@ bool SimulationParametersUpdateService::updateSimulationParametersAfterTimestep(
     for (int i = 0; i < MAX_COLORS; ++i) {
         externalEnergyPresent |= settings.simulationParameters.externalEnergyBackflowFactor[i] > 0;
     }
-    externalEnergyPresent &= settings.simulationParameters.expertSettingsToggles.externalEnergyControl;
+    externalEnergyPresent &= settings.simulationParameters.expertToggles.externalEnergyControl;
     if (externalEnergyPresent) {
         double temp;
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(&temp, simulationData.externalEnergy, sizeof(double), cudaMemcpyDeviceToHost));

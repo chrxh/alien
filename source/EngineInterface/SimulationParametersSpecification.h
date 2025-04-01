@@ -68,6 +68,9 @@ using ZoneEnabledMember = std::shared_ptr<_ZoneEnabledMember>;
 using _SourceEnabledMember = bool RadiationSource::*;
 using SourceEnabledMember = std::shared_ptr<_SourceEnabledMember>;
 
+using _ExpertToggleMember = bool ExpertToggles::*;
+using ExpertToggleMember = std::shared_ptr<_ExpertToggleMember>;
+
 using BoolMemberSpec = std::variant<std::monostate, BoolMember, BoolZoneValuesMember, ColorMatrixBoolMember>;
 
 struct BoolSpec
@@ -184,8 +187,10 @@ struct ParameterGroupSpec
 {
     MEMBER(ParameterGroupSpec, std::string, name, std::string());
     MEMBER(ParameterGroupSpec, std::vector<ParameterSpec>, parameters, {});
-    MEMBER(ParameterGroupSpec, std::optional<size_t>, expertToggleAddress, std::nullopt);
     MEMBER(ParameterGroupSpec, std::optional<std::string>, tooltip, std::nullopt);
+
+    SETTER_SHARED_PTR(ParameterGroupSpec, ExpertToggleMember, expertToggle);
+    ExpertToggleMember _expertToggle;
 };
 
 struct ParametersSpec

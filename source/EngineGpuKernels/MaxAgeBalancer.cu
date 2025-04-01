@@ -16,7 +16,7 @@ namespace
 bool _MaxAgeBalancer::balance(SimulationParameters& parameters, StatisticsRawData const& statistics, uint64_t timestep)
 {
     auto result = false;
-    if (parameters.expertSettingsToggles.cellAgeLimiter && parameters.maxCellAgeBalancerEnabled) {
+    if (parameters.expertToggles.cellAgeLimiter && parameters.maxCellAgeBalancerEnabled) {
         initializeIfNecessary(parameters, timestep);
         result |= doAdaptionIfNecessary(parameters, statistics, timestep);
     }
