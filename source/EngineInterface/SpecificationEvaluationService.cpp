@@ -48,6 +48,11 @@ int* SpecificationEvaluationService::getIntRef(IntMemberSpec const& memberSpec, 
         return reinterpret_cast<int*>(parameters.**std::get<ColorMatrixIntMember>(memberSpec));
     }
 
+    // NEW
+    if (std::holds_alternative<IntMemberNew>(memberSpec)) {
+        return &(parameters.**std::get<IntMemberNew>(memberSpec)).value;
+    }
+
     return nullptr;
 }
 
@@ -93,6 +98,19 @@ float* SpecificationEvaluationService::getFloatRef(FloatMemberSpec const& member
         }
     }
 
+    // NEW
+    // Single value
+    if (std::holds_alternative<FloatMemberNew>(memberSpec)) {
+        return &(parameters.**std::get<FloatMemberNew>(memberSpec)).value;
+    } else if (std::holds_alternative<FloatZoneValuesMemberNew>(memberSpec)) {
+        if (locationIndex == 0) {
+            return &(parameters.**std::get<FloatZoneValuesMemberNew>(memberSpec)).baseValue;
+        } else {
+            auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+            return &(parameters.**std::get<FloatZoneValuesMemberNew>(memberSpec)).zoneValues[index].value;
+        }
+    }
+
     return nullptr;
 }
 
@@ -100,6 +118,11 @@ char* SpecificationEvaluationService::getChar64Ref(Char64MemberSpec const& membe
 {
     if (std::holds_alternative<Char64Member>(memberSpec)) {
         return parameters.**std::get<Char64Member>(memberSpec);
+    }
+
+    // NEW
+    if (std::holds_alternative<Char64MemberNew>(memberSpec)) {
+        return (parameters.**std::get<Char64MemberNew>(memberSpec)).value;
     }
 
     return nullptr;
@@ -110,6 +133,11 @@ int* SpecificationEvaluationService::getAlternativeRef(AlternativeMemberSpec con
     // Single value
     if (std::holds_alternative<IntMember>(memberSpec)) {
         return &(parameters.**std::get<IntMember>(memberSpec));
+    }
+
+    // NEW
+    if (std::holds_alternative<IntMemberNew>(memberSpec)) {
+        return &(parameters.**std::get<IntMemberNew>(memberSpec)).value;
     }
 
     return nullptr;

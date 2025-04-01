@@ -175,7 +175,7 @@ void SpecificationService::createSpec()
                         "calculates the forces based on particle collisions and should be preferred for mechanical simulation with solids.")),
                 ParameterSpec()
                     .name("Friction")
-                    .reference(FloatSpec().member(&SimulationParametersZoneValues::friction).min(0).max(1.0f).logarithmic(true).format("%.4f"))
+                    .reference(FloatSpec().member(&SimulationParameters::friction).min(0).max(1.0f).logarithmic(true).format("%.4f"))
                     .tooltip("This specifies the fraction of the velocity that is slowed down per time step."),
                 ParameterSpec()
                     .name("Rigidity")

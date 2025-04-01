@@ -2,6 +2,44 @@
 
 #include "Colors.h"
 
+template <typename T>
+struct BaseParameter
+{
+    T value;
+
+    bool operator==(BaseParameter<T> const&) const = default;
+};
+
+template <typename T>
+struct BaseWithEnabledParameter
+{};
+
+template <typename T>
+struct ZoneParameter
+{};
+
+
+template <typename T>
+struct ZoneValue
+{
+    T value;
+    bool enabled = false;
+
+    bool operator==(ZoneValue<T> const&) const = default;
+};
+template <typename T>
+struct BaseZoneParameter
+{
+    T baseValue;
+    ZoneValue<T> zoneValues[MAX_ZONES];
+
+    bool operator==(BaseZoneParameter<T> const&) const = default;
+};
+
+template <typename T>
+struct BaseZoneWithEnabledParameter
+{};
+
 enum class LocationType
 {
     Base,

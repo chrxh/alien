@@ -12,6 +12,18 @@
 class ZoneCalculator
 {
 public:
+    //NEW
+    __device__ __inline__ static float calcParameterNew(BaseZoneParameter<float> const& baseZoneParameter, SimulationData const& data, float2 const& worldPos);
+
+    template <typename T>
+    __device__ __inline__ static T calcResultingValueNew(
+        BaseMap const& map,
+        float2 const& worldPos,
+        T const& baseValue,
+        T (&spotValues)[MAX_ZONES],
+        BaseZoneParameter<float> const& baseZoneParameter);
+
+    //OLD
     template <typename T>
     __device__ __inline__ static T calcResultingValue(
         BaseMap const& map,
@@ -185,12 +197,12 @@ public:
 
 private:
 
-    __device__ __inline__ static float calcWeight(float2 const& delta, int const& spotIndex)
+    __device__ __inline__ static float calcWeight(float2 const& delta, int const& zoneIndex)
     {
-        if (cudaSimulationParameters.zone[spotIndex].shape.type == ZoneShapeType_Rectangular) {
-            return calcWeightForRectSpot(delta, spotIndex);
+        if (cudaSimulationParameters.zone[zoneIndex].shape.type == ZoneShapeType_Rectangular) {
+            return calcWeightForRectSpot(delta, zoneIndex);
         } else {
-            return calcWeightForCircularSpot(delta, spotIndex);
+            return calcWeightForCircularSpot(delta, zoneIndex);
         }
     }
 
@@ -250,3 +262,45 @@ private:
     }
 
 };
+
+
+/************************************************************************/
+/* Implementation                                                       */
+/************************************************************************/
+
+__device__ __inline__ float ZoneCalculator::calcParameterNew(BaseZoneParameter<float> const& baseZoneParameter, SimulationData const& data, float2 const& worldPos)
+{
+    float zoneValues[MAX_ZONES];
+    int numValues = 0;
+    for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
+        if (baseZoneParameter.zoneValues[i].enabled) {
+            zoneValues[numValues++] = baseZoneParameter.zoneValues[i].value;
+        }
+    }
+
+    return calcResultingValueNew(data.cellMap, worldPos, baseZoneParameter.baseValue, zoneValues, baseZoneParameter);
+}
+
+template <typename T>
+__device__ __inline__ T ZoneCalculator::calcResultingValueNew(
+    BaseMap const& map,
+    float2 const& worldPos,
+    T const& baseValue,
+    T (&spotValues)[MAX_ZONES],
+    BaseZoneParameter<float> const& baseZoneParameter)
+{
+    if (0 == cudaSimulationParameters.numZones) {
+        return baseValue;
+    } else {
+        float spotWeights[MAX_ZONES];
+        int numValues = 0;
+        for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
+            if (baseZoneParameter.zoneValues[i].enabled) {
+                float2 spotPos = {cudaSimulationParameters.zone[i].posX, cudaSimulationParameters.zone[i].posY};
+                auto delta = map.getCorrectedDirection(spotPos - worldPos);
+                spotWeights[numValues++] = calcWeight(delta, i);
+            }
+        }
+        return mix(baseValue, spotValues, spotWeights, numValues);
+    }
+}
