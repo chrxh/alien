@@ -3,9 +3,9 @@
 #include <imgui.h>
 
 #include "AlienImGui.h"
-#include "EngineInterface/SimulationParametersEditService.h"
+#include "EngineInterface/ParametersEditService.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/SimulationParametersValidationService.h"
+#include "EngineInterface/ParametersValidationService.h"
 #include "EngineInterface/LocationHelper.h"
 #include "SimulationInteractionController.h"
 
@@ -22,7 +22,7 @@ void _SimulationParametersSourceWidgets::init(SimulationFacade const& simulation
 
 void _SimulationParametersSourceWidgets::process()
 {
-    auto& editService = SimulationParametersEditService::get();
+    auto& editService = ParametersEditService::get();
 
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
@@ -161,7 +161,7 @@ void _SimulationParametersSourceWidgets::process()
     }
     AlienImGui::EndTreeNode();
 
-    SimulationParametersValidationService::get().validateAndCorrect(source);
+    ParametersValidationService::get().validateAndCorrect(source);
 
     if (source != lastSource) {
         auto isRunning = _simulationFacade->isSimulationRunning();

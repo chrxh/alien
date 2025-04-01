@@ -23,6 +23,10 @@ add_library(EngineInterface
     LocationHelper.h
     MutationType.h
     OverlayDescriptions.h
+    ParametersEditService.cpp
+    ParametersEditService.h
+    ParametersValidationService.cpp
+    ParametersValidationService.h
     PreviewDescriptionService.cpp
     PreviewDescriptionService.h
     PreviewDescriptions.h
@@ -34,20 +38,18 @@ add_library(EngineInterface
     ShapeGenerator.h
     SimulationFacade.h
     SimulationParameters.h
-    SimulationParametersEditService.cpp
-    SimulationParametersEditService.h
     SimulationParametersTypes.h
     SimulationParametersUpdateConfig.h
-    SimulationParametersValidationService.cpp
-    SimulationParametersValidationService.h
     SimulationParametersZone.h
     SimulationParametersZoneEnabledValues.h
     SimulationParametersZoneValues.h
     SimulationParametersSpecification.h
-    SimulationParametersSpecificationService.cpp
-    SimulationParametersSpecificationService.h
     SpaceCalculator.cpp
     SpaceCalculator.h
+    SpecificationEvaluationService.cpp
+    SpecificationEvaluationService.h
+    SpecificationService.cpp
+    SpecificationService.h
     StatisticsConverterService.cpp
     StatisticsConverterService.h
     StatisticsHistory.cpp

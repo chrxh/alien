@@ -5,9 +5,10 @@
 
 #include <boost/range/adaptors.hpp>
 
-#include "EngineInterface/SimulationParametersSpecificationService.h"
+#include "EngineInterface/SpecificationService.h"
 #include "EngineInterface/SimulationParametersTypes.h"
 #include "EngineInterface/SimulationParameters.h"
+#include "EngineInterface/SpecificationEvaluationService.h"
 
 #include "AlienImGui.h"
 
@@ -18,8 +19,8 @@ namespace
 
 void ParametersSpecGuiService::createWidgetsForParameters(SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const
 {
-    auto& specService = SimulationParametersSpecificationService::get();
-    auto const& parametersSpecs = specService.getSpec();
+    auto& evaluationService = SpecificationEvaluationService::get();
+    auto const& parametersSpecs = SpecificationService::get().getSpec();
     auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
 
     for (auto const& groupSpec : parametersSpecs._groups) {
@@ -30,7 +31,7 @@ void ParametersSpecGuiService::createWidgetsForParameters(SimulationParameters& 
         auto isGroupVisibleActive = true;
         auto name = groupSpec._name;
         if (isExpertSettings) {
-            isGroupVisibleActive = *specService.getExpertToggleValueRef(groupSpec, parameters);
+            isGroupVisibleActive = *evaluationService.getExpertToggleValueRef(groupSpec, parameters);
             name = "Expert settings: " + name;
         }
         ImGui::PushID(name.c_str());
@@ -44,13 +45,13 @@ void ParametersSpecGuiService::createWidgetsForParameters(SimulationParameters& 
 
 void ParametersSpecGuiService::createWidgetsForExpertToggles(SimulationParameters& parameters, SimulationParameters& origParameters) const
 {
-    auto& specService = SimulationParametersSpecificationService::get();
-    auto const& parametersSpecs = specService.getSpec();
+    auto& evaluationService = SpecificationEvaluationService::get();
+    auto const& parametersSpecs = SpecificationService::get().getSpec();
 
     for (auto const& groupSpec : parametersSpecs._groups) {
         if (groupSpec._expertToggleAddress.has_value()) {
-            auto expertToggleValue = specService.getExpertToggleValueRef(groupSpec, parameters);
-            auto origExpertToggleValue = specService.getExpertToggleValueRef(groupSpec, origParameters);
+            auto expertToggleValue = evaluationService.getExpertToggleValueRef(groupSpec, parameters);
+            auto origExpertToggleValue = evaluationService.getExpertToggleValueRef(groupSpec, origParameters);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name(groupSpec._name)
@@ -125,13 +126,13 @@ void ParametersSpecGuiService::createWidgetsForBoolSpec(
     SimulationParameters& origParameters,
     int locationIndex) const
 {
-    auto& specService = SimulationParametersSpecificationService::get();
+    auto& evaluationService = SpecificationEvaluationService::get();
     auto const& boolSpec = std::get<BoolSpec>(parameterSpec._reference);
 
     if (std::holds_alternative<ColorMatrixBoolMember>(boolSpec._member)) {
 
-        auto value = reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(specService.getBoolRef(boolSpec._member, parameters, locationIndex));
-        auto origValue = reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(specService.getBoolRef(boolSpec._member, origParameters, locationIndex));
+        auto value = reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(evaluationService.getBoolRef(boolSpec._member, parameters, locationIndex));
+        auto origValue = reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(evaluationService.getBoolRef(boolSpec._member, origParameters, locationIndex));
         AlienImGui::CheckboxColorMatrix(
             AlienImGui::CheckboxColorMatrixParameters()
                 .name(parameterSpec._name)
@@ -142,8 +143,8 @@ void ParametersSpecGuiService::createWidgetsForBoolSpec(
 
     } else {
 
-        auto value = specService.getBoolRef(boolSpec._member, parameters, locationIndex);
-        auto origValue = specService.getBoolRef(boolSpec._member, origParameters, locationIndex);
+        auto value = evaluationService.getBoolRef(boolSpec._member, parameters, locationIndex);
+        auto origValue = evaluationService.getBoolRef(boolSpec._member, origParameters, locationIndex);
         AlienImGui::Checkbox(
             AlienImGui::CheckboxParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue).tooltip(parameterSpec._tooltip),
             *value);
@@ -157,13 +158,13 @@ void ParametersSpecGuiService::createWidgetsForIntSpec(
     SimulationParameters& origParameters,
     int locationIndex) const
 {
-    auto& specService = SimulationParametersSpecificationService::get();
+    auto& evaluationService = SpecificationEvaluationService::get();
     auto const& intSpec = std::get<IntSpec>(parameterSpec._reference);
 
     if (std::holds_alternative<ColorMatrixIntMember>(intSpec._member)) {
 
-        auto value = reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(specService.getIntRef(intSpec._member, parameters, locationIndex));
-        auto origValue = reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(specService.getIntRef(intSpec._member, origParameters, locationIndex));
+        auto value = reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(evaluationService.getIntRef(intSpec._member, parameters, locationIndex));
+        auto origValue = reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(evaluationService.getIntRef(intSpec._member, origParameters, locationIndex));
         AlienImGui::InputIntColorMatrix(
             AlienImGui::InputIntColorMatrixParameters()
                 .name(parameterSpec._name)
@@ -177,10 +178,10 @@ void ParametersSpecGuiService::createWidgetsForIntSpec(
 
     } else {
 
-        auto value = specService.getIntRef(intSpec._member, parameters, locationIndex);
-        auto origValue = specService.getIntRef(intSpec._member, origParameters, locationIndex);
-        auto enabledValue = specService.getEnabledRef(parameterSpec._enabled, parameters, locationIndex);
-        auto origEnabledValue = specService.getEnabledRef(parameterSpec._enabled, origParameters, locationIndex);
+        auto value = evaluationService.getIntRef(intSpec._member, parameters, locationIndex);
+        auto origValue = evaluationService.getIntRef(intSpec._member, origParameters, locationIndex);
+        auto enabledValue = evaluationService.getEnabledRef(parameterSpec._enabled, parameters, locationIndex);
+        auto origEnabledValue = evaluationService.getEnabledRef(parameterSpec._enabled, origParameters, locationIndex);
         AlienImGui::SliderInt(
             AlienImGui::SliderIntParameters()
                 .name(parameterSpec._name)
@@ -205,13 +206,13 @@ void ParametersSpecGuiService::createWidgetsForFloatSpec(
     SimulationParameters& origParameters,
     int locationIndex) const
 {
-    auto& specService = SimulationParametersSpecificationService::get();
+    auto& evaluationService = SpecificationEvaluationService::get();
     auto const& floatSpec = std::get<FloatSpec>(parameterSpec._reference);
 
     if (std::holds_alternative<ColorMatrixFloatMember>(floatSpec._member) || std::holds_alternative<ColorMatrixFloatZoneValuesMember>(floatSpec._member)) {
 
-        auto value = reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(specService.getFloatRef(floatSpec._member, parameters, locationIndex));
-        auto origValue = reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(specService.getFloatRef(floatSpec._member, origParameters, locationIndex));
+        auto value = reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(evaluationService.getFloatRef(floatSpec._member, parameters, locationIndex));
+        auto origValue = reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(evaluationService.getFloatRef(floatSpec._member, origParameters, locationIndex));
         AlienImGui::InputFloatColorMatrix(
             AlienImGui::InputFloatColorMatrixParameters()
                 .name(parameterSpec._name)
@@ -254,10 +255,10 @@ void ParametersSpecGuiService::createWidgetsForFloatSpec(
 
         bool* pinnedValue = nullptr;
         //specService.getPinnedValueRef(parameterSpec._value, parameters, locationIndex);
-        auto value = specService.getFloatRef(floatSpec._member, parameters, locationIndex);
-        auto origValue = specService.getFloatRef(floatSpec._member, origParameters, locationIndex);
-        auto enabledValue = specService.getEnabledRef(parameterSpec._enabled, parameters, locationIndex);
-        auto origEnabledValue = specService.getEnabledRef(parameterSpec._enabled, origParameters, locationIndex);
+        auto value = evaluationService.getFloatRef(floatSpec._member, parameters, locationIndex);
+        auto origValue = evaluationService.getFloatRef(floatSpec._member, origParameters, locationIndex);
+        auto enabledValue = evaluationService.getEnabledRef(parameterSpec._enabled, parameters, locationIndex);
+        auto origEnabledValue = evaluationService.getEnabledRef(parameterSpec._enabled, origParameters, locationIndex);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name(parameterSpec._name)
@@ -286,11 +287,11 @@ void ParametersSpecGuiService::createWidgetsForChar64Spec(
     SimulationParameters& origParameters,
     int locationIndex) const
 {
-    auto& specService = SimulationParametersSpecificationService::get();
+    auto& evaluationService = SpecificationEvaluationService::get();
     auto const& char64Spec = std::get<Char64Spec>(parameterSpec._reference);
 
-    auto value = specService.getChar64Ref(char64Spec._member, parameters, locationIndex);
-    auto origValue = specService.getChar64Ref(char64Spec._member, origParameters, locationIndex);
+    auto value = evaluationService.getChar64Ref(char64Spec._member, parameters, locationIndex);
+    auto origValue = evaluationService.getChar64Ref(char64Spec._member, origParameters, locationIndex);
     AlienImGui::InputText(
         AlienImGui::InputTextParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(origValue).tooltip(parameterSpec._tooltip),
         value,
@@ -303,11 +304,11 @@ void ParametersSpecGuiService::createWidgetsForAlternativeSpec(
     SimulationParameters& origParameters,
     int locationIndex) const
 {
-    auto& specService = SimulationParametersSpecificationService::get();
+    auto& evaluationService = SpecificationEvaluationService::get();
     auto alternativeSpec = std::get<AlternativeSpec>(parameterSpec._reference);
 
-    auto value = specService.getAlternativeRef(alternativeSpec._member, parameters, locationIndex);
-    auto origValue = specService.getAlternativeRef(alternativeSpec._member, origParameters, locationIndex);
+    auto value = evaluationService.getAlternativeRef(alternativeSpec._member, parameters, locationIndex);
+    auto origValue = evaluationService.getAlternativeRef(alternativeSpec._member, origParameters, locationIndex);
     std::vector<std::string> values;
     values.reserve(alternativeSpec._alternatives.size());
     for (auto const& name : alternativeSpec._alternatives | std::views::keys) {
@@ -330,11 +331,11 @@ void ParametersSpecGuiService::createWidgetsForColorPickerSpec(
     SimulationParameters& origParameters,
     int locationIndex) const
 {
-    auto& specService = SimulationParametersSpecificationService::get();
+    auto& evaluationService = SpecificationEvaluationService::get();
     auto const& colorPickerSpec = std::get<ColorPickerSpec>(parameterSpec._reference);
 
-    auto value = specService.getFloatColorRGBRef(colorPickerSpec._member, parameters, locationIndex);
-    auto origValue = specService.getFloatColorRGBRef(colorPickerSpec._member, origParameters, locationIndex);
+    auto value = evaluationService.getFloatColorRGBRef(colorPickerSpec._member, parameters, locationIndex);
+    auto origValue = evaluationService.getFloatColorRGBRef(colorPickerSpec._member, origParameters, locationIndex);
     
     AlienImGui::ColorButtonWithPicker(
         AlienImGui::ColorButtonWithPickerParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue), *value);
@@ -346,11 +347,11 @@ void ParametersSpecGuiService::createWidgetsForColorTransitionRulesSpec(
     SimulationParameters& origParameters,
     int locationIndex) const
 {
-    auto& specService = SimulationParametersSpecificationService::get();
+    auto& evaluationService = SpecificationEvaluationService::get();
     auto const& colorTransitionRulesSpec = std::get<ColorTransitionRulesSpec>(parameterSpec._reference);
 
-    auto value = specService.getColorTransitionRulesRef(colorTransitionRulesSpec._member, parameters, locationIndex);
-    auto origValue = specService.getColorTransitionRulesRef(colorTransitionRulesSpec._member, origParameters, locationIndex);
+    auto value = evaluationService.getColorTransitionRulesRef(colorTransitionRulesSpec._member, parameters, locationIndex);
+    auto origValue = evaluationService.getColorTransitionRulesRef(colorTransitionRulesSpec._member, origParameters, locationIndex);
     for (int color = 0; color < MAX_COLORS; ++color) {
         ImGui::PushID(color);
         auto widgetParameters = AlienImGui::InputColorTransitionParameters()

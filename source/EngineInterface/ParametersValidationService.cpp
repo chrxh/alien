@@ -1,6 +1,6 @@
-#include "SimulationParametersValidationService.h"
+#include "ParametersValidationService.h"
 
-void SimulationParametersValidationService::validateAndCorrect(SimulationParameters& parameters) const
+void ParametersValidationService::validateAndCorrect(SimulationParameters& parameters) const
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
@@ -50,7 +50,7 @@ void SimulationParametersValidationService::validateAndCorrect(SimulationParamet
     }
 }
 
-void SimulationParametersValidationService::validateAndCorrect(RadiationSource& source) const
+void ParametersValidationService::validateAndCorrect(RadiationSource& source) const
 {
     if (source.shape.type == RadiationSourceShapeType_Circular) {
         source.shape.alternatives.circularRadiationSource.radius = std::max(1.0f, source.shape.alternatives.circularRadiationSource.radius);
@@ -61,7 +61,7 @@ void SimulationParametersValidationService::validateAndCorrect(RadiationSource& 
     }
 }
 
-void SimulationParametersValidationService::validateAndCorrect(SimulationParametersZone& zone, SimulationParameters const& parameters) const
+void ParametersValidationService::validateAndCorrect(SimulationParametersZone& zone, SimulationParameters const& parameters) const
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {

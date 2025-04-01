@@ -7,9 +7,9 @@
 #include "SimulationParameters.h"
 
 
-class SimulationParametersValidationService
+class ParametersValidationService
 {
-    MAKE_SINGLETON(SimulationParametersValidationService);
+    MAKE_SINGLETON(ParametersValidationService);
 
 public:
     void validateAndCorrect(SimulationParameters& parameters) const;

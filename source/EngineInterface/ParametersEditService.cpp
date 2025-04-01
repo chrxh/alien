@@ -1,8 +1,8 @@
-#include "SimulationParametersEditService.h"
+#include "ParametersEditService.h"
 
 #include "Base/Definitions.h"
 
-auto SimulationParametersEditService::getRadiationStrengths(SimulationParameters const& parameters) const -> RadiationStrengths
+auto ParametersEditService::getRadiationStrengths(SimulationParameters const& parameters) const -> RadiationStrengths
 {
     RadiationStrengths result;
     result.values.reserve(parameters.numRadiationSources + 1);
@@ -28,7 +28,7 @@ auto SimulationParametersEditService::getRadiationStrengths(SimulationParameters
     return result;
 }
 
-void SimulationParametersEditService::applyRadiationStrengths(SimulationParameters& parameters, RadiationStrengths const& strengths)
+void ParametersEditService::applyRadiationStrengths(SimulationParameters& parameters, RadiationStrengths const& strengths)
 {
     CHECK(parameters.numRadiationSources + 1 == strengths.values.size());
 
@@ -39,7 +39,7 @@ void SimulationParametersEditService::applyRadiationStrengths(SimulationParamete
     }
 }
 
-void SimulationParametersEditService::adaptRadiationStrengths(RadiationStrengths& strengths, RadiationStrengths& origStrengths, int changeIndex) const
+void ParametersEditService::adaptRadiationStrengths(RadiationStrengths& strengths, RadiationStrengths& origStrengths, int changeIndex) const
 {
     auto pinnedValues = strengths.pinned;
     pinnedValues.insert(changeIndex);
@@ -91,7 +91,7 @@ void SimulationParametersEditService::adaptRadiationStrengths(RadiationStrengths
     }
 }
 
-auto SimulationParametersEditService::calcRadiationStrengthsForAddingZone(RadiationStrengths const& strengths) const -> RadiationStrengths
+auto ParametersEditService::calcRadiationStrengthsForAddingZone(RadiationStrengths const& strengths) const -> RadiationStrengths
 {
     auto result = strengths;
     if (strengths.values.size() == strengths.pinned.size()) {
@@ -112,7 +112,7 @@ auto SimulationParametersEditService::calcRadiationStrengthsForAddingZone(Radiat
     return result;
 }
 
-auto SimulationParametersEditService::calcRadiationStrengthsForDeletingZone(
+auto ParametersEditService::calcRadiationStrengthsForDeletingZone(
     RadiationStrengths const& strengths, int deleteIndex) const -> RadiationStrengths
 {
     auto existsUnpinned = false;
