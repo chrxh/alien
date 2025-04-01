@@ -39,11 +39,11 @@ void _SimulationParametersZoneWidgets::process()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
+    auto lastParameters = parameters;
 
     auto zoneIndex = LocationHelper::findLocationArrayIndex(parameters, _locationIndex);
     SimulationParametersZone& zone = parameters.zone[zoneIndex];
     SimulationParametersZone const& origZone = origParameters.zone[zoneIndex];
-    auto lastZone = zone;
     _zoneName = std::string(zone.name);
 
     auto worldSize = _simulationFacade->getWorldSize();
@@ -256,11 +256,11 @@ void _SimulationParametersZoneWidgets::process()
                 .min(0)
                 .max(1)
                 .logarithmic(true)
-                .defaultValue(&origZone.values.friction)
-                .disabledValue(&parameters.baseValues.friction)
+                .defaultValue(&origParameters.friction.zoneValues[zoneIndex].value)
+                .disabledValue(&parameters.friction.baseValue)
                 .format("%.4f"),
-            &zone.values.friction,
-            &zone.enabledValues.friction);
+            &parameters.friction.zoneValues[zoneIndex].value,
+            &parameters.friction.zoneValues[zoneIndex].enabled);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Rigidity")
@@ -746,7 +746,7 @@ void _SimulationParametersZoneWidgets::process()
 
     ParametersValidationService::get().validateAndCorrect(zone, parameters);
 
-    if (zone != lastZone) {
+    if (parameters != lastParameters) {
         auto isRunning = _simulationFacade->isSimulationRunning();
         _simulationFacade->setSimulationParameters(
             parameters, isRunning ? SimulationParametersUpdateConfig::AllExceptChangingPositions : SimulationParametersUpdateConfig::All);

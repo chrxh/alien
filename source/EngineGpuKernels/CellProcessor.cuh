@@ -734,8 +734,7 @@ __inline__ __device__ void CellProcessor::applyFriction(SimulationData& data)
             continue;
         }
 
-        auto friction = ZoneCalculator::calcParameter(
-            &SimulationParametersZoneValues::friction, &SimulationParametersZoneEnabledValues::friction, data, cell->pos);
+        auto friction = ZoneCalculator::calcParameterNew(cudaSimulationParameters.friction, data, cell->pos);
         cell->vel = cell->vel * (1.0f - friction);
     }
 }

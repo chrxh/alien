@@ -232,7 +232,7 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveSi
             request->getRequestId(),
             SaveSimulationResultData{
                 .filename = filename,
-                .projectName = deserializedData.auxiliaryData.simulationParameters.projectName,
+                .projectName = deserializedData.auxiliaryData.simulationParameters.projectName.value,
                 .timestep = deserializedData.auxiliaryData.timestep,
                 .timestamp = timestamp});
     } catch (...) {
@@ -687,7 +687,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             request->getRequestId(),
             SaveDeserializedSimulationResultData{
                 .filename = filename,
-                .projectName = deserializedData.auxiliaryData.simulationParameters.projectName,
+                .projectName = deserializedData.auxiliaryData.simulationParameters.projectName.value,
                 .timestep = deserializedData.auxiliaryData.timestep,
                 .timestamp = requestData.sharedDeserializedSimulation->getTimestamp(),
                 .statisticsRawData = requestData.sharedDeserializedSimulation->getStatisticsRawData()});

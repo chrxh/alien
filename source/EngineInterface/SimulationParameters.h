@@ -27,11 +27,11 @@ struct SimulationParameters
     SimulationParametersZone zone[MAX_ZONES];
 
     // General
-    Char64 projectName = "<unnamed>";
+    BaseParameter<Char64> projectName = {"<unnamed>"};
 
     // Visualization
-    CellColoring primaryCellColoring = CellColoring_CellColor;
-    CellType highlightedCellType = CellType_Constructor;
+    BaseParameter<CellColoring> primaryCellColoring = {CellColoring_CellColor};
+    BaseParameter<CellType> highlightedCellType = {CellType_Constructor};
     float cellRadius = 0.25f;
     float zoomLevelForNeuronVisualization = 2.0f;
     bool attackVisualization = false;
@@ -45,6 +45,8 @@ struct SimulationParameters
     float timestepSize = 1.0f;
 
     // Physics: Motion
+    BaseZoneParameter<float> friction = {0.01f};
+
     MotionType motionType = MotionType_Fluid;
     float smoothingLength = 0.8f;   // MotionType_Fluid
     float viscosityStrength = 0.1f;  // MotionType_Fluid

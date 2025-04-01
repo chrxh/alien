@@ -14,7 +14,8 @@ namespace
         ParserTask parserTask)
     {
         SimulationParameters defaultParameters;
-        ParameterParser::encodeDecode(tree, parameters.projectName, defaultParameters.projectName, "simulation parameters.project name", parserTask);
+        ParameterParser::encodeDecode(
+            tree, parameters.projectName.value, defaultParameters.projectName.value, "simulation parameters.project name", parserTask);
         ParameterParser::encodeDecode(
             tree, parameters.baseValues.backgroundColor.r, defaultParameters.baseValues.backgroundColor.r, "simulation parameters.background color.r", parserTask);
         ParameterParser::encodeDecode(
@@ -30,14 +31,18 @@ namespace
             "simulation parameters.background color.b",
             parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.primaryCellColoring, defaultParameters.primaryCellColoring, "simulation parameters.cell colorization", parserTask);
+            tree, parameters.primaryCellColoring.value, defaultParameters.primaryCellColoring.value, "simulation parameters.cell colorization", parserTask);
         ParameterParser::encodeDecode(
             tree, parameters.cellGlowColoring, defaultParameters.cellGlowColoring, "simulation parameters.cell glow.coloring", parserTask);
         ParameterParser::encodeDecode(tree, parameters.cellGlowRadius, defaultParameters.cellGlowRadius, "simulation parameters.cell glow.radius", parserTask);
         ParameterParser::encodeDecode(
             tree, parameters.cellGlowStrength, defaultParameters.cellGlowStrength, "simulation parameters.cell glow.strength", parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.highlightedCellType, defaultParameters.highlightedCellType, "simulation parameters.highlighted cell function", parserTask);
+            tree,
+            parameters.highlightedCellType.value,
+            defaultParameters.highlightedCellType.value,
+            "simulation parameters.highlighted cell function",
+            parserTask);
         ParameterParser::encodeDecode(
             tree,
             parameters.zoomLevelForNeuronVisualization,
@@ -99,7 +104,7 @@ namespace
         }
 
         ParameterParser::encodeDecode(
-            tree, parameters.baseValues.friction, defaultParameters.baseValues.friction, "simulation parameters.friction", parserTask);
+            tree, parameters.friction.baseValue, defaultParameters.friction.baseValue, "simulation parameters.friction", parserTask);
         ParameterParser::encodeDecode(
             tree, parameters.baseValues.rigidity, defaultParameters.baseValues.rigidity, "simulation parameters.rigidity", parserTask);
         ParameterParser::encodeDecode(
@@ -721,7 +726,12 @@ namespace
             ParameterParser::encodeDecode(tree, spot.fadeoutRadius, defaultSpot.fadeoutRadius, base + "fadeout radius", parserTask);
 
             ParameterParser::encodeDecodeWithEnabled(
-                tree, spot.values.friction, spot.enabledValues.friction, defaultSpot.values.friction, base + "friction", parserTask);
+                tree,
+                parameters.friction.zoneValues[index].value,
+                spot.enabledValues.friction,
+                defaultParameters.friction.baseValue,
+                base + "friction",
+                parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree, spot.values.rigidity, spot.enabledValues.rigidity, defaultSpot.values.rigidity, base + "rigidity", parserTask);
             ParameterParser::encodeDecodeWithEnabled(

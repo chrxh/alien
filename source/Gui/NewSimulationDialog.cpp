@@ -74,7 +74,7 @@ void NewSimulationDialog::onNewSimulation()
         parameters = _simulationFacade->getSimulationParameters();
     }
     for (int i = 0; i < ProjectNameSize; ++i) {
-        parameters.projectName[i] = _projectName[i];
+        parameters.projectName.value[i] = _projectName[i];
     }
     _simulationFacade->closeSimulation();
 
