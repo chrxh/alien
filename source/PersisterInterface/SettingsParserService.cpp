@@ -940,48 +940,48 @@ namespace
         //features
         ParameterParser::encodeDecode(
             tree,
-            parameters.expertSettingsToggles.genomeComplexityMeasurement,
-            defaultParameters.expertSettingsToggles.genomeComplexityMeasurement,
+            parameters.expertToggles.genomeComplexityMeasurement,
+            defaultParameters.expertToggles.genomeComplexityMeasurement,
             "simulation parameters.features.genome complexity measurement",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.expertSettingsToggles.advancedAbsorptionControl,
-            defaultParameters.expertSettingsToggles.advancedAbsorptionControl,
+            parameters.expertToggles.advancedAbsorptionControl,
+            defaultParameters.expertToggles.advancedAbsorptionControl,
             "simulation parameters.features.additional absorption control",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.expertSettingsToggles.advancedAttackerControl,
-            defaultParameters.expertSettingsToggles.advancedAttackerControl,
+            parameters.expertToggles.advancedAttackerControl,
+            defaultParameters.expertToggles.advancedAttackerControl,
             "simulation parameters.features.additional attacker control",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.expertSettingsToggles.externalEnergyControl,
-            defaultParameters.expertSettingsToggles.externalEnergyControl,
+            parameters.expertToggles.externalEnergyControl,
+            defaultParameters.expertToggles.externalEnergyControl,
             "simulation parameters.features.external energy",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.expertSettingsToggles.cellColorTransitionRules,
-            defaultParameters.expertSettingsToggles.cellColorTransitionRules,
+            parameters.expertToggles.cellColorTransitionRules,
+            defaultParameters.expertToggles.cellColorTransitionRules,
             "simulation parameters.features.cell color transition rules",
             parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.expertSettingsToggles.cellAgeLimiter, defaultParameters.expertSettingsToggles.cellAgeLimiter, "simulation parameters.features.cell age limiter", parserTask);
+            tree, parameters.expertToggles.cellAgeLimiter, defaultParameters.expertToggles.cellAgeLimiter, "simulation parameters.features.cell age limiter", parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.expertSettingsToggles.cellGlow, defaultParameters.expertSettingsToggles.cellGlow, "simulation parameters.features.cell glow", parserTask);
+            tree, parameters.expertToggles.cellGlow, defaultParameters.expertToggles.cellGlow, "simulation parameters.features.cell glow", parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.expertSettingsToggles.customizeNeuronMutations,
-            defaultParameters.expertSettingsToggles.customizeNeuronMutations,
+            parameters.expertToggles.customizeNeuronMutations,
+            defaultParameters.expertToggles.customizeNeuronMutations,
             "simulation parameters.features.customize neuron mutations",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.expertSettingsToggles.customizeDeletionMutations,
-            defaultParameters.expertSettingsToggles.customizeDeletionMutations,
+            parameters.expertToggles.customizeDeletionMutations,
+            defaultParameters.expertToggles.customizeDeletionMutations,
             "simulation parameters.features.customize deletion mutations",
             parserTask);
     }

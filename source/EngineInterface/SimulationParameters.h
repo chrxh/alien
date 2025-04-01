@@ -4,7 +4,7 @@
 #include <cstring>
 
 #include "CellTypeConstants.h"
-#include "ExpertSettingsToggles.h"
+#include "ExpertToggles.h"
 #include "RadiationSource.h"
 #include "SimulationParametersTypes.h"
 #include "SimulationParametersZone.h"
@@ -16,7 +16,7 @@
 struct SimulationParameters
 {
     // Expert settings toggles
-    ExpertSettingsToggles expertSettingsToggles;
+    ExpertToggles expertToggles;
 
     // Particle sources
     int numRadiationSources = 0;

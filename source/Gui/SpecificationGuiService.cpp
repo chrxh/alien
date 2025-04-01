@@ -27,11 +27,11 @@ void SpecificationGuiService::createWidgetsForParameters(SimulationParameters& p
         if (!isVisible(groupSpec, locationType)) {
             continue;
         }
-        auto isExpertSettings = groupSpec._expertToggleAddress.has_value();
+        auto isExpertSettings = groupSpec._expertToggle != nullptr;
         auto isGroupVisibleActive = true;
         auto name = groupSpec._name;
         if (isExpertSettings) {
-            isGroupVisibleActive = *evaluationService.getExpertToggleValueRef(groupSpec, parameters);
+            isGroupVisibleActive = *evaluationService.getExpertToggleRef(groupSpec._expertToggle, parameters);
             name = "Expert settings: " + name;
         }
         ImGui::PushID(name.c_str());
@@ -49,9 +49,9 @@ void SpecificationGuiService::createWidgetsForExpertToggles(SimulationParameters
     auto const& parametersSpecs = SpecificationService::get().getSpec();
 
     for (auto const& groupSpec : parametersSpecs._groups) {
-        if (groupSpec._expertToggleAddress.has_value()) {
-            auto expertToggleValue = evaluationService.getExpertToggleValueRef(groupSpec, parameters);
-            auto origExpertToggleValue = evaluationService.getExpertToggleValueRef(groupSpec, origParameters);
+        if (groupSpec._expertToggle) {
+            auto expertToggleValue = evaluationService.getExpertToggleRef(groupSpec._expertToggle, parameters);
+            auto origExpertToggleValue = evaluationService.getExpertToggleRef(groupSpec._expertToggle, origParameters);
             AlienImGui::Checkbox(
                 AlienImGui::CheckboxParameters()
                     .name(groupSpec._name)

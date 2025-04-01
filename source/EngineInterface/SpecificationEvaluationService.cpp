@@ -172,8 +172,11 @@ bool* SpecificationEvaluationService::getEnabledRef(EnabledSpec const& spec, Sim
 //    return nullptr;
 //}
 
-bool* SpecificationEvaluationService::getExpertToggleValueRef(ParameterGroupSpec const& spec, SimulationParameters& parameters) const
+bool* SpecificationEvaluationService::getExpertToggleRef(ExpertToggleMember const& expertToggle, SimulationParameters& parameters) const
 {
-    return reinterpret_cast<bool*>(reinterpret_cast<char*>(&parameters.expertSettingsToggles) + spec._expertToggleAddress.value());
+    if (expertToggle) {
+        return &(parameters.expertToggles.**expertToggle);
+    }
+    return nullptr;
 }
 

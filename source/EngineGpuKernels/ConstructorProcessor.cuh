@@ -853,7 +853,7 @@ ConstructorProcessor::constructCellIntern(
 
 __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData)
 {
-    if (cudaSimulationParameters.expertSettingsToggles.externalEnergyControl && hostCell->energy < constructionData.energy + cudaSimulationParameters.normalCellEnergy[hostCell->color]
+    if (cudaSimulationParameters.expertToggles.externalEnergyControl && hostCell->energy < constructionData.energy + cudaSimulationParameters.normalCellEnergy[hostCell->color]
         && cudaSimulationParameters.externalEnergyInflowFactor[hostCell->color] > 0) {
         auto externalEnergyPortion = [&] {
             if (cudaSimulationParameters.externalEnergyInflowOnlyForNonSelfReplicators) {
@@ -881,7 +881,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
 
     auto externalEnergyConditionalInflowFactor =
         [&] {
-        if (!cudaSimulationParameters.expertSettingsToggles.externalEnergyControl) {
+        if (!cudaSimulationParameters.expertToggles.externalEnergyControl) {
             return 0.0f;
         }
         if (cudaSimulationParameters.externalEnergyInflowOnlyForNonSelfReplicators) {
@@ -949,10 +949,10 @@ __inline__ __device__ float ConstructorProcessor::calcGenomeComplexity(int color
     auto lastDepth = 0;
     auto numRamifications = 1;
     auto genomeComplexityRamificationFactor =
-        cudaSimulationParameters.expertSettingsToggles.genomeComplexityMeasurement ? cudaSimulationParameters.genomeComplexityRamificationFactor[color] : 0.0f;
+        cudaSimulationParameters.expertToggles.genomeComplexityMeasurement ? cudaSimulationParameters.genomeComplexityRamificationFactor[color] : 0.0f;
     auto sizeFactor =
-        cudaSimulationParameters.expertSettingsToggles.genomeComplexityMeasurement ? cudaSimulationParameters.genomeComplexitySizeFactor[color] : 1.0f;
-    auto depthLevel = cudaSimulationParameters.expertSettingsToggles.genomeComplexityMeasurement ? cudaSimulationParameters.genomeComplexityDepthLevel[color] : 3;
+        cudaSimulationParameters.expertToggles.genomeComplexityMeasurement ? cudaSimulationParameters.genomeComplexitySizeFactor[color] : 1.0f;
+    auto depthLevel = cudaSimulationParameters.expertToggles.genomeComplexityMeasurement ? cudaSimulationParameters.genomeComplexityDepthLevel[color] : 3;
     GenomeDecoder::executeForEachNodeRecursively(genome, toInt(genomeSize), false, false, [&](int depth, int nodeAddress, int repetitions) {
         auto ramificationFactor = depth > lastDepth ? genomeComplexityRamificationFactor * toFloat(numRamifications) : 0.0f;
         if (depth <= depthLevel) {

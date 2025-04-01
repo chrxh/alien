@@ -605,7 +605,7 @@ void _SimulationParametersZoneWidgets::process()
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
                                       .name("Expert settings: Advanced energy absorption control")
-                                      .visible(parameters.expertSettingsToggles.advancedAbsorptionControl)
+                                      .visible(parameters.expertToggles.advancedAbsorptionControl)
                                       .blinkWhenActivated(true))) {
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -639,7 +639,7 @@ void _SimulationParametersZoneWidgets::process()
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
                                       .name("Expert settings: Advanced attacker control")
-                                      .visible(parameters.expertSettingsToggles.advancedAttackerControl)
+                                      .visible(parameters.expertToggles.advancedAttackerControl)
                                       .blinkWhenActivated(true))) {
         AlienImGui::InputFloatColorMatrix(
             AlienImGui::InputFloatColorMatrixParameters()
@@ -682,7 +682,7 @@ void _SimulationParametersZoneWidgets::process()
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
                                       .name("Expert settings: Cell age limiter")
-                                      .visible(parameters.expertSettingsToggles.cellAgeLimiter)
+                                      .visible(parameters.expertToggles.cellAgeLimiter)
                                       .blinkWhenActivated(true))) {
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -706,7 +706,7 @@ void _SimulationParametersZoneWidgets::process()
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
                                       .name("Expert settings: Cell color transition rules")
-                                      .visible(parameters.expertSettingsToggles.cellColorTransitionRules)
+                                      .visible(parameters.expertToggles.cellColorTransitionRules)
                                       .blinkWhenActivated(true))) {
         ImGui::Checkbox("##cellColorTransition", &zone.enabledValues.colorTransitionRules);
         ImGui::SameLine();

@@ -7,8 +7,6 @@
 #include "LocationHelper.h"
 #include "ParametersEditService.h"
 
-#define EXPERT_VALUE_OFFSET(X) offsetof(ExpertSettingsToggles, X)
-
 ParametersSpec const& SpecificationService::getSpec()
 {
     if (!_parametersSpec.has_value()) {
@@ -537,7 +535,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Advanced energy absorption control")
-            .expertToggleAddress(EXPERT_VALUE_OFFSET(advancedAbsorptionControl))
+            .expertToggle(&ExpertToggles::advancedAbsorptionControl)
             .parameters({
                 ParameterSpec()
                     .name("Low genome complexity penalty")
@@ -560,7 +558,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Advanced attacker control")
-            .expertToggleAddress(EXPERT_VALUE_OFFSET(advancedAttackerControl))
+            .expertToggle(&ExpertToggles::advancedAttackerControl)
             .parameters({
                 ParameterSpec()
                     .name("Same mutant protection")
@@ -590,7 +588,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Cell age limiter")
-            .expertToggleAddress(EXPERT_VALUE_OFFSET(cellAgeLimiter))
+            .expertToggle(&ExpertToggles::cellAgeLimiter)
             .parameters({
                 ParameterSpec()
                     .name("Maximum inactive cell age")
@@ -630,7 +628,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Cell color transition rules")
-            .expertToggleAddress(EXPERT_VALUE_OFFSET(cellColorTransitionRules))
+            .expertToggle(&ExpertToggles::cellColorTransitionRules)
             .parameters({
                 ParameterSpec()
                     .name("Target color and duration")
@@ -641,7 +639,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Cell glow")
-            .expertToggleAddress(EXPERT_VALUE_OFFSET(cellGlow))
+            .expertToggle(&ExpertToggles::cellGlow)
             .parameters({
                 ParameterSpec()
                     .name("Coloring")
@@ -668,7 +666,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Customize deletion mutations")
-            .expertToggleAddress(EXPERT_VALUE_OFFSET(customizeDeletionMutations))
+            .expertToggle(&ExpertToggles::customizeDeletionMutations)
             .parameters({
                 ParameterSpec()
                     .name("Minimum size")
@@ -678,7 +676,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Customize neuron mutations")
-            .expertToggleAddress(EXPERT_VALUE_OFFSET(customizeNeuronMutations))
+            .expertToggle(&ExpertToggles::customizeNeuronMutations)
             .parameters({
                 ParameterSpec()
                     .name("Affected weights")
@@ -714,7 +712,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("External energy control")
-            .expertToggleAddress(EXPERT_VALUE_OFFSET(externalEnergyControl))
+            .expertToggle(&ExpertToggles::externalEnergyControl)
             .parameters({
                 ParameterSpec()
                     .name("External energy amount")
@@ -765,7 +763,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Genome complexity measurement")
-            .expertToggleAddress(EXPERT_VALUE_OFFSET(genomeComplexityMeasurement))
+            .expertToggle(&ExpertToggles::genomeComplexityMeasurement)
             .parameters({
                 ParameterSpec()
                     .name("Size factor")
