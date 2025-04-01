@@ -1,4 +1,4 @@
-#include "ParametersSpecGuiService.h"
+#include "SpecificationGuiService.h"
 
 #include <algorithm>
 #include <ranges>
@@ -17,7 +17,7 @@ namespace
     auto constexpr RightColumnWidth = 285.0f;
 }
 
-void ParametersSpecGuiService::createWidgetsForParameters(SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const
+void SpecificationGuiService::createWidgetsForParameters(SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& parametersSpecs = SpecificationService::get().getSpec();
@@ -43,7 +43,7 @@ void ParametersSpecGuiService::createWidgetsForParameters(SimulationParameters& 
     }
 }
 
-void ParametersSpecGuiService::createWidgetsForExpertToggles(SimulationParameters& parameters, SimulationParameters& origParameters) const
+void SpecificationGuiService::createWidgetsForExpertToggles(SimulationParameters& parameters, SimulationParameters& origParameters) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& parametersSpecs = SpecificationService::get().getSpec();
@@ -80,7 +80,7 @@ namespace
     }
 }
 
-void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
+void SpecificationGuiService::createWidgetsFromParameterSpecs(
     std::vector<ParameterSpec> const& parameterSpecs,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
@@ -120,7 +120,7 @@ void ParametersSpecGuiService::createWidgetsFromParameterSpecs(
     }
 }
 
-void ParametersSpecGuiService::createWidgetsForBoolSpec(
+void SpecificationGuiService::createWidgetsForBoolSpec(
     ParameterSpec const& parameterSpec,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
@@ -152,7 +152,7 @@ void ParametersSpecGuiService::createWidgetsForBoolSpec(
     }
 }
 
-void ParametersSpecGuiService::createWidgetsForIntSpec(
+void SpecificationGuiService::createWidgetsForIntSpec(
     ParameterSpec const& parameterSpec,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
@@ -200,7 +200,7 @@ void ParametersSpecGuiService::createWidgetsForIntSpec(
     }
 }
 
-void ParametersSpecGuiService::createWidgetsForFloatSpec(
+void SpecificationGuiService::createWidgetsForFloatSpec(
     ParameterSpec const& parameterSpec,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
@@ -281,7 +281,7 @@ void ParametersSpecGuiService::createWidgetsForFloatSpec(
     }
 }
 
-void ParametersSpecGuiService::createWidgetsForChar64Spec(
+void SpecificationGuiService::createWidgetsForChar64Spec(
     ParameterSpec const& parameterSpec,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
@@ -298,7 +298,7 @@ void ParametersSpecGuiService::createWidgetsForChar64Spec(
         sizeof(Char64) / sizeof(char));
 }
 
-void ParametersSpecGuiService::createWidgetsForAlternativeSpec(
+void SpecificationGuiService::createWidgetsForAlternativeSpec(
     ParameterSpec const& parameterSpec,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
@@ -325,7 +325,7 @@ void ParametersSpecGuiService::createWidgetsForAlternativeSpec(
     createWidgetsFromParameterSpecs(alternativeSpec._alternatives.at(*value).second, parameters, origParameters, locationIndex);
 }
 
-void ParametersSpecGuiService::createWidgetsForColorPickerSpec(
+void SpecificationGuiService::createWidgetsForColorPickerSpec(
     ParameterSpec const& parameterSpec,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
@@ -341,7 +341,7 @@ void ParametersSpecGuiService::createWidgetsForColorPickerSpec(
         AlienImGui::ColorButtonWithPickerParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue), *value);
 }
 
-void ParametersSpecGuiService::createWidgetsForColorTransitionRulesSpec(
+void SpecificationGuiService::createWidgetsForColorTransitionRulesSpec(
     ParameterSpec const& parameterSpec,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
@@ -369,14 +369,14 @@ void ParametersSpecGuiService::createWidgetsForColorTransitionRulesSpec(
     }
 }
 
-bool ParametersSpecGuiService::isVisible(ParameterGroupSpec const& groupSpec, LocationType locationType) const
+bool SpecificationGuiService::isVisible(ParameterGroupSpec const& groupSpec, LocationType locationType) const
 {
     return std::any_of(groupSpec._parameters.begin(), groupSpec._parameters.end(), [&](auto const& parameterSpec) {
         return isVisible(parameterSpec, locationType);
     });
 }
 
-bool ParametersSpecGuiService::isVisible(ParameterSpec const& parameterSpec, LocationType locationType) const
+bool SpecificationGuiService::isVisible(ParameterSpec const& parameterSpec, LocationType locationType) const
 {
     if (locationType == LocationType::Base) {
         if (std::holds_alternative<BoolSpec>(parameterSpec._reference)) {
