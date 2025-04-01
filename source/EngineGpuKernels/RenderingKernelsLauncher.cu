@@ -21,7 +21,7 @@ void _RenderingKernelsLauncher::drawImage(
     KERNEL_CALL(cudaFilterParticlesForRendering, data.worldSize, rectUpperLeft, data.objects.particlePointers, data.tempObjects.particlePointers, imageSize, zoom);
     KERNEL_CALL(cudaDrawCells, data.timestep, data.worldSize, rectUpperLeft, rectLowerRight, data.tempObjects.cellPointers, targetImage, imageSize, zoom);
     KERNEL_CALL(cudaDrawParticles, data.worldSize, rectUpperLeft, rectLowerRight, data.tempObjects.particlePointers, targetImage, imageSize, zoom);
-    if (settings.simulationParameters.showRadiationSources) {
+    if (settings.simulationParameters.showRadiationSources.value) {
         KERNEL_CALL_1_1(cudaDrawRadiationSources, targetImage, rectUpperLeft, data.worldSize, imageSize, zoom);
     }
 
@@ -41,7 +41,7 @@ void _RenderingKernelsLauncher::drawImage(
         cudaDrawCellGlow<<<blocks, threadsPerBlock>>>(data.worldSize, rectUpperLeft, data.tempObjects.cellPointers, targetImage, imageSize, zoom);
     }
 
-    if (settings.simulationParameters.borderlessRendering) {
+    if (settings.simulationParameters.borderlessRendering.value) {
         KERNEL_CALL(cudaDrawRepetition, data.worldSize, imageSize, rectUpperLeft, rectLowerRight, targetImage, zoom);
     }
 }

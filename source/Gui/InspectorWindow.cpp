@@ -55,7 +55,7 @@ void _InspectorWindow::process()
     auto width = calcWindowWidth();
     auto height = isCell() ? StyleRepository::get().scale(370.0f)
                            : StyleRepository::get().scale(70.0f);
-    auto borderlessRendering = _simulationFacade->getSimulationParameters().borderlessRendering;
+    auto borderlessRendering = _simulationFacade->getSimulationParameters().borderlessRendering.value;
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::SetNextWindowSize({width, height}, ImGuiCond_Appearing);
     ImGui::SetNextWindowPos({_initialPos.x, _initialPos.y}, ImGuiCond_Appearing);

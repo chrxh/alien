@@ -32,14 +32,14 @@ struct SimulationParameters
     // Visualization
     BaseParameter<CellColoring> primaryCellColoring = {CellColoring_CellColor};
     BaseParameter<CellType> highlightedCellType = {CellType_Constructor};
-    float cellRadius = 0.25f;
-    float zoomLevelForNeuronVisualization = 2.0f;
-    bool attackVisualization = false;
-    bool muscleMovementVisualization = false;
-    bool borderlessRendering = false;
-    bool gridLines = false;
-    bool markReferenceDomain = true;
-    bool showRadiationSources = true;
+    BaseParameter<float> cellRadius = {0.25f};
+    BaseParameter<float> zoomLevelForNeuronVisualization = {2.0f};
+    BaseParameter<bool> attackVisualization = {false};
+    BaseParameter<bool> muscleMovementVisualization = {false};
+    BaseParameter<bool> borderlessRendering = {false};
+    BaseParameter<bool> gridLines = {false};
+    BaseParameter<bool> markReferenceDomain = {true};
+    BaseParameter<bool> showRadiationSources = {true};
 
     // Numerics
     float timestepSize = 1.0f;
