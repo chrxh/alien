@@ -2,8 +2,32 @@
 
 #include "Base/Definitions.h"
 
-std::variant<SimulationParametersZone*, RadiationSource*> LocationHelper::findLocation(SimulationParameters& parameters, int locationIndex)
+LocationType LocationHelper::getLocationType(int locationIndex, SimulationParameters const& parameters)
 {
+    if (locationIndex == 0) {
+        return LocationType::Base;
+    } else {
+        for (int i = 0; i < parameters.numZones; ++i) {
+            if (parameters.zone[i].locationIndex == locationIndex) {
+                return LocationType::Zone;
+            }
+        }
+        for (int i = 0; i < parameters.numRadiationSources; ++i) {
+            if (parameters.radiationSource[i].locationIndex == locationIndex) {
+                return LocationType::Source;
+            }
+        }
+    }
+    CHECK(false);
+}
+
+std::variant<SimulationParameters*, SimulationParametersZone*, RadiationSource*> LocationHelper::findLocation(
+    SimulationParameters& parameters,
+    int locationIndex)
+{
+    if (locationIndex == 0) {
+        return &parameters;
+    }
     for (int i = 0; i < parameters.numZones; ++i) {
         if (parameters.zone[i].locationIndex == locationIndex) {
             return &parameters.zone[i];
@@ -14,7 +38,7 @@ std::variant<SimulationParametersZone*, RadiationSource*> LocationHelper::findLo
             return &parameters.radiationSource[i];
         }
     }
-    THROW_NOT_IMPLEMENTED();
+    CHECK(false);
 }
 
 int LocationHelper::findLocationArrayIndex(SimulationParameters const& parameters, int locationIndex)
@@ -29,13 +53,13 @@ int LocationHelper::findLocationArrayIndex(SimulationParameters const& parameter
             return i;
         }
     }
-    THROW_NOT_IMPLEMENTED();
+    CHECK(false);
 }
 
 std::map<int, int> LocationHelper::onDecreaseLocationIndex(SimulationParameters& parameters, int locationIndex)
 {
-    std::variant<SimulationParametersZone*, RadiationSource*> zoneOrSource1 = findLocation(parameters, locationIndex);
-    std::variant<SimulationParametersZone*, RadiationSource*> zoneOrSource2 = findLocation(parameters, locationIndex - 1);
+    auto zoneOrSource1 = findLocation(parameters, locationIndex);
+    auto zoneOrSource2 = findLocation(parameters, locationIndex - 1);
     if (std::holds_alternative<SimulationParametersZone*>(zoneOrSource1)) {
         std::get<SimulationParametersZone*>(zoneOrSource1)->locationIndex -= 1;
     } else {
@@ -62,8 +86,8 @@ std::map<int, int> LocationHelper::onDecreaseLocationIndex(SimulationParameters&
 
 std::map<int, int> LocationHelper::onIncreaseLocationIndex(SimulationParameters& parameters, int locationIndex)
 {
-    std::variant<SimulationParametersZone*, RadiationSource*> zoneOrSource1 = findLocation(parameters, locationIndex);
-    std::variant<SimulationParametersZone*, RadiationSource*> zoneOrSource2 = findLocation(parameters, locationIndex + 1);
+    auto zoneOrSource1 = findLocation(parameters, locationIndex);
+    auto zoneOrSource2 = findLocation(parameters, locationIndex + 1);
     if (std::holds_alternative<SimulationParametersZone*>(zoneOrSource1)) {
         std::get<SimulationParametersZone*>(zoneOrSource1)->locationIndex += 1;
     } else {

@@ -243,10 +243,10 @@ void SimulationParametersMainWindow::processDetailWidget()
                 auto type = _locations.at(_selectedLocationIndex).type;
                 if (type == LocationType::Base) {
                     _baseWidgets->process();
-                } else if (type == LocationType::ParameterZone) {
+                } else if (type == LocationType::Zone) {
                     _zoneWidgets->setLocationIndex(_selectedLocationIndex);
                     _zoneWidgets->process();
-                } else if (type == LocationType::RadiationSource) {
+                } else if (type == LocationType::Source) {
                     _sourceWidgets->setLocationIndex(_selectedLocationIndex);
                     _sourceWidgets->process();
                 }
@@ -333,9 +333,9 @@ void SimulationParametersMainWindow::processLocationTable()
                 ImGui::TableNextColumn();
                 if (entry.type == LocationType::Base) {
                     AlienImGui::Text("Base parameters");
-                } else if (entry.type == LocationType::ParameterZone) {
+                } else if (entry.type == LocationType::Zone) {
                     AlienImGui::Text("Zone");
-                } else if (entry.type == LocationType::RadiationSource) {
+                } else if (entry.type == LocationType::Source) {
                     AlienImGui::Text("Radiation");
                 }
 
@@ -657,14 +657,14 @@ void SimulationParametersMainWindow::updateLocations()
     for (int i = 0; i < parameters.numZones; ++i) {
         auto const& zone = parameters.zone[i];
         auto position = "(" + StringHelper::format(zone.posX, 0) + ", " + StringHelper::format(zone.posY, 0) + ")";
-        _locations.at(zone.locationIndex) = Location{zone.name, LocationType::ParameterZone, position};
+        _locations.at(zone.locationIndex) = Location{zone.name, LocationType::Zone, position};
     }
     for (int i = 0; i < parameters.numRadiationSources; ++i) {
         auto const& source = parameters.radiationSource[i];
         auto position = "(" + StringHelper::format(source.posX, 0) + ", " + StringHelper::format(source.posY, 0) + ")";
         auto pinnedString = strength.pinned.contains(i + 1) ? ICON_FA_THUMBTACK " " : " ";
         _locations.at(source.locationIndex) = Location{
-            source.name, LocationType::RadiationSource, position, pinnedString + StringHelper::format(strength.values.at(i + 1) * 100 + 0.05f, 1) + "%"};
+            source.name, LocationType::Source, position, pinnedString + StringHelper::format(strength.values.at(i + 1) * 100 + 0.05f, 1) + "%"};
     }
 }
 

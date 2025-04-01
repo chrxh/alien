@@ -59,13 +59,16 @@ using ColorTransitionRulesZoneMember = std::shared_ptr<_ColorTransitionRulesZone
 using FloatGetterSetter =
     std::pair<std::function<float(SimulationParameters const&, int)>, std::function<void(float, SimulationParameters&, int)>>;  // int for locationIndex
 
+using _BaseEnabledMember = bool SimulationParameters::*;
+using BaseEnabledMember = std::shared_ptr<_BaseEnabledMember>;
+
+using _ZoneEnabledMember = bool SimulationParametersZoneEnabledValues::*;
+using ZoneEnabledMember = std::shared_ptr<_ZoneEnabledMember>;
+
+using _SourceEnabledMember = bool RadiationSource::*;
+using SourceEnabledMember = std::shared_ptr<_SourceEnabledMember>;
+
 using BoolMemberSpec = std::variant<std::monostate, BoolMember, BoolZoneValuesMember, ColorMatrixBoolMember>;
-using IntMemberSpec = std::variant<std::monostate, IntMember, ColorVectorIntMember, ColorMatrixIntMember>;
-using FloatMemberSpec = std::variant<std::monostate, FloatMember, ColorVectorFloatMember, ColorMatrixFloatMember, FloatZoneValuesMember, ColorVectorFloatZoneValuesMember, ColorMatrixFloatZoneValuesMember, FloatGetterSetter>;
-using Char64MemberSpec = std::variant<std::monostate, Char64Member>;
-using AlternativeMemberSpec = std::variant<std::monostate, IntMember>;
-using ColorPickerMemberSpec = std::variant<std::monostate, FloatColorRGBZoneMember>;
-using ColorTransitionRulesMemberSpec = std::variant<std::monostate, ColorTransitionRulesZoneMember>;
 
 struct BoolSpec
 {
@@ -74,6 +77,8 @@ struct BoolSpec
     SETTER_SHARED_PTR(BoolSpec, ColorMatrixBoolMember, member);
     BoolMemberSpec _member = std::monostate();
 };
+
+using IntMemberSpec = std::variant<std::monostate, IntMember, ColorVectorIntMember, ColorMatrixIntMember>;
 
 struct IntSpec
 {
@@ -87,6 +92,16 @@ struct IntSpec
     MEMBER(IntSpec, bool, logarithmic, false);
     MEMBER(IntSpec, bool, infinity, false);
 };
+
+using FloatMemberSpec = std::variant<
+    std::monostate,
+    FloatMember,
+    ColorVectorFloatMember,
+    ColorMatrixFloatMember,
+    FloatZoneValuesMember,
+    ColorVectorFloatZoneValuesMember,
+    ColorMatrixFloatZoneValuesMember,
+    FloatGetterSetter>;
 
 struct FloatSpec
 {
@@ -106,11 +121,15 @@ struct FloatSpec
     MEMBER(FloatSpec, bool, infinity, false);
 };
 
+using Char64MemberSpec = std::variant<std::monostate, Char64Member>;
+
 struct Char64Spec
 {
     SETTER_SHARED_PTR(Char64Spec, Char64Member, member);
     Char64MemberSpec _member = std::monostate();
 };
+
+using AlternativeMemberSpec = std::variant<std::monostate, IntMember>;
 
 struct ParameterSpec;
 struct AlternativeSpec
@@ -122,11 +141,15 @@ struct AlternativeSpec
     MEMBER(AlternativeSpec, Alternatives, alternatives, {});
 };
 
+using ColorPickerMemberSpec = std::variant<std::monostate, FloatColorRGBZoneMember>;
+
 struct ColorPickerSpec
 {
     SETTER_SHARED_PTR(ColorPickerSpec, FloatColorRGBZoneMember, member);
     ColorPickerMemberSpec _member = std::monostate();
 };
+
+using ColorTransitionRulesMemberSpec = std::variant<std::monostate, ColorTransitionRulesZoneMember>;
 
 struct ColorTransitionRulesSpec
 {
@@ -134,19 +157,20 @@ struct ColorTransitionRulesSpec
     ColorTransitionRulesMemberSpec _member = std::monostate();
 };
 
-using ReferenceSpec = std::variant<BoolSpec, IntSpec, FloatSpec, Char64Spec, AlternativeSpec, ColorPickerSpec, ColorTransitionRulesSpec>;
-
-using BaseEnabledMember = std::shared_ptr<bool SimulationParameters::*>;
-using ZoneEnabledMember = std::shared_ptr<bool SimulationParametersZoneEnabledValues::*>;
-using SourceEnabledMember = std::shared_ptr<bool RadiationSource::*>;
-
-using EnabledMember = std::variant<std::monostate, BaseEnabledMember>;
 struct EnabledSpec
 {
-    MEMBER(EnabledSpec, BaseEnabledMember, base, nullptr);
-    MEMBER(EnabledSpec, ZoneEnabledMember, zone, nullptr);
-    MEMBER(EnabledSpec, SourceEnabledMember, source, nullptr);
+    SETTER_SHARED_PTR(EnabledSpec, BaseEnabledMember, base);
+    BaseEnabledMember _base;
+
+    SETTER_SHARED_PTR(EnabledSpec, ZoneEnabledMember, zone);
+    ZoneEnabledMember _zone;
+
+    SETTER_SHARED_PTR(EnabledSpec, SourceEnabledMember, source);
+    SourceEnabledMember _source;
+
 };
+
+using ReferenceSpec = std::variant<BoolSpec, IntSpec, FloatSpec, Char64Spec, AlternativeSpec, ColorPickerSpec, ColorTransitionRulesSpec>;
 
 struct ParameterSpec
 {
