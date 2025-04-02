@@ -211,7 +211,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
     auto const& floatSpec = std::get<FloatSpec>(parameterSpec._reference);
 
     if (std::holds_alternative<ColorMatrixFloatMember>(floatSpec._member) || std::holds_alternative<ColorMatrixFloatZoneValuesMember>(floatSpec._member)
-        || std::holds_alternative<ColorMatrixFloatMemberNew>(floatSpec._member) || std::holds_alternative<ColorMatrixFloatZoneValuesMemberNew>(floatSpec._member)) {
+        || std::holds_alternative<ColorMatrixFloatMemberNew>(floatSpec._member) || std::holds_alternative<ColorMatrixFloatBaseZoneMemberNew>(floatSpec._member)) {
 
         auto value = reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(evaluationService.getFloatRef(floatSpec._member, parameters, locationIndex));
         auto origValue = reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(evaluationService.getFloatRef(floatSpec._member, origParameters, locationIndex));
@@ -277,7 +277,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
                     std::holds_alternative<ColorVectorFloatMember>(floatSpec._member)
                     || std::holds_alternative<ColorVectorFloatZoneValuesMember>(floatSpec._member)
                     || std::holds_alternative<ColorVectorFloatMemberNew>(floatSpec._member)
-                    || std::holds_alternative<ColorVectorFloatZoneValuesMemberNew >(floatSpec._member))
+                    || std::holds_alternative<ColorVectorFloatBaseZoneMemberNew >(floatSpec._member))
                 .tooltip(parameterSpec._tooltip),
             value,
             enabledValue,
@@ -472,8 +472,8 @@ bool SpecificationGuiService::isVisible(ParameterSpec const& parameterSpec, Loca
             auto const& floatSpec = std::get<FloatSpec>(parameterSpec._reference);
             if (std::holds_alternative<FloatMemberNew>(floatSpec._member) || std::holds_alternative<ColorVectorFloatMemberNew>(floatSpec._member)
                 || std::holds_alternative<ColorMatrixFloatMemberNew>(floatSpec._member) || std::holds_alternative<FloatZoneValuesMemberNew>(floatSpec._member)
-                || std::holds_alternative<ColorVectorFloatZoneValuesMemberNew>(floatSpec._member)
-                || std::holds_alternative<ColorMatrixFloatZoneValuesMemberNew>(floatSpec._member)
+                || std::holds_alternative<ColorVectorFloatBaseZoneMemberNew>(floatSpec._member)
+                || std::holds_alternative<ColorMatrixFloatBaseZoneMemberNew>(floatSpec._member)
                 || std::holds_alternative<FloatGetterSetter>(floatSpec._member)) {
                 return true;
             }
@@ -489,12 +489,12 @@ bool SpecificationGuiService::isVisible(ParameterSpec const& parameterSpec, Loca
             }
         } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._reference)) {
             auto const& colorPickerSpec = std::get<ColorPickerSpec>(parameterSpec._reference);
-            if (std::holds_alternative<FloatColorRGBZoneMemberNew>(colorPickerSpec._member)) {
+            if (std::holds_alternative<FloatColorRGBBaseZoneMemberNew>(colorPickerSpec._member)) {
                 return true;
             }
         } else if (std::holds_alternative<ColorTransitionRulesSpec>(parameterSpec._reference)) {
             auto const& colorTransitionRulesSpec = std::get<ColorTransitionRulesSpec>(parameterSpec._reference);
-            if (std::holds_alternative<ColorTransitionRulesZoneMemberNew>(colorTransitionRulesSpec._member)) {
+            if (std::holds_alternative<ColorTransitionRulesBaseZoneMemberNew>(colorTransitionRulesSpec._member)) {
                 return true;
             }
         }
@@ -507,18 +507,18 @@ bool SpecificationGuiService::isVisible(ParameterSpec const& parameterSpec, Loca
             }
         } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
             auto const& floatSpec = std::get<FloatSpec>(parameterSpec._reference);
-            if (std::holds_alternative<ColorVectorFloatZoneValuesMemberNew>(floatSpec._member)
-                || std::holds_alternative<ColorMatrixFloatZoneValuesMemberNew>(floatSpec._member)) {
+            if (std::holds_alternative<ColorVectorFloatBaseZoneMemberNew>(floatSpec._member)
+                || std::holds_alternative<ColorMatrixFloatBaseZoneMemberNew>(floatSpec._member)) {
                 return true;
             }
         } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._reference)) {
             auto const& colorPickerSpec = std::get<ColorPickerSpec>(parameterSpec._reference);
-            if (std::holds_alternative<FloatColorRGBZoneMemberNew>(colorPickerSpec._member)) {
+            if (std::holds_alternative<FloatColorRGBBaseZoneMemberNew>(colorPickerSpec._member)) {
                 return true;
             }
         } else if (std::holds_alternative<ColorTransitionRulesSpec>(parameterSpec._reference)) {
             auto const& colorTransitionRulesSpec = std::get<ColorTransitionRulesSpec>(parameterSpec._reference);
-            if (std::holds_alternative<ColorTransitionRulesZoneMemberNew>(colorTransitionRulesSpec._member)) {
+            if (std::holds_alternative<ColorTransitionRulesBaseZoneMemberNew>(colorTransitionRulesSpec._member)) {
                 return true;
             }
         }

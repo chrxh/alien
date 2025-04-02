@@ -10,11 +10,8 @@ struct SimulationParametersZoneEnabledValues
     bool radiationAbsorptionLowGenomeComplexityPenalty = false;
     bool radiationType1_strength = false;
     bool radiationDisableSources = false;
-    bool cellMaxForce = false;
     bool minCellEnergy = false;
     bool cellDeathProbability = false;
-    bool cellFusionVelocity = false;
-    bool cellMaxBindingEnergy = false;
     bool maxAgeForInactiveCellsEnabled = false;
     bool colorTransitionRules = false;
     bool attackerEnergyCost = false;

@@ -267,11 +267,11 @@ void _SimulationParametersZoneWidgets::process()
                 .textWidth(RightColumnWidth)
                 .min(0)
                 .max(1)
-                .defaultValue(&origZone.values.rigidity)
-                .disabledValue(&parameters.baseValues.rigidity)
+                .defaultValue(&origParameters.rigidity.zoneValues[zoneIndex].value)
+                .disabledValue(&parameters.rigidity.baseValue)
                 .format("%.2f"),
-            &zone.values.rigidity,
-            &zone.enabledValues.rigidity);
+            &parameters.rigidity.zoneValues[zoneIndex].value,
+            &parameters.rigidity.zoneValues[zoneIndex].enabled);
     }
     AlienImGui::EndTreeNode();
 
@@ -286,10 +286,10 @@ void _SimulationParametersZoneWidgets::process()
                 .min(0)
                 .max(3.0f)
                 .colorDependence(true)
-                .defaultValue(origZone.values.cellMaxForce)
-                .disabledValue(parameters.baseValues.cellMaxForce),
-            zone.values.cellMaxForce,
-            &zone.enabledValues.cellMaxForce);
+                .defaultValue(origParameters.maxForce.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.maxForce.zoneValues[zoneIndex].value),
+            parameters.maxForce.zoneValues[zoneIndex].value,
+            &parameters.maxForce.zoneValues[zoneIndex].enabled);
     }
     AlienImGui::EndTreeNode();
 
@@ -303,10 +303,10 @@ void _SimulationParametersZoneWidgets::process()
                 .textWidth(RightColumnWidth)
                 .min(0)
                 .max(2.0f)
-                .defaultValue(&origZone.values.cellFusionVelocity)
-                .disabledValue(&parameters.baseValues.cellFusionVelocity),
-            &zone.values.cellFusionVelocity,
-            &zone.enabledValues.cellFusionVelocity);
+                .defaultValue(&origParameters.cellFusionVelocity.zoneValues[zoneIndex].value)
+                .disabledValue(&parameters.cellFusionVelocity.baseValue),
+            &parameters.cellFusionVelocity.zoneValues[zoneIndex].value,
+            &parameters.cellFusionVelocity.zoneValues[zoneIndex].enabled);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Maximum energy")
@@ -316,10 +316,10 @@ void _SimulationParametersZoneWidgets::process()
                 .logarithmic(true)
                 .infinity(true)
                 .format("%.0f")
-                .defaultValue(&origZone.values.cellMaxBindingEnergy)
-                .disabledValue(&parameters.baseValues.cellMaxBindingEnergy),
-            &zone.values.cellMaxBindingEnergy,
-            &zone.enabledValues.cellMaxBindingEnergy);
+                .defaultValue(&origParameters.cellMaxBindingEnergy.zoneValues[zoneIndex].value)
+                .disabledValue(&parameters.cellMaxBindingEnergy.baseValue),
+            &parameters.cellMaxBindingEnergy.zoneValues[zoneIndex].value,
+            &parameters.cellMaxBindingEnergy.zoneValues[zoneIndex].enabled);
     }
     AlienImGui::EndTreeNode();
 

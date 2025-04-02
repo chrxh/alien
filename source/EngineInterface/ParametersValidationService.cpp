@@ -33,7 +33,6 @@ void ParametersValidationService::validateAndCorrect(SimulationParameters& param
         parameters.defenderAntiInjectorStrength[i] = std::max(0.0f, parameters.defenderAntiInjectorStrength[i]);
     }
     parameters.externalEnergy = std::max(0.0f, parameters.externalEnergy);
-    parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
     parameters.timestepSize.value = std::max(0.01f, parameters.timestepSize.value);
     parameters.maxCellAgeBalancerInterval = std::max(1000, std::min(1000000, parameters.maxCellAgeBalancerInterval));
     parameters.cellGlowRadius = std::max(1.0f, std::min(8.0f, parameters.cellGlowRadius));
@@ -77,5 +76,4 @@ void ParametersValidationService::validateAndCorrect(SimulationParametersZone& z
             std::max(0.0f, std::min(1.0f, zone.values.radiationAbsorptionLowGenomeComplexityPenalty[i]));
         zone.values.radiationAbsorptionLowVelocityPenalty[i] = std::max(0.0f, std::min(1.0f, zone.values.radiationAbsorptionLowVelocityPenalty[i]));
     }
-    zone.values.cellMaxBindingEnergy = std::max(10.0f, zone.values.cellMaxBindingEnergy);
 }

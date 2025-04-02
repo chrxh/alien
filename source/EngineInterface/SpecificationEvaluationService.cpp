@@ -148,13 +148,13 @@ float* SpecificationEvaluationService::getFloatRef(FloatMemberSpec const& member
     // Color vector
     else if (std::holds_alternative<ColorVectorFloatMemberNew>(memberSpec)) {
         return (parameters.**std::get<ColorVectorFloatMemberNew>(memberSpec)).value;
-    } else if (std::holds_alternative<ColorVectorFloatZoneValuesMemberNew>(memberSpec)) {
+    } else if (std::holds_alternative<ColorVectorFloatBaseZoneMemberNew>(memberSpec)) {
         switch (LocationHelper::getLocationType(locationIndex, parameters)) {
         case LocationType::Base:
-            return (parameters.**std::get<ColorVectorFloatZoneValuesMemberNew>(memberSpec)).baseValue;
+            return (parameters.**std::get<ColorVectorFloatBaseZoneMemberNew>(memberSpec)).baseValue;
         case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return (parameters.**std::get<ColorVectorFloatZoneValuesMemberNew>(memberSpec)).zoneValues[index].value;
+            return (parameters.**std::get<ColorVectorFloatBaseZoneMemberNew>(memberSpec)).zoneValues[index].value;
         }
         }
     }
@@ -206,13 +206,13 @@ FloatColorRGB* SpecificationEvaluationService::getFloatColorRGBRef(ColorPickerMe
     }
 
     // NEW
-    if (std::holds_alternative<FloatColorRGBZoneMemberNew>(memberSpec)) {
+    if (std::holds_alternative<FloatColorRGBBaseZoneMemberNew>(memberSpec)) {
         switch (LocationHelper::getLocationType(locationIndex, parameters)) {
         case LocationType::Base:
-            return &(parameters.**std::get<FloatColorRGBZoneMemberNew>(memberSpec)).baseValue;
+            return &(parameters.**std::get<FloatColorRGBBaseZoneMemberNew>(memberSpec)).baseValue;
         case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return &(parameters.**std::get<FloatColorRGBZoneMemberNew>(memberSpec)).zoneValues[index].value;
+            return &(parameters.**std::get<FloatColorRGBBaseZoneMemberNew>(memberSpec)).zoneValues[index].value;
         }
         }
     }
@@ -234,13 +234,13 @@ SpecificationEvaluationService::getColorTransitionRulesRef(ColorTransitionRulesM
     }
 
     // NEW
-    if (std::holds_alternative<ColorTransitionRulesZoneMemberNew>(memberSpec)) {
+    if (std::holds_alternative<ColorTransitionRulesBaseZoneMemberNew>(memberSpec)) {
         switch (LocationHelper::getLocationType(locationIndex, parameters)) {
         case LocationType::Base:
-            return &(parameters.**std::get<ColorTransitionRulesZoneMemberNew>(memberSpec)).baseValue;
+            return &(parameters.**std::get<ColorTransitionRulesBaseZoneMemberNew>(memberSpec)).baseValue;
         case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return &(parameters.**std::get<ColorTransitionRulesZoneMemberNew>(memberSpec)).zoneValues[index].value;
+            return &(parameters.**std::get<ColorTransitionRulesBaseZoneMemberNew>(memberSpec)).zoneValues[index].value;
         }
         }
     }

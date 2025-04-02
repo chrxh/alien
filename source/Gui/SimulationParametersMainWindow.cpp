@@ -435,6 +435,8 @@ void SimulationParametersMainWindow::onAddZone()
     zone.values = parameters.baseValues;
     parameters.backgroundColor.zoneValues[index].enabled = true;
     parameters.backgroundColor.zoneValues[index].value = _zoneColorPalette.getColor((2 + parameters.numZones.value) * 8);
+    origParameters.backgroundColor.zoneValues[index].enabled = true;
+    origParameters.backgroundColor.zoneValues[index].value = _zoneColorPalette.getColor((2 + parameters.numZones.value) * 8);
 
     setDefaultShapeDataForZone(zone);
 
