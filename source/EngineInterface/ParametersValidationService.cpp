@@ -34,7 +34,7 @@ void ParametersValidationService::validateAndCorrect(SimulationParameters& param
     }
     parameters.externalEnergy = std::max(0.0f, parameters.externalEnergy);
     parameters.baseValues.cellMaxBindingEnergy = std::max(10.0f, parameters.baseValues.cellMaxBindingEnergy);
-    parameters.timestepSize = std::max(0.0f, parameters.timestepSize);
+    parameters.timestepSize.value = std::max(0.01f, parameters.timestepSize.value);
     parameters.maxCellAgeBalancerInterval = std::max(1000, std::min(1000000, parameters.maxCellAgeBalancerInterval));
     parameters.cellGlowRadius = std::max(1.0f, std::min(8.0f, parameters.cellGlowRadius));
 
@@ -45,7 +45,7 @@ void ParametersValidationService::validateAndCorrect(SimulationParameters& param
     parameters.cellCopyMutationNeuronDataDamping = std::max(1.0f, std::min(2.0f, parameters.cellCopyMutationNeuronDataDamping));
     parameters.cellCopyMutationNeuronDataOffset = std::max(0.0f, std::min(1.0f, parameters.cellCopyMutationNeuronDataOffset));
 
-    for (int i = 0; i < parameters.numZones; ++i) {
+    for (int i = 0; i < parameters.numZones.value; ++i) {
         validateAndCorrect(parameters.zone[i], parameters);
     }
 }

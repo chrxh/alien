@@ -57,6 +57,10 @@ void SpecificationService::createSpec()
         "selected in the next parameter.\n\n" ICON_FA_CHEVRON_RIGHT " Every cell function: The cells are colored according to their cell function.";
 
     _parametersSpec = ParametersSpec().groups({
+        ParameterGroupSpec().name("Sizes").parameters({
+            ParameterSpec().name("Number of zones").reference(IntSpec().member(&SimulationParameters::numZones)).visible(false),
+            ParameterSpec().name("Number of radiation sources").reference(IntSpec().member(&SimulationParameters::numRadiationSources)).visible(false),
+        }),
         ParameterGroupSpec().name("General").parameters({
             ParameterSpec()
                 .name("Project name")
@@ -65,7 +69,7 @@ void SpecificationService::createSpec()
         ParameterGroupSpec()
             .name("Visualization")
             .parameters({
-                ParameterSpec().name("Background color").reference(ColorPickerSpec().member(&SimulationParametersZoneValues::backgroundColor)),
+                ParameterSpec().name("Background color").reference(ColorPickerSpec().member(&SimulationParameters::backgroundColor)),
                 ParameterSpec()
                     .name("Primary cell coloring")
                     .reference(AlternativeSpec()

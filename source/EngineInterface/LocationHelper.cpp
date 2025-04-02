@@ -7,12 +7,12 @@ LocationType LocationHelper::getLocationType(int locationIndex, SimulationParame
     if (locationIndex == 0) {
         return LocationType::Base;
     } else {
-        for (int i = 0; i < parameters.numZones; ++i) {
+        for (int i = 0; i < parameters.numZones.value; ++i) {
             if (parameters.zone[i].locationIndex == locationIndex) {
                 return LocationType::Zone;
             }
         }
-        for (int i = 0; i < parameters.numRadiationSources; ++i) {
+        for (int i = 0; i < parameters.numRadiationSources.value; ++i) {
             if (parameters.radiationSource[i].locationIndex == locationIndex) {
                 return LocationType::Source;
             }
@@ -28,12 +28,12 @@ std::variant<SimulationParameters*, SimulationParametersZone*, RadiationSource*>
     if (locationIndex == 0) {
         return &parameters;
     }
-    for (int i = 0; i < parameters.numZones; ++i) {
+    for (int i = 0; i < parameters.numZones.value; ++i) {
         if (parameters.zone[i].locationIndex == locationIndex) {
             return &parameters.zone[i];
         }
     }
-    for (int i = 0; i < parameters.numRadiationSources; ++i) {
+    for (int i = 0; i < parameters.numRadiationSources.value; ++i) {
         if (parameters.radiationSource[i].locationIndex == locationIndex) {
             return &parameters.radiationSource[i];
         }
@@ -43,12 +43,12 @@ std::variant<SimulationParameters*, SimulationParametersZone*, RadiationSource*>
 
 int LocationHelper::findLocationArrayIndex(SimulationParameters const& parameters, int locationIndex)
 {
-    for (int i = 0; i < parameters.numZones; ++i) {
+    for (int i = 0; i < parameters.numZones.value; ++i) {
         if (parameters.zone[i].locationIndex == locationIndex) {
             return i;
         }
     }
-    for (int i = 0; i < parameters.numRadiationSources; ++i) {
+    for (int i = 0; i < parameters.numRadiationSources.value; ++i) {
         if (parameters.radiationSource[i].locationIndex == locationIndex) {
             return i;
         }
@@ -72,7 +72,7 @@ std::map<int, int> LocationHelper::onDecreaseLocationIndex(SimulationParameters&
     }
 
     std::map<int, int> result;
-    for (int i = 0; i < parameters.numZones + parameters.numRadiationSources + 1; ++i) {
+    for (int i = 0; i < parameters.numZones.value + parameters.numRadiationSources.value + 1; ++i) {
         if (i == locationIndex) {
             result.emplace(i, i - 1);
         } else if (i == locationIndex - 1) {
@@ -100,7 +100,7 @@ std::map<int, int> LocationHelper::onIncreaseLocationIndex(SimulationParameters&
     }
 
     std::map<int, int> result;
-    for (int i = 0; i < parameters.numZones + parameters.numRadiationSources + 1; ++i) {
+    for (int i = 0; i < parameters.numZones.value + parameters.numRadiationSources.value + 1; ++i) {
         if (i == locationIndex) {
             result.emplace(i, i + 1);
         } else if (i == locationIndex + 1) {
@@ -116,7 +116,7 @@ std::map<int, int> LocationHelper::adaptLocationIndex(SimulationParameters& para
 {
     std::map<int, int> result;
     result.emplace(0, 0);
-    for (int i = 0; i < parameters.numZones; ++i) {
+    for (int i = 0; i < parameters.numZones.value; ++i) {
         auto& zone = parameters.zone[i];
         if (zone.locationIndex >= fromLocationIndex) {
             result.emplace(zone.locationIndex, zone.locationIndex + offset);
@@ -125,7 +125,7 @@ std::map<int, int> LocationHelper::adaptLocationIndex(SimulationParameters& para
             result.emplace(zone.locationIndex, zone.locationIndex);
         }
     }
-    for (int i = 0; i < parameters.numRadiationSources; ++i) {
+    for (int i = 0; i < parameters.numRadiationSources.value; ++i) {
         auto& source = parameters.radiationSource[i];
         if (source.locationIndex >= fromLocationIndex) {
             result.emplace(source.locationIndex, source.locationIndex + offset);
@@ -145,7 +145,7 @@ std::string LocationHelper::generateZoneName(SimulationParameters& parameters)
     do {
         alreadyUsed = false;
         result = "Zone " + std::to_string(++counter);
-        for (int i = 0; i < parameters.numZones; ++i) {
+        for (int i = 0; i < parameters.numZones.value; ++i) {
             auto name = std::string(parameters.zone[i].name);
             if (result == name) {
                 alreadyUsed = true;
@@ -165,7 +165,7 @@ std::string LocationHelper::generateSourceName(SimulationParameters& parameters)
     do {
         alreadyUsed = false;
         result = "Radiation " + std::to_string(++counter);
-        for (int i = 0; i < parameters.numRadiationSources; ++i) {
+        for (int i = 0; i < parameters.numRadiationSources.value; ++i) {
             auto name = std::string(parameters.radiationSource[i].name);
             if (result == name) {
                 alreadyUsed = true;

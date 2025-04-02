@@ -13,7 +13,7 @@ public:
     static SimulationParameters getParameters()
     {
         SimulationParameters result;
-        result.innerFriction = 0;
+        result.innerFriction.value = 0;
         result.friction.baseValue = 1;
         for (int i = 0; i < MAX_COLORS; ++i) {
             result.baseValues.radiationType1_strength[i] = 0;

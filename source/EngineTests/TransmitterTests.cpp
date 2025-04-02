@@ -14,7 +14,7 @@ public:
     {
         SimulationParameters result;
         result.transmitterEnergyDistributionSameCreature = true;
-        result.innerFriction = 0;
+        result.innerFriction.value = 0;
         result.friction.baseValue = 0;
         for (int i = 0; i < MAX_COLORS; ++i) {
             result.baseValues.radiationType1_strength[i] = 0;

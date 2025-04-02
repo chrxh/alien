@@ -228,14 +228,14 @@ void TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
     auto parameters = _simulationFacade->getSimulationParameters();
     auto const& origParameters = snapshot.parameters;
 
-    if (origParameters.numRadiationSources == parameters.numRadiationSources) {
-        for (int i = 0; i < parameters.numRadiationSources; ++i) {
+    if (origParameters.numRadiationSources.value == parameters.numRadiationSources.value) {
+        for (int i = 0; i < parameters.numZones.value; ++i) {
             restorePosition(parameters.radiationSource[i], origParameters.radiationSource[i], snapshot.timestep);
         }
     }
 
-    if (origParameters.numZones == parameters.numZones) {
-        for (int i = 0; i < parameters.numZones; ++i) {
+    if (origParameters.numZones.value == parameters.numZones.value) {
+        for (int i = 0; i < parameters.numZones.value; ++i) {
             restorePosition(parameters.zone[i], origParameters.zone[i], snapshot.timestep);
         }
     }
