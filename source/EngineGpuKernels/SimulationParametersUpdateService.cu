@@ -17,7 +17,7 @@ SimulationParameters SimulationParametersUpdateService::integrateChanges(
     auto result = changedParameters;
 
     if (updateConfig == SimulationParametersUpdateConfig::AllExceptChangingPositions) {
-        auto numSpots = std::min(currentParameters.numZones, changedParameters.numZones);
+        auto numSpots = std::min(currentParameters.numZones.value, changedParameters.numZones.value);
         for (int i = 0; i < numSpots; ++i) {
             if (currentParameters.zone[i].velX != 0) {
                 result.zone[i].posX = currentParameters.zone[i].posX;
@@ -27,7 +27,7 @@ SimulationParameters SimulationParametersUpdateService::integrateChanges(
             }
         }
 
-        auto numRadiationSources = std::min(currentParameters.numRadiationSources, changedParameters.numRadiationSources);
+        auto numRadiationSources = std::min(currentParameters.numZones.value, changedParameters.numZones.value);
         for (int i = 0; i < numRadiationSources; ++i) {
             if (currentParameters.radiationSource[i].velX != 0) {
                 result.radiationSource[i].posX = currentParameters.radiationSource[i].posX;
@@ -51,28 +51,28 @@ bool SimulationParametersUpdateService::updateSimulationParametersAfterTimestep(
     auto const& worldSizeX = settings.worldSizeX;
     auto const& worldSizeY = settings.worldSizeY;
     SpaceCalculator space({worldSizeX, worldSizeY});
-    for (int i = 0; i < settings.simulationParameters.numRadiationSources; ++i) {
+    for (int i = 0; i < settings.simulationParameters.numZones.value; ++i) {
         auto& source = settings.simulationParameters.radiationSource[i];
         if (abs(source.velX) > NEAR_ZERO) {
-            source.posX += source.velX * settings.simulationParameters.timestepSize;
+            source.posX += source.velX * settings.simulationParameters.timestepSize.value;
             result = true;
         }
         if (abs(source.velY) > NEAR_ZERO) {
-            source.posY += source.velY * settings.simulationParameters.timestepSize;
+            source.posY += source.velY * settings.simulationParameters.timestepSize.value;
             result = true;
         }
         auto correctedPosition = space.getCorrectedPosition({source.posX, source.posY});
         source.posX = correctedPosition.x;
         source.posY = correctedPosition.y;
     }
-    for (int i = 0; i < settings.simulationParameters.numZones; ++i) {
+    for (int i = 0; i < settings.simulationParameters.numZones.value; ++i) {
         auto& spot = settings.simulationParameters.zone[i];
         if (abs(spot.velX) > NEAR_ZERO) {
-            spot.posX += spot.velX * settings.simulationParameters.timestepSize;
+            spot.posX += spot.velX * settings.simulationParameters.timestepSize.value;
             result = true;
         }
         if (abs(spot.velY) > NEAR_ZERO) {
-            spot.posY += spot.velY * settings.simulationParameters.timestepSize;
+            spot.posY += spot.velY * settings.simulationParameters.timestepSize.value;
             result = true;
         }
         auto correctedPosition = space.getCorrectedPosition({spot.posX, spot.posY});

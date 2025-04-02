@@ -15,21 +15,15 @@
  */
 struct SimulationParameters
 {
-    // Expert settings toggles
-    ExpertToggles expertToggles;
-
-    // Particle sources
-    int numRadiationSources = 0;
-    RadiationSource radiationSource[MAX_RADIATION_SOURCES];
-
-    // Spots
-    int numZones = 0;
-    SimulationParametersZone zone[MAX_ZONES];
+    // Sizes
+    BaseParameter<int> numZones = {0};
+    BaseParameter<int> numRadiationSources = {0};
 
     // General
     BaseParameter<Char64> projectName = {"<unnamed>"};
 
     // Visualization
+    BaseZoneParameter<FloatColorRGB> backgroundColor = {.baseValue = {0.0f, 0.0f, 0.106f}};
     BaseParameter<CellColoring> primaryCellColoring = {CellColoring_CellColor};
     BaseParameter<CellType> highlightedCellType = {CellType_Constructor};
     BaseParameter<float> cellRadius = {0.25f};
@@ -42,19 +36,19 @@ struct SimulationParameters
     BaseParameter<bool> showRadiationSources = {true};
 
     // Numerics
-    float timestepSize = 1.0f;
+    BaseParameter<float> timestepSize = {1.0f};
 
     // Physics: Motion
-    BaseZoneParameter<float> friction = {0.01f};
+    BaseZoneParameter<float> friction = {.baseValue = 0.01f};
 
-    MotionType motionType = MotionType_Fluid;
-    float smoothingLength = 0.8f;   // MotionType_Fluid
-    float viscosityStrength = 0.1f;  // MotionType_Fluid
-    float pressureStrength = 0.1f;   // MotionType_Fluid
-    float maxCollisionDistance = 1.3f;  // MotionType_Collision
-    float repulsionStrength = 0.08f;    // MotionType_Collision
+    BaseParameter<MotionType> motionType = {MotionType_Fluid};
+    BaseParameter<float> smoothingLength = {0.8f};       // MotionType_Fluid
+    BaseParameter<float> viscosityStrength = {0.1f};     // MotionType_Fluid
+    BaseParameter<float> pressureStrength = {0.1f};      // MotionType_Fluid
+    BaseParameter<float> maxCollisionDistance = {1.3f};  // MotionType_Collision
+    BaseParameter<float> repulsionStrength = {0.08f};  // MotionType_Collision
 
-    float innerFriction = 0.3f;
+    BaseParameter<float> innerFriction = {0.3f};
 
     // Physics: Thresholds
     float maxVelocity = 2.0f;
@@ -216,6 +210,18 @@ struct SimulationParameters
 
     // All other parameters
     SimulationParametersZoneValues baseValues;
+
+
+    // OLD
+    // Expert settings toggles
+    ExpertToggles expertToggles;
+
+    // Particle sources
+    RadiationSource radiationSource[MAX_RADIATION_SOURCES];
+
+    // Spots
+    SimulationParametersZone zone[MAX_ZONES];
+
 
     bool operator==(SimulationParameters const&) const = default;
 };

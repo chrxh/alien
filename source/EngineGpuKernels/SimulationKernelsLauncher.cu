@@ -17,7 +17,7 @@ namespace
 {
     int calcOptimalThreadsForFluidKernel(SimulationParameters const& parameters)
     {
-        auto scanRectLength = ceilf(parameters.smoothingLength * 2) * 2 + 1;
+        auto scanRectLength = ceilf(parameters.smoothingLength.value * 2) * 2 + 1;
         return scanRectLength * scanRectLength;
     }
 }
@@ -34,13 +34,13 @@ void _SimulationKernelsLauncher::calcTimestep(SettingsForSimulation const& setti
 
     KERNEL_CALL(cudaNextTimestep_physics_init, data);
     KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, 64, data);
-    if (settings.simulationParameters.motionType == MotionType_Fluid) {
+    if (settings.simulationParameters.motionType.value == MotionType_Fluid) {
         auto threadBlockSize = calcOptimalThreadsForFluidKernel(settings.simulationParameters);
         KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, threadBlockSize, data);
     } else {
         KERNEL_CALL(cudaNextTimestep_physics_calcCollisionForces, data);
     }
-    if (settings.simulationParameters.numZones > 0) {
+    if (settings.simulationParameters.numZones.value > 0) {
         KERNEL_CALL(cudaApplyFlowFieldSettings, data);
     }
     KERNEL_CALL_MOD(cudaNextTimestep_physics_applyForces, 16, data);
@@ -106,7 +106,7 @@ void _SimulationKernelsLauncher::prepareForSimulationParametersChanges(SettingsF
 
 bool _SimulationKernelsLauncher::isRigidityUpdateEnabled(SettingsForSimulation const& settings) const
 {
-    for (int i = 0; i < settings.simulationParameters.numZones; ++i) {
+    for (int i = 0; i < settings.simulationParameters.numZones.value; ++i) {
         if (settings.simulationParameters.zone[i].values.rigidity != 0) {
             return true;
         }

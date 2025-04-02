@@ -232,6 +232,7 @@ struct ParameterSpec
     MEMBER(ParameterSpec, std::string, name, std::string());
     MEMBER(ParameterSpec, ReferenceSpec, reference, FloatSpec());
     MEMBER(ParameterSpec, EnabledSpec, enabled, EnabledSpec());
+    MEMBER(ParameterSpec, bool, visible, true);
     MEMBER(ParameterSpec, std::optional<std::string>, tooltip, std::nullopt);
 };
 

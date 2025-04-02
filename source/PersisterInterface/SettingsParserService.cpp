@@ -17,17 +17,21 @@ namespace
         ParameterParser::encodeDecode(
             tree, parameters.projectName.value, defaultParameters.projectName.value, "simulation parameters.project name", parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.baseValues.backgroundColor.r, defaultParameters.baseValues.backgroundColor.r, "simulation parameters.background color.r", parserTask);
+            tree,
+            parameters.backgroundColor.baseValue.r,
+            defaultParameters.backgroundColor.baseValue.r,
+            "simulation parameters.background color.r",
+            parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.backgroundColor.g,
-            defaultParameters.baseValues.backgroundColor.g,
+            parameters.backgroundColor.baseValue.g,
+            defaultParameters.backgroundColor.baseValue.g,
             "simulation parameters.background color.g",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.backgroundColor.b,
-            defaultParameters.baseValues.backgroundColor.b,
+            parameters.backgroundColor.baseValue.b,
+            defaultParameters.backgroundColor.baseValue.b,
             "simulation parameters.background color.b",
             parserTask);
         ParameterParser::encodeDecode(
@@ -70,39 +74,40 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(tree, parameters.cellRadius.value, defaultParameters.cellRadius.value, "simulation parameters.cek", parserTask);
 
-        ParameterParser::encodeDecode(tree, parameters.timestepSize, defaultParameters.timestepSize, "simulation parameters.time step size", parserTask);
+        ParameterParser::encodeDecode(
+            tree, parameters.timestepSize.value, defaultParameters.timestepSize.value, "simulation parameters.time step size", parserTask);
 
-        ParameterParser::encodeDecode(tree, parameters.motionType, defaultParameters.motionType, "simulation parameters.motion.type", parserTask);
-        if (parameters.motionType == MotionType_Fluid) {
+        ParameterParser::encodeDecode(tree, parameters.motionType.value, defaultParameters.motionType.value, "simulation parameters.motion.type", parserTask);
+        if (parameters.motionType.value == MotionType_Fluid) {
             ParameterParser::encodeDecode(
                 tree,
-                parameters.smoothingLength,
-                defaultParameters.smoothingLength,
+                parameters.smoothingLength.value,
+                defaultParameters.smoothingLength.value,
                 "simulation parameters.fluid.smoothing length",
                 parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.pressureStrength,
-                defaultParameters.pressureStrength,
+                parameters.pressureStrength.value,
+                defaultParameters.pressureStrength.value,
                 "simulation parameters.fluid.pressure strength",
                 parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.viscosityStrength,
-                defaultParameters.viscosityStrength,
+                parameters.viscosityStrength.value,
+                defaultParameters.viscosityStrength.value,
                 "simulation parameters.fluid.viscosity strength",
                 parserTask);
         } else {
             ParameterParser::encodeDecode(
                 tree,
-                parameters.maxCollisionDistance,
-                defaultParameters.maxCollisionDistance,
+                parameters.maxCollisionDistance.value,
+                defaultParameters.maxCollisionDistance.value,
                 "simulation parameters.motion.collision.max distance",
                 parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.repulsionStrength,
-                defaultParameters.repulsionStrength,
+                parameters.repulsionStrength.value,
+                defaultParameters.repulsionStrength.value,
                 "simulation parameters.motion.collision.repulsion strength",
                 parserTask);
         }
@@ -623,14 +628,18 @@ namespace
 
         //particle sources
         ParameterParser::encodeDecode(
-            tree, parameters.numRadiationSources, defaultParameters.numRadiationSources, "simulation parameters.particle sources.num sources", parserTask);
+            tree,
+            parameters.numRadiationSources.value,
+            defaultParameters.numRadiationSources.value,
+            "simulation parameters.particle sources.num sources",
+            parserTask);
         ParameterParser::encodeDecode(
             tree,
             parameters.baseStrengthRatioPinned,
             defaultParameters.baseStrengthRatioPinned,
             "simulation parameters.particle sources.base strength pinned",
             parserTask);
-        for (int index = 0; index < parameters.numRadiationSources; ++index) {
+        for (int index = 0; index < parameters.numRadiationSources.value; ++index) {
             std::string base = "simulation parameters.particle sources." + std::to_string(index) + ".";
             auto& source = parameters.radiationSource[index];
             auto& defaultSource = defaultParameters.radiationSource[index];
@@ -669,17 +678,14 @@ namespace
             }
         }
 
-        //spots
-        ParameterParser::encodeDecode(tree, parameters.numZones, defaultParameters.numZones, "simulation parameters.spots.num spots", parserTask);
-        for (int index = 0; index < parameters.numZones; ++index) {
+        // Zones
+        ParameterParser::encodeDecode(tree, parameters.numZones.value, defaultParameters.numZones.value, "simulation parameters.spots.num spots", parserTask);
+        for (int index = 0; index < parameters.numZones.value; ++index) {
             std::string base = "simulation parameters.spots." + std::to_string(index) + ".";
             auto& spot = parameters.zone[index];
             auto& defaultSpot = defaultParameters.zone[index];
             ParameterParser::encodeDecode(tree, spot.name, defaultSpot.name, base + "name", parserTask);
             ParameterParser::encodeDecode(tree, spot.locationIndex, defaultSpot.locationIndex, base + "location index", parserTask);
-            ParameterParser::encodeDecode(tree, spot.values.backgroundColor.r, defaultSpot.values.backgroundColor.r, base + "color.r", parserTask);
-            ParameterParser::encodeDecode(tree, spot.values.backgroundColor.g, defaultSpot.values.backgroundColor.g, base + "color.g", parserTask);
-            ParameterParser::encodeDecode(tree, spot.values.backgroundColor.b, defaultSpot.values.backgroundColor.b, base + "color.b", parserTask);
             ParameterParser::encodeDecode(tree, spot.posX, defaultSpot.posX, base + "pos.x", parserTask);
             ParameterParser::encodeDecode(tree, spot.posY, defaultSpot.posY, base + "pos.y", parserTask);
             ParameterParser::encodeDecode(tree, spot.velX, defaultSpot.velX, base + "vel.x", parserTask);
@@ -731,8 +737,30 @@ namespace
 
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
+                parameters.backgroundColor.zoneValues[index].value.r,
+                parameters.backgroundColor.zoneValues[index].enabled,
+                parameters.backgroundColor.baseValue.r,
+                base + "color.r",
+                parserTask);
+            ParameterParser::encodeDecodeWithEnabled(
+                tree,
+                parameters.backgroundColor.zoneValues[index].value.g,
+                parameters.backgroundColor.zoneValues[index].enabled,
+                parameters.backgroundColor.baseValue.g,
+                base + "color.g",
+                parserTask);
+            ParameterParser::encodeDecodeWithEnabled(
+                tree,
+                parameters.backgroundColor.zoneValues[index].value.b,
+                parameters.backgroundColor.zoneValues[index].enabled,
+                parameters.backgroundColor.baseValue.b,
+                base + "color.b",
+                parserTask);
+
+            ParameterParser::encodeDecodeWithEnabled(
+                tree,
                 parameters.friction.zoneValues[index].value,
-                spot.enabledValues.friction,
+                parameters.friction.zoneValues[index].enabled,
                 defaultParameters.friction.baseValue,
                 base + "friction",
                 parserTask);

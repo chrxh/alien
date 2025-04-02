@@ -135,7 +135,8 @@ void SimulationParametersMainWindow::processToolbar()
                                                "parameters and those from the clipboard.")
                                       .disabled(!_copiedParameters))) {
         auto parameters = _simulationFacade->getSimulationParameters();
-        if (_copiedParameters->numZones == parameters.numZones && _copiedParameters->numRadiationSources == parameters.numRadiationSources) {
+        if (_copiedParameters->numZones.value == parameters.numZones.value
+            && _copiedParameters->numRadiationSources.value == parameters.numRadiationSources.value) {
             _simulationFacade->setOriginalSimulationParameters(*_copiedParameters);
             printOverlayMessage("Reference simulation parameters replaced");
         } else {
@@ -421,6 +422,7 @@ void SimulationParametersMainWindow::onAddZone()
     LocationHelper::adaptLocationIndex(origParameters, _selectedLocationIndex, 1);
 
     auto worldSize = _simulationFacade->getWorldSize();
+    int index = parameters.numZones.value;
 
     SimulationParametersZone zone;
     StringHelper::copy(zone.name, sizeof(zone.name), LocationHelper::generateZoneName(parameters));
@@ -431,15 +433,15 @@ void SimulationParametersMainWindow::onAddZone()
     zone.shape.type = ZoneShapeType_Circular;
     zone.fadeoutRadius = maxRadius / 3;
     zone.values = parameters.baseValues;
-    zone.values.backgroundColor = _zoneColorPalette.getColor((2 + parameters.numZones) * 8);
+    parameters.backgroundColor.zoneValues[index].enabled = true;
+    parameters.backgroundColor.zoneValues[index].value = _zoneColorPalette.getColor((2 + parameters.numZones.value) * 8);
 
     setDefaultShapeDataForZone(zone);
 
-    int index = parameters.numZones;
     parameters.zone[index] = zone;
     origParameters.zone[index] = zone;
-    ++parameters.numZones;
-    ++origParameters.numZones;
+    ++parameters.numZones.value;
+    ++origParameters.numZones.value;
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 }
@@ -470,11 +472,11 @@ void SimulationParametersMainWindow::onAddSource()
     source.posX = toFloat(worldSize.x / 2);
     source.posY = toFloat(worldSize.y / 2);
 
-    auto index = parameters.numRadiationSources;
+    auto index = parameters.numRadiationSources.value;
     parameters.radiationSource[index] = source;
     origParameters.radiationSource[index] = source;
-    ++parameters.numRadiationSources;
-    ++origParameters.numRadiationSources;
+    ++parameters.numRadiationSources.value;
+    ++origParameters.numRadiationSources.value;
 
     editService.applyRadiationStrengths(parameters, newStrengths);
     editService.applyRadiationStrengths(origParameters, newStrengths);
@@ -511,11 +513,11 @@ void SimulationParametersMainWindow::onCloneLocation()
         StringHelper::copy(clone.name, sizeof(clone.name), LocationHelper::generateZoneName(parameters));
         clone.locationIndex = _selectedLocationIndex;
 
-        int index = parameters.numZones;
+        int index = parameters.numZones.value;
         parameters.zone[index] = clone;
         origParameters.zone[index] = clone;
-        ++parameters.numZones;
-        ++origParameters.numZones;
+        ++parameters.numZones.value;
+        ++origParameters.numZones.value;
     } else {
         auto source = std::get<RadiationSource*>(location);
         auto clone = *source;
@@ -526,11 +528,11 @@ void SimulationParametersMainWindow::onCloneLocation()
 
         StringHelper::copy(clone.name, sizeof(clone.name), LocationHelper::generateSourceName(parameters));
         clone.locationIndex = _selectedLocationIndex;
-        auto index = parameters.numRadiationSources;
+        auto index = parameters.numRadiationSources.value;
         parameters.radiationSource[index] = clone;
         origParameters.radiationSource[index] = clone;
-        ++parameters.numRadiationSources;
-        ++origParameters.numRadiationSources;
+        ++parameters.numRadiationSources.value;
+        ++origParameters.numRadiationSources.value;
 
         editService.applyRadiationStrengths(parameters, newStrengths);
         editService.applyRadiationStrengths(origParameters, newStrengths);
@@ -550,35 +552,35 @@ void SimulationParametersMainWindow::onDeleteLocation()
 
     if (std::holds_alternative<SimulationParametersZone*>(location)) {
         std::optional<int> zoneIndex;
-        for (int i = 0; i < parameters.numZones; ++i) {
+        for (int i = 0; i < parameters.numZones.value; ++i) {
             if (parameters.zone[i].locationIndex == _selectedLocationIndex) {
                 zoneIndex = i;
                 break;
             }
         }
         if (zoneIndex.has_value()) {
-            for (int i = zoneIndex.value(); i < parameters.numZones - 1; ++i) {
+            for (int i = zoneIndex.value(); i < parameters.numZones.value - 1; ++i) {
                 parameters.zone[i] = parameters.zone[i + 1];
                 origParameters.zone[i] = origParameters.zone[i + 1];
             }
-            --parameters.numZones;
-            --origParameters.numZones;
+            --parameters.numZones.value;
+            --origParameters.numZones.value;
         }
     } else {
         std::optional<int> sourceIndex;
-        for (int i = 0; i < parameters.numRadiationSources; ++i) {
+        for (int i = 0; i < parameters.numRadiationSources.value; ++i) {
             if (parameters.radiationSource[i].locationIndex == _selectedLocationIndex) {
                 sourceIndex = i;
                 break;
             }
         }
         if (sourceIndex.has_value()) {
-            for (int i = sourceIndex.value(); i < parameters.numRadiationSources - 1; ++i) {
+            for (int i = sourceIndex.value(); i < parameters.numRadiationSources.value - 1; ++i) {
                 parameters.radiationSource[i] = parameters.radiationSource[i + 1];
                 origParameters.radiationSource[i] = origParameters.radiationSource[i + 1];
             }
-            --parameters.numRadiationSources;
-            --origParameters.numRadiationSources;
+            --parameters.numRadiationSources.value;
+            --origParameters.numRadiationSources.value;
         }
     }
 
@@ -650,16 +652,16 @@ void SimulationParametersMainWindow::updateLocations()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
 
-    _locations = std::vector<Location>(1 + parameters.numZones + parameters.numRadiationSources);
+    _locations = std::vector<Location>(1 + parameters.numZones.value + parameters.numRadiationSources.value);
     auto strength = ParametersEditService::get().getRadiationStrengths(parameters);
     auto pinnedString = strength.pinned.contains(0) ? ICON_FA_THUMBTACK " " : " ";
     _locations.at(0) = Location{"Base", LocationType::Base, "-", pinnedString + StringHelper::format(strength.values.front() * 100 + 0.05f, 1) + "%"};
-    for (int i = 0; i < parameters.numZones; ++i) {
+    for (int i = 0; i < parameters.numZones.value; ++i) {
         auto const& zone = parameters.zone[i];
         auto position = "(" + StringHelper::format(zone.posX, 0) + ", " + StringHelper::format(zone.posY, 0) + ")";
         _locations.at(zone.locationIndex) = Location{zone.name, LocationType::Zone, position};
     }
-    for (int i = 0; i < parameters.numRadiationSources; ++i) {
+    for (int i = 0; i < parameters.numRadiationSources.value; ++i) {
         auto const& source = parameters.radiationSource[i];
         auto position = "(" + StringHelper::format(source.posX, 0) + ", " + StringHelper::format(source.posY, 0) + ")";
         auto pinnedString = strength.pinned.contains(i + 1) ? ICON_FA_THUMBTACK " " : " ";
@@ -693,7 +695,7 @@ void SimulationParametersMainWindow::correctLayout(float origMasterHeight, float
 
 bool SimulationParametersMainWindow::checkNumZones(SimulationParameters const& parameters)
 {
-    if (parameters.numZones == MAX_ZONES) {
+    if (parameters.numZones.value == MAX_ZONES) {
         showMessage("Error", "The maximum number of zones has been reached.");
         return false;
     }
@@ -702,7 +704,7 @@ bool SimulationParametersMainWindow::checkNumZones(SimulationParameters const& p
 
 bool SimulationParametersMainWindow::checkNumSources(SimulationParameters const& parameters)
 {
-    if (parameters.numRadiationSources == MAX_RADIATION_SOURCES) {
+    if (parameters.numRadiationSources.value == MAX_RADIATION_SOURCES) {
         showMessage("Error", "The maximum number of radiation sources has been reached.");
         return false;
     }

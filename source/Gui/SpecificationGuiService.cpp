@@ -452,6 +452,9 @@ bool SpecificationGuiService::isVisible(ParameterSpec const& parameterSpec, Loca
     }
 
     // NEW
+    if (!parameterSpec._visible) {
+        return false;
+    }
     if (locationType == LocationType::Base) {
         if (std::holds_alternative<BoolSpec>(parameterSpec._reference)) {
             auto const& boolSpec = std::get<BoolSpec>(parameterSpec._reference);

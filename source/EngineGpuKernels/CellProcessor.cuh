@@ -127,7 +127,7 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
 {
     auto& cells = data.objects.cellPointers;
     auto blockPartition = calcBlockPartition(cells.getNumEntries());
-    auto const& smoothingLength = cudaSimulationParameters.smoothingLength;
+    auto const& smoothingLength = cudaSimulationParameters.smoothingLength.value;
 
     for (int cellIndex = blockPartition.startIndex; cellIndex <= blockPartition.endIndex; ++cellIndex) {
         auto& cell = cells.at(cellIndex);
@@ -278,8 +278,8 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             }
 
             cell->pos += cellPosDelta;
-            cell->shared1 += F_pressure * cudaSimulationParameters.pressureStrength
-                + F_viscosity * cudaSimulationParameters.viscosityStrength;
+            cell->shared1 += F_pressure * cudaSimulationParameters.pressureStrength.value
+                + F_viscosity * cudaSimulationParameters.viscosityStrength.value;
             cell->shared2.x = density;
         }
         __syncthreads();
@@ -294,7 +294,7 @@ __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctO
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         data.cellMap.executeForEach(
-            cell->pos, cudaSimulationParameters.maxCollisionDistance, cell->detached, [&](auto const& otherCell) {
+            cell->pos, cudaSimulationParameters.maxCollisionDistance.value, cell->detached, [&](auto const& otherCell) {
                 if (otherCell == cell) {
                     return;
                 }
@@ -336,8 +336,8 @@ __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctO
                         atomicAdd(&otherCell->shared1.y, -force.y);
                     } else {
                         auto force = Math::normalized(posDelta)
-                            * (cudaSimulationParameters.maxCollisionDistance - Math::length(posDelta))
-                            * cudaSimulationParameters.repulsionStrength * barrierFactor;
+                            * (cudaSimulationParameters.maxCollisionDistance.value - Math::length(posDelta))
+                            * cudaSimulationParameters.repulsionStrength.value * barrierFactor;
                         atomicAdd(&cell->shared1.x, force.x);
                         atomicAdd(&cell->shared1.y, force.y);
                         atomicAdd(&otherCell->shared1.x, -force.x);
@@ -535,11 +535,11 @@ __inline__ __device__ void CellProcessor::verletPositionUpdate(SimulationData& d
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if (cell->barrier) {
-            cell->pos += cell->vel * cudaSimulationParameters.timestepSize;
+            cell->pos += cell->vel * cudaSimulationParameters.timestepSize.value;
             data.cellMap.correctPosition(cell->pos);
         } else {
-            cell->pos += cell->vel * cudaSimulationParameters.timestepSize
-                + cell->shared1 * cudaSimulationParameters.timestepSize * cudaSimulationParameters.timestepSize / 2;
+            cell->pos += cell->vel * cudaSimulationParameters.timestepSize.value
+                + cell->shared1 * cudaSimulationParameters.timestepSize.value * cudaSimulationParameters.timestepSize.value / 2;
             data.cellMap.correctPosition(cell->pos);
             cell->shared2 = cell->shared1;  //forces
             cell->shared1 = {0, 0};
@@ -558,7 +558,7 @@ __inline__ __device__ void CellProcessor::verletVelocityUpdate(SimulationData& d
             continue;
         }
         auto acceleration = (cell->shared1 + cell->shared2) / 2;
-        cell->vel += acceleration * cudaSimulationParameters.timestepSize;
+        cell->vel += acceleration * cudaSimulationParameters.timestepSize.value;
     }
 }
 
@@ -699,7 +699,7 @@ __inline__ __device__ void CellProcessor::applyInnerFriction(SimulationData& dat
     auto const partition =
         calcAllThreadsPartition(cells.getNumEntries());
 
-    auto const innerFriction = cudaSimulationParameters.innerFriction;
+    auto const innerFriction = cudaSimulationParameters.innerFriction.value;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if (cell->barrier) {

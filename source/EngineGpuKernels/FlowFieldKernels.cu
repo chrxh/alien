@@ -58,7 +58,7 @@ __global__ void cudaApplyFlowFieldSettings(SimulationData data)
                 continue;
             }
             int numFlowFields = 0;
-            for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
+            for (int i = 0; i < cudaSimulationParameters.numZones.value; ++i) {
 
                 if (cudaSimulationParameters.zone[i].flow.type != FlowType_None) {
                     accelerations[numFlowFields] = calcAcceleration(data.cellMap, cell->pos, i);
@@ -75,7 +75,7 @@ __global__ void cudaApplyFlowFieldSettings(SimulationData data)
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& particle = particles.at(index);
             int numFlowFields = 0;
-            for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
+            for (int i = 0; i < cudaSimulationParameters.numZones.value; ++i) {
 
                 if (cudaSimulationParameters.zone[i].flow.type != FlowType_None) {
                     accelerations[numFlowFields] = calcAcceleration(data.cellMap, particle->absPos, i);

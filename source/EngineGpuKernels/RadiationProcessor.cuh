@@ -43,7 +43,7 @@ __inline__ __device__ void RadiationProcessor::calcActiveSources(SimulationData&
 {
     if (threadIdx.x == 0 && blockIdx.x == 0) {
         int activeSourceIndex = 0;
-        for (int i = 0; i < cudaSimulationParameters.numRadiationSources; ++i) {
+        for (int i = 0; i < cudaSimulationParameters.numZones.value; ++i) {
             auto sourceActive = !ZoneCalculator::calcParameter(
                 &SimulationParametersZoneValues::radiationDisableSources,
                 &SimulationParametersZoneEnabledValues::radiationDisableSources,
@@ -64,7 +64,7 @@ __inline__ __device__ void RadiationProcessor::movement(SimulationData& data)
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         auto& particle = data.objects.particlePointers.at(particleIndex);
-        particle->absPos = particle->absPos + particle->vel * cudaSimulationParameters.timestepSize;
+        particle->absPos = particle->absPos + particle->vel * cudaSimulationParameters.timestepSize.value;
         data.particleMap.correctPosition(particle->absPos);
     }
 }

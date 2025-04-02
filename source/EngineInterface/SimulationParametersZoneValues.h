@@ -25,7 +25,6 @@ struct ColorTransitionRules
 
 struct SimulationParametersZoneValues
 {
-    FloatColorRGB backgroundColor = {0.0f, 0.0f, 0.106f};
     float rigidity = 0.0f;
     ColorVector<float> radiationAbsorption = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     ColorVector<float> radiationAbsorptionLowVelocityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
