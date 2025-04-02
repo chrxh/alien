@@ -387,8 +387,8 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
     auto constructionSiteDistance = hostCell->getRefDistance(lastCell);
     posDelta = Math::normalized(posDelta) * (constructionSiteDistance - desiredDistance);
 
-    if (Math::length(posDelta) <= cudaSimulationParameters.minCellDistance
-        || constructionSiteDistance - desiredDistance < cudaSimulationParameters.minCellDistance) {
+    if (Math::length(posDelta) <= cudaSimulationParameters.minCellDistance.value
+        || constructionSiteDistance - desiredDistance < cudaSimulationParameters.minCellDistance.value) {
         return nullptr;
     }
 

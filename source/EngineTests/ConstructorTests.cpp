@@ -1226,7 +1226,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSpace)
             .cellType(ConstructorDescription().genomeCurrentNodeIndex(1).genome(genome)),
         CellDescription()
             .id(2)
-            .pos({10.0f - 1.0f - _parameters.minCellDistance/2, 10.0f})
+            .pos({10.0f - 1.0f - _parameters.minCellDistance.value / 2, 10.0f})
             .energy(100)
             .cellType(OscillatorDescription())
             .livingState(LivingState_UnderConstruction),

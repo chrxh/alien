@@ -14,6 +14,7 @@ class ZoneCalculator
 public:
     //NEW
     __device__ __inline__ static float calcParameterNew(BaseZoneParameter<float> const& baseZoneParameter, SimulationData const& data, float2 const& worldPos);
+    __device__ __inline__ static float calcParameterNew(BaseZoneParameter<ColorVector<float>> const& baseZoneParameter, SimulationData const& data, float2 const& worldPos, int color);
 
     template <typename T, typename Parameter>
     __device__ __inline__ static T calcResultingValueNew(
@@ -279,6 +280,20 @@ __device__ __inline__ float ZoneCalculator::calcParameterNew(BaseZoneParameter<f
     }
 
     return calcResultingValueNew(data.cellMap, worldPos, baseZoneParameter.baseValue, zoneValues, baseZoneParameter);
+}
+
+__device__ __inline__ float
+ZoneCalculator::calcParameterNew(BaseZoneParameter<ColorVector<float>> const& baseZoneParameter, SimulationData const& data, float2 const& worldPos, int color)
+{
+    float zoneValues[MAX_ZONES];
+    int numValues = 0;
+    for (int i = 0; i < cudaSimulationParameters.numZones.value; ++i) {
+        if (baseZoneParameter.zoneValues[i].enabled) {
+            zoneValues[numValues++] = baseZoneParameter.zoneValues[i].value[color];
+        }
+    }
+
+    return calcResultingValueNew(data.cellMap, worldPos, baseZoneParameter.baseValue[color], zoneValues, baseZoneParameter);
 }
 
 template <typename T, typename Parameter>

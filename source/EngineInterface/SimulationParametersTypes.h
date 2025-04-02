@@ -3,6 +3,25 @@
 #include "Colors.h"
 
 template <typename T>
+struct ZoneValue
+{
+    T value;
+    bool enabled = false;
+
+    bool operator==(ZoneValue<T> const&) const = default;
+};
+
+template <typename T>
+struct PinnableZoneValue
+{
+    T value;
+    bool enabled = false;
+    bool pinned = false;
+
+    bool operator==(PinnableZoneValue<T> const&) const = default;
+};
+
+template <typename T>
 struct BaseParameter
 {
     T value;
@@ -11,22 +30,13 @@ struct BaseParameter
 };
 
 template <typename T>
-struct BaseWithEnabledParameter
+struct EnableableBaseParameter
 {};
 
 template <typename T>
 struct ZoneParameter
 {};
 
-
-template <typename T>
-struct ZoneValue
-{
-    T value;
-    bool enabled = false;
-
-    bool operator==(ZoneValue<T> const&) const = default;
-};
 
 template <typename T>
 struct BaseZoneParameter
@@ -38,8 +48,13 @@ struct BaseZoneParameter
 };
 
 template <typename T>
-struct BaseZoneWithEnabledParameter
-{};
+struct PinnableBaseZoneParameter
+{
+    bool baseValuePinned = false;
+    PinnableZoneValue<T> zoneValues[MAX_ZONES];
+
+    bool operator==(PinnableBaseZoneParameter<T> const&) const = default;
+};
 
 enum class LocationType
 {

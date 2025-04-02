@@ -182,8 +182,12 @@ void SpecificationService::createSpec()
                     .reference(FloatSpec().member(&SimulationParameters::friction).min(0).max(1.0f).logarithmic(true).format("%.4f"))
                     .tooltip("This specifies the fraction of the velocity that is slowed down per time step."),
                 ParameterSpec()
+                    .name("Inner friction")
+                    .reference(FloatSpec().member(&SimulationParameters::innerFriction).min(0).max(1.0f).logarithmic(true).format("%.4f"))
+                    .visible(false),
+                ParameterSpec()
                     .name("Rigidity")
-                    .reference(FloatSpec().member(&SimulationParametersZoneValues::rigidity).min(0).max(3.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::rigidity).min(0).max(1.0f).format("%.2f"))
                     .tooltip("Controls the rigidity of connected cells. A higher value will cause connected cells to move more uniformly as a rigid body."),
             }),
         ParameterGroupSpec()
@@ -195,7 +199,7 @@ void SpecificationService::createSpec()
                     .tooltip("Maximum velocity that a cell can reach."),
                 ParameterSpec()
                     .name("Maximum force")
-                    .reference(FloatSpec().member(&SimulationParametersZoneValues::cellMaxForce).min(0.0f).max(3.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::maxForce).min(0.0f).max(3.0f))
                     .tooltip("Maximum force that can be applied to a cell without causing it to disintegrate."),
                 ParameterSpec()
                     .name("Minimum distance")
@@ -211,13 +215,13 @@ void SpecificationService::createSpec()
                     .tooltip("Maximum distance up to which a connection of two cells is possible."),
                 ParameterSpec()
                     .name("Fusion velocity")
-                    .reference(FloatSpec().member(&SimulationParametersZoneValues::cellFusionVelocity).min(0.0f).max(2.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::cellFusionVelocity).min(0.0f).max(2.0f))
                     .tooltip("Maximum force that can be applied to a cell without causing it to disintegrate."),
                 ParameterSpec()
                     .name("Maximum energy")
                     .reference(
                         FloatSpec()
-                            .member(&SimulationParametersZoneValues::cellMaxBindingEnergy)
+                            .member(&SimulationParameters::cellMaxBindingEnergy)
                             .min(50.0f)
                             .max(10000000.0f)
                             .logarithmic(true)
@@ -231,7 +235,12 @@ void SpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Relative strength")
-                    .reference(FloatSpec().member(FloatGetterSetter{radiationStrengthGetter, radiationStrengthSetter}).min(0.0f).max(1.0f))
+                    .reference(FloatSpec()
+                                   .member(PinnableBaseZoneValueSpec()
+                                               .member(&SimulationParameters::relativeStrength)
+                                               .getterSetter(FloatGetterSetter{radiationStrengthGetter, radiationStrengthSetter}))
+                                   .min(0.0f)
+                                   .max(1.0f))
                     .tooltip("Cells can emit energy particles over time. A portion of this energy can be released directly near the cell, while the rest is "
                              "utilized by one of the available radiation sources. This parameter determines the fraction of energy assigned to the emitted "
                              "energy particle in the vicinity of the cell. Values between 0 and 1 are permitted."),

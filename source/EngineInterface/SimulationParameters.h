@@ -39,27 +39,29 @@ struct SimulationParameters
     BaseParameter<float> timestepSize = {1.0f};
 
     // Physics: Motion
-    BaseZoneParameter<float> friction = {.baseValue = 0.01f};
-
     BaseParameter<MotionType> motionType = {MotionType_Fluid};
-    BaseParameter<float> smoothingLength = {0.8f};       // MotionType_Fluid
-    BaseParameter<float> viscosityStrength = {0.1f};     // MotionType_Fluid
-    BaseParameter<float> pressureStrength = {0.1f};      // MotionType_Fluid
-    BaseParameter<float> maxCollisionDistance = {1.3f};  // MotionType_Collision
-    BaseParameter<float> repulsionStrength = {0.08f};  // MotionType_Collision
-
+    BaseParameter<float> smoothingLength = {0.8f};       // for MotionType_Fluid
+    BaseParameter<float> viscosityStrength = {0.1f};     // for MotionType_Fluid
+    BaseParameter<float> pressureStrength = {0.1f};      // for MotionType_Fluid
+    BaseParameter<float> maxCollisionDistance = {1.3f};  // for MotionType_Collision
+    BaseParameter<float> repulsionStrength = {0.08f};    // for MotionType_Collision
+    BaseZoneParameter<float> friction = {.baseValue = 0.01f};
     BaseParameter<float> innerFriction = {0.3f};
+    BaseZoneParameter<float> rigidity = {.baseValue = 0.0f};
 
     // Physics: Thresholds
-    float maxVelocity = 2.0f;
-    float minCellDistance = 0.3f;
+    BaseParameter<float> maxVelocity = {2.0f};
+    BaseZoneParameter<ColorVector<float>> maxForce = {.baseValue = {0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f}};
+    BaseParameter<float> minCellDistance = {0.3f};
     static float constexpr maxForceDecayProbability = 0.2f;
 
     // Physics: Binding
-    ColorVector<float> maxBindingDistance = {3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f};
+    BaseParameter<ColorVector<float>> maxBindingDistance = {{3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f}};
+    BaseZoneParameter<float> cellFusionVelocity = {.baseValue = 2.0f};
+    BaseZoneParameter<float> cellMaxBindingEnergy = {.baseValue = Infinity<float>::value};
 
     // Physics: Radiation
-    bool baseStrengthRatioPinned = false;
+    PinnableBaseZoneParameter<float> relativeStrength = {};
     ColorVector<int> radiationType1_minimumAge = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> radiationType2_strength = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> radiationType2_energyThreshold = {500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f};

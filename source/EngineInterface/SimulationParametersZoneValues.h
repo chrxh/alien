@@ -25,18 +25,14 @@ struct ColorTransitionRules
 
 struct SimulationParametersZoneValues
 {
-    float rigidity = 0.0f;
     ColorVector<float> radiationAbsorption = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
     ColorVector<float> radiationAbsorptionLowVelocityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> radiationAbsorptionLowGenomeComplexityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     ColorVector<float> radiationType1_strength = {0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f};
     bool radiationDisableSources = false;
-    ColorVector<float> cellMaxForce = {0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f};
     ColorVector<float> minCellEnergy = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f};
     ColorVector<float> cellDeathProbability = {0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f};
 
-    float cellFusionVelocity = 2.0f;
-    float cellMaxBindingEnergy = Infinity<float>::value;
     ColorVector<float> maxAgeForInactiveCells = {   // Candidate for deletion
         Infinity<float>::value,
         Infinity<float>::value,

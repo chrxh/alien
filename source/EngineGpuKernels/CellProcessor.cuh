@@ -150,10 +150,8 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             F_viscosity = {0, 0};
             cellPosDelta = {0, 0};
             density = 0;
-            cellMaxBindingEnergy = ZoneCalculator::calcParameter(
-                &SimulationParametersZoneValues::cellMaxBindingEnergy, &SimulationParametersZoneEnabledValues::cellMaxBindingEnergy, data, cell->pos);
-            cellFusionVelocity = ZoneCalculator::calcParameter(
-                &SimulationParametersZoneValues::cellFusionVelocity, &SimulationParametersZoneEnabledValues::cellFusionVelocity, data, cell->pos);
+            cellMaxBindingEnergy = ZoneCalculator::calcParameterNew(cudaSimulationParameters.cellMaxBindingEnergy, data, cell->pos);
+            cellFusionVelocity = ZoneCalculator::calcParameterNew(cudaSimulationParameters.cellFusionVelocity, data, cell->pos);
 
             int radiusInt = ceilf(smoothingLength * 2);
             scanLength = radiusInt * 2 + 1;
@@ -189,9 +187,9 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
                 if (cell != otherCell) {
 
                     //overlap correction
-                    if (!cell->barrier && distance < cudaSimulationParameters.minCellDistance) {
-                        atomicAdd_block(&cellPosDelta.x, posDelta.x * cudaSimulationParameters.minCellDistance / 5);
-                        atomicAdd_block(&cellPosDelta.y, posDelta.y * cudaSimulationParameters.minCellDistance / 5);
+                    if (!cell->barrier && distance < cudaSimulationParameters.minCellDistance.value) {
+                        atomicAdd_block(&cellPosDelta.x, posDelta.x * cudaSimulationParameters.minCellDistance.value / 5);
+                        atomicAdd_block(&cellPosDelta.y, posDelta.y * cudaSimulationParameters.minCellDistance.value / 5);
                     }
 
                     bool isConnected = false;
@@ -306,8 +304,8 @@ __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctO
 
                 //overlap correction
                 if (!cell->barrier) {
-                    if (distance < cudaSimulationParameters.minCellDistance) {
-                        cell->pos += posDelta * cudaSimulationParameters.minCellDistance / 5;
+                    if (distance < cudaSimulationParameters.minCellDistance.value) {
+                        cell->pos += posDelta * cudaSimulationParameters.minCellDistance.value / 5;
                     }
                 }
 
@@ -345,17 +343,8 @@ __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctO
                     }
 
                     //fusion
-                    auto cellMaxBindingEnergy = ZoneCalculator::calcParameter(
-                        &SimulationParametersZoneValues::cellMaxBindingEnergy,
-                        &SimulationParametersZoneEnabledValues::cellMaxBindingEnergy,
-                        data,
-                        cell->pos);
-
-                    auto cellFusionVelocity = ZoneCalculator::calcParameter(
-                        &SimulationParametersZoneValues::cellFusionVelocity,
-                        &SimulationParametersZoneEnabledValues::cellFusionVelocity,
-                        data,
-                        cell->pos);
+                    auto cellMaxBindingEnergy = ZoneCalculator::calcParameterNew(cudaSimulationParameters.cellMaxBindingEnergy, data, cell->pos);
+                    auto cellFusionVelocity = ZoneCalculator::calcParameterNew(cudaSimulationParameters.cellFusionVelocity, data, cell->pos);
 
                     if (cell->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS
                         && Math::length(velDelta) >= cellFusionVelocity
@@ -380,8 +369,7 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
             continue;
         }
 
-        if (Math::length(cell->shared1) > ZoneCalculator::calcParameter(
-                &SimulationParametersZoneValues::cellMaxForce, &SimulationParametersZoneEnabledValues::cellMaxForce, data, cell->pos, cell->color)) {
+        if (Math::length(cell->shared1) > ZoneCalculator::calcParameterNew(cudaSimulationParameters.maxForce, data, cell->pos, cell->color)) {
             if (data.numberGen1.random() < cudaSimulationParameters.maxForceDecayProbability) {
                 CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
             }
@@ -402,8 +390,8 @@ __inline__ __device__ void CellProcessor::applyForces(SimulationData& data)
         }
 
         cell->vel += cell->shared1;
-        if (Math::length(cell->vel) > cudaSimulationParameters.maxVelocity) {
-            cell->vel = Math::normalized(cell->vel) * cudaSimulationParameters.maxVelocity;
+        if (Math::length(cell->vel) > cudaSimulationParameters.maxVelocity.value) {
+            cell->vel = Math::normalized(cell->vel) * cudaSimulationParameters.maxVelocity.value;
         }
         cell->shared1 = {0, 0};
     }
@@ -463,11 +451,11 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
 
                     auto strength = abs(referenceAngleFromPrevious - actualAngleFromPrevious) / 2000 * cellStiffnessSquared;
 
-                    auto force1 = Math::normalized(displacement) / max(Math::length(displacement), cudaSimulationParameters.minCellDistance) * strength;
+                    auto force1 = Math::normalized(displacement) / max(Math::length(displacement), cudaSimulationParameters.minCellDistance.value) * strength;
                     Math::rotateQuarterClockwise(force1);
 
                     auto force2 =
-                        Math::normalized(prevDisplacement) / max(Math::length(prevDisplacement), cudaSimulationParameters.minCellDistance) * strength;
+                        Math::normalized(prevDisplacement) / max(Math::length(prevDisplacement), cudaSimulationParameters.minCellDistance.value) * strength;
                     Math::rotateQuarterCounterClockwise(force2);
 
                     if (referenceAngleFromPrevious < actualAngleFromPrevious) {
@@ -512,7 +500,7 @@ __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
             auto displacement = connectedCell->pos - cell->pos;
             data.cellMap.correctDirection(displacement);
             auto actualDistance = Math::length(displacement);
-            if (actualDistance > cudaSimulationParameters.maxBindingDistance[cell->color]) {
+            if (actualDistance > cudaSimulationParameters.maxBindingDistance.value[cell->color]) {
                 scheduleForDestruction = true;
             }
         }
@@ -800,8 +788,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         if (cell->barrier) {
             continue;
         }
-        auto cellMaxBindingEnergy = ZoneCalculator::calcParameter(
-            &SimulationParametersZoneValues::cellMaxBindingEnergy, &SimulationParametersZoneEnabledValues::cellMaxBindingEnergy, data, cell->pos);
+        auto cellMaxBindingEnergy = ZoneCalculator::calcParameterNew(cudaSimulationParameters.cellMaxBindingEnergy, data, cell->pos);
         if (cell->energy > cellMaxBindingEnergy) {
             CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
         }

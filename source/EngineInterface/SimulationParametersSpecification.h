@@ -68,23 +68,26 @@ using FloatZoneValuesMemberNew = std::shared_ptr<_FloatZoneValuesMemberNew>;
 
 using _ColorVectorFloatZoneValuesMember = ColorVector<float> SimulationParametersZoneValues::*;
 using ColorVectorFloatZoneValuesMember = std::shared_ptr<_ColorVectorFloatZoneValuesMember>;
-using _ColorVectorFloatZoneValuesMemberNew = BaseZoneParameter<ColorVector<float>> SimulationParameters::*;
-using ColorVectorFloatZoneValuesMemberNew = std::shared_ptr<_ColorVectorFloatZoneValuesMemberNew>;
+using _ColorVectorFloatBaseZoneMemberNew = BaseZoneParameter<ColorVector<float>> SimulationParameters::*;
+using ColorVectorFloatBaseZoneMemberNew = std::shared_ptr<_ColorVectorFloatBaseZoneMemberNew>;
 
 using _ColorMatrixFloatZoneValuesMember = ColorMatrix<float> SimulationParametersZoneValues::*;
 using ColorMatrixFloatZoneValuesMember = std::shared_ptr<_ColorMatrixFloatZoneValuesMember>;
-using _ColorMatrixFloatZoneValuesMemberNew = BaseZoneParameter<ColorMatrix<float>> SimulationParameters::*;
-using ColorMatrixFloatZoneValuesMemberNew = std::shared_ptr<_ColorMatrixFloatZoneValuesMemberNew>;
+using _ColorMatrixFloatBaseZoneMemberNew = BaseZoneParameter<ColorMatrix<float>> SimulationParameters::*;
+using ColorMatrixFloatBaseZoneMemberNew = std::shared_ptr<_ColorMatrixFloatBaseZoneMemberNew>;
 
 using _FloatColorRGBZoneMember = FloatColorRGB SimulationParametersZoneValues::*;
 using FloatColorRGBZoneMember = std::shared_ptr<_FloatColorRGBZoneMember>;
-using _FloatColorRGBZoneMemberNew = BaseZoneParameter<FloatColorRGB> SimulationParameters::*;
-using FloatColorRGBZoneMemberNew = std::shared_ptr<_FloatColorRGBZoneMemberNew>;
+using _FloatColorRGBBaseZoneMemberNew = BaseZoneParameter<FloatColorRGB> SimulationParameters::*;
+using FloatColorRGBBaseZoneMemberNew = std::shared_ptr<_FloatColorRGBBaseZoneMemberNew>;
 
 using _ColorTransitionRulesZoneMember = ColorTransitionRules SimulationParametersZoneValues::*;
 using ColorTransitionRulesZoneMember = std::shared_ptr<_ColorTransitionRulesZoneMember>;
-using _ColorTransitionRulesZoneMemberNew = BaseZoneParameter<ColorTransitionRules> SimulationParameters::*;
-using ColorTransitionRulesZoneMemberNew = std::shared_ptr<_ColorTransitionRulesZoneMemberNew>;
+using _ColorTransitionRulesBaseZoneMemberNew = BaseZoneParameter<ColorTransitionRules> SimulationParameters::*;
+using ColorTransitionRulesBaseZoneMemberNew = std::shared_ptr<_ColorTransitionRulesBaseZoneMemberNew>;
+
+using _PinnableBaseZoneMember = PinnableBaseZoneParameter<float> SimulationParameters::*;
+using PinnableBaseZoneMember = std::shared_ptr<_PinnableBaseZoneMember>;
 
 using FloatGetterSetter =
     std::pair<std::function<float(SimulationParameters const&, int)>, std::function<void(float, SimulationParameters&, int)>>;  // int for locationIndex
@@ -102,6 +105,14 @@ using _ExpertToggleMember = bool ExpertToggles::*;
 using ExpertToggleMember = std::shared_ptr<_ExpertToggleMember>;
 
 using BoolMemberSpec = std::variant<std::monostate, BoolMember, BoolZoneValuesMember, ColorMatrixBoolMember, BoolMemberNew, BoolZoneValuesMemberNew, ColorMatrixBoolMemberNew>;
+
+struct PinnableBaseZoneValueSpec
+{
+    SETTER_SHARED_PTR(PinnableBaseZoneValueSpec, PinnableBaseZoneMember, member);
+    PinnableBaseZoneMember _member;
+
+    MEMBER(PinnableBaseZoneValueSpec, FloatGetterSetter, getterSetter, {});
+};
 
 struct BoolSpec
 {
@@ -144,9 +155,9 @@ using FloatMemberSpec = std::variant<
     ColorVectorFloatMemberNew,
     ColorMatrixFloatMemberNew,
     FloatZoneValuesMemberNew,
-    ColorVectorFloatZoneValuesMemberNew,
-    ColorMatrixFloatZoneValuesMemberNew,
-    FloatGetterSetter>;
+    ColorVectorFloatBaseZoneMemberNew,
+    ColorMatrixFloatBaseZoneMemberNew,
+    PinnableBaseZoneValueSpec>;
 
 struct FloatSpec
 {
@@ -160,9 +171,9 @@ struct FloatSpec
     SETTER_SHARED_PTR(FloatSpec, ColorVectorFloatMemberNew, member);
     SETTER_SHARED_PTR(FloatSpec, ColorMatrixFloatMemberNew, member);
     SETTER_SHARED_PTR(FloatSpec, FloatZoneValuesMemberNew, member);
-    SETTER_SHARED_PTR(FloatSpec, ColorVectorFloatZoneValuesMemberNew, member);
-    SETTER_SHARED_PTR(FloatSpec, ColorMatrixFloatZoneValuesMemberNew, member);
-    SETTER(FloatSpec, FloatGetterSetter, member);
+    SETTER_SHARED_PTR(FloatSpec, ColorVectorFloatBaseZoneMemberNew, member);
+    SETTER_SHARED_PTR(FloatSpec, ColorMatrixFloatBaseZoneMemberNew, member);
+    SETTER(FloatSpec, PinnableBaseZoneValueSpec, member);
     FloatMemberSpec _member = std::monostate();
 
     MEMBER(FloatSpec, float, min, 0);
@@ -194,21 +205,21 @@ struct AlternativeSpec
     MEMBER(AlternativeSpec, Alternatives, alternatives, {});
 };
 
-using ColorPickerMemberSpec = std::variant<std::monostate, FloatColorRGBZoneMember, FloatColorRGBZoneMemberNew>;
+using ColorPickerMemberSpec = std::variant<std::monostate, FloatColorRGBZoneMember, FloatColorRGBBaseZoneMemberNew>;
 
 struct ColorPickerSpec
 {
     SETTER_SHARED_PTR(ColorPickerSpec, FloatColorRGBZoneMember, member);
-    SETTER_SHARED_PTR(ColorPickerSpec, FloatColorRGBZoneMemberNew, member);
+    SETTER_SHARED_PTR(ColorPickerSpec, FloatColorRGBBaseZoneMemberNew, member);
     ColorPickerMemberSpec _member = std::monostate();
 };
 
-using ColorTransitionRulesMemberSpec = std::variant<std::monostate, ColorTransitionRulesZoneMember, ColorTransitionRulesZoneMemberNew>;
+using ColorTransitionRulesMemberSpec = std::variant<std::monostate, ColorTransitionRulesZoneMember, ColorTransitionRulesBaseZoneMemberNew>;
 
 struct ColorTransitionRulesSpec
 {
     SETTER_SHARED_PTR(ColorTransitionRulesSpec, ColorTransitionRulesZoneMember, member);
-    SETTER_SHARED_PTR(ColorTransitionRulesSpec, ColorTransitionRulesZoneMemberNew, member);
+    SETTER_SHARED_PTR(ColorTransitionRulesSpec, ColorTransitionRulesBaseZoneMemberNew, member);
     ColorTransitionRulesMemberSpec _member = std::monostate();
 };
 

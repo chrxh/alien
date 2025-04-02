@@ -107,9 +107,9 @@ void _SimulationKernelsLauncher::prepareForSimulationParametersChanges(SettingsF
 bool _SimulationKernelsLauncher::isRigidityUpdateEnabled(SettingsForSimulation const& settings) const
 {
     for (int i = 0; i < settings.simulationParameters.numZones.value; ++i) {
-        if (settings.simulationParameters.zone[i].values.rigidity != 0) {
+        if (settings.simulationParameters.rigidity.zoneValues[i].value != 0) {
             return true;
         }
     }
-    return settings.simulationParameters.baseValues.rigidity != 0;
+    return settings.simulationParameters.rigidity.baseValue != 0;
 }

@@ -114,31 +114,34 @@ namespace
 
         ParameterParser::encodeDecode(
             tree, parameters.friction.baseValue, defaultParameters.friction.baseValue, "simulation parameters.friction", parserTask);
+        ParameterParser::encodeDecode(tree, parameters.rigidity.baseValue, defaultParameters.rigidity.baseValue, "simulation parameters.rigidity", parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.baseValues.rigidity, defaultParameters.baseValues.rigidity, "simulation parameters.rigidity", parserTask);
+            tree, parameters.maxVelocity.value, defaultParameters.maxVelocity.value, "simulation parameters.cell.max velocity", parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.maxVelocity, defaultParameters.maxVelocity, "simulation parameters.cell.max velocity", parserTask);
-        ParameterParser::encodeDecode(
-            tree, parameters.maxBindingDistance, defaultParameters.maxBindingDistance, "simulation parameters.cell.max binding distance", parserTask);
+            tree,
+            parameters.maxBindingDistance.value,
+            defaultParameters.maxBindingDistance.value,
+            "simulation parameters.cell.max binding distance",
+            parserTask);
         ParameterParser::encodeDecode(
             tree, parameters.normalCellEnergy, defaultParameters.normalCellEnergy, "simulation parameters.cell.normal energy", parserTask);
 
         ParameterParser::encodeDecode(
-            tree, parameters.minCellDistance, defaultParameters.minCellDistance, "simulation parameters.cell.min distance", parserTask);
+            tree, parameters.minCellDistance.value, defaultParameters.minCellDistance.value, "simulation parameters.cell.min distance", parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.baseValues.cellMaxForce, defaultParameters.baseValues.cellMaxForce, "simulation parameters.cell.max force", parserTask);
+            tree, parameters.maxForce.baseValue, defaultParameters.maxForce.baseValue, "simulation parameters.cell.max force", parserTask);
         ParameterParser::encodeDecode(
             tree, parameters.baseValues.minCellEnergy, defaultParameters.baseValues.minCellEnergy, "simulation parameters.cell.min energy", parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.cellFusionVelocity,
-            defaultParameters.baseValues.cellFusionVelocity,
+            parameters.cellFusionVelocity.baseValue,
+            parameters.cellFusionVelocity.baseValue,
             "simulation parameters.cell.fusion velocity",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.cellMaxBindingEnergy,
-            parameters.baseValues.cellMaxBindingEnergy,
+            parameters.cellMaxBindingEnergy.baseValue,
+            parameters.cellMaxBindingEnergy.baseValue,
             "simulation parameters.cell.max binding energy",
             parserTask);
         ParameterParser::encodeDecode(tree, parameters.maxCellAge, defaultParameters.maxCellAge, "simulation parameters.cell.max age", parserTask);
@@ -765,7 +768,12 @@ namespace
                 base + "friction",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
-                tree, spot.values.rigidity, spot.enabledValues.rigidity, defaultSpot.values.rigidity, base + "rigidity", parserTask);
+                tree,
+                parameters.rigidity.zoneValues[index].value,
+                parameters.rigidity.zoneValues[index].enabled,
+                defaultParameters.rigidity.baseValue,
+                base + "rigidity",
+                parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
                 spot.values.radiationDisableSources,
@@ -802,7 +810,13 @@ namespace
                 base + "radiation.factor",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
-                tree, spot.values.cellMaxForce, spot.enabledValues.cellMaxForce, defaultSpot.values.cellMaxForce, base + "cell.max force", parserTask);
+                tree,
+                parameters.maxForce.zoneValues[index].value,
+                parameters.maxForce.zoneValues[index].enabled,
+                defaultParameters.maxForce.baseValue,
+                base + "cell.max force",
+                parserTask);
+
             ParameterParser::encodeDecodeWithEnabled(
                 tree, spot.values.minCellEnergy, spot.enabledValues.minCellEnergy, defaultSpot.values.minCellEnergy, base + "cell.min energy", parserTask);
             ParameterParser::encodeDecodeWithEnabled(
@@ -815,16 +829,16 @@ namespace
 
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.cellFusionVelocity,
-                spot.enabledValues.cellFusionVelocity,
-                defaultSpot.values.cellFusionVelocity,
+                parameters.cellFusionVelocity.zoneValues[index].value,
+                parameters.cellFusionVelocity.zoneValues[index].enabled,
+                defaultParameters.cellFusionVelocity.baseValue,
                 base + "cell.fusion velocity",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.cellMaxBindingEnergy,
-                spot.enabledValues.cellMaxBindingEnergy,
-                defaultSpot.values.cellMaxBindingEnergy,
+                parameters.cellMaxBindingEnergy.zoneValues[index].value,
+                parameters.cellMaxBindingEnergy.zoneValues[index].enabled,
+                defaultParameters.cellMaxBindingEnergy.baseValue,
                 base + "cell.max binding energy",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
