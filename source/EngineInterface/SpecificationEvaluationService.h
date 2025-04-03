@@ -21,6 +21,5 @@ public:
 
     bool* getEnabledRef(EnabledSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
 
-    //bool* getPinnedValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
     bool* getExpertToggleRef(ExpertToggleMember const& expertToggle, SimulationParameters& parameters) const;
 };

@@ -260,17 +260,6 @@ bool* SpecificationEvaluationService::getEnabledRef(EnabledSpec const& spec, Sim
     return nullptr;
 }
 
-//bool* SimulationParametersSpecificationEvaluationService::getPinnedValueRef(ValueSpec const& spec, SimulationParameters& parameters, int locationIndex) const
-//{
-//    if (std::get<BaseValueSpec>(&spec)) {
-//        auto baseValueSpec = std::get<BaseValueSpec>(spec);
-//        if (baseValueSpec._pinnedAddress.has_value()) {
-//            return reinterpret_cast<bool*>(reinterpret_cast<char*>(&parameters) + baseValueSpec._pinnedAddress.value());
-//        }
-//    }
-//    return nullptr;
-//}
-
 bool* SpecificationEvaluationService::getExpertToggleRef(ExpertToggleMember const& expertToggle, SimulationParameters& parameters) const
 {
     if (expertToggle) {

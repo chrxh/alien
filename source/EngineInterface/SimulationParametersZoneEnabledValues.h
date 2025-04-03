@@ -5,10 +5,8 @@
 struct SimulationParametersZoneEnabledValues
 {
     bool rigidity = false;
-    bool radiationAbsorption = false;
     bool radiationAbsorptionLowVelocityPenalty = false;
     bool radiationAbsorptionLowGenomeComplexityPenalty = false;
-    bool radiationType1_strength = false;
     bool radiationDisableSources = false;
     bool minCellEnergy = false;
     bool cellDeathProbability = false;

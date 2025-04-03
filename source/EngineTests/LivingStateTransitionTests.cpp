@@ -19,7 +19,7 @@ public:
         result.innerFriction.value = 0;
         result.friction.baseValue = 0;
         for (int i = 0; i < MAX_COLORS; ++i) {
-            result.baseValues.radiationType1_strength[i] = 0;
+            result.radiationType1_strength.baseValue[i] = 0;
         }
         return result;
     }

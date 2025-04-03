@@ -86,9 +86,6 @@ using ColorTransitionRulesZoneMember = std::shared_ptr<_ColorTransitionRulesZone
 using _ColorTransitionRulesBaseZoneMemberNew = BaseZoneParameter<ColorTransitionRules> SimulationParameters::*;
 using ColorTransitionRulesBaseZoneMemberNew = std::shared_ptr<_ColorTransitionRulesBaseZoneMemberNew>;
 
-using _PinnableBaseZoneMember = PinnableBaseZoneParameter<float> SimulationParameters::*;
-using PinnableBaseZoneMember = std::shared_ptr<_PinnableBaseZoneMember>;
-
 using FloatGetterSetter =
     std::pair<std::function<float(SimulationParameters const&, int)>, std::function<void(float, SimulationParameters&, int)>>;  // int for locationIndex
 
@@ -106,12 +103,12 @@ using ExpertToggleMember = std::shared_ptr<_ExpertToggleMember>;
 
 using BoolMemberSpec = std::variant<std::monostate, BoolMember, BoolZoneValuesMember, ColorMatrixBoolMember, BoolMemberNew, BoolZoneValuesMemberNew, ColorMatrixBoolMemberNew>;
 
-struct PinnableBaseZoneValueSpec
+struct PinnableBaseValueSpecNew
 {
-    SETTER_SHARED_PTR(PinnableBaseZoneValueSpec, PinnableBaseZoneMember, member);
-    PinnableBaseZoneMember _member;
+    SETTER_SHARED_PTR(PinnableBaseValueSpecNew, BoolMemberNew, pinnedMember);
+    BoolMemberNew _pinnedMember;
 
-    MEMBER(PinnableBaseZoneValueSpec, FloatGetterSetter, getterSetter, {});
+    MEMBER(PinnableBaseValueSpecNew, FloatGetterSetter, getterSetter, {});
 };
 
 struct BoolSpec
@@ -157,7 +154,7 @@ using FloatMemberSpec = std::variant<
     FloatZoneValuesMemberNew,
     ColorVectorFloatBaseZoneMemberNew,
     ColorMatrixFloatBaseZoneMemberNew,
-    PinnableBaseZoneValueSpec>;
+    PinnableBaseValueSpecNew>;
 
 struct FloatSpec
 {
@@ -173,7 +170,7 @@ struct FloatSpec
     SETTER_SHARED_PTR(FloatSpec, FloatZoneValuesMemberNew, member);
     SETTER_SHARED_PTR(FloatSpec, ColorVectorFloatBaseZoneMemberNew, member);
     SETTER_SHARED_PTR(FloatSpec, ColorMatrixFloatBaseZoneMemberNew, member);
-    SETTER(FloatSpec, PinnableBaseZoneValueSpec, member);
+    SETTER(FloatSpec, PinnableBaseValueSpecNew, member);
     FloatMemberSpec _member = std::monostate();
 
     MEMBER(FloatSpec, float, min, 0);

@@ -22,7 +22,7 @@ auto ParametersEditService::getRadiationStrengths(SimulationParameters const& pa
             result.pinned.insert(i + 1);
         }
     }
-    if (parameters.baseStrengthRatioPinned) {
+    if (parameters.relativeStrengthPinned.value) {
         result.pinned.insert(0);
     }
     return result;
@@ -32,7 +32,7 @@ void ParametersEditService::applyRadiationStrengths(SimulationParameters& parame
 {
     CHECK(parameters.numRadiationSources.value + 1 == strengths.values.size());
 
-    parameters.baseStrengthRatioPinned = strengths.pinned.contains(0);
+    parameters.relativeStrengthPinned.value = strengths.pinned.contains(0);
     for (int i = 0; i < parameters.numRadiationSources.value; ++i) {
         parameters.radiationSource[i].strength = strengths.values.at(i + 1);
         parameters.radiationSource[i].strengthPinned = strengths.pinned.contains(i + 1);

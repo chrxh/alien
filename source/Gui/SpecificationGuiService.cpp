@@ -227,13 +227,13 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
                 .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*origValue)),
             *value);
 
-    } else if (std::holds_alternative<FloatGetterSetter>(floatSpec._member)) {
+    } else if (std::holds_alternative<PinnableBaseValueSpecNew>(floatSpec._member)) {
 
-        auto [getter, setter] = std::get<FloatGetterSetter>(floatSpec._member);
+        auto pinnableBaseValue = std::get<PinnableBaseValueSpecNew>(floatSpec._member);
+        auto [getter, setter] = pinnableBaseValue._getterSetter;
         auto value = getter(parameters, locationIndex);
         auto origValue = getter(origParameters, locationIndex);
-        bool* pinnedValue = nullptr;
-        //specService.getPinnedValueRef(parameterSpec._value, parameters, locationIndex);
+        bool* pinnedValue = evaluationService.getBoolRef(pinnableBaseValue._pinnedMember, parameters, locationIndex);
 
         if (AlienImGui::SliderFloat(
                 AlienImGui::SliderFloatParameters()
@@ -401,7 +401,7 @@ bool SpecificationGuiService::isVisible(ParameterSpec const& parameterSpec, Loca
                 || std::holds_alternative<ColorMatrixFloatMember>(floatSpec._member) || std::holds_alternative<FloatZoneValuesMember>(floatSpec._member)
                 || std::holds_alternative<ColorVectorFloatZoneValuesMember>(floatSpec._member)
                 || std::holds_alternative<ColorMatrixFloatZoneValuesMember>(floatSpec._member)
-                || std::holds_alternative<FloatGetterSetter>(floatSpec._member)) {
+                || std::holds_alternative<PinnableBaseValueSpecNew>(floatSpec._member)) {
                 return true;
             }
         } else if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {
@@ -474,7 +474,7 @@ bool SpecificationGuiService::isVisible(ParameterSpec const& parameterSpec, Loca
                 || std::holds_alternative<ColorMatrixFloatMemberNew>(floatSpec._member) || std::holds_alternative<FloatZoneValuesMemberNew>(floatSpec._member)
                 || std::holds_alternative<ColorVectorFloatBaseZoneMemberNew>(floatSpec._member)
                 || std::holds_alternative<ColorMatrixFloatBaseZoneMemberNew>(floatSpec._member)
-                || std::holds_alternative<FloatGetterSetter>(floatSpec._member)) {
+                || std::holds_alternative<PinnableBaseValueSpecNew>(floatSpec._member)) {
                 return true;
             }
         } else if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {

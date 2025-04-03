@@ -211,8 +211,8 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.radiationType1_strength,
-            defaultParameters.baseValues.radiationType1_strength,
+            parameters.radiationType1_strength.baseValue,
+            defaultParameters.radiationType1_strength.baseValue,
             "simulation parameters.radiation.factor",
             parserTask);
         ParameterParser::encodeDecode(
@@ -223,8 +223,8 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.radiationAbsorption,
-            defaultParameters.baseValues.radiationAbsorption,
+            parameters.radiationAbsorption.baseValue,
+            defaultParameters.radiationAbsorption.baseValue,
             "simulation parameters.radiation.absorption",
             parserTask);
         ParameterParser::encodeDecode(
@@ -253,14 +253,22 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.radiationType2_energyThreshold,
-            defaultParameters.radiationType2_energyThreshold,
+            parameters.radiationType2_energyThreshold.value,
+            defaultParameters.radiationType2_energyThreshold.value,
             "simulation parameters.high radiation.min cell energy",
             parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.radiationType2_strength, defaultParameters.radiationType2_strength, "simulation parameters.high radiation.factor", parserTask);
+            tree,
+            parameters.radiationType2_strength.value,
+            defaultParameters.radiationType2_strength.value,
+            "simulation parameters.high radiation.factor",
+            parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.radiationType1_minimumAge, defaultParameters.radiationType1_minimumAge, "simulation parameters.radiation.min cell age", parserTask);
+            tree,
+            parameters.radiationType1_minimumAge.value,
+            defaultParameters.radiationType1_minimumAge.value,
+            "simulation parameters.radiation.min cell age",
+            parserTask);
 
         ParameterParser::encodeDecode(
             tree, parameters.externalEnergy, defaultParameters.externalEnergy, "simulation parameters.cell.function.constructor.external energy", parserTask);
@@ -595,12 +603,12 @@ namespace
 
         ParameterParser::encodeDecode(
             tree,
-            parameters.particleTransformationAllowed,
-            defaultParameters.particleTransformationAllowed,
+            parameters.particleTransformationAllowed.value,
+            defaultParameters.particleTransformationAllowed.value,
             "simulation parameters.particle.transformation allowed",
             parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.particleSplitEnergy, defaultParameters.particleSplitEnergy, "simulation parameters.particle.split energy", parserTask);
+            tree, parameters.particleSplitEnergy.value, defaultParameters.particleSplitEnergy.value, "simulation parameters.particle.split energy", parserTask);
 
         ParameterParser::encodeDecode(
             tree,
@@ -638,8 +646,8 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseStrengthRatioPinned,
-            defaultParameters.baseStrengthRatioPinned,
+            parameters.relativeStrengthPinned.value,
+            defaultParameters.relativeStrengthPinned.value,
             "simulation parameters.particle sources.base strength pinned",
             parserTask);
         for (int index = 0; index < parameters.numRadiationSources.value; ++index) {
@@ -783,9 +791,9 @@ namespace
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.radiationAbsorption,
-                spot.enabledValues.radiationAbsorption,
-                defaultSpot.values.radiationAbsorption,
+                parameters.radiationAbsorption.zoneValues[index].value,
+                parameters.radiationAbsorption.zoneValues[index].enabled,
+                parameters.radiationAbsorption.baseValue,
                 base + "radiation.absorption",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
@@ -804,9 +812,9 @@ namespace
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.radiationType1_strength,
-                spot.enabledValues.radiationType1_strength,
-                defaultSpot.values.radiationType1_strength,
+                parameters.radiationType1_strength.zoneValues[index].value,
+                parameters.radiationType1_strength.zoneValues[index].enabled,
+                parameters.radiationType1_strength.baseValue,
                 base + "radiation.factor",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
