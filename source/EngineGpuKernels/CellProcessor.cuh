@@ -645,19 +645,19 @@ __inline__ __device__ void CellProcessor::livingStateTransition_calcFutureState(
                 }
                 cell->angleToFront = Math::normalizedAngle(cell->angleToFront, -180.0f);
             }
-            if (isOtherCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences != CellDeathConsquences_None) {
+            if (isOtherCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences.value != CellDeathConsquences_None) {
                 livingState = LivingState_Detaching;
             }
         } else if (origLivingState == LivingState_Detaching) {
-            if (isSameCreatureNeighborReviving && cudaSimulationParameters.cellDeathConsequences == CellDeathConsquences_DetachedPartsDie) {
+            if (isSameCreatureNeighborReviving && cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsquences_DetachedPartsDie) {
                 livingState = LivingState_Reviving;
             }
-            if (cudaSimulationParameters.cellDeathConsequences == CellDeathConsquences_None) {
+            if (cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsquences_None) {
                 livingState = LivingState_Ready;
             }
         } else if (origLivingState == LivingState_Ready) {
-            if (isSameCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences != CellDeathConsquences_None) {
-                if (cudaSimulationParameters.cellDeathConsequences == CellDeathConsquences_DetachedPartsDie && cell->cellType == CellType_Constructor
+            if (isSameCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences.value != CellDeathConsquences_None) {
+                if (cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsquences_DetachedPartsDie && cell->cellType == CellType_Constructor
                     && GenomeDecoder::containsSelfReplication(cell->cellTypeData.constructor)) {
                     livingState = LivingState_Reviving;
                 } else {
@@ -788,16 +788,10 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
         }
 
-        auto cellMinEnergy = ZoneCalculator::calcParameter(
-            &SimulationParametersZoneValues::minCellEnergy, &SimulationParametersZoneEnabledValues::minCellEnergy, data, cell->pos, cell->color);
+        auto cellMinEnergy = ZoneCalculator::calcParameterNew(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
 
         if (cell->livingState == LivingState_Dying || cell->livingState == LivingState_Detaching) {
-            auto cellDeathProbability = ZoneCalculator::calcParameter(
-                &SimulationParametersZoneValues::cellDeathProbability,
-                &SimulationParametersZoneEnabledValues::cellDeathProbability,
-                data,
-                cell->pos,
-                cell->color);
+            auto cellDeathProbability = ZoneCalculator::calcParameterNew(cudaSimulationParameters.cellDeathProbability, data, cell->pos, cell->color);
             if (data.numberGen1.random() < cellDeathProbability) {
                 CellConnectionProcessor::scheduleDeleteCell(data, index);
             }
@@ -808,7 +802,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             cellDestruction = true;
         }
 
-        auto cellMaxAge = cudaSimulationParameters.maxCellAge[cell->color];
+        auto cellMaxAge = cudaSimulationParameters.maxCellAge.value[cell->color];
         if (cudaSimulationParameters.expertToggles.cellAgeLimiter && cudaSimulationParameters.maxAgeForInactiveCellsEnabled && cell->mutationId != 1
             && cell->cellTypeUsed == CellTriggered_No && cell->livingState == LivingState_Ready && cell->activationTime == 0) {
             bool adjacentCellsUsed = false;
@@ -888,16 +882,15 @@ __inline__ __device__ void CellProcessor::applyEnergyFlow(SimulationData& data)
         }
         auto i = data.timestep % cell->numConnections;
         auto& connectedCell = cell->connections[i].cell;
-        auto cellMinEnergy = ZoneCalculator::calcParameter(
-            &SimulationParametersZoneValues::minCellEnergy, &SimulationParametersZoneEnabledValues::minCellEnergy, data, cell->pos, cell->color);
+        auto cellMinEnergy = ZoneCalculator::calcParameterNew(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
 
         auto needCellEnergy = cell->cellType == CellType_Constructor && !GenomeDecoder::isFinished(cell->cellTypeData.constructor)
-            && connectedCell->energy > cudaSimulationParameters.normalCellEnergy[cell->color];
+            && connectedCell->energy > cudaSimulationParameters.normalCellEnergy.value[cell->color];
         auto hasOtherCellMoreEnergy = (connectedCell->cellType != CellType_Constructor || GenomeDecoder::isFinished(connectedCell->cellTypeData.constructor))
             && connectedCell->energy > cell->energy;
         float flow = 0;
         if (needCellEnergy) {
-            flow = connectedCell->energy - cudaSimulationParameters.normalCellEnergy[cell->color];
+            flow = connectedCell->energy - cudaSimulationParameters.normalCellEnergy.value[cell->color];
         } else if (hasOtherCellMoreEnergy) {
             flow = (connectedCell->energy - cell->energy) / 2;
         }

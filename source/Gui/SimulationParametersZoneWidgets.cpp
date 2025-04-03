@@ -378,10 +378,10 @@ void _SimulationParametersZoneWidgets::process()
                 .colorDependence(true)
                 .min(10.0f)
                 .max(200.0f)
-                .defaultValue(origZone.values.minCellEnergy)
-                .disabledValue(parameters.baseValues.minCellEnergy),
-            zone.values.minCellEnergy,
-            &zone.enabledValues.minCellEnergy);
+                .defaultValue(origParameters.minCellEnergy.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.minCellEnergy.baseValue),
+            parameters.minCellEnergy.zoneValues[zoneIndex].value,
+            &parameters.minCellEnergy.zoneValues[zoneIndex].enabled);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Decay rate of dying cells")
@@ -391,10 +391,10 @@ void _SimulationParametersZoneWidgets::process()
                 .max(0.1f)
                 .format("%.6f")
                 .logarithmic(true)
-                .defaultValue(origZone.values.cellDeathProbability)
-                .disabledValue(parameters.baseValues.cellDeathProbability),
-            zone.values.cellDeathProbability,
-            &zone.enabledValues.cellDeathProbability);
+                .defaultValue(origParameters.cellDeathProbability.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.cellDeathProbability.baseValue),
+            parameters.cellDeathProbability.zoneValues[zoneIndex].value,
+            &parameters.cellDeathProbability.zoneValues[zoneIndex].enabled);
     }
     AlienImGui::EndTreeNode();
 
