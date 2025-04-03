@@ -292,7 +292,7 @@ void SpecificationService::createSpec()
                     .tooltip("Defines the maximum age of a cell. If a cell exceeds this age it will be transformed to an energy particle."),
                 ParameterSpec()
                     .name("Minimum energy")
-                    .reference(FloatSpec().member(&SimulationParametersZoneValues::minCellEnergy).min(10.0f).max(200.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::minCellEnergy).min(10.0f).max(200.0f))
                     .tooltip("Minimum energy a cell needs to exist."),
                 ParameterSpec()
                     .name("Normal energy")
@@ -308,7 +308,7 @@ void SpecificationService::createSpec()
                         "cells is activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal value."),
                 ParameterSpec()
                     .name("Decay rate of dying cells")
-                    .reference(FloatSpec().member(&SimulationParametersZoneValues::cellDeathProbability).min(1e-6f).max(1e-1f).format("%.6f").logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::cellDeathProbability).min(1e-6f).max(1e-1f).format("%.6f").logarithmic(true))
                     .tooltip("The probability per time step with which a cell will disintegrate (i.e. transform into an energy particle) when it is in the "
                              "state 'Dying'. This can occur when one of the following conditions is satisfied:\n\n" ICON_FA_CHEVRON_RIGHT
                              " The cell has too low energy.\n\n" ICON_FA_CHEVRON_RIGHT " The cell has exceeded its maximum age."),

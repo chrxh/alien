@@ -38,7 +38,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(LivingStateTransitionTests, ready_ready)
 {
-    _parameters.cellDeathConsequences = GetParam();
+    _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
     DataDescription data;
@@ -57,7 +57,7 @@ TEST_P(LivingStateTransitionTests, ready_ready)
 
 TEST_P(LivingStateTransitionTests, ready_dying)
 {
-    _parameters.cellDeathConsequences = GetParam();
+    _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
     DataDescription data;
@@ -76,7 +76,7 @@ TEST_P(LivingStateTransitionTests, ready_dying)
 
 TEST_P(LivingStateTransitionTests, ready_detaching)
 {
-    _parameters.cellDeathConsequences = GetParam();
+    _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
     DataDescription data;
@@ -104,7 +104,7 @@ TEST_P(LivingStateTransitionTests, ready_detaching)
 
 TEST_P(LivingStateTransitionTests, ready_detaching_onSelfReplicator)
 {
-    _parameters.cellDeathConsequences = GetParam();
+    _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
@@ -144,7 +144,7 @@ TEST_P(LivingStateTransitionTests, ready_detaching_onSelfReplicator)
 
 TEST_P(LivingStateTransitionTests, ready_detaching_differentCreature)
 {
-    _parameters.cellDeathConsequences = GetParam();
+    _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
     DataDescription data;
@@ -172,7 +172,7 @@ TEST_P(LivingStateTransitionTests, ready_detaching_differentCreature)
 
 TEST_P(LivingStateTransitionTests, detaching_reviving)
 {
-    _parameters.cellDeathConsequences = GetParam();
+    _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
     DataDescription data;
@@ -200,7 +200,7 @@ TEST_P(LivingStateTransitionTests, detaching_reviving)
 
 TEST_P(LivingStateTransitionTests, underConstruction_activating)
 {
-    _parameters.cellDeathConsequences = GetParam();
+    _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
     DataDescription data;
@@ -219,7 +219,7 @@ TEST_P(LivingStateTransitionTests, underConstruction_activating)
 
 TEST_P(LivingStateTransitionTests, noDyingForBarrierCells)
 {
-    _parameters.cellDeathConsequences = GetParam();
+    _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
     DataDescription data;

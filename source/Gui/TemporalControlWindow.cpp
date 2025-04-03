@@ -243,7 +243,7 @@ void TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
     parameters.externalEnergy = origParameters.externalEnergy;
     if (parameters.maxCellAgeBalancerEnabled || origParameters.maxCellAgeBalancerEnabled) {
         for (int i = 0; i < MAX_COLORS; ++i) {
-            parameters.maxCellAge[i] = origParameters.maxCellAge[i];
+            parameters.maxCellAge.value[i] = origParameters.maxCellAge.value[i];
         }
     }
     _simulationFacade->setCurrentTimestep(snapshot.timestep);

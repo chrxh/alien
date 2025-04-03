@@ -41,8 +41,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 {
     if (SignalProcessor::isManuallyTriggered(data, cell)) {
         float energyDelta = 0;
-        auto cellMinEnergy = ZoneCalculator::calcParameter(
-            &SimulationParametersZoneValues::minCellEnergy, &SimulationParametersZoneEnabledValues::minCellEnergy, data, cell->pos, cell->color);
+        auto cellMinEnergy = ZoneCalculator::calcParameterNew(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
         auto baseValue = cudaSimulationParameters.attackerDestroyCells ? cellMinEnergy * 0.1f : cellMinEnergy;
 
         Cell* someOtherCell = nullptr;

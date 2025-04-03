@@ -19,12 +19,12 @@ public:
 TEST_F(CellConnectionTests_New, decay)
 {
     _parameters.radiationAbsorption.baseValue[0] = 0;
-    _parameters.cellDeathConsequences = CellDeathConsquences_CreatureDies;
-    _parameters.baseValues.cellDeathProbability[0] = 0.5f;
+    _parameters.cellDeathConsequences.value = CellDeathConsquences_CreatureDies;
+    _parameters.cellDeathProbability.baseValue[0] = 0.5f;
 
     _simulationFacade->setSimulationParameters(_parameters);
     auto origData = DescriptionEditService::get().createRect(
-        DescriptionEditService::CreateRectParameters().width(10).height(10).energy(_parameters.baseValues.minCellEnergy[0] / 2));
+        DescriptionEditService::CreateRectParameters().width(10).height(10).energy(_parameters.minCellEnergy.baseValue[0] / 2));
 
     _simulationFacade->setSimulationData(origData);
     _simulationFacade->calcTimesteps(1000);

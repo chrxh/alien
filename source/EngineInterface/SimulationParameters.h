@@ -81,16 +81,18 @@ struct SimulationParameters
     static float constexpr radiationVelocityPerturbation = 0.5f;
 
     // Cell life cycle
-    ColorVector<int> maxCellAge = {
+    BaseParameter<ColorVector<int>> maxCellAge = {{
         Infinity<int>::value,
         Infinity<int>::value,
         Infinity<int>::value,
         Infinity<int>::value,
         Infinity<int>::value,
         Infinity<int>::value,
-        Infinity<int>::value};
-    ColorVector<float> normalCellEnergy = {100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f};
-    CellDeathConsquences cellDeathConsequences = CellDeathConsquences_DetachedPartsDie;
+        Infinity<int>::value}};
+    BaseZoneParameter<ColorVector<float>> minCellEnergy = {.baseValue = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f}};
+    BaseParameter<ColorVector<float>> normalCellEnergy = {100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f};
+    BaseZoneParameter<ColorVector<float>> cellDeathProbability = {.baseValue = {0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f}};
+    BaseParameter<CellDeathConsquences> cellDeathConsequences = {CellDeathConsquences_DetachedPartsDie};
 
     // Mutation
     ColorMatrix<bool> copyMutationColorTransitions = {

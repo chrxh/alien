@@ -207,7 +207,7 @@ __inline__ __device__ void RadiationProcessor::transformation(SimulationData& da
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         if (auto& particle = data.objects.particlePointers.at(particleIndex)) {
             
-            if (particle->energy >= cudaSimulationParameters.normalCellEnergy[particle->color]) {
+            if (particle->energy >= cudaSimulationParameters.normalCellEnergy.value[particle->color]) {
                 ObjectFactory factory;
                 factory.init(&data);
                 auto cell = factory.createFreeCell(particle->energy, particle->absPos, particle->vel);

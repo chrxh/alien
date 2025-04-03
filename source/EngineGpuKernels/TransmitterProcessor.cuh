@@ -42,7 +42,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
     float energyDelta = 0;
     auto const& energyDistribution = cudaSimulationParameters.transmitterEnergyDistributionValue[cell->color];
     auto origEnergy = atomicAdd(&cell->energy, -energyDistribution);
-    if (origEnergy > cudaSimulationParameters.normalCellEnergy[cell->color]) {
+    if (origEnergy > cudaSimulationParameters.normalCellEnergy.value[cell->color]) {
         energyDelta = energyDistribution;
     } else {
         atomicAdd(&cell->energy, energyDistribution);  //revert
@@ -58,7 +58,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
             }
         }
         auto origEnergy = atomicAdd(&connectedCell->energy, -energyDistribution);
-        if (origEnergy > cudaSimulationParameters.normalCellEnergy[cell->color]) {
+        if (origEnergy > cudaSimulationParameters.normalCellEnergy.value[cell->color]) {
             energyDelta += energyDistribution;
         } else {
             atomicAdd(&connectedCell->energy, energyDistribution);  //revert

@@ -853,7 +853,7 @@ ConstructorProcessor::constructCellIntern(
 
 __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData)
 {
-    if (cudaSimulationParameters.expertToggles.externalEnergyControl && hostCell->energy < constructionData.energy + cudaSimulationParameters.normalCellEnergy[hostCell->color]
+    if (cudaSimulationParameters.expertToggles.externalEnergyControl && hostCell->energy < constructionData.energy + cudaSimulationParameters.normalCellEnergy.value[hostCell->color]
         && cudaSimulationParameters.externalEnergyInflowFactor[hostCell->color] > 0) {
         auto externalEnergyPortion = [&] {
             if (cudaSimulationParameters.externalEnergyInflowOnlyForNonSelfReplicators) {
@@ -891,17 +891,17 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         }
     }();
 
-    auto energyNeededFromHost = max(0.0f, constructionData.energy - cudaSimulationParameters.normalCellEnergy[hostCell->color])
-        + min(constructionData.energy, cudaSimulationParameters.normalCellEnergy[hostCell->color]) * (1.0f - externalEnergyConditionalInflowFactor);
+    auto energyNeededFromHost = max(0.0f, constructionData.energy - cudaSimulationParameters.normalCellEnergy.value[hostCell->color])
+        + min(constructionData.energy, cudaSimulationParameters.normalCellEnergy.value[hostCell->color]) * (1.0f - externalEnergyConditionalInflowFactor);
 
-    if (externalEnergyConditionalInflowFactor < 1.0f && hostCell->energy < cudaSimulationParameters.normalCellEnergy[hostCell->color] + energyNeededFromHost) {
+    if (externalEnergyConditionalInflowFactor < 1.0f && hostCell->energy < cudaSimulationParameters.normalCellEnergy.value[hostCell->color] + energyNeededFromHost) {
         return false;
     }
     auto energyNeededFromExternalSource = constructionData.energy - energyNeededFromHost;
     auto orig = atomicAdd(data.externalEnergy, -energyNeededFromExternalSource);
     if (orig < energyNeededFromExternalSource) {
         atomicAdd(data.externalEnergy, energyNeededFromExternalSource);
-        if (hostCell->energy < cudaSimulationParameters.normalCellEnergy[hostCell->color] + constructionData.energy) {
+        if (hostCell->energy < cudaSimulationParameters.normalCellEnergy.value[hostCell->color] + constructionData.energy) {
             return false;
         }
         hostCell->energy -= constructionData.energy;

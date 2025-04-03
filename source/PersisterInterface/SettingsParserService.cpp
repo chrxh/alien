@@ -124,14 +124,14 @@ namespace
             "simulation parameters.cell.max binding distance",
             parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.normalCellEnergy, defaultParameters.normalCellEnergy, "simulation parameters.cell.normal energy", parserTask);
+            tree, parameters.normalCellEnergy.value, defaultParameters.normalCellEnergy.value, "simulation parameters.cell.normal energy", parserTask);
 
         ParameterParser::encodeDecode(
             tree, parameters.minCellDistance.value, defaultParameters.minCellDistance.value, "simulation parameters.cell.min distance", parserTask);
         ParameterParser::encodeDecode(
             tree, parameters.maxForce.baseValue, defaultParameters.maxForce.baseValue, "simulation parameters.cell.max force", parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.baseValues.minCellEnergy, defaultParameters.baseValues.minCellEnergy, "simulation parameters.cell.min energy", parserTask);
+            tree, parameters.minCellEnergy.baseValue, defaultParameters.minCellEnergy.baseValue, "simulation parameters.cell.min energy", parserTask);
         ParameterParser::encodeDecode(
             tree,
             parameters.cellFusionVelocity.baseValue,
@@ -144,7 +144,7 @@ namespace
             parameters.cellMaxBindingEnergy.baseValue,
             "simulation parameters.cell.max binding energy",
             parserTask);
-        ParameterParser::encodeDecode(tree, parameters.maxCellAge, defaultParameters.maxCellAge, "simulation parameters.cell.max age", parserTask);
+        ParameterParser::encodeDecode(tree, parameters.maxCellAge.value, defaultParameters.maxCellAge.value, "simulation parameters.cell.max age", parserTask);
         ParameterParser::encodeDecode(
             tree, parameters.maxCellAgeBalancerEnabled, defaultParameters.maxCellAgeBalancerEnabled, "simulation parameters.cell.max age.balance.enabled", parserTask);
         ParameterParser::encodeDecode(
@@ -310,11 +310,15 @@ namespace
             parserTask);
 
         ParameterParser::encodeDecode(
-            tree, parameters.cellDeathConsequences, defaultParameters.cellDeathConsequences, "simulation parameters.cell.death consequences", parserTask);
+            tree,
+            parameters.cellDeathConsequences.value,
+            defaultParameters.cellDeathConsequences.value,
+            "simulation parameters.cell.death consequences",
+            parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.cellDeathProbability,
-            defaultParameters.baseValues.cellDeathProbability,
+            parameters.cellDeathProbability.baseValue,
+            defaultParameters.cellDeathProbability.baseValue,
             "simulation parameters.cell.death probability",
             parserTask);
 
@@ -826,12 +830,17 @@ namespace
                 parserTask);
 
             ParameterParser::encodeDecodeWithEnabled(
-                tree, spot.values.minCellEnergy, spot.enabledValues.minCellEnergy, defaultSpot.values.minCellEnergy, base + "cell.min energy", parserTask);
+                tree,
+                parameters.minCellEnergy.zoneValues[index].value,
+                parameters.minCellEnergy.zoneValues[index].enabled,
+                defaultParameters.minCellEnergy.baseValue,
+                base + "cell.min energy",
+                parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.cellDeathProbability,
-                spot.enabledValues.cellDeathProbability,
-                defaultSpot.values.cellDeathProbability,
+                parameters.cellDeathProbability.zoneValues[index].value,
+                parameters.cellDeathProbability.zoneValues[index].enabled,
+                defaultParameters.cellDeathProbability.baseValue,
                 base + "cell.death probability",
                 parserTask);
 
