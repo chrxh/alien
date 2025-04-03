@@ -12,7 +12,6 @@ void ParametersValidationService::validateAndCorrect(SimulationParameters& param
             parameters.baseValues.attackerComplexCreatureProtection[i][j] =
                 std::max(0.0f, parameters.baseValues.attackerComplexCreatureProtection[i][j]);
         }
-        parameters.baseValues.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorption[i]));
         parameters.radiationAbsorptionHighVelocityPenalty[i] = std::max(0.0f, parameters.radiationAbsorptionHighVelocityPenalty[i]);
         parameters.radiationAbsorptionLowConnectionPenalty[i] = std::max(0.0f, parameters.radiationAbsorptionLowConnectionPenalty[i]);
         parameters.externalEnergyConditionalInflowFactor[i] = std::max(0.0f, std::min(1.0f, parameters.externalEnergyConditionalInflowFactor[i]));
@@ -21,7 +20,7 @@ void ParametersValidationService::validateAndCorrect(SimulationParameters& param
             std::max(0.0f, std::min(1.0f, parameters.detonatorChainExplosionProbability[i]));
         parameters.externalEnergyInflowFactor[i] = std::max(0.0f, std::min(1.0f, parameters.externalEnergyInflowFactor[i]));
         parameters.baseValues.minCellEnergy[i] = std::min(parameters.baseValues.minCellEnergy[i], parameters.normalCellEnergy[i] * 0.95f);
-        parameters.particleSplitEnergy[i] = std::max(0.0f, parameters.particleSplitEnergy[i]);
+        parameters.particleSplitEnergy.value[i] = std::max(0.0f, parameters.particleSplitEnergy.value[i]);
         parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty[i] =
             std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty[i]));
         parameters.baseValues.radiationAbsorptionLowVelocityPenalty[i] =
@@ -70,7 +69,6 @@ void ParametersValidationService::validateAndCorrect(SimulationParametersZone& z
             zone.values.attackerNewComplexMutantProtection[i][j] =
                 std::max(0.0f, std::min(1.0f, zone.values.attackerNewComplexMutantProtection[i][j]));
         }
-        zone.values.radiationAbsorption[i] = std::max(0.0f, std::min(1.0f, zone.values.radiationAbsorption[i]));
         zone.values.minCellEnergy[i] = std::min(parameters.baseValues.minCellEnergy[i], parameters.normalCellEnergy[i] * 0.95f);
         zone.values.radiationAbsorptionLowGenomeComplexityPenalty[i] =
             std::max(0.0f, std::min(1.0f, zone.values.radiationAbsorptionLowGenomeComplexityPenalty[i]));

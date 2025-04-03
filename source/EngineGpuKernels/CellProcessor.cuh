@@ -741,16 +741,11 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
         if (data.numberGen1.random() < cudaSimulationParameters.radiationProbability) {
 
             auto radiationFactor = 0.0f;
-            if (cell->energy > cudaSimulationParameters.radiationType2_energyThreshold[cell->color]) {
-                radiationFactor += cudaSimulationParameters.radiationType2_strength[cell->color];
+            if (cell->energy > cudaSimulationParameters.radiationType2_energyThreshold.value[cell->color]) {
+                radiationFactor += cudaSimulationParameters.radiationType2_strength.value[cell->color];
             }
-            if (cell->age > cudaSimulationParameters.radiationType1_minimumAge[cell->color]) {
-                radiationFactor += ZoneCalculator::calcParameter(
-                    &SimulationParametersZoneValues::radiationType1_strength,
-                    &SimulationParametersZoneEnabledValues::radiationType1_strength,
-                    data,
-                    cell->pos,
-                    cell->color);
+            if (cell->age > cudaSimulationParameters.radiationType1_minimumAge.value[cell->color]) {
+                radiationFactor += ZoneCalculator::calcParameterNew(cudaSimulationParameters.radiationType1_strength, data, cell->pos, cell->color);
             }
 
             if (radiationFactor > 0) {

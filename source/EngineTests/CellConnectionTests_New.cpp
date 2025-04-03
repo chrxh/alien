@@ -18,7 +18,7 @@ public:
 
 TEST_F(CellConnectionTests_New, decay)
 {
-    _parameters.baseValues.radiationAbsorption[0] = 0;
+    _parameters.radiationAbsorption.baseValue[0] = 0;
     _parameters.cellDeathConsequences = CellDeathConsquences_CreatureDies;
     _parameters.baseValues.cellDeathProbability[0] = 0.5f;
 

@@ -108,12 +108,7 @@ __inline__ __device__ void RadiationProcessor::collision(SimulationData& data)
                     if (particle->lastAbsorbedCell == cell) {
                         continue;
                     }
-                    auto radiationAbsorption = ZoneCalculator::calcParameter(
-                        &SimulationParametersZoneValues::radiationAbsorption,
-                        &SimulationParametersZoneEnabledValues::radiationAbsorption,
-                        data,
-                        cell->pos,
-                        cell->color);
+                    auto radiationAbsorption = ZoneCalculator::calcParameterNew(cudaSimulationParameters.radiationAbsorption, data, cell->pos, cell->color);
 
                     if (radiationAbsorption < NEAR_ZERO) {
                         continue;
@@ -182,7 +177,7 @@ __inline__ __device__ void RadiationProcessor::splitting(SimulationData& data)
             continue;
         }
 
-        if (particle->energy > cudaSimulationParameters.particleSplitEnergy[particle->color]) {
+        if (particle->energy > cudaSimulationParameters.particleSplitEnergy.value[particle->color]) {
             particle->energy *= 0.5f;
             auto velPerturbation = Math::unitVectorOfAngle(data.numberGen1.random() * 360);
 
@@ -205,7 +200,7 @@ __inline__ __device__ void RadiationProcessor::splitting(SimulationData& data)
 
 __inline__ __device__ void RadiationProcessor::transformation(SimulationData& data)
 {
-    if (!cudaSimulationParameters.particleTransformationAllowed) {
+    if (!cudaSimulationParameters.particleTransformationAllowed.value) {
         return;
     }
     auto const partition = calcAllThreadsPartition(data.objects.particlePointers.getNumOrigEntries());

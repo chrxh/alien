@@ -61,19 +61,21 @@ struct SimulationParameters
     BaseZoneParameter<float> cellMaxBindingEnergy = {.baseValue = Infinity<float>::value};
 
     // Physics: Radiation
-    PinnableBaseZoneParameter<float> relativeStrength = {};
-    ColorVector<int> radiationType1_minimumAge = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> radiationType2_strength = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> radiationType2_energyThreshold = {500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f};
-    ColorVector<float> particleSplitEnergy = {
-        Infinity<float>::value,
-        Infinity<float>::value,
-        Infinity<float>::value,
-        Infinity<float>::value,
-        Infinity<float>::value,
-        Infinity<float>::value,
-        Infinity<float>::value};
-    bool particleTransformationAllowed = false;
+    BaseParameter<bool> relativeStrengthPinned = {false};
+    BaseZoneParameter<ColorVector<float>> radiationAbsorption = {.baseValue = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
+    BaseZoneParameter<ColorVector<float>> radiationType1_strength = {.baseValue = {0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f}};
+    BaseParameter<ColorVector<int>> radiationType1_minimumAge = {{0, 0, 0, 0, 0, 0, 0}};
+    BaseParameter<ColorVector<float>> radiationType2_strength = {{0, 0, 0, 0, 0, 0, 0}};
+    BaseParameter<ColorVector<float>> radiationType2_energyThreshold = {500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f};
+    BaseParameter<ColorVector<float>> particleSplitEnergy = {
+        {Infinity<float>::value,
+         Infinity<float>::value,
+         Infinity<float>::value,
+         Infinity<float>::value,
+         Infinity<float>::value,
+         Infinity<float>::value,
+         Infinity<float>::value}};
+    BaseParameter<bool> particleTransformationAllowed = {false};
     static float constexpr radiationProbability = 0.03f;
     static float constexpr radiationVelocityMultiplier = 1.0f;
     static float constexpr radiationVelocityPerturbation = 0.5f;

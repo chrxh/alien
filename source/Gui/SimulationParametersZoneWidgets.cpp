@@ -346,10 +346,10 @@ void _SimulationParametersZoneWidgets::process()
                 .min(0)
                 .max(1.0)
                 .format("%.4f")
-                .defaultValue(origZone.values.radiationAbsorption)
-                .disabledValue(parameters.baseValues.radiationAbsorption),
-            zone.values.radiationAbsorption,
-            &zone.enabledValues.radiationAbsorption);
+                .defaultValue(origParameters.radiationAbsorption.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.radiationAbsorption.baseValue),
+            parameters.radiationAbsorption.zoneValues[zoneIndex].value,
+            &parameters.radiationAbsorption.zoneValues[zoneIndex].enabled);
 
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -358,12 +358,12 @@ void _SimulationParametersZoneWidgets::process()
                 .colorDependence(true)
                 .min(0)
                 .max(0.01f)
+                .format("%.6f")
                 .logarithmic(true)
-                .defaultValue(origZone.values.radiationType1_strength)
-                .disabledValue(parameters.baseValues.radiationType1_strength)
-                .format("%.6f"),
-            zone.values.radiationType1_strength,
-            &zone.enabledValues.radiationType1_strength);
+                .defaultValue(origParameters.radiationType1_strength.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.radiationType1_strength.baseValue),
+            parameters.radiationType1_strength.zoneValues[zoneIndex].value,
+            &parameters.radiationType1_strength.zoneValues[zoneIndex].enabled);
     }
     AlienImGui::EndTreeNode();
 
