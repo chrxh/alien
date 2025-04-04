@@ -411,10 +411,10 @@ void _SimulationParametersZoneWidgets::process()
                 .format("%.7f")
                 .colorDependence(true)
                 .logarithmic(true)
-                .defaultValue(origZone.values.copyMutationNeuronData)
-                .disabledValue(parameters.baseValues.copyMutationNeuronData),
-            zone.values.copyMutationNeuronData,
-            &zone.enabledValues.copyMutationNeuronData);
+                .defaultValue(origParameters.copyMutationNeuronData.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.copyMutationNeuronData.baseValue),
+            parameters.copyMutationNeuronData.zoneValues[zoneIndex].value,
+            &parameters.copyMutationNeuronData.zoneValues[zoneIndex].enabled);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Cell properties")
@@ -424,10 +424,10 @@ void _SimulationParametersZoneWidgets::process()
                 .format("%.7f")
                 .logarithmic(true)
                 .colorDependence(true)
-                .defaultValue(origZone.values.copyMutationCellProperties)
-                .disabledValue(parameters.baseValues.copyMutationCellProperties),
-            zone.values.copyMutationCellProperties,
-            &zone.enabledValues.copyMutationCellProperties);
+                .defaultValue(origParameters.copyMutationCellProperties.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.copyMutationCellProperties.baseValue),
+            parameters.copyMutationCellProperties.zoneValues[zoneIndex].value,
+            &parameters.copyMutationCellProperties.zoneValues[zoneIndex].enabled);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Geometry")
@@ -437,10 +437,10 @@ void _SimulationParametersZoneWidgets::process()
                 .format("%.7f")
                 .logarithmic(true)
                 .colorDependence(true)
-                .defaultValue(origZone.values.copyMutationGeometry)
-                .disabledValue(parameters.baseValues.copyMutationGeometry),
-            zone.values.copyMutationGeometry,
-            &zone.enabledValues.copyMutationGeometry);
+                .defaultValue(origParameters.copyMutationGeometry.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.copyMutationGeometry.baseValue),
+            parameters.copyMutationGeometry.zoneValues[zoneIndex].value,
+            &parameters.copyMutationGeometry.zoneValues[zoneIndex].enabled);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Custom geometry")
@@ -450,10 +450,10 @@ void _SimulationParametersZoneWidgets::process()
                 .format("%.7f")
                 .logarithmic(true)
                 .colorDependence(true)
-                .defaultValue(origZone.values.copyMutationCustomGeometry)
-                .disabledValue(parameters.baseValues.copyMutationCustomGeometry),
-            zone.values.copyMutationCustomGeometry,
-            &zone.enabledValues.copyMutationCustomGeometry);
+                .defaultValue(origParameters.copyMutationCustomGeometry.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.copyMutationCustomGeometry.baseValue),
+            parameters.copyMutationCustomGeometry.zoneValues[zoneIndex].value,
+            &parameters.copyMutationCustomGeometry.zoneValues[zoneIndex].enabled);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Cell function type")
@@ -463,10 +463,10 @@ void _SimulationParametersZoneWidgets::process()
                 .format("%.7f")
                 .logarithmic(true)
                 .colorDependence(true)
-                .defaultValue(origZone.values.copyMutationCellType)
-                .disabledValue(parameters.baseValues.copyMutationCellType),
-            zone.values.copyMutationCellType,
-            &zone.enabledValues.copyMutationCellType);
+                .defaultValue(origParameters.copyMutationCellType.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.copyMutationCellType.baseValue),
+            parameters.copyMutationCellType.zoneValues[zoneIndex].value,
+            &parameters.copyMutationCellType.zoneValues[zoneIndex].enabled);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Cell insertion")
@@ -476,10 +476,10 @@ void _SimulationParametersZoneWidgets::process()
                 .format("%.7f")
                 .logarithmic(true)
                 .colorDependence(true)
-                .defaultValue(origZone.values.copyMutationInsertion)
-                .disabledValue(parameters.baseValues.copyMutationInsertion),
-            zone.values.copyMutationInsertion,
-            &zone.enabledValues.copyMutationInsertion);
+                .defaultValue(origParameters.copyMutationInsertion.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.copyMutationInsertion.baseValue),
+            parameters.copyMutationInsertion.zoneValues[zoneIndex].value,
+            &parameters.copyMutationInsertion.zoneValues[zoneIndex].enabled);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Cell deletion")
@@ -489,10 +489,10 @@ void _SimulationParametersZoneWidgets::process()
                 .format("%.7f")
                 .logarithmic(true)
                 .colorDependence(true)
-                .defaultValue(origZone.values.copyMutationDeletion)
-                .disabledValue(parameters.baseValues.copyMutationDeletion),
-            zone.values.copyMutationDeletion,
-            &zone.enabledValues.copyMutationDeletion);
+                .defaultValue(origParameters.copyMutationDeletion.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.copyMutationDeletion.baseValue),
+            parameters.copyMutationDeletion.zoneValues[zoneIndex].value,
+            &parameters.copyMutationDeletion.zoneValues[zoneIndex].enabled);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Translation")
@@ -502,10 +502,10 @@ void _SimulationParametersZoneWidgets::process()
                 .format("%.7f")
                 .logarithmic(true)
                 .colorDependence(true)
-                .defaultValue(origZone.values.copyMutationTranslation)
-                .disabledValue(parameters.baseValues.copyMutationTranslation),
-            zone.values.copyMutationTranslation,
-            &zone.enabledValues.copyMutationTranslation);
+                .defaultValue(origParameters.copyMutationTranslation.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.copyMutationTranslation.baseValue),
+            parameters.copyMutationTranslation.zoneValues[zoneIndex].value,
+            &parameters.copyMutationTranslation.zoneValues[zoneIndex].enabled);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Duplication")
@@ -515,10 +515,10 @@ void _SimulationParametersZoneWidgets::process()
                 .format("%.7f")
                 .logarithmic(true)
                 .colorDependence(true)
-                .defaultValue(origZone.values.copyMutationDuplication)
-                .disabledValue(parameters.baseValues.copyMutationDuplication),
-            zone.values.copyMutationDuplication,
-            &zone.enabledValues.copyMutationDuplication);
+                .defaultValue(origParameters.copyMutationDuplication.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.copyMutationDuplication.baseValue),
+            parameters.copyMutationDuplication.zoneValues[zoneIndex].value,
+            &parameters.copyMutationDuplication.zoneValues[zoneIndex].enabled);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Individual cell color")
@@ -528,10 +528,10 @@ void _SimulationParametersZoneWidgets::process()
                 .format("%.7f")
                 .logarithmic(true)
                 .colorDependence(true)
-                .defaultValue(origZone.values.copyMutationCellColor)
-                .disabledValue(parameters.baseValues.copyMutationCellColor),
-            zone.values.copyMutationCellColor,
-            &zone.enabledValues.copyMutationCellColor);
+                .defaultValue(origParameters.copyMutationCellColor.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.copyMutationCellColor.baseValue),
+            parameters.copyMutationCellColor.zoneValues[zoneIndex].value,
+            &parameters.copyMutationCellColor.zoneValues[zoneIndex].enabled);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Sub-genome color")
@@ -541,10 +541,10 @@ void _SimulationParametersZoneWidgets::process()
                 .format("%.7f")
                 .logarithmic(true)
                 .colorDependence(true)
-                .defaultValue(origZone.values.copyMutationSubgenomeColor)
-                .disabledValue(parameters.baseValues.copyMutationSubgenomeColor),
-            zone.values.copyMutationSubgenomeColor,
-            &zone.enabledValues.copyMutationSubgenomeColor);
+                .defaultValue(origParameters.copyMutationSubgenomeColor.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.copyMutationSubgenomeColor.baseValue),
+            parameters.copyMutationSubgenomeColor.zoneValues[zoneIndex].value,
+            &parameters.copyMutationSubgenomeColor.zoneValues[zoneIndex].enabled);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Genome color")
@@ -554,10 +554,10 @@ void _SimulationParametersZoneWidgets::process()
                 .format("%.7f")
                 .logarithmic(true)
                 .colorDependence(true)
-                .defaultValue(origZone.values.copyMutationGenomeColor)
-                .disabledValue(parameters.baseValues.copyMutationGenomeColor),
-            zone.values.copyMutationGenomeColor,
-            &zone.enabledValues.copyMutationGenomeColor);
+                .defaultValue(origParameters.copyMutationGenomeColor.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.copyMutationGenomeColor.baseValue),
+            parameters.copyMutationGenomeColor.zoneValues[zoneIndex].value,
+            &parameters.copyMutationGenomeColor.zoneValues[zoneIndex].enabled);
     }
     AlienImGui::EndTreeNode();
 

@@ -328,69 +328,64 @@ void SpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Neural nets")
-                    .reference(FloatSpec().member(&SimulationParametersZoneValues::copyMutationNeuronData).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::copyMutationNeuronData).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip(
                         "This type of mutation can change the weights, biases and activation functions of neural networks of each neuron cell encoded in the "
                         "genome."),
                 ParameterSpec()
                     .name("Cell properties")
-                    .reference(
-                        FloatSpec().member(&SimulationParametersZoneValues::copyMutationCellProperties).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::copyMutationCellProperties).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation changes a random property (e.g. (input) execution order number, required energy, block output and "
                              "function-specific properties such as minimum density for sensors, neural net weights etc.). The spatial structure, color, cell "
                              "function type and self-replication capabilities are not changed. This mutation is applied to each encoded cell in the genome."),
                 ParameterSpec()
                     .name("Geometry")
-                    .reference(FloatSpec().member(&SimulationParametersZoneValues::copyMutationGeometry).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::copyMutationGeometry).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation changes the geometry type, connection distance, stiffness and single construction flag. The probability of "
                              "a change is given by the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Custom geometry")
-                    .reference(
-                        FloatSpec().member(&SimulationParametersZoneValues::copyMutationCustomGeometry).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::copyMutationCustomGeometry).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation only changes angles and required connections of custom geometries. The probability of a change is given by "
                              "the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Cell function type")
-                    .reference(FloatSpec().member(&SimulationParametersZoneValues::copyMutationCellType).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::copyMutationCellType).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation changes the type of cell function. The changed cell function will have random properties. The probability "
                              "of a change is given by the specified value times the number of coded cells in the genome. If the flag 'Preserve "
                              "self-replication' is disabled it can also alter self-replication capabilities by changing a constructor to "
                              "something else or vice versa."),
                 ParameterSpec()
                     .name("Insertion")
-                    .reference(FloatSpec().member(&SimulationParametersZoneValues::copyMutationInsertion).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::copyMutationInsertion).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation inserts a new cell description to the genome at a random position. The probability of a change is given by "
                              "the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Deletion")
-                    .reference(FloatSpec().member(&SimulationParametersZoneValues::copyMutationDeletion).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::copyMutationDeletion).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation deletes a cell description from the genome at a random position. The probability of a change is given by "
                              "the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Translation")
                     .reference(
-                        FloatSpec().member(&SimulationParametersZoneValues::copyMutationTranslation).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                        FloatSpec().member(&SimulationParameters::copyMutationTranslation).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation moves a block of cell descriptions from the genome at a random position to a new random position."),
                 ParameterSpec()
                     .name("Duplication")
-                    .reference(
-                        FloatSpec().member(&SimulationParametersZoneValues::copyMutationDuplication).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::copyMutationDuplication).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation copies a block of cell descriptions from the genome at a random position to a new random position."),
                 ParameterSpec()
                     .name("Individual cell color")
-                    .reference(FloatSpec().member(&SimulationParametersZoneValues::copyMutationCellColor).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::copyMutationCellColor).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation alters the color of a single cell descriptions in a genome by using the specified color transitions. The "
                              "probability of a change is given by the specified value times the number of coded cells in the genome."),
                 ParameterSpec()
                     .name("Sub-genome color")
-                    .reference(
-                        FloatSpec().member(&SimulationParametersZoneValues::copyMutationSubgenomeColor).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::copyMutationSubgenomeColor).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation alters the color of all cell descriptions in a sub-genome by using the specified color transitions."),
                 ParameterSpec()
                     .name("Genome color")
-                    .reference(
-                        FloatSpec().member(&SimulationParametersZoneValues::copyMutationGenomeColor).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::copyMutationGenomeColor).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
                     .tooltip("This type of mutation alters the color of all cell descriptions in a genome by using the specified color transitions."),
                 ParameterSpec()
                     .name("Color transitions")

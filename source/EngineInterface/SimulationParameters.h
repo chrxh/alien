@@ -95,16 +95,28 @@ struct SimulationParameters
     BaseParameter<CellDeathConsquences> cellDeathConsequences = {CellDeathConsquences_DetachedPartsDie};
 
     // Mutation
-    ColorMatrix<bool> copyMutationColorTransitions = {
-        {true, true, true, true, true, true, true},
-        {true, true, true, true, true, true, true},
-        {true, true, true, true, true, true, true},
-        {true, true, true, true, true, true, true},
-        {true, true, true, true, true, true, true},
-        {true, true, true, true, true, true, true},
-        {true, true, true, true, true, true, true}};
-    bool copyMutationPreventDepthIncrease = false;
-    bool copyMutationSelfReplication = false;
+    BaseZoneParameter<ColorVector<float>> copyMutationNeuronData = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseZoneParameter<ColorVector<float>> copyMutationCellProperties = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseZoneParameter<ColorVector<float>> copyMutationGeometry = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseZoneParameter<ColorVector<float>> copyMutationCustomGeometry = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseZoneParameter<ColorVector<float>> copyMutationCellType = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseZoneParameter<ColorVector<float>> copyMutationInsertion = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseZoneParameter<ColorVector<float>> copyMutationDeletion = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseZoneParameter<ColorVector<float>> copyMutationTranslation = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseZoneParameter<ColorVector<float>> copyMutationDuplication = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseZoneParameter<ColorVector<float>> copyMutationCellColor = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseZoneParameter<ColorVector<float>> copyMutationSubgenomeColor = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseZoneParameter<ColorVector<float>> copyMutationGenomeColor = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseParameter<ColorMatrix<bool>> copyMutationColorTransitions = {
+        {{true, true, true, true, true, true, true},
+         {true, true, true, true, true, true, true},
+         {true, true, true, true, true, true, true},
+         {true, true, true, true, true, true, true},
+         {true, true, true, true, true, true, true},
+         {true, true, true, true, true, true, true},
+         {true, true, true, true, true, true, true}}};
+    BaseParameter<bool> copyMutationPreventDepthIncrease = {false};
+    BaseParameter<bool> copyMutationSelfReplication = {false};
 
     // Cell type: Attacker
     ColorVector<float> attackerStrength = {0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f};
