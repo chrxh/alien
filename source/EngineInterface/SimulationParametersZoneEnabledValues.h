@@ -17,18 +17,5 @@ struct SimulationParametersZoneEnabledValues
     bool attackerGeometryDeviationProtection = false;
     bool attackerConnectionsMismatchProtection = false;
 
-    bool copyMutationNeuronData = false;
-    bool copyMutationCellProperties = false;
-    bool copyMutationCellType = false;
-    bool copyMutationGeometry = false;
-    bool copyMutationCustomGeometry = false; 
-    bool copyMutationInsertion = false;
-    bool copyMutationDeletion = false;
-    bool copyMutationTranslation = false;
-    bool copyMutationDuplication = false;
-    bool copyMutationCellColor = false;
-    bool copyMutationSubgenomeColor = false;
-    bool copyMutationGenomeColor = false;
-
     bool operator==(SimulationParametersZoneEnabledValues const&) const = default;
 };

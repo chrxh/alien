@@ -67,18 +67,5 @@ struct SimulationParametersZoneValues
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
 
-    ColorVector<float> copyMutationNeuronData = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> copyMutationCellProperties = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> copyMutationCellType = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> copyMutationGeometry = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> copyMutationCustomGeometry = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> copyMutationInsertion = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> copyMutationDeletion = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> copyMutationTranslation = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> copyMutationDuplication = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> copyMutationCellColor = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> copyMutationSubgenomeColor = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> copyMutationGenomeColor = {0, 0, 0, 0, 0, 0, 0};
-
     bool operator==(SimulationParametersZoneValues const&) const = default;
 };

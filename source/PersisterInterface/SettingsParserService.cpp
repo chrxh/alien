@@ -337,8 +337,8 @@ namespace
 
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.copyMutationNeuronData,
-            defaultParameters.baseValues.copyMutationNeuronData,
+            parameters.copyMutationNeuronData.baseValue,
+            defaultParameters.copyMutationNeuronData.baseValue,
             "simulation parameters.cell.copy mutation.neuron data",
             parserTask);
         ParameterParser::encodeDecode(
@@ -379,38 +379,38 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.copyMutationCellProperties,
-            defaultParameters.baseValues.copyMutationCellProperties,
+            parameters.copyMutationCellProperties.baseValue,
+            defaultParameters.copyMutationCellProperties.baseValue,
             "simulation parameters.cell.copy mutation.cell properties",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.copyMutationGeometry,
-            defaultParameters.baseValues.copyMutationGeometry,
+            parameters.copyMutationGeometry.baseValue,
+            defaultParameters.copyMutationGeometry.baseValue,
             "simulation parameters.cell.copy mutation.geometry",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.copyMutationCustomGeometry,
-            defaultParameters.baseValues.copyMutationCustomGeometry,
+            parameters.copyMutationCustomGeometry.baseValue,
+            defaultParameters.copyMutationCustomGeometry.baseValue,
             "simulation parameters.cell.copy mutation.custom geometry",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.copyMutationCellType,
-            defaultParameters.baseValues.copyMutationCellType,
+            parameters.copyMutationCellType.baseValue,
+            defaultParameters.copyMutationCellType.baseValue,
             "simulation parameters.cell.copy mutation.cell function",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.copyMutationInsertion,
-            defaultParameters.baseValues.copyMutationInsertion,
+            parameters.copyMutationInsertion.baseValue,
+            defaultParameters.copyMutationInsertion.baseValue,
             "simulation parameters.cell.copy mutation.insertion",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.copyMutationDeletion,
-            defaultParameters.baseValues.copyMutationDeletion,
+            parameters.copyMutationDeletion.baseValue,
+            defaultParameters.copyMutationDeletion.baseValue,
             "simulation parameters.cell.copy mutation.deletion",
             parserTask);
         ParameterParser::encodeDecode(
@@ -421,50 +421,50 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.copyMutationTranslation,
-            defaultParameters.baseValues.copyMutationTranslation,
+            parameters.copyMutationTranslation.baseValue,
+            defaultParameters.copyMutationTranslation.baseValue,
             "simulation parameters.cell.copy mutation.translation",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.copyMutationDuplication,
-            defaultParameters.baseValues.copyMutationDuplication,
+            parameters.copyMutationDuplication.baseValue,
+            defaultParameters.copyMutationDuplication.baseValue,
             "simulation parameters.cell.copy mutation.duplication",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.copyMutationCellColor,
-            defaultParameters.baseValues.copyMutationCellColor,
+            parameters.copyMutationCellColor.baseValue,
+            defaultParameters.copyMutationCellColor.baseValue,
             "simulation parameters.cell.copy mutation.cell color",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.copyMutationSubgenomeColor,
-            defaultParameters.baseValues.copyMutationSubgenomeColor,
+            parameters.copyMutationSubgenomeColor.baseValue,
+            defaultParameters.copyMutationSubgenomeColor.baseValue,
             "simulation parameters.cell.copy mutation.subgenome color",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.copyMutationGenomeColor,
-            defaultParameters.baseValues.copyMutationGenomeColor,
+            parameters.copyMutationGenomeColor.baseValue,
+            defaultParameters.copyMutationGenomeColor.baseValue,
             "simulation parameters.cell.copy mutation.genome color",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.copyMutationColorTransitions,
-            defaultParameters.copyMutationColorTransitions,
+            parameters.copyMutationColorTransitions.value,
+            defaultParameters.copyMutationColorTransitions.value,
             "simulation parameters.cell.copy mutation.color transition",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.copyMutationSelfReplication,
-            defaultParameters.copyMutationSelfReplication,
+            parameters.copyMutationSelfReplication.value,
+            defaultParameters.copyMutationSelfReplication.value,
             "simulation parameters.cell.copy mutation.self replication flag",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.copyMutationPreventDepthIncrease,
-            defaultParameters.copyMutationPreventDepthIncrease,
+            parameters.copyMutationPreventDepthIncrease.value,
+            defaultParameters.copyMutationPreventDepthIncrease.value,
             "simulation parameters.cell.copy mutation.prevent depth increase",
             parserTask);
 
@@ -926,86 +926,86 @@ namespace
 
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.copyMutationNeuronData,
-                spot.enabledValues.copyMutationNeuronData,
-                defaultSpot.values.copyMutationNeuronData,
+                parameters.copyMutationNeuronData.zoneValues[index].value,
+                parameters.copyMutationNeuronData.zoneValues[index].enabled,
+                defaultParameters.copyMutationNeuronData.baseValue,
                 base + "cell.copy mutation.neuron data",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.copyMutationCellProperties,
-                spot.enabledValues.copyMutationCellProperties,
-                defaultSpot.values.copyMutationCellProperties,
+                parameters.copyMutationCellProperties.zoneValues[index].value,
+                parameters.copyMutationCellProperties.zoneValues[index].enabled,
+                defaultParameters.copyMutationCellProperties.baseValue,
                 base + "cell.copy mutation.cell properties",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.copyMutationGeometry,
-                spot.enabledValues.copyMutationGeometry,
-                defaultSpot.values.copyMutationGeometry,
+                parameters.copyMutationGeometry.zoneValues[index].value,
+                parameters.copyMutationGeometry.zoneValues[index].enabled,
+                defaultParameters.copyMutationGeometry.baseValue,
                 base + "cell.copy mutation.geometry",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.copyMutationCustomGeometry,
-                spot.enabledValues.copyMutationCustomGeometry,
-                defaultSpot.values.copyMutationCustomGeometry,
+                parameters.copyMutationCustomGeometry.zoneValues[index].value,
+                parameters.copyMutationCustomGeometry.zoneValues[index].enabled,
+                defaultParameters.copyMutationCustomGeometry.baseValue,
                 base + "cell.copy mutation.custom geometry",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.copyMutationCellType,
-                spot.enabledValues.copyMutationCellType,
-                defaultSpot.values.copyMutationCellType,
+                parameters.copyMutationCellType.zoneValues[index].value,
+                parameters.copyMutationCellType.zoneValues[index].enabled,
+                defaultParameters.copyMutationCellType.baseValue,
                 base + "cell.copy mutation.cell function",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.copyMutationInsertion,
-                spot.enabledValues.copyMutationInsertion,
-                defaultSpot.values.copyMutationInsertion,
+                parameters.copyMutationInsertion.zoneValues[index].value,
+                parameters.copyMutationInsertion.zoneValues[index].enabled,
+                defaultParameters.copyMutationInsertion.baseValue,
                 base + "cell.copy mutation.insertion",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.copyMutationDeletion,
-                spot.enabledValues.copyMutationDeletion,
-                defaultSpot.values.copyMutationDeletion,
+                parameters.copyMutationDeletion.zoneValues[index].value,
+                parameters.copyMutationDeletion.zoneValues[index].enabled,
+                defaultParameters.copyMutationDeletion.baseValue,
                 base + "cell.copy mutation.deletion",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.copyMutationTranslation,
-                spot.enabledValues.copyMutationTranslation,
-                defaultSpot.values.copyMutationTranslation,
+                parameters.copyMutationTranslation.zoneValues[index].value,
+                parameters.copyMutationTranslation.zoneValues[index].enabled,
+                defaultParameters.copyMutationTranslation.baseValue,
                 base + "cell.copy mutation.translation",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.copyMutationDuplication,
-                spot.enabledValues.copyMutationDuplication,
-                defaultSpot.values.copyMutationDuplication,
+                parameters.copyMutationDuplication.zoneValues[index].value,
+                parameters.copyMutationDuplication.zoneValues[index].enabled,
+                defaultParameters.copyMutationDuplication.baseValue,
                 base + "cell.copy mutation.duplication",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.copyMutationCellColor,
-                spot.enabledValues.copyMutationCellColor,
-                defaultSpot.values.copyMutationCellColor,
+                parameters.copyMutationCellColor.zoneValues[index].value,
+                parameters.copyMutationCellColor.zoneValues[index].enabled,
+                defaultParameters.copyMutationCellColor.baseValue,
                 base + "cell.copy mutation.cell color",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.copyMutationSubgenomeColor,
-                spot.enabledValues.copyMutationSubgenomeColor,
-                defaultSpot.values.copyMutationSubgenomeColor,
+                parameters.copyMutationSubgenomeColor.zoneValues[index].value,
+                parameters.copyMutationSubgenomeColor.zoneValues[index].enabled,
+                defaultParameters.copyMutationSubgenomeColor.baseValue,
                 base + "cell.copy mutation.subgenome color",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.copyMutationGenomeColor,
-                spot.enabledValues.copyMutationGenomeColor,
-                defaultSpot.values.copyMutationGenomeColor,
+                parameters.copyMutationGenomeColor.zoneValues[index].value,
+                parameters.copyMutationGenomeColor.zoneValues[index].enabled,
+                defaultParameters.copyMutationGenomeColor.baseValue,
                 base + "cell.copy mutation.genome color",
                 parserTask);
         }
