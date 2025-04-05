@@ -101,7 +101,7 @@ using SourceEnabledMember = std::shared_ptr<_SourceEnabledMember>;
 using _ExpertToggleMember = bool ExpertToggles::*;
 using ExpertToggleMember = std::shared_ptr<_ExpertToggleMember>;
 
-using BoolMemberSpec = std::variant<std::monostate, BoolMember, BoolZoneValuesMember, ColorMatrixBoolMember, BoolMemberNew, BoolZoneValuesMemberNew, ColorMatrixBoolMemberNew>;
+using BoolMemberVariant = std::variant<std::monostate, BoolMember, BoolZoneValuesMember, ColorMatrixBoolMember, BoolMemberNew, BoolZoneValuesMemberNew, ColorMatrixBoolMemberNew>;
 
 struct PinnableBaseValueSpecNew
 {
@@ -119,10 +119,10 @@ struct BoolSpec
     SETTER_SHARED_PTR(BoolSpec, BoolMemberNew, member);
     SETTER_SHARED_PTR(BoolSpec, BoolZoneValuesMemberNew, member);
     SETTER_SHARED_PTR(BoolSpec, ColorMatrixBoolMemberNew, member);
-    BoolMemberSpec _member = std::monostate();
+    BoolMemberVariant _member = std::monostate();
 };
 
-using IntMemberSpec = std::variant<std::monostate, IntMember, ColorVectorIntMember, ColorMatrixIntMember, IntMemberNew, ColorVectorIntMemberNew, ColorMatrixIntMemberNew>;
+using IntMemberVariant = std::variant<std::monostate, IntMember, ColorVectorIntMember, ColorMatrixIntMember, IntMemberNew, ColorVectorIntMemberNew, ColorMatrixIntMemberNew>;
 
 struct IntSpec
 {
@@ -132,7 +132,7 @@ struct IntSpec
     SETTER_SHARED_PTR(IntSpec, IntMemberNew, member);
     SETTER_SHARED_PTR(IntSpec, ColorVectorIntMemberNew, member);
     SETTER_SHARED_PTR(IntSpec, ColorMatrixIntMemberNew, member);
-    IntMemberSpec _member = std::monostate();
+    IntMemberVariant _member = std::monostate();
 
     MEMBER(IntSpec, int, min, 0);
     MEMBER(IntSpec, int, max, 0);
@@ -140,7 +140,7 @@ struct IntSpec
     MEMBER(IntSpec, bool, infinity, false);
 };
 
-using FloatMemberSpec = std::variant<
+using FloatMemberVariant = std::variant<
     std::monostate,
     FloatMember,
     ColorVectorFloatMember,
@@ -171,7 +171,7 @@ struct FloatSpec
     SETTER_SHARED_PTR(FloatSpec, ColorVectorFloatBaseZoneMemberNew, member);
     SETTER_SHARED_PTR(FloatSpec, ColorMatrixFloatBaseZoneMemberNew, member);
     SETTER(FloatSpec, PinnableBaseValueSpecNew, member);
-    FloatMemberSpec _member = std::monostate();
+    FloatMemberVariant _member = std::monostate();
 
     MEMBER(FloatSpec, float, min, 0);
     MEMBER(FloatSpec, float, max, 0);
@@ -180,44 +180,44 @@ struct FloatSpec
     MEMBER(FloatSpec, bool, infinity, false);
 };
 
-using Char64MemberSpec = std::variant<std::monostate, Char64Member, Char64MemberNew>;
+using Char64MemberVariant = std::variant<std::monostate, Char64Member, Char64MemberNew>;
 
 struct Char64Spec
 {
     SETTER_SHARED_PTR(Char64Spec, Char64Member, member);
     SETTER_SHARED_PTR(Char64Spec, Char64MemberNew, member);
-    Char64MemberSpec _member = std::monostate();
+    Char64MemberVariant _member = std::monostate();
 };
 
-using AlternativeMemberSpec = std::variant<std::monostate, IntMember, IntMemberNew>;
+using AlternativeMemberVariant = std::variant<std::monostate, IntMember, IntMemberNew>;
 
 struct ParameterSpec;
 struct AlternativeSpec
 {
     SETTER_SHARED_PTR(AlternativeSpec, IntMember, member);
     SETTER_SHARED_PTR(AlternativeSpec, IntMemberNew, member);
-    AlternativeMemberSpec _member = std::monostate();
+    AlternativeMemberVariant _member = std::monostate();
 
     using Alternatives = std::vector<std::pair<std::string, std::vector<ParameterSpec>>>;
     MEMBER(AlternativeSpec, Alternatives, alternatives, {});
 };
 
-using ColorPickerMemberSpec = std::variant<std::monostate, FloatColorRGBZoneMember, FloatColorRGBBaseZoneMemberNew>;
+using ColorPickerMemberVariant = std::variant<std::monostate, FloatColorRGBZoneMember, FloatColorRGBBaseZoneMemberNew>;
 
 struct ColorPickerSpec
 {
     SETTER_SHARED_PTR(ColorPickerSpec, FloatColorRGBZoneMember, member);
     SETTER_SHARED_PTR(ColorPickerSpec, FloatColorRGBBaseZoneMemberNew, member);
-    ColorPickerMemberSpec _member = std::monostate();
+    ColorPickerMemberVariant _member = std::monostate();
 };
 
-using ColorTransitionRulesMemberSpec = std::variant<std::monostate, ColorTransitionRulesZoneMember, ColorTransitionRulesBaseZoneMemberNew>;
+using ColorTransitionRulesMemberVariant = std::variant<std::monostate, ColorTransitionRulesZoneMember, ColorTransitionRulesBaseZoneMemberNew>;
 
 struct ColorTransitionRulesSpec
 {
     SETTER_SHARED_PTR(ColorTransitionRulesSpec, ColorTransitionRulesZoneMember, member);
     SETTER_SHARED_PTR(ColorTransitionRulesSpec, ColorTransitionRulesBaseZoneMemberNew, member);
-    ColorTransitionRulesMemberSpec _member = std::monostate();
+    ColorTransitionRulesMemberVariant _member = std::monostate();
 };
 
 struct EnabledSpec
@@ -250,8 +250,8 @@ struct ParameterGroupSpec
     MEMBER(ParameterGroupSpec, std::vector<ParameterSpec>, parameters, {});
     MEMBER(ParameterGroupSpec, std::optional<std::string>, tooltip, std::nullopt);
 
-    SETTER_SHARED_PTR(ParameterGroupSpec, ExpertToggleMember, expertToggle);
-    ExpertToggleMember _expertToggle;
+    SETTER_SHARED_PTR(ParameterGroupSpec, BoolMemberNew, expertToggle);
+    BoolMemberNew _expertToggle;
 };
 
 struct ParametersSpec

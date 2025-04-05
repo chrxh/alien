@@ -119,7 +119,7 @@ __inline__ __device__ void RadiationProcessor::collision(SimulationData& data)
                     if (particle->tryLock()) {
 
                         auto energyToTransfer = particle->energy * radiationAbsorption;
-                        if (cudaSimulationParameters.expertToggles.advancedAbsorptionControl) {
+                        if (cudaSimulationParameters.expertToggle_advancedAbsorptionControl.value) {
                             energyToTransfer *=
                                 max(0.0f, 1.0f - Math::length(cell->vel) * cudaSimulationParameters.radiationAbsorptionHighVelocityPenalty[cell->color]);
 

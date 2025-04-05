@@ -543,7 +543,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Advanced energy absorption control")
-            .expertToggle(&ExpertToggles::advancedAbsorptionControl)
+            .expertToggle(&SimulationParameters::expertToggle_advancedAbsorptionControl)
             .parameters({
                 ParameterSpec()
                     .name("Low genome complexity penalty")
@@ -566,7 +566,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Advanced attacker control")
-            .expertToggle(&ExpertToggles::advancedAttackerControl)
+            //.expertToggle(&ExpertToggles::advancedAttackerControl)
             .parameters({
                 ParameterSpec()
                     .name("Same mutant protection")
@@ -596,7 +596,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Cell age limiter")
-            .expertToggle(&ExpertToggles::cellAgeLimiter)
+            //.expertToggle(&ExpertToggles::cellAgeLimiter)
             .parameters({
                 ParameterSpec()
                     .name("Maximum inactive cell age")
@@ -636,7 +636,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Cell color transition rules")
-            .expertToggle(&ExpertToggles::cellColorTransitionRules)
+            //.expertToggle(&ExpertToggles::cellColorTransitionRules)
             .parameters({
                 ParameterSpec()
                     .name("Target color and duration")
@@ -647,7 +647,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Cell glow")
-            .expertToggle(&ExpertToggles::cellGlow)
+            //.expertToggle(&ExpertToggles::cellGlow)
             .parameters({
                 ParameterSpec()
                     .name("Coloring")
@@ -674,7 +674,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Customize deletion mutations")
-            .expertToggle(&ExpertToggles::customizeDeletionMutations)
+            //.expertToggle(&ExpertToggles::customizeDeletionMutations)
             .parameters({
                 ParameterSpec()
                     .name("Minimum size")
@@ -684,7 +684,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Customize neuron mutations")
-            .expertToggle(&ExpertToggles::customizeNeuronMutations)
+            //.expertToggle(&ExpertToggles::customizeNeuronMutations)
             .parameters({
                 ParameterSpec()
                     .name("Affected weights")
@@ -720,7 +720,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("External energy control")
-            .expertToggle(&ExpertToggles::externalEnergyControl)
+            //.expertToggle(&ExpertToggles::externalEnergyControl)
             .parameters({
                 ParameterSpec()
                     .name("External energy amount")
@@ -771,7 +771,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Genome complexity measurement")
-            .expertToggle(&ExpertToggles::genomeComplexityMeasurement)
+            //.expertToggle(&ExpertToggles::genomeComplexityMeasurement)
             .parameters({
                 ParameterSpec()
                     .name("Size factor")
