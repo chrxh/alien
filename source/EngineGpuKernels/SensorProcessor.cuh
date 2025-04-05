@@ -141,7 +141,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
     auto const& densityMap = data.preprocessedSimulationData.densityMap;
 
     auto const startRadius = max(toFloat(cell->cellTypeData.sensor.minRange), calcStartDistanceForScanning(restrictToColor, restrictToMutants, cell->color));
-    auto endRadius = cudaSimulationParameters.sensorRadius[cell->color];
+    auto endRadius = cudaSimulationParameters.sensorRadius.value[cell->color];
     if (cell->cellTypeData.sensor.maxRange >= 0) {
         endRadius = min(endRadius, toFloat(cell->cellTypeData.sensor.maxRange));
     }

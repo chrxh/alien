@@ -13,7 +13,7 @@ public:
     static SimulationParameters getParameters()
     {
         SimulationParameters result;
-        result.transmitterEnergyDistributionSameCreature = true;
+        result.transmitterEnergyDistributionSameCreature.value = true;
         result.innerFriction.value = 0;
         result.friction.baseValue = 0;
         for (int i = 0; i < MAX_COLORS; ++i) {
@@ -265,7 +265,7 @@ TEST_F(TransmitterTests, distributeToTwoTransmittersWithDifferentColor)
 
 TEST_F(TransmitterTests, distributeNotToNotReadyConstructors)
 {
-    _parameters.constructorCompletenessCheck = true;
+    _parameters.constructorCompletenessCheck.value = true;
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto subgenome = GenomeDescription().cells({CellGenomeDescription()});
@@ -318,7 +318,7 @@ TEST_F(TransmitterTests, distributeNotToNotReadyConstructors)
 
 TEST_F(TransmitterTests, distributeToReadyConstructors)
 {
-    _parameters.constructorCompletenessCheck = true;
+    _parameters.constructorCompletenessCheck.value = true;
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto subgenome = GenomeDescription().cells({CellGenomeDescription()});

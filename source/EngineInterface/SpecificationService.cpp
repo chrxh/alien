@@ -408,11 +408,11 @@ void SpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Energy cost")
-                    .reference(FloatSpec().member(&SimulationParametersZoneValues::attackerEnergyCost).min(0).max(1.0f).logarithmic(true).format("%.5f"))
+                    .reference(FloatSpec().member(&SimulationParameters::attackerEnergyCost).min(0).max(1.0f).logarithmic(true).format("%.5f"))
                     .tooltip("Amount of energy lost by an attempted attack of a cell in form of emitted energy particles."),
                 ParameterSpec()
                     .name("Food chain color matrix")
-                    .reference(FloatSpec().member(&SimulationParametersZoneValues::attackerFoodChainColorMatrix).min(0.0f).max(1.0f).format("%.2f"))
+                    .reference(FloatSpec().member(&SimulationParameters::attackerFoodChainColorMatrix).min(0.0f).max(1.0f).format("%.2f"))
                     .tooltip(
                         "This matrix can be used to determine how well one cell can attack another cell. The color of the attacking cell correspond to the "
                         "row number and the color of the attacked cell to the column number. A value of 0 means that the attacked cell cannot be digested, "
@@ -429,7 +429,7 @@ void SpecificationService::createSpec()
                     .tooltip("The maximum distance over which an attacker cell can attack another cell."),
                 ParameterSpec()
                     .name("Complex creature protection")
-                    .reference(FloatSpec().member(&SimulationParametersZoneValues::attackerComplexCreatureProtection).min(0).max(20.0f).format("%.2f"))
+                    .reference(FloatSpec().member(&SimulationParameters::attackerComplexCreatureProtection).min(0).max(20.0f).format("%.2f"))
                     .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with more complex genomes."),
                 ParameterSpec()
                     .name("Destroy cells")

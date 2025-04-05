@@ -119,52 +119,71 @@ struct SimulationParameters
     BaseParameter<bool> copyMutationSelfReplication = {false};
 
     // Cell type: Attacker
-    ColorVector<float> attackerStrength = {0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f};
-    ColorVector<float> attackerRadius = {1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f};
-    bool attackerDestroyCells = true;
+    BaseZoneParameter<ColorVector<float>> attackerEnergyCost = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseZoneParameter<ColorMatrix<float>> attackerFoodChainColorMatrix = {
+        .baseValue = {
+            {1, 1, 1, 1, 1, 1, 1},
+            {1, 1, 1, 1, 1, 1, 1},
+            {1, 1, 1, 1, 1, 1, 1},
+            {1, 1, 1, 1, 1, 1, 1},
+            {1, 1, 1, 1, 1, 1, 1},
+            {1, 1, 1, 1, 1, 1, 1},
+            {1, 1, 1, 1, 1, 1, 1}}};
+    BaseParameter<ColorVector<float>> attackerStrength = {{0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f}};
+    BaseParameter<ColorVector<float>> attackerRadius = {{1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f}};
+    BaseZoneParameter<ColorMatrix<float>> attackerComplexCreatureProtection = {
+        .baseValue = {
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}}};
+    BaseParameter<bool> attackerDestroyCells = {true};
 
     // Cell type: Constructor
-    ColorVector<float> constructorConnectingCellDistance = {2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f};
-    bool constructorCompletenessCheck = false;
+    BaseParameter<ColorVector<float>> constructorConnectingCellDistance = {{2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f}};
+    BaseParameter<bool> constructorCompletenessCheck = {false};
     static float constexpr constructorAdditionalOffspringDistance = 0.8f;
 
     // Cell type: Defender
-    ColorVector<float> defenderAntiAttackerStrength = {0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f};
-    ColorVector<float> defenderAntiInjectorStrength = {0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f};
+    BaseParameter<ColorVector<float>> defenderAntiAttackerStrength = {{0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f}};
+    BaseParameter<ColorVector<float>> defenderAntiInjectorStrength = {{0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f}};
 
     // Cell type: Injector
-    ColorVector<float> injectorInjectionRadius = {3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f};
-    ColorMatrix<int> injectorInjectionTime = {
+    BaseParameter<ColorVector<float>> injectorInjectionRadius = {{3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f}};
+    BaseParameter<ColorMatrix<int>> injectorInjectionTime = {{
         {3, 3, 3, 3, 3, 3, 3},
         {3, 3, 3, 3, 3, 3, 3},
         {3, 3, 3, 3, 3, 3, 3},
         {3, 3, 3, 3, 3, 3, 3},
         {3, 3, 3, 3, 3, 3, 3},
         {3, 3, 3, 3, 3, 3, 3},
-        {3, 3, 3, 3, 3, 3, 3}};
+        {3, 3, 3, 3, 3, 3, 3}}};
 
     // Cell type: Muscle
-    ColorVector<float> muscleEnergyCost = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> muscleMovementAcceleration = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-    ColorVector<float> muscleCrawlingAcceleration = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-    ColorVector<float> muscleBendingAcceleration = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+    BaseParameter<ColorVector<float>> muscleEnergyCost = {{0, 0, 0, 0, 0, 0, 0}};
+    BaseParameter<ColorVector<float>> muscleMovementAcceleration = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
+    BaseParameter<ColorVector<float>> muscleCrawlingAcceleration = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
+    BaseParameter<ColorVector<float>> muscleBendingAcceleration = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
     static float constexpr cellTypeMuscleThreshold = 0.2f;
     static int constexpr cellTypeMuscleActivationCountdown = 10;
 
     // Cell type: Sensor
-    ColorVector<float> sensorRadius = {255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f};
+    BaseParameter<ColorVector<float>> sensorRadius = {{255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f}};
 
     // Cell type: Transmitter
-    ColorVector<float> transmitterEnergyDistributionRadius = {3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f};
-    ColorVector<float> transmitterEnergyDistributionValue = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
-    bool transmitterEnergyDistributionSameCreature = true;
+    BaseParameter<ColorVector<float>> transmitterEnergyDistributionRadius = {{3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f}};
+    BaseParameter<ColorVector<float>> transmitterEnergyDistributionValue = {{10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f}};
+    BaseParameter<bool> transmitterEnergyDistributionSameCreature = {true};
 
     // Cell type: Reconnector
-    ColorVector<float> reconnectorRadius = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
+    BaseParameter<ColorVector<float>> reconnectorRadius = {{2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f}};
 
     // Cell type: Detonator
-    ColorVector<float> detonatorRadius = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
-    ColorVector<float> detonatorChainExplosionProbability = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+    BaseParameter<ColorVector<float>> detonatorRadius = {{10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f}};
+    BaseParameter<ColorVector<float>> detonatorChainExplosionProbability = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
 
     // Expert settings: Advanced absorption control
     ColorVector<float> radiationAbsorptionLowConnectionPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};

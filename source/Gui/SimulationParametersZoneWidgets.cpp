@@ -570,20 +570,20 @@ void _SimulationParametersZoneWidgets::process()
                 .name("Food chain color matrix")
                 .max(1)
                 .textWidth(RightColumnWidth)
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origZone.values.attackerFoodChainColorMatrix))
-                .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.attackerFoodChainColorMatrix)),
-            zone.values.attackerFoodChainColorMatrix,
-            &zone.enabledValues.attackerFoodChainColorMatrix);
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.attackerFoodChainColorMatrix.zoneValues[zoneIndex].value))
+                .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.attackerFoodChainColorMatrix.baseValue)),
+            parameters.attackerFoodChainColorMatrix.zoneValues[zoneIndex].value,
+            &parameters.attackerFoodChainColorMatrix.zoneValues[zoneIndex].enabled);
         AlienImGui::InputFloatColorMatrix(
             AlienImGui::InputFloatColorMatrixParameters()
                 .name("Complex creature protection")
                 .textWidth(RightColumnWidth)
                 .min(0)
                 .max(20.0f)
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origZone.values.attackerComplexCreatureProtection))
-                .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.attackerComplexCreatureProtection)),
-            zone.values.attackerComplexCreatureProtection,
-            &zone.enabledValues.attackerComplexCreatureProtection);
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.attackerComplexCreatureProtection.zoneValues[zoneIndex].value))
+                .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.attackerComplexCreatureProtection.baseValue)),
+            parameters.attackerComplexCreatureProtection.zoneValues[zoneIndex].value,
+            &parameters.attackerComplexCreatureProtection.zoneValues[zoneIndex].enabled);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Energy cost")
@@ -593,10 +593,10 @@ void _SimulationParametersZoneWidgets::process()
                 .max(1.0f)
                 .format("%.5f")
                 .logarithmic(true)
-                .defaultValue(origZone.values.attackerEnergyCost)
-                .disabledValue(parameters.baseValues.attackerEnergyCost),
-            zone.values.attackerEnergyCost,
-            &zone.enabledValues.attackerEnergyCost);
+                .defaultValue(origParameters.attackerEnergyCost.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.attackerEnergyCost.baseValue),
+            parameters.attackerEnergyCost.zoneValues[zoneIndex].value,
+            &parameters.attackerEnergyCost.zoneValues[zoneIndex].enabled);
     }
     AlienImGui::EndTreeNode();
 

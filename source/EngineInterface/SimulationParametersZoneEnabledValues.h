@@ -10,9 +10,6 @@ struct SimulationParametersZoneEnabledValues
     bool radiationDisableSources = false;
     bool maxAgeForInactiveCellsEnabled = false;
     bool colorTransitionRules = false;
-    bool attackerEnergyCost = false;
-    bool attackerFoodChainColorMatrix = false;
-    bool attackerComplexCreatureProtection = false;
     bool attackerNewComplexMutantProtection = false;
     bool attackerGeometryDeviationProtection = false;
     bool attackerConnectionsMismatchProtection = false;

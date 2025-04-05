@@ -38,26 +38,9 @@ struct SimulationParametersZoneValues
         Infinity<float>::value,
         Infinity<float>::value};
     ColorTransitionRules colorTransitionRules;
-    ColorVector<float> attackerEnergyCost = {0, 0, 0, 0, 0, 0, 0};
-    ColorMatrix<float> attackerFoodChainColorMatrix = {
-        {1, 1, 1, 1, 1, 1, 1},
-        {1, 1, 1, 1, 1, 1, 1},
-        {1, 1, 1, 1, 1, 1, 1},
-        {1, 1, 1, 1, 1, 1, 1},
-        {1, 1, 1, 1, 1, 1, 1},
-        {1, 1, 1, 1, 1, 1, 1},
-        {1, 1, 1, 1, 1, 1, 1}};
 
     ColorVector<float> attackerGeometryDeviationProtection = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<float> attackerConnectionsMismatchProtection = {0, 0, 0, 0, 0, 0, 0};
-    ColorMatrix<float> attackerComplexCreatureProtection = {
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     ColorMatrix<float> attackerNewComplexMutantProtection = {
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},

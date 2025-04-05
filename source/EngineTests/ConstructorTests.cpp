@@ -259,7 +259,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_constructionNotBui
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
-    _parameters.constructorCompletenessCheck = true;
+    _parameters.constructorCompletenessCheck.value = true;
     _simulationFacade->setSimulationParameters(_parameters);
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -295,7 +295,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_repeatedConstructi
     data.addConnection(2, 3);
     data.addConnection(3, 4);
 
-    _parameters.constructorCompletenessCheck = true;
+    _parameters.constructorCompletenessCheck.value = true;
     _simulationFacade->setSimulationParameters(_parameters);
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -332,7 +332,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_constructionBuilt)
     data.addConnection(2, 3);
     data.addConnection(3, 4);
 
-    _parameters.constructorCompletenessCheck = true;
+    _parameters.constructorCompletenessCheck.value = true;
     _simulationFacade->setSimulationParameters(_parameters);
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -370,7 +370,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_infiniteConstructi
     data.addConnection(2, 3);
     data.addConnection(3, 4);
 
-    _parameters.constructorCompletenessCheck = true;
+    _parameters.constructorCompletenessCheck.value = true;
     _simulationFacade->setSimulationParameters(_parameters);
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -393,7 +393,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_largeCluster)
     cell1.energy(_parameters.normalCellEnergy.value[0] * 3)
         .cellType(ConstructorDescription().genome(genome).numInheritedGenomeNodes(RectLength * RectLength));
 
-    _parameters.constructorCompletenessCheck = true;
+    _parameters.constructorCompletenessCheck.value = true;
     _simulationFacade->setSimulationParameters(_parameters);
     _simulationFacade->setSimulationData(rect);
     _simulationFacade->calcTimesteps(1);
@@ -473,7 +473,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_thinCluster)
         }
     }
 
-    _parameters.constructorCompletenessCheck = true;
+    _parameters.constructorCompletenessCheck.value = true;
     _simulationFacade->setSimulationParameters(_parameters);
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -517,7 +517,7 @@ TEST_F(ConstructorTests, DISABLED_constructFirstCell_completenessCheck_underCons
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
-    _parameters.constructorCompletenessCheck = true;
+    _parameters.constructorCompletenessCheck.value = true;
     _simulationFacade->setSimulationParameters(_parameters);
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);

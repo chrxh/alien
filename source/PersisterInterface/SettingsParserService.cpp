@@ -324,14 +324,14 @@ namespace
 
         ParameterParser::encodeDecode(
             tree,
-            parameters.constructorConnectingCellDistance,
-            defaultParameters.constructorConnectingCellDistance,
+            parameters.constructorConnectingCellDistance.value,
+            defaultParameters.constructorConnectingCellDistance.value,
             "simulation parameters.cell.function.constructor.connecting cell max distance",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.constructorCompletenessCheck,
-            defaultParameters.constructorCompletenessCheck,
+            parameters.constructorCompletenessCheck.value,
+            defaultParameters.constructorCompletenessCheck.value,
             "simulation parameters.cell.function.constructor.completeness check for self-replication",
             parserTask);
 
@@ -470,33 +470,33 @@ namespace
 
         ParameterParser::encodeDecode(
             tree,
-            parameters.injectorInjectionRadius,
-            defaultParameters.injectorInjectionRadius,
+            parameters.injectorInjectionRadius.value,
+            defaultParameters.injectorInjectionRadius.value,
             "simulation parameters.cell.function.injector.radius",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.injectorInjectionTime,
-            defaultParameters.injectorInjectionTime,
+            parameters.injectorInjectionTime.value,
+            defaultParameters.injectorInjectionTime.value,
             "simulation parameters.cell.function.injector.duration",
             parserTask);
 
         ParameterParser::encodeDecode(
             tree,
-            parameters.attackerRadius,
-            defaultParameters.attackerRadius,
+            parameters.attackerRadius.value,
+            defaultParameters.attackerRadius.value,
             "simulation parameters.cell.function.attacker.radius",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.attackerStrength,
-            defaultParameters.attackerStrength,
+            parameters.attackerStrength.value,
+            defaultParameters.attackerStrength.value,
             "simulation parameters.cell.function.attacker.strength",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.attackerEnergyCost,
-            defaultParameters.baseValues.attackerEnergyCost,
+            parameters.attackerEnergyCost.baseValue,
+            defaultParameters.attackerEnergyCost.baseValue,
             "simulation parameters.cell.function.attacker.energy cost",
             parserTask);
         ParameterParser::encodeDecode(
@@ -507,8 +507,8 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.attackerFoodChainColorMatrix,
-            defaultParameters.baseValues.attackerFoodChainColorMatrix,
+            parameters.attackerFoodChainColorMatrix.baseValue,
+            defaultParameters.attackerFoodChainColorMatrix.baseValue,
             "simulation parameters.cell.function.attacker.food chain color matrix",
             parserTask);
         ParameterParser::encodeDecode(
@@ -519,8 +519,8 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.attackerComplexCreatureProtection,
-            defaultParameters.baseValues.attackerComplexCreatureProtection,
+            parameters.attackerComplexCreatureProtection.baseValue,
+            defaultParameters.attackerComplexCreatureProtection.baseValue,
             "simulation parameters.cell.function.attacker.genome size bonus",
             parserTask);
         ParameterParser::encodeDecode(
@@ -543,65 +543,64 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.attackerDestroyCells,
-            defaultParameters.attackerDestroyCells,
+            parameters.attackerDestroyCells.value,
+            defaultParameters.attackerDestroyCells.value,
             "simulation parameters.cell.function.attacker.destroy cells",
             parserTask);
 
         ParameterParser::encodeDecode(
             tree,
-            parameters.defenderAntiAttackerStrength,
-            defaultParameters.defenderAntiAttackerStrength,
+            parameters.defenderAntiAttackerStrength.value,
+            defaultParameters.defenderAntiAttackerStrength.value,
             "simulation parameters.cell.function.defender.against attacker strength",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.defenderAntiInjectorStrength,
-            defaultParameters.defenderAntiInjectorStrength,
+            parameters.defenderAntiInjectorStrength.value,
+            defaultParameters.defenderAntiInjectorStrength.value,
             "simulation parameters.cell.function.defender.against injector strength",
             parserTask);
 
         ParameterParser::encodeDecode(
             tree,
-            parameters.transmitterEnergyDistributionSameCreature,
-            defaultParameters.transmitterEnergyDistributionSameCreature,
+            parameters.transmitterEnergyDistributionSameCreature.value,
+            defaultParameters.transmitterEnergyDistributionSameCreature.value,
             "simulation parameters.cell.function.transmitter.energy distribution same creature",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.transmitterEnergyDistributionRadius,
-            defaultParameters.transmitterEnergyDistributionRadius,
+            parameters.transmitterEnergyDistributionRadius.value,
+            defaultParameters.transmitterEnergyDistributionRadius.value,
             "simulation parameters.cell.function.transmitter.energy distribution radius",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.transmitterEnergyDistributionValue,
-            defaultParameters.transmitterEnergyDistributionValue,
+            parameters.transmitterEnergyDistributionValue.value,
+            defaultParameters.transmitterEnergyDistributionValue.value,
             "simulation parameters.cell.function.transmitter.energy distribution value",
             parserTask);
 
         ParameterParser::encodeDecode(
             tree,
-            parameters.muscleCrawlingAcceleration,
-            defaultParameters.muscleCrawlingAcceleration,
+            parameters.muscleCrawlingAcceleration.value,
+            defaultParameters.muscleCrawlingAcceleration.value,
             "simulation parameters.cell.function.muscle.crawling acceleration",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.muscleMovementAcceleration,
-            defaultParameters.muscleMovementAcceleration,
+            parameters.muscleMovementAcceleration.value,
+            defaultParameters.muscleMovementAcceleration.value,
             "simulation parameters.cell.function.muscle.movement acceleration",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.muscleBendingAcceleration,
-            defaultParameters.muscleBendingAcceleration,
+            parameters.muscleBendingAcceleration.value,
+            defaultParameters.muscleBendingAcceleration.value,
             "simulation parameters.cell.function.muscle.bending acceleration",
             parserTask);
         ParameterParser::encodeDecode(
-            tree,
-            parameters.muscleEnergyCost,
-            defaultParameters.muscleEnergyCost,
+            tree, parameters.muscleEnergyCost.value,
+            defaultParameters.muscleEnergyCost.value,
             "simulation parameters.cell.function.muscle.energy cost",
             parserTask);
 
@@ -615,29 +614,24 @@ namespace
             tree, parameters.particleSplitEnergy.value, defaultParameters.particleSplitEnergy.value, "simulation parameters.particle.split energy", parserTask);
 
         ParameterParser::encodeDecode(
-            tree,
-            parameters.sensorRadius,
-            defaultParameters.sensorRadius,
-            "simulation parameters.cell.function.sensor.range",
-            parserTask);
+            tree, parameters.sensorRadius.value, defaultParameters.sensorRadius.value, "simulation parameters.cell.function.sensor.range", parserTask);
 
         ParameterParser::encodeDecode(
             tree,
-            parameters.reconnectorRadius,
-            defaultParameters.reconnectorRadius,
+            parameters.reconnectorRadius.value,
+            defaultParameters.reconnectorRadius.value,
             "simulation parameters.cell.function.reconnector.radius",
             parserTask);
 
         ParameterParser::encodeDecode(
-            tree,
-            parameters.detonatorRadius,
-            defaultParameters.detonatorRadius,
+            tree, parameters.detonatorRadius.value,
+            defaultParameters.detonatorRadius.value,
             "simulation parameters.cell.function.detonator.radius",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.detonatorChainExplosionProbability,
-            defaultParameters.detonatorChainExplosionProbability,
+            parameters.detonatorChainExplosionProbability.value,
+            defaultParameters.detonatorChainExplosionProbability.value,
             "simulation parameters.cell.function.detonator.chain explosion probability",
             parserTask);
 
@@ -882,24 +876,24 @@ namespace
 
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.attackerEnergyCost,
-                spot.enabledValues.attackerEnergyCost,
-                defaultSpot.values.attackerEnergyCost,
+                parameters.attackerEnergyCost.zoneValues[index].value,
+                parameters.attackerEnergyCost.zoneValues[index].enabled,
+                defaultParameters.attackerEnergyCost.baseValue,
                 base + "cell.function.attacker.energy cost",
                 parserTask);
 
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.attackerFoodChainColorMatrix,
-                spot.enabledValues.attackerFoodChainColorMatrix,
-                defaultSpot.values.attackerFoodChainColorMatrix,
+                parameters.attackerFoodChainColorMatrix.zoneValues[index].value,
+                parameters.attackerFoodChainColorMatrix.zoneValues[index].enabled,
+                defaultParameters.attackerFoodChainColorMatrix.baseValue,
                 base + "cell.function.attacker.food chain color matrix",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.attackerComplexCreatureProtection,
-                spot.enabledValues.attackerComplexCreatureProtection,
-                defaultSpot.values.attackerComplexCreatureProtection,
+                parameters.attackerComplexCreatureProtection.zoneValues[index].value,
+                parameters.attackerComplexCreatureProtection.zoneValues[index].enabled,
+                defaultParameters.attackerComplexCreatureProtection.baseValue,
                 base + "cell.function.attacker.genome size bonus",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
