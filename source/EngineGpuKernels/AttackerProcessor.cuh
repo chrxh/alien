@@ -66,8 +66,8 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             auto otherColor = calcMod(otherCell->color, MAX_COLORS);
 
             // Evaluate sensor detection factor
-            if (cudaSimulationParameters.expertToggles.advancedAttackerControl && otherCell->detectedByCreatureId != (cell->creatureId & 0xffff)) {
-                energyToTransfer *= (1.0f - cudaSimulationParameters.attackerSensorDetectionFactor[color]);
+            if (cudaSimulationParameters.expertToggle_advancedAttackerControl.value && otherCell->detectedByCreatureId != (cell->creatureId & 0xffff)) {
+                energyToTransfer *= (1.0f - cudaSimulationParameters.attackerSensorDetectionFactor.value[color]);
             }
 
             // Evaluate genome complexity bonus
@@ -79,22 +79,17 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             }
 
             // Evaluate same mutant penalty
-            if (cudaSimulationParameters.expertToggles.advancedAttackerControl
+            if (cudaSimulationParameters.expertToggle_advancedAttackerControl.value
                 && ((otherCell->mutationId == cell->mutationId) || (otherCell->ancestorMutationId == static_cast<uint8_t>(cell->mutationId & 0xff)))
                 && cell->mutationId != 0) {
-                energyToTransfer *= (1.0f - cudaSimulationParameters.attackerSameMutantProtection[color][otherColor]);
+                energyToTransfer *= (1.0f - cudaSimulationParameters.attackerSameMutantProtection.value[color][otherColor]);
             }
 
             // Evaluate new complex mutant penalty
-            if (cudaSimulationParameters.expertToggles.advancedAttackerControl && cell->mutationId < otherCell->mutationId
+            if (cudaSimulationParameters.expertToggle_advancedAttackerControl.value && cell->mutationId < otherCell->mutationId
                 && cell->genomeComplexity <= otherCell->genomeComplexity) {
-                auto cellTypeAttackerArisingComplexMutantPenalty = ZoneCalculator::calcParameter(
-                    &SimulationParametersZoneValues::attackerNewComplexMutantProtection,
-                    &SimulationParametersZoneEnabledValues::attackerNewComplexMutantProtection,
-                    data,
-                    cell->pos,
-                    color,
-                    otherColor);
+                auto cellTypeAttackerArisingComplexMutantPenalty =
+                    ZoneCalculator::calcParameterNew(cudaSimulationParameters.attackerNewComplexMutantProtection, data, cell->pos, color, otherColor);
                 energyToTransfer *= (1.0f - cellTypeAttackerArisingComplexMutantPenalty);
             }
 
@@ -110,13 +105,9 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             }
 
             // Evaluate geometry deviation
-            if (cudaSimulationParameters.expertToggles.advancedAttackerControl) {
-                auto cellTypeAttackerGeometryDeviationExponent = ZoneCalculator::calcParameter(
-                    &SimulationParametersZoneValues::attackerGeometryDeviationProtection,
-                    &SimulationParametersZoneEnabledValues::attackerGeometryDeviationProtection,
-                    data,
-                    cell->pos,
-                    cell->color);
+            if (cudaSimulationParameters.expertToggle_advancedAttackerControl.value) {
+                auto cellTypeAttackerGeometryDeviationExponent =
+                    ZoneCalculator::calcParameterNew(cudaSimulationParameters.attackerGeometryDeviationProtection, data, cell->pos, cell->color);
 
                 if (abs(cellTypeAttackerGeometryDeviationExponent) > 0) {
                     auto d = otherCell->pos - cell->pos;
@@ -128,13 +119,9 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             }
 
             // Evaluate attacker connections mismatch penalty
-            if (cudaSimulationParameters.expertToggles.advancedAttackerControl) {
-                auto cellTypeAttackerConnectionsMismatchPenalty = ZoneCalculator::calcParameter(
-                    &SimulationParametersZoneValues::attackerConnectionsMismatchProtection,
-                    &SimulationParametersZoneEnabledValues::attackerConnectionsMismatchProtection,
-                    data,
-                    cell->pos,
-                    cell->color);
+            if (cudaSimulationParameters.expertToggle_advancedAttackerControl.value) {
+                auto cellTypeAttackerConnectionsMismatchPenalty =
+                    ZoneCalculator::calcParameterNew(cudaSimulationParameters.attackerConnectionsMismatchProtection, data, cell->pos, cell->color);
                 if (otherCell->numConnections > cell->numConnections + 1) {
                     energyToTransfer *= (1.0f - cellTypeAttackerConnectionsMismatchPenalty) * (1.0f - cellTypeAttackerConnectionsMismatchPenalty);
                 }

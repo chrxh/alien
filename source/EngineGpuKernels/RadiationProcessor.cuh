@@ -121,24 +121,16 @@ __inline__ __device__ void RadiationProcessor::collision(SimulationData& data)
                         auto energyToTransfer = particle->energy * radiationAbsorption;
                         if (cudaSimulationParameters.expertToggle_advancedAbsorptionControl.value) {
                             energyToTransfer *=
-                                max(0.0f, 1.0f - Math::length(cell->vel) * cudaSimulationParameters.radiationAbsorptionHighVelocityPenalty[cell->color]);
+                                max(0.0f, 1.0f - Math::length(cell->vel) * cudaSimulationParameters.radiationAbsorptionHighVelocityPenalty.value[cell->color]);
 
-                            auto radiationAbsorptionLowVelocityPenalty = ZoneCalculator::calcParameter(
-                                &SimulationParametersZoneValues::radiationAbsorptionLowVelocityPenalty,
-                                &SimulationParametersZoneEnabledValues::radiationAbsorptionLowVelocityPenalty,
-                                data,
-                                cell->pos,
-                                cell->color);
+                            auto radiationAbsorptionLowVelocityPenalty =
+                                ZoneCalculator::calcParameterNew(cudaSimulationParameters.radiationAbsorptionLowVelocityPenalty, data, cell->pos, cell->color);
                             energyToTransfer *= 1.0f - radiationAbsorptionLowVelocityPenalty / powf(1.0f + Math::length(cell->vel), 10.0f);
                             energyToTransfer *=
-                                powf(toFloat(cell->numConnections + 1) / 7.0f, cudaSimulationParameters.radiationAbsorptionLowConnectionPenalty[cell->color]);
+                                powf(toFloat(cell->numConnections + 1) / 7.0f, cudaSimulationParameters.radiationAbsorptionLowConnectionPenalty.value[cell->color]);
 
-                            auto radiationAbsorptionLowGenomeComplexityPenalty = ZoneCalculator::calcParameter(
-                                &SimulationParametersZoneValues::radiationAbsorptionLowGenomeComplexityPenalty,
-                                &SimulationParametersZoneEnabledValues::radiationAbsorptionLowGenomeComplexityPenalty,
-                                data,
-                                cell->pos,
-                                cell->color);
+                            auto radiationAbsorptionLowGenomeComplexityPenalty = ZoneCalculator::calcParameterNew(
+                                cudaSimulationParameters.radiationAbsorptionLowGenomeComplexityPenalty, data, cell->pos, cell->color);
                             energyToTransfer *= 1.0f - radiationAbsorptionLowGenomeComplexityPenalty / powf(1.0f + cell->genomeComplexity, 0.1f);
                         }
 

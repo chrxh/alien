@@ -25,8 +25,6 @@ struct ColorTransitionRules
 
 struct SimulationParametersZoneValues
 {
-    ColorVector<float> radiationAbsorptionLowVelocityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    ColorVector<float> radiationAbsorptionLowGenomeComplexityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     bool radiationDisableSources = false;
 
     ColorVector<float> maxAgeForInactiveCells = {   // Candidate for deletion
@@ -38,17 +36,6 @@ struct SimulationParametersZoneValues
         Infinity<float>::value,
         Infinity<float>::value};
     ColorTransitionRules colorTransitionRules;
-
-    ColorVector<float> attackerGeometryDeviationProtection = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> attackerConnectionsMismatchProtection = {0, 0, 0, 0, 0, 0, 0};
-    ColorMatrix<float> attackerNewComplexMutantProtection = {
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
 
     bool operator==(SimulationParametersZoneValues const&) const = default;
 };
