@@ -229,26 +229,26 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.radiationAbsorptionHighVelocityPenalty,
-            defaultParameters.radiationAbsorptionHighVelocityPenalty,
+            parameters.radiationAbsorptionHighVelocityPenalty.value,
+            defaultParameters.radiationAbsorptionHighVelocityPenalty.value,
             "simulation parameters.radiation.absorption velocity penalty",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.radiationAbsorptionLowVelocityPenalty,
-            defaultParameters.baseValues.radiationAbsorptionLowVelocityPenalty,
+            parameters.radiationAbsorptionLowVelocityPenalty.baseValue,
+            defaultParameters.radiationAbsorptionLowVelocityPenalty.baseValue,
             "simulation parameters.radiation.absorption low velocity penalty",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.radiationAbsorptionLowConnectionPenalty,
-            defaultParameters.radiationAbsorptionLowConnectionPenalty,
+            parameters.radiationAbsorptionLowConnectionPenalty.value,
+            defaultParameters.radiationAbsorptionLowConnectionPenalty.value,
             "simulation parameters.radiation.absorption low connection penalty",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty,
-            defaultParameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty,
+            parameters.radiationAbsorptionLowGenomeComplexityPenalty.baseValue,
+            defaultParameters.radiationAbsorptionLowGenomeComplexityPenalty.baseValue,
             "simulation parameters.radiation.absorption low genome complexity penalty",
             parserTask);
         ParameterParser::encodeDecode(
@@ -501,8 +501,8 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.attackerGeometryDeviationProtection,
-            defaultParameters.baseValues.attackerGeometryDeviationProtection,
+            parameters.attackerGeometryDeviationProtection.baseValue,
+            defaultParameters.attackerGeometryDeviationProtection.baseValue,
             "simulation parameters.cell.function.attacker.geometry deviation exponent",
             parserTask);
         ParameterParser::encodeDecode(
@@ -513,8 +513,8 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.attackerConnectionsMismatchProtection,
-            defaultParameters.baseValues.attackerConnectionsMismatchProtection,
+            parameters.attackerConnectionsMismatchProtection.baseValue,
+            defaultParameters.attackerConnectionsMismatchProtection.baseValue,
             "simulation parameters.cell.function.attacker.connections mismatch penalty",
             parserTask);
         ParameterParser::encodeDecode(
@@ -525,20 +525,20 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.attackerSameMutantProtection,
-            defaultParameters.attackerSameMutantProtection,
+            parameters.attackerSameMutantProtection.value,
+            defaultParameters.attackerSameMutantProtection.value,
             "simulation parameters.cell.function.attacker.same mutant penalty",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.attackerNewComplexMutantProtection,
-            defaultParameters.baseValues.attackerNewComplexMutantProtection,
+            parameters.attackerNewComplexMutantProtection.baseValue,
+            defaultParameters.attackerNewComplexMutantProtection.baseValue,
             "simulation parameters.cell.function.attacker.new complex mutant penalty",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.attackerSensorDetectionFactor,
-            defaultParameters.attackerSensorDetectionFactor,
+            parameters.attackerSensorDetectionFactor.value,
+            defaultParameters.attackerSensorDetectionFactor.value,
             "simulation parameters.cell.function.attacker.sensor detection factor",
             parserTask);
         ParameterParser::encodeDecode(
@@ -796,16 +796,16 @@ namespace
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.radiationAbsorptionLowVelocityPenalty,
-                spot.enabledValues.radiationAbsorptionLowVelocityPenalty,
-                defaultSpot.values.radiationAbsorptionLowVelocityPenalty,
+                parameters.radiationAbsorptionLowVelocityPenalty.zoneValues[index].value,
+                parameters.radiationAbsorptionLowVelocityPenalty.zoneValues[index].enabled,
+                parameters.radiationAbsorptionLowVelocityPenalty.baseValue,
                 base + "radiation.absorption low velocity penalty",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.radiationAbsorptionLowGenomeComplexityPenalty,
-                spot.enabledValues.radiationAbsorptionLowGenomeComplexityPenalty,
-                defaultSpot.values.radiationAbsorptionLowGenomeComplexityPenalty,
+                parameters.radiationAbsorptionLowGenomeComplexityPenalty.zoneValues[index].value,
+                parameters.radiationAbsorptionLowGenomeComplexityPenalty.zoneValues[index].enabled,
+                parameters.radiationAbsorptionLowGenomeComplexityPenalty.baseValue,
                 base + "radiation.absorption low genome complexity penalty",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
@@ -898,23 +898,23 @@ namespace
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.attackerNewComplexMutantProtection,
-                spot.enabledValues.attackerNewComplexMutantProtection,
-                defaultSpot.values.attackerNewComplexMutantProtection,
+                parameters.attackerNewComplexMutantProtection.zoneValues[index].value,
+                parameters.attackerNewComplexMutantProtection.zoneValues[index].enabled,
+                defaultParameters.attackerNewComplexMutantProtection.baseValue,
                 base + "cell.function.attacker.new complex mutant penalty",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.attackerGeometryDeviationProtection,
-                spot.enabledValues.attackerGeometryDeviationProtection,
-                defaultSpot.values.attackerGeometryDeviationProtection,
+                parameters.attackerGeometryDeviationProtection.zoneValues[index].value,
+                parameters.attackerGeometryDeviationProtection.zoneValues[index].enabled,
+                defaultParameters.attackerGeometryDeviationProtection.baseValue,
                 base + "cell.function.attacker.geometry deviation exponent",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.attackerConnectionsMismatchProtection,
-                spot.enabledValues.attackerConnectionsMismatchProtection,
-                defaultSpot.values.attackerConnectionsMismatchProtection,
+                parameters.attackerConnectionsMismatchProtection.zoneValues[index].value,
+                parameters.attackerConnectionsMismatchProtection.zoneValues[index].enabled,
+                defaultParameters.attackerConnectionsMismatchProtection.baseValue,
                 base + "cell.function.attacker.connections mismatch penalty",
                 parserTask);
 
@@ -1019,8 +1019,8 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.expertToggles.advancedAttackerControl,
-            defaultParameters.expertToggles.advancedAttackerControl,
+            parameters.expertToggle_advancedAttackerControl.value,
+            defaultParameters.expertToggle_advancedAttackerControl.value,
             "simulation parameters.features.additional attacker control",
             parserTask);
         ParameterParser::encodeDecode(

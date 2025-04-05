@@ -615,10 +615,10 @@ void _SimulationParametersZoneWidgets::process()
                 .min(0)
                 .max(1.0f)
                 .format("%.2f")
-                .defaultValue(origZone.values.radiationAbsorptionLowVelocityPenalty)
-                .disabledValue(parameters.baseValues.radiationAbsorptionLowVelocityPenalty),
-            zone.values.radiationAbsorptionLowVelocityPenalty,
-            &zone.enabledValues.radiationAbsorptionLowVelocityPenalty);
+                .defaultValue(origParameters.radiationAbsorptionLowVelocityPenalty.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.radiationAbsorptionLowVelocityPenalty.baseValue),
+            parameters.radiationAbsorptionLowVelocityPenalty.zoneValues[zoneIndex].value,
+            &parameters.radiationAbsorptionLowVelocityPenalty.zoneValues[zoneIndex].enabled);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Low genome complexity penalty")
@@ -627,10 +627,10 @@ void _SimulationParametersZoneWidgets::process()
                 .min(0)
                 .max(1.0f)
                 .format("%.2f")
-                .defaultValue(origZone.values.radiationAbsorptionLowGenomeComplexityPenalty)
-                .disabledValue(parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty),
-            zone.values.radiationAbsorptionLowGenomeComplexityPenalty,
-            &zone.enabledValues.radiationAbsorptionLowGenomeComplexityPenalty);
+                .defaultValue(origParameters.radiationAbsorptionLowGenomeComplexityPenalty.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.radiationAbsorptionLowGenomeComplexityPenalty.baseValue),
+            parameters.radiationAbsorptionLowGenomeComplexityPenalty.zoneValues[zoneIndex].value,
+            &parameters.radiationAbsorptionLowGenomeComplexityPenalty.zoneValues[zoneIndex].enabled);
     }
     AlienImGui::EndTreeNode();
 
@@ -639,7 +639,7 @@ void _SimulationParametersZoneWidgets::process()
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
                                       .name("Expert settings: Advanced attacker control")
-                                      .visible(parameters.expertToggles.advancedAttackerControl)
+                                      .visible(parameters.expertToggle_advancedAttackerControl.value)
                                       .blinkWhenActivated(true))) {
         AlienImGui::InputFloatColorMatrix(
             AlienImGui::InputFloatColorMatrixParameters()
@@ -647,11 +647,10 @@ void _SimulationParametersZoneWidgets::process()
                 .textWidth(RightColumnWidth)
                 .min(0)
                 .max(1.0f)
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origZone.values.attackerNewComplexMutantProtection))
-                .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.baseValues.attackerNewComplexMutantProtection)),
-            zone.values.attackerNewComplexMutantProtection,
-            &zone.enabledValues.attackerNewComplexMutantProtection);
-
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(origParameters.attackerNewComplexMutantProtection.zoneValues[zoneIndex].value))
+                .disabledValue(toVector<MAX_COLORS, MAX_COLORS>(parameters.attackerNewComplexMutantProtection.baseValue)),
+            parameters.attackerNewComplexMutantProtection.zoneValues[zoneIndex].value,
+            &parameters.attackerNewComplexMutantProtection.zoneValues[zoneIndex].enabled);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Geometry penalty")
@@ -659,10 +658,10 @@ void _SimulationParametersZoneWidgets::process()
                 .colorDependence(true)
                 .min(0)
                 .max(5.0f)
-                .defaultValue(origZone.values.attackerGeometryDeviationProtection)
-                .disabledValue(parameters.baseValues.attackerGeometryDeviationProtection),
-            zone.values.attackerGeometryDeviationProtection,
-            &zone.enabledValues.attackerGeometryDeviationProtection);
+                .defaultValue(origParameters.attackerGeometryDeviationProtection.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.attackerGeometryDeviationProtection.baseValue),
+            parameters.attackerGeometryDeviationProtection.zoneValues[zoneIndex].value,
+            &parameters.attackerGeometryDeviationProtection.zoneValues[zoneIndex].enabled);
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name("Connections mismatch penalty")
@@ -670,10 +669,10 @@ void _SimulationParametersZoneWidgets::process()
                 .colorDependence(true)
                 .min(0)
                 .max(1.0f)
-                .defaultValue(origZone.values.attackerConnectionsMismatchProtection)
-                .disabledValue(parameters.baseValues.attackerConnectionsMismatchProtection),
-            zone.values.attackerConnectionsMismatchProtection,
-            &zone.enabledValues.attackerConnectionsMismatchProtection);
+                .defaultValue(origParameters.attackerConnectionsMismatchProtection.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.attackerConnectionsMismatchProtection.baseValue),
+            parameters.attackerConnectionsMismatchProtection.zoneValues[zoneIndex].value,
+            &parameters.attackerConnectionsMismatchProtection.zoneValues[zoneIndex].enabled);
     }
     AlienImGui::EndTreeNode();
 

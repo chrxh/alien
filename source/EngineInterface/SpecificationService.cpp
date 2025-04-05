@@ -548,7 +548,7 @@ void SpecificationService::createSpec()
                 ParameterSpec()
                     .name("Low genome complexity penalty")
                     .reference(
-                        FloatSpec().member(&SimulationParametersZoneValues::radiationAbsorptionLowGenomeComplexityPenalty).min(0).max(1.0f).format("%.2f"))
+                        FloatSpec().member(&SimulationParameters::radiationAbsorptionLowGenomeComplexityPenalty).min(0).max(1.0f).format("%.2f"))
                     .tooltip("When this parameter is increased, cells with fewer genome complexity will absorb less energy from an incoming energy particle."),
                 ParameterSpec()
                     .name("Low connection penalty")
@@ -561,12 +561,12 @@ void SpecificationService::createSpec()
                     .tooltip("When this parameter is increased, fast moving cells will absorb less energy from an incoming energy particle."),
                 ParameterSpec()
                     .name("Low velocity penalty")
-                    .reference(FloatSpec().member(&SimulationParametersZoneValues::radiationAbsorptionLowVelocityPenalty).min(0).max(1.0f).format("%.2f"))
+                    .reference(FloatSpec().member(&SimulationParameters::radiationAbsorptionLowVelocityPenalty).min(0).max(1.0f).format("%.2f"))
                     .tooltip("When this parameter is increased, slowly moving cells will absorb less energy from an incoming energy particle."),
             }),
         ParameterGroupSpec()
             .name("Advanced attacker control")
-            //.expertToggle(&ExpertToggles::advancedAttackerControl)
+            .expertToggle(&SimulationParameters::expertToggle_advancedAttackerControl)
             .parameters({
                 ParameterSpec()
                     .name("Same mutant protection")
@@ -574,7 +574,7 @@ void SpecificationService::createSpec()
                     .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with the same mutation id."),
                 ParameterSpec()
                     .name("New complex mutant protection")
-                    .reference(FloatSpec().member(&SimulationParametersZoneValues::attackerNewComplexMutantProtection).min(0).max(1.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::attackerNewComplexMutantProtection).min(0).max(1.0f))
                     .tooltip("A high value protects new mutants with equal or greater genome complexity from being attacked."),
                 ParameterSpec()
                     .name("Sensor detection factor")
@@ -586,12 +586,12 @@ void SpecificationService::createSpec()
                              "compares them with the attacked target."),
                 ParameterSpec()
                     .name("Geometry deviation protection")
-                    .reference(FloatSpec().member(&SimulationParametersZoneValues::attackerGeometryDeviationProtection).min(0).max(5.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::attackerGeometryDeviationProtection).min(0).max(5.0f))
                     .tooltip("The larger this value is, the less energy a cell can gain from an attack if the local geometry of the attacked cell does not "
                              "match the attacking cell."),
                 ParameterSpec()
                     .name("Connections mismatch protection")
-                    .reference(FloatSpec().member(&SimulationParametersZoneValues::attackerConnectionsMismatchProtection).min(0).max(1.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::attackerConnectionsMismatchProtection).min(0).max(1.0f))
                     .tooltip("The larger this parameter is, the more difficult it is to attack cells that contain more connections."),
             }),
         ParameterGroupSpec()

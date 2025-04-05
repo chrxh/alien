@@ -3,22 +3,10 @@
 void ParametersValidationService::validateAndCorrect(SimulationParameters& parameters) const
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
-        for (int j = 0; j < MAX_COLORS; ++j) {
-            parameters.attackerSameMutantProtection[i][j] = std::max(0.0f, std::min(1.0f, parameters.attackerSameMutantProtection[i][j]));
-            parameters.baseValues.attackerNewComplexMutantProtection[i][j] =
-                std::max(0.0f, std::min(1.0f, parameters.baseValues.attackerNewComplexMutantProtection[i][j]));
-        }
-        parameters.radiationAbsorptionHighVelocityPenalty[i] = std::max(0.0f, parameters.radiationAbsorptionHighVelocityPenalty[i]);
-        parameters.radiationAbsorptionLowConnectionPenalty[i] = std::max(0.0f, parameters.radiationAbsorptionLowConnectionPenalty[i]);
         parameters.externalEnergyConditionalInflowFactor[i] = std::max(0.0f, std::min(1.0f, parameters.externalEnergyConditionalInflowFactor[i]));
-        parameters.attackerSensorDetectionFactor[i] = std::max(0.0f, std::min(1.0f, parameters.attackerSensorDetectionFactor[i]));
         parameters.externalEnergyInflowFactor[i] = std::max(0.0f, std::min(1.0f, parameters.externalEnergyInflowFactor[i]));
         parameters.minCellEnergy.baseValue[i] = std::min(parameters.minCellEnergy.baseValue[i], parameters.normalCellEnergy.value[i] * 0.95f);
         parameters.particleSplitEnergy.value[i] = std::max(0.0f, parameters.particleSplitEnergy.value[i]);
-        parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty[i] =
-            std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorptionLowGenomeComplexityPenalty[i]));
-        parameters.baseValues.radiationAbsorptionLowVelocityPenalty[i] =
-            std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorptionLowVelocityPenalty[i]));
         parameters.genomeComplexitySizeFactor[i] = std::max(0.0f, parameters.genomeComplexitySizeFactor[i]);
         parameters.genomeComplexityRamificationFactor[i] = std::max(0.0f, parameters.genomeComplexityRamificationFactor[i]);
         parameters.defenderAntiAttackerStrength.value[i] = std::max(0.0f, parameters.defenderAntiAttackerStrength.value[i]);
@@ -54,13 +42,4 @@ void ParametersValidationService::validateAndCorrect(RadiationSource& source) co
 
 void ParametersValidationService::validateAndCorrect(SimulationParametersZone& zone, SimulationParameters const& parameters) const
 {
-    for (int i = 0; i < MAX_COLORS; ++i) {
-        for (int j = 0; j < MAX_COLORS; ++j) {
-            zone.values.attackerNewComplexMutantProtection[i][j] =
-                std::max(0.0f, std::min(1.0f, zone.values.attackerNewComplexMutantProtection[i][j]));
-        }
-        zone.values.radiationAbsorptionLowGenomeComplexityPenalty[i] =
-            std::max(0.0f, std::min(1.0f, zone.values.radiationAbsorptionLowGenomeComplexityPenalty[i]));
-        zone.values.radiationAbsorptionLowVelocityPenalty[i] = std::max(0.0f, std::min(1.0f, zone.values.radiationAbsorptionLowVelocityPenalty[i]));
-    }
 }
