@@ -605,7 +605,7 @@ void _SimulationParametersZoneWidgets::process()
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
                                       .name("Expert settings: Advanced energy absorption control")
-                                      .visible(parameters.expertToggles.advancedAbsorptionControl)
+                                      .visible(parameters.expertToggle_advancedAbsorptionControl.value)
                                       .blinkWhenActivated(true))) {
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()

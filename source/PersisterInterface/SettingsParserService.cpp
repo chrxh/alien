@@ -1013,8 +1013,8 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.expertToggles.advancedAbsorptionControl,
-            defaultParameters.expertToggles.advancedAbsorptionControl,
+            parameters.expertToggle_advancedAbsorptionControl.value,
+            defaultParameters.expertToggle_advancedAbsorptionControl.value,
             "simulation parameters.features.additional absorption control",
             parserTask);
         ParameterParser::encodeDecode(

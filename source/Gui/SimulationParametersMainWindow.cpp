@@ -366,11 +366,11 @@ void SimulationParametersMainWindow::processExpertSettings()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
-    auto lastFeatures = parameters.expertToggles;
+    auto lastParameters = parameters;
 
     SpecificationGuiService::get().createWidgetsForExpertToggles(parameters, origParameters);
 
-    if (parameters.expertToggles != lastFeatures) {
+    if (parameters != lastParameters) {
         _simulationFacade->setSimulationParameters(parameters);
     }
 }

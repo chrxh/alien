@@ -7,168 +7,168 @@
 #include "ParametersEditService.h"
 #include "SpecificationEvaluationService.h"
 
-bool* SpecificationEvaluationService::getBoolRef(BoolMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const
+bool* SpecificationEvaluationService::getBoolRef(BoolMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const
 {
     // Single value
-    if (std::holds_alternative<BoolMember>(memberSpec)) {
-        return &(parameters.**std::get<BoolMember>(memberSpec));
-    } else if (std::holds_alternative<BoolZoneValuesMember>(memberSpec)) {
+    if (std::holds_alternative<BoolMember>(member)) {
+        return &(parameters.**std::get<BoolMember>(member));
+    } else if (std::holds_alternative<BoolZoneValuesMember>(member)) {
         switch (LocationHelper::getLocationType(locationIndex, parameters)) {
         case LocationType::Base:
-            return &(parameters.baseValues.**std::get<BoolZoneValuesMember>(memberSpec));
+            return &(parameters.baseValues.**std::get<BoolZoneValuesMember>(member));
         case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return &(parameters.zone[index].values.**std::get<BoolZoneValuesMember>(memberSpec));
+            return &(parameters.zone[index].values.**std::get<BoolZoneValuesMember>(member));
         }
         }
     }
 
     // Color matrix
-    else if (std::holds_alternative<ColorMatrixBoolMember>(memberSpec)) {
-        return reinterpret_cast<bool*>(parameters.**std::get<ColorMatrixBoolMember>(memberSpec));
+    else if (std::holds_alternative<ColorMatrixBoolMember>(member)) {
+        return reinterpret_cast<bool*>(parameters.**std::get<ColorMatrixBoolMember>(member));
     }
 
     // NEW
     // Single value
-    if (std::holds_alternative<BoolMemberNew>(memberSpec)) {
-        return &(parameters.**std::get<BoolMemberNew>(memberSpec)).value;
-    } else if (std::holds_alternative<BoolZoneValuesMemberNew>(memberSpec)) {
+    if (std::holds_alternative<BoolMemberNew>(member)) {
+        return &(parameters.**std::get<BoolMemberNew>(member)).value;
+    } else if (std::holds_alternative<BoolZoneValuesMemberNew>(member)) {
         switch (LocationHelper::getLocationType(locationIndex, parameters)) {
         case LocationType::Base:
-            return &(parameters.**std::get<BoolZoneValuesMemberNew>(memberSpec)).baseValue;
+            return &(parameters.**std::get<BoolZoneValuesMemberNew>(member)).baseValue;
         case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return &(parameters.**std::get<BoolZoneValuesMemberNew>(memberSpec)).zoneValues[index].value;
+            return &(parameters.**std::get<BoolZoneValuesMemberNew>(member)).zoneValues[index].value;
         }
         }
     }
 
     // Color matrix
-    else if (std::holds_alternative<ColorMatrixBoolMemberNew>(memberSpec)) {
-        return reinterpret_cast<bool*>((parameters.**std::get<ColorMatrixBoolMemberNew>(memberSpec)).value);
+    else if (std::holds_alternative<ColorMatrixBoolMemberNew>(member)) {
+        return reinterpret_cast<bool*>((parameters.**std::get<ColorMatrixBoolMemberNew>(member)).value);
     }
 
     return nullptr;
 }
 
-int* SpecificationEvaluationService::getIntRef(IntMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const
+int* SpecificationEvaluationService::getIntRef(IntMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const
 {
     // Single value
-    if (std::holds_alternative<IntMember>(memberSpec)) {
-        return &(parameters.**std::get<IntMember>(memberSpec));
+    if (std::holds_alternative<IntMember>(member)) {
+        return &(parameters.**std::get<IntMember>(member));
     }
 
     // Color vector
-    else if (std::holds_alternative<ColorVectorIntMember>(memberSpec)) {
-        return parameters.**std::get<ColorVectorIntMember>(memberSpec);
+    else if (std::holds_alternative<ColorVectorIntMember>(member)) {
+        return parameters.**std::get<ColorVectorIntMember>(member);
     }
 
     // Color matrix
-    else if (std::holds_alternative<ColorMatrixIntMember>(memberSpec)) {
-        return reinterpret_cast<int*>(parameters.**std::get<ColorMatrixIntMember>(memberSpec));
+    else if (std::holds_alternative<ColorMatrixIntMember>(member)) {
+        return reinterpret_cast<int*>(parameters.**std::get<ColorMatrixIntMember>(member));
     }
 
     // NEW
     // Single value
-    if (std::holds_alternative<IntMemberNew>(memberSpec)) {
-        return &(parameters.**std::get<IntMemberNew>(memberSpec)).value;
+    if (std::holds_alternative<IntMemberNew>(member)) {
+        return &(parameters.**std::get<IntMemberNew>(member)).value;
     }
 
     // Color vector
-    else if (std::holds_alternative<ColorVectorIntMemberNew>(memberSpec)) {
-        return (parameters.**std::get<ColorVectorIntMemberNew>(memberSpec)).value;
+    else if (std::holds_alternative<ColorVectorIntMemberNew>(member)) {
+        return (parameters.**std::get<ColorVectorIntMemberNew>(member)).value;
     }
 
     // Color matrix
-    else if (std::holds_alternative<ColorMatrixIntMemberNew>(memberSpec)) {
-        return reinterpret_cast<int*>((parameters.**std::get<ColorMatrixIntMemberNew>(memberSpec)).value);
+    else if (std::holds_alternative<ColorMatrixIntMemberNew>(member)) {
+        return reinterpret_cast<int*>((parameters.**std::get<ColorMatrixIntMemberNew>(member)).value);
     }
     return nullptr;
 }
 
-float* SpecificationEvaluationService::getFloatRef(FloatMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const
+float* SpecificationEvaluationService::getFloatRef(FloatMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const
 {
     // Single value
-    if (std::holds_alternative<FloatMember>(memberSpec)) {
-        return &(parameters.**std::get<FloatMember>(memberSpec));
-    } else if (std::holds_alternative<FloatZoneValuesMember>(memberSpec)) {
+    if (std::holds_alternative<FloatMember>(member)) {
+        return &(parameters.**std::get<FloatMember>(member));
+    } else if (std::holds_alternative<FloatZoneValuesMember>(member)) {
         switch (LocationHelper::getLocationType(locationIndex, parameters)) {
         case LocationType::Base:
-            return &(parameters.baseValues.**std::get<FloatZoneValuesMember>(memberSpec));
+            return &(parameters.baseValues.**std::get<FloatZoneValuesMember>(member));
         case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return &(parameters.zone[index].values.**std::get<FloatZoneValuesMember>(memberSpec));
+            return &(parameters.zone[index].values.**std::get<FloatZoneValuesMember>(member));
         }
         }
     }
 
     // Color vector
-    else if (std::holds_alternative<ColorVectorFloatMember>(memberSpec)) {
-        return parameters.**std::get<ColorVectorFloatMember>(memberSpec);
-    } else if (std::holds_alternative<ColorVectorFloatZoneValuesMember>(memberSpec)) {
+    else if (std::holds_alternative<ColorVectorFloatMember>(member)) {
+        return parameters.**std::get<ColorVectorFloatMember>(member);
+    } else if (std::holds_alternative<ColorVectorFloatZoneValuesMember>(member)) {
         switch (LocationHelper::getLocationType(locationIndex, parameters)) {
         case LocationType::Base:
-            return parameters.baseValues.**std::get<ColorVectorFloatZoneValuesMember>(memberSpec);
+            return parameters.baseValues.**std::get<ColorVectorFloatZoneValuesMember>(member);
         case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return parameters.zone[index].values.**std::get<ColorVectorFloatZoneValuesMember>(memberSpec);
+            return parameters.zone[index].values.**std::get<ColorVectorFloatZoneValuesMember>(member);
         }
         }
     }
 
     // Color matrix
-    else if (std::holds_alternative<ColorMatrixFloatMember>(memberSpec)) {
-        return reinterpret_cast<float*>(parameters.**std::get<ColorMatrixFloatMember>(memberSpec));
-    } else if (std::holds_alternative<ColorMatrixFloatZoneValuesMember>(memberSpec)) {
+    else if (std::holds_alternative<ColorMatrixFloatMember>(member)) {
+        return reinterpret_cast<float*>(parameters.**std::get<ColorMatrixFloatMember>(member));
+    } else if (std::holds_alternative<ColorMatrixFloatZoneValuesMember>(member)) {
         switch (LocationHelper::getLocationType(locationIndex, parameters)) {
         case LocationType::Base:
-            return reinterpret_cast<float*>(parameters.baseValues.**std::get<ColorMatrixFloatZoneValuesMember>(memberSpec));
+            return reinterpret_cast<float*>(parameters.baseValues.**std::get<ColorMatrixFloatZoneValuesMember>(member));
         case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return reinterpret_cast<float*>(parameters.zone[index].values.**std::get<ColorMatrixFloatZoneValuesMember>(memberSpec));
+            return reinterpret_cast<float*>(parameters.zone[index].values.**std::get<ColorMatrixFloatZoneValuesMember>(member));
         }
         }
     }
 
     // NEW
     // Single value
-    if (std::holds_alternative<FloatMemberNew>(memberSpec)) {
-        return &(parameters.**std::get<FloatMemberNew>(memberSpec)).value;
-    } else if (std::holds_alternative<FloatZoneValuesMemberNew>(memberSpec)) {
+    if (std::holds_alternative<FloatMemberNew>(member)) {
+        return &(parameters.**std::get<FloatMemberNew>(member)).value;
+    } else if (std::holds_alternative<FloatZoneValuesMemberNew>(member)) {
         switch (LocationHelper::getLocationType(locationIndex, parameters)) {
         case LocationType::Base:
-            return &(parameters.**std::get<FloatZoneValuesMemberNew>(memberSpec)).baseValue;
+            return &(parameters.**std::get<FloatZoneValuesMemberNew>(member)).baseValue;
         case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return &(parameters.**std::get<FloatZoneValuesMemberNew>(memberSpec)).zoneValues[index].value;
+            return &(parameters.**std::get<FloatZoneValuesMemberNew>(member)).zoneValues[index].value;
         }
         }
     }
     
     // Color vector
-    else if (std::holds_alternative<ColorVectorFloatMemberNew>(memberSpec)) {
-        return (parameters.**std::get<ColorVectorFloatMemberNew>(memberSpec)).value;
-    } else if (std::holds_alternative<ColorVectorFloatBaseZoneMemberNew>(memberSpec)) {
+    else if (std::holds_alternative<ColorVectorFloatMemberNew>(member)) {
+        return (parameters.**std::get<ColorVectorFloatMemberNew>(member)).value;
+    } else if (std::holds_alternative<ColorVectorFloatBaseZoneMemberNew>(member)) {
         switch (LocationHelper::getLocationType(locationIndex, parameters)) {
         case LocationType::Base:
-            return (parameters.**std::get<ColorVectorFloatBaseZoneMemberNew>(memberSpec)).baseValue;
+            return (parameters.**std::get<ColorVectorFloatBaseZoneMemberNew>(member)).baseValue;
         case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return (parameters.**std::get<ColorVectorFloatBaseZoneMemberNew>(memberSpec)).zoneValues[index].value;
+            return (parameters.**std::get<ColorVectorFloatBaseZoneMemberNew>(member)).zoneValues[index].value;
         }
         }
     }
 
     // Color matrix
-    else if (std::holds_alternative<ColorMatrixFloatMemberNew>(memberSpec)) {
-        return reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatMemberNew>(memberSpec)).value);
-    } else if (std::holds_alternative<ColorMatrixFloatBaseZoneMemberNew>(memberSpec)) {
+    else if (std::holds_alternative<ColorMatrixFloatMemberNew>(member)) {
+        return reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatMemberNew>(member)).value);
+    } else if (std::holds_alternative<ColorMatrixFloatBaseZoneMemberNew>(member)) {
         switch (LocationHelper::getLocationType(locationIndex, parameters)) {
         case LocationType::Base:
-            return reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatBaseZoneMemberNew>(memberSpec)).baseValue);
+            return reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatBaseZoneMemberNew>(member)).baseValue);
         case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatBaseZoneMemberNew>(memberSpec)).zoneValues[index].value);
+            return reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatBaseZoneMemberNew>(member)).zoneValues[index].value);
         }
         }
     }
@@ -176,57 +176,57 @@ float* SpecificationEvaluationService::getFloatRef(FloatMemberSpec const& member
     return nullptr;
 }
 
-char* SpecificationEvaluationService::getChar64Ref(Char64MemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const
+char* SpecificationEvaluationService::getChar64Ref(Char64MemberVariant const& member, SimulationParameters& parameters, int locationIndex) const
 {
-    if (std::holds_alternative<Char64Member>(memberSpec)) {
-        return parameters.**std::get<Char64Member>(memberSpec);
+    if (std::holds_alternative<Char64Member>(member)) {
+        return parameters.**std::get<Char64Member>(member);
     }
 
     // NEW
-    if (std::holds_alternative<Char64MemberNew>(memberSpec)) {
-        return (parameters.**std::get<Char64MemberNew>(memberSpec)).value;
+    if (std::holds_alternative<Char64MemberNew>(member)) {
+        return (parameters.**std::get<Char64MemberNew>(member)).value;
     }
 
     return nullptr;
 }
 
-int* SpecificationEvaluationService::getAlternativeRef(AlternativeMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const
+int* SpecificationEvaluationService::getAlternativeRef(AlternativeMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const
 {
     // Single value
-    if (std::holds_alternative<IntMember>(memberSpec)) {
-        return &(parameters.**std::get<IntMember>(memberSpec));
+    if (std::holds_alternative<IntMember>(member)) {
+        return &(parameters.**std::get<IntMember>(member));
     }
 
     // NEW
     // Single value
-    if (std::holds_alternative<IntMemberNew>(memberSpec)) {
-        return &(parameters.**std::get<IntMemberNew>(memberSpec)).value;
+    if (std::holds_alternative<IntMemberNew>(member)) {
+        return &(parameters.**std::get<IntMemberNew>(member)).value;
     }
 
     return nullptr;
 }
 
-FloatColorRGB* SpecificationEvaluationService::getFloatColorRGBRef(ColorPickerMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const
+FloatColorRGB* SpecificationEvaluationService::getFloatColorRGBRef(ColorPickerMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const
 {
-    if (std::holds_alternative<FloatColorRGBZoneMember>(memberSpec)) {
+    if (std::holds_alternative<FloatColorRGBZoneMember>(member)) {
         switch (LocationHelper::getLocationType(locationIndex, parameters)) {
         case LocationType::Base:
-            return &(parameters.baseValues.**std::get<FloatColorRGBZoneMember>(memberSpec));
+            return &(parameters.baseValues.**std::get<FloatColorRGBZoneMember>(member));
         case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return &(parameters.zone[index].values.**std::get<FloatColorRGBZoneMember>(memberSpec));
+            return &(parameters.zone[index].values.**std::get<FloatColorRGBZoneMember>(member));
         }
         }
     }
 
     // NEW
-    if (std::holds_alternative<FloatColorRGBBaseZoneMemberNew>(memberSpec)) {
+    if (std::holds_alternative<FloatColorRGBBaseZoneMemberNew>(member)) {
         switch (LocationHelper::getLocationType(locationIndex, parameters)) {
         case LocationType::Base:
-            return &(parameters.**std::get<FloatColorRGBBaseZoneMemberNew>(memberSpec)).baseValue;
+            return &(parameters.**std::get<FloatColorRGBBaseZoneMemberNew>(member)).baseValue;
         case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return &(parameters.**std::get<FloatColorRGBBaseZoneMemberNew>(memberSpec)).zoneValues[index].value;
+            return &(parameters.**std::get<FloatColorRGBBaseZoneMemberNew>(member)).zoneValues[index].value;
         }
         }
     }
@@ -234,27 +234,27 @@ FloatColorRGB* SpecificationEvaluationService::getFloatColorRGBRef(ColorPickerMe
 }
 
 ColorTransitionRules*
-SpecificationEvaluationService::getColorTransitionRulesRef(ColorTransitionRulesMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const
+SpecificationEvaluationService::getColorTransitionRulesRef(ColorTransitionRulesMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const
 {
-    if (std::holds_alternative<ColorTransitionRulesZoneMember>(memberSpec)) {
+    if (std::holds_alternative<ColorTransitionRulesZoneMember>(member)) {
         switch (LocationHelper::getLocationType(locationIndex, parameters)) {
         case LocationType::Base:
-            return &(parameters.baseValues.**std::get<ColorTransitionRulesZoneMember>(memberSpec));
+            return &(parameters.baseValues.**std::get<ColorTransitionRulesZoneMember>(member));
         case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return &(parameters.zone[index].values.**std::get<ColorTransitionRulesZoneMember>(memberSpec));
+            return &(parameters.zone[index].values.**std::get<ColorTransitionRulesZoneMember>(member));
         }
         }
     }
 
     // NEW
-    if (std::holds_alternative<ColorTransitionRulesBaseZoneMemberNew>(memberSpec)) {
+    if (std::holds_alternative<ColorTransitionRulesBaseZoneMemberNew>(member)) {
         switch (LocationHelper::getLocationType(locationIndex, parameters)) {
         case LocationType::Base:
-            return &(parameters.**std::get<ColorTransitionRulesBaseZoneMemberNew>(memberSpec)).baseValue;
+            return &(parameters.**std::get<ColorTransitionRulesBaseZoneMemberNew>(member)).baseValue;
         case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return &(parameters.**std::get<ColorTransitionRulesBaseZoneMemberNew>(memberSpec)).zoneValues[index].value;
+            return &(parameters.**std::get<ColorTransitionRulesBaseZoneMemberNew>(member)).zoneValues[index].value;
         }
         }
     }
@@ -274,11 +274,8 @@ bool* SpecificationEvaluationService::getEnabledRef(EnabledSpec const& spec, Sim
     return nullptr;
 }
 
-bool* SpecificationEvaluationService::getExpertToggleRef(ExpertToggleMember const& expertToggle, SimulationParameters& parameters) const
+bool* SpecificationEvaluationService::getExpertToggleRef(BoolMemberNew const& member, SimulationParameters& parameters) const
 {
-    if (expertToggle) {
-        return &(parameters.expertToggles.**expertToggle);
-    }
-    return nullptr;
+    return &(parameters.**member).value;
 }
 

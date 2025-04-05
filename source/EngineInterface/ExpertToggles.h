@@ -8,7 +8,6 @@
 
 struct ExpertToggles
 {
-    bool advancedAbsorptionControl = false;
     bool advancedAttackerControl = false;
     bool externalEnergyControl = false;
     bool customizeNeuronMutations = false;

@@ -11,15 +11,14 @@ class SpecificationEvaluationService
     MAKE_SINGLETON(SpecificationEvaluationService);
 
 public:
-    bool* getBoolRef(BoolMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const;
-    int* getIntRef(IntMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const;
-    float* getFloatRef(FloatMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const;
-    char* getChar64Ref(Char64MemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const;
-    int* getAlternativeRef(AlternativeMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const;
-    FloatColorRGB* getFloatColorRGBRef(ColorPickerMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const;
-    ColorTransitionRules* getColorTransitionRulesRef(ColorTransitionRulesMemberSpec const& memberSpec, SimulationParameters& parameters, int locationIndex) const;
+    bool* getBoolRef(BoolMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
+    int* getIntRef(IntMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
+    float* getFloatRef(FloatMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
+    char* getChar64Ref(Char64MemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
+    int* getAlternativeRef(AlternativeMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
+    FloatColorRGB* getFloatColorRGBRef(ColorPickerMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
+    ColorTransitionRules* getColorTransitionRulesRef(ColorTransitionRulesMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
 
     bool* getEnabledRef(EnabledSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
-
-    bool* getExpertToggleRef(ExpertToggleMember const& expertToggle, SimulationParameters& parameters) const;
+    bool* getExpertToggleRef(BoolMemberNew const& member, SimulationParameters& parameters) const;
 };
