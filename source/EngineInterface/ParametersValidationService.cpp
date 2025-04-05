@@ -4,20 +4,14 @@ void ParametersValidationService::validateAndCorrect(SimulationParameters& param
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
-            parameters.baseValues.attackerFoodChainColorMatrix[i][j] =
-                std::max(0.0f, std::min(1.0f, parameters.baseValues.attackerFoodChainColorMatrix[i][j]));
             parameters.attackerSameMutantProtection[i][j] = std::max(0.0f, std::min(1.0f, parameters.attackerSameMutantProtection[i][j]));
             parameters.baseValues.attackerNewComplexMutantProtection[i][j] =
                 std::max(0.0f, std::min(1.0f, parameters.baseValues.attackerNewComplexMutantProtection[i][j]));
-            parameters.baseValues.attackerComplexCreatureProtection[i][j] =
-                std::max(0.0f, parameters.baseValues.attackerComplexCreatureProtection[i][j]);
         }
         parameters.radiationAbsorptionHighVelocityPenalty[i] = std::max(0.0f, parameters.radiationAbsorptionHighVelocityPenalty[i]);
         parameters.radiationAbsorptionLowConnectionPenalty[i] = std::max(0.0f, parameters.radiationAbsorptionLowConnectionPenalty[i]);
         parameters.externalEnergyConditionalInflowFactor[i] = std::max(0.0f, std::min(1.0f, parameters.externalEnergyConditionalInflowFactor[i]));
         parameters.attackerSensorDetectionFactor[i] = std::max(0.0f, std::min(1.0f, parameters.attackerSensorDetectionFactor[i]));
-        parameters.detonatorChainExplosionProbability[i] =
-            std::max(0.0f, std::min(1.0f, parameters.detonatorChainExplosionProbability[i]));
         parameters.externalEnergyInflowFactor[i] = std::max(0.0f, std::min(1.0f, parameters.externalEnergyInflowFactor[i]));
         parameters.minCellEnergy.baseValue[i] = std::min(parameters.minCellEnergy.baseValue[i], parameters.normalCellEnergy.value[i] * 0.95f);
         parameters.particleSplitEnergy.value[i] = std::max(0.0f, parameters.particleSplitEnergy.value[i]);
@@ -27,9 +21,8 @@ void ParametersValidationService::validateAndCorrect(SimulationParameters& param
             std::max(0.0f, std::min(1.0f, parameters.baseValues.radiationAbsorptionLowVelocityPenalty[i]));
         parameters.genomeComplexitySizeFactor[i] = std::max(0.0f, parameters.genomeComplexitySizeFactor[i]);
         parameters.genomeComplexityRamificationFactor[i] = std::max(0.0f, parameters.genomeComplexityRamificationFactor[i]);
-        parameters.muscleEnergyCost[i] = std::max(0.0f, std::min(5.0f, parameters.muscleEnergyCost[i]));
-        parameters.defenderAntiAttackerStrength[i] = std::max(0.0f, parameters.defenderAntiAttackerStrength[i]);
-        parameters.defenderAntiInjectorStrength[i] = std::max(0.0f, parameters.defenderAntiInjectorStrength[i]);
+        parameters.defenderAntiAttackerStrength.value[i] = std::max(0.0f, parameters.defenderAntiAttackerStrength.value[i]);
+        parameters.defenderAntiInjectorStrength.value[i] = std::max(0.0f, parameters.defenderAntiInjectorStrength.value[i]);
     }
     parameters.externalEnergy = std::max(0.0f, parameters.externalEnergy);
     parameters.timestepSize.value = std::max(0.01f, parameters.timestepSize.value);
@@ -63,9 +56,6 @@ void ParametersValidationService::validateAndCorrect(SimulationParametersZone& z
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
         for (int j = 0; j < MAX_COLORS; ++j) {
-            zone.values.attackerFoodChainColorMatrix[i][j] =
-                std::max(0.0f, std::min(1.0f, zone.values.attackerFoodChainColorMatrix[i][j]));
-            zone.values.attackerComplexCreatureProtection[i][j] = std::max(0.0f, zone.values.attackerComplexCreatureProtection[i][j]);
             zone.values.attackerNewComplexMutantProtection[i][j] =
                 std::max(0.0f, std::min(1.0f, zone.values.attackerNewComplexMutantProtection[i][j]));
         }

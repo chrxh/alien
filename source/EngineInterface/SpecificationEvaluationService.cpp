@@ -159,6 +159,20 @@ float* SpecificationEvaluationService::getFloatRef(FloatMemberSpec const& member
         }
     }
 
+    // Color matrix
+    else if (std::holds_alternative<ColorMatrixFloatMemberNew>(memberSpec)) {
+        return reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatMemberNew>(memberSpec)).value);
+    } else if (std::holds_alternative<ColorMatrixFloatBaseZoneMemberNew>(memberSpec)) {
+        switch (LocationHelper::getLocationType(locationIndex, parameters)) {
+        case LocationType::Base:
+            return reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatBaseZoneMemberNew>(memberSpec)).baseValue);
+        case LocationType::Zone: {
+            auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+            return reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatBaseZoneMemberNew>(memberSpec)).zoneValues[index].value);
+        }
+        }
+    }
+
     return nullptr;
 }
 

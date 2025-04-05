@@ -183,7 +183,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
                 } else {
                     actualAngleDelta *= powf(1.0f - frontBackVelRatio, 4.0f);
                 }
-                auto acceleration = direction * actualAngleDelta * cudaSimulationParameters.muscleBendingAcceleration[cell->color] / 9.0f;
+                auto acceleration = direction * actualAngleDelta * cudaSimulationParameters.muscleBendingAcceleration.value[cell->color] / 9.0f;
 
                 if (cell->numConnections == 2) {
                     int chainLength = 0;
@@ -287,7 +287,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
                 } else {
                     actualAngleDelta *= powf(1.0f - bending.frontBackVelRatio, 4.0f);
                 }
-                auto acceleration = direction * actualAngleDelta * cudaSimulationParameters.muscleBendingAcceleration[cell->color] / 9.0f;
+                auto acceleration = direction * actualAngleDelta * cudaSimulationParameters.muscleBendingAcceleration.value[cell->color] / 9.0f;
 
                 if (cell->numConnections == 2) {
                     int chainLength = 0;
@@ -470,7 +470,7 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
                         actualDistanceDelta = abs(actualDistanceDelta);
                     }
                 }
-                auto acceleration = direction * actualDistanceDelta * cudaSimulationParameters.muscleCrawlingAcceleration[cell->color] * 20;
+                auto acceleration = direction * actualDistanceDelta * cudaSimulationParameters.muscleCrawlingAcceleration.value[cell->color] * 20;
                 atomicAdd(&cell->vel.x, min(AccelerationLimit, max(-AccelerationLimit, acceleration.x)));
                 atomicAdd(&cell->vel.y, min(AccelerationLimit, max(-AccelerationLimit, acceleration.y)));
             }
@@ -566,7 +566,7 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
                         actualDistanceDelta = abs(actualDistanceDelta);
                     }
                 }
-                auto acceleration = direction * actualDistanceDelta * cudaSimulationParameters.muscleCrawlingAcceleration[cell->color] * 20;
+                auto acceleration = direction * actualDistanceDelta * cudaSimulationParameters.muscleCrawlingAcceleration.value[cell->color] * 20;
                 atomicAdd(&cell->vel.x, min(AccelerationLimit, max(-AccelerationLimit, acceleration.x)));
                 atomicAdd(&cell->vel.y, min(AccelerationLimit, max(-AccelerationLimit, acceleration.y)));
             }
@@ -586,7 +586,7 @@ __inline__ __device__ void MuscleProcessor::directMovement(SimulationData& data,
         direction = Math::rotateClockwise(direction, angle);
 
         auto activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleTrigger]));
-        direction = direction * cudaSimulationParameters.muscleMovementAcceleration[cell->color] * activation * 0.1f;
+        direction = direction * cudaSimulationParameters.muscleMovementAcceleration.value[cell->color] * activation * 0.1f;
         cell->vel += direction;
         cell->cellTypeData.muscle.lastMovementX = direction.x;
         cell->cellTypeData.muscle.lastMovementY = direction.y;
@@ -597,7 +597,7 @@ __inline__ __device__ void MuscleProcessor::directMovement(SimulationData& data,
 
 __inline__ __device__ void MuscleProcessor::radiate(SimulationData& data, Cell* cell)
 {
-    auto cellTypeMuscleEnergyCost = cudaSimulationParameters.muscleEnergyCost[cell->color];
+    auto cellTypeMuscleEnergyCost = cudaSimulationParameters.muscleEnergyCost.value[cell->color];
     if (cellTypeMuscleEnergyCost > 0) {
         RadiationProcessor::radiate(data, cell, cellTypeMuscleEnergyCost);
     }

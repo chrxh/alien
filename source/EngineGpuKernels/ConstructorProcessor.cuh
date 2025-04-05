@@ -99,7 +99,7 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 
 __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    if (!cudaSimulationParameters.constructorCompletenessCheck) {
+    if (!cudaSimulationParameters.constructorCompletenessCheck.value) {
         return;
     }
     auto& constructor = cell->cellTypeData.constructor;
@@ -332,11 +332,11 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     float2 newCellPos = hostCell->pos + newCellDirection;
 
     if (CellConnectionProcessor::existCrossingConnections(
-            data, hostCell->pos, newCellPos, cudaSimulationParameters.constructorConnectingCellDistance[hostCell->color], hostCell->detached)) {
+            data, hostCell->pos, newCellPos, cudaSimulationParameters.constructorConnectingCellDistance.value[hostCell->color], hostCell->detached)) {
         return nullptr;
     }
 
-    if (cudaSimulationParameters.constructorCompletenessCheck && !constructor.isReady) {
+    if (cudaSimulationParameters.constructorCompletenessCheck.value && !constructor.isReady) {
         return nullptr;
     }
 
@@ -571,7 +571,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
         MAX_CELL_BONDS * 4,
         numNearCells,
         newCellPos,
-        cudaSimulationParameters.constructorConnectingCellDistance[hostCell->color],
+        cudaSimulationParameters.constructorConnectingCellDistance.value[hostCell->color],
         hostCell->detached,
         [&](Cell* const& otherCell) { return otherCell != hostCell && otherCell != constructionData.lastConstructionCell; });
 
@@ -599,7 +599,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
             MAX_CELL_BONDS * 2,
             numOtherCellCandidates,
             newCellPos,
-            cudaSimulationParameters.constructorConnectingCellDistance[hostCell->color],
+            cudaSimulationParameters.constructorConnectingCellDistance.value[hostCell->color],
             hostCell->detached,
             [&](Cell* const& otherCell) {
                 if (otherCell == constructionData.lastConstructionCell || otherCell == hostCell
@@ -630,7 +630,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
             MAX_CELL_BONDS * 2,
             numOtherCellCandidates,
             newCellPos,
-            cudaSimulationParameters.constructorConnectingCellDistance[hostCell->color],
+            cudaSimulationParameters.constructorConnectingCellDistance.value[hostCell->color],
             hostCell->detached,
             [&](Cell* const& otherCell) {
                 if (otherCell->livingState != LivingState_UnderConstruction

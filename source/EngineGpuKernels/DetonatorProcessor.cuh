@@ -45,8 +45,7 @@ __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data,
         if (detonator.countdown == -1) {
             detonator.countdown = 0;
             statistics.incNumDetonations(cell->color);
-            data.cellMap.executeForEach(
-                cell->pos, cudaSimulationParameters.detonatorRadius[cell->color], cell->detached, [&](Cell* const& otherCell) {
+            data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.detonatorRadius.value[cell->color], cell->detached, [&](Cell* const& otherCell) {
                     if (otherCell == cell) {
                         return;
                     }
@@ -56,11 +55,11 @@ __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data,
                     auto delta = data.cellMap.getCorrectedDirection(otherCell->pos - cell->pos);
                     auto lengthSquared = Math::lengthSquared(delta);
                     if (lengthSquared > NEAR_ZERO) {
-                        auto force = delta / lengthSquared * cudaSimulationParameters.detonatorRadius[cell->color] * 2;
+                        auto force = delta / lengthSquared * cudaSimulationParameters.detonatorRadius.value[cell->color] * 2;
                         otherCell->vel += force;
                     }
                     if (otherCell->cellType == CellType_Detonator && otherCell->cellTypeData.detonator.state != DetonatorState_Exploded) {
-                        if (data.numberGen1.random() < cudaSimulationParameters.detonatorChainExplosionProbability[cell->color]) {
+                        if (data.numberGen1.random() < cudaSimulationParameters.detonatorChainExplosionProbability.value[cell->color]) {
                             otherCell->cellTypeData.detonator.state = DetonatorState_Activated;
                             otherCell->cellTypeData.detonator.countdown = 1;
                         }
