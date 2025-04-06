@@ -131,7 +131,7 @@ void SpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Position (x,y)")
-                    .reference(Float2Spec().member(&SimulationParameters::zonePosition).max(WorldSize())),
+                    .reference(Float2Spec().member(&SimulationParameters::zonePosition).min(RealVector2D{0.0f, 0.0f}).max(WorldSize()).mousePicker(true)),
             }),
         ParameterGroupSpec()
             .name("Numerics")

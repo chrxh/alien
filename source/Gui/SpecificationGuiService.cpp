@@ -11,6 +11,7 @@
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/SpecificationEvaluationService.h"
 
+#include "SimulationInteractionController.h"
 #include "AlienImGui.h"
 
 namespace
@@ -284,6 +285,11 @@ void SpecificationGuiService::createWidgetsForFloat2Spec(
             return std::get<RealVector2D>(float2Spec._max);
         }
     }();
+
+    auto getMousePickerEnabledFunc = [&]() { return SimulationInteractionController::get().isPositionSelectionMode(); };
+    auto setMousePickerEnabledFunc = [&](bool value) { SimulationInteractionController::get().setPositionSelectionMode(value); };
+    auto getMousePickerPositionFunc = [&]() { return SimulationInteractionController::get().getPositionSelectionData(); };
+
     AlienImGui::SliderFloat2(
         AlienImGui::SliderFloat2Parameters()
             .name(parameterSpec._name)
@@ -292,9 +298,9 @@ void SpecificationGuiService::createWidgetsForFloat2Spec(
             .max(max)
             .defaultValue(*origValue)
             .format("%.2f")
-            //.getMousePickerEnabledFunc(getMousePickerEnabledFunc)
-            //.setMousePickerEnabledFunc(setMousePickerEnabledFunc)
-            //.getMousePickerPositionFunc(getMousePickerPositionFunc)
+            .getMousePickerEnabledFunc(float2Spec._mousePicker ? std::make_optional(getMousePickerEnabledFunc) : std::nullopt)
+            .setMousePickerEnabledFunc(float2Spec._mousePicker ? std::make_optional(setMousePickerEnabledFunc) : std::nullopt)
+            .getMousePickerPositionFunc(float2Spec._mousePicker ? std::make_optional(getMousePickerPositionFunc) : std::nullopt)
             .tooltip(parameterSpec._tooltip),
         value->x,
         value->y);

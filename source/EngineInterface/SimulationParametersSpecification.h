@@ -133,6 +133,7 @@ struct Float2Spec
 
     MEMBER(Float2Spec, Min2Variant, min, RealVector2D());
     MEMBER(Float2Spec, Max2Variant, max, RealVector2D());
+    MEMBER(Float2Spec, bool, mousePicker, false);
 };
 
 struct Char64Spec
