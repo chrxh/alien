@@ -79,6 +79,9 @@ ValueRef<float> SpecificationEvaluationService::getRef(FloatMemberVariant const&
     } else if (std::holds_alternative<FloatPinMember>(member)) {
         return ValueRef<float>{
             .pinned = &(parameters.**std::get<FloatPinMember>(member)).pinned};
+    } else if (std::holds_alternative<FloatZoneMember>(member)) {
+        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+        return ValueRef{.value = &(parameters.**std::get<FloatZoneMember>(member)).zoneValues[index]};
     }
     
     // Color vector
@@ -145,6 +148,9 @@ ValueRef<int> SpecificationEvaluationService::getRef(AlternativeMemberVariant co
     // Single value
     if (std::holds_alternative<IntMember>(member)) {
         return ValueRef{.value = &(parameters.**std::get<IntMember>(member)).value};
+    } else if (std::holds_alternative<IntZoneMember>(member)) {
+        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+        return ValueRef{.value = &(parameters.**std::get<IntZoneMember>(member)).zoneValues[index]};
     }
 
     return {};
@@ -255,7 +261,8 @@ bool SpecificationEvaluationService::isVisible(ParameterSpec const& parameterSpe
         } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
             auto const& floatSpec = std::get<FloatSpec>(parameterSpec._reference);
             if (std::holds_alternative<ColorVectorFloatBaseZoneMember>(floatSpec._member)
-                || std::holds_alternative<ColorMatrixFloatBaseZoneMember>(floatSpec._member)) {
+                || std::holds_alternative<ColorMatrixFloatBaseZoneMember>(floatSpec._member)
+                || std::holds_alternative<FloatZoneMember>(floatSpec._member)) {
                 return true;
             }
         } else if (std::holds_alternative<Float2Spec>(parameterSpec._reference)) {
@@ -266,6 +273,11 @@ bool SpecificationEvaluationService::isVisible(ParameterSpec const& parameterSpe
         } else if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {
             auto const& char64Spec = std::get<Char64Spec>(parameterSpec._reference);
             if (std::holds_alternative<Char64ZoneMember>(char64Spec._member)) {
+                return true;
+            }
+        } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._reference)) {
+            auto const& alternativeSpec = std::get<AlternativeSpec>(parameterSpec._reference);
+            if (std::holds_alternative<IntZoneMember>(alternativeSpec._member)) {
                 return true;
             }
         } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._reference)) {

@@ -238,9 +238,9 @@ void TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
         for (int i = 0; i < parameters.numZones.value; ++i) {
             restorePositionNew(
                 parameters.zonePosition.zoneValues[i],
-                {parameters.zone[i].velX, parameters.zone[i].velY},
-                parameters.zonePosition.zoneValues[i],
-                {parameters.zone[i].velX, parameters.zone[i].velY},
+                parameters.zoneVelocity.zoneValues[i],
+                origParameters.zonePosition.zoneValues[i],
+                origParameters.zoneVelocity.zoneValues[i],
                 snapshot.timestep);
         }
     }

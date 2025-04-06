@@ -683,32 +683,30 @@ namespace
             ParameterParser::encodeDecode(tree, spot.locationIndex, defaultSpot.locationIndex, base + "location index", parserTask);
             ParameterParser::encodeDecode(tree, parameters.zonePosition.zoneValues[index].x, defaultParameters.zonePosition.zoneValues[index].x, base + "pos.x", parserTask);
             ParameterParser::encodeDecode(tree, parameters.zonePosition.zoneValues[index].y, defaultParameters.zonePosition.zoneValues[index].y, base + "pos.y", parserTask);
-            ParameterParser::encodeDecode(tree, spot.velX, defaultSpot.velX, base + "vel.x", parserTask);
-            ParameterParser::encodeDecode(tree, spot.velY, defaultSpot.velY, base + "vel.y", parserTask);
+            ParameterParser::encodeDecode(tree, parameters.zoneVelocity.zoneValues[index].x, defaultParameters.zoneVelocity.zoneValues[index].x, base + "vel.x", parserTask);
+            ParameterParser::encodeDecode(tree, parameters.zoneVelocity.zoneValues[index].y, defaultParameters.zoneVelocity.zoneValues[index].y, base + "vel.y", parserTask);
 
-            ParameterParser::encodeDecode(tree, spot.shape.type, defaultSpot.shape.type, base + "shape.type", parserTask);
-            if (spot.shape.type == ZoneShapeType_Circular) {
-                ParameterParser::encodeDecode(
-                    tree,
-                    spot.shape.alternatives.circularZone.coreRadius,
-                    defaultSpot.shape.alternatives.circularZone.coreRadius,
-                    base + "shape.circular.core radius",
-                    parserTask);
-            }
-            if (spot.shape.type == ZoneShapeType_Rectangular) {
-                ParameterParser::encodeDecode(
-                    tree,
-                    spot.shape.alternatives.rectangularZone.width,
-                    defaultSpot.shape.alternatives.rectangularZone.width,
-                    base + "shape.rectangular.core width",
-                    parserTask);
-                ParameterParser::encodeDecode(
-                    tree,
-                    spot.shape.alternatives.rectangularZone.height,
-                    defaultSpot.shape.alternatives.rectangularZone.height,
-                    base + "shape.rectangular.core height",
-                    parserTask);
-            }
+            ParameterParser::encodeDecode(
+                tree, parameters.zoneShape.zoneValues[index], defaultParameters.zoneShape.zoneValues[index], base + "shape.type", parserTask);
+            ParameterParser::encodeDecode(
+                tree,
+                parameters.zoneCoreRadius.zoneValues[index],
+                defaultParameters.zoneCoreRadius.zoneValues[index],
+                base + "shape.circular.core radius",
+                parserTask);
+            ParameterParser::encodeDecode(
+                tree,
+                parameters.zoneCoreRect.zoneValues[index].x,
+                defaultParameters.zoneCoreRect.zoneValues[index].x,
+                base + "shape.rectangular.core width",
+                parserTask);
+            ParameterParser::encodeDecode(
+                tree,
+                parameters.zoneCoreRect.zoneValues[index].y,
+                defaultParameters.zoneCoreRect.zoneValues[index].y,
+                base + "shape.rectangular.core height",
+                parserTask);
+
             ParameterParser::encodeDecode(tree, spot.flow.type, defaultSpot.flow.type, base + "flow.type", parserTask);
             if (spot.flow.type == FlowType_Radial) {
                 ParameterParser::encodeDecode(

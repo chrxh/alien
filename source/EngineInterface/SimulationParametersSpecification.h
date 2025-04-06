@@ -31,8 +31,10 @@ using _ColorVectorIntMember = BaseParameter<ColorVector<int>> SimulationParamete
 using ColorVectorIntMember = std::shared_ptr<_ColorVectorIntMember>;
 using _ColorMatrixIntMember = BaseParameter<ColorMatrix<int>> SimulationParameters::*;
 using ColorMatrixIntMember = std::shared_ptr<_ColorMatrixIntMember>;
+using _IntZoneMember = ZoneParameter<int> SimulationParameters::*;
+using IntZoneMember = std::shared_ptr<_IntZoneMember>;
 using IntMemberVariant = std::variant<std::monostate, IntMember, IntEnableableMember, ColorVectorIntMember, ColorMatrixIntMember>;
-using AlternativeMemberVariant = std::variant<std::monostate, IntMember>;
+using AlternativeMemberVariant = std::variant<std::monostate, IntMember, IntZoneMember>;
 
 using _FloatMember = BaseParameter<float> SimulationParameters::*;
 using FloatMember = std::shared_ptr<_FloatMember>;
@@ -48,6 +50,8 @@ using _ColorVectorFloatBaseZoneMember = BaseZoneParameter<ColorVector<float>> Si
 using ColorVectorFloatBaseZoneMember = std::shared_ptr<_ColorVectorFloatBaseZoneMember>;
 using _ColorMatrixFloatBaseZoneMember = BaseZoneParameter<ColorMatrix<float>> SimulationParameters::*;
 using ColorMatrixFloatBaseZoneMember = std::shared_ptr<_ColorMatrixFloatBaseZoneMember>;
+using _FloatZoneMember = ZoneParameter<float> SimulationParameters::*;
+using FloatZoneMember = std::shared_ptr<_FloatZoneMember >;
 using FloatGetterSetter =
     std::pair<std::function<float(SimulationParameters const&, int)>, std::function<void(float, SimulationParameters&, int)>>;  // int for locationIndex
 using FloatMemberVariant = std::variant<
@@ -58,7 +62,8 @@ using FloatMemberVariant = std::variant<
     ColorMatrixFloatMember,
     FloatBaseZoneMember,
     ColorVectorFloatBaseZoneMember,
-    ColorMatrixFloatBaseZoneMember>;
+    ColorMatrixFloatBaseZoneMember,
+    FloatZoneMember>;
 
 using _Float2ZoneMember = ZoneParameter<RealVector2D> SimulationParameters::*;
 using Float2ZoneMember = std::shared_ptr<_Float2ZoneMember>;
@@ -101,6 +106,11 @@ struct IntSpec
     MEMBER(IntSpec, bool, infinity, false);
 };
 
+struct MaxWorldRadiusSize
+{};
+using FloatMinVariant = std::variant<float>;
+using FloatMaxVariant = std::variant<float, MaxWorldRadiusSize>;
+
 struct FloatSpec
 {
     SETTER_SHARED_PTR(FloatSpec, FloatMember, member);
@@ -110,12 +120,13 @@ struct FloatSpec
     SETTER_SHARED_PTR(FloatSpec, FloatBaseZoneMember, member);
     SETTER_SHARED_PTR(FloatSpec, ColorVectorFloatBaseZoneMember, member);
     SETTER_SHARED_PTR(FloatSpec, ColorMatrixFloatBaseZoneMember, member);
+    SETTER_SHARED_PTR(FloatSpec, FloatZoneMember, member);
     FloatMemberVariant _member = std::monostate();
 
     MEMBER(FloatSpec, std::optional<FloatGetterSetter>, getterSetter, std::nullopt);
 
-    MEMBER(FloatSpec, float, min, 0);
-    MEMBER(FloatSpec, float, max, 0);
+    MEMBER(FloatSpec, FloatMinVariant, min, 0.0f);
+    MEMBER(FloatSpec, FloatMaxVariant, max, 0.0f);
     MEMBER(FloatSpec, bool, logarithmic, false);
     MEMBER(FloatSpec, std::string, format, "%.3f");
     MEMBER(FloatSpec, bool, infinity, false);
@@ -133,6 +144,7 @@ struct Float2Spec
 
     MEMBER(Float2Spec, Min2Variant, min, RealVector2D());
     MEMBER(Float2Spec, Max2Variant, max, RealVector2D());
+    MEMBER(Float2Spec, std::string, format, "%.3f");
     MEMBER(Float2Spec, bool, mousePicker, false);
 };
 
@@ -147,6 +159,7 @@ struct ParameterSpec;
 struct AlternativeSpec
 {
     SETTER_SHARED_PTR(AlternativeSpec, IntMember, member);
+    SETTER_SHARED_PTR(AlternativeSpec, IntZoneMember, member);
     AlternativeMemberVariant _member = std::monostate();
 
     using Alternatives = std::vector<std::pair<std::string, std::vector<ParameterSpec>>>;

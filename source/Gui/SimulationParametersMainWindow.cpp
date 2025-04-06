@@ -422,6 +422,7 @@ void SimulationParametersMainWindow::onAddZone()
     LocationHelper::adaptLocationIndex(origParameters, _selectedLocationIndex, 1);
 
     auto worldSize = _simulationFacade->getWorldSize();
+    auto minRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
     int index = parameters.numZones.value;
 
     SimulationParametersZone zone;
@@ -429,16 +430,21 @@ void SimulationParametersMainWindow::onAddZone()
     StringHelper::copy(parameters.zoneNames.zoneValues[index], sizeof(parameters.zoneNames.zoneValues[index]), zoneName);
     StringHelper::copy(origParameters.zoneNames.zoneValues[index], sizeof(parameters.zoneNames.zoneValues[index]), zoneName);
     zone.locationIndex = _selectedLocationIndex;
-    parameters.zonePosition.zoneValues[index] = {toFloat(worldSize.x / 2), toFloat(worldSize.y / 2)};
-    origParameters.zonePosition.zoneValues[index] = parameters.zonePosition.zoneValues[index];
-    auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
-    zone.shape.type = ZoneShapeType_Circular;
-    zone.fadeoutRadius = maxRadius / 3;
+
     parameters.backgroundColor.zoneValues[index].enabled = true;
     parameters.backgroundColor.zoneValues[index].value = _zoneColorPalette.getColor((2 + parameters.numZones.value) * 8);
-    origParameters.backgroundColor.zoneValues[index] = parameters.backgroundColor.zoneValues[index];
+    parameters.zoneShape.zoneValues[index] = ZoneShapeType_Circular;
+    parameters.zonePosition.zoneValues[index] = {toFloat(worldSize.x / 2), toFloat(worldSize.y / 2)};
+    parameters.zoneCoreRadius.zoneValues[index] = minRadius / 3;
+    parameters.zoneCoreRect.zoneValues[index] = {minRadius / 3, minRadius / 3};
 
-    setDefaultShapeDataForZone(zone);
+    origParameters.backgroundColor.zoneValues[index] = parameters.backgroundColor.zoneValues[index];
+    origParameters.zoneShape.zoneValues[index] = parameters.zoneShape.zoneValues[index];
+    origParameters.zonePosition.zoneValues[index] = parameters.zonePosition.zoneValues[index];
+    origParameters.zoneCoreRadius.zoneValues[index] = parameters.zoneCoreRadius.zoneValues[index];
+    origParameters.zoneCoreRect.zoneValues[index] = parameters.zoneCoreRect.zoneValues[index];
+
+    zone.fadeoutRadius = minRadius / 3;
 
     parameters.zone[index] = zone;
     origParameters.zone[index] = zone;
@@ -670,19 +676,6 @@ void SimulationParametersMainWindow::updateLocations()
         auto pinnedString = strength.pinned.contains(i + 1) ? ICON_FA_THUMBTACK " " : " ";
         _locations.at(source.locationIndex) = Location{
             source.name, LocationType::Source, position, pinnedString + StringHelper::format(strength.values.at(i + 1) * 100 + 0.05f, 1) + "%"};
-    }
-}
-
-void SimulationParametersMainWindow::setDefaultShapeDataForZone(SimulationParametersZone& spot) const
-{
-    auto worldSize = _simulationFacade->getWorldSize();
-
-    auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
-    if (spot.shape.type == ZoneShapeType_Circular) {
-        spot.shape.alternatives.circularZone.coreRadius = maxRadius / 3;
-    } else {
-        spot.shape.alternatives.rectangularZone.height = maxRadius / 3;
-        spot.shape.alternatives.rectangularZone.width = maxRadius / 3;
     }
 }
 

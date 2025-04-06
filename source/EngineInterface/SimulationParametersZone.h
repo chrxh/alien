@@ -90,61 +90,11 @@ enum ZoneShapeType_
     ZoneShapeType_Rectangular
 };
 
-struct CircularZone
-{
-    float coreRadius = 100.0f;
-
-    bool operator==(CircularZone const&) const = default;
-};
-
-struct RectangularZone
-{
-    float width = 100.0f;
-    float height = 200.0f;
-
-    bool operator==(RectangularZone const&) const = default;
-};
-
-union ZoneShapeAlternatives
-{
-    CircularZone circularZone;
-    RectangularZone rectangularZone;
-};
-
-struct ZoneShape
-{
-    ZoneShapeType type = ZoneShapeType_Circular;
-    ZoneShapeAlternatives alternatives = {CircularZone()};
-
-    bool operator==(ZoneShape const& other) const
-    {
-        if (type != other.type) {
-            return false;
-        }
-        if (type == ZoneShapeType_Circular) {
-            if (alternatives.circularZone != other.alternatives.circularZone) {
-                return false;
-            }
-        }
-        if (type == ZoneShapeType_Rectangular) {
-            if (alternatives.rectangularZone != other.alternatives.rectangularZone) {
-                return false;
-            }
-        }
-        return true;
-    }
-};
-
 struct SimulationParametersZone
 {
     int locationIndex = -1;
 
-    float velX = 0;
-    float velY = 0;
-
     float fadeoutRadius = 100.0f;
-
-    ZoneShape shape;
 
     Flow flow;
 

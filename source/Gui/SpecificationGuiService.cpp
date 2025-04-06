@@ -106,7 +106,7 @@ void SpecificationGuiService::createWidgetsFromParameterSpecs(
         } else if (std::holds_alternative<IntSpec>(parameterSpec._reference)) {
             createWidgetsForIntSpec(parameterSpec, parameters, origParameters, locationIndex);
         } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
-            createWidgetsForFloatSpec(parameterSpec, parameters, origParameters, locationIndex);
+            createWidgetsForFloatSpec(parameterSpec, parameters, origParameters, simulationFacade, locationIndex);
         } else if (std::holds_alternative<Float2Spec>(parameterSpec._reference)) {
             createWidgetsForFloat2Spec(parameterSpec, parameters, origParameters, simulationFacade, locationIndex);
         } else if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {
@@ -199,6 +199,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
     ParameterSpec const& parameterSpec,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
+    SimulationFacade const& simulationFacade,
     int locationIndex) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
@@ -207,13 +208,23 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
     auto [value, baseValue, enabledValue, pinnedValue] = evaluationService.getRef(floatSpec._member, parameters, locationIndex);
     auto [origValue, origBaseValue, origEnabledValue, origPinnedValue] = evaluationService.getRef(floatSpec._member, origParameters, locationIndex);
 
+    float min = std::get<float>(floatSpec._min);
+    float max = [&] {
+        if (std::holds_alternative<MaxWorldRadiusSize>(floatSpec._max)) {
+            auto worldSize = simulationFacade->getWorldSize();
+            return toFloat(std::max(worldSize.x, worldSize.y));
+        } else {
+            return std::get<float>(floatSpec._max);
+        }
+    }();
+
     if (std::holds_alternative<ColorMatrixFloatMember>(floatSpec._member) || std::holds_alternative<ColorMatrixFloatBaseZoneMember>(floatSpec._member)) {
 
         AlienImGui::InputFloatColorMatrix(
             AlienImGui::InputFloatColorMatrixParameters()
                 .name(parameterSpec._name)
-                .max(floatSpec._min)
-                .max(floatSpec._max)
+                .max(min)
+                .max(max)
                 .logarithmic(floatSpec._logarithmic)
                 .format(floatSpec._format)
                 .textWidth(RightColumnWidth)
@@ -236,23 +247,23 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
             origValue = &tempOrigValue;
         }
 
-        if(AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
-                .name(parameterSpec._name)
-                .textWidth(RightColumnWidth)
-                .min(floatSpec._min)
-                .max(floatSpec._max)
-                .logarithmic(floatSpec._logarithmic)
-                .format(floatSpec._format)
-                .infinity(floatSpec._infinity)
-                .disabledValue(baseValue)
-                .defaultValue(origValue)
-                .defaultEnabledValue(origEnabledValue)
-                .colorDependence(
-                    std::holds_alternative<ColorVectorFloatMember>(floatSpec._member)
-                    || std::holds_alternative<ColorVectorFloatBaseZoneMember >(floatSpec._member))
-                .tooltip(parameterSpec._tooltip),
-            value,
+        if (AlienImGui::SliderFloat(
+                AlienImGui::SliderFloatParameters()
+                    .name(parameterSpec._name)
+                    .textWidth(RightColumnWidth)
+                    .max(min)
+                    .max(max)
+                    .logarithmic(floatSpec._logarithmic)
+                    .format(floatSpec._format)
+                    .infinity(floatSpec._infinity)
+                    .disabledValue(baseValue)
+                    .defaultValue(origValue)
+                    .defaultEnabledValue(origEnabledValue)
+                    .colorDependence(
+                        std::holds_alternative<ColorVectorFloatMember>(floatSpec._member)
+                        || std::holds_alternative<ColorVectorFloatBaseZoneMember>(floatSpec._member))
+                    .tooltip(parameterSpec._tooltip),
+                value,
             enabledValue,
             pinnedValue)) {
 
@@ -297,7 +308,7 @@ void SpecificationGuiService::createWidgetsForFloat2Spec(
             .min(min)
             .max(max)
             .defaultValue(*origValue)
-            .format("%.2f")
+            .format(float2Spec._format)
             .getMousePickerEnabledFunc(float2Spec._mousePicker ? std::make_optional(getMousePickerEnabledFunc) : std::nullopt)
             .setMousePickerEnabledFunc(float2Spec._mousePicker ? std::make_optional(setMousePickerEnabledFunc) : std::nullopt)
             .getMousePickerPositionFunc(float2Spec._mousePicker ? std::make_optional(getMousePickerPositionFunc) : std::nullopt)
