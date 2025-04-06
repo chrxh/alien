@@ -4,7 +4,6 @@
 
 #include "Base/JsonParser.h"
 #include "Base/Singleton.h"
-#include "EngineInterface/SimulationParametersZoneValues.h"
 
 #include "SettingsForSerialization.h"
 #include "Definitions.h"

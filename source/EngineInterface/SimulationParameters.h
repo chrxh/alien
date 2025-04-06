@@ -7,19 +7,29 @@
 #include "RadiationSource.h"
 #include "SimulationParametersTypes.h"
 #include "SimulationParametersZone.h"
-#include "SimulationParametersZoneValues.h"
 
 /**
  * NOTE: header is also included in kernel code
  */
 struct SimulationParameters
 {
-    // Sizes
+    /**
+     * Sizes
+     */
     BaseParameter<int> numZones = {0};
     BaseParameter<int> numRadiationSources = {0};
 
+    /**
+     * Source parameters
+     */
+
+    /**
+     * Base and Zone parameters
+     */
+
     // General
     BaseParameter<Char64> projectName = {"<unnamed>"};
+    ZoneParameter<Char64> zoneNames = {"<unnamed>"};
 
     // Visualization
     BaseZoneParameter<FloatColorRGB> backgroundColor = {.baseValue = {0.0f, 0.0f, 0.106f}};
@@ -61,6 +71,7 @@ struct SimulationParameters
 
     // Physics: Radiation
     PinBaseParameter relativeStrengthPinned = {false};
+    ZoneParameter<bool> radiationDisableSources = {false};
     BaseZoneParameter<ColorVector<float>> radiationAbsorption = {.baseValue = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
     BaseZoneParameter<ColorVector<float>> radiationType1_strength = {.baseValue = {0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f}};
     BaseParameter<ColorVector<int>> radiationType1_minimumAge = {{0, 0, 0, 0, 0, 0, 0}};
@@ -274,8 +285,6 @@ struct SimulationParameters
     BaseParameter<ColorVector<int>> genomeComplexityDepthLevel = {{3, 3, 3, 3, 3, 3, 3}};
 
     // OLD
-    // All other parameters
-    SimulationParametersZoneValues baseValues;
 
     // Particle sources
     RadiationSource radiationSource[MAX_RADIATION_SOURCES];

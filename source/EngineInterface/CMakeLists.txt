@@ -40,8 +40,6 @@ add_library(EngineInterface
     SimulationParametersTypes.h
     SimulationParametersUpdateConfig.h
     SimulationParametersZone.h
-    SimulationParametersZoneEnabledValues.h
-    SimulationParametersZoneValues.h
     SimulationParametersSpecification.h
     SpaceCalculator.cpp
     SpaceCalculator.h

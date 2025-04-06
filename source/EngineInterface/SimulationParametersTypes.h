@@ -9,6 +9,10 @@ struct ExpertToggle
     bool operator==(ExpertToggle const&) const = default;
 };
 
+/**
+ * Base parameters
+ */
+
 template <typename T>
 struct BaseParameter
 {
@@ -33,27 +37,42 @@ struct PinBaseParameter
     bool operator==(PinBaseParameter const&) const = default;
 };
 
+/**
+ * Zone parameters
+ */
+
 template <typename T>
-struct ZoneValue
+struct ZoneParameter
+{
+    T zoneValues[MAX_ZONES];
+    bool operator==(ZoneParameter<T> const&) const = default;
+};
+
+template <typename T>
+struct EnableableValue
 {
     T value;
     bool enabled = false;
 
-    bool operator==(ZoneValue<T> const&) const = default;
+    bool operator==(EnableableValue<T> const&) const = default;
 };
 
-template <typename T>
-struct ZoneParameter
-{};
+/**
+ * Base and zone parameters
+ */
 
 template <typename T>
 struct BaseZoneParameter
 {
     T baseValue;
-    ZoneValue<T> zoneValues[MAX_ZONES];
+    EnableableValue<T> zoneValues[MAX_ZONES];
 
     bool operator==(BaseZoneParameter<T> const&) const = default;
 };
+
+/**
+ * Source parameters
+ */
 
 template <typename T>
 struct PinnableSourceValue
@@ -71,6 +90,10 @@ struct PinnableSourceParameter
 
     bool operator==(PinnableSourceParameter<T> const&) const = default;
 };
+
+/**
+ * Misc
+ */
 
 struct ColorTransitionRules
 {

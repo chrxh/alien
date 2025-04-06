@@ -44,11 +44,10 @@ __inline__ __device__ void RadiationProcessor::calcActiveSources(SimulationData&
     if (threadIdx.x == 0 && blockIdx.x == 0) {
         int activeSourceIndex = 0;
         for (int i = 0; i < cudaSimulationParameters.numZones.value; ++i) {
-            auto sourceActive = !ZoneCalculator::calcParameter(
-                &SimulationParametersZoneValues::radiationDisableSources,
-                &SimulationParametersZoneEnabledValues::radiationDisableSources,
+            auto sourceActive = !ZoneCalculator::isCoveredByZonesNew(
                 data,
-                {cudaSimulationParameters.radiationSource[i].posX, cudaSimulationParameters.radiationSource[i].posY});
+                {cudaSimulationParameters.radiationSource[i].posX, cudaSimulationParameters.radiationSource[i].posY},
+                cudaSimulationParameters.radiationDisableSources);
             if (sourceActive) {
                 data.preprocessedSimulationData.activeRadiationSources.setActiveSource(activeSourceIndex, i);
                 ++activeSourceIndex;

@@ -679,7 +679,7 @@ namespace
             std::string base = "simulation parameters.spots." + std::to_string(index) + ".";
             auto& spot = parameters.zone[index];
             auto& defaultSpot = defaultParameters.zone[index];
-            ParameterParser::encodeDecode(tree, spot.name, defaultSpot.name, base + "name", parserTask);
+            ParameterParser::encodeDecode(tree, parameters.zoneNames.zoneValues[index], defaultParameters.zoneNames.zoneValues[0], base + "name", parserTask);
             ParameterParser::encodeDecode(tree, spot.locationIndex, defaultSpot.locationIndex, base + "location index", parserTask);
             ParameterParser::encodeDecode(tree, spot.posX, defaultSpot.posX, base + "pos.x", parserTask);
             ParameterParser::encodeDecode(tree, spot.posY, defaultSpot.posY, base + "pos.y", parserTask);
@@ -712,21 +712,41 @@ namespace
             ParameterParser::encodeDecode(tree, spot.flow.type, defaultSpot.flow.type, base + "flow.type", parserTask);
             if (spot.flow.type == FlowType_Radial) {
                 ParameterParser::encodeDecode(
-                    tree, spot.flow.alternatives.radialFlow.orientation, defaultSpot.flow.alternatives.radialFlow.orientation, base + "flow.radial.orientation", parserTask);
+                    tree,
+                    spot.flow.alternatives.radialFlow.orientation,
+                    defaultSpot.flow.alternatives.radialFlow.orientation,
+                    base + "flow.radial.orientation",
+                    parserTask);
                 ParameterParser::encodeDecode(
-                    tree, spot.flow.alternatives.radialFlow.strength, defaultSpot.flow.alternatives.radialFlow.strength, base + "flow.radial.strength", parserTask);
+                    tree,
+                    spot.flow.alternatives.radialFlow.strength,
+                    defaultSpot.flow.alternatives.radialFlow.strength,
+                    base + "flow.radial.strength",
+                    parserTask);
                 ParameterParser::encodeDecode(
-                    tree, spot.flow.alternatives.radialFlow.driftAngle, defaultSpot.flow.alternatives.radialFlow.driftAngle, base + "flow.radial.drift angle", parserTask);
+                    tree,
+                    spot.flow.alternatives.radialFlow.driftAngle,
+                    defaultSpot.flow.alternatives.radialFlow.driftAngle,
+                    base + "flow.radial.drift angle",
+                    parserTask);
             }
             if (spot.flow.type == FlowType_Central) {
                 ParameterParser::encodeDecode(
-                    tree, spot.flow.alternatives.centralFlow.strength, defaultSpot.flow.alternatives.centralFlow.strength, base + "flow.central.strength", parserTask);
+                    tree,
+                    spot.flow.alternatives.centralFlow.strength,
+                    defaultSpot.flow.alternatives.centralFlow.strength,
+                    base + "flow.central.strength",
+                    parserTask);
             }
             if (spot.flow.type == FlowType_Linear) {
                 ParameterParser::encodeDecode(
                     tree, spot.flow.alternatives.linearFlow.angle, defaultSpot.flow.alternatives.linearFlow.angle, base + "flow.linear.angle", parserTask);
                 ParameterParser::encodeDecode(
-                    tree, spot.flow.alternatives.linearFlow.strength, defaultSpot.flow.alternatives.linearFlow.strength, base + "flow.linear.strength", parserTask);
+                    tree,
+                    spot.flow.alternatives.linearFlow.strength,
+                    defaultSpot.flow.alternatives.linearFlow.strength,
+                    base + "flow.linear.strength",
+                    parserTask);
             }
             ParameterParser::encodeDecode(tree, spot.fadeoutRadius, defaultSpot.fadeoutRadius, base + "fadeout radius", parserTask);
 
@@ -766,11 +786,10 @@ namespace
                 defaultParameters.rigidity.baseValue,
                 base + "rigidity",
                 parserTask);
-            ParameterParser::encodeDecodeWithEnabled(
+            ParameterParser::encodeDecode(
                 tree,
-                spot.values.radiationDisableSources,
-                spot.enabledValues.radiationDisableSources,
-                defaultSpot.values.radiationDisableSources,
+                parameters.radiationDisableSources.zoneValues[index],
+                defaultParameters.radiationDisableSources.zoneValues[0],
                 base + "radiation.disable sources",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(

@@ -9,21 +9,21 @@
 
 namespace
 {
-    template <typename T>
-    bool contains(SimulationParameters const& parameters, ColorVector<T> SimulationParametersZoneValues::*parameter, std::set<T> const& values)
-    {
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            if (!values.contains((parameters.baseValues.*parameter)[i])) {
-                return false;
-            }
-            for (int j = 0; j < parameters.numZones.value; ++j) {
-                if (!values.contains((parameters.zone[j].values.*parameter)[i])) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
+    //template <typename T>
+    //bool contains(SimulationParameters const& parameters, ColorVector<T> SimulationParametersZoneValues::*parameter, std::set<T> const& values)
+    //{
+    //    for (int i = 0; i < MAX_COLORS; ++i) {
+    //        if (!values.contains((parameters.baseValues.*parameter)[i])) {
+    //            return false;
+    //        }
+    //        for (int j = 0; j < parameters.numZones.value; ++j) {
+    //            if (!values.contains((parameters.zone[j].values.*parameter)[i])) {
+    //                return false;
+    //            }
+    //        }
+    //    }
+    //    return true;
+    //}
 
     template <typename T>
     bool equals(ColorVector<T> const& parameter, T const& value)
