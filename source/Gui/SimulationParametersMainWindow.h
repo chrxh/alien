@@ -49,8 +49,6 @@ private:
 
     void updateLocations();
 
-    void setDefaultShapeDataForZone(SimulationParametersZone& spot) const;
-
     void correctLayout(float origMasterHeight, float origExpertWidgetHeight);
 
     bool checkNumZones(SimulationParameters const& parameters);

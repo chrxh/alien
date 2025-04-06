@@ -706,16 +706,3 @@ void _SimulationParametersZoneWidgets::setLocationIndex(int locationIndex)
 {
     _locationIndex = locationIndex;
 }
-
-void _SimulationParametersZoneWidgets::setDefaultSpotData(SimulationParametersZone& spot) const
-{
-    auto worldSize = _simulationFacade->getWorldSize();
-
-    auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
-    if (spot.shape.type == ZoneShapeType_Circular) {
-        spot.shape.alternatives.circularZone.coreRadius = maxRadius / 3;
-    } else {
-        spot.shape.alternatives.rectangularZone.height = maxRadius / 3;
-        spot.shape.alternatives.rectangularZone.width = maxRadius / 3;
-    }
-}

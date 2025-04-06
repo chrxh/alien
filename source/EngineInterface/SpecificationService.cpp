@@ -131,7 +131,32 @@ void SpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Position (x,y)")
-                    .reference(Float2Spec().member(&SimulationParameters::zonePosition).min(RealVector2D{0.0f, 0.0f}).max(WorldSize()).mousePicker(true)),
+                     .reference(Float2Spec()
+                                    .member(&SimulationParameters::zonePosition)
+                                    .min(RealVector2D{0.0f, 0.0f})
+                                    .max(WorldSize())
+                                    .format("%.2f")
+                                    .mousePicker(true)),
+                ParameterSpec()
+                    .name("Velocity (x,y)")
+                     .reference(
+                         Float2Spec().member(&SimulationParameters::zoneVelocity).min(RealVector2D{-4.0f, -4.0f}).max(RealVector2D{4.0f, 4.0f}).format("%.2f")),
+                 ParameterSpec().name("Shape").reference(
+                     AlternativeSpec()
+                         .member(&SimulationParameters::zoneShape)
+                         .alternatives(
+                             {{"Circular",
+                               {ParameterSpec()
+                                    .name("Core radius")
+                                    .reference(FloatSpec().member(&SimulationParameters::zoneCoreRadius).min(0.0f).max(MaxWorldRadiusSize()).format("%.2f"))}},
+                              {"Rectangular",
+                               {ParameterSpec()
+                                    .name("Core size (width,height)")
+                                    .reference(Float2Spec()
+                                                   .member(&SimulationParameters::zoneCoreRect)
+                                                   .min(RealVector2D{0.0f, 0.0f})
+                                                   .max(WorldSize())
+                                                   .format("%.2f"))}}}))
             }),
         ParameterGroupSpec()
             .name("Numerics")
@@ -155,18 +180,18 @@ void SpecificationService::createSpec()
                                   {
                                       ParameterSpec()
                                           .name("Smoothing length")
-                                          .reference(FloatSpec().member(&SimulationParameters::smoothingLength).min(0).max(3.0f))
+                                          .reference(FloatSpec().member(&SimulationParameters::smoothingLength).min(0.0f).max(3.0f))
                                           .tooltip(
                                               "The smoothing length determines the region of influence of the neighboring particles for the calculation of "
                                               "density, pressure and viscosity. Values that are too small lead to numerical instabilities, while values that "
                                               "are too large cause the particles to drift apart."),
                                       ParameterSpec()
                                           .name("Pressure")
-                                          .reference(FloatSpec().member(&SimulationParameters::pressureStrength).min(0).max(0.3f))
+                                          .reference(FloatSpec().member(&SimulationParameters::pressureStrength).min(0.0f).max(0.3f))
                                           .tooltip("This parameter allows to control the strength of the pressure."),
                                       ParameterSpec()
                                           .name("Viscosity")
-                                          .reference(FloatSpec().member(&SimulationParameters::viscosityStrength).min(0).max(0.3f))
+                                          .reference(FloatSpec().member(&SimulationParameters::viscosityStrength).min(0.0f).max(0.3f))
                                           .tooltip(
                                               "This parameter be used to control the strength of the viscosity. Larger values lead to a smoother movement."),
                                   }},
@@ -174,11 +199,11 @@ void SpecificationService::createSpec()
                                   {
                                       ParameterSpec()
                                           .name("Repulsion strength")
-                                          .reference(FloatSpec().member(&SimulationParameters::repulsionStrength).min(0).max(0.3f))
+                                          .reference(FloatSpec().member(&SimulationParameters::repulsionStrength).min(0.0f).max(0.3f))
                                           .tooltip("The strength of the repulsive forces, between two cells that are not connected."),
                                       ParameterSpec()
                                           .name("Maximum collision distance")
-                                          .reference(FloatSpec().member(&SimulationParameters::maxCollisionDistance).min(0).max(3.0f))
+                                          .reference(FloatSpec().member(&SimulationParameters::maxCollisionDistance).min(0.0f).max(3.0f))
                                           .tooltip("Maximum distance up to which a collision of two cells is possible."),
                                   }}}))
                     .tooltip(std::string(
@@ -187,15 +212,15 @@ void SpecificationService::createSpec()
                         "calculates the forces based on particle collisions and should be preferred for mechanical simulation with solids.")),
                 ParameterSpec()
                     .name("Friction")
-                    .reference(FloatSpec().member(&SimulationParameters::friction).min(0).max(1.0f).logarithmic(true).format("%.4f"))
+                    .reference(FloatSpec().member(&SimulationParameters::friction).min(0.0f).max(1.0f).logarithmic(true).format("%.4f"))
                     .tooltip("This specifies the fraction of the velocity that is slowed down per time step."),
                 ParameterSpec()
                     .name("Inner friction")
-                    .reference(FloatSpec().member(&SimulationParameters::innerFriction).min(0).max(1.0f).logarithmic(true).format("%.4f"))
+                    .reference(FloatSpec().member(&SimulationParameters::innerFriction).min(0.0f).max(1.0f).logarithmic(true).format("%.4f"))
                     .visible(false),
                 ParameterSpec()
                     .name("Rigidity")
-                    .reference(FloatSpec().member(&SimulationParameters::rigidity).min(0).max(1.0f).format("%.2f"))
+                    .reference(FloatSpec().member(&SimulationParameters::rigidity).min(0.0f).max(1.0f).format("%.2f"))
                     .tooltip("Controls the rigidity of connected cells. A higher value will cause connected cells to move more uniformly as a rigid body."),
             }),
         ParameterGroupSpec()
@@ -419,7 +444,7 @@ void SpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Energy cost")
-                    .reference(FloatSpec().member(&SimulationParameters::attackerEnergyCost).min(0).max(1.0f).logarithmic(true).format("%.5f"))
+                    .reference(FloatSpec().member(&SimulationParameters::attackerEnergyCost).min(0.0f).max(1.0f).logarithmic(true).format("%.5f"))
                     .tooltip("Amount of energy lost by an attempted attack of a cell in form of emitted energy particles."),
                 ParameterSpec()
                     .name("Food chain color matrix")
@@ -431,16 +456,16 @@ void SpecificationService::createSpec()
                         "a zero is entered in row 2 (red) and column 3 (green), it means that red cells cannot eat green cells."),
                 ParameterSpec()
                     .name("Attack strength")
-                    .reference(FloatSpec().member(&SimulationParameters::attackerStrength).min(0).max(0.5f).logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::attackerStrength).min(0.0f).max(0.5f).logarithmic(true))
                     .tooltip("Indicates the portion of energy through which a successfully attacked cell is weakened. However, this energy portion can be "
                              "influenced by other factors adjustable within the attacker's simulation parameters."),
                 ParameterSpec()
                     .name("Attack radius")
-                    .reference(FloatSpec().member(&SimulationParameters::attackerRadius).min(0).max(3.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::attackerRadius).min(0.0f).max(3.0f))
                     .tooltip("The maximum distance over which an attacker cell can attack another cell."),
                 ParameterSpec()
                     .name("Complex creature protection")
-                    .reference(FloatSpec().member(&SimulationParameters::attackerComplexCreatureProtection).min(0).max(20.0f).format("%.2f"))
+                    .reference(FloatSpec().member(&SimulationParameters::attackerComplexCreatureProtection).min(0.0f).max(20.0f).format("%.2f"))
                     .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with more complex genomes."),
                 ParameterSpec()
                     .name("Destroy cells")
@@ -491,20 +516,20 @@ void SpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Energy cost")
-                    .reference(FloatSpec().member(&SimulationParameters::muscleEnergyCost).min(0).max(5.0f).format("%.5f").logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::muscleEnergyCost).min(0.0f).max(5.0f).format("%.5f").logarithmic(true))
                     .tooltip("Amount of energy lost by a muscle action of a cell in form of emitted energy particles."),
                 ParameterSpec()
                     .name("Movement acceleration")
-                    .reference(FloatSpec().member(&SimulationParameters::muscleMovementAcceleration).min(0).max(10.0f).logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::muscleMovementAcceleration).min(0.0f).max(10.0f).logarithmic(true))
                     .tooltip("The maximum value by which a muscle cell can modify its velocity during activation. This parameter applies only to muscle cells "
                              "which are in movement mode."),
                 ParameterSpec()
                     .name("Crawling acceleration")
-                    .reference(FloatSpec().member(&SimulationParameters::muscleCrawlingAcceleration).min(0).max(10.0f).logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::muscleCrawlingAcceleration).min(0.0f).max(10.0f).logarithmic(true))
                     .tooltip("Amount of energy lost by a muscle action of a cell in form of emitted energy particles."),
                 ParameterSpec()
                     .name("Bending acceleration")
-                    .reference(FloatSpec().member(&SimulationParameters::muscleBendingAcceleration).min(0).max(10.0f).logarithmic(true))
+                    .reference(FloatSpec().member(&SimulationParameters::muscleBendingAcceleration).min(0.0f).max(10.0f).logarithmic(true))
                     .tooltip("The maximum value by which a muscle cell can modify its velocity during a bending action. This parameter applies "
                              "only to muscle cells which are in bending mode."),
             }),
@@ -521,11 +546,11 @@ void SpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Energy distribution radius")
-                    .reference(FloatSpec().member(&SimulationParameters::transmitterEnergyDistributionRadius).min(0).max(5.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::transmitterEnergyDistributionRadius).min(0.0f).max(5.0f))
                     .tooltip("The maximum distance over which a transmitter cell transfers its additional energy to nearby transmitter or constructor cells."),
                 ParameterSpec()
                     .name("Energy distribution Value")
-                    .reference(FloatSpec().member(&SimulationParameters::transmitterEnergyDistributionValue).min(0).max(20.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::transmitterEnergyDistributionValue).min(0.0f).max(20.0f))
                     .tooltip("The amount of energy which a transmitter cell can transfer to nearby transmitter or constructor cells or to connected cells."),
                 ParameterSpec()
                     .name("Same creature energy distribution")
@@ -537,7 +562,7 @@ void SpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Radius")
-                    .reference(FloatSpec().member(&SimulationParameters::reconnectorRadius).min(0).max(3.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::reconnectorRadius).min(0.0f).max(3.0f))
                     .tooltip("The maximum radius in which a reconnector cell can establish or destroy connections to other cells."),
             }),
         ParameterGroupSpec()
@@ -545,11 +570,11 @@ void SpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Blast radius")
-                    .reference(FloatSpec().member(&SimulationParameters::detonatorRadius).min(0).max(10.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::detonatorRadius).min(0.0f).max(10.0f))
                     .tooltip("The radius of the detonation."),
                 ParameterSpec()
                     .name("Chain explosion probability")
-                    .reference(FloatSpec().member(&SimulationParameters::detonatorChainExplosionProbability).min(0).max(1.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::detonatorChainExplosionProbability).min(0.0f).max(1.0f))
                     .tooltip("The probability that the explosion of one detonator will trigger the explosion of other detonators within the blast radius."),
             }),
         ParameterGroupSpec()
@@ -559,20 +584,20 @@ void SpecificationService::createSpec()
                 ParameterSpec()
                     .name("Low genome complexity penalty")
                     .reference(
-                        FloatSpec().member(&SimulationParameters::radiationAbsorptionLowGenomeComplexityPenalty).min(0).max(1.0f).format("%.2f"))
+                        FloatSpec().member(&SimulationParameters::radiationAbsorptionLowGenomeComplexityPenalty).min(0.0f).max(1.0f).format("%.2f"))
                     .tooltip("When this parameter is increased, cells with fewer genome complexity will absorb less energy from an incoming energy particle."),
                 ParameterSpec()
                     .name("Low connection penalty")
-                    .reference(FloatSpec().member(&SimulationParameters::radiationAbsorptionLowConnectionPenalty).min(0).max(5.0f).format("%.1f"))
+                    .reference(FloatSpec().member(&SimulationParameters::radiationAbsorptionLowConnectionPenalty).min(0.0f).max(5.0f).format("%.1f"))
                     .tooltip("When this parameter is increased, cells with fewer cell connections will absorb less energy from an incoming energy particle."),
                 ParameterSpec()
                     .name("High velocity penalty")
                     .reference(
-                        FloatSpec().member(&SimulationParameters::radiationAbsorptionHighVelocityPenalty).min(0).max(30.0f).logarithmic(true).format("%.2f"))
+                        FloatSpec().member(&SimulationParameters::radiationAbsorptionHighVelocityPenalty).min(0.0f).max(30.0f).logarithmic(true).format("%.2f"))
                     .tooltip("When this parameter is increased, fast moving cells will absorb less energy from an incoming energy particle."),
                 ParameterSpec()
                     .name("Low velocity penalty")
-                    .reference(FloatSpec().member(&SimulationParameters::radiationAbsorptionLowVelocityPenalty).min(0).max(1.0f).format("%.2f"))
+                    .reference(FloatSpec().member(&SimulationParameters::radiationAbsorptionLowVelocityPenalty).min(0.0f).max(1.0f).format("%.2f"))
                     .tooltip("When this parameter is increased, slowly moving cells will absorb less energy from an incoming energy particle."),
             }),
         ParameterGroupSpec()
@@ -581,15 +606,15 @@ void SpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Same mutant protection")
-                    .reference(FloatSpec().member(&SimulationParameters::attackerSameMutantProtection).min(0).max(1.0f).format("%.2f"))
+                    .reference(FloatSpec().member(&SimulationParameters::attackerSameMutantProtection).min(0.0f).max(1.0f).format("%.2f"))
                     .tooltip("The larger this parameter is, the less energy can be gained by attacking creatures with the same mutation id."),
                 ParameterSpec()
                     .name("New complex mutant protection")
-                    .reference(FloatSpec().member(&SimulationParameters::attackerNewComplexMutantProtection).min(0).max(1.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::attackerNewComplexMutantProtection).min(0.0f).max(1.0f))
                     .tooltip("A high value protects new mutants with equal or greater genome complexity from being attacked."),
                 ParameterSpec()
                     .name("Sensor detection factor")
-                    .reference(FloatSpec().member(&SimulationParameters::attackerSensorDetectionFactor).min(0).max(1.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::attackerSensorDetectionFactor).min(0.0f).max(1.0f))
                     .tooltip("This parameter controls whether the target must be previously detected with sensors in order to be attacked. The larger this "
                              "value is, the less energy can be gained during the attack if the target has not already been detected. For this purpose, the "
                              "attacker cell searches for connected (or connected-connected) sensor cells to see which cell networks they have detected last "
@@ -597,12 +622,12 @@ void SpecificationService::createSpec()
                              "compares them with the attacked target."),
                 ParameterSpec()
                     .name("Geometry deviation protection")
-                    .reference(FloatSpec().member(&SimulationParameters::attackerGeometryDeviationProtection).min(0).max(5.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::attackerGeometryDeviationProtection).min(0.0f).max(5.0f))
                     .tooltip("The larger this value is, the less energy a cell can gain from an attack if the local geometry of the attacked cell does not "
                              "match the attacking cell."),
                 ParameterSpec()
                     .name("Connections mismatch protection")
-                    .reference(FloatSpec().member(&SimulationParameters::attackerConnectionsMismatchProtection).min(0).max(1.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::attackerConnectionsMismatchProtection).min(0.0f).max(1.0f))
                     .tooltip("The larger this parameter is, the more difficult it is to attack cells that contain more connections."),
             }),
         ParameterGroupSpec()

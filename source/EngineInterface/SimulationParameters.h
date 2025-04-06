@@ -24,7 +24,6 @@ struct SimulationParameters
      * Source parameters
      */
 
-
     /**
      * Base and Zone parameters
      */
@@ -48,6 +47,10 @@ struct SimulationParameters
 
     // Location
     ZoneParameter<RealVector2D> zonePosition;
+    ZoneParameter<RealVector2D> zoneVelocity;
+    ZoneParameter<ZoneShapeType> zoneShape = {{ZoneShapeType_Circular}};
+    ZoneParameter<float> zoneCoreRadius = {{100.0f}};               // for ZoneShapeType_Circular
+    ZoneParameter<RealVector2D> zoneCoreRect = {{{100.0f, 100.0f}}};  // for ZoneShapeType_Rectangular
 
     // Numerics
     BaseParameter<float> timestepSize = {1.0f};

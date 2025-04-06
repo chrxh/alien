@@ -26,7 +26,7 @@ private:
 
     void createWidgetsForBoolSpec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
     void createWidgetsForIntSpec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
-    void createWidgetsForFloatSpec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
+    void createWidgetsForFloatSpec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, SimulationFacade const& simulationFacade,int locationIndex) const;
     void createWidgetsForFloat2Spec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, SimulationFacade const& simulationFacade, int locationIndex) const;
     void createWidgetsForChar64Spec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
     void createWidgetsForAlternativeSpec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, SimulationFacade const& simulationFacade,int locationIndex) const;

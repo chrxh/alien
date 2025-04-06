@@ -192,7 +192,7 @@ __device__ __inline__ T ZoneCalculator::calcResultingFlowField(BaseMap const& ma
 
 __device__ __inline__ float ZoneCalculator::calcWeight(float2 const& delta, int const& zoneIndex)
 {
-    if (cudaSimulationParameters.zone[zoneIndex].shape.type == ZoneShapeType_Rectangular) {
+    if (cudaSimulationParameters.zoneShape.zoneValues[zoneIndex] == ZoneShapeType_Rectangular) {
         return calcWeightForRectZone(delta, zoneIndex);
     } else {
         return calcWeightForCircularZone(delta, zoneIndex);
@@ -202,7 +202,7 @@ __device__ __inline__ float ZoneCalculator::calcWeight(float2 const& delta, int 
 __device__ __inline__ float ZoneCalculator::calcWeightForCircularZone(float2 const& delta, int const& zoneIndex)
 {
     auto distance = Math::length(delta);
-    auto coreRadius = cudaSimulationParameters.zone[zoneIndex].shape.alternatives.circularZone.coreRadius;
+    auto coreRadius = cudaSimulationParameters.zoneCoreRadius.zoneValues[zoneIndex];
     auto fadeoutRadius = cudaSimulationParameters.zone[zoneIndex].fadeoutRadius + 1;
     return distance < coreRadius ? 0.0f : min(1.0f, (distance - coreRadius) / fadeoutRadius);
 }
@@ -211,10 +211,11 @@ __device__ __inline__ float ZoneCalculator::calcWeightForRectZone(float2 const& 
 {
     auto const& zone = cudaSimulationParameters.zone[zoneIndex];
     float result = 0;
-    if (abs(delta.x) > zone.shape.alternatives.rectangularZone.width / 2 || abs(delta.y) > zone.shape.alternatives.rectangularZone.height / 2) {
+    if (abs(delta.x) > cudaSimulationParameters.zoneCoreRect.zoneValues[zoneIndex].x / 2
+        || abs(delta.y) > cudaSimulationParameters.zoneCoreRect.zoneValues[zoneIndex].y / 2) {
         float2 distanceFromRect = {
-            max(0.0f, abs(delta.x) - zone.shape.alternatives.rectangularZone.width / 2),
-            max(0.0f, abs(delta.y) - zone.shape.alternatives.rectangularZone.height / 2)};
+            max(0.0f, abs(delta.x) - cudaSimulationParameters.zoneCoreRect.zoneValues[zoneIndex].x / 2),
+            max(0.0f, abs(delta.y) - cudaSimulationParameters.zoneCoreRect.zoneValues[zoneIndex].y / 2)};
         result = min(1.0f, Math::length(distanceFromRect) / (zone.fadeoutRadius + 1));
     }
     return result;

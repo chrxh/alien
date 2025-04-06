@@ -16,8 +16,6 @@ public:
     void setLocationIndex(int locationIndex) override;
 
 private:
-    void setDefaultSpotData(SimulationParametersZone& spot) const;
-
     SimulationFacade _simulationFacade;
 
     int _locationIndex = 0;
