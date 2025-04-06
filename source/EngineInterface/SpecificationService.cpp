@@ -127,6 +127,13 @@ void SpecificationService::createSpec()
                     .tooltip("This option draws red crosses in the center of radiation sources."),
             }),
         ParameterGroupSpec()
+            .name("Location")
+            .parameters({
+                ParameterSpec()
+                    .name("Position (x,y)")
+                    .reference(Float2Spec().member(&SimulationParameters::zonePosition).max(WorldSize())),
+            }),
+        ParameterGroupSpec()
             .name("Numerics")
             .parameters({
                 ParameterSpec()

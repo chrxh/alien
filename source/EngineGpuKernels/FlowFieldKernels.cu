@@ -7,35 +7,39 @@
 
 namespace
 {
-    __device__ float getHeight(BaseMap const& map, float2 const& pos, SimulationParametersZone const& spot)
+    __device__ float getHeight(BaseMap const& map, float2 const& pos, int const& zoneIndex)
     {
-        auto dist = map.getDistance(pos, float2{spot.posX, spot.posY});
-        if (Orientation_Clockwise == spot.flow.alternatives.radialFlow.orientation) {
-            return sqrtf(dist) * spot.flow.alternatives.radialFlow.strength;
+        auto const& zone = cudaSimulationParameters.zone[zoneIndex];
+
+        auto dist =
+            map.getDistance(pos, float2{cudaSimulationParameters.zonePosition.zoneValues[zoneIndex].x, cudaSimulationParameters.zonePosition.zoneValues[zoneIndex].y});
+        if (Orientation_Clockwise == zone.flow.alternatives.radialFlow.orientation) {
+            return sqrtf(dist) * zone.flow.alternatives.radialFlow.strength;
         } else {
-            return -sqrtf(dist) * spot.flow.alternatives.radialFlow.strength;
+            return -sqrtf(dist) * zone.flow.alternatives.radialFlow.strength;
         }
     }
 
-    __device__ __inline__ float2 calcAcceleration(BaseMap const& map, float2 const& pos, int const& spotIndex)
+    __device__ __inline__ float2 calcAcceleration(BaseMap const& map, float2 const& pos, int const& zoneIndex)
     {
-        auto const& spot = cudaSimulationParameters.zone[spotIndex];
-        switch (spot.flow.type) {
+        auto const& zone = cudaSimulationParameters.zone[zoneIndex];
+        switch (zone.flow.type) {
         case FlowType_Radial: {
-            auto baseValue = getHeight(map, pos, spot);
-            auto downValue = getHeight(map, pos + float2{0, 1}, spot);
-            auto rightValue = getHeight(map, pos + float2{1, 0}, spot);
+            auto baseValue = getHeight(map, pos, zoneIndex);
+            auto downValue = getHeight(map, pos + float2{0, 1}, zoneIndex);
+            auto rightValue = getHeight(map, pos + float2{1, 0}, zoneIndex);
             float2 result{rightValue - baseValue, downValue - baseValue};
-            result = Math::rotateClockwise(result, 90.0f + spot.flow.alternatives.radialFlow.driftAngle);
+            result = Math::rotateClockwise(result, 90.0f + zone.flow.alternatives.radialFlow.driftAngle);
             return result;
         }
         case FlowType_Central: {
-            auto centerDirection = map.getCorrectedDirection(float2{spot.posX, spot.posY} - pos);
-            return centerDirection * spot.flow.alternatives.centralFlow.strength / (Math::lengthSquared(centerDirection) + 50.0f);
+            auto centerDirection = map.getCorrectedDirection(
+                float2{cudaSimulationParameters.zonePosition.zoneValues[zoneIndex].x, cudaSimulationParameters.zonePosition.zoneValues[zoneIndex].y} - pos);
+            return centerDirection * zone.flow.alternatives.centralFlow.strength / (Math::lengthSquared(centerDirection) + 50.0f);
         }
         case FlowType_Linear: {
-            auto centerDirection = Math::unitVectorOfAngle(spot.flow.alternatives.linearFlow.angle);
-            return centerDirection * spot.flow.alternatives.linearFlow.strength;
+            auto centerDirection = Math::unitVectorOfAngle(zone.flow.alternatives.linearFlow.angle);
+            return centerDirection * zone.flow.alternatives.linearFlow.strength;
         }
         default:
             return {0, 0};

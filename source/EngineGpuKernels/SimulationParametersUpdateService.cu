@@ -20,10 +20,10 @@ SimulationParameters SimulationParametersUpdateService::integrateChanges(
         auto numSpots = std::min(currentParameters.numZones.value, changedParameters.numZones.value);
         for (int i = 0; i < numSpots; ++i) {
             if (currentParameters.zone[i].velX != 0) {
-                result.zone[i].posX = currentParameters.zone[i].posX;
+                result.zonePosition.zoneValues[i].x = currentParameters.zonePosition.zoneValues[i].x;
             }
             if (currentParameters.zone[i].velY != 0) {
-                result.zone[i].posY = currentParameters.zone[i].posY;
+                result.zonePosition.zoneValues[i].y = currentParameters.zonePosition.zoneValues[i].y;
             }
         }
 
@@ -66,18 +66,16 @@ bool SimulationParametersUpdateService::updateSimulationParametersAfterTimestep(
         source.posY = correctedPosition.y;
     }
     for (int i = 0; i < settings.simulationParameters.numZones.value; ++i) {
-        auto& spot = settings.simulationParameters.zone[i];
-        if (abs(spot.velX) > NEAR_ZERO) {
-            spot.posX += spot.velX * settings.simulationParameters.timestepSize.value;
+        auto& zone = settings.simulationParameters.zone[i];
+        if (abs(zone.velX) > NEAR_ZERO) {
+            settings.simulationParameters.zonePosition.zoneValues[i].x += zone.velX * settings.simulationParameters.timestepSize.value;
             result = true;
         }
-        if (abs(spot.velY) > NEAR_ZERO) {
-            spot.posY += spot.velY * settings.simulationParameters.timestepSize.value;
+        if (abs(zone.velY) > NEAR_ZERO) {
+            settings.simulationParameters.zonePosition.zoneValues[i].y += zone.velY * settings.simulationParameters.timestepSize.value;
             result = true;
         }
-        auto correctedPosition = space.getCorrectedPosition({spot.posX, spot.posY});
-        spot.posX = correctedPosition.x;
-        spot.posY = correctedPosition.y;
+        settings.simulationParameters.zonePosition.zoneValues[i] = space.getCorrectedPosition({settings.simulationParameters.zonePosition.zoneValues[i]});
     }
 
     auto externalEnergyPresent = settings.simulationParameters.externalEnergy.value > 0;

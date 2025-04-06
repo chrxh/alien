@@ -425,10 +425,12 @@ void SimulationParametersMainWindow::onAddZone()
     int index = parameters.numZones.value;
 
     SimulationParametersZone zone;
-    StringHelper::copy(parameters.zoneNames.zoneValues[index], sizeof(parameters.zoneNames.zoneValues[index]), LocationHelper::generateZoneName(parameters));
+    auto zoneName = LocationHelper::generateZoneName(parameters);
+    StringHelper::copy(parameters.zoneNames.zoneValues[index], sizeof(parameters.zoneNames.zoneValues[index]), zoneName);
+    StringHelper::copy(origParameters.zoneNames.zoneValues[index], sizeof(parameters.zoneNames.zoneValues[index]), zoneName);
     zone.locationIndex = _selectedLocationIndex;
-    zone.posX = toFloat(worldSize.x / 2);
-    zone.posY = toFloat(worldSize.y / 2);
+    parameters.zonePosition.zoneValues[index].x = toFloat(worldSize.x / 2);
+    parameters.zonePosition.zoneValues[index].y = toFloat(worldSize.y / 2);
     auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
     zone.shape.type = ZoneShapeType_Circular;
     zone.fadeoutRadius = maxRadius / 3;
@@ -637,14 +639,14 @@ void SimulationParametersMainWindow::onOpenInLocationWindow()
 void SimulationParametersMainWindow::onCenterLocation(int locationIndex)
 {
     auto parameters = _simulationFacade->getSimulationParameters();
-    auto location = LocationHelper::findLocation(parameters, locationIndex);
+    auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
+    auto arrayIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
     RealVector2D pos;
-    if (std::holds_alternative<SimulationParametersZone*>(location)) {
-        auto zone = std::get<SimulationParametersZone*>(location);
-        pos = {zone->posX, zone->posY};
-    } else {
-        auto source = std::get<RadiationSource*>(location);
-        pos = {source->posX, source->posY};
+    if (locationType == LocationType::Zone) {
+        pos = parameters.zonePosition.zoneValues[arrayIndex];
+    } else if (locationType == LocationType::Source) {
+        auto const& source = parameters.radiationSource[arrayIndex];
+        pos = {source.posX, source.posY};
     }
     Viewport::get().setCenterInWorldPos(pos);
 }
@@ -659,7 +661,8 @@ void SimulationParametersMainWindow::updateLocations()
     _locations.at(0) = Location{"Base", LocationType::Base, "-", pinnedString + StringHelper::format(strength.values.front() * 100 + 0.05f, 1) + "%"};
     for (int i = 0; i < parameters.numZones.value; ++i) {
         auto const& zone = parameters.zone[i];
-        auto position = "(" + StringHelper::format(zone.posX, 0) + ", " + StringHelper::format(zone.posY, 0) + ")";
+        auto position =
+            "(" + StringHelper::format(parameters.zonePosition.zoneValues[i].x, 0) + ", " + StringHelper::format(parameters.zonePosition.zoneValues[i].y, 0) + ")";
         _locations.at(zone.locationIndex) = Location{parameters.zoneNames.zoneValues[i], LocationType::Zone, position};
     }
     for (int i = 0; i < parameters.numRadiationSources.value; ++i) {
@@ -677,10 +680,10 @@ void SimulationParametersMainWindow::setDefaultShapeDataForZone(SimulationParame
 
     auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
     if (spot.shape.type == ZoneShapeType_Circular) {
-        spot.shape.alternatives.circularSpot.coreRadius = maxRadius / 3;
+        spot.shape.alternatives.circularZone.coreRadius = maxRadius / 3;
     } else {
-        spot.shape.alternatives.rectangularSpot.height = maxRadius / 3;
-        spot.shape.alternatives.rectangularSpot.width = maxRadius / 3;
+        spot.shape.alternatives.rectangularZone.height = maxRadius / 3;
+        spot.shape.alternatives.rectangularZone.width = maxRadius / 3;
     }
 }
 

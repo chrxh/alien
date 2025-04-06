@@ -1,15 +1,9 @@
 #include "Vector2D.h"
 
-RealVector2D::RealVector2D(float x_, float y_)
-    : x(x_)
-    , y(y_)
-{}
-
-RealVector2D::RealVector2D(std::initializer_list<float> l)
+void IntVector2D::operator-=(IntVector2D const& vec)
 {
-    auto it = l.begin();
-    x = *it++;
-    y = *it;
+    x -= vec.x;
+    y -= vec.y;
 }
 
 bool RealVector2D::operator==(RealVector2D const& other) const

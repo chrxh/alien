@@ -107,8 +107,8 @@ struct RectangularZone
 
 union ZoneShapeAlternatives
 {
-    CircularZone circularSpot;
-    RectangularZone rectangularSpot;
+    CircularZone circularZone;
+    RectangularZone rectangularZone;
 };
 
 struct ZoneShape
@@ -122,12 +122,12 @@ struct ZoneShape
             return false;
         }
         if (type == ZoneShapeType_Circular) {
-            if (alternatives.circularSpot != other.alternatives.circularSpot) {
+            if (alternatives.circularZone != other.alternatives.circularZone) {
                 return false;
             }
         }
         if (type == ZoneShapeType_Rectangular) {
-            if (alternatives.rectangularSpot != other.alternatives.rectangularSpot) {
+            if (alternatives.rectangularZone != other.alternatives.rectangularZone) {
                 return false;
             }
         }
@@ -139,9 +139,7 @@ struct SimulationParametersZone
 {
     int locationIndex = -1;
 
-    float posX = 0;
-    float posY = 0;
-    float velX= 0;
+    float velX = 0;
     float velY = 0;
 
     float fadeoutRadius = 100.0f;

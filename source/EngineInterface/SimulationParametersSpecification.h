@@ -60,6 +60,10 @@ using FloatMemberVariant = std::variant<
     ColorVectorFloatBaseZoneMember,
     ColorMatrixFloatBaseZoneMember>;
 
+using _Float2ZoneMember = ZoneParameter<RealVector2D> SimulationParameters::*;
+using Float2ZoneMember = std::shared_ptr<_Float2ZoneMember>;
+using Float2MemberVariant = std::variant<std::monostate, Float2ZoneMember>;
+
 using _Char64Member = BaseParameter<Char64> SimulationParameters::*;
 using Char64Member = std::shared_ptr<_Char64Member>;
 using _Char64ZoneMember = ZoneParameter<Char64> SimulationParameters::*;
@@ -117,6 +121,20 @@ struct FloatSpec
     MEMBER(FloatSpec, bool, infinity, false);
 };
 
+struct WorldSize
+{};
+using Min2Variant = std::variant<RealVector2D>;
+using Max2Variant = std::variant<RealVector2D, WorldSize>;
+
+struct Float2Spec
+{
+    SETTER_SHARED_PTR(Float2Spec, Float2ZoneMember, member);
+    Float2MemberVariant _member = std::monostate();
+
+    MEMBER(Float2Spec, Min2Variant, min, RealVector2D());
+    MEMBER(Float2Spec, Max2Variant, max, RealVector2D());
+};
+
 struct Char64Spec
 {
     SETTER_SHARED_PTR(Char64Spec, Char64Member, member);
@@ -146,7 +164,7 @@ struct ColorTransitionRulesSpec
     ColorTransitionRulesMemberVariant _member = std::monostate();
 };
 
-using ReferenceSpec = std::variant<BoolSpec, IntSpec, FloatSpec, Char64Spec, AlternativeSpec, ColorPickerSpec, ColorTransitionRulesSpec>;
+using ReferenceSpec = std::variant<BoolSpec, IntSpec, FloatSpec, Float2Spec, Char64Spec, AlternativeSpec, ColorPickerSpec, ColorTransitionRulesSpec>;
 
 struct ParameterSpec
 {

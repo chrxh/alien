@@ -7,6 +7,7 @@
 #include "RadiationSource.h"
 #include "SimulationParametersTypes.h"
 #include "SimulationParametersZone.h"
+#include "Base/Vector2D.h"
 
 /**
  * NOTE: header is also included in kernel code
@@ -22,6 +23,7 @@ struct SimulationParameters
     /**
      * Source parameters
      */
+
 
     /**
      * Base and Zone parameters
@@ -43,6 +45,9 @@ struct SimulationParameters
     BaseParameter<bool> gridLines = {false};
     BaseParameter<bool> markReferenceDomain = {true};
     BaseParameter<bool> showRadiationSources = {true};
+
+    // Location
+    ZoneParameter<RealVector2D> zonePosition;
 
     // Numerics
     BaseParameter<float> timestepSize = {1.0f};
@@ -71,7 +76,7 @@ struct SimulationParameters
 
     // Physics: Radiation
     PinBaseParameter relativeStrengthPinned = {false};
-    ZoneParameter<bool> radiationDisableSources = {false};
+    ZoneParameter<bool> radiationDisableSources = {{false}};
     BaseZoneParameter<ColorVector<float>> radiationAbsorption = {.baseValue = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
     BaseZoneParameter<ColorVector<float>> radiationType1_strength = {.baseValue = {0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f}};
     BaseParameter<ColorVector<int>> radiationType1_minimumAge = {{0, 0, 0, 0, 0, 0, 0}};

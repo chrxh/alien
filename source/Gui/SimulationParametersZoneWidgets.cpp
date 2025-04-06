@@ -48,7 +48,7 @@ void _SimulationParametersZoneWidgets::process()
 
     auto worldSize = _simulationFacade->getWorldSize();
 
-    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _locationIndex);
+    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _simulationFacade, _locationIndex);
     AlienImGui::Separator();
     AlienImGui::Separator();
     AlienImGui::Separator();
@@ -732,9 +732,9 @@ void _SimulationParametersZoneWidgets::setDefaultSpotData(SimulationParametersZo
 
     auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
     if (spot.shape.type == ZoneShapeType_Circular) {
-        spot.shape.alternatives.circularSpot.coreRadius = maxRadius / 3;
+        spot.shape.alternatives.circularZone.coreRadius = maxRadius / 3;
     } else {
-        spot.shape.alternatives.rectangularSpot.height = maxRadius / 3;
-        spot.shape.alternatives.rectangularSpot.width = maxRadius / 3;
+        spot.shape.alternatives.rectangularZone.height = maxRadius / 3;
+        spot.shape.alternatives.rectangularZone.width = maxRadius / 3;
     }
 }
