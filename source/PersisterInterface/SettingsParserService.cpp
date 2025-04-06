@@ -681,8 +681,8 @@ namespace
             auto& defaultSpot = defaultParameters.zone[index];
             ParameterParser::encodeDecode(tree, parameters.zoneNames.zoneValues[index], defaultParameters.zoneNames.zoneValues[0], base + "name", parserTask);
             ParameterParser::encodeDecode(tree, spot.locationIndex, defaultSpot.locationIndex, base + "location index", parserTask);
-            ParameterParser::encodeDecode(tree, spot.posX, defaultSpot.posX, base + "pos.x", parserTask);
-            ParameterParser::encodeDecode(tree, spot.posY, defaultSpot.posY, base + "pos.y", parserTask);
+            ParameterParser::encodeDecode(tree, parameters.zonePosition.zoneValues[index].x, defaultParameters.zonePosition.zoneValues[index].x, base + "pos.x", parserTask);
+            ParameterParser::encodeDecode(tree, parameters.zonePosition.zoneValues[index].y, defaultParameters.zonePosition.zoneValues[index].y, base + "pos.y", parserTask);
             ParameterParser::encodeDecode(tree, spot.velX, defaultSpot.velX, base + "vel.x", parserTask);
             ParameterParser::encodeDecode(tree, spot.velY, defaultSpot.velY, base + "vel.y", parserTask);
 
@@ -690,22 +690,22 @@ namespace
             if (spot.shape.type == ZoneShapeType_Circular) {
                 ParameterParser::encodeDecode(
                     tree,
-                    spot.shape.alternatives.circularSpot.coreRadius,
-                    defaultSpot.shape.alternatives.circularSpot.coreRadius,
+                    spot.shape.alternatives.circularZone.coreRadius,
+                    defaultSpot.shape.alternatives.circularZone.coreRadius,
                     base + "shape.circular.core radius",
                     parserTask);
             }
             if (spot.shape.type == ZoneShapeType_Rectangular) {
                 ParameterParser::encodeDecode(
                     tree,
-                    spot.shape.alternatives.rectangularSpot.width,
-                    defaultSpot.shape.alternatives.rectangularSpot.width,
+                    spot.shape.alternatives.rectangularZone.width,
+                    defaultSpot.shape.alternatives.rectangularZone.width,
                     base + "shape.rectangular.core width",
                     parserTask);
                 ParameterParser::encodeDecode(
                     tree,
-                    spot.shape.alternatives.rectangularSpot.height,
-                    defaultSpot.shape.alternatives.rectangularSpot.height,
+                    spot.shape.alternatives.rectangularZone.height,
+                    defaultSpot.shape.alternatives.rectangularZone.height,
                     base + "shape.rectangular.core height",
                     parserTask);
             }

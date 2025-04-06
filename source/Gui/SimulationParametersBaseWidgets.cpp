@@ -23,7 +23,7 @@ void _SimulationParametersBaseWidgets::process()
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
     auto lastParameters = parameters;
 
-    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, 0);
+    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _simulationFacade, 0);
 
     ParametersValidationService::get().validateAndCorrect(parameters);
 

@@ -47,7 +47,13 @@ private:
 
     template <typename MovedObjectType>
     void restorePosition(MovedObjectType& movedObject, MovedObjectType const& origMovedObject, uint64_t origTimestep);
-    
+    void restorePositionNew(
+        RealVector2D& position,
+        RealVector2D const& velocity,
+        RealVector2D const& origPosition,
+        RealVector2D const& origVelocity,
+        uint64_t origTimestep);
+
     SimulationFacade _simulationFacade; 
 
     std::optional<Snapshot> _snapshot;

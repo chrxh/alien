@@ -236,7 +236,12 @@ void TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
 
     if (origParameters.numZones.value == parameters.numZones.value) {
         for (int i = 0; i < parameters.numZones.value; ++i) {
-            restorePosition(parameters.zone[i], origParameters.zone[i], snapshot.timestep);
+            restorePositionNew(
+                parameters.zonePosition.zoneValues[i],
+                {parameters.zone[i].velX, parameters.zone[i].velY},
+                parameters.zonePosition.zoneValues[i],
+                {parameters.zone[i].velX, parameters.zone[i].velY},
+                snapshot.timestep);
         }
     }
 
@@ -263,5 +268,18 @@ void TemporalControlWindow::restorePosition(MovedObjectType& movedObject, MovedO
         || std::abs(origMovedObject.velY) > NEAR_ZERO) {
         movedObject.posX = origMovedObject.posX;
         movedObject.posY = origMovedObject.posY;
+    }
+}
+
+void TemporalControlWindow::restorePositionNew(
+    RealVector2D& position,
+    RealVector2D const& velocity,
+    RealVector2D const& origPosition,
+    RealVector2D const& origVelocity,
+    uint64_t origTimestep)
+{
+    if (std::abs(velocity.x) > NEAR_ZERO || std::abs(velocity.y) > NEAR_ZERO || std::abs(origVelocity.x) > NEAR_ZERO
+        || std::abs(origVelocity.y) > NEAR_ZERO) {
+        position = origPosition;
     }
 }
