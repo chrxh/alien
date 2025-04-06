@@ -429,15 +429,14 @@ void SimulationParametersMainWindow::onAddZone()
     StringHelper::copy(parameters.zoneNames.zoneValues[index], sizeof(parameters.zoneNames.zoneValues[index]), zoneName);
     StringHelper::copy(origParameters.zoneNames.zoneValues[index], sizeof(parameters.zoneNames.zoneValues[index]), zoneName);
     zone.locationIndex = _selectedLocationIndex;
-    parameters.zonePosition.zoneValues[index].x = toFloat(worldSize.x / 2);
-    parameters.zonePosition.zoneValues[index].y = toFloat(worldSize.y / 2);
+    parameters.zonePosition.zoneValues[index] = {toFloat(worldSize.x / 2), toFloat(worldSize.y / 2)};
+    origParameters.zonePosition.zoneValues[index] = parameters.zonePosition.zoneValues[index];
     auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
     zone.shape.type = ZoneShapeType_Circular;
     zone.fadeoutRadius = maxRadius / 3;
     parameters.backgroundColor.zoneValues[index].enabled = true;
     parameters.backgroundColor.zoneValues[index].value = _zoneColorPalette.getColor((2 + parameters.numZones.value) * 8);
-    origParameters.backgroundColor.zoneValues[index].enabled = true;
-    origParameters.backgroundColor.zoneValues[index].value = _zoneColorPalette.getColor((2 + parameters.numZones.value) * 8);
+    origParameters.backgroundColor.zoneValues[index] = parameters.backgroundColor.zoneValues[index];
 
     setDefaultShapeDataForZone(zone);
 

@@ -10,25 +10,6 @@
 #include "SpecificationGuiService.h"
 #include "SimulationInteractionController.h"
 
-namespace
-{
-    auto constexpr RightColumnWidth = 285.0f;
-
-    template <int numRows, int numCols, typename T>
-    std::vector<std::vector<T>> toVector(T const v[numRows][numCols])
-    {
-        std::vector<std::vector<T>> result;
-        for (int row = 0; row < numRows; ++row) {
-            std::vector<T> rowVector;
-            for (int col = 0; col < numCols; ++col) {
-                rowVector.emplace_back(v[row][col]);
-            }
-            result.emplace_back(rowVector);
-        }
-        return result;
-    }
-}
-
 void _SimulationParametersZoneWidgets::init(SimulationFacade const& simulationFacade, int locationIndex)
 {
     _simulationFacade = simulationFacade;
