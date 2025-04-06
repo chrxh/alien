@@ -2,8 +2,6 @@
 
 #include <cstdint>
 
-#include "SimulationParametersZoneEnabledValues.h"
-#include "SimulationParametersZoneValues.h"
 #include "SimulationParametersTypes.h"
 
 using Orientation = int;
@@ -139,7 +137,6 @@ struct ZoneShape
 
 struct SimulationParametersZone
 {
-    Char64 name = "<unnamed>";
     int locationIndex = -1;
 
     float posX = 0;
@@ -152,9 +149,6 @@ struct SimulationParametersZone
     ZoneShape shape;
 
     Flow flow;
-
-    SimulationParametersZoneValues values;
-    SimulationParametersZoneEnabledValues enabledValues;
 
     bool operator==(SimulationParametersZone const&) const = default;
 };

@@ -425,14 +425,13 @@ void SimulationParametersMainWindow::onAddZone()
     int index = parameters.numZones.value;
 
     SimulationParametersZone zone;
-    StringHelper::copy(zone.name, sizeof(zone.name), LocationHelper::generateZoneName(parameters));
+    StringHelper::copy(parameters.zoneNames.zoneValues[index], sizeof(parameters.zoneNames.zoneValues[index]), LocationHelper::generateZoneName(parameters));
     zone.locationIndex = _selectedLocationIndex;
     zone.posX = toFloat(worldSize.x / 2);
     zone.posY = toFloat(worldSize.y / 2);
     auto maxRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
     zone.shape.type = ZoneShapeType_Circular;
     zone.fadeoutRadius = maxRadius / 3;
-    zone.values = parameters.baseValues;
     parameters.backgroundColor.zoneValues[index].enabled = true;
     parameters.backgroundColor.zoneValues[index].value = _zoneColorPalette.getColor((2 + parameters.numZones.value) * 8);
     origParameters.backgroundColor.zoneValues[index].enabled = true;
@@ -512,7 +511,7 @@ void SimulationParametersMainWindow::onCloneLocation()
         auto zone = std::get<SimulationParametersZone*>(location);
         auto clone = *zone;
 
-        StringHelper::copy(clone.name, sizeof(clone.name), LocationHelper::generateZoneName(parameters));
+        //StringHelper::copy(clone.name, sizeof(clone.name), LocationHelper::generateZoneName(parameters));
         clone.locationIndex = _selectedLocationIndex;
 
         int index = parameters.numZones.value;
@@ -661,7 +660,7 @@ void SimulationParametersMainWindow::updateLocations()
     for (int i = 0; i < parameters.numZones.value; ++i) {
         auto const& zone = parameters.zone[i];
         auto position = "(" + StringHelper::format(zone.posX, 0) + ", " + StringHelper::format(zone.posY, 0) + ")";
-        _locations.at(zone.locationIndex) = Location{zone.name, LocationType::Zone, position};
+        _locations.at(zone.locationIndex) = Location{parameters.zoneNames.zoneValues[i], LocationType::Zone, position};
     }
     for (int i = 0; i < parameters.numRadiationSources.value; ++i) {
         auto const& source = parameters.radiationSource[i];

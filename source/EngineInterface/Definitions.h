@@ -9,8 +9,6 @@
 #include "CellTypeConstants.h"
 
 struct SimulationParameters;
-struct SimulationParametersZoneValues;
-struct SimulationParametersZoneEnabledValues;
 struct RadiationSource;
 struct ExpertToggles;
 struct ColorTransitionRules;

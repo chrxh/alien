@@ -146,7 +146,7 @@ std::string LocationHelper::generateZoneName(SimulationParameters& parameters)
         alreadyUsed = false;
         result = "Zone " + std::to_string(++counter);
         for (int i = 0; i < parameters.numZones.value; ++i) {
-            auto name = std::string(parameters.zone[i].name);
+            auto name = std::string(parameters.zoneNames.zoneValues[i]);
             if (result == name) {
                 alreadyUsed = true;
                 break;

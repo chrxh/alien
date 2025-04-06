@@ -65,6 +65,7 @@ void SpecificationService::createSpec()
             ParameterSpec()
                 .name("Project name")
                 .reference(Char64Spec().member(&SimulationParameters::projectName)),
+            ParameterSpec().name("Zone name").reference(Char64Spec().member(&SimulationParameters::zoneNames)),
         }),
         ParameterGroupSpec()
             .name("Visualization")
@@ -243,6 +244,10 @@ void SpecificationService::createSpec()
                     .tooltip("Cells can emit energy particles over time. A portion of this energy can be released directly near the cell, while the rest is "
                              "utilized by one of the available radiation sources. This parameter determines the fraction of energy assigned to the emitted "
                              "energy particle in the vicinity of the cell. Values between 0 and 1 are permitted."),
+                ParameterSpec()
+                    .name("Disable radiation sources")
+                    .reference(BoolSpec().member(&SimulationParameters::radiationDisableSources))
+                    .tooltip("If activated, all radiation sources within this zone are deactivated."),
                 ParameterSpec()
                     .name("Absorption factor")
                     .reference(FloatSpec().member(&SimulationParameters::radiationAbsorption).min(0.0f).max(1.0f).logarithmic(true).format("%.4f"))
