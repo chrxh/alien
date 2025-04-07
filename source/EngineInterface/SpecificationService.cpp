@@ -236,9 +236,8 @@ void SpecificationService::createSpec()
                 ParameterSpec()
                     .name("Relative strength")
                     .reference(FloatSpec()
-                                   .member(PinnableBaseValueSpecNew()
-                                               .pinnedMember(&SimulationParameters::relativeStrengthPinned)
-                                               .getterSetter(FloatGetterSetter{radiationStrengthGetter, radiationStrengthSetter}))
+                                   .member(&SimulationParameters::relativeStrengthPinned)
+                                   .getterSetter(FloatGetterSetter{radiationStrengthGetter, radiationStrengthSetter})
                                    .min(0.0f)
                                    .max(1.0f))
                     .tooltip("Cells can emit energy particles over time. A portion of this energy can be released directly near the cell, while the rest is "
@@ -543,7 +542,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Advanced energy absorption control")
-            .expertToggle(&SimulationParameters::expertToggle_advancedAbsorptionControl)
+            .expertToggle(&SimulationParameters::advancedAbsorptionControl)
             .parameters({
                 ParameterSpec()
                     .name("Low genome complexity penalty")
@@ -566,7 +565,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Advanced attacker control")
-            .expertToggle(&SimulationParameters::expertToggle_advancedAttackerControl)
+            .expertToggle(&SimulationParameters::advancedAttackerControl)
             .parameters({
                 ParameterSpec()
                     .name("Same mutant protection")
@@ -596,27 +595,17 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Cell age limiter")
-            //.expertToggle(&ExpertToggles::cellAgeLimiter)
+            .expertToggle(&SimulationParameters::cellAgeLimiter)
             .parameters({
                 ParameterSpec()
                     .name("Maximum inactive cell age")
                     .reference(
-                        FloatSpec()
-                            .member(&SimulationParametersZoneValues::maxAgeForInactiveCells)
-                            .min(1.0f)
-                            .max(1e7f)
-                            .format("%.0f")
-                            .logarithmic(true)
-                            .infinity(true))
-                    .enabled(EnabledSpec()
-                                 .base(&SimulationParameters::maxAgeForInactiveCellsEnabled)
-                                 .zone(&SimulationParametersZoneEnabledValues::maxAgeForInactiveCellsEnabled))
+                        FloatSpec().member(&SimulationParameters::maxAgeForInactiveCells).min(1.0f).max(1e7f).format("%.0f").logarithmic(true).infinity(true))
                     .tooltip("Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered. Cells which "
                              "are in state 'Under construction' are not affected by this option."),
                 ParameterSpec()
                     .name("Maximum free cell age")
                     .reference(IntSpec().member(&SimulationParameters::freeCellMaxAge).min(1).max(1e7).logarithmic(true).infinity(true))
-                    .enabled(EnabledSpec().base(&SimulationParameters::freeCellMaxAgeEnabled))
                     .tooltip("The maximal age of free cells (= cells that arise from energy particles) can be set here."),
                 ParameterSpec()
                     .name("Reset age after construction")
@@ -627,9 +616,6 @@ void SpecificationService::createSpec()
                              "completion if their construction takes a long time."),
                 ParameterSpec()
                     .name("Maximum age balancing")
-                    //.value(BaseValueSpec()
-                    //           .valueAddress(BASE_VALUE_OFFSET(maxCellAgeBalancerInterval))
-                    //           .enabledValueAddress(BASE_VALUE_OFFSET(maxCellAgeBalancerEnabled)))
                     .reference(IntSpec().member(&SimulationParameters::maxCellAgeBalancerInterval).min(1e3).max(1e6).logarithmic(true))
                     .tooltip("Adjusts the maximum age at regular intervals. It increases the maximum age for the cell color where the fewest "
                              "replicators exist. Conversely, the maximum age is decreased for the cell color with the most replicators."),

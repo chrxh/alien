@@ -2,23 +2,11 @@
 
 #include "Colors.h"
 
-template <typename T>
-struct ZoneValue
+struct ExpertToggle
 {
-    T value;
-    bool enabled = false;
+    bool value = false;
 
-    bool operator==(ZoneValue<T> const&) const = default;
-};
-
-template <typename T>
-struct PinnableZoneValue
-{
-    T value;
-    bool enabled = false;
-    bool pinned = false;
-
-    bool operator==(PinnableZoneValue<T> const&) const = default;
+    bool operator==(ExpertToggle const&) const = default;
 };
 
 template <typename T>
@@ -31,12 +19,34 @@ struct BaseParameter
 
 template <typename T>
 struct EnableableBaseParameter
-{};
+{
+    T value;
+    bool enabled = false;
+
+    bool operator==(EnableableBaseParameter<T> const&) const = default;
+};
+
+template <typename T>
+struct PinnableBaseParameter
+{
+    T value;
+    bool pinned = false;
+
+    bool operator==(PinnableBaseParameter<T> const&) const = default;
+};
+
+template <typename T>
+struct ZoneValue
+{
+    T value;
+    bool enabled = false;
+
+    bool operator==(ZoneValue<T> const&) const = default;
+};
 
 template <typename T>
 struct ZoneParameter
 {};
-
 
 template <typename T>
 struct BaseZoneParameter
@@ -48,12 +58,20 @@ struct BaseZoneParameter
 };
 
 template <typename T>
-struct PinnableBaseZoneParameter
+struct PinnableSourceValue
 {
-    bool baseValuePinned = false;
-    PinnableZoneValue<T> zoneValues[MAX_ZONES];
+    T value;
+    bool pinned = false;
 
-    bool operator==(PinnableBaseZoneParameter<T> const&) const = default;
+    bool operator==(PinnableSourceValue<T> const&) const = default;
+};
+
+template <typename T>
+struct PinnableSourceParameter
+{
+    PinnableSourceValue<T> value[MAX_RADIATION_SOURCES];
+
+    bool operator==(PinnableSourceParameter<T> const&) const = default;
 };
 
 enum class LocationType

@@ -61,7 +61,7 @@ struct SimulationParameters
     BaseZoneParameter<float> cellMaxBindingEnergy = {.baseValue = Infinity<float>::value};
 
     // Physics: Radiation
-    BaseParameter<bool> relativeStrengthPinned = {false};
+    PinnableBaseParameter<float> relativeStrengthPinned = {false};
     BaseZoneParameter<ColorVector<float>> radiationAbsorption = {.baseValue = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
     BaseZoneParameter<ColorVector<float>> radiationType1_strength = {.baseValue = {0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f}};
     BaseParameter<ColorVector<int>> radiationType1_minimumAge = {{0, 0, 0, 0, 0, 0, 0}};
@@ -186,14 +186,14 @@ struct SimulationParameters
     BaseParameter<ColorVector<float>> detonatorChainExplosionProbability = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
 
     // Expert settings: Advanced absorption control
-    BaseParameter<bool> expertToggle_advancedAbsorptionControl = {false};
+    ExpertToggle advancedAbsorptionControl = {false};
     BaseZoneParameter<ColorVector<float>> radiationAbsorptionLowGenomeComplexityPenalty = {.baseValue = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     BaseParameter<ColorVector<float>> radiationAbsorptionLowConnectionPenalty = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     BaseParameter<ColorVector<float>> radiationAbsorptionHighVelocityPenalty = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     BaseZoneParameter<ColorVector<float>> radiationAbsorptionLowVelocityPenalty = {.baseValue = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
 
     // Expert settings: Advanced attacker control
-    BaseParameter<bool> expertToggle_advancedAttackerControl = {false};
+    ExpertToggle advancedAttackerControl = {false};
     BaseParameter<ColorMatrix<float>> attackerSameMutantProtection = {{
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
@@ -216,19 +216,25 @@ struct SimulationParameters
     static float constexpr attackerColorInhomogeneityFactor = 1.0f;
 
     // Expert settings: Cell age limiter
-    bool maxAgeForInactiveCellsEnabled = false;  // Candidate for deletion
-    bool freeCellMaxAgeEnabled = false;
-    ColorVector<int> freeCellMaxAge = {
+    ExpertToggle cellAgeLimiter = {false};
+    BaseZoneParameter<ColorVector<float>> maxAgeForInactiveCells = {.baseValue = {  // Candidate for deletion
+        Infinity<float>::value,
+        Infinity<float>::value,
+        Infinity<float>::value,
+        Infinity<float>::value,
+        Infinity<float>::value,
+        Infinity<float>::value,
+        Infinity<float>::value}};
+    BaseParameter<ColorVector<int>> freeCellMaxAge = {{
         Infinity<int>::value,
         Infinity<int>::value,
         Infinity<int>::value,
         Infinity<int>::value,
         Infinity<int>::value,
         Infinity<int>::value,
-        Infinity<int>::value};
-    bool resetCellAgeAfterActivation = false;   // Candidate for deletion
-    bool maxCellAgeBalancerEnabled = false;
-    int maxCellAgeBalancerInterval = 10000;
+        Infinity<int>::value}};
+    BaseParameter<bool> resetCellAgeAfterActivation = {false};  // Candidate for deletion
+    EnableableBaseParameter<int> maxCellAgeBalancerInterval = {.value = 10000, .enabled = false};
 
     // Expert settings: Cell glow
     CellColoring cellGlowColoring = CellColoring_CellColor;
