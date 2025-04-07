@@ -25,7 +25,7 @@ void _RenderingKernelsLauncher::drawImage(
         KERNEL_CALL_1_1(cudaDrawRadiationSources, targetImage, rectUpperLeft, data.worldSize, imageSize, zoom);
     }
 
-    if (settings.simulationParameters.expertToggles.cellGlow) {
+    if (settings.simulationParameters.cellGlowToggle.value) {
         int blocks;
         int threadsPerBlock;
         if (zoom < 4) {

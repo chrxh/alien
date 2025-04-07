@@ -3,25 +3,12 @@
 void ParametersValidationService::validateAndCorrect(SimulationParameters& parameters) const
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
-        parameters.externalEnergyConditionalInflowFactor[i] = std::max(0.0f, std::min(1.0f, parameters.externalEnergyConditionalInflowFactor[i]));
-        parameters.externalEnergyInflowFactor[i] = std::max(0.0f, std::min(1.0f, parameters.externalEnergyInflowFactor[i]));
         parameters.minCellEnergy.baseValue[i] = std::min(parameters.minCellEnergy.baseValue[i], parameters.normalCellEnergy.value[i] * 0.95f);
         parameters.particleSplitEnergy.value[i] = std::max(0.0f, parameters.particleSplitEnergy.value[i]);
-        parameters.genomeComplexitySizeFactor[i] = std::max(0.0f, parameters.genomeComplexitySizeFactor[i]);
-        parameters.genomeComplexityRamificationFactor[i] = std::max(0.0f, parameters.genomeComplexityRamificationFactor[i]);
         parameters.defenderAntiAttackerStrength.value[i] = std::max(0.0f, parameters.defenderAntiAttackerStrength.value[i]);
         parameters.defenderAntiInjectorStrength.value[i] = std::max(0.0f, parameters.defenderAntiInjectorStrength.value[i]);
     }
-    parameters.externalEnergy = std::max(0.0f, parameters.externalEnergy);
     parameters.timestepSize.value = std::max(0.01f, parameters.timestepSize.value);
-    parameters.cellGlowRadius = std::max(1.0f, std::min(8.0f, parameters.cellGlowRadius));
-
-    parameters.cellCopyMutationNeuronDataWeight = std::max(0.0f, std::min(1.0f, parameters.cellCopyMutationNeuronDataWeight));
-    parameters.cellCopyMutationNeuronDataBias = std::max(0.0f, std::min(1.0f, parameters.cellCopyMutationNeuronDataBias));
-    parameters.cellCopyMutationNeuronDataActivationFunction = std::max(0.0f, std::min(1.0f, parameters.cellCopyMutationNeuronDataActivationFunction));
-    parameters.cellCopyMutationNeuronDataReinforcement = std::max(1.0f, std::min(2.0f, parameters.cellCopyMutationNeuronDataReinforcement));
-    parameters.cellCopyMutationNeuronDataDamping = std::max(1.0f, std::min(2.0f, parameters.cellCopyMutationNeuronDataDamping));
-    parameters.cellCopyMutationNeuronDataOffset = std::max(0.0f, std::min(1.0f, parameters.cellCopyMutationNeuronDataOffset));
 
     for (int i = 0; i < parameters.numZones.value; ++i) {
         validateAndCorrect(parameters.zone[i], parameters);

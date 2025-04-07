@@ -26,13 +26,11 @@ struct EnableableBaseParameter
     bool operator==(EnableableBaseParameter<T> const&) const = default;
 };
 
-template <typename T>
-struct PinnableBaseParameter
+struct PinBaseParameter
 {
-    T value;
     bool pinned = false;
 
-    bool operator==(PinnableBaseParameter<T> const&) const = default;
+    bool operator==(PinBaseParameter const&) const = default;
 };
 
 template <typename T>
@@ -72,6 +70,21 @@ struct PinnableSourceParameter
     PinnableSourceValue<T> value[MAX_RADIATION_SOURCES];
 
     bool operator==(PinnableSourceParameter<T> const&) const = default;
+};
+
+struct ColorTransitionRules
+{
+    ColorVector<int> cellColorTransitionDuration = {
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value,
+        Infinity<int>::value};
+    ColorVector<int> cellColorTransitionTargetColor = {0, 1, 2, 3, 4, 5, 6};
+
+    bool operator==(ColorTransitionRules const&) const = default;
 };
 
 enum class LocationType

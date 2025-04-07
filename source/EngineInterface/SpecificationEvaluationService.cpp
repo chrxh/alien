@@ -146,11 +146,11 @@ ValueRef<float> SpecificationEvaluationService::getRef(FloatMemberVariant const&
             return ValueRef{.value = &(parameters.**std::get<FloatZoneValuesMemberNew>(member)).zoneValues[index].value};
         }
         }
-    } else if (std::holds_alternative<FloatPinnableMemberNew>(member)) {
-        return ValueRef{
-            .value = &(parameters.**std::get<FloatPinnableMemberNew>(member)).value,
+    } else if (std::holds_alternative<FloatPinMemberNew>(member)) {
+        return ValueRef<float>{
+            .value = nullptr,
             .enabled = nullptr,
-            .pinned = &(parameters.**std::get<FloatPinnableMemberNew>(member)).pinned};
+            .pinned = &(parameters.**std::get<FloatPinMemberNew>(member)).pinned};
     }
     
     // Color vector

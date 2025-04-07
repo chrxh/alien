@@ -31,8 +31,8 @@ using _FloatMember = float SimulationParameters::*;
 using FloatMember = std::shared_ptr<_FloatMember>;
 using _FloatMemberNew = BaseParameter<float> SimulationParameters::*;
 using FloatMemberNew = std::shared_ptr<_FloatMemberNew>;
-using _FloatPinnableMemberNew = PinnableBaseParameter<float> SimulationParameters::*;
-using FloatPinnableMemberNew = std::shared_ptr<_FloatPinnableMemberNew>;
+using _FloatPinMemberNew = PinBaseParameter SimulationParameters::*;
+using FloatPinMemberNew = std::shared_ptr<_FloatPinMemberNew>;
 
 using _ColorVectorIntMember = ColorVector<int> SimulationParameters::*;
 using ColorVectorIntMember = std::shared_ptr<_ColorVectorIntMember >;
@@ -139,7 +139,7 @@ using FloatMemberVariant = std::variant<
     ColorVectorFloatZoneValuesMember,
     ColorMatrixFloatZoneValuesMember,
     FloatMemberNew,
-    FloatPinnableMemberNew,
+    FloatPinMemberNew,
     ColorVectorFloatMemberNew,
     ColorMatrixFloatMemberNew,
     FloatZoneValuesMemberNew,
@@ -155,7 +155,7 @@ struct FloatSpec
     SETTER_SHARED_PTR(FloatSpec, ColorVectorFloatZoneValuesMember, member);
     SETTER_SHARED_PTR(FloatSpec, ColorMatrixFloatZoneValuesMember, member);
     SETTER_SHARED_PTR(FloatSpec, FloatMemberNew, member);
-    SETTER_SHARED_PTR(FloatSpec, FloatPinnableMemberNew, member);
+    SETTER_SHARED_PTR(FloatSpec, FloatPinMemberNew, member);
     SETTER_SHARED_PTR(FloatSpec, ColorVectorFloatMemberNew, member);
     SETTER_SHARED_PTR(FloatSpec, ColorMatrixFloatMemberNew, member);
     SETTER_SHARED_PTR(FloatSpec, FloatZoneValuesMemberNew, member);

@@ -8,12 +8,5 @@
 
 struct ExpertToggles
 {
-    bool externalEnergyControl = false;
-    bool customizeNeuronMutations = false;
-    bool customizeDeletionMutations = false;
-    bool cellColorTransitionRules = false;
-    bool cellGlow = false;
-    bool genomeComplexityMeasurement = false;
-
     bool operator==(ExpertToggles const&) const = default;
 };

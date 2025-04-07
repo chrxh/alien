@@ -25,6 +25,11 @@ public:
         T (&zoneValues)[MAX_ZONES],
         Parameter const& baseZoneParameter);
 
+    //return -1 for base
+    template <typename T>
+    __device__ __inline__ static int
+    getFirstMatchingZoneOrBaseNew(SimulationData const& data, float2 const& worldPos, BaseZoneParameter<T> SimulationParameters::*parameter);
+
     //OLD
     template <typename T>
     __device__ __inline__ static T calcResultingValue(
@@ -313,6 +318,28 @@ __device__ __inline__ float ZoneCalculator::calcParameterNew(
     }
 
     return calcResultingValueNew(data.cellMap, worldPos, baseZoneParameter.baseValue[color1][color2], zoneValues, baseZoneParameter);
+}
+
+template<typename T>
+__device__ __inline__ int
+ZoneCalculator::getFirstMatchingZoneOrBaseNew(
+    SimulationData const& data, float2 const& worldPos, BaseZoneParameter<T> SimulationParameters::*parameter)
+{
+    if (0 == cudaSimulationParameters.numZones.value) {
+        return -1;
+    } else {
+        auto const& map = data.cellMap;
+        for (int i = 0; i < cudaSimulationParameters.numZones.value; ++i) {
+            if ((cudaSimulationParameters.*parameter).zoneValues[i].enabled) {
+                float2 spotPos = {cudaSimulationParameters.zone[i].posX, cudaSimulationParameters.zone[i].posY};
+                auto delta = map.getCorrectedDirection(spotPos - worldPos);
+                if (calcWeight(delta, i) < NEAR_ZERO) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
 }
 
 template <typename T, typename Parameter>

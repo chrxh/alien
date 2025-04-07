@@ -61,7 +61,7 @@ struct SimulationParameters
     BaseZoneParameter<float> cellMaxBindingEnergy = {.baseValue = Infinity<float>::value};
 
     // Physics: Radiation
-    PinnableBaseParameter<float> relativeStrengthPinned = {false};
+    PinBaseParameter relativeStrengthPinned = {false};
     BaseZoneParameter<ColorVector<float>> radiationAbsorption = {.baseValue = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
     BaseZoneParameter<ColorVector<float>> radiationType1_strength = {.baseValue = {0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f}};
     BaseParameter<ColorVector<int>> radiationType1_minimumAge = {{0, 0, 0, 0, 0, 0, 0}};
@@ -186,14 +186,14 @@ struct SimulationParameters
     BaseParameter<ColorVector<float>> detonatorChainExplosionProbability = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
 
     // Expert settings: Advanced absorption control
-    ExpertToggle advancedAbsorptionControl = {false};
+    ExpertToggle advancedAbsorptionControlToggle = {false};
     BaseZoneParameter<ColorVector<float>> radiationAbsorptionLowGenomeComplexityPenalty = {.baseValue = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     BaseParameter<ColorVector<float>> radiationAbsorptionLowConnectionPenalty = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     BaseParameter<ColorVector<float>> radiationAbsorptionHighVelocityPenalty = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     BaseZoneParameter<ColorVector<float>> radiationAbsorptionLowVelocityPenalty = {.baseValue = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
 
     // Expert settings: Advanced attacker control
-    ExpertToggle advancedAttackerControl = {false};
+    ExpertToggle advancedAttackerControlToggle = {false};
     BaseParameter<ColorMatrix<float>> attackerSameMutantProtection = {{
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
@@ -216,7 +216,7 @@ struct SimulationParameters
     static float constexpr attackerColorInhomogeneityFactor = 1.0f;
 
     // Expert settings: Cell age limiter
-    ExpertToggle cellAgeLimiter = {false};
+    ExpertToggle cellAgeLimiterToggle = {false};
     BaseZoneParameter<ColorVector<float>> maxAgeForInactiveCells = {.baseValue = {  // Candidate for deletion
         Infinity<float>::value,
         Infinity<float>::value,
@@ -236,40 +236,48 @@ struct SimulationParameters
     BaseParameter<bool> resetCellAgeAfterActivation = {false};  // Candidate for deletion
     EnableableBaseParameter<int> maxCellAgeBalancerInterval = {.value = 10000, .enabled = false};
 
+    // Expert settings: Cell color transition rules
+    ExpertToggle colorTransitionRulesToggle = {false};
+    BaseZoneParameter<ColorTransitionRules> colorTransitionRules;
+
     // Expert settings: Cell glow
-    CellColoring cellGlowColoring = CellColoring_CellColor;
-    float cellGlowRadius = 4.0f;
-    ColorVector<float> cellGlowStrength = {0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f};
+    ExpertToggle cellGlowToggle = {false};
+    BaseParameter<CellColoring> cellGlowColoring = {CellColoring_CellColor};
+    BaseParameter<float> cellGlowRadius = {4.0f};
+    BaseParameter<ColorVector<float>> cellGlowStrength = {{0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f}};
 
     // Expert settings: Customize deletion mutations setting
-    int cellCopyMutationDeletionMinSize = 0;
+    ExpertToggle customizeDeletionMutationsToggle = {false};
+    BaseParameter<int> cellCopyMutationDeletionMinSize = {0};
 
     // Expert settings: Customize neuron mutations setting
-    float cellCopyMutationNeuronDataWeight = 0.2f;
-    float cellCopyMutationNeuronDataBias = 0.2f;
-    float cellCopyMutationNeuronDataActivationFunction = 0.05f;
-    float cellCopyMutationNeuronDataReinforcement = 1.05f;
-    float cellCopyMutationNeuronDataDamping = 1.05f;
-    float cellCopyMutationNeuronDataOffset = 0.05f;
+    ExpertToggle customizeNeuronMutationsToggle = {false};
+    BaseParameter<float> cellCopyMutationNeuronDataWeight = {0.2f};
+    BaseParameter<float> cellCopyMutationNeuronDataBias = {0.2f};
+    BaseParameter<float> cellCopyMutationNeuronDataActivationFunction = {0.05f};
+    BaseParameter<float> cellCopyMutationNeuronDataReinforcement = {1.05f};
+    BaseParameter<float> cellCopyMutationNeuronDataDamping = {1.05f};
+    BaseParameter<float> cellCopyMutationNeuronDataOffset = {0.05f};
 
     // Expert settings: External energy settings
-    float externalEnergy = 0.0f;
-    ColorVector<float> externalEnergyInflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    ColorVector<float> externalEnergyConditionalInflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    bool externalEnergyInflowOnlyForNonSelfReplicators = false;
-    ColorVector<float> externalEnergyBackflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    float externalEnergyBackflowLimit = Infinity<float>::value;
+    ExpertToggle externalEnergyControlToggle = {false};
+    BaseParameter<float> externalEnergy = {0.0f};
+    BaseParameter<ColorVector<float>> externalEnergyInflowFactor = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    BaseParameter<ColorVector<float>> externalEnergyConditionalInflowFactor = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    BaseParameter<bool> externalEnergyInflowOnlyForNonSelfReplicators = {false};
+    BaseParameter<ColorVector<float>> externalEnergyBackflowFactor = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    BaseParameter<float> externalEnergyBackflowLimit = {Infinity<float>::value};
 
     // Expert settings: Genome complexity measurement
-    ColorVector<float> genomeComplexitySizeFactor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-    ColorVector<float> genomeComplexityRamificationFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    ColorVector<int> genomeComplexityDepthLevel = {3, 3, 3, 3, 3, 3, 3};
+    ExpertToggle genomeComplexityMeasurementToggle = {false};
+    BaseParameter<ColorVector<float>> genomeComplexitySizeFactor = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
+    BaseParameter<ColorVector<float>> genomeComplexityRamificationFactor = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    BaseParameter<ColorVector<int>> genomeComplexityDepthLevel = {{3, 3, 3, 3, 3, 3, 3}};
 
+    // OLD
     // All other parameters
     SimulationParametersZoneValues baseValues;
 
-
-    // OLD
     // Expert settings toggles
     ExpertToggles expertToggles;
 

@@ -5,7 +5,6 @@
 struct SimulationParametersZoneEnabledValues
 {
     bool radiationDisableSources = false;
-    bool colorTransitionRules = false;
 
     bool operator==(SimulationParametersZoneEnabledValues const&) const = default;
 };

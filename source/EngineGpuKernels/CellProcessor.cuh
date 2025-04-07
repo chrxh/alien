@@ -561,17 +561,17 @@ __inline__ __device__ void CellProcessor::aging(SimulationData& data)
         ++cell->age;
 
 
-        if (cudaSimulationParameters.expertToggles.cellColorTransitionRules) {
+        if (cudaSimulationParameters.colorTransitionRulesToggle.value) {
             int transitionDuration;
             int targetColor;
             auto color = calcMod(cell->color, MAX_COLORS);
-            auto zoneIndex = ZoneCalculator::getFirstMatchingZoneOrBase(data, cell->pos, &SimulationParametersZoneEnabledValues::colorTransitionRules);
+            auto zoneIndex = ZoneCalculator::getFirstMatchingZoneOrBaseNew(data, cell->pos, &SimulationParameters::colorTransitionRules);
             if (zoneIndex == -1) {
-                transitionDuration = cudaSimulationParameters.baseValues.colorTransitionRules.cellColorTransitionDuration[color];
-                targetColor = cudaSimulationParameters.baseValues.colorTransitionRules.cellColorTransitionTargetColor[color];
+                transitionDuration = cudaSimulationParameters.colorTransitionRules.baseValue.cellColorTransitionDuration[color];
+                targetColor = cudaSimulationParameters.colorTransitionRules.baseValue.cellColorTransitionTargetColor[color];
             } else {
-                transitionDuration = cudaSimulationParameters.zone[zoneIndex].values.colorTransitionRules.cellColorTransitionDuration[color];
-                targetColor = cudaSimulationParameters.zone[zoneIndex].values.colorTransitionRules.cellColorTransitionTargetColor[color];
+                transitionDuration = cudaSimulationParameters.colorTransitionRules.zoneValues[zoneIndex].value.cellColorTransitionDuration[color];
+                targetColor = cudaSimulationParameters.colorTransitionRules.zoneValues[zoneIndex].value.cellColorTransitionTargetColor[color];
             }
             if (transitionDuration > 0 && cell->age > transitionDuration) {
                 cell->color = targetColor;
@@ -626,7 +626,7 @@ __inline__ __device__ void CellProcessor::livingStateTransition_calcFutureState(
             livingState = LivingState_Ready;
         } else if (origLivingState == LivingState_Activating) {
             livingState = LivingState_Ready;
-            if (cudaSimulationParameters.cellAgeLimiter.value && cudaSimulationParameters.resetCellAgeAfterActivation.value) {
+            if (cudaSimulationParameters.cellAgeLimiterToggle.value && cudaSimulationParameters.resetCellAgeAfterActivation.value) {
                 atomicExch(&cell->age, 0);
             }
         } else if (origLivingState == LivingState_Reviving) {
@@ -803,7 +803,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         }
 
         auto cellMaxAge = cudaSimulationParameters.maxCellAge.value[cell->color];
-        if (cudaSimulationParameters.cellAgeLimiter.value && cell->mutationId != 1
+        if (cudaSimulationParameters.cellAgeLimiterToggle.value && cell->mutationId != 1
             && cell->cellTypeUsed == CellTriggered_No && cell->livingState == LivingState_Ready && cell->activationTime == 0) {
             bool adjacentCellsUsed = false;
             for (int i = 0; i < cell->numConnections; ++i) {
@@ -818,7 +818,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
                 cellMaxAge = toInt(cellInactiveMaxAge);
             }
         }
-        if (cudaSimulationParameters.cellAgeLimiter.value && cell->cellType == CellType_Free) {
+        if (cudaSimulationParameters.cellAgeLimiterToggle.value && cell->cellType == CellType_Free) {
             cellMaxAge = cudaSimulationParameters.freeCellMaxAge.value[cell->color];
         }
         if (cellMaxAge > 0 && cell->age > cellMaxAge) {

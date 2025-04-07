@@ -443,7 +443,7 @@ bool SpecificationGuiService::isVisible(ParameterSpec const& parameterSpec, Loca
             }
         } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
             auto const& floatSpec = std::get<FloatSpec>(parameterSpec._reference);
-            if (std::holds_alternative<FloatMemberNew>(floatSpec._member) || std::holds_alternative<FloatPinnableMemberNew>(floatSpec._member)
+            if (std::holds_alternative<FloatMemberNew>(floatSpec._member) || std::holds_alternative<FloatPinMemberNew>(floatSpec._member)
                 || std::holds_alternative<ColorVectorFloatMemberNew>(floatSpec._member)
                 || std::holds_alternative<ColorMatrixFloatMemberNew>(floatSpec._member) || std::holds_alternative<FloatZoneValuesMemberNew>(floatSpec._member)
                 || std::holds_alternative<ColorVectorFloatBaseZoneMemberNew>(floatSpec._member)
