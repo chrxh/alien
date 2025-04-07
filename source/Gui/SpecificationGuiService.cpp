@@ -96,22 +96,16 @@ void SpecificationGuiService::createWidgetsFromParameterSpecs(
 
         if (std::holds_alternative<BoolSpec>(parameterSpec._reference)) {
             createWidgetsForBoolSpec(parameterSpec, parameters, origParameters, locationIndex);
-
         } else if (std::holds_alternative<IntSpec>(parameterSpec._reference)) {
             createWidgetsForIntSpec(parameterSpec, parameters, origParameters, locationIndex);
-
         } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
             createWidgetsForFloatSpec(parameterSpec, parameters, origParameters, locationIndex);
-
         } else if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {
             createWidgetsForChar64Spec(parameterSpec, parameters, origParameters, locationIndex);
-
         } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._reference)) {
             createWidgetsForAlternativeSpec(parameterSpec, parameters, origParameters, locationIndex);
-
         } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._reference)) {
             createWidgetsForColorPickerSpec(parameterSpec, parameters, origParameters, locationIndex);
-
         } else if (std::holds_alternative<ColorTransitionRulesSpec>(parameterSpec._reference)) {
             createWidgetsForColorTransitionRulesSpec(parameterSpec, parameters, origParameters, locationIndex);
         }
@@ -129,25 +123,22 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& boolSpec = std::get<BoolSpec>(parameterSpec._reference);
 
+    auto ref = evaluationService.getRef(boolSpec._member, parameters, locationIndex);
+    auto origRef = evaluationService.getRef(boolSpec._member, origParameters, locationIndex);
     if (std::holds_alternative<ColorMatrixBoolMember>(boolSpec._member) || std::holds_alternative<ColorMatrixBoolMemberNew>(boolSpec._member)) {
 
-        auto value = reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(evaluationService.getBoolRef(boolSpec._member, parameters, locationIndex));
-        auto origValue = reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(evaluationService.getBoolRef(boolSpec._member, origParameters, locationIndex));
         AlienImGui::CheckboxColorMatrix(
             AlienImGui::CheckboxColorMatrixParameters()
                 .name(parameterSpec._name)
                 .textWidth(RightColumnWidth)
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*origValue))
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(origRef.value)))
                 .tooltip(parameterSpec._tooltip),
-            *value);
+            *reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(ref.value));
 
     } else {
-
-        auto value = evaluationService.getBoolRef(boolSpec._member, parameters, locationIndex);
-        auto origValue = evaluationService.getBoolRef(boolSpec._member, origParameters, locationIndex);
         AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue).tooltip(parameterSpec._tooltip),
-            *value);
+            AlienImGui::CheckboxParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origRef.value).tooltip(parameterSpec._tooltip),
+            *ref.value);
 
     }
 }
@@ -161,10 +152,10 @@ void SpecificationGuiService::createWidgetsForIntSpec(
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& intSpec = std::get<IntSpec>(parameterSpec._reference);
 
-    if (std::holds_alternative<ColorMatrixIntMember>(intSpec._member) || std::holds_alternative<ColorMatrixIntMemberNew>(intSpec._member)) {
+    auto [value, enabledValue, pinnedValue] = evaluationService.getRef(intSpec._member, parameters, locationIndex);
+    auto [origValue, origEnabledValue, origPinnedValue] = evaluationService.getRef(intSpec._member, origParameters, locationIndex);
 
-        auto value = reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(evaluationService.getIntRef(intSpec._member, parameters, locationIndex));
-        auto origValue = reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(evaluationService.getIntRef(intSpec._member, origParameters, locationIndex));
+    if (std::holds_alternative<ColorMatrixIntMember>(intSpec._member) || std::holds_alternative<ColorMatrixIntMemberNew>(intSpec._member)) {
         AlienImGui::InputIntColorMatrix(
             AlienImGui::InputIntColorMatrixParameters()
                 .name(parameterSpec._name)
@@ -173,15 +164,10 @@ void SpecificationGuiService::createWidgetsForIntSpec(
                 .logarithmic(intSpec._logarithmic)
                 .textWidth(RightColumnWidth)
                 .tooltip(parameterSpec._tooltip)
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*origValue)),
-            *value);
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(origValue))),
+            *reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(value));
 
     } else {
-
-        auto value = evaluationService.getIntRef(intSpec._member, parameters, locationIndex);
-        auto origValue = evaluationService.getIntRef(intSpec._member, origParameters, locationIndex);
-        auto enabledValue = evaluationService.getEnabledRef(parameterSpec._enabled, parameters, locationIndex);
-        auto origEnabledValue = evaluationService.getEnabledRef(parameterSpec._enabled, origParameters, locationIndex);
         AlienImGui::SliderInt(
             AlienImGui::SliderIntParameters()
                 .name(parameterSpec._name)
@@ -210,11 +196,12 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& floatSpec = std::get<FloatSpec>(parameterSpec._reference);
 
+    auto [value, enabledValue, pinnedValue] = evaluationService.getRef(floatSpec._member, parameters, locationIndex);
+    auto [origValue, origEnabledValue, origPinnedValue] = evaluationService.getRef(floatSpec._member, origParameters, locationIndex);
+
     if (std::holds_alternative<ColorMatrixFloatMember>(floatSpec._member) || std::holds_alternative<ColorMatrixFloatZoneValuesMember>(floatSpec._member)
         || std::holds_alternative<ColorMatrixFloatMemberNew>(floatSpec._member) || std::holds_alternative<ColorMatrixFloatBaseZoneMemberNew>(floatSpec._member)) {
 
-        auto value = reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(evaluationService.getFloatRef(floatSpec._member, parameters, locationIndex));
-        auto origValue = reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(evaluationService.getFloatRef(floatSpec._member, origParameters, locationIndex));
         AlienImGui::InputFloatColorMatrix(
             AlienImGui::InputFloatColorMatrixParameters()
                 .name(parameterSpec._name)
@@ -224,44 +211,21 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
                 .format(floatSpec._format)
                 .textWidth(RightColumnWidth)
                 .tooltip(parameterSpec._tooltip)
-                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*origValue)),
-            *value);
-
-    } else if (std::holds_alternative<PinnableBaseValueSpecNew>(floatSpec._member)) {
-
-        auto pinnableBaseValue = std::get<PinnableBaseValueSpecNew>(floatSpec._member);
-        auto [getter, setter] = pinnableBaseValue._getterSetter;
-        auto value = getter(parameters, locationIndex);
-        auto origValue = getter(origParameters, locationIndex);
-        bool* pinnedValue = evaluationService.getBoolRef(pinnableBaseValue._pinnedMember, parameters, locationIndex);
-
-        if (AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
-                    .name(parameterSpec._name)
-                    .textWidth(RightColumnWidth)
-                    .min(floatSpec._min)
-                    .max(floatSpec._max)
-                    .logarithmic(floatSpec._logarithmic)
-                    .format(floatSpec._format)
-                    .infinity(floatSpec._infinity)
-                    .defaultValue(&origValue)
-                    .tooltip(parameterSpec._tooltip),
-                &value,
-                nullptr,
-                pinnedValue)) {
-
-            setter(value, parameters, locationIndex);
-        }
+                .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(origValue))),
+            *reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(value));
 
     } else {
+        float tempValue;
+        float tempOrigValue;
+        if (floatSpec._getterSetter.has_value()) {
+            auto [getter, setter] = floatSpec._getterSetter.value();
+            tempValue = getter(parameters, locationIndex);
+            tempOrigValue = getter(origParameters, locationIndex);
+            value = &tempValue;
+            origValue = &tempOrigValue;
+        }
 
-        bool* pinnedValue = nullptr;
-        //specService.getPinnedValueRef(parameterSpec._value, parameters, locationIndex);
-        auto value = evaluationService.getFloatRef(floatSpec._member, parameters, locationIndex);
-        auto origValue = evaluationService.getFloatRef(floatSpec._member, origParameters, locationIndex);
-        auto enabledValue = evaluationService.getEnabledRef(parameterSpec._enabled, parameters, locationIndex);
-        auto origEnabledValue = evaluationService.getEnabledRef(parameterSpec._enabled, origParameters, locationIndex);
-        AlienImGui::SliderFloat(
+        if(AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
                 .name(parameterSpec._name)
                 .textWidth(RightColumnWidth)
@@ -281,7 +245,13 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
                 .tooltip(parameterSpec._tooltip),
             value,
             enabledValue,
-            pinnedValue);
+            pinnedValue)) {
+
+            if (floatSpec._getterSetter.has_value()) {
+                auto [getter, setter] = floatSpec._getterSetter.value();
+                setter(tempValue, parameters, locationIndex);
+            }
+        }
     }
 }
 
@@ -294,8 +264,9 @@ void SpecificationGuiService::createWidgetsForChar64Spec(
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& char64Spec = std::get<Char64Spec>(parameterSpec._reference);
 
-    auto value = evaluationService.getChar64Ref(char64Spec._member, parameters, locationIndex);
-    auto origValue = evaluationService.getChar64Ref(char64Spec._member, origParameters, locationIndex);
+    auto [value, enabledValue, pinnedValue] = evaluationService.getRef(char64Spec._member, parameters, locationIndex);
+    auto [origValue, origEnabledValue, origPinnedValue] = evaluationService.getRef(char64Spec._member, origParameters, locationIndex);
+
     AlienImGui::InputText(
         AlienImGui::InputTextParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(origValue).tooltip(parameterSpec._tooltip),
         value,
@@ -311,8 +282,9 @@ void SpecificationGuiService::createWidgetsForAlternativeSpec(
     auto& evaluationService = SpecificationEvaluationService::get();
     auto alternativeSpec = std::get<AlternativeSpec>(parameterSpec._reference);
 
-    auto value = evaluationService.getAlternativeRef(alternativeSpec._member, parameters, locationIndex);
-    auto origValue = evaluationService.getAlternativeRef(alternativeSpec._member, origParameters, locationIndex);
+    auto [value, enabledValue, pinnedValue] = evaluationService.getRef(alternativeSpec._member, parameters, locationIndex);
+    auto [origValue, origEnabledValue, origPinnedValue] = evaluationService.getRef(alternativeSpec._member, origParameters, locationIndex);
+
     std::vector<std::string> values;
     values.reserve(alternativeSpec._alternatives.size());
     for (auto const& name : alternativeSpec._alternatives | std::views::keys) {
@@ -338,9 +310,9 @@ void SpecificationGuiService::createWidgetsForColorPickerSpec(
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& colorPickerSpec = std::get<ColorPickerSpec>(parameterSpec._reference);
 
-    auto value = evaluationService.getFloatColorRGBRef(colorPickerSpec._member, parameters, locationIndex);
-    auto origValue = evaluationService.getFloatColorRGBRef(colorPickerSpec._member, origParameters, locationIndex);
-    
+    auto [value, enabledValue, pinnedValue] = evaluationService.getRef(colorPickerSpec._member, parameters, locationIndex);
+    auto [origValue, origEnabledValue, origPinnedValue] = evaluationService.getRef(colorPickerSpec._member, origParameters, locationIndex);
+   
     AlienImGui::ColorButtonWithPicker(
         AlienImGui::ColorButtonWithPickerParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue), *value);
 }
@@ -354,8 +326,9 @@ void SpecificationGuiService::createWidgetsForColorTransitionRulesSpec(
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& colorTransitionRulesSpec = std::get<ColorTransitionRulesSpec>(parameterSpec._reference);
 
-    auto value = evaluationService.getColorTransitionRulesRef(colorTransitionRulesSpec._member, parameters, locationIndex);
-    auto origValue = evaluationService.getColorTransitionRulesRef(colorTransitionRulesSpec._member, origParameters, locationIndex);
+    auto [value, enabledValue, pinnedValue] = evaluationService.getRef(colorTransitionRulesSpec._member, parameters, locationIndex);
+    auto [origValue, origEnabledValue, origPinnedValue] = evaluationService.getRef(colorTransitionRulesSpec._member, origParameters, locationIndex);
+
     for (int color = 0; color < MAX_COLORS; ++color) {
         ImGui::PushID(color);
         auto widgetParameters = AlienImGui::InputColorTransitionParameters()
@@ -400,8 +373,7 @@ bool SpecificationGuiService::isVisible(ParameterSpec const& parameterSpec, Loca
             if (std::holds_alternative<FloatMember>(floatSpec._member) || std::holds_alternative<ColorVectorFloatMember>(floatSpec._member)
                 || std::holds_alternative<ColorMatrixFloatMember>(floatSpec._member) || std::holds_alternative<FloatZoneValuesMember>(floatSpec._member)
                 || std::holds_alternative<ColorVectorFloatZoneValuesMember>(floatSpec._member)
-                || std::holds_alternative<ColorMatrixFloatZoneValuesMember>(floatSpec._member)
-                || std::holds_alternative<PinnableBaseValueSpecNew>(floatSpec._member)) {
+                || std::holds_alternative<ColorMatrixFloatZoneValuesMember>(floatSpec._member)) {
                 return true;
             }
         } else if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {
@@ -464,17 +436,18 @@ bool SpecificationGuiService::isVisible(ParameterSpec const& parameterSpec, Loca
             }
         } else if (std::holds_alternative<IntSpec>(parameterSpec._reference)) {
             auto const& intSpec = std::get<IntSpec>(parameterSpec._reference);
-            if (std::holds_alternative<IntMemberNew>(intSpec._member) || std::holds_alternative<ColorVectorIntMemberNew>(intSpec._member)
+            if (std::holds_alternative<IntMemberNew>(intSpec._member) || std::holds_alternative<IntEnableableMemberNew>(intSpec._member)
+                || std::holds_alternative<ColorVectorIntMemberNew>(intSpec._member)
                 || std::holds_alternative<ColorMatrixIntMemberNew>(intSpec._member)) {
                 return true;
             }
         } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
             auto const& floatSpec = std::get<FloatSpec>(parameterSpec._reference);
-            if (std::holds_alternative<FloatMemberNew>(floatSpec._member) || std::holds_alternative<ColorVectorFloatMemberNew>(floatSpec._member)
+            if (std::holds_alternative<FloatMemberNew>(floatSpec._member) || std::holds_alternative<FloatPinnableMemberNew>(floatSpec._member)
+                || std::holds_alternative<ColorVectorFloatMemberNew>(floatSpec._member)
                 || std::holds_alternative<ColorMatrixFloatMemberNew>(floatSpec._member) || std::holds_alternative<FloatZoneValuesMemberNew>(floatSpec._member)
                 || std::holds_alternative<ColorVectorFloatBaseZoneMemberNew>(floatSpec._member)
-                || std::holds_alternative<ColorMatrixFloatBaseZoneMemberNew>(floatSpec._member)
-                || std::holds_alternative<PinnableBaseValueSpecNew>(floatSpec._member)) {
+                || std::holds_alternative<ColorMatrixFloatBaseZoneMemberNew>(floatSpec._member)) {
                 return true;
             }
         } else if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {

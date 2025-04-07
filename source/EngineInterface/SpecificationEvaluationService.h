@@ -6,19 +6,26 @@
 #include "SimulationParametersSpecification.h"
 #include "SimulationParametersTypes.h"
 
+template <typename T>
+struct ValueRef
+{
+    T* value = nullptr;
+    bool* enabled = nullptr;
+    bool* pinned = nullptr;
+};
+
 class SpecificationEvaluationService
 {
     MAKE_SINGLETON(SpecificationEvaluationService);
 
 public:
-    bool* getBoolRef(BoolMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
-    int* getIntRef(IntMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
-    float* getFloatRef(FloatMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
-    char* getChar64Ref(Char64MemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
-    int* getAlternativeRef(AlternativeMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
-    FloatColorRGB* getFloatColorRGBRef(ColorPickerMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
-    ColorTransitionRules* getColorTransitionRulesRef(ColorTransitionRulesMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
+    ValueRef<bool> getRef(BoolMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
+    ValueRef<int> getRef(IntMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
+    ValueRef<float> getRef(FloatMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
+    ValueRef<char> getRef(Char64MemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
+    ValueRef<int> getRef(AlternativeMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
+    ValueRef<FloatColorRGB> getRef(ColorPickerMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
+    ValueRef<ColorTransitionRules> getRef(ColorTransitionRulesMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
 
-    bool* getEnabledRef(EnabledSpec const& spec, SimulationParameters& parameters, int locationIndex) const;
-    bool* getExpertToggleRef(BoolMemberNew const& member, SimulationParameters& parameters) const;
+    bool* getExpertToggleRef(ExpertToggleMemberNew const& member, SimulationParameters& parameters) const;
 };

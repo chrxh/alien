@@ -14,7 +14,6 @@ void ParametersValidationService::validateAndCorrect(SimulationParameters& param
     }
     parameters.externalEnergy = std::max(0.0f, parameters.externalEnergy);
     parameters.timestepSize.value = std::max(0.01f, parameters.timestepSize.value);
-    parameters.maxCellAgeBalancerInterval = std::max(1000, std::min(1000000, parameters.maxCellAgeBalancerInterval));
     parameters.cellGlowRadius = std::max(1.0f, std::min(8.0f, parameters.cellGlowRadius));
 
     parameters.cellCopyMutationNeuronDataWeight = std::max(0.0f, std::min(1.0f, parameters.cellCopyMutationNeuronDataWeight));

@@ -605,7 +605,7 @@ void _SimulationParametersZoneWidgets::process()
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
                                       .name("Expert settings: Advanced energy absorption control")
-                                      .visible(parameters.expertToggle_advancedAbsorptionControl.value)
+                                      .visible(parameters.advancedAbsorptionControl.value)
                                       .blinkWhenActivated(true))) {
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -639,7 +639,7 @@ void _SimulationParametersZoneWidgets::process()
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
                                       .name("Expert settings: Advanced attacker control")
-                                      .visible(parameters.expertToggle_advancedAttackerControl.value)
+                                      .visible(parameters.advancedAttackerControl.value)
                                       .blinkWhenActivated(true))) {
         AlienImGui::InputFloatColorMatrix(
             AlienImGui::InputFloatColorMatrixParameters()
@@ -681,7 +681,7 @@ void _SimulationParametersZoneWidgets::process()
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
                                       .name("Expert settings: Cell age limiter")
-                                      .visible(parameters.expertToggles.cellAgeLimiter)
+                                      .visible(parameters.cellAgeLimiter.value)
                                       .blinkWhenActivated(true))) {
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -693,10 +693,10 @@ void _SimulationParametersZoneWidgets::process()
                 .logarithmic(true)
                 .infinity(true)
                 .format("%.0f")
-                .disabledValue(parameters.baseValues.maxAgeForInactiveCells)
-                .defaultValue(origZone.values.maxAgeForInactiveCells),
-            zone.values.maxAgeForInactiveCells,
-            &zone.enabledValues.maxAgeForInactiveCellsEnabled);
+                .defaultValue(origParameters.maxAgeForInactiveCells.zoneValues[zoneIndex].value)
+                .disabledValue(parameters.maxAgeForInactiveCells.baseValue),
+            parameters.maxAgeForInactiveCells.zoneValues[zoneIndex].value,
+            &parameters.maxAgeForInactiveCells.zoneValues[zoneIndex].enabled);
     }
     AlienImGui::EndTreeNode();
 

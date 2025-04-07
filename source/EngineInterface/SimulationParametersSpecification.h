@@ -16,15 +16,23 @@ using BoolMember = std::shared_ptr<_BoolMember>;
 using _BoolMemberNew = BaseParameter<bool> SimulationParameters::*;
 using BoolMemberNew = std::shared_ptr<_BoolMemberNew>;
 
+using _ExpertToggleMemberNew = ExpertToggle SimulationParameters::*;
+using ExpertToggleMemberNew = std::shared_ptr<_ExpertToggleMemberNew>;
+
 using _IntMember = int SimulationParameters::*;
 using IntMember = std::shared_ptr<_IntMember>;
 using _IntMemberNew = BaseParameter<int> SimulationParameters::*;
 using IntMemberNew = std::shared_ptr<_IntMemberNew>;
 
+using _IntEnableableMemberNew = EnableableBaseParameter<int> SimulationParameters::*;
+using IntEnableableMemberNew = std::shared_ptr<_IntEnableableMemberNew>;
+
 using _FloatMember = float SimulationParameters::*;
 using FloatMember = std::shared_ptr<_FloatMember>;
 using _FloatMemberNew = BaseParameter<float> SimulationParameters::*;
 using FloatMemberNew = std::shared_ptr<_FloatMemberNew>;
+using _FloatPinnableMemberNew = PinnableBaseParameter<float> SimulationParameters::*;
+using FloatPinnableMemberNew = std::shared_ptr<_FloatPinnableMemberNew>;
 
 using _ColorVectorIntMember = ColorVector<int> SimulationParameters::*;
 using ColorVectorIntMember = std::shared_ptr<_ColorVectorIntMember >;
@@ -89,27 +97,7 @@ using ColorTransitionRulesBaseZoneMemberNew = std::shared_ptr<_ColorTransitionRu
 using FloatGetterSetter =
     std::pair<std::function<float(SimulationParameters const&, int)>, std::function<void(float, SimulationParameters&, int)>>;  // int for locationIndex
 
-using _BaseEnabledMember = bool SimulationParameters::*;
-using BaseEnabledMember = std::shared_ptr<_BaseEnabledMember>;
-
-using _ZoneEnabledMember = bool SimulationParametersZoneEnabledValues::*;
-using ZoneEnabledMember = std::shared_ptr<_ZoneEnabledMember>;
-
-using _SourceEnabledMember = bool RadiationSource::*;
-using SourceEnabledMember = std::shared_ptr<_SourceEnabledMember>;
-
-using _ExpertToggleMember = bool ExpertToggles::*;
-using ExpertToggleMember = std::shared_ptr<_ExpertToggleMember>;
-
 using BoolMemberVariant = std::variant<std::monostate, BoolMember, BoolZoneValuesMember, ColorMatrixBoolMember, BoolMemberNew, BoolZoneValuesMemberNew, ColorMatrixBoolMemberNew>;
-
-struct PinnableBaseValueSpecNew
-{
-    SETTER_SHARED_PTR(PinnableBaseValueSpecNew, BoolMemberNew, pinnedMember);
-    BoolMemberNew _pinnedMember;
-
-    MEMBER(PinnableBaseValueSpecNew, FloatGetterSetter, getterSetter, {});
-};
 
 struct BoolSpec
 {
@@ -122,14 +110,16 @@ struct BoolSpec
     BoolMemberVariant _member = std::monostate();
 };
 
-using IntMemberVariant = std::variant<std::monostate, IntMember, ColorVectorIntMember, ColorMatrixIntMember, IntMemberNew, ColorVectorIntMemberNew, ColorMatrixIntMemberNew>;
+using IntMemberVariant = std::variant<std::monostate, IntMember, ColorVectorIntMember, ColorMatrixIntMember, IntMemberNew, IntEnableableMemberNew, ColorVectorIntMemberNew, ColorMatrixIntMemberNew>;
 
 struct IntSpec
 {
     SETTER_SHARED_PTR(IntSpec, IntMember, member);
     SETTER_SHARED_PTR(IntSpec, ColorVectorIntMember, member);
     SETTER_SHARED_PTR(IntSpec, ColorMatrixIntMember, member);
+
     SETTER_SHARED_PTR(IntSpec, IntMemberNew, member);
+    SETTER_SHARED_PTR(IntSpec, IntEnableableMemberNew, member);
     SETTER_SHARED_PTR(IntSpec, ColorVectorIntMemberNew, member);
     SETTER_SHARED_PTR(IntSpec, ColorMatrixIntMemberNew, member);
     IntMemberVariant _member = std::monostate();
@@ -149,12 +139,12 @@ using FloatMemberVariant = std::variant<
     ColorVectorFloatZoneValuesMember,
     ColorMatrixFloatZoneValuesMember,
     FloatMemberNew,
+    FloatPinnableMemberNew,
     ColorVectorFloatMemberNew,
     ColorMatrixFloatMemberNew,
     FloatZoneValuesMemberNew,
     ColorVectorFloatBaseZoneMemberNew,
-    ColorMatrixFloatBaseZoneMemberNew,
-    PinnableBaseValueSpecNew>;
+    ColorMatrixFloatBaseZoneMemberNew>;
 
 struct FloatSpec
 {
@@ -165,13 +155,15 @@ struct FloatSpec
     SETTER_SHARED_PTR(FloatSpec, ColorVectorFloatZoneValuesMember, member);
     SETTER_SHARED_PTR(FloatSpec, ColorMatrixFloatZoneValuesMember, member);
     SETTER_SHARED_PTR(FloatSpec, FloatMemberNew, member);
+    SETTER_SHARED_PTR(FloatSpec, FloatPinnableMemberNew, member);
     SETTER_SHARED_PTR(FloatSpec, ColorVectorFloatMemberNew, member);
     SETTER_SHARED_PTR(FloatSpec, ColorMatrixFloatMemberNew, member);
     SETTER_SHARED_PTR(FloatSpec, FloatZoneValuesMemberNew, member);
     SETTER_SHARED_PTR(FloatSpec, ColorVectorFloatBaseZoneMemberNew, member);
     SETTER_SHARED_PTR(FloatSpec, ColorMatrixFloatBaseZoneMemberNew, member);
-    SETTER(FloatSpec, PinnableBaseValueSpecNew, member);
     FloatMemberVariant _member = std::monostate();
+
+    MEMBER(FloatSpec, std::optional<FloatGetterSetter>, getterSetter, std::nullopt);
 
     MEMBER(FloatSpec, float, min, 0);
     MEMBER(FloatSpec, float, max, 0);
@@ -220,26 +212,12 @@ struct ColorTransitionRulesSpec
     ColorTransitionRulesMemberVariant _member = std::monostate();
 };
 
-struct EnabledSpec
-{
-    SETTER_SHARED_PTR(EnabledSpec, BaseEnabledMember, base);
-    BaseEnabledMember _base;
-
-    SETTER_SHARED_PTR(EnabledSpec, ZoneEnabledMember, zone);
-    ZoneEnabledMember _zone;
-
-    SETTER_SHARED_PTR(EnabledSpec, SourceEnabledMember, source);
-    SourceEnabledMember _source;
-
-};
-
 using ReferenceSpec = std::variant<BoolSpec, IntSpec, FloatSpec, Char64Spec, AlternativeSpec, ColorPickerSpec, ColorTransitionRulesSpec>;
 
 struct ParameterSpec
 {
     MEMBER(ParameterSpec, std::string, name, std::string());
     MEMBER(ParameterSpec, ReferenceSpec, reference, FloatSpec());
-    MEMBER(ParameterSpec, EnabledSpec, enabled, EnabledSpec());
     MEMBER(ParameterSpec, bool, visible, true);
     MEMBER(ParameterSpec, std::optional<std::string>, tooltip, std::nullopt);
 };
@@ -250,8 +228,8 @@ struct ParameterGroupSpec
     MEMBER(ParameterGroupSpec, std::vector<ParameterSpec>, parameters, {});
     MEMBER(ParameterGroupSpec, std::optional<std::string>, tooltip, std::nullopt);
 
-    SETTER_SHARED_PTR(ParameterGroupSpec, BoolMemberNew, expertToggle);
-    BoolMemberNew _expertToggle;
+    SETTER_SHARED_PTR(ParameterGroupSpec, ExpertToggleMemberNew, expertToggle);
+    ExpertToggleMemberNew _expertToggle;
 };
 
 struct ParametersSpec

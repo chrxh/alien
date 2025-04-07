@@ -12,7 +12,6 @@ struct ExpertToggles
     bool customizeNeuronMutations = false;
     bool customizeDeletionMutations = false;
     bool cellColorTransitionRules = false;
-    bool cellAgeLimiter = false;
     bool cellGlow = false;
     bool genomeComplexityMeasurement = false;
 

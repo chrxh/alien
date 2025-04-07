@@ -146,37 +146,29 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(tree, parameters.maxCellAge.value, defaultParameters.maxCellAge.value, "simulation parameters.cell.max age", parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.maxCellAgeBalancerEnabled, defaultParameters.maxCellAgeBalancerEnabled, "simulation parameters.cell.max age.balance.enabled", parserTask);
+            tree,
+            parameters.maxCellAgeBalancerInterval.enabled,
+            defaultParameters.maxCellAgeBalancerInterval.enabled,
+            "simulation parameters.cell.max age.balance.enabled",
+            parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.maxCellAgeBalancerInterval,
-            defaultParameters.maxCellAgeBalancerInterval,
+            parameters.maxCellAgeBalancerInterval.value,
+            defaultParameters.maxCellAgeBalancerInterval.value,
             "simulation parameters.cell.max age.balance.interval",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.maxAgeForInactiveCellsEnabled,
-            defaultParameters.maxAgeForInactiveCellsEnabled,
-            "simulation parameters.cell.inactive max age activated",
-            parserTask);
-        ParameterParser::encodeDecode(
-            tree,
-            parameters.baseValues.maxAgeForInactiveCells,
-            defaultParameters.baseValues.maxAgeForInactiveCells,
+            parameters.maxAgeForInactiveCells.baseValue,
+            defaultParameters.maxAgeForInactiveCells.baseValue,
             "simulation parameters.cell.inactive max age",
             parserTask);
         ParameterParser::encodeDecode(
-            tree,
-            parameters.freeCellMaxAgeEnabled,
-            defaultParameters.freeCellMaxAgeEnabled,
-            "simulation parameters.cell.nutrient max age activated",
-            parserTask);
-        ParameterParser::encodeDecode(
-            tree, parameters.freeCellMaxAge, defaultParameters.freeCellMaxAge, "simulation parameters.cell.nutrient max age", parserTask);
+            tree, parameters.freeCellMaxAge.value, defaultParameters.freeCellMaxAge.value, "simulation parameters.cell.nutrient max age", parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.resetCellAgeAfterActivation,
-            defaultParameters.resetCellAgeAfterActivation,
+            parameters.resetCellAgeAfterActivation.value,
+            defaultParameters.resetCellAgeAfterActivation.value,
             "simulation parameters.cell.reset age after activation",
             parserTask);
         ParameterParser::encodeDecode(
@@ -854,9 +846,9 @@ namespace
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                spot.values.maxAgeForInactiveCells,
-                spot.enabledValues.maxAgeForInactiveCellsEnabled,
-                defaultSpot.values.maxAgeForInactiveCells,
+                parameters.maxAgeForInactiveCells.zoneValues[index].value,
+                parameters.maxAgeForInactiveCells.zoneValues[index].enabled,
+                defaultParameters.maxAgeForInactiveCells.baseValue,
                 base + "cell.inactive max age",
                 parserTask);
 
@@ -1013,14 +1005,14 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.expertToggle_advancedAbsorptionControl.value,
-            defaultParameters.expertToggle_advancedAbsorptionControl.value,
+            parameters.advancedAbsorptionControl.value,
+            defaultParameters.advancedAbsorptionControl.value,
             "simulation parameters.features.additional absorption control",
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.expertToggle_advancedAttackerControl.value,
-            defaultParameters.expertToggle_advancedAttackerControl.value,
+            parameters.advancedAttackerControl.value,
+            defaultParameters.advancedAttackerControl.value,
             "simulation parameters.features.additional attacker control",
             parserTask);
         ParameterParser::encodeDecode(
@@ -1036,7 +1028,7 @@ namespace
             "simulation parameters.features.cell color transition rules",
             parserTask);
         ParameterParser::encodeDecode(
-            tree, parameters.expertToggles.cellAgeLimiter, defaultParameters.expertToggles.cellAgeLimiter, "simulation parameters.features.cell age limiter", parserTask);
+            tree, parameters.cellAgeLimiter.value, defaultParameters.cellAgeLimiter.value, "simulation parameters.features.cell age limiter", parserTask);
         ParameterParser::encodeDecode(
             tree, parameters.expertToggles.cellGlow, defaultParameters.expertToggles.cellGlow, "simulation parameters.features.cell glow", parserTask);
         ParameterParser::encodeDecode(

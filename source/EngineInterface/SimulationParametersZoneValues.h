@@ -27,14 +27,6 @@ struct SimulationParametersZoneValues
 {
     bool radiationDisableSources = false;
 
-    ColorVector<float> maxAgeForInactiveCells = {   // Candidate for deletion
-        Infinity<float>::value,
-        Infinity<float>::value,
-        Infinity<float>::value,
-        Infinity<float>::value,
-        Infinity<float>::value,
-        Infinity<float>::value,
-        Infinity<float>::value};
     ColorTransitionRules colorTransitionRules;
 
     bool operator==(SimulationParametersZoneValues const&) const = default;
