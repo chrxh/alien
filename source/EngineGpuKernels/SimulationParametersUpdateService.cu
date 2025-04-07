@@ -80,15 +80,15 @@ bool SimulationParametersUpdateService::updateSimulationParametersAfterTimestep(
         spot.posY = correctedPosition.y;
     }
 
-    auto externalEnergyPresent = settings.simulationParameters.externalEnergy > 0;
+    auto externalEnergyPresent = settings.simulationParameters.externalEnergy.value > 0;
     for (int i = 0; i < MAX_COLORS; ++i) {
-        externalEnergyPresent |= settings.simulationParameters.externalEnergyBackflowFactor[i] > 0;
+        externalEnergyPresent |= settings.simulationParameters.externalEnergyBackflowFactor.value[i] > 0;
     }
-    externalEnergyPresent &= settings.simulationParameters.expertToggles.externalEnergyControl;
+    externalEnergyPresent &= settings.simulationParameters.externalEnergyControlToggle.value;
     if (externalEnergyPresent) {
         double temp;
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(&temp, simulationData.externalEnergy, sizeof(double), cudaMemcpyDeviceToHost));
-        settings.simulationParameters.externalEnergy = toFloat(temp);
+        settings.simulationParameters.externalEnergy.value = toFloat(temp);
         result = true;
     }
 

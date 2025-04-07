@@ -41,7 +41,7 @@ __device__ void SimulationData::prepareForNextTimestep()
     for (int i = CellType_Base; i < CellType_Count; ++i) {
         cellTypeOperations[i].setMemory(processMemory.getTypedSubArray<CellTypeOperation>(maxCellTypeOperations), maxCellTypeOperations);
     }
-    *externalEnergy = cudaSimulationParameters.externalEnergy;
+    *externalEnergy = cudaSimulationParameters.externalEnergy.value;
 
     objects.saveNumEntries();
 }

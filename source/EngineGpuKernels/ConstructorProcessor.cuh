@@ -853,15 +853,15 @@ ConstructorProcessor::constructCellIntern(
 
 __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData)
 {
-    if (cudaSimulationParameters.expertToggles.externalEnergyControl && hostCell->energy < constructionData.energy + cudaSimulationParameters.normalCellEnergy.value[hostCell->color]
-        && cudaSimulationParameters.externalEnergyInflowFactor[hostCell->color] > 0) {
+    if (cudaSimulationParameters.externalEnergyControlToggle.value && hostCell->energy < constructionData.energy + cudaSimulationParameters.normalCellEnergy.value[hostCell->color]
+        && cudaSimulationParameters.externalEnergyInflowFactor.value[hostCell->color] > 0) {
         auto externalEnergyPortion = [&] {
-            if (cudaSimulationParameters.externalEnergyInflowOnlyForNonSelfReplicators) {
+            if (cudaSimulationParameters.externalEnergyInflowOnlyForNonSelfReplicators.value) {
                 return !constructionData.containsSelfReplication && !GenomeDecoder::isFinished(hostCell->cellTypeData.constructor)
-                    ? constructionData.energy * cudaSimulationParameters.externalEnergyInflowFactor[hostCell->color]
+                    ? constructionData.energy * cudaSimulationParameters.externalEnergyInflowFactor.value[hostCell->color]
                     : 0.0f;
             } else {
-                return constructionData.energy * cudaSimulationParameters.externalEnergyInflowFactor[hostCell->color];
+                return constructionData.energy * cudaSimulationParameters.externalEnergyInflowFactor.value[hostCell->color];
             }
         }();
 
@@ -881,13 +881,13 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
 
     auto externalEnergyConditionalInflowFactor =
         [&] {
-        if (!cudaSimulationParameters.expertToggles.externalEnergyControl) {
+        if (!cudaSimulationParameters.externalEnergyControlToggle.value) {
             return 0.0f;
         }
-        if (cudaSimulationParameters.externalEnergyInflowOnlyForNonSelfReplicators) {
-            return !constructionData.containsSelfReplication ? cudaSimulationParameters.externalEnergyConditionalInflowFactor[hostCell->color] : 0.0f;
+        if (cudaSimulationParameters.externalEnergyInflowOnlyForNonSelfReplicators.value) {
+            return !constructionData.containsSelfReplication ? cudaSimulationParameters.externalEnergyConditionalInflowFactor.value[hostCell->color] : 0.0f;
         } else {
-            return cudaSimulationParameters.externalEnergyConditionalInflowFactor[hostCell->color];
+            return cudaSimulationParameters.externalEnergyConditionalInflowFactor.value[hostCell->color];
         }
     }();
 
@@ -949,10 +949,10 @@ __inline__ __device__ float ConstructorProcessor::calcGenomeComplexity(int color
     auto lastDepth = 0;
     auto numRamifications = 1;
     auto genomeComplexityRamificationFactor =
-        cudaSimulationParameters.expertToggles.genomeComplexityMeasurement ? cudaSimulationParameters.genomeComplexityRamificationFactor[color] : 0.0f;
+        cudaSimulationParameters.genomeComplexityMeasurementToggle.value ? cudaSimulationParameters.genomeComplexityRamificationFactor.value[color] : 0.0f;
     auto sizeFactor =
-        cudaSimulationParameters.expertToggles.genomeComplexityMeasurement ? cudaSimulationParameters.genomeComplexitySizeFactor[color] : 1.0f;
-    auto depthLevel = cudaSimulationParameters.expertToggles.genomeComplexityMeasurement ? cudaSimulationParameters.genomeComplexityDepthLevel[color] : 3;
+        cudaSimulationParameters.genomeComplexityMeasurementToggle.value ? cudaSimulationParameters.genomeComplexitySizeFactor.value[color] : 1.0f;
+    auto depthLevel = cudaSimulationParameters.genomeComplexityMeasurementToggle.value ? cudaSimulationParameters.genomeComplexityDepthLevel.value[color] : 3;
     GenomeDecoder::executeForEachNodeRecursively(genome, toInt(genomeSize), false, false, [&](int depth, int nodeAddress, int repetitions) {
         auto ramificationFactor = depth > lastDepth ? genomeComplexityRamificationFactor * toFloat(numRamifications) : 0.0f;
         if (depth <= depthLevel) {

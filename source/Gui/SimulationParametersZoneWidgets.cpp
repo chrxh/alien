@@ -605,7 +605,7 @@ void _SimulationParametersZoneWidgets::process()
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
                                       .name("Expert settings: Advanced energy absorption control")
-                                      .visible(parameters.advancedAbsorptionControl.value)
+                                      .visible(parameters.advancedAbsorptionControlToggle.value)
                                       .blinkWhenActivated(true))) {
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -639,7 +639,7 @@ void _SimulationParametersZoneWidgets::process()
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
                                       .name("Expert settings: Advanced attacker control")
-                                      .visible(parameters.advancedAttackerControl.value)
+                                      .visible(parameters.advancedAttackerControlToggle.value)
                                       .blinkWhenActivated(true))) {
         AlienImGui::InputFloatColorMatrix(
             AlienImGui::InputFloatColorMatrixParameters()
@@ -681,7 +681,7 @@ void _SimulationParametersZoneWidgets::process()
      */
     if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
                                       .name("Expert settings: Cell age limiter")
-                                      .visible(parameters.cellAgeLimiter.value)
+                                      .visible(parameters.cellAgeLimiterToggle.value)
                                       .blinkWhenActivated(true))) {
         AlienImGui::SliderFloat(
             AlienImGui::SliderFloatParameters()
@@ -700,48 +700,6 @@ void _SimulationParametersZoneWidgets::process()
     }
     AlienImGui::EndTreeNode();
 
-    /**
-     * Expert settings: Cell color transition rules
-     */
-    if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
-                                      .name("Expert settings: Cell color transition rules")
-                                      .visible(parameters.expertToggles.cellColorTransitionRules)
-                                      .blinkWhenActivated(true))) {
-        ImGui::Checkbox("##cellColorTransition", &zone.enabledValues.colorTransitionRules);
-        ImGui::SameLine();
-        ImGui::BeginDisabled(!zone.enabledValues.colorTransitionRules);
-        auto posX = ImGui::GetCursorPos().x;
-        for (int color = 0; color < MAX_COLORS; ++color) {
-            ImGui::SetCursorPosX(posX);
-            ImGui::PushID(color);
-            auto parameters = AlienImGui::InputColorTransitionParameters()
-                                  .textWidth(RightColumnWidth)
-                                  .color(color)
-                                  .defaultTargetColor(origZone.values.colorTransitionRules.cellColorTransitionTargetColor[color])
-                                  .defaultTransitionAge(origZone.values.colorTransitionRules.cellColorTransitionDuration[color])
-                                  .logarithmic(true)
-                                  .infinity(true);
-            if (0 == color) {
-                parameters.name("Target color and duration");
-            }
-            AlienImGui::InputColorTransition(
-                parameters,
-                color,
-                zone.values.colorTransitionRules.cellColorTransitionTargetColor[color],
-                zone.values.colorTransitionRules.cellColorTransitionDuration[color]);
-            ImGui::PopID();
-        }
-        ImGui::EndDisabled();
-        if (!zone.enabledValues.colorTransitionRules) {
-            for (int color = 0; color < MAX_COLORS; ++color) {
-                zone.values.colorTransitionRules.cellColorTransitionTargetColor[color] =
-                    parameters.baseValues.colorTransitionRules.cellColorTransitionTargetColor[color];
-                zone.values.colorTransitionRules.cellColorTransitionDuration[color] =
-                    parameters.baseValues.colorTransitionRules.cellColorTransitionDuration[color];
-            }
-        }
-    }
-    AlienImGui::EndTreeNode();
 
     ParametersValidationService::get().validateAndCorrect(zone, parameters);
 

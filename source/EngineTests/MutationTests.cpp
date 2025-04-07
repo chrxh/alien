@@ -875,8 +875,8 @@ TEST_F(MutationTests, deleteMutation_partiallyEraseGenome)
 
 TEST_F(MutationTests, deleteMutation_selfReplicatorWithGenomeBelowMinSize)
 {
-    _parameters.expertToggles.customizeDeletionMutations = true;
-    _parameters.cellCopyMutationDeletionMinSize = 3;
+    _parameters.customizeDeletionMutationsToggle.value = true;
+    _parameters.cellCopyMutationDeletionMinSize.value = 3;
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells(
@@ -904,8 +904,8 @@ TEST_F(MutationTests, deleteMutation_selfReplicatorWithGenomeBelowMinSize)
 
 TEST_F(MutationTests, deleteMutation_selfReplicatorWithGenomeAboveMinSize)
 {
-    _parameters.expertToggles.customizeDeletionMutations = true;
-    _parameters.cellCopyMutationDeletionMinSize = 1;
+    _parameters.customizeDeletionMutationsToggle.value = true;
+    _parameters.cellCopyMutationDeletionMinSize.value = 1;
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({

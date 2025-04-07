@@ -542,7 +542,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Advanced energy absorption control")
-            .expertToggle(&SimulationParameters::advancedAbsorptionControl)
+            .expertToggle(&SimulationParameters::advancedAbsorptionControlToggle)
             .parameters({
                 ParameterSpec()
                     .name("Low genome complexity penalty")
@@ -565,7 +565,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Advanced attacker control")
-            .expertToggle(&SimulationParameters::advancedAttackerControl)
+            .expertToggle(&SimulationParameters::advancedAttackerControlToggle)
             .parameters({
                 ParameterSpec()
                     .name("Same mutant protection")
@@ -595,7 +595,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Cell age limiter")
-            .expertToggle(&SimulationParameters::cellAgeLimiter)
+            .expertToggle(&SimulationParameters::cellAgeLimiterToggle)
             .parameters({
                 ParameterSpec()
                     .name("Maximum inactive cell age")
@@ -622,18 +622,18 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Cell color transition rules")
-            //.expertToggle(&ExpertToggles::cellColorTransitionRules)
+            .expertToggle(&SimulationParameters::colorTransitionRulesToggle)
             .parameters({
                 ParameterSpec()
                     .name("Target color and duration")
-                    .reference(ColorTransitionRulesSpec().member(&SimulationParametersZoneValues::colorTransitionRules))
+                    .reference(ColorTransitionRulesSpec().member(&SimulationParameters::colorTransitionRules))
                     .tooltip("Rules can be defined that describe how the colors of cells will change over time. For this purpose, a subsequent "
                              "color can be defined for each cell color. In addition, durations must be specified that define how many time steps the "
                              "corresponding color are kept."),
             }),
         ParameterGroupSpec()
             .name("Cell glow")
-            //.expertToggle(&ExpertToggles::cellGlow)
+            .expertToggle(&SimulationParameters::cellGlowToggle)
             .parameters({
                 ParameterSpec()
                     .name("Coloring")
@@ -660,7 +660,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Customize deletion mutations")
-            //.expertToggle(&ExpertToggles::customizeDeletionMutations)
+            .expertToggle(&SimulationParameters::customizeDeletionMutationsToggle)
             .parameters({
                 ParameterSpec()
                     .name("Minimum size")
@@ -670,7 +670,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Customize neuron mutations")
-            //.expertToggle(&ExpertToggles::customizeNeuronMutations)
+            .expertToggle(&SimulationParameters::customizeNeuronMutationsToggle)
             .parameters({
                 ParameterSpec()
                     .name("Affected weights")
@@ -687,26 +687,26 @@ void SpecificationService::createSpec()
                              "is 0.05."),
                 ParameterSpec()
                     .name("Reinforcement factor")
-                    .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataReinforcement).min(1.0f).max(1.2f).format("%.3f"))
+                    .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataReinforcement).min(1.0f).max(2.0f).format("%.3f"))
                     .tooltip(
                         "If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an offset. "
                         "The factor that is used for reinforcement is defined here. The default is 1.05."),
                 ParameterSpec()
                     .name("Damping factor")
-                    .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataDamping).min(1.0f).max(1.2f).format("%.3f"))
+                    .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataDamping).min(1.0f).max(2.0f).format("%.3f"))
                     .tooltip(
                         "If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an offset. "
                         "The factor that is used for weakening is defined here. The default is 1.05."),
                 ParameterSpec()
                     .name("Offset")
-                    .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataOffset).min(0.0f).max(0.2f).format("%.3f"))
+                    .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataOffset).min(0.0f).max(1.0f).format("%.3f"))
                     .tooltip(
                         "If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an offset. "
                         "The value that is used for the offset is defined here. The default is 0.05."),
             }),
         ParameterGroupSpec()
             .name("External energy control")
-            //.expertToggle(&ExpertToggles::externalEnergyControl)
+            .expertToggle(&SimulationParameters::externalEnergyControlToggle)
             .parameters({
                 ParameterSpec()
                     .name("External energy amount")
@@ -726,7 +726,7 @@ void SpecificationService::createSpec()
                 ParameterSpec()
                     .name("Conditional inflow")
                     .reference(
-                        FloatSpec().member(&SimulationParameters::externalEnergyConditionalInflowFactor).min(0.00f).max(1.0f).format("%.5f").logarithmic(true))
+                        FloatSpec().member(&SimulationParameters::externalEnergyConditionalInflowFactor).min(0.0f).max(1.0f).format("%.5f").logarithmic(true))
                     .tooltip("Here one can specify the fraction of energy transferred to constructor cells if they can provide the remaining energy for the "
                              "construction process.\n\nFor example, a value of 0.6 means that a constructor cell receives 60% of the energy required to "
                              "build the new cell for free from the external energy source. However, it must provide 40% of the energy required by itself. "
@@ -757,7 +757,7 @@ void SpecificationService::createSpec()
             }),
         ParameterGroupSpec()
             .name("Genome complexity measurement")
-            //.expertToggle(&ExpertToggles::genomeComplexityMeasurement)
+            .expertToggle(&SimulationParameters::genomeComplexityMeasurementToggle)
             .parameters({
                 ParameterSpec()
                     .name("Size factor")
