@@ -209,12 +209,6 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.baseValues.radiationDisableSources,
-            defaultParameters.baseValues.radiationDisableSources,
-            "simulation parameters.radiation.disable sources",
-            parserTask);
-        ParameterParser::encodeDecode(
-            tree,
             parameters.radiationAbsorption.baseValue,
             defaultParameters.radiationAbsorption.baseValue,
             "simulation parameters.radiation.absorption",
