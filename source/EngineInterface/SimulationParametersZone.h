@@ -11,76 +11,13 @@ enum Orientation_
     Orientation_CounterClockwise
 };
 
-using FlowType = int;
-enum FlowType_
+using ForceField = int;
+enum ForceField_
 {
-    FlowType_None,
-    FlowType_Radial,
-    FlowType_Central,
-    FlowType_Linear
-};
-
-struct RadialFlow
-{
-    Orientation orientation = Orientation_Clockwise;
-    float strength = 0.001f;
-    float driftAngle = 0.0f;
-
-    bool operator==(RadialFlow const& other) const { return orientation == other.orientation && strength == other.strength && driftAngle == other.driftAngle; }
-    bool operator!=(RadialFlow const& other) const { return !operator==(other); }
-};
-
-struct CentralFlow
-{
-    float strength = 0.05f;
-
-    bool operator==(CentralFlow const& other) const { return strength == other.strength; }
-    bool operator!=(CentralFlow const& other) const { return !operator==(other); }
-};
-
-struct LinearFlow
-{
-    float angle = 0;
-    float strength = 0.01f;
-
-    bool operator==(LinearFlow const& other) const { return angle == other.angle && strength == other.strength; }
-    bool operator!=(LinearFlow const& other) const { return !operator==(other); }
-};
-
-union FlowAlternatives
-{
-    RadialFlow radialFlow;
-    CentralFlow centralFlow;
-    LinearFlow linearFlow;
-};
-
-struct Flow
-{
-    FlowType type = FlowType_None;
-    FlowAlternatives alternatives = {RadialFlow()};
-
-    bool operator==(Flow const& other) const
-    {
-        if (type != other.type) {
-            return false;
-        }
-        if (type == FlowType_Radial) {
-            if (alternatives.radialFlow != other.alternatives.radialFlow) {
-                return false;
-            }
-        }
-        if (type == FlowType_Central) {
-            if (alternatives.centralFlow != other.alternatives.centralFlow) {
-                return false;
-            }
-        }
-        if (type == FlowType_Linear) {
-            if (alternatives.linearFlow != other.alternatives.linearFlow) {
-                return false;
-            }
-        }
-        return true;
-    }
+    ForceField_None,
+    ForceField_Radial,
+    ForceField_Central,
+    ForceField_Linear
 };
 
 using ZoneShapeType = int;
@@ -93,10 +30,6 @@ enum ZoneShapeType_
 struct SimulationParametersZone
 {
     int locationIndex = -1;
-
-    float fadeoutRadius = 100.0f;
-
-    Flow flow;
 
     bool operator==(SimulationParametersZone const&) const = default;
 };

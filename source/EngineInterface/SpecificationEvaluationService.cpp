@@ -45,6 +45,9 @@ ValueRef<int> SpecificationEvaluationService::getRef(IntMemberVariant const& mem
     } else if (std::holds_alternative<IntEnableableMember>(member)) {
         return ValueRef{
             .value = &(parameters.**std::get<IntEnableableMember>(member)).value, .enabled = &(parameters.**std::get<IntEnableableMember>(member)).enabled};
+    } else if (std::holds_alternative<IntZoneMember>(member)) {
+        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+        return ValueRef{.value = &(parameters.**std::get<IntZoneMember>(member)).zoneValues[index]};
     }
 
     // Color vector

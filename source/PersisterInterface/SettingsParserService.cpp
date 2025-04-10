@@ -707,46 +707,50 @@ namespace
                 base + "shape.rectangular.core height",
                 parserTask);
 
-            ParameterParser::encodeDecode(tree, spot.flow.type, defaultSpot.flow.type, base + "flow.type", parserTask);
-            if (spot.flow.type == FlowType_Radial) {
-                ParameterParser::encodeDecode(
-                    tree,
-                    spot.flow.alternatives.radialFlow.orientation,
-                    defaultSpot.flow.alternatives.radialFlow.orientation,
-                    base + "flow.radial.orientation",
-                    parserTask);
-                ParameterParser::encodeDecode(
-                    tree,
-                    spot.flow.alternatives.radialFlow.strength,
-                    defaultSpot.flow.alternatives.radialFlow.strength,
-                    base + "flow.radial.strength",
-                    parserTask);
-                ParameterParser::encodeDecode(
-                    tree,
-                    spot.flow.alternatives.radialFlow.driftAngle,
-                    defaultSpot.flow.alternatives.radialFlow.driftAngle,
-                    base + "flow.radial.drift angle",
-                    parserTask);
-            }
-            if (spot.flow.type == FlowType_Central) {
-                ParameterParser::encodeDecode(
-                    tree,
-                    spot.flow.alternatives.centralFlow.strength,
-                    defaultSpot.flow.alternatives.centralFlow.strength,
-                    base + "flow.central.strength",
-                    parserTask);
-            }
-            if (spot.flow.type == FlowType_Linear) {
-                ParameterParser::encodeDecode(
-                    tree, spot.flow.alternatives.linearFlow.angle, defaultSpot.flow.alternatives.linearFlow.angle, base + "flow.linear.angle", parserTask);
-                ParameterParser::encodeDecode(
-                    tree,
-                    spot.flow.alternatives.linearFlow.strength,
-                    defaultSpot.flow.alternatives.linearFlow.strength,
-                    base + "flow.linear.strength",
-                    parserTask);
-            }
-            ParameterParser::encodeDecode(tree, spot.fadeoutRadius, defaultSpot.fadeoutRadius, base + "fadeout radius", parserTask);
+            ParameterParser::encodeDecode(
+                tree, parameters.zoneForceFieldType.zoneValues[index], defaultParameters.zoneForceFieldType.zoneValues[index], base + "flow.type", parserTask);
+            ParameterParser::encodeDecode(
+                tree,
+                parameters.zoneRadialForceFieldOrientation.zoneValues[index],
+                defaultParameters.zoneRadialForceFieldOrientation.zoneValues[index],
+                base + "flow.radial.orientation",
+                parserTask);
+            ParameterParser::encodeDecode(
+                tree,
+                parameters.zoneRadialForceFieldStrength.zoneValues[index],
+                defaultParameters.zoneRadialForceFieldStrength.zoneValues[index],
+                base + "flow.radial.strength",
+                parserTask);
+            ParameterParser::encodeDecode(
+                tree,
+                parameters.zoneRadialForceFieldDriftAngle.zoneValues[index],
+                defaultParameters.zoneRadialForceFieldDriftAngle.zoneValues[index],
+                base + "flow.radial.drift angle",
+                parserTask);
+            ParameterParser::encodeDecode(
+                tree,
+                parameters.zoneCentralForceFieldStrength.zoneValues[index],
+                defaultParameters.zoneCentralForceFieldStrength.zoneValues[index],
+                base + "flow.central.strength",
+                parserTask);
+            ParameterParser::encodeDecode(
+                tree,
+                parameters.zoneLinearForceFieldAngle.zoneValues[index],
+                defaultParameters.zoneLinearForceFieldAngle.zoneValues[index],
+                base + "flow.linear.angle",
+                parserTask);
+            ParameterParser::encodeDecode(
+                tree,
+                parameters.zoneLinearForceFieldStrength.zoneValues[index],
+                defaultParameters.zoneLinearForceFieldStrength.zoneValues[index],
+                base + "flow.linear.strength",
+                parserTask);
+            ParameterParser::encodeDecode(
+                tree,
+                parameters.zoneFadeoutRadius.zoneValues[index],
+                defaultParameters.zoneFadeoutRadius.zoneValues[index],
+                base + "fadeout radius",
+                parserTask);
 
             ParameterParser::encodeDecodeWithEnabled(
                 tree,

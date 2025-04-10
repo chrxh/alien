@@ -223,7 +223,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
         AlienImGui::InputFloatColorMatrix(
             AlienImGui::InputFloatColorMatrixParameters()
                 .name(parameterSpec._name)
-                .max(min)
+                .min(min)
                 .max(max)
                 .logarithmic(floatSpec._logarithmic)
                 .format(floatSpec._format)
@@ -251,7 +251,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
                 AlienImGui::SliderFloatParameters()
                     .name(parameterSpec._name)
                     .textWidth(RightColumnWidth)
-                    .max(min)
+                    .min(min)
                     .max(max)
                     .logarithmic(floatSpec._logarithmic)
                     .format(floatSpec._format)
