@@ -28,8 +28,8 @@ add_library(EngineGpuKernels
     EditKernels.cuh
     EditKernelsLauncher.cu
     EditKernelsLauncher.cuh
-    FlowFieldKernels.cu
-    FlowFieldKernels.cuh
+    ForceFieldKernels.cu
+    ForceFieldKernels.cuh
     GarbageCollectorKernels.cu
     GarbageCollectorKernels.cuh
     GarbageCollectorKernelsLauncher.cu

@@ -3,7 +3,7 @@
 #include "EngineInterface/SpaceCalculator.h"
 
 #include "SimulationKernels.cuh"
-#include "FlowFieldKernels.cuh"
+#include "ForceFieldKernels.cuh"
 #include "GarbageCollectorKernelsLauncher.cuh"
 #include "DebugKernels.cuh"
 #include "SimulationStatistics.cuh"
@@ -41,7 +41,7 @@ void _SimulationKernelsLauncher::calcTimestep(SettingsForSimulation const& setti
         KERNEL_CALL(cudaNextTimestep_physics_calcCollisionForces, data);
     }
     if (settings.simulationParameters.numZones.value > 0) {
-        KERNEL_CALL(cudaApplyFlowFieldSettings, data);
+        KERNEL_CALL(cudaApplyForceFieldSettings, data);
     }
     KERNEL_CALL_MOD(cudaNextTimestep_physics_applyForces, 16, data);
     KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, 16, data, considerForcesFromAngleDifferences);

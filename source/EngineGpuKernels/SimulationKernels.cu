@@ -1,5 +1,5 @@
 ﻿#include "SimulationKernels.cuh"
-#include "FlowFieldKernels.cuh"
+#include "ForceFieldKernels.cuh"
 #include "ClusterProcessor.cuh"
 #include "SignalProcessor.cuh"
 #include "OscillatorProcessor.cuh"

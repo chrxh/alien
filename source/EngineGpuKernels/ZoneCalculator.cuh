@@ -180,7 +180,7 @@ __device__ __inline__ T ZoneCalculator::calcResultingFlowField(BaseMap const& ma
         float zoneWeights[MAX_ZONES];
         int numValues = 0;
         for (int i = 0; i < cudaSimulationParameters.numZones.value; ++i) {
-            if (cudaSimulationParameters.zone[i].flow.type != FlowType_None) {
+            if (cudaSimulationParameters.zoneForceFieldType.zoneValues[i] != ForceField_None) {
                 float2 zonePos = {cudaSimulationParameters.zonePosition.zoneValues[i].x, cudaSimulationParameters.zonePosition.zoneValues[i].y};
                 auto delta = map.getCorrectedDirection(zonePos - worldPos);
                 zoneWeights[numValues++] = calcWeight(delta, i);
@@ -203,20 +203,20 @@ __device__ __inline__ float ZoneCalculator::calcWeightForCircularZone(float2 con
 {
     auto distance = Math::length(delta);
     auto coreRadius = cudaSimulationParameters.zoneCoreRadius.zoneValues[zoneIndex];
-    auto fadeoutRadius = cudaSimulationParameters.zone[zoneIndex].fadeoutRadius + 1;
+    auto fadeoutRadius = cudaSimulationParameters.zoneFadeoutRadius.zoneValues[zoneIndex] + 1;
+
     return distance < coreRadius ? 0.0f : min(1.0f, (distance - coreRadius) / fadeoutRadius);
 }
 
 __device__ __inline__ float ZoneCalculator::calcWeightForRectZone(float2 const& delta, int const& zoneIndex)
 {
-    auto const& zone = cudaSimulationParameters.zone[zoneIndex];
     float result = 0;
     if (abs(delta.x) > cudaSimulationParameters.zoneCoreRect.zoneValues[zoneIndex].x / 2
         || abs(delta.y) > cudaSimulationParameters.zoneCoreRect.zoneValues[zoneIndex].y / 2) {
         float2 distanceFromRect = {
             max(0.0f, abs(delta.x) - cudaSimulationParameters.zoneCoreRect.zoneValues[zoneIndex].x / 2),
             max(0.0f, abs(delta.y) - cudaSimulationParameters.zoneCoreRect.zoneValues[zoneIndex].y / 2)};
-        result = min(1.0f, Math::length(distanceFromRect) / (zone.fadeoutRadius + 1));
+        result = min(1.0f, Math::length(distanceFromRect) / (cudaSimulationParameters.zoneFadeoutRadius.zoneValues[zoneIndex] + 1));
     }
     return result;
 }

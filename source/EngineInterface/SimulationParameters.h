@@ -46,11 +46,22 @@ struct SimulationParameters
     BaseParameter<bool> showRadiationSources = {true};
 
     // Location
+    ZoneParameter<int> zoneLocationIndex = {{-1}};
     ZoneParameter<RealVector2D> zonePosition;
     ZoneParameter<RealVector2D> zoneVelocity;
     ZoneParameter<ZoneShapeType> zoneShape = {{ZoneShapeType_Circular}};
     ZoneParameter<float> zoneCoreRadius = {{100.0f}};               // for ZoneShapeType_Circular
     ZoneParameter<RealVector2D> zoneCoreRect = {{{100.0f, 100.0f}}};  // for ZoneShapeType_Rectangular
+    ZoneParameter<float> zoneFadeoutRadius = {{100.0f}};
+
+    // Force field
+    ZoneParameter<ForceField> zoneForceFieldType = {{ForceField_None}};
+    ZoneParameter<Orientation> zoneRadialForceFieldOrientation = {{Orientation_Clockwise}};  // for ForceField_Radial
+    ZoneParameter<float> zoneRadialForceFieldStrength = {{0.001f}};                      // for ForceField_Radial
+    ZoneParameter<float> zoneRadialForceFieldDriftAngle = {{0.0f}};                          // for ForceField_Radial       
+    ZoneParameter<float> zoneCentralForceFieldStrength = {{0.05f}};                     // for ForceField_Central
+    ZoneParameter<float> zoneLinearForceFieldAngle = {{0}};
+    ZoneParameter<float> zoneLinearForceFieldStrength = {{0.01f}};
 
     // Numerics
     BaseParameter<float> timestepSize = {1.0f};

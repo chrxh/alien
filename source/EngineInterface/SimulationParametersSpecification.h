@@ -33,7 +33,7 @@ using _ColorMatrixIntMember = BaseParameter<ColorMatrix<int>> SimulationParamete
 using ColorMatrixIntMember = std::shared_ptr<_ColorMatrixIntMember>;
 using _IntZoneMember = ZoneParameter<int> SimulationParameters::*;
 using IntZoneMember = std::shared_ptr<_IntZoneMember>;
-using IntMemberVariant = std::variant<std::monostate, IntMember, IntEnableableMember, ColorVectorIntMember, ColorMatrixIntMember>;
+using IntMemberVariant = std::variant<std::monostate, IntMember, IntEnableableMember, ColorVectorIntMember, ColorMatrixIntMember, IntZoneMember>;
 using AlternativeMemberVariant = std::variant<std::monostate, IntMember, IntZoneMember>;
 
 using _FloatMember = BaseParameter<float> SimulationParameters::*;
@@ -98,6 +98,7 @@ struct IntSpec
     SETTER_SHARED_PTR(IntSpec, IntEnableableMember, member);
     SETTER_SHARED_PTR(IntSpec, ColorVectorIntMember, member);
     SETTER_SHARED_PTR(IntSpec, ColorMatrixIntMember, member);
+    SETTER_SHARED_PTR(IntSpec, IntZoneMember, member);
     IntMemberVariant _member = std::monostate();
 
     MEMBER(IntSpec, int, min, 0);

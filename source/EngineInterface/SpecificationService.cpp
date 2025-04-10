@@ -130,6 +130,9 @@ void SpecificationService::createSpec()
             .name("Location")
             .parameters({
                 ParameterSpec()
+                    .name("Location index")
+                    .reference(IntSpec().member(&SimulationParameters::zoneLocationIndex)).visible(false),
+                ParameterSpec()
                     .name("Position (x,y)")
                      .reference(Float2Spec()
                                     .member(&SimulationParameters::zonePosition)
@@ -156,7 +159,74 @@ void SpecificationService::createSpec()
                                                    .member(&SimulationParameters::zoneCoreRect)
                                                    .min(RealVector2D{0.0f, 0.0f})
                                                    .max(WorldSize())
-                                                   .format("%.2f"))}}}))
+                                                   .format("%.2f"))}}})),
+                ParameterSpec()
+                    .name("Fade-out radius")
+                    .reference(FloatSpec().member(&SimulationParameters::zoneFadeoutRadius).min(0.0f).max(MaxWorldRadiusSize()).format("%.2f")),
+            }),
+        ParameterGroupSpec()
+            .name("Force field")
+            .parameters({
+                ParameterSpec()
+                    .name("Field type")
+                    .reference(
+                        AlternativeSpec()
+                            .member(&SimulationParameters::zoneForceFieldType)
+                            .alternatives(
+                                {{"None", {}},
+                                 {"Radial",
+                                  {
+                                      ParameterSpec()
+                                          .name("Orientation")
+                                          .reference(AlternativeSpec()
+                                                         .member(&SimulationParameters::zoneRadialForceFieldOrientation)
+                                                         .alternatives({{"Clockwise", {}}, {"Counter clockwise", {}}})),
+                                      ParameterSpec()
+                                          .name("Strength")
+                                          .reference(
+                                              FloatSpec()
+                                                  .member(&SimulationParameters::zoneRadialForceFieldStrength)
+                                                  .min(0.0f)
+                                                  .max(0.5f)
+                                                  .format("%.5f")
+                                                  .logarithmic(true)),
+                                      ParameterSpec()
+                                          .name("Drift angle")
+                                          .reference(
+                                              FloatSpec().member(&SimulationParameters::zoneRadialForceFieldDriftAngle).min(-180.00f).max(180.0f).format("%.1f")),
+                                  }},
+                                 {"Central",
+                                  {
+                                      ParameterSpec()
+                                          .name("Strength")
+                                          .reference(
+                                              FloatSpec()
+                                                  .member(&SimulationParameters::zoneCentralForceFieldStrength)
+                                                  .min(0.0f)
+                                                  .max(0.5f)
+                                                  .logarithmic(true)
+                                                  .format("%.5f")),
+                                  }},
+                                 {"Linear",
+                                  {
+                                      ParameterSpec()
+                                          .name("Angle")
+                                          .reference(
+                                              FloatSpec()
+                                                  .member(&SimulationParameters::zoneLinearForceFieldAngle)
+                                                  .min(-180.0f)
+                                                  .max(180.0f)
+                                                  .format("%.1f")),
+                                      ParameterSpec()
+                                          .name("Strength")
+                                          .reference(
+                                              FloatSpec()
+                                                  .member(&SimulationParameters::zoneLinearForceFieldStrength)
+                                                  .min(0.0f)
+                                                  .max(0.5f)
+                                                  .logarithmic(true)
+                                                  .format("%.5f")),
+                                  }}})),
             }),
         ParameterGroupSpec()
             .name("Numerics")

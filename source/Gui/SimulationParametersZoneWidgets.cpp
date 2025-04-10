@@ -24,15 +24,9 @@ void _SimulationParametersZoneWidgets::process()
 
     auto zoneIndex = LocationHelper::findLocationArrayIndex(parameters, _locationIndex);
     SimulationParametersZone& zone = parameters.zone[zoneIndex];
-    SimulationParametersZone const& origZone = origParameters.zone[zoneIndex];
     _zoneName = std::string(parameters.zoneNames.zoneValues[zoneIndex]);
 
-    auto worldSize = _simulationFacade->getWorldSize();
-
     SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _simulationFacade, _locationIndex);
-    AlienImGui::Separator();
-    AlienImGui::Separator();
-    AlienImGui::Separator();
 
     ///**
     // * General

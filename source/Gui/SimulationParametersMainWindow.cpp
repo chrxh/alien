@@ -437,14 +437,22 @@ void SimulationParametersMainWindow::onAddZone()
     parameters.zonePosition.zoneValues[index] = {toFloat(worldSize.x / 2), toFloat(worldSize.y / 2)};
     parameters.zoneCoreRadius.zoneValues[index] = minRadius / 3;
     parameters.zoneCoreRect.zoneValues[index] = {minRadius / 3, minRadius / 3};
+    parameters.zoneFadeoutRadius.zoneValues[index] = minRadius / 3;
+    parameters.zoneForceFieldType.zoneValues[index] = ForceField_None;
+    parameters.zoneRadialForceFieldOrientation.zoneValues[index] = Orientation_Clockwise;
+    parameters.zoneRadialForceFieldStrength.zoneValues[index] = 0.001f;
+    parameters.zoneRadialForceFieldDriftAngle.zoneValues[index] = 0.0f;
 
     origParameters.backgroundColor.zoneValues[index] = parameters.backgroundColor.zoneValues[index];
     origParameters.zoneShape.zoneValues[index] = parameters.zoneShape.zoneValues[index];
     origParameters.zonePosition.zoneValues[index] = parameters.zonePosition.zoneValues[index];
     origParameters.zoneCoreRadius.zoneValues[index] = parameters.zoneCoreRadius.zoneValues[index];
     origParameters.zoneCoreRect.zoneValues[index] = parameters.zoneCoreRect.zoneValues[index];
-
-    zone.fadeoutRadius = minRadius / 3;
+    origParameters.zoneFadeoutRadius.zoneValues[index] = parameters.zoneFadeoutRadius.zoneValues[index];
+    origParameters.zoneForceFieldType.zoneValues[index] = parameters.zoneForceFieldType.zoneValues[index];
+    origParameters.zoneRadialForceFieldOrientation.zoneValues[index] = parameters.zoneRadialForceFieldOrientation.zoneValues[index];
+    origParameters.zoneRadialForceFieldStrength.zoneValues[index] = parameters.zoneRadialForceFieldStrength.zoneValues[index];
+    origParameters.zoneRadialForceFieldDriftAngle.zoneValues[index] = parameters.zoneRadialForceFieldDriftAngle.zoneValues[index];
 
     parameters.zone[index] = zone;
     origParameters.zone[index] = zone;
