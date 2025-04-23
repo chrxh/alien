@@ -1,11 +1,9 @@
 #include "SpecificationEvaluationService.h"
 
 #include <algorithm>
-#include <boost/variant.hpp>
 
 #include "CellTypeStrings.h"
 #include "LocationHelper.h"
-#include "ParametersEditService.h"
 
 ValueRef<bool> SpecificationEvaluationService::getRef(BoolMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const
 {
@@ -140,6 +138,9 @@ ValueRef<char> SpecificationEvaluationService::getRef(Char64MemberVariant const&
     } else if (std::holds_alternative<Char64ZoneMember>(member)) {
         auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
         return ValueRef{.value = (parameters.**std::get<Char64ZoneMember>(member)).zoneValues[index]};
+    } else if (std::holds_alternative<Char64SourceMember>(member)) {
+        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+        return ValueRef{.value = (parameters.**std::get<Char64SourceMember>(member)).sourceValues[index]};
     }
 
     return {};
@@ -291,6 +292,14 @@ bool SpecificationEvaluationService::isVisible(ParameterSpec const& parameterSpe
         } else if (std::holds_alternative<ColorTransitionRulesSpec>(parameterSpec._reference)) {
             auto const& colorTransitionRulesSpec = std::get<ColorTransitionRulesSpec>(parameterSpec._reference);
             if (std::holds_alternative<ColorTransitionRulesBaseZoneMember>(colorTransitionRulesSpec._member)) {
+                return true;
+            }
+        }
+    }
+    if (locationType == LocationType::Source) {
+        if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {
+            auto const& char64Spec = std::get<Char64Spec>(parameterSpec._reference);
+            if (std::holds_alternative<Char64SourceMember>(char64Spec._member)) {
                 return true;
             }
         }

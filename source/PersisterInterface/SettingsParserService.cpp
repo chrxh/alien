@@ -638,8 +638,14 @@ namespace
             std::string base = "simulation parameters.particle sources." + std::to_string(index) + ".";
             auto& source = parameters.radiationSource[index];
             auto& defaultSource = defaultParameters.radiationSource[index];
-            ParameterParser::encodeDecode(tree, source.name, defaultSource.name, base + "name", parserTask);
-            ParameterParser::encodeDecode(tree, source.locationIndex, defaultSource.locationIndex, base + "location index", parserTask);
+            ParameterParser::encodeDecode(
+                tree, parameters.sourceName.sourceValues[index], defaultParameters.sourceName.sourceValues[index], base + "name", parserTask);
+            ParameterParser::encodeDecode(
+                tree,
+                parameters.sourceLocationIndex.sourceValues[index],
+                defaultParameters.sourceLocationIndex.sourceValues[index],
+                base + "location index",
+                parserTask);
             ParameterParser::encodeDecode(tree, source.posX, defaultSource.posX, base + "pos.x", parserTask);
             ParameterParser::encodeDecode(tree, source.posY, defaultSource.posY, base + "pos.y", parserTask);
             ParameterParser::encodeDecode(tree, source.velX, defaultSource.velX, base + "vel.x", parserTask);
@@ -677,10 +683,13 @@ namespace
         ParameterParser::encodeDecode(tree, parameters.numZones.value, defaultParameters.numZones.value, "simulation parameters.spots.num spots", parserTask);
         for (int index = 0; index < parameters.numZones.value; ++index) {
             std::string base = "simulation parameters.spots." + std::to_string(index) + ".";
-            auto& spot = parameters.zone[index];
-            auto& defaultSpot = defaultParameters.zone[index];
-            ParameterParser::encodeDecode(tree, parameters.zoneNames.zoneValues[index], defaultParameters.zoneNames.zoneValues[0], base + "name", parserTask);
-            ParameterParser::encodeDecode(tree, spot.locationIndex, defaultSpot.locationIndex, base + "location index", parserTask);
+            ParameterParser::encodeDecode(tree, parameters.zoneName.zoneValues[index], defaultParameters.zoneName.zoneValues[0], base + "name", parserTask);
+            ParameterParser::encodeDecode(
+                tree,
+                parameters.zoneLocationIndex.zoneValues[index],
+                defaultParameters.zoneLocationIndex.zoneValues[index],
+                base + "location index",
+                parserTask);
             ParameterParser::encodeDecode(tree, parameters.zonePosition.zoneValues[index].x, defaultParameters.zonePosition.zoneValues[index].x, base + "pos.x", parserTask);
             ParameterParser::encodeDecode(tree, parameters.zonePosition.zoneValues[index].y, defaultParameters.zonePosition.zoneValues[index].y, base + "pos.y", parserTask);
             ParameterParser::encodeDecode(tree, parameters.zoneVelocity.zoneValues[index].x, defaultParameters.zoneVelocity.zoneValues[index].x, base + "vel.x", parserTask);

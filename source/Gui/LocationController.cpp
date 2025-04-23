@@ -17,8 +17,8 @@ void LocationController::addLocationWindow(int locationIndex, RealVector2D const
         widgets = baseWidgets;
     } else {
         auto parameters = _simulationFacade->getSimulationParameters();
-        auto location = LocationHelper::findLocation(parameters, locationIndex);
-        if (std::holds_alternative<SimulationParametersZone*>(location)) {
+        auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
+        if (locationType == LocationType::Zone) {
             auto zoneWidgets = std::make_shared<_SimulationParametersZoneWidgets>();
             zoneWidgets->init(_simulationFacade, locationIndex);
             widgets = zoneWidgets;

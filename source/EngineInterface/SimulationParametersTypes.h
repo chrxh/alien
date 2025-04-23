@@ -45,6 +45,7 @@ template <typename T>
 struct ZoneParameter
 {
     T zoneValues[MAX_ZONES];
+
     bool operator==(ZoneParameter<T> const&) const = default;
 };
 
@@ -73,6 +74,14 @@ struct BaseZoneParameter
 /**
  * Source parameters
  */
+
+template <typename T>
+struct SourceParameter
+{
+    T sourceValues[MAX_ZONES];
+
+    bool operator==(SourceParameter<T> const&) const = default;
+};
 
 template <typename T>
 struct PinnableSourceValue
@@ -154,4 +163,27 @@ enum MotionType_
 {
     MotionType_Fluid,
     MotionType_Collision
+};
+
+using Orientation = int;
+enum Orientation_
+{
+    Orientation_Clockwise,
+    Orientation_CounterClockwise
+};
+
+using ForceField = int;
+enum ForceField_
+{
+    ForceField_None,
+    ForceField_Radial,
+    ForceField_Central,
+    ForceField_Linear
+};
+
+using ZoneShapeType = int;
+enum ZoneShapeType_
+{
+    ZoneShapeType_Circular,
+    ZoneShapeType_Rectangular
 };

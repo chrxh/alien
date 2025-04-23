@@ -62,10 +62,9 @@ void SpecificationService::createSpec()
             ParameterSpec().name("Number of radiation sources").reference(IntSpec().member(&SimulationParameters::numRadiationSources)).visible(false),
         }),
         ParameterGroupSpec().name("General").parameters({
-            ParameterSpec()
-                .name("Project name")
-                .reference(Char64Spec().member(&SimulationParameters::projectName)),
-            ParameterSpec().name("Zone name").reference(Char64Spec().member(&SimulationParameters::zoneNames)),
+            ParameterSpec().name("Project name").reference(Char64Spec().member(&SimulationParameters::projectName)),
+            ParameterSpec().name("Zone name").reference(Char64Spec().member(&SimulationParameters::zoneName)),
+            ParameterSpec().name("Source name").reference(Char64Spec().member(&SimulationParameters::sourceName)),
         }),
         ParameterGroupSpec()
             .name("Visualization")
@@ -132,6 +131,7 @@ void SpecificationService::createSpec()
                 ParameterSpec()
                     .name("Location index")
                     .reference(IntSpec().member(&SimulationParameters::zoneLocationIndex)).visible(false),
+                ParameterSpec().name("Location index").reference(IntSpec().member(&SimulationParameters::sourceLocationIndex)).visible(false),
                 ParameterSpec()
                     .name("Position (x,y)")
                      .reference(Float2Spec()

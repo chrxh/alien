@@ -329,10 +329,13 @@ void SpecificationGuiService::createWidgetsForChar64Spec(
     auto [value, baseValue, enabledValue, pinnedValue] = evaluationService.getRef(char64Spec._member, parameters, locationIndex);
     auto [origValue, origBaseValue, origEnabledValue, origPinnedValue] = evaluationService.getRef(char64Spec._member, origParameters, locationIndex);
 
-    AlienImGui::InputText(
+    if (AlienImGui::InputText(
         AlienImGui::InputTextParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(origValue).tooltip(parameterSpec._tooltip),
         value,
-        sizeof(Char64) / sizeof(char));
+        sizeof(Char64) / sizeof(char))) {
+        int dummy = 0;
+        int dummy2 = 0;
+    }
 }
 
 void SpecificationGuiService::createWidgetsForAlternativeSpec(

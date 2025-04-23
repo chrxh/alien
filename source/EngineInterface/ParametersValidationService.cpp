@@ -9,10 +9,6 @@ void ParametersValidationService::validateAndCorrect(SimulationParameters& param
         parameters.defenderAntiInjectorStrength.value[i] = std::max(0.0f, parameters.defenderAntiInjectorStrength.value[i]);
     }
     parameters.timestepSize.value = std::max(0.01f, parameters.timestepSize.value);
-
-    for (int i = 0; i < parameters.numZones.value; ++i) {
-        validateAndCorrect(parameters.zone[i], parameters);
-    }
 }
 
 void ParametersValidationService::validateAndCorrect(RadiationSource& source) const
@@ -26,6 +22,3 @@ void ParametersValidationService::validateAndCorrect(RadiationSource& source) co
     }
 }
 
-void ParametersValidationService::validateAndCorrect(SimulationParametersZone& zone, SimulationParameters const& parameters) const
-{
-}

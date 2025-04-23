@@ -3,34 +3,27 @@
 #include <cstdint>
 #include <cstring>
 
+#include "Base/Vector2D.h"
+
 #include "CellTypeConstants.h"
 #include "RadiationSource.h"
 #include "SimulationParametersTypes.h"
-#include "SimulationParametersZone.h"
-#include "Base/Vector2D.h"
 
 /**
  * NOTE: header is also included in kernel code
  */
 struct SimulationParameters
 {
-    /**
-     * Sizes
-     */
     BaseParameter<int> numZones = {0};
     BaseParameter<int> numRadiationSources = {0};
 
-    /**
-     * Source parameters
-     */
-
-    /**
-     * Base and Zone parameters
-     */
+    // Location
+    SourceParameter<int> sourceLocationIndex = {{-1}};
 
     // General
     BaseParameter<Char64> projectName = {"<unnamed>"};
-    ZoneParameter<Char64> zoneNames = {"<unnamed>"};
+    ZoneParameter<Char64> zoneName = {{"<unnamed>"}};
+    SourceParameter<Char64> sourceName = {{"<unnamed>"}};
 
     // Visualization
     BaseZoneParameter<FloatColorRGB> backgroundColor = {.baseValue = {0.0f, 0.0f, 0.106f}};
@@ -307,10 +300,6 @@ struct SimulationParameters
 
     // Particle sources
     RadiationSource radiationSource[MAX_RADIATION_SOURCES];
-
-    // Spots
-    SimulationParametersZone zone[MAX_ZONES];
-
 
     bool operator==(SimulationParameters const&) const = default;
 };

@@ -33,7 +33,9 @@ using _ColorMatrixIntMember = BaseParameter<ColorMatrix<int>> SimulationParamete
 using ColorMatrixIntMember = std::shared_ptr<_ColorMatrixIntMember>;
 using _IntZoneMember = ZoneParameter<int> SimulationParameters::*;
 using IntZoneMember = std::shared_ptr<_IntZoneMember>;
-using IntMemberVariant = std::variant<std::monostate, IntMember, IntEnableableMember, ColorVectorIntMember, ColorMatrixIntMember, IntZoneMember>;
+using _IntSourceMember = SourceParameter<int> SimulationParameters::*;
+using IntSourceMember = std::shared_ptr<_IntSourceMember>;
+using IntMemberVariant = std::variant<std::monostate, IntMember, IntEnableableMember, ColorVectorIntMember, ColorMatrixIntMember, IntZoneMember, IntSourceMember>;
 using AlternativeMemberVariant = std::variant<std::monostate, IntMember, IntZoneMember>;
 
 using _FloatMember = BaseParameter<float> SimulationParameters::*;
@@ -73,7 +75,9 @@ using _Char64Member = BaseParameter<Char64> SimulationParameters::*;
 using Char64Member = std::shared_ptr<_Char64Member>;
 using _Char64ZoneMember = ZoneParameter<Char64> SimulationParameters::*;
 using Char64ZoneMember = std::shared_ptr<_Char64ZoneMember>;
-using Char64MemberVariant = std::variant<std::monostate, Char64Member, Char64ZoneMember>;
+using _Char64SourceMember = SourceParameter<Char64> SimulationParameters::*;
+using Char64SourceMember = std::shared_ptr<_Char64SourceMember>;
+using Char64MemberVariant = std::variant<std::monostate, Char64Member, Char64ZoneMember, Char64SourceMember>;
 
 using _FloatColorRGBBaseZoneMember = BaseZoneParameter<FloatColorRGB> SimulationParameters::*;
 using FloatColorRGBBaseZoneMember = std::shared_ptr<_FloatColorRGBBaseZoneMember>;
@@ -99,6 +103,7 @@ struct IntSpec
     SETTER_SHARED_PTR(IntSpec, ColorVectorIntMember, member);
     SETTER_SHARED_PTR(IntSpec, ColorMatrixIntMember, member);
     SETTER_SHARED_PTR(IntSpec, IntZoneMember, member);
+    SETTER_SHARED_PTR(IntSpec, IntSourceMember, member);
     IntMemberVariant _member = std::monostate();
 
     MEMBER(IntSpec, int, min, 0);
@@ -153,6 +158,7 @@ struct Char64Spec
 {
     SETTER_SHARED_PTR(Char64Spec, Char64Member, member);
     SETTER_SHARED_PTR(Char64Spec, Char64ZoneMember, member);
+    SETTER_SHARED_PTR(Char64Spec, Char64SourceMember, member);
     Char64MemberVariant _member = std::monostate();
 };
 
