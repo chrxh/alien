@@ -228,12 +228,6 @@ void TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
     auto parameters = _simulationFacade->getSimulationParameters();
     auto const& origParameters = snapshot.parameters;
 
-    if (origParameters.numRadiationSources.value == parameters.numRadiationSources.value) {
-        for (int i = 0; i < parameters.numZones.value; ++i) {
-            restorePosition(parameters.radiationSource[i], origParameters.radiationSource[i], snapshot.timestep);
-        }
-    }
-
     if (origParameters.numZones.value == parameters.numZones.value) {
         for (int i = 0; i < parameters.numZones.value; ++i) {
             restorePositionNew(
@@ -241,6 +235,17 @@ void TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
                 parameters.zoneVelocity.zoneValues[i],
                 origParameters.zonePosition.zoneValues[i],
                 origParameters.zoneVelocity.zoneValues[i],
+                snapshot.timestep);
+        }
+    }
+
+    if (origParameters.numSources.value == parameters.numSources.value) {
+        for (int i = 0; i < parameters.numZones.value; ++i) {
+            restorePositionNew(
+                parameters.sourcePosition.sourceValues[i],
+                parameters.sourceVelocity.sourceValues[i],
+                origParameters.sourcePosition.sourceValues[i],
+                origParameters.sourceVelocity.sourceValues[i],
                 snapshot.timestep);
         }
     }

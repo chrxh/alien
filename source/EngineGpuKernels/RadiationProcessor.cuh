@@ -46,7 +46,7 @@ __inline__ __device__ void RadiationProcessor::calcActiveSources(SimulationData&
         for (int i = 0; i < cudaSimulationParameters.numZones.value; ++i) {
             auto sourceActive = !ZoneCalculator::isCoveredByZonesNew(
                 data,
-                {cudaSimulationParameters.radiationSource[i].posX, cudaSimulationParameters.radiationSource[i].posY},
+                {cudaSimulationParameters.sourcePosition.sourceValues[i].x, cudaSimulationParameters.sourcePosition.sourceValues[i].y},
                 cudaSimulationParameters.radiationDisableSources);
             if (sourceActive) {
                 data.preprocessedSimulationData.activeRadiationSources.setActiveSource(activeSourceIndex, i);
@@ -256,8 +256,8 @@ __inline__ __device__ void RadiationProcessor::createEnergyParticle(SimulationDa
             }
             if (matchSource) {
 
-                pos.x = cudaSimulationParameters.radiationSource[sourceIndex].posX;
-                pos.y = cudaSimulationParameters.radiationSource[sourceIndex].posY;
+                pos.x = cudaSimulationParameters.sourcePosition.sourceValues[sourceIndex].x;
+                pos.y = cudaSimulationParameters.sourcePosition.sourceValues[sourceIndex].y;
 
                 auto const& source = cudaSimulationParameters.radiationSource[sourceIndex];
                 if (source.shape.type == RadiationSourceShapeType_Circular) {

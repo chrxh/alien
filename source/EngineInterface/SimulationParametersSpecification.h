@@ -69,7 +69,9 @@ using FloatMemberVariant = std::variant<
 
 using _Float2ZoneMember = ZoneParameter<RealVector2D> SimulationParameters::*;
 using Float2ZoneMember = std::shared_ptr<_Float2ZoneMember>;
-using Float2MemberVariant = std::variant<std::monostate, Float2ZoneMember>;
+using _Float2SourceMember = SourceParameter<RealVector2D> SimulationParameters::*;
+using Float2SourceMember = std::shared_ptr<_Float2SourceMember>;
+using Float2MemberVariant = std::variant<std::monostate, Float2ZoneMember, Float2SourceMember>;
 
 using _Char64Member = BaseParameter<Char64> SimulationParameters::*;
 using Char64Member = std::shared_ptr<_Char64Member>;
@@ -146,6 +148,7 @@ using Max2Variant = std::variant<RealVector2D, WorldSize>;
 struct Float2Spec
 {
     SETTER_SHARED_PTR(Float2Spec, Float2ZoneMember, member);
+    SETTER_SHARED_PTR(Float2Spec, Float2SourceMember, member);
     Float2MemberVariant _member = std::monostate();
 
     MEMBER(Float2Spec, Min2Variant, min, RealVector2D());

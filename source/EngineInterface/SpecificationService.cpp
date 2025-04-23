@@ -59,7 +59,7 @@ void SpecificationService::createSpec()
     _parametersSpec = ParametersSpec().groups({
         ParameterGroupSpec().name("Sizes").parameters({
             ParameterSpec().name("Number of zones").reference(IntSpec().member(&SimulationParameters::numZones)).visible(false),
-            ParameterSpec().name("Number of radiation sources").reference(IntSpec().member(&SimulationParameters::numRadiationSources)).visible(false),
+            ParameterSpec().name("Number of radiation sources").reference(IntSpec().member(&SimulationParameters::numSources)).visible(false),
         }),
         ParameterGroupSpec().name("General").parameters({
             ParameterSpec().name("Project name").reference(Char64Spec().member(&SimulationParameters::projectName)),
@@ -163,6 +163,18 @@ void SpecificationService::createSpec()
                 ParameterSpec()
                     .name("Fade-out radius")
                     .reference(FloatSpec().member(&SimulationParameters::zoneFadeoutRadius).min(0.0f).max(MaxWorldRadiusSize()).format("%.2f")),
+                ParameterSpec()
+                    .name("Position (x,y)")
+                    .reference(Float2Spec()
+                                   .member(&SimulationParameters::sourcePosition)
+                                   .min(RealVector2D{0.0f, 0.0f})
+                                   .max(WorldSize())
+                                   .format("%.2f")
+                                   .mousePicker(true)),
+                ParameterSpec()
+                    .name("Velocity (x,y)")
+                    .reference(
+                        Float2Spec().member(&SimulationParameters::sourceVelocity).min(RealVector2D{-4.0f, -4.0f}).max(RealVector2D{4.0f, 4.0f}).format("%.2f")),
             }),
         ParameterGroupSpec()
             .name("Force field")

@@ -15,7 +15,7 @@
 struct SimulationParameters
 {
     BaseParameter<int> numZones = {0};
-    BaseParameter<int> numRadiationSources = {0};
+    BaseParameter<int> numSources = {0};
 
     // Location
     SourceParameter<int> sourceLocationIndex = {{-1}};
@@ -46,6 +46,8 @@ struct SimulationParameters
     ZoneParameter<float> zoneCoreRadius = {{100.0f}};               // for ZoneShapeType_Circular
     ZoneParameter<RealVector2D> zoneCoreRect = {{{100.0f, 100.0f}}};  // for ZoneShapeType_Rectangular
     ZoneParameter<float> zoneFadeoutRadius = {{100.0f}};
+    SourceParameter<RealVector2D> sourcePosition;
+    SourceParameter<RealVector2D> sourceVelocity;
 
     // Force field
     ZoneParameter<ForceField> zoneForceFieldType = {{ForceField_None}};

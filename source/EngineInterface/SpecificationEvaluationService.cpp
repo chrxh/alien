@@ -127,7 +127,11 @@ ValueRef<RealVector2D> SpecificationEvaluationService::getRef(Float2MemberVarian
     if (std::holds_alternative<Float2ZoneMember>(member)) {
         auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
         return ValueRef{.value = &(parameters.**std::get<Float2ZoneMember>(member)).zoneValues[index]};
+    } else if (std::holds_alternative<Float2SourceMember>(member)) {
+        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+        return ValueRef{.value = &(parameters.**std::get<Float2SourceMember>(member)).sourceValues[index]};
     }
+
     return {};
 }
 
@@ -297,7 +301,13 @@ bool SpecificationEvaluationService::isVisible(ParameterSpec const& parameterSpe
         }
     }
     if (locationType == LocationType::Source) {
-        if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {
+        if (std::holds_alternative<Float2Spec>(parameterSpec._reference))
+        {
+            auto const& float2Spec = std::get<Float2Spec>(parameterSpec._reference);
+            if (std::holds_alternative<Float2SourceMember>(float2Spec._member)) {
+                return true;
+            }
+        } else if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {
             auto const& char64Spec = std::get<Char64Spec>(parameterSpec._reference);
             if (std::holds_alternative<Char64SourceMember>(char64Spec._member)) {
                 return true;
