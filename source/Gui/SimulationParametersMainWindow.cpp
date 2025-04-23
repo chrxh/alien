@@ -136,7 +136,7 @@ void SimulationParametersMainWindow::processToolbar()
                                       .disabled(!_copiedParameters))) {
         auto parameters = _simulationFacade->getSimulationParameters();
         if (_copiedParameters->numZones.value == parameters.numZones.value
-            && _copiedParameters->numRadiationSources.value == parameters.numRadiationSources.value) {
+            && _copiedParameters->numSources.value == parameters.numSources.value) {
             _simulationFacade->setOriginalSimulationParameters(*_copiedParameters);
             printOverlayMessage("Reference simulation parameters replaced");
         } else {
@@ -479,21 +479,25 @@ void SimulationParametersMainWindow::onAddSource()
 
     auto worldSize = _simulationFacade->getWorldSize();
 
-    auto index = parameters.numRadiationSources.value;
+    auto index = parameters.numSources.value;
 
-    StringHelper::copy(
-        parameters.sourceName.sourceValues[index], sizeof(parameters.sourceName.sourceValues[index]), LocationHelper::generateSourceName(parameters));
+    auto sourceName = LocationHelper::generateSourceName(parameters);
+    StringHelper::copy(parameters.sourceName.sourceValues[index], sizeof(parameters.sourceName.sourceValues[index]), sourceName);
+    StringHelper::copy(origParameters.sourceName.sourceValues[index], sizeof(parameters.sourceName.sourceValues[index]), sourceName);
+
     parameters.sourceLocationIndex.sourceValues[index] = _selectedLocationIndex;
-
-    RadiationSource source;
-    source.posX = toFloat(worldSize.x / 2);
-    source.posY = toFloat(worldSize.y / 2);
+    parameters.sourcePosition.sourceValues[index] = {toFloat(worldSize.x / 2), toFloat(worldSize.y / 2)};
 
     origParameters.sourceLocationIndex.sourceValues[index] = _selectedLocationIndex;
+    origParameters.sourcePosition.sourceValues[index] = parameters.sourcePosition.sourceValues[index];
+
+
+    RadiationSource source;
     parameters.radiationSource[index] = source;
     origParameters.radiationSource[index] = source;
-    ++parameters.numRadiationSources.value;
-    ++origParameters.numRadiationSources.value;
+
+    ++parameters.numSources.value;
+    ++origParameters.numSources.value;
 
     editService.applyRadiationStrengths(parameters, newStrengths);
     editService.applyRadiationStrengths(origParameters, newStrengths);
@@ -663,8 +667,7 @@ void SimulationParametersMainWindow::onCenterLocation(int locationIndex)
     if (locationType == LocationType::Zone) {
         pos = parameters.zonePosition.zoneValues[arrayIndex];
     } else if (locationType == LocationType::Source) {
-        auto const& source = parameters.radiationSource[arrayIndex];
-        pos = {source.posX, source.posY};
+        pos = parameters.sourcePosition.sourceValues[arrayIndex];
     }
     Viewport::get().setCenterInWorldPos(pos);
 }
@@ -673,7 +676,7 @@ void SimulationParametersMainWindow::updateLocations()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
 
-    _locations = std::vector<Location>(1 + parameters.numZones.value + parameters.numRadiationSources.value);
+    _locations = std::vector<Location>(1 + parameters.numZones.value + parameters.numSources.value);
     auto strength = ParametersEditService::get().getRadiationStrengths(parameters);
     auto pinnedString = strength.pinned.contains(0) ? ICON_FA_THUMBTACK " " : " ";
     _locations.at(0) = Location{"Base", LocationType::Base, "-", pinnedString + StringHelper::format(strength.values.front() * 100 + 0.05f, 1) + "%"};
@@ -682,9 +685,10 @@ void SimulationParametersMainWindow::updateLocations()
             "(" + StringHelper::format(parameters.zonePosition.zoneValues[i].x, 0) + ", " + StringHelper::format(parameters.zonePosition.zoneValues[i].y, 0) + ")";
         _locations.at(parameters.zoneLocationIndex.zoneValues[i]) = Location{parameters.zoneName.zoneValues[i], LocationType::Zone, position};
     }
-    for (int i = 0; i < parameters.numRadiationSources.value; ++i) {
+    for (int i = 0; i < parameters.numSources.value; ++i) {
         auto const& source = parameters.radiationSource[i];
-        auto position = "(" + StringHelper::format(source.posX, 0) + ", " + StringHelper::format(source.posY, 0) + ")";
+        auto position = "(" + StringHelper::format(parameters.sourcePosition.sourceValues[i].x, 0) + ", "
+            + StringHelper::format(parameters.sourcePosition.sourceValues[i].y, 0) + ")";
         auto pinnedString = strength.pinned.contains(i + 1) ? ICON_FA_THUMBTACK " " : " ";
         _locations.at(parameters.sourceLocationIndex.sourceValues[i]) =
             Location{
@@ -716,7 +720,7 @@ bool SimulationParametersMainWindow::checkNumZones(SimulationParameters const& p
 
 bool SimulationParametersMainWindow::checkNumSources(SimulationParameters const& parameters)
 {
-    if (parameters.numRadiationSources.value == MAX_RADIATION_SOURCES) {
+    if (parameters.numSources.value == MAX_RADIATION_SOURCES) {
         showMessage("Error", "The maximum number of radiation sources has been reached.");
         return false;
     }

@@ -5,10 +5,10 @@
 auto ParametersEditService::getRadiationStrengths(SimulationParameters const& parameters) const -> RadiationStrengths
 {
     RadiationStrengths result;
-    result.values.reserve(parameters.numRadiationSources.value + 1);
+    result.values.reserve(parameters.numSources.value + 1);
 
     auto baseStrength = 1.0f;
-    for (int i = 0; i < parameters.numRadiationSources.value; ++i) {
+    for (int i = 0; i < parameters.numSources.value; ++i) {
         baseStrength -= parameters.radiationSource[i].strength;
     }
     if (baseStrength < 0) {
@@ -16,7 +16,7 @@ auto ParametersEditService::getRadiationStrengths(SimulationParameters const& pa
     }
 
     result.values.emplace_back(baseStrength);
-    for (int i = 0; i < parameters.numRadiationSources.value; ++i) {
+    for (int i = 0; i < parameters.numSources.value; ++i) {
         result.values.emplace_back(parameters.radiationSource[i].strength);
         if (parameters.radiationSource[i].strengthPinned) {
             result.pinned.insert(i + 1);
@@ -30,10 +30,10 @@ auto ParametersEditService::getRadiationStrengths(SimulationParameters const& pa
 
 void ParametersEditService::applyRadiationStrengths(SimulationParameters& parameters, RadiationStrengths const& strengths)
 {
-    CHECK(parameters.numRadiationSources.value + 1 == strengths.values.size());
+    CHECK(parameters.numSources.value + 1 == strengths.values.size());
 
     parameters.relativeStrengthPinned.pinned = strengths.pinned.contains(0);
-    for (int i = 0; i < parameters.numRadiationSources.value; ++i) {
+    for (int i = 0; i < parameters.numSources.value; ++i) {
         parameters.radiationSource[i].strength = strengths.values.at(i + 1);
         parameters.radiationSource[i].strengthPinned = strengths.pinned.contains(i + 1);
     }

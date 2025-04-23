@@ -62,10 +62,6 @@ struct RadiationSource
 {
     float strength = 0.0f;
     bool strengthPinned = false;
-    float posX = 0;
-    float posY = 0;
-    float velX = 0;
-    float velY = 0;
     bool useAngle = false;
     float angle = 0;
 

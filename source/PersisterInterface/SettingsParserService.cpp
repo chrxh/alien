@@ -624,8 +624,8 @@ namespace
         //particle sources
         ParameterParser::encodeDecode(
             tree,
-            parameters.numRadiationSources.value,
-            defaultParameters.numRadiationSources.value,
+            parameters.numSources.value,
+            defaultParameters.numSources.value,
             "simulation parameters.particle sources.num sources",
             parserTask);
         ParameterParser::encodeDecode(
@@ -634,7 +634,7 @@ namespace
             defaultParameters.relativeStrengthPinned.pinned,
             "simulation parameters.particle sources.base strength pinned",
             parserTask);
-        for (int index = 0; index < parameters.numRadiationSources.value; ++index) {
+        for (int index = 0; index < parameters.numSources.value; ++index) {
             std::string base = "simulation parameters.particle sources." + std::to_string(index) + ".";
             auto& source = parameters.radiationSource[index];
             auto& defaultSource = defaultParameters.radiationSource[index];
@@ -646,10 +646,14 @@ namespace
                 defaultParameters.sourceLocationIndex.sourceValues[index],
                 base + "location index",
                 parserTask);
-            ParameterParser::encodeDecode(tree, source.posX, defaultSource.posX, base + "pos.x", parserTask);
-            ParameterParser::encodeDecode(tree, source.posY, defaultSource.posY, base + "pos.y", parserTask);
-            ParameterParser::encodeDecode(tree, source.velX, defaultSource.velX, base + "vel.x", parserTask);
-            ParameterParser::encodeDecode(tree, source.velY, defaultSource.velY, base + "vel.y", parserTask);
+            ParameterParser::encodeDecode(
+                tree, parameters.sourcePosition.sourceValues[index].x, defaultParameters.sourcePosition.sourceValues[index].x, base + "pos.x", parserTask);
+            ParameterParser::encodeDecode(
+                tree, parameters.sourcePosition.sourceValues[index].y, defaultParameters.sourcePosition.sourceValues[index].y, base + "pos.y", parserTask);
+            ParameterParser::encodeDecode(
+                tree, parameters.sourceVelocity.sourceValues[index].x, defaultParameters.sourceVelocity.sourceValues[index].x, base + "vel.x", parserTask);
+            ParameterParser::encodeDecode(
+                tree, parameters.sourceVelocity.sourceValues[index].y, defaultParameters.sourceVelocity.sourceValues[index].y, base + "vel.y", parserTask);
             ParameterParser::encodeDecode(tree, source.useAngle, defaultSource.useAngle, base + "use angle", parserTask);
             ParameterParser::encodeDecode(tree, source.strength, defaultSource.strength, base + "strength", parserTask);
             ParameterParser::encodeDecode(tree, source.strengthPinned, defaultSource.strengthPinned, base + "strength pinned", parserTask);
