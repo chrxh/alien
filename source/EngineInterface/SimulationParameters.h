@@ -14,6 +14,7 @@
  */
 struct SimulationParameters
 {
+    // Locations
     BaseParameter<int> numZones = {0};
     BaseParameter<int> numSources = {0};
 
