@@ -60,9 +60,6 @@ struct RadiationSourceShape
 
 struct RadiationSource
 {
-    Char64 name = "<unnamed>";
-    int locationIndex = -1;
-
     float strength = 0.0f;
     bool strengthPinned = false;
     float posX = 0;

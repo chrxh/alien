@@ -1,6 +1,5 @@
 #pragma once
 
-#include "EngineInterface/SimulationParametersZone.h"
 #include "EngineInterface/Definitions.h"
 
 #include "LocationWidgets.h"
