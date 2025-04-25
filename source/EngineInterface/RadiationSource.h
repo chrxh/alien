@@ -60,11 +60,6 @@ struct RadiationSourceShape
 
 struct RadiationSource
 {
-    float strength = 0.0f;
-    bool strengthPinned = false;
-    bool useAngle = false;
-    float angle = 0;
-
     RadiationSourceShape shape;
 
     bool operator==(RadiationSource const& other) const = default;

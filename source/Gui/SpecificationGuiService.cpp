@@ -161,8 +161,8 @@ void SpecificationGuiService::createWidgetsForIntSpec(
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& intSpec = std::get<IntSpec>(parameterSpec._reference);
 
-    auto [value, baseValue, enabledValue, pinnedValue] = evaluationService.getRef(intSpec._member, parameters, locationIndex);
-    auto [origValue, origBaseValue, origEnabledValue, origPinnedValue] = evaluationService.getRef(intSpec._member, origParameters, locationIndex);
+    auto [value, disabledValue, enabledValue, pinnedValue] = evaluationService.getRef(intSpec._member, parameters, locationIndex);
+    auto [origValue, origDisabledValue, origEnabledValue, origPinnedValue] = evaluationService.getRef(intSpec._member, origParameters, locationIndex);
 
     if (std::holds_alternative<ColorMatrixIntMember>(intSpec._member)) {
         AlienImGui::InputIntColorMatrix(
@@ -185,7 +185,7 @@ void SpecificationGuiService::createWidgetsForIntSpec(
                 .max(intSpec._max)
                 .logarithmic(intSpec._logarithmic)
                 .infinity(intSpec._infinity)
-                .disabledValue(baseValue)
+                .disabledValue(disabledValue)
                 .defaultValue(origValue)
                 .defaultEnabledValue(origEnabledValue)
                 .tooltip(parameterSpec._tooltip)
@@ -205,8 +205,8 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& floatSpec = std::get<FloatSpec>(parameterSpec._reference);
 
-    auto [value, baseValue, enabledValue, pinnedValue] = evaluationService.getRef(floatSpec._member, parameters, locationIndex);
-    auto [origValue, origBaseValue, origEnabledValue, origPinnedValue] = evaluationService.getRef(floatSpec._member, origParameters, locationIndex);
+    auto [value, disabledValue, enabledValue, pinnedValue] = evaluationService.getRef(floatSpec._member, parameters, locationIndex);
+    auto [origValue, origDisabledValue, origEnabledValue, origPinnedValue] = evaluationService.getRef(floatSpec._member, origParameters, locationIndex);
 
     float min = std::get<float>(floatSpec._min);
     float max = [&] {
@@ -231,7 +231,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
                 .tooltip(parameterSpec._tooltip)
                 .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(origValue)))
                 .disabledValue(
-                    baseValue != nullptr ? std::make_optional(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(baseValue)))
+                    disabledValue != nullptr ? std::make_optional(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(disabledValue)))
                                          : std::optional<std::vector<std::vector<float>>>()),
             *reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(value),
             enabledValue);
@@ -256,7 +256,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
                     .logarithmic(floatSpec._logarithmic)
                     .format(floatSpec._format)
                     .infinity(floatSpec._infinity)
-                    .disabledValue(baseValue)
+                    .disabledValue(disabledValue)
                     .defaultValue(origValue)
                     .defaultEnabledValue(origEnabledValue)
                     .colorDependence(
@@ -285,8 +285,8 @@ void SpecificationGuiService::createWidgetsForFloat2Spec(
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& float2Spec = std::get<Float2Spec>(parameterSpec._reference);
 
-    auto [value, baseValue, enabledValue, pinnedValue] = evaluationService.getRef(float2Spec._member, parameters, locationIndex);
-    auto [origValue, origBaseValue, origEnabledValue, origPinnedValue] = evaluationService.getRef(float2Spec._member, origParameters, locationIndex);
+    auto [value, disabledValue, enabledValue, pinnedValue] = evaluationService.getRef(float2Spec._member, parameters, locationIndex);
+    auto [origValue, origDisabledValue, origEnabledValue, origPinnedValue] = evaluationService.getRef(float2Spec._member, origParameters, locationIndex);
 
     RealVector2D min = std::get<RealVector2D>(float2Spec._min);
     RealVector2D max = [&] {
@@ -326,8 +326,8 @@ void SpecificationGuiService::createWidgetsForChar64Spec(
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& char64Spec = std::get<Char64Spec>(parameterSpec._reference);
 
-    auto [value, baseValue, enabledValue, pinnedValue] = evaluationService.getRef(char64Spec._member, parameters, locationIndex);
-    auto [origValue, origBaseValue, origEnabledValue, origPinnedValue] = evaluationService.getRef(char64Spec._member, origParameters, locationIndex);
+    auto [value, disabledValue, enabledValue, pinnedValue] = evaluationService.getRef(char64Spec._member, parameters, locationIndex);
+    auto [origValue, origDisabledValue, origEnabledValue, origPinnedValue] = evaluationService.getRef(char64Spec._member, origParameters, locationIndex);
 
     AlienImGui::InputText(
         AlienImGui::InputTextParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(origValue).tooltip(parameterSpec._tooltip),
@@ -345,8 +345,8 @@ void SpecificationGuiService::createWidgetsForAlternativeSpec(
     auto& evaluationService = SpecificationEvaluationService::get();
     auto alternativeSpec = std::get<AlternativeSpec>(parameterSpec._reference);
 
-    auto [value, baseValue, enabledValue, pinnedValue] = evaluationService.getRef(alternativeSpec._member, parameters, locationIndex);
-    auto [origValue, origBaseValue, origEnabledValue, origPinnedValue] = evaluationService.getRef(alternativeSpec._member, origParameters, locationIndex);
+    auto [value, disabledValue, enabledValue, pinnedValue] = evaluationService.getRef(alternativeSpec._member, parameters, locationIndex);
+    auto [origValue, origDisabledValue, origEnabledValue, origPinnedValue] = evaluationService.getRef(alternativeSpec._member, origParameters, locationIndex);
 
     std::vector<std::string> values;
     values.reserve(alternativeSpec._alternatives.size());
@@ -373,8 +373,8 @@ void SpecificationGuiService::createWidgetsForColorPickerSpec(
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& colorPickerSpec = std::get<ColorPickerSpec>(parameterSpec._reference);
 
-    auto [value, baseValue, enabledValue, pinnedValue] = evaluationService.getRef(colorPickerSpec._member, parameters, locationIndex);
-    auto [origValue, origBaseValue, origEnabledValue, origPinnedValue] = evaluationService.getRef(colorPickerSpec._member, origParameters, locationIndex);
+    auto [value, disabledValue, enabledValue, pinnedValue] = evaluationService.getRef(colorPickerSpec._member, parameters, locationIndex);
+    auto [origValue, origDisabledValue, origEnabledValue, origPinnedValue] = evaluationService.getRef(colorPickerSpec._member, origParameters, locationIndex);
    
     AlienImGui::ColorButtonWithPicker(
         AlienImGui::ColorButtonWithPickerParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue), *value);
@@ -389,8 +389,8 @@ void SpecificationGuiService::createWidgetsForColorTransitionRulesSpec(
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& colorTransitionRulesSpec = std::get<ColorTransitionRulesSpec>(parameterSpec._reference);
 
-    auto [value, baseValue, enabledValue, pinnedValue] = evaluationService.getRef(colorTransitionRulesSpec._member, parameters, locationIndex);
-    auto [origValue, origBaseValue, origEnabledValue, origPinnedValue] =
+    auto [value, disabledValue, enabledValue, pinnedValue] = evaluationService.getRef(colorTransitionRulesSpec._member, parameters, locationIndex);
+    auto [origValue, origDisabledValue, origEnabledValue, origPinnedValue] =
         evaluationService.getRef(colorTransitionRulesSpec._member, origParameters, locationIndex);
 
     for (int color = 0; color < MAX_COLORS; ++color) {

@@ -720,7 +720,7 @@ bool SimulationParametersMainWindow::checkNumZones(SimulationParameters const& p
 
 bool SimulationParametersMainWindow::checkNumSources(SimulationParameters const& parameters)
 {
-    if (parameters.numSources.value == MAX_RADIATION_SOURCES) {
+    if (parameters.numSources.value == MAX_SOURCES) {
         showMessage("Error", "The maximum number of radiation sources has been reached.");
         return false;
     }

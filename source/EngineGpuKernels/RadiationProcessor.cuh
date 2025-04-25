@@ -43,11 +43,11 @@ __inline__ __device__ void RadiationProcessor::calcActiveSources(SimulationData&
 {
     if (threadIdx.x == 0 && blockIdx.x == 0) {
         int activeSourceIndex = 0;
-        for (int i = 0; i < cudaSimulationParameters.numZones.value; ++i) {
+        for (int i = 0; i < cudaSimulationParameters.numSources.value; ++i) {
             auto sourceActive = !ZoneCalculator::isCoveredByZonesNew(
                 data,
                 {cudaSimulationParameters.sourcePosition.sourceValues[i].x, cudaSimulationParameters.sourcePosition.sourceValues[i].y},
-                cudaSimulationParameters.radiationDisableSources);
+                cudaSimulationParameters.disableRadiationSources);
             if (sourceActive) {
                 data.preprocessedSimulationData.activeRadiationSources.setActiveSource(activeSourceIndex, i);
                 ++activeSourceIndex;
@@ -239,7 +239,7 @@ __inline__ __device__ void RadiationProcessor::createEnergyParticle(SimulationDa
         auto sumActiveRatios = 0.0f;
         for (int i = 0; i < numActiveSources; ++i) {
             auto index = data.preprocessedSimulationData.activeRadiationSources.getActiveSource(i);
-            sumActiveRatios += cudaSimulationParameters.radiationSource[index].strength;
+            sumActiveRatios += cudaSimulationParameters.sourceRelativeStrength.sourceValues[index].value;
         }
         if (sumActiveRatios > 0) {
             auto randomRatioValue = data.numberGen1.random(1.0f);
@@ -248,7 +248,7 @@ __inline__ __device__ void RadiationProcessor::createEnergyParticle(SimulationDa
             auto matchSource = false;
             for (int i = 0; i < numActiveSources; ++i) {
                 sourceIndex = data.preprocessedSimulationData.activeRadiationSources.getActiveSource(i);
-                sumActiveRatios += cudaSimulationParameters.radiationSource[sourceIndex].strength;
+                sumActiveRatios += cudaSimulationParameters.sourceRelativeStrength.sourceValues[sourceIndex].value;
                 if (randomRatioValue <= sumActiveRatios) {
                     matchSource = true;
                     break;
@@ -271,8 +271,9 @@ __inline__ __device__ void RadiationProcessor::createEnergyParticle(SimulationDa
                         }
                     }
                     pos += delta;
-                    if (source.useAngle) {
-                        vel = Math::unitVectorOfAngle(source.angle) * data.numberGen1.random(0.5f, 1.0f);
+                    if (cudaSimulationParameters.sourceRadiationAngle.sourceValues[sourceIndex].enabled) {
+                        vel = Math::unitVectorOfAngle(cudaSimulationParameters.sourceRadiationAngle.sourceValues[sourceIndex].value)
+                            * data.numberGen1.random(0.5f, 1.0f);
                     } else {
                         vel = Math::normalized(delta) * data.numberGen1.random(0.5f, 1.0f);
                     }
@@ -283,8 +284,9 @@ __inline__ __device__ void RadiationProcessor::createEnergyParticle(SimulationDa
                     delta.x = data.numberGen1.random() * rectangle.width - rectangle.width / 2;
                     delta.y = data.numberGen1.random() * rectangle.height - rectangle.height / 2;
                     pos += delta;
-                    if (source.useAngle) {
-                        vel = Math::unitVectorOfAngle(source.angle) * data.numberGen1.random(0.5f, 1.0f);
+                    if (cudaSimulationParameters.sourceRadiationAngle.sourceValues[sourceIndex].enabled) {
+                        vel = Math::unitVectorOfAngle(cudaSimulationParameters.sourceRadiationAngle.sourceValues[sourceIndex].value)
+                            * data.numberGen1.random(0.5f, 1.0f);
                     } else {
                         auto roundSize = min(rectangle.width, rectangle.height) / 2;
                         float2 corner1{-rectangle.width / 2, -rectangle.height / 2};

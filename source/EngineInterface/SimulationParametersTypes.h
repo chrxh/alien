@@ -49,6 +49,10 @@ struct ZoneParameter
     bool operator==(ZoneParameter<T> const&) const = default;
 };
 
+/**
+ * Base and zone parameters
+ */
+
 template <typename T>
 struct EnableableValue
 {
@@ -57,10 +61,6 @@ struct EnableableValue
 
     bool operator==(EnableableValue<T> const&) const = default;
 };
-
-/**
- * Base and zone parameters
- */
 
 template <typename T>
 struct BaseZoneParameter
@@ -84,6 +84,14 @@ struct SourceParameter
 };
 
 template <typename T>
+struct EnableableSourceParameter
+{
+    EnableableValue<T> sourceValues[MAX_SOURCES];
+
+    bool operator==(EnableableSourceParameter<T> const&) const = default;
+};
+
+template <typename T>
 struct PinnableSourceValue
 {
     T value;
@@ -95,7 +103,7 @@ struct PinnableSourceValue
 template <typename T>
 struct PinnableSourceParameter
 {
-    PinnableSourceValue<T> value[MAX_RADIATION_SOURCES];
+    PinnableSourceValue<T> sourceValues[MAX_SOURCES];
 
     bool operator==(PinnableSourceParameter<T> const&) const = default;
 };
