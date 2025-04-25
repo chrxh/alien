@@ -13,5 +13,4 @@ class ParametersValidationService
 
 public:
     void validateAndCorrect(SimulationParameters& parameters) const;
-    void validateAndCorrect(RadiationSource& source) const;
 };

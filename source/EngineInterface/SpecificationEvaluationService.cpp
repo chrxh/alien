@@ -83,6 +83,9 @@ ValueRef<float> SpecificationEvaluationService::getRef(FloatMemberVariant const&
     } else if (std::holds_alternative<FloatZoneMember>(member)) {
         auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
         return ValueRef{.value = &(parameters.**std::get<FloatZoneMember>(member)).zoneValues[index]};
+    } else if (std::holds_alternative<FloatSourceMember>(member)) {
+        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+        return ValueRef{.value = &(parameters.**std::get<FloatSourceMember>(member)).sourceValues[index]};
     } else if (std::holds_alternative<FloatEnableableSourceMember>(member)) {
         auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
         return ValueRef{
@@ -171,6 +174,9 @@ ValueRef<int> SpecificationEvaluationService::getRef(AlternativeMemberVariant co
     } else if (std::holds_alternative<IntZoneMember>(member)) {
         auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
         return ValueRef{.value = &(parameters.**std::get<IntZoneMember>(member)).zoneValues[index]};
+    } else if (std::holds_alternative<IntSourceMember>(member)) {
+        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+        return ValueRef{.value = &(parameters.**std::get<IntSourceMember>(member)).sourceValues[index]};
     }
 
     return {};
@@ -315,7 +321,8 @@ bool SpecificationEvaluationService::isVisible(ParameterSpec const& parameterSpe
     if (locationType == LocationType::Source) {
         if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
             auto const& floatSpec = std::get<FloatSpec>(parameterSpec._reference);
-            if (std::holds_alternative<FloatEnableableSourceMember>(floatSpec._member)
+            if (std::holds_alternative<FloatSourceMember>(floatSpec._member)
+                || std::holds_alternative<FloatEnableableSourceMember>(floatSpec._member)
                 || std::holds_alternative<FloatPinnableSourceMember>(floatSpec._member)) {
                 return true;
             }
@@ -327,6 +334,11 @@ bool SpecificationEvaluationService::isVisible(ParameterSpec const& parameterSpe
         } else if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {
             auto const& char64Spec = std::get<Char64Spec>(parameterSpec._reference);
             if (std::holds_alternative<Char64SourceMember>(char64Spec._member)) {
+                return true;
+            }
+        } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._reference)) {
+            auto const& alternativeSpec = std::get<AlternativeSpec>(parameterSpec._reference);
+            if (std::holds_alternative<IntSourceMember>(alternativeSpec._member)) {
                 return true;
             }
         }

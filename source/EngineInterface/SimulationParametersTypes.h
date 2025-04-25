@@ -195,3 +195,10 @@ enum ZoneShapeType_
     ZoneShapeType_Circular,
     ZoneShapeType_Rectangular
 };
+
+using SourceShapeType = int;
+enum SourceShapeType_
+{
+    SourceShapeType_Circular,
+    SourceShapeType_Rectangular
+};

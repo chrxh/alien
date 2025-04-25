@@ -259,9 +259,8 @@ __inline__ __device__ void RadiationProcessor::createEnergyParticle(SimulationDa
                 pos.x = cudaSimulationParameters.sourcePosition.sourceValues[sourceIndex].x;
                 pos.y = cudaSimulationParameters.sourcePosition.sourceValues[sourceIndex].y;
 
-                auto const& source = cudaSimulationParameters.radiationSource[sourceIndex];
-                if (source.shape.type == RadiationSourceShapeType_Circular) {
-                    auto radius = max(1.0f, source.shape.alternatives.circularRadiationSource.radius);
+                if (cudaSimulationParameters.sourceShapeType.sourceValues[sourceIndex] == SourceShapeType_Circular) {
+                    auto radius = max(1.0f, cudaSimulationParameters.sourceCircularRadius.sourceValues[sourceIndex]);
                     float2 delta{0, 0};
                     for (int i = 0; i < 10; ++i) {
                         delta.x = data.numberGen1.random() * radius * 2 - radius;
@@ -278,21 +277,21 @@ __inline__ __device__ void RadiationProcessor::createEnergyParticle(SimulationDa
                         vel = Math::normalized(delta) * data.numberGen1.random(0.5f, 1.0f);
                     }
                 }
-                if (source.shape.type == RadiationSourceShapeType_Rectangular) {
-                    auto const& rectangle = source.shape.alternatives.rectangularRadiationSource;
+                if (cudaSimulationParameters.sourceShapeType.sourceValues[sourceIndex] == SourceShapeType_Rectangular) {
+                    auto const& rect = cudaSimulationParameters.sourceRectangularRect.sourceValues[sourceIndex];
                     float2 delta;
-                    delta.x = data.numberGen1.random() * rectangle.width - rectangle.width / 2;
-                    delta.y = data.numberGen1.random() * rectangle.height - rectangle.height / 2;
+                    delta.x = data.numberGen1.random() * rect.x - rect.x / 2;
+                    delta.y = data.numberGen1.random() * rect.y - rect.y / 2;
                     pos += delta;
                     if (cudaSimulationParameters.sourceRadiationAngle.sourceValues[sourceIndex].enabled) {
                         vel = Math::unitVectorOfAngle(cudaSimulationParameters.sourceRadiationAngle.sourceValues[sourceIndex].value)
                             * data.numberGen1.random(0.5f, 1.0f);
                     } else {
-                        auto roundSize = min(rectangle.width, rectangle.height) / 2;
-                        float2 corner1{-rectangle.width / 2, -rectangle.height / 2};
-                        float2 corner2{rectangle.width / 2, -rectangle.height / 2};
-                        float2 corner3{-rectangle.width / 2, rectangle.height / 2};
-                        float2 corner4{rectangle.width / 2, rectangle.height / 2};
+                        auto roundSize = min(rect.x, rect.y) / 2;
+                        float2 corner1{-rect.x / 2, -rect.y / 2};
+                        float2 corner2{rect.x / 2, -rect.y / 2};
+                        float2 corner3{-rect.x / 2, rect.y / 2};
+                        float2 corner4{rect.x / 2, rect.y / 2};
                         if (Math::lengthMax(corner1 - delta) <= roundSize) {
                             vel = Math::normalized(delta - (corner1 + float2{roundSize, roundSize}));
                         } else if (Math::lengthMax(corner2 - delta) <= roundSize) {
@@ -304,10 +303,10 @@ __inline__ __device__ void RadiationProcessor::createEnergyParticle(SimulationDa
                         } else {
                             vel.x = 0;
                             vel.y = 0;
-                            auto dx1 = rectangle.width / 2 + delta.x;
-                            auto dx2 = rectangle.width / 2 - delta.x;
-                            auto dy1 = rectangle.height / 2 + delta.y;
-                            auto dy2 = rectangle.height / 2 - delta.y;
+                            auto dx1 = rect.x / 2 + delta.x;
+                            auto dx2 = rect.x / 2 - delta.x;
+                            auto dy1 = rect.y / 2 + delta.y;
+                            auto dy2 = rect.y / 2 - delta.y;
                             if (dx1 <= dy1 && dx1 <= dy2 && delta.x <= 0) {
                                 vel.x = -1;
                             }

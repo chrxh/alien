@@ -6,7 +6,6 @@
 #include "Base/Vector2D.h"
 
 #include "CellTypeConstants.h"
-#include "RadiationSource.h"
 #include "SimulationParametersTypes.h"
 
 /**
@@ -17,9 +16,6 @@ struct SimulationParameters
     // Locations
     BaseParameter<int> numZones = {0};
     BaseParameter<int> numSources = {0};
-
-    // Location
-    SourceParameter<int> sourceLocationIndex = {{-1}};
 
     // General
     BaseParameter<Char64> projectName = {"<unnamed>"};
@@ -41,12 +37,16 @@ struct SimulationParameters
 
     // Location
     ZoneParameter<int> zoneLocationIndex = {{-1}};
+    SourceParameter<int> sourceLocationIndex = {{-1}};
     ZoneParameter<RealVector2D> zonePosition;
     ZoneParameter<RealVector2D> zoneVelocity;
     ZoneParameter<ZoneShapeType> zoneShape = {{ZoneShapeType_Circular}};
     ZoneParameter<float> zoneCoreRadius = {{100.0f}};               // for ZoneShapeType_Circular
     ZoneParameter<RealVector2D> zoneCoreRect = {{{100.0f, 100.0f}}};  // for ZoneShapeType_Rectangular
     ZoneParameter<float> zoneFadeoutRadius = {{100.0f}};
+    SourceParameter<SourceShapeType> sourceShapeType = {{SourceShapeType_Circular}};
+    SourceParameter<float> sourceCircularRadius = {{1.0f}};  // for SourceShapeType_Circular
+    SourceParameter<RealVector2D> sourceRectangularRect = {{{30.0f, 60.0f}}};  // for SourceShapeType_Rectangular
     SourceParameter<RealVector2D> sourcePosition;
     SourceParameter<RealVector2D> sourceVelocity;
 
@@ -300,11 +300,6 @@ struct SimulationParameters
     BaseParameter<ColorVector<float>> genomeComplexitySizeFactor = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
     BaseParameter<ColorVector<float>> genomeComplexityRamificationFactor = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     BaseParameter<ColorVector<int>> genomeComplexityDepthLevel = {{3, 3, 3, 3, 3, 3, 3}};
-
-    // OLD
-
-    // Particle sources
-    RadiationSource radiationSource[MAX_SOURCES];
 
     bool operator==(SimulationParameters const&) const = default;
 };
