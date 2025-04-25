@@ -636,8 +636,6 @@ namespace
             parserTask);
         for (int index = 0; index < parameters.numSources.value; ++index) {
             std::string base = "simulation parameters.particle sources." + std::to_string(index) + ".";
-            auto& source = parameters.radiationSource[index];
-            auto& defaultSource = defaultParameters.radiationSource[index];
             ParameterParser::encodeDecode(
                 tree, parameters.sourceName.sourceValues[index], defaultParameters.sourceName.sourceValues[index], base + "name", parserTask);
             ParameterParser::encodeDecode(
@@ -678,26 +676,27 @@ namespace
                 defaultParameters.sourceRadiationAngle.sourceValues[index].value,
                 base + "angle",
                 parserTask);
-            ParameterParser::encodeDecode(tree, source.shape.type, defaultSource.shape.type, base + "shape.type", parserTask);
-            if (source.shape.type == ZoneShapeType_Circular) {
+            ParameterParser::encodeDecode(
+                tree, parameters.sourceShapeType.sourceValues[index], defaultParameters.sourceShapeType.sourceValues[index], base + "shape.type", parserTask);
+            if (parameters.sourceShapeType.sourceValues[index] == ZoneShapeType_Circular) {
                 ParameterParser::encodeDecode(
                     tree,
-                    source.shape.alternatives.circularRadiationSource.radius,
-                    defaultSource.shape.alternatives.circularRadiationSource.radius,
+                    parameters.sourceCircularRadius.sourceValues[index],
+                    defaultParameters.sourceCircularRadius.sourceValues[index],
                     base + "shape.circular.radius",
                     parserTask);
             }
-            if (source.shape.type == ZoneShapeType_Rectangular) {
+            if (parameters.sourceShapeType.sourceValues[index] == ZoneShapeType_Rectangular) {
                 ParameterParser::encodeDecode(
                     tree,
-                    source.shape.alternatives.rectangularRadiationSource.width,
-                    defaultSource.shape.alternatives.rectangularRadiationSource.width,
+                    parameters.sourceRectangularRect.sourceValues[index].x,
+                    defaultParameters.sourceRectangularRect.sourceValues[index].x,
                     base + "shape.rectangular.width",
                     parserTask);
                 ParameterParser::encodeDecode(
                     tree,
-                    source.shape.alternatives.rectangularRadiationSource.height,
-                    defaultSource.shape.alternatives.rectangularRadiationSource.height,
+                    parameters.sourceRectangularRect.sourceValues[index].y,
+                    defaultParameters.sourceRectangularRect.sourceValues[index].y,
                     base + "shape.rectangular.height",
                     parserTask);
             }

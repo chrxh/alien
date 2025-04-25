@@ -29,7 +29,6 @@ add_library(EngineInterface
     PreviewDescriptionService.cpp
     PreviewDescriptionService.h
     PreviewDescriptions.h
-    RadiationSource.h
     SelectionShallowData.h
     SettingsForSimulation.h
     ShallowUpdateSelectionData.h

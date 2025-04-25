@@ -164,6 +164,24 @@ void SpecificationService::createSpec()
                     .name("Fade-out radius")
                     .reference(FloatSpec().member(&SimulationParameters::zoneFadeoutRadius).min(0.0f).max(MaxWorldRadiusSize()).format("%.2f")),
                 ParameterSpec()
+                    .name("Shape").reference(
+                    AlternativeSpec()
+                        .member(&SimulationParameters::sourceShapeType)
+                        .alternatives(
+                            {{"Circular",
+                              {
+                                  ParameterSpec().name("Radius").reference(
+                                      FloatSpec().member(&SimulationParameters::sourceCircularRadius).min(0.0f).max(MaxWorldRadiusSize()).format("%.2f")),
+                              }},
+                             {"Rectangular",
+                              {
+                                  ParameterSpec().name("Size (width, height)").reference(Float2Spec()
+                                                     .member(&SimulationParameters::sourceRectangularRect)
+                                                     .min(RealVector2D{0.0f, 0.0f})
+                                                     .max(WorldSize())
+                                                     .format("%.2f")),
+                              }}})),
+                ParameterSpec()
                     .name("Position (x,y)")
                     .reference(Float2Spec()
                                    .member(&SimulationParameters::sourcePosition)
@@ -245,7 +263,7 @@ void SpecificationService::createSpec()
             .parameters({
                 ParameterSpec()
                     .name("Time step size")
-                    .reference(FloatSpec().member(&SimulationParameters::timestepSize).min(0.05f).max(1.0f))
+                    .reference(FloatSpec().member(&SimulationParameters::timestepSize).min(0.01f).max(1.0f))
                     .tooltip("The time duration calculated in a single simulation step. Smaller values increase the accuracy of the simulation while larger "
                              "values can lead to numerical instabilities."),
             }),

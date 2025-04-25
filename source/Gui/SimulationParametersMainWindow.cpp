@@ -491,11 +491,6 @@ void SimulationParametersMainWindow::onAddSource()
     origParameters.sourceLocationIndex.sourceValues[index] = _selectedLocationIndex;
     origParameters.sourcePosition.sourceValues[index] = parameters.sourcePosition.sourceValues[index];
 
-
-    RadiationSource source;
-    parameters.radiationSource[index] = source;
-    origParameters.radiationSource[index] = source;
-
     ++parameters.numSources.value;
     ++origParameters.numSources.value;
 
@@ -686,7 +681,6 @@ void SimulationParametersMainWindow::updateLocations()
         _locations.at(parameters.zoneLocationIndex.zoneValues[i]) = Location{parameters.zoneName.zoneValues[i], LocationType::Zone, position};
     }
     for (int i = 0; i < parameters.numSources.value; ++i) {
-        auto const& source = parameters.radiationSource[i];
         auto position = "(" + StringHelper::format(parameters.sourcePosition.sourceValues[i].x, 0) + ", "
             + StringHelper::format(parameters.sourcePosition.sourceValues[i].y, 0) + ")";
         auto pinnedString = strength.pinned.contains(i + 1) ? ICON_FA_THUMBTACK " " : " ";

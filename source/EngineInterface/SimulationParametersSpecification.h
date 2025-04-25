@@ -36,7 +36,7 @@ using IntZoneMember = std::shared_ptr<_IntZoneMember>;
 using _IntSourceMember = SourceParameter<int> SimulationParameters::*;
 using IntSourceMember = std::shared_ptr<_IntSourceMember>;
 using IntMemberVariant = std::variant<std::monostate, IntMember, IntEnableableMember, ColorVectorIntMember, ColorMatrixIntMember, IntZoneMember, IntSourceMember>;
-using AlternativeMemberVariant = std::variant<std::monostate, IntMember, IntZoneMember>;
+using AlternativeMemberVariant = std::variant<std::monostate, IntMember, IntZoneMember, IntSourceMember>;
 
 using _FloatMember = BaseParameter<float> SimulationParameters::*;
 using FloatMember = std::shared_ptr<_FloatMember>;
@@ -54,6 +54,8 @@ using _ColorMatrixFloatBaseZoneMember = BaseZoneParameter<ColorMatrix<float>> Si
 using ColorMatrixFloatBaseZoneMember = std::shared_ptr<_ColorMatrixFloatBaseZoneMember>;
 using _FloatZoneMember = ZoneParameter<float> SimulationParameters::*;
 using FloatZoneMember = std::shared_ptr<_FloatZoneMember >;
+using _FloatSourceMember = SourceParameter<float> SimulationParameters::*;
+using FloatSourceMember = std::shared_ptr<_FloatSourceMember>;
 using _FloatEnableableSourceMember = EnableableSourceParameter<float> SimulationParameters::*;
 using FloatEnableableSourceMember = std::shared_ptr<_FloatEnableableSourceMember >;
 using _FloatPinnableSourceMember = PinnableSourceParameter<float> SimulationParameters::*;
@@ -68,6 +70,7 @@ using FloatMemberVariant = std::variant<
     ColorVectorFloatBaseZoneMember,
     ColorMatrixFloatBaseZoneMember,
     FloatZoneMember,
+    FloatSourceMember,
     FloatEnableableSourceMember,
     FloatPinnableSourceMember>;
 using FloatGetterSetter =
@@ -135,6 +138,7 @@ struct FloatSpec
     SETTER_SHARED_PTR(FloatSpec, ColorVectorFloatBaseZoneMember, member);
     SETTER_SHARED_PTR(FloatSpec, ColorMatrixFloatBaseZoneMember, member);
     SETTER_SHARED_PTR(FloatSpec, FloatZoneMember, member);
+    SETTER_SHARED_PTR(FloatSpec, FloatSourceMember, member);
     SETTER_SHARED_PTR(FloatSpec, FloatEnableableSourceMember, member);
     SETTER_SHARED_PTR(FloatSpec, FloatPinnableSourceMember, member);
     FloatMemberVariant _member = std::monostate();
@@ -178,6 +182,7 @@ struct AlternativeSpec
 {
     SETTER_SHARED_PTR(AlternativeSpec, IntMember, member);
     SETTER_SHARED_PTR(AlternativeSpec, IntZoneMember, member);
+    SETTER_SHARED_PTR(AlternativeSpec, IntSourceMember, member);
     AlternativeMemberVariant _member = std::monostate();
 
     using Alternatives = std::vector<std::pair<std::string, std::vector<ParameterSpec>>>;
