@@ -10,7 +10,7 @@ template <typename T>
 struct ValueRef
 {
     T* value = nullptr;
-    T* baseValue = nullptr;
+    T* disabledValue = nullptr;
     bool* enabled = nullptr;
     bool* pinned = nullptr;
 };

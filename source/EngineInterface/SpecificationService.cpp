@@ -28,7 +28,7 @@ void SpecificationService::createSpec()
             return strength.values.at(0);
         } else {
             auto sourceIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            return parameters.radiationSource[sourceIndex].strength;
+            return parameters.sourceRelativeStrength.sourceValues[sourceIndex].value;
         }
     };
 
@@ -346,12 +346,12 @@ void SpecificationService::createSpec()
                              "value, all bonds will be destroyed."),
             }),
         ParameterGroupSpec()
-            .name("Physics: Radiation")
+            .name("Radiation")
             .parameters({
                 ParameterSpec()
                     .name("Relative strength")
                     .reference(FloatSpec()
-                                   .member(&SimulationParameters::relativeStrengthPinned)
+                                   .member(&SimulationParameters::relativeStrengthBasePin)
                                    .getterSetter(FloatGetterSetter{radiationStrengthGetter, radiationStrengthSetter})
                                    .min(0.0f)
                                    .max(1.0f))
@@ -359,8 +359,19 @@ void SpecificationService::createSpec()
                              "utilized by one of the available radiation sources. This parameter determines the fraction of energy assigned to the emitted "
                              "energy particle in the vicinity of the cell. Values between 0 and 1 are permitted."),
                 ParameterSpec()
+                    .name("Relative strength")
+                    .reference(
+                        FloatSpec()
+                            .member(&SimulationParameters::sourceRelativeStrength)
+                            .getterSetter(FloatGetterSetter{radiationStrengthGetter, radiationStrengthSetter})
+                            .min(0.0f)
+                            .max(1.0f))
+                    .tooltip("Cells can emit energy particles over time. A portion of this energy can be released directly near the cell, while the rest is "
+                             "utilized by one of the available radiation sources. This parameter determines the fraction of energy assigned to the emitted "
+                             "energy particle in the current radiation source. Values between 0 and 1 are permitted."),
+                ParameterSpec()
                     .name("Disable radiation sources")
-                    .reference(BoolSpec().member(&SimulationParameters::radiationDisableSources))
+                    .reference(BoolSpec().member(&SimulationParameters::disableRadiationSources))
                     .tooltip("If activated, all radiation sources within this zone are deactivated."),
                 ParameterSpec()
                     .name("Absorption factor")
@@ -400,6 +411,9 @@ void SpecificationService::createSpec()
                     .name("Energy to cell transformation")
                     .reference(BoolSpec().member(&SimulationParameters::particleTransformationAllowed))
                     .tooltip("If activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal energy value."),
+                ParameterSpec()
+                    .name("Radiation angle")
+                    .reference(FloatSpec().member(&SimulationParameters::sourceRadiationAngle).min(-180.0f).max(180.0f).format("%.1f")),
             }),
         ParameterGroupSpec()
             .name("Cell life cycle")

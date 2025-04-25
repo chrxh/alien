@@ -54,8 +54,10 @@ using _ColorMatrixFloatBaseZoneMember = BaseZoneParameter<ColorMatrix<float>> Si
 using ColorMatrixFloatBaseZoneMember = std::shared_ptr<_ColorMatrixFloatBaseZoneMember>;
 using _FloatZoneMember = ZoneParameter<float> SimulationParameters::*;
 using FloatZoneMember = std::shared_ptr<_FloatZoneMember >;
-using FloatGetterSetter =
-    std::pair<std::function<float(SimulationParameters const&, int)>, std::function<void(float, SimulationParameters&, int)>>;  // int for locationIndex
+using _FloatEnableableSourceMember = EnableableSourceParameter<float> SimulationParameters::*;
+using FloatEnableableSourceMember = std::shared_ptr<_FloatEnableableSourceMember >;
+using _FloatPinnableSourceMember = PinnableSourceParameter<float> SimulationParameters::*;
+using FloatPinnableSourceMember = std::shared_ptr<_FloatPinnableSourceMember >;
 using FloatMemberVariant = std::variant<
     std::monostate,
     FloatMember,
@@ -65,7 +67,11 @@ using FloatMemberVariant = std::variant<
     FloatBaseZoneMember,
     ColorVectorFloatBaseZoneMember,
     ColorMatrixFloatBaseZoneMember,
-    FloatZoneMember>;
+    FloatZoneMember,
+    FloatEnableableSourceMember,
+    FloatPinnableSourceMember>;
+using FloatGetterSetter =
+    std::pair<std::function<float(SimulationParameters const&, int)>, std::function<void(float, SimulationParameters&, int)>>;  // int for locationIndex
 
 using _Float2ZoneMember = ZoneParameter<RealVector2D> SimulationParameters::*;
 using Float2ZoneMember = std::shared_ptr<_Float2ZoneMember>;
@@ -129,6 +135,8 @@ struct FloatSpec
     SETTER_SHARED_PTR(FloatSpec, ColorVectorFloatBaseZoneMember, member);
     SETTER_SHARED_PTR(FloatSpec, ColorMatrixFloatBaseZoneMember, member);
     SETTER_SHARED_PTR(FloatSpec, FloatZoneMember, member);
+    SETTER_SHARED_PTR(FloatSpec, FloatEnableableSourceMember, member);
+    SETTER_SHARED_PTR(FloatSpec, FloatPinnableSourceMember, member);
     FloatMemberVariant _member = std::monostate();
 
     MEMBER(FloatSpec, std::optional<FloatGetterSetter>, getterSetter, std::nullopt);

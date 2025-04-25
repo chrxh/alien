@@ -630,8 +630,8 @@ namespace
             parserTask);
         ParameterParser::encodeDecode(
             tree,
-            parameters.relativeStrengthPinned.pinned,
-            defaultParameters.relativeStrengthPinned.pinned,
+            parameters.relativeStrengthBasePin.pinned,
+            defaultParameters.relativeStrengthBasePin.pinned,
             "simulation parameters.particle sources.base strength pinned",
             parserTask);
         for (int index = 0; index < parameters.numSources.value; ++index) {
@@ -654,10 +654,30 @@ namespace
                 tree, parameters.sourceVelocity.sourceValues[index].x, defaultParameters.sourceVelocity.sourceValues[index].x, base + "vel.x", parserTask);
             ParameterParser::encodeDecode(
                 tree, parameters.sourceVelocity.sourceValues[index].y, defaultParameters.sourceVelocity.sourceValues[index].y, base + "vel.y", parserTask);
-            ParameterParser::encodeDecode(tree, source.useAngle, defaultSource.useAngle, base + "use angle", parserTask);
-            ParameterParser::encodeDecode(tree, source.strength, defaultSource.strength, base + "strength", parserTask);
-            ParameterParser::encodeDecode(tree, source.strengthPinned, defaultSource.strengthPinned, base + "strength pinned", parserTask);
-            ParameterParser::encodeDecode(tree, source.angle, defaultSource.angle, base + "angle", parserTask);
+            ParameterParser::encodeDecode(
+                tree,
+                parameters.sourceRadiationAngle.sourceValues[index].enabled,
+                defaultParameters.sourceRadiationAngle.sourceValues[index].enabled,
+                base + "use angle",
+                parserTask);
+            ParameterParser::encodeDecode(
+                tree,
+                parameters.sourceRelativeStrength.sourceValues[index].value,
+                defaultParameters.sourceRelativeStrength.sourceValues[index].value,
+                base + "strength",
+                parserTask);
+            ParameterParser::encodeDecode(
+                tree,
+                parameters.sourceRelativeStrength.sourceValues[index].pinned,
+                defaultParameters.sourceRelativeStrength.sourceValues[index].pinned,
+                base + "strength pinned",
+                parserTask);
+            ParameterParser::encodeDecode(
+                tree,
+                parameters.sourceRadiationAngle.sourceValues[index].value,
+                defaultParameters.sourceRadiationAngle.sourceValues[index].value,
+                base + "angle",
+                parserTask);
             ParameterParser::encodeDecode(tree, source.shape.type, defaultSource.shape.type, base + "shape.type", parserTask);
             if (source.shape.type == ZoneShapeType_Circular) {
                 ParameterParser::encodeDecode(
@@ -803,8 +823,8 @@ namespace
                 parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.radiationDisableSources.zoneValues[index],
-                defaultParameters.radiationDisableSources.zoneValues[0],
+                parameters.disableRadiationSources.zoneValues[index],
+                defaultParameters.disableRadiationSources.zoneValues[0],
                 base + "radiation.disable sources",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(

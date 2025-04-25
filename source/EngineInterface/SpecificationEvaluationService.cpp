@@ -18,7 +18,7 @@ ValueRef<bool> SpecificationEvaluationService::getRef(BoolMemberVariant const& m
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
             return ValueRef{
                 .value = &(parameters.**std::get<BoolBaseZoneMember>(member)).zoneValues[index].value,
-                .baseValue = &(parameters.**std::get<BoolBaseZoneMember>(member)).baseValue,
+                .disabledValue = &(parameters.**std::get<BoolBaseZoneMember>(member)).baseValue,
                 .enabled = &(parameters.**std::get<BoolBaseZoneMember>(member)).zoneValues[index].enabled};
         }
         }
@@ -73,7 +73,7 @@ ValueRef<float> SpecificationEvaluationService::getRef(FloatMemberVariant const&
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
             return ValueRef{
                 .value = &(parameters.**std::get<FloatBaseZoneMember>(member)).zoneValues[index].value,
-                .baseValue = &(parameters.**std::get<FloatBaseZoneMember>(member)).baseValue,
+                .disabledValue = &(parameters.**std::get<FloatBaseZoneMember>(member)).baseValue,
                 .enabled = &(parameters.**std::get<FloatBaseZoneMember>(member)).zoneValues[index].enabled};
         }
         }
@@ -83,6 +83,18 @@ ValueRef<float> SpecificationEvaluationService::getRef(FloatMemberVariant const&
     } else if (std::holds_alternative<FloatZoneMember>(member)) {
         auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
         return ValueRef{.value = &(parameters.**std::get<FloatZoneMember>(member)).zoneValues[index]};
+    } else if (std::holds_alternative<FloatEnableableSourceMember>(member)) {
+        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+        return ValueRef{
+            .value = &(parameters.**std::get<FloatEnableableSourceMember>(member)).sourceValues[index].value,
+            .disabledValue = &(parameters.**std::get<FloatEnableableSourceMember>(member)).sourceValues[index].value,
+            .enabled = &(parameters.**std::get<FloatEnableableSourceMember>(member)).sourceValues[index].enabled};
+    } else if (std::holds_alternative<FloatPinnableSourceMember>(member)) {
+        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+        return ValueRef{
+            .value = &(parameters.**std::get<FloatPinnableSourceMember>(member)).sourceValues[index].value,
+            .pinned = &(parameters.**std::get<FloatPinnableSourceMember>(member)).sourceValues[index].pinned,
+        };
     }
     
     // Color vector
@@ -96,7 +108,7 @@ ValueRef<float> SpecificationEvaluationService::getRef(FloatMemberVariant const&
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
             return ValueRef{
                 .value = (parameters.**std::get<ColorVectorFloatBaseZoneMember>(member)).zoneValues[index].value,
-                .baseValue = (parameters.**std::get<ColorVectorFloatBaseZoneMember>(member)).baseValue,
+                .disabledValue = (parameters.**std::get<ColorVectorFloatBaseZoneMember>(member)).baseValue,
                 .enabled = &(parameters.**std::get<ColorVectorFloatBaseZoneMember>(member)).zoneValues[index].enabled};
         }
         }
@@ -113,7 +125,7 @@ ValueRef<float> SpecificationEvaluationService::getRef(FloatMemberVariant const&
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
             return ValueRef{
                 .value = reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatBaseZoneMember>(member)).zoneValues[index].value),
-                .baseValue = reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatBaseZoneMember>(member)).baseValue),
+                .disabledValue = reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatBaseZoneMember>(member)).baseValue),
                 .enabled = &(parameters.**std::get<ColorMatrixFloatBaseZoneMember>(member)).zoneValues[index].enabled};
         }
         }
@@ -175,7 +187,7 @@ SpecificationEvaluationService::getRef(FloatColorRGBMemberVariant const& member,
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
             return ValueRef{
                 .value = &(parameters.**std::get<FloatColorRGBBaseZoneMember>(member)).zoneValues[index].value,
-                .baseValue = &(parameters.**std::get<FloatColorRGBBaseZoneMember>(member)).baseValue,
+                .disabledValue = &(parameters.**std::get<FloatColorRGBBaseZoneMember>(member)).baseValue,
                 .enabled = &(parameters.**std::get<FloatColorRGBBaseZoneMember>(member)).zoneValues[index].enabled};
         }
         }
@@ -193,7 +205,7 @@ ValueRef<ColorTransitionRules> SpecificationEvaluationService::getRef(ColorTrans
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
             return ValueRef{
                 .value = &(parameters.**std::get<ColorTransitionRulesBaseZoneMember>(member)).zoneValues[index].value,
-                .baseValue = &(parameters.**std::get<ColorTransitionRulesBaseZoneMember>(member)).baseValue,
+                .disabledValue = &(parameters.**std::get<ColorTransitionRulesBaseZoneMember>(member)).baseValue,
                 .enabled = &(parameters.**std::get<ColorTransitionRulesBaseZoneMember>(member)).zoneValues[index].enabled};
         }
         }
@@ -301,8 +313,13 @@ bool SpecificationEvaluationService::isVisible(ParameterSpec const& parameterSpe
         }
     }
     if (locationType == LocationType::Source) {
-        if (std::holds_alternative<Float2Spec>(parameterSpec._reference))
-        {
+        if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
+            auto const& floatSpec = std::get<FloatSpec>(parameterSpec._reference);
+            if (std::holds_alternative<FloatEnableableSourceMember>(floatSpec._member)
+                || std::holds_alternative<FloatPinnableSourceMember>(floatSpec._member)) {
+                return true;
+            }
+        } else if (std::holds_alternative<Float2Spec>(parameterSpec._reference)) {
             auto const& float2Spec = std::get<Float2Spec>(parameterSpec._reference);
             if (std::holds_alternative<Float2SourceMember>(float2Spec._member)) {
                 return true;

@@ -84,9 +84,10 @@ struct SimulationParameters
     BaseZoneParameter<float> cellFusionVelocity = {.baseValue = 2.0f};
     BaseZoneParameter<float> cellMaxBindingEnergy = {.baseValue = Infinity<float>::value};
 
-    // Physics: Radiation
-    PinBaseParameter relativeStrengthPinned = {false};
-    ZoneParameter<bool> radiationDisableSources = {{false}};
+    // Radiation
+    PinBaseParameter relativeStrengthBasePin = {false};
+    PinnableSourceParameter<float> sourceRelativeStrength= {{{.value = 0.0f, .pinned = false}}};
+    ZoneParameter<bool> disableRadiationSources = {{false}};
     BaseZoneParameter<ColorVector<float>> radiationAbsorption = {.baseValue = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
     BaseZoneParameter<ColorVector<float>> radiationType1_strength = {.baseValue = {0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f}};
     BaseParameter<ColorVector<int>> radiationType1_minimumAge = {{0, 0, 0, 0, 0, 0, 0}};
@@ -101,6 +102,7 @@ struct SimulationParameters
          Infinity<float>::value,
          Infinity<float>::value}};
     BaseParameter<bool> particleTransformationAllowed = {false};
+    EnableableSourceParameter<float> sourceRadiationAngle = {{{.value = 0.0f, .enabled = false}}};
     static float constexpr radiationProbability = 0.03f;
     static float constexpr radiationVelocityMultiplier = 1.0f;
     static float constexpr radiationVelocityPerturbation = 0.5f;
@@ -302,7 +304,7 @@ struct SimulationParameters
     // OLD
 
     // Particle sources
-    RadiationSource radiationSource[MAX_RADIATION_SOURCES];
+    RadiationSource radiationSource[MAX_SOURCES];
 
     bool operator==(SimulationParameters const&) const = default;
 };

@@ -9,7 +9,7 @@ public:
     __host__ __inline__ void init()
     {
         CudaMemoryManager::getInstance().acquireMemory<int>(1, _numActiveSources);
-        CudaMemoryManager::getInstance().acquireMemory<int>(MAX_RADIATION_SOURCES, _activeSources);
+        CudaMemoryManager::getInstance().acquireMemory<int>(MAX_SOURCES, _activeSources);
     }
 
     __host__ __inline__ void free()
