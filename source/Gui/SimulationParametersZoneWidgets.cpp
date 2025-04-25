@@ -5,7 +5,6 @@
 #include "EngineInterface/ParametersValidationService.h"
 
 #include "AlienImGui.h"
-#include "LoginDialog.h"
 #include "SpecificationGuiService.h"
 #include "SimulationInteractionController.h"
 
