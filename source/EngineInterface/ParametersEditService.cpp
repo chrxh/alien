@@ -1,6 +1,18 @@
 #include "ParametersEditService.h"
 
+#include <ranges>
+
 #include "Base/Definitions.h"
+#include "SpecificationService.h"
+#include "SpecificationEvaluationService.h"
+
+void ParametersEditService::copyLocation(SimulationParameters& parameters, int sourceLocationIndex, int targetLocationIndex) const
+{
+    auto const& parametersSpecs = SpecificationService::get().getSpec();
+    for (auto const& groupSpec : parametersSpecs._groups) {
+        copyLocationIntern(parameters, groupSpec._parameters, sourceLocationIndex, targetLocationIndex);
+    }
+}
 
 auto ParametersEditService::getRadiationStrengths(SimulationParameters const& parameters) const -> RadiationStrengths
 {
@@ -146,4 +158,61 @@ auto ParametersEditService::calcRadiationStrengthsForDeletingZone(
     }
 
     return result;
+}
+
+void ParametersEditService::copyLocationIntern(
+    SimulationParameters& parameters,
+    std::vector<ParameterSpec> const& parameterSpecs,
+    int sourceLocationIndex,
+    int targetLocationIndex) const
+{
+    auto& evaluationService = SpecificationEvaluationService::get();
+
+    auto copySourceToTarget = [&evaluationService, &parameters](auto const& reference, int sourceLocationIndex, int targetLocationIndex) {
+        auto source = evaluationService.getRef(reference._member, parameters, sourceLocationIndex);
+        auto target = evaluationService.getRef(reference._member, parameters, targetLocationIndex);
+        if (source.value != nullptr && target.value != nullptr) {
+
+            if (source.valueType == ValueType::Single) {
+                *target.value = *source.value;
+            } else if (source.valueType == ValueType::ColorVector) {
+                for (int i = 0; i < MAX_COLORS; ++i) {
+                    target.value[i] = source.value[i];
+                }
+            } else if (source.valueType == ValueType::ColorMatrix) {
+                for (int i = 0; i < MAX_COLORS * MAX_COLORS; ++i) {
+                    target.value[i] = source.value[i];
+                }
+            }
+        }
+        if (source.enabled != nullptr && target.enabled != nullptr) {
+            *target.enabled = *source.enabled;
+        }
+        if (source.pinned != nullptr && target.pinned != nullptr) {
+            *target.pinned = *source.pinned;
+        }
+    };
+    for (auto const& parameterSpec : parameterSpecs) {
+        if (std::holds_alternative<BoolSpec>(parameterSpec._reference)) {
+            copySourceToTarget(std::get<BoolSpec>(parameterSpec._reference), sourceLocationIndex, targetLocationIndex);
+        } else if (std::holds_alternative<IntSpec>(parameterSpec._reference)) {
+            //copySourceToTarget(std::get<IntSpec>(parameterSpec._reference), sourceLocationIndex, targetLocationIndex);
+        } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
+            copySourceToTarget(std::get<FloatSpec>(parameterSpec._reference), sourceLocationIndex, targetLocationIndex);
+        } else if (std::holds_alternative<Float2Spec>(parameterSpec._reference)) {
+            copySourceToTarget(std::get<Float2Spec>(parameterSpec._reference), sourceLocationIndex, targetLocationIndex);
+        } else if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {
+            copySourceToTarget(std::get<Char64Spec>(parameterSpec._reference), sourceLocationIndex, targetLocationIndex);
+        } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._reference)) {
+            auto const& altSpec = std::get<AlternativeSpec>(parameterSpec._reference);
+            copySourceToTarget(altSpec, sourceLocationIndex, targetLocationIndex);
+            for (auto const& parameterSpecs : altSpec._alternatives | std::views::values) {
+                copyLocationIntern(parameters, parameterSpecs, sourceLocationIndex, targetLocationIndex);
+            }
+        } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._reference)) {
+            copySourceToTarget(std::get<ColorPickerSpec>(parameterSpec._reference), sourceLocationIndex, targetLocationIndex);
+        } else if (std::holds_alternative<ColorTransitionRulesSpec>(parameterSpec._reference)) {
+            copySourceToTarget(std::get<ColorTransitionRulesSpec>(parameterSpec._reference), sourceLocationIndex, targetLocationIndex);
+        }
+    }
 }

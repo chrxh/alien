@@ -29,7 +29,7 @@ ValueRef<bool> SpecificationEvaluationService::getRef(BoolMemberVariant const& m
 
     // Color matrix
     else if (std::holds_alternative<ColorMatrixBoolMember>(member)) {
-        return ValueRef{.value = reinterpret_cast<bool*>((parameters.**std::get<ColorMatrixBoolMember>(member)).value)};
+        return ValueRef{.value = reinterpret_cast<bool*>((parameters.**std::get<ColorMatrixBoolMember>(member)).value), .valueType = ValueType::ColorMatrix};
     }
 
     return {};
@@ -50,12 +50,12 @@ ValueRef<int> SpecificationEvaluationService::getRef(IntMemberVariant const& mem
 
     // Color vector
     else if (std::holds_alternative<ColorVectorIntMember>(member)) {
-        return ValueRef{.value = (parameters.**std::get<ColorVectorIntMember>(member)).value};
+        return ValueRef{.value = (parameters.**std::get<ColorVectorIntMember>(member)).value, .valueType = ValueType::ColorVector};
     }
 
     // Color matrix
     else if (std::holds_alternative<ColorMatrixIntMember>(member)) {
-        return ValueRef{.value = reinterpret_cast<int*>((parameters.**std::get<ColorMatrixIntMember>(member)).value)};
+        return ValueRef{.value = reinterpret_cast<int*>((parameters.**std::get<ColorMatrixIntMember>(member)).value), .valueType = ValueType::ColorMatrix};
     }
     return {};
 }
@@ -102,34 +102,38 @@ ValueRef<float> SpecificationEvaluationService::getRef(FloatMemberVariant const&
     
     // Color vector
     else if (std::holds_alternative<ColorVectorFloatMember>(member)) {
-        return ValueRef{.value = (parameters.**std::get<ColorVectorFloatMember>(member)).value};
+        return ValueRef{.value = (parameters.**std::get<ColorVectorFloatMember>(member)).value, .valueType = ValueType::ColorVector};
     } else if (std::holds_alternative<ColorVectorFloatBaseZoneMember>(member)) {
         switch (LocationHelper::getLocationType(locationIndex, parameters)) {
         case LocationType::Base:
-            return ValueRef{.value = (parameters.**std::get<ColorVectorFloatBaseZoneMember>(member)).baseValue};
+            return ValueRef{.value = (parameters.**std::get<ColorVectorFloatBaseZoneMember>(member)).baseValue, .valueType = ValueType::ColorVector};
         case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
             return ValueRef{
                 .value = (parameters.**std::get<ColorVectorFloatBaseZoneMember>(member)).zoneValues[index].value,
                 .disabledValue = (parameters.**std::get<ColorVectorFloatBaseZoneMember>(member)).baseValue,
-                .enabled = &(parameters.**std::get<ColorVectorFloatBaseZoneMember>(member)).zoneValues[index].enabled};
+                .enabled = &(parameters.**std::get<ColorVectorFloatBaseZoneMember>(member)).zoneValues[index].enabled,
+                .valueType = ValueType::ColorVector};
         }
         }
     }
 
     // Color matrix
     else if (std::holds_alternative<ColorMatrixFloatMember>(member)) {
-        return ValueRef{.value = reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatMember>(member)).value)};
+        return ValueRef{.value = reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatMember>(member)).value), .valueType = ValueType::ColorMatrix};
     } else if (std::holds_alternative<ColorMatrixFloatBaseZoneMember>(member)) {
         switch (LocationHelper::getLocationType(locationIndex, parameters)) {
         case LocationType::Base:
-            return ValueRef{.value = reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatBaseZoneMember>(member)).baseValue)};
+            return ValueRef{
+                .value = reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatBaseZoneMember>(member)).baseValue),
+                .valueType = ValueType::ColorMatrix};
         case LocationType::Zone: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
             return ValueRef{
                 .value = reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatBaseZoneMember>(member)).zoneValues[index].value),
                 .disabledValue = reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatBaseZoneMember>(member)).baseValue),
-                .enabled = &(parameters.**std::get<ColorMatrixFloatBaseZoneMember>(member)).zoneValues[index].enabled};
+                .enabled = &(parameters.**std::get<ColorMatrixFloatBaseZoneMember>(member)).zoneValues[index].enabled,
+                .valueType = ValueType::ColorMatrix};
         }
         }
     }
@@ -168,7 +172,6 @@ ValueRef<char> SpecificationEvaluationService::getRef(Char64MemberVariant const&
 ValueRef<int> SpecificationEvaluationService::getRef(AlternativeMemberVariant const& member, SimulationParameters& parameters, int locationIndex)
     const
 {
-    // Single value
     if (std::holds_alternative<IntMember>(member)) {
         return ValueRef{.value = &(parameters.**std::get<IntMember>(member)).value};
     } else if (std::holds_alternative<IntZoneMember>(member)) {

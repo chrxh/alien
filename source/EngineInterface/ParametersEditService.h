@@ -6,6 +6,7 @@
 
 #include "Base/Singleton.h"
 #include "SimulationParameters.h"
+#include "SimulationParametersSpecification.h"
 
 struct RadiationStrengths
 {
@@ -18,10 +19,15 @@ class ParametersEditService
     MAKE_SINGLETON(ParametersEditService);
 
 public:
+    void copyLocation(SimulationParameters& parameters, int sourceLocationIndex, int targetLocationIndex) const;
+
     RadiationStrengths getRadiationStrengths(SimulationParameters const& parameters) const;
     void applyRadiationStrengths(SimulationParameters& parameters, RadiationStrengths const& strengths);
 
     void adaptRadiationStrengths(RadiationStrengths& strengths, RadiationStrengths& origStrengths, int changeIndex) const;
     RadiationStrengths calcRadiationStrengthsForAddingZone(RadiationStrengths const& strengths) const;
     RadiationStrengths calcRadiationStrengthsForDeletingZone(RadiationStrengths const& strengths, int deleteIndex) const;
+
+private:
+    void copyLocationIntern(SimulationParameters& parameters, std::vector<ParameterSpec> const& parameterSpecs, int sourceLocationIndex, int targetLocationIndex) const;
 };

@@ -6,6 +6,12 @@
 #include "SimulationParametersSpecification.h"
 #include "SimulationParametersTypes.h"
 
+enum class ValueType
+{
+    Single,
+    ColorVector,
+    ColorMatrix
+};
 template <typename T>
 struct ValueRef
 {
@@ -13,6 +19,7 @@ struct ValueRef
     T* disabledValue = nullptr;
     bool* enabled = nullptr;
     bool* pinned = nullptr;
+    ValueType valueType = ValueType::Single;
 };
 
 class SpecificationEvaluationService
