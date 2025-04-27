@@ -43,7 +43,7 @@ __inline__ __device__ void RadiationProcessor::calcActiveSources(SimulationData&
 {
     if (threadIdx.x == 0 && blockIdx.x == 0) {
         int activeSourceIndex = 0;
-        for (int i = 0; i < cudaSimulationParameters.numSources.value; ++i) {
+        for (int i = 0; i < cudaSimulationParameters.numSources; ++i) {
             auto sourceActive = !ZoneCalculator::isCoveredByZonesNew(
                 data,
                 {cudaSimulationParameters.sourcePosition.sourceValues[i].x, cudaSimulationParameters.sourcePosition.sourceValues[i].y},

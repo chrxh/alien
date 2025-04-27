@@ -16,7 +16,7 @@ namespace
     //        if (!values.contains((parameters.baseValues.*parameter)[i])) {
     //            return false;
     //        }
-    //        for (int j = 0; j < parameters.numZones.value; ++j) {
+    //        for (int j = 0; j < parameters.numZones; ++j) {
     //            if (!values.contains((parameters.zone[j].values.*parameter)[i])) {
     //                return false;
     //            }
@@ -86,7 +86,7 @@ void LegacySettingsParserService::searchAndApplyLegacyParameters(
 
     LegacyParameters legacyParameters;
     legacyParameters.base = readLegacyParametersForBase(tree, "simulation parameters.");
-    for (int i = 0; i < parameters.numZones.value; ++i) {
+    for (int i = 0; i < parameters.numZones; ++i) {
         legacyParameters.spots[i] = readLegacyParametersForSpot(tree, "simulation parameters.spots." + std::to_string(i) + ".");
     }
     updateParametersAndFeaturesForLegacyFiles(programVersion, legacyFeatures, legacyParameters, parameters);

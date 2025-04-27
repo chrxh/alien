@@ -61,7 +61,7 @@ __global__ void cudaApplyForceFieldSettings(SimulationData data)
                 continue;
             }
             int numFlowFields = 0;
-            for (int i = 0; i < cudaSimulationParameters.numZones.value; ++i) {
+            for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
 
                 if (cudaSimulationParameters.zoneForceFieldType.zoneValues[i] != ForceField_None) {
                     accelerations[numFlowFields] = calcAcceleration(data.cellMap, cell->pos, i);
@@ -78,7 +78,7 @@ __global__ void cudaApplyForceFieldSettings(SimulationData data)
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& particle = particles.at(index);
             int numFlowFields = 0;
-            for (int i = 0; i < cudaSimulationParameters.numZones.value; ++i) {
+            for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
 
                 if (cudaSimulationParameters.zoneForceFieldType.zoneValues[i] != ForceField_None) {
                     accelerations[numFlowFields] = calcAcceleration(data.cellMap, particle->absPos, i);

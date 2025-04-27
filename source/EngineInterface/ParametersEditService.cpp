@@ -17,10 +17,10 @@ void ParametersEditService::copyLocation(SimulationParameters& parameters, int s
 auto ParametersEditService::getRadiationStrengths(SimulationParameters const& parameters) const -> RadiationStrengths
 {
     RadiationStrengths result;
-    result.values.reserve(parameters.numSources.value + 1);
+    result.values.reserve(parameters.numSources + 1);
 
     auto baseStrength = 1.0f;
-    for (int i = 0; i < parameters.numSources.value; ++i) {
+    for (int i = 0; i < parameters.numSources; ++i) {
         baseStrength -= parameters.sourceRelativeStrength.sourceValues[i].value;
     }
     if (baseStrength < 0) {
@@ -28,7 +28,7 @@ auto ParametersEditService::getRadiationStrengths(SimulationParameters const& pa
     }
 
     result.values.emplace_back(baseStrength);
-    for (int i = 0; i < parameters.numSources.value; ++i) {
+    for (int i = 0; i < parameters.numSources; ++i) {
         result.values.emplace_back(parameters.sourceRelativeStrength.sourceValues[i].value);
         if (parameters.sourceRelativeStrength.sourceValues[i].pinned) {
             result.pinned.insert(i + 1);
@@ -42,10 +42,10 @@ auto ParametersEditService::getRadiationStrengths(SimulationParameters const& pa
 
 void ParametersEditService::applyRadiationStrengths(SimulationParameters& parameters, RadiationStrengths const& strengths)
 {
-    CHECK(parameters.numSources.value + 1 == strengths.values.size());
+    CHECK(parameters.numSources + 1 == strengths.values.size());
 
     parameters.relativeStrengthBasePin.pinned = strengths.pinned.contains(0);
-    for (int i = 0; i < parameters.numSources.value; ++i) {
+    for (int i = 0; i < parameters.numSources; ++i) {
         parameters.sourceRelativeStrength.sourceValues[i].value = strengths.values.at(i + 1);
         parameters.sourceRelativeStrength.sourceValues[i].pinned = strengths.pinned.contains(i + 1);
     }
@@ -196,7 +196,7 @@ void ParametersEditService::copyLocationIntern(
         if (std::holds_alternative<BoolSpec>(parameterSpec._reference)) {
             copySourceToTarget(std::get<BoolSpec>(parameterSpec._reference), sourceLocationIndex, targetLocationIndex);
         } else if (std::holds_alternative<IntSpec>(parameterSpec._reference)) {
-            //copySourceToTarget(std::get<IntSpec>(parameterSpec._reference), sourceLocationIndex, targetLocationIndex);
+            copySourceToTarget(std::get<IntSpec>(parameterSpec._reference), sourceLocationIndex, targetLocationIndex);
         } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
             copySourceToTarget(std::get<FloatSpec>(parameterSpec._reference), sourceLocationIndex, targetLocationIndex);
         } else if (std::holds_alternative<Float2Spec>(parameterSpec._reference)) {
