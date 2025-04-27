@@ -57,10 +57,6 @@ void SpecificationService::createSpec()
         "selected in the next parameter.\n\n" ICON_FA_CHEVRON_RIGHT " Every cell function: The cells are colored according to their cell function.";
 
     _parametersSpec = ParametersSpec().groups({
-        ParameterGroupSpec().name("Number of locations").parameters({
-            ParameterSpec().name("Number of zones").reference(IntSpec().member(&SimulationParameters::numZones)).visible(false),
-            ParameterSpec().name("Number of radiation sources").reference(IntSpec().member(&SimulationParameters::numSources)).visible(false),
-        }),
         ParameterGroupSpec().name("General").parameters({
             ParameterSpec().name("Project name").reference(Char64Spec().member(&SimulationParameters::projectName)),
             ParameterSpec().name("Zone name").reference(Char64Spec().member(&SimulationParameters::zoneName)),
@@ -128,10 +124,6 @@ void SpecificationService::createSpec()
         ParameterGroupSpec()
             .name("Location")
             .parameters({
-                ParameterSpec()
-                    .name("Location index")
-                    .reference(IntSpec().member(&SimulationParameters::zoneLocationIndex)).visible(false),
-                ParameterSpec().name("Location index").reference(IntSpec().member(&SimulationParameters::sourceLocationIndex)).visible(false),
                 ParameterSpec()
                     .name("Position (x,y)")
                      .reference(Float2Spec()

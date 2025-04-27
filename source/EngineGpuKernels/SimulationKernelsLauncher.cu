@@ -40,7 +40,7 @@ void _SimulationKernelsLauncher::calcTimestep(SettingsForSimulation const& setti
     } else {
         KERNEL_CALL(cudaNextTimestep_physics_calcCollisionForces, data);
     }
-    if (settings.simulationParameters.numZones.value > 0) {
+    if (settings.simulationParameters.numZones > 0) {
         KERNEL_CALL(cudaApplyForceFieldSettings, data);
     }
     KERNEL_CALL_MOD(cudaNextTimestep_physics_applyForces, 16, data);
@@ -106,7 +106,7 @@ void _SimulationKernelsLauncher::prepareForSimulationParametersChanges(SettingsF
 
 bool _SimulationKernelsLauncher::isRigidityUpdateEnabled(SettingsForSimulation const& settings) const
 {
-    for (int i = 0; i < settings.simulationParameters.numZones.value; ++i) {
+    for (int i = 0; i < settings.simulationParameters.numZones; ++i) {
         if (settings.simulationParameters.rigidity.zoneValues[i].value != 0) {
             return true;
         }

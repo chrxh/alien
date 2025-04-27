@@ -13,9 +13,10 @@
  */
 struct SimulationParameters
 {
-    // Number of locations
-    BaseParameter<int> numZones = {0};
-    BaseParameter<int> numSources = {0};
+    int numZones = 0;
+    int numSources = 0;
+    int zoneLocationIndex[MAX_ZONES] = {};
+    int sourceLocationIndex[MAX_SOURCES] = {};
 
     // General
     BaseParameter<Char64> projectName = {"<unnamed>"};
@@ -36,8 +37,6 @@ struct SimulationParameters
     BaseParameter<bool> showRadiationSources = {true};
 
     // Location
-    ZoneParameter<int> zoneLocationIndex = {{-1}};
-    SourceParameter<int> sourceLocationIndex = {{-1}};
     ZoneParameter<RealVector2D> zonePosition;
     ZoneParameter<RealVector2D> zoneVelocity;
     ZoneParameter<ZoneShapeType> zoneShape = {{ZoneShapeType_Circular}};

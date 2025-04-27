@@ -17,7 +17,7 @@ SimulationParameters SimulationParametersUpdateService::integrateChanges(
     auto result = changedParameters;
 
     if (updateConfig == SimulationParametersUpdateConfig::AllExceptChangingPositions) {
-        auto numSpots = std::min(currentParameters.numZones.value, changedParameters.numZones.value);
+        auto numSpots = std::min(currentParameters.numZones, changedParameters.numZones);
         for (int i = 0; i < numSpots; ++i) {
             if (currentParameters.zoneVelocity.zoneValues[i].x != 0) {
                 result.zonePosition.zoneValues[i].x = currentParameters.zonePosition.zoneValues[i].x;
@@ -27,7 +27,7 @@ SimulationParameters SimulationParametersUpdateService::integrateChanges(
             }
         }
 
-        auto numRadiationSources = std::min(currentParameters.numZones.value, changedParameters.numZones.value);
+        auto numRadiationSources = std::min(currentParameters.numZones, changedParameters.numZones);
         for (int i = 0; i < numRadiationSources; ++i) {
             if (currentParameters.sourceVelocity.sourceValues[i].x != 0) {
                 result.sourcePosition.sourceValues[i].x = currentParameters.sourcePosition.sourceValues[i].x;
@@ -51,7 +51,7 @@ bool SimulationParametersUpdateService::updateSimulationParametersAfterTimestep(
     auto const& worldSizeX = settings.worldSizeX;
     auto const& worldSizeY = settings.worldSizeY;
     SpaceCalculator space({worldSizeX, worldSizeY});
-    for (int i = 0; i < settings.simulationParameters.numSources.value; ++i) {
+    for (int i = 0; i < settings.simulationParameters.numSources; ++i) {
         auto& sourcePos = settings.simulationParameters.sourcePosition.sourceValues[i];
         auto& sourceVel = settings.simulationParameters.sourceVelocity.sourceValues[i];
         if (abs(sourceVel.x) > NEAR_ZERO) {
@@ -65,7 +65,7 @@ bool SimulationParametersUpdateService::updateSimulationParametersAfterTimestep(
         auto correctedPosition = space.getCorrectedPosition(sourcePos);
         sourcePos = correctedPosition;
     }
-    for (int i = 0; i < settings.simulationParameters.numZones.value; ++i) {
+    for (int i = 0; i < settings.simulationParameters.numZones; ++i) {
         auto& zonePosition = settings.simulationParameters.zonePosition.zoneValues[i];
         auto& zoneVelocity = settings.simulationParameters.zoneVelocity.zoneValues[i];
         if (abs(zoneVelocity.x) > NEAR_ZERO) {
