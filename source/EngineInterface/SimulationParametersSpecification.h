@@ -101,8 +101,8 @@ using ColorTransitionRulesMemberVariant = std::variant<std::monostate, ColorTran
 struct BoolSpec
 {
     SETTER_SHARED_PTR(BoolSpec, BoolMember, member);
-    SETTER_SHARED_PTR(BoolSpec, BoolBaseZoneMember, member);
     SETTER_SHARED_PTR(BoolSpec, ColorMatrixBoolMember, member);
+    SETTER_SHARED_PTR(BoolSpec, BoolBaseZoneMember, member);
     SETTER_SHARED_PTR(BoolSpec, BoolZoneMember, member);
     BoolMemberVariant _member = std::monostate();
 };

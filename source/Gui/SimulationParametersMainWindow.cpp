@@ -503,6 +503,8 @@ void SimulationParametersMainWindow::onAddSource()
 
 void SimulationParametersMainWindow::onCloneLocation()
 {
+    auto& editService = ParametersEditService::get();
+
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
@@ -523,7 +525,24 @@ void SimulationParametersMainWindow::onCloneLocation()
     LocationHelper::adaptLocationIndex(origParameters, _selectedLocationIndex, 1);
 
     if (locationType == LocationType::Zone) {
-        THROW_NOT_IMPLEMENTED();
+        int index = parameters.numZones.value;
+        parameters.zoneLocationIndex.zoneValues[index] = _selectedLocationIndex;
+        origParameters.zoneLocationIndex.zoneValues[index] = _selectedLocationIndex;
+        ++parameters.numZones.value;
+        ++origParameters.numZones.value;
+    } else {
+        int index = parameters.numSources.value;
+        parameters.sourceLocationIndex.sourceValues[index] = _selectedLocationIndex;
+        origParameters.sourceLocationIndex.sourceValues[index] = _selectedLocationIndex;
+        ++parameters.numSources.value;
+        ++origParameters.numSources.value;
+    }
+
+    editService.copyLocation(parameters, _selectedLocationIndex - 1, _selectedLocationIndex);
+    editService.copyLocation(origParameters, _selectedLocationIndex - 1, _selectedLocationIndex);
+
+    //if (locationType == LocationType::Zone) {
+    //    THROW_NOT_IMPLEMENTED();
         //auto zone = std::get<SimulationParametersZone*>(location);
         //auto clone = *zone;
 
@@ -535,8 +554,8 @@ void SimulationParametersMainWindow::onCloneLocation()
         //origParameters.zone[index] = clone;
         //++parameters.numZones.value;
         //++origParameters.numZones.value;
-    } else {
-        THROW_NOT_IMPLEMENTED();
+    //} else {
+    //    THROW_NOT_IMPLEMENTED();
         //auto source = std::get<RadiationSource*>(location);
         //auto clone = *source;
 
@@ -554,7 +573,7 @@ void SimulationParametersMainWindow::onCloneLocation()
 
         //editService.applyRadiationStrengths(parameters, newStrengths);
         //editService.applyRadiationStrengths(origParameters, newStrengths);
-    }
+    //}
 
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
