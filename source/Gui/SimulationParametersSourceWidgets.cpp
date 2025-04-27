@@ -25,7 +25,9 @@ void _SimulationParametersSourceWidgets::process()
 
     _sourceName = std::string(parameters.sourceName.sourceValues[sourceIndex]);
 
+    ImGui::PushID("Source");
     SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _simulationFacade, _locationIndex);
+    ImGui::PopID();
 
     if (parameters != lastParameters) {
         auto isRunning = _simulationFacade->isSimulationRunning();

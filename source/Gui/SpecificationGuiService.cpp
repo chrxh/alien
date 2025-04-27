@@ -134,7 +134,7 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
 
     auto ref = evaluationService.getRef(boolSpec._member, parameters, locationIndex);
     auto origRef = evaluationService.getRef(boolSpec._member, origParameters, locationIndex);
-    if (std::holds_alternative<ColorMatrixBoolMember>(boolSpec._member)) {
+    if (ref.valueType == ValueType::ColorMatrix) {
 
         AlienImGui::CheckboxColorMatrix(
             AlienImGui::CheckboxColorMatrixParameters()
@@ -165,7 +165,7 @@ void SpecificationGuiService::createWidgetsForIntSpec(
     auto [origValue, origDisabledValue, origEnabledValue, origPinnedValue, origValueType] =
         evaluationService.getRef(intSpec._member, origParameters, locationIndex);
 
-    if (std::holds_alternative<ColorMatrixIntMember>(intSpec._member)) {
+    if (valueType == ValueType::ColorMatrix) {
         AlienImGui::InputIntColorMatrix(
             AlienImGui::InputIntColorMatrixParameters()
                 .name(parameterSpec._name)
@@ -190,7 +190,7 @@ void SpecificationGuiService::createWidgetsForIntSpec(
                 .defaultValue(origValue)
                 .defaultEnabledValue(origEnabledValue)
                 .tooltip(parameterSpec._tooltip)
-                .colorDependence(std::holds_alternative<ColorVectorIntMember>(intSpec._member)),
+                .colorDependence(valueType == ValueType::ColorVector),
             value,
             enabledValue);
     }
@@ -220,8 +220,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
         }
     }();
 
-    if (std::holds_alternative<ColorMatrixFloatMember>(floatSpec._member) || std::holds_alternative<ColorMatrixFloatBaseZoneMember>(floatSpec._member)) {
-
+    if (valueType == ValueType::ColorMatrix) {
         AlienImGui::InputFloatColorMatrix(
             AlienImGui::InputFloatColorMatrixParameters()
                 .name(parameterSpec._name)
@@ -261,9 +260,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
                     .disabledValue(disabledValue)
                     .defaultValue(origValue)
                     .defaultEnabledValue(origEnabledValue)
-                    .colorDependence(
-                        std::holds_alternative<ColorVectorFloatMember>(floatSpec._member)
-                        || std::holds_alternative<ColorVectorFloatBaseZoneMember>(floatSpec._member))
+                    .colorDependence(valueType == ValueType::ColorVector)
                     .tooltip(parameterSpec._tooltip),
                 value,
             enabledValue,

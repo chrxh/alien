@@ -23,7 +23,9 @@ void _SimulationParametersZoneWidgets::process()
     auto zoneIndex = LocationHelper::findLocationArrayIndex(parameters, _locationIndex);
     _zoneName = std::string(parameters.zoneName.zoneValues[zoneIndex]);
 
+    ImGui::PushID("Zone");
     SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _simulationFacade, _locationIndex);
+    ImGui::PopID();
 
     if (parameters != lastParameters) {
         auto isRunning = _simulationFacade->isSimulationRunning();
