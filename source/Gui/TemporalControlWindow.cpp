@@ -230,23 +230,21 @@ void TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
 
     if (origParameters.numZones == parameters.numZones) {
         for (int i = 0; i < parameters.numZones; ++i) {
-            restorePositionNew(
+            restorePosition(
                 parameters.zonePosition.zoneValues[i],
                 parameters.zoneVelocity.zoneValues[i],
                 origParameters.zonePosition.zoneValues[i],
-                origParameters.zoneVelocity.zoneValues[i],
-                snapshot.timestep);
+                origParameters.zoneVelocity.zoneValues[i]);
         }
     }
 
     if (origParameters.numSources == parameters.numSources) {
         for (int i = 0; i < parameters.numZones; ++i) {
-            restorePositionNew(
+            restorePosition(
                 parameters.sourcePosition.sourceValues[i],
                 parameters.sourceVelocity.sourceValues[i],
                 origParameters.sourcePosition.sourceValues[i],
-                origParameters.sourceVelocity.sourceValues[i],
-                snapshot.timestep);
+                origParameters.sourceVelocity.sourceValues[i]);
         }
     }
 
@@ -263,25 +261,11 @@ void TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
     _simulationFacade->setSimulationParameters(parameters);
 }
 
-template <typename MovedObjectType>
-void TemporalControlWindow::restorePosition(MovedObjectType& movedObject, MovedObjectType const& origMovedObject, uint64_t origTimestep)
-{
-    auto origMovedObjectClone = origMovedObject;
-    auto movedObjectClone = movedObject;
-
-    if (std::abs(movedObject.velX) > NEAR_ZERO || std::abs(movedObject.velY) > NEAR_ZERO || std::abs(origMovedObject.velX) > NEAR_ZERO
-        || std::abs(origMovedObject.velY) > NEAR_ZERO) {
-        movedObject.posX = origMovedObject.posX;
-        movedObject.posY = origMovedObject.posY;
-    }
-}
-
-void TemporalControlWindow::restorePositionNew(
+void TemporalControlWindow::restorePosition(
     RealVector2D& position,
     RealVector2D const& velocity,
     RealVector2D const& origPosition,
-    RealVector2D const& origVelocity,
-    uint64_t origTimestep)
+    RealVector2D const& origVelocity)
 {
     if (std::abs(velocity.x) > NEAR_ZERO || std::abs(velocity.y) > NEAR_ZERO || std::abs(origVelocity.x) > NEAR_ZERO
         || std::abs(origVelocity.y) > NEAR_ZERO) {

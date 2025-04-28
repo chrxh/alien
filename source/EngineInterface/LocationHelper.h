@@ -21,7 +21,7 @@ public:
     static std::map<int, int> onIncreaseLocationIndex(SimulationParameters& parameters, int locationIndex);
 
     // returns new by old location index
-    static std::map<int, int> adaptLocationIndex(SimulationParameters& parameters, int fromLocationIndex, int offset);
+    static std::map<int, int> adaptLocationIndices(SimulationParameters& parameters, int fromLocationIndex, int offset);
 
     static std::string generateZoneName(SimulationParameters& parameters);
     static std::string generateSourceName(SimulationParameters& parameters);

@@ -418,8 +418,8 @@ void SimulationParametersMainWindow::onAddZone()
     }
 
     ++_selectedLocationIndex;
-    LocationHelper::adaptLocationIndex(parameters, _selectedLocationIndex, 1);
-    LocationHelper::adaptLocationIndex(origParameters, _selectedLocationIndex, 1);
+    LocationHelper::adaptLocationIndices(parameters, _selectedLocationIndex, 1);
+    LocationHelper::adaptLocationIndices(origParameters, _selectedLocationIndex, 1);
 
     auto worldSize = _simulationFacade->getWorldSize();
     auto minRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
@@ -471,8 +471,8 @@ void SimulationParametersMainWindow::onAddSource()
     }
 
     ++_selectedLocationIndex;
-    LocationHelper::adaptLocationIndex(parameters, _selectedLocationIndex, 1);
-    LocationHelper::adaptLocationIndex(origParameters, _selectedLocationIndex, 1);
+    LocationHelper::adaptLocationIndices(parameters, _selectedLocationIndex, 1);
+    LocationHelper::adaptLocationIndices(origParameters, _selectedLocationIndex, 1);
 
     auto strengths = editService.getRadiationStrengths(parameters);
     auto newStrengths = editService.calcRadiationStrengthsForAddingZone(strengths);
@@ -504,12 +504,10 @@ void SimulationParametersMainWindow::onAddSource()
 void SimulationParametersMainWindow::onCloneLocation()
 {
     auto& editService = ParametersEditService::get();
-
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
     auto locationType = LocationHelper::getLocationType(_selectedLocationIndex, parameters);
-
     if (locationType == LocationType::Zone) {
         if (!checkNumZones(parameters)) {
             return;
@@ -520,61 +518,10 @@ void SimulationParametersMainWindow::onCloneLocation()
         }
     }
 
+    editService.cloneLocation(parameters, _selectedLocationIndex);
+    editService.cloneLocation(origParameters, _selectedLocationIndex);
+
     ++_selectedLocationIndex;
-    LocationHelper::adaptLocationIndex(parameters, _selectedLocationIndex, 1);
-    LocationHelper::adaptLocationIndex(origParameters, _selectedLocationIndex, 1);
-
-    if (locationType == LocationType::Zone) {
-        int index = parameters.numZones;
-        parameters.zoneLocationIndex[index] = _selectedLocationIndex;
-        origParameters.zoneLocationIndex[index] = _selectedLocationIndex;
-        ++parameters.numZones;
-        ++origParameters.numZones;
-    } else {
-        int index = parameters.numSources;
-        parameters.sourceLocationIndex[index] = _selectedLocationIndex;
-        origParameters.sourceLocationIndex[index] = _selectedLocationIndex;
-        ++parameters.numSources;
-        ++origParameters.numSources;
-    }
-
-    editService.copyLocation(parameters, _selectedLocationIndex - 1, _selectedLocationIndex);
-    editService.copyLocation(origParameters, _selectedLocationIndex - 1, _selectedLocationIndex);
-
-    //if (locationType == LocationType::Zone) {
-    //    THROW_NOT_IMPLEMENTED();
-        //auto zone = std::get<SimulationParametersZone*>(location);
-        //auto clone = *zone;
-
-        ////StringHelper::copy(clone.name, sizeof(clone.name), LocationHelper::generateZoneName(parameters));
-        //clone.locationIndex = _selectedLocationIndex;
-
-        //int index = parameters.numZones;
-        //parameters.zone[index] = clone;
-        //origParameters.zone[index] = clone;
-        //++parameters.numZones;
-        //++origParameters.numZones;
-    //} else {
-    //    THROW_NOT_IMPLEMENTED();
-        //auto source = std::get<RadiationSource*>(location);
-        //auto clone = *source;
-
-        //auto& editService = ParametersEditService::get();
-        //auto strengths = editService.getRadiationStrengths(parameters);
-        //auto newStrengths = editService.calcRadiationStrengthsForAddingZone(strengths);
-
-        //StringHelper::copy(clone.name, sizeof(clone.name), LocationHelper::generateSourceName(parameters));
-        //clone.locationIndex = _selectedLocationIndex;
-        //auto index = parameters.numRadiationSources.value;
-        //parameters.radiationSource[index] = clone;
-        //origParameters.radiationSource[index] = clone;
-        //++parameters.numRadiationSources.value;
-        //++origParameters.numRadiationSources.value;
-
-        //editService.applyRadiationStrengths(parameters, newStrengths);
-        //editService.applyRadiationStrengths(origParameters, newStrengths);
-    //}
-
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 }
@@ -623,8 +570,8 @@ void SimulationParametersMainWindow::onDeleteLocation()
         //}
     }
 
-    auto newByOldLocationIndex = LocationHelper::adaptLocationIndex(parameters, _selectedLocationIndex, -1);
-    LocationHelper::adaptLocationIndex(origParameters, _selectedLocationIndex, -1);
+    auto newByOldLocationIndex = LocationHelper::adaptLocationIndices(parameters, _selectedLocationIndex, -1);
+    LocationHelper::adaptLocationIndices(origParameters, _selectedLocationIndex, -1);
 
     if (_locations.size() - 1 == _selectedLocationIndex) {
         --_selectedLocationIndex;
@@ -762,3 +709,4 @@ float SimulationParametersMainWindow::getDetailWidgetHeight() const
 {
     return _detailWidgetOpen ? std::max(scale(MasterMinHeight), ImGui::GetContentRegionAvail().y - getExpertWidgetRefHeight() + scale(4.0f)) : scale(25.0f);
 }
+
