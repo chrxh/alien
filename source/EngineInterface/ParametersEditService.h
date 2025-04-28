@@ -20,7 +20,7 @@ class ParametersEditService
 
 public:
     void cloneLocation(SimulationParameters& parameters, int locationIndex) const;
-    void copyLocation(SimulationParameters& parameters, int sourceLocationIndex, int targetLocationIndex) const;
+    void copyLocation(SimulationParameters& targetParameters, int targetLocationIndex, SimulationParameters& sourceParameters, int sourceLocationIndex) const;
 
     RadiationStrengths getRadiationStrengths(SimulationParameters const& parameters) const;
     void applyRadiationStrengths(SimulationParameters& parameters, RadiationStrengths const& strengths);
@@ -30,5 +30,10 @@ public:
     RadiationStrengths calcRadiationStrengthsForDeletingZone(RadiationStrengths const& strengths, int deleteIndex) const;
 
 private:
-    void copyLocationImpl(SimulationParameters& parameters, std::vector<ParameterSpec> const& parameterSpecs, int sourceLocationIndex, int targetLocationIndex) const;
+    void copyLocationImpl(
+        SimulationParameters& targetParameters,
+        int targetLocationIndex,
+        SimulationParameters& sourceParameters,
+        int sourceLocationIndex,
+        std::vector<ParameterSpec> const& parameterSpecs) const;
 };
