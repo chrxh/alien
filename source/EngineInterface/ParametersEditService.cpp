@@ -24,7 +24,7 @@ void ParametersEditService::cloneLocation(SimulationParameters& parameters, int 
         for (int i = parameters.numZones - 2; i >= startIndex; --i) {
             auto sourceLocationIndex = parameters.zoneLocationIndex[i];
             auto targetLocationIndex = parameters.zoneLocationIndex[i + 1];
-            copyLocation(parameters, sourceLocationIndex, targetLocationIndex);
+            copyLocation(parameters, targetLocationIndex, parameters, sourceLocationIndex);
         }
         StringHelper::copy(
             parameters.zoneName.zoneValues[startIndex + 1],
@@ -40,7 +40,7 @@ void ParametersEditService::cloneLocation(SimulationParameters& parameters, int 
         for (int i = parameters.numSources - 2; i >= startIndex; --i) {
             auto sourceLocationIndex = parameters.sourceLocationIndex[i];
             auto targetLocationIndex = parameters.sourceLocationIndex[i + 1];
-            copyLocation(parameters, sourceLocationIndex, targetLocationIndex);
+            copyLocation(parameters, targetLocationIndex, parameters, sourceLocationIndex);
         }
         StringHelper::copy(
             parameters.sourceName.sourceValues[startIndex + 1],
@@ -49,11 +49,15 @@ void ParametersEditService::cloneLocation(SimulationParameters& parameters, int 
     }
 }
 
-void ParametersEditService::copyLocation(SimulationParameters& parameters, int sourceLocationIndex, int targetLocationIndex) const
+void ParametersEditService::copyLocation(
+    SimulationParameters& targetParameters,
+    int targetLocationIndex,
+    SimulationParameters& sourceParameters,
+    int sourceLocationIndex) const
 {
     auto const& parametersSpecs = SpecificationService::get().getSpec();
     for (auto const& groupSpec : parametersSpecs._groups) {
-        copyLocationImpl(parameters, groupSpec._parameters, sourceLocationIndex, targetLocationIndex);
+        copyLocationImpl(targetParameters, targetLocationIndex, sourceParameters, sourceLocationIndex, groupSpec._parameters);
     }
 }
 
@@ -204,16 +208,17 @@ auto ParametersEditService::calcRadiationStrengthsForDeletingZone(
 }
 
 void ParametersEditService::copyLocationImpl(
-    SimulationParameters& parameters,
-    std::vector<ParameterSpec> const& parameterSpecs,
+    SimulationParameters& targetParameters,
+    int targetLocationIndex,
+    SimulationParameters& sourceParameters,
     int sourceLocationIndex,
-    int targetLocationIndex) const
+    std::vector<ParameterSpec> const& parameterSpecs) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
 
-    auto copySourceToTarget = [&evaluationService, &parameters](auto const& reference, int sourceLocationIndex, int targetLocationIndex) {
-        auto source = evaluationService.getRef(reference._member, parameters, sourceLocationIndex);
-        auto target = evaluationService.getRef(reference._member, parameters, targetLocationIndex);
+    auto copySourceToTarget = [&](auto const& reference, int sourceLocationIndex, int targetLocationIndex) {
+        auto source = evaluationService.getRef(reference._member, sourceParameters, sourceLocationIndex);
+        auto target = evaluationService.getRef(reference._member, targetParameters, targetLocationIndex);
         if (source.value != nullptr && target.value != nullptr) {
             if constexpr (std::is_same_v<decltype(source.value), Char64*>) {
                 for (int i = 0; i < sizeof(Char64); ++i) {
@@ -255,7 +260,7 @@ void ParametersEditService::copyLocationImpl(
             auto const& altSpec = std::get<AlternativeSpec>(parameterSpec._reference);
             copySourceToTarget(altSpec, sourceLocationIndex, targetLocationIndex);
             for (auto const& parameterSpecs : altSpec._alternatives | std::views::values) {
-                copyLocationImpl(parameters, parameterSpecs, sourceLocationIndex, targetLocationIndex);
+                copyLocationImpl(targetParameters, targetLocationIndex, sourceParameters, sourceLocationIndex, parameterSpecs);
             }
         } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._reference)) {
             copySourceToTarget(std::get<ColorPickerSpec>(parameterSpec._reference), sourceLocationIndex, targetLocationIndex);
