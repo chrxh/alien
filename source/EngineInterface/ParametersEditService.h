@@ -19,6 +19,7 @@ class ParametersEditService
     MAKE_SINGLETON(ParametersEditService);
 
 public:
+    void cloneLocation(SimulationParameters& parameters, int locationIndex) const;
     void copyLocation(SimulationParameters& parameters, int sourceLocationIndex, int targetLocationIndex) const;
 
     RadiationStrengths getRadiationStrengths(SimulationParameters const& parameters) const;
@@ -29,5 +30,5 @@ public:
     RadiationStrengths calcRadiationStrengthsForDeletingZone(RadiationStrengths const& strengths, int deleteIndex) const;
 
 private:
-    void copyLocationIntern(SimulationParameters& parameters, std::vector<ParameterSpec> const& parameterSpecs, int sourceLocationIndex, int targetLocationIndex) const;
+    void copyLocationImpl(SimulationParameters& parameters, std::vector<ParameterSpec> const& parameterSpecs, int sourceLocationIndex, int targetLocationIndex) const;
 };

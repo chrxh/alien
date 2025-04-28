@@ -92,7 +92,7 @@ std::map<int, int> LocationHelper::onIncreaseLocationIndex(SimulationParameters&
     return result;
 }
 
-std::map<int, int> LocationHelper::adaptLocationIndex(SimulationParameters& parameters, int fromLocationIndex, int offset)
+std::map<int, int> LocationHelper::adaptLocationIndices(SimulationParameters& parameters, int fromLocationIndex, int offset)
 {
     std::map<int, int> result;
     result.emplace(0, 0);

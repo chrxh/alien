@@ -134,7 +134,7 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
 
     auto ref = evaluationService.getRef(boolSpec._member, parameters, locationIndex);
     auto origRef = evaluationService.getRef(boolSpec._member, origParameters, locationIndex);
-    if (ref.valueType == ValueType::ColorMatrix) {
+    if (ref.valueType == ColorDependence::ColorMatrix) {
 
         AlienImGui::CheckboxColorMatrix(
             AlienImGui::CheckboxColorMatrixParameters()
@@ -165,7 +165,7 @@ void SpecificationGuiService::createWidgetsForIntSpec(
     auto [origValue, origDisabledValue, origEnabledValue, origPinnedValue, origValueType] =
         evaluationService.getRef(intSpec._member, origParameters, locationIndex);
 
-    if (valueType == ValueType::ColorMatrix) {
+    if (valueType == ColorDependence::ColorMatrix) {
         AlienImGui::InputIntColorMatrix(
             AlienImGui::InputIntColorMatrixParameters()
                 .name(parameterSpec._name)
@@ -190,7 +190,7 @@ void SpecificationGuiService::createWidgetsForIntSpec(
                 .defaultValue(origValue)
                 .defaultEnabledValue(origEnabledValue)
                 .tooltip(parameterSpec._tooltip)
-                .colorDependence(valueType == ValueType::ColorVector),
+                .colorDependence(valueType == ColorDependence::ColorVector),
             value,
             enabledValue);
     }
@@ -220,7 +220,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
         }
     }();
 
-    if (valueType == ValueType::ColorMatrix) {
+    if (valueType == ColorDependence::ColorMatrix) {
         AlienImGui::InputFloatColorMatrix(
             AlienImGui::InputFloatColorMatrixParameters()
                 .name(parameterSpec._name)
@@ -260,7 +260,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
                     .disabledValue(disabledValue)
                     .defaultValue(origValue)
                     .defaultEnabledValue(origEnabledValue)
-                    .colorDependence(valueType == ValueType::ColorVector)
+                    .colorDependence(valueType == ColorDependence::ColorVector)
                     .tooltip(parameterSpec._tooltip),
                 value,
             enabledValue,
@@ -331,8 +331,8 @@ void SpecificationGuiService::createWidgetsForChar64Spec(
         evaluationService.getRef(char64Spec._member, origParameters, locationIndex);
 
     AlienImGui::InputText(
-        AlienImGui::InputTextParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(origValue).tooltip(parameterSpec._tooltip),
-        value,
+        AlienImGui::InputTextParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue).tooltip(parameterSpec._tooltip),
+        *value,
         sizeof(Char64) / sizeof(char));
 }
 

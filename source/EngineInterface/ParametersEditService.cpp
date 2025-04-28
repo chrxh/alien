@@ -3,14 +3,57 @@
 #include <ranges>
 
 #include "Base/Definitions.h"
+#include "Base/StringHelper.h"
 #include "SpecificationService.h"
 #include "SpecificationEvaluationService.h"
+
+void ParametersEditService::cloneLocation(SimulationParameters& parameters, int locationIndex) const
+{
+    auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
+
+    auto startIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+    LocationHelper::adaptLocationIndices(parameters, locationIndex, 1);
+
+    if (locationType == LocationType::Zone) {
+        ++parameters.numZones;
+        for (int i = parameters.numZones - 2; i >= startIndex; --i) {
+            parameters.zoneLocationIndex[i + 1] = parameters.zoneLocationIndex[i];
+        }
+        parameters.zoneLocationIndex[startIndex] = locationIndex;
+
+        for (int i = parameters.numZones - 2; i >= startIndex; --i) {
+            auto sourceLocationIndex = parameters.zoneLocationIndex[i];
+            auto targetLocationIndex = parameters.zoneLocationIndex[i + 1];
+            copyLocation(parameters, sourceLocationIndex, targetLocationIndex);
+        }
+        StringHelper::copy(
+            parameters.zoneName.zoneValues[startIndex + 1],
+            sizeof(parameters.zoneName.zoneValues[startIndex + 1]),
+            LocationHelper::generateZoneName(parameters));
+    } else {
+        ++parameters.numSources;
+        for (int i = parameters.numSources - 2; i >= startIndex; --i) {
+            parameters.sourceLocationIndex[i + 1] = parameters.sourceLocationIndex[i];
+        }
+        parameters.sourceLocationIndex[startIndex] = locationIndex;
+
+        for (int i = parameters.numSources - 2; i >= startIndex; --i) {
+            auto sourceLocationIndex = parameters.sourceLocationIndex[i];
+            auto targetLocationIndex = parameters.sourceLocationIndex[i + 1];
+            copyLocation(parameters, sourceLocationIndex, targetLocationIndex);
+        }
+        StringHelper::copy(
+            parameters.sourceName.sourceValues[startIndex + 1],
+            sizeof(parameters.sourceName.sourceValues[startIndex + 1]),
+            LocationHelper::generateSourceName(parameters));
+    }
+}
 
 void ParametersEditService::copyLocation(SimulationParameters& parameters, int sourceLocationIndex, int targetLocationIndex) const
 {
     auto const& parametersSpecs = SpecificationService::get().getSpec();
     for (auto const& groupSpec : parametersSpecs._groups) {
-        copyLocationIntern(parameters, groupSpec._parameters, sourceLocationIndex, targetLocationIndex);
+        copyLocationImpl(parameters, groupSpec._parameters, sourceLocationIndex, targetLocationIndex);
     }
 }
 
@@ -160,7 +203,7 @@ auto ParametersEditService::calcRadiationStrengthsForDeletingZone(
     return result;
 }
 
-void ParametersEditService::copyLocationIntern(
+void ParametersEditService::copyLocationImpl(
     SimulationParameters& parameters,
     std::vector<ParameterSpec> const& parameterSpecs,
     int sourceLocationIndex,
@@ -172,16 +215,21 @@ void ParametersEditService::copyLocationIntern(
         auto source = evaluationService.getRef(reference._member, parameters, sourceLocationIndex);
         auto target = evaluationService.getRef(reference._member, parameters, targetLocationIndex);
         if (source.value != nullptr && target.value != nullptr) {
-
-            if (source.valueType == ValueType::Single) {
-                *target.value = *source.value;
-            } else if (source.valueType == ValueType::ColorVector) {
-                for (int i = 0; i < MAX_COLORS; ++i) {
-                    target.value[i] = source.value[i];
+            if constexpr (std::is_same_v<decltype(source.value), Char64*>) {
+                for (int i = 0; i < sizeof(Char64); ++i) {
+                    (*target.value)[i] = (*source.value)[i];
                 }
-            } else if (source.valueType == ValueType::ColorMatrix) {
-                for (int i = 0; i < MAX_COLORS * MAX_COLORS; ++i) {
-                    target.value[i] = source.value[i];
+            } else {
+                if (source.valueType == ColorDependence::None) {
+                    *target.value = *source.value;
+                } else if (source.valueType == ColorDependence::ColorVector) {
+                    for (int i = 0; i < MAX_COLORS; ++i) {
+                        target.value[i] = source.value[i];
+                    }
+                } else if (source.valueType == ColorDependence::ColorMatrix) {
+                    for (int i = 0; i < MAX_COLORS * MAX_COLORS; ++i) {
+                        target.value[i] = source.value[i];
+                    }
                 }
             }
         }
@@ -207,7 +255,7 @@ void ParametersEditService::copyLocationIntern(
             auto const& altSpec = std::get<AlternativeSpec>(parameterSpec._reference);
             copySourceToTarget(altSpec, sourceLocationIndex, targetLocationIndex);
             for (auto const& parameterSpecs : altSpec._alternatives | std::views::values) {
-                copyLocationIntern(parameters, parameterSpecs, sourceLocationIndex, targetLocationIndex);
+                copyLocationImpl(parameters, parameterSpecs, sourceLocationIndex, targetLocationIndex);
             }
         } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._reference)) {
             copySourceToTarget(std::get<ColorPickerSpec>(parameterSpec._reference), sourceLocationIndex, targetLocationIndex);
