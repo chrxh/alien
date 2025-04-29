@@ -18,7 +18,7 @@ PUBLIC
     MutationTests.cpp
     NeuronTests.cpp
     OscillatorTests_New.cpp
-    ParametersEditServiceTests.cpp
+    ParametersEditServiceTests_New.cpp
     ReconnectorTests.cpp
     SensorTests.cpp
     SensorTests_New.cpp
