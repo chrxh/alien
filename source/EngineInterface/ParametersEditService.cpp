@@ -40,6 +40,39 @@ void ParametersEditService::insertDefaultZone(SimulationParameters& parameters, 
         parameters.zoneName.zoneValues[startIndex], sizeof(parameters.zoneName.zoneValues[startIndex]), LocationHelper::generateZoneName(parameters));
 }
 
+void ParametersEditService::insertDefaultSource(SimulationParameters& parameters, int locationIndex) const
+{
+    LocationHelper::adaptLocationIndices(parameters, locationIndex + 1, 1);
+
+    auto startIndex = 0;
+    for (int i = 0; i < parameters.numSources; ++i) {
+        if (parameters.sourceLocationIndex[i] > locationIndex) {
+            startIndex = i;
+            break;
+        }
+    }
+
+    ++parameters.numSources;
+    for (int i = parameters.numSources - 2; i >= startIndex; --i) {
+        parameters.sourceLocationIndex[i + 1] = parameters.sourceLocationIndex[i];
+    }
+    parameters.sourceLocationIndex[startIndex] = locationIndex + 1;
+
+    for (int i = parameters.numSources - 2; i >= startIndex; --i) {
+        auto sourceLocationIndex = parameters.sourceLocationIndex[i];
+        auto targetLocationIndex = parameters.sourceLocationIndex[i + 1];
+        copyLocation(parameters, targetLocationIndex, parameters, sourceLocationIndex);
+    }
+
+    SimulationParameters defaultParameters;
+    defaultParameters.numSources = 1;
+    defaultParameters.sourceLocationIndex[0] = 1;
+    copyLocation(parameters, locationIndex + 1, defaultParameters, 1);
+
+    StringHelper::copy(
+        parameters.sourceName.sourceValues[startIndex], sizeof(parameters.sourceName.sourceValues[startIndex]), LocationHelper::generateSourceName(parameters));
+}
+
 void ParametersEditService::cloneLocation(SimulationParameters& parameters, int locationIndex) const
 {
     auto locationType = LocationHelper::getLocationType(locationIndex, parameters);

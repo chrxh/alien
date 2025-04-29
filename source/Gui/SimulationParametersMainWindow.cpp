@@ -150,12 +150,12 @@ void SimulationParametersMainWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_LAYER_GROUP).tooltip("Add parameter zone"))) {
-        onAddZone();
+        onInsertDefaultZone();
     }
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_SUN).tooltip("Add radiation source"))) {
-        onAddSource();
+        onInsertDefaultSource();
     }
 
     ImGui::SameLine();
@@ -408,7 +408,7 @@ void SimulationParametersMainWindow::onSaveParameters()
         });
 }
 
-void SimulationParametersMainWindow::onAddZone()
+void SimulationParametersMainWindow::onInsertDefaultZone()
 {
     auto& editService = ParametersEditService::get();
     auto parameters = _simulationFacade->getSimulationParameters();
@@ -455,40 +455,22 @@ void SimulationParametersMainWindow::onAddZone()
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 }
 
-void SimulationParametersMainWindow::onAddSource()
+void SimulationParametersMainWindow::onInsertDefaultSource()
 {
     auto& editService = ParametersEditService::get();
-
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
     if (!checkNumSources(parameters)) {
         return;
     }
-
-    ++_selectedLocationIndex;
-    LocationHelper::adaptLocationIndices(parameters, _selectedLocationIndex, 1);
-    LocationHelper::adaptLocationIndices(origParameters, _selectedLocationIndex, 1);
-
     auto strengths = editService.getRadiationStrengths(parameters);
     auto newStrengths = editService.calcRadiationStrengthsForAddingZone(strengths);
 
-    auto worldSize = _simulationFacade->getWorldSize();
+    editService.insertDefaultSource(parameters, _selectedLocationIndex);
+    editService.insertDefaultSource(origParameters, _selectedLocationIndex);
 
-    auto index = parameters.numSources;
-
-    auto sourceName = LocationHelper::generateSourceName(parameters);
-    StringHelper::copy(parameters.sourceName.sourceValues[index], sizeof(parameters.sourceName.sourceValues[index]), sourceName);
-    StringHelper::copy(origParameters.sourceName.sourceValues[index], sizeof(parameters.sourceName.sourceValues[index]), sourceName);
-
-    parameters.sourceLocationIndex[index] = _selectedLocationIndex;
-    parameters.sourcePosition.sourceValues[index] = {toFloat(worldSize.x / 2), toFloat(worldSize.y / 2)};
-
-    origParameters.sourceLocationIndex[index] = _selectedLocationIndex;
-    origParameters.sourcePosition.sourceValues[index] = parameters.sourcePosition.sourceValues[index];
-
-    ++parameters.numSources;
-    ++origParameters.numSources;
+    ++_selectedLocationIndex;
 
     editService.applyRadiationStrengths(parameters, newStrengths);
     editService.applyRadiationStrengths(origParameters, newStrengths);
