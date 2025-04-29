@@ -7,6 +7,35 @@
 #include "SpecificationService.h"
 #include "SpecificationEvaluationService.h"
 
+void ParametersEditService::insertZone(SimulationParameters& parameters, int locationIndex) const
+{
+    LocationHelper::adaptLocationIndices(parameters, locationIndex + 1, 1);
+
+    auto startIndex = 0;
+    for (int i = 0; i < parameters.numZones; ++i) {
+        if (parameters.zoneLocationIndex[i] > locationIndex) {
+            startIndex = i;
+            break;
+        }
+    }
+
+    ++parameters.numZones;
+    for (int i = parameters.numZones - 2; i >= startIndex; --i) {
+        parameters.zoneLocationIndex[i + 1] = parameters.zoneLocationIndex[i];
+    }
+    parameters.zoneLocationIndex[startIndex] = locationIndex + 1;
+
+    for (int i = parameters.numZones - 2; i >= startIndex; --i) {
+        auto sourceLocationIndex = parameters.zoneLocationIndex[i];
+        auto targetLocationIndex = parameters.zoneLocationIndex[i + 1];
+        copyLocation(parameters, targetLocationIndex, parameters, sourceLocationIndex);
+    }
+    StringHelper::copy(
+        parameters.zoneName.zoneValues[startIndex],
+        sizeof(parameters.zoneName.zoneValues[startIndex]),
+        LocationHelper::generateZoneName(parameters));
+}
+
 void ParametersEditService::cloneLocation(SimulationParameters& parameters, int locationIndex) const
 {
     auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
