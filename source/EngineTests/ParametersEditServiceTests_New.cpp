@@ -7,12 +7,12 @@
 
 #include "IntegrationTestFramework.h"
 
-class ParametersEditServiceTests : public IntegrationTestFramework
+class ParametersEditServiceTests_New : public IntegrationTestFramework
 {
 };
 
 
-TEST_F(ParametersEditServiceTests, cloneZone)
+TEST_F(ParametersEditServiceTests_New, cloneZone)
 {
     SimulationParameters parameters;
 
@@ -50,7 +50,7 @@ TEST_F(ParametersEditServiceTests, cloneZone)
     EXPECT_TRUE(approxCompare(4.0f, parameters.sourceCircularRadius.sourceValues[1]));
 }
 
-TEST_F(ParametersEditServiceTests, cloneSource)
+TEST_F(ParametersEditServiceTests_New, cloneSource)
 {
     SimulationParameters parameters;
 
@@ -83,7 +83,7 @@ TEST_F(ParametersEditServiceTests, cloneSource)
     EXPECT_TRUE(approxCompare(4.0f, parameters.sourceCircularRadius.sourceValues[2]));
 }
 
-TEST_F(ParametersEditServiceTests, insertDefaultZoneAfterBase)
+TEST_F(ParametersEditServiceTests_New, insertDefaultZoneAfterBase)
 {
     SimulationParameters parameters;
     parameters.numSources = 1;
@@ -97,7 +97,22 @@ TEST_F(ParametersEditServiceTests, insertDefaultZoneAfterBase)
     EXPECT_EQ(2, parameters.sourceLocationIndex[0]);
 }
 
-TEST_F(ParametersEditServiceTests, insertDefaultZoneAfterZone)
+TEST_F(ParametersEditServiceTests_New, insertDefaultSourceAfterBase)
+{
+    SimulationParameters parameters;
+    parameters.numZones = 1;
+    parameters.zoneLocationIndex[0] = 1;
+
+    ParametersEditService::get().insertDefaultSource(parameters, 0);
+
+    EXPECT_EQ(1, parameters.numZones);
+    EXPECT_EQ(1, parameters.numSources);
+    EXPECT_EQ(2, parameters.zoneLocationIndex[0]);
+    EXPECT_EQ(1, parameters.sourceLocationIndex[0]);
+}
+
+
+TEST_F(ParametersEditServiceTests_New, insertDefaultZoneAfterZone)
 {
     SimulationParameters parameters;
     parameters.numZones = 2;
@@ -118,7 +133,6 @@ TEST_F(ParametersEditServiceTests, insertDefaultZoneAfterZone)
     EXPECT_EQ(2, parameters.zoneLocationIndex[1]);
     EXPECT_EQ(4, parameters.zoneLocationIndex[2]);
     EXPECT_EQ(3, parameters.sourceLocationIndex[0]);
-    EXPECT_TRUE(approxCompare(0.05f, parameters.friction.zoneValues[0].value));
 
     SimulationParameters defaultParameters;
     EXPECT_TRUE(approxCompare(origParameters.friction.zoneValues[0].value, parameters.friction.zoneValues[0].value));
@@ -129,7 +143,34 @@ TEST_F(ParametersEditServiceTests, insertDefaultZoneAfterZone)
     EXPECT_EQ(origParameters.friction.zoneValues[1].enabled, parameters.friction.zoneValues[2].enabled);
 }
 
-TEST_F(ParametersEditServiceTests, insertDefaultZoneAfterSource)
+TEST_F(ParametersEditServiceTests_New, insertDefaultSourceAfterZone)
+{
+    SimulationParameters parameters;
+    parameters.numZones = 1;
+    parameters.numSources = 2;
+    parameters.sourceLocationIndex[0] = 1;
+    parameters.sourceLocationIndex[1] = 3;
+    parameters.zoneLocationIndex[0] = 2;
+    parameters.sourceCircularRadius.sourceValues[0] = 0.05f;
+
+    auto origParameters = parameters;
+
+    ParametersEditService::get().insertDefaultSource(parameters, 1);
+
+    EXPECT_EQ(1, parameters.numZones);
+    EXPECT_EQ(3, parameters.numSources);
+    EXPECT_EQ(1, parameters.sourceLocationIndex[0]);
+    EXPECT_EQ(2, parameters.sourceLocationIndex[1]);
+    EXPECT_EQ(4, parameters.sourceLocationIndex[2]);
+    EXPECT_EQ(3, parameters.zoneLocationIndex[0]);
+
+    SimulationParameters defaultParameters;
+    EXPECT_TRUE(approxCompare(origParameters.sourceCircularRadius.sourceValues[0], parameters.sourceCircularRadius.sourceValues[0]));
+    EXPECT_TRUE(approxCompare(defaultParameters.sourceCircularRadius.sourceValues[0], parameters.sourceCircularRadius.sourceValues[1]));
+    EXPECT_TRUE(approxCompare(origParameters.sourceCircularRadius.sourceValues[1], parameters.sourceCircularRadius.sourceValues[2]));
+}
+
+TEST_F(ParametersEditServiceTests_New, insertDefaultZoneAfterSource)
 {
     SimulationParameters parameters;
     parameters.numZones = 1;
@@ -146,4 +187,23 @@ TEST_F(ParametersEditServiceTests, insertDefaultZoneAfterSource)
     EXPECT_EQ(3, parameters.zoneLocationIndex[1]);
     EXPECT_EQ(1, parameters.sourceLocationIndex[0]);
     EXPECT_EQ(4, parameters.sourceLocationIndex[1]);
+}
+
+TEST_F(ParametersEditServiceTests_New, insertDefaultSourceAfterSource)
+{
+    SimulationParameters parameters;
+    parameters.numZones = 2;
+    parameters.numSources = 1;
+    parameters.sourceLocationIndex[0] = 2;
+    parameters.zoneLocationIndex[0] = 1;
+    parameters.zoneLocationIndex[1] = 3;
+
+    ParametersEditService::get().insertDefaultSource(parameters, 1);
+
+    EXPECT_EQ(2, parameters.numZones);
+    EXPECT_EQ(2, parameters.numSources);
+    EXPECT_EQ(2, parameters.sourceLocationIndex[0]);
+    EXPECT_EQ(3, parameters.sourceLocationIndex[1]);
+    EXPECT_EQ(1, parameters.zoneLocationIndex[0]);
+    EXPECT_EQ(4, parameters.zoneLocationIndex[1]);
 }
