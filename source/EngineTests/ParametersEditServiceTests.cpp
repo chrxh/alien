@@ -83,13 +83,13 @@ TEST_F(ParametersEditServiceTests, cloneSource)
     EXPECT_TRUE(approxCompare(4.0f, parameters.sourceCircularRadius.sourceValues[2]));
 }
 
-TEST_F(ParametersEditServiceTests, insertZoneAfterBase)
+TEST_F(ParametersEditServiceTests, insertDefaultZoneAfterBase)
 {
     SimulationParameters parameters;
     parameters.numSources = 1;
     parameters.sourceLocationIndex[0] = 1;
 
-    ParametersEditService::get().insertZone(parameters, 0);
+    ParametersEditService::get().insertDefaultZone(parameters, 0);
 
     EXPECT_EQ(1, parameters.numZones);
     EXPECT_EQ(1, parameters.numSources);
@@ -97,7 +97,7 @@ TEST_F(ParametersEditServiceTests, insertZoneAfterBase)
     EXPECT_EQ(2, parameters.sourceLocationIndex[0]);
 }
 
-TEST_F(ParametersEditServiceTests, insertZoneAfterZone)
+TEST_F(ParametersEditServiceTests, insertDefaultZoneAfterZone)
 {
     SimulationParameters parameters;
     parameters.numZones = 2;
@@ -105,8 +105,12 @@ TEST_F(ParametersEditServiceTests, insertZoneAfterZone)
     parameters.zoneLocationIndex[0] = 1;
     parameters.zoneLocationIndex[1] = 3;
     parameters.sourceLocationIndex[0] = 2;
+    parameters.friction.zoneValues[0].value = 0.05f;
+    parameters.friction.zoneValues[0].enabled = true;
 
-    ParametersEditService::get().insertZone(parameters, 1);
+    auto origParameters = parameters;
+
+    ParametersEditService::get().insertDefaultZone(parameters, 1);
 
     EXPECT_EQ(3, parameters.numZones);
     EXPECT_EQ(1, parameters.numSources);
@@ -114,9 +118,18 @@ TEST_F(ParametersEditServiceTests, insertZoneAfterZone)
     EXPECT_EQ(2, parameters.zoneLocationIndex[1]);
     EXPECT_EQ(4, parameters.zoneLocationIndex[2]);
     EXPECT_EQ(3, parameters.sourceLocationIndex[0]);
+    EXPECT_TRUE(approxCompare(0.05f, parameters.friction.zoneValues[0].value));
+
+    SimulationParameters defaultParameters;
+    EXPECT_TRUE(approxCompare(origParameters.friction.zoneValues[0].value, parameters.friction.zoneValues[0].value));
+    EXPECT_EQ(origParameters.friction.zoneValues[0].enabled, parameters.friction.zoneValues[0].enabled);
+    EXPECT_TRUE(approxCompare(defaultParameters.friction.zoneValues[0].value, parameters.friction.zoneValues[1].value));
+    EXPECT_EQ(defaultParameters.friction.zoneValues[0].enabled, parameters.friction.zoneValues[1].enabled);
+    EXPECT_TRUE(approxCompare(origParameters.friction.zoneValues[1].value, parameters.friction.zoneValues[2].value));
+    EXPECT_EQ(origParameters.friction.zoneValues[1].enabled, parameters.friction.zoneValues[2].enabled);
 }
 
-TEST_F(ParametersEditServiceTests, insertZoneAfterSource)
+TEST_F(ParametersEditServiceTests, insertDefaultZoneAfterSource)
 {
     SimulationParameters parameters;
     parameters.numZones = 1;
@@ -125,7 +138,7 @@ TEST_F(ParametersEditServiceTests, insertZoneAfterSource)
     parameters.sourceLocationIndex[0] = 1;
     parameters.sourceLocationIndex[1] = 3;
 
-    ParametersEditService::get().insertZone(parameters, 1);
+    ParametersEditService::get().insertDefaultZone(parameters, 1);
 
     EXPECT_EQ(2, parameters.numZones);
     EXPECT_EQ(2, parameters.numSources);
