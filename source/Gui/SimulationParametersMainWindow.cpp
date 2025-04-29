@@ -518,8 +518,14 @@ void SimulationParametersMainWindow::onCloneLocation()
         }
     }
 
+    auto strengths = editService.getRadiationStrengths(parameters);
+    auto newStrengths = editService.calcRadiationStrengthsForAddingZone(strengths);
+
     editService.cloneLocation(parameters, _selectedLocationIndex);
     editService.cloneLocation(origParameters, _selectedLocationIndex);
+
+    editService.applyRadiationStrengths(parameters, newStrengths);
+    editService.applyRadiationStrengths(origParameters, newStrengths);
 
     ++_selectedLocationIndex;
     _simulationFacade->setSimulationParameters(parameters);
