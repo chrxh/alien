@@ -19,7 +19,8 @@ class ParametersEditService
     MAKE_SINGLETON(ParametersEditService);
 
 public:
-    void cloneLocation(SimulationParameters& parameters, int locationIndex) const;
+    void insertZone(SimulationParameters& parameters, int locationIndex) const; // Create location has locationIndex + 1
+    void cloneLocation(SimulationParameters& parameters, int locationIndex) const;  // Create location has locationIndex + 1
     void copyLocation(SimulationParameters& targetParameters, int targetLocationIndex, SimulationParameters& sourceParameters, int sourceLocationIndex) const;
 
     RadiationStrengths getRadiationStrengths(SimulationParameters const& parameters) const;
