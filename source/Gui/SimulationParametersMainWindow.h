@@ -38,8 +38,8 @@ private:
 
     void onOpenParameters();
     void onSaveParameters();
-    void onAddZone();
-    void onAddSource();
+    void onInsertDefaultZone();
+    void onInsertDefaultSource();
     void onCloneLocation();
     void onDeleteLocation();
     void onDecreaseLocationIndex();
