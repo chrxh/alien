@@ -418,8 +418,8 @@ void SimulationParametersMainWindow::onAddZone()
         return;
     }
 
-    editService.insertZone(parameters, _selectedLocationIndex);
-    editService.insertZone(origParameters, _selectedLocationIndex);
+    editService.insertDefaultZone(parameters, _selectedLocationIndex);
+    editService.insertDefaultZone(origParameters, _selectedLocationIndex);
 
     ++_selectedLocationIndex;
 
@@ -453,55 +453,6 @@ void SimulationParametersMainWindow::onAddZone()
 
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
-
-
-    //auto parameters = _simulationFacade->getSimulationParameters();
-    //auto origParameters = _simulationFacade->getOriginalSimulationParameters();
-
-    //if (!checkNumZones(parameters)) {
-    //    return;
-    //}
-
-    //++_selectedLocationIndex;
-    //LocationHelper::adaptLocationIndices(parameters, _selectedLocationIndex, 1);
-    //LocationHelper::adaptLocationIndices(origParameters, _selectedLocationIndex, 1);
-
-    //auto worldSize = _simulationFacade->getWorldSize();
-    //auto minRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
-    //int index = parameters.numZones;
-
-    //auto zoneName = LocationHelper::generateZoneName(parameters);
-    //StringHelper::copy(parameters.zoneName.zoneValues[index], sizeof(parameters.zoneName.zoneValues[index]), zoneName);
-    //StringHelper::copy(origParameters.zoneName.zoneValues[index], sizeof(parameters.zoneName.zoneValues[index]), zoneName);
-    //parameters.zoneLocationIndex[index] = _selectedLocationIndex;
-    //parameters.backgroundColor.zoneValues[index].enabled = true;
-    //parameters.backgroundColor.zoneValues[index].value = _zoneColorPalette.getColor((2 + parameters.numZones) * 8);
-    //parameters.zoneShape.zoneValues[index] = ZoneShapeType_Circular;
-    //parameters.zonePosition.zoneValues[index] = {toFloat(worldSize.x / 2), toFloat(worldSize.y / 2)};
-    //parameters.zoneCoreRadius.zoneValues[index] = minRadius / 3;
-    //parameters.zoneCoreRect.zoneValues[index] = {minRadius / 3, minRadius / 3};
-    //parameters.zoneFadeoutRadius.zoneValues[index] = minRadius / 3;
-    //parameters.zoneForceFieldType.zoneValues[index] = ForceField_None;
-    //parameters.zoneRadialForceFieldOrientation.zoneValues[index] = Orientation_Clockwise;
-    //parameters.zoneRadialForceFieldStrength.zoneValues[index] = 0.001f;
-    //parameters.zoneRadialForceFieldDriftAngle.zoneValues[index] = 0.0f;
-
-    //origParameters.zoneLocationIndex[index] = _selectedLocationIndex;
-    //origParameters.backgroundColor.zoneValues[index] = parameters.backgroundColor.zoneValues[index];
-    //origParameters.zoneShape.zoneValues[index] = parameters.zoneShape.zoneValues[index];
-    //origParameters.zonePosition.zoneValues[index] = parameters.zonePosition.zoneValues[index];
-    //origParameters.zoneCoreRadius.zoneValues[index] = parameters.zoneCoreRadius.zoneValues[index];
-    //origParameters.zoneCoreRect.zoneValues[index] = parameters.zoneCoreRect.zoneValues[index];
-    //origParameters.zoneFadeoutRadius.zoneValues[index] = parameters.zoneFadeoutRadius.zoneValues[index];
-    //origParameters.zoneForceFieldType.zoneValues[index] = parameters.zoneForceFieldType.zoneValues[index];
-    //origParameters.zoneRadialForceFieldOrientation.zoneValues[index] = parameters.zoneRadialForceFieldOrientation.zoneValues[index];
-    //origParameters.zoneRadialForceFieldStrength.zoneValues[index] = parameters.zoneRadialForceFieldStrength.zoneValues[index];
-    //origParameters.zoneRadialForceFieldDriftAngle.zoneValues[index] = parameters.zoneRadialForceFieldDriftAngle.zoneValues[index];
-
-    //++parameters.numZones;
-    //++origParameters.numZones;
-    //_simulationFacade->setSimulationParameters(parameters);
-    //_simulationFacade->setOriginalSimulationParameters(origParameters);
 }
 
 void SimulationParametersMainWindow::onAddSource()
