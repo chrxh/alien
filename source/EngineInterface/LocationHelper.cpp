@@ -117,7 +117,7 @@ std::map<int, int> LocationHelper::adaptLocationIndices(SimulationParameters& pa
     return result;
 }
 
-std::string LocationHelper::generateZoneName(SimulationParameters& parameters)
+std::string LocationHelper::generateZoneName(SimulationParameters const& parameters)
 {
     int counter = 0;
     bool alreadyUsed;
@@ -137,7 +137,7 @@ std::string LocationHelper::generateZoneName(SimulationParameters& parameters)
     return result;
 }
 
-std::string LocationHelper::generateSourceName(SimulationParameters& parameters)
+std::string LocationHelper::generateSourceName(SimulationParameters const& parameters)
 {
     int counter = 0;
     bool alreadyUsed;

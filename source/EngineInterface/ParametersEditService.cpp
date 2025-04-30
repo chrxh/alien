@@ -12,10 +12,15 @@ void ParametersEditService::insertDefaultZone(SimulationParameters& parameters, 
     LocationHelper::adaptLocationIndices(parameters, locationIndex + 1, 1);
 
     auto startIndex = 0;
+    auto insertAtEnd = false;
     for (int i = 0; i < parameters.numZones; ++i) {
         if (parameters.zoneLocationIndex[i] > locationIndex) {
             startIndex = i;
             break;
+        }
+        if (i == parameters.numZones - 1) {
+            insertAtEnd = true;
+            startIndex = i;
         }
     }
 
@@ -23,7 +28,7 @@ void ParametersEditService::insertDefaultZone(SimulationParameters& parameters, 
     for (int i = parameters.numZones - 2; i >= startIndex; --i) {
         parameters.zoneLocationIndex[i + 1] = parameters.zoneLocationIndex[i];
     }
-    parameters.zoneLocationIndex[startIndex] = locationIndex + 1;
+    parameters.zoneLocationIndex[insertAtEnd ? startIndex + 1 : startIndex] = locationIndex + 1;
 
     for (int i = parameters.numZones - 2; i >= startIndex; --i) {
         auto sourceLocationIndex = parameters.zoneLocationIndex[i];
@@ -36,8 +41,8 @@ void ParametersEditService::insertDefaultZone(SimulationParameters& parameters, 
     defaultParameters.zoneLocationIndex[0] = 1;
     copyLocation(parameters, locationIndex + 1, defaultParameters, 1);
 
-    StringHelper::copy(
-        parameters.zoneName.zoneValues[startIndex], sizeof(parameters.zoneName.zoneValues[startIndex]), LocationHelper::generateZoneName(parameters));
+    auto newZoneIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex + 1);
+    StringHelper::copy(parameters.zoneName.zoneValues[newZoneIndex], sizeof(Char64), LocationHelper::generateZoneName(parameters));
 }
 
 void ParametersEditService::insertDefaultSource(SimulationParameters& parameters, int locationIndex) const
@@ -45,10 +50,15 @@ void ParametersEditService::insertDefaultSource(SimulationParameters& parameters
     LocationHelper::adaptLocationIndices(parameters, locationIndex + 1, 1);
 
     auto startIndex = 0;
+    auto insertAtEnd = false;
     for (int i = 0; i < parameters.numSources; ++i) {
         if (parameters.sourceLocationIndex[i] > locationIndex) {
             startIndex = i;
             break;
+        }
+        if (i == parameters.numSources - 1) {
+            insertAtEnd = true;
+            startIndex = i;
         }
     }
 
@@ -56,7 +66,7 @@ void ParametersEditService::insertDefaultSource(SimulationParameters& parameters
     for (int i = parameters.numSources - 2; i >= startIndex; --i) {
         parameters.sourceLocationIndex[i + 1] = parameters.sourceLocationIndex[i];
     }
-    parameters.sourceLocationIndex[startIndex] = locationIndex + 1;
+    parameters.sourceLocationIndex[insertAtEnd ? startIndex + 1 : startIndex] = locationIndex + 1;
 
     for (int i = parameters.numSources - 2; i >= startIndex; --i) {
         auto sourceLocationIndex = parameters.sourceLocationIndex[i];
@@ -69,14 +79,13 @@ void ParametersEditService::insertDefaultSource(SimulationParameters& parameters
     defaultParameters.sourceLocationIndex[0] = 1;
     copyLocation(parameters, locationIndex + 1, defaultParameters, 1);
 
-    StringHelper::copy(
-        parameters.sourceName.sourceValues[startIndex], sizeof(parameters.sourceName.sourceValues[startIndex]), LocationHelper::generateSourceName(parameters));
+    auto newSourceIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex + 1);
+    StringHelper::copy(parameters.sourceName.sourceValues[newSourceIndex], sizeof(Char64), LocationHelper::generateSourceName(parameters));
 }
 
 void ParametersEditService::cloneLocation(SimulationParameters& parameters, int locationIndex) const
 {
     auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
-
     auto startIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
     LocationHelper::adaptLocationIndices(parameters, locationIndex, 1);
 
@@ -115,16 +124,21 @@ void ParametersEditService::cloneLocation(SimulationParameters& parameters, int 
     }
 }
 
-void ParametersEditService::copyLocation(
-    SimulationParameters& targetParameters,
-    int targetLocationIndex,
-    SimulationParameters& sourceParameters,
-    int sourceLocationIndex) const
+void ParametersEditService::deleteLocation(SimulationParameters& parameters, int locationIndex) const
 {
-    auto const& parametersSpecs = SpecificationService::get().getSpec();
-    for (auto const& groupSpec : parametersSpecs._groups) {
-        copyLocationImpl(targetParameters, targetLocationIndex, sourceParameters, sourceLocationIndex, groupSpec._parameters);
+    auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
+    auto startIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+
+    if (locationType == LocationType::Zone) {
+        for (int i = startIndex; i < parameters.numZones - 1; ++i) {
+            auto targetLocationIndex = parameters.sourceLocationIndex[i];
+            auto sourceLocationIndex = parameters.sourceLocationIndex[i + 1];
+            copyLocation(parameters, targetLocationIndex, parameters, sourceLocationIndex);
+        }
+        --parameters.numZones;
     }
+
+    LocationHelper::adaptLocationIndices(parameters, locationIndex + 1, -1);
 }
 
 auto ParametersEditService::getRadiationStrengths(SimulationParameters const& parameters) const -> RadiationStrengths
@@ -216,7 +230,7 @@ void ParametersEditService::adaptRadiationStrengths(RadiationStrengths& strength
     }
 }
 
-auto ParametersEditService::calcRadiationStrengthsForAddingZone(RadiationStrengths const& strengths) const -> RadiationStrengths
+auto ParametersEditService::calcRadiationStrengthsForAddingSource(RadiationStrengths const& strengths) const -> RadiationStrengths
 {
     auto result = strengths;
     if (strengths.values.size() == strengths.pinned.size()) {
@@ -271,6 +285,18 @@ auto ParametersEditService::calcRadiationStrengthsForDeletingZone(
     }
 
     return result;
+}
+
+void ParametersEditService::copyLocation(
+    SimulationParameters& targetParameters,
+    int targetLocationIndex,
+    SimulationParameters& sourceParameters,
+    int sourceLocationIndex) const
+{
+    auto const& parametersSpecs = SpecificationService::get().getSpec();
+    for (auto const& groupSpec : parametersSpecs._groups) {
+        copyLocationImpl(targetParameters, targetLocationIndex, sourceParameters, sourceLocationIndex, groupSpec._parameters);
+    }
 }
 
 void ParametersEditService::copyLocationImpl(

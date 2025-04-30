@@ -97,14 +97,27 @@ std::string StringHelper::format(std::chrono::system_clock::time_point const& ti
     return ss.str();
 }
 
-void StringHelper::copy(char* target, int targetSize, std::string const& source)
+void StringHelper::copy(char* target, int maxSize, std::string const& source)
 {
     auto sourceSize = source.size();
-    if (sourceSize >= targetSize) {
-        sourceSize = targetSize - 1;
+    if (sourceSize >= maxSize) {
+        sourceSize = maxSize - 1;
     }
     source.copy(target, sourceSize);
     target[sourceSize] = 0;
+}
+
+bool StringHelper::compare(char const* target, int maxSize, char const* source)
+{
+    for (int i = 0; i < maxSize; ++i) {
+        if (target[i] != source[i]) {
+            return false;
+        }
+        if (source[i] == 0) {
+            break;
+        }
+    }
+    return true;
 }
 
 bool StringHelper::containsCaseInsensitive(std::string const& str, std::string const& toMatch)

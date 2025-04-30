@@ -23,6 +23,6 @@ public:
     // returns new by old location index
     static std::map<int, int> adaptLocationIndices(SimulationParameters& parameters, int fromLocationIndex, int offset);
 
-    static std::string generateZoneName(SimulationParameters& parameters);
-    static std::string generateSourceName(SimulationParameters& parameters);
+    static std::string generateZoneName(SimulationParameters const& parameters);
+    static std::string generateSourceName(SimulationParameters const& parameters);
 };
