@@ -439,7 +439,6 @@ void SimulationParametersMainWindow::onInsertDefaultZone()
     parameters.zoneRadialForceFieldStrength.zoneValues[index] = 0.001f;
     parameters.zoneRadialForceFieldDriftAngle.zoneValues[index] = 0.0f;
 
-    origParameters.zoneLocationIndex[index] = _selectedLocationIndex;
     origParameters.backgroundColor.zoneValues[index] = parameters.backgroundColor.zoneValues[index];
     origParameters.zoneShape.zoneValues[index] = parameters.zoneShape.zoneValues[index];
     origParameters.zonePosition.zoneValues[index] = parameters.zonePosition.zoneValues[index];
@@ -465,7 +464,7 @@ void SimulationParametersMainWindow::onInsertDefaultSource()
         return;
     }
     auto strengths = editService.getRadiationStrengths(parameters);
-    auto newStrengths = editService.calcRadiationStrengthsForAddingZone(strengths);
+    auto newStrengths = editService.calcRadiationStrengthsForAddingSource(strengths);
 
     editService.insertDefaultSource(parameters, _selectedLocationIndex);
     editService.insertDefaultSource(origParameters, _selectedLocationIndex);
@@ -497,7 +496,7 @@ void SimulationParametersMainWindow::onCloneLocation()
     }
 
     auto strengths = editService.getRadiationStrengths(parameters);
-    auto newStrengths = editService.calcRadiationStrengthsForAddingZone(strengths);
+    auto newStrengths = editService.calcRadiationStrengthsForAddingSource(strengths);
 
     editService.cloneLocation(parameters, _selectedLocationIndex);
     editService.cloneLocation(origParameters, _selectedLocationIndex);
@@ -512,14 +511,19 @@ void SimulationParametersMainWindow::onCloneLocation()
 
 void SimulationParametersMainWindow::onDeleteLocation()
 {
+    auto& editService = ParametersEditService::get();
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
     LocationController::get().deleteLocationWindow(_selectedLocationIndex);
-    auto locationType = LocationHelper::getLocationType(_selectedLocationIndex, parameters);
 
-    if (locationType == LocationType::Zone) {
-        THROW_NOT_IMPLEMENTED();
+    editService.deleteLocation(parameters, _selectedLocationIndex);
+    editService.deleteLocation(origParameters, _selectedLocationIndex);
+
+    //auto locationType = LocationHelper::getLocationType(_selectedLocationIndex, parameters);
+
+    //if (locationType == LocationType::Zone) {
+    //    THROW_NOT_IMPLEMENTED();
         //std::optional<int> zoneIndex;
         //for (int i = 0; i < parameters.numZones; ++i) {
         //    if (parameters.zoneLocationIndex[i] == _selectedLocationIndex) {
@@ -535,8 +539,8 @@ void SimulationParametersMainWindow::onDeleteLocation()
         //    --parameters.numZones;
         //    --origParameters.numZones;
         //}
-    } else {
-        THROW_NOT_IMPLEMENTED();
+    //} else {
+    //    THROW_NOT_IMPLEMENTED();
         //std::optional<int> sourceIndex;
         //for (int i = 0; i < parameters.numRadiationSources.value; ++i) {
         //    if (parameters.radiationSource[i].locationIndex == _selectedLocationIndex) {
@@ -552,10 +556,10 @@ void SimulationParametersMainWindow::onDeleteLocation()
         //    --parameters.numRadiationSources.value;
         //    --origParameters.numRadiationSources.value;
         //}
-    }
+    //}
 
-    auto newByOldLocationIndex = LocationHelper::adaptLocationIndices(parameters, _selectedLocationIndex, -1);
-    LocationHelper::adaptLocationIndices(origParameters, _selectedLocationIndex, -1);
+    //auto newByOldLocationIndex = LocationHelper::adaptLocationIndices(parameters, _selectedLocationIndex, -1);
+    //LocationHelper::adaptLocationIndices(origParameters, _selectedLocationIndex, -1);
 
     if (_locations.size() - 1 == _selectedLocationIndex) {
         --_selectedLocationIndex;
@@ -564,7 +568,7 @@ void SimulationParametersMainWindow::onDeleteLocation()
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 
-    LocationController::get().remapLocationIndices(newByOldLocationIndex);
+    //LocationController::get().remapLocationIndices(newByOldLocationIndex);
 }
 
 void SimulationParametersMainWindow::onDecreaseLocationIndex()
