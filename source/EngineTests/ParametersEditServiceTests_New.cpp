@@ -176,6 +176,25 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultZone_empty)
     checkParametersAfterDefaultInsertion(parameters, origParameters, {LocationType::Zone}, 1);
 }
 
+TEST_F(ParametersEditServiceTests_New, insertDefaultZone_onlySources)
+{
+    auto origParameters = createTestData({
+        LocationType::Source,
+        LocationType::Source,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().insertDefaultZone(parameters, 1);
+    checkParametersAfterDefaultInsertion(
+        parameters,
+        origParameters,
+        {
+            LocationType::Source,
+            LocationType::Zone,
+            LocationType::Source,
+        },
+        2);
+}
+
 TEST_F(ParametersEditServiceTests_New, insertDefaultZone_base)
 {
     auto origParameters = createTestData({
@@ -251,7 +270,7 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultZone_firstZone2)
         3);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultZone_middle)
+TEST_F(ParametersEditServiceTests_New, insertDefaultZone_middle1)
 {
     auto origParameters = createTestData({
         LocationType::Zone,
@@ -274,6 +293,35 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultZone_middle)
             LocationType::Zone,
         },
         4);
+}
+
+TEST_F(ParametersEditServiceTests_New, insertDefaultZone_middle2)
+{
+    auto origParameters = createTestData({
+        LocationType::Zone,
+        LocationType::Source,
+        LocationType::Zone,
+        LocationType::Source,
+        LocationType::Source,
+        LocationType::Zone,
+        LocationType::Source,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().insertDefaultZone(parameters, 4);
+    checkParametersAfterDefaultInsertion(
+        parameters,
+        origParameters,
+        {
+            LocationType::Zone,
+            LocationType::Source,
+            LocationType::Zone,
+            LocationType::Source,
+            LocationType::Zone,
+            LocationType::Source,
+            LocationType::Zone,
+            LocationType::Source,
+        },
+        5);
 }
 
 TEST_F(ParametersEditServiceTests_New, insertDefaultZone_end)
@@ -307,6 +355,25 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_empty)
     auto parameters = origParameters;
     ParametersEditService::get().insertDefaultSource(parameters, 0);
     checkParametersAfterDefaultInsertion(parameters, origParameters, {LocationType::Source}, 1);
+}
+
+TEST_F(ParametersEditServiceTests_New, insertDefaultSource_onlyZones)
+{
+    auto origParameters = createTestData({
+        LocationType::Zone,
+        LocationType::Zone,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().insertDefaultSource(parameters, 1);
+    checkParametersAfterDefaultInsertion(
+        parameters,
+        origParameters,
+        {
+            LocationType::Zone,
+            LocationType::Source,
+            LocationType::Zone,
+        },
+        2);
 }
 
 TEST_F(ParametersEditServiceTests_New, insertDefaultSource_base)
@@ -384,7 +451,7 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_firstSource2)
         3);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultSource_middle)
+TEST_F(ParametersEditServiceTests_New, insertDefaultSource_middle1)
 {
     auto origParameters = createTestData({
         LocationType::Source,
@@ -407,6 +474,35 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_middle)
             LocationType::Source,
         },
         4);
+}
+
+TEST_F(ParametersEditServiceTests_New, insertDefaultSource_middle2)
+{
+    auto origParameters = createTestData({
+        LocationType::Source,
+        LocationType::Zone,
+        LocationType::Source,
+        LocationType::Zone,
+        LocationType::Zone,
+        LocationType::Source,
+        LocationType::Zone,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().insertDefaultSource(parameters, 4);
+    checkParametersAfterDefaultInsertion(
+        parameters,
+        origParameters,
+        {
+            LocationType::Source,
+            LocationType::Zone,
+            LocationType::Source,
+            LocationType::Zone,
+            LocationType::Source,
+            LocationType::Zone,
+            LocationType::Source,
+            LocationType::Zone,
+        },
+        5);
 }
 
 TEST_F(ParametersEditServiceTests_New, insertDefaultSource_end)
