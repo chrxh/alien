@@ -4,7 +4,7 @@
 #include "Definitions.cuh"
 #include "SimulationData.cuh"
 #include "ConstantMemory.cuh"
-#include "ZoneCalculator.cuh"
+#include "ParameterCalculator.cuh"
 #include "ObjectFactory.cuh"
 #include "RadiationProcessor.cuh"
 

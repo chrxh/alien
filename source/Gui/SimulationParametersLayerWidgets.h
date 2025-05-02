@@ -3,9 +3,9 @@
 #include "EngineInterface/Definitions.h"
 
 #include "LocationWidgets.h"
-#include "ZoneColorPalette.h"
+#include "LayerColorPalette.h"
 
-class _SimulationParametersZoneWidgets : public _LocationWidgets
+class _SimulationParametersLayerWidgets : public _LocationWidgets
 {
 public:
     void init(SimulationFacade const& simulationFacade, int locationIndex);
@@ -19,5 +19,5 @@ private:
 
     int _locationIndex = 0;
     std::vector<std::string> _cellTypeStrings;
-    std::string _zoneName;
+    std::string _layerName;
 };

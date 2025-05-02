@@ -5,7 +5,7 @@
 
 #include "SimulationParametersBaseWidgets.h"
 #include "SimulationParametersSourceWidgets.h"
-#include "SimulationParametersZoneWidgets.h"
+#include "SimulationParametersLayerWidgets.h"
 
 void LocationController::addLocationWindow(int locationIndex, RealVector2D const& initialPos)
 {
@@ -18,10 +18,10 @@ void LocationController::addLocationWindow(int locationIndex, RealVector2D const
     } else {
         auto parameters = _simulationFacade->getSimulationParameters();
         auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
-        if (locationType == LocationType::Zone) {
-            auto zoneWidgets = std::make_shared<_SimulationParametersZoneWidgets>();
-            zoneWidgets->init(_simulationFacade, locationIndex);
-            widgets = zoneWidgets;
+        if (locationType == LocationType::Layer) {
+            auto layerWidgets = std::make_shared<_SimulationParametersLayerWidgets>();
+            layerWidgets->init(_simulationFacade, locationIndex);
+            widgets = layerWidgets;
         } else {
             auto sourceWidgets = std::make_shared<_SimulationParametersSourceWidgets>();
             sourceWidgets->init(_simulationFacade, locationIndex);

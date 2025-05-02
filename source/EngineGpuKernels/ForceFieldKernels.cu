@@ -3,42 +3,42 @@
 #include "EngineInterface/SimulationParameters.h"
 
 #include "ConstantMemory.cuh"
-#include "ZoneCalculator.cuh"
+#include "ParameterCalculator.cuh"
 
 namespace
 {
-    __device__ float getHeight(BaseMap const& map, float2 const& pos, int const& zoneIndex)
+    __device__ float getHeight(BaseMap const& map, float2 const& pos, int const& index)
     {
         auto dist =
-            map.getDistance(pos, float2{cudaSimulationParameters.zonePosition.zoneValues[zoneIndex].x, cudaSimulationParameters.zonePosition.zoneValues[zoneIndex].y});
-        if (Orientation_Clockwise == cudaSimulationParameters.zoneRadialForceFieldOrientation.zoneValues[zoneIndex]) {
-            return sqrtf(dist) * cudaSimulationParameters.zoneRadialForceFieldStrength.zoneValues[zoneIndex];
+            map.getDistance(pos, float2{cudaSimulationParameters.layerPosition.layerValues[index].x, cudaSimulationParameters.layerPosition.layerValues[index].y});
+        if (Orientation_Clockwise == cudaSimulationParameters.layerRadialForceFieldOrientation.layerValues[index]) {
+            return sqrtf(dist) * cudaSimulationParameters.layerRadialForceFieldStrength.layerValues[index];
         } else {
-            return -sqrtf(dist) * cudaSimulationParameters.zoneRadialForceFieldStrength.zoneValues[zoneIndex];
+            return -sqrtf(dist) * cudaSimulationParameters.layerRadialForceFieldStrength.layerValues[index];
         }
     }
 
-    __device__ __inline__ float2 calcAcceleration(BaseMap const& map, float2 const& pos, int const& zoneIndex)
+    __device__ __inline__ float2 calcAcceleration(BaseMap const& map, float2 const& pos, int const& index)
     {
-        switch (cudaSimulationParameters.zoneForceFieldType.zoneValues[zoneIndex]) {
+        switch (cudaSimulationParameters.layerForceFieldType.layerValues[index]) {
         case ForceField_Radial: {
-            auto baseValue = getHeight(map, pos, zoneIndex);
-            auto downValue = getHeight(map, pos + float2{0, 1}, zoneIndex);
-            auto rightValue = getHeight(map, pos + float2{1, 0}, zoneIndex);
+            auto baseValue = getHeight(map, pos, index);
+            auto downValue = getHeight(map, pos + float2{0, 1}, index);
+            auto rightValue = getHeight(map, pos + float2{1, 0}, index);
             float2 result{rightValue - baseValue, downValue - baseValue};
             result = Math::rotateClockwise(
-                result, 90.0f + cudaSimulationParameters.zoneRadialForceFieldDriftAngle.zoneValues[zoneIndex]);
+                result, 90.0f + cudaSimulationParameters.layerRadialForceFieldDriftAngle.layerValues[index]);
             return result;
         }
         case ForceField_Central: {
             auto centerDirection = map.getCorrectedDirection(
-                float2{cudaSimulationParameters.zonePosition.zoneValues[zoneIndex].x, cudaSimulationParameters.zonePosition.zoneValues[zoneIndex].y} - pos);
-            return centerDirection * cudaSimulationParameters.zoneCentralForceFieldStrength.zoneValues[zoneIndex]
+                float2{cudaSimulationParameters.layerPosition.layerValues[index].x, cudaSimulationParameters.layerPosition.layerValues[index].y} - pos);
+            return centerDirection * cudaSimulationParameters.layerCentralForceFieldStrength.layerValues[index]
                 / (Math::lengthSquared(centerDirection) + 50.0f);
         }
         case ForceField_Linear: {
-            auto centerDirection = Math::unitVectorOfAngle(cudaSimulationParameters.zoneLinearForceFieldAngle.zoneValues[zoneIndex]);
-            return centerDirection * cudaSimulationParameters.zoneLinearForceFieldStrength.zoneValues[zoneIndex];
+            auto centerDirection = Math::unitVectorOfAngle(cudaSimulationParameters.layerLinearForceFieldAngle.layerValues[index]);
+            return centerDirection * cudaSimulationParameters.layerLinearForceFieldStrength.layerValues[index];
         }
         default:
             return {0, 0};
@@ -50,7 +50,7 @@ namespace
 
 __global__ void cudaApplyForceFieldSettings(SimulationData data)
 {
-    float2 accelerations[MAX_ZONES];
+    float2 accelerations[MAX_LAYERS];
     {
         auto& cells = data.objects.cellPointers;
         auto partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -61,14 +61,14 @@ __global__ void cudaApplyForceFieldSettings(SimulationData data)
                 continue;
             }
             int numFlowFields = 0;
-            for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
+            for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
 
-                if (cudaSimulationParameters.zoneForceFieldType.zoneValues[i] != ForceField_None) {
+                if (cudaSimulationParameters.layerForceFieldType.layerValues[i] != ForceField_None) {
                     accelerations[numFlowFields] = calcAcceleration(data.cellMap, cell->pos, i);
                     ++numFlowFields;
                 }
             }
-            auto resultingAcceleration = ZoneCalculator::calcResultingFlowField(data.cellMap, cell->pos, float2{0, 0}, accelerations);
+            auto resultingAcceleration = ParameterCalculator::calcResultingFlowField(data.cellMap, cell->pos, float2{0, 0}, accelerations);
             cell->shared1 += resultingAcceleration;
         }
     }
@@ -78,14 +78,14 @@ __global__ void cudaApplyForceFieldSettings(SimulationData data)
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& particle = particles.at(index);
             int numFlowFields = 0;
-            for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
+            for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
 
-                if (cudaSimulationParameters.zoneForceFieldType.zoneValues[i] != ForceField_None) {
+                if (cudaSimulationParameters.layerForceFieldType.layerValues[i] != ForceField_None) {
                     accelerations[numFlowFields] = calcAcceleration(data.cellMap, particle->absPos, i);
                     ++numFlowFields;
                 }
             }
-            auto resultingAcceleration = ZoneCalculator::calcResultingFlowField(data.cellMap, particle->absPos, float2{0, 0}, accelerations);
+            auto resultingAcceleration = ParameterCalculator::calcResultingFlowField(data.cellMap, particle->absPos, float2{0, 0}, accelerations);
             particle->vel += resultingAcceleration;
         }
     }

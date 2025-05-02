@@ -201,7 +201,7 @@ void TemporalControlWindow::processLoadFlashbackButton()
     ImGui::BeginDisabled(!_snapshot);
     auto result = AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_UNDO));
     AlienImGui::Tooltip("Loading in-memory flashback: It loads the saved world from the memory. Static simulation parameters will not be changed. Non-static parameters "
-                        "(such as the position of moving zones) will be restored as well.");
+                        "(such as the position of moving layers) will be restored as well.");
     if (result) {
         delayedExecution([this] { applySnapshot(*_snapshot); });
         _simulationFacade->removeSelection();
@@ -228,18 +228,18 @@ void TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
     auto parameters = _simulationFacade->getSimulationParameters();
     auto const& origParameters = snapshot.parameters;
 
-    if (origParameters.numZones == parameters.numZones) {
-        for (int i = 0; i < parameters.numZones; ++i) {
+    if (origParameters.numLayers == parameters.numLayers) {
+        for (int i = 0; i < parameters.numLayers; ++i) {
             restorePosition(
-                parameters.zonePosition.zoneValues[i],
-                parameters.zoneVelocity.zoneValues[i],
-                origParameters.zonePosition.zoneValues[i],
-                origParameters.zoneVelocity.zoneValues[i]);
+                parameters.layerPosition.layerValues[i],
+                parameters.layerVelocity.layerValues[i],
+                origParameters.layerPosition.layerValues[i],
+                origParameters.layerVelocity.layerValues[i]);
         }
     }
 
     if (origParameters.numSources == parameters.numSources) {
-        for (int i = 0; i < parameters.numZones; ++i) {
+        for (int i = 0; i < parameters.numLayers; ++i) {
             restorePosition(
                 parameters.sourcePosition.sourceValues[i],
                 parameters.sourceVelocity.sourceValues[i],

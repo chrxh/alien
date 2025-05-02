@@ -4,7 +4,7 @@ auto constexpr MAX_CELL_BONDS = 6;
 auto constexpr MAX_CHANNELS = 8;
 auto constexpr MAX_GENOME_BYTES = 8000;
 auto constexpr MAX_COLORS = 7;
-auto constexpr MAX_ZONES = 20;
+auto constexpr MAX_LAYERS = 20;
 auto constexpr MAX_SOURCES = 40;
 auto constexpr MAX_HISTOGRAM_SLOTS = 20;
 

@@ -21,7 +21,7 @@
 #include "StyleRepository.h"
 #include "HelpStrings.h"
 #include "OverlayController.h"
-#include "ZoneColorPalette.h"
+#include "LayerColorPalette.h"
 
 namespace
 {
@@ -1018,9 +1018,9 @@ void AlienImGui::ColorButtonWithPicker(ColorButtonWithPickerParameters const& pa
     }
 
     static FloatColorRGB backupColor;
-    static ZoneColorPalette zoneColorPalette;
+    static LayerColorPalette layerColorPalette;
 
-    auto savedPalette = zoneColorPalette.getReference();
+    auto savedPalette = layerColorPalette.getReference();
 
     ImVec4 imGuiColor = ImColor(color.r, color.g, color.b);
     ImVec4 imGuiBackupColor = ImColor(backupColor.r, backupColor.g, backupColor.b);

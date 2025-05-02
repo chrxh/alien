@@ -6,42 +6,42 @@
 #include "Base/StringHelper.h"
 #include "SpecificationEvaluationService.h"
 
-NewByOldLocationIndex ParametersEditService::insertDefaultZone(SimulationParameters& parameters, int locationIndex) const
+NewByOldLocationIndex ParametersEditService::insertDefaultLayer(SimulationParameters& parameters, int locationIndex) const
 {
     auto result = LocationHelper::adaptLocationIndices(parameters, locationIndex + 1, 1);
 
     auto startIndex = 0;
     auto insertAtEnd = false;
-    for (int i = 0; i < parameters.numZones; ++i) {
-        if (parameters.zoneLocationIndex[i] > locationIndex) {
+    for (int i = 0; i < parameters.numLayers; ++i) {
+        if (parameters.layerLocationIndex[i] > locationIndex) {
             startIndex = i;
             break;
         }
-        if (i == parameters.numZones - 1) {
+        if (i == parameters.numLayers - 1) {
             insertAtEnd = true;
             startIndex = i;
         }
     }
 
-    ++parameters.numZones;
-    for (int i = parameters.numZones - 2; i >= startIndex; --i) {
-        parameters.zoneLocationIndex[i + 1] = parameters.zoneLocationIndex[i];
+    ++parameters.numLayers;
+    for (int i = parameters.numLayers - 2; i >= startIndex; --i) {
+        parameters.layerLocationIndex[i + 1] = parameters.layerLocationIndex[i];
     }
-    parameters.zoneLocationIndex[insertAtEnd ? startIndex + 1 : startIndex] = locationIndex + 1;
+    parameters.layerLocationIndex[insertAtEnd ? startIndex + 1 : startIndex] = locationIndex + 1;
 
-    for (int i = parameters.numZones - 2; i >= startIndex; --i) {
-        auto sourceLocationIndex = parameters.zoneLocationIndex[i];
-        auto targetLocationIndex = parameters.zoneLocationIndex[i + 1];
+    for (int i = parameters.numLayers - 2; i >= startIndex; --i) {
+        auto sourceLocationIndex = parameters.layerLocationIndex[i];
+        auto targetLocationIndex = parameters.layerLocationIndex[i + 1];
         copyLocation(parameters, targetLocationIndex, parameters, sourceLocationIndex);
     }
 
     SimulationParameters defaultParameters;
-    defaultParameters.numZones = 1;
-    defaultParameters.zoneLocationIndex[0] = 1;
+    defaultParameters.numLayers = 1;
+    defaultParameters.layerLocationIndex[0] = 1;
     copyLocation(parameters, locationIndex + 1, defaultParameters, 1);
 
-    auto newZoneIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex + 1);
-    StringHelper::copy(parameters.zoneName.zoneValues[newZoneIndex], sizeof(Char64), LocationHelper::generateZoneName(parameters));
+    auto newLayerIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex + 1);
+    StringHelper::copy(parameters.layerName.layerValues[newLayerIndex], sizeof(Char64), LocationHelper::generateLayerName(parameters));
 
     return result;
 }
@@ -92,22 +92,22 @@ NewByOldLocationIndex ParametersEditService::cloneLocation(SimulationParameters&
     auto startIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
     auto result = LocationHelper::adaptLocationIndices(parameters, locationIndex, 1);
 
-    if (locationType == LocationType::Zone) {
-        ++parameters.numZones;
-        for (int i = parameters.numZones - 2; i >= startIndex; --i) {
-            parameters.zoneLocationIndex[i + 1] = parameters.zoneLocationIndex[i];
+    if (locationType == LocationType::Layer) {
+        ++parameters.numLayers;
+        for (int i = parameters.numLayers - 2; i >= startIndex; --i) {
+            parameters.layerLocationIndex[i + 1] = parameters.layerLocationIndex[i];
         }
-        parameters.zoneLocationIndex[startIndex] = locationIndex;
+        parameters.layerLocationIndex[startIndex] = locationIndex;
 
-        for (int i = parameters.numZones - 2; i >= startIndex; --i) {
-            auto sourceLocationIndex = parameters.zoneLocationIndex[i];
-            auto targetLocationIndex = parameters.zoneLocationIndex[i + 1];
+        for (int i = parameters.numLayers - 2; i >= startIndex; --i) {
+            auto sourceLocationIndex = parameters.layerLocationIndex[i];
+            auto targetLocationIndex = parameters.layerLocationIndex[i + 1];
             copyLocation(parameters, targetLocationIndex, parameters, sourceLocationIndex);
         }
         StringHelper::copy(
-            parameters.zoneName.zoneValues[startIndex + 1],
-            sizeof(parameters.zoneName.zoneValues[startIndex + 1]),
-            LocationHelper::generateZoneName(parameters));
+            parameters.layerName.layerValues[startIndex + 1],
+            sizeof(parameters.layerName.layerValues[startIndex + 1]),
+            LocationHelper::generateLayerName(parameters));
     } else {
         ++parameters.numSources;
         for (int i = parameters.numSources - 2; i >= startIndex; --i) {
@@ -134,16 +134,16 @@ NewByOldLocationIndex ParametersEditService::deleteLocation(SimulationParameters
     auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
     auto startIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
 
-    if (locationType == LocationType::Zone) {
-        for (int i = startIndex; i < parameters.numZones - 1; ++i) {
-            auto targetLocationIndex = parameters.zoneLocationIndex[i];
-            auto sourceLocationIndex = parameters.zoneLocationIndex[i + 1];
+    if (locationType == LocationType::Layer) {
+        for (int i = startIndex; i < parameters.numLayers - 1; ++i) {
+            auto targetLocationIndex = parameters.layerLocationIndex[i];
+            auto sourceLocationIndex = parameters.layerLocationIndex[i + 1];
             copyLocation(parameters, targetLocationIndex, parameters, sourceLocationIndex);
         }
-        for (int i = startIndex; i < parameters.numZones - 1; ++i) {
-            parameters.zoneLocationIndex[i] = parameters.zoneLocationIndex[i + 1];
+        for (int i = startIndex; i < parameters.numLayers - 1; ++i) {
+            parameters.layerLocationIndex[i] = parameters.layerLocationIndex[i + 1];
         }
-        --parameters.numZones;
+        --parameters.numLayers;
     } else {
         for (int i = startIndex; i < parameters.numSources- 1; ++i) {
             auto targetLocationIndex = parameters.sourceLocationIndex[i];
@@ -166,12 +166,12 @@ NewByOldLocationIndex ParametersEditService::moveLocationUpwards(SimulationParam
 
     if (sourceLocationType == targetLocationType) {
         SimulationParameters tempParameters;
-        if (sourceLocationType == LocationType::Zone) {
-            tempParameters.numZones = 1;
-            tempParameters.zoneLocationIndex[0] = 1;
+        if (sourceLocationType == LocationType::Layer) {
+            tempParameters.numLayers = 1;
+            tempParameters.layerLocationIndex[0] = 1;
 
             auto arrayIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            auto prevLocationIndex = parameters.zoneLocationIndex[arrayIndex - 1];
+            auto prevLocationIndex = parameters.layerLocationIndex[arrayIndex - 1];
 
             copyLocation(tempParameters, 1, parameters, locationIndex);
             copyLocation(parameters, locationIndex, parameters, prevLocationIndex);
@@ -192,7 +192,7 @@ NewByOldLocationIndex ParametersEditService::moveLocationUpwards(SimulationParam
     }
 
     std::map<int, int> result;
-    for (int i = 0; i < parameters.numZones + parameters.numSources + 1; ++i) {
+    for (int i = 0; i < parameters.numLayers + parameters.numSources + 1; ++i) {
         if (i == locationIndex) {
             result.emplace(i, i - 1);
         } else if (i == locationIndex - 1) {
@@ -211,12 +211,12 @@ NewByOldLocationIndex ParametersEditService::moveLocationDownwards(SimulationPar
 
     if (sourceLocationType == targetLocationType) {
         SimulationParameters tempParameters;
-        if (sourceLocationType == LocationType::Zone) {
-            tempParameters.numZones = 1;
-            tempParameters.zoneLocationIndex[0] = 1;
+        if (sourceLocationType == LocationType::Layer) {
+            tempParameters.numLayers = 1;
+            tempParameters.layerLocationIndex[0] = 1;
 
             auto arrayIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            auto nextLocationIndex = parameters.zoneLocationIndex[arrayIndex + 1];
+            auto nextLocationIndex = parameters.layerLocationIndex[arrayIndex + 1];
 
             copyLocation(tempParameters, 1, parameters, locationIndex);
             copyLocation(parameters, locationIndex, parameters, nextLocationIndex);
@@ -237,7 +237,7 @@ NewByOldLocationIndex ParametersEditService::moveLocationDownwards(SimulationPar
     }
 
     std::map<int, int> result;
-    for (int i = 0; i < parameters.numZones + parameters.numSources + 1; ++i) {
+    for (int i = 0; i < parameters.numLayers + parameters.numSources + 1; ++i) {
         if (i == locationIndex) {
             result.emplace(i, i + 1);
         } else if (i == locationIndex + 1) {
@@ -359,7 +359,7 @@ auto ParametersEditService::calcRadiationStrengthsForAddingSource(RadiationStren
     return result;
 }
 
-auto ParametersEditService::calcRadiationStrengthsForDeletingZone(
+auto ParametersEditService::calcRadiationStrengthsForDeletingLayer(
     RadiationStrengths const& strengths, int deleteIndex) const -> RadiationStrengths
 {
     auto existsUnpinned = false;

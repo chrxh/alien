@@ -1,10 +1,9 @@
 #pragma once
 
 #include "EngineInterface/Definitions.h"
+#include "EngineInterface/SimulationParametersSpecification.h"
 
 #include "LocationWidgets.h"
-#include "ZoneColorPalette.h"
-#include "EngineInterface/SimulationParametersSpecification.h"
 
 class _SimulationParametersBaseWidgets : public _LocationWidgets
 {

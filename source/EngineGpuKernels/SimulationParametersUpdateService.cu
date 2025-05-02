@@ -17,17 +17,17 @@ SimulationParameters SimulationParametersUpdateService::integrateChanges(
     auto result = changedParameters;
 
     if (updateConfig == SimulationParametersUpdateConfig::AllExceptChangingPositions) {
-        auto numSpots = std::min(currentParameters.numZones, changedParameters.numZones);
+        auto numSpots = std::min(currentParameters.numLayers, changedParameters.numLayers);
         for (int i = 0; i < numSpots; ++i) {
-            if (currentParameters.zoneVelocity.zoneValues[i].x != 0) {
-                result.zonePosition.zoneValues[i].x = currentParameters.zonePosition.zoneValues[i].x;
+            if (currentParameters.layerVelocity.layerValues[i].x != 0) {
+                result.layerPosition.layerValues[i].x = currentParameters.layerPosition.layerValues[i].x;
             }
-            if (currentParameters.zoneVelocity.zoneValues[i].y != 0) {
-                result.zonePosition.zoneValues[i].y = currentParameters.zonePosition.zoneValues[i].y;
+            if (currentParameters.layerVelocity.layerValues[i].y != 0) {
+                result.layerPosition.layerValues[i].y = currentParameters.layerPosition.layerValues[i].y;
             }
         }
 
-        auto numRadiationSources = std::min(currentParameters.numZones, changedParameters.numZones);
+        auto numRadiationSources = std::min(currentParameters.numLayers, changedParameters.numLayers);
         for (int i = 0; i < numRadiationSources; ++i) {
             if (currentParameters.sourceVelocity.sourceValues[i].x != 0) {
                 result.sourcePosition.sourceValues[i].x = currentParameters.sourcePosition.sourceValues[i].x;
@@ -65,18 +65,18 @@ bool SimulationParametersUpdateService::updateSimulationParametersAfterTimestep(
         auto correctedPosition = space.getCorrectedPosition(sourcePos);
         sourcePos = correctedPosition;
     }
-    for (int i = 0; i < settings.simulationParameters.numZones; ++i) {
-        auto& zonePosition = settings.simulationParameters.zonePosition.zoneValues[i];
-        auto& zoneVelocity = settings.simulationParameters.zoneVelocity.zoneValues[i];
-        if (abs(zoneVelocity.x) > NEAR_ZERO) {
-            zonePosition.x += zoneVelocity.x * settings.simulationParameters.timestepSize.value;
+    for (int i = 0; i < settings.simulationParameters.numLayers; ++i) {
+        auto& layerPosition = settings.simulationParameters.layerPosition.layerValues[i];
+        auto& layerVelocity = settings.simulationParameters.layerVelocity.layerValues[i];
+        if (abs(layerVelocity.x) > NEAR_ZERO) {
+            layerPosition.x += layerVelocity.x * settings.simulationParameters.timestepSize.value;
             result = true;
         }
-        if (abs(zoneVelocity.y) > NEAR_ZERO) {
-            zonePosition.y += zoneVelocity.y * settings.simulationParameters.timestepSize.value;
+        if (abs(layerVelocity.y) > NEAR_ZERO) {
+            layerPosition.y += layerVelocity.y * settings.simulationParameters.timestepSize.value;
             result = true;
         }
-        zonePosition = space.getCorrectedPosition(zonePosition);
+        layerPosition = space.getCorrectedPosition(layerPosition);
     }
 
     auto externalEnergyPresent = settings.simulationParameters.externalEnergy.value > 0;

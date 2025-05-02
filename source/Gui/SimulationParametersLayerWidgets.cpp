@@ -1,4 +1,4 @@
-#include "SimulationParametersZoneWidgets.h"
+#include "SimulationParametersLayerWidgets.h"
 
 #include "EngineInterface/LocationHelper.h"
 #include "EngineInterface/SimulationFacade.h"
@@ -8,22 +8,22 @@
 #include "SpecificationGuiService.h"
 #include "SimulationInteractionController.h"
 
-void _SimulationParametersZoneWidgets::init(SimulationFacade const& simulationFacade, int locationIndex)
+void _SimulationParametersLayerWidgets::init(SimulationFacade const& simulationFacade, int locationIndex)
 {
     _simulationFacade = simulationFacade;
     _locationIndex = locationIndex;
 }
 
-void _SimulationParametersZoneWidgets::process()
+void _SimulationParametersLayerWidgets::process()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
     auto lastParameters = parameters;
 
-    auto zoneIndex = LocationHelper::findLocationArrayIndex(parameters, _locationIndex);
-    _zoneName = std::string(parameters.zoneName.zoneValues[zoneIndex]);
+    auto layerIndex = LocationHelper::findLocationArrayIndex(parameters, _locationIndex);
+    _layerName = std::string(parameters.layerName.layerValues[layerIndex]);
 
-    ImGui::PushID("Zone");
+    ImGui::PushID("Layer");
     SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _simulationFacade, _locationIndex);
     ImGui::PopID();
 
@@ -34,17 +34,17 @@ void _SimulationParametersZoneWidgets::process()
     }
 }
 
-std::string _SimulationParametersZoneWidgets::getLocationName()
+std::string _SimulationParametersLayerWidgets::getLocationName()
 {
-    return "Simulation parameters for '" + _zoneName + "'";
+    return "Simulation parameters for '" + _layerName + "'";
 }
 
-int _SimulationParametersZoneWidgets::getLocationIndex() const
+int _SimulationParametersLayerWidgets::getLocationIndex() const
 {
     return _locationIndex;
 }
 
-void _SimulationParametersZoneWidgets::setLocationIndex(int locationIndex)
+void _SimulationParametersLayerWidgets::setLocationIndex(int locationIndex)
 {
     _locationIndex = locationIndex;
 }

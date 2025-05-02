@@ -54,6 +54,7 @@ add_library(EngineGpuKernels
     Objects.cuh
     ObjectFactory.cuh
     Operations.cuh
+    ParameterCalculator.cuh
     Physics.cuh
     PreprocessedSimulationData.cuh
     RadiationProcessor.cuh
@@ -91,7 +92,6 @@ add_library(EngineGpuKernels
     TransmitterProcessor.cuh
     TOs.cuh
     Util.cuh
-    ZoneCalculator.cuh
     )
 
 target_link_libraries(EngineGpuKernels Base)

@@ -7,7 +7,7 @@
 #include "SignalProcessor.cuh"
 #include "ConstantMemory.cuh"
 #include "SimulationData.cuh"
-#include "ZoneCalculator.cuh"
+#include "ParameterCalculator.cuh"
 #include "SimulationStatistics.cuh"
 #include "RadiationProcessor.cuh"
 
@@ -41,7 +41,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 {
     if (SignalProcessor::isManuallyTriggered(data, cell)) {
         float energyDelta = 0;
-        auto cellMinEnergy = ZoneCalculator::calcParameterNew(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
+        auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
         auto baseValue = cudaSimulationParameters.attackerDestroyCells.value ? cellMinEnergy * 0.1f : cellMinEnergy;
 
         Cell* someOtherCell = nullptr;
@@ -73,7 +73,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             // Evaluate genome complexity bonus
             if (otherCell->genomeComplexity > cell->genomeComplexity) {
                 auto cellTypeAttackerGenomeComplexityBonus =
-                    ZoneCalculator::calcParameterNew(cudaSimulationParameters.attackerComplexCreatureProtection, data, cell->pos, color, otherColor);
+                    ParameterCalculator::calcParameter(cudaSimulationParameters.attackerComplexCreatureProtection, data, cell->pos, color, otherColor);
                 energyToTransfer /=
                     (1.0f + cellTypeAttackerGenomeComplexityBonus * (otherCell->genomeComplexity - cell->genomeComplexity));
             }
@@ -89,7 +89,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (cudaSimulationParameters.advancedAttackerControlToggle.value && cell->mutationId < otherCell->mutationId
                 && cell->genomeComplexity <= otherCell->genomeComplexity) {
                 auto cellTypeAttackerArisingComplexMutantPenalty =
-                    ZoneCalculator::calcParameterNew(cudaSimulationParameters.attackerNewComplexMutantProtection, data, cell->pos, color, otherColor);
+                    ParameterCalculator::calcParameter(cudaSimulationParameters.attackerNewComplexMutantProtection, data, cell->pos, color, otherColor);
                 energyToTransfer *= (1.0f - cellTypeAttackerArisingComplexMutantPenalty);
             }
 
@@ -107,7 +107,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             // Evaluate geometry deviation
             if (cudaSimulationParameters.advancedAttackerControlToggle.value) {
                 auto cellTypeAttackerGeometryDeviationExponent =
-                    ZoneCalculator::calcParameterNew(cudaSimulationParameters.attackerGeometryDeviationProtection, data, cell->pos, cell->color);
+                    ParameterCalculator::calcParameter(cudaSimulationParameters.attackerGeometryDeviationProtection, data, cell->pos, cell->color);
 
                 if (abs(cellTypeAttackerGeometryDeviationExponent) > 0) {
                     auto d = otherCell->pos - cell->pos;
@@ -121,7 +121,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             // Evaluate attacker connections mismatch penalty
             if (cudaSimulationParameters.advancedAttackerControlToggle.value) {
                 auto cellTypeAttackerConnectionsMismatchPenalty =
-                    ZoneCalculator::calcParameterNew(cudaSimulationParameters.attackerConnectionsMismatchProtection, data, cell->pos, cell->color);
+                    ParameterCalculator::calcParameter(cudaSimulationParameters.attackerConnectionsMismatchProtection, data, cell->pos, cell->color);
                 if (otherCell->numConnections > cell->numConnections + 1) {
                     energyToTransfer *= (1.0f - cellTypeAttackerConnectionsMismatchPenalty) * (1.0f - cellTypeAttackerConnectionsMismatchPenalty);
                 }
@@ -131,7 +131,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             }
 
             // Evaluate food chain color matrix
-            energyToTransfer *= ZoneCalculator::calcParameterNew(cudaSimulationParameters.attackerFoodChainColorMatrix, data, cell->pos, color, otherColor);
+            energyToTransfer *= ParameterCalculator::calcParameter(cudaSimulationParameters.attackerFoodChainColorMatrix, data, cell->pos, color, otherColor);
 
             if (abs(energyToTransfer) < NEAR_ZERO) {
                 return;
@@ -177,7 +177,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         }
 
         // Radiation
-        auto cellTypeWeaponEnergyCost = ZoneCalculator::calcParameterNew(cudaSimulationParameters.attackerEnergyCost, data, cell->pos, cell->color);
+        auto cellTypeWeaponEnergyCost = ParameterCalculator::calcParameter(cudaSimulationParameters.attackerEnergyCost, data, cell->pos, cell->color);
         if (cellTypeWeaponEnergyCost > 0) {
             RadiationProcessor::radiate(data, cell, cellTypeWeaponEnergyCost);
         }

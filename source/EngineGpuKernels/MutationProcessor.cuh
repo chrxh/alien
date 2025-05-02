@@ -62,17 +62,17 @@ __inline__ __device__ void MutationProcessor::applyRandomMutationsForCell(Simula
 {
     auto& constructor = cell->cellTypeData.constructor;
     auto numNodes = toFloat(GenomeDecoder::getNumNodesRecursively(constructor.genome, constructor.genomeSize, false, true));
-    auto cellCopyMutationGeometry = ZoneCalculator::calcParameterNew(cudaSimulationParameters.copyMutationGeometry, data, cell->pos, cell->color) * numNodes;
+    auto cellCopyMutationGeometry = ParameterCalculator::calcParameter(cudaSimulationParameters.copyMutationGeometry, data, cell->pos, cell->color) * numNodes;
     auto cellCopyMutationCustomGeometry =
-        ZoneCalculator::calcParameterNew(cudaSimulationParameters.copyMutationCustomGeometry, data, cell->pos, cell->color) * numNodes;
-    auto cellCopyMutationCellType = ZoneCalculator::calcParameterNew(cudaSimulationParameters.copyMutationCellType, data, cell->pos, cell->color) * numNodes;
-    auto cellCopyMutationInsertion = ZoneCalculator::calcParameterNew(cudaSimulationParameters.copyMutationInsertion, data, cell->pos, cell->color) * numNodes;
-    auto cellCopyMutationDeletion = ZoneCalculator::calcParameterNew(cudaSimulationParameters.copyMutationDeletion, data, cell->pos, cell->color) * numNodes;
-    auto cellCopyMutationCellColor = ZoneCalculator::calcParameterNew(cudaSimulationParameters.copyMutationCellColor, data, cell->pos, cell->color) * numNodes;
-    auto cellCopyMutationTranslation = ZoneCalculator::calcParameterNew(cudaSimulationParameters.copyMutationTranslation, data, cell->pos, cell->color);
-    auto cellCopyMutationDuplication = ZoneCalculator::calcParameterNew(cudaSimulationParameters.copyMutationDuplication, data, cell->pos, cell->color);
-    auto cellCopyMutationSubgenomeColor = ZoneCalculator::calcParameterNew(cudaSimulationParameters.copyMutationSubgenomeColor, data, cell->pos, cell->color);
-    auto cellCopyMutationGenomeColor = ZoneCalculator::calcParameterNew(cudaSimulationParameters.copyMutationGenomeColor, data, cell->pos, cell->color);
+        ParameterCalculator::calcParameter(cudaSimulationParameters.copyMutationCustomGeometry, data, cell->pos, cell->color) * numNodes;
+    auto cellCopyMutationCellType = ParameterCalculator::calcParameter(cudaSimulationParameters.copyMutationCellType, data, cell->pos, cell->color) * numNodes;
+    auto cellCopyMutationInsertion = ParameterCalculator::calcParameter(cudaSimulationParameters.copyMutationInsertion, data, cell->pos, cell->color) * numNodes;
+    auto cellCopyMutationDeletion = ParameterCalculator::calcParameter(cudaSimulationParameters.copyMutationDeletion, data, cell->pos, cell->color) * numNodes;
+    auto cellCopyMutationCellColor = ParameterCalculator::calcParameter(cudaSimulationParameters.copyMutationCellColor, data, cell->pos, cell->color) * numNodes;
+    auto cellCopyMutationTranslation = ParameterCalculator::calcParameter(cudaSimulationParameters.copyMutationTranslation, data, cell->pos, cell->color);
+    auto cellCopyMutationDuplication = ParameterCalculator::calcParameter(cudaSimulationParameters.copyMutationDuplication, data, cell->pos, cell->color);
+    auto cellCopyMutationSubgenomeColor = ParameterCalculator::calcParameter(cudaSimulationParameters.copyMutationSubgenomeColor, data, cell->pos, cell->color);
+    auto cellCopyMutationGenomeColor = ParameterCalculator::calcParameter(cudaSimulationParameters.copyMutationGenomeColor, data, cell->pos, cell->color);
 
     neuronDataMutation(data, cell);
     propertiesMutation(data, cell);
@@ -118,7 +118,7 @@ __inline__ __device__ void MutationProcessor::neuronDataMutation(SimulationData&
     auto& genome = constructor.genome;
     auto const& genomeSize = constructor.genomeSize;
 
-    auto cellCopyMutationNeuronData = ZoneCalculator::calcParameterNew(cudaSimulationParameters.copyMutationNeuronData, data, cell->pos, cell->color);
+    auto cellCopyMutationNeuronData = ParameterCalculator::calcParameter(cudaSimulationParameters.copyMutationNeuronData, data, cell->pos, cell->color);
 
     GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, false, [&](int depth, int nodeAddressIntern, int repetition) {
         if (isRandomEvent(data, cellCopyMutationNeuronData)) {
@@ -137,7 +137,7 @@ __inline__ __device__ void MutationProcessor::propertiesMutation(SimulationData&
     auto& genome = constructor.genome;
     auto const& genomeSize = constructor.genomeSize;
 
-    auto cellCopyMutationCellProperties = ZoneCalculator::calcParameterNew(cudaSimulationParameters.copyMutationCellProperties, data, cell->pos, cell->color);
+    auto cellCopyMutationCellProperties = ParameterCalculator::calcParameter(cudaSimulationParameters.copyMutationCellProperties, data, cell->pos, cell->color);
 
     int prevNodeAddress = 0;
     GenomeDecoder::executeForEachNodeRecursively(genome, genomeSize, true, false, [&](int depth, int nodeAddress, int repetition) {
