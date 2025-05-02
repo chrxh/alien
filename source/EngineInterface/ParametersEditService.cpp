@@ -131,11 +131,24 @@ void ParametersEditService::deleteLocation(SimulationParameters& parameters, int
 
     if (locationType == LocationType::Zone) {
         for (int i = startIndex; i < parameters.numZones - 1; ++i) {
+            auto targetLocationIndex = parameters.zoneLocationIndex[i];
+            auto sourceLocationIndex = parameters.zoneLocationIndex[i + 1];
+            copyLocation(parameters, targetLocationIndex, parameters, sourceLocationIndex);
+        }
+        for (int i = startIndex; i < parameters.numZones - 1; ++i) {
+            parameters.zoneLocationIndex[i] = parameters.zoneLocationIndex[i + 1];
+        }
+        --parameters.numZones;
+    } else {
+        for (int i = startIndex; i < parameters.numSources- 1; ++i) {
             auto targetLocationIndex = parameters.sourceLocationIndex[i];
             auto sourceLocationIndex = parameters.sourceLocationIndex[i + 1];
             copyLocation(parameters, targetLocationIndex, parameters, sourceLocationIndex);
         }
-        --parameters.numZones;
+        for (int i = startIndex; i < parameters.numSources - 1; ++i) {
+            parameters.sourceLocationIndex[i] = parameters.sourceLocationIndex[i + 1];
+        }
+        --parameters.numSources;
     }
 
     LocationHelper::adaptLocationIndices(parameters, locationIndex + 1, -1);
