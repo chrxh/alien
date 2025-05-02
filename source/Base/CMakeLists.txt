@@ -12,6 +12,7 @@ add_library(Base
     JsonParser.h
     LoggingService.cpp
     LoggingService.h
+    Macros.h
     Math.cpp
     Math.h
     NumberGenerator.cpp

@@ -1,15 +1,18 @@
 #pragma once
 
-#include <map>
 #include <string>
 #include <variant>
 #include <vector>
+#include <optional>
+#include <memory>
 
 #include "Base/Definitions.h"
 
 #include "Definitions.h"
 #include "SimulationParametersTypes.h"
 #include "Colors.h"
+
+struct SimulationParameters;
 
 using _BoolMember = BaseParameter<bool> SimulationParameters::*;
 using BoolMember = std::shared_ptr<_BoolMember>;
