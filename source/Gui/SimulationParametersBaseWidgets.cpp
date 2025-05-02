@@ -7,7 +7,6 @@
 #include "EngineInterface/ParametersEditService.h"
 #include "EngineInterface/SimulationParametersUpdateConfig.h"
 #include "EngineInterface/ParametersValidationService.h"
-#include "EngineInterface/SpecificationService.h"
 
 #include "AlienImGui.h"
 #include "SpecificationGuiService.h"

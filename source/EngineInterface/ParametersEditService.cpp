@@ -4,7 +4,6 @@
 
 #include "Base/Definitions.h"
 #include "Base/StringHelper.h"
-#include "SpecificationService.h"
 #include "SpecificationEvaluationService.h"
 
 NewByOldLocationIndex ParametersEditService::insertDefaultZone(SimulationParameters& parameters, int locationIndex) const
@@ -402,7 +401,7 @@ void ParametersEditService::copyLocation(
     SimulationParameters& sourceParameters,
     int sourceLocationIndex) const
 {
-    auto const& parametersSpecs = SpecificationService::get().getSpec();
+    auto const& parametersSpecs = SimulationParameters::getSpec();
     for (auto const& groupSpec : parametersSpecs._groups) {
         copyLocationImpl(targetParameters, targetLocationIndex, sourceParameters, sourceLocationIndex, groupSpec._parameters);
     }

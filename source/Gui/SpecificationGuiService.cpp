@@ -5,7 +5,6 @@
 
 #include <boost/range/adaptors.hpp>
 
-#include "EngineInterface/SpecificationService.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/SimulationParametersTypes.h"
 #include "EngineInterface/SimulationParameters.h"
@@ -26,7 +25,7 @@ void SpecificationGuiService::createWidgetsForParameters(
     int locationIndex) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
-    auto const& parametersSpecs = SpecificationService::get().getSpec();
+    auto const& parametersSpecs = SimulationParameters::getSpec();
     auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
 
     for (auto const& groupSpec : parametersSpecs._groups) {
@@ -52,7 +51,7 @@ void SpecificationGuiService::createWidgetsForParameters(
 void SpecificationGuiService::createWidgetsForExpertToggles(SimulationParameters& parameters, SimulationParameters& origParameters) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
-    auto const& parametersSpecs = SpecificationService::get().getSpec();
+    auto const& parametersSpecs = SimulationParameters::getSpec();
 
     for (auto const& groupSpec : parametersSpecs._groups) {
         if (groupSpec._expertToggle) {

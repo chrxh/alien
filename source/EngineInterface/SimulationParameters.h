@@ -8,6 +8,8 @@
 #include "CellTypeConstants.h"
 #include "SimulationParametersTypes.h"
 
+struct ParametersSpec;
+
 /**
  * NOTE: header is also included in kernel code
  */
@@ -40,11 +42,11 @@ struct SimulationParameters
     ZoneParameter<RealVector2D> zonePosition;
     ZoneParameter<RealVector2D> zoneVelocity;
     ZoneParameter<ZoneShapeType> zoneShape = {{ZoneShapeType_Circular}};
-    ZoneParameter<float> zoneCoreRadius = {{100.0f}};               // for ZoneShapeType_Circular
+    ZoneParameter<float> zoneCoreRadius = {{100.0f}};                 // for ZoneShapeType_Circular
     ZoneParameter<RealVector2D> zoneCoreRect = {{{100.0f, 100.0f}}};  // for ZoneShapeType_Rectangular
     ZoneParameter<float> zoneFadeoutRadius = {{100.0f}};
     SourceParameter<SourceShapeType> sourceShapeType = {{SourceShapeType_Circular}};
-    SourceParameter<float> sourceCircularRadius = {{1.0f}};  // for SourceShapeType_Circular
+    SourceParameter<float> sourceCircularRadius = {{1.0f}};                    // for SourceShapeType_Circular
     SourceParameter<RealVector2D> sourceRectangularRect = {{{30.0f, 60.0f}}};  // for SourceShapeType_Rectangular
     SourceParameter<RealVector2D> sourcePosition;
     SourceParameter<RealVector2D> sourceVelocity;
@@ -52,9 +54,9 @@ struct SimulationParameters
     // Force field
     ZoneParameter<ForceField> zoneForceFieldType = {{ForceField_None}};
     ZoneParameter<Orientation> zoneRadialForceFieldOrientation = {{Orientation_Clockwise}};  // for ForceField_Radial
-    ZoneParameter<float> zoneRadialForceFieldStrength = {{0.001f}};                      // for ForceField_Radial
-    ZoneParameter<float> zoneRadialForceFieldDriftAngle = {{0.0f}};                          // for ForceField_Radial       
-    ZoneParameter<float> zoneCentralForceFieldStrength = {{0.05f}};                     // for ForceField_Central
+    ZoneParameter<float> zoneRadialForceFieldStrength = {{0.001f}};                          // for ForceField_Radial
+    ZoneParameter<float> zoneRadialForceFieldDriftAngle = {{0.0f}};                          // for ForceField_Radial
+    ZoneParameter<float> zoneCentralForceFieldStrength = {{0.05f}};                          // for ForceField_Central
     ZoneParameter<float> zoneLinearForceFieldAngle = {{0}};
     ZoneParameter<float> zoneLinearForceFieldStrength = {{0.01f}};
 
@@ -85,7 +87,7 @@ struct SimulationParameters
 
     // Radiation
     PinBaseParameter relativeStrengthBasePin = {false};
-    PinnableSourceParameter<float> sourceRelativeStrength= {{{.value = 0.0f, .pinned = false}}};
+    PinnableSourceParameter<float> sourceRelativeStrength = {{{.value = 0.0f, .pinned = false}}};
     ZoneParameter<bool> disableRadiationSources = {{false}};
     BaseZoneParameter<ColorVector<float>> radiationAbsorption = {.baseValue = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
     BaseZoneParameter<ColorVector<float>> radiationType1_strength = {.baseValue = {0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f}};
@@ -107,14 +109,14 @@ struct SimulationParameters
     static float constexpr radiationVelocityPerturbation = 0.5f;
 
     // Cell life cycle
-    BaseParameter<ColorVector<int>> maxCellAge = {{
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value}};
+    BaseParameter<ColorVector<int>> maxCellAge = {
+        {Infinity<int>::value,
+         Infinity<int>::value,
+         Infinity<int>::value,
+         Infinity<int>::value,
+         Infinity<int>::value,
+         Infinity<int>::value,
+         Infinity<int>::value}};
     BaseZoneParameter<ColorVector<float>> minCellEnergy = {.baseValue = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f}};
     BaseParameter<ColorVector<float>> normalCellEnergy = {100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f};
     BaseZoneParameter<ColorVector<float>> cellDeathProbability = {.baseValue = {0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f}};
@@ -179,14 +181,14 @@ struct SimulationParameters
 
     // Cell type: Injector
     BaseParameter<ColorVector<float>> injectorInjectionRadius = {{3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f}};
-    BaseParameter<ColorMatrix<int>> injectorInjectionTime = {{
-        {3, 3, 3, 3, 3, 3, 3},
-        {3, 3, 3, 3, 3, 3, 3},
-        {3, 3, 3, 3, 3, 3, 3},
-        {3, 3, 3, 3, 3, 3, 3},
-        {3, 3, 3, 3, 3, 3, 3},
-        {3, 3, 3, 3, 3, 3, 3},
-        {3, 3, 3, 3, 3, 3, 3}}};
+    BaseParameter<ColorMatrix<int>> injectorInjectionTime = {
+        {{3, 3, 3, 3, 3, 3, 3},
+         {3, 3, 3, 3, 3, 3, 3},
+         {3, 3, 3, 3, 3, 3, 3},
+         {3, 3, 3, 3, 3, 3, 3},
+         {3, 3, 3, 3, 3, 3, 3},
+         {3, 3, 3, 3, 3, 3, 3},
+         {3, 3, 3, 3, 3, 3, 3}}};
 
     // Cell type: Muscle
     BaseParameter<ColorVector<float>> muscleEnergyCost = {{0, 0, 0, 0, 0, 0, 0}};
@@ -220,22 +222,23 @@ struct SimulationParameters
 
     // Expert settings: Advanced attacker control
     ExpertToggle advancedAttackerControlToggle = {false};
-    BaseParameter<ColorMatrix<float>> attackerSameMutantProtection = {{
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}}};
-    BaseZoneParameter<ColorMatrix<float>> attackerNewComplexMutantProtection = {.baseValue = {
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}}};
+    BaseParameter<ColorMatrix<float>> attackerSameMutantProtection = {
+        {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}}};
+    BaseZoneParameter<ColorMatrix<float>> attackerNewComplexMutantProtection = {
+        .baseValue = {
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}}};
     BaseParameter<ColorVector<float>> attackerSensorDetectionFactor = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     BaseZoneParameter<ColorVector<float>> attackerGeometryDeviationProtection = {.baseValue = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     BaseZoneParameter<ColorVector<float>> attackerConnectionsMismatchProtection = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
@@ -243,22 +246,23 @@ struct SimulationParameters
 
     // Expert settings: Cell age limiter
     ExpertToggle cellAgeLimiterToggle = {false};
-    BaseZoneParameter<ColorVector<float>> maxAgeForInactiveCells = {.baseValue = {  // Candidate for deletion
-        Infinity<float>::value,
-        Infinity<float>::value,
-        Infinity<float>::value,
-        Infinity<float>::value,
-        Infinity<float>::value,
-        Infinity<float>::value,
-        Infinity<float>::value}};
-    BaseParameter<ColorVector<int>> freeCellMaxAge = {{
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value}};
+    BaseZoneParameter<ColorVector<float>> maxAgeForInactiveCells = {
+        .baseValue = {// Candidate for deletion
+                      Infinity<float>::value,
+                      Infinity<float>::value,
+                      Infinity<float>::value,
+                      Infinity<float>::value,
+                      Infinity<float>::value,
+                      Infinity<float>::value,
+                      Infinity<float>::value}};
+    BaseParameter<ColorVector<int>> freeCellMaxAge = {
+        {Infinity<int>::value,
+         Infinity<int>::value,
+         Infinity<int>::value,
+         Infinity<int>::value,
+         Infinity<int>::value,
+         Infinity<int>::value,
+         Infinity<int>::value}};
     BaseParameter<bool> resetCellAgeAfterActivation = {false};  // Candidate for deletion
     EnableableBaseParameter<int> maxCellAgeBalancerInterval = {.value = 10000, .enabled = false};
 
@@ -301,4 +305,7 @@ struct SimulationParameters
     BaseParameter<ColorVector<int>> genomeComplexityDepthLevel = {{3, 3, 3, 3, 3, 3, 3}};
 
     bool operator==(SimulationParameters const&) const = default;
+
+    static ParametersSpec const& getSpec();
 };
+
