@@ -51,7 +51,9 @@ protected:
             lastLocationIndex = parameters.sourceLocationIndex[i];
         }
         EXPECT_EQ(parameters.numZones + parameters.numSources, locationIndices.size());
-        EXPECT_EQ(parameters.numZones + parameters.numSources, *std::max_element(locationIndices.begin(), locationIndices.end()));
+        if (!locationIndices.empty()) {
+            EXPECT_EQ(parameters.numZones + parameters.numSources, *std::max_element(locationIndices.begin(), locationIndices.end()));
+        }
 
         for (int i = 0; i < parameters.numZones; ++i) {
             auto locationIndex = parameters.zoneLocationIndex[i];
@@ -146,6 +148,31 @@ protected:
             Char64 sourceName;
             StringHelper::copy(sourceName, sizeof(Char64), LocationHelper::generateSourceName(origParameters));
             EXPECT_TRUE(StringHelper::compare(sourceName, sizeof(Char64), parameters.sourceName.sourceValues[insertedArrayIndex]));
+        }
+    }
+
+    void checkParametersAfterDeletion(
+        SimulationParameters const& parameters,
+        SimulationParameters const& origParameters,
+        std::vector<LocationType> const& locationTypes,
+        int deletedLocationIndex)
+    {
+        checkParameters(parameters, locationTypes);
+        for (int i = 0; i < parameters.numZones; ++i) {
+            auto locationIndex = parameters.zoneLocationIndex[i];
+            auto origLocationIndex = locationIndex < deletedLocationIndex ? locationIndex : locationIndex + 1;
+            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origLocationIndex);
+
+            EXPECT_EQ(origParameters.zoneCoreRadius.zoneValues[origArrayIndex], parameters.zoneCoreRadius.zoneValues[i]);
+            EXPECT_TRUE(StringHelper::compare(origParameters.zoneName.zoneValues[origArrayIndex], sizeof(Char64), parameters.zoneName.zoneValues[i]));
+        }
+        for (int i = 0; i < parameters.numSources; ++i) {
+            auto locationIndex = parameters.sourceLocationIndex[i];
+            auto origLocationIndex = locationIndex < deletedLocationIndex ? locationIndex : locationIndex + 1;
+            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origLocationIndex);
+
+            EXPECT_EQ(origParameters.sourceCircularRadius.sourceValues[origArrayIndex], parameters.sourceCircularRadius.sourceValues[i]);
+            EXPECT_TRUE(StringHelper::compare(origParameters.sourceName.sourceValues[origArrayIndex], sizeof(Char64), parameters.sourceName.sourceValues[i]));
         }
     }
 };
@@ -528,4 +555,200 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_end)
             LocationType::Source,
         },
         6);
+}
+
+TEST_F(ParametersEditServiceTests_New, deleteZone_afterwardEmpty)
+{
+    auto origParameters = createTestData({
+        LocationType::Zone,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().deleteLocation(parameters, 1);
+    checkParametersAfterDeletion(parameters, origParameters, {}, 1);
+}
+
+TEST_F(ParametersEditServiceTests_New, deleteZone_afterwardOnlySources)
+{
+    auto origParameters = createTestData({
+        LocationType::Source,
+        LocationType::Zone,
+        LocationType::Source,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().deleteLocation(parameters, 2);
+    checkParametersAfterDeletion(
+        parameters,
+        origParameters,
+        {
+            LocationType::Source,
+            LocationType::Source,
+        },
+        2);
+}
+
+TEST_F(ParametersEditServiceTests_New, deleteZone_firstZone)
+{
+    auto origParameters = createTestData({
+        LocationType::Zone,
+        LocationType::Source,
+        LocationType::Zone,
+        LocationType::Source,
+        LocationType::Zone,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().deleteLocation(parameters, 1);
+    checkParametersAfterDeletion(
+        parameters,
+        origParameters,
+        {
+            LocationType::Source,
+            LocationType::Zone,
+            LocationType::Source,
+            LocationType::Zone,
+        },
+        1);
+}
+
+TEST_F(ParametersEditServiceTests_New, deleteZone_middle)
+{
+    auto origParameters = createTestData({
+        LocationType::Zone,
+        LocationType::Source,
+        LocationType::Zone,
+        LocationType::Source,
+        LocationType::Zone,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().deleteLocation(parameters, 3);
+    checkParametersAfterDeletion(
+        parameters,
+        origParameters,
+        {
+            LocationType::Zone,
+            LocationType::Source,
+            LocationType::Source,
+            LocationType::Zone,
+        },
+        3);
+}
+
+TEST_F(ParametersEditServiceTests_New, deleteZone_end)
+{
+    auto origParameters = createTestData({
+        LocationType::Zone,
+        LocationType::Source,
+        LocationType::Zone,
+        LocationType::Source,
+        LocationType::Zone,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().deleteLocation(parameters, 5);
+    checkParametersAfterDeletion(
+        parameters,
+        origParameters,
+        {
+            LocationType::Zone,
+            LocationType::Source,
+            LocationType::Zone,
+            LocationType::Source,
+        },
+        5);
+}
+
+TEST_F(ParametersEditServiceTests_New, deleteSource_afterwardEmpty)
+{
+    auto origParameters = createTestData({
+        LocationType::Source,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().deleteLocation(parameters, 1);
+    checkParametersAfterDeletion(parameters, origParameters, {}, 1);
+}
+
+TEST_F(ParametersEditServiceTests_New, deleteSource_afterwardOnlyZones)
+{
+    auto origParameters = createTestData({
+        LocationType::Zone,
+        LocationType::Source,
+        LocationType::Zone,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().deleteLocation(parameters, 2);
+    checkParametersAfterDeletion(
+        parameters,
+        origParameters,
+        {
+            LocationType::Zone,
+            LocationType::Zone,
+        },
+        2);
+}
+
+TEST_F(ParametersEditServiceTests_New, deleteSource_firstSource)
+{
+    auto origParameters = createTestData({
+        LocationType::Source,
+        LocationType::Zone,
+        LocationType::Source,
+        LocationType::Zone,
+        LocationType::Source,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().deleteLocation(parameters, 1);
+    checkParametersAfterDeletion(
+        parameters,
+        origParameters,
+        {
+            LocationType::Zone,
+            LocationType::Source,
+            LocationType::Zone,
+            LocationType::Source,
+        },
+        1);
+}
+
+TEST_F(ParametersEditServiceTests_New, deleteSource_middle)
+{
+    auto origParameters = createTestData({
+        LocationType::Source,
+        LocationType::Zone,
+        LocationType::Source,
+        LocationType::Zone,
+        LocationType::Source,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().deleteLocation(parameters, 3);
+    checkParametersAfterDeletion(
+        parameters,
+        origParameters,
+        {
+            LocationType::Source,
+            LocationType::Zone,
+            LocationType::Zone,
+            LocationType::Source,
+        },
+        3);
+}
+
+TEST_F(ParametersEditServiceTests_New, deleteSource_end)
+{
+    auto origParameters = createTestData({
+        LocationType::Source,
+        LocationType::Zone,
+        LocationType::Source,
+        LocationType::Zone,
+        LocationType::Source,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().deleteLocation(parameters, 5);
+    checkParametersAfterDeletion(
+        parameters,
+        origParameters,
+        {
+            LocationType::Source,
+            LocationType::Zone,
+            LocationType::Source,
+            LocationType::Zone,
+        },
+        5);
 }
