@@ -476,6 +476,11 @@ void SimulationParametersMainWindow::onInsertDefaultSource()
     editService.applyRadiationStrengths(parameters, newStrengths);
     editService.applyRadiationStrengths(origParameters, newStrengths);
 
+    auto index = LocationHelper::findLocationArrayIndex(parameters, _selectedLocationIndex);
+    auto worldSize = _simulationFacade->getWorldSize();
+    parameters.sourcePosition.sourceValues[index] = {toFloat(worldSize.x / 2), toFloat(worldSize.y / 2)};
+    origParameters.sourcePosition.sourceValues[index] = parameters.sourcePosition.sourceValues[index];
+
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 
