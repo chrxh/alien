@@ -13,7 +13,7 @@
 #include "CellConnectionProcessor.cuh"
 #include "GenomeDecoder.cuh"
 #include "RadiationProcessor.cuh"
-#include "ZoneCalculator.cuh"
+#include "ParameterCalculator.cuh"
 
 class CellProcessor
 {
@@ -150,8 +150,8 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             F_viscosity = {0, 0};
             cellPosDelta = {0, 0};
             density = 0;
-            cellMaxBindingEnergy = ZoneCalculator::calcParameterNew(cudaSimulationParameters.cellMaxBindingEnergy, data, cell->pos);
-            cellFusionVelocity = ZoneCalculator::calcParameterNew(cudaSimulationParameters.cellFusionVelocity, data, cell->pos);
+            cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.cellMaxBindingEnergy, data, cell->pos);
+            cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.cellFusionVelocity, data, cell->pos);
 
             int radiusInt = ceilf(smoothingLength * 2);
             scanLength = radiusInt * 2 + 1;
@@ -343,8 +343,8 @@ __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctO
                     }
 
                     //fusion
-                    auto cellMaxBindingEnergy = ZoneCalculator::calcParameterNew(cudaSimulationParameters.cellMaxBindingEnergy, data, cell->pos);
-                    auto cellFusionVelocity = ZoneCalculator::calcParameterNew(cudaSimulationParameters.cellFusionVelocity, data, cell->pos);
+                    auto cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.cellMaxBindingEnergy, data, cell->pos);
+                    auto cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.cellFusionVelocity, data, cell->pos);
 
                     if (cell->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS
                         && Math::length(velDelta) >= cellFusionVelocity
@@ -369,7 +369,7 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
             continue;
         }
 
-        if (Math::length(cell->shared1) > ZoneCalculator::calcParameterNew(cudaSimulationParameters.maxForce, data, cell->pos, cell->color)) {
+        if (Math::length(cell->shared1) > ParameterCalculator::calcParameter(cudaSimulationParameters.maxForce, data, cell->pos, cell->color)) {
             if (data.numberGen1.random() < cudaSimulationParameters.maxForceDecayProbability) {
                 CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
             }
@@ -565,13 +565,13 @@ __inline__ __device__ void CellProcessor::aging(SimulationData& data)
             int transitionDuration;
             int targetColor;
             auto color = calcMod(cell->color, MAX_COLORS);
-            auto zoneIndex = ZoneCalculator::getFirstMatchingZoneOrBaseNew(data, cell->pos, cudaSimulationParameters.colorTransitionRules);
-            if (zoneIndex == -1) {
+            auto index = ParameterCalculator::getFirstMatchingLayerOrBase(data, cell->pos, cudaSimulationParameters.colorTransitionRules);
+            if (index == -1) {
                 transitionDuration = cudaSimulationParameters.colorTransitionRules.baseValue.cellColorTransitionDuration[color];
                 targetColor = cudaSimulationParameters.colorTransitionRules.baseValue.cellColorTransitionTargetColor[color];
             } else {
-                transitionDuration = cudaSimulationParameters.colorTransitionRules.zoneValues[zoneIndex].value.cellColorTransitionDuration[color];
-                targetColor = cudaSimulationParameters.colorTransitionRules.zoneValues[zoneIndex].value.cellColorTransitionTargetColor[color];
+                transitionDuration = cudaSimulationParameters.colorTransitionRules.layerValues[index].value.cellColorTransitionDuration[color];
+                targetColor = cudaSimulationParameters.colorTransitionRules.layerValues[index].value.cellColorTransitionTargetColor[color];
             }
             if (transitionDuration > 0 && cell->age > transitionDuration) {
                 cell->color = targetColor;
@@ -722,7 +722,7 @@ __inline__ __device__ void CellProcessor::applyFriction(SimulationData& data)
             continue;
         }
 
-        auto friction = ZoneCalculator::calcParameterNew(cudaSimulationParameters.friction, data, cell->pos);
+        auto friction = ParameterCalculator::calcParameter(cudaSimulationParameters.friction, data, cell->pos);
         cell->vel = cell->vel * (1.0f - friction);
     }
 }
@@ -745,7 +745,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
                 radiationFactor += cudaSimulationParameters.radiationType2_strength.value[cell->color];
             }
             if (cell->age > cudaSimulationParameters.radiationType1_minimumAge.value[cell->color]) {
-                radiationFactor += ZoneCalculator::calcParameterNew(cudaSimulationParameters.radiationType1_strength, data, cell->pos, cell->color);
+                radiationFactor += ParameterCalculator::calcParameter(cudaSimulationParameters.radiationType1_strength, data, cell->pos, cell->color);
             }
 
             if (radiationFactor > 0) {
@@ -783,15 +783,15 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         if (cell->barrier) {
             continue;
         }
-        auto cellMaxBindingEnergy = ZoneCalculator::calcParameterNew(cudaSimulationParameters.cellMaxBindingEnergy, data, cell->pos);
+        auto cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.cellMaxBindingEnergy, data, cell->pos);
         if (cell->energy > cellMaxBindingEnergy) {
             CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
         }
 
-        auto cellMinEnergy = ZoneCalculator::calcParameterNew(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
+        auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
 
         if (cell->livingState == LivingState_Dying || cell->livingState == LivingState_Detaching) {
-            auto cellDeathProbability = ZoneCalculator::calcParameterNew(cudaSimulationParameters.cellDeathProbability, data, cell->pos, cell->color);
+            auto cellDeathProbability = ParameterCalculator::calcParameter(cudaSimulationParameters.cellDeathProbability, data, cell->pos, cell->color);
             if (data.numberGen1.random() < cellDeathProbability) {
                 CellConnectionProcessor::scheduleDeleteCell(data, index);
             }
@@ -813,7 +813,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
                 }
             }
             if (!adjacentCellsUsed) {
-                auto cellInactiveMaxAge = ZoneCalculator::calcParameterNew(cudaSimulationParameters.maxAgeForInactiveCells, data, cell->pos, cell->color);
+                auto cellInactiveMaxAge = ParameterCalculator::calcParameter(cudaSimulationParameters.maxAgeForInactiveCells, data, cell->pos, cell->color);
 
                 cellMaxAge = toInt(cellInactiveMaxAge);
             }
@@ -877,7 +877,7 @@ __inline__ __device__ void CellProcessor::applyEnergyFlow(SimulationData& data)
         }
         auto i = data.timestep % cell->numConnections;
         auto& connectedCell = cell->connections[i].cell;
-        auto cellMinEnergy = ZoneCalculator::calcParameterNew(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
+        auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
 
         auto needCellEnergy = cell->cellType == CellType_Constructor && !GenomeDecoder::isFinished(cell->cellTypeData.constructor)
             && connectedCell->energy > cudaSimulationParameters.normalCellEnergy.value[cell->color];

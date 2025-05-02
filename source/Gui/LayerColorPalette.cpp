@@ -1,8 +1,8 @@
-#include "ZoneColorPalette.h"
+#include "LayerColorPalette.h"
 
 #include <imgui.h>
 
-ZoneColorPalette::ZoneColorPalette()
+LayerColorPalette::LayerColorPalette()
 {
     for (int n = 0; n < IM_ARRAYSIZE(_palette); n++) {
         ImVec4 color;
@@ -14,12 +14,12 @@ ZoneColorPalette::ZoneColorPalette()
     }
 }
 
-FloatColorRGB ZoneColorPalette::getColor(int index) const
+FloatColorRGB LayerColorPalette::getColor(int index) const
 {
     return _palette[index % IM_ARRAYSIZE(_palette)];
 }
 
-auto ZoneColorPalette::getReference()-> Palette&
+auto LayerColorPalette::getReference()-> Palette&
 {
     return _palette;
 }

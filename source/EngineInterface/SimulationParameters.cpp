@@ -53,7 +53,7 @@ ParametersSpec const& SimulationParameters::getSpec()
         spec = ParametersSpec().groups({
             ParameterGroupSpec().name("General").parameters({
                 ParameterSpec().name("Project name").reference(Char64Spec().member(&SimulationParameters::projectName)),
-                ParameterSpec().name("Zone name").reference(Char64Spec().member(&SimulationParameters::zoneName)),
+                ParameterSpec().name("Layer name").reference(Char64Spec().member(&SimulationParameters::layerName)),
                 ParameterSpec().name("Source name").reference(Char64Spec().member(&SimulationParameters::sourceName)),
             }),
             ParameterGroupSpec()
@@ -119,7 +119,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Position (x,y)")
                         .reference(Float2Spec()
-                                       .member(&SimulationParameters::zonePosition)
+                                       .member(&SimulationParameters::layerPosition)
                                        .min(RealVector2D{0.0f, 0.0f})
                                        .max(WorldSize())
                                        .format("%.2f")
@@ -127,30 +127,30 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Velocity (x,y)")
                         .reference(Float2Spec()
-                                       .member(&SimulationParameters::zoneVelocity)
+                                       .member(&SimulationParameters::layerVelocity)
                                        .min(RealVector2D{-4.0f, -4.0f})
                                        .max(RealVector2D{4.0f, 4.0f})
                                        .format("%.2f")),
                     ParameterSpec().name("Shape").reference(
                         AlternativeSpec()
-                            .member(&SimulationParameters::zoneShape)
+                            .member(&SimulationParameters::layerShape)
                             .alternatives(
                                 {{"Circular",
                                   {ParameterSpec()
                                        .name("Core radius")
                                        .reference(
-                                           FloatSpec().member(&SimulationParameters::zoneCoreRadius).min(0.0f).max(MaxWorldRadiusSize()).format("%.2f"))}},
+                                           FloatSpec().member(&SimulationParameters::layerCoreRadius).min(0.0f).max(MaxWorldRadiusSize()).format("%.2f"))}},
                                  {"Rectangular",
                                   {ParameterSpec()
                                        .name("Core size (width,height)")
                                        .reference(Float2Spec()
-                                                      .member(&SimulationParameters::zoneCoreRect)
+                                                      .member(&SimulationParameters::layerCoreRect)
                                                       .min(RealVector2D{0.0f, 0.0f})
                                                       .max(WorldSize())
                                                       .format("%.2f"))}}})),
                     ParameterSpec()
                         .name("Fade-out radius")
-                        .reference(FloatSpec().member(&SimulationParameters::zoneFadeoutRadius).min(0.0f).max(MaxWorldRadiusSize()).format("%.2f")),
+                        .reference(FloatSpec().member(&SimulationParameters::layerFadeoutRadius).min(0.0f).max(MaxWorldRadiusSize()).format("%.2f")),
                     ParameterSpec().name("Shape").reference(
                         AlternativeSpec()
                             .member(&SimulationParameters::sourceShapeType)
@@ -193,7 +193,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Field type")
                         .reference(
                             AlternativeSpec()
-                                .member(&SimulationParameters::zoneForceFieldType)
+                                .member(&SimulationParameters::layerForceFieldType)
                                 .alternatives(
                                     {{"None", {}},
                                      {"Radial",
@@ -201,13 +201,13 @@ ParametersSpec const& SimulationParameters::getSpec()
                                           ParameterSpec()
                                               .name("Orientation")
                                               .reference(AlternativeSpec()
-                                                             .member(&SimulationParameters::zoneRadialForceFieldOrientation)
+                                                             .member(&SimulationParameters::layerRadialForceFieldOrientation)
                                                              .alternatives({{"Clockwise", {}}, {"Counter clockwise", {}}})),
                                           ParameterSpec()
                                               .name("Strength")
                                               .reference(
                                                   FloatSpec()
-                                                      .member(&SimulationParameters::zoneRadialForceFieldStrength)
+                                                      .member(&SimulationParameters::layerRadialForceFieldStrength)
                                                       .min(0.0f)
                                                       .max(0.5f)
                                                       .format("%.5f")
@@ -216,7 +216,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                                               .name("Drift angle")
                                               .reference(
                                                   FloatSpec()
-                                                      .member(&SimulationParameters::zoneRadialForceFieldDriftAngle)
+                                                      .member(&SimulationParameters::layerRadialForceFieldDriftAngle)
                                                       .min(-180.00f)
                                                       .max(180.0f)
                                                       .format("%.1f")),
@@ -227,7 +227,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                                               .name("Strength")
                                               .reference(
                                                   FloatSpec()
-                                                      .member(&SimulationParameters::zoneCentralForceFieldStrength)
+                                                      .member(&SimulationParameters::layerCentralForceFieldStrength)
                                                       .min(0.0f)
                                                       .max(0.5f)
                                                       .logarithmic(true)
@@ -236,12 +236,12 @@ ParametersSpec const& SimulationParameters::getSpec()
                                      {"Linear",
                                       {
                                           ParameterSpec().name("Angle").reference(
-                                              FloatSpec().member(&SimulationParameters::zoneLinearForceFieldAngle).min(-180.0f).max(180.0f).format("%.1f")),
+                                              FloatSpec().member(&SimulationParameters::layerLinearForceFieldAngle).min(-180.0f).max(180.0f).format("%.1f")),
                                           ParameterSpec()
                                               .name("Strength")
                                               .reference(
                                                   FloatSpec()
-                                                      .member(&SimulationParameters::zoneLinearForceFieldStrength)
+                                                      .member(&SimulationParameters::layerLinearForceFieldStrength)
                                                       .min(0.0f)
                                                       .max(0.5f)
                                                       .logarithmic(true)
@@ -385,7 +385,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Disable radiation sources")
                         .reference(BoolSpec().member(&SimulationParameters::disableRadiationSources))
-                        .tooltip("If activated, all radiation sources within this zone are deactivated."),
+                        .tooltip("If activated, all radiation sources within this layer are deactivated."),
                     ParameterSpec()
                         .name("Absorption factor")
                         .reference(FloatSpec().member(&SimulationParameters::radiationAbsorption).min(0.0f).max(1.0f).logarithmic(true).format("%.4f"))

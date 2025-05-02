@@ -7,9 +7,9 @@ LocationType LocationHelper::getLocationType(int locationIndex, SimulationParame
     if (locationIndex == 0) {
         return LocationType::Base;
     } else {
-        for (int i = 0; i < parameters.numZones; ++i) {
-            if (parameters.zoneLocationIndex[i] == locationIndex) {
-                return LocationType::Zone;
+        for (int i = 0; i < parameters.numLayers; ++i) {
+            if (parameters.layerLocationIndex[i] == locationIndex) {
+                return LocationType::Layer;
             }
         }
         for (int i = 0; i < parameters.numSources; ++i) {
@@ -23,9 +23,9 @@ LocationType LocationHelper::getLocationType(int locationIndex, SimulationParame
 
 int& LocationHelper::findLocationIndexRef(SimulationParameters& parameters, int locationIndex)
 {
-    for (int i = 0; i < parameters.numZones; ++i) {
-        if (parameters.zoneLocationIndex[i] == locationIndex) {
-            return parameters.zoneLocationIndex[i];
+    for (int i = 0; i < parameters.numLayers; ++i) {
+        if (parameters.layerLocationIndex[i] == locationIndex) {
+            return parameters.layerLocationIndex[i];
         }
     }
     for (int i = 0; i < parameters.numSources; ++i) {
@@ -39,8 +39,8 @@ int& LocationHelper::findLocationIndexRef(SimulationParameters& parameters, int 
 
 int LocationHelper::findLocationArrayIndex(SimulationParameters const& parameters, int locationIndex)
 {
-    for (int i = 0; i < parameters.numZones; ++i) {
-        if (parameters.zoneLocationIndex[i] == locationIndex) {
+    for (int i = 0; i < parameters.numLayers; ++i) {
+        if (parameters.layerLocationIndex[i] == locationIndex) {
             return i;
         }
     }
@@ -72,8 +72,8 @@ std::map<int, int> LocationHelper::adaptLocationIndices(SimulationParameters& pa
 {
     std::map<int, int> result;
     result.emplace(0, 0);
-    for (int i = 0; i < parameters.numZones; ++i) {
-        auto& locationIndex = parameters.zoneLocationIndex[i];
+    for (int i = 0; i < parameters.numLayers; ++i) {
+        auto& locationIndex = parameters.layerLocationIndex[i];
         if (locationIndex >= fromLocationIndex) {
             result.emplace(locationIndex, locationIndex + offset);
             locationIndex += offset;
@@ -93,16 +93,16 @@ std::map<int, int> LocationHelper::adaptLocationIndices(SimulationParameters& pa
     return result;
 }
 
-std::string LocationHelper::generateZoneName(SimulationParameters const& parameters)
+std::string LocationHelper::generateLayerName(SimulationParameters const& parameters)
 {
     int counter = 0;
     bool alreadyUsed;
     std::string result;
     do {
         alreadyUsed = false;
-        result = "Zone " + std::to_string(++counter);
-        for (int i = 0; i < parameters.numZones; ++i) {
-            auto name = std::string(parameters.zoneName.zoneValues[i]);
+        result = "Layer " + std::to_string(++counter);
+        for (int i = 0; i < parameters.numLayers; ++i) {
+            auto name = std::string(parameters.layerName.layerValues[i]);
             if (result == name) {
                 alreadyUsed = true;
                 break;

@@ -38,19 +38,19 @@ struct PinBaseParameter
 };
 
 /**
- * Zone parameters
+ * Layer parameters
  */
 
 template <typename T>
-struct ZoneParameter
+struct LayerParameter
 {
-    T zoneValues[MAX_ZONES];
+    T layerValues[MAX_LAYERS];
 
-    bool operator==(ZoneParameter<T> const&) const = default;
+    bool operator==(LayerParameter<T> const&) const = default;
 };
 
 /**
- * Base and zone parameters
+ * Base and layer parameters
  */
 
 template <typename T>
@@ -63,12 +63,12 @@ struct EnableableValue
 };
 
 template <typename T>
-struct BaseZoneParameter
+struct BaseLayerParameter
 {
     T baseValue;
-    EnableableValue<T> zoneValues[MAX_ZONES];
+    EnableableValue<T> layerValues[MAX_LAYERS];
 
-    bool operator==(BaseZoneParameter<T> const&) const = default;
+    bool operator==(BaseLayerParameter<T> const&) const = default;
 };
 
 /**
@@ -78,7 +78,7 @@ struct BaseZoneParameter
 template <typename T>
 struct SourceParameter
 {
-    T sourceValues[MAX_ZONES];
+    T sourceValues[MAX_LAYERS];
 
     bool operator==(SourceParameter<T> const&) const = default;
 };
@@ -130,7 +130,7 @@ struct ColorTransitionRules
 enum class LocationType
 {
     Base,
-    Zone,
+    Layer,
     Source
 };
 
@@ -189,11 +189,11 @@ enum ForceField_
     ForceField_Linear
 };
 
-using ZoneShapeType = int;
-enum ZoneShapeType_
+using LayerShapeType = int;
+enum LayerShapeType_
 {
-    ZoneShapeType_Circular,
-    ZoneShapeType_Rectangular
+    LayerShapeType_Circular,
+    LayerShapeType_Rectangular
 };
 
 using SourceShapeType = int;

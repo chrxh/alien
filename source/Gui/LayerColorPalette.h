@@ -4,10 +4,10 @@
 
 #include "EngineInterface/SimulationParametersTypes.h"
 
-class ZoneColorPalette
+class LayerColorPalette
 {
 public:
-    ZoneColorPalette();
+    LayerColorPalette();
 
     FloatColorRGB getColor(int index) const;
 

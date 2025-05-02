@@ -15,7 +15,7 @@
 #include "LocationController.h"
 #include "OverlayController.h"
 #include "SimulationParametersSourceWidgets.h"
-#include "SimulationParametersZoneWidgets.h"
+#include "SimulationParametersLayerWidgets.h"
 #include "AlienImGui.h"
 #include "SpecificationGuiService.h"
 #include "Viewport.h"
@@ -50,9 +50,9 @@ void SimulationParametersMainWindow::initIntern(SimulationFacade simulationFacad
     baseWidgets->init(_simulationFacade);
     _baseWidgets = baseWidgets;
 
-    auto zoneWidgets = std::make_shared<_SimulationParametersZoneWidgets>();
-    zoneWidgets->init(_simulationFacade, 0);
-    _zoneWidgets = zoneWidgets;
+    auto layerWidgets = std::make_shared<_SimulationParametersLayerWidgets>();
+    layerWidgets->init(_simulationFacade, 0);
+    _layerWidgets = layerWidgets;
 
 
     auto sourceWidgets = std::make_shared<_SimulationParametersSourceWidgets>();
@@ -135,13 +135,13 @@ void SimulationParametersMainWindow::processToolbar()
                                                "parameters and those from the clipboard.")
                                       .disabled(!_copiedParameters))) {
         auto parameters = _simulationFacade->getSimulationParameters();
-        if (_copiedParameters->numZones == parameters.numZones
+        if (_copiedParameters->numLayers == parameters.numLayers
             && _copiedParameters->numSources == parameters.numSources) {
             _simulationFacade->setOriginalSimulationParameters(*_copiedParameters);
             printOverlayMessage("Reference simulation parameters replaced");
         } else {
             GenericMessageDialog::get().information(
-                "Error", "The number of zones and radiation sources of the current simulation parameters must match with those from the clipboard.");
+                "Error", "The number of layers and radiation sources of the current simulation parameters must match with those from the clipboard.");
         }
     }
 
@@ -149,8 +149,8 @@ void SimulationParametersMainWindow::processToolbar()
     AlienImGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_LAYER_GROUP).tooltip("Add parameter zone"))) {
-        onInsertDefaultZone();
+    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_LAYER_GROUP).tooltip("Add parameter layer"))) {
+        onInsertDefaultLayer();
     }
 
     ImGui::SameLine();
@@ -163,13 +163,13 @@ void SimulationParametersMainWindow::processToolbar()
                                       .text(ICON_FA_PLUS)
                                       .secondText(ICON_FA_CLONE)
                                       .disabled(_selectedLocationIndex == 0)
-                                      .tooltip("Clone selected zone/radiation source"))) {
+                                      .tooltip("Clone selected layer/radiation source"))) {
         onCloneLocation();
     }
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(
-            AlienImGui::ToolbarButtonParameters().text(ICON_FA_MINUS).disabled(_selectedLocationIndex == 0).tooltip("Delete selected zone/radiation source"))) {
+            AlienImGui::ToolbarButtonParameters().text(ICON_FA_MINUS).disabled(_selectedLocationIndex == 0).tooltip("Delete selected layer/radiation source"))) {
         onDeleteLocation();
     }
 
@@ -180,14 +180,14 @@ void SimulationParametersMainWindow::processToolbar()
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
                                       .text(ICON_FA_CHEVRON_UP)
                                       .disabled(_selectedLocationIndex <= 1)
-                                      .tooltip("Move selected zone/radiation source upward"))) {
+                                      .tooltip("Move selected layer/radiation source upward"))) {
         onDecreaseLocationIndex();
     }
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
                                       .text(ICON_FA_CHEVRON_DOWN)
-                                      .tooltip("Move selected zone/radiation source downward")
+                                      .tooltip("Move selected layer/radiation source downward")
                                       .disabled(_selectedLocationIndex >= _locations.size() - 1 || _selectedLocationIndex == 0))) {
         onIncreaseLocationIndex();
     }
@@ -198,7 +198,7 @@ void SimulationParametersMainWindow::processToolbar()
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
                                       .text(ICON_FA_EXTERNAL_LINK_SQUARE_ALT)
-                                      .tooltip("Open parameters for selected zone/radiation source in a new window"))) {
+                                      .tooltip("Open parameters for selected layer/radiation source in a new window"))) {
         onOpenInLocationWindow();
     }
 
@@ -244,9 +244,9 @@ void SimulationParametersMainWindow::processDetailWidget()
                 auto type = _locations.at(_selectedLocationIndex).type;
                 if (type == LocationType::Base) {
                     _baseWidgets->process();
-                } else if (type == LocationType::Zone) {
-                    _zoneWidgets->setLocationIndex(_selectedLocationIndex);
-                    _zoneWidgets->process();
+                } else if (type == LocationType::Layer) {
+                    _layerWidgets->setLocationIndex(_selectedLocationIndex);
+                    _layerWidgets->process();
                 } else if (type == LocationType::Source) {
                     _sourceWidgets->setLocationIndex(_selectedLocationIndex);
                     _sourceWidgets->process();
@@ -334,8 +334,8 @@ void SimulationParametersMainWindow::processLocationTable()
                 ImGui::TableNextColumn();
                 if (entry.type == LocationType::Base) {
                     AlienImGui::Text("Base parameters");
-                } else if (entry.type == LocationType::Zone) {
-                    AlienImGui::Text("Zone");
+                } else if (entry.type == LocationType::Layer) {
+                    AlienImGui::Text("Layer");
                 } else if (entry.type == LocationType::Source) {
                     AlienImGui::Text("Radiation");
                 }
@@ -408,18 +408,18 @@ void SimulationParametersMainWindow::onSaveParameters()
         });
 }
 
-void SimulationParametersMainWindow::onInsertDefaultZone()
+void SimulationParametersMainWindow::onInsertDefaultLayer()
 {
     auto& editService = ParametersEditService::get();
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
-    if (!checkNumZones(parameters)) {
+    if (!checkNumLayers(parameters)) {
         return;
     }
 
-    auto newByOldLocationIndex = editService.insertDefaultZone(parameters, _selectedLocationIndex);
-    editService.insertDefaultZone(origParameters, _selectedLocationIndex);
+    auto newByOldLocationIndex = editService.insertDefaultLayer(parameters, _selectedLocationIndex);
+    editService.insertDefaultLayer(origParameters, _selectedLocationIndex);
 
     ++_selectedLocationIndex;
 
@@ -427,28 +427,28 @@ void SimulationParametersMainWindow::onInsertDefaultZone()
     auto minRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
 
     auto index = LocationHelper::findLocationArrayIndex(parameters, _selectedLocationIndex);
-    parameters.backgroundColor.zoneValues[index].enabled = true;
-    parameters.backgroundColor.zoneValues[index].value = _zoneColorPalette.getColor((2 + parameters.numZones) * 8);
-    parameters.zoneShape.zoneValues[index] = ZoneShapeType_Circular;
-    parameters.zonePosition.zoneValues[index] = {toFloat(worldSize.x / 2), toFloat(worldSize.y / 2)};
-    parameters.zoneCoreRadius.zoneValues[index] = minRadius / 3;
-    parameters.zoneCoreRect.zoneValues[index] = {minRadius / 3, minRadius / 3};
-    parameters.zoneFadeoutRadius.zoneValues[index] = minRadius / 3;
-    parameters.zoneForceFieldType.zoneValues[index] = ForceField_None;
-    parameters.zoneRadialForceFieldOrientation.zoneValues[index] = Orientation_Clockwise;
-    parameters.zoneRadialForceFieldStrength.zoneValues[index] = 0.001f;
-    parameters.zoneRadialForceFieldDriftAngle.zoneValues[index] = 0.0f;
+    parameters.backgroundColor.layerValues[index].enabled = true;
+    parameters.backgroundColor.layerValues[index].value = _layerColorPalette.getColor((2 + parameters.numLayers) * 8);
+    parameters.layerShape.layerValues[index] = LayerShapeType_Circular;
+    parameters.layerPosition.layerValues[index] = {toFloat(worldSize.x / 2), toFloat(worldSize.y / 2)};
+    parameters.layerCoreRadius.layerValues[index] = minRadius / 3;
+    parameters.layerCoreRect.layerValues[index] = {minRadius / 3, minRadius / 3};
+    parameters.layerFadeoutRadius.layerValues[index] = minRadius / 3;
+    parameters.layerForceFieldType.layerValues[index] = ForceField_None;
+    parameters.layerRadialForceFieldOrientation.layerValues[index] = Orientation_Clockwise;
+    parameters.layerRadialForceFieldStrength.layerValues[index] = 0.001f;
+    parameters.layerRadialForceFieldDriftAngle.layerValues[index] = 0.0f;
 
-    origParameters.backgroundColor.zoneValues[index] = parameters.backgroundColor.zoneValues[index];
-    origParameters.zoneShape.zoneValues[index] = parameters.zoneShape.zoneValues[index];
-    origParameters.zonePosition.zoneValues[index] = parameters.zonePosition.zoneValues[index];
-    origParameters.zoneCoreRadius.zoneValues[index] = parameters.zoneCoreRadius.zoneValues[index];
-    origParameters.zoneCoreRect.zoneValues[index] = parameters.zoneCoreRect.zoneValues[index];
-    origParameters.zoneFadeoutRadius.zoneValues[index] = parameters.zoneFadeoutRadius.zoneValues[index];
-    origParameters.zoneForceFieldType.zoneValues[index] = parameters.zoneForceFieldType.zoneValues[index];
-    origParameters.zoneRadialForceFieldOrientation.zoneValues[index] = parameters.zoneRadialForceFieldOrientation.zoneValues[index];
-    origParameters.zoneRadialForceFieldStrength.zoneValues[index] = parameters.zoneRadialForceFieldStrength.zoneValues[index];
-    origParameters.zoneRadialForceFieldDriftAngle.zoneValues[index] = parameters.zoneRadialForceFieldDriftAngle.zoneValues[index];
+    origParameters.backgroundColor.layerValues[index] = parameters.backgroundColor.layerValues[index];
+    origParameters.layerShape.layerValues[index] = parameters.layerShape.layerValues[index];
+    origParameters.layerPosition.layerValues[index] = parameters.layerPosition.layerValues[index];
+    origParameters.layerCoreRadius.layerValues[index] = parameters.layerCoreRadius.layerValues[index];
+    origParameters.layerCoreRect.layerValues[index] = parameters.layerCoreRect.layerValues[index];
+    origParameters.layerFadeoutRadius.layerValues[index] = parameters.layerFadeoutRadius.layerValues[index];
+    origParameters.layerForceFieldType.layerValues[index] = parameters.layerForceFieldType.layerValues[index];
+    origParameters.layerRadialForceFieldOrientation.layerValues[index] = parameters.layerRadialForceFieldOrientation.layerValues[index];
+    origParameters.layerRadialForceFieldStrength.layerValues[index] = parameters.layerRadialForceFieldStrength.layerValues[index];
+    origParameters.layerRadialForceFieldDriftAngle.layerValues[index] = parameters.layerRadialForceFieldDriftAngle.layerValues[index];
 
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
@@ -494,8 +494,8 @@ void SimulationParametersMainWindow::onCloneLocation()
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
     auto locationType = LocationHelper::getLocationType(_selectedLocationIndex, parameters);
-    if (locationType == LocationType::Zone) {
-        if (!checkNumZones(parameters)) {
+    if (locationType == LocationType::Layer) {
+        if (!checkNumLayers(parameters)) {
             return;
         }
     } else {
@@ -591,8 +591,8 @@ void SimulationParametersMainWindow::onCenterLocation(int locationIndex)
     auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
     auto arrayIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
     RealVector2D pos;
-    if (locationType == LocationType::Zone) {
-        pos = parameters.zonePosition.zoneValues[arrayIndex];
+    if (locationType == LocationType::Layer) {
+        pos = parameters.layerPosition.layerValues[arrayIndex];
     } else if (locationType == LocationType::Source) {
         pos = parameters.sourcePosition.sourceValues[arrayIndex];
     }
@@ -603,14 +603,14 @@ void SimulationParametersMainWindow::updateLocations()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
 
-    _locations = std::vector<Location>(1 + parameters.numZones + parameters.numSources);
+    _locations = std::vector<Location>(1 + parameters.numLayers + parameters.numSources);
     auto strength = ParametersEditService::get().getRadiationStrengths(parameters);
     auto pinnedString = strength.pinned.contains(0) ? ICON_FA_THUMBTACK " " : " ";
     _locations.at(0) = Location{"Base", LocationType::Base, "-", pinnedString + StringHelper::format(strength.values.front() * 100 + 0.05f, 1) + "%"};
-    for (int i = 0; i < parameters.numZones; ++i) {
+    for (int i = 0; i < parameters.numLayers; ++i) {
         auto position =
-            "(" + StringHelper::format(parameters.zonePosition.zoneValues[i].x, 0) + ", " + StringHelper::format(parameters.zonePosition.zoneValues[i].y, 0) + ")";
-        _locations.at(parameters.zoneLocationIndex[i]) = Location{parameters.zoneName.zoneValues[i], LocationType::Zone, position};
+            "(" + StringHelper::format(parameters.layerPosition.layerValues[i].x, 0) + ", " + StringHelper::format(parameters.layerPosition.layerValues[i].y, 0) + ")";
+        _locations.at(parameters.layerLocationIndex[i]) = Location{parameters.layerName.layerValues[i], LocationType::Layer, position};
     }
     for (int i = 0; i < parameters.numSources; ++i) {
         auto position = "(" + StringHelper::format(parameters.sourcePosition.sourceValues[i].x, 0) + ", "
@@ -635,10 +635,10 @@ void SimulationParametersMainWindow::correctLayout(float origMasterHeight, float
     }
 }
 
-bool SimulationParametersMainWindow::checkNumZones(SimulationParameters const& parameters)
+bool SimulationParametersMainWindow::checkNumLayers(SimulationParameters const& parameters)
 {
-    if (parameters.numZones == MAX_ZONES) {
-        showMessage("Error", "The maximum number of zones has been reached.");
+    if (parameters.numLayers == MAX_LAYERS) {
+        showMessage("Error", "The maximum number of layers has been reached.");
         return false;
     }
     return true;

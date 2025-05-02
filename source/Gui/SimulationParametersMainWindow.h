@@ -6,7 +6,7 @@
 
 #include "AlienWindow.h"
 #include "SimulationParametersBaseWidgets.h"
-#include "ZoneColorPalette.h"
+#include "LayerColorPalette.h"
 
 class SimulationParametersMainWindow : public AlienWindow<SimulationFacade>
 {
@@ -28,7 +28,7 @@ private:
     struct Location
     {
         std::string name;
-        LocationType type = LocationType::Zone;
+        LocationType type = LocationType::Layer;
         std::string position;
         std::string strength;
     };
@@ -38,7 +38,7 @@ private:
 
     void onOpenParameters();
     void onSaveParameters();
-    void onInsertDefaultZone();
+    void onInsertDefaultLayer();
     void onInsertDefaultSource();
     void onCloneLocation();
     void onDeleteLocation();
@@ -51,7 +51,7 @@ private:
 
     void correctLayout(float origMasterHeight, float origExpertWidgetHeight);
 
-    bool checkNumZones(SimulationParameters const& parameters);
+    bool checkNumLayers(SimulationParameters const& parameters);
     bool checkNumSources(SimulationParameters const& parameters);
 
     float getMasterWidgetRefHeight() const;
@@ -64,7 +64,7 @@ private:
     SimulationFacade _simulationFacade;
 
     LocationWidgets _baseWidgets;
-    LocationWidgets _zoneWidgets;
+    LocationWidgets _layerWidgets;
     LocationWidgets _sourceWidgets;
 
     bool _masterWidgetOpen = true;
@@ -73,7 +73,7 @@ private:
     float _masterWidgetHeight = 0;
     float _expertWidgetHeight = 0;
 
-    ZoneColorPalette _zoneColorPalette;
+    LayerColorPalette _layerColorPalette;
 
     std::optional<SimulationParameters> _copiedParameters;
     std::optional<int> _sessionId;

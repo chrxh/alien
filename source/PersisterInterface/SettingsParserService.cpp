@@ -678,7 +678,7 @@ namespace
                 parserTask);
             ParameterParser::encodeDecode(
                 tree, parameters.sourceShapeType.sourceValues[index], defaultParameters.sourceShapeType.sourceValues[index], base + "shape.type", parserTask);
-            if (parameters.sourceShapeType.sourceValues[index] == ZoneShapeType_Circular) {
+            if (parameters.sourceShapeType.sourceValues[index] == LayerShapeType_Circular) {
                 ParameterParser::encodeDecode(
                     tree,
                     parameters.sourceCircularRadius.sourceValues[index],
@@ -686,7 +686,7 @@ namespace
                     base + "shape.circular.radius",
                     parserTask);
             }
-            if (parameters.sourceShapeType.sourceValues[index] == ZoneShapeType_Rectangular) {
+            if (parameters.sourceShapeType.sourceValues[index] == LayerShapeType_Rectangular) {
                 ParameterParser::encodeDecode(
                     tree,
                     parameters.sourceRectangularRect.sourceValues[index].x,
@@ -702,343 +702,343 @@ namespace
             }
         }
 
-        // Zones
-        ParameterParser::encodeDecode(tree, parameters.numZones, defaultParameters.numZones, "simulation parameters.spots.num spots", parserTask);
-        for (int index = 0; index < parameters.numZones; ++index) {
+        // Layers
+        ParameterParser::encodeDecode(tree, parameters.numLayers, defaultParameters.numLayers, "simulation parameters.spots.num spots", parserTask);
+        for (int index = 0; index < parameters.numLayers; ++index) {
             std::string base = "simulation parameters.spots." + std::to_string(index) + ".";
-            ParameterParser::encodeDecode(tree, parameters.zoneName.zoneValues[index], defaultParameters.zoneName.zoneValues[0], base + "name", parserTask);
+            ParameterParser::encodeDecode(tree, parameters.layerName.layerValues[index], defaultParameters.layerName.layerValues[0], base + "name", parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.zoneLocationIndex[index],
-                defaultParameters.zoneLocationIndex[index],
+                parameters.layerLocationIndex[index],
+                defaultParameters.layerLocationIndex[index],
                 base + "location index",
                 parserTask);
-            ParameterParser::encodeDecode(tree, parameters.zonePosition.zoneValues[index].x, defaultParameters.zonePosition.zoneValues[index].x, base + "pos.x", parserTask);
-            ParameterParser::encodeDecode(tree, parameters.zonePosition.zoneValues[index].y, defaultParameters.zonePosition.zoneValues[index].y, base + "pos.y", parserTask);
-            ParameterParser::encodeDecode(tree, parameters.zoneVelocity.zoneValues[index].x, defaultParameters.zoneVelocity.zoneValues[index].x, base + "vel.x", parserTask);
-            ParameterParser::encodeDecode(tree, parameters.zoneVelocity.zoneValues[index].y, defaultParameters.zoneVelocity.zoneValues[index].y, base + "vel.y", parserTask);
+            ParameterParser::encodeDecode(tree, parameters.layerPosition.layerValues[index].x, defaultParameters.layerPosition.layerValues[index].x, base + "pos.x", parserTask);
+            ParameterParser::encodeDecode(tree, parameters.layerPosition.layerValues[index].y, defaultParameters.layerPosition.layerValues[index].y, base + "pos.y", parserTask);
+            ParameterParser::encodeDecode(tree, parameters.layerVelocity.layerValues[index].x, defaultParameters.layerVelocity.layerValues[index].x, base + "vel.x", parserTask);
+            ParameterParser::encodeDecode(tree, parameters.layerVelocity.layerValues[index].y, defaultParameters.layerVelocity.layerValues[index].y, base + "vel.y", parserTask);
 
             ParameterParser::encodeDecode(
-                tree, parameters.zoneShape.zoneValues[index], defaultParameters.zoneShape.zoneValues[index], base + "shape.type", parserTask);
+                tree, parameters.layerShape.layerValues[index], defaultParameters.layerShape.layerValues[index], base + "shape.type", parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.zoneCoreRadius.zoneValues[index],
-                defaultParameters.zoneCoreRadius.zoneValues[index],
+                parameters.layerCoreRadius.layerValues[index],
+                defaultParameters.layerCoreRadius.layerValues[index],
                 base + "shape.circular.core radius",
                 parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.zoneCoreRect.zoneValues[index].x,
-                defaultParameters.zoneCoreRect.zoneValues[index].x,
+                parameters.layerCoreRect.layerValues[index].x,
+                defaultParameters.layerCoreRect.layerValues[index].x,
                 base + "shape.rectangular.core width",
                 parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.zoneCoreRect.zoneValues[index].y,
-                defaultParameters.zoneCoreRect.zoneValues[index].y,
+                parameters.layerCoreRect.layerValues[index].y,
+                defaultParameters.layerCoreRect.layerValues[index].y,
                 base + "shape.rectangular.core height",
                 parserTask);
 
             ParameterParser::encodeDecode(
-                tree, parameters.zoneForceFieldType.zoneValues[index], defaultParameters.zoneForceFieldType.zoneValues[index], base + "flow.type", parserTask);
+                tree, parameters.layerForceFieldType.layerValues[index], defaultParameters.layerForceFieldType.layerValues[index], base + "flow.type", parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.zoneRadialForceFieldOrientation.zoneValues[index],
-                defaultParameters.zoneRadialForceFieldOrientation.zoneValues[index],
+                parameters.layerRadialForceFieldOrientation.layerValues[index],
+                defaultParameters.layerRadialForceFieldOrientation.layerValues[index],
                 base + "flow.radial.orientation",
                 parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.zoneRadialForceFieldStrength.zoneValues[index],
-                defaultParameters.zoneRadialForceFieldStrength.zoneValues[index],
+                parameters.layerRadialForceFieldStrength.layerValues[index],
+                defaultParameters.layerRadialForceFieldStrength.layerValues[index],
                 base + "flow.radial.strength",
                 parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.zoneRadialForceFieldDriftAngle.zoneValues[index],
-                defaultParameters.zoneRadialForceFieldDriftAngle.zoneValues[index],
+                parameters.layerRadialForceFieldDriftAngle.layerValues[index],
+                defaultParameters.layerRadialForceFieldDriftAngle.layerValues[index],
                 base + "flow.radial.drift angle",
                 parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.zoneCentralForceFieldStrength.zoneValues[index],
-                defaultParameters.zoneCentralForceFieldStrength.zoneValues[index],
+                parameters.layerCentralForceFieldStrength.layerValues[index],
+                defaultParameters.layerCentralForceFieldStrength.layerValues[index],
                 base + "flow.central.strength",
                 parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.zoneLinearForceFieldAngle.zoneValues[index],
-                defaultParameters.zoneLinearForceFieldAngle.zoneValues[index],
+                parameters.layerLinearForceFieldAngle.layerValues[index],
+                defaultParameters.layerLinearForceFieldAngle.layerValues[index],
                 base + "flow.linear.angle",
                 parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.zoneLinearForceFieldStrength.zoneValues[index],
-                defaultParameters.zoneLinearForceFieldStrength.zoneValues[index],
+                parameters.layerLinearForceFieldStrength.layerValues[index],
+                defaultParameters.layerLinearForceFieldStrength.layerValues[index],
                 base + "flow.linear.strength",
                 parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.zoneFadeoutRadius.zoneValues[index],
-                defaultParameters.zoneFadeoutRadius.zoneValues[index],
+                parameters.layerFadeoutRadius.layerValues[index],
+                defaultParameters.layerFadeoutRadius.layerValues[index],
                 base + "fadeout radius",
                 parserTask);
 
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.backgroundColor.zoneValues[index].value.r,
-                parameters.backgroundColor.zoneValues[index].enabled,
+                parameters.backgroundColor.layerValues[index].value.r,
+                parameters.backgroundColor.layerValues[index].enabled,
                 parameters.backgroundColor.baseValue.r,
                 base + "color.r",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.backgroundColor.zoneValues[index].value.g,
-                parameters.backgroundColor.zoneValues[index].enabled,
+                parameters.backgroundColor.layerValues[index].value.g,
+                parameters.backgroundColor.layerValues[index].enabled,
                 parameters.backgroundColor.baseValue.g,
                 base + "color.g",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.backgroundColor.zoneValues[index].value.b,
-                parameters.backgroundColor.zoneValues[index].enabled,
+                parameters.backgroundColor.layerValues[index].value.b,
+                parameters.backgroundColor.layerValues[index].enabled,
                 parameters.backgroundColor.baseValue.b,
                 base + "color.b",
                 parserTask);
 
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.friction.zoneValues[index].value,
-                parameters.friction.zoneValues[index].enabled,
+                parameters.friction.layerValues[index].value,
+                parameters.friction.layerValues[index].enabled,
                 defaultParameters.friction.baseValue,
                 base + "friction",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.rigidity.zoneValues[index].value,
-                parameters.rigidity.zoneValues[index].enabled,
+                parameters.rigidity.layerValues[index].value,
+                parameters.rigidity.layerValues[index].enabled,
                 defaultParameters.rigidity.baseValue,
                 base + "rigidity",
                 parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.disableRadiationSources.zoneValues[index],
-                defaultParameters.disableRadiationSources.zoneValues[0],
+                parameters.disableRadiationSources.layerValues[index],
+                defaultParameters.disableRadiationSources.layerValues[0],
                 base + "radiation.disable sources",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.radiationAbsorption.zoneValues[index].value,
-                parameters.radiationAbsorption.zoneValues[index].enabled,
+                parameters.radiationAbsorption.layerValues[index].value,
+                parameters.radiationAbsorption.layerValues[index].enabled,
                 parameters.radiationAbsorption.baseValue,
                 base + "radiation.absorption",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.radiationAbsorptionLowVelocityPenalty.zoneValues[index].value,
-                parameters.radiationAbsorptionLowVelocityPenalty.zoneValues[index].enabled,
+                parameters.radiationAbsorptionLowVelocityPenalty.layerValues[index].value,
+                parameters.radiationAbsorptionLowVelocityPenalty.layerValues[index].enabled,
                 parameters.radiationAbsorptionLowVelocityPenalty.baseValue,
                 base + "radiation.absorption low velocity penalty",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.radiationAbsorptionLowGenomeComplexityPenalty.zoneValues[index].value,
-                parameters.radiationAbsorptionLowGenomeComplexityPenalty.zoneValues[index].enabled,
+                parameters.radiationAbsorptionLowGenomeComplexityPenalty.layerValues[index].value,
+                parameters.radiationAbsorptionLowGenomeComplexityPenalty.layerValues[index].enabled,
                 parameters.radiationAbsorptionLowGenomeComplexityPenalty.baseValue,
                 base + "radiation.absorption low genome complexity penalty",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.radiationType1_strength.zoneValues[index].value,
-                parameters.radiationType1_strength.zoneValues[index].enabled,
+                parameters.radiationType1_strength.layerValues[index].value,
+                parameters.radiationType1_strength.layerValues[index].enabled,
                 parameters.radiationType1_strength.baseValue,
                 base + "radiation.factor",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.maxForce.zoneValues[index].value,
-                parameters.maxForce.zoneValues[index].enabled,
+                parameters.maxForce.layerValues[index].value,
+                parameters.maxForce.layerValues[index].enabled,
                 defaultParameters.maxForce.baseValue,
                 base + "cell.max force",
                 parserTask);
 
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.minCellEnergy.zoneValues[index].value,
-                parameters.minCellEnergy.zoneValues[index].enabled,
+                parameters.minCellEnergy.layerValues[index].value,
+                parameters.minCellEnergy.layerValues[index].enabled,
                 defaultParameters.minCellEnergy.baseValue,
                 base + "cell.min energy",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.cellDeathProbability.zoneValues[index].value,
-                parameters.cellDeathProbability.zoneValues[index].enabled,
+                parameters.cellDeathProbability.layerValues[index].value,
+                parameters.cellDeathProbability.layerValues[index].enabled,
                 defaultParameters.cellDeathProbability.baseValue,
                 base + "cell.death probability",
                 parserTask);
 
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.cellFusionVelocity.zoneValues[index].value,
-                parameters.cellFusionVelocity.zoneValues[index].enabled,
+                parameters.cellFusionVelocity.layerValues[index].value,
+                parameters.cellFusionVelocity.layerValues[index].enabled,
                 defaultParameters.cellFusionVelocity.baseValue,
                 base + "cell.fusion velocity",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.cellMaxBindingEnergy.zoneValues[index].value,
-                parameters.cellMaxBindingEnergy.zoneValues[index].enabled,
+                parameters.cellMaxBindingEnergy.layerValues[index].value,
+                parameters.cellMaxBindingEnergy.layerValues[index].enabled,
                 defaultParameters.cellMaxBindingEnergy.baseValue,
                 base + "cell.max binding energy",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.maxAgeForInactiveCells.zoneValues[index].value,
-                parameters.maxAgeForInactiveCells.zoneValues[index].enabled,
+                parameters.maxAgeForInactiveCells.layerValues[index].value,
+                parameters.maxAgeForInactiveCells.layerValues[index].enabled,
                 defaultParameters.maxAgeForInactiveCells.baseValue,
                 base + "cell.inactive max age",
                 parserTask);
 
             ParameterParser::encodeDecode(
-                tree, parameters.colorTransitionRules.zoneValues[index].enabled, false, base + "cell.color transition rules.activated", parserTask);
+                tree, parameters.colorTransitionRules.layerValues[index].enabled, false, base + "cell.color transition rules.activated", parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.colorTransitionRules.zoneValues[index].value.cellColorTransitionDuration,
-                defaultParameters.colorTransitionRules.zoneValues[index].value.cellColorTransitionDuration,
+                parameters.colorTransitionRules.layerValues[index].value.cellColorTransitionDuration,
+                defaultParameters.colorTransitionRules.layerValues[index].value.cellColorTransitionDuration,
                 base + "cell.color transition rules.duration",
                 parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.colorTransitionRules.zoneValues[index].value.cellColorTransitionTargetColor,
-                defaultParameters.colorTransitionRules.zoneValues[index].value.cellColorTransitionTargetColor,
+                parameters.colorTransitionRules.layerValues[index].value.cellColorTransitionTargetColor,
+                defaultParameters.colorTransitionRules.layerValues[index].value.cellColorTransitionTargetColor,
                 base + "cell.color transition rules.target color",
                 parserTask);
 
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.attackerEnergyCost.zoneValues[index].value,
-                parameters.attackerEnergyCost.zoneValues[index].enabled,
+                parameters.attackerEnergyCost.layerValues[index].value,
+                parameters.attackerEnergyCost.layerValues[index].enabled,
                 defaultParameters.attackerEnergyCost.baseValue,
                 base + "cell.function.attacker.energy cost",
                 parserTask);
 
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.attackerFoodChainColorMatrix.zoneValues[index].value,
-                parameters.attackerFoodChainColorMatrix.zoneValues[index].enabled,
+                parameters.attackerFoodChainColorMatrix.layerValues[index].value,
+                parameters.attackerFoodChainColorMatrix.layerValues[index].enabled,
                 defaultParameters.attackerFoodChainColorMatrix.baseValue,
                 base + "cell.function.attacker.food chain color matrix",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.attackerComplexCreatureProtection.zoneValues[index].value,
-                parameters.attackerComplexCreatureProtection.zoneValues[index].enabled,
+                parameters.attackerComplexCreatureProtection.layerValues[index].value,
+                parameters.attackerComplexCreatureProtection.layerValues[index].enabled,
                 defaultParameters.attackerComplexCreatureProtection.baseValue,
                 base + "cell.function.attacker.genome size bonus",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.attackerNewComplexMutantProtection.zoneValues[index].value,
-                parameters.attackerNewComplexMutantProtection.zoneValues[index].enabled,
+                parameters.attackerNewComplexMutantProtection.layerValues[index].value,
+                parameters.attackerNewComplexMutantProtection.layerValues[index].enabled,
                 defaultParameters.attackerNewComplexMutantProtection.baseValue,
                 base + "cell.function.attacker.new complex mutant penalty",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.attackerGeometryDeviationProtection.zoneValues[index].value,
-                parameters.attackerGeometryDeviationProtection.zoneValues[index].enabled,
+                parameters.attackerGeometryDeviationProtection.layerValues[index].value,
+                parameters.attackerGeometryDeviationProtection.layerValues[index].enabled,
                 defaultParameters.attackerGeometryDeviationProtection.baseValue,
                 base + "cell.function.attacker.geometry deviation exponent",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.attackerConnectionsMismatchProtection.zoneValues[index].value,
-                parameters.attackerConnectionsMismatchProtection.zoneValues[index].enabled,
+                parameters.attackerConnectionsMismatchProtection.layerValues[index].value,
+                parameters.attackerConnectionsMismatchProtection.layerValues[index].enabled,
                 defaultParameters.attackerConnectionsMismatchProtection.baseValue,
                 base + "cell.function.attacker.connections mismatch penalty",
                 parserTask);
 
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.copyMutationNeuronData.zoneValues[index].value,
-                parameters.copyMutationNeuronData.zoneValues[index].enabled,
+                parameters.copyMutationNeuronData.layerValues[index].value,
+                parameters.copyMutationNeuronData.layerValues[index].enabled,
                 defaultParameters.copyMutationNeuronData.baseValue,
                 base + "cell.copy mutation.neuron data",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.copyMutationCellProperties.zoneValues[index].value,
-                parameters.copyMutationCellProperties.zoneValues[index].enabled,
+                parameters.copyMutationCellProperties.layerValues[index].value,
+                parameters.copyMutationCellProperties.layerValues[index].enabled,
                 defaultParameters.copyMutationCellProperties.baseValue,
                 base + "cell.copy mutation.cell properties",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.copyMutationGeometry.zoneValues[index].value,
-                parameters.copyMutationGeometry.zoneValues[index].enabled,
+                parameters.copyMutationGeometry.layerValues[index].value,
+                parameters.copyMutationGeometry.layerValues[index].enabled,
                 defaultParameters.copyMutationGeometry.baseValue,
                 base + "cell.copy mutation.geometry",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.copyMutationCustomGeometry.zoneValues[index].value,
-                parameters.copyMutationCustomGeometry.zoneValues[index].enabled,
+                parameters.copyMutationCustomGeometry.layerValues[index].value,
+                parameters.copyMutationCustomGeometry.layerValues[index].enabled,
                 defaultParameters.copyMutationCustomGeometry.baseValue,
                 base + "cell.copy mutation.custom geometry",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.copyMutationCellType.zoneValues[index].value,
-                parameters.copyMutationCellType.zoneValues[index].enabled,
+                parameters.copyMutationCellType.layerValues[index].value,
+                parameters.copyMutationCellType.layerValues[index].enabled,
                 defaultParameters.copyMutationCellType.baseValue,
                 base + "cell.copy mutation.cell function",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.copyMutationInsertion.zoneValues[index].value,
-                parameters.copyMutationInsertion.zoneValues[index].enabled,
+                parameters.copyMutationInsertion.layerValues[index].value,
+                parameters.copyMutationInsertion.layerValues[index].enabled,
                 defaultParameters.copyMutationInsertion.baseValue,
                 base + "cell.copy mutation.insertion",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.copyMutationDeletion.zoneValues[index].value,
-                parameters.copyMutationDeletion.zoneValues[index].enabled,
+                parameters.copyMutationDeletion.layerValues[index].value,
+                parameters.copyMutationDeletion.layerValues[index].enabled,
                 defaultParameters.copyMutationDeletion.baseValue,
                 base + "cell.copy mutation.deletion",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.copyMutationTranslation.zoneValues[index].value,
-                parameters.copyMutationTranslation.zoneValues[index].enabled,
+                parameters.copyMutationTranslation.layerValues[index].value,
+                parameters.copyMutationTranslation.layerValues[index].enabled,
                 defaultParameters.copyMutationTranslation.baseValue,
                 base + "cell.copy mutation.translation",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.copyMutationDuplication.zoneValues[index].value,
-                parameters.copyMutationDuplication.zoneValues[index].enabled,
+                parameters.copyMutationDuplication.layerValues[index].value,
+                parameters.copyMutationDuplication.layerValues[index].enabled,
                 defaultParameters.copyMutationDuplication.baseValue,
                 base + "cell.copy mutation.duplication",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.copyMutationCellColor.zoneValues[index].value,
-                parameters.copyMutationCellColor.zoneValues[index].enabled,
+                parameters.copyMutationCellColor.layerValues[index].value,
+                parameters.copyMutationCellColor.layerValues[index].enabled,
                 defaultParameters.copyMutationCellColor.baseValue,
                 base + "cell.copy mutation.cell color",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.copyMutationSubgenomeColor.zoneValues[index].value,
-                parameters.copyMutationSubgenomeColor.zoneValues[index].enabled,
+                parameters.copyMutationSubgenomeColor.layerValues[index].value,
+                parameters.copyMutationSubgenomeColor.layerValues[index].enabled,
                 defaultParameters.copyMutationSubgenomeColor.baseValue,
                 base + "cell.copy mutation.subgenome color",
                 parserTask);
             ParameterParser::encodeDecodeWithEnabled(
                 tree,
-                parameters.copyMutationGenomeColor.zoneValues[index].value,
-                parameters.copyMutationGenomeColor.zoneValues[index].enabled,
+                parameters.copyMutationGenomeColor.layerValues[index].value,
+                parameters.copyMutationGenomeColor.layerValues[index].enabled,
                 defaultParameters.copyMutationGenomeColor.baseValue,
                 base + "cell.copy mutation.genome color",
                 parserTask);

@@ -38,7 +38,7 @@ struct LegacyParametersForSpot
 struct LegacyParameters
 {
     LegacyParametersForBase base;
-    LegacyParametersForSpot spots[MAX_ZONES];
+    LegacyParametersForSpot spots[MAX_LAYERS];
 };
 
 class LegacySettingsParserService

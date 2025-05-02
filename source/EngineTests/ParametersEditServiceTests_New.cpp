@@ -18,11 +18,11 @@ protected:
     {
         SimulationParameters result;
         for (auto const& [orderIndex, locationType] : locationTypes | boost::adaptors::indexed(0)) {
-            if (locationType == LocationType::Zone) {
-                result.zoneLocationIndex[result.numZones] = orderIndex + 1;
-                result.zoneCoreRadius.zoneValues[result.numZones] = toFloat(orderIndex) + 0.5f;
-                StringHelper::copy(result.zoneName.zoneValues[result.numZones], sizeof(Char64), "Zone " + std::to_string(result.numZones + 1));
-                ++result.numZones;
+            if (locationType == LocationType::Layer) {
+                result.layerLocationIndex[result.numLayers] = orderIndex + 1;
+                result.layerCoreRadius.layerValues[result.numLayers] = toFloat(orderIndex) + 0.5f;
+                StringHelper::copy(result.layerName.layerValues[result.numLayers], sizeof(Char64), "Layer " + std::to_string(result.numLayers + 1));
+                ++result.numLayers;
             } else if (locationType == LocationType::Source) {
                 result.sourceLocationIndex[result.numSources] = orderIndex + 1;
                 result.sourceCircularRadius.sourceValues[result.numSources] = toFloat(orderIndex) + 0.5f;
@@ -37,11 +37,11 @@ protected:
     {
         std::set<int> locationIndices;
         int lastLocationIndex = 0;
-        for (int i = 0; i < parameters.numZones; ++i) {
-            EXPECT_FALSE(locationIndices.contains(parameters.zoneLocationIndex[i]));
-            locationIndices.insert(parameters.zoneLocationIndex[i]);
-            EXPECT_TRUE(lastLocationIndex < parameters.zoneLocationIndex[i]);
-            lastLocationIndex = parameters.zoneLocationIndex[i];
+        for (int i = 0; i < parameters.numLayers; ++i) {
+            EXPECT_FALSE(locationIndices.contains(parameters.layerLocationIndex[i]));
+            locationIndices.insert(parameters.layerLocationIndex[i]);
+            EXPECT_TRUE(lastLocationIndex < parameters.layerLocationIndex[i]);
+            lastLocationIndex = parameters.layerLocationIndex[i];
         }
         lastLocationIndex = 0;
         for (int i = 0; i < parameters.numSources; ++i) {
@@ -50,14 +50,14 @@ protected:
             EXPECT_TRUE(lastLocationIndex < parameters.sourceLocationIndex[i]);
             lastLocationIndex = parameters.sourceLocationIndex[i];
         }
-        EXPECT_EQ(parameters.numZones + parameters.numSources, locationIndices.size());
+        EXPECT_EQ(parameters.numLayers + parameters.numSources, locationIndices.size());
         if (!locationIndices.empty()) {
-            EXPECT_EQ(parameters.numZones + parameters.numSources, *std::max_element(locationIndices.begin(), locationIndices.end()));
+            EXPECT_EQ(parameters.numLayers + parameters.numSources, *std::max_element(locationIndices.begin(), locationIndices.end()));
         }
 
-        for (int i = 0; i < parameters.numZones; ++i) {
-            auto locationIndex = parameters.zoneLocationIndex[i];
-            EXPECT_EQ(LocationType::Zone, locationTypes.at(locationIndex - 1));
+        for (int i = 0; i < parameters.numLayers; ++i) {
+            auto locationIndex = parameters.layerLocationIndex[i];
+            EXPECT_EQ(LocationType::Layer, locationTypes.at(locationIndex - 1));
         }
         for (int i = 0; i < parameters.numSources; ++i) {
             auto locationIndex = parameters.sourceLocationIndex[i];
@@ -72,16 +72,16 @@ protected:
         int insertedLocationIndex)
     {
         checkParameters(parameters, locationTypes);
-        for (int i = 0; i < parameters.numZones; ++i) {
-            auto locationIndex = parameters.zoneLocationIndex[i];
+        for (int i = 0; i < parameters.numLayers; ++i) {
+            auto locationIndex = parameters.layerLocationIndex[i];
             if (locationIndex == insertedLocationIndex) {
                 continue;
             }
             auto origLocationIndex = locationIndex < insertedLocationIndex ? locationIndex : locationIndex - 1;
             auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origLocationIndex);
 
-            EXPECT_EQ(origParameters.zoneCoreRadius.zoneValues[origArrayIndex], parameters.zoneCoreRadius.zoneValues[i]);
-            EXPECT_TRUE(StringHelper::compare(origParameters.zoneName.zoneValues[origArrayIndex], sizeof(Char64), parameters.zoneName.zoneValues[i]));
+            EXPECT_EQ(origParameters.layerCoreRadius.layerValues[origArrayIndex], parameters.layerCoreRadius.layerValues[i]);
+            EXPECT_TRUE(StringHelper::compare(origParameters.layerName.layerValues[origArrayIndex], sizeof(Char64), parameters.layerName.layerValues[i]));
         }
         for (int i = 0; i < parameters.numSources; ++i) {
             auto locationIndex = parameters.sourceLocationIndex[i];
@@ -108,12 +108,12 @@ protected:
         auto locationType = LocationHelper::getLocationType(insertedLocationIndex, parameters);
         auto insertedArrayIndex = LocationHelper::findLocationArrayIndex(parameters, insertedLocationIndex);
 
-        if (locationType == LocationType::Zone) {
-            EXPECT_EQ(defaultParameters.zoneCoreRadius.zoneValues[0], parameters.zoneCoreRadius.zoneValues[insertedArrayIndex]);
+        if (locationType == LocationType::Layer) {
+            EXPECT_EQ(defaultParameters.layerCoreRadius.layerValues[0], parameters.layerCoreRadius.layerValues[insertedArrayIndex]);
             
-            Char64 zoneName;
-            StringHelper::copy(zoneName, sizeof(Char64), LocationHelper::generateZoneName(origParameters));
-            EXPECT_TRUE(StringHelper::compare(zoneName, sizeof(Char64), parameters.zoneName.zoneValues[insertedArrayIndex]));
+            Char64 layerName;
+            StringHelper::copy(layerName, sizeof(Char64), LocationHelper::generateLayerName(origParameters));
+            EXPECT_TRUE(StringHelper::compare(layerName, sizeof(Char64), parameters.layerName.layerValues[insertedArrayIndex]));
         } else if (locationType == LocationType::Source) {
             EXPECT_EQ(defaultParameters.sourceCircularRadius.sourceValues[0], parameters.sourceCircularRadius.sourceValues[insertedArrayIndex]);
 
@@ -136,12 +136,12 @@ protected:
         auto insertedArrayIndex = LocationHelper::findLocationArrayIndex(parameters, insertedLocationIndex);
         auto prevArrayIndex = LocationHelper::findLocationArrayIndex(parameters, insertedLocationIndex);
 
-        if (locationType == LocationType::Zone) {
-            EXPECT_EQ(parameters.zoneCoreRadius.zoneValues[prevArrayIndex], parameters.zoneCoreRadius.zoneValues[insertedArrayIndex]);
+        if (locationType == LocationType::Layer) {
+            EXPECT_EQ(parameters.layerCoreRadius.layerValues[prevArrayIndex], parameters.layerCoreRadius.layerValues[insertedArrayIndex]);
 
-            Char64 zoneName;
-            StringHelper::copy(zoneName, sizeof(Char64), LocationHelper::generateZoneName(origParameters));
-            EXPECT_TRUE(StringHelper::compare(zoneName, sizeof(Char64), parameters.zoneName.zoneValues[insertedArrayIndex]));
+            Char64 layerName;
+            StringHelper::copy(layerName, sizeof(Char64), LocationHelper::generateLayerName(origParameters));
+            EXPECT_TRUE(StringHelper::compare(layerName, sizeof(Char64), parameters.layerName.layerValues[insertedArrayIndex]));
         } else if (locationType == LocationType::Source) {
             EXPECT_EQ(parameters.sourceCircularRadius.sourceValues[prevArrayIndex], parameters.sourceCircularRadius.sourceValues[insertedArrayIndex]);
 
@@ -158,13 +158,13 @@ protected:
         int deletedLocationIndex)
     {
         checkParameters(parameters, locationTypes);
-        for (int i = 0; i < parameters.numZones; ++i) {
-            auto locationIndex = parameters.zoneLocationIndex[i];
+        for (int i = 0; i < parameters.numLayers; ++i) {
+            auto locationIndex = parameters.layerLocationIndex[i];
             auto origLocationIndex = locationIndex < deletedLocationIndex ? locationIndex : locationIndex + 1;
             auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origLocationIndex);
 
-            EXPECT_EQ(origParameters.zoneCoreRadius.zoneValues[origArrayIndex], parameters.zoneCoreRadius.zoneValues[i]);
-            EXPECT_TRUE(StringHelper::compare(origParameters.zoneName.zoneValues[origArrayIndex], sizeof(Char64), parameters.zoneName.zoneValues[i]));
+            EXPECT_EQ(origParameters.layerCoreRadius.layerValues[origArrayIndex], parameters.layerCoreRadius.layerValues[i]);
+            EXPECT_TRUE(StringHelper::compare(origParameters.layerName.layerValues[origArrayIndex], sizeof(Char64), parameters.layerName.layerValues[i]));
         }
         for (int i = 0; i < parameters.numSources; ++i) {
             auto locationIndex = parameters.sourceLocationIndex[i];
@@ -183,8 +183,8 @@ protected:
         int movedLocationIndex)
     {
         checkParameters(parameters, locationTypes);
-        for (int i = 0; i < parameters.numZones; ++i) {
-            auto locationIndex = parameters.zoneLocationIndex[i];
+        for (int i = 0; i < parameters.numLayers; ++i) {
+            auto locationIndex = parameters.layerLocationIndex[i];
             auto origLocationIndex = [&] {
                 if (locationIndex < movedLocationIndex - 1 || locationIndex > movedLocationIndex) {
                     return locationIndex;
@@ -199,8 +199,8 @@ protected:
 
             auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origLocationIndex);
 
-            EXPECT_EQ(origParameters.zoneCoreRadius.zoneValues[origArrayIndex], parameters.zoneCoreRadius.zoneValues[i]);
-            EXPECT_TRUE(StringHelper::compare(origParameters.zoneName.zoneValues[origArrayIndex], sizeof(Char64), parameters.zoneName.zoneValues[i]));
+            EXPECT_EQ(origParameters.layerCoreRadius.layerValues[origArrayIndex], parameters.layerCoreRadius.layerValues[i]);
+            EXPECT_TRUE(StringHelper::compare(origParameters.layerName.layerValues[origArrayIndex], sizeof(Char64), parameters.layerName.layerValues[i]));
         }
         for (int i = 0; i < parameters.numSources; ++i) {
             auto locationIndex = parameters.sourceLocationIndex[i];
@@ -229,8 +229,8 @@ protected:
         int movedLocationIndex)
     {
         checkParameters(parameters, locationTypes);
-        for (int i = 0; i < parameters.numZones; ++i) {
-            auto locationIndex = parameters.zoneLocationIndex[i];
+        for (int i = 0; i < parameters.numLayers; ++i) {
+            auto locationIndex = parameters.layerLocationIndex[i];
             auto origLocationIndex = [&] {
                 if (locationIndex < movedLocationIndex || locationIndex > movedLocationIndex + 1) {
                     return locationIndex;
@@ -245,8 +245,8 @@ protected:
 
             auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origLocationIndex);
 
-            EXPECT_EQ(origParameters.zoneCoreRadius.zoneValues[origArrayIndex], parameters.zoneCoreRadius.zoneValues[i]);
-            EXPECT_TRUE(StringHelper::compare(origParameters.zoneName.zoneValues[origArrayIndex], sizeof(Char64), parameters.zoneName.zoneValues[i]));
+            EXPECT_EQ(origParameters.layerCoreRadius.layerValues[origArrayIndex], parameters.layerCoreRadius.layerValues[i]);
+            EXPECT_TRUE(StringHelper::compare(origParameters.layerName.layerValues[origArrayIndex], sizeof(Char64), parameters.layerName.layerValues[i]));
         }
         for (int i = 0; i < parameters.numSources; ++i) {
             auto locationIndex = parameters.sourceLocationIndex[i];
@@ -269,201 +269,201 @@ protected:
     }
 };
 
-TEST_F(ParametersEditServiceTests_New, cloneZone)
+TEST_F(ParametersEditServiceTests_New, cloneLayer)
 {
-    auto origParameters = createTestData({LocationType::Zone, LocationType::Zone, LocationType::Source, LocationType::Source});
+    auto origParameters = createTestData({LocationType::Layer, LocationType::Layer, LocationType::Source, LocationType::Source});
     auto parameters = origParameters;
     ParametersEditService::get().cloneLocation(parameters, 1);
     checkParametersAfterCloning(
-        parameters, origParameters, {LocationType::Zone, LocationType::Zone, LocationType::Zone, LocationType::Source, LocationType::Source}, 2);
+        parameters, origParameters, {LocationType::Layer, LocationType::Layer, LocationType::Layer, LocationType::Source, LocationType::Source}, 2);
 }
 
 TEST_F(ParametersEditServiceTests_New, cloneSource)
 {
-    auto origParameters = createTestData({LocationType::Zone, LocationType::Zone, LocationType::Source, LocationType::Source});
+    auto origParameters = createTestData({LocationType::Layer, LocationType::Layer, LocationType::Source, LocationType::Source});
     auto parameters = origParameters;
     ParametersEditService::get().cloneLocation(parameters, 3);
     checkParametersAfterCloning(
-        parameters, origParameters, {LocationType::Zone, LocationType::Zone, LocationType::Source, LocationType::Source, LocationType::Source}, 4);
+        parameters, origParameters, {LocationType::Layer, LocationType::Layer, LocationType::Source, LocationType::Source, LocationType::Source}, 4);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultZone_empty)
+TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_empty)
 {
     auto origParameters = createTestData({});
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultZone(parameters, 0);
-    checkParametersAfterDefaultInsertion(parameters, origParameters, {LocationType::Zone}, 1);
+    ParametersEditService::get().insertDefaultLayer(parameters, 0);
+    checkParametersAfterDefaultInsertion(parameters, origParameters, {LocationType::Layer}, 1);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultZone_onlySources)
+TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_onlySources)
 {
     auto origParameters = createTestData({
         LocationType::Source,
         LocationType::Source,
     });
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultZone(parameters, 1);
+    ParametersEditService::get().insertDefaultLayer(parameters, 1);
     checkParametersAfterDefaultInsertion(
         parameters,
         origParameters,
         {
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
         },
         2);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultZone_base)
+TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_base)
 {
     auto origParameters = createTestData({
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
     });
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultZone(parameters, 0);
+    ParametersEditService::get().insertDefaultLayer(parameters, 0);
     checkParametersAfterDefaultInsertion(
         parameters,
         origParameters,
         {
-            LocationType::Zone,
-            LocationType::Zone,
+            LocationType::Layer,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
         },
         1);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultZone_firstZone1)
+TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_firstLayer1)
 {
     auto origParameters = createTestData({
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
     });
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultZone(parameters, 1);
+    ParametersEditService::get().insertDefaultLayer(parameters, 1);
     checkParametersAfterDefaultInsertion(
         parameters,
         origParameters,
         {
-            LocationType::Zone,
-            LocationType::Zone,
+            LocationType::Layer,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
         },
         2);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultZone_firstZone2)
+TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_firstLayer2)
 {
     auto origParameters = createTestData({
         LocationType::Source,
-        LocationType::Zone,
-        LocationType::Zone,
+        LocationType::Layer,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
     });
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultZone(parameters, 2);
+    ParametersEditService::get().insertDefaultLayer(parameters, 2);
     checkParametersAfterDefaultInsertion(
         parameters,
         origParameters,
         {
             LocationType::Source,
-            LocationType::Zone,
-            LocationType::Zone,
-            LocationType::Zone,
+            LocationType::Layer,
+            LocationType::Layer,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
         },
         3);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultZone_middle1)
+TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_middle1)
 {
     auto origParameters = createTestData({
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
     });
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultZone(parameters, 3);
+    ParametersEditService::get().insertDefaultLayer(parameters, 3);
     checkParametersAfterDefaultInsertion(
         parameters,
         origParameters,
         {
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
-            LocationType::Zone,
+            LocationType::Layer,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
         },
         4);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultZone_middle2)
+TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_middle2)
 {
     auto origParameters = createTestData({
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
     });
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultZone(parameters, 4);
+    ParametersEditService::get().insertDefaultLayer(parameters, 4);
     checkParametersAfterDefaultInsertion(
         parameters,
         origParameters,
         {
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
         },
         5);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultZone_end)
+TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_end)
 {
     auto origParameters = createTestData({
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
     });
     auto parameters = origParameters;
-    ParametersEditService::get().insertDefaultZone(parameters, 5);
+    ParametersEditService::get().insertDefaultLayer(parameters, 5);
     checkParametersAfterDefaultInsertion(
         parameters,
         origParameters,
         {
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
-            LocationType::Zone,
+            LocationType::Layer,
+            LocationType::Layer,
         },
         6);
 }
@@ -476,11 +476,11 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_empty)
     checkParametersAfterDefaultInsertion(parameters, origParameters, {LocationType::Source}, 1);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultSource_onlyZones)
+TEST_F(ParametersEditServiceTests_New, insertDefaultSource_onlyLayers)
 {
     auto origParameters = createTestData({
-        LocationType::Zone,
-        LocationType::Zone,
+        LocationType::Layer,
+        LocationType::Layer,
     });
     auto parameters = origParameters;
     ParametersEditService::get().insertDefaultSource(parameters, 1);
@@ -488,9 +488,9 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_onlyZones)
         parameters,
         origParameters,
         {
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
         },
         2);
 }
@@ -499,9 +499,9 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_base)
 {
     auto origParameters = createTestData({
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
     });
     auto parameters = origParameters;
@@ -512,9 +512,9 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_base)
         {
             LocationType::Source,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
         },
         1);
@@ -524,9 +524,9 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_firstSource1)
 {
     auto origParameters = createTestData({
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
     });
     auto parameters = origParameters;
@@ -537,9 +537,9 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_firstSource1)
         {
             LocationType::Source,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
         },
         2);
@@ -548,10 +548,10 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_firstSource1)
 TEST_F(ParametersEditServiceTests_New, insertDefaultSource_firstSource2)
 {
     auto origParameters = createTestData({
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
     });
     auto parameters = origParameters;
@@ -560,11 +560,11 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_firstSource2)
         parameters,
         origParameters,
         {
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
             LocationType::Source,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
         },
         3);
@@ -574,9 +574,9 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_middle1)
 {
     auto origParameters = createTestData({
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
     });
     auto parameters = origParameters;
@@ -586,10 +586,10 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_middle1)
         origParameters,
         {
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
         },
         4);
@@ -599,12 +599,12 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_middle2)
 {
     auto origParameters = createTestData({
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
-        LocationType::Zone,
+        LocationType::Layer,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
     });
     auto parameters = origParameters;
     ParametersEditService::get().insertDefaultSource(parameters, 4);
@@ -613,13 +613,13 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_middle2)
         origParameters,
         {
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
         },
         5);
 }
@@ -628,9 +628,9 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_end)
 {
     auto origParameters = createTestData({
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
     });
     auto parameters = origParameters;
@@ -640,30 +640,30 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_end)
         origParameters,
         {
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
             LocationType::Source,
         },
         6);
 }
 
-TEST_F(ParametersEditServiceTests_New, deleteZone_afterwardEmpty)
+TEST_F(ParametersEditServiceTests_New, deleteLayer_afterwardEmpty)
 {
     auto origParameters = createTestData({
-        LocationType::Zone,
+        LocationType::Layer,
     });
     auto parameters = origParameters;
     ParametersEditService::get().deleteLocation(parameters, 1);
     checkParametersAfterDeletion(parameters, origParameters, {}, 1);
 }
 
-TEST_F(ParametersEditServiceTests_New, deleteZone_afterwardOnlySources)
+TEST_F(ParametersEditServiceTests_New, deleteLayer_afterwardOnlySources)
 {
     auto origParameters = createTestData({
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
     });
     auto parameters = origParameters;
@@ -678,14 +678,14 @@ TEST_F(ParametersEditServiceTests_New, deleteZone_afterwardOnlySources)
         2);
 }
 
-TEST_F(ParametersEditServiceTests_New, deleteZone_firstZone)
+TEST_F(ParametersEditServiceTests_New, deleteLayer_firstLayer)
 {
     auto origParameters = createTestData({
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
     });
     auto parameters = origParameters;
     ParametersEditService::get().deleteLocation(parameters, 1);
@@ -694,21 +694,21 @@ TEST_F(ParametersEditServiceTests_New, deleteZone_firstZone)
         origParameters,
         {
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
         },
         1);
 }
 
-TEST_F(ParametersEditServiceTests_New, deleteZone_middle)
+TEST_F(ParametersEditServiceTests_New, deleteLayer_middle)
 {
     auto origParameters = createTestData({
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
     });
     auto parameters = origParameters;
     ParametersEditService::get().deleteLocation(parameters, 3);
@@ -716,22 +716,22 @@ TEST_F(ParametersEditServiceTests_New, deleteZone_middle)
         parameters,
         origParameters,
         {
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
         },
         3);
 }
 
-TEST_F(ParametersEditServiceTests_New, deleteZone_end)
+TEST_F(ParametersEditServiceTests_New, deleteLayer_end)
 {
     auto origParameters = createTestData({
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
     });
     auto parameters = origParameters;
     ParametersEditService::get().deleteLocation(parameters, 5);
@@ -739,9 +739,9 @@ TEST_F(ParametersEditServiceTests_New, deleteZone_end)
         parameters,
         origParameters,
         {
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
         },
         5);
@@ -757,12 +757,12 @@ TEST_F(ParametersEditServiceTests_New, deleteSource_afterwardEmpty)
     checkParametersAfterDeletion(parameters, origParameters, {}, 1);
 }
 
-TEST_F(ParametersEditServiceTests_New, deleteSource_afterwardOnlyZones)
+TEST_F(ParametersEditServiceTests_New, deleteSource_afterwardOnlyLayers)
 {
     auto origParameters = createTestData({
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
     });
     auto parameters = origParameters;
     ParametersEditService::get().deleteLocation(parameters, 2);
@@ -770,8 +770,8 @@ TEST_F(ParametersEditServiceTests_New, deleteSource_afterwardOnlyZones)
         parameters,
         origParameters,
         {
-            LocationType::Zone,
-            LocationType::Zone,
+            LocationType::Layer,
+            LocationType::Layer,
         },
         2);
 }
@@ -780,9 +780,9 @@ TEST_F(ParametersEditServiceTests_New, deleteSource_firstSource)
 {
     auto origParameters = createTestData({
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
     });
     auto parameters = origParameters;
@@ -791,9 +791,9 @@ TEST_F(ParametersEditServiceTests_New, deleteSource_firstSource)
         parameters,
         origParameters,
         {
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
         },
         1);
@@ -803,9 +803,9 @@ TEST_F(ParametersEditServiceTests_New, deleteSource_middle)
 {
     auto origParameters = createTestData({
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
     });
     auto parameters = origParameters;
@@ -815,8 +815,8 @@ TEST_F(ParametersEditServiceTests_New, deleteSource_middle)
         origParameters,
         {
             LocationType::Source,
-            LocationType::Zone,
-            LocationType::Zone,
+            LocationType::Layer,
+            LocationType::Layer,
             LocationType::Source,
         },
         3);
@@ -826,9 +826,9 @@ TEST_F(ParametersEditServiceTests_New, deleteSource_end)
 {
     auto origParameters = createTestData({
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
     });
     auto parameters = origParameters;
@@ -838,18 +838,18 @@ TEST_F(ParametersEditServiceTests_New, deleteSource_end)
         origParameters,
         {
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
         },
         5);
 }
 
-TEST_F(ParametersEditServiceTests_New, moveZoneUpwards_afterOtherSource)
+TEST_F(ParametersEditServiceTests_New, moveLayerUpwards_afterOtherSource)
 {
     auto origParameters = createTestData({
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
     });
     auto parameters = origParameters;
     ParametersEditService::get().moveLocationUpwards(parameters, 2);
@@ -857,18 +857,18 @@ TEST_F(ParametersEditServiceTests_New, moveZoneUpwards_afterOtherSource)
         parameters,
         origParameters,
         {
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
         },
         2);
 }
 
-TEST_F(ParametersEditServiceTests_New, moveZoneUpwards_afterOtherZone)
+TEST_F(ParametersEditServiceTests_New, moveLayerUpwards_afterOtherLayer)
 {
     auto origParameters = createTestData({
         LocationType::Source,
-        LocationType::Zone,
-        LocationType::Zone,
+        LocationType::Layer,
+        LocationType::Layer,
     });
     auto parameters = origParameters;
     ParametersEditService::get().moveLocationUpwards(parameters, 3);
@@ -877,20 +877,20 @@ TEST_F(ParametersEditServiceTests_New, moveZoneUpwards_afterOtherZone)
         origParameters,
         {
             LocationType::Source,
-            LocationType::Zone,
-            LocationType::Zone,
+            LocationType::Layer,
+            LocationType::Layer,
         },
         3);
 }
 
-TEST_F(ParametersEditServiceTests_New, moveZoneUpwards_afterOtherZoneAndSources)
+TEST_F(ParametersEditServiceTests_New, moveLayerUpwards_afterOtherLayerAndSources)
 {
     auto origParameters = createTestData({
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
     });
     auto parameters = origParameters;
     ParametersEditService::get().moveLocationUpwards(parameters, 3);
@@ -898,19 +898,19 @@ TEST_F(ParametersEditServiceTests_New, moveZoneUpwards_afterOtherZoneAndSources)
         parameters,
         origParameters,
         {
-            LocationType::Zone,
-            LocationType::Zone,
+            LocationType::Layer,
+            LocationType::Layer,
             LocationType::Source,
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
         },
         3);
 }
 
-TEST_F(ParametersEditServiceTests_New, moveSourceUpwards_afterOtherZone)
+TEST_F(ParametersEditServiceTests_New, moveSourceUpwards_afterOtherLayer)
 {
     auto origParameters = createTestData({
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
     });
     auto parameters = origParameters;
@@ -920,7 +920,7 @@ TEST_F(ParametersEditServiceTests_New, moveSourceUpwards_afterOtherZone)
         origParameters,
         {
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
         },
         2);
 }
@@ -928,7 +928,7 @@ TEST_F(ParametersEditServiceTests_New, moveSourceUpwards_afterOtherZone)
 TEST_F(ParametersEditServiceTests_New, moveSourceUpwards_afterOtherSource)
 {
     auto origParameters = createTestData({
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
         LocationType::Source,
     });
@@ -938,20 +938,20 @@ TEST_F(ParametersEditServiceTests_New, moveSourceUpwards_afterOtherSource)
         parameters,
         origParameters,
         {
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
             LocationType::Source,
         },
         3);
 }
 
-TEST_F(ParametersEditServiceTests_New, moveSourceUpwards_afterOtherZoneAndSources)
+TEST_F(ParametersEditServiceTests_New, moveSourceUpwards_afterOtherLayerAndSources)
 {
     auto origParameters = createTestData({
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
     });
     auto parameters = origParameters;
@@ -962,17 +962,17 @@ TEST_F(ParametersEditServiceTests_New, moveSourceUpwards_afterOtherZoneAndSource
         {
             LocationType::Source,
             LocationType::Source,
-            LocationType::Zone,
-            LocationType::Zone,
+            LocationType::Layer,
+            LocationType::Layer,
             LocationType::Source,
         },
         3);
 }
 
-TEST_F(ParametersEditServiceTests_New, moveZoneDownwards_beforeOtherSource)
+TEST_F(ParametersEditServiceTests_New, moveLayerDownwards_beforeOtherSource)
 {
     auto origParameters = createTestData({
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
     });
     auto parameters = origParameters;
@@ -982,16 +982,16 @@ TEST_F(ParametersEditServiceTests_New, moveZoneDownwards_beforeOtherSource)
         origParameters,
         {
             LocationType::Source,
-            LocationType::Zone,
+            LocationType::Layer,
         },
         1);
 }
 
-TEST_F(ParametersEditServiceTests_New, moveZoneDownwards_beforeOtherZone)
+TEST_F(ParametersEditServiceTests_New, moveLayerDownwards_beforeOtherLayer)
 {
     auto origParameters = createTestData({
-        LocationType::Zone,
-        LocationType::Zone,
+        LocationType::Layer,
+        LocationType::Layer,
     });
     auto parameters = origParameters;
     ParametersEditService::get().moveLocationDownwards(parameters, 1);
@@ -999,20 +999,20 @@ TEST_F(ParametersEditServiceTests_New, moveZoneDownwards_beforeOtherZone)
         parameters,
         origParameters,
         {
-            LocationType::Zone,
-            LocationType::Zone,
+            LocationType::Layer,
+            LocationType::Layer,
         },
         1);
 }
 
-TEST_F(ParametersEditServiceTests_New, moveZoneDownwards_beforeOtherZoneAndSources)
+TEST_F(ParametersEditServiceTests_New, moveLayerDownwards_beforeOtherLayerAndSources)
 {
     auto origParameters = createTestData({
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
     });
     auto parameters = origParameters;
     ParametersEditService::get().moveLocationDownwards(parameters, 3);
@@ -1020,20 +1020,20 @@ TEST_F(ParametersEditServiceTests_New, moveZoneDownwards_beforeOtherZoneAndSourc
         parameters,
         origParameters,
         {
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
             LocationType::Source,
-            LocationType::Zone,
-            LocationType::Zone,
+            LocationType::Layer,
+            LocationType::Layer,
         },
         3);
 }
 
-TEST_F(ParametersEditServiceTests_New, moveSourceDownwards_beforeOtherZone)
+TEST_F(ParametersEditServiceTests_New, moveSourceDownwards_beforeOtherLayer)
 {
     auto origParameters = createTestData({
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
     });
     auto parameters = origParameters;
     ParametersEditService::get().moveLocationDownwards(parameters, 1);
@@ -1041,7 +1041,7 @@ TEST_F(ParametersEditServiceTests_New, moveSourceDownwards_beforeOtherZone)
         parameters,
         origParameters,
         {
-            LocationType::Zone,
+            LocationType::Layer,
             LocationType::Source,
         },
         1);
@@ -1065,13 +1065,13 @@ TEST_F(ParametersEditServiceTests_New, moveSourceDownwards_beforeOtherSource)
         1);
 }
 
-TEST_F(ParametersEditServiceTests_New, moveSourceDownwards_beforeOtherZoneAndSources)
+TEST_F(ParametersEditServiceTests_New, moveSourceDownwards_beforeOtherLayerAndSources)
 {
     auto origParameters = createTestData({
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
-        LocationType::Zone,
+        LocationType::Layer,
         LocationType::Source,
 
     });
@@ -1082,8 +1082,8 @@ TEST_F(ParametersEditServiceTests_New, moveSourceDownwards_beforeOtherZoneAndSou
         origParameters,
         {
             LocationType::Source,
-            LocationType::Zone,
-            LocationType::Zone,
+            LocationType::Layer,
+            LocationType::Layer,
             LocationType::Source,
             LocationType::Source,
         },

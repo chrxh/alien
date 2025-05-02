@@ -15,18 +15,18 @@ struct ParametersSpec;
  */
 struct SimulationParameters
 {
-    int numZones = 0;
+    int numLayers = 0;
     int numSources = 0;
-    int zoneLocationIndex[MAX_ZONES] = {};
+    int layerLocationIndex[MAX_LAYERS] = {};
     int sourceLocationIndex[MAX_SOURCES] = {};
 
     // General
     BaseParameter<Char64> projectName = {"<unnamed>"};
-    ZoneParameter<Char64> zoneName = {{"<unnamed>"}};
+    LayerParameter<Char64> layerName = {{"<unnamed>"}};
     SourceParameter<Char64> sourceName = {{"<unnamed>"}};
 
     // Visualization
-    BaseZoneParameter<FloatColorRGB> backgroundColor = {.baseValue = {0.0f, 0.0f, 0.106f}};
+    BaseLayerParameter<FloatColorRGB> backgroundColor = {.baseValue = {0.0f, 0.0f, 0.106f}};
     BaseParameter<CellColoring> primaryCellColoring = {CellColoring_CellColor};
     BaseParameter<CellType> highlightedCellType = {CellType_Constructor};
     BaseParameter<float> cellRadius = {0.25f};
@@ -39,12 +39,12 @@ struct SimulationParameters
     BaseParameter<bool> showRadiationSources = {true};
 
     // Location
-    ZoneParameter<RealVector2D> zonePosition;
-    ZoneParameter<RealVector2D> zoneVelocity;
-    ZoneParameter<ZoneShapeType> zoneShape = {{ZoneShapeType_Circular}};
-    ZoneParameter<float> zoneCoreRadius = {{100.0f}};                 // for ZoneShapeType_Circular
-    ZoneParameter<RealVector2D> zoneCoreRect = {{{100.0f, 100.0f}}};  // for ZoneShapeType_Rectangular
-    ZoneParameter<float> zoneFadeoutRadius = {{100.0f}};
+    LayerParameter<RealVector2D> layerPosition;
+    LayerParameter<RealVector2D> layerVelocity;
+    LayerParameter<LayerShapeType> layerShape = {{LayerShapeType_Circular}};
+    LayerParameter<float> layerCoreRadius = {{100.0f}};                 // for LayerShapeType_Circular
+    LayerParameter<RealVector2D> layerCoreRect = {{{100.0f, 100.0f}}};  // for LayerShapeType_Rectangular
+    LayerParameter<float> layerFadeoutRadius = {{100.0f}};
     SourceParameter<SourceShapeType> sourceShapeType = {{SourceShapeType_Circular}};
     SourceParameter<float> sourceCircularRadius = {{1.0f}};                    // for SourceShapeType_Circular
     SourceParameter<RealVector2D> sourceRectangularRect = {{{30.0f, 60.0f}}};  // for SourceShapeType_Rectangular
@@ -52,13 +52,13 @@ struct SimulationParameters
     SourceParameter<RealVector2D> sourceVelocity;
 
     // Force field
-    ZoneParameter<ForceField> zoneForceFieldType = {{ForceField_None}};
-    ZoneParameter<Orientation> zoneRadialForceFieldOrientation = {{Orientation_Clockwise}};  // for ForceField_Radial
-    ZoneParameter<float> zoneRadialForceFieldStrength = {{0.001f}};                          // for ForceField_Radial
-    ZoneParameter<float> zoneRadialForceFieldDriftAngle = {{0.0f}};                          // for ForceField_Radial
-    ZoneParameter<float> zoneCentralForceFieldStrength = {{0.05f}};                          // for ForceField_Central
-    ZoneParameter<float> zoneLinearForceFieldAngle = {{0}};
-    ZoneParameter<float> zoneLinearForceFieldStrength = {{0.01f}};
+    LayerParameter<ForceField> layerForceFieldType = {{ForceField_None}};
+    LayerParameter<Orientation> layerRadialForceFieldOrientation = {{Orientation_Clockwise}};  // for ForceField_Radial
+    LayerParameter<float> layerRadialForceFieldStrength = {{0.001f}};                          // for ForceField_Radial
+    LayerParameter<float> layerRadialForceFieldDriftAngle = {{0.0f}};                          // for ForceField_Radial
+    LayerParameter<float> layerCentralForceFieldStrength = {{0.05f}};                          // for ForceField_Central
+    LayerParameter<float> layerLinearForceFieldAngle = {{0}};
+    LayerParameter<float> layerLinearForceFieldStrength = {{0.01f}};
 
     // Numerics
     BaseParameter<float> timestepSize = {1.0f};
@@ -70,27 +70,27 @@ struct SimulationParameters
     BaseParameter<float> pressureStrength = {0.1f};      // for MotionType_Fluid
     BaseParameter<float> maxCollisionDistance = {1.3f};  // for MotionType_Collision
     BaseParameter<float> repulsionStrength = {0.08f};    // for MotionType_Collision
-    BaseZoneParameter<float> friction = {.baseValue = 0.01f};
+    BaseLayerParameter<float> friction = {.baseValue = 0.01f};
     BaseParameter<float> innerFriction = {0.3f};
-    BaseZoneParameter<float> rigidity = {.baseValue = 0.0f};
+    BaseLayerParameter<float> rigidity = {.baseValue = 0.0f};
 
     // Physics: Thresholds
     BaseParameter<float> maxVelocity = {2.0f};
-    BaseZoneParameter<ColorVector<float>> maxForce = {.baseValue = {0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f}};
+    BaseLayerParameter<ColorVector<float>> maxForce = {.baseValue = {0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f}};
     BaseParameter<float> minCellDistance = {0.3f};
     static float constexpr maxForceDecayProbability = 0.2f;
 
     // Physics: Binding
     BaseParameter<ColorVector<float>> maxBindingDistance = {{3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f}};
-    BaseZoneParameter<float> cellFusionVelocity = {.baseValue = 2.0f};
-    BaseZoneParameter<float> cellMaxBindingEnergy = {.baseValue = Infinity<float>::value};
+    BaseLayerParameter<float> cellFusionVelocity = {.baseValue = 2.0f};
+    BaseLayerParameter<float> cellMaxBindingEnergy = {.baseValue = Infinity<float>::value};
 
     // Radiation
     PinBaseParameter relativeStrengthBasePin = {false};
     PinnableSourceParameter<float> sourceRelativeStrength = {{{.value = 0.0f, .pinned = false}}};
-    ZoneParameter<bool> disableRadiationSources = {{false}};
-    BaseZoneParameter<ColorVector<float>> radiationAbsorption = {.baseValue = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
-    BaseZoneParameter<ColorVector<float>> radiationType1_strength = {.baseValue = {0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f}};
+    LayerParameter<bool> disableRadiationSources = {{false}};
+    BaseLayerParameter<ColorVector<float>> radiationAbsorption = {.baseValue = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
+    BaseLayerParameter<ColorVector<float>> radiationType1_strength = {.baseValue = {0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f}};
     BaseParameter<ColorVector<int>> radiationType1_minimumAge = {{0, 0, 0, 0, 0, 0, 0}};
     BaseParameter<ColorVector<float>> radiationType2_strength = {{0, 0, 0, 0, 0, 0, 0}};
     BaseParameter<ColorVector<float>> radiationType2_energyThreshold = {500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f};
@@ -117,24 +117,24 @@ struct SimulationParameters
          Infinity<int>::value,
          Infinity<int>::value,
          Infinity<int>::value}};
-    BaseZoneParameter<ColorVector<float>> minCellEnergy = {.baseValue = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f}};
+    BaseLayerParameter<ColorVector<float>> minCellEnergy = {.baseValue = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f}};
     BaseParameter<ColorVector<float>> normalCellEnergy = {100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f};
-    BaseZoneParameter<ColorVector<float>> cellDeathProbability = {.baseValue = {0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f}};
+    BaseLayerParameter<ColorVector<float>> cellDeathProbability = {.baseValue = {0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f}};
     BaseParameter<CellDeathConsquences> cellDeathConsequences = {CellDeathConsquences_DetachedPartsDie};
 
     // Mutation
-    BaseZoneParameter<ColorVector<float>> copyMutationNeuronData = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseZoneParameter<ColorVector<float>> copyMutationCellProperties = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseZoneParameter<ColorVector<float>> copyMutationGeometry = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseZoneParameter<ColorVector<float>> copyMutationCustomGeometry = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseZoneParameter<ColorVector<float>> copyMutationCellType = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseZoneParameter<ColorVector<float>> copyMutationInsertion = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseZoneParameter<ColorVector<float>> copyMutationDeletion = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseZoneParameter<ColorVector<float>> copyMutationTranslation = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseZoneParameter<ColorVector<float>> copyMutationDuplication = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseZoneParameter<ColorVector<float>> copyMutationCellColor = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseZoneParameter<ColorVector<float>> copyMutationSubgenomeColor = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseZoneParameter<ColorVector<float>> copyMutationGenomeColor = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationNeuronData = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationCellProperties = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationGeometry = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationCustomGeometry = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationCellType = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationInsertion = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationDeletion = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationTranslation = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationDuplication = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationCellColor = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationSubgenomeColor = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationGenomeColor = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
     BaseParameter<ColorMatrix<bool>> copyMutationColorTransitions = {
         {{true, true, true, true, true, true, true},
          {true, true, true, true, true, true, true},
@@ -147,8 +147,8 @@ struct SimulationParameters
     BaseParameter<bool> copyMutationSelfReplication = {false};
 
     // Cell type: Attacker
-    BaseZoneParameter<ColorVector<float>> attackerEnergyCost = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    BaseZoneParameter<ColorMatrix<float>> attackerFoodChainColorMatrix = {
+    BaseLayerParameter<ColorVector<float>> attackerEnergyCost = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorMatrix<float>> attackerFoodChainColorMatrix = {
         .baseValue = {
             {1, 1, 1, 1, 1, 1, 1},
             {1, 1, 1, 1, 1, 1, 1},
@@ -159,7 +159,7 @@ struct SimulationParameters
             {1, 1, 1, 1, 1, 1, 1}}};
     BaseParameter<ColorVector<float>> attackerStrength = {{0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f}};
     BaseParameter<ColorVector<float>> attackerRadius = {{1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f}};
-    BaseZoneParameter<ColorMatrix<float>> attackerComplexCreatureProtection = {
+    BaseLayerParameter<ColorMatrix<float>> attackerComplexCreatureProtection = {
         .baseValue = {
             {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
             {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
@@ -215,10 +215,10 @@ struct SimulationParameters
 
     // Expert settings: Advanced absorption control
     ExpertToggle advancedAbsorptionControlToggle = {false};
-    BaseZoneParameter<ColorVector<float>> radiationAbsorptionLowGenomeComplexityPenalty = {.baseValue = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    BaseLayerParameter<ColorVector<float>> radiationAbsorptionLowGenomeComplexityPenalty = {.baseValue = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     BaseParameter<ColorVector<float>> radiationAbsorptionLowConnectionPenalty = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     BaseParameter<ColorVector<float>> radiationAbsorptionHighVelocityPenalty = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
-    BaseZoneParameter<ColorVector<float>> radiationAbsorptionLowVelocityPenalty = {.baseValue = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    BaseLayerParameter<ColorVector<float>> radiationAbsorptionLowVelocityPenalty = {.baseValue = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
 
     // Expert settings: Advanced attacker control
     ExpertToggle advancedAttackerControlToggle = {false};
@@ -230,7 +230,7 @@ struct SimulationParameters
          {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
          {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
          {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}}};
-    BaseZoneParameter<ColorMatrix<float>> attackerNewComplexMutantProtection = {
+    BaseLayerParameter<ColorMatrix<float>> attackerNewComplexMutantProtection = {
         .baseValue = {
             {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
             {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
@@ -240,13 +240,13 @@ struct SimulationParameters
             {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
             {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}}};
     BaseParameter<ColorVector<float>> attackerSensorDetectionFactor = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
-    BaseZoneParameter<ColorVector<float>> attackerGeometryDeviationProtection = {.baseValue = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
-    BaseZoneParameter<ColorVector<float>> attackerConnectionsMismatchProtection = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> attackerGeometryDeviationProtection = {.baseValue = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    BaseLayerParameter<ColorVector<float>> attackerConnectionsMismatchProtection = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
     static float constexpr attackerColorInhomogeneityFactor = 1.0f;
 
     // Expert settings: Cell age limiter
     ExpertToggle cellAgeLimiterToggle = {false};
-    BaseZoneParameter<ColorVector<float>> maxAgeForInactiveCells = {
+    BaseLayerParameter<ColorVector<float>> maxAgeForInactiveCells = {
         .baseValue = {// Candidate for deletion
                       Infinity<float>::value,
                       Infinity<float>::value,
@@ -268,7 +268,7 @@ struct SimulationParameters
 
     // Expert settings: Cell color transition rules
     ExpertToggle colorTransitionRulesToggle = {false};
-    BaseZoneParameter<ColorTransitionRules> colorTransitionRules;
+    BaseLayerParameter<ColorTransitionRules> colorTransitionRules;
 
     // Expert settings: Cell glow
     ExpertToggle cellGlowToggle = {false};

@@ -10,14 +10,14 @@
 namespace
 {
     //template <typename T>
-    //bool contains(SimulationParameters const& parameters, ColorVector<T> SimulationParametersZoneValues::*parameter, std::set<T> const& values)
+    //bool contains(SimulationParameters const& parameters, ColorVector<T> SimulationParametersLayerValues::*parameter, std::set<T> const& values)
     //{
     //    for (int i = 0; i < MAX_COLORS; ++i) {
     //        if (!values.contains((parameters.baseValues.*parameter)[i])) {
     //            return false;
     //        }
-    //        for (int j = 0; j < parameters.numZones; ++j) {
-    //            if (!values.contains((parameters.zone[j].values.*parameter)[i])) {
+    //        for (int j = 0; j < parameters.numLayers; ++j) {
+    //            if (!values.contains((parameters.layer[j].values.*parameter)[i])) {
     //                return false;
     //            }
     //        }
@@ -86,7 +86,7 @@ void LegacySettingsParserService::searchAndApplyLegacyParameters(
 
     LegacyParameters legacyParameters;
     legacyParameters.base = readLegacyParametersForBase(tree, "simulation parameters.");
-    for (int i = 0; i < parameters.numZones; ++i) {
+    for (int i = 0; i < parameters.numLayers; ++i) {
         legacyParameters.spots[i] = readLegacyParametersForSpot(tree, "simulation parameters.spots." + std::to_string(i) + ".");
     }
     updateParametersAndFeaturesForLegacyFiles(programVersion, legacyFeatures, legacyParameters, parameters);

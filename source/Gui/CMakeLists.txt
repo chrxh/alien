@@ -59,6 +59,8 @@ PUBLIC
     InspectorWindow.h
     LastSessionBrowserData.cpp
     LastSessionBrowserData.h
+    LayerColorPalette.cpp
+    LayerColorPalette.h
     LocationController.cpp
     LocationController.h
     LocationWidgets.h
@@ -117,8 +119,8 @@ PUBLIC
     SimulationParametersMainWindow.h
     SimulationParametersSourceWidgets.cpp
     SimulationParametersSourceWidgets.h
-    SimulationParametersZoneWidgets.cpp
-    SimulationParametersZoneWidgets.h
+    SimulationParametersLayerWidgets.cpp
+    SimulationParametersLayerWidgets.h
     SimulationScrollbar.cpp
     SimulationScrollbar.h
     SimulationView.cpp
@@ -146,9 +148,7 @@ PUBLIC
     Viewport.cpp
     Viewport.h
     WindowController.cpp
-    WindowController.h
-    ZoneColorPalette.cpp
-    ZoneColorPalette.h)
+    WindowController.h)
 
 target_link_libraries(alien Base)
 target_link_libraries(alien EngineGpuKernels)

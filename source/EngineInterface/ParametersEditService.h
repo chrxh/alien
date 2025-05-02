@@ -21,7 +21,7 @@ class ParametersEditService
     MAKE_SINGLETON(ParametersEditService);
 
 public:
-    NewByOldLocationIndex insertDefaultZone(SimulationParameters& parameters, int locationIndex) const;  // Create location at locationIndex + 1
+    NewByOldLocationIndex insertDefaultLayer(SimulationParameters& parameters, int locationIndex) const;  // Create location at locationIndex + 1
     NewByOldLocationIndex insertDefaultSource(SimulationParameters& parameters, int locationIndex) const;  // Create location at locationIndex + 1
     NewByOldLocationIndex cloneLocation(SimulationParameters& parameters, int locationIndex) const;        // Create location at locationIndex + 1
     NewByOldLocationIndex deleteLocation(SimulationParameters& parameters, int locationIndex) const;
@@ -33,7 +33,7 @@ public:
 
     void adaptRadiationStrengths(RadiationStrengths& strengths, RadiationStrengths& origStrengths, int changeIndex) const;
     RadiationStrengths calcRadiationStrengthsForAddingSource(RadiationStrengths const& strengths) const;
-    RadiationStrengths calcRadiationStrengthsForDeletingZone(RadiationStrengths const& strengths, int deleteIndex) const;
+    RadiationStrengths calcRadiationStrengthsForDeletingLayer(RadiationStrengths const& strengths, int deleteIndex) const;
 
 private:
     void copyLocation(SimulationParameters& targetParameters, int targetLocationIndex, SimulationParameters& sourceParameters, int sourceLocationIndex) const;

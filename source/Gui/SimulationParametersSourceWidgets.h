@@ -4,7 +4,7 @@
 
 #include "EngineInterface/Definitions.h"
 #include "LocationWidgets.h"
-#include "ZoneColorPalette.h"
+#include "LayerColorPalette.h"
 
 class _SimulationParametersSourceWidgets : public _LocationWidgets
 {
