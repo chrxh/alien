@@ -9,16 +9,16 @@
 class LocationHelper
 {
 public:
-    static LocationType getLocationType(int locationIndex, SimulationParameters const& parameters);
+    static LocationType getLocationType(int orderNumber, SimulationParameters const& parameters);
 
-    static int& findLocationIndexRef(SimulationParameters& parameters, int locationIndex);
-    static int findLocationArrayIndex(SimulationParameters const& parameters, int locationIndex);
+    static int& findOrderNumberRef(SimulationParameters& parameters, int orderNumber);
+    static int findLocationArrayIndex(SimulationParameters const& parameters, int orderNumber);
 
-    static void decreaseLocationIndex(SimulationParameters& parameters, int locationIndex);
-    static void increaseLocationIndex(SimulationParameters& parameters, int locationIndex);
+    static void decreaseOrderNumber(SimulationParameters& parameters, int orderNumber);
+    static void increaseOrderNumber(SimulationParameters& parameters, int orderNumber);
 
     // returns new by old location index
-    static std::map<int, int> adaptLocationIndices(SimulationParameters& parameters, int fromLocationIndex, int offset);
+    static std::map<int, int> adaptLocationIndices(SimulationParameters& parameters, int fromOrderNumber, int offset);
 
     static std::string generateLayerName(SimulationParameters const& parameters);
     static std::string generateSourceName(SimulationParameters const& parameters);

@@ -8,10 +8,10 @@
 #include "SpecificationGuiService.h"
 #include "SimulationInteractionController.h"
 
-void _SimulationParametersLayerWidgets::init(SimulationFacade const& simulationFacade, int locationIndex)
+void _SimulationParametersLayerWidgets::init(SimulationFacade const& simulationFacade, int orderNumber)
 {
     _simulationFacade = simulationFacade;
-    _locationIndex = locationIndex;
+    _orderNumber = orderNumber;
 }
 
 void _SimulationParametersLayerWidgets::process()
@@ -20,11 +20,11 @@ void _SimulationParametersLayerWidgets::process()
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
     auto lastParameters = parameters;
 
-    auto layerIndex = LocationHelper::findLocationArrayIndex(parameters, _locationIndex);
+    auto layerIndex = LocationHelper::findLocationArrayIndex(parameters, _orderNumber);
     _layerName = std::string(parameters.layerName.layerValues[layerIndex]);
 
     ImGui::PushID("Layer");
-    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _simulationFacade, _locationIndex);
+    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _simulationFacade, _orderNumber);
     ImGui::PopID();
 
     if (parameters != lastParameters) {
@@ -39,12 +39,12 @@ std::string _SimulationParametersLayerWidgets::getLocationName()
     return "Simulation parameters for '" + _layerName + "'";
 }
 
-int _SimulationParametersLayerWidgets::getLocationIndex() const
+int _SimulationParametersLayerWidgets::getOrderNumber() const
 {
-    return _locationIndex;
+    return _orderNumber;
 }
 
-void _SimulationParametersLayerWidgets::setLocationIndex(int locationIndex)
+void _SimulationParametersLayerWidgets::setOrderNumber(int orderNumber)
 {
-    _locationIndex = locationIndex;
+    _orderNumber = orderNumber;
 }

@@ -63,7 +63,7 @@ void SimulationParametersMainWindow::initIntern(SimulationFacade simulationFacad
 void SimulationParametersMainWindow::processIntern()
 {
     if (!_sessionId.has_value() || _sessionId.value() != _simulationFacade->getSessionId()) {
-        _selectedLocationIndex = 0;
+        _selectedOrderNumber = 0;
     }
 
     processToolbar();
@@ -162,14 +162,14 @@ void SimulationParametersMainWindow::processToolbar()
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
                                       .text(ICON_FA_PLUS)
                                       .secondText(ICON_FA_CLONE)
-                                      .disabled(_selectedLocationIndex == 0)
+                                      .disabled(_selectedOrderNumber == 0)
                                       .tooltip("Clone selected layer/radiation source"))) {
         onCloneLocation();
     }
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(
-            AlienImGui::ToolbarButtonParameters().text(ICON_FA_MINUS).disabled(_selectedLocationIndex == 0).tooltip("Delete selected layer/radiation source"))) {
+            AlienImGui::ToolbarButtonParameters().text(ICON_FA_MINUS).disabled(_selectedOrderNumber == 0).tooltip("Delete selected layer/radiation source"))) {
         onDeleteLocation();
     }
 
@@ -179,17 +179,17 @@ void SimulationParametersMainWindow::processToolbar()
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
                                       .text(ICON_FA_CHEVRON_UP)
-                                      .disabled(_selectedLocationIndex <= 1)
+                                      .disabled(_selectedOrderNumber <= 1)
                                       .tooltip("Move selected layer/radiation source upward"))) {
-        onDecreaseLocationIndex();
+        onDecreaseOrderNumber();
     }
 
     ImGui::SameLine();
     if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
                                       .text(ICON_FA_CHEVRON_DOWN)
                                       .tooltip("Move selected layer/radiation source downward")
-                                      .disabled(_selectedLocationIndex >= _locations.size() - 1 || _selectedLocationIndex == 0))) {
-        onIncreaseLocationIndex();
+                                      .disabled(_selectedOrderNumber >= _locations.size() - 1 || _selectedOrderNumber == 0))) {
+        onIncreaseOrderNumber();
     }
 
     ImGui::SameLine();
@@ -241,14 +241,14 @@ void SimulationParametersMainWindow::processDetailWidget()
             AlienImGui::SetFilterText(_filter);
             if (ImGui::BeginChild(
                     "##detail2", {0, -ImGui::GetStyle().FramePadding.y - scale(33.0f)}, ImGuiChildFlags_Border, ImGuiWindowFlags_HorizontalScrollbar)) {
-                auto type = _locations.at(_selectedLocationIndex).type;
+                auto type = _locations.at(_selectedOrderNumber).type;
                 if (type == LocationType::Base) {
                     _baseWidgets->process();
                 } else if (type == LocationType::Layer) {
-                    _layerWidgets->setLocationIndex(_selectedLocationIndex);
+                    _layerWidgets->setOrderNumber(_selectedOrderNumber);
                     _layerWidgets->process();
                 } else if (type == LocationType::Source) {
-                    _sourceWidgets->setLocationIndex(_selectedLocationIndex);
+                    _sourceWidgets->setOrderNumber(_selectedOrderNumber);
                     _sourceWidgets->process();
                 }
             }
@@ -318,13 +318,13 @@ void SimulationParametersMainWindow::processLocationTable()
 
                 // name
                 ImGui::TableNextColumn();
-                auto selected = _selectedLocationIndex == row;
+                auto selected = _selectedOrderNumber == row;
                 if (ImGui::Selectable(
                         "",
                         &selected,
                         ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap,
                         ImVec2(0, scale(MasterRowHeight) - ImGui::GetStyle().FramePadding.y))) {
-                    _selectedLocationIndex = row;
+                    _selectedOrderNumber = row;
                 }
                 ImGui::SameLine();
                 AlienImGui::Text(entry.name);
@@ -345,7 +345,7 @@ void SimulationParametersMainWindow::processLocationTable()
                 if (row > 0) {
                     if (AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH))) {
                         onCenterLocation(row);
-                        _selectedLocationIndex = row;
+                        _selectedOrderNumber = row;
                     }
                     ImGui::SameLine();
                 }
@@ -418,15 +418,15 @@ void SimulationParametersMainWindow::onInsertDefaultLayer()
         return;
     }
 
-    auto newByOldLocationIndex = editService.insertDefaultLayer(parameters, _selectedLocationIndex);
-    editService.insertDefaultLayer(origParameters, _selectedLocationIndex);
+    auto newByOldOrderNumber = editService.insertDefaultLayer(parameters, _selectedOrderNumber);
+    editService.insertDefaultLayer(origParameters, _selectedOrderNumber);
 
-    ++_selectedLocationIndex;
+    ++_selectedOrderNumber;
 
     auto worldSize = _simulationFacade->getWorldSize();
     auto minRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
 
-    auto index = LocationHelper::findLocationArrayIndex(parameters, _selectedLocationIndex);
+    auto index = LocationHelper::findLocationArrayIndex(parameters, _selectedOrderNumber);
     parameters.backgroundColor.layerValues[index].enabled = true;
     parameters.backgroundColor.layerValues[index].value = _layerColorPalette.getColor((2 + parameters.numLayers) * 8);
     parameters.layerShape.layerValues[index] = LayerShapeType_Circular;
@@ -453,7 +453,7 @@ void SimulationParametersMainWindow::onInsertDefaultLayer()
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 
-    LocationController::get().remapLocationIndices(newByOldLocationIndex);
+    LocationController::get().remapLocationIndices(newByOldOrderNumber);
 }
 
 void SimulationParametersMainWindow::onInsertDefaultSource()
@@ -468,15 +468,15 @@ void SimulationParametersMainWindow::onInsertDefaultSource()
     auto strengths = editService.getRadiationStrengths(parameters);
     auto newStrengths = editService.calcRadiationStrengthsForAddingSource(strengths);
 
-    auto newByOldLocationIndex = editService.insertDefaultSource(parameters, _selectedLocationIndex);
-    editService.insertDefaultSource(origParameters, _selectedLocationIndex);
+    auto newByOldOrderNumber = editService.insertDefaultSource(parameters, _selectedOrderNumber);
+    editService.insertDefaultSource(origParameters, _selectedOrderNumber);
 
-    ++_selectedLocationIndex;
+    ++_selectedOrderNumber;
 
     editService.applyRadiationStrengths(parameters, newStrengths);
     editService.applyRadiationStrengths(origParameters, newStrengths);
 
-    auto index = LocationHelper::findLocationArrayIndex(parameters, _selectedLocationIndex);
+    auto index = LocationHelper::findLocationArrayIndex(parameters, _selectedOrderNumber);
     auto worldSize = _simulationFacade->getWorldSize();
     parameters.sourcePosition.sourceValues[index] = {toFloat(worldSize.x / 2), toFloat(worldSize.y / 2)};
     origParameters.sourcePosition.sourceValues[index] = parameters.sourcePosition.sourceValues[index];
@@ -484,7 +484,7 @@ void SimulationParametersMainWindow::onInsertDefaultSource()
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 
-    LocationController::get().remapLocationIndices(newByOldLocationIndex);
+    LocationController::get().remapLocationIndices(newByOldOrderNumber);
 }
 
 void SimulationParametersMainWindow::onCloneLocation()
@@ -493,7 +493,7 @@ void SimulationParametersMainWindow::onCloneLocation()
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
-    auto locationType = LocationHelper::getLocationType(_selectedLocationIndex, parameters);
+    auto locationType = LocationHelper::getLocationType(_selectedOrderNumber, parameters);
     if (locationType == LocationType::Layer) {
         if (!checkNumLayers(parameters)) {
             return;
@@ -507,19 +507,19 @@ void SimulationParametersMainWindow::onCloneLocation()
     auto strengths = editService.getRadiationStrengths(parameters);
     auto newStrengths = editService.calcRadiationStrengthsForAddingSource(strengths);
 
-    auto newByOldLocationIndex = editService.cloneLocation(parameters, _selectedLocationIndex);
-    editService.cloneLocation(origParameters, _selectedLocationIndex);
+    auto newByOldOrderNumber = editService.cloneLocation(parameters, _selectedOrderNumber);
+    editService.cloneLocation(origParameters, _selectedOrderNumber);
 
     if (locationType == LocationType::Source) {
         editService.applyRadiationStrengths(parameters, newStrengths);
         editService.applyRadiationStrengths(origParameters, newStrengths);
     }
 
-    ++_selectedLocationIndex;
+    ++_selectedOrderNumber;
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 
-    LocationController::get().remapLocationIndices(newByOldLocationIndex);
+    LocationController::get().remapLocationIndices(newByOldOrderNumber);
 }
 
 void SimulationParametersMainWindow::onDeleteLocation()
@@ -528,68 +528,68 @@ void SimulationParametersMainWindow::onDeleteLocation()
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
-    LocationController::get().deleteLocationWindow(_selectedLocationIndex);
+    LocationController::get().deleteLocationWindow(_selectedOrderNumber);
 
-    auto newByOldLocationIndex = editService.deleteLocation(parameters, _selectedLocationIndex);
-    editService.deleteLocation(origParameters, _selectedLocationIndex);
+    auto newByOldOrderNumber = editService.deleteLocation(parameters, _selectedOrderNumber);
+    editService.deleteLocation(origParameters, _selectedOrderNumber);
 
-    if (_locations.size() - 1 == _selectedLocationIndex) {
-        --_selectedLocationIndex;
+    if (_locations.size() - 1 == _selectedOrderNumber) {
+        --_selectedOrderNumber;
     }
 
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 
-    LocationController::get().remapLocationIndices(newByOldLocationIndex);
+    LocationController::get().remapLocationIndices(newByOldOrderNumber);
 }
 
-void SimulationParametersMainWindow::onDecreaseLocationIndex()
+void SimulationParametersMainWindow::onDecreaseOrderNumber()
 {
     auto& editService = ParametersEditService::get();
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
-    auto newByOldLocationIndex = editService.moveLocationUpwards(parameters, _selectedLocationIndex);
-    editService.moveLocationUpwards(origParameters, _selectedLocationIndex);
+    auto newByOldOrderNumber = editService.moveLocationUpwards(parameters, _selectedOrderNumber);
+    editService.moveLocationUpwards(origParameters, _selectedOrderNumber);
 
-    --_selectedLocationIndex;
+    --_selectedOrderNumber;
 
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 
-    LocationController::get().remapLocationIndices(newByOldLocationIndex);
+    LocationController::get().remapLocationIndices(newByOldOrderNumber);
 }
 
-void SimulationParametersMainWindow::onIncreaseLocationIndex()
+void SimulationParametersMainWindow::onIncreaseOrderNumber()
 {
     auto& editService = ParametersEditService::get();
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
 
-    auto newByOldLocationIndex = editService.moveLocationDownwards(parameters, _selectedLocationIndex);
-    editService.moveLocationDownwards(origParameters, _selectedLocationIndex);
+    auto newByOldOrderNumber = editService.moveLocationDownwards(parameters, _selectedOrderNumber);
+    editService.moveLocationDownwards(origParameters, _selectedOrderNumber);
 
-    ++_selectedLocationIndex;
+    ++_selectedOrderNumber;
 
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 
-    LocationController::get().remapLocationIndices(newByOldLocationIndex);
+    LocationController::get().remapLocationIndices(newByOldOrderNumber);
 }
 
 void SimulationParametersMainWindow::onOpenInLocationWindow()
 {
     auto mousePos = ImGui::GetMousePos();
     auto offset = RealVector2D{50.0f + toFloat(_locationWindowCounter) * 15, toFloat(_locationWindowCounter) * 15};
-    LocationController::get().addLocationWindow(_selectedLocationIndex, {mousePos.x + offset.x, mousePos.y + offset.y});
+    LocationController::get().addLocationWindow(_selectedOrderNumber, {mousePos.x + offset.x, mousePos.y + offset.y});
     _locationWindowCounter = (_locationWindowCounter + 1) % 8;
 }
 
-void SimulationParametersMainWindow::onCenterLocation(int locationIndex)
+void SimulationParametersMainWindow::onCenterLocation(int orderNumber)
 {
     auto parameters = _simulationFacade->getSimulationParameters();
-    auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
-    auto arrayIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+    auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
+    auto arrayIndex = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
     RealVector2D pos;
     if (locationType == LocationType::Layer) {
         pos = parameters.layerPosition.layerValues[arrayIndex];
@@ -610,13 +610,13 @@ void SimulationParametersMainWindow::updateLocations()
     for (int i = 0; i < parameters.numLayers; ++i) {
         auto position =
             "(" + StringHelper::format(parameters.layerPosition.layerValues[i].x, 0) + ", " + StringHelper::format(parameters.layerPosition.layerValues[i].y, 0) + ")";
-        _locations.at(parameters.layerLocationIndex[i]) = Location{parameters.layerName.layerValues[i], LocationType::Layer, position};
+        _locations.at(parameters.layerOrderNumbers[i]) = Location{parameters.layerName.layerValues[i], LocationType::Layer, position};
     }
     for (int i = 0; i < parameters.numSources; ++i) {
         auto position = "(" + StringHelper::format(parameters.sourcePosition.sourceValues[i].x, 0) + ", "
             + StringHelper::format(parameters.sourcePosition.sourceValues[i].y, 0) + ")";
         auto pinnedString = strength.pinned.contains(i + 1) ? ICON_FA_THUMBTACK " " : " ";
-        _locations.at(parameters.sourceLocationIndex[i]) =
+        _locations.at(parameters.sourceOrderNumbers[i]) =
             Location{
             parameters.sourceName.sourceValues[i],
             LocationType::Source,

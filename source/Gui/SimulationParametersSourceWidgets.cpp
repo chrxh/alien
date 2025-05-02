@@ -9,10 +9,10 @@
 #include "SimulationInteractionController.h"
 #include "SpecificationGuiService.h"
 
-void _SimulationParametersSourceWidgets::init(SimulationFacade const& simulationFacade, int locationIndex)
+void _SimulationParametersSourceWidgets::init(SimulationFacade const& simulationFacade, int orderNumber)
 {
     _simulationFacade = simulationFacade;
-    _locationIndex = locationIndex;
+    _orderNumber = orderNumber;
 }
 
 void _SimulationParametersSourceWidgets::process()
@@ -21,12 +21,12 @@ void _SimulationParametersSourceWidgets::process()
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
     auto lastParameters = parameters;
 
-    auto sourceIndex = LocationHelper::findLocationArrayIndex(parameters, _locationIndex);
+    auto sourceIndex = LocationHelper::findLocationArrayIndex(parameters, _orderNumber);
 
     _sourceName = std::string(parameters.sourceName.sourceValues[sourceIndex]);
 
     ImGui::PushID("Source");
-    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _simulationFacade, _locationIndex);
+    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _simulationFacade, _orderNumber);
     ImGui::PopID();
 
     if (parameters != lastParameters) {
@@ -41,12 +41,12 @@ std::string _SimulationParametersSourceWidgets::getLocationName()
     return "Simulation parameters for '" + _sourceName + "'";
 }
 
-int _SimulationParametersSourceWidgets::getLocationIndex() const
+int _SimulationParametersSourceWidgets::getOrderNumber() const
 {
-    return _locationIndex;
+    return _orderNumber;
 }
 
-void _SimulationParametersSourceWidgets::setLocationIndex(int locationIndex)
+void _SimulationParametersSourceWidgets::setOrderNumber(int orderNumber)
 {
-    _locationIndex = locationIndex;
+    _orderNumber = orderNumber;
 }

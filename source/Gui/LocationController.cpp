@@ -7,24 +7,24 @@
 #include "SimulationParametersSourceWidgets.h"
 #include "SimulationParametersLayerWidgets.h"
 
-void LocationController::addLocationWindow(int locationIndex, RealVector2D const& initialPos)
+void LocationController::addLocationWindow(int orderNumber, RealVector2D const& initialPos)
 {
     LocationWindow window;
     LocationWidgets widgets;
-    if (locationIndex == 0) {
+    if (orderNumber == 0) {
         auto baseWidgets = std::make_shared<_SimulationParametersBaseWidgets>();
         baseWidgets->init(_simulationFacade);
         widgets = baseWidgets;
     } else {
         auto parameters = _simulationFacade->getSimulationParameters();
-        auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
+        auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
         if (locationType == LocationType::Layer) {
             auto layerWidgets = std::make_shared<_SimulationParametersLayerWidgets>();
-            layerWidgets->init(_simulationFacade, locationIndex);
+            layerWidgets->init(_simulationFacade, orderNumber);
             widgets = layerWidgets;
         } else {
             auto sourceWidgets = std::make_shared<_SimulationParametersSourceWidgets>();
-            sourceWidgets->init(_simulationFacade, locationIndex);
+            sourceWidgets->init(_simulationFacade, orderNumber);
             widgets = sourceWidgets;
         }
     }
@@ -33,23 +33,23 @@ void LocationController::addLocationWindow(int locationIndex, RealVector2D const
     _locationWindows.emplace_back(std::move(window));
 }
 
-void LocationController::deleteLocationWindow(int locationIndex)
+void LocationController::deleteLocationWindow(int orderNumber)
 {
     std::vector<LocationWindow> newlocationWindows;
     newlocationWindows.reserve(_locationWindows.size());
 
     for (auto& locationWindow : _locationWindows) {
-        if (locationWindow.getLocationIndex() != locationIndex) {
+        if (locationWindow.getOrderNumber() != orderNumber) {
             newlocationWindows.emplace_back(std::move(locationWindow));
         }
     }
     _locationWindows.swap(newlocationWindows);
 }
 
-void LocationController::remapLocationIndices(std::map<int, int> const& newByOldLocationIndex)
+void LocationController::remapLocationIndices(std::map<int, int> const& newByOldOrderNumber)
 {
     for (auto& locationWindow : _locationWindows) {
-        locationWindow.setLocationIndex(newByOldLocationIndex.at(locationWindow.getLocationIndex()));
+        locationWindow.setOrderNumber(newByOldOrderNumber.at(locationWindow.getOrderNumber()));
     }
 }
 

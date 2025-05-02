@@ -19,12 +19,12 @@ protected:
         SimulationParameters result;
         for (auto const& [orderIndex, locationType] : locationTypes | boost::adaptors::indexed(0)) {
             if (locationType == LocationType::Layer) {
-                result.layerLocationIndex[result.numLayers] = orderIndex + 1;
+                result.layerOrderNumbers[result.numLayers] = orderIndex + 1;
                 result.layerCoreRadius.layerValues[result.numLayers] = toFloat(orderIndex) + 0.5f;
                 StringHelper::copy(result.layerName.layerValues[result.numLayers], sizeof(Char64), "Layer " + std::to_string(result.numLayers + 1));
                 ++result.numLayers;
             } else if (locationType == LocationType::Source) {
-                result.sourceLocationIndex[result.numSources] = orderIndex + 1;
+                result.sourceOrderNumbers[result.numSources] = orderIndex + 1;
                 result.sourceCircularRadius.sourceValues[result.numSources] = toFloat(orderIndex) + 0.5f;
                 StringHelper::copy(result.sourceName.sourceValues[result.numSources], sizeof(Char64), "Radiation " + std::to_string(result.numSources + 1));
                 ++result.numSources;
@@ -36,19 +36,19 @@ protected:
     void checkParameters(SimulationParameters const& parameters, std::vector<LocationType> const& locationTypes)
     {
         std::set<int> locationIndices;
-        int lastLocationIndex = 0;
+        int lastOrderNumber = 0;
         for (int i = 0; i < parameters.numLayers; ++i) {
-            EXPECT_FALSE(locationIndices.contains(parameters.layerLocationIndex[i]));
-            locationIndices.insert(parameters.layerLocationIndex[i]);
-            EXPECT_TRUE(lastLocationIndex < parameters.layerLocationIndex[i]);
-            lastLocationIndex = parameters.layerLocationIndex[i];
+            EXPECT_FALSE(locationIndices.contains(parameters.layerOrderNumbers[i]));
+            locationIndices.insert(parameters.layerOrderNumbers[i]);
+            EXPECT_TRUE(lastOrderNumber < parameters.layerOrderNumbers[i]);
+            lastOrderNumber = parameters.layerOrderNumbers[i];
         }
-        lastLocationIndex = 0;
+        lastOrderNumber = 0;
         for (int i = 0; i < parameters.numSources; ++i) {
-            EXPECT_FALSE(locationIndices.contains(parameters.sourceLocationIndex[i]));
-            locationIndices.insert(parameters.sourceLocationIndex[i]);
-            EXPECT_TRUE(lastLocationIndex < parameters.sourceLocationIndex[i]);
-            lastLocationIndex = parameters.sourceLocationIndex[i];
+            EXPECT_FALSE(locationIndices.contains(parameters.sourceOrderNumbers[i]));
+            locationIndices.insert(parameters.sourceOrderNumbers[i]);
+            EXPECT_TRUE(lastOrderNumber < parameters.sourceOrderNumbers[i]);
+            lastOrderNumber = parameters.sourceOrderNumbers[i];
         }
         EXPECT_EQ(parameters.numLayers + parameters.numSources, locationIndices.size());
         if (!locationIndices.empty()) {
@@ -56,12 +56,12 @@ protected:
         }
 
         for (int i = 0; i < parameters.numLayers; ++i) {
-            auto locationIndex = parameters.layerLocationIndex[i];
-            EXPECT_EQ(LocationType::Layer, locationTypes.at(locationIndex - 1));
+            auto orderNumber = parameters.layerOrderNumbers[i];
+            EXPECT_EQ(LocationType::Layer, locationTypes.at(orderNumber - 1));
         }
         for (int i = 0; i < parameters.numSources; ++i) {
-            auto locationIndex = parameters.sourceLocationIndex[i];
-            EXPECT_EQ(LocationType::Source, locationTypes.at(locationIndex - 1));
+            auto orderNumber = parameters.sourceOrderNumbers[i];
+            EXPECT_EQ(LocationType::Source, locationTypes.at(orderNumber - 1));
         }
     }
 
@@ -69,27 +69,27 @@ protected:
         SimulationParameters const& parameters,
         SimulationParameters const& origParameters,
         std::vector<LocationType> const& locationTypes,
-        int insertedLocationIndex)
+        int insertedOrderNumber)
     {
         checkParameters(parameters, locationTypes);
         for (int i = 0; i < parameters.numLayers; ++i) {
-            auto locationIndex = parameters.layerLocationIndex[i];
-            if (locationIndex == insertedLocationIndex) {
+            auto orderNumber = parameters.layerOrderNumbers[i];
+            if (orderNumber == insertedOrderNumber) {
                 continue;
             }
-            auto origLocationIndex = locationIndex < insertedLocationIndex ? locationIndex : locationIndex - 1;
-            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origLocationIndex);
+            auto origOrderNumber = orderNumber < insertedOrderNumber ? orderNumber : orderNumber - 1;
+            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.layerCoreRadius.layerValues[origArrayIndex], parameters.layerCoreRadius.layerValues[i]);
             EXPECT_TRUE(StringHelper::compare(origParameters.layerName.layerValues[origArrayIndex], sizeof(Char64), parameters.layerName.layerValues[i]));
         }
         for (int i = 0; i < parameters.numSources; ++i) {
-            auto locationIndex = parameters.sourceLocationIndex[i];
-            if (locationIndex == insertedLocationIndex) {
+            auto orderNumber = parameters.sourceOrderNumbers[i];
+            if (orderNumber == insertedOrderNumber) {
                 continue;
             }
-            auto origLocationIndex = locationIndex < insertedLocationIndex ? locationIndex : locationIndex - 1;
-            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origLocationIndex);
+            auto origOrderNumber = orderNumber < insertedOrderNumber ? orderNumber : orderNumber - 1;
+            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.sourceCircularRadius.sourceValues[origArrayIndex], parameters.sourceCircularRadius.sourceValues[i]);
             EXPECT_TRUE(StringHelper::compare(origParameters.sourceName.sourceValues[origArrayIndex], sizeof(Char64), parameters.sourceName.sourceValues[i]));
@@ -100,13 +100,13 @@ protected:
         SimulationParameters const& parameters,
         SimulationParameters const& origParameters,
         std::vector<LocationType> const& locationTypes,
-        int insertedLocationIndex)
+        int insertedOrderNumber)
     {
-        checkParametersAfterInsertion(parameters, origParameters, locationTypes, insertedLocationIndex);
+        checkParametersAfterInsertion(parameters, origParameters, locationTypes, insertedOrderNumber);
 
         SimulationParameters defaultParameters;
-        auto locationType = LocationHelper::getLocationType(insertedLocationIndex, parameters);
-        auto insertedArrayIndex = LocationHelper::findLocationArrayIndex(parameters, insertedLocationIndex);
+        auto locationType = LocationHelper::getLocationType(insertedOrderNumber, parameters);
+        auto insertedArrayIndex = LocationHelper::findLocationArrayIndex(parameters, insertedOrderNumber);
 
         if (locationType == LocationType::Layer) {
             EXPECT_EQ(defaultParameters.layerCoreRadius.layerValues[0], parameters.layerCoreRadius.layerValues[insertedArrayIndex]);
@@ -127,14 +127,14 @@ protected:
         SimulationParameters const& parameters,
         SimulationParameters const& origParameters,
         std::vector<LocationType> const& locationTypes,
-        int insertedLocationIndex)
+        int insertedOrderNumber)
     {
-        checkParametersAfterInsertion(parameters, origParameters, locationTypes, insertedLocationIndex);
+        checkParametersAfterInsertion(parameters, origParameters, locationTypes, insertedOrderNumber);
 
         SimulationParameters defaultParameters;
-        auto locationType = LocationHelper::getLocationType(insertedLocationIndex, parameters);
-        auto insertedArrayIndex = LocationHelper::findLocationArrayIndex(parameters, insertedLocationIndex);
-        auto prevArrayIndex = LocationHelper::findLocationArrayIndex(parameters, insertedLocationIndex);
+        auto locationType = LocationHelper::getLocationType(insertedOrderNumber, parameters);
+        auto insertedArrayIndex = LocationHelper::findLocationArrayIndex(parameters, insertedOrderNumber);
+        auto prevArrayIndex = LocationHelper::findLocationArrayIndex(parameters, insertedOrderNumber);
 
         if (locationType == LocationType::Layer) {
             EXPECT_EQ(parameters.layerCoreRadius.layerValues[prevArrayIndex], parameters.layerCoreRadius.layerValues[insertedArrayIndex]);
@@ -155,21 +155,21 @@ protected:
         SimulationParameters const& parameters,
         SimulationParameters const& origParameters,
         std::vector<LocationType> const& locationTypes,
-        int deletedLocationIndex)
+        int deletedOrderNumber)
     {
         checkParameters(parameters, locationTypes);
         for (int i = 0; i < parameters.numLayers; ++i) {
-            auto locationIndex = parameters.layerLocationIndex[i];
-            auto origLocationIndex = locationIndex < deletedLocationIndex ? locationIndex : locationIndex + 1;
-            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origLocationIndex);
+            auto orderNumber = parameters.layerOrderNumbers[i];
+            auto origOrderNumber = orderNumber < deletedOrderNumber ? orderNumber : orderNumber + 1;
+            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.layerCoreRadius.layerValues[origArrayIndex], parameters.layerCoreRadius.layerValues[i]);
             EXPECT_TRUE(StringHelper::compare(origParameters.layerName.layerValues[origArrayIndex], sizeof(Char64), parameters.layerName.layerValues[i]));
         }
         for (int i = 0; i < parameters.numSources; ++i) {
-            auto locationIndex = parameters.sourceLocationIndex[i];
-            auto origLocationIndex = locationIndex < deletedLocationIndex ? locationIndex : locationIndex + 1;
-            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origLocationIndex);
+            auto orderNumber = parameters.sourceOrderNumbers[i];
+            auto origOrderNumber = orderNumber < deletedOrderNumber ? orderNumber : orderNumber + 1;
+            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.sourceCircularRadius.sourceValues[origArrayIndex], parameters.sourceCircularRadius.sourceValues[i]);
             EXPECT_TRUE(StringHelper::compare(origParameters.sourceName.sourceValues[origArrayIndex], sizeof(Char64), parameters.sourceName.sourceValues[i]));
@@ -180,42 +180,42 @@ protected:
         SimulationParameters const& parameters,
         SimulationParameters const& origParameters,
         std::vector<LocationType> const& locationTypes,
-        int movedLocationIndex)
+        int movedOrderNumber)
     {
         checkParameters(parameters, locationTypes);
         for (int i = 0; i < parameters.numLayers; ++i) {
-            auto locationIndex = parameters.layerLocationIndex[i];
-            auto origLocationIndex = [&] {
-                if (locationIndex < movedLocationIndex - 1 || locationIndex > movedLocationIndex) {
-                    return locationIndex;
-                } else if (locationIndex == movedLocationIndex - 1) {
-                    return movedLocationIndex;
-                } else if (locationIndex == movedLocationIndex) {
-                    return movedLocationIndex - 1;
+            auto orderNumber = parameters.layerOrderNumbers[i];
+            auto origOrderNumber = [&] {
+                if (orderNumber < movedOrderNumber - 1 || orderNumber > movedOrderNumber) {
+                    return orderNumber;
+                } else if (orderNumber == movedOrderNumber - 1) {
+                    return movedOrderNumber;
+                } else if (orderNumber == movedOrderNumber) {
+                    return movedOrderNumber - 1;
                 } else {
                     CHECK(false);
                 }
             }();
 
-            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origLocationIndex);
+            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.layerCoreRadius.layerValues[origArrayIndex], parameters.layerCoreRadius.layerValues[i]);
             EXPECT_TRUE(StringHelper::compare(origParameters.layerName.layerValues[origArrayIndex], sizeof(Char64), parameters.layerName.layerValues[i]));
         }
         for (int i = 0; i < parameters.numSources; ++i) {
-            auto locationIndex = parameters.sourceLocationIndex[i];
-            auto origLocationIndex = [&] {
-                if (locationIndex < movedLocationIndex - 1 || locationIndex > movedLocationIndex) {
-                    return locationIndex;
-                } else if (locationIndex == movedLocationIndex - 1) {
-                    return movedLocationIndex;
-                } else if (locationIndex == movedLocationIndex) {
-                    return movedLocationIndex - 1;
+            auto orderNumber = parameters.sourceOrderNumbers[i];
+            auto origOrderNumber = [&] {
+                if (orderNumber < movedOrderNumber - 1 || orderNumber > movedOrderNumber) {
+                    return orderNumber;
+                } else if (orderNumber == movedOrderNumber - 1) {
+                    return movedOrderNumber;
+                } else if (orderNumber == movedOrderNumber) {
+                    return movedOrderNumber - 1;
                 } else {
                     CHECK(false);
                 }
             }();
-            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origLocationIndex);
+            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.sourceCircularRadius.sourceValues[origArrayIndex], parameters.sourceCircularRadius.sourceValues[i]);
             EXPECT_TRUE(StringHelper::compare(origParameters.sourceName.sourceValues[origArrayIndex], sizeof(Char64), parameters.sourceName.sourceValues[i]));
@@ -226,42 +226,42 @@ protected:
         SimulationParameters const& parameters,
         SimulationParameters const& origParameters,
         std::vector<LocationType> const& locationTypes,
-        int movedLocationIndex)
+        int movedOrderNumber)
     {
         checkParameters(parameters, locationTypes);
         for (int i = 0; i < parameters.numLayers; ++i) {
-            auto locationIndex = parameters.layerLocationIndex[i];
-            auto origLocationIndex = [&] {
-                if (locationIndex < movedLocationIndex || locationIndex > movedLocationIndex + 1) {
-                    return locationIndex;
-                } else if (locationIndex == movedLocationIndex + 1) {
-                    return movedLocationIndex;
-                } else if (locationIndex == movedLocationIndex) {
-                    return movedLocationIndex + 1;
+            auto orderNumber = parameters.layerOrderNumbers[i];
+            auto origOrderNumber = [&] {
+                if (orderNumber < movedOrderNumber || orderNumber > movedOrderNumber + 1) {
+                    return orderNumber;
+                } else if (orderNumber == movedOrderNumber + 1) {
+                    return movedOrderNumber;
+                } else if (orderNumber == movedOrderNumber) {
+                    return movedOrderNumber + 1;
                 } else {
                     CHECK(false);
                 }
             }();
 
-            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origLocationIndex);
+            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.layerCoreRadius.layerValues[origArrayIndex], parameters.layerCoreRadius.layerValues[i]);
             EXPECT_TRUE(StringHelper::compare(origParameters.layerName.layerValues[origArrayIndex], sizeof(Char64), parameters.layerName.layerValues[i]));
         }
         for (int i = 0; i < parameters.numSources; ++i) {
-            auto locationIndex = parameters.sourceLocationIndex[i];
-            auto origLocationIndex = [&] {
-                if (locationIndex < movedLocationIndex || locationIndex > movedLocationIndex + 1) {
-                    return locationIndex;
-                } else if (locationIndex == movedLocationIndex + 1) {
-                    return movedLocationIndex;
-                } else if (locationIndex == movedLocationIndex) {
-                    return movedLocationIndex + 1;
+            auto orderNumber = parameters.sourceOrderNumbers[i];
+            auto origOrderNumber = [&] {
+                if (orderNumber < movedOrderNumber || orderNumber > movedOrderNumber + 1) {
+                    return orderNumber;
+                } else if (orderNumber == movedOrderNumber + 1) {
+                    return movedOrderNumber;
+                } else if (orderNumber == movedOrderNumber) {
+                    return movedOrderNumber + 1;
                 } else {
                     CHECK(false);
                 }
             }();
-            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origLocationIndex);
+            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origOrderNumber);
 
             EXPECT_EQ(origParameters.sourceCircularRadius.sourceValues[origArrayIndex], parameters.sourceCircularRadius.sourceValues[i]);
             EXPECT_TRUE(StringHelper::compare(origParameters.sourceName.sourceValues[origArrayIndex], sizeof(Char64), parameters.sourceName.sourceValues[i]));

@@ -640,8 +640,8 @@ namespace
                 tree, parameters.sourceName.sourceValues[index], defaultParameters.sourceName.sourceValues[index], base + "name", parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.sourceLocationIndex[index],
-                defaultParameters.sourceLocationIndex[index],
+                parameters.sourceOrderNumbers[index],
+                defaultParameters.sourceOrderNumbers[index],
                 base + "location index",
                 parserTask);
             ParameterParser::encodeDecode(
@@ -709,8 +709,8 @@ namespace
             ParameterParser::encodeDecode(tree, parameters.layerName.layerValues[index], defaultParameters.layerName.layerValues[0], base + "name", parserTask);
             ParameterParser::encodeDecode(
                 tree,
-                parameters.layerLocationIndex[index],
-                defaultParameters.layerLocationIndex[index],
+                parameters.layerOrderNumbers[index],
+                defaultParameters.layerOrderNumbers[index],
                 base + "location index",
                 parserTask);
             ParameterParser::encodeDecode(tree, parameters.layerPosition.layerValues[index].x, defaultParameters.layerPosition.layerValues[index].x, base + "pos.x", parserTask);

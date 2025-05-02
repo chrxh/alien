@@ -17,8 +17,8 @@ struct SimulationParameters
 {
     int numLayers = 0;
     int numSources = 0;
-    int layerLocationIndex[MAX_LAYERS] = {};
-    int sourceLocationIndex[MAX_SOURCES] = {};
+    int layerOrderNumbers[MAX_LAYERS] = {};
+    int sourceOrderNumbers[MAX_SOURCES] = {};
 
     // General
     BaseParameter<Char64> projectName = {"<unnamed>"};
