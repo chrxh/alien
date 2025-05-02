@@ -9,15 +9,15 @@
 class _SimulationParametersSourceWidgets : public _LocationWidgets
 {
 public:
-    void init(SimulationFacade const& simulationFacade, int locationIndex);
+    void init(SimulationFacade const& simulationFacade, int orderNumber);
     void process() override;
     std::string getLocationName() override;
-    int getLocationIndex() const override;
-    void setLocationIndex(int locationIndex) override;
+    int getOrderNumber() const override;
+    void setOrderNumber(int orderNumber) override;
 
 private:
     SimulationFacade _simulationFacade;
 
-    int _locationIndex = 0;
+    int _orderNumber = 0;
     std::string _sourceName;
 };

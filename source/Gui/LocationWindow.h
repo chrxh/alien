@@ -10,8 +10,8 @@ public:
 
     bool isOn() const;
 
-    int getLocationIndex() const;
-    void setLocationIndex(int locationIndex);
+    int getOrderNumber() const;
+    void setOrderNumber(int orderNumber);
 
 private:
     LocationWidgets _widgets;

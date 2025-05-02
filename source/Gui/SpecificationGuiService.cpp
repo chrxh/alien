@@ -22,11 +22,11 @@ void SpecificationGuiService::createWidgetsForParameters(
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
     SimulationFacade const& simulationFacade,
-    int locationIndex) const
+    int orderNumber) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& parametersSpecs = SimulationParameters::getSpec();
-    auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
+    auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
 
     for (auto const& groupSpec : parametersSpecs._groups) {
         if (!evaluationService.isVisible(groupSpec, locationType)) {
@@ -41,7 +41,7 @@ void SpecificationGuiService::createWidgetsForParameters(
         }
         ImGui::PushID(name.c_str());
         if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name(name).visible(isGroupVisibleActive).blinkWhenActivated(isExpertSettings))) {
-            createWidgetsFromParameterSpecs(groupSpec._parameters, parameters, origParameters, simulationFacade, locationIndex);
+            createWidgetsFromParameterSpecs(groupSpec._parameters, parameters, origParameters, simulationFacade, orderNumber);
         }
         ImGui::PopID();
         AlienImGui::EndTreeNode();
@@ -90,9 +90,9 @@ void SpecificationGuiService::createWidgetsFromParameterSpecs(
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
     SimulationFacade const& simulationFacade,
-    int locationIndex) const
+    int orderNumber) const
 {
-    auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
+    auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
 
     for (auto const& [index, parameterSpec] : parameterSpecs | boost::adaptors::indexed(0)) {
         if (!SpecificationEvaluationService::get().isVisible(parameterSpec, locationType)) {
@@ -101,21 +101,21 @@ void SpecificationGuiService::createWidgetsFromParameterSpecs(
         ImGui::PushID(toInt(index));
 
         if (std::holds_alternative<BoolSpec>(parameterSpec._reference)) {
-            createWidgetsForBoolSpec(parameterSpec, parameters, origParameters, locationIndex);
+            createWidgetsForBoolSpec(parameterSpec, parameters, origParameters, orderNumber);
         } else if (std::holds_alternative<IntSpec>(parameterSpec._reference)) {
-            createWidgetsForIntSpec(parameterSpec, parameters, origParameters, locationIndex);
+            createWidgetsForIntSpec(parameterSpec, parameters, origParameters, orderNumber);
         } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
-            createWidgetsForFloatSpec(parameterSpec, parameters, origParameters, simulationFacade, locationIndex);
+            createWidgetsForFloatSpec(parameterSpec, parameters, origParameters, simulationFacade, orderNumber);
         } else if (std::holds_alternative<Float2Spec>(parameterSpec._reference)) {
-            createWidgetsForFloat2Spec(parameterSpec, parameters, origParameters, simulationFacade, locationIndex);
+            createWidgetsForFloat2Spec(parameterSpec, parameters, origParameters, simulationFacade, orderNumber);
         } else if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {
-            createWidgetsForChar64Spec(parameterSpec, parameters, origParameters, locationIndex);
+            createWidgetsForChar64Spec(parameterSpec, parameters, origParameters, orderNumber);
         } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._reference)) {
-            createWidgetsForAlternativeSpec(parameterSpec, parameters, origParameters, simulationFacade, locationIndex);
+            createWidgetsForAlternativeSpec(parameterSpec, parameters, origParameters, simulationFacade, orderNumber);
         } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._reference)) {
-            createWidgetsForColorPickerSpec(parameterSpec, parameters, origParameters, locationIndex);
+            createWidgetsForColorPickerSpec(parameterSpec, parameters, origParameters, orderNumber);
         } else if (std::holds_alternative<ColorTransitionRulesSpec>(parameterSpec._reference)) {
-            createWidgetsForColorTransitionRulesSpec(parameterSpec, parameters, origParameters, locationIndex);
+            createWidgetsForColorTransitionRulesSpec(parameterSpec, parameters, origParameters, orderNumber);
         }
 
         ImGui::PopID();
@@ -126,13 +126,13 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
     ParameterSpec const& parameterSpec,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
-    int locationIndex) const
+    int orderNumber) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& boolSpec = std::get<BoolSpec>(parameterSpec._reference);
 
-    auto ref = evaluationService.getRef(boolSpec._member, parameters, locationIndex);
-    auto origRef = evaluationService.getRef(boolSpec._member, origParameters, locationIndex);
+    auto ref = evaluationService.getRef(boolSpec._member, parameters, orderNumber);
+    auto origRef = evaluationService.getRef(boolSpec._member, origParameters, orderNumber);
     if (ref.valueType == ColorDependence::ColorMatrix) {
 
         AlienImGui::CheckboxColorMatrix(
@@ -155,14 +155,14 @@ void SpecificationGuiService::createWidgetsForIntSpec(
     ParameterSpec const& parameterSpec,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
-    int locationIndex) const
+    int orderNumber) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& intSpec = std::get<IntSpec>(parameterSpec._reference);
 
-    auto [value, disabledValue, enabledValue, pinnedValue, valueType] = evaluationService.getRef(intSpec._member, parameters, locationIndex);
+    auto [value, disabledValue, enabledValue, pinnedValue, valueType] = evaluationService.getRef(intSpec._member, parameters, orderNumber);
     auto [origValue, origDisabledValue, origEnabledValue, origPinnedValue, origValueType] =
-        evaluationService.getRef(intSpec._member, origParameters, locationIndex);
+        evaluationService.getRef(intSpec._member, origParameters, orderNumber);
 
     if (valueType == ColorDependence::ColorMatrix) {
         AlienImGui::InputIntColorMatrix(
@@ -200,14 +200,14 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
     SimulationFacade const& simulationFacade,
-    int locationIndex) const
+    int orderNumber) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& floatSpec = std::get<FloatSpec>(parameterSpec._reference);
 
-    auto [value, disabledValue, enabledValue, pinnedValue, valueType] = evaluationService.getRef(floatSpec._member, parameters, locationIndex);
+    auto [value, disabledValue, enabledValue, pinnedValue, valueType] = evaluationService.getRef(floatSpec._member, parameters, orderNumber);
     auto [origValue, origDisabledValue, origEnabledValue, origPinnedValue, origValueType] =
-        evaluationService.getRef(floatSpec._member, origParameters, locationIndex);
+        evaluationService.getRef(floatSpec._member, origParameters, orderNumber);
 
     float min = std::get<float>(floatSpec._min);
     float max = [&] {
@@ -241,8 +241,8 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
         float tempOrigValue;
         if (floatSpec._getterSetter.has_value()) {
             auto [getter, setter] = floatSpec._getterSetter.value();
-            tempValue = getter(parameters, locationIndex);
-            tempOrigValue = getter(origParameters, locationIndex);
+            tempValue = getter(parameters, orderNumber);
+            tempOrigValue = getter(origParameters, orderNumber);
             value = &tempValue;
             origValue = &tempOrigValue;
         }
@@ -267,7 +267,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
 
             if (floatSpec._getterSetter.has_value()) {
                 auto [getter, setter] = floatSpec._getterSetter.value();
-                setter(tempValue, parameters, locationIndex);
+                setter(tempValue, parameters, orderNumber);
             }
         }
     }
@@ -278,14 +278,14 @@ void SpecificationGuiService::createWidgetsForFloat2Spec(
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
     SimulationFacade const& simulationFacade,
-    int locationIndex) const
+    int orderNumber) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& float2Spec = std::get<Float2Spec>(parameterSpec._reference);
 
-    auto [value, disabledValue, enabledValue, pinnedValue, valueType] = evaluationService.getRef(float2Spec._member, parameters, locationIndex);
+    auto [value, disabledValue, enabledValue, pinnedValue, valueType] = evaluationService.getRef(float2Spec._member, parameters, orderNumber);
     auto [origValue, origDisabledValue, origEnabledValue, origPinnedValue, origValueType] =
-        evaluationService.getRef(float2Spec._member, origParameters, locationIndex);
+        evaluationService.getRef(float2Spec._member, origParameters, orderNumber);
 
     RealVector2D min = std::get<RealVector2D>(float2Spec._min);
     RealVector2D max = [&] {
@@ -320,14 +320,14 @@ void SpecificationGuiService::createWidgetsForChar64Spec(
     ParameterSpec const& parameterSpec,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
-    int locationIndex) const
+    int orderNumber) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& char64Spec = std::get<Char64Spec>(parameterSpec._reference);
 
-    auto [value, disabledValue, enabledValue, pinnedValue, valueType] = evaluationService.getRef(char64Spec._member, parameters, locationIndex);
+    auto [value, disabledValue, enabledValue, pinnedValue, valueType] = evaluationService.getRef(char64Spec._member, parameters, orderNumber);
     auto [origValue, origDisabledValue, origEnabledValue, origPinnedValue, origValueType] =
-        evaluationService.getRef(char64Spec._member, origParameters, locationIndex);
+        evaluationService.getRef(char64Spec._member, origParameters, orderNumber);
 
     AlienImGui::InputText(
         AlienImGui::InputTextParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue).tooltip(parameterSpec._tooltip),
@@ -340,14 +340,14 @@ void SpecificationGuiService::createWidgetsForAlternativeSpec(
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
     SimulationFacade const& simulationFacade,
-    int locationIndex) const
+    int orderNumber) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
     auto alternativeSpec = std::get<AlternativeSpec>(parameterSpec._reference);
 
-    auto [value, disabledValue, enabledValue, pinnedValue, valueType] = evaluationService.getRef(alternativeSpec._member, parameters, locationIndex);
+    auto [value, disabledValue, enabledValue, pinnedValue, valueType] = evaluationService.getRef(alternativeSpec._member, parameters, orderNumber);
     auto [origValue, origDisabledValue, origEnabledValue, origPinnedValue, origValueType] =
-        evaluationService.getRef(alternativeSpec._member, origParameters, locationIndex);
+        evaluationService.getRef(alternativeSpec._member, origParameters, orderNumber);
 
     std::vector<std::string> values;
     values.reserve(alternativeSpec._alternatives.size());
@@ -362,21 +362,21 @@ void SpecificationGuiService::createWidgetsForAlternativeSpec(
             .values(values)
             .tooltip(parameterSpec._tooltip),
         *value);
-    createWidgetsFromParameterSpecs(alternativeSpec._alternatives.at(*value).second, parameters, origParameters, simulationFacade, locationIndex);
+    createWidgetsFromParameterSpecs(alternativeSpec._alternatives.at(*value).second, parameters, origParameters, simulationFacade, orderNumber);
 }
 
 void SpecificationGuiService::createWidgetsForColorPickerSpec(
     ParameterSpec const& parameterSpec,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
-    int locationIndex) const
+    int orderNumber) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& colorPickerSpec = std::get<ColorPickerSpec>(parameterSpec._reference);
 
-    auto [value, disabledValue, enabledValue, pinnedValue, valueType] = evaluationService.getRef(colorPickerSpec._member, parameters, locationIndex);
+    auto [value, disabledValue, enabledValue, pinnedValue, valueType] = evaluationService.getRef(colorPickerSpec._member, parameters, orderNumber);
     auto [origValue, origDisabledValue, origEnabledValue, origPinnedValue, origValueType] =
-        evaluationService.getRef(colorPickerSpec._member, origParameters, locationIndex);
+        evaluationService.getRef(colorPickerSpec._member, origParameters, orderNumber);
    
     AlienImGui::ColorButtonWithPicker(
         AlienImGui::ColorButtonWithPickerParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue), *value);
@@ -386,14 +386,14 @@ void SpecificationGuiService::createWidgetsForColorTransitionRulesSpec(
     ParameterSpec const& parameterSpec,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
-    int locationIndex) const
+    int orderNumber) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& colorTransitionRulesSpec = std::get<ColorTransitionRulesSpec>(parameterSpec._reference);
 
-    auto [value, disabledValue, enabledValue, pinnedValue, valueType] = evaluationService.getRef(colorTransitionRulesSpec._member, parameters, locationIndex);
+    auto [value, disabledValue, enabledValue, pinnedValue, valueType] = evaluationService.getRef(colorTransitionRulesSpec._member, parameters, orderNumber);
     auto [origValue, origDisabledValue, origEnabledValue, origPinnedValue, origValueType] =
-        evaluationService.getRef(colorTransitionRulesSpec._member, origParameters, locationIndex);
+        evaluationService.getRef(colorTransitionRulesSpec._member, origParameters, orderNumber);
 
     for (int color = 0; color < MAX_COLORS; ++color) {
         ImGui::PushID(color);

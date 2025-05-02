@@ -16,21 +16,21 @@ ParametersSpec const& SimulationParameters::getSpec()
             cellTypeStrings.emplace_back(std::make_pair(Const::CellTypeToStringMap.at(i), std::vector<ParameterSpec>()));
         }
 
-        auto radiationStrengthGetter = [](SimulationParameters const& parameters, int locationIndex) {
+        auto radiationStrengthGetter = [](SimulationParameters const& parameters, int orderNumber) {
             auto strength = ParametersEditService::get().getRadiationStrengths(parameters);
-            if (locationIndex == 0) {
+            if (orderNumber == 0) {
                 return strength.values.at(0);
             } else {
-                auto sourceIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+                auto sourceIndex = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
                 return parameters.sourceRelativeStrength.sourceValues[sourceIndex].value;
             }
         };
 
-        auto radiationStrengthSetter = [](float value, SimulationParameters& parameters, int locationIndex) {
+        auto radiationStrengthSetter = [](float value, SimulationParameters& parameters, int orderNumber) {
             auto& editService = ParametersEditService::get();
             auto strength = ParametersEditService::get().getRadiationStrengths(parameters);
             auto editedStrength = strength;
-            int strengthIndex = locationIndex == 0 ? 0 : LocationHelper::findLocationArrayIndex(parameters, locationIndex) + 1;
+            int strengthIndex = orderNumber == 0 ? 0 : LocationHelper::findLocationArrayIndex(parameters, orderNumber) + 1;
             editedStrength.values.at(strengthIndex) = value;
             editService.adaptRadiationStrengths(editedStrength, strength, strengthIndex);
             editService.applyRadiationStrengths(parameters, editedStrength);

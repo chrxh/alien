@@ -77,7 +77,7 @@ using FloatMemberVariant = std::variant<
     FloatEnableableSourceMember,
     FloatPinnableSourceMember>;
 using FloatGetterSetter =
-    std::pair<std::function<float(SimulationParameters const&, int)>, std::function<void(float, SimulationParameters&, int)>>;  // int for locationIndex
+    std::pair<std::function<float(SimulationParameters const&, int)>, std::function<void(float, SimulationParameters&, int)>>;  // int for orderNumber
 
 using _Float2LayerMember = LayerParameter<RealVector2D> SimulationParameters::*;
 using Float2LayerMember = std::shared_ptr<_Float2LayerMember>;

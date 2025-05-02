@@ -27,14 +27,14 @@ class SpecificationEvaluationService
     MAKE_SINGLETON(SpecificationEvaluationService);
 
 public:
-    ValueRef<bool> getRef(BoolMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
-    ValueRef<int> getRef(IntMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
-    ValueRef<float> getRef(FloatMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
-    ValueRef<RealVector2D> getRef(Float2MemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
-    ValueRef<Char64> getRef(Char64MemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
-    ValueRef<int> getRef(AlternativeMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
-    ValueRef<FloatColorRGB> getRef(FloatColorRGBMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
-    ValueRef<ColorTransitionRules> getRef(ColorTransitionRulesMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const;
+    ValueRef<bool> getRef(BoolMemberVariant const& member, SimulationParameters& parameters, int orderNumber) const;
+    ValueRef<int> getRef(IntMemberVariant const& member, SimulationParameters& parameters, int orderNumber) const;
+    ValueRef<float> getRef(FloatMemberVariant const& member, SimulationParameters& parameters, int orderNumber) const;
+    ValueRef<RealVector2D> getRef(Float2MemberVariant const& member, SimulationParameters& parameters, int orderNumber) const;
+    ValueRef<Char64> getRef(Char64MemberVariant const& member, SimulationParameters& parameters, int orderNumber) const;
+    ValueRef<int> getRef(AlternativeMemberVariant const& member, SimulationParameters& parameters, int orderNumber) const;
+    ValueRef<FloatColorRGB> getRef(FloatColorRGBMemberVariant const& member, SimulationParameters& parameters, int orderNumber) const;
+    ValueRef<ColorTransitionRules> getRef(ColorTransitionRulesMemberVariant const& member, SimulationParameters& parameters, int orderNumber) const;
 
     bool* getExpertToggleRef(ExpertToggleMember const& member, SimulationParameters& parameters) const;
 

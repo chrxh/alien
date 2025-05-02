@@ -36,12 +36,12 @@ std::string _SimulationParametersBaseWidgets::getLocationName()
     return "Simulation parameters for 'Base'";
 }
 
-int _SimulationParametersBaseWidgets::getLocationIndex() const
+int _SimulationParametersBaseWidgets::getOrderNumber() const
 {
     return 0;
 }
 
-void _SimulationParametersBaseWidgets::setLocationIndex(int locationIndex)
+void _SimulationParametersBaseWidgets::setOrderNumber(int orderNumber)
 {
     // do nothing
 }

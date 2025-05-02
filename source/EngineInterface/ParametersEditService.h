@@ -14,19 +14,19 @@ struct RadiationStrengths
     std::set<int> pinned;
 };
 
-using NewByOldLocationIndex = std::map<int, int>;
+using NewByOldOrderNumber = std::map<int, int>;
 
 class ParametersEditService
 {
     MAKE_SINGLETON(ParametersEditService);
 
 public:
-    NewByOldLocationIndex insertDefaultLayer(SimulationParameters& parameters, int locationIndex) const;  // Create location at locationIndex + 1
-    NewByOldLocationIndex insertDefaultSource(SimulationParameters& parameters, int locationIndex) const;  // Create location at locationIndex + 1
-    NewByOldLocationIndex cloneLocation(SimulationParameters& parameters, int locationIndex) const;        // Create location at locationIndex + 1
-    NewByOldLocationIndex deleteLocation(SimulationParameters& parameters, int locationIndex) const;
-    NewByOldLocationIndex moveLocationUpwards(SimulationParameters& parameters, int locationIndex) const;
-    NewByOldLocationIndex moveLocationDownwards(SimulationParameters& parameters, int locationIndex) const;
+    NewByOldOrderNumber insertDefaultLayer(SimulationParameters& parameters, int orderNumber) const;  // Create location at orderNumber + 1
+    NewByOldOrderNumber insertDefaultSource(SimulationParameters& parameters, int orderNumber) const;  // Create location at orderNumber + 1
+    NewByOldOrderNumber cloneLocation(SimulationParameters& parameters, int orderNumber) const;        // Create location at orderNumber + 1
+    NewByOldOrderNumber deleteLocation(SimulationParameters& parameters, int orderNumber) const;
+    NewByOldOrderNumber moveLocationUpwards(SimulationParameters& parameters, int orderNumber) const;
+    NewByOldOrderNumber moveLocationDownwards(SimulationParameters& parameters, int orderNumber) const;
 
     RadiationStrengths getRadiationStrengths(SimulationParameters const& parameters) const;
     void applyRadiationStrengths(SimulationParameters& parameters, RadiationStrengths const& strengths);
@@ -36,12 +36,12 @@ public:
     RadiationStrengths calcRadiationStrengthsForDeletingLayer(RadiationStrengths const& strengths, int deleteIndex) const;
 
 private:
-    void copyLocation(SimulationParameters& targetParameters, int targetLocationIndex, SimulationParameters& sourceParameters, int sourceLocationIndex) const;
+    void copyLocation(SimulationParameters& targetParameters, int targetOrderNumber, SimulationParameters& sourceParameters, int sourceOrderNumber) const;
 
     void copyLocationImpl(
         SimulationParameters& targetParameters,
-        int targetLocationIndex,
+        int targetOrderNumber,
         SimulationParameters& sourceParameters,
-        int sourceLocationIndex,
+        int sourceOrderNumber,
         std::vector<ParameterSpec> const& parameterSpecs) const;
 };

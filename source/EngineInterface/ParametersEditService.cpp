@@ -6,14 +6,14 @@
 #include "Base/StringHelper.h"
 #include "SpecificationEvaluationService.h"
 
-NewByOldLocationIndex ParametersEditService::insertDefaultLayer(SimulationParameters& parameters, int locationIndex) const
+NewByOldOrderNumber ParametersEditService::insertDefaultLayer(SimulationParameters& parameters, int orderNumber) const
 {
-    auto result = LocationHelper::adaptLocationIndices(parameters, locationIndex + 1, 1);
+    auto result = LocationHelper::adaptLocationIndices(parameters, orderNumber + 1, 1);
 
     auto startIndex = 0;
     auto insertAtEnd = false;
     for (int i = 0; i < parameters.numLayers; ++i) {
-        if (parameters.layerLocationIndex[i] > locationIndex) {
+        if (parameters.layerOrderNumbers[i] > orderNumber) {
             startIndex = i;
             break;
         }
@@ -25,35 +25,35 @@ NewByOldLocationIndex ParametersEditService::insertDefaultLayer(SimulationParame
 
     ++parameters.numLayers;
     for (int i = parameters.numLayers - 2; i >= startIndex; --i) {
-        parameters.layerLocationIndex[i + 1] = parameters.layerLocationIndex[i];
+        parameters.layerOrderNumbers[i + 1] = parameters.layerOrderNumbers[i];
     }
-    parameters.layerLocationIndex[insertAtEnd ? startIndex + 1 : startIndex] = locationIndex + 1;
+    parameters.layerOrderNumbers[insertAtEnd ? startIndex + 1 : startIndex] = orderNumber + 1;
 
     for (int i = parameters.numLayers - 2; i >= startIndex; --i) {
-        auto sourceLocationIndex = parameters.layerLocationIndex[i];
-        auto targetLocationIndex = parameters.layerLocationIndex[i + 1];
-        copyLocation(parameters, targetLocationIndex, parameters, sourceLocationIndex);
+        auto sourceOrderNumber = parameters.layerOrderNumbers[i];
+        auto targetOrderNumber = parameters.layerOrderNumbers[i + 1];
+        copyLocation(parameters, targetOrderNumber, parameters, sourceOrderNumber);
     }
 
     SimulationParameters defaultParameters;
     defaultParameters.numLayers = 1;
-    defaultParameters.layerLocationIndex[0] = 1;
-    copyLocation(parameters, locationIndex + 1, defaultParameters, 1);
+    defaultParameters.layerOrderNumbers[0] = 1;
+    copyLocation(parameters, orderNumber + 1, defaultParameters, 1);
 
-    auto newLayerIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex + 1);
+    auto newLayerIndex = LocationHelper::findLocationArrayIndex(parameters, orderNumber + 1);
     StringHelper::copy(parameters.layerName.layerValues[newLayerIndex], sizeof(Char64), LocationHelper::generateLayerName(parameters));
 
     return result;
 }
 
-NewByOldLocationIndex ParametersEditService::insertDefaultSource(SimulationParameters& parameters, int locationIndex) const
+NewByOldOrderNumber ParametersEditService::insertDefaultSource(SimulationParameters& parameters, int orderNumber) const
 {
-    auto result = LocationHelper::adaptLocationIndices(parameters, locationIndex + 1, 1);
+    auto result = LocationHelper::adaptLocationIndices(parameters, orderNumber + 1, 1);
 
     auto startIndex = 0;
     auto insertAtEnd = false;
     for (int i = 0; i < parameters.numSources; ++i) {
-        if (parameters.sourceLocationIndex[i] > locationIndex) {
+        if (parameters.sourceOrderNumbers[i] > orderNumber) {
             startIndex = i;
             break;
         }
@@ -65,44 +65,44 @@ NewByOldLocationIndex ParametersEditService::insertDefaultSource(SimulationParam
 
     ++parameters.numSources;
     for (int i = parameters.numSources - 2; i >= startIndex; --i) {
-        parameters.sourceLocationIndex[i + 1] = parameters.sourceLocationIndex[i];
+        parameters.sourceOrderNumbers[i + 1] = parameters.sourceOrderNumbers[i];
     }
-    parameters.sourceLocationIndex[insertAtEnd ? startIndex + 1 : startIndex] = locationIndex + 1;
+    parameters.sourceOrderNumbers[insertAtEnd ? startIndex + 1 : startIndex] = orderNumber + 1;
 
     for (int i = parameters.numSources - 2; i >= startIndex; --i) {
-        auto sourceLocationIndex = parameters.sourceLocationIndex[i];
-        auto targetLocationIndex = parameters.sourceLocationIndex[i + 1];
-        copyLocation(parameters, targetLocationIndex, parameters, sourceLocationIndex);
+        auto sourceOrderNumber = parameters.sourceOrderNumbers[i];
+        auto targetOrderNumber = parameters.sourceOrderNumbers[i + 1];
+        copyLocation(parameters, targetOrderNumber, parameters, sourceOrderNumber);
     }
 
     SimulationParameters defaultParameters;
     defaultParameters.numSources = 1;
-    defaultParameters.sourceLocationIndex[0] = 1;
-    copyLocation(parameters, locationIndex + 1, defaultParameters, 1);
+    defaultParameters.sourceOrderNumbers[0] = 1;
+    copyLocation(parameters, orderNumber + 1, defaultParameters, 1);
 
-    auto newSourceIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex + 1);
+    auto newSourceIndex = LocationHelper::findLocationArrayIndex(parameters, orderNumber + 1);
     StringHelper::copy(parameters.sourceName.sourceValues[newSourceIndex], sizeof(Char64), LocationHelper::generateSourceName(parameters));
 
     return result;
 }
 
-NewByOldLocationIndex ParametersEditService::cloneLocation(SimulationParameters& parameters, int locationIndex) const
+NewByOldOrderNumber ParametersEditService::cloneLocation(SimulationParameters& parameters, int orderNumber) const
 {
-    auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
-    auto startIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-    auto result = LocationHelper::adaptLocationIndices(parameters, locationIndex, 1);
+    auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
+    auto startIndex = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
+    auto result = LocationHelper::adaptLocationIndices(parameters, orderNumber, 1);
 
     if (locationType == LocationType::Layer) {
         ++parameters.numLayers;
         for (int i = parameters.numLayers - 2; i >= startIndex; --i) {
-            parameters.layerLocationIndex[i + 1] = parameters.layerLocationIndex[i];
+            parameters.layerOrderNumbers[i + 1] = parameters.layerOrderNumbers[i];
         }
-        parameters.layerLocationIndex[startIndex] = locationIndex;
+        parameters.layerOrderNumbers[startIndex] = orderNumber;
 
         for (int i = parameters.numLayers - 2; i >= startIndex; --i) {
-            auto sourceLocationIndex = parameters.layerLocationIndex[i];
-            auto targetLocationIndex = parameters.layerLocationIndex[i + 1];
-            copyLocation(parameters, targetLocationIndex, parameters, sourceLocationIndex);
+            auto sourceOrderNumber = parameters.layerOrderNumbers[i];
+            auto targetOrderNumber = parameters.layerOrderNumbers[i + 1];
+            copyLocation(parameters, targetOrderNumber, parameters, sourceOrderNumber);
         }
         StringHelper::copy(
             parameters.layerName.layerValues[startIndex + 1],
@@ -111,14 +111,14 @@ NewByOldLocationIndex ParametersEditService::cloneLocation(SimulationParameters&
     } else {
         ++parameters.numSources;
         for (int i = parameters.numSources - 2; i >= startIndex; --i) {
-            parameters.sourceLocationIndex[i + 1] = parameters.sourceLocationIndex[i];
+            parameters.sourceOrderNumbers[i + 1] = parameters.sourceOrderNumbers[i];
         }
-        parameters.sourceLocationIndex[startIndex] = locationIndex;
+        parameters.sourceOrderNumbers[startIndex] = orderNumber;
 
         for (int i = parameters.numSources - 2; i >= startIndex; --i) {
-            auto sourceLocationIndex = parameters.sourceLocationIndex[i];
-            auto targetLocationIndex = parameters.sourceLocationIndex[i + 1];
-            copyLocation(parameters, targetLocationIndex, parameters, sourceLocationIndex);
+            auto sourceOrderNumber = parameters.sourceOrderNumbers[i];
+            auto targetOrderNumber = parameters.sourceOrderNumbers[i + 1];
+            copyLocation(parameters, targetOrderNumber, parameters, sourceOrderNumber);
         }
         StringHelper::copy(
             parameters.sourceName.sourceValues[startIndex + 1],
@@ -129,73 +129,73 @@ NewByOldLocationIndex ParametersEditService::cloneLocation(SimulationParameters&
     return result;
 }
 
-NewByOldLocationIndex ParametersEditService::deleteLocation(SimulationParameters& parameters, int locationIndex) const
+NewByOldOrderNumber ParametersEditService::deleteLocation(SimulationParameters& parameters, int orderNumber) const
 {
-    auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
-    auto startIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+    auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
+    auto startIndex = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
 
     if (locationType == LocationType::Layer) {
         for (int i = startIndex; i < parameters.numLayers - 1; ++i) {
-            auto targetLocationIndex = parameters.layerLocationIndex[i];
-            auto sourceLocationIndex = parameters.layerLocationIndex[i + 1];
-            copyLocation(parameters, targetLocationIndex, parameters, sourceLocationIndex);
+            auto targetOrderNumber = parameters.layerOrderNumbers[i];
+            auto sourceOrderNumber = parameters.layerOrderNumbers[i + 1];
+            copyLocation(parameters, targetOrderNumber, parameters, sourceOrderNumber);
         }
         for (int i = startIndex; i < parameters.numLayers - 1; ++i) {
-            parameters.layerLocationIndex[i] = parameters.layerLocationIndex[i + 1];
+            parameters.layerOrderNumbers[i] = parameters.layerOrderNumbers[i + 1];
         }
         --parameters.numLayers;
     } else {
         for (int i = startIndex; i < parameters.numSources- 1; ++i) {
-            auto targetLocationIndex = parameters.sourceLocationIndex[i];
-            auto sourceLocationIndex = parameters.sourceLocationIndex[i + 1];
-            copyLocation(parameters, targetLocationIndex, parameters, sourceLocationIndex);
+            auto targetOrderNumber = parameters.sourceOrderNumbers[i];
+            auto sourceOrderNumber = parameters.sourceOrderNumbers[i + 1];
+            copyLocation(parameters, targetOrderNumber, parameters, sourceOrderNumber);
         }
         for (int i = startIndex; i < parameters.numSources - 1; ++i) {
-            parameters.sourceLocationIndex[i] = parameters.sourceLocationIndex[i + 1];
+            parameters.sourceOrderNumbers[i] = parameters.sourceOrderNumbers[i + 1];
         }
         --parameters.numSources;
     }
 
-    return LocationHelper::adaptLocationIndices(parameters, locationIndex + 1, -1);
+    return LocationHelper::adaptLocationIndices(parameters, orderNumber + 1, -1);
 }
 
-NewByOldLocationIndex ParametersEditService::moveLocationUpwards(SimulationParameters& parameters, int locationIndex) const
+NewByOldOrderNumber ParametersEditService::moveLocationUpwards(SimulationParameters& parameters, int orderNumber) const
 {
-    auto sourceLocationType = LocationHelper::getLocationType(locationIndex, parameters);
-    auto targetLocationType = LocationHelper::getLocationType(locationIndex - 1, parameters);
+    auto sourceLocationType = LocationHelper::getLocationType(orderNumber, parameters);
+    auto targetLocationType = LocationHelper::getLocationType(orderNumber - 1, parameters);
 
     if (sourceLocationType == targetLocationType) {
         SimulationParameters tempParameters;
         if (sourceLocationType == LocationType::Layer) {
             tempParameters.numLayers = 1;
-            tempParameters.layerLocationIndex[0] = 1;
+            tempParameters.layerOrderNumbers[0] = 1;
 
-            auto arrayIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            auto prevLocationIndex = parameters.layerLocationIndex[arrayIndex - 1];
+            auto arrayIndex = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
+            auto prevOrderNumber = parameters.layerOrderNumbers[arrayIndex - 1];
 
-            copyLocation(tempParameters, 1, parameters, locationIndex);
-            copyLocation(parameters, locationIndex, parameters, prevLocationIndex);
-            copyLocation(parameters, prevLocationIndex, tempParameters, 1);
+            copyLocation(tempParameters, 1, parameters, orderNumber);
+            copyLocation(parameters, orderNumber, parameters, prevOrderNumber);
+            copyLocation(parameters, prevOrderNumber, tempParameters, 1);
         } else {
             tempParameters.numSources = 1;
-            tempParameters.sourceLocationIndex[0] = 1;
+            tempParameters.sourceOrderNumbers[0] = 1;
 
-            auto arrayIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            auto prevLocationIndex = parameters.sourceLocationIndex[arrayIndex - 1];
+            auto arrayIndex = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
+            auto prevOrderNumber = parameters.sourceOrderNumbers[arrayIndex - 1];
 
-            copyLocation(tempParameters, 1, parameters, locationIndex);
-            copyLocation(parameters, locationIndex, parameters, prevLocationIndex);
-            copyLocation(parameters, prevLocationIndex, tempParameters, 1);
+            copyLocation(tempParameters, 1, parameters, orderNumber);
+            copyLocation(parameters, orderNumber, parameters, prevOrderNumber);
+            copyLocation(parameters, prevOrderNumber, tempParameters, 1);
         }
     } else {
-        LocationHelper::decreaseLocationIndex(parameters, locationIndex);
+        LocationHelper::decreaseOrderNumber(parameters, orderNumber);
     }
 
     std::map<int, int> result;
     for (int i = 0; i < parameters.numLayers + parameters.numSources + 1; ++i) {
-        if (i == locationIndex) {
+        if (i == orderNumber) {
             result.emplace(i, i - 1);
-        } else if (i == locationIndex - 1) {
+        } else if (i == orderNumber - 1) {
             result.emplace(i, i + 1);
         } else {
             result.emplace(i, i);
@@ -204,43 +204,43 @@ NewByOldLocationIndex ParametersEditService::moveLocationUpwards(SimulationParam
     return result;
 }
 
-NewByOldLocationIndex ParametersEditService::moveLocationDownwards(SimulationParameters& parameters, int locationIndex) const
+NewByOldOrderNumber ParametersEditService::moveLocationDownwards(SimulationParameters& parameters, int orderNumber) const
 {
-    auto sourceLocationType = LocationHelper::getLocationType(locationIndex, parameters);
-    auto targetLocationType = LocationHelper::getLocationType(locationIndex + 1, parameters);
+    auto sourceLocationType = LocationHelper::getLocationType(orderNumber, parameters);
+    auto targetLocationType = LocationHelper::getLocationType(orderNumber + 1, parameters);
 
     if (sourceLocationType == targetLocationType) {
         SimulationParameters tempParameters;
         if (sourceLocationType == LocationType::Layer) {
             tempParameters.numLayers = 1;
-            tempParameters.layerLocationIndex[0] = 1;
+            tempParameters.layerOrderNumbers[0] = 1;
 
-            auto arrayIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            auto nextLocationIndex = parameters.layerLocationIndex[arrayIndex + 1];
+            auto arrayIndex = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
+            auto nextOrderNumber = parameters.layerOrderNumbers[arrayIndex + 1];
 
-            copyLocation(tempParameters, 1, parameters, locationIndex);
-            copyLocation(parameters, locationIndex, parameters, nextLocationIndex);
-            copyLocation(parameters, nextLocationIndex, tempParameters, 1);
+            copyLocation(tempParameters, 1, parameters, orderNumber);
+            copyLocation(parameters, orderNumber, parameters, nextOrderNumber);
+            copyLocation(parameters, nextOrderNumber, tempParameters, 1);
         } else {
             tempParameters.numSources = 1;
-            tempParameters.sourceLocationIndex[0] = 1;
+            tempParameters.sourceOrderNumbers[0] = 1;
 
-            auto arrayIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
-            auto nextLocationIndex = parameters.sourceLocationIndex[arrayIndex + 1];
+            auto arrayIndex = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
+            auto nextOrderNumber = parameters.sourceOrderNumbers[arrayIndex + 1];
 
-            copyLocation(tempParameters, 1, parameters, locationIndex);
-            copyLocation(parameters, locationIndex, parameters, nextLocationIndex);
-            copyLocation(parameters, nextLocationIndex, tempParameters, 1);
+            copyLocation(tempParameters, 1, parameters, orderNumber);
+            copyLocation(parameters, orderNumber, parameters, nextOrderNumber);
+            copyLocation(parameters, nextOrderNumber, tempParameters, 1);
         }
     } else {
-        LocationHelper::increaseLocationIndex(parameters, locationIndex);
+        LocationHelper::increaseOrderNumber(parameters, orderNumber);
     }
 
     std::map<int, int> result;
     for (int i = 0; i < parameters.numLayers + parameters.numSources + 1; ++i) {
-        if (i == locationIndex) {
+        if (i == orderNumber) {
             result.emplace(i, i + 1);
-        } else if (i == locationIndex + 1) {
+        } else if (i == orderNumber + 1) {
             result.emplace(i, i - 1);
         } else {
             result.emplace(i, i);
@@ -397,28 +397,28 @@ auto ParametersEditService::calcRadiationStrengthsForDeletingLayer(
 
 void ParametersEditService::copyLocation(
     SimulationParameters& targetParameters,
-    int targetLocationIndex,
+    int targetOrderNumber,
     SimulationParameters& sourceParameters,
-    int sourceLocationIndex) const
+    int sourceOrderNumber) const
 {
     auto const& parametersSpecs = SimulationParameters::getSpec();
     for (auto const& groupSpec : parametersSpecs._groups) {
-        copyLocationImpl(targetParameters, targetLocationIndex, sourceParameters, sourceLocationIndex, groupSpec._parameters);
+        copyLocationImpl(targetParameters, targetOrderNumber, sourceParameters, sourceOrderNumber, groupSpec._parameters);
     }
 }
 
 void ParametersEditService::copyLocationImpl(
     SimulationParameters& targetParameters,
-    int targetLocationIndex,
+    int targetOrderNumber,
     SimulationParameters& sourceParameters,
-    int sourceLocationIndex,
+    int sourceOrderNumber,
     std::vector<ParameterSpec> const& parameterSpecs) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
 
-    auto copySourceToTarget = [&](auto const& reference, int sourceLocationIndex, int targetLocationIndex) {
-        auto source = evaluationService.getRef(reference._member, sourceParameters, sourceLocationIndex);
-        auto target = evaluationService.getRef(reference._member, targetParameters, targetLocationIndex);
+    auto copySourceToTarget = [&](auto const& reference, int sourceOrderNumber, int targetOrderNumber) {
+        auto source = evaluationService.getRef(reference._member, sourceParameters, sourceOrderNumber);
+        auto target = evaluationService.getRef(reference._member, targetParameters, targetOrderNumber);
         if (source.value != nullptr && target.value != nullptr) {
             if constexpr (std::is_same_v<decltype(source.value), Char64*>) {
                 for (int i = 0; i < sizeof(Char64); ++i) {
@@ -447,25 +447,25 @@ void ParametersEditService::copyLocationImpl(
     };
     for (auto const& parameterSpec : parameterSpecs) {
         if (std::holds_alternative<BoolSpec>(parameterSpec._reference)) {
-            copySourceToTarget(std::get<BoolSpec>(parameterSpec._reference), sourceLocationIndex, targetLocationIndex);
+            copySourceToTarget(std::get<BoolSpec>(parameterSpec._reference), sourceOrderNumber, targetOrderNumber);
         } else if (std::holds_alternative<IntSpec>(parameterSpec._reference)) {
-            copySourceToTarget(std::get<IntSpec>(parameterSpec._reference), sourceLocationIndex, targetLocationIndex);
+            copySourceToTarget(std::get<IntSpec>(parameterSpec._reference), sourceOrderNumber, targetOrderNumber);
         } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
-            copySourceToTarget(std::get<FloatSpec>(parameterSpec._reference), sourceLocationIndex, targetLocationIndex);
+            copySourceToTarget(std::get<FloatSpec>(parameterSpec._reference), sourceOrderNumber, targetOrderNumber);
         } else if (std::holds_alternative<Float2Spec>(parameterSpec._reference)) {
-            copySourceToTarget(std::get<Float2Spec>(parameterSpec._reference), sourceLocationIndex, targetLocationIndex);
+            copySourceToTarget(std::get<Float2Spec>(parameterSpec._reference), sourceOrderNumber, targetOrderNumber);
         } else if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {
-            copySourceToTarget(std::get<Char64Spec>(parameterSpec._reference), sourceLocationIndex, targetLocationIndex);
+            copySourceToTarget(std::get<Char64Spec>(parameterSpec._reference), sourceOrderNumber, targetOrderNumber);
         } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._reference)) {
             auto const& altSpec = std::get<AlternativeSpec>(parameterSpec._reference);
-            copySourceToTarget(altSpec, sourceLocationIndex, targetLocationIndex);
+            copySourceToTarget(altSpec, sourceOrderNumber, targetOrderNumber);
             for (auto const& parameterSpecs : altSpec._alternatives | std::views::values) {
-                copyLocationImpl(targetParameters, targetLocationIndex, sourceParameters, sourceLocationIndex, parameterSpecs);
+                copyLocationImpl(targetParameters, targetOrderNumber, sourceParameters, sourceOrderNumber, parameterSpecs);
             }
         } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._reference)) {
-            copySourceToTarget(std::get<ColorPickerSpec>(parameterSpec._reference), sourceLocationIndex, targetLocationIndex);
+            copySourceToTarget(std::get<ColorPickerSpec>(parameterSpec._reference), sourceOrderNumber, targetOrderNumber);
         } else if (std::holds_alternative<ColorTransitionRulesSpec>(parameterSpec._reference)) {
-            copySourceToTarget(std::get<ColorTransitionRulesSpec>(parameterSpec._reference), sourceLocationIndex, targetLocationIndex);
+            copySourceToTarget(std::get<ColorTransitionRulesSpec>(parameterSpec._reference), sourceOrderNumber, targetOrderNumber);
         }
     }
 }

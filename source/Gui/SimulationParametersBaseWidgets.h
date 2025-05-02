@@ -11,8 +11,8 @@ public:
     void init(SimulationFacade const& simulationFacade);
     void process() override;
     std::string getLocationName() override;
-    int getLocationIndex() const override;
-    void setLocationIndex(int locationIndex) override;
+    int getOrderNumber() const override;
+    void setOrderNumber(int orderNumber) override;
 
 private:
     SimulationFacade _simulationFacade;

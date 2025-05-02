@@ -12,7 +12,7 @@ public:
         SimulationParameters& parameters,
         SimulationParameters& origParameters,
         SimulationFacade const& simulationFacade,
-        int locationIndex) const;
+        int orderNumber) const;
 
     void createWidgetsForExpertToggles(SimulationParameters& parameters, SimulationParameters& origParameters) const;
 
@@ -22,14 +22,14 @@ private:
         SimulationParameters& parameters,
         SimulationParameters& origParameters,
         SimulationFacade const& simulationFacade,
-        int locationIndex) const;
+        int orderNumber) const;
 
-    void createWidgetsForBoolSpec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
-    void createWidgetsForIntSpec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
-    void createWidgetsForFloatSpec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, SimulationFacade const& simulationFacade,int locationIndex) const;
-    void createWidgetsForFloat2Spec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, SimulationFacade const& simulationFacade, int locationIndex) const;
-    void createWidgetsForChar64Spec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
-    void createWidgetsForAlternativeSpec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, SimulationFacade const& simulationFacade,int locationIndex) const;
-    void createWidgetsForColorPickerSpec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
-    void createWidgetsForColorTransitionRulesSpec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int locationIndex) const;
+    void createWidgetsForBoolSpec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int orderNumber) const;
+    void createWidgetsForIntSpec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int orderNumber) const;
+    void createWidgetsForFloatSpec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, SimulationFacade const& simulationFacade,int orderNumber) const;
+    void createWidgetsForFloat2Spec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, SimulationFacade const& simulationFacade, int orderNumber) const;
+    void createWidgetsForChar64Spec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int orderNumber) const;
+    void createWidgetsForAlternativeSpec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, SimulationFacade const& simulationFacade,int orderNumber) const;
+    void createWidgetsForColorPickerSpec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int orderNumber) const;
+    void createWidgetsForColorTransitionRulesSpec(ParameterSpec const& parameterSpec, SimulationParameters& parameters, SimulationParameters& origParameters, int orderNumber) const;
 };

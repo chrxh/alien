@@ -35,12 +35,12 @@ bool LocationWindow::isOn() const
     return _on;
 }
 
-int LocationWindow::getLocationIndex() const
+int LocationWindow::getOrderNumber() const
 {
-    return _widgets->getLocationIndex();
+    return _widgets->getOrderNumber();
 }
 
-void LocationWindow::setLocationIndex(int locationIndex)
+void LocationWindow::setOrderNumber(int orderNumber)
 {
-    _widgets->setLocationIndex(locationIndex);
+    _widgets->setOrderNumber(orderNumber);
 }

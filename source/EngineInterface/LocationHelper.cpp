@@ -2,18 +2,18 @@
 
 #include "Base/Definitions.h"
 
-LocationType LocationHelper::getLocationType(int locationIndex, SimulationParameters const& parameters)
+LocationType LocationHelper::getLocationType(int orderNumber, SimulationParameters const& parameters)
 {
-    if (locationIndex == 0) {
+    if (orderNumber == 0) {
         return LocationType::Base;
     } else {
         for (int i = 0; i < parameters.numLayers; ++i) {
-            if (parameters.layerLocationIndex[i] == locationIndex) {
+            if (parameters.layerOrderNumbers[i] == orderNumber) {
                 return LocationType::Layer;
             }
         }
         for (int i = 0; i < parameters.numSources; ++i) {
-            if (parameters.sourceLocationIndex[i] == locationIndex) {
+            if (parameters.sourceOrderNumbers[i] == orderNumber) {
                 return LocationType::Source;
             }
         }
@@ -21,73 +21,73 @@ LocationType LocationHelper::getLocationType(int locationIndex, SimulationParame
     CHECK(false);
 }
 
-int& LocationHelper::findLocationIndexRef(SimulationParameters& parameters, int locationIndex)
+int& LocationHelper::findOrderNumberRef(SimulationParameters& parameters, int orderNumber)
 {
     for (int i = 0; i < parameters.numLayers; ++i) {
-        if (parameters.layerLocationIndex[i] == locationIndex) {
-            return parameters.layerLocationIndex[i];
+        if (parameters.layerOrderNumbers[i] == orderNumber) {
+            return parameters.layerOrderNumbers[i];
         }
     }
     for (int i = 0; i < parameters.numSources; ++i) {
-        if (parameters.sourceLocationIndex[i] == locationIndex) {
-            return parameters.sourceLocationIndex[i];
+        if (parameters.sourceOrderNumbers[i] == orderNumber) {
+            return parameters.sourceOrderNumbers[i];
         }
     }
 
     CHECK(false);
 }
 
-int LocationHelper::findLocationArrayIndex(SimulationParameters const& parameters, int locationIndex)
+int LocationHelper::findLocationArrayIndex(SimulationParameters const& parameters, int orderNumber)
 {
     for (int i = 0; i < parameters.numLayers; ++i) {
-        if (parameters.layerLocationIndex[i] == locationIndex) {
+        if (parameters.layerOrderNumbers[i] == orderNumber) {
             return i;
         }
     }
     for (int i = 0; i < parameters.numSources; ++i) {
-        if (parameters.sourceLocationIndex[i] == locationIndex) {
+        if (parameters.sourceOrderNumbers[i] == orderNumber) {
             return i;
         }
     }
     CHECK(false);
 }
 
-void LocationHelper::decreaseLocationIndex(SimulationParameters& parameters, int locationIndex)
+void LocationHelper::decreaseOrderNumber(SimulationParameters& parameters, int orderNumber)
 {
-    auto& locationIndexRef1 = findLocationIndexRef(parameters, locationIndex);
-    auto& locationIndexRef2 = findLocationIndexRef(parameters, locationIndex - 1);
-    --locationIndexRef1;
-    ++locationIndexRef2;
+    auto& orderNumberRef1 = findOrderNumberRef(parameters, orderNumber);
+    auto& orderNumberRef2 = findOrderNumberRef(parameters, orderNumber - 1);
+    --orderNumberRef1;
+    ++orderNumberRef2;
 }
 
-void LocationHelper::increaseLocationIndex(SimulationParameters& parameters, int locationIndex)
+void LocationHelper::increaseOrderNumber(SimulationParameters& parameters, int orderNumber)
 {
-    auto& locationIndexRef1 = findLocationIndexRef(parameters, locationIndex);
-    auto& locationIndexRef2 = findLocationIndexRef(parameters, locationIndex + 1);
-    ++locationIndexRef1;
-    --locationIndexRef2;
+    auto& orderNumberRef1 = findOrderNumberRef(parameters, orderNumber);
+    auto& orderNumberRef2 = findOrderNumberRef(parameters, orderNumber + 1);
+    ++orderNumberRef1;
+    --orderNumberRef2;
 }
 
-std::map<int, int> LocationHelper::adaptLocationIndices(SimulationParameters& parameters, int fromLocationIndex, int offset)
+std::map<int, int> LocationHelper::adaptLocationIndices(SimulationParameters& parameters, int fromOrderNumber, int offset)
 {
     std::map<int, int> result;
     result.emplace(0, 0);
     for (int i = 0; i < parameters.numLayers; ++i) {
-        auto& locationIndex = parameters.layerLocationIndex[i];
-        if (locationIndex >= fromLocationIndex) {
-            result.emplace(locationIndex, locationIndex + offset);
-            locationIndex += offset;
+        auto& orderNumber = parameters.layerOrderNumbers[i];
+        if (orderNumber >= fromOrderNumber) {
+            result.emplace(orderNumber, orderNumber + offset);
+            orderNumber += offset;
         } else {
-            result.emplace(locationIndex, locationIndex);
+            result.emplace(orderNumber, orderNumber);
         }
     }
     for (int i = 0; i < parameters.numSources; ++i) {
-        auto& locationIndex = parameters.sourceLocationIndex[i];
-        if (locationIndex >= fromLocationIndex) {
-            result.emplace(locationIndex, locationIndex + offset);
-            locationIndex += offset;
+        auto& orderNumber = parameters.sourceOrderNumbers[i];
+        if (orderNumber >= fromOrderNumber) {
+            result.emplace(orderNumber, orderNumber + offset);
+            orderNumber += offset;
         } else {
-            result.emplace(locationIndex, locationIndex);
+            result.emplace(orderNumber, orderNumber);
         }
     }
     return result;

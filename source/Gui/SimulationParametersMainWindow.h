@@ -42,10 +42,10 @@ private:
     void onInsertDefaultSource();
     void onCloneLocation();
     void onDeleteLocation();
-    void onDecreaseLocationIndex();
-    void onIncreaseLocationIndex();
+    void onDecreaseOrderNumber();
+    void onIncreaseOrderNumber();
     void onOpenInLocationWindow();
-    void onCenterLocation(int locationIndex);
+    void onCenterLocation(int orderNumber);
 
     void updateLocations();
 
@@ -79,7 +79,7 @@ private:
     std::optional<int> _sessionId;
 
     std::vector<Location> _locations;
-    int _selectedLocationIndex = 0;
+    int _selectedOrderNumber = 0;
 
     int _locationWindowCounter = 0;
 

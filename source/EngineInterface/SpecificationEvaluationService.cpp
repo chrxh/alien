@@ -5,19 +5,19 @@
 #include "CellTypeStrings.h"
 #include "LocationHelper.h"
 
-ValueRef<bool> SpecificationEvaluationService::getRef(BoolMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const
+ValueRef<bool> SpecificationEvaluationService::getRef(BoolMemberVariant const& member, SimulationParameters& parameters, int orderNumber) const
 {
-    auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
+    auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
 
     // Single value
     if (locationType == LocationType::Base && std::holds_alternative<BoolMember>(member)) {
         return ValueRef{.value = &(parameters.**std::get<BoolMember>(member)).value};
     } else if (locationType != LocationType::Source && std::holds_alternative<BoolBaseLayerMember>(member)) {
-        switch (LocationHelper::getLocationType(locationIndex, parameters)) {
+        switch (LocationHelper::getLocationType(orderNumber, parameters)) {
         case LocationType::Base:
             return ValueRef{.value = &(parameters.**std::get<BoolBaseLayerMember>(member)).baseValue};
         case LocationType::Layer: {
-            auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+            auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
             return ValueRef{
                 .value = &(parameters.**std::get<BoolBaseLayerMember>(member)).layerValues[index].value,
                 .disabledValue = &(parameters.**std::get<BoolBaseLayerMember>(member)).baseValue,
@@ -25,7 +25,7 @@ ValueRef<bool> SpecificationEvaluationService::getRef(BoolMemberVariant const& m
         }
         }
     } else if (locationType == LocationType::Layer && std::holds_alternative<BoolLayerMember>(member)) {
-        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+        auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
         return ValueRef{.value = &(parameters.**std::get<BoolLayerMember>(member)).layerValues[index]};
     }
 
@@ -37,9 +37,9 @@ ValueRef<bool> SpecificationEvaluationService::getRef(BoolMemberVariant const& m
     return {};
 }
 
-ValueRef<int> SpecificationEvaluationService::getRef(IntMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const
+ValueRef<int> SpecificationEvaluationService::getRef(IntMemberVariant const& member, SimulationParameters& parameters, int orderNumber) const
 {
-    auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
+    auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
 
     // Single value
     if (locationType == LocationType::Base && std::holds_alternative<IntMember>(member)) {
@@ -48,7 +48,7 @@ ValueRef<int> SpecificationEvaluationService::getRef(IntMemberVariant const& mem
         return ValueRef{
             .value = &(parameters.**std::get<IntEnableableMember>(member)).value, .enabled = &(parameters.**std::get<IntEnableableMember>(member)).enabled};
     } else if (locationType == LocationType::Layer && std::holds_alternative<IntLayerMember>(member)) {
-        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+        auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
         return ValueRef{.value = &(parameters.**std::get<IntLayerMember>(member)).layerValues[index]};
     }
 
@@ -64,19 +64,19 @@ ValueRef<int> SpecificationEvaluationService::getRef(IntMemberVariant const& mem
     return {};
 }
 
-ValueRef<float> SpecificationEvaluationService::getRef(FloatMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const
+ValueRef<float> SpecificationEvaluationService::getRef(FloatMemberVariant const& member, SimulationParameters& parameters, int orderNumber) const
 {
-    auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
+    auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
 
     // Single value
     if (locationType == LocationType::Base && std::holds_alternative<FloatMember>(member)) {
         return ValueRef{.value = &(parameters.**std::get<FloatMember>(member)).value};
     } else if (locationType != LocationType::Source && std::holds_alternative<FloatBaseLayerMember>(member)) {
-        switch (LocationHelper::getLocationType(locationIndex, parameters)) {
+        switch (LocationHelper::getLocationType(orderNumber, parameters)) {
         case LocationType::Base:
             return ValueRef{.value = &(parameters.**std::get<FloatBaseLayerMember>(member)).baseValue};
         case LocationType::Layer: {
-            auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+            auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
             return ValueRef{
                 .value = &(parameters.**std::get<FloatBaseLayerMember>(member)).layerValues[index].value,
                 .disabledValue = &(parameters.**std::get<FloatBaseLayerMember>(member)).baseValue,
@@ -87,19 +87,19 @@ ValueRef<float> SpecificationEvaluationService::getRef(FloatMemberVariant const&
         return ValueRef<float>{
             .pinned = &(parameters.**std::get<FloatPinMember>(member)).pinned};
     } else if (locationType == LocationType::Layer && std::holds_alternative<FloatLayerMember>(member)) {
-        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+        auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
         return ValueRef{.value = &(parameters.**std::get<FloatLayerMember>(member)).layerValues[index]};
     } else if (locationType == LocationType::Source &&  std::holds_alternative<FloatSourceMember>(member)) {
-        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+        auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
         return ValueRef{.value = &(parameters.**std::get<FloatSourceMember>(member)).sourceValues[index]};
     } else if (locationType == LocationType::Source && std::holds_alternative<FloatEnableableSourceMember>(member)) {
-        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+        auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
         return ValueRef{
             .value = &(parameters.**std::get<FloatEnableableSourceMember>(member)).sourceValues[index].value,
             .disabledValue = &(parameters.**std::get<FloatEnableableSourceMember>(member)).sourceValues[index].value,
             .enabled = &(parameters.**std::get<FloatEnableableSourceMember>(member)).sourceValues[index].enabled};
     } else if (locationType == LocationType::Source && std::holds_alternative<FloatPinnableSourceMember>(member)) {
-        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+        auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
         return ValueRef{
             .value = &(parameters.**std::get<FloatPinnableSourceMember>(member)).sourceValues[index].value,
             .pinned = &(parameters.**std::get<FloatPinnableSourceMember>(member)).sourceValues[index].pinned,
@@ -110,11 +110,11 @@ ValueRef<float> SpecificationEvaluationService::getRef(FloatMemberVariant const&
     else if (locationType == LocationType::Base && std::holds_alternative<ColorVectorFloatMember>(member)) {
         return ValueRef{.value = (parameters.**std::get<ColorVectorFloatMember>(member)).value, .valueType = ColorDependence::ColorVector};
     } else if (locationType != LocationType::Source && std::holds_alternative<ColorVectorFloatBaseLayerMember>(member)) {
-        switch (LocationHelper::getLocationType(locationIndex, parameters)) {
+        switch (LocationHelper::getLocationType(orderNumber, parameters)) {
         case LocationType::Base:
             return ValueRef{.value = (parameters.**std::get<ColorVectorFloatBaseLayerMember>(member)).baseValue, .valueType = ColorDependence::ColorVector};
         case LocationType::Layer: {
-            auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+            auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
             return ValueRef{
                 .value = (parameters.**std::get<ColorVectorFloatBaseLayerMember>(member)).layerValues[index].value,
                 .disabledValue = (parameters.**std::get<ColorVectorFloatBaseLayerMember>(member)).baseValue,
@@ -128,13 +128,13 @@ ValueRef<float> SpecificationEvaluationService::getRef(FloatMemberVariant const&
     else if (locationType == LocationType::Base && std::holds_alternative<ColorMatrixFloatMember>(member)) {
         return ValueRef{.value = reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatMember>(member)).value), .valueType = ColorDependence::ColorMatrix};
     } else if (locationType != LocationType::Source && std::holds_alternative<ColorMatrixFloatBaseLayerMember>(member)) {
-        switch (LocationHelper::getLocationType(locationIndex, parameters)) {
+        switch (LocationHelper::getLocationType(orderNumber, parameters)) {
         case LocationType::Base:
             return ValueRef{
                 .value = reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatBaseLayerMember>(member)).baseValue),
                 .valueType = ColorDependence::ColorMatrix};
         case LocationType::Layer: {
-            auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+            auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
             return ValueRef{
                 .value = reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatBaseLayerMember>(member)).layerValues[index].value),
                 .disabledValue = reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatBaseLayerMember>(member)).baseValue),
@@ -147,50 +147,50 @@ ValueRef<float> SpecificationEvaluationService::getRef(FloatMemberVariant const&
     return {};
 }
 
-ValueRef<RealVector2D> SpecificationEvaluationService::getRef(Float2MemberVariant const& member, SimulationParameters& parameters, int locationIndex) const
+ValueRef<RealVector2D> SpecificationEvaluationService::getRef(Float2MemberVariant const& member, SimulationParameters& parameters, int orderNumber) const
 {
-    auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
+    auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
 
     if (locationType == LocationType::Layer && std::holds_alternative<Float2LayerMember>(member)) {
-        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+        auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
         return ValueRef{.value = &(parameters.**std::get<Float2LayerMember>(member)).layerValues[index]};
     } else if (locationType == LocationType::Source && std::holds_alternative<Float2SourceMember>(member)) {
-        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+        auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
         return ValueRef{.value = &(parameters.**std::get<Float2SourceMember>(member)).sourceValues[index]};
     }
 
     return {};
 }
 
-ValueRef<Char64> SpecificationEvaluationService::getRef(Char64MemberVariant const& member, SimulationParameters& parameters, int locationIndex) const
+ValueRef<Char64> SpecificationEvaluationService::getRef(Char64MemberVariant const& member, SimulationParameters& parameters, int orderNumber) const
 {
-    auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
+    auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
 
     if (locationType == LocationType::Base && std::holds_alternative<Char64Member>(member)) {
         return ValueRef{.value = &(parameters.**std::get<Char64Member>(member)).value};
     } else if (locationType == LocationType::Layer && std::holds_alternative<Char64LayerMember>(member)) {
-        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+        auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
         return ValueRef{.value = &(parameters.**std::get<Char64LayerMember>(member)).layerValues[index]};
     } else if (locationType == LocationType::Source && std::holds_alternative<Char64SourceMember>(member)) {
-        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+        auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
         return ValueRef{.value = &(parameters.**std::get<Char64SourceMember>(member)).sourceValues[index]};
     }
 
     return {};
 }
 
-ValueRef<int> SpecificationEvaluationService::getRef(AlternativeMemberVariant const& member, SimulationParameters& parameters, int locationIndex)
+ValueRef<int> SpecificationEvaluationService::getRef(AlternativeMemberVariant const& member, SimulationParameters& parameters, int orderNumber)
     const
 {
-    auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
+    auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
 
     if (locationType == LocationType::Base && std::holds_alternative<IntMember>(member)) {
         return ValueRef{.value = &(parameters.**std::get<IntMember>(member)).value};
     } else if (locationType == LocationType::Layer && std::holds_alternative<IntLayerMember>(member)) {
-        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+        auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
         return ValueRef{.value = &(parameters.**std::get<IntLayerMember>(member)).layerValues[index]};
     } else if (locationType == LocationType::Source && std::holds_alternative<IntSourceMember>(member)) {
-        auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+        auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
         return ValueRef{.value = &(parameters.**std::get<IntSourceMember>(member)).sourceValues[index]};
     }
 
@@ -198,16 +198,16 @@ ValueRef<int> SpecificationEvaluationService::getRef(AlternativeMemberVariant co
 }
 
 ValueRef<FloatColorRGB>
-SpecificationEvaluationService::getRef(FloatColorRGBMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const
+SpecificationEvaluationService::getRef(FloatColorRGBMemberVariant const& member, SimulationParameters& parameters, int orderNumber) const
 {
-    auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
+    auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
 
     if (locationType != LocationType::Source && std::holds_alternative<FloatColorRGBBaseLayerMember>(member)) {
-        switch (LocationHelper::getLocationType(locationIndex, parameters)) {
+        switch (LocationHelper::getLocationType(orderNumber, parameters)) {
         case LocationType::Base:
             return ValueRef{.value = &(parameters.**std::get<FloatColorRGBBaseLayerMember>(member)).baseValue};
         case LocationType::Layer: {
-            auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+            auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
             return ValueRef{
                 .value = &(parameters.**std::get<FloatColorRGBBaseLayerMember>(member)).layerValues[index].value,
                 .disabledValue = &(parameters.**std::get<FloatColorRGBBaseLayerMember>(member)).baseValue,
@@ -218,16 +218,16 @@ SpecificationEvaluationService::getRef(FloatColorRGBMemberVariant const& member,
     return {};
 }
 
-ValueRef<ColorTransitionRules> SpecificationEvaluationService::getRef(ColorTransitionRulesMemberVariant const& member, SimulationParameters& parameters, int locationIndex) const
+ValueRef<ColorTransitionRules> SpecificationEvaluationService::getRef(ColorTransitionRulesMemberVariant const& member, SimulationParameters& parameters, int orderNumber) const
 {
-    auto locationType = LocationHelper::getLocationType(locationIndex, parameters);
+    auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
 
     if (locationType != LocationType::Source && std::holds_alternative<ColorTransitionRulesBaseLayerMember>(member)) {
-        switch (LocationHelper::getLocationType(locationIndex, parameters)) {
+        switch (LocationHelper::getLocationType(orderNumber, parameters)) {
         case LocationType::Base:
             return ValueRef{.value = &(parameters.**std::get<ColorTransitionRulesBaseLayerMember>(member)).baseValue};
         case LocationType::Layer: {
-            auto index = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+            auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
             return ValueRef{
                 .value = &(parameters.**std::get<ColorTransitionRulesBaseLayerMember>(member)).layerValues[index].value,
                 .disabledValue = &(parameters.**std::get<ColorTransitionRulesBaseLayerMember>(member)).baseValue,
