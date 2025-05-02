@@ -418,7 +418,7 @@ void SimulationParametersMainWindow::onInsertDefaultZone()
         return;
     }
 
-    editService.insertDefaultZone(parameters, _selectedLocationIndex);
+    auto newByOldLocationIndex = editService.insertDefaultZone(parameters, _selectedLocationIndex);
     editService.insertDefaultZone(origParameters, _selectedLocationIndex);
 
     ++_selectedLocationIndex;
@@ -452,6 +452,8 @@ void SimulationParametersMainWindow::onInsertDefaultZone()
 
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
+
+    LocationController::get().remapLocationIndices(newByOldLocationIndex);
 }
 
 void SimulationParametersMainWindow::onInsertDefaultSource()
@@ -466,7 +468,7 @@ void SimulationParametersMainWindow::onInsertDefaultSource()
     auto strengths = editService.getRadiationStrengths(parameters);
     auto newStrengths = editService.calcRadiationStrengthsForAddingSource(strengths);
 
-    editService.insertDefaultSource(parameters, _selectedLocationIndex);
+    auto newByOldLocationIndex = editService.insertDefaultSource(parameters, _selectedLocationIndex);
     editService.insertDefaultSource(origParameters, _selectedLocationIndex);
 
     ++_selectedLocationIndex;
@@ -476,6 +478,8 @@ void SimulationParametersMainWindow::onInsertDefaultSource()
 
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
+
+    LocationController::get().remapLocationIndices(newByOldLocationIndex);
 }
 
 void SimulationParametersMainWindow::onCloneLocation()
@@ -498,15 +502,19 @@ void SimulationParametersMainWindow::onCloneLocation()
     auto strengths = editService.getRadiationStrengths(parameters);
     auto newStrengths = editService.calcRadiationStrengthsForAddingSource(strengths);
 
-    editService.cloneLocation(parameters, _selectedLocationIndex);
+    auto newByOldLocationIndex = editService.cloneLocation(parameters, _selectedLocationIndex);
     editService.cloneLocation(origParameters, _selectedLocationIndex);
 
-    editService.applyRadiationStrengths(parameters, newStrengths);
-    editService.applyRadiationStrengths(origParameters, newStrengths);
+    if (locationType == LocationType::Source) {
+        editService.applyRadiationStrengths(parameters, newStrengths);
+        editService.applyRadiationStrengths(origParameters, newStrengths);
+    }
 
     ++_selectedLocationIndex;
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
+
+    LocationController::get().remapLocationIndices(newByOldLocationIndex);
 }
 
 void SimulationParametersMainWindow::onDeleteLocation()
@@ -517,49 +525,8 @@ void SimulationParametersMainWindow::onDeleteLocation()
 
     LocationController::get().deleteLocationWindow(_selectedLocationIndex);
 
-    editService.deleteLocation(parameters, _selectedLocationIndex);
+    auto newByOldLocationIndex = editService.deleteLocation(parameters, _selectedLocationIndex);
     editService.deleteLocation(origParameters, _selectedLocationIndex);
-
-    //auto locationType = LocationHelper::getLocationType(_selectedLocationIndex, parameters);
-
-    //if (locationType == LocationType::Zone) {
-    //    THROW_NOT_IMPLEMENTED();
-        //std::optional<int> zoneIndex;
-        //for (int i = 0; i < parameters.numZones; ++i) {
-        //    if (parameters.zoneLocationIndex[i] == _selectedLocationIndex) {
-        //        zoneIndex = i;
-        //        break;
-        //    }
-        //}
-        //if (zoneIndex.has_value()) {
-        //    for (int i = zoneIndex.value(); i < parameters.numZones - 1; ++i) {
-        //        parameters.zone[i] = parameters.zone[i + 1];
-        //        origParameters.zone[i] = origParameters.zone[i + 1];
-        //    }
-        //    --parameters.numZones;
-        //    --origParameters.numZones;
-        //}
-    //} else {
-    //    THROW_NOT_IMPLEMENTED();
-        //std::optional<int> sourceIndex;
-        //for (int i = 0; i < parameters.numRadiationSources.value; ++i) {
-        //    if (parameters.radiationSource[i].locationIndex == _selectedLocationIndex) {
-        //        sourceIndex = i;
-        //        break;
-        //    }
-        //}
-        //if (sourceIndex.has_value()) {
-        //    for (int i = sourceIndex.value(); i < parameters.numRadiationSources.value - 1; ++i) {
-        //        parameters.radiationSource[i] = parameters.radiationSource[i + 1];
-        //        origParameters.radiationSource[i] = origParameters.radiationSource[i + 1];
-        //    }
-        //    --parameters.numRadiationSources.value;
-        //    --origParameters.numRadiationSources.value;
-        //}
-    //}
-
-    //auto newByOldLocationIndex = LocationHelper::adaptLocationIndices(parameters, _selectedLocationIndex, -1);
-    //LocationHelper::adaptLocationIndices(origParameters, _selectedLocationIndex, -1);
 
     if (_locations.size() - 1 == _selectedLocationIndex) {
         --_selectedLocationIndex;
@@ -568,7 +535,7 @@ void SimulationParametersMainWindow::onDeleteLocation()
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 
-    //LocationController::get().remapLocationIndices(newByOldLocationIndex);
+    LocationController::get().remapLocationIndices(newByOldLocationIndex);
 }
 
 void SimulationParametersMainWindow::onDecreaseLocationIndex()

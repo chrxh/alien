@@ -14,15 +14,17 @@ struct RadiationStrengths
     std::set<int> pinned;
 };
 
+using NewByOldLocationIndex = std::map<int, int>;
+
 class ParametersEditService
 {
     MAKE_SINGLETON(ParametersEditService);
 
 public:
-    void insertDefaultZone(SimulationParameters& parameters, int locationIndex) const; // Create location at locationIndex + 1
-    void insertDefaultSource(SimulationParameters& parameters, int locationIndex) const;  // Create location at locationIndex + 1
-    void cloneLocation(SimulationParameters& parameters, int locationIndex) const;      // Create location at locationIndex + 1
-    void deleteLocation(SimulationParameters& parameters, int locationIndex) const;
+    NewByOldLocationIndex insertDefaultZone(SimulationParameters& parameters, int locationIndex) const;  // Create location at locationIndex + 1
+    NewByOldLocationIndex insertDefaultSource(SimulationParameters& parameters, int locationIndex) const;  // Create location at locationIndex + 1
+    NewByOldLocationIndex cloneLocation(SimulationParameters& parameters, int locationIndex) const;        // Create location at locationIndex + 1
+    NewByOldLocationIndex deleteLocation(SimulationParameters& parameters, int locationIndex) const;
 
     RadiationStrengths getRadiationStrengths(SimulationParameters const& parameters) const;
     void applyRadiationStrengths(SimulationParameters& parameters, RadiationStrengths const& strengths);
