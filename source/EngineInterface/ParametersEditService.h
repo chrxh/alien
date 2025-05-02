@@ -25,6 +25,8 @@ public:
     NewByOldLocationIndex insertDefaultSource(SimulationParameters& parameters, int locationIndex) const;  // Create location at locationIndex + 1
     NewByOldLocationIndex cloneLocation(SimulationParameters& parameters, int locationIndex) const;        // Create location at locationIndex + 1
     NewByOldLocationIndex deleteLocation(SimulationParameters& parameters, int locationIndex) const;
+    NewByOldLocationIndex moveLocationUpwards(SimulationParameters& parameters, int locationIndex) const;
+    NewByOldLocationIndex moveLocationDownwards(SimulationParameters& parameters, int locationIndex) const;
 
     RadiationStrengths getRadiationStrengths(SimulationParameters const& parameters) const;
     void applyRadiationStrengths(SimulationParameters& parameters, RadiationStrengths const& strengths);
