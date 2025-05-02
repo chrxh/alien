@@ -540,29 +540,35 @@ void SimulationParametersMainWindow::onDeleteLocation()
 
 void SimulationParametersMainWindow::onDecreaseLocationIndex()
 {
+    auto& editService = ParametersEditService::get();
     auto parameters = _simulationFacade->getSimulationParameters();
-    auto newByOldLocationIndex = LocationHelper::onDecreaseLocationIndex(parameters, _selectedLocationIndex);
-    _simulationFacade->setSimulationParameters(parameters);
-
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
-    LocationHelper::onDecreaseLocationIndex(origParameters, _selectedLocationIndex);
-    _simulationFacade->setOriginalSimulationParameters(parameters);
+
+    auto newByOldLocationIndex = editService.moveLocationUpwards(parameters, _selectedLocationIndex);
+    editService.moveLocationUpwards(origParameters, _selectedLocationIndex);
 
     --_selectedLocationIndex;
+
+    _simulationFacade->setSimulationParameters(parameters);
+    _simulationFacade->setOriginalSimulationParameters(origParameters);
+
     LocationController::get().remapLocationIndices(newByOldLocationIndex);
 }
 
 void SimulationParametersMainWindow::onIncreaseLocationIndex()
 {
+    auto& editService = ParametersEditService::get();
     auto parameters = _simulationFacade->getSimulationParameters();
-    auto newByOldLocationIndex = LocationHelper::onIncreaseLocationIndex(parameters, _selectedLocationIndex);
-    _simulationFacade->setSimulationParameters(parameters);
-
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
-    LocationHelper::onIncreaseLocationIndex(origParameters, _selectedLocationIndex);
-    _simulationFacade->setOriginalSimulationParameters(parameters);
+
+    auto newByOldLocationIndex = editService.moveLocationDownwards(parameters, _selectedLocationIndex);
+    editService.moveLocationDownwards(origParameters, _selectedLocationIndex);
 
     ++_selectedLocationIndex;
+
+    _simulationFacade->setSimulationParameters(parameters);
+    _simulationFacade->setOriginalSimulationParameters(origParameters);
+
     LocationController::get().remapLocationIndices(newByOldLocationIndex);
 }
 

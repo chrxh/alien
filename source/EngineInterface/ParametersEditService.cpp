@@ -160,6 +160,96 @@ NewByOldLocationIndex ParametersEditService::deleteLocation(SimulationParameters
     return LocationHelper::adaptLocationIndices(parameters, locationIndex + 1, -1);
 }
 
+NewByOldLocationIndex ParametersEditService::moveLocationUpwards(SimulationParameters& parameters, int locationIndex) const
+{
+    auto sourceLocationType = LocationHelper::getLocationType(locationIndex, parameters);
+    auto targetLocationType = LocationHelper::getLocationType(locationIndex - 1, parameters);
+
+    if (sourceLocationType == targetLocationType) {
+        SimulationParameters tempParameters;
+        if (sourceLocationType == LocationType::Zone) {
+            tempParameters.numZones = 1;
+            tempParameters.zoneLocationIndex[0] = 1;
+
+            auto arrayIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+            auto prevLocationIndex = parameters.zoneLocationIndex[arrayIndex - 1];
+
+            copyLocation(tempParameters, 1, parameters, locationIndex);
+            copyLocation(parameters, locationIndex, parameters, prevLocationIndex);
+            copyLocation(parameters, prevLocationIndex, tempParameters, 1);
+        } else {
+            tempParameters.numSources = 1;
+            tempParameters.sourceLocationIndex[0] = 1;
+
+            auto arrayIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+            auto prevLocationIndex = parameters.sourceLocationIndex[arrayIndex - 1];
+
+            copyLocation(tempParameters, 1, parameters, locationIndex);
+            copyLocation(parameters, locationIndex, parameters, prevLocationIndex);
+            copyLocation(parameters, prevLocationIndex, tempParameters, 1);
+        }
+    } else {
+        LocationHelper::decreaseLocationIndex(parameters, locationIndex);
+    }
+
+    std::map<int, int> result;
+    for (int i = 0; i < parameters.numZones + parameters.numSources + 1; ++i) {
+        if (i == locationIndex) {
+            result.emplace(i, i - 1);
+        } else if (i == locationIndex - 1) {
+            result.emplace(i, i + 1);
+        } else {
+            result.emplace(i, i);
+        }
+    }
+    return result;
+}
+
+NewByOldLocationIndex ParametersEditService::moveLocationDownwards(SimulationParameters& parameters, int locationIndex) const
+{
+    auto sourceLocationType = LocationHelper::getLocationType(locationIndex, parameters);
+    auto targetLocationType = LocationHelper::getLocationType(locationIndex + 1, parameters);
+
+    if (sourceLocationType == targetLocationType) {
+        SimulationParameters tempParameters;
+        if (sourceLocationType == LocationType::Zone) {
+            tempParameters.numZones = 1;
+            tempParameters.zoneLocationIndex[0] = 1;
+
+            auto arrayIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+            auto nextLocationIndex = parameters.zoneLocationIndex[arrayIndex + 1];
+
+            copyLocation(tempParameters, 1, parameters, locationIndex);
+            copyLocation(parameters, locationIndex, parameters, nextLocationIndex);
+            copyLocation(parameters, nextLocationIndex, tempParameters, 1);
+        } else {
+            tempParameters.numSources = 1;
+            tempParameters.sourceLocationIndex[0] = 1;
+
+            auto arrayIndex = LocationHelper::findLocationArrayIndex(parameters, locationIndex);
+            auto nextLocationIndex = parameters.sourceLocationIndex[arrayIndex + 1];
+
+            copyLocation(tempParameters, 1, parameters, locationIndex);
+            copyLocation(parameters, locationIndex, parameters, nextLocationIndex);
+            copyLocation(parameters, nextLocationIndex, tempParameters, 1);
+        }
+    } else {
+        LocationHelper::increaseLocationIndex(parameters, locationIndex);
+    }
+
+    std::map<int, int> result;
+    for (int i = 0; i < parameters.numZones + parameters.numSources + 1; ++i) {
+        if (i == locationIndex) {
+            result.emplace(i, i + 1);
+        } else if (i == locationIndex + 1) {
+            result.emplace(i, i - 1);
+        } else {
+            result.emplace(i, i);
+        }
+    }
+    return result;
+}
+
 auto ParametersEditService::getRadiationStrengths(SimulationParameters const& parameters) const -> RadiationStrengths
 {
     RadiationStrengths result;

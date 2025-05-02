@@ -52,44 +52,20 @@ int LocationHelper::findLocationArrayIndex(SimulationParameters const& parameter
     CHECK(false);
 }
 
-std::map<int, int> LocationHelper::onDecreaseLocationIndex(SimulationParameters& parameters, int locationIndex)
+void LocationHelper::decreaseLocationIndex(SimulationParameters& parameters, int locationIndex)
 {
     auto& locationIndexRef1 = findLocationIndexRef(parameters, locationIndex);
     auto& locationIndexRef2 = findLocationIndexRef(parameters, locationIndex - 1);
     --locationIndexRef1;
     ++locationIndexRef2;
-
-    std::map<int, int> result;
-    for (int i = 0; i < parameters.numZones + parameters.numSources + 1; ++i) {
-        if (i == locationIndex) {
-            result.emplace(i, i - 1);
-        } else if (i == locationIndex - 1) {
-            result.emplace(i, i + 1);
-        } else {
-            result.emplace(i, i);
-        }
-    }
-    return result;
 }
 
-std::map<int, int> LocationHelper::onIncreaseLocationIndex(SimulationParameters& parameters, int locationIndex)
+void LocationHelper::increaseLocationIndex(SimulationParameters& parameters, int locationIndex)
 {
     auto& locationIndexRef1 = findLocationIndexRef(parameters, locationIndex);
     auto& locationIndexRef2 = findLocationIndexRef(parameters, locationIndex + 1);
     ++locationIndexRef1;
     --locationIndexRef2;
-
-    std::map<int, int> result;
-    for (int i = 0; i < parameters.numZones + parameters.numSources + 1; ++i) {
-        if (i == locationIndex) {
-            result.emplace(i, i + 1);
-        } else if (i == locationIndex + 1) {
-            result.emplace(i, i - 1);
-        } else {
-            result.emplace(i, i);
-        }
-    }
-    return result;
 }
 
 std::map<int, int> LocationHelper::adaptLocationIndices(SimulationParameters& parameters, int fromLocationIndex, int offset)

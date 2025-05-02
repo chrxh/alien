@@ -175,6 +175,98 @@ protected:
             EXPECT_TRUE(StringHelper::compare(origParameters.sourceName.sourceValues[origArrayIndex], sizeof(Char64), parameters.sourceName.sourceValues[i]));
         }
     }
+
+    void checkParametersAfterMovingUpwards(
+        SimulationParameters const& parameters,
+        SimulationParameters const& origParameters,
+        std::vector<LocationType> const& locationTypes,
+        int movedLocationIndex)
+    {
+        checkParameters(parameters, locationTypes);
+        for (int i = 0; i < parameters.numZones; ++i) {
+            auto locationIndex = parameters.zoneLocationIndex[i];
+            auto origLocationIndex = [&] {
+                if (locationIndex < movedLocationIndex - 1 || locationIndex > movedLocationIndex) {
+                    return locationIndex;
+                } else if (locationIndex == movedLocationIndex - 1) {
+                    return movedLocationIndex;
+                } else if (locationIndex == movedLocationIndex) {
+                    return movedLocationIndex - 1;
+                } else {
+                    CHECK(false);
+                }
+            }();
+
+            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origLocationIndex);
+
+            EXPECT_EQ(origParameters.zoneCoreRadius.zoneValues[origArrayIndex], parameters.zoneCoreRadius.zoneValues[i]);
+            EXPECT_TRUE(StringHelper::compare(origParameters.zoneName.zoneValues[origArrayIndex], sizeof(Char64), parameters.zoneName.zoneValues[i]));
+        }
+        for (int i = 0; i < parameters.numSources; ++i) {
+            auto locationIndex = parameters.sourceLocationIndex[i];
+            auto origLocationIndex = [&] {
+                if (locationIndex < movedLocationIndex - 1 || locationIndex > movedLocationIndex) {
+                    return locationIndex;
+                } else if (locationIndex == movedLocationIndex - 1) {
+                    return movedLocationIndex;
+                } else if (locationIndex == movedLocationIndex) {
+                    return movedLocationIndex - 1;
+                } else {
+                    CHECK(false);
+                }
+            }();
+            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origLocationIndex);
+
+            EXPECT_EQ(origParameters.sourceCircularRadius.sourceValues[origArrayIndex], parameters.sourceCircularRadius.sourceValues[i]);
+            EXPECT_TRUE(StringHelper::compare(origParameters.sourceName.sourceValues[origArrayIndex], sizeof(Char64), parameters.sourceName.sourceValues[i]));
+        }
+    }
+
+    void checkParametersAfterMovingDownwards(
+        SimulationParameters const& parameters,
+        SimulationParameters const& origParameters,
+        std::vector<LocationType> const& locationTypes,
+        int movedLocationIndex)
+    {
+        checkParameters(parameters, locationTypes);
+        for (int i = 0; i < parameters.numZones; ++i) {
+            auto locationIndex = parameters.zoneLocationIndex[i];
+            auto origLocationIndex = [&] {
+                if (locationIndex < movedLocationIndex || locationIndex > movedLocationIndex + 1) {
+                    return locationIndex;
+                } else if (locationIndex == movedLocationIndex + 1) {
+                    return movedLocationIndex;
+                } else if (locationIndex == movedLocationIndex) {
+                    return movedLocationIndex + 1;
+                } else {
+                    CHECK(false);
+                }
+            }();
+
+            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origLocationIndex);
+
+            EXPECT_EQ(origParameters.zoneCoreRadius.zoneValues[origArrayIndex], parameters.zoneCoreRadius.zoneValues[i]);
+            EXPECT_TRUE(StringHelper::compare(origParameters.zoneName.zoneValues[origArrayIndex], sizeof(Char64), parameters.zoneName.zoneValues[i]));
+        }
+        for (int i = 0; i < parameters.numSources; ++i) {
+            auto locationIndex = parameters.sourceLocationIndex[i];
+            auto origLocationIndex = [&] {
+                if (locationIndex < movedLocationIndex || locationIndex > movedLocationIndex + 1) {
+                    return locationIndex;
+                } else if (locationIndex == movedLocationIndex + 1) {
+                    return movedLocationIndex;
+                } else if (locationIndex == movedLocationIndex) {
+                    return movedLocationIndex + 1;
+                } else {
+                    CHECK(false);
+                }
+            }();
+            auto origArrayIndex = LocationHelper::findLocationArrayIndex(origParameters, origLocationIndex);
+
+            EXPECT_EQ(origParameters.sourceCircularRadius.sourceValues[origArrayIndex], parameters.sourceCircularRadius.sourceValues[i]);
+            EXPECT_TRUE(StringHelper::compare(origParameters.sourceName.sourceValues[origArrayIndex], sizeof(Char64), parameters.sourceName.sourceValues[i]));
+        }
+    }
 };
 
 TEST_F(ParametersEditServiceTests_New, cloneZone)
@@ -751,4 +843,249 @@ TEST_F(ParametersEditServiceTests_New, deleteSource_end)
             LocationType::Zone,
         },
         5);
+}
+
+TEST_F(ParametersEditServiceTests_New, moveZoneUpwards_afterOtherSource)
+{
+    auto origParameters = createTestData({
+        LocationType::Source,
+        LocationType::Zone,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().moveLocationUpwards(parameters, 2);
+    checkParametersAfterMovingUpwards(
+        parameters,
+        origParameters,
+        {
+            LocationType::Zone,
+            LocationType::Source,
+        },
+        2);
+}
+
+TEST_F(ParametersEditServiceTests_New, moveZoneUpwards_afterOtherZone)
+{
+    auto origParameters = createTestData({
+        LocationType::Source,
+        LocationType::Zone,
+        LocationType::Zone,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().moveLocationUpwards(parameters, 3);
+    checkParametersAfterMovingUpwards(
+        parameters,
+        origParameters,
+        {
+            LocationType::Source,
+            LocationType::Zone,
+            LocationType::Zone,
+        },
+        3);
+}
+
+TEST_F(ParametersEditServiceTests_New, moveZoneUpwards_afterOtherZoneAndSources)
+{
+    auto origParameters = createTestData({
+        LocationType::Zone,
+        LocationType::Source,
+        LocationType::Zone,
+        LocationType::Source,
+        LocationType::Zone,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().moveLocationUpwards(parameters, 3);
+    checkParametersAfterMovingUpwards(
+        parameters,
+        origParameters,
+        {
+            LocationType::Zone,
+            LocationType::Zone,
+            LocationType::Source,
+            LocationType::Source,
+            LocationType::Zone,
+        },
+        3);
+}
+
+TEST_F(ParametersEditServiceTests_New, moveSourceUpwards_afterOtherZone)
+{
+    auto origParameters = createTestData({
+        LocationType::Zone,
+        LocationType::Source,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().moveLocationUpwards(parameters, 2);
+    checkParametersAfterMovingUpwards(
+        parameters,
+        origParameters,
+        {
+            LocationType::Source,
+            LocationType::Zone,
+        },
+        2);
+}
+
+TEST_F(ParametersEditServiceTests_New, moveSourceUpwards_afterOtherSource)
+{
+    auto origParameters = createTestData({
+        LocationType::Zone,
+        LocationType::Source,
+        LocationType::Source,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().moveLocationUpwards(parameters, 3);
+    checkParametersAfterMovingUpwards(
+        parameters,
+        origParameters,
+        {
+            LocationType::Zone,
+            LocationType::Source,
+            LocationType::Source,
+        },
+        3);
+}
+
+TEST_F(ParametersEditServiceTests_New, moveSourceUpwards_afterOtherZoneAndSources)
+{
+    auto origParameters = createTestData({
+        LocationType::Source,
+        LocationType::Zone,
+        LocationType::Source,
+        LocationType::Zone,
+        LocationType::Source,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().moveLocationUpwards(parameters, 3);
+    checkParametersAfterMovingUpwards(
+        parameters,
+        origParameters,
+        {
+            LocationType::Source,
+            LocationType::Source,
+            LocationType::Zone,
+            LocationType::Zone,
+            LocationType::Source,
+        },
+        3);
+}
+
+TEST_F(ParametersEditServiceTests_New, moveZoneDownwards_beforeOtherSource)
+{
+    auto origParameters = createTestData({
+        LocationType::Zone,
+        LocationType::Source,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().moveLocationDownwards(parameters, 1);
+    checkParametersAfterMovingDownwards(
+        parameters,
+        origParameters,
+        {
+            LocationType::Source,
+            LocationType::Zone,
+        },
+        1);
+}
+
+TEST_F(ParametersEditServiceTests_New, moveZoneDownwards_beforeOtherZone)
+{
+    auto origParameters = createTestData({
+        LocationType::Zone,
+        LocationType::Zone,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().moveLocationDownwards(parameters, 1);
+    checkParametersAfterMovingDownwards(
+        parameters,
+        origParameters,
+        {
+            LocationType::Zone,
+            LocationType::Zone,
+        },
+        1);
+}
+
+TEST_F(ParametersEditServiceTests_New, moveZoneDownwards_beforeOtherZoneAndSources)
+{
+    auto origParameters = createTestData({
+        LocationType::Zone,
+        LocationType::Source,
+        LocationType::Zone,
+        LocationType::Source,
+        LocationType::Zone,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().moveLocationDownwards(parameters, 3);
+    checkParametersAfterMovingDownwards(
+        parameters,
+        origParameters,
+        {
+            LocationType::Zone,
+            LocationType::Source,
+            LocationType::Source,
+            LocationType::Zone,
+            LocationType::Zone,
+        },
+        3);
+}
+
+TEST_F(ParametersEditServiceTests_New, moveSourceDownwards_beforeOtherZone)
+{
+    auto origParameters = createTestData({
+        LocationType::Source,
+        LocationType::Zone,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().moveLocationDownwards(parameters, 1);
+    checkParametersAfterMovingDownwards(
+        parameters,
+        origParameters,
+        {
+            LocationType::Zone,
+            LocationType::Source,
+        },
+        1);
+}
+
+TEST_F(ParametersEditServiceTests_New, moveSourceDownwards_beforeOtherSource)
+{
+    auto origParameters = createTestData({
+        LocationType::Source,
+        LocationType::Source,
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().moveLocationDownwards(parameters, 1);
+    checkParametersAfterMovingDownwards(
+        parameters,
+        origParameters,
+        {
+            LocationType::Source,
+            LocationType::Source,
+        },
+        1);
+}
+
+TEST_F(ParametersEditServiceTests_New, moveSourceDownwards_beforeOtherZoneAndSources)
+{
+    auto origParameters = createTestData({
+        LocationType::Source,
+        LocationType::Zone,
+        LocationType::Source,
+        LocationType::Zone,
+        LocationType::Source,
+
+    });
+    auto parameters = origParameters;
+    ParametersEditService::get().moveLocationDownwards(parameters, 3);
+    checkParametersAfterMovingDownwards(
+        parameters,
+        origParameters,
+        {
+            LocationType::Source,
+            LocationType::Zone,
+            LocationType::Zone,
+            LocationType::Source,
+            LocationType::Source,
+        },
+        3);
 }
