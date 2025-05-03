@@ -15,8 +15,6 @@ add_library(PersisterInterface
     GetPeakSimulationResultData.h
     GetUserNamesForReactionRequestData.h
     GetUserNamesForReactionResultData.h
-    LegacySettingsParserService.cpp
-    LegacySettingsParserService.h
     LoginRequestData.h
     LoginResultData.h
     MoveNetworkResourceRequestData.h
