@@ -1274,14 +1274,14 @@ void SerializerService::deserializeDataDescription(ClusteredDataDescription& dat
 
 void SerializerService::serializeAuxiliaryData(SettingsForSerialization const& auxiliaryData, std::ostream& stream)
 {
-    boost::property_tree::json_parser::write_json(stream, SettingsParserService::get().encodeAuxiliaryData(auxiliaryData));
+    boost::property_tree::json_parser::write_json(stream, SettingsParserService::get().encodeSettings(auxiliaryData));
 }
 
 void SerializerService::deserializeAuxiliaryData(SettingsForSerialization& auxiliaryData, std::istream& stream)
 {
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(stream, tree);
-    auxiliaryData = SettingsParserService::get().decodeAuxiliaryData(tree);
+    auxiliaryData = SettingsParserService::get().decodeSettings(tree);
 }
 
 void SerializerService::serializeSimulationParameters(SimulationParameters const& parameters, std::ostream& stream)

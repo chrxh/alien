@@ -13,8 +13,8 @@ class SettingsParserService
     MAKE_SINGLETON(SettingsParserService);
 
 public:
-    boost::property_tree::ptree encodeAuxiliaryData(SettingsForSerialization const& data);
-    SettingsForSerialization decodeAuxiliaryData(boost::property_tree::ptree tree);
+    boost::property_tree::ptree encodeSettings(SettingsForSerialization const& data);
+    SettingsForSerialization decodeSettings(boost::property_tree::ptree tree);
 
     boost::property_tree::ptree encodeSimulationParameters(SimulationParameters const& data);
     SimulationParameters decodeSimulationParameters(boost::property_tree::ptree tree);

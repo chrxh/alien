@@ -90,9 +90,9 @@ namespace
         boost::property_tree::ptree& tree,
         SimulationParameters& parameters,
         SimulationParameters& defaultParameters,
+        std::string const& nodeBase,
         ParserTask parserTask,
-        std::vector<ParameterSpec> const& parameterSpecs,
-        std::string const& nodeBase)
+        std::vector<ParameterSpec> const& parameterSpecs)
     {
         for (auto const& parameterSpec : parameterSpecs) {
             if (std::holds_alternative<BoolSpec>(parameterSpec._reference)) {
@@ -115,7 +115,7 @@ namespace
                 encodeDecodeParameter(tree, parameters, defaultParameters, altSpec, parserTask, nodeBase + "." + parameterSpec._name);
                 for (auto const& [alternative, parameterSpecs] : altSpec._alternatives) {
                     encodeDecodeSimulationParameterGroup(
-                        tree, parameters, defaultParameters, parserTask, parameterSpecs, nodeBase + "." + parameterSpec._name + "." + alternative);
+                        tree, parameters, defaultParameters, nodeBase + "." + parameterSpec._name + "." + alternative, parserTask, parameterSpecs);
                 }
             } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._reference)) {
                 encodeDecodeParameter(
@@ -132,7 +132,7 @@ namespace
         }
     }
 
-    void encodeDecodeSimulationParameters(boost::property_tree::ptree& tree, SimulationParameters& parameters, ParserTask parserTask)
+    void encodeDecodeSimulationParameters(boost::property_tree::ptree& tree, SimulationParameters& parameters, std::string const& nodeBase, ParserTask parserTask)
     {
         auto& evaluationService = SpecificationEvaluationService::get();
 
@@ -142,7 +142,6 @@ namespace
         defaultParameters.layerOrderNumbers[0] = 1;
         defaultParameters.sourceOrderNumbers[0] = 2;
 
-        auto nodeBase = std::string("Simulation parameters");
         ParameterParser::encodeDecode(tree, parameters.numLayers, 0, nodeBase + ".Number of layers", parserTask);
         ParameterParser::encodeDecode(tree, parameters.numSources, 0, nodeBase + ".Number of sources", parserTask);
         for (int i = 0; i < parameters.numLayers; ++i) {
@@ -150,7 +149,7 @@ namespace
                 tree,
                 parameters.layerOrderNumbers[i],
                 defaultParameters.layerOrderNumbers[i],
-                nodeBase + ".Layer order number.index " + std::to_string(i),
+                nodeBase + ".Layer order number.Index " + std::to_string(i),
                 parserTask);
         }
         for (int i = 0; i < parameters.numSources; ++i) {
@@ -158,7 +157,7 @@ namespace
                 tree,
                 parameters.sourceOrderNumbers[i],
                 defaultParameters.sourceOrderNumbers[i],
-                nodeBase + ".Source order number.index " + std::to_string(i),
+                nodeBase + ".Source order number.Index " + std::to_string(i),
                 parserTask);
         }
 
@@ -170,7 +169,7 @@ namespace
                 auto defaultExpertToggleRef = evaluationService.getExpertToggleRef(groupSpec._expertToggle, defaultParameters);
                 ParameterParser::encodeDecode(tree, *expertToggleRef, *defaultExpertToggleRef, nodeBase + "." + groupSpec._name + ".Enabled", parserTask);
             }
-            encodeDecodeSimulationParameterGroup(tree, parameters, defaultParameters, parserTask, groupSpec._parameters, nodeBase + "." + groupSpec._name);
+            encodeDecodeSimulationParameterGroup(tree, parameters, defaultParameters, nodeBase + "." + groupSpec._name, parserTask, groupSpec._parameters);
         }
     }
 
@@ -188,18 +187,18 @@ namespace
         ParameterParser::encodeDecode(tree, data.center, defaultSettings.center, nodeBase + ".Center", parserTask);
         ParameterParser::encodeDecode(tree, data.worldSize, defaultSettings.worldSize, nodeBase + ".World size", parserTask);
 
-        encodeDecodeSimulationParameters(tree, data.simulationParameters, parserTask);
+        encodeDecodeSimulationParameters(tree, data.simulationParameters, "Simulation parameters", parserTask);
     }
 }
 
-boost::property_tree::ptree SettingsParserService::encodeAuxiliaryData(SettingsForSerialization const& data)
+boost::property_tree::ptree SettingsParserService::encodeSettings(SettingsForSerialization const& data)
 {
     boost::property_tree::ptree tree;
     encodeDecode(tree, const_cast<SettingsForSerialization&>(data), ParserTask::Encode);
     return tree;
 }
 
-SettingsForSerialization SettingsParserService::decodeAuxiliaryData(boost::property_tree::ptree tree)
+SettingsForSerialization SettingsParserService::decodeSettings(boost::property_tree::ptree tree)
 {
     SettingsForSerialization result;
     encodeDecode(tree, result, ParserTask::Decode);
@@ -209,13 +208,13 @@ SettingsForSerialization SettingsParserService::decodeAuxiliaryData(boost::prope
 boost::property_tree::ptree SettingsParserService::encodeSimulationParameters(SimulationParameters const& data)
 {
     boost::property_tree::ptree tree;
-    encodeDecodeSimulationParameters(tree, const_cast<SimulationParameters&>(data), ParserTask::Encode);
+    encodeDecodeSimulationParameters(tree, const_cast<SimulationParameters&>(data), "Simulation parameters", ParserTask::Encode);
     return tree;
 }
 
 SimulationParameters SettingsParserService::decodeSimulationParameters(boost::property_tree::ptree tree)
 {
     SimulationParameters result;
-    encodeDecodeSimulationParameters(tree, result, ParserTask::Decode);
+    encodeDecodeSimulationParameters(tree, result, "Simulation parameters", ParserTask::Decode);
     return result;
 }
