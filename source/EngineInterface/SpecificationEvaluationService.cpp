@@ -46,7 +46,9 @@ ValueRef<int> SpecificationEvaluationService::getRef(IntMemberVariant const& mem
         return ValueRef{.value = &(parameters.**std::get<IntMember>(member)).value};
     } else if (locationType == LocationType::Base && std::holds_alternative<IntEnableableMember>(member)) {
         return ValueRef{
-            .value = &(parameters.**std::get<IntEnableableMember>(member)).value, .enabled = &(parameters.**std::get<IntEnableableMember>(member)).enabled};
+            .value = &(parameters.**std::get<IntEnableableMember>(member)).value,
+            .disabledValue = &(parameters.**std::get<IntEnableableMember>(member)).value,
+            .enabled = &(parameters.**std::get<IntEnableableMember>(member)).enabled};
     } else if (locationType == LocationType::Layer && std::holds_alternative<IntLayerMember>(member)) {
         auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
         return ValueRef{.value = &(parameters.**std::get<IntLayerMember>(member)).layerValues[index]};

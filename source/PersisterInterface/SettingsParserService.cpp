@@ -6,7 +6,6 @@
 #include "EngineInterface/SimulationParametersSpecification.h"
 #include "EngineInterface/SpecificationEvaluationService.h"
 
-#include "LegacySettingsParserService.h"
 #include "ParameterParser.h"
 
 namespace
@@ -135,17 +134,17 @@ namespace
 
     void encodeDecodeSimulationParameters(boost::property_tree::ptree& tree, SimulationParameters& parameters, ParserTask parserTask)
     {
+        auto& evaluationService = SpecificationEvaluationService::get();
+
         SimulationParameters defaultParameters;
         defaultParameters.numLayers = 1;
         defaultParameters.numSources = 1;
         defaultParameters.layerOrderNumbers[0] = 1;
         defaultParameters.sourceOrderNumbers[0] = 2;
 
-        auto programVersion = Const::ProgramVersion;
         auto nodeBase = std::string("Simulation parameters");
-        ParameterParser::encodeDecode(tree, programVersion, std::string(), nodeBase + ".Version", parserTask);
-        ParameterParser::encodeDecode(tree, parameters.numLayers, defaultParameters.numLayers, nodeBase + ".Number of layers", parserTask);
-        ParameterParser::encodeDecode(tree, parameters.numSources, defaultParameters.numSources, nodeBase + ".Number of sources", parserTask);
+        ParameterParser::encodeDecode(tree, parameters.numLayers, 0, nodeBase + ".Number of layers", parserTask);
+        ParameterParser::encodeDecode(tree, parameters.numSources, 0, nodeBase + ".Number of sources", parserTask);
         for (int i = 0; i < parameters.numLayers; ++i) {
             ParameterParser::encodeDecode(
                 tree,
@@ -154,24 +153,25 @@ namespace
                 nodeBase + ".Layer order number.index " + std::to_string(i),
                 parserTask);
         }
-        for (int i = 0; i < parameters.numLayers; ++i) {
+        for (int i = 0; i < parameters.numSources; ++i) {
             ParameterParser::encodeDecode(
                 tree,
-                parameters.layerOrderNumbers[i],
-                defaultParameters.layerOrderNumbers[i],
-                nodeBase + ".Layer order number.index " + std::to_string(i),
+                parameters.sourceOrderNumbers[i],
+                defaultParameters.sourceOrderNumbers[i],
+                nodeBase + ".Source order number.index " + std::to_string(i),
                 parserTask);
         }
 
         auto const& parametersSpecs = SimulationParameters::getSpec();
         for (auto const& groupSpec : parametersSpecs._groups) {
+
+            if (groupSpec._expertToggle != nullptr) {
+                auto expertToggleRef = evaluationService.getExpertToggleRef(groupSpec._expertToggle, parameters);
+                auto defaultExpertToggleRef = evaluationService.getExpertToggleRef(groupSpec._expertToggle, defaultParameters);
+                ParameterParser::encodeDecode(tree, *expertToggleRef, *defaultExpertToggleRef, nodeBase + "." + groupSpec._name + ".Enabled", parserTask);
+            }
             encodeDecodeSimulationParameterGroup(tree, parameters, defaultParameters, parserTask, groupSpec._parameters, nodeBase + "." + groupSpec._name);
         }
-
-        // Compatibility with legacy parameters
-        //if (parserTask == ParserTask::Decode) {
-        //    LegacySettingsParserService::get().searchAndApplyLegacyParameters(programVersion, tree, parameters);
-        //}
     }
 
     void encodeDecode(boost::property_tree::ptree& tree, SettingsForSerialization& data, ParserTask parserTask)
@@ -179,11 +179,14 @@ namespace
         SettingsForSerialization defaultSettings;
 
         // General settings
-        ParameterParser::encodeDecode(tree, data.timestep, uint64_t(0), "General.Time step", parserTask);
-        ParameterParser::encodeDecode(tree, data.realTime, std::chrono::milliseconds(0), "General.Real time", parserTask);
-        ParameterParser::encodeDecode(tree, data.zoom, 4.0f, "General.Zoom", parserTask);
-        ParameterParser::encodeDecode(tree, data.center, RealVector2D(), "General.Center", parserTask);
-        ParameterParser::encodeDecode(tree, data.worldSize, defaultSettings.worldSize, "General.World size", parserTask);
+        auto nodeBase = std::string("General");
+        auto programVersion = Const::ProgramVersion;
+        ParameterParser::encodeDecode(tree, programVersion, std::string(), nodeBase + ".Version", parserTask);
+        ParameterParser::encodeDecode(tree, data.timestep, defaultSettings.timestep, nodeBase + ".Time step", parserTask);
+        ParameterParser::encodeDecode(tree, data.realTime, defaultSettings.realTime, nodeBase + ".Real time", parserTask);
+        ParameterParser::encodeDecode(tree, data.zoom, defaultSettings.zoom, nodeBase + ".Zoom", parserTask);
+        ParameterParser::encodeDecode(tree, data.center, defaultSettings.center, nodeBase + ".Center", parserTask);
+        ParameterParser::encodeDecode(tree, data.worldSize, defaultSettings.worldSize, nodeBase + ".World size", parserTask);
 
         encodeDecodeSimulationParameters(tree, data.simulationParameters, parserTask);
     }
