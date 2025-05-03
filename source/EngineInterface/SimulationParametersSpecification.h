@@ -97,7 +97,7 @@ using _FloatColorRGBBaseLayerMember = BaseLayerParameter<FloatColorRGB> Simulati
 using FloatColorRGBBaseLayerMember = std::shared_ptr<_FloatColorRGBBaseLayerMember>;
 using FloatColorRGBMemberVariant = std::variant<std::monostate, FloatColorRGBBaseLayerMember>;
 
-using _ColorTransitionRulesBaseLayerMember = BaseLayerParameter<ColorTransitionRules> SimulationParameters::*;
+using _ColorTransitionRulesBaseLayerMember = BaseLayerParameter<ColorVector<ColorTransitionRule>> SimulationParameters::*;
 using ColorTransitionRulesBaseLayerMember = std::shared_ptr<_ColorTransitionRulesBaseLayerMember>;
 using ColorTransitionRulesMemberVariant = std::variant<std::monostate, ColorTransitionRulesBaseLayerMember>;
 

@@ -31,7 +31,7 @@ ValueRef<bool> SpecificationEvaluationService::getRef(BoolMemberVariant const& m
 
     // Color matrix
     else if (locationType == LocationType::Base && std::holds_alternative<ColorMatrixBoolMember>(member)) {
-        return ValueRef{.value = reinterpret_cast<bool*>((parameters.**std::get<ColorMatrixBoolMember>(member)).value), .valueType = ColorDependence::ColorMatrix};
+        return ValueRef{.value = reinterpret_cast<bool*>((parameters.**std::get<ColorMatrixBoolMember>(member)).value), .colorDependence = ColorDependence::ColorMatrix};
     }
 
     return {};
@@ -54,12 +54,12 @@ ValueRef<int> SpecificationEvaluationService::getRef(IntMemberVariant const& mem
 
     // Color vector
     else if (locationType == LocationType::Base && std::holds_alternative<ColorVectorIntMember>(member)) {
-        return ValueRef{.value = (parameters.**std::get<ColorVectorIntMember>(member)).value, .valueType = ColorDependence::ColorVector};
+        return ValueRef{.value = (parameters.**std::get<ColorVectorIntMember>(member)).value, .colorDependence = ColorDependence::ColorVector};
     }
 
     // Color matrix
     else if (locationType == LocationType::Base && std::holds_alternative<ColorMatrixIntMember>(member)) {
-        return ValueRef{.value = reinterpret_cast<int*>((parameters.**std::get<ColorMatrixIntMember>(member)).value), .valueType = ColorDependence::ColorMatrix};
+        return ValueRef{.value = reinterpret_cast<int*>((parameters.**std::get<ColorMatrixIntMember>(member)).value), .colorDependence = ColorDependence::ColorMatrix};
     }
     return {};
 }
@@ -108,38 +108,38 @@ ValueRef<float> SpecificationEvaluationService::getRef(FloatMemberVariant const&
     
     // Color vector
     else if (locationType == LocationType::Base && std::holds_alternative<ColorVectorFloatMember>(member)) {
-        return ValueRef{.value = (parameters.**std::get<ColorVectorFloatMember>(member)).value, .valueType = ColorDependence::ColorVector};
+        return ValueRef{.value = (parameters.**std::get<ColorVectorFloatMember>(member)).value, .colorDependence = ColorDependence::ColorVector};
     } else if (locationType != LocationType::Source && std::holds_alternative<ColorVectorFloatBaseLayerMember>(member)) {
         switch (LocationHelper::getLocationType(orderNumber, parameters)) {
         case LocationType::Base:
-            return ValueRef{.value = (parameters.**std::get<ColorVectorFloatBaseLayerMember>(member)).baseValue, .valueType = ColorDependence::ColorVector};
+            return ValueRef{.value = (parameters.**std::get<ColorVectorFloatBaseLayerMember>(member)).baseValue, .colorDependence = ColorDependence::ColorVector};
         case LocationType::Layer: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
             return ValueRef{
                 .value = (parameters.**std::get<ColorVectorFloatBaseLayerMember>(member)).layerValues[index].value,
                 .disabledValue = (parameters.**std::get<ColorVectorFloatBaseLayerMember>(member)).baseValue,
                 .enabled = &(parameters.**std::get<ColorVectorFloatBaseLayerMember>(member)).layerValues[index].enabled,
-                .valueType = ColorDependence::ColorVector};
+                .colorDependence = ColorDependence::ColorVector};
         }
         }
     }
 
     // Color matrix
     else if (locationType == LocationType::Base && std::holds_alternative<ColorMatrixFloatMember>(member)) {
-        return ValueRef{.value = reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatMember>(member)).value), .valueType = ColorDependence::ColorMatrix};
+        return ValueRef{.value = reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatMember>(member)).value), .colorDependence = ColorDependence::ColorMatrix};
     } else if (locationType != LocationType::Source && std::holds_alternative<ColorMatrixFloatBaseLayerMember>(member)) {
         switch (LocationHelper::getLocationType(orderNumber, parameters)) {
         case LocationType::Base:
             return ValueRef{
                 .value = reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatBaseLayerMember>(member)).baseValue),
-                .valueType = ColorDependence::ColorMatrix};
+                .colorDependence = ColorDependence::ColorMatrix};
         case LocationType::Layer: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
             return ValueRef{
                 .value = reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatBaseLayerMember>(member)).layerValues[index].value),
                 .disabledValue = reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatBaseLayerMember>(member)).baseValue),
                 .enabled = &(parameters.**std::get<ColorMatrixFloatBaseLayerMember>(member)).layerValues[index].enabled,
-                .valueType = ColorDependence::ColorMatrix};
+                .colorDependence = ColorDependence::ColorMatrix};
         }
         }
     }
@@ -218,20 +218,22 @@ SpecificationEvaluationService::getRef(FloatColorRGBMemberVariant const& member,
     return {};
 }
 
-ValueRef<ColorTransitionRules> SpecificationEvaluationService::getRef(ColorTransitionRulesMemberVariant const& member, SimulationParameters& parameters, int orderNumber) const
+ValueRef<ColorTransitionRule> SpecificationEvaluationService::getRef(ColorTransitionRulesMemberVariant const& member, SimulationParameters& parameters, int orderNumber) const
 {
     auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
 
     if (locationType != LocationType::Source && std::holds_alternative<ColorTransitionRulesBaseLayerMember>(member)) {
         switch (LocationHelper::getLocationType(orderNumber, parameters)) {
         case LocationType::Base:
-            return ValueRef{.value = &(parameters.**std::get<ColorTransitionRulesBaseLayerMember>(member)).baseValue};
+            return ValueRef{
+                .value = (parameters.**std::get<ColorTransitionRulesBaseLayerMember>(member)).baseValue, .colorDependence = ColorDependence::ColorVector};
         case LocationType::Layer: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
             return ValueRef{
-                .value = &(parameters.**std::get<ColorTransitionRulesBaseLayerMember>(member)).layerValues[index].value,
-                .disabledValue = &(parameters.**std::get<ColorTransitionRulesBaseLayerMember>(member)).baseValue,
-                .enabled = &(parameters.**std::get<ColorTransitionRulesBaseLayerMember>(member)).layerValues[index].enabled};
+                .value = (parameters.**std::get<ColorTransitionRulesBaseLayerMember>(member)).layerValues[index].value,
+                .disabledValue = (parameters.**std::get<ColorTransitionRulesBaseLayerMember>(member)).baseValue,
+                .enabled = &(parameters.**std::get<ColorTransitionRulesBaseLayerMember>(member)).layerValues[index].enabled,
+                .colorDependence = ColorDependence::ColorVector};
         }
         }
     }

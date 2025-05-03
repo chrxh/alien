@@ -112,19 +112,12 @@ struct PinnableSourceParameter
  * Misc
  */
 
-struct ColorTransitionRules
+struct ColorTransitionRule
 {
-    ColorVector<int> cellColorTransitionDuration = {
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value};
-    ColorVector<int> cellColorTransitionTargetColor = {0, 1, 2, 3, 4, 5, 6};
+    int duration = Infinity<int>::value;
+    int targetColor = 0;
 
-    bool operator==(ColorTransitionRules const&) const = default;
+    bool operator==(ColorTransitionRule const&) const = default;
 };
 
 enum class LocationType

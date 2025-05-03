@@ -403,11 +403,11 @@ void ParametersEditService::copyLocation(
 {
     auto const& parametersSpecs = SimulationParameters::getSpec();
     for (auto const& groupSpec : parametersSpecs._groups) {
-        copyLocationImpl(targetParameters, targetOrderNumber, sourceParameters, sourceOrderNumber, groupSpec._parameters);
+        copyLocationIntern(targetParameters, targetOrderNumber, sourceParameters, sourceOrderNumber, groupSpec._parameters);
     }
 }
 
-void ParametersEditService::copyLocationImpl(
+void ParametersEditService::copyLocationIntern(
     SimulationParameters& targetParameters,
     int targetOrderNumber,
     SimulationParameters& sourceParameters,
@@ -425,13 +425,13 @@ void ParametersEditService::copyLocationImpl(
                     (*target.value)[i] = (*source.value)[i];
                 }
             } else {
-                if (source.valueType == ColorDependence::None) {
+                if (source.colorDependence == ColorDependence::None) {
                     *target.value = *source.value;
-                } else if (source.valueType == ColorDependence::ColorVector) {
+                } else if (source.colorDependence == ColorDependence::ColorVector) {
                     for (int i = 0; i < MAX_COLORS; ++i) {
                         target.value[i] = source.value[i];
                     }
-                } else if (source.valueType == ColorDependence::ColorMatrix) {
+                } else if (source.colorDependence == ColorDependence::ColorMatrix) {
                     for (int i = 0; i < MAX_COLORS * MAX_COLORS; ++i) {
                         target.value[i] = source.value[i];
                     }
@@ -460,7 +460,7 @@ void ParametersEditService::copyLocationImpl(
             auto const& altSpec = std::get<AlternativeSpec>(parameterSpec._reference);
             copySourceToTarget(altSpec, sourceOrderNumber, targetOrderNumber);
             for (auto const& parameterSpecs : altSpec._alternatives | std::views::values) {
-                copyLocationImpl(targetParameters, targetOrderNumber, sourceParameters, sourceOrderNumber, parameterSpecs);
+                copyLocationIntern(targetParameters, targetOrderNumber, sourceParameters, sourceOrderNumber, parameterSpecs);
             }
         } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._reference)) {
             copySourceToTarget(std::get<ColorPickerSpec>(parameterSpec._reference), sourceOrderNumber, targetOrderNumber);

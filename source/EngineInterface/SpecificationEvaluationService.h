@@ -19,7 +19,7 @@ struct ValueRef
     T* disabledValue = nullptr;
     bool* enabled = nullptr;
     bool* pinned = nullptr;
-    ColorDependence valueType = ColorDependence::None;
+    ColorDependence colorDependence = ColorDependence::None;
 };
 
 class SpecificationEvaluationService
@@ -34,7 +34,7 @@ public:
     ValueRef<Char64> getRef(Char64MemberVariant const& member, SimulationParameters& parameters, int orderNumber) const;
     ValueRef<int> getRef(AlternativeMemberVariant const& member, SimulationParameters& parameters, int orderNumber) const;
     ValueRef<FloatColorRGB> getRef(FloatColorRGBMemberVariant const& member, SimulationParameters& parameters, int orderNumber) const;
-    ValueRef<ColorTransitionRules> getRef(ColorTransitionRulesMemberVariant const& member, SimulationParameters& parameters, int orderNumber) const;
+    ValueRef<ColorTransitionRule> getRef(ColorTransitionRulesMemberVariant const& member, SimulationParameters& parameters, int orderNumber) const;
 
     bool* getExpertToggleRef(ExpertToggleMember const& member, SimulationParameters& parameters) const;
 
