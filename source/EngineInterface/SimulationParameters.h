@@ -268,7 +268,7 @@ struct SimulationParameters
 
     // Expert settings: Cell color transition rules
     ExpertToggle colorTransitionRulesToggle = {false};
-    BaseLayerParameter<ColorTransitionRules> colorTransitionRules;
+    BaseLayerParameter<ColorVector<ColorTransitionRule>> colorTransitionRules;
 
     // Expert settings: Cell glow
     ExpertToggle cellGlowToggle = {false};

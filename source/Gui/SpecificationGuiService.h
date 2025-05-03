@@ -17,7 +17,7 @@ public:
     void createWidgetsForExpertToggles(SimulationParameters& parameters, SimulationParameters& origParameters) const;
 
 private:
-    void createWidgetsFromParameterSpecs(
+    void createWidgetsForParameterGroup(
         std::vector<ParameterSpec> const& parameterSpecs,
         SimulationParameters& parameters,
         SimulationParameters& origParameters,

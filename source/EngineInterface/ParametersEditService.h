@@ -38,7 +38,7 @@ public:
 private:
     void copyLocation(SimulationParameters& targetParameters, int targetOrderNumber, SimulationParameters& sourceParameters, int sourceOrderNumber) const;
 
-    void copyLocationImpl(
+    void copyLocationIntern(
         SimulationParameters& targetParameters,
         int targetOrderNumber,
         SimulationParameters& sourceParameters,

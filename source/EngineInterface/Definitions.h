@@ -11,7 +11,7 @@
 struct SimulationParameters;
 struct RadiationSource;
 struct ExpertToggles;
-struct ColorTransitionRules;
+struct ColorTransitionRule;
 
 struct ClusteredDataDescription;
 struct DataDescription;

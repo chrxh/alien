@@ -41,7 +41,7 @@ void SpecificationGuiService::createWidgetsForParameters(
         }
         ImGui::PushID(name.c_str());
         if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name(name).visible(isGroupVisibleActive).blinkWhenActivated(isExpertSettings))) {
-            createWidgetsFromParameterSpecs(groupSpec._parameters, parameters, origParameters, simulationFacade, orderNumber);
+            createWidgetsForParameterGroup(groupSpec._parameters, parameters, origParameters, simulationFacade, orderNumber);
         }
         ImGui::PopID();
         AlienImGui::EndTreeNode();
@@ -85,7 +85,7 @@ namespace
     }
 }
 
-void SpecificationGuiService::createWidgetsFromParameterSpecs(
+void SpecificationGuiService::createWidgetsForParameterGroup(
     std::vector<ParameterSpec> const& parameterSpecs,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
@@ -133,7 +133,7 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
 
     auto ref = evaluationService.getRef(boolSpec._member, parameters, orderNumber);
     auto origRef = evaluationService.getRef(boolSpec._member, origParameters, orderNumber);
-    if (ref.valueType == ColorDependence::ColorMatrix) {
+    if (ref.colorDependence == ColorDependence::ColorMatrix) {
 
         AlienImGui::CheckboxColorMatrix(
             AlienImGui::CheckboxColorMatrixParameters()
@@ -362,7 +362,7 @@ void SpecificationGuiService::createWidgetsForAlternativeSpec(
             .values(values)
             .tooltip(parameterSpec._tooltip),
         *value);
-    createWidgetsFromParameterSpecs(alternativeSpec._alternatives.at(*value).second, parameters, origParameters, simulationFacade, orderNumber);
+    createWidgetsForParameterGroup(alternativeSpec._alternatives.at(*value).second, parameters, origParameters, simulationFacade, orderNumber);
 }
 
 void SpecificationGuiService::createWidgetsForColorPickerSpec(
@@ -400,14 +400,14 @@ void SpecificationGuiService::createWidgetsForColorTransitionRulesSpec(
         auto widgetParameters = AlienImGui::InputColorTransitionParameters()
                                     .textWidth(RightColumnWidth)
                                     .color(color)
-                                    .defaultTargetColor(origValue->cellColorTransitionTargetColor[color])
-                                    .defaultTransitionAge(origValue->cellColorTransitionDuration[color])
+                                    .defaultTargetColor(origValue[color].targetColor)
+                                    .defaultTransitionAge(origValue[color].duration)
                                     .logarithmic(true)
                                     .infinity(true);
         if (0 == color) {
             widgetParameters.name(parameterSpec._name).tooltip(parameterSpec._tooltip);
         }
-        AlienImGui::InputColorTransition(widgetParameters, color, value->cellColorTransitionTargetColor[color], value->cellColorTransitionDuration[color]);
+        AlienImGui::InputColorTransition(widgetParameters, color, value[color].targetColor, value[color].duration);
         ImGui::PopID();
     }
 }
