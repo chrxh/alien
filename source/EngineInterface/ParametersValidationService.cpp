@@ -14,9 +14,6 @@ void ParametersValidationService::validateAndCorrect(ValidationConfig const& con
             validateAndCorrectIntern(config, groupSpec._parameters, parameters, i);
         }
     }
-    //for (int i = 0; i < MAX_COLORS; ++i) {
-    //    parameters.minCellEnergy.baseValue[i] = std::min(parameters.minCellEnergy.baseValue[i], parameters.normalCellEnergy.value[i] * 0.95f);
-    //}
 }
 
 namespace 
@@ -66,6 +63,12 @@ void ParametersValidationService::validateAndCorrectIntern(
                 auto arraySize = getArraySize(ref.colorDependence);
                 for (int i = 0; i < arraySize; ++i) {
                     ref.value[i] = std::clamp(ref.value[i], min, max);
+                }
+                auto otherRef = evaluationService.getRef(valueSpec._greaterThan, parameters, orderNumber);
+                if (otherRef.value) {
+                    for (int i = 0; i < arraySize; ++i) {
+                        ref.value[i] = std::max(ref.value[i], otherRef.value[i]);
+                    }
                 }
             }
         } else if (std::holds_alternative<Float2Spec>(parameterSpec._reference)) {

@@ -130,7 +130,6 @@ struct MaxWorldRadiusSize
 {};
 using FloatMinVariant = std::variant<float>;
 using FloatMaxVariant = std::variant<float, MaxWorldRadiusSize>;
-using FloatGreaterThanVariant = std::variant<std::monostate, ColorVectorFloatBaseLayerMember>;
 
 struct FloatSpec
 {
@@ -150,7 +149,7 @@ struct FloatSpec
     MEMBER(FloatSpec, std::optional<FloatGetterSetter>, getterSetter, std::nullopt);
 
     SETTER_SHARED_PTR(FloatSpec, ColorVectorFloatBaseLayerMember, greaterThan);
-    FloatGreaterThanVariant _greaterThan = std::monostate();
+    FloatMemberVariant _greaterThan = std::monostate();
     MEMBER(FloatSpec, FloatMinVariant, min, 0.0f);
     MEMBER(FloatSpec, FloatMaxVariant, max, 0.0f);
     MEMBER(FloatSpec, bool, logarithmic, false);
