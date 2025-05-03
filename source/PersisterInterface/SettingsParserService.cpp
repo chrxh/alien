@@ -5,6 +5,7 @@
 #include "Base/Resources.h"
 #include "EngineInterface/SimulationParametersSpecification.h"
 #include "EngineInterface/SpecificationEvaluationService.h"
+#include "EngineInterface/ParametersValidationService.h"
 
 #include "ParameterParser.h"
 
@@ -117,9 +118,9 @@ namespace
                     encodeDecodeSimulationParameterGroup(
                         tree, parameters, defaultParameters, nodeBase + "." + parameterSpec._name + "." + alternative, parserTask, parameterSpecs);
                 }
-            } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._reference)) {
+            } else if (std::holds_alternative<ColorSpec>(parameterSpec._reference)) {
                 encodeDecodeParameter(
-                    tree, parameters, defaultParameters, std::get<ColorPickerSpec>(parameterSpec._reference), parserTask, nodeBase + "." + parameterSpec._name);
+                    tree, parameters, defaultParameters, std::get<ColorSpec>(parameterSpec._reference), parserTask, nodeBase + "." + parameterSpec._name);
             } else if (std::holds_alternative<ColorTransitionRulesSpec>(parameterSpec._reference)) {
                 encodeDecodeParameter(
                     tree,
@@ -188,6 +189,8 @@ namespace
         ParameterParser::encodeDecode(tree, data.worldSize, defaultSettings.worldSize, nodeBase + ".World size", parserTask);
 
         encodeDecodeSimulationParameters(tree, data.simulationParameters, "Simulation parameters", parserTask);
+
+        ParametersValidationService::get().validateAndCorrect({data.worldSize}, data.simulationParameters);
     }
 }
 

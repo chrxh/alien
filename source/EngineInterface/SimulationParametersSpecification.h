@@ -195,9 +195,9 @@ struct AlternativeSpec
     MEMBER(AlternativeSpec, Alternatives, alternatives, {});
 };
 
-struct ColorPickerSpec
+struct ColorSpec
 {
-    SETTER_SHARED_PTR(ColorPickerSpec, FloatColorRGBBaseLayerMember, member);
+    SETTER_SHARED_PTR(ColorSpec, FloatColorRGBBaseLayerMember, member);
     FloatColorRGBMemberVariant _member = std::monostate();
 };
 
@@ -207,7 +207,7 @@ struct ColorTransitionRulesSpec
     ColorTransitionRulesMemberVariant _member = std::monostate();
 };
 
-using ReferenceSpec = std::variant<BoolSpec, IntSpec, FloatSpec, Float2Spec, Char64Spec, AlternativeSpec, ColorPickerSpec, ColorTransitionRulesSpec>;
+using ReferenceSpec = std::variant<BoolSpec, IntSpec, FloatSpec, Float2Spec, Char64Spec, AlternativeSpec, ColorSpec, ColorTransitionRulesSpec>;
 
 struct ParameterSpec
 {

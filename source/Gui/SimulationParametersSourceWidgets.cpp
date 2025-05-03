@@ -30,6 +30,7 @@ void _SimulationParametersSourceWidgets::process()
     ImGui::PopID();
 
     if (parameters != lastParameters) {
+        ParametersValidationService::get().validateAndCorrect({_simulationFacade->getWorldSize()}, parameters);
         auto isRunning = _simulationFacade->isSimulationRunning();
         _simulationFacade->setSimulationParameters(
             parameters, isRunning ? SimulationParametersUpdateConfig::AllExceptChangingPositions : SimulationParametersUpdateConfig::All);

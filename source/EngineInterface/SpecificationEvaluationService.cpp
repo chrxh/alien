@@ -289,8 +289,8 @@ bool SpecificationEvaluationService::isVisible(ParameterSpec const& parameterSpe
             if (std::holds_alternative<IntMember>(alternativeSpec._member)) {
                 return true;
             }
-        } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._reference)) {
-            auto const& colorPickerSpec = std::get<ColorPickerSpec>(parameterSpec._reference);
+        } else if (std::holds_alternative<ColorSpec>(parameterSpec._reference)) {
+            auto const& colorPickerSpec = std::get<ColorSpec>(parameterSpec._reference);
             if (std::holds_alternative<FloatColorRGBBaseLayerMember>(colorPickerSpec._member)) {
                 return true;
             }
@@ -329,8 +329,8 @@ bool SpecificationEvaluationService::isVisible(ParameterSpec const& parameterSpe
             if (std::holds_alternative<IntLayerMember>(alternativeSpec._member)) {
                 return true;
             }
-        } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._reference)) {
-            auto const& colorPickerSpec = std::get<ColorPickerSpec>(parameterSpec._reference);
+        } else if (std::holds_alternative<ColorSpec>(parameterSpec._reference)) {
+            auto const& colorPickerSpec = std::get<ColorSpec>(parameterSpec._reference);
             if (std::holds_alternative<FloatColorRGBBaseLayerMember>(colorPickerSpec._member)) {
                 return true;
             }

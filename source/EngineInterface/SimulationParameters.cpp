@@ -59,7 +59,7 @@ ParametersSpec const& SimulationParameters::getSpec()
             ParameterGroupSpec()
                 .name("Visualization")
                 .parameters({
-                    ParameterSpec().name("Background color").reference(ColorPickerSpec().member(&SimulationParameters::backgroundColor)),
+                    ParameterSpec().name("Background color").reference(ColorSpec().member(&SimulationParameters::backgroundColor)),
                     ParameterSpec()
                         .name("Primary cell coloring")
                         .reference(AlternativeSpec()
