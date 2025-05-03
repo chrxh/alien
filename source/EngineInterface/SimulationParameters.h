@@ -70,7 +70,7 @@ struct SimulationParameters
     BaseParameter<float> pressureStrength = {0.1f};      // for MotionType_Fluid
     BaseParameter<float> maxCollisionDistance = {1.3f};  // for MotionType_Collision
     BaseParameter<float> repulsionStrength = {0.08f};    // for MotionType_Collision
-    BaseLayerParameter<float> friction = {.baseValue = 0.01f};
+    BaseLayerParameter<float> friction = {.baseValue = 0.001f};
     BaseParameter<float> innerFriction = {0.3f};
     BaseLayerParameter<float> rigidity = {.baseValue = 0.0f};
 
