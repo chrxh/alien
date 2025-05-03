@@ -44,8 +44,9 @@ void ParametersValidationService::validateAndCorrectIntern(
             auto ref = evaluationService.getRef(valueSpec._member, parameters, orderNumber);
             if (ref.value) {
                 auto arraySize = getArraySize(ref.colorDependence);
+                auto max = valueSpec._infinity ? Infinity<int>::value : valueSpec._max;
                 for (int i = 0; i < arraySize; ++i) {
-                    ref.value[i] = std::clamp(ref.value[i], valueSpec._min, valueSpec._max);
+                    ref.value[i] = std::clamp(ref.value[i], valueSpec._min, max);
                 }
             }
         } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
@@ -57,7 +58,11 @@ void ParametersValidationService::validateAndCorrectIntern(
                     if (std::holds_alternative<MaxWorldRadiusSize>(valueSpec._max)) {
                         return toFloat(std::max(config.worldSize.x, config.worldSize.y));
                     } else {
-                        return std::get<float>(valueSpec._max);
+                        if (valueSpec._infinity) {
+                            return std::numeric_limits<float>::infinity();
+                        } else {
+                            return std::get<float>(valueSpec._max);
+                        }
                     }
                 }();
                 auto arraySize = getArraySize(ref.colorDependence);
