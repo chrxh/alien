@@ -112,7 +112,7 @@ void SpecificationGuiService::createWidgetsForParameterGroup(
             createWidgetsForChar64Spec(parameterSpec, parameters, origParameters, orderNumber);
         } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._reference)) {
             createWidgetsForAlternativeSpec(parameterSpec, parameters, origParameters, simulationFacade, orderNumber);
-        } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._reference)) {
+        } else if (std::holds_alternative<ColorSpec>(parameterSpec._reference)) {
             createWidgetsForColorPickerSpec(parameterSpec, parameters, origParameters, orderNumber);
         } else if (std::holds_alternative<ColorTransitionRulesSpec>(parameterSpec._reference)) {
             createWidgetsForColorTransitionRulesSpec(parameterSpec, parameters, origParameters, orderNumber);
@@ -209,8 +209,8 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
     auto [origValue, origDisabledValue, origEnabledValue, origPinnedValue, origValueType] =
         evaluationService.getRef(floatSpec._member, origParameters, orderNumber);
 
-    float min = std::get<float>(floatSpec._min);
-    float max = [&] {
+    auto min = std::get<float>(floatSpec._min);
+    auto max = [&] {
         if (std::holds_alternative<MaxWorldRadiusSize>(floatSpec._max)) {
             auto worldSize = simulationFacade->getWorldSize();
             return toFloat(std::max(worldSize.x, worldSize.y));
@@ -372,7 +372,7 @@ void SpecificationGuiService::createWidgetsForColorPickerSpec(
     int orderNumber) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
-    auto const& colorPickerSpec = std::get<ColorPickerSpec>(parameterSpec._reference);
+    auto const& colorPickerSpec = std::get<ColorSpec>(parameterSpec._reference);
 
     auto [value, disabledValue, enabledValue, pinnedValue, valueType] = evaluationService.getRef(colorPickerSpec._member, parameters, orderNumber);
     auto [origValue, origDisabledValue, origEnabledValue, origPinnedValue, origValueType] =

@@ -462,8 +462,8 @@ void ParametersEditService::copyLocationIntern(
             for (auto const& parameterSpecs : altSpec._alternatives | std::views::values) {
                 copyLocationIntern(targetParameters, targetOrderNumber, sourceParameters, sourceOrderNumber, parameterSpecs);
             }
-        } else if (std::holds_alternative<ColorPickerSpec>(parameterSpec._reference)) {
-            copySourceToTarget(std::get<ColorPickerSpec>(parameterSpec._reference), sourceOrderNumber, targetOrderNumber);
+        } else if (std::holds_alternative<ColorSpec>(parameterSpec._reference)) {
+            copySourceToTarget(std::get<ColorSpec>(parameterSpec._reference), sourceOrderNumber, targetOrderNumber);
         } else if (std::holds_alternative<ColorTransitionRulesSpec>(parameterSpec._reference)) {
             copySourceToTarget(std::get<ColorTransitionRulesSpec>(parameterSpec._reference), sourceOrderNumber, targetOrderNumber);
         }

@@ -24,9 +24,8 @@ void _SimulationParametersBaseWidgets::process()
 
     SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _simulationFacade, 0);
 
-    ParametersValidationService::get().validateAndCorrect(parameters);
-
     if (parameters != lastParameters) {
+        ParametersValidationService::get().validateAndCorrect({_simulationFacade->getWorldSize()}, parameters);
         _simulationFacade->setSimulationParameters(parameters, SimulationParametersUpdateConfig::AllExceptChangingPositions);
     }
 }
