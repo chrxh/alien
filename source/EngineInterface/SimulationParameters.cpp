@@ -447,7 +447,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .tooltip("Minimum energy a cell needs to exist."),
                     ParameterSpec()
                         .name("Normal energy")
-                        .reference(FloatSpec().member(&SimulationParameters::normalCellEnergy).min(10.0f).max(200.0f))
+                        .reference(
+                            FloatSpec().member(&SimulationParameters::normalCellEnergy).min(10.0f).max(200.0f).greaterThan(&SimulationParameters::minCellEnergy))
                         .tooltip(
                             "The normal energy value of a cell is defined here. This is used as a reference value in various contexts: "
                             "\n\n" ICON_FA_CHEVRON_RIGHT
