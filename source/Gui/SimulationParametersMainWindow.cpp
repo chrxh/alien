@@ -24,7 +24,7 @@ namespace
 {
     auto constexpr MasterHeight = 130.0f;
     auto constexpr MasterMinHeight = 50.0f;
-    auto constexpr MasterRowHeight = 25.0f;
+    auto constexpr MasterRowHeight = 23.0f;
 
     auto constexpr DetailWidgetMinHeight = 0.0f;
 
@@ -308,7 +308,7 @@ void SimulationParametersMainWindow::processLocationTable()
         ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
 
         ImGuiListClipper clipper;
-        clipper.Begin(_locations.size());
+        clipper.Begin(toInt(_locations.size()));
         while (clipper.Step()) {
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
                 auto const& entry = _locations.at(row);
@@ -327,7 +327,15 @@ void SimulationParametersMainWindow::processLocationTable()
                     _selectedOrderNumber = row;
                 }
                 ImGui::SameLine();
-                AlienImGui::Text(entry.name);
+                std::string icon;
+                if (entry.type == LocationType::Base) {
+                    icon = "";
+                } else if (entry.type == LocationType::Layer) {
+                    icon = ICON_FA_LAYER_GROUP " ";
+                } else if (entry.type == LocationType::Source) {
+                    icon = ICON_FA_SUN " ";
+                }
+                AlienImGui::Text(icon + entry.name);
 
 
                 // type
