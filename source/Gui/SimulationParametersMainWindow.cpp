@@ -438,10 +438,12 @@ void SimulationParametersMainWindow::onInsertDefaultLayer()
     parameters.backgroundColor.layerValues[index].enabled = true;
     parameters.backgroundColor.layerValues[index].value = _layerColorPalette.getColor((2 + parameters.numLayers) * 8);
     parameters.layerShape.layerValues[index] = LayerShapeType_Circular;
-    parameters.layerPosition.layerValues[index] = {toFloat(worldSize.x / 2), toFloat(worldSize.y / 2)};
+    parameters.layerPosition.layerValues[index] = {
+        toFloat(worldSize.x / 2 + (_insertedLocationCounter % 10) * worldSize.x / 20),
+        toFloat(worldSize.y / 2 + (_insertedLocationCounter % 10) * worldSize.y / 20)};
     parameters.layerCoreRadius.layerValues[index] = minRadius / 3;
     parameters.layerCoreRect.layerValues[index] = {minRadius / 3, minRadius / 3};
-    parameters.layerFadeoutRadius.layerValues[index] = minRadius / 3;
+    parameters.layerFadeoutRadius.layerValues[index] = minRadius / 5;
     parameters.layerForceFieldType.layerValues[index] = ForceField_None;
     parameters.layerRadialForceFieldOrientation.layerValues[index] = Orientation_Clockwise;
     parameters.layerRadialForceFieldStrength.layerValues[index] = 0.001f;
@@ -462,6 +464,7 @@ void SimulationParametersMainWindow::onInsertDefaultLayer()
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 
     LocationController::get().remapLocationIndices(newByOldOrderNumber);
+    ++_insertedLocationCounter;
 }
 
 void SimulationParametersMainWindow::onInsertDefaultSource()
@@ -486,13 +489,16 @@ void SimulationParametersMainWindow::onInsertDefaultSource()
 
     auto index = LocationHelper::findLocationArrayIndex(parameters, _selectedOrderNumber);
     auto worldSize = _simulationFacade->getWorldSize();
-    parameters.sourcePosition.sourceValues[index] = {toFloat(worldSize.x / 2), toFloat(worldSize.y / 2)};
+    parameters.sourcePosition.sourceValues[index] = {
+        toFloat(worldSize.x / 2 + (_insertedLocationCounter % 10) * worldSize.x / 20),
+        toFloat(worldSize.y / 2 + (_insertedLocationCounter % 10) * worldSize.y / 20)};
     origParameters.sourcePosition.sourceValues[index] = parameters.sourcePosition.sourceValues[index];
 
     _simulationFacade->setSimulationParameters(parameters);
     _simulationFacade->setOriginalSimulationParameters(origParameters);
 
     LocationController::get().remapLocationIndices(newByOldOrderNumber);
+    ++_insertedLocationCounter;
 }
 
 void SimulationParametersMainWindow::onCloneLocation()

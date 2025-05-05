@@ -82,6 +82,7 @@ private:
     int _selectedOrderNumber = 0;
 
     int _locationWindowCounter = 0;
+    int _insertedLocationCounter = 0;
 
     std::string _fileDialogPath;
 
