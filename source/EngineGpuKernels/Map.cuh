@@ -248,7 +248,7 @@ public:
         auto partition = calcPartition(numEntities, threadIdx.x, blockDim.x);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& entity = entities[index];
-            int2 posInt = {floorInt(entity->absPos.x), floorInt(entity->absPos.y)};
+            int2 posInt = {floorInt(entity->pos.x), floorInt(entity->pos.y)};
             correctPosition(posInt);
             auto mapEntry = posInt.x + posInt.y * _size.x;
             _map[mapEntry] = entity;

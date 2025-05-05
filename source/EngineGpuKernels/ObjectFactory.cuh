@@ -50,8 +50,8 @@ __inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleTO c
     *particlePointer = particle;
     
     particle->id = createIds ? _data->numberGen1.createNewId() : particleTO.id;
-    particle->absPos = particleTO.pos;
-    _map.correctPosition(particle->absPos);
+    particle->pos = particleTO.pos;
+    _map.correctPosition(particle->pos);
     particle->vel = particleTO.vel;
     particle->energy = particleTO.energy;
     particle->locked = 0;
@@ -248,7 +248,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
 __inline__ __device__ void ObjectFactory::changeParticleFromTO(ParticleTO const& particleTO, Particle* particle)
 {
     particle->energy = particleTO.energy;
-    particle->absPos = particleTO.pos;
+    particle->pos = particleTO.pos;
     particle->color = particleTO.color;
 }
 
@@ -279,7 +279,7 @@ ObjectFactory::createParticle(float energy, float2 const& pos, float2 const& vel
     particle->selected = 0;
     particle->locked = 0;
     particle->energy = energy;
-    particle->absPos = pos;
+    particle->pos = pos;
     particle->vel = vel;
     particle->color = color;
     particle->lastAbsorbedCell = nullptr;

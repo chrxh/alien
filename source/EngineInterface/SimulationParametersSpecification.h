@@ -213,14 +213,14 @@ struct ParameterSpec
     MEMBER(ParameterSpec, std::string, name, std::string());
     MEMBER(ParameterSpec, ReferenceSpec, reference, FloatSpec());
     MEMBER(ParameterSpec, bool, visible, true);
-    MEMBER(ParameterSpec, std::optional<std::string>, tooltip, std::nullopt);
+    MEMBER(ParameterSpec, std::optional<std::string>, description, std::nullopt);
 };
 
 struct ParameterGroupSpec
 {
     MEMBER(ParameterGroupSpec, std::string, name, std::string());
     MEMBER(ParameterGroupSpec, std::vector<ParameterSpec>, parameters, {});
-    MEMBER(ParameterGroupSpec, std::optional<std::string>, tooltip, std::nullopt);
+    MEMBER(ParameterGroupSpec, std::optional<std::string>, description, std::nullopt);
 
     SETTER_SHARED_PTR(ParameterGroupSpec, ExpertToggleMember, expertToggle);
     ExpertToggleMember _expertToggle;

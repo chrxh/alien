@@ -202,7 +202,7 @@ namespace
         ParticleTO& particleTO = dataTO.particles[particleTOIndex];
 
         particleTO.id = particle->id;
-        particleTO.pos = particle->absPos;
+        particleTO.pos = particle->pos;
         particleTO.vel = particle->vel;
         particleTO.energy = particle->energy;
         particleTO.color = particle->color;
@@ -330,7 +330,7 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& particle = particles.at(index);
 
-            auto pos = particle->absPos;
+            auto pos = particle->pos;
             data.particleMap.correctPosition(pos);
             if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
                 continue;
@@ -339,7 +339,7 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
             auto& particleTO = dataTO.particles[particleTOIndex];
 
             particleTO.id = particle->id;
-            particleTO.pos = particle->absPos;
+            particleTO.pos = particle->pos;
             particleTO.selected = particle->selected;
         }
     }
@@ -386,7 +386,7 @@ __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, Sim
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
         auto const& particle = data.objects.particlePointers.at(particleIndex);
-        auto pos = particle->absPos;
+        auto pos = particle->pos;
         data.particleMap.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
             continue;

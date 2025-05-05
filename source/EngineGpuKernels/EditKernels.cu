@@ -230,10 +230,10 @@ __global__ void cudaUpdateAngleAndAngularVelForSelection(ShallowUpdateSelectionD
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& particle = data.objects.particlePointers.at(index);
             if (particle->selected != 0) {
-                auto relPos = particle->absPos - center;
+                auto relPos = particle->pos - center;
                 data.cellMap.correctDirection(relPos);
-                particle->absPos = Math::applyMatrix(relPos, rotationMatrix) + center;
-                data.cellMap.correctPosition(particle->absPos);
+                particle->pos = Math::applyMatrix(relPos, rotationMatrix) + center;
+                data.cellMap.correctPosition(particle->pos);
             }
         }
     }
@@ -269,8 +269,8 @@ __global__ void cudaCalcAccumulatedCenterAndVel(SimulationData data, int refCell
             auto const& particle = data.objects.particlePointers.at(index);
             if (particle->selected != 0) {
                 if (center) {
-                    atomicAdd(&center->x, particle->absPos.x);
-                    atomicAdd(&center->y, particle->absPos.y);
+                    atomicAdd(&center->x, particle->pos.x);
+                    atomicAdd(&center->y, particle->pos.y);
                 }
                 if (velocity) {
                     atomicAdd(&velocity->x, particle->vel.x);
@@ -298,8 +298,8 @@ __global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData up
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = data.objects.particlePointers.at(index);
         if (0 != particle->selected) {
-            particle->absPos = particle->absPos + float2{updateData.posDeltaX, updateData.posDeltaY};
-            data.particleMap.correctPosition(particle->absPos);
+            particle->pos = particle->pos + float2{updateData.posDeltaX, updateData.posDeltaY};
+            data.particleMap.correctPosition(particle->pos);
             particle->vel = float2{updateData.velX, updateData.velY};
         }
     }
@@ -407,7 +407,7 @@ __global__ void cudaExistsSelection(PointSelectionData pointData, SimulationData
 
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = data.objects.particlePointers.at(index);
-        if (1 == particle->selected && data.cellMap.getDistance(pointData.pos, particle->absPos) < pointData.radius) {
+        if (1 == particle->selected && data.cellMap.getDistance(pointData.pos, particle->pos) < pointData.radius) {
             atomicExch(result, 1);
         }
     }
@@ -430,7 +430,7 @@ __global__ void cudaSetSelection(float2 pos, float radius, SimulationData data)
 
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = data.objects.particlePointers.at(index);
-        if (data.particleMap.getDistance(pos, particle->absPos) < radius) {
+        if (data.particleMap.getDistance(pos, particle->pos) < radius) {
             particle->selected = 1;
         } else {
             particle->selected = 0;
@@ -455,8 +455,8 @@ __global__ void cudaSetSelection(AreaSelectionData selectionData, SimulationData
     auto const particlePartition = calcAllThreadsPartition(data.objects.particlePointers.getNumEntries());
     for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
         auto const& particle = data.objects.particlePointers.at(index);
-        if (Math::isInBetweenModulo(toFloat(selectionData.startPos.x), toFloat(selectionData.endPos.x), particle->absPos.x, toFloat(data.worldSize.x))
-            && Math::isInBetweenModulo(toFloat(selectionData.startPos.y), toFloat(selectionData.endPos.y), particle->absPos.y, toFloat(data.worldSize.y))) {
+        if (Math::isInBetweenModulo(toFloat(selectionData.startPos.x), toFloat(selectionData.endPos.x), particle->pos.x, toFloat(data.worldSize.x))
+            && Math::isInBetweenModulo(toFloat(selectionData.startPos.y), toFloat(selectionData.endPos.y), particle->pos.y, toFloat(data.worldSize.y))) {
             particle->selected = 1;
         } else {
             particle->selected = 0;
@@ -502,7 +502,7 @@ __global__ void cudaSwapSelection(float2 pos, float radius, SimulationData data)
     auto const particleBlock = calcAllThreadsPartition(data.objects.particlePointers.getNumEntries());
     for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
         auto const& particle = data.objects.particlePointers.at(index);
-        if (data.particleMap.getDistance(pos, particle->absPos) < radius) {
+        if (data.particleMap.getDistance(pos, particle->pos) < radius) {
             particle->selected = 1 - particle->selected;
         }
     }
@@ -562,7 +562,7 @@ __global__ void cudaApplyForce(SimulationData data, ApplyForceData applyData)
 
         for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
             auto const& particle = data.objects.particlePointers.at(index);
-            auto const& pos = particle->absPos;
+            auto const& pos = particle->pos;
             auto distanceToSegment = Math::calcDistanceToLineSegment(applyData.startPos, applyData.endPos, pos, applyData.radius);
             if (distanceToSegment < applyData.radius) {
                 auto weightedForce = applyData.force;  //*(actionRadius - distanceToSegment) / actionRadius;
