@@ -78,12 +78,12 @@ __global__ void cudaApplyForceFieldSettings(SimulationData data)
             auto& particle = particles.at(index);
             for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
                 if (cudaSimulationParameters.layerForceFieldType.layerValues[i] != ForceField_None) {
-                    accelerations[i] = calcAcceleration(data.cellMap, particle->absPos, i);
+                    accelerations[i] = calcAcceleration(data.cellMap, particle->pos, i);
                 } else {
                     accelerations[i] = float2{0, 0};
                 }
             }
-            auto resultingAcceleration = ParameterCalculator::calcParameter(float2{0, 0}, accelerations, data, particle->absPos);
+            auto resultingAcceleration = ParameterCalculator::calcParameter(float2{0, 0}, accelerations, data, particle->pos);
             particle->vel += resultingAcceleration;
         }
     }

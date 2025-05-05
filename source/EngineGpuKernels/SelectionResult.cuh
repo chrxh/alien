@@ -65,7 +65,7 @@ public:
 
     __device__ void collectParticle(Particle* particle, float2 refPos, BaseMap const& map)
     {
-        auto pos = particle->absPos + map.getCorrectionIncrement(refPos, particle->absPos);
+        auto pos = particle->pos + map.getCorrectionIncrement(refPos, particle->pos);
 
         atomicAdd(&_selectionShallowData->numParticles, 1);
         atomicAdd(&_selectionShallowData->centerPosX, pos.x);

@@ -13,7 +13,7 @@
 struct Particle
 {
     uint64_t id;
-    float2 absPos;
+    float2 pos;
     float2 vel;
     uint8_t color;
     float energy;

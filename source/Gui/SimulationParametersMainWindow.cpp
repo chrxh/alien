@@ -24,7 +24,7 @@ namespace
 {
     auto constexpr MasterHeight = 130.0f;
     auto constexpr MasterMinHeight = 50.0f;
-    auto constexpr MasterRowHeight = 23.0f;
+    auto constexpr MasterRowHeight = 25.0f;
 
     auto constexpr DetailWidgetMinHeight = 0.0f;
 

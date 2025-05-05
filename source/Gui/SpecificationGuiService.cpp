@@ -62,8 +62,7 @@ void SpecificationGuiService::createWidgetsForExpertToggles(SimulationParameters
                 AlienImGui::CheckboxParameters()
                     .name(groupSpec._name)
                     .textWidth(0)
-                    .defaultValue(*origExpertToggleValue)
-                    .tooltip(groupSpec._tooltip),
+                    .defaultValue(*origExpertToggleValue).tooltip(groupSpec._description),
                 *expertToggleValue);
         }
     }
@@ -141,12 +140,16 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
                 .name(parameterSpec._name)
                 .textWidth(RightColumnWidth)
                 .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(origRef.value)))
-                .tooltip(parameterSpec._tooltip),
+                .tooltip(parameterSpec._description),
             *reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(ref.value));
 
     } else {
         AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origRef.value).tooltip(parameterSpec._tooltip),
+            AlienImGui::CheckboxParameters()
+                .name(parameterSpec._name)
+                .textWidth(RightColumnWidth)
+                .defaultValue(*origRef.value)
+                .tooltip(parameterSpec._description),
             *ref.value);
 
     }
@@ -173,7 +176,7 @@ void SpecificationGuiService::createWidgetsForIntSpec(
                 .max(intSpec._max)
                 .logarithmic(intSpec._logarithmic)
                 .textWidth(RightColumnWidth)
-                .tooltip(parameterSpec._tooltip)
+                .tooltip(parameterSpec._description)
                 .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(origValue))),
             *reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(value));
 
@@ -189,7 +192,7 @@ void SpecificationGuiService::createWidgetsForIntSpec(
                 .disabledValue(disabledValue)
                 .defaultValue(origValue)
                 .defaultEnabledValue(origEnabledValue)
-                .tooltip(parameterSpec._tooltip)
+                .tooltip(parameterSpec._description)
                 .colorDependence(valueType == ColorDependence::ColorVector),
             value,
             enabledValue);
@@ -229,7 +232,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
                 .logarithmic(floatSpec._logarithmic)
                 .format(floatSpec._format)
                 .textWidth(RightColumnWidth)
-                .tooltip(parameterSpec._tooltip)
+                .tooltip(parameterSpec._description)
                 .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(origValue)))
                 .disabledValue(
                     disabledValue != nullptr ? std::make_optional(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(disabledValue)))
@@ -261,7 +264,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
                     .defaultValue(origValue)
                     .defaultEnabledValue(origEnabledValue)
                     .colorDependence(valueType == ColorDependence::ColorVector)
-                    .tooltip(parameterSpec._tooltip),
+                    .tooltip(parameterSpec._description),
                 value,
             enabledValue,
             pinnedValue)) {
@@ -312,7 +315,7 @@ void SpecificationGuiService::createWidgetsForFloat2Spec(
             .getMousePickerEnabledFunc(float2Spec._mousePicker ? std::make_optional(getMousePickerEnabledFunc) : std::nullopt)
             .setMousePickerEnabledFunc(float2Spec._mousePicker ? std::make_optional(setMousePickerEnabledFunc) : std::nullopt)
             .getMousePickerPositionFunc(float2Spec._mousePicker ? std::make_optional(getMousePickerPositionFunc) : std::nullopt)
-            .tooltip(parameterSpec._tooltip),
+            .tooltip(parameterSpec._description),
         value->x,
         value->y);
 }
@@ -331,7 +334,7 @@ void SpecificationGuiService::createWidgetsForChar64Spec(
         evaluationService.getRef(char64Spec._member, origParameters, orderNumber);
 
     AlienImGui::InputText(
-        AlienImGui::InputTextParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue).tooltip(parameterSpec._tooltip),
+        AlienImGui::InputTextParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue).tooltip(parameterSpec._description),
         *value,
         sizeof(Char64) / sizeof(char));
 }
@@ -361,7 +364,7 @@ void SpecificationGuiService::createWidgetsForAlternativeSpec(
             .textWidth(RightColumnWidth)
             .defaultValue(*origValue)
             .values(values)
-            .tooltip(parameterSpec._tooltip),
+            .tooltip(parameterSpec._description),
         *value);
 
     auto const& parametersForAlternative = alternativeSpec._alternatives.at(*value).second;
@@ -419,7 +422,7 @@ void SpecificationGuiService::createWidgetsForColorTransitionRulesSpec(
                                     .logarithmic(true)
                                     .infinity(true);
         if (0 == color) {
-            widgetParameters.name(parameterSpec._name).tooltip(parameterSpec._tooltip);
+            widgetParameters.name(parameterSpec._name).tooltip(parameterSpec._description);
         }
         AlienImGui::InputColorTransition(widgetParameters, color, value[color].targetColor, value[color].duration);
         ImGui::PopID();

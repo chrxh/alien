@@ -63,8 +63,8 @@ __inline__ __device__ void RadiationProcessor::movement(SimulationData& data)
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         auto& particle = data.objects.particlePointers.at(particleIndex);
-        particle->absPos = particle->absPos + particle->vel * cudaSimulationParameters.timestepSize.value;
-        data.particleMap.correctPosition(particle->absPos);
+        particle->pos = particle->pos + particle->vel * cudaSimulationParameters.timestepSize.value;
+        data.particleMap.correctPosition(particle->pos);
     }
 }
 
@@ -74,9 +74,9 @@ __inline__ __device__ void RadiationProcessor::collision(SimulationData& data)
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         auto& particle = data.objects.particlePointers.at(particleIndex);
-        auto otherParticle = data.particleMap.get(particle->absPos);
+        auto otherParticle = data.particleMap.get(particle->pos);
         if (otherParticle && otherParticle != particle
-            && Math::lengthSquared(particle->absPos - otherParticle->absPos) < 0.5) {
+            && Math::lengthSquared(particle->pos - otherParticle->pos) < 0.5) {
 
             SystemDoubleLock lock;
             lock.init(&particle->locked, &otherParticle->locked);
@@ -94,10 +94,10 @@ __inline__ __device__ void RadiationProcessor::collision(SimulationData& data)
                 lock.releaseLock();
             }
         } else {
-            if (auto cell = data.cellMap.getFirst(particle->absPos + particle->vel)) {
+            if (auto cell = data.cellMap.getFirst(particle->pos + particle->vel)) {
                 if (cell->barrier) {
                     auto vr = particle->vel - cell->vel;
-                    auto r = data.cellMap.getCorrectedDirection(particle->absPos - cell->pos);
+                    auto r = data.cellMap.getCorrectedDirection(particle->pos - cell->pos);
                     auto dot_vr_r = Math::dot(vr, r);
                     if (dot_vr_r < 0) {
                         auto truncated_r_squared = max(0.1f, Math::lengthSquared(r));
@@ -172,11 +172,11 @@ __inline__ __device__ void RadiationProcessor::splitting(SimulationData& data)
             particle->energy *= 0.5f;
             auto velPerturbation = Math::unitVectorOfAngle(data.numberGen1.random() * 360);
 
-            float2 otherPos = particle->absPos + velPerturbation / 5;
+            float2 otherPos = particle->pos + velPerturbation / 5;
             data.particleMap.correctPosition(otherPos);
 
-            particle->absPos -= velPerturbation / 5;
-            data.particleMap.correctPosition(particle->absPos);
+            particle->pos -= velPerturbation / 5;
+            data.particleMap.correctPosition(particle->pos);
 
             velPerturbation *= cudaSimulationParameters.radiationVelocityPerturbation / (particle->energy + 1.0f);
             float2 otherVel = particle->vel + velPerturbation;
@@ -201,7 +201,7 @@ __inline__ __device__ void RadiationProcessor::transformation(SimulationData& da
             if (particle->energy >= cudaSimulationParameters.normalCellEnergy.value[particle->color]) {
                 ObjectFactory factory;
                 factory.init(&data);
-                auto cell = factory.createFreeCell(particle->energy, particle->absPos, particle->vel);
+                auto cell = factory.createFreeCell(particle->energy, particle->pos, particle->vel);
                 cell->color = particle->color;
 
                 particle = nullptr;
