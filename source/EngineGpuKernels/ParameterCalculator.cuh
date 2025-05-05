@@ -11,17 +11,10 @@
 class ParameterCalculator
 {
 public:
-    __device__ __inline__ static float calcParameter(BaseLayerParameter<float> const& baseLayerParameter, SimulationData const& data, float2 const& worldPos);
-    __device__ __inline__ static float calcParameter(BaseLayerParameter<ColorVector<float>> const& baseLayerParameter, SimulationData const& data, float2 const& worldPos, int color);
-    __device__ __inline__ static float calcParameter(BaseLayerParameter<ColorMatrix<float>> const& baseLayerParameter, SimulationData const& data, float2 const& worldPos, int color1, int color2);
-
-    template <typename T, typename Parameter>
-    __device__ __inline__ static T calcResultingValue(
-        BaseMap const& map,
-        float2 const& worldPos,
-        T const& baseValue,
-        T (&layerValues)[MAX_LAYERS],
-        Parameter const& baseLayerParameter);
+    __device__ __inline__ static float calcParameter(BaseLayerParameter<float> const& parameter, SimulationData const& data, float2 const& worldPos);
+    __device__ __inline__ static float calcParameter(BaseLayerParameter<ColorVector<float>> const& parameter, SimulationData const& data, float2 const& worldPos, int color);
+    __device__ __inline__ static float calcParameter(BaseLayerParameter<ColorMatrix<float>> const& parameter, SimulationData const& data, float2 const& worldPos, int color1, int color2);
+    __device__ __inline__ static FloatColorRGB calcParameter(BaseLayerParameter<FloatColorRGB> const& parameter, BaseMap const& map, float2 const& worldPos);
 
     //return -1 for base
     template <typename T>
@@ -51,49 +44,67 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__device__ __inline__ float ParameterCalculator::calcParameter(BaseLayerParameter<float> const& baseLayerParameter, SimulationData const& data, float2 const& worldPos)
+__device__ __inline__ float ParameterCalculator::calcParameter(BaseLayerParameter<float> const& parameter, SimulationData const& data, float2 const& worldPos)
 {
-    float layerValues[MAX_LAYERS];
-    int numValues = 0;
+    auto result = parameter.baseValue;
     for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
-        if (baseLayerParameter.layerValues[i].enabled) {
-            layerValues[numValues++] = baseLayerParameter.layerValues[i].value;
+        if (parameter.layerValues[i].enabled) {
+            float2 layerPos = {cudaSimulationParameters.layerPosition.layerValues[i].x, cudaSimulationParameters.layerPosition.layerValues[i].y};
+            auto delta = data.cellMap.getCorrectedDirection(layerPos - worldPos);
+            auto weight = calcWeight(delta, i);
+            result = result * weight + parameter.layerValues[i].value * (1.0f - weight);
         }
     }
-
-    return calcResultingValue(data.cellMap, worldPos, baseLayerParameter.baseValue, layerValues, baseLayerParameter);
+    return result;
 }
 
-__device__ __inline__ float
-ParameterCalculator::calcParameter(BaseLayerParameter<ColorVector<float>> const& baseLayerParameter, SimulationData const& data, float2 const& worldPos, int color)
+__device__ __inline__ float ParameterCalculator::calcParameter(BaseLayerParameter<ColorVector<float>> const& parameter, SimulationData const& data, float2 const& worldPos, int color)
 {
-    float layerValues[MAX_LAYERS];
-    int numValues = 0;
+    auto result = parameter.baseValue[color];
     for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
-        if (baseLayerParameter.layerValues[i].enabled) {
-            layerValues[numValues++] = baseLayerParameter.layerValues[i].value[color];
+        if (parameter.layerValues[i].enabled) {
+            float2 layerPos = {cudaSimulationParameters.layerPosition.layerValues[i].x, cudaSimulationParameters.layerPosition.layerValues[i].y};
+            auto delta = data.cellMap.getCorrectedDirection(layerPos - worldPos);
+            auto weight = calcWeight(delta, i);
+            result = result * weight + parameter.layerValues[i].value[color] * (1.0f - weight);
         }
     }
-
-    return calcResultingValue(data.cellMap, worldPos, baseLayerParameter.baseValue[color], layerValues, baseLayerParameter);
+    return result;
 }
 
 __device__ __inline__ float ParameterCalculator::calcParameter(
-    BaseLayerParameter<ColorMatrix<float>> const& baseLayerParameter,
+    BaseLayerParameter<ColorMatrix<float>> const& parameter,
     SimulationData const& data,
     float2 const& worldPos,
     int color1,
     int color2)
 {
-    float layerValues[MAX_LAYERS];
-    int numValues = 0;
+    auto result = parameter.baseValue[color1][color2];
     for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
-        if (baseLayerParameter.layerValues[i].enabled) {
-            layerValues[numValues++] = baseLayerParameter.layerValues[i].value[color1][color2];
+        if (parameter.layerValues[i].enabled) {
+            float2 layerPos = {cudaSimulationParameters.layerPosition.layerValues[i].x, cudaSimulationParameters.layerPosition.layerValues[i].y};
+            auto delta = data.cellMap.getCorrectedDirection(layerPos - worldPos);
+            auto weight = calcWeight(delta, i);
+            result = result * weight + parameter.layerValues[i].value[color1][color2] * (1.0f - weight);
         }
     }
+    return result;
+}
 
-    return calcResultingValue(data.cellMap, worldPos, baseLayerParameter.baseValue[color1][color2], layerValues, baseLayerParameter);
+__device__ __inline__ FloatColorRGB ParameterCalculator::calcParameter(BaseLayerParameter<FloatColorRGB> const& parameter, BaseMap const& map, float2 const& worldPos)
+{
+    auto result = parameter.baseValue;
+    for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
+        if (parameter.layerValues[i].enabled) {
+            float2 layerPos = {cudaSimulationParameters.layerPosition.layerValues[i].x, cudaSimulationParameters.layerPosition.layerValues[i].y};
+            auto delta = map.getCorrectedDirection(layerPos - worldPos);
+            auto weight = calcWeight(delta, i);
+            result.r = result.r * weight + parameter.layerValues[i].value.r * (1.0f - weight);
+            result.g = result.g * weight + parameter.layerValues[i].value.g * (1.0f - weight);
+            result.b = result.b * weight + parameter.layerValues[i].value.b * (1.0f - weight);
+        }
+    }
+    return result;
 }
 
 template<typename T>
@@ -128,29 +139,29 @@ __device__ __inline__ bool ParameterCalculator::isCoveredByLayers(SimulationData
     return false;
 }
 
-template <typename T, typename Parameter>
-__device__ __inline__ T ParameterCalculator::calcResultingValue(
-    BaseMap const& map,
-    float2 const& worldPos,
-    T const& baseValue,
-    T (&layerValues)[MAX_LAYERS],
-    Parameter const& baseLayerParameter)
-{
-    if (0 == cudaSimulationParameters.numLayers) {
-        return baseValue;
-    } else {
-        float layerWeights[MAX_LAYERS];
-        int numValues = 0;
-        for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
-            if (baseLayerParameter.layerValues[i].enabled) {
-                float2 layerPos = {cudaSimulationParameters.layerPosition.layerValues[i].x, cudaSimulationParameters.layerPosition.layerValues[i].y};
-                auto delta = map.getCorrectedDirection(layerPos - worldPos);
-                layerWeights[numValues++] = calcWeight(delta, i);
-            }
-        }
-        return mix(baseValue, layerValues, layerWeights, numValues);
-    }
-}
+//template <typename T, typename Parameter>
+//__device__ __inline__ T ParameterCalculator::calcResultingValue(
+//    BaseMap const& map,
+//    float2 const& worldPos,
+//    T const& baseValue,
+//    T (&layerValues)[MAX_LAYERS],
+//    Parameter const& baseLayerParameter)
+//{
+//    if (0 == cudaSimulationParameters.numLayers) {
+//        return baseValue;
+//    } else {
+//        float layerWeights[MAX_LAYERS];
+//        int numValues = 0;
+//        for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
+//            if (baseLayerParameter.layerValues[i].enabled) {
+//                float2 layerPos = {cudaSimulationParameters.layerPosition.layerValues[i].x, cudaSimulationParameters.layerPosition.layerValues[i].y};
+//                auto delta = map.getCorrectedDirection(layerPos - worldPos);
+//                layerWeights[numValues++] = calcWeight(delta, i);
+//            }
+//        }
+//        return mix(baseValue, layerValues, layerWeights, numValues);
+//    }
+//}
 
 template <typename T>
 __device__ __inline__ T ParameterCalculator::calcResultingFlowField(BaseMap const& map, float2 const& worldPos, T const& baseValue, T (&layerValues)[MAX_LAYERS])
