@@ -12,6 +12,7 @@
 
 #include "SimulationInteractionController.h"
 #include "AlienImGui.h"
+#include "StyleRepository.h"
 
 namespace
 {
@@ -362,7 +363,20 @@ void SpecificationGuiService::createWidgetsForAlternativeSpec(
             .values(values)
             .tooltip(parameterSpec._tooltip),
         *value);
-    createWidgetsForParameterGroup(alternativeSpec._alternatives.at(*value).second, parameters, origParameters, simulationFacade, orderNumber);
+
+    auto const& parametersForAlternative = alternativeSpec._alternatives.at(*value).second;
+    auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
+    auto containsWidgets = std::any_of(parametersForAlternative.begin(), parametersForAlternative.end(), [&](auto const& parameterSpec) {
+        return evaluationService.isVisible(parameterSpec, locationType);
+    });
+
+    if (containsWidgets) {
+        ImGui::Dummy(ImVec2(scale(20), 0));
+        ImGui::SameLine();
+        ImGui::BeginGroup();
+        createWidgetsForParameterGroup(alternativeSpec._alternatives.at(*value).second, parameters, origParameters, simulationFacade, orderNumber);
+        ImGui::EndGroup();
+    }
 }
 
 void SpecificationGuiService::createWidgetsForColorPickerSpec(
