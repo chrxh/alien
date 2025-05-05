@@ -60,15 +60,14 @@ __global__ void cudaApplyForceFieldSettings(SimulationData data)
             if (cell->barrier) {
                 continue;
             }
-            int numFlowFields = 0;
             for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
-
                 if (cudaSimulationParameters.layerForceFieldType.layerValues[i] != ForceField_None) {
-                    accelerations[numFlowFields] = calcAcceleration(data.cellMap, cell->pos, i);
-                    ++numFlowFields;
+                    accelerations[i] = calcAcceleration(data.cellMap, cell->pos, i);
+                } else {
+                    accelerations[i] = float2{0, 0};
                 }
             }
-            auto resultingAcceleration = ParameterCalculator::calcResultingFlowField(data.cellMap, cell->pos, float2{0, 0}, accelerations);
+            auto resultingAcceleration = ParameterCalculator::calcParameter(float2{0, 0}, accelerations, data, cell->pos);
             cell->shared1 += resultingAcceleration;
         }
     }
@@ -77,15 +76,14 @@ __global__ void cudaApplyForceFieldSettings(SimulationData data)
         auto partition = calcAllThreadsPartition(particles.getNumEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& particle = particles.at(index);
-            int numFlowFields = 0;
             for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
-
                 if (cudaSimulationParameters.layerForceFieldType.layerValues[i] != ForceField_None) {
-                    accelerations[numFlowFields] = calcAcceleration(data.cellMap, particle->absPos, i);
-                    ++numFlowFields;
+                    accelerations[i] = calcAcceleration(data.cellMap, particle->absPos, i);
+                } else {
+                    accelerations[i] = float2{0, 0};
                 }
             }
-            auto resultingAcceleration = ParameterCalculator::calcResultingFlowField(data.cellMap, particle->absPos, float2{0, 0}, accelerations);
+            auto resultingAcceleration = ParameterCalculator::calcParameter(float2{0, 0}, accelerations, data, particle->absPos);
             particle->vel += resultingAcceleration;
         }
     }
