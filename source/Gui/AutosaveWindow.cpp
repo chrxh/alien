@@ -422,8 +422,10 @@ void AutosaveWindow::processDeleteNonPersistentSavepoint()
     for (auto const& entry : _savepointsInProgressToDelete) {
         if (auto requestState = _persisterFacade->getRequestState(PersisterRequestId{entry->requestId})) {
             if (requestState.value() == PersisterRequestState::Finished) {
-                auto resultData = _persisterFacade->fetchSaveSimulationData(PersisterRequestId{entry->requestId});
-                SerializerService::get().deleteSimulation(resultData.filename);
+                auto requestResult = _persisterFacade->fetchPersisterRequestResult(PersisterRequestId{entry->requestId});
+                if (auto saveResult = std::dynamic_pointer_cast<_SaveSimulationRequestResult>(requestResult)) {
+                    SerializerService::get().deleteSimulation(saveResult->getData().filename);
+                }
             } else if (requestState.value() == PersisterRequestState::Error) {
                 // do nothing
             } else {
@@ -441,8 +443,8 @@ void AutosaveWindow::scheduleCleanup()
 
 void AutosaveWindow::updateSavepoint(int row)
 {
-    auto entry = _savepointTable->at(row);
-    if (entry->state != SavepointState_Persisted) {
+    auto state = _savepointTable->at(row)->state;
+    if (state != SavepointState_Persisted) {
         auto newEntry = _savepointTable->at(row);
         auto requestState = _persisterFacade->getRequestState(PersisterRequestId{newEntry->requestId});
         if (requestState.has_value()) {
@@ -472,7 +474,9 @@ void AutosaveWindow::updateSavepoint(int row)
             if (requestState.value() == PersisterRequestState::Error) {
                 newEntry->state = SavepointState_Error;
             }
-            SavepointTableService::get().updateEntry(_savepointTable.value(), row, newEntry);
+            if (state != newEntry->state) {
+                SavepointTableService::get().updateEntry(_savepointTable.value(), row, newEntry);
+            }
         }
     }
 }
