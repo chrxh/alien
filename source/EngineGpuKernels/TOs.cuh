@@ -253,6 +253,7 @@ struct CellTO
     uint8_t numConnections;
     float angleToFront;
     bool barrier;
+    bool sticky;
     uint32_t age;
     LivingState livingState;
     uint32_t creatureId;

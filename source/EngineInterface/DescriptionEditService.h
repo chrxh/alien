@@ -19,7 +19,7 @@ public:
         MEMBER(CreateRectParameters, float, energy, 100.0f);
         MEMBER(CreateRectParameters, float, stiffness, 1.0f);
         MEMBER(CreateRectParameters, RealVector2D, center, RealVector2D({0, 0}));
-        MEMBER(CreateRectParameters, bool, removeStickiness, false);
+        MEMBER(CreateRectParameters, bool, sticky, false);
         MEMBER(CreateRectParameters, int, color, 0);
         MEMBER(CreateRectParameters, bool, barrier, false);
         MEMBER(CreateRectParameters, bool, randomCreatureId, true);
@@ -35,7 +35,7 @@ public:
         MEMBER(CreateHexParameters, float, energy, 100.0f);
         MEMBER(CreateHexParameters, float, stiffness, 1.0f);
         MEMBER(CreateHexParameters, RealVector2D, center, RealVector2D({0, 0}));
-        MEMBER(CreateHexParameters, bool, removeStickiness, false);
+        MEMBER(CreateHexParameters, bool, sticky, false);
         MEMBER(CreateHexParameters, int, color, 0);
         MEMBER(CreateHexParameters, bool, barrier, false);
         MEMBER(CreateHexParameters, bool, randomCreatureId, true);
@@ -51,6 +51,7 @@ public:
         MEMBER(CreateUnconnectedCircleParameters, RealVector2D, center, RealVector2D({0, 0}));
         MEMBER(CreateUnconnectedCircleParameters, int, color, 0);
         MEMBER(CreateUnconnectedCircleParameters, bool, barrier, false);
+        MEMBER(CreateUnconnectedCircleParameters, bool, sticky, false);
         MEMBER(CreateUnconnectedCircleParameters, bool, randomCreatureId, true);
     };
     DataDescription createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters);
@@ -99,7 +100,6 @@ public:
     addIfSpaceAvailable(DataDescription& result, Occupancy& cellOccupancy, DataDescription const& toAdd, float distance, IntVector2D const& worldSize);
 
     void reconnectCells(DataDescription& data, float maxDistance);
-    void removeStickiness(DataDescription& data);
     void correctConnections(ClusteredDataDescription& data, IntVector2D const& worldSize);
 
     void randomizeCellColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes);

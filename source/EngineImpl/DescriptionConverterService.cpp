@@ -392,6 +392,7 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
     result._mutationId = cellTO.mutationId;
     result._ancestorMutationId = cellTO.ancestorMutationId;
     result._barrier = cellTO.barrier;
+    result._sticky = cellTO.sticky;
     result._age = cellTO.age;
     result._color = cellTO.color;
     result._angleToFront = cellTO.angleToFront;
@@ -758,6 +759,7 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
     cellTO.activationTime = cellDesc._activationTime;
     cellTO.numConnections = 0;
     cellTO.barrier = cellDesc._barrier;
+    cellTO.sticky = cellDesc._sticky;
     cellTO.age = cellDesc._age;
     cellTO.color = cellDesc._color;
     cellTO.genomeComplexity = cellDesc._genomeComplexity;

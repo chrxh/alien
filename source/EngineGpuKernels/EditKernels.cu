@@ -330,7 +330,7 @@ __global__ void cudaMakeSticky(SimulationData data, bool includeClusters)
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = data.objects.cellPointers.at(index);
         if (isSelected(cell, includeClusters)) {
-            //#TODO introduce sticky flag
+            cell->sticky = true;
         }
     }
 }
@@ -341,7 +341,7 @@ __global__ void cudaRemoveStickiness(SimulationData data, bool includeClusters)
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = data.objects.cellPointers.at(index);
         if (isSelected(cell, includeClusters)) {
-            //#TODO introduce sticky flag
+            cell->sticky = false;
         }
     }
 }
