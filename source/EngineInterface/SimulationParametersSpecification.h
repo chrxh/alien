@@ -22,9 +22,11 @@ using _ColorMatrixBoolMember = BaseParameter<ColorMatrix<bool>> SimulationParame
 using ColorMatrixBoolMember = std::shared_ptr<_ColorMatrixBoolMember>;
 using _BoolBaseLayerMember = BaseLayerParameter<bool> SimulationParameters::*;
 using BoolBaseLayerMember = std::shared_ptr<_BoolBaseLayerMember>;
+using _BoolSourceMember = SourceParameter<bool> SimulationParameters::*;
+using BoolSourceMember = std::shared_ptr<_BoolSourceMember>;
 using _ExpertToggleMember = ExpertToggle SimulationParameters::*;
 using ExpertToggleMember = std::shared_ptr<_ExpertToggleMember>;
-using BoolMemberVariant = std::variant<std::monostate, BoolMember, BoolBaseLayerMember, ColorMatrixBoolMember, BoolLayerMember>;
+using BoolMemberVariant = std::variant<std::monostate, BoolMember, BoolBaseLayerMember, ColorMatrixBoolMember, BoolLayerMember, BoolSourceMember>;
 
 using _IntMember = BaseParameter<int> SimulationParameters::*;
 using IntMember = std::shared_ptr<_IntMember>;
@@ -107,6 +109,7 @@ struct BoolSpec
     SETTER_SHARED_PTR(BoolSpec, ColorMatrixBoolMember, member);
     SETTER_SHARED_PTR(BoolSpec, BoolBaseLayerMember, member);
     SETTER_SHARED_PTR(BoolSpec, BoolLayerMember, member);
+    SETTER_SHARED_PTR(BoolSpec, BoolSourceMember, member);
     BoolMemberVariant _member = std::monostate();
 };
 

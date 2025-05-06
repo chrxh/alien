@@ -126,8 +126,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .reference(BoolSpec().member(&SimulationParameters::markReferenceDomain))
                         .description("This option draws a suitable grid in the background depending on the zoom level."),
                     ParameterSpec()
-                        .name("Show radiation sources")
-                        .reference(BoolSpec().member(&SimulationParameters::showRadiationSources))
+                        .name("Show radiation source")
+                        .reference(BoolSpec().member(&SimulationParameters::sourceShow))
                         .description("This option draws red crosses in the center of radiation sources."),
                 }),
             ParameterGroupSpec()
