@@ -24,6 +24,7 @@ namespace
         cellTO.pos = cell->pos;
         cellTO.vel = cell->vel;
         cellTO.barrier = cell->barrier;
+        cellTO.sticky = cell->sticky;
         cellTO.energy = cell->energy;
         cellTO.stiffness = cell->stiffness;
         cellTO.numConnections = cell->numConnections;

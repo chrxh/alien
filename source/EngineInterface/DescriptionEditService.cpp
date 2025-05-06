@@ -23,6 +23,7 @@ DataDescription DescriptionEditService::createRect(CreateRectParameters const& p
                                .stiffness(parameters._stiffness)
                                .color(parameters._color)
                                .barrier(parameters._barrier)
+                               .sticky(parameters._sticky)
                                .creatureId(creatureId)
                                .mutationId(parameters._mutationId)
                                .genomeComplexity(parameters._genomeComplexity)
@@ -30,9 +31,6 @@ DataDescription DescriptionEditService::createRect(CreateRectParameters const& p
         }
     }
     reconnectCells(result, parameters._cellDistance * 1.1f);
-    if (parameters._removeStickiness) {
-        removeStickiness(result);
-    }
     result.setCenter(parameters._center);
     return result;
 }
@@ -54,6 +52,7 @@ DataDescription DescriptionEditService::createHex(CreateHexParameters const& par
                                .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
                                .color(parameters._color)
                                .barrier(parameters._barrier)
+                               .sticky(parameters._sticky)
                                .creatureId(creatureId));
 
             //create cell: under layer (except for 0-layer)
@@ -72,9 +71,6 @@ DataDescription DescriptionEditService::createHex(CreateHexParameters const& par
     }
 
     reconnectCells(result, parameters._cellDistance * 1.5f);
-    if (parameters._removeStickiness) {
-        removeStickiness(result);
-    }
     result.setCenter(parameters._center);
 
     return result;
@@ -94,6 +90,7 @@ DataDescription DescriptionEditService::createUnconnectedCircle(CreateUnconnecte
                            .stiffness(parameters._stiffness)
                            .color(parameters._color)
                            .barrier(parameters._barrier)
+                           .sticky(parameters._sticky)
                            .creatureId(creatureId));
         return result;
     }
@@ -119,6 +116,7 @@ DataDescription DescriptionEditService::createUnconnectedCircle(CreateUnconnecte
                                .pos({parameters._center.x + dxMod, parameters._center.y + dy})
                                .color(parameters._color)
                                .barrier(parameters._barrier)
+                               .sticky(parameters._sticky)
                                .creatureId(creatureId));
 
         }
@@ -377,13 +375,6 @@ void DescriptionEditService::reconnectCells(DataDescription& data, float maxDist
                 data.addConnection(cell._id, nearbyCell._id, &cache);
             }
         }
-    }
-}
-
-void DescriptionEditService::removeStickiness(DataDescription& data)
-{
-    for (auto& cell : data._cells) {
-        //#TODO introduce sticky flag
     }
 }
 

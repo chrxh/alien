@@ -99,6 +99,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->stiffness = cellTO.stiffness;
     cell->cellType = cellTO.cellType;
     cell->barrier = cellTO.barrier;
+    cell->sticky = cellTO.sticky;
     cell->age = cellTO.age;
     cell->color = cellTO.color;
     cell->angleToFront = cellTO.angleToFront;
@@ -308,6 +309,7 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->metadata.nameSize = 0;
     cell->metadata.descriptionSize = 0;
     cell->barrier = false;
+    cell->sticky = false;
     cell->age = 0;
     cell->activationTime = 0;
     cell->genomeComplexity = 0;
@@ -343,7 +345,8 @@ __inline__ __device__ Cell* ObjectFactory::createCell(uint64_t& cellPointerIndex
     cell->color = 0;
     cell->metadata.nameSize = 0;
     cell->metadata.descriptionSize = 0;
-    cell->barrier = 0;
+    cell->barrier = false;
+    cell->sticky = false;
     cell->age = 0;
     cell->vel = {0, 0};
     cell->activationTime = 0;

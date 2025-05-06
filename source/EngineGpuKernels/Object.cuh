@@ -295,6 +295,7 @@ struct Cell
     uint8_t color;
     float angleToFront;
     bool barrier;
+    bool sticky;
     uint32_t age;
     LivingState livingState;
     uint32_t creatureId;

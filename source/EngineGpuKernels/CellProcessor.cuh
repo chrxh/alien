@@ -221,6 +221,7 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
 
                         //fusion
                         if (Math::length(velDelta) >= cellFusionVelocity && cell->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS
+                            && (cell->sticky || otherCell->sticky)
                             && cell->energy <= cellMaxBindingEnergy
                             && otherCell->energy <= cellMaxBindingEnergy && !cell->barrier && !otherCell->barrier) {
                             CellConnectionProcessor::scheduleAddConnectionPair(data, cell, otherCell);
@@ -347,6 +348,7 @@ __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctO
                     auto cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.cellFusionVelocity, data, cell->pos);
 
                     if (cell->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS
+                        && (cell->sticky || otherCell->sticky)
                         && Math::length(velDelta) >= cellFusionVelocity
                         && isApproaching && cell->energy <= cellMaxBindingEnergy && otherCell->energy <= cellMaxBindingEnergy && !cell->barrier
                         && !otherCell->barrier) {

@@ -187,6 +187,7 @@ void CreatorWindow::onDrawing()
                                                               .radius(EditorModel::get().getPencilWidth())
                                                               .energy(_energy)
                                                               .stiffness(_stiffness)
+                                                              .sticky(_makeSticky)
                                                               .cellDistance(1.0f)
                                                               .color(EditorModel::get().getDefaultColorCode())
                                                               .barrier(_barrier));
@@ -208,14 +209,7 @@ void CreatorWindow::onDrawing()
         }
     }
     DescriptionEditService::get().reconnectCells(_drawingDataDescription, 1.5f);
-    if (!_makeSticky) {
-        auto origDrawing = _drawingDataDescription;
-        DescriptionEditService::get().removeStickiness(_drawingDataDescription);
-        _simulationFacade->addAndSelectSimulationData(_drawingDataDescription);
-        _drawingDataDescription = origDrawing;
-    } else {
-        _simulationFacade->addAndSelectSimulationData(_drawingDataDescription);
-    }
+    _simulationFacade->addAndSelectSimulationData(_drawingDataDescription);
 
     _simulationFacade->reconnectSelectedObjects();
     EditorModel::get().update();
@@ -241,6 +235,7 @@ void CreatorWindow::createCell()
                     .stiffness(_stiffness)
                     .color(EditorModel::get().getDefaultColorCode())
                     .barrier(_barrier)
+                    .sticky(_makeSticky)
                     .creatureId(creatureId);
     auto data = DataDescription().addCell(cell);
     _simulationFacade->addAndSelectSimulationData(data);
@@ -265,7 +260,7 @@ void CreatorWindow::createRectangle()
                                                   .cellDistance(_cellDistance)
                                                   .energy(_energy)
                                                   .stiffness(_stiffness)
-                                                  .removeStickiness(!_makeSticky)
+                                                  .sticky(_makeSticky)
                                                   .color(EditorModel::get().getDefaultColorCode())
                                                   .center(getRandomPos())
                                                   .barrier(_barrier));
@@ -283,7 +278,7 @@ void CreatorWindow::createHexagon()
                                                             .cellDistance(_cellDistance)
                                                             .energy(_energy)
                                                             .stiffness(_stiffness)
-                                                            .removeStickiness(!_makeSticky)
+                                                            .sticky(_makeSticky)
                                                             .color(EditorModel::get().getDefaultColorCode())
                                                             .center(getRandomPos())
                                                             .barrier(_barrier));
@@ -315,6 +310,7 @@ void CreatorWindow::createDisc()
                              .id(NumberGenerator::get().getId())
                              .energy(_energy)
                              .stiffness(_stiffness)
+                             .sticky(_makeSticky)
                              .pos(relPos)
                              .color(EditorModel::get().getDefaultColorCode())
                              .barrier(_barrier));
@@ -322,9 +318,6 @@ void CreatorWindow::createDisc()
     }
 
     DescriptionEditService::get().reconnectCells(data, _cellDistance * 1.7f);
-    if (!_makeSticky) {
-        DescriptionEditService::get().removeStickiness(data);
-    }
     data.setCenter(getRandomPos());
     _simulationFacade->addAndSelectSimulationData(data);
 }

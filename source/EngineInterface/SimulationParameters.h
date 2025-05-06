@@ -84,7 +84,7 @@ struct SimulationParameters
 
     // Physics: Binding
     BaseParameter<ColorVector<float>> maxBindingDistance = {{3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f}};
-    BaseLayerParameter<float> cellFusionVelocity = {.baseValue = 2.0f};
+    BaseLayerParameter<float> cellFusionVelocity = {.baseValue = 0.1f};
     BaseLayerParameter<float> cellMaxBindingEnergy = {.baseValue = Infinity<float>::value};
 
     // Radiation

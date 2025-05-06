@@ -551,6 +551,11 @@ struct CellDescription
         _barrier = value;
         return *this;
     }
+    CellDescription& sticky(bool value)
+    {
+        _sticky = value;
+        return *this;
+    }
     CellDescription& age(int value)
     {
         _age = value;
@@ -661,6 +666,7 @@ struct CellDescription
     int _color = 0;
     float _angleToFront = 0;  // Angle between [cell, cell->connection[0]] and front direction in reference configuration
     bool _barrier = false;
+    bool _sticky = false;
     int _age = 0;
     LivingState _livingState = LivingState_Ready;
     int _creatureId = 0;
