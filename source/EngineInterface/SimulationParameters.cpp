@@ -55,6 +55,23 @@ ParametersSpec const& SimulationParameters::getSpec()
                 ParameterSpec().name("Project name").reference(Char64Spec().member(&SimulationParameters::projectName)),
                 ParameterSpec().name("Layer name").reference(Char64Spec().member(&SimulationParameters::layerName)),
                 ParameterSpec().name("Source name").reference(Char64Spec().member(&SimulationParameters::sourceName)),
+                ParameterSpec()
+                    .name("Strength")
+                    .reference(FloatSpec().member(&SimulationParameters::layerStrength).min(0.0f).max(1.0f))
+                    .description("Layers can overwrite basic parameters and exert force fields. The general strength is specified with this parameter between "
+                                 "0 and 1. A value of 1 means that parameters in the core area of the layer can be completely overwritten, while a value "
+                                 "of 0 means that the layer has no effect."),
+                ParameterSpec()
+                    .name("Relative strength")
+                    .reference(FloatSpec()
+                                   .member(&SimulationParameters::sourceRelativeStrength)
+                                   .getterSetter(FloatGetterSetter{radiationStrengthGetter, radiationStrengthSetter})
+                                   .min(0.0f)
+                                   .max(1.0f))
+                    .description(
+                        "Cells can emit energy particles over time. A portion of this energy can be released directly near the cell, while the rest is "
+                        "utilized by one of the available radiation sources. This parameter determines the fraction of energy assigned to the emitted "
+                        "energy particle in the current radiation source. Values between 0 and 1 are permitted."),
             }),
             ParameterGroupSpec()
                 .name("Visualization")
@@ -370,18 +387,6 @@ ParametersSpec const& SimulationParameters::getSpec()
                             "Cells can emit energy particles over time. A portion of this energy can be released directly near the cell, while the rest is "
                             "utilized by one of the available radiation sources. This parameter determines the fraction of energy assigned to the emitted "
                             "energy particle in the vicinity of the cell. Values between 0 and 1 are permitted."),
-                    ParameterSpec()
-                        .name("Relative strength")
-                        .reference(
-                            FloatSpec()
-                                .member(&SimulationParameters::sourceRelativeStrength)
-                                .getterSetter(FloatGetterSetter{radiationStrengthGetter, radiationStrengthSetter})
-                                .min(0.0f)
-                                .max(1.0f))
-                        .description(
-                            "Cells can emit energy particles over time. A portion of this energy can be released directly near the cell, while the rest is "
-                            "utilized by one of the available radiation sources. This parameter determines the fraction of energy assigned to the emitted "
-                            "energy particle in the current radiation source. Values between 0 and 1 are permitted."),
                     ParameterSpec()
                         .name("Disable radiation sources")
                         .reference(BoolSpec().member(&SimulationParameters::disableRadiationSources))

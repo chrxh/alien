@@ -302,7 +302,7 @@ void SimulationParametersMainWindow::processLocationTable()
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
         ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
         ImGui::TableSetupColumn("Position", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(115.0f));
-        ImGui::TableSetupColumn("Strength", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
+        ImGui::TableSetupColumn("Strength", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(130.0f));
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
         ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
@@ -316,7 +316,7 @@ void SimulationParametersMainWindow::processLocationTable()
                 ImGui::PushID(row);
                 ImGui::TableNextRow(0, scale(MasterRowHeight));
 
-                // name
+                // Column: Name
                 ImGui::TableNextColumn();
                 auto selected = _selectedOrderNumber == row;
                 if (ImGui::Selectable(
@@ -338,7 +338,7 @@ void SimulationParametersMainWindow::processLocationTable()
                 AlienImGui::Text(icon + entry.name);
 
 
-                // type
+                // Column: Type
                 ImGui::TableNextColumn();
                 if (entry.type == LocationType::Base) {
                     AlienImGui::Text("Base parameters");
@@ -348,7 +348,7 @@ void SimulationParametersMainWindow::processLocationTable()
                     AlienImGui::Text("Radiation");
                 }
 
-                // position
+                // Column: Position
                 ImGui::TableNextColumn();
                 if (row > 0) {
                     if (AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH))) {
@@ -359,9 +359,20 @@ void SimulationParametersMainWindow::processLocationTable()
                 }
                 AlienImGui::Text(entry.position);
 
-                // strength
+                // Column: Strength
                 ImGui::TableNextColumn();
                 AlienImGui::Text(entry.strength);
+                ImGui::SameLine();
+                auto pos = ImGui::GetCursorScreenPos();
+                ImGui::SetCursorScreenPos({pos.x + scale(3.0f), pos.y});
+                ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextLightDecentColor);
+                if (entry.type == LocationType::Base || entry.type == LocationType::Source) {
+                    AlienImGui::Text("(radiation)");
+                } else {
+                    AlienImGui::Text("(opacity)");
+                }
+                ImGui::PopStyleColor();
+
 
                 ImGui::PopID();
             }
@@ -618,24 +629,28 @@ void SimulationParametersMainWindow::updateLocations()
     auto parameters = _simulationFacade->getSimulationParameters();
 
     _locations = std::vector<Location>(1 + parameters.numLayers + parameters.numSources);
-    auto strength = ParametersEditService::get().getRadiationStrengths(parameters);
-    auto pinnedString = strength.pinned.contains(0) ? ICON_FA_THUMBTACK " " : " ";
-    _locations.at(0) = Location{"Base", LocationType::Base, "-", pinnedString + StringHelper::format(strength.values.front() * 100 + 0.05f, 1) + "%"};
+    auto radiationStrength = ParametersEditService::get().getRadiationStrengths(parameters);
+    auto pinnedString = radiationStrength.pinned.contains(0) ? ICON_FA_THUMBTACK " " : " ";
+    _locations.at(0) = Location{"Base", LocationType::Base, "-", pinnedString + StringHelper::format(radiationStrength.values.front() * 100 + 0.05f, 1) + "%"};
     for (int i = 0; i < parameters.numLayers; ++i) {
         auto position =
             "(" + StringHelper::format(parameters.layerPosition.layerValues[i].x, 0) + ", " + StringHelper::format(parameters.layerPosition.layerValues[i].y, 0) + ")";
-        _locations.at(parameters.layerOrderNumbers[i]) = Location{parameters.layerName.layerValues[i], LocationType::Layer, position};
+        _locations.at(parameters.layerOrderNumbers[i]) = Location{
+            .name = parameters.layerName.layerValues[i],
+            .type = LocationType::Layer,
+            .position = position,
+            .strength = " " + StringHelper::format(parameters.layerStrength.layerValues[i] * 100 + 0.05f, 1) + "%"};
     }
     for (int i = 0; i < parameters.numSources; ++i) {
         auto position = "(" + StringHelper::format(parameters.sourcePosition.sourceValues[i].x, 0) + ", "
             + StringHelper::format(parameters.sourcePosition.sourceValues[i].y, 0) + ")";
-        auto pinnedString = strength.pinned.contains(i + 1) ? ICON_FA_THUMBTACK " " : " ";
+        auto pinnedString = radiationStrength.pinned.contains(i + 1) ? ICON_FA_THUMBTACK " " : " ";
         _locations.at(parameters.sourceOrderNumbers[i]) =
             Location{
             parameters.sourceName.sourceValues[i],
             LocationType::Source,
             position,
-            pinnedString + StringHelper::format(strength.values.at(i + 1) * 100 + 0.05f, 1) + "%"};
+            pinnedString + StringHelper::format(radiationStrength.values.at(i + 1) * 100 + 0.05f, 1) + "%"};
     }
 }
 

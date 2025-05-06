@@ -24,6 +24,8 @@ struct SimulationParameters
     BaseParameter<Char64> projectName = {"<unnamed>"};
     LayerParameter<Char64> layerName = {{"<unnamed>"}};
     SourceParameter<Char64> sourceName = {{"<unnamed>"}};
+    LayerParameter<float> layerStrength = {{1.0f}};
+    PinnableSourceParameter<float> sourceRelativeStrength = {{{.value = 0.0f, .pinned = false}}};
 
     // Visualization
     BaseLayerParameter<FloatColorRGB> backgroundColor = {.baseValue = {0.0f, 0.0f, 0.106f}};
@@ -87,7 +89,6 @@ struct SimulationParameters
 
     // Radiation
     PinBaseParameter relativeStrengthBasePin = {false};
-    PinnableSourceParameter<float> sourceRelativeStrength = {{{.value = 0.0f, .pinned = false}}};
     LayerParameter<bool> disableRadiationSources = {{false}};
     BaseLayerParameter<ColorVector<float>> radiationAbsorption = {.baseValue = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
     BaseLayerParameter<ColorVector<float>> radiationType1_strength = {.baseValue = {0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f}};
