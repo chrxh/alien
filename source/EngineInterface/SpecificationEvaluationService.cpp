@@ -27,6 +27,9 @@ ValueRef<bool> SpecificationEvaluationService::getRef(BoolMemberVariant const& m
     } else if (locationType == LocationType::Layer && std::holds_alternative<BoolLayerMember>(member)) {
         auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
         return ValueRef{.value = &(parameters.**std::get<BoolLayerMember>(member)).layerValues[index]};
+    } else if (locationType == LocationType::Source && std::holds_alternative<BoolSourceMember>(member)) {
+        auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
+        return ValueRef{.value = &(parameters.**std::get<BoolSourceMember>(member)).sourceValues[index]};
     }
 
     // Color matrix
@@ -342,7 +345,12 @@ bool SpecificationEvaluationService::isVisible(ParameterSpec const& parameterSpe
         }
     }
     if (locationType == LocationType::Source) {
-        if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
+        if (std::holds_alternative<BoolSpec>(parameterSpec._reference)) {
+            auto const& boolSpec = std::get<BoolSpec>(parameterSpec._reference);
+            if (std::holds_alternative<BoolSourceMember>(boolSpec._member)) {
+                return true;
+            }
+        } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
             auto const& floatSpec = std::get<FloatSpec>(parameterSpec._reference);
             if (std::holds_alternative<FloatSourceMember>(floatSpec._member)
                 || std::holds_alternative<FloatEnableableSourceMember>(floatSpec._member)
