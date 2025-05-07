@@ -38,7 +38,7 @@ struct SimulationParameters
     BaseParameter<bool> borderlessRendering = {false};
     BaseParameter<bool> gridLines = {false};
     BaseParameter<bool> markReferenceDomain = {true};
-    SourceParameter<bool> sourceShow = {true};
+    SourceParameter<bool> sourceShowRadiationCenter = {true};
 
     // Location
     LayerParameter<RealVector2D> layerPosition;
