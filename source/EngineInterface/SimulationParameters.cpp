@@ -56,9 +56,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                 ParameterSpec().name("Layer name").reference(Char64Spec().member(&SimulationParameters::layerName)),
                 ParameterSpec().name("Source name").reference(Char64Spec().member(&SimulationParameters::sourceName)),
                 ParameterSpec()
-                    .name("Strength")
-                    .reference(FloatSpec().member(&SimulationParameters::layerStrength).min(0.0f).max(1.0f))
-                    .description("Layers can overwrite basic parameters and exert force fields. The general strength is specified with this parameter between "
+                    .name("Opacity")
+                    .reference(FloatSpec().member(&SimulationParameters::layerOpacity).min(0.0f).max(1.0f))
+                    .description("Layers can overwrite basic parameters and exert force fields. The opacity is specified with this parameter between "
                                  "0 and 1. A value of 1 means that parameters in the core area of the layer can be completely overwritten, while a value "
                                  "of 0 means that the layer has no effect."),
                 ParameterSpec()
@@ -128,7 +128,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Show radiation source")
                         .reference(BoolSpec().member(&SimulationParameters::sourceShow))
-                        .description("This option draws red crosses in the center of radiation sources."),
+                        .description("This option draws a red cross in the center of the radiation source."),
                 }),
             ParameterGroupSpec()
                 .name("Location")

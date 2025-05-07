@@ -24,7 +24,7 @@ struct SimulationParameters
     BaseParameter<Char64> projectName = {"<unnamed>"};
     LayerParameter<Char64> layerName = {{"<unnamed>"}};
     SourceParameter<Char64> sourceName = {{"<unnamed>"}};
-    LayerParameter<float> layerStrength = {{1.0f}};
+    LayerParameter<float> layerOpacity = {{1.0f}};
     PinnableSourceParameter<float> sourceRelativeStrength = {{{.value = 0.0f, .pinned = false}}};
 
     // Visualization

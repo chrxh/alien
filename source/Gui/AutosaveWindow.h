@@ -30,6 +30,8 @@ private:
     void onDeleteSavepoint(SavepointEntry const& entry);
     void onLoadSavepoint(SavepointEntry const& entry);
 
+    void processStateUpdates();
+
     void scheduleDeleteNonPersistentSavepoint(std::vector<SavepointEntry> const& entries);
     void processDeleteNonPersistentSavepoint();
 

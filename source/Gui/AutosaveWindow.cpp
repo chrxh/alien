@@ -99,6 +99,7 @@ void AutosaveWindow::processIntern()
 
 void AutosaveWindow::processBackground()
 {
+    processStateUpdates();
     processDeleteNonPersistentSavepoint();
     processCleanup();
     processAutomaticSavepoints();
@@ -160,7 +161,6 @@ void AutosaveWindow::processTable()
         clipper.Begin(_savepointTable->getSize());
         while (clipper.Step()) {
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                updateSavepoint(row);
                 auto const& entry = _savepointTable->at(row);
 
                 ImGui::PushID(row);
@@ -356,6 +356,13 @@ void AutosaveWindow::onLoadSavepoint(SavepointEntry const& entry)
 {
     auto path = SavepointTableService::get().calcAbsolutePath(_savepointTable.value(), entry);
     FileTransferController::get().onOpenSimulation(path);
+}
+
+void AutosaveWindow::processStateUpdates()
+{
+    for (int row = 0, size = _savepointTable->getSize(); row < size; ++row) {
+        updateSavepoint(row);
+    }
 }
 
 void AutosaveWindow::processCleanup()

@@ -639,7 +639,7 @@ void SimulationParametersMainWindow::updateLocations()
             .name = parameters.layerName.layerValues[i],
             .type = LocationType::Layer,
             .position = position,
-            .strength = " " + StringHelper::format(parameters.layerStrength.layerValues[i] * 100 + 0.05f, 1) + "%"};
+            .strength = " " + StringHelper::format(parameters.layerOpacity.layerValues[i] * 100 + 0.05f, 1) + "%"};
     }
     for (int i = 0; i < parameters.numSources; ++i) {
         auto position = "(" + StringHelper::format(parameters.sourcePosition.sourceValues[i].x, 0) + ", "
