@@ -7,7 +7,7 @@
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
-#include "TOs.cuh"
+#include "ObjectTO.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
 #include "ObjectFactory.cuh"

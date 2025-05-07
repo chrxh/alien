@@ -4,7 +4,8 @@
 #include "sm_60_atomic_functions.h"
 
 #include "EngineInterface/InspectedEntityIds.h"
-#include "TOs.cuh"
+
+#include "ObjectTO.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
 #include "ObjectFactory.cuh"

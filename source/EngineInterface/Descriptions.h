@@ -658,6 +658,7 @@ struct CellDescription
 
     // General
     uint64_t _id = 0;
+    uint64_t _genomeId_New = 0;
     std::vector<ConnectionDescription> _connections;
     RealVector2D _pos;
     RealVector2D _vel;

@@ -1,13 +1,12 @@
 #pragma once
 
-#include <optional>
-
 #include <nppdefs.h>
 
 #include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/CellTypeConstants.h"
 
 #include "Base.cuh"
+#include "Genome.cuh"
 #include "Math.cuh"
 
 struct Particle
@@ -286,6 +285,7 @@ struct Cell
 {
     // General
     uint64_t id;
+    Genome_New* genome_New;
     CellConnection connections[MAX_CELL_BONDS];
     float2 pos;
     float2 vel;

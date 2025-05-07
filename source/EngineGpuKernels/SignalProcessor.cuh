@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TOs.cuh"
+#include "ObjectTO.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
 #include "ObjectFactory.cuh"

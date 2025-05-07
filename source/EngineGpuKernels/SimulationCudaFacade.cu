@@ -19,7 +19,7 @@
 #include "EngineInterface/SpaceCalculator.h"
 
 #include "DataAccessKernels.cuh"
-#include "TOs.cuh"
+#include "ObjectTO.cuh"
 #include "Base.cuh"
 #include "GarbageCollectorKernels.cuh"
 #include "ConstantMemory.cuh"

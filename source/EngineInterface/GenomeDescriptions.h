@@ -562,3 +562,26 @@ struct GenomeDescription
     GenomeHeaderDescription _header;
     std::vector<CellGenomeDescription> _cells;
 };
+
+
+struct NodeDescription
+{
+    auto operator<=>(NodeDescription const&) const = default;
+
+    MEMBER(NodeDescription, CellType, cellType, CellType_Base);
+};
+
+struct GeneDescription
+{
+    auto operator<=>(GeneDescription const&) const = default;
+
+    MEMBER(GeneDescription, std::vector<NodeDescription>, nodes, {})
+};
+
+struct GenomeDescription_New
+{
+    auto operator<=>(GenomeDescription_New const&) const = default;
+
+    MEMBER(GenomeDescription_New, uint64_t, id, 0);
+    MEMBER(GenomeDescription_New, std::vector<GeneDescription>, genes, {})
+};
