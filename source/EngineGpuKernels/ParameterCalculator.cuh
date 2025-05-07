@@ -159,8 +159,8 @@ __device__ __inline__ float ParameterCalculator::calcWeightForCircularLayer(floa
     auto coreRadius = cudaSimulationParameters.layerCoreRadius.layerValues[index];
     auto fadeoutRadius = cudaSimulationParameters.layerFadeoutRadius.layerValues[index] + 1;
 
-    return distance < coreRadius ? 1.0f - cudaSimulationParameters.layerStrength.layerValues[index]
-                                 : min(1.0f, 1.0f - cudaSimulationParameters.layerStrength.layerValues[index] + (distance - coreRadius) / fadeoutRadius);
+    return distance < coreRadius ? 1.0f - cudaSimulationParameters.layerOpacity.layerValues[index]
+                                 : min(1.0f, 1.0f - cudaSimulationParameters.layerOpacity.layerValues[index] + (distance - coreRadius) / fadeoutRadius);
 }
 
 __device__ __inline__ float ParameterCalculator::calcWeightForRectLayer(float2 const& delta, int const& index)
@@ -172,9 +172,9 @@ __device__ __inline__ float ParameterCalculator::calcWeightForRectLayer(float2 c
             max(0.0f, abs(delta.y) - cudaSimulationParameters.layerCoreRect.layerValues[index].y / 2)};
         return
             min(1.0f,
-                1.0f - cudaSimulationParameters.layerStrength.layerValues[index]
+                1.0f - cudaSimulationParameters.layerOpacity.layerValues[index]
                     + Math::length(distanceFromRect) / (cudaSimulationParameters.layerFadeoutRadius.layerValues[index] + 1));
     } else {
-        return 1.0f - cudaSimulationParameters.layerStrength.layerValues[index];
+        return 1.0f - cudaSimulationParameters.layerOpacity.layerValues[index];
     }
 }
