@@ -34,7 +34,9 @@ add_library(EngineGpuKernels
     GarbageCollectorKernels.cuh
     GarbageCollectorKernelsLauncher.cu
     GarbageCollectorKernelsLauncher.cuh
+    Genome.cuh
     GenomeDecoder.cuh
+    GenomeTO.cuh
     HashMap.cuh
     HashSet.cuh
     InjectorProcessor.cuh
@@ -52,6 +54,7 @@ add_library(EngineGpuKernels
     Object.cuh
     Objects.cu
     Objects.cuh
+    ObjectTO.cuh
     ObjectFactory.cuh
     Operations.cuh
     ParameterCalculator.cuh
@@ -90,7 +93,6 @@ add_library(EngineGpuKernels
     TestKernelsLauncher.cu
     TestKernelsLauncher.cuh
     TransmitterProcessor.cuh
-    TOs.cuh
     Util.cuh
     )
 

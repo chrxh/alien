@@ -3,7 +3,7 @@
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/ZoomLevels.h"
 
-#include "TOs.cuh"
+#include "ObjectTO.cuh"
 #include "Base.cuh"
 #include "GarbageCollectorKernels.cuh"
 #include "ObjectFactory.cuh"

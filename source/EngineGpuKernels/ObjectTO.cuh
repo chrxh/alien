@@ -244,6 +244,7 @@ struct CellTO
 {
     // General
     uint64_t id;
+    uint64_t genomeIndex_New;
     ConnectionTO connections[MAX_CELL_BONDS];
     float2 pos;
     float2 vel;

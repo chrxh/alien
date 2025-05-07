@@ -5,7 +5,7 @@
 
 #include "EngineInterface/CellTypeConstants.h"
 
-#include "TOs.cuh"
+#include "ObjectTO.cuh"
 #include "Base.cuh"
 #include "ObjectFactory.cuh"
 #include "Map.cuh"

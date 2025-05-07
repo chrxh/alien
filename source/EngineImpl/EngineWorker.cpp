@@ -2,7 +2,7 @@
 
 #include <chrono>
 
-#include "EngineGpuKernels/TOs.cuh"
+#include "EngineGpuKernels/ObjectTO.cuh"
 #include "EngineGpuKernels/SimulationCudaFacade.cuh"
 #include "AccessDataTOCache.h"
 #include "DescriptionConverterService.h"

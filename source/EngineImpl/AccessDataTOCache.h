@@ -3,7 +3,7 @@
 #include "Base/Definitions.h"
 
 #include "EngineInterface/ArraySizes.h"
-#include "EngineGpuKernels/TOs.cuh"
+#include "EngineGpuKernels/ObjectTO.cuh"
 
 #include "Definitions.h"
 
