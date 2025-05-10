@@ -47,6 +47,7 @@ public:
         MEMBER(SliderFloatParameters, bool, infinity, false);
         MEMBER(SliderFloatParameters, float, textWidth, 100);
         MEMBER(SliderFloatParameters, bool, colorDependence, false);
+        MEMBER(SliderFloatParameters, bool, disabled, false);
         MEMBER(SliderFloatParameters, float const*, defaultValue, nullptr);
         MEMBER(SliderFloatParameters, float const*, disabledValue, nullptr);
         MEMBER(SliderFloatParameters, bool const*, defaultEnabledValue, nullptr);
@@ -64,6 +65,7 @@ public:
         MEMBER(SliderIntParameters, bool, infinity, false);
         MEMBER(SliderIntParameters, float, textWidth, 100);
         MEMBER(SliderIntParameters, bool, colorDependence, false);
+        MEMBER(SliderIntParameters, bool, disabled, false);
         MEMBER(SliderIntParameters, int const*, defaultValue, nullptr);
         MEMBER(SliderIntParameters, int const*, disabledValue, nullptr);
         MEMBER(SliderIntParameters, bool const*, defaultEnabledValue, nullptr);
@@ -224,6 +226,7 @@ public:
         MEMBER(SwitcherParameters, bool, disabled, false);
         MEMBER(SwitcherParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER(SwitcherParameters, std::vector<std::string>, values, std::vector<std::string>());
+        MEMBER(SwitcherParameters, std::optional<int>, disabledValue, std::nullopt);
         MEMBER(SwitcherParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool Switcher(SwitcherParameters& parameters, int& value, bool* enabled = nullptr);

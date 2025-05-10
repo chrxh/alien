@@ -49,10 +49,6 @@ struct LayerParameter
     bool operator==(LayerParameter<T> const&) const = default;
 };
 
-/**
- * Base and layer parameters
- */
-
 template <typename T>
 struct EnableableValue
 {
@@ -61,6 +57,18 @@ struct EnableableValue
 
     bool operator==(EnableableValue<T> const&) const = default;
 };
+
+template <typename T>
+struct EnableableLayerParameter
+{
+    EnableableValue<T> layerValues[MAX_LAYERS];
+
+    bool operator==(EnableableLayerParameter<T> const&) const = default;
+};
+
+/**
+ * Base and layer parameters
+ */
 
 template <typename T>
 struct BaseLayerParameter

@@ -20,7 +20,7 @@ namespace
 
     __device__ __inline__ float2 calcAcceleration(BaseMap const& map, float2 const& pos, int const& index)
     {
-        switch (cudaSimulationParameters.layerForceFieldType.layerValues[index]) {
+        switch (cudaSimulationParameters.layerForceFieldType.layerValues[index].value) {
         case ForceField_Radial: {
             auto baseValue = getHeight(map, pos, index);
             auto downValue = getHeight(map, pos + float2{0, 1}, index);
@@ -51,6 +51,19 @@ namespace
 __global__ void cudaApplyForceFieldSettings(SimulationData data)
 {
     float2 accelerations[MAX_LAYERS];
+
+    auto calcResultingAcceleration = [&](float2 const& pos) {
+        for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
+            if (cudaSimulationParameters.layerForceFieldType.layerValues[i].enabled) {
+                if (cudaSimulationParameters.layerForceFieldType.layerValues[i].value != ForceField_None) {
+                    accelerations[i] = calcAcceleration(data.cellMap, pos, i);
+                } else {
+                    accelerations[i] = float2{0, 0};
+                }
+            }
+        }
+        return ParameterCalculator::calcParameter(float2{0, 0}, accelerations, data, pos);
+    };
     {
         auto& cells = data.objects.cellPointers;
         auto partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -60,15 +73,7 @@ __global__ void cudaApplyForceFieldSettings(SimulationData data)
             if (cell->barrier) {
                 continue;
             }
-            for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
-                if (cudaSimulationParameters.layerForceFieldType.layerValues[i] != ForceField_None) {
-                    accelerations[i] = calcAcceleration(data.cellMap, cell->pos, i);
-                } else {
-                    accelerations[i] = float2{0, 0};
-                }
-            }
-            auto resultingAcceleration = ParameterCalculator::calcParameter(float2{0, 0}, accelerations, data, cell->pos);
-            cell->shared1 += resultingAcceleration;
+            cell->shared1 += calcResultingAcceleration(cell->pos);
         }
     }
     {
@@ -76,15 +81,7 @@ __global__ void cudaApplyForceFieldSettings(SimulationData data)
         auto partition = calcAllThreadsPartition(particles.getNumEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& particle = particles.at(index);
-            for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
-                if (cudaSimulationParameters.layerForceFieldType.layerValues[i] != ForceField_None) {
-                    accelerations[i] = calcAcceleration(data.cellMap, particle->pos, i);
-                } else {
-                    accelerations[i] = float2{0, 0};
-                }
-            }
-            auto resultingAcceleration = ParameterCalculator::calcParameter(float2{0, 0}, accelerations, data, particle->pos);
-            particle->vel += resultingAcceleration;
+            particle->vel += calcResultingAcceleration(particle->pos);
         }
     }
 }

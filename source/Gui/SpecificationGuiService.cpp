@@ -42,7 +42,7 @@ void SpecificationGuiService::createWidgetsForParameters(
         }
         ImGui::PushID(name.c_str());
         if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name(name).visible(isGroupVisibleActive).blinkWhenActivated(isExpertSettings))) {
-            createWidgetsForParameterGroup(groupSpec._parameters, parameters, origParameters, simulationFacade, orderNumber);
+            createWidgetsForParameterGroup(groupSpec._parameters, true, parameters, origParameters, simulationFacade, orderNumber);
         }
         ImGui::PopID();
         AlienImGui::EndTreeNode();
@@ -87,6 +87,7 @@ namespace
 
 void SpecificationGuiService::createWidgetsForParameterGroup(
     std::vector<ParameterSpec> const& parameterSpecs,
+    bool enabled,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
     SimulationFacade const& simulationFacade,
@@ -101,21 +102,21 @@ void SpecificationGuiService::createWidgetsForParameterGroup(
         ImGui::PushID(toInt(index));
 
         if (std::holds_alternative<BoolSpec>(parameterSpec._reference)) {
-            createWidgetsForBoolSpec(parameterSpec, parameters, origParameters, orderNumber);
+            createWidgetsForBoolSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
         } else if (std::holds_alternative<IntSpec>(parameterSpec._reference)) {
-            createWidgetsForIntSpec(parameterSpec, parameters, origParameters, orderNumber);
+            createWidgetsForIntSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
         } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
-            createWidgetsForFloatSpec(parameterSpec, parameters, origParameters, simulationFacade, orderNumber);
+            createWidgetsForFloatSpec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber);
         } else if (std::holds_alternative<Float2Spec>(parameterSpec._reference)) {
-            createWidgetsForFloat2Spec(parameterSpec, parameters, origParameters, simulationFacade, orderNumber);
+            createWidgetsForFloat2Spec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber);
         } else if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {
-            createWidgetsForChar64Spec(parameterSpec, parameters, origParameters, orderNumber);
+            createWidgetsForChar64Spec(parameterSpec, enabled, parameters, origParameters, orderNumber);
         } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._reference)) {
-            createWidgetsForAlternativeSpec(parameterSpec, parameters, origParameters, simulationFacade, orderNumber);
+            createWidgetsForAlternativeSpec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber);
         } else if (std::holds_alternative<ColorSpec>(parameterSpec._reference)) {
-            createWidgetsForColorPickerSpec(parameterSpec, parameters, origParameters, orderNumber);
+            createWidgetsForColorPickerSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
         } else if (std::holds_alternative<ColorTransitionRulesSpec>(parameterSpec._reference)) {
-            createWidgetsForColorTransitionRulesSpec(parameterSpec, parameters, origParameters, orderNumber);
+            createWidgetsForColorTransitionRulesSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
         }
 
         ImGui::PopID();
@@ -124,6 +125,7 @@ void SpecificationGuiService::createWidgetsForParameterGroup(
 
 void SpecificationGuiService::createWidgetsForBoolSpec(
     ParameterSpec const& parameterSpec,
+    bool enabled,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
     int orderNumber) const
@@ -157,6 +159,7 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
 
 void SpecificationGuiService::createWidgetsForIntSpec(
     ParameterSpec const& parameterSpec,
+    bool enabled,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
     int orderNumber) const
@@ -201,6 +204,7 @@ void SpecificationGuiService::createWidgetsForIntSpec(
 
 void SpecificationGuiService::createWidgetsForFloatSpec(
     ParameterSpec const& parameterSpec,
+    bool enabled,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
     SimulationFacade const& simulationFacade,
@@ -260,6 +264,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
                     .logarithmic(floatSpec._logarithmic)
                     .format(floatSpec._format)
                     .infinity(floatSpec._infinity)
+                    .disabled(!enabled)
                     .disabledValue(disabledValue)
                     .defaultValue(origValue)
                     .defaultEnabledValue(origEnabledValue)
@@ -279,6 +284,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
 
 void SpecificationGuiService::createWidgetsForFloat2Spec(
     ParameterSpec const& parameterSpec,
+    bool enabled,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
     SimulationFacade const& simulationFacade,
@@ -322,6 +328,7 @@ void SpecificationGuiService::createWidgetsForFloat2Spec(
 
 void SpecificationGuiService::createWidgetsForChar64Spec(
     ParameterSpec const& parameterSpec,
+    bool enabled,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
     int orderNumber) const
@@ -341,6 +348,7 @@ void SpecificationGuiService::createWidgetsForChar64Spec(
 
 void SpecificationGuiService::createWidgetsForAlternativeSpec(
     ParameterSpec const& parameterSpec,
+    bool enabled,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
     SimulationFacade const& simulationFacade,
@@ -364,8 +372,10 @@ void SpecificationGuiService::createWidgetsForAlternativeSpec(
             .textWidth(RightColumnWidth)
             .defaultValue(*origValue)
             .values(values)
+            .disabled(!enabled)
             .tooltip(parameterSpec._description),
-        *value);
+        *value,
+        enabledValue);
 
     auto const& parametersForAlternative = alternativeSpec._alternatives.at(*value).second;
     auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
@@ -374,16 +384,20 @@ void SpecificationGuiService::createWidgetsForAlternativeSpec(
     });
 
     if (containsWidgets) {
-        ImGui::Dummy(ImVec2(scale(20), 0));
+        ImGui::Dummy(ImVec2(scale(22), 0));
         ImGui::SameLine();
         ImGui::BeginGroup();
-        createWidgetsForParameterGroup(alternativeSpec._alternatives.at(*value).second, parameters, origParameters, simulationFacade, orderNumber);
+        if (enabled) {
+            enabled = enabledValue != nullptr ? *enabledValue : true;
+        }
+        createWidgetsForParameterGroup(alternativeSpec._alternatives.at(*value).second, enabled, parameters, origParameters, simulationFacade, orderNumber);
         ImGui::EndGroup();
     }
 }
 
 void SpecificationGuiService::createWidgetsForColorPickerSpec(
     ParameterSpec const& parameterSpec,
+    bool enabled,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
     int orderNumber) const
@@ -401,6 +415,7 @@ void SpecificationGuiService::createWidgetsForColorPickerSpec(
 
 void SpecificationGuiService::createWidgetsForColorTransitionRulesSpec(
     ParameterSpec const& parameterSpec,
+    bool enabled,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
     int orderNumber) const
