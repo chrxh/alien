@@ -607,15 +607,15 @@ bool AlienImGui::Switcher(SwitcherParameters& parameters, int& value, bool* enab
         ImGui::EndDisabled();
     }
 
-    ImGui::SameLine();
-    AlienImGui::Text(parameters._name.c_str());
-
     if (enabled) {
         ImGui::EndDisabled();
     }
     if (parameters._disabled) {
         ImGui::EndDisabled();
     }
+
+    ImGui::SameLine();
+    AlienImGui::Text(parameters._name);
 
     if (parameters._tooltip) {
         AlienImGui::HelpMarker(*parameters._tooltip);
@@ -2048,6 +2048,10 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
 
     ImGui::PushID(parameters._name.c_str());
 
+    if (parameters._disabled) {
+        ImGui::BeginDisabled();
+    }
+
     //enable button
     if (enabled) {
         ImGui::Checkbox("##checkbox", enabled);
@@ -2203,7 +2207,13 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
                 if (enabled) {
                     ImGui::EndDisabled();
                 }
+                if (parameters._disabled) {
+                    ImGui::EndDisabled();
+                }
                 AlienImGui::Text(parameters._name);
+                if (parameters._disabled) {
+                    ImGui::BeginDisabled();
+                }
                 if (enabled) {
                     ImGui::BeginDisabled(!(*enabled));
                 }
@@ -2222,6 +2232,9 @@ bool AlienImGui::BasicSlider(Parameter const& parameters, T* value, bool* enable
         }
     }
     if (enabled) {
+        ImGui::EndDisabled();
+    }
+    if (parameters._disabled) {
         ImGui::EndDisabled();
     }
     ImGui::PopID();

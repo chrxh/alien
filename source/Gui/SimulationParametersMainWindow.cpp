@@ -455,7 +455,6 @@ void SimulationParametersMainWindow::onInsertDefaultLayer()
     parameters.layerCoreRadius.layerValues[index] = minRadius / 3;
     parameters.layerCoreRect.layerValues[index] = {minRadius / 3, minRadius / 3};
     parameters.layerFadeoutRadius.layerValues[index] = minRadius / 5;
-    parameters.layerForceFieldType.layerValues[index] = ForceField_None;
     parameters.layerRadialForceFieldOrientation.layerValues[index] = Orientation_Clockwise;
     parameters.layerRadialForceFieldStrength.layerValues[index] = 0.001f;
     parameters.layerRadialForceFieldDriftAngle.layerValues[index] = 0.0f;

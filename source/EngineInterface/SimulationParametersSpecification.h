@@ -38,10 +38,12 @@ using _ColorMatrixIntMember = BaseParameter<ColorMatrix<int>> SimulationParamete
 using ColorMatrixIntMember = std::shared_ptr<_ColorMatrixIntMember>;
 using _IntLayerMember = LayerParameter<int> SimulationParameters::*;
 using IntLayerMember = std::shared_ptr<_IntLayerMember>;
+using _IntEnableableLayerMember = EnableableLayerParameter<int> SimulationParameters::*;
+using IntEnableableLayerMember = std::shared_ptr<_IntEnableableLayerMember>;
 using _IntSourceMember = SourceParameter<int> SimulationParameters::*;
 using IntSourceMember = std::shared_ptr<_IntSourceMember>;
 using IntMemberVariant = std::variant<std::monostate, IntMember, IntEnableableMember, ColorVectorIntMember, ColorMatrixIntMember, IntLayerMember, IntSourceMember>;
-using AlternativeMemberVariant = std::variant<std::monostate, IntMember, IntLayerMember, IntSourceMember>;
+using AlternativeMemberVariant = std::variant<std::monostate, IntMember, IntLayerMember, IntEnableableLayerMember, IntSourceMember>;
 
 using _FloatMember = BaseParameter<float> SimulationParameters::*;
 using FloatMember = std::shared_ptr<_FloatMember>;
@@ -190,6 +192,7 @@ struct AlternativeSpec
 {
     SETTER_SHARED_PTR(AlternativeSpec, IntMember, member);
     SETTER_SHARED_PTR(AlternativeSpec, IntLayerMember, member);
+    SETTER_SHARED_PTR(AlternativeSpec, IntEnableableLayerMember, member);
     SETTER_SHARED_PTR(AlternativeSpec, IntSourceMember, member);
     AlternativeMemberVariant _member = std::monostate();
 

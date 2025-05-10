@@ -54,7 +54,7 @@ struct SimulationParameters
     SourceParameter<RealVector2D> sourceVelocity;
 
     // Force field
-    LayerParameter<ForceField> layerForceFieldType = {{ForceField_None}};
+    EnableableLayerParameter<ForceField> layerForceFieldType = {.layerValues = {{ForceField_None, false}}};
     LayerParameter<Orientation> layerRadialForceFieldOrientation = {{Orientation_Clockwise}};  // for ForceField_Radial
     LayerParameter<float> layerRadialForceFieldStrength = {{0.001f}};                          // for ForceField_Radial
     LayerParameter<float> layerRadialForceFieldDriftAngle = {{0.0f}};                          // for ForceField_Radial
