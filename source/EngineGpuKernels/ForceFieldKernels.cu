@@ -55,11 +55,7 @@ __global__ void cudaApplyForceFieldSettings(SimulationData data)
     auto calcResultingAcceleration = [&](float2 const& pos) {
         for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
             if (cudaSimulationParameters.layerForceFieldType.layerValues[i].enabled) {
-                if (cudaSimulationParameters.layerForceFieldType.layerValues[i].value != ForceField_None) {
-                    accelerations[i] = calcAcceleration(data.cellMap, pos, i);
-                } else {
-                    accelerations[i] = float2{0, 0};
-                }
+                accelerations[i] = calcAcceleration(data.cellMap, pos, i);
             }
         }
         return ParameterCalculator::calcParameter(float2{0, 0}, accelerations, data, pos);
