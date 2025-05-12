@@ -1,8 +1,12 @@
 #pragma once
 
 #include <variant>
+#include <optional>
+#include <string>
+#include <unordered_set>
 
-#include "Base/Definitions.h"
+#include "Base/Macros.h"
+#include "Base/Vector2D.h"
 #include "EngineInterface/EngineConstants.h"
 
 #include "Definitions.h"
@@ -120,7 +124,7 @@ struct ConstructorDescription
 
     ConstructorDescription& autoTriggerInterval(int value)
     {
-        _autoTriggerInterval = toUInt8(value);
+        _autoTriggerInterval = static_cast<uint8_t>(value);
         return *this;
     }
     ConstructorDescription& constructionActivationTime(int value)

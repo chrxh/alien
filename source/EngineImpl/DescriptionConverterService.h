@@ -15,9 +15,6 @@ class DescriptionConverterService
 public:
     DescriptionConverterService(SimulationParameters const& parameters);
 
-    ArraySizes getArraySizes(DataDescription const& data) const;
-    ArraySizes getArraySizes(ClusteredDataDescription const& data) const;
-
     ClusteredDataDescription convertTOtoClusteredDataDescription(DataTO const& dataTO) const;
     DataDescription convertTOtoDataDescription(DataTO const& dataTO) const;
     OverlayDescription convertTOtoOverlayDescription(DataTO const& dataTO) const;
@@ -27,8 +24,6 @@ public:
     void convertDescriptionToTO(DataTO& result, ParticleDescription const& particle) const;
 
 private:
-    void addAdditionalDataSizeForCell(CellDescription const& cell, uint64_t& additionalDataSize) const;
-
 	struct CreateClusterReturnData
     {
         ClusterDescription cluster;
