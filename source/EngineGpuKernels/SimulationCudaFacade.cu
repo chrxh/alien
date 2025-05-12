@@ -474,11 +474,7 @@ ArraySizes _SimulationCudaFacade::getGpuArraySizesNeededFor(ClusteredDataDescrip
 
 auto _SimulationCudaFacade::getCurrentGpuArraySizes() const -> ArraySizes
 {
-    return {
-        _cudaSimulationData->objects.cellPointers.getSize_host(),
-        _cudaSimulationData->objects.particlePointers.getSize_host(),
-        _cudaSimulationData->objects.rawMemory.getSize_host()
-    };
+    return _cudaSimulationData->getCurrentArraySizes();
 }
 
 StatisticsRawData _SimulationCudaFacade::getStatisticsRawData()

@@ -81,14 +81,23 @@ void SimulationData::resizeObjects()
     objects.particlePointers.resize(tempObjects.particlePointers.getSize_host());
     objects.rawMemory.resize(tempObjects.rawMemory.getSize_host());
 
-    auto cellArraySize = objects.cellPointers.getSize_host();
-    cellMap.resize(cellArraySize);
-    auto particleArraySize = objects.particlePointers.getSize_host();
-    particleMap.resize(particleArraySize);
+    auto estimatedMaxActiveCells = objects.cellPointers.getSize_host() / 5;
+    cellMap.resize(estimatedMaxActiveCells);
+    auto estimatedMaxActiveParticles = objects.particlePointers.getSize_host() / 5;
+    particleMap.resize(estimatedMaxActiveParticles);
 
-    auto approxActiveCells = cellArraySize / 5;
-    auto upperBoundDynamicMemory = (sizeof(StructuralOperation) + sizeof(CellTypeOperation) * CellType_Count + 200) * (approxActiveCells + 1000);  //heuristic
+    auto upperBoundDynamicMemory =
+        (sizeof(StructuralOperation) + sizeof(CellTypeOperation) * CellType_Count + 200) * (estimatedMaxActiveCells + 1000);  //heuristic
     processMemory.resize(upperBoundDynamicMemory);
+}
+
+ArraySizes SimulationData::getCurrentArraySizes() const
+{
+    ArraySizes result;
+    result.cellArraySize = objects.cellPointers.getSize_host();
+    result.particleArraySize = objects.particlePointers.getSize_host();
+    result.rawMemorySize = objects.rawMemory.getSize_host();
+    return result;
 }
 
 bool SimulationData::isEmpty()

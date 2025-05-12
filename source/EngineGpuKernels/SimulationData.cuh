@@ -43,6 +43,7 @@ struct SimulationData
     bool shouldResize(ArraySizes const& additionals);
     void resizeTargetObjects(ArraySizes const& additionals);
     void resizeObjects();
+    ArraySizes getCurrentArraySizes() const;
     bool isEmpty();
     void free();
 
