@@ -62,7 +62,7 @@ bool SimulationData::shouldResize(ArraySizes const& additionals)
     calcArraySizes(cellArraySizeResult, particleArraySizeResult, additionals.cellArraySize, additionals.particleArraySize);
     return objects.cellPointers.shouldResize_host(cellArraySizeResult * 5)
         || objects.particles.shouldResize_host(particleArraySizeResult) || objects.particlePointers.shouldResize_host(particleArraySizeResult * 5)
-        || objects.auxiliaryData.shouldResize_host(additionals.auxiliaryDataSize);
+        || objects.rawMemory.shouldResize_host(additionals.auxiliaryDataSize);
 }
 
 void SimulationData::resizeTargetObjects(ArraySizes const& additionals)
@@ -73,7 +73,7 @@ void SimulationData::resizeTargetObjects(ArraySizes const& additionals)
     resizeTargetIntern(objects.cellPointers, tempObjects.cellPointers, cellArraySizeResult * 5);
     resizeTargetIntern(objects.particles, tempObjects.particles, particleArraySizeResult);
     resizeTargetIntern(objects.particlePointers, tempObjects.particlePointers, particleArraySizeResult * 5);
-    resizeTargetIntern(objects.auxiliaryData, tempObjects.auxiliaryData, additionals.auxiliaryDataSize);
+    resizeTargetIntern(objects.rawMemory, tempObjects.rawMemory, additionals.auxiliaryDataSize);
 }
 
 void SimulationData::resizeObjects()
@@ -81,20 +81,21 @@ void SimulationData::resizeObjects()
     objects.cellPointers.resize(tempObjects.cellPointers.getSize_host());
     objects.particles.resize(tempObjects.particles.getSize_host());
     objects.particlePointers.resize(tempObjects.particlePointers.getSize_host());
-    objects.auxiliaryData.resize(tempObjects.auxiliaryData.getSize_host());
+    objects.rawMemory.resize(tempObjects.rawMemory.getSize_host());
 
     auto cellArraySize = objects.cellPointers.getSize_host();
     cellMap.resize(cellArraySize);
     auto particleArraySize = objects.particlePointers.getSize_host();
     particleMap.resize(particleArraySize);
 
-    int upperBoundDynamicMemory = (sizeof(StructuralOperation) + sizeof(CellTypeOperation) * CellType_Count + 200) * (cellArraySize + 1000); //heuristic
+    auto approxActiveCells = cellArraySize / 5;
+    auto upperBoundDynamicMemory = (sizeof(StructuralOperation) + sizeof(CellTypeOperation) * CellType_Count + 200) * (approxActiveCells + 1000);  //heuristic
     processMemory.resize(upperBoundDynamicMemory);
 }
 
 bool SimulationData::isEmpty()
 {
-    return 0 == objects.auxiliaryData.getNumEntries_host() && 0 == objects.particles.getNumEntries_host();
+    return 0 == objects.rawMemory.getNumEntries_host() && 0 == objects.particles.getNumEntries_host();
 }
 
 void SimulationData::free()

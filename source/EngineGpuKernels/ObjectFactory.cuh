@@ -263,7 +263,7 @@ __inline__ __device__ void ObjectFactory::createAuxiliaryData(T sourceSize, uint
 __inline__ __device__ void ObjectFactory::createAuxiliaryDataWithFixedSize(uint64_t size, uint64_t sourceIndex, uint8_t* auxiliaryData, uint8_t*& target)
 {
     if (size > 0) {
-        target = _data->objects.auxiliaryData.getRawSubArray(size);
+        target = _data->objects.rawMemory.getRawSubArray(size);
         for (int i = 0; i < size; ++i) {
             target[i] = auxiliaryData[sourceIndex + i];
         }
@@ -289,7 +289,7 @@ ObjectFactory::createParticle(float energy, float2 const& pos, float2 const& vel
 
 __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 const& pos, float2 const& vel)
 {
-    auto cell = _data->objects.auxiliaryData.getTypedSubArray<Cell>(1);
+    auto cell = _data->objects.rawMemory.getTypedSubArray<Cell>(1);
     auto cellPointers = _data->objects.cellPointers.getNewElement();
     *cellPointers = cell;
 
@@ -332,7 +332,7 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
 
 __inline__ __device__ Cell* ObjectFactory::createCell(uint64_t& cellPointerIndex)
 {
-    auto cell = _data->objects.auxiliaryData.getTypedSubArray<Cell>(1);
+    auto cell = _data->objects.rawMemory.getTypedSubArray<Cell>(1);
     auto cellPointer = _data->objects.cellPointers.getNewElement(&cellPointerIndex);
     *cellPointer = cell;
 
