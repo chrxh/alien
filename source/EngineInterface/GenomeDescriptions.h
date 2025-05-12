@@ -5,7 +5,6 @@
 #include <optional>
 #include <variant>
 #include <limits>
-#include <mdspan>
 
 #include "Base/Definitions.h"
 #include "EngineConstants.h"
@@ -23,21 +22,27 @@ struct NeuralNetworkGenomeDescription
         _weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
         _biases.resize(MAX_CHANNELS, 0);
         _activationFunctions.resize(MAX_CHANNELS, ActivationFunction_Identity);
-        auto md = std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS);
+        // #TODO GCC incompatibily:
+        // auto md = std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS);
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            md[i, i] = 1.0f;
+            // #TODO GCC incompatibily:
+            // md[i, i] = 1.0f;
+            _weights[i * MAX_CHANNELS + i] = 1.0f;
         }
     }
     auto operator<=>(NeuralNetworkGenomeDescription const&) const = default;
 
     NeuralNetworkGenomeDescription& weight(int row, int col, float value)
     {
-        auto md = std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS);
-        md[row, col] = value;
+        // #TODO GCC incompatibily:
+        // auto md = std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS);
+        // md[row, col] = value;
+        _weights[row * MAX_CHANNELS + col] = value;
         return *this;
     }
-    auto getWeights() const { return std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
-    auto getWeights() { return std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
+    // #TODO GCC incompatibily:
+    // auto getWeights() const { return std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
+    // auto getWeights() { return std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
 
     std::vector<float> _weights;
     std::vector<float> _biases;
