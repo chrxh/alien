@@ -16,6 +16,7 @@
 #include "EngineInterface/InspectedEntityIds.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/GpuSettings.h"
+#include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SpaceCalculator.h"
 
 #include "DataAccessKernels.cuh"
@@ -406,6 +407,67 @@ void _SimulationCudaFacade::setSimulationParameters(SimulationParameters const& 
     std::lock_guard lock(_mutexForSimulationParameters);
     _newSimulationParameters = parameters;
     _simulationParametersUpdateConfig = updateConfig;
+}
+
+namespace
+{
+    void addAdditionalDataSizeForCell(CellDescription const& cell, uint64_t& additionalDataSize)
+    {
+        additionalDataSize += cell._metadata._name.size() + cell._metadata._description.size();
+        switch (cell.getCellType()) {
+        case CellType_Base: {
+            additionalDataSize += MAX_CHANNELS * (MAX_CHANNELS + 1) * sizeof(float);
+        } break;
+        case CellType_Depot:
+            break;
+        case CellType_Constructor:
+            additionalDataSize += std::get<ConstructorDescription>(cell._cellTypeData)._genome.size();
+            break;
+        case CellType_Sensor:
+            break;
+        case CellType_Oscillator:
+            break;
+        case CellType_Attacker:
+            break;
+        case CellType_Injector:
+            additionalDataSize += std::get<InjectorDescription>(cell._cellTypeData)._genome.size();
+            break;
+        case CellType_Muscle:
+            break;
+        case CellType_Defender:
+            break;
+        case CellType_Reconnector:
+            break;
+        case CellType_Detonator:
+            break;
+        }
+    }
+}
+
+ArraySizes _SimulationCudaFacade::getArraySizesNeededFor(DataDescription const& data) const
+{
+    ArraySizes result;
+    result.cellArraySize = data._cells.size();
+    result.particleArraySize = data._particles.size();
+    result.auxiliaryDataSize = data._cells.size() * (sizeof(Cell) + 16);
+    for (auto const& cell : data._cells) {
+        addAdditionalDataSizeForCell(cell, result.auxiliaryDataSize);
+    }
+    return result;
+}
+
+ArraySizes _SimulationCudaFacade::getArraySizesNeededFor(ClusteredDataDescription const& data) const
+{
+    ArraySizes result;
+    for (auto const& cluster : data._clusters) {
+        result.cellArraySize += cluster._cells.size();
+        result.auxiliaryDataSize += cluster._cells.size() * (sizeof(Cell) + 16);
+        for (auto const& cell : cluster._cells) {
+            addAdditionalDataSizeForCell(cell, result.auxiliaryDataSize);
+        }
+    }
+    result.particleArraySize = data._particles.size();
+    return result;
 }
 
 auto _SimulationCudaFacade::getArraySizes() const -> ArraySizes

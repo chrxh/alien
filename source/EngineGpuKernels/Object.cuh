@@ -54,7 +54,7 @@ struct GenomeHeader
     __inline__ __device__ bool hasInfiniteRepetitions() const { return numRepetitions == 2147483647; }  // 2147483647 is the max value of int32_t
 };
 
-struct CellMetadataDescription
+struct CellMetadata
 {
     uint16_t nameSize;
     uint8_t* name;
@@ -317,7 +317,7 @@ struct Cell
     uint16_t detectedByCreatureId;  // Only the first 16 bits from the creature id
 
     // Annotations
-    CellMetadataDescription metadata;
+    CellMetadata metadata;
 
     // Additional rendering data
     CellEvent event;

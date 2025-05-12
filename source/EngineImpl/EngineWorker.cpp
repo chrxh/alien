@@ -199,7 +199,7 @@ void EngineWorker::addAndSelectSimulationData(DataDescription const& dataToUpdat
 {
     DescriptionConverterService converter(_settings.simulationParameters);
 
-    auto arraySizes = converter.getArraySizes(dataToUpdate);
+    auto arraySizes = _simulationCudaFacade->getArraySizesNeededFor(dataToUpdate);
 
     EngineWorkerGuard access(this);
 
@@ -218,7 +218,9 @@ void EngineWorker::setClusteredSimulationData(ClusteredDataDescription const& da
 
     EngineWorkerGuard access(this);
 
-    _simulationCudaFacade->resizeArraysIfNecessary(converter.getArraySizes(dataToUpdate));
+    auto arraySizes = _simulationCudaFacade->getArraySizesNeededFor(dataToUpdate);
+
+    _simulationCudaFacade->resizeArraysIfNecessary(arraySizes);
 
     DataTO dataTO = provideTO();
 
@@ -233,7 +235,8 @@ void EngineWorker::setSimulationData(DataDescription const& dataToUpdate)
 
     EngineWorkerGuard access(this);
 
-    _simulationCudaFacade->resizeArraysIfNecessary(converter.getArraySizes(dataToUpdate));
+    auto arraySizes = _simulationCudaFacade->getArraySizesNeededFor(dataToUpdate);
+    _simulationCudaFacade->resizeArraysIfNecessary(arraySizes);
 
     DataTO dataTO = provideTO();
     converter.convertDescriptionToTO(dataTO, dataToUpdate);
