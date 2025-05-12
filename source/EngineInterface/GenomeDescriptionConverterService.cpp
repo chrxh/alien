@@ -182,10 +182,13 @@ std::vector<uint8_t> GenomeDescriptionConverterService::convertDescriptionToByte
         writeAngle(result, cell._signalRoutingRestriction._baseAngle);
         writeAngle(result, cell._signalRoutingRestriction._openingAngle);
 
-        auto weights = cell._neuralNetwork.getWeights();
+        // #TODO GCC incompatibily:
+        // auto weights = cell._neuralNetwork.getWeights();
         for (int row = 0; row < MAX_CHANNELS; ++row) {
             for (int col = 0; col < MAX_CHANNELS; ++col) {
-                writeNeuronProperty(result, weights[row, col]);
+                // #TODO GCC incompatibily:
+                // writeNeuronProperty(result, weights[row, col]);
+                writeNeuronProperty(result, cell._neuralNetwork._weights[row * MAX_CHANNELS + col]);
             }
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
@@ -321,10 +324,13 @@ namespace
             cell._signalRoutingRestriction._baseAngle = readAngle(data, bytePosition);
             cell._signalRoutingRestriction._openingAngle = readAngle(data, bytePosition);
 
-            auto weights = cell._neuralNetwork.getWeights();
+            // #TODO GCC incompatibily:
+            // auto weights = cell._neuralNetwork.getWeights();
             for (int row = 0; row < MAX_CHANNELS; ++row) {
                 for (int col = 0; col < MAX_CHANNELS; ++col) {
-                    weights[row, col] = readNeuronProperty(data, bytePosition);
+                    // #TODO GCC incompatibily:
+                    // weights[row, col] = readNeuronProperty(data, bytePosition);
+                    cell._neuralNetwork._weights[row * MAX_CHANNELS + col] = readNeuronProperty(data, bytePosition);
                 }
             }
             for (int i = 0; i < MAX_CHANNELS; ++i) {

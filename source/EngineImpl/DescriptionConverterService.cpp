@@ -2,7 +2,7 @@
 
 #include <cmath>
 #include <algorithm>
-#include <mdspan>
+//#include <mdspan>
 
 #include <boost/range/adaptor/map.hpp>
 
@@ -31,7 +31,8 @@ namespace
     NeuralNetworkDescription convertToNeuronDescription(DataTO const& dataTO, uint64_t sourceIndex)
     {
         NeuralNetworkDescription result;
-        auto weights_span = std::mdspan(result._weights.data(), MAX_CHANNELS, MAX_CHANNELS);
+        // #TODO GCC incompatibily:
+        // auto weights_span = std::mdspan(result._weights.data(), MAX_CHANNELS, MAX_CHANNELS);
 
         BytesAsFloat bytesAsFloat;
         int index = 0;
@@ -41,7 +42,9 @@ namespace
                     bytesAsFloat.b[i] = dataTO.auxiliaryData[sourceIndex + index];
                     ++index;
                 }
-                weights_span[row, col] = bytesAsFloat.f;
+                result._weights[row * MAX_CHANNELS + col] = bytesAsFloat.f;
+                // #TODO GCC incompatibily:
+                // weights_span[row, col] = bytesAsFloat.f;
             }
         }
         for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
@@ -78,13 +81,17 @@ namespace
         targetIndex = *dataTO.numAuxiliaryData;
         *dataTO.numAuxiliaryData += NeuralNetworkTO::DataSize;
 
-        auto weights_span = std::mdspan(neuralNetDesc._weights.data(), MAX_CHANNELS, MAX_CHANNELS);
+        // #TODO GCC incompatibily:
+        // auto weights_span = std::mdspan(neuralNetDesc._weights.data(), MAX_CHANNELS, MAX_CHANNELS);
 
         BytesAsFloat bytesAsFloat;
         int bytePos = 0;
         for (int row = 0; row < MAX_CHANNELS; ++row) {
             for (int col = 0; col < MAX_CHANNELS; ++col) {
-                bytesAsFloat.f = weights_span[row, col];
+                bytesAsFloat.f = neuralNetDesc._weights[row * MAX_CHANNELS + col];
+                // #TODO GCC incompatibily:
+                // weights_span[row, col];
+
                 for (int i = 0; i < 4; ++i) {
                     dataTO.auxiliaryData[targetIndex + bytePos] = bytesAsFloat.b[i];
                     ++bytePos;
