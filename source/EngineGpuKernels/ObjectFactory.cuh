@@ -17,7 +17,7 @@ class ObjectFactory
 public:
     __inline__ __device__ void init(SimulationData* data);
     __inline__ __device__ Particle* createParticleFromTO(ParticleTO const& particleTO, bool createIds);
-    __inline__ __device__ Cell* createCellFromTO(DataTO const& dataTO, int targetIndex, CellTO const& cellTO, Cell* cellArray, bool createIds);
+    __inline__ __device__ Cell* createCellFromTO(DataTO const& dataTO, CellTO const& cellTO, int index, Cell* cellArray, bool createIds);
     __inline__ __device__ void changeCellFromTO(DataTO const& dataTO, CellTO const& cellTO, Cell* cell, bool createIds);
     __inline__ __device__ void changeParticleFromTO(ParticleTO const& particleTO, Particle* particle);
     __inline__ __device__ Particle* createParticle(float energy, float2 const& pos, float2 const& vel, int color);
@@ -61,10 +61,10 @@ __inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleTO c
     return particle;
 }
 
-__inline__ __device__ Cell* ObjectFactory::createCellFromTO(DataTO const& dataTO, int targetIndex, CellTO const& cellTO, Cell* cellTargetArray, bool createIds)
+__inline__ __device__ Cell* ObjectFactory::createCellFromTO(DataTO const& dataTO, CellTO const& cellTO, int index, Cell* cellArray, bool createIds)
 {
     Cell** cellPointer = _data->objects.cellPointers.getNewElement();
-    Cell* cell = cellTargetArray + targetIndex;
+    Cell* cell = cellArray + index;
     *cellPointer = cell;
 
     changeCellFromTO(dataTO, cellTO, cell, createIds);
@@ -77,7 +77,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromTO(DataTO const& dataTO
     cell->event = CellEvent_No;
     for (int i = 0; i < cell->numConnections; ++i) {
         auto& connectingCell = cell->connections[i];
-        connectingCell.cell = cellTargetArray + cellTO.connections[i].cellIndex;
+        connectingCell.cell = cellArray + cellTO.connections[i].cellIndex;
         connectingCell.distance = cellTO.connections[i].distance;
         connectingCell.angleFromPrevious = cellTO.connections[i].angleFromPrevious;
     }
@@ -263,7 +263,7 @@ __inline__ __device__ void ObjectFactory::createAuxiliaryData(T sourceSize, uint
 __inline__ __device__ void ObjectFactory::createAuxiliaryDataWithFixedSize(uint64_t size, uint64_t sourceIndex, uint8_t* auxiliaryData, uint8_t*& target)
 {
     if (size > 0) {
-        target = _data->objects.auxiliaryData.getAlignedSubArray(size);
+        target = _data->objects.auxiliaryData.getRawSubArray(size);
         for (int i = 0; i < size; ++i) {
             target[i] = auxiliaryData[sourceIndex + i];
         }
@@ -289,7 +289,7 @@ ObjectFactory::createParticle(float energy, float2 const& pos, float2 const& vel
 
 __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 const& pos, float2 const& vel)
 {
-    auto cell = _data->objects.cells.getNewElement();
+    auto cell = _data->objects.auxiliaryData.getTypedSubArray<Cell>(1);
     auto cellPointers = _data->objects.cellPointers.getNewElement();
     *cellPointers = cell;
 
@@ -332,7 +332,7 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
 
 __inline__ __device__ Cell* ObjectFactory::createCell(uint64_t& cellPointerIndex)
 {
-    auto cell = _data->objects.cells.getNewElement();
+    auto cell = _data->objects.auxiliaryData.getTypedSubArray<Cell>(1);
     auto cellPointer = _data->objects.cellPointers.getNewElement(&cellPointerIndex);
     *cellPointer = cell;
 

@@ -29,7 +29,7 @@ struct CellMetadataTO
 
 struct ConnectionTO
 {
-    int cellIndex;
+    uint64_t cellIndex;
     float distance;
     float angleFromPrevious;
 };

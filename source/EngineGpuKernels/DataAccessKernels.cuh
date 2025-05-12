@@ -23,7 +23,8 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
 __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataTO dataTO);
 __global__ void cudaResolveConnections(SimulationData data, DataTO dataTO);
 __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataTO access);
-__global__ void cudaCreateDataFromTO(SimulationData data, DataTO dataTO, bool selectNewData, bool createIds);
+__global__ void cudaGetArraysBasedOnTO(SimulationData data, DataTO dataTO, Cell** cellArray);
+__global__ void cudaCreateDataFromTO(SimulationData data, DataTO dataTO, Cell** cellArray, bool selectNewData, bool createIds);
 __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataTO dataTO);
 __global__ void cudaClearDataTO(DataTO dataTO);
 __global__ void cudaSaveNumEntries(SimulationData data);

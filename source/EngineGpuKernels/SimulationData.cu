@@ -60,7 +60,7 @@ bool SimulationData::shouldResize(ArraySizes const& additionals)
 {
     uint64_t cellArraySizeResult, particleArraySizeResult;
     calcArraySizes(cellArraySizeResult, particleArraySizeResult, additionals.cellArraySize, additionals.particleArraySize);
-    return objects.cells.shouldResize_host(cellArraySizeResult) || objects.cellPointers.shouldResize_host(cellArraySizeResult * 5)
+    return objects.cellPointers.shouldResize_host(cellArraySizeResult * 5)
         || objects.particles.shouldResize_host(particleArraySizeResult) || objects.particlePointers.shouldResize_host(particleArraySizeResult * 5)
         || objects.auxiliaryData.shouldResize_host(additionals.auxiliaryDataSize);
 }
@@ -70,7 +70,6 @@ void SimulationData::resizeTargetObjects(ArraySizes const& additionals)
     uint64_t cellArraySizeResult, particleArraySizeResult;
     calcArraySizes(cellArraySizeResult, particleArraySizeResult, additionals.cellArraySize, additionals.particleArraySize);
 
-    resizeTargetIntern(objects.cells, tempObjects.cells, cellArraySizeResult);
     resizeTargetIntern(objects.cellPointers, tempObjects.cellPointers, cellArraySizeResult * 5);
     resizeTargetIntern(objects.particles, tempObjects.particles, particleArraySizeResult);
     resizeTargetIntern(objects.particlePointers, tempObjects.particlePointers, particleArraySizeResult * 5);
@@ -79,15 +78,14 @@ void SimulationData::resizeTargetObjects(ArraySizes const& additionals)
 
 void SimulationData::resizeObjects()
 {
-    objects.cells.resize(tempObjects.cells.getSize_host());
     objects.cellPointers.resize(tempObjects.cellPointers.getSize_host());
     objects.particles.resize(tempObjects.particles.getSize_host());
     objects.particlePointers.resize(tempObjects.particlePointers.getSize_host());
     objects.auxiliaryData.resize(tempObjects.auxiliaryData.getSize_host());
 
-    auto cellArraySize = objects.cells.getSize_host();
+    auto cellArraySize = objects.cellPointers.getSize_host();
     cellMap.resize(cellArraySize);
-    auto particleArraySize = objects.particles.getSize_host();
+    auto particleArraySize = objects.particlePointers.getSize_host();
     particleMap.resize(particleArraySize);
 
     int upperBoundDynamicMemory = (sizeof(StructuralOperation) + sizeof(CellTypeOperation) * CellType_Count + 200) * (cellArraySize + 1000); //heuristic
@@ -96,7 +94,7 @@ void SimulationData::resizeObjects()
 
 bool SimulationData::isEmpty()
 {
-    return 0 == objects.cells.getNumEntries_host() && 0 == objects.particles.getNumEntries_host();
+    return 0 == objects.auxiliaryData.getNumEntries_host() && 0 == objects.particles.getNumEntries_host();
 }
 
 void SimulationData::free()

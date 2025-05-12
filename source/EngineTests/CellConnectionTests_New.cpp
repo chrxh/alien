@@ -24,7 +24,7 @@ TEST_F(CellConnectionTests_New, decay)
 
     _simulationFacade->setSimulationParameters(_parameters);
     auto origData = DescriptionEditService::get().createRect(
-        DescriptionEditService::CreateRectParameters().width(10).height(10).energy(_parameters.minCellEnergy.baseValue[0] / 2));
+        DescriptionEditService::CreateRectParameters().width(1).height(1).energy(_parameters.minCellEnergy.baseValue[0] / 2));
 
     _simulationFacade->setSimulationData(origData);
     _simulationFacade->calcTimesteps(1000);

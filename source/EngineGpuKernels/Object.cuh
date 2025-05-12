@@ -330,7 +330,7 @@ struct Cell
 
     // Internal algorithm data
     int locked;  // 0 = unlocked, 1 = locked
-    int tag;
+    int64_t tag;
     float density;
     Cell* nextCell; // Linked list for finding all overlapping cells
     int32_t scheduledOperationIndex;  // -1 = no operation scheduled

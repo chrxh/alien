@@ -15,7 +15,7 @@ namespace
         }
     }
 
-    __device__ void createCellTO(Cell* cell, DataTO& dataTO, Cell* cellArrayStart)
+    __device__ void createCellTO(Cell* cell, DataTO& dataTO, uint8_t* memoryBlockStart)
     {
         auto cellTOIndex = alienAtomicAdd64(dataTO.numCells, uint64_t(1));
         auto& cellTO = dataTO.cells[cellTOIndex];
@@ -68,7 +68,7 @@ namespace
         cell->tag = cellTOIndex;
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectingCell = cell->connections[i].cell;
-            cellTO.connections[i].cellIndex = connectingCell - cellArrayStart;
+            cellTO.connections[i].cellIndex = reinterpret_cast<uint8_t*>(connectingCell) - memoryBlockStart;
             cellTO.connections[i].distance = cell->connections[i].distance;
             cellTO.connections[i].angleFromPrevious = cell->connections[i].angleFromPrevious;
         }
@@ -218,7 +218,7 @@ __global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, b
 {
     auto const& cells = data.objects.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
-    auto const cellArrayStart = data.objects.cells.getArray();
+    auto const cellArrayStart = data.objects.auxiliaryData.getArray();
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
@@ -248,7 +248,7 @@ __global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds id
 {
     auto const& cells = data.objects.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
-    auto const cellArrayStart = data.objects.cells.getArray();
+    auto const cellArrayStart = data.objects.auxiliaryData.getArray();
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
@@ -346,12 +346,12 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
     }
 }
 
-//tags cell with cellTO index and tags cellTO connections with cell index
+// tags cell with cellTO index and tags cellTO connections with cell index
 __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataTO dataTO)
 {
     auto const& cells = data.objects.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
-    auto const cellArrayStart = data.objects.cells.getArray();
+    auto const cellArrayStart = data.objects.auxiliaryData.getArray();
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
@@ -376,7 +376,7 @@ __global__ void cudaResolveConnections(SimulationData data, DataTO dataTO)
 
         for (int i = 0; i < cellTO.numConnections; ++i) {
             auto const cellIndex = cellTO.connections[i].cellIndex;
-            cellTO.connections[i].cellIndex = data.objects.cells.at(cellIndex).tag;
+            cellTO.connections[i].cellIndex = data.objects.auxiliaryData.atType<Cell>(cellIndex).tag;
         }
     }
 }
@@ -397,7 +397,12 @@ __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, Sim
     }
 }
 
-__global__ void cudaCreateDataFromTO(SimulationData data, DataTO dataTO, bool selectNewData, bool createIds)
+__global__ void cudaGetArraysBasedOnTO(SimulationData data, DataTO dataTO, Cell** cellArray)
+{
+    *cellArray = data.objects.auxiliaryData.getTypedSubArray<Cell>(*dataTO.numCells);
+}
+
+__global__ void cudaCreateDataFromTO(SimulationData data, DataTO dataTO, Cell** cellArray, bool selectNewData, bool createIds)
 {
     __shared__ ObjectFactory factory;
     if (0 == threadIdx.x) {
@@ -414,9 +419,8 @@ __global__ void cudaCreateDataFromTO(SimulationData data, DataTO dataTO, bool se
     }
 
     auto cellPartition = calcPartition(*dataTO.numCells, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-    auto cellTargetArray = data.objects.cells.getArray() + data.objects.cells.getNumOrigEntries();
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
-        auto cell = factory.createCellFromTO(dataTO, index, dataTO.cells[index], cellTargetArray, createIds);
+        auto cell = factory.createCellFromTO(dataTO, dataTO.cells[index], index, *cellArray, createIds);
         if (selectNewData) {
             cell->selected = 1;
         }
@@ -458,7 +462,6 @@ __global__ void cudaClearData(SimulationData data)
 {
     data.objects.cellPointers.reset();
     data.objects.particlePointers.reset();
-    data.objects.cells.reset();
     data.objects.particles.reset();
     data.objects.auxiliaryData.reset();
 }

@@ -181,13 +181,24 @@ public:
         return reinterpret_cast<T*>(getSubArray(size));
     }
 
-    __device__ __inline__ uint8_t* getAlignedSubArray(uint64_t size)
+    __device__ __inline__ uint8_t* getRawSubArray(uint64_t size)
     {
         if (0 == size) {
             return nullptr;
         }
         size = size + 16 - (size % 16);
         return getSubArray(size);
+    }
+
+    template <typename T>
+    __device__ __inline__ T& atType(uint64_t address)
+    {
+        return *reinterpret_cast<T*>(*_data + address);
+    }
+    template <typename T>
+    __device__ __inline__ T const& atType(uint64_t address) const
+    {
+        return *reinterpret_cast<T*>(*_data + address);
     }
 };
 

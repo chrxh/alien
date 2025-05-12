@@ -352,7 +352,7 @@ __inline__ __device__ void GenomeDecoder::copyGenome(SimulationData& data, CellT
     if (!makeGenomeCopy) {
         auto size = readWord(source, genomeBytePosition);
         target.genomeSize = size;
-        target.genome = data.objects.auxiliaryData.getAlignedSubArray(size);
+        target.genome = data.objects.auxiliaryData.getRawSubArray(size);
         //#TODO can be optimized
         for (int i = 0; i < size; ++i) {
             target.genome[i] = source.genome[genomeBytePosition + i];
@@ -360,7 +360,7 @@ __inline__ __device__ void GenomeDecoder::copyGenome(SimulationData& data, CellT
     } else {
         auto size = source.genomeSize;
         target.genomeSize = size;
-        target.genome = data.objects.auxiliaryData.getAlignedSubArray(size);
+        target.genome = data.objects.auxiliaryData.getRawSubArray(size);
         //#TODO can be optimized
         for (int i = 0; i < size; ++i) {
             target.genome[i] = source.genome[i];
