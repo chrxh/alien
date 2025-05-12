@@ -9,7 +9,7 @@ __global__ void cudaPreparePointerArraysForCleanup(SimulationData data)
 __global__ void cudaPrepareArraysForCleanup(SimulationData data)
 {
     data.tempObjects.particles.reset();
-    data.tempObjects.auxiliaryData.reset();
+    data.tempObjects.rawMemory.reset();
 }
 
 __global__ void cudaCleanupCellsStep1(Array<Cell*> cellPointers, RawMemory rawMemory)
@@ -104,7 +104,7 @@ __global__ void cudaSwapPointerArrays(SimulationData data)
 __global__ void cudaSwapArrays(SimulationData data)
 {
     data.objects.particles.swapContent(data.tempObjects.particles);
-    data.objects.auxiliaryData.swapContent(data.tempObjects.auxiliaryData);
+    data.objects.rawMemory.swapContent(data.tempObjects.rawMemory);
 }
 
 
@@ -132,7 +132,7 @@ __global__ void cudaCleanupParticles(Array<Particle*> particlePointers, Array<Pa
 __global__ void cudaCheckIfCleanupIsNecessary(SimulationData data, bool* result)
 {
     if (data.objects.particles.getNumEntries() > data.objects.particles.getSize() * Const::ArrayFillLevelFactor
-        || data.objects.auxiliaryData.getNumEntries() > data.objects.auxiliaryData.getSize() * Const::ArrayFillLevelFactor) {
+        || data.objects.rawMemory.getNumEntries() > data.objects.rawMemory.getSize() * Const::ArrayFillLevelFactor) {
         *result = true;
     } else {
         *result = false;

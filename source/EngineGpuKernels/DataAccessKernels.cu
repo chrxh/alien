@@ -218,7 +218,7 @@ __global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, b
 {
     auto const& cells = data.objects.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
-    auto const cellArrayStart = data.objects.auxiliaryData.getArray();
+    auto const cellArrayStart = data.objects.rawMemory.getArray();
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
@@ -248,7 +248,7 @@ __global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds id
 {
     auto const& cells = data.objects.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
-    auto const cellArrayStart = data.objects.auxiliaryData.getArray();
+    auto const cellArrayStart = data.objects.rawMemory.getArray();
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
@@ -351,7 +351,7 @@ __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectL
 {
     auto const& cells = data.objects.cellPointers;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
-    auto const cellArrayStart = data.objects.auxiliaryData.getArray();
+    auto const cellArrayStart = data.objects.rawMemory.getArray();
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
@@ -376,7 +376,7 @@ __global__ void cudaResolveConnections(SimulationData data, DataTO dataTO)
 
         for (int i = 0; i < cellTO.numConnections; ++i) {
             auto const cellIndex = cellTO.connections[i].cellIndex;
-            cellTO.connections[i].cellIndex = data.objects.auxiliaryData.atType<Cell>(cellIndex).tag;
+            cellTO.connections[i].cellIndex = data.objects.rawMemory.atType<Cell>(cellIndex).tag;
         }
     }
 }
@@ -399,7 +399,7 @@ __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, Sim
 
 __global__ void cudaGetArraysBasedOnTO(SimulationData data, DataTO dataTO, Cell** cellArray)
 {
-    *cellArray = data.objects.auxiliaryData.getTypedSubArray<Cell>(*dataTO.numCells);
+    *cellArray = data.objects.rawMemory.getTypedSubArray<Cell>(*dataTO.numCells);
 }
 
 __global__ void cudaCreateDataFromTO(SimulationData data, DataTO dataTO, Cell** cellArray, bool selectNewData, bool createIds)
@@ -463,7 +463,7 @@ __global__ void cudaClearData(SimulationData data)
     data.objects.cellPointers.reset();
     data.objects.particlePointers.reset();
     data.objects.particles.reset();
-    data.objects.auxiliaryData.reset();
+    data.objects.rawMemory.reset();
 }
 
 __global__ void cudaSaveNumEntries(SimulationData data)

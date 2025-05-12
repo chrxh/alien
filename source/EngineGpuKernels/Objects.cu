@@ -7,7 +7,7 @@ void Objects::init()
     cellPointers.init();
     particles.init();
     particlePointers.init();
-    auxiliaryData.init();
+    rawMemory.init();
 }
 
 void Objects::free()
@@ -15,7 +15,7 @@ void Objects::free()
     cellPointers.free();
     particles.free();
     particlePointers.free();
-    auxiliaryData.free();
+    rawMemory.free();
 }
 
 __device__ void Objects::saveNumEntries()
