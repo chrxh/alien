@@ -9,6 +9,13 @@ _DataAccessKernelsLauncher::_DataAccessKernelsLauncher()
 {
     _garbageCollectorKernels = std::make_shared<_GarbageCollectorKernelsLauncher>();
     _editKernels = std::make_shared<_EditKernelsLauncher>();
+
+    CudaMemoryManager::getInstance().acquireMemory<Cell*>(1, _cudaCellArray);
+}
+
+_DataAccessKernelsLauncher::~_DataAccessKernelsLauncher()
+{
+    CudaMemoryManager::getInstance().freeMemory(_cudaCellArray);
 }
 
 void _DataAccessKernelsLauncher::getData(
@@ -63,7 +70,9 @@ void _DataAccessKernelsLauncher::addData(GpuSettings const& gpuSettings, Simulat
 {
     KERNEL_CALL_1_1(cudaSaveNumEntries, data);
     KERNEL_CALL(cudaAdaptNumberGenerator, data.numberGen1, dataTO);
-    KERNEL_CALL(cudaCreateDataFromTO, data, dataTO, selectData, createIds);
+
+    KERNEL_CALL_1_1(cudaGetArraysBasedOnTO, data, dataTO, _cudaCellArray);
+    KERNEL_CALL(cudaCreateDataFromTO, data, dataTO, _cudaCellArray, selectData, createIds);
     _garbageCollectorKernels->cleanupAfterDataManipulation(gpuSettings, data);
     if (selectData) {
         _editKernels->rolloutSelection(gpuSettings, data);

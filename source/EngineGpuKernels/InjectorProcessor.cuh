@@ -66,7 +66,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
                         return;
                     }
 
-                    auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(injector.genomeSize);
+                    auto targetGenome = data.objects.auxiliaryData.getRawSubArray(injector.genomeSize);
                     for (int i = 0; i < injector.genomeSize; ++i) {
                         targetGenome[i] = injector.genome[i];
                     }
@@ -102,7 +102,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
                     if (!otherCell->tryLock()) {
                         return;
                     }
-                    auto targetGenome = data.objects.auxiliaryData.getAlignedSubArray(injector.genomeSize);
+                    auto targetGenome = data.objects.auxiliaryData.getRawSubArray(injector.genomeSize);
                     for (int i = 0; i < injector.genomeSize; ++i) {
                         targetGenome[i] = injector.genome[i];
                     }

@@ -121,6 +121,7 @@ ArraySizes DescriptionConverterService::getArraySizes(DataDescription const& dat
     ArraySizes result;
     result.cellArraySize = data._cells.size();
     result.particleArraySize = data._particles.size();
+    result.auxiliaryDataSize = data._cells.size() * 1000;  // #TODO get size via Service
     for (auto const& cell : data._cells) {
         addAdditionalDataSizeForCell(cell, result.auxiliaryDataSize);
     }
@@ -132,6 +133,7 @@ ArraySizes DescriptionConverterService::getArraySizes(ClusteredDataDescription c
     ArraySizes result;
     for (auto const& cluster : data._clusters) {
         result.cellArraySize += cluster._cells.size();
+        result.auxiliaryDataSize += cluster._cells.size() * 1000;  // #TODO get size via Service
         for (auto const& cell : cluster._cells) {
             addAdditionalDataSizeForCell(cell, result.auxiliaryDataSize);
         }

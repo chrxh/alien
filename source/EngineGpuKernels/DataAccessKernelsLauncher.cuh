@@ -12,6 +12,7 @@ class _DataAccessKernelsLauncher
 {
 public:
     _DataAccessKernelsLauncher();
+    ~_DataAccessKernelsLauncher();
 
     void getData(GpuSettings const& gpuSettings, SimulationData const& data, int2 const& rectUpperLeft, int2 const& rectLowerRight, DataTO const& dataTO);
     void getSelectedData(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters, DataTO const& dataTO);
@@ -24,5 +25,8 @@ public:
 private:
     GarbageCollectorKernelsLauncher _garbageCollectorKernels;
     EditKernelsLauncher _editKernels;
+
+    // gpu memory
+    Cell** _cudaCellArray;
 };
 
