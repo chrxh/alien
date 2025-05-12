@@ -46,7 +46,7 @@ __inline__ __device__ void ObjectFactory::init(SimulationData* data)
 __inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleTO const& particleTO, bool createIds)
 {
     Particle** particlePointer = _data->objects.particlePointers.getNewElement();
-    Particle* particle = _data->objects.particles.getNewElement();
+    Particle* particle = _data->objects.rawMemory.getTypedSubArray<Particle>(1);
     *particlePointer = particle;
     
     particle->id = createIds ? _data->numberGen1.createNewId() : particleTO.id;
@@ -274,7 +274,7 @@ __inline__ __device__ Particle*
 ObjectFactory::createParticle(float energy, float2 const& pos, float2 const& vel, int color)
 {
     Particle** particlePointer = _data->objects.particlePointers.getNewElement();
-    Particle* particle = _data->objects.particles.getNewElement();
+    Particle* particle = _data->objects.rawMemory.getTypedSubArray<Particle>(1);
     *particlePointer = particle;
     particle->id = _data->numberGen1.createNewId();
     particle->selected = 0;

@@ -75,9 +75,9 @@ public:
         SimulationParameters const& parameters,
         SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All);
 
-    ArraySizes getArraySizesNeededFor(DataDescription const& data) const;
-    ArraySizes getArraySizesNeededFor(ClusteredDataDescription const& data) const;
-    ArraySizes getArraySizes() const;
+    ArraySizes getGpuArraySizesNeededFor(DataDescription const& data) const;
+    ArraySizes getGpuArraySizesNeededFor(ClusteredDataDescription const& data) const;
+    ArraySizes getCurrentGpuArraySizes() const;
 
     StatisticsRawData getStatisticsRawData();
     void updateStatistics();

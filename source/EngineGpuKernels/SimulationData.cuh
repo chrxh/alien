@@ -16,26 +16,26 @@
 
 struct SimulationData
 {
-    //maps
+    // Maps
     uint64_t timestep;
     int2 worldSize;
     CellMap cellMap;
     ParticleMap particleMap;
 
-    //objects
+    // Objects
     Objects objects;
     Objects tempObjects;
 
-    //additional data for cell functions
+    // Additional data for cell functions
     double* externalEnergy;
     RawMemory processMemory;
     PreprocessedSimulationData preprocessedSimulationData;
 
-    //scheduled operations
+    // Temporary memory for operations
     UnmanagedArray<StructuralOperation> structuralOperations;
     UnmanagedArray<CellTypeOperation> cellTypeOperations[CellType_Count];
 
-    //number generators
+    // Number generators
     CudaNumberGenerator numberGen1;
     CudaNumberGenerator numberGen2;  //second random number generator used in combination with the first generator for evaluating very low probabilities
 

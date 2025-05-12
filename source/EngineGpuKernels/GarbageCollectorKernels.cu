@@ -8,7 +8,6 @@ __global__ void cudaPreparePointerArraysForCleanup(SimulationData data)
 
 __global__ void cudaPrepareArraysForCleanup(SimulationData data)
 {
-    data.tempObjects.particles.reset();
     data.tempObjects.rawMemory.reset();
 }
 
@@ -64,7 +63,7 @@ namespace
     }
 }
 
-__global__ void cudaCleanupAuxiliaryData(Array<Cell*> cellPointers, RawMemory auxiliaryData)
+__global__ void cudaCleanupRawMemory(Array<Cell*> cellPointers, RawMemory auxiliaryData)
 {
     auto const partition = calcAllThreadsPartition(cellPointers.getNumEntries());
 
@@ -101,24 +100,23 @@ __global__ void cudaSwapPointerArrays(SimulationData data)
     data.objects.cellPointers.swapContent(data.tempObjects.cellPointers);
 }
 
-__global__ void cudaSwapArrays(SimulationData data)
+__global__ void cudaSwapRawMemory(SimulationData data)
 {
-    data.objects.particles.swapContent(data.tempObjects.particles);
     data.objects.rawMemory.swapContent(data.tempObjects.rawMemory);
 }
 
 
-__global__ void cudaCleanupParticles(Array<Particle*> particlePointers, Array<Particle> particles)
+__global__ void cudaCleanupParticles(Array<Particle*> particlePointers, RawMemory rawMemory)
 {
     //assumes that particlePointers are already cleaned up
-    PartitionData pointerBlock = calcPartition(particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto partition = calcAllThreadsPartition(particlePointers.getNumEntries());
 
-    int numParticlesToCopy = pointerBlock.numElements();
+    int numParticlesToCopy = partition.numElements();
     if (numParticlesToCopy > 0) {
-        auto newParticles = particles.getSubArray(numParticlesToCopy);
+        auto newParticles = rawMemory.getTypedSubArray<Particle>(numParticlesToCopy);
 
         int newParticleIndex = 0;
-        for (int index = pointerBlock.startIndex; index <= pointerBlock.endIndex; ++index) {
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& particlePointer = particlePointers.at(index);
             auto& newParticle = newParticles[newParticleIndex];
             newParticle = *particlePointer;
@@ -131,8 +129,7 @@ __global__ void cudaCleanupParticles(Array<Particle*> particlePointers, Array<Pa
 
 __global__ void cudaCheckIfCleanupIsNecessary(SimulationData data, bool* result)
 {
-    if (data.objects.particles.getNumEntries() > data.objects.particles.getSize() * Const::ArrayFillLevelFactor
-        || data.objects.rawMemory.getNumEntries() > data.objects.rawMemory.getSize() * Const::ArrayFillLevelFactor) {
+    if (data.objects.rawMemory.getNumEntries() > data.objects.rawMemory.getSize() * Const::ArrayFillLevelFactor) {
         *result = true;
     } else {
         *result = false;

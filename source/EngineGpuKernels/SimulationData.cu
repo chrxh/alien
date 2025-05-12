@@ -61,8 +61,8 @@ bool SimulationData::shouldResize(ArraySizes const& additionals)
     uint64_t cellArraySizeResult, particleArraySizeResult;
     calcArraySizes(cellArraySizeResult, particleArraySizeResult, additionals.cellArraySize, additionals.particleArraySize);
     return objects.cellPointers.shouldResize_host(cellArraySizeResult * 5)
-        || objects.particles.shouldResize_host(particleArraySizeResult) || objects.particlePointers.shouldResize_host(particleArraySizeResult * 5)
-        || objects.rawMemory.shouldResize_host(additionals.auxiliaryDataSize);
+        || objects.particlePointers.shouldResize_host(particleArraySizeResult * 5)
+        || objects.rawMemory.shouldResize_host(additionals.rawMemorySize);
 }
 
 void SimulationData::resizeTargetObjects(ArraySizes const& additionals)
@@ -71,15 +71,13 @@ void SimulationData::resizeTargetObjects(ArraySizes const& additionals)
     calcArraySizes(cellArraySizeResult, particleArraySizeResult, additionals.cellArraySize, additionals.particleArraySize);
 
     resizeTargetIntern(objects.cellPointers, tempObjects.cellPointers, cellArraySizeResult * 5);
-    resizeTargetIntern(objects.particles, tempObjects.particles, particleArraySizeResult);
     resizeTargetIntern(objects.particlePointers, tempObjects.particlePointers, particleArraySizeResult * 5);
-    resizeTargetIntern(objects.rawMemory, tempObjects.rawMemory, additionals.auxiliaryDataSize);
+    resizeTargetIntern(objects.rawMemory, tempObjects.rawMemory, additionals.rawMemorySize);
 }
 
 void SimulationData::resizeObjects()
 {
     objects.cellPointers.resize(tempObjects.cellPointers.getSize_host());
-    objects.particles.resize(tempObjects.particles.getSize_host());
     objects.particlePointers.resize(tempObjects.particlePointers.getSize_host());
     objects.rawMemory.resize(tempObjects.rawMemory.getSize_host());
 
@@ -95,7 +93,7 @@ void SimulationData::resizeObjects()
 
 bool SimulationData::isEmpty()
 {
-    return 0 == objects.rawMemory.getNumEntries_host() && 0 == objects.particles.getNumEntries_host();
+    return 0 == objects.rawMemory.getNumEntries_host();
 }
 
 void SimulationData::free()

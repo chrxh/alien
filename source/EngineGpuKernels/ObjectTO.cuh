@@ -300,7 +300,7 @@ struct DataTO
         *numAuxiliaryData = 0;
         cells = new CellTO[arraySizes.cellArraySize];
         particles = new ParticleTO[arraySizes.particleArraySize];
-        auxiliaryData = new uint8_t[arraySizes.auxiliaryDataSize];
+        auxiliaryData = new uint8_t[arraySizes.rawMemorySize];
     }
 
     void destroy()

@@ -462,7 +462,6 @@ __global__ void cudaClearData(SimulationData data)
 {
     data.objects.cellPointers.reset();
     data.objects.particlePointers.reset();
-    data.objects.particles.reset();
     data.objects.rawMemory.reset();
 }
 

@@ -444,33 +444,35 @@ namespace
     }
 }
 
-ArraySizes _SimulationCudaFacade::getArraySizesNeededFor(DataDescription const& data) const
+ArraySizes _SimulationCudaFacade::getGpuArraySizesNeededFor(DataDescription const& data) const
 {
     ArraySizes result;
     result.cellArraySize = data._cells.size();
     result.particleArraySize = data._particles.size();
-    result.auxiliaryDataSize = data._cells.size() * (sizeof(Cell) + 16);
+    result.rawMemorySize = data._cells.size() * (sizeof(Cell) + 16);
+    result.rawMemorySize += data._particles.size() * (sizeof(Particle) + 16);
     for (auto const& cell : data._cells) {
-        addAdditionalDataSizeForCell(cell, result.auxiliaryDataSize);
+        addAdditionalDataSizeForCell(cell, result.rawMemorySize);
     }
     return result;
 }
 
-ArraySizes _SimulationCudaFacade::getArraySizesNeededFor(ClusteredDataDescription const& data) const
+ArraySizes _SimulationCudaFacade::getGpuArraySizesNeededFor(ClusteredDataDescription const& data) const
 {
     ArraySizes result;
     for (auto const& cluster : data._clusters) {
         result.cellArraySize += cluster._cells.size();
-        result.auxiliaryDataSize += cluster._cells.size() * (sizeof(Cell) + 16);
+        result.rawMemorySize += cluster._cells.size() * (sizeof(Cell) + 16);
         for (auto const& cell : cluster._cells) {
-            addAdditionalDataSizeForCell(cell, result.auxiliaryDataSize);
+            addAdditionalDataSizeForCell(cell, result.rawMemorySize);
         }
     }
     result.particleArraySize = data._particles.size();
+    result.rawMemorySize += data._particles.size() * (sizeof(Particle) + 16);
     return result;
 }
 
-auto _SimulationCudaFacade::getArraySizes() const -> ArraySizes
+auto _SimulationCudaFacade::getCurrentGpuArraySizes() const -> ArraySizes
 {
     return {
         _cudaSimulationData->objects.cellPointers.getSize_host(),
