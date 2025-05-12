@@ -11,8 +11,6 @@ struct Objects
     Array<Cell*> cellPointers;
     Array<Particle*> particlePointers;
 
-    Array<Particle> particles;
-
     RawMemory rawMemory;
 
     void init();

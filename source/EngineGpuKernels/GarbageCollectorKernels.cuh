@@ -47,12 +47,12 @@ __global__ void cudaCleanupPointerArray(Array<Entity> entityArray, Array<Entity>
     __syncthreads();
 }
 
-__global__ void cudaCleanupParticles(Array<Particle*> particlePointers, Array<Particle> particles);
+__global__ void cudaCleanupParticles(Array<Particle*> particlePointers, RawMemory rawMemory);
 __global__ void cudaCleanupCellsStep1(Array<Cell*> cellPointers, RawMemory rawMemory);
 __global__ void cudaCleanupCellsStep2(Array<Cell*> cellPointers, RawMemory rawMemory);
-__global__ void cudaCleanupAuxiliaryData(Array<Cell*> cellPointers, RawMemory stringBytes);
+__global__ void cudaCleanupRawMemory(Array<Cell*> cellPointers, RawMemory stringBytes);
 __global__ void cudaCleanupCellMap(SimulationData data);
 __global__ void cudaCleanupParticleMap(SimulationData data);
 __global__ void cudaSwapPointerArrays(SimulationData data);
-__global__ void cudaSwapArrays(SimulationData data);
+__global__ void cudaSwapRawMemory(SimulationData data);
 __global__ void cudaCheckIfCleanupIsNecessary(SimulationData data, bool* result);
