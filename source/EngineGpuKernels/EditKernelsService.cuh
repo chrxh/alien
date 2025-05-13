@@ -6,11 +6,11 @@
 #include "Base.cuh"
 #include "Definitions.cuh"
 
-class _EditKernelsLauncher
+class _EditKernelsService
 {
 public:
-    _EditKernelsLauncher();
-    ~_EditKernelsLauncher();
+    _EditKernelsService();
+    ~_EditKernelsService();
 
     void removeSelection(GpuSettings const& gpuSettings, SimulationData const& data);
     void swapSelection(GpuSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData);
@@ -41,7 +41,7 @@ public:
     void applyCataclysm(GpuSettings const& gpuSettings, SimulationData const& data);
 
 private:
-    GarbageCollectorKernelsLauncher _garbageCollector;
+    GarbageCollectorKernelsService _garbageCollector;
 
     //gpu memory
     int* _cudaRolloutResult;

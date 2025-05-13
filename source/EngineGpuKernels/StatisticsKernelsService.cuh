@@ -6,7 +6,7 @@
 #include "Definitions.cuh"
 #include "Macros.cuh"
 
-class _StatisticsKernelsLauncher
+class _StatisticsKernelsService
 {
 public:
     void updateStatistics(GpuSettings const& gpuSettings, SimulationData const& data, SimulationStatistics const& simulationStatistics);

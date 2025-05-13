@@ -4,11 +4,11 @@
 #include "EngineInterface/GpuSettings.h"
 #include "EngineInterface/MutationType.h"
 
-class _TestKernelsLauncher
+class _TestKernelsService
 {
 public:
-    _TestKernelsLauncher();
-    ~_TestKernelsLauncher();
+    _TestKernelsService();
+    ~_TestKernelsService();
 
     void testOnly_mutate(GpuSettings const& gpuSettings, SimulationData const& data, uint64_t cellId, MutationType mutationType);
     void testOnly_mutationCheck(GpuSettings const& gpuSettings, SimulationData const& data, uint64_t cellId);

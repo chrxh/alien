@@ -8,11 +8,11 @@
 #include "Definitions.cuh"
 #include "Macros.cuh"
 
-class _DataAccessKernelsLauncher
+class _DataAccessKernelsService
 {
 public:
-    _DataAccessKernelsLauncher();
-    ~_DataAccessKernelsLauncher();
+    _DataAccessKernelsService();
+    ~_DataAccessKernelsService();
 
     void getData(GpuSettings const& gpuSettings, SimulationData const& data, int2 const& rectUpperLeft, int2 const& rectLowerRight, DataTO const& dataTO);
     void getSelectedData(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters, DataTO const& dataTO);
@@ -23,8 +23,8 @@ public:
     void clearData(GpuSettings const& gpuSettings, SimulationData const& data);
 
 private:
-    GarbageCollectorKernelsLauncher _garbageCollectorKernels;
-    EditKernelsLauncher _editKernels;
+    GarbageCollectorKernelsService _garbageCollectorKernels;
+    EditKernelsService _editKernels;
 
     // gpu memory
     Cell** _cudaCellArray;

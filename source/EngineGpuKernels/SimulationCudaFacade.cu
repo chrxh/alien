@@ -32,15 +32,15 @@
 #include "EditKernels.cuh"
 #include "RenderingKernels.cuh"
 #include "SimulationData.cuh"
-#include "SimulationKernelsLauncher.cuh"
-#include "DataAccessKernelsLauncher.cuh"
-#include "RenderingKernelsLauncher.cuh"
-#include "EditKernelsLauncher.cuh"
-#include "StatisticsKernelsLauncher.cuh"
+#include "SimulationKernelsService.cuh"
+#include "DataAccessKernelsService.cuh"
+#include "RenderingKernelsService.cuh"
+#include "EditKernelsService.cuh"
+#include "StatisticsKernelsService.cuh"
 #include "SelectionResult.cuh"
 #include "RenderingData.cuh"
 #include "SimulationParametersUpdateService.cuh"
-#include "TestKernelsLauncher.cuh"
+#include "TestKernelsService.cuh"
 #include "StatisticsService.cuh"
 #include "MaxAgeBalancer.cuh"
 
@@ -72,13 +72,13 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     _cudaSimulationStatistics->init();
     _cudaSelectionResult->init();
 
-    _simulationKernels = std::make_shared<_SimulationKernelsLauncher>();
-    _dataAccessKernels = std::make_shared<_DataAccessKernelsLauncher>();
-    _garbageCollectorKernels = std::make_shared<_GarbageCollectorKernelsLauncher>();
-    _renderingKernels = std::make_shared<_RenderingKernelsLauncher>();
-    _editKernels = std::make_shared<_EditKernelsLauncher>();
-    _statisticsKernels = std::make_shared<_StatisticsKernelsLauncher>();
-    _testKernels = std::make_shared<_TestKernelsLauncher>();
+    _simulationKernels = std::make_shared<_SimulationKernelsService>();
+    _dataAccessKernels = std::make_shared<_DataAccessKernelsService>();
+    _garbageCollectorKernels = std::make_shared<_GarbageCollectorKernelsService>();
+    _renderingKernels = std::make_shared<_RenderingKernelsService>();
+    _editKernels = std::make_shared<_EditKernelsService>();
+    _statisticsKernels = std::make_shared<_StatisticsKernelsService>();
+    _testKernels = std::make_shared<_TestKernelsService>();
 
     CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _cudaAccessTO->numCells);
     CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _cudaAccessTO->numParticles);

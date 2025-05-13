@@ -1,9 +1,9 @@
-﻿#include "RenderingKernelsLauncher.cuh"
+﻿#include "RenderingKernelsService.cuh"
 
 #include "RenderingData.cuh"
 #include "RenderingKernels.cuh"
 
-void _RenderingKernelsLauncher::drawImage(
+void _RenderingKernelsService::drawImage(
     SettingsForSimulation const& settings,
     float2 rectUpperLeft,
     float2 rectLowerRight,

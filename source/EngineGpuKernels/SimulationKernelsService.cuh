@@ -5,10 +5,10 @@
 #include "Definitions.cuh"
 #include "Macros.cuh"
 
-class _SimulationKernelsLauncher
+class _SimulationKernelsService
 {
 public:
-    _SimulationKernelsLauncher();
+    _SimulationKernelsService();
 
     void calcTimestep(SettingsForSimulation const& settings, SimulationData const& simulationData, SimulationStatistics const& statistics);
     void prepareForSimulationParametersChanges(SettingsForSimulation const& settings, SimulationData const& simulationData);
@@ -16,6 +16,6 @@ public:
 private:
     bool isRigidityUpdateEnabled(SettingsForSimulation const& settings) const;
 
-    GarbageCollectorKernelsLauncher _garbageCollector;
+    GarbageCollectorKernelsService _garbageCollector;
 };
 
