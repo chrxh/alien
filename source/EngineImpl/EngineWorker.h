@@ -11,15 +11,16 @@
 
 #include "Base/Definitions.h"
 
+#include "EngineInterface/ArraySizes.h"
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/GpuSettings.h"
-#include "EngineInterface/StatisticsRawData.h"
+#include "EngineInterface/MutationType.h"
 #include "EngineInterface/OverlayDescriptions.h"
+#include "EngineInterface/StatisticsRawData.h"
 #include "EngineInterface/SettingsForSimulation.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
-#include "EngineInterface/MutationType.h"
+#include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/StatisticsHistory.h"
 #include "EngineInterface/SimulationParametersUpdateConfig.h"
 
@@ -112,10 +113,14 @@ public:
     void pauseSimulation();
     bool isSimulationRunning() const;
 
-    // for tests only
+    // Only for tests
     void testOnly_mutate(uint64_t cellId, MutationType mutationType);
     void testOnly_mutationCheck(uint64_t cellId);
     void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2);
+    void testOnly_cleanupAfterTimestep();
+    void testOnly_cleanupAfterDataManipulation();
+    void testOnly_resizeArrays(ArraySizes const& sizeDelta);
+    bool testOnly_areArraysValid();
 
 private:
     DataTO provideTO(); 

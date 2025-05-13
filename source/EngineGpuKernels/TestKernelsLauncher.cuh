@@ -7,7 +7,14 @@
 class _TestKernelsLauncher
 {
 public:
+    _TestKernelsLauncher();
+    ~_TestKernelsLauncher();
+
     void testOnly_mutate(GpuSettings const& gpuSettings, SimulationData const& data, uint64_t cellId, MutationType mutationType);
     void testOnly_mutationCheck(GpuSettings const& gpuSettings, SimulationData const& data, uint64_t cellId);
     void testOnly_createConnection(GpuSettings const& gpuSettings, SimulationData const& data, uint64_t cellId1, uint64_t cellId2);
+    bool testOnly_areArraysValid(GpuSettings const& gpuSettings, SimulationData const& data);
+
+private:
+    bool* _cudaBoolResult;
 };

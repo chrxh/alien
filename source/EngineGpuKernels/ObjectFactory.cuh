@@ -46,7 +46,7 @@ __inline__ __device__ void ObjectFactory::init(SimulationData* data)
 __inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleTO const& particleTO, bool createIds)
 {
     Particle** particlePointer = _data->objects.particlePointers.getNewElement();
-    Particle* particle = _data->objects.rawMemory.getTypedSubArray<Particle>(1);
+    Particle* particle = _data->objects.heap.getTypedSubArray<Particle>(1);
     *particlePointer = particle;
     
     particle->id = createIds ? _data->numberGen1.createNewId() : particleTO.id;
@@ -263,7 +263,7 @@ __inline__ __device__ void ObjectFactory::createAuxiliaryData(T sourceSize, uint
 __inline__ __device__ void ObjectFactory::createAuxiliaryDataWithFixedSize(uint64_t size, uint64_t sourceIndex, uint8_t* auxiliaryData, uint8_t*& target)
 {
     if (size > 0) {
-        target = _data->objects.rawMemory.getRawSubArray(size);
+        target = _data->objects.heap.getRawSubArray(size);
         for (int i = 0; i < size; ++i) {
             target[i] = auxiliaryData[sourceIndex + i];
         }
@@ -274,7 +274,7 @@ __inline__ __device__ Particle*
 ObjectFactory::createParticle(float energy, float2 const& pos, float2 const& vel, int color)
 {
     Particle** particlePointer = _data->objects.particlePointers.getNewElement();
-    Particle* particle = _data->objects.rawMemory.getTypedSubArray<Particle>(1);
+    Particle* particle = _data->objects.heap.getTypedSubArray<Particle>(1);
     *particlePointer = particle;
     particle->id = _data->numberGen1.createNewId();
     particle->selected = 0;
@@ -289,7 +289,7 @@ ObjectFactory::createParticle(float energy, float2 const& pos, float2 const& vel
 
 __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 const& pos, float2 const& vel)
 {
-    auto cell = _data->objects.rawMemory.getTypedSubArray<Cell>(1);
+    auto cell = _data->objects.heap.getTypedSubArray<Cell>(1);
     auto cellPointers = _data->objects.cellPointers.getNewElement();
     *cellPointers = cell;
 
@@ -332,7 +332,7 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
 
 __inline__ __device__ Cell* ObjectFactory::createCell(uint64_t& cellPointerIndex)
 {
-    auto cell = _data->objects.rawMemory.getTypedSubArray<Cell>(1);
+    auto cell = _data->objects.heap.getTypedSubArray<Cell>(1);
     auto cellPointer = _data->objects.cellPointers.getNewElement(&cellPointerIndex);
     *cellPointer = cell;
 

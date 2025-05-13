@@ -92,10 +92,14 @@ public:
 
     void resizeArraysIfNecessary(ArraySizes const& additionals = ArraySizes());
 
-    // only for tests
+    // Only for tests
     void testOnly_mutate(uint64_t cellId, MutationType mutationType);
     void testOnly_mutationCheck(uint64_t cellId);
     void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2);
+    void testOnly_cleanupAfterTimestep();
+    void testOnly_cleanupAfterDataManipulation();
+    void testOnly_resizeArrays(ArraySizes const& sizeDelta);
+    bool testOnly_areArraysValid();
 
 private:
     void initCuda();
@@ -104,7 +108,7 @@ private:
     void copyDataTOtoDevice(DataTO const& dataTO);
     void copyDataTOtoHost(DataTO const& dataTO);
     void automaticResizeArrays();
-    void resizeArrays(ArraySizes const& additionals = ArraySizes());
+    void resizeArrays(ArraySizes const& sizeDelta = ArraySizes());
     void checkAndProcessSimulationParameterChanges();
 
     SimulationData getSimulationDataIntern() const;

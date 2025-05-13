@@ -511,6 +511,30 @@ void EngineWorker::testOnly_createConnection(uint64_t cellId1, uint64_t cellId2)
     _simulationCudaFacade->testOnly_createConnection(cellId1, cellId2);
 }
 
+void EngineWorker::testOnly_cleanupAfterTimestep()
+{
+    EngineWorkerGuard access(this);
+    _simulationCudaFacade->testOnly_cleanupAfterTimestep();
+}
+
+void EngineWorker::testOnly_cleanupAfterDataManipulation()
+{
+    EngineWorkerGuard access(this);
+    _simulationCudaFacade->testOnly_cleanupAfterDataManipulation();
+}
+
+void EngineWorker::testOnly_resizeArrays(ArraySizes const& sizeDelta)
+{
+    EngineWorkerGuard access(this);
+    _simulationCudaFacade->testOnly_resizeArrays(sizeDelta);
+}
+
+bool EngineWorker::testOnly_areArraysValid()
+{
+    EngineWorkerGuard access(this);
+    return _simulationCudaFacade->testOnly_areArraysValid();
+}
+
 DataTO EngineWorker::provideTO()
 {
     return _dataTOCache->getDataTO(_simulationCudaFacade->getCurrentGpuArraySizes());

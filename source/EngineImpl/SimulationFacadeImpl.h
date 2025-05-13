@@ -116,6 +116,10 @@ public:
     void testOnly_mutate(uint64_t cellId, MutationType mutationType) override;
     void testOnly_mutationCheck(uint64_t cellId) override;
     void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2) override;
+    void testOnly_cleanupAfterTimestep() override;
+    void testOnly_cleanupAfterDataManipulation() override;
+    void testOnly_resizeArrays(ArraySizes const& sizeDelta) override;
+    bool testOnly_areArraysValid() override;
 
 private:
     bool _selectionNeedsUpdate = false;

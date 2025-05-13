@@ -23,12 +23,12 @@ void _GarbageCollectorKernelsLauncher::cleanupAfterTimestep(GpuSettings const& g
     KERNEL_CALL_1_1(cudaCheckIfCleanupIsNecessary, data, _cudaBool);
     cudaDeviceSynchronize();
     if (copyToHost(_cudaBool)) {
-        KERNEL_CALL_1_1(cudaPrepareArraysForCleanup, data);
-        KERNEL_CALL(cudaCleanupParticles, data.objects.particlePointers, data.tempObjects.rawMemory);
-        KERNEL_CALL(cudaCleanupCellsStep1, data.objects.cellPointers, data.tempObjects.rawMemory);
-        KERNEL_CALL(cudaCleanupCellsStep2, data.objects.cellPointers, data.tempObjects.rawMemory);
-        KERNEL_CALL(cudaCleanupRawMemory, data.objects.cellPointers, data.tempObjects.rawMemory);
-        KERNEL_CALL_1_1(cudaSwapRawMemory, data);
+        KERNEL_CALL_1_1(cudaPrepareHeapForCleanup, data);
+        KERNEL_CALL(cudaCleanupParticles, data.objects.particlePointers, data.tempObjects.heap);
+        KERNEL_CALL(cudaCleanupCellsStep1, data.objects.cellPointers, data.tempObjects.heap);
+        KERNEL_CALL(cudaCleanupCellsStep2, data.objects.cellPointers, data.tempObjects.heap);
+        KERNEL_CALL(cudaCleanupDependentCellData, data.objects.cellPointers, data.tempObjects.heap);
+        KERNEL_CALL_1_1(cudaSwapHeaps, data);
     }
 }
 
@@ -39,12 +39,12 @@ void _GarbageCollectorKernelsLauncher::cleanupAfterDataManipulation(GpuSettings 
     KERNEL_CALL(cudaCleanupPointerArray<Cell*>, data.objects.cellPointers, data.tempObjects.cellPointers);
     KERNEL_CALL_1_1(cudaSwapPointerArrays, data);
 
-    KERNEL_CALL_1_1(cudaPrepareArraysForCleanup, data);
-    KERNEL_CALL(cudaCleanupParticles, data.objects.particlePointers, data.tempObjects.rawMemory);
-    KERNEL_CALL(cudaCleanupCellsStep1, data.objects.cellPointers, data.tempObjects.rawMemory);
-    KERNEL_CALL(cudaCleanupCellsStep2, data.objects.cellPointers, data.tempObjects.rawMemory);
-    KERNEL_CALL(cudaCleanupRawMemory, data.objects.cellPointers, data.tempObjects.rawMemory);
-    KERNEL_CALL_1_1(cudaSwapRawMemory, data);
+    KERNEL_CALL_1_1(cudaPrepareHeapForCleanup, data);
+    KERNEL_CALL(cudaCleanupParticles, data.objects.particlePointers, data.tempObjects.heap);
+    KERNEL_CALL(cudaCleanupCellsStep1, data.objects.cellPointers, data.tempObjects.heap);
+    KERNEL_CALL(cudaCleanupCellsStep2, data.objects.cellPointers, data.tempObjects.heap);
+    KERNEL_CALL(cudaCleanupDependentCellData, data.objects.cellPointers, data.tempObjects.heap);
+    KERNEL_CALL_1_1(cudaSwapHeaps, data);
 }
 
 void _GarbageCollectorKernelsLauncher::copyArrays(GpuSettings const& gpuSettings, SimulationData const& data)
@@ -53,15 +53,15 @@ void _GarbageCollectorKernelsLauncher::copyArrays(GpuSettings const& gpuSettings
     KERNEL_CALL(cudaCleanupPointerArray<Particle*>, data.objects.particlePointers, data.tempObjects.particlePointers);
     KERNEL_CALL(cudaCleanupPointerArray<Cell*>, data.objects.cellPointers, data.tempObjects.cellPointers);
 
-    KERNEL_CALL_1_1(cudaPrepareArraysForCleanup, data);
-    KERNEL_CALL(cudaCleanupParticles, data.tempObjects.particlePointers, data.tempObjects.rawMemory);
-    KERNEL_CALL(cudaCleanupCellsStep1, data.objects.cellPointers, data.tempObjects.rawMemory);
-    KERNEL_CALL(cudaCleanupCellsStep2, data.objects.cellPointers, data.tempObjects.rawMemory);
-    KERNEL_CALL(cudaCleanupRawMemory, data.tempObjects.cellPointers, data.tempObjects.rawMemory);
+    KERNEL_CALL_1_1(cudaPrepareHeapForCleanup, data);
+    KERNEL_CALL(cudaCleanupParticles, data.tempObjects.particlePointers, data.tempObjects.heap);
+    KERNEL_CALL(cudaCleanupCellsStep1, data.tempObjects.cellPointers, data.tempObjects.heap);
+    KERNEL_CALL(cudaCleanupCellsStep2, data.tempObjects.cellPointers, data.tempObjects.heap);
+    KERNEL_CALL(cudaCleanupDependentCellData, data.tempObjects.cellPointers, data.tempObjects.heap);
 }
 
 void _GarbageCollectorKernelsLauncher::swapArrays(GpuSettings const& gpuSettings, SimulationData const& data)
 {
     KERNEL_CALL_1_1(cudaSwapPointerArrays, data);
-    KERNEL_CALL_1_1(cudaSwapRawMemory, data);
+    KERNEL_CALL_1_1(cudaSwapHeaps, data);
 }

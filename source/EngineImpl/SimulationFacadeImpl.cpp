@@ -385,3 +385,23 @@ void _SimulationFacadeImpl::testOnly_createConnection(uint64_t cellId1, uint64_t
 {
     _worker.testOnly_createConnection(cellId1, cellId2);
 }
+
+void _SimulationFacadeImpl::testOnly_cleanupAfterTimestep()
+{
+    _worker.testOnly_cleanupAfterTimestep();
+}
+
+void _SimulationFacadeImpl::testOnly_cleanupAfterDataManipulation()
+{
+    _worker.testOnly_cleanupAfterDataManipulation();
+}
+
+void _SimulationFacadeImpl::testOnly_resizeArrays(ArraySizes const& sizeDelta)
+{
+    _worker.testOnly_resizeArrays(sizeDelta);
+}
+
+bool _SimulationFacadeImpl::testOnly_areArraysValid()
+{
+    return _worker.testOnly_areArraysValid();
+}

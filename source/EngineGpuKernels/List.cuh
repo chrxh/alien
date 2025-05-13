@@ -13,7 +13,7 @@ public:
         _numElements = 0;
     }
 
-    __device__ __inline__ void pushBack(Value const& value, RawMemory* dynamicMemory)
+    __device__ __inline__ void pushBack(Value const& value, Heap* dynamicMemory)
     {
         atomicAdd(&_numElements, 1);
         auto newEntry = dynamicMemory->getArray<ListEntry>(1);
@@ -32,7 +32,7 @@ public:
         }
     }
 
-    __device__ __inline__ Value* asArray(RawMemory* dynamicMemory) const
+    __device__ __inline__ Value* asArray(Heap* dynamicMemory) const
     {
         Value* result = dynamicMemory->getArray<Value>(_numElements);
         auto index = 0;

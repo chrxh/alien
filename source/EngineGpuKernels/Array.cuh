@@ -10,7 +10,8 @@
 
 namespace Const
 {
-    constexpr float ArrayFillLevelFactor = 2.0f / 4.0f;
+    constexpr float ArrayFillPercentage = 2.0f / 4.0f;
+    constexpr float ArrayResizePercentage = 3.0f;
 }
 
 template <typename T>
@@ -110,7 +111,7 @@ public:
 
     __host__ __inline__ bool shouldResize_host(uint64_t arraySizeInc) const
     {
-        return getNumEntries_host() + arraySizeInc > getSize_host() * Const::ArrayFillLevelFactor;
+        return getNumEntries_host() + arraySizeInc > toUInt64(getSize_host() * Const::ArrayFillPercentage);
     }
 
     //methods for device
@@ -163,11 +164,11 @@ public:
 
     __device__ __inline__ bool shouldResize(uint64_t arraySizeInc) const
     {
-        return getNumEntries() + arraySizeInc > getSize() * Const::ArrayFillLevelFactor;
+        return getNumEntries() + arraySizeInc > getSize() * Const::ArrayFillPercentage;
     }
 };
 
-class RawMemory : public Array<uint8_t>
+class Heap : public Array<uint8_t>
 {
 public:
     template <typename T>

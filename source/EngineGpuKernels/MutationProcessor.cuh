@@ -301,7 +301,7 @@ __inline__ __device__ void MutationProcessor::cellTypeMutation(SimulationData& d
     if (targetGenomeSize > MAX_GENOME_BYTES) {
         return;
     }
-    auto targetGenome = data.objects.rawMemory.getRawSubArray(targetGenomeSize);
+    auto targetGenome = data.objects.heap.getRawSubArray(targetGenomeSize);
     for (int i = 0; i < nodeAddress + Const::CellBasicBytes; ++i) {
         targetGenome[i] = genome[i];
     }
@@ -393,7 +393,7 @@ __inline__ __device__ void MutationProcessor::insertMutation(SimulationData& dat
     if (targetGenomeSize > MAX_GENOME_BYTES) {
         return;
     }
-    auto targetGenome = data.objects.rawMemory.getRawSubArray(targetGenomeSize);
+    auto targetGenome = data.objects.heap.getRawSubArray(targetGenomeSize);
     for (int i = 0; i < nodeAddress; ++i) {
         targetGenome[i] = genome[i];
     }
@@ -531,7 +531,7 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
         return;
     }
 
-    auto targetGenome = data.objects.rawMemory.getRawSubArray(genomeSize);
+    auto targetGenome = data.objects.heap.getRawSubArray(genomeSize);
     if (startTargetIndex > endSourceIndex) {
 
         //copy genome
@@ -697,7 +697,7 @@ __inline__ __device__ void MutationProcessor::duplicateMutation(SimulationData& 
         return;
     }
 
-    auto targetGenome = data.objects.rawMemory.getRawSubArray(targetGenomeSize);
+    auto targetGenome = data.objects.heap.getRawSubArray(targetGenomeSize);
 
     //copy segment before duplication
     for (int i = 0; i < startTargetIndex; ++i) {
