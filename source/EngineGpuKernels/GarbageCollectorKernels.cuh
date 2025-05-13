@@ -7,7 +7,7 @@
 #include "Object.cuh"
 
 __global__ void cudaPreparePointerArraysForCleanup(SimulationData data);
-__global__ void cudaPrepareArraysForCleanup(SimulationData data);
+__global__ void cudaPrepareHeapForCleanup(SimulationData data);
 
 template<typename Entity>
 __global__ void cudaCleanupPointerArray(Array<Entity> entityArray, Array<Entity> newEntityArray)
@@ -47,12 +47,12 @@ __global__ void cudaCleanupPointerArray(Array<Entity> entityArray, Array<Entity>
     __syncthreads();
 }
 
-__global__ void cudaCleanupParticles(Array<Particle*> particlePointers, RawMemory rawMemory);
-__global__ void cudaCleanupCellsStep1(Array<Cell*> cellPointers, RawMemory rawMemory);
-__global__ void cudaCleanupCellsStep2(Array<Cell*> cellPointers, RawMemory rawMemory);
-__global__ void cudaCleanupRawMemory(Array<Cell*> cellPointers, RawMemory stringBytes);
+__global__ void cudaCleanupParticles(Array<Particle*> particlePointers, Heap rawMemory);
+__global__ void cudaCleanupCellsStep1(Array<Cell*> cellPointers, Heap newHeap);
+__global__ void cudaCleanupCellsStep2(Array<Cell*> cellPointers, Heap newHeap);
+__global__ void cudaCleanupDependentCellData(Array<Cell*> cellPointers, Heap stringBytes);
 __global__ void cudaCleanupCellMap(SimulationData data);
 __global__ void cudaCleanupParticleMap(SimulationData data);
 __global__ void cudaSwapPointerArrays(SimulationData data);
-__global__ void cudaSwapRawMemory(SimulationData data);
+__global__ void cudaSwapHeaps(SimulationData data);
 __global__ void cudaCheckIfCleanupIsNecessary(SimulationData data, bool* result);

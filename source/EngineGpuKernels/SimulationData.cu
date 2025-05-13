@@ -33,8 +33,9 @@ __device__ void SimulationData::prepareForNextTimestep()
     particleMap.reset();
     processMemory.reset();
 
-    auto maxStructureOperations = 1000 + objects.cellPointers.getNumEntries() / 2; //heuristic
-    auto maxCellTypeOperations = objects.cellPointers.getNumEntries();  //heuristic
+    // Heuristics
+    auto maxStructureOperations = 1000 + objects.cellPointers.getNumEntries() / 2;
+    auto maxCellTypeOperations = objects.cellPointers.getNumEntries();
 
     structuralOperations.setMemory(processMemory.getTypedSubArray<StructuralOperation>(maxStructureOperations), maxStructureOperations);
 
@@ -62,7 +63,7 @@ bool SimulationData::shouldResize(ArraySizes const& additionals)
     calcArraySizes(cellArraySizeResult, particleArraySizeResult, additionals.cellArraySize, additionals.particleArraySize);
     return objects.cellPointers.shouldResize_host(cellArraySizeResult * 5)
         || objects.particlePointers.shouldResize_host(particleArraySizeResult * 5)
-        || objects.rawMemory.shouldResize_host(additionals.rawMemorySize);
+        || objects.heap.shouldResize_host(additionals.heapSize);
 }
 
 void SimulationData::resizeTargetObjects(ArraySizes const& additionals)
@@ -72,14 +73,14 @@ void SimulationData::resizeTargetObjects(ArraySizes const& additionals)
 
     resizeTargetIntern(objects.cellPointers, tempObjects.cellPointers, cellArraySizeResult * 5);
     resizeTargetIntern(objects.particlePointers, tempObjects.particlePointers, particleArraySizeResult * 5);
-    resizeTargetIntern(objects.rawMemory, tempObjects.rawMemory, additionals.rawMemorySize);
+    resizeTargetIntern(objects.heap, tempObjects.heap, additionals.heapSize);
 }
 
 void SimulationData::resizeObjects()
 {
     objects.cellPointers.resize(tempObjects.cellPointers.getSize_host());
     objects.particlePointers.resize(tempObjects.particlePointers.getSize_host());
-    objects.rawMemory.resize(tempObjects.rawMemory.getSize_host());
+    objects.heap.resize(tempObjects.heap.getSize_host());
 
     auto estimatedMaxActiveCells = objects.cellPointers.getSize_host() / 5;
     cellMap.resize(estimatedMaxActiveCells);
@@ -87,7 +88,7 @@ void SimulationData::resizeObjects()
     particleMap.resize(estimatedMaxActiveParticles);
 
     auto upperBoundDynamicMemory =
-        (sizeof(StructuralOperation) + sizeof(CellTypeOperation) * CellType_Count + 200) * (estimatedMaxActiveCells + 1000);  //heuristic
+        (sizeof(StructuralOperation) + sizeof(CellTypeOperation) * CellType_Count + 200) * (estimatedMaxActiveCells + 1000);  // Heuristic
     processMemory.resize(upperBoundDynamicMemory);
 }
 
@@ -96,13 +97,13 @@ ArraySizes SimulationData::getCurrentArraySizes() const
     ArraySizes result;
     result.cellArraySize = objects.cellPointers.getSize_host();
     result.particleArraySize = objects.particlePointers.getSize_host();
-    result.rawMemorySize = objects.rawMemory.getSize_host();
+    result.heapSize = objects.heap.getSize_host();
     return result;
 }
 
 bool SimulationData::isEmpty()
 {
-    return 0 == objects.rawMemory.getNumEntries_host();
+    return 0 == objects.heap.getNumEntries_host();
 }
 
 void SimulationData::free()
@@ -127,7 +128,7 @@ template <typename Entity>
 void SimulationData::resizeTargetIntern(Array<Entity> const& sourceArray, Array<Entity>& targetArray, uint64_t additionalEntities)
 {
     if (sourceArray.shouldResize_host(additionalEntities)) {
-        auto newSize = (sourceArray.getSize_host() + additionalEntities) * 3;
-        targetArray.resize(newSize);
+        auto newSize = (sourceArray.getSize_host() + additionalEntities) * Const::ArrayResizePercentage;
+        targetArray.resize(toUInt64(newSize));
     }
 }

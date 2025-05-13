@@ -78,6 +78,35 @@ __global__ void cudaTestCreateConnection(SimulationData data, uint64_t cellId1, 
     }
 }
 
+__global__ void cudaTestAreArraysValid(SimulationData data, bool* result)
+{
+    auto& cells = data.objects.cellPointers;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        if (auto& cell = cells.at(index)) {
+
+            bool isValid = true;
+            if (reinterpret_cast<uint64_t>(cell) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
+                || reinterpret_cast<uint64_t>(cell) >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getSize())) {
+                *result = false;
+                isValid = false;
+            }
+
+            if (isValid) {
+                for (int i = 0; i < cell->numConnections; ++i) {
+                    auto connectingCell = cell->connections[i].cell;
+                    if (reinterpret_cast<uint64_t>(connectingCell) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
+                        || reinterpret_cast<uint64_t>(connectingCell)
+                            >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getSize())) {
+                        *result = false;
+                    }
+                }
+            }
+        }
+    }
+}
+
 __global__ void cudaTestMutationCheck(SimulationData data, uint64_t cellId)
 {
     auto& cells = data.objects.cellPointers;

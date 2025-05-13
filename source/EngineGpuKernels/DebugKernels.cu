@@ -140,19 +140,19 @@ __global__ void DEBUG_checkGenomes(SimulationData data, int location)
     }
 }
 
-/*
-__global__ void DEBUG_kernel(SimulationData data, int location)
-{
-    float* sumEnergy = new float;
-    *sumEnergy = 0;
 
-    DEPRECATED_KERNEL_CALL_SYNC(DEBUG_checkCellsAndParticles, data, sumEnergy, location);
+//__global__ void DEBUG_kernel(SimulationData data, int location)
+//{
+//    float* sumEnergy = new float;
+//    *sumEnergy = 0;
+//
+//    DEPRECATED_KERNEL_CALL_SYNC(DEBUG_checkCellsAndParticles, data, sumEnergy, location);
+//
+//    float const expectedEnergy = 187500;
+//    if (abs(*sumEnergy - expectedEnergy) > 1) {
+//        printf("location: %d, actual energy: %f, expected energy: %f\n", location, *sumEnergy, expectedEnergy);
+//        CUDA_THROW_NOT_IMPLEMENTED();
+//    }
+//    delete sumEnergy;
+//}
 
-    float const expectedEnergy = 187500;
-    if (abs(*sumEnergy - expectedEnergy) > 1) {
-        printf("location: %d, actual energy: %f, expected energy: %f\n", location, *sumEnergy, expectedEnergy);
-        CUDA_THROW_NOT_IMPLEMENTED();
-    }
-    delete sumEnergy;
-}
-*/

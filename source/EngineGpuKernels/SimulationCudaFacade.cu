@@ -411,35 +411,18 @@ void _SimulationCudaFacade::setSimulationParameters(SimulationParameters const& 
 
 namespace
 {
-    void addAdditionalDataSizeForCell(CellDescription const& cell, uint64_t& additionalDataSize)
+    void sumDependentDataSize(CellDescription const& cell, uint64_t& dependentDataSize)
     {
-        additionalDataSize += cell._metadata._name.size() + cell._metadata._description.size();
-        switch (cell.getCellType()) {
-        case CellType_Base: {
-            additionalDataSize += MAX_CHANNELS * (MAX_CHANNELS + 1) * sizeof(float);
-        } break;
-        case CellType_Depot:
-            break;
-        case CellType_Constructor:
-            additionalDataSize += std::get<ConstructorDescription>(cell._cellTypeData)._genome.size();
-            break;
-        case CellType_Sensor:
-            break;
-        case CellType_Oscillator:
-            break;
-        case CellType_Attacker:
-            break;
-        case CellType_Injector:
-            additionalDataSize += std::get<InjectorDescription>(cell._cellTypeData)._genome.size();
-            break;
-        case CellType_Muscle:
-            break;
-        case CellType_Defender:
-            break;
-        case CellType_Reconnector:
-            break;
-        case CellType_Detonator:
-            break;
+        dependentDataSize += cell._metadata._name.size() + cell._metadata._description.size();
+        auto cellType = cell.getCellType();
+        if (cellType != CellType_Structure && cellType != CellType_Free) {
+            dependentDataSize += MAX_CHANNELS * (MAX_CHANNELS + 1) * sizeof(float);
+        }
+        if (cellType == CellType_Constructor) {
+            dependentDataSize += std::get<ConstructorDescription>(cell._cellTypeData)._genome.size();
+        }
+        if (cellType == CellType_Injector) {
+            dependentDataSize += std::get<InjectorDescription>(cell._cellTypeData)._genome.size();
         }
     }
 }
@@ -449,10 +432,10 @@ ArraySizes _SimulationCudaFacade::getGpuArraySizesNeededFor(DataDescription cons
     ArraySizes result;
     result.cellArraySize = data._cells.size();
     result.particleArraySize = data._particles.size();
-    result.rawMemorySize = data._cells.size() * (sizeof(Cell) + 16);
-    result.rawMemorySize += data._particles.size() * (sizeof(Particle) + 16);
+    result.heapSize = data._cells.size() * (sizeof(Cell) + 16);
+    result.heapSize += data._particles.size() * (sizeof(Particle) + 16);
     for (auto const& cell : data._cells) {
-        addAdditionalDataSizeForCell(cell, result.rawMemorySize);
+        sumDependentDataSize(cell, result.heapSize);
     }
     return result;
 }
@@ -462,13 +445,13 @@ ArraySizes _SimulationCudaFacade::getGpuArraySizesNeededFor(ClusteredDataDescrip
     ArraySizes result;
     for (auto const& cluster : data._clusters) {
         result.cellArraySize += cluster._cells.size();
-        result.rawMemorySize += cluster._cells.size() * (sizeof(Cell) + 16);
+        result.heapSize += cluster._cells.size() * (sizeof(Cell) + 16);
         for (auto const& cell : cluster._cells) {
-            addAdditionalDataSizeForCell(cell, result.rawMemorySize);
+            sumDependentDataSize(cell, result.heapSize);
         }
     }
     result.particleArraySize = data._particles.size();
-    result.rawMemorySize += data._particles.size() * (sizeof(Particle) + 16);
+    result.heapSize += data._particles.size() * (sizeof(Particle) + 16);
     return result;
 }
 
@@ -563,6 +546,35 @@ void _SimulationCudaFacade::testOnly_createConnection(uint64_t cellId1, uint64_t
     checkAndProcessSimulationParameterChanges();
     _testKernels->testOnly_createConnection(_settings.gpuSettings, getSimulationDataIntern(), cellId1, cellId2);
     syncAndCheck();
+}
+
+void _SimulationCudaFacade::testOnly_cleanupAfterTimestep()
+{
+    checkAndProcessSimulationParameterChanges();
+    _garbageCollectorKernels->cleanupAfterTimestep(_settings.gpuSettings, getSimulationDataIntern());
+    syncAndCheck();
+}
+
+void _SimulationCudaFacade::testOnly_cleanupAfterDataManipulation()
+{
+    checkAndProcessSimulationParameterChanges();
+    _garbageCollectorKernels->cleanupAfterDataManipulation(_settings.gpuSettings, getSimulationDataIntern());
+    syncAndCheck();
+}
+
+void _SimulationCudaFacade::testOnly_resizeArrays(ArraySizes const& sizeDelta)
+{
+    checkAndProcessSimulationParameterChanges();
+    resizeArrays(sizeDelta);
+    syncAndCheck();
+}
+
+bool _SimulationCudaFacade::testOnly_areArraysValid()
+{
+    checkAndProcessSimulationParameterChanges();
+    auto result = _testKernels->testOnly_areArraysValid(_settings.gpuSettings, getSimulationDataIntern());
+    syncAndCheck();
+    return result;
 }
 
 void _SimulationCudaFacade::initCuda()
@@ -667,11 +679,11 @@ void _SimulationCudaFacade::automaticResizeArrays()
     }
 }
 
-void _SimulationCudaFacade::resizeArrays(ArraySizes const& additionals)
+void _SimulationCudaFacade::resizeArrays(ArraySizes const& sizeDelta)
 {
     log(Priority::Important, "resize arrays");
 
-    _cudaSimulationData->resizeTargetObjects(additionals);
+    _cudaSimulationData->resizeTargetObjects(sizeDelta);
 
     if (!_cudaSimulationData->isEmpty()) {
         _garbageCollectorKernels->copyArrays(_settings.gpuSettings, getSimulationDataIntern());
@@ -693,7 +705,7 @@ void _SimulationCudaFacade::resizeArrays(ArraySizes const& additionals)
     CudaMemoryManager::getInstance().acquireMemory<CellTO>(cellArraySize, _cudaAccessTO->cells);
     auto particleArraySize = _cudaSimulationData->objects.particlePointers.getSize_host();
     CudaMemoryManager::getInstance().acquireMemory<ParticleTO>(particleArraySize, _cudaAccessTO->particles);
-    auto auxiliaryDataSize = _cudaSimulationData->objects.rawMemory.getSize_host();
+    auto auxiliaryDataSize = _cudaSimulationData->objects.heap.getSize_host();
     CudaMemoryManager::getInstance().acquireMemory<uint8_t>(auxiliaryDataSize, _cudaAccessTO->auxiliaryData);
 
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());

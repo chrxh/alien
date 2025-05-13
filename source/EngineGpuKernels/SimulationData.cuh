@@ -28,7 +28,7 @@ struct SimulationData
 
     // Additional data for cell functions
     double* externalEnergy;
-    RawMemory processMemory;
+    Heap processMemory;
     PreprocessedSimulationData preprocessedSimulationData;
 
     // Temporary memory for operations

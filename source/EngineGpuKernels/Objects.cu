@@ -6,14 +6,14 @@ void Objects::init()
 {
     cellPointers.init();
     particlePointers.init();
-    rawMemory.init();
+    heap.init();
 }
 
 void Objects::free()
 {
     cellPointers.free();
     particlePointers.free();
-    rawMemory.free();
+    heap.free();
 }
 
 __device__ void Objects::saveNumEntries()

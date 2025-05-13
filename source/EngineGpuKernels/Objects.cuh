@@ -11,7 +11,7 @@ struct Objects
     Array<Cell*> cellPointers;
     Array<Particle*> particlePointers;
 
-    RawMemory rawMemory;
+    Heap heap;
 
     void init();
     void free();

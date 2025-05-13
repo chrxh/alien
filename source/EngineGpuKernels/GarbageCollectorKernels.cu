@@ -6,19 +6,20 @@ __global__ void cudaPreparePointerArraysForCleanup(SimulationData data)
     data.tempObjects.cellPointers.reset();
 }
 
-__global__ void cudaPrepareArraysForCleanup(SimulationData data)
+__global__ void cudaPrepareHeapForCleanup(SimulationData data)
 {
-    data.tempObjects.rawMemory.reset();
+    data.tempObjects.heap.reset();
 }
 
-__global__ void cudaCleanupCellsStep1(Array<Cell*> cellPointers, RawMemory rawMemory)
+__global__ void cudaCleanupCellsStep1(Array<Cell*> cellPointers, Heap newHeap)
 {
     //assumes that cellPointers are already cleaned up
     PartitionData cellPartition = calcAllThreadsPartition(cellPointers.getNumEntries());
 
     int numCellsToCopy = cellPartition.numElements();
     if (numCellsToCopy > 0) {
-        auto newCells = rawMemory.getTypedSubArray<Cell>(numCellsToCopy);
+        auto newCells = newHeap.getTypedSubArray<Cell>(numCellsToCopy);
+        auto newHeapStart = newHeap.getArray();
 
         int newCellIndex = 0;
         for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
@@ -26,7 +27,7 @@ __global__ void cudaCleanupCellsStep1(Array<Cell*> cellPointers, RawMemory rawMe
             auto& newCell = newCells[newCellIndex];
             newCell = *cellPointer;
 
-            cellPointer->tag = reinterpret_cast<uint8_t*>(&newCell) - rawMemory.getArray();  //save index of new cell in old cell
+            cellPointer->tag = reinterpret_cast<uint8_t*>(&newCell) - newHeapStart;  //save index of new cell in old cell
             cellPointer = &newCell;
 
             ++newCellIndex;
@@ -34,16 +35,16 @@ __global__ void cudaCleanupCellsStep1(Array<Cell*> cellPointers, RawMemory rawMe
     }
 }
 
-__global__ void cudaCleanupCellsStep2(Array<Cell*> cellPointers, RawMemory rawMemory)
+__global__ void cudaCleanupCellsStep2(Array<Cell*> cellPointers, Heap newHeap)
 {
     {
         auto partition = calcAllThreadsPartition(cellPointers.getNumEntries());
-
+        auto newHeapStart = newHeap.getArray();
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& cell = cellPointers.at(index);
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto& connectedCell = cell->connections[i].cell;
-                cell->connections[i].cell = reinterpret_cast<Cell*>(rawMemory.getArray() + connectedCell->tag);
+                connectedCell = reinterpret_cast<Cell*>(newHeapStart + connectedCell->tag);
             }
         }
     }
@@ -51,7 +52,7 @@ __global__ void cudaCleanupCellsStep2(Array<Cell*> cellPointers, RawMemory rawMe
 
 namespace
 {
-    __device__ void copyAndAssignNewAuxiliaryData(uint8_t*& source, uint64_t numBytes, RawMemory& target)
+    __device__ void copyAndAssignNewHeapData(uint8_t*& source, uint64_t numBytes, Heap& target)
     {
         if (numBytes > 0) {
             uint8_t* bytes = target.getRawSubArray(numBytes);
@@ -63,23 +64,23 @@ namespace
     }
 }
 
-__global__ void cudaCleanupRawMemory(Array<Cell*> cellPointers, RawMemory auxiliaryData)
+__global__ void cudaCleanupDependentCellData(Array<Cell*> cellPointers, Heap newHeap)
 {
     auto const partition = calcAllThreadsPartition(cellPointers.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cellPointers.at(index);
-        copyAndAssignNewAuxiliaryData(cell->metadata.name, cell->metadata.nameSize, auxiliaryData);
-        copyAndAssignNewAuxiliaryData(cell->metadata.description, cell->metadata.descriptionSize, auxiliaryData);
+        copyAndAssignNewHeapData(cell->metadata.name, cell->metadata.nameSize, newHeap);
+        copyAndAssignNewHeapData(cell->metadata.description, cell->metadata.descriptionSize, newHeap);
         if (cell->cellType != CellType_Structure && cell->cellType != CellType_Free) {
-            copyAndAssignNewAuxiliaryData(
-                reinterpret_cast<uint8_t*&>(cell->neuralNetwork), sizeof(*cell->neuralNetwork), auxiliaryData);
+            copyAndAssignNewHeapData(
+                reinterpret_cast<uint8_t*&>(cell->neuralNetwork), sizeof(*cell->neuralNetwork), newHeap);
         }
         if (cell->cellType == CellType_Constructor) {
-            copyAndAssignNewAuxiliaryData(cell->cellTypeData.constructor.genome, cell->cellTypeData.constructor.genomeSize, auxiliaryData);
+            copyAndAssignNewHeapData(cell->cellTypeData.constructor.genome, cell->cellTypeData.constructor.genomeSize, newHeap);
         }
         if (cell->cellType == CellType_Injector) {
-            copyAndAssignNewAuxiliaryData(cell->cellTypeData.injector.genome, cell->cellTypeData.injector.genomeSize, auxiliaryData);
+            copyAndAssignNewHeapData(cell->cellTypeData.injector.genome, cell->cellTypeData.injector.genomeSize, newHeap);
         }
     }
 }
@@ -100,13 +101,13 @@ __global__ void cudaSwapPointerArrays(SimulationData data)
     data.objects.cellPointers.swapContent(data.tempObjects.cellPointers);
 }
 
-__global__ void cudaSwapRawMemory(SimulationData data)
+__global__ void cudaSwapHeaps(SimulationData data)
 {
-    data.objects.rawMemory.swapContent(data.tempObjects.rawMemory);
+    data.objects.heap.swapContent(data.tempObjects.heap);
 }
 
 
-__global__ void cudaCleanupParticles(Array<Particle*> particlePointers, RawMemory rawMemory)
+__global__ void cudaCleanupParticles(Array<Particle*> particlePointers, Heap rawMemory)
 {
     //assumes that particlePointers are already cleaned up
     auto partition = calcAllThreadsPartition(particlePointers.getNumEntries());
@@ -129,7 +130,7 @@ __global__ void cudaCleanupParticles(Array<Particle*> particlePointers, RawMemor
 
 __global__ void cudaCheckIfCleanupIsNecessary(SimulationData data, bool* result)
 {
-    if (data.objects.rawMemory.getNumEntries() > data.objects.rawMemory.getSize() * Const::ArrayFillLevelFactor) {
+    if (data.objects.heap.getNumEntries() > data.objects.heap.getSize() * Const::ArrayFillPercentage) {
         *result = true;
     } else {
         *result = false;
