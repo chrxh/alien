@@ -1,16 +1,16 @@
-﻿#include "SimulationKernelsLauncher.cuh"
+﻿#include "SimulationKernelsService.cuh"
 
 #include "EngineInterface/SpaceCalculator.h"
 
 #include "SimulationKernels.cuh"
 #include "ForceFieldKernels.cuh"
-#include "GarbageCollectorKernelsLauncher.cuh"
+#include "GarbageCollectorKernelsService.cuh"
 #include "DebugKernels.cuh"
 #include "SimulationStatistics.cuh"
 
-_SimulationKernelsLauncher::_SimulationKernelsLauncher()
+_SimulationKernelsService::_SimulationKernelsService()
 {
-    _garbageCollector = std::make_shared<_GarbageCollectorKernelsLauncher>();
+    _garbageCollector = std::make_shared<_GarbageCollectorKernelsService>();
 }
 
 namespace 
@@ -22,7 +22,7 @@ namespace
     }
 }
 
-void _SimulationKernelsLauncher::calcTimestep(SettingsForSimulation const& settings, SimulationData const& data, SimulationStatistics const& statistics)
+void _SimulationKernelsService::calcTimestep(SettingsForSimulation const& settings, SimulationData const& data, SimulationStatistics const& statistics)
 {
     auto const gpuSettings = settings.gpuSettings;
     KERNEL_CALL_1_1(cudaNextTimestep_prepare, data, statistics);
@@ -98,13 +98,13 @@ void _SimulationKernelsLauncher::calcTimestep(SettingsForSimulation const& setti
     _garbageCollector->cleanupAfterTimestep(settings.gpuSettings, data);
 }
 
-void _SimulationKernelsLauncher::prepareForSimulationParametersChanges(SettingsForSimulation const& settings, SimulationData const& data)
+void _SimulationKernelsService::prepareForSimulationParametersChanges(SettingsForSimulation const& settings, SimulationData const& data)
 {
     auto const gpuSettings = settings.gpuSettings;
     KERNEL_CALL(cudaResetDensity, data);
 }
 
-bool _SimulationKernelsLauncher::isRigidityUpdateEnabled(SettingsForSimulation const& settings) const
+bool _SimulationKernelsService::isRigidityUpdateEnabled(SettingsForSimulation const& settings) const
 {
     for (int i = 0; i < settings.simulationParameters.numLayers; ++i) {
         if (settings.simulationParameters.rigidity.layerValues[i].value != 0) {

@@ -7,10 +7,10 @@
 #include "Base.cuh"
 #include "DataAccessKernels.cuh"
 #include "Definitions.cuh"
-#include "GarbageCollectorKernelsLauncher.cuh"
+#include "GarbageCollectorKernelsService.cuh"
 #include "Macros.cuh"
 
-class _RenderingKernelsLauncher
+class _RenderingKernelsService
 {
 public:
     void drawImage(

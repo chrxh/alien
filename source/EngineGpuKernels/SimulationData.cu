@@ -57,23 +57,23 @@ namespace
     }
 }
 
-bool SimulationData::shouldResize(ArraySizes const& additionals)
+bool SimulationData::shouldResize(ArraySizes const& sizeDelta)
 {
     uint64_t cellArraySizeResult, particleArraySizeResult;
-    calcArraySizes(cellArraySizeResult, particleArraySizeResult, additionals.cellArraySize, additionals.particleArraySize);
-    return objects.cellPointers.shouldResize_host(cellArraySizeResult * 5)
-        || objects.particlePointers.shouldResize_host(particleArraySizeResult * 5)
-        || objects.heap.shouldResize_host(additionals.heapSize);
+    calcArraySizes(cellArraySizeResult, particleArraySizeResult, sizeDelta.cellArraySize, sizeDelta.particleArraySize);
+    return objects.cellPointers.shouldResize_host(cellArraySizeResult)
+        || objects.particlePointers.shouldResize_host(particleArraySizeResult)
+        || objects.heap.shouldResize_host(sizeDelta.heapSize);
 }
 
-void SimulationData::resizeTargetObjects(ArraySizes const& additionals)
+void SimulationData::resizeTargetObjects(ArraySizes const& size)
 {
     uint64_t cellArraySizeResult, particleArraySizeResult;
-    calcArraySizes(cellArraySizeResult, particleArraySizeResult, additionals.cellArraySize, additionals.particleArraySize);
+    calcArraySizes(cellArraySizeResult, particleArraySizeResult, size.cellArraySize, size.particleArraySize);
 
-    resizeTargetIntern(objects.cellPointers, tempObjects.cellPointers, cellArraySizeResult * 5);
-    resizeTargetIntern(objects.particlePointers, tempObjects.particlePointers, particleArraySizeResult * 5);
-    resizeTargetIntern(objects.heap, tempObjects.heap, additionals.heapSize);
+    resizeTargetIntern(objects.cellPointers, tempObjects.cellPointers, cellArraySizeResult);
+    resizeTargetIntern(objects.particlePointers, tempObjects.particlePointers, particleArraySizeResult);
+    resizeTargetIntern(objects.heap, tempObjects.heap, size.heapSize);
 }
 
 void SimulationData::resizeObjects()
@@ -82,9 +82,9 @@ void SimulationData::resizeObjects()
     objects.particlePointers.resize(tempObjects.particlePointers.getSize_host());
     objects.heap.resize(tempObjects.heap.getSize_host());
 
-    auto estimatedMaxActiveCells = objects.cellPointers.getSize_host() / 5;
+    auto estimatedMaxActiveCells = objects.cellPointers.getSize_host();
     cellMap.resize(estimatedMaxActiveCells);
-    auto estimatedMaxActiveParticles = objects.particlePointers.getSize_host() / 5;
+    auto estimatedMaxActiveParticles = objects.particlePointers.getSize_host();
     particleMap.resize(estimatedMaxActiveParticles);
 
     auto upperBoundDynamicMemory =

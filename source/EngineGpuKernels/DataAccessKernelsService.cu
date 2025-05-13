@@ -1,24 +1,24 @@
-﻿#include "DataAccessKernelsLauncher.cuh"
+﻿#include "DataAccessKernelsService.cuh"
 
 #include "DataAccessKernels.cuh"
-#include "GarbageCollectorKernelsLauncher.cuh"
-#include "EditKernelsLauncher.cuh"
+#include "GarbageCollectorKernelsService.cuh"
+#include "EditKernelsService.cuh"
 #include "DebugKernels.cuh"
 
-_DataAccessKernelsLauncher::_DataAccessKernelsLauncher()
+_DataAccessKernelsService::_DataAccessKernelsService()
 {
-    _garbageCollectorKernels = std::make_shared<_GarbageCollectorKernelsLauncher>();
-    _editKernels = std::make_shared<_EditKernelsLauncher>();
+    _garbageCollectorKernels = std::make_shared<_GarbageCollectorKernelsService>();
+    _editKernels = std::make_shared<_EditKernelsService>();
 
     CudaMemoryManager::getInstance().acquireMemory<Cell*>(1, _cudaCellArray);
 }
 
-_DataAccessKernelsLauncher::~_DataAccessKernelsLauncher()
+_DataAccessKernelsService::~_DataAccessKernelsService()
 {
     CudaMemoryManager::getInstance().freeMemory(_cudaCellArray);
 }
 
-void _DataAccessKernelsLauncher::getData(
+void _DataAccessKernelsService::getData(
     GpuSettings const& gpuSettings,
     SimulationData const& data,
     int2 const& rectUpperLeft,
@@ -31,7 +31,7 @@ void _DataAccessKernelsLauncher::getData(
     KERNEL_CALL(cudaGetParticleData, rectUpperLeft, rectLowerRight, data, dataTO);
 }
 
-void _DataAccessKernelsLauncher::getSelectedData(
+void _DataAccessKernelsService::getSelectedData(
     GpuSettings const& gpuSettings,
     SimulationData const& data,
     bool includeClusters,
@@ -43,7 +43,7 @@ void _DataAccessKernelsLauncher::getSelectedData(
     KERNEL_CALL(cudaGetSelectedParticleData, data, dataTO);
 }
 
-void _DataAccessKernelsLauncher::getInspectedData(
+void _DataAccessKernelsService::getInspectedData(
     GpuSettings const& gpuSettings,
     SimulationData const& data,
     InspectedEntityIds entityIds,
@@ -55,7 +55,7 @@ void _DataAccessKernelsLauncher::getInspectedData(
     KERNEL_CALL(cudaGetInspectedParticleData, entityIds, data, dataTO);
 }
 
-void _DataAccessKernelsLauncher::getOverlayData(
+void _DataAccessKernelsService::getOverlayData(
     GpuSettings const& gpuSettings,
     SimulationData const& data,
     int2 rectUpperLeft,
@@ -66,7 +66,7 @@ void _DataAccessKernelsLauncher::getOverlayData(
     KERNEL_CALL(cudaGetOverlayData, rectUpperLeft, rectLowerRight, data, dataTO);
 }
 
-void _DataAccessKernelsLauncher::addData(GpuSettings const& gpuSettings, SimulationData const& data, DataTO const& dataTO, bool selectData, bool createIds)
+void _DataAccessKernelsService::addData(GpuSettings const& gpuSettings, SimulationData const& data, DataTO const& dataTO, bool selectData, bool createIds)
 {
     KERNEL_CALL_1_1(cudaSaveNumEntries, data);
     KERNEL_CALL(cudaAdaptNumberGenerator, data.numberGen1, dataTO);
@@ -80,7 +80,7 @@ void _DataAccessKernelsLauncher::addData(GpuSettings const& gpuSettings, Simulat
     KERNEL_CALL(cudaAdaptNumberGenerator, data.numberGen1, dataTO);
 }
 
-void _DataAccessKernelsLauncher::clearData(GpuSettings const& gpuSettings, SimulationData const& data)
+void _DataAccessKernelsService::clearData(GpuSettings const& gpuSettings, SimulationData const& data)
 {
     KERNEL_CALL(cudaClearData, data);
 }
