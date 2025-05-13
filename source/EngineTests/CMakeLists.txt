@@ -9,6 +9,7 @@ PUBLIC
     DescriptionEditTests.cpp
     DetonatorTests.cpp
     EnergyFlowTests_New.cpp
+    GarbageCollectorTests_New.cpp
     InjectorTests.cpp
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h

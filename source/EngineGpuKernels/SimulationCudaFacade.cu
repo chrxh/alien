@@ -78,6 +78,7 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     _renderingKernels = std::make_shared<_RenderingKernelsLauncher>();
     _editKernels = std::make_shared<_EditKernelsLauncher>();
     _statisticsKernels = std::make_shared<_StatisticsKernelsLauncher>();
+    _testKernels = std::make_shared<_TestKernelsLauncher>();
 
     CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _cudaAccessTO->numCells);
     CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _cudaAccessTO->numParticles);
@@ -100,6 +101,7 @@ _SimulationCudaFacade::~_SimulationCudaFacade()
     _renderingKernels.reset();
     _editKernels.reset();
     _statisticsKernels.reset();
+    _testKernels.reset();
 
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->cells);
     CudaMemoryManager::getInstance().freeMemory(_cudaAccessTO->particles);
