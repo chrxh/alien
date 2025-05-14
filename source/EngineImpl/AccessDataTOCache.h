@@ -2,7 +2,7 @@
 
 #include "Base/Definitions.h"
 
-#include "EngineInterface/ArraySizes.h"
+#include "EngineInterface/ObjectTOArraySizes.h"
 #include "EngineGpuKernels/ObjectTO.cuh"
 
 #include "Definitions.h"
@@ -13,11 +13,11 @@ public:
     _AccessDataTOCache();
     ~_AccessDataTOCache();
 
-    DataTO getDataTO(ArraySizes const& arraySizes);
+    DataTO getDataTO(ObjectTOArraySizes const& arraySizes);
 
 private:
-    bool fits(ArraySizes const& left, ArraySizes const& right) const;
-    ArraySizes getArraySizes(DataTO const& dataTO) const;
+    bool fits(ObjectTOArraySizes const& left, ObjectTOArraySizes const& right) const;
+    ObjectTOArraySizes getArraySizes(DataTO const& dataTO) const;
 
     std::optional<DataTO> _dataTO;
 };

@@ -3,7 +3,6 @@
 #include <unordered_map>
 
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/ArraySizes.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/OverlayDescriptions.h"
 #include "EngineInterface/SimulationParameters.h"

@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-struct ArraySizes
+struct ObjectTOArraySizes
 {
     uint64_t cellArraySize = 0;
     uint64_t particleArraySize = 0;

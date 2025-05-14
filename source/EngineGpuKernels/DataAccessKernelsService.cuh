@@ -3,6 +3,7 @@
 #include "EngineInterface/GpuSettings.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/InspectedEntityIds.h"
+#include "EngineInterface/ObjectTOArraySizes.h"
 
 #include "Base.cuh"
 #include "Definitions.cuh"
@@ -14,6 +15,7 @@ public:
     _DataAccessKernelsService();
     ~_DataAccessKernelsService();
 
+    ObjectTOArraySizes getActualArraySizes(GpuSettings const& gpuSettings, SimulationData const& data);
     void getData(GpuSettings const& gpuSettings, SimulationData const& data, int2 const& rectUpperLeft, int2 const& rectLowerRight, DataTO const& dataTO);
     void getSelectedData(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters, DataTO const& dataTO);
     void getInspectedData(GpuSettings const& gpuSettings, SimulationData const& data, InspectedEntityIds entityIds, DataTO const& dataTO);
@@ -26,7 +28,8 @@ private:
     GarbageCollectorKernelsService _garbageCollectorKernels;
     EditKernelsService _editKernels;
 
-    // gpu memory
+    // Gpu memory
     Cell** _cudaCellArray;
+    ObjectTOArraySizes* _arraySizes;
 };
 

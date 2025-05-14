@@ -109,12 +109,12 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
     cell->cellTypeUsed = cellTO.cellTypeUsed;
     cell->genomeNodeIndex = cellTO.genomeNodeIndex;
 
-    createAuxiliaryData(cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, dataTO.auxiliaryData, cell->metadata.nameSize, cell->metadata.name);
+    createAuxiliaryData(cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, dataTO.heap, cell->metadata.nameSize, cell->metadata.name);
 
     createAuxiliaryData(
         cellTO.metadata.descriptionSize,
         cellTO.metadata.descriptionDataIndex,
-        dataTO.auxiliaryData,
+        dataTO.heap,
         cell->metadata.descriptionSize,
         cell->metadata.description);
 
@@ -132,7 +132,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
 
     if (cellTO.cellType != CellType_Structure && cellTO.cellType != CellType_Free) {
         createAuxiliaryDataWithFixedSize(
-            sizeof(NeuralNetwork), cellTO.neuralNetwork.dataIndex, dataTO.auxiliaryData, reinterpret_cast<uint8_t*&>(cell->neuralNetwork));
+            sizeof(NeuralNetwork), cellTO.neuralNetwork.dataIndex, dataTO.heap, reinterpret_cast<uint8_t*&>(cell->neuralNetwork));
     } else {
         cell->neuralNetwork = nullptr;
     }
@@ -148,7 +148,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         createAuxiliaryData(
             cellTO.cellTypeData.constructor.genomeSize,
             cellTO.cellTypeData.constructor.genomeDataIndex,
-            dataTO.auxiliaryData,
+            dataTO.heap,
             cell->cellTypeData.constructor.genomeSize,
             cell->cellTypeData.constructor.genome);
         cell->cellTypeData.constructor.numInheritedGenomeNodes = cellTO.cellTypeData.constructor.numInheritedGenomeNodes;
@@ -184,7 +184,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(DataTO const& dataTO,
         createAuxiliaryData(
             cellTO.cellTypeData.injector.genomeSize,
             cellTO.cellTypeData.injector.genomeDataIndex,
-            dataTO.auxiliaryData,
+            dataTO.heap,
             cell->cellTypeData.injector.genomeSize,
             cell->cellTypeData.injector.genome);
         cell->cellTypeData.injector.genomeGeneration = cellTO.cellTypeData.injector.genomeGeneration;

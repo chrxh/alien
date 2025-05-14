@@ -55,7 +55,7 @@ TEST_P(GarbageCollectorTests_AllCleanupActions_New, cleanupAfterTimestep)
     case CleanupAction::CleanupAfterDataManipulation:
         _simulationFacade->testOnly_cleanupAfterDataManipulation();
     case CleanupAction::ResizeArrays:
-        _simulationFacade->testOnly_resizeArrays(ArraySizes{.cellArraySize = 1000, .particleArraySize = 1000, .heapSize = 1000000});
+        _simulationFacade->testOnly_resizeArrays(ObjectArraySizes{.cellArraySize = 1000, .particleArraySize = 1000, .heapSize = 1000000});
     }
     EXPECT_TRUE(_simulationFacade->testOnly_areArraysValid());
 }

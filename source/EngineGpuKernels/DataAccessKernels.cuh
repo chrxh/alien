@@ -29,3 +29,4 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataTO d
 __global__ void cudaClearDataTO(DataTO dataTO);
 __global__ void cudaSaveNumEntries(SimulationData data);
 __global__ void cudaClearData(SimulationData data);
+__global__ void cudaGetActualArraySizes(SimulationData data, ObjectTOArraySizes* arraySizes);

@@ -57,7 +57,7 @@ namespace
     }
 }
 
-bool SimulationData::shouldResize(ArraySizes const& sizeDelta)
+bool SimulationData::shouldResize(ObjectArraySizes const& sizeDelta)
 {
     uint64_t cellArraySizeResult, particleArraySizeResult;
     calcArraySizes(cellArraySizeResult, particleArraySizeResult, sizeDelta.cellArraySize, sizeDelta.particleArraySize);
@@ -66,7 +66,7 @@ bool SimulationData::shouldResize(ArraySizes const& sizeDelta)
         || objects.heap.shouldResize_host(sizeDelta.heapSize);
 }
 
-void SimulationData::resizeTargetObjects(ArraySizes const& size)
+void SimulationData::resizeTargetObjects(ObjectArraySizes const& size)
 {
     uint64_t cellArraySizeResult, particleArraySizeResult;
     calcArraySizes(cellArraySizeResult, particleArraySizeResult, size.cellArraySize, size.particleArraySize);
@@ -90,15 +90,6 @@ void SimulationData::resizeObjects()
     auto upperBoundDynamicMemory =
         (sizeof(StructuralOperation) + sizeof(CellTypeOperation) * CellType_Count + 200) * (estimatedMaxActiveCells + 1000);  // Heuristic
     processMemory.resize(upperBoundDynamicMemory);
-}
-
-ArraySizes SimulationData::getCurrentArraySizes() const
-{
-    ArraySizes result;
-    result.cellArraySize = objects.cellPointers.getSize_host();
-    result.particleArraySize = objects.particlePointers.getSize_host();
-    result.heapSize = objects.heap.getSize_host();
-    return result;
 }
 
 bool SimulationData::isEmpty()

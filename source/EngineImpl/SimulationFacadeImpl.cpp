@@ -396,7 +396,7 @@ void _SimulationFacadeImpl::testOnly_cleanupAfterDataManipulation()
     _worker.testOnly_cleanupAfterDataManipulation();
 }
 
-void _SimulationFacadeImpl::testOnly_resizeArrays(ArraySizes const& sizeDelta)
+void _SimulationFacadeImpl::testOnly_resizeArrays(ObjectArraySizes const& sizeDelta)
 {
     _worker.testOnly_resizeArrays(sizeDelta);
 }

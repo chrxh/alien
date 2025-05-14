@@ -55,15 +55,15 @@ namespace
             cell->metadata.name,
             cellTO.metadata.nameSize,
             cellTO.metadata.nameDataIndex,
-            *dataTO.numAuxiliaryData,
-            dataTO.auxiliaryData);
+            *dataTO.heapSize,
+            dataTO.heap);
         copyAuxiliaryData(
             cell->metadata.descriptionSize,
             cell->metadata.description,
             cellTO.metadata.descriptionSize,
             cellTO.metadata.descriptionDataIndex,
-            *dataTO.numAuxiliaryData,
-            dataTO.auxiliaryData);
+            *dataTO.heapSize,
+            dataTO.heap);
 
         cell->tag = cellTOIndex;
         for (int i = 0; i < cell->numConnections; ++i) {
@@ -80,8 +80,8 @@ namespace
                 reinterpret_cast<uint8_t*>(cell->neuralNetwork),
                 targetSize,
                 cellTO.neuralNetwork.dataIndex,
-                *dataTO.numAuxiliaryData,
-                dataTO.auxiliaryData);
+                *dataTO.heapSize,
+                dataTO.heap);
         }
         switch (cell->cellType) {
         case CellType_Base: {
@@ -97,8 +97,8 @@ namespace
                 cell->cellTypeData.constructor.genome,
                 cellTO.cellTypeData.constructor.genomeSize,
                 cellTO.cellTypeData.constructor.genomeDataIndex,
-                *dataTO.numAuxiliaryData,
-                dataTO.auxiliaryData);
+                *dataTO.heapSize,
+                dataTO.heap);
             cellTO.cellTypeData.constructor.numInheritedGenomeNodes = cell->cellTypeData.constructor.numInheritedGenomeNodes;
             cellTO.cellTypeData.constructor.lastConstructedCellId = cell->cellTypeData.constructor.lastConstructedCellId;
             cellTO.cellTypeData.constructor.genomeCurrentNodeIndex = cell->cellTypeData.constructor.genomeCurrentNodeIndex;
@@ -133,8 +133,8 @@ namespace
                 cell->cellTypeData.injector.genome,
                 cellTO.cellTypeData.injector.genomeSize,
                 cellTO.cellTypeData.injector.genomeDataIndex,
-                *dataTO.numAuxiliaryData,
-                dataTO.auxiliaryData);
+                *dataTO.heapSize,
+                dataTO.heap);
             cellTO.cellTypeData.injector.genomeGeneration = cell->cellTypeData.injector.genomeGeneration;
         } break;
         case CellType_Muscle: {
@@ -418,7 +418,7 @@ __global__ void cudaCreateDataFromTO(SimulationData data, DataTO dataTO, Cell** 
         }
     }
 
-    auto cellPartition = calcPartition(*dataTO.numCells, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto cellPartition = calcAllThreadsPartition(*dataTO.numCells);
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto cell = factory.createCellFromTO(dataTO, dataTO.cells[index], index, *cellArray, createIds);
         if (selectNewData) {
@@ -430,7 +430,7 @@ __global__ void cudaCreateDataFromTO(SimulationData data, DataTO dataTO, Cell** 
 __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataTO dataTO)
 {
     {
-        auto const partition = calcPartition(*dataTO.numCells, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        auto const partition = calcAllThreadsPartition(*dataTO.numCells);
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& cell = dataTO.cells[index];
@@ -455,7 +455,12 @@ __global__ void cudaClearDataTO(DataTO dataTO)
 {
     *dataTO.numCells = 0;
     *dataTO.numParticles = 0;
-    *dataTO.numAuxiliaryData = 0;
+    *dataTO.heapSize = 0;
+}
+
+__global__ void cudaSaveNumEntries(SimulationData data)
+{
+    data.objects.saveNumEntries();
 }
 
 __global__ void cudaClearData(SimulationData data)
@@ -465,7 +470,26 @@ __global__ void cudaClearData(SimulationData data)
     data.objects.heap.reset();
 }
 
-__global__ void cudaSaveNumEntries(SimulationData data)
+__global__ void cudaGetActualArraySizes(SimulationData data, ObjectTOArraySizes* arraySizes)
 {
-    data.objects.saveNumEntries();
+    auto const& cells = data.objects.cellPointers;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    if (threadIdx.x == 0 && blockIdx.x == 0) {
+        arraySizes->cellArraySize = cells.getNumEntries();
+        arraySizes->particleArraySize = cells.getNumEntries();
+    }
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        uint64_t dependentDataSize = cell->metadata.nameSize + cell->metadata.descriptionSize + 32;
+        if (cell->cellType == CellType_Constructor) {
+            dependentDataSize += cell->cellTypeData.constructor.genomeSize + 16;
+        } else if (cell->cellType == CellType_Injector) {
+            dependentDataSize += cell->cellTypeData.injector.genomeSize + 16;
+        } else if (cell->cellType != CellType_Structure && cell->cellType != CellType_Free) {
+            dependentDataSize += sizeof(NeuralNetwork) + 16;
+        }
+        atomicAdd(&arraySizes->heapSize, dependentDataSize);
+    }
 }

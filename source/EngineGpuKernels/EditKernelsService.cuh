@@ -19,10 +19,7 @@ public:
     void updateSelection(GpuSettings const& gpuSettings, SimulationData const& data);
 
     void getSelectionShallowData(GpuSettings const& gpuSettings, SimulationData const& data, SelectionResult const& selectionResult);
-    void shallowUpdateSelectedObjects(
-        GpuSettings const& gpuSettings,
-        SimulationData const& data,
-        ShallowUpdateSelectionData const& updateData);
+    void shallowUpdateSelectedObjects(GpuSettings const& gpuSettings, SimulationData const& data, ShallowUpdateSelectionData const& updateData);
     void removeSelectedObjects(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
     void relaxSelectedObjects(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
     void uniformVelocities(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
@@ -43,7 +40,7 @@ public:
 private:
     GarbageCollectorKernelsService _garbageCollector;
 
-    //gpu memory
+    // Gpu memory
     int* _cudaRolloutResult;
     int* _cudaSwitchResult;
     int* _cudaUpdateResult;

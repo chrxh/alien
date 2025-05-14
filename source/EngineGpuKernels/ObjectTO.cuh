@@ -5,7 +5,7 @@
 
 #include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/CellTypeConstants.h"
-#include "EngineInterface/ArraySizes.h"
+#include "EngineInterface/ObjectTOArraySizes.h"
 
 struct ParticleTO
 {
@@ -287,30 +287,30 @@ struct DataTO
 	CellTO* cells = nullptr;
     uint64_t* numParticles = nullptr;
 	ParticleTO* particles = nullptr;
-    uint64_t* numAuxiliaryData = nullptr;
-    uint8_t* auxiliaryData = nullptr;
+    uint64_t* heapSize = nullptr;
+    uint8_t* heap = nullptr;
 
-    void init(ArraySizes arraySizes)
+    void init(ObjectTOArraySizes const& arraySizes)
     {
         numCells = new uint64_t;
         numParticles = new uint64_t;
-        numAuxiliaryData = new uint64_t;
+        heapSize = new uint64_t;
         *numCells = 0;
         *numParticles = 0;
-        *numAuxiliaryData = 0;
+        *heapSize = 0;
         cells = new CellTO[arraySizes.cellArraySize];
         particles = new ParticleTO[arraySizes.particleArraySize];
-        auxiliaryData = new uint8_t[arraySizes.heapSize];
+        heap = new uint8_t[arraySizes.heapSize];
     }
 
     void destroy()
     {
         delete numCells;
         delete numParticles;
-        delete numAuxiliaryData;
+        delete heapSize;
         delete[] cells;
         delete[] particles;
-        delete[] auxiliaryData;
+        delete[] heap;
     }
 
 	bool operator==(DataTO const& other) const
@@ -319,8 +319,8 @@ struct DataTO
 			&& cells == other.cells
 			&& numParticles == other.numParticles
 			&& particles == other.particles
-            && numAuxiliaryData == other.numAuxiliaryData
-            && auxiliaryData == other.auxiliaryData;
+            && heapSize == other.heapSize
+            && heap == other.heap;
 	}
 };
 
