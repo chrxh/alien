@@ -12,13 +12,15 @@
 #include <vector_types.h>
 #include <GL/gl.h>
 
-#include "EngineInterface/StatisticsRawData.h"
+#include "EngineInterface/MutationType.h"
+#include "EngineInterface/ObjectArraySizes.h"
+#include "EngineInterface/ObjectTOArraySizes.h"
 #include "EngineInterface/SettingsForSimulation.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
-#include "EngineInterface/MutationType.h"
-#include "EngineInterface/StatisticsHistory.h"
 #include "EngineInterface/SimulationParametersUpdateConfig.h"
+#include "EngineInterface/StatisticsRawData.h"
+#include "EngineInterface/StatisticsHistory.h"
 
 #include "Definitions.cuh"
 
@@ -75,9 +77,11 @@ public:
         SimulationParameters const& parameters,
         SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All);
 
-    ArraySizes getGpuArraySizesNeededFor(DataDescription const& data) const;
-    ArraySizes getGpuArraySizesNeededFor(ClusteredDataDescription const& data) const;
-    ArraySizes getCurrentGpuArraySizes() const;
+    ObjectArraySizes estimateObjectArraySizes(DataDescription const& data) const;
+    ObjectArraySizes estimateObjectArraySizes(ClusteredDataDescription const& data) const;
+    ObjectTOArraySizes estimateObjectTOArraySizes(DataDescription const& data) const;
+    ObjectTOArraySizes estimateObjectTOArraySizes(ClusteredDataDescription const& data) const;
+    ObjectTOArraySizes getActualObjectArraySizes() const;
 
     StatisticsRawData getStatisticsRawData();
     void updateStatistics();
@@ -90,7 +94,7 @@ public:
 
     void clear();
 
-    void resizeArraysIfNecessary(ArraySizes const& additionals = ArraySizes());
+    void resizeArraysIfNecessary(ObjectArraySizes const& sizeDelta = ObjectArraySizes());
 
     // Only for tests
     void testOnly_mutate(uint64_t cellId, MutationType mutationType);
@@ -98,7 +102,7 @@ public:
     void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2);
     void testOnly_cleanupAfterTimestep();
     void testOnly_cleanupAfterDataManipulation();
-    void testOnly_resizeArrays(ArraySizes const& sizeDelta);
+    void testOnly_resizeArrays(ObjectArraySizes const& sizeDelta);
     bool testOnly_areArraysValid();
 
 private:
@@ -108,7 +112,7 @@ private:
     void copyDataTOtoDevice(DataTO const& dataTO);
     void copyDataTOtoHost(DataTO const& dataTO);
     void automaticResizeArrays();
-    void resizeArrays(ArraySizes const& sizeDelta = ArraySizes());
+    void resizeArrays(ObjectArraySizes const& sizeDelta = ObjectArraySizes());
     void checkAndProcessSimulationParameterChanges();
 
     SimulationData getSimulationDataIntern() const;

@@ -23,7 +23,7 @@ namespace
     {
         target.resize(sourceSize);
         for (int i = 0; i < sourceSize; ++i) {
-            target[i] = dataTO.auxiliaryData[sourceIndex + i];
+            target[i] = dataTO.heap[sourceIndex + i];
         }
     }
 
@@ -38,7 +38,7 @@ namespace
         for (int row = 0; row < MAX_CHANNELS; ++row) {
             for (int col = 0; col < MAX_CHANNELS; ++col) {
                 for (int i = 0; i < 4; ++i) {
-                    bytesAsFloat.b[i] = dataTO.auxiliaryData[sourceIndex + index];
+                    bytesAsFloat.b[i] = dataTO.heap[sourceIndex + index];
                     ++index;
                 }
                 result._weights[row * MAX_CHANNELS + col] = bytesAsFloat.f;
@@ -48,13 +48,13 @@ namespace
         }
         for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
             for (int i = 0; i < 4; ++i) {
-                bytesAsFloat.b[i] = dataTO.auxiliaryData[sourceIndex + index];
+                bytesAsFloat.b[i] = dataTO.heap[sourceIndex + index];
                 ++index;
             }
             result._biases[channel] = bytesAsFloat.f;
         }
         for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
-            result._activationFunctions[channel] = dataTO.auxiliaryData[sourceIndex + index];
+            result._activationFunctions[channel] = dataTO.heap[sourceIndex + index];
             ++index;
         }
 
@@ -66,19 +66,19 @@ namespace
     {
         targetSize = source.size();
         if (targetSize > 0) {
-            targetIndex = *dataTO.numAuxiliaryData;
+            targetIndex = *dataTO.heapSize;
             uint64_t size = source.size();
             for (uint64_t i = 0; i < size; ++i) {
-                dataTO.auxiliaryData[targetIndex + i] = source.at(i);
+                dataTO.heap[targetIndex + i] = source.at(i);
             }
-            (*dataTO.numAuxiliaryData) += size;
+            (*dataTO.heapSize) += size;
         }
     }
 
     void convertToNeuronData(DataTO const& dataTO, NeuralNetworkDescription const& neuralNetDesc, uint64_t& targetIndex)
     {
-        targetIndex = *dataTO.numAuxiliaryData;
-        *dataTO.numAuxiliaryData += NeuralNetworkTO::DataSize;
+        targetIndex = *dataTO.heapSize;
+        *dataTO.heapSize += NeuralNetworkTO::DataSize;
 
         // #TODO GCC incompatibily:
         // auto weights_span = std::mdspan(neuralNetDesc._weights.data(), MAX_CHANNELS, MAX_CHANNELS);
@@ -92,7 +92,7 @@ namespace
                 // weights_span[row, col];
 
                 for (int i = 0; i < 4; ++i) {
-                    dataTO.auxiliaryData[targetIndex + bytePos] = bytesAsFloat.b[i];
+                    dataTO.heap[targetIndex + bytePos] = bytesAsFloat.b[i];
                     ++bytePos;
                 }
             }
@@ -100,12 +100,12 @@ namespace
         for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
             bytesAsFloat.f = neuralNetDesc._biases[channel];
             for (int i = 0; i < 4; ++i) {
-                dataTO.auxiliaryData[targetIndex + bytePos] = bytesAsFloat.b[i];
+                dataTO.heap[targetIndex + bytePos] = bytesAsFloat.b[i];
                 ++bytePos;
             }
         }
         for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
-            dataTO.auxiliaryData[targetIndex + bytePos] = neuralNetDesc._activationFunctions[channel];
+            dataTO.heap[targetIndex + bytePos] = neuralNetDesc._activationFunctions[channel];
             ++bytePos;
         }
     }
@@ -354,12 +354,12 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
     auto const& metadataTO = cellTO.metadata;
     auto metadata = CellMetadataDescription();
     if (metadataTO.nameSize > 0) {
-        auto const name = std::string(reinterpret_cast<char*>(&dataTO.auxiliaryData[metadataTO.nameDataIndex]), metadataTO.nameSize);
+        auto const name = std::string(reinterpret_cast<char*>(&dataTO.heap[metadataTO.nameDataIndex]), metadataTO.nameSize);
         metadata.name(name);
     }
     if (metadataTO.descriptionSize > 0) {
         auto const description =
-            std::string(reinterpret_cast<char*>(&dataTO.auxiliaryData[metadataTO.descriptionDataIndex]), metadataTO.descriptionSize);
+            std::string(reinterpret_cast<char*>(&dataTO.heap[metadataTO.descriptionDataIndex]), metadataTO.descriptionSize);
         metadata.description(description);
     }
     result._metadata = metadata;

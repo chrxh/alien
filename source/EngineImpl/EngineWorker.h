@@ -11,7 +11,6 @@
 
 #include "Base/Definitions.h"
 
-#include "EngineInterface/ArraySizes.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/GpuSettings.h"
 #include "EngineInterface/MutationType.h"
@@ -27,6 +26,7 @@
 #include "EngineGpuKernels/Definitions.h"
 
 #include "Definitions.h"
+#include "EngineInterface/ObjectArraySizes.h"
 
 struct ExceptionData
 {
@@ -119,11 +119,10 @@ public:
     void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2);
     void testOnly_cleanupAfterTimestep();
     void testOnly_cleanupAfterDataManipulation();
-    void testOnly_resizeArrays(ArraySizes const& sizeDelta);
+    void testOnly_resizeArrays(ObjectArraySizes const& sizeDelta);
     bool testOnly_areArraysValid();
 
 private:
-    DataTO provideTO(); 
     void resetTimeIntervalStatistics();
     void processJobs();
 

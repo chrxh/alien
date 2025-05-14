@@ -72,7 +72,7 @@ std::optional<OverlayDescription> EngineWorker::tryDrawVectorGraphicsAndReturnOv
         _simulationCudaFacade->drawVectorGraphics(
             {rectUpperLeft.x, rectUpperLeft.y}, {rectLowerRight.x, rectLowerRight.y}, _cudaResource, {imageSize.x, imageSize.y}, zoom);
 
-        DataTO dataTO = provideTO();
+        DataTO dataTO = _dataTOCache->getDataTO(_simulationCudaFacade->getActualObjectArraySizes());
 
         _simulationCudaFacade->getOverlayData(
             {toInt(rectUpperLeft.x), toInt(rectUpperLeft.y)},
@@ -114,7 +114,7 @@ ClusteredDataDescription EngineWorker::getClusteredSimulationData(IntVector2D co
     {
         EngineWorkerGuard access(this);
 
-        dataTO.init(_simulationCudaFacade->getCurrentGpuArraySizes());
+        dataTO.init(_simulationCudaFacade->getActualObjectArraySizes());
 
         _simulationCudaFacade->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y}, dataTO);
     }
@@ -129,7 +129,7 @@ DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft
 {
     EngineWorkerGuard access(this);
 
-    auto dataTO = provideTO();
+    DataTO dataTO = _dataTOCache->getDataTO(_simulationCudaFacade->getActualObjectArraySizes());
     _simulationCudaFacade->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y}, dataTO);
 
     DescriptionConverterService converter(_settings.simulationParameters);
@@ -141,8 +141,7 @@ ClusteredDataDescription EngineWorker::getSelectedClusteredSimulationData(bool i
 {
     EngineWorkerGuard access(this);
 
-    DataTO dataTO = provideTO();
-    
+    DataTO dataTO = _dataTOCache->getDataTO(_simulationCudaFacade->getActualObjectArraySizes());
     _simulationCudaFacade->getSelectedSimulationData(includeClusters, dataTO);
 
     DescriptionConverterService converter(_settings.simulationParameters);
@@ -155,8 +154,7 @@ DataDescription EngineWorker::getSelectedSimulationData(bool includeClusters)
 {
     EngineWorkerGuard access(this);
 
-    DataTO dataTO = provideTO();
-    
+    DataTO dataTO = _dataTOCache->getDataTO(_simulationCudaFacade->getActualObjectArraySizes());
     _simulationCudaFacade->getSelectedSimulationData(includeClusters, dataTO);
 
     DescriptionConverterService converter(_settings.simulationParameters);
@@ -170,8 +168,7 @@ DataDescription EngineWorker::getInspectedSimulationData(std::vector<uint64_t> o
 {
     EngineWorkerGuard access(this);
 
-    DataTO dataTO = provideTO();
-    
+    DataTO dataTO = _dataTOCache->getDataTO(_simulationCudaFacade->getActualObjectArraySizes());
     _simulationCudaFacade->getInspectedSimulationData(objectsIds, dataTO);
 
     DescriptionConverterService converter(_settings.simulationParameters);
@@ -199,14 +196,12 @@ void EngineWorker::addAndSelectSimulationData(DataDescription const& dataToUpdat
 {
     DescriptionConverterService converter(_settings.simulationParameters);
 
-    auto arraySizes = _simulationCudaFacade->getGpuArraySizesNeededFor(dataToUpdate);
-
     EngineWorkerGuard access(this);
 
+    auto arraySizes = _simulationCudaFacade->estimateObjectArraySizes(dataToUpdate);
     _simulationCudaFacade->resizeArraysIfNecessary(arraySizes);
 
-    DataTO dataTO = provideTO();
-
+    DataTO dataTO = _dataTOCache->getDataTO(_simulationCudaFacade->estimateObjectTOArraySizes(dataToUpdate));
     converter.convertDescriptionToTO(dataTO, dataToUpdate);
 
     _simulationCudaFacade->addAndSelectSimulationData(dataTO);
@@ -218,12 +213,10 @@ void EngineWorker::setClusteredSimulationData(ClusteredDataDescription const& da
 
     EngineWorkerGuard access(this);
 
-    auto arraySizes = _simulationCudaFacade->getGpuArraySizesNeededFor(dataToUpdate);
-
+    auto arraySizes = _simulationCudaFacade->estimateObjectArraySizes(dataToUpdate);
     _simulationCudaFacade->resizeArraysIfNecessary(arraySizes);
 
-    DataTO dataTO = provideTO();
-
+    DataTO dataTO = _dataTOCache->getDataTO(_simulationCudaFacade->estimateObjectTOArraySizes(dataToUpdate));
     converter.convertDescriptionToTO(dataTO, dataToUpdate);
 
     _simulationCudaFacade->setSimulationData(dataTO);
@@ -235,10 +228,10 @@ void EngineWorker::setSimulationData(DataDescription const& dataToUpdate)
 
     EngineWorkerGuard access(this);
 
-    auto arraySizes = _simulationCudaFacade->getGpuArraySizesNeededFor(dataToUpdate);
+    auto arraySizes = _simulationCudaFacade->estimateObjectArraySizes(dataToUpdate);
     _simulationCudaFacade->resizeArraysIfNecessary(arraySizes);
 
-    DataTO dataTO = provideTO();
+    DataTO dataTO = _dataTOCache->getDataTO(_simulationCudaFacade->estimateObjectTOArraySizes(dataToUpdate));
     converter.convertDescriptionToTO(dataTO, dataToUpdate);
 
     _simulationCudaFacade->setSimulationData(dataTO);
@@ -290,7 +283,7 @@ void EngineWorker::changeCell(CellDescription const& changedCell)
 {
     EngineWorkerGuard access(this);
 
-    auto dataTO = provideTO();
+    DataTO dataTO = _dataTOCache->getDataTO(_simulationCudaFacade->estimateObjectTOArraySizes(DataDescription().addCell(changedCell)));
 
     DescriptionConverterService converter(_settings.simulationParameters);
     converter.convertDescriptionToTO(dataTO, changedCell);
@@ -302,7 +295,7 @@ void EngineWorker::changeParticle(ParticleDescription const& changedParticle)
 {
     EngineWorkerGuard access(this);
 
-    auto dataTO = provideTO();
+    DataTO dataTO = _dataTOCache->getDataTO(_simulationCudaFacade->estimateObjectTOArraySizes(DataDescription().addParticle(changedParticle)));
 
     DescriptionConverterService converter(_settings.simulationParameters);
     converter.convertDescriptionToTO(dataTO, changedParticle);
@@ -523,7 +516,7 @@ void EngineWorker::testOnly_cleanupAfterDataManipulation()
     _simulationCudaFacade->testOnly_cleanupAfterDataManipulation();
 }
 
-void EngineWorker::testOnly_resizeArrays(ArraySizes const& sizeDelta)
+void EngineWorker::testOnly_resizeArrays(ObjectArraySizes const& sizeDelta)
 {
     EngineWorkerGuard access(this);
     _simulationCudaFacade->testOnly_resizeArrays(sizeDelta);
@@ -533,11 +526,6 @@ bool EngineWorker::testOnly_areArraysValid()
 {
     EngineWorkerGuard access(this);
     return _simulationCudaFacade->testOnly_areArraysValid();
-}
-
-DataTO EngineWorker::provideTO()
-{
-    return _dataTOCache->getDataTO(_simulationCudaFacade->getCurrentGpuArraySizes());
 }
 
 void EngineWorker::resetTimeIntervalStatistics()
