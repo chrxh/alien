@@ -35,8 +35,8 @@ DataTO _AccessDataTOCache::getDataTO(ArraySizesForObjectTOs const& arraySizes)
 
 bool _AccessDataTOCache::fits(ArraySizesForObjectTOs const& left, ArraySizesForObjectTOs const& right) const
 {
-    return left.cellArraySize >= right.cellArraySize && left.particleArraySize >= right.particleArraySize
-        && left.heapSize >= right.heapSize;
+    return left.cellArray >= right.cellArray && left.particleArray >= right.particleArray
+        && left.heap >= right.heap;
 }
 
 auto _AccessDataTOCache::getArraySizes(DataTO const& dataTO) const -> ArraySizesForObjectTOs

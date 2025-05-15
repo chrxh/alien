@@ -302,9 +302,9 @@ struct DataTO
         *numCells = 0;
         *numParticles = 0;
         *heapSize = 0;
-        cells = new CellTO[capacities.cellArraySize];
-        particles = new ParticleTO[capacities.particleArraySize];
-        heap = new uint8_t[capacities.heapSize];
+        cells = new CellTO[capacities.cellArray];
+        particles = new ParticleTO[capacities.particleArray];
+        heap = new uint8_t[capacities.heap];
     }
 
     void destroy()

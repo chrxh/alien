@@ -432,12 +432,12 @@ namespace
 ArraySizesForObjects _SimulationCudaFacade::estimateObjectArraySizes(DataDescription const& data) const
 {
     ArraySizesForObjects result;
-    result.cellArraySize = data._cells.size();
-    result.particleArraySize = data._particles.size();
-    result.heapSize = data._cells.size() * (sizeof(Cell) + 16);
-    result.heapSize += data._particles.size() * (sizeof(Particle) + 16);
+    result.cellArray = data._cells.size();
+    result.particleArray = data._particles.size();
+    result.heap = data._cells.size() * (sizeof(Cell) + 16);
+    result.heap += data._particles.size() * (sizeof(Particle) + 16);
     for (auto const& cell : data._cells) {
-        sumDependentDataSize(cell, result.heapSize);
+        sumDependentDataSize(cell, result.heap);
     }
     return result;
 }
@@ -446,14 +446,14 @@ ArraySizesForObjects _SimulationCudaFacade::estimateObjectArraySizes(ClusteredDa
 {
     ArraySizesForObjects result;
     for (auto const& cluster : data._clusters) {
-        result.cellArraySize += cluster._cells.size();
-        result.heapSize += cluster._cells.size() * (sizeof(Cell) + 16);
+        result.cellArray += cluster._cells.size();
+        result.heap += cluster._cells.size() * (sizeof(Cell) + 16);
         for (auto const& cell : cluster._cells) {
-            sumDependentDataSize(cell, result.heapSize);
+            sumDependentDataSize(cell, result.heap);
         }
     }
-    result.particleArraySize = data._particles.size();
-    result.heapSize += data._particles.size() * (sizeof(Particle) + 16);
+    result.particleArray = data._particles.size();
+    result.heap += data._particles.size() * (sizeof(Particle) + 16);
     return result;
 }
 

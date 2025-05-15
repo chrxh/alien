@@ -60,20 +60,20 @@ namespace
 bool SimulationData::shouldResize(ArraySizesForObjects const& sizeDelta)
 {
     uint64_t cellArraySizeResult, particleArraySizeResult;
-    calcArraySizes(cellArraySizeResult, particleArraySizeResult, sizeDelta.cellArraySize, sizeDelta.particleArraySize);
+    calcArraySizes(cellArraySizeResult, particleArraySizeResult, sizeDelta.cellArray, sizeDelta.particleArray);
     return objects.cellPointers.shouldResize_host(cellArraySizeResult)
         || objects.particlePointers.shouldResize_host(particleArraySizeResult)
-        || objects.heap.shouldResize_host(sizeDelta.heapSize);
+        || objects.heap.shouldResize_host(sizeDelta.heap);
 }
 
 void SimulationData::resizeTargetObjects(ArraySizesForObjects const& size)
 {
     uint64_t cellArraySizeResult, particleArraySizeResult;
-    calcArraySizes(cellArraySizeResult, particleArraySizeResult, size.cellArraySize, size.particleArraySize);
+    calcArraySizes(cellArraySizeResult, particleArraySizeResult, size.cellArray, size.particleArray);
 
     resizeTargetIntern(objects.cellPointers, tempObjects.cellPointers, cellArraySizeResult);
     resizeTargetIntern(objects.particlePointers, tempObjects.particlePointers, particleArraySizeResult);
-    resizeTargetIntern(objects.heap, tempObjects.heap, size.heapSize);
+    resizeTargetIntern(objects.heap, tempObjects.heap, size.heap);
 }
 
 void SimulationData::resizeObjects()
