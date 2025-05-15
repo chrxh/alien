@@ -470,7 +470,7 @@ __global__ void cudaClearData(SimulationData data)
     data.objects.heap.reset();
 }
 
-__global__ void cudaGetActualArraySizes(SimulationData data, ObjectTOArraySizes* arraySizes)
+__global__ void cudaGetActualArraySizes(SimulationData data, ArraySizesForObjectTOs* arraySizes)
 {
     auto const& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());

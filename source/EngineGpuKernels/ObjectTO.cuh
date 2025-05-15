@@ -5,7 +5,7 @@
 
 #include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/CellTypeConstants.h"
-#include "EngineInterface/ObjectTOArraySizes.h"
+#include "EngineInterface/ArraySizesForObjectTOs.h"
 
 struct ParticleTO
 {
@@ -283,6 +283,8 @@ struct CellTO
 
 struct DataTO
 {
+    ArraySizesForObjectTOs capacities;
+
 	uint64_t* numCells = nullptr;
 	CellTO* cells = nullptr;
     uint64_t* numParticles = nullptr;
@@ -290,8 +292,10 @@ struct DataTO
     uint64_t* heapSize = nullptr;
     uint8_t* heap = nullptr;
 
-    void init(ObjectTOArraySizes const& capacities)
+    void init(ArraySizesForObjectTOs const& capacities_)
     {
+        capacities = capacities_;
+
         numCells = new uint64_t;
         numParticles = new uint64_t;
         heapSize = new uint64_t;

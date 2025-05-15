@@ -500,7 +500,7 @@ void EngineWorker::testOnly_cleanupAfterDataManipulation()
     _simulationCudaFacade->testOnly_cleanupAfterDataManipulation();
 }
 
-void EngineWorker::testOnly_resizeArrays(ObjectArraySizes const& sizeDelta)
+void EngineWorker::testOnly_resizeArrays(ArraySizesForObjects const& sizeDelta)
 {
     EngineWorkerGuard access(this);
     _simulationCudaFacade->testOnly_resizeArrays(sizeDelta);

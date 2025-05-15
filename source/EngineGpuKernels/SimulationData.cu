@@ -57,7 +57,7 @@ namespace
     }
 }
 
-bool SimulationData::shouldResize(ObjectArraySizes const& sizeDelta)
+bool SimulationData::shouldResize(ArraySizesForObjects const& sizeDelta)
 {
     uint64_t cellArraySizeResult, particleArraySizeResult;
     calcArraySizes(cellArraySizeResult, particleArraySizeResult, sizeDelta.cellArraySize, sizeDelta.particleArraySize);
@@ -66,7 +66,7 @@ bool SimulationData::shouldResize(ObjectArraySizes const& sizeDelta)
         || objects.heap.shouldResize_host(sizeDelta.heapSize);
 }
 
-void SimulationData::resizeTargetObjects(ObjectArraySizes const& size)
+void SimulationData::resizeTargetObjects(ArraySizesForObjects const& size)
 {
     uint64_t cellArraySizeResult, particleArraySizeResult;
     calcArraySizes(cellArraySizeResult, particleArraySizeResult, size.cellArraySize, size.particleArraySize);

@@ -13,8 +13,8 @@
 #include <GL/gl.h>
 
 #include "EngineInterface/MutationType.h"
-#include "EngineInterface/ObjectArraySizes.h"
-#include "EngineInterface/ObjectTOArraySizes.h"
+#include "EngineInterface/ArraySizesForObjects.h"
+#include "EngineInterface/ArraySizesForObjectTOs.h"
 #include "EngineInterface/SettingsForSimulation.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
@@ -77,9 +77,9 @@ public:
         SimulationParameters const& parameters,
         SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All);
 
-    ObjectArraySizes estimateObjectArraySizes(DataDescription const& data) const;
-    ObjectArraySizes estimateObjectArraySizes(ClusteredDataDescription const& data) const;
-    ObjectTOArraySizes getActualObjectArraySizes() const;
+    ArraySizesForObjects estimateObjectArraySizes(DataDescription const& data) const;
+    ArraySizesForObjects estimateObjectArraySizes(ClusteredDataDescription const& data) const;
+    ArraySizesForObjectTOs getActualObjectArraySizes() const;
 
     StatisticsRawData getStatisticsRawData();
     void updateStatistics();
@@ -92,7 +92,7 @@ public:
 
     void clear();
 
-    void resizeArraysIfNecessary(ObjectArraySizes const& sizeDelta = ObjectArraySizes());
+    void resizeArraysIfNecessary(ArraySizesForObjects const& sizeDelta = ArraySizesForObjects());
 
     // Only for tests
     void testOnly_mutate(uint64_t cellId, MutationType mutationType);
@@ -100,7 +100,7 @@ public:
     void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2);
     void testOnly_cleanupAfterTimestep();
     void testOnly_cleanupAfterDataManipulation();
-    void testOnly_resizeArrays(ObjectArraySizes const& sizeDelta);
+    void testOnly_resizeArrays(ArraySizesForObjects const& sizeDelta);
     bool testOnly_areArraysValid();
 
 private:
@@ -110,7 +110,7 @@ private:
     void copyDataTOtoDevice(DataTO const& dataTO);
     void copyDataTOtoHost(DataTO const& dataTO);
     void automaticResizeArrays();
-    void resizeArrays(ObjectArraySizes const& sizeDelta = ObjectArraySizes());
+    void resizeArrays(ArraySizesForObjects const& sizeDelta = ArraySizesForObjects());
     void checkAndProcessSimulationParameterChanges();
 
     SimulationData getSimulationDataIntern() const;
