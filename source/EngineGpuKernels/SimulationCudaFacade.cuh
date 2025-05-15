@@ -79,8 +79,6 @@ public:
 
     ObjectArraySizes estimateObjectArraySizes(DataDescription const& data) const;
     ObjectArraySizes estimateObjectArraySizes(ClusteredDataDescription const& data) const;
-    ObjectTOArraySizes estimateObjectTOArraySizes(DataDescription const& data) const;
-    ObjectTOArraySizes estimateObjectTOArraySizes(ClusteredDataDescription const& data) const;
     ObjectTOArraySizes getActualObjectArraySizes() const;
 
     StatisticsRawData getStatisticsRawData();

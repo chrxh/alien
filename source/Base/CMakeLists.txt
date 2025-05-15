@@ -17,6 +17,7 @@ add_library(Base
     Math.h
     NumberGenerator.cpp
     NumberGenerator.h
+    OutOfScopeGuard.h
     Physics.cpp
     Physics.h
     Resources.h

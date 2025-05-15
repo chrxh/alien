@@ -2,8 +2,10 @@
 
 #include <chrono>
 
+#include "Base/OutOfScopeGuard.h"
 #include "EngineGpuKernels/ObjectTO.cuh"
 #include "EngineGpuKernels/SimulationCudaFacade.cuh"
+
 #include "AccessDataTOCache.h"
 #include "DescriptionConverterService.h"
 
@@ -79,8 +81,7 @@ std::optional<OverlayDescription> EngineWorker::tryDrawVectorGraphicsAndReturnOv
             int2{toInt(rectLowerRight.x), toInt(rectLowerRight.y)},
             dataTO);
 
-        DescriptionConverterService converter(_settings.simulationParameters);
-        auto result = converter.convertTOtoOverlayDescription(dataTO);
+        auto result = DescriptionConverterService::get().convertTOtoOverlayDescription(dataTO);
 
         syncSimulationWithRenderingIfDesired();
         return result;
@@ -111,6 +112,8 @@ void EngineWorker::setSyncSimulationWithRenderingRatio(int value)
 ClusteredDataDescription EngineWorker::getClusteredSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
 {
     DataTO dataTO;
+    OutOfScopeGuard guard([&dataTO]() { dataTO.destroy(); });
+
     {
         EngineWorkerGuard access(this);
 
@@ -118,10 +121,8 @@ ClusteredDataDescription EngineWorker::getClusteredSimulationData(IntVector2D co
 
         _simulationCudaFacade->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y}, dataTO);
     }
-    DescriptionConverterService converter(_settings.simulationParameters);
 
-    auto result = converter.convertTOtoClusteredDataDescription(dataTO);
-    dataTO.destroy();
+    auto result = DescriptionConverterService::get().convertTOtoClusteredDataDescription(dataTO);
     return result;
 }
 
@@ -132,8 +133,7 @@ DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft
     DataTO dataTO = _dataTOCache->getDataTO(_simulationCudaFacade->getActualObjectArraySizes());
     _simulationCudaFacade->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y}, dataTO);
 
-    DescriptionConverterService converter(_settings.simulationParameters);
-    auto result = converter.convertTOtoDataDescription(dataTO);
+    auto result = DescriptionConverterService::get().convertTOtoDataDescription(dataTO);
     return result;
 }
 
@@ -144,9 +144,7 @@ ClusteredDataDescription EngineWorker::getSelectedClusteredSimulationData(bool i
     DataTO dataTO = _dataTOCache->getDataTO(_simulationCudaFacade->getActualObjectArraySizes());
     _simulationCudaFacade->getSelectedSimulationData(includeClusters, dataTO);
 
-    DescriptionConverterService converter(_settings.simulationParameters);
-
-    auto result = converter.convertTOtoClusteredDataDescription(dataTO);
+    auto result = DescriptionConverterService::get().convertTOtoClusteredDataDescription(dataTO);
     return result;
 }
 
@@ -157,9 +155,7 @@ DataDescription EngineWorker::getSelectedSimulationData(bool includeClusters)
     DataTO dataTO = _dataTOCache->getDataTO(_simulationCudaFacade->getActualObjectArraySizes());
     _simulationCudaFacade->getSelectedSimulationData(includeClusters, dataTO);
 
-    DescriptionConverterService converter(_settings.simulationParameters);
-
-    auto result = converter.convertTOtoDataDescription(dataTO);
+    auto result = DescriptionConverterService::get().convertTOtoDataDescription(dataTO);
 
     return result;
 }
@@ -171,9 +167,7 @@ DataDescription EngineWorker::getInspectedSimulationData(std::vector<uint64_t> o
     DataTO dataTO = _dataTOCache->getDataTO(_simulationCudaFacade->getActualObjectArraySizes());
     _simulationCudaFacade->getInspectedSimulationData(objectsIds, dataTO);
 
-    DescriptionConverterService converter(_settings.simulationParameters);
-
-    auto result = converter.convertTOtoDataDescription(dataTO);
+    auto result = DescriptionConverterService::get().convertTOtoDataDescription(dataTO);
     return result;
 }
 
@@ -194,45 +188,39 @@ void EngineWorker::setStatisticsHistory(StatisticsHistoryData const& data)
 
 void EngineWorker::addAndSelectSimulationData(DataDescription const& dataToUpdate)
 {
-    DescriptionConverterService converter(_settings.simulationParameters);
-
     EngineWorkerGuard access(this);
 
     auto arraySizes = _simulationCudaFacade->estimateObjectArraySizes(dataToUpdate);
     _simulationCudaFacade->resizeArraysIfNecessary(arraySizes);
 
-    DataTO dataTO = _dataTOCache->getDataTO(_simulationCudaFacade->estimateObjectTOArraySizes(dataToUpdate));
-    converter.convertDescriptionToTO(dataTO, dataToUpdate);
+    auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(dataToUpdate);
+    OutOfScopeGuard guard([&dataTO]() { dataTO.destroy(); });
 
     _simulationCudaFacade->addAndSelectSimulationData(dataTO);
 }
 
 void EngineWorker::setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate)
 {
-    DescriptionConverterService converter(_settings.simulationParameters);
-
     EngineWorkerGuard access(this);
 
     auto arraySizes = _simulationCudaFacade->estimateObjectArraySizes(dataToUpdate);
     _simulationCudaFacade->resizeArraysIfNecessary(arraySizes);
 
-    DataTO dataTO = _dataTOCache->getDataTO(_simulationCudaFacade->estimateObjectTOArraySizes(dataToUpdate));
-    converter.convertDescriptionToTO(dataTO, dataToUpdate);
+    auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(dataToUpdate);
+    OutOfScopeGuard guard([&dataTO]() { dataTO.destroy(); });
 
     _simulationCudaFacade->setSimulationData(dataTO);
 }
 
 void EngineWorker::setSimulationData(DataDescription const& dataToUpdate)
 {
-    DescriptionConverterService converter(_settings.simulationParameters);
-
     EngineWorkerGuard access(this);
 
     auto arraySizes = _simulationCudaFacade->estimateObjectArraySizes(dataToUpdate);
     _simulationCudaFacade->resizeArraysIfNecessary(arraySizes);
 
-    DataTO dataTO = _dataTOCache->getDataTO(_simulationCudaFacade->estimateObjectTOArraySizes(dataToUpdate));
-    converter.convertDescriptionToTO(dataTO, dataToUpdate);
+    auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(dataToUpdate);
+    OutOfScopeGuard guard([&dataTO]() { dataTO.destroy(); });
 
     _simulationCudaFacade->setSimulationData(dataTO);
 }
@@ -283,10 +271,8 @@ void EngineWorker::changeCell(CellDescription const& changedCell)
 {
     EngineWorkerGuard access(this);
 
-    DataTO dataTO = _dataTOCache->getDataTO(_simulationCudaFacade->estimateObjectTOArraySizes(DataDescription().addCell(changedCell)));
-
-    DescriptionConverterService converter(_settings.simulationParameters);
-    converter.convertDescriptionToTO(dataTO, changedCell);
+    auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(changedCell);
+    OutOfScopeGuard guard([&dataTO]() { dataTO.destroy(); });
 
     _simulationCudaFacade->changeInspectedSimulationData(dataTO);
 }
@@ -295,10 +281,8 @@ void EngineWorker::changeParticle(ParticleDescription const& changedParticle)
 {
     EngineWorkerGuard access(this);
 
-    DataTO dataTO = _dataTOCache->getDataTO(_simulationCudaFacade->estimateObjectTOArraySizes(DataDescription().addParticle(changedParticle)));
-
-    DescriptionConverterService converter(_settings.simulationParameters);
-    converter.convertDescriptionToTO(dataTO, changedParticle);
+    auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(changedParticle);
+    OutOfScopeGuard guard([&dataTO]() { dataTO.destroy(); });
 
     _simulationCudaFacade->changeInspectedSimulationData(dataTO);
 }
