@@ -476,8 +476,8 @@ __global__ void cudaGetActualArraySizes(SimulationData data, ArraySizesForObject
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     if (threadIdx.x == 0 && blockIdx.x == 0) {
-        arraySizes->cellArraySize = cells.getNumEntries();
-        arraySizes->particleArraySize = cells.getNumEntries();
+        arraySizes->cellArray = cells.getNumEntries();
+        arraySizes->particleArray = cells.getNumEntries();
     }
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -490,6 +490,6 @@ __global__ void cudaGetActualArraySizes(SimulationData data, ArraySizesForObject
         } else if (cell->cellType != CellType_Structure && cell->cellType != CellType_Free) {
             dependentDataSize += sizeof(NeuralNetwork) + 16;
         }
-        atomicAdd(&arraySizes->heapSize, dependentDataSize);
+        atomicAdd(&arraySizes->heap, dependentDataSize);
     }
 }
