@@ -62,23 +62,22 @@ namespace
     }
 
     template<typename Container, typename SizeType>
-    void convert(DataTO const& dataTO, Container const& source, SizeType& targetSize, uint64_t& targetIndex)
+    void convert(std::vector<uint8_t>& heap, SizeType& targetSize, uint64_t& targetIndex, Container const& source)
     {
         targetSize = source.size();
         if (targetSize > 0) {
-            targetIndex = *dataTO.heapSize;
+            targetIndex = heap.size();
             uint64_t size = source.size();
             for (uint64_t i = 0; i < size; ++i) {
-                dataTO.heap[targetIndex + i] = source.at(i);
+                heap.emplace_back(source.at(i));
             }
-            (*dataTO.heapSize) += size;
         }
     }
 
-    void convertToNeuronData(DataTO const& dataTO, NeuralNetworkDescription const& neuralNetDesc, uint64_t& targetIndex)
+    void convertToNeuronData(std::vector<uint8_t>& heap, uint64_t& targetIndex, NeuralNetworkDescription const& neuralNetDesc)
     {
-        targetIndex = *dataTO.heapSize;
-        *dataTO.heapSize += NeuralNetworkTO::DataSize;
+        targetIndex = heap.size();
+        heap.resize(targetIndex + NeuralNetworkTO::DataSize);
 
         // #TODO GCC incompatibily:
         // auto weights_span = std::mdspan(neuralNetDesc._weights.data(), MAX_CHANNELS, MAX_CHANNELS);
@@ -92,7 +91,7 @@ namespace
                 // weights_span[row, col];
 
                 for (int i = 0; i < 4; ++i) {
-                    dataTO.heap[targetIndex + bytePos] = bytesAsFloat.b[i];
+                    heap.at(targetIndex + bytePos) = bytesAsFloat.b[i];
                     ++bytePos;
                 }
             }
@@ -100,20 +99,16 @@ namespace
         for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
             bytesAsFloat.f = neuralNetDesc._biases[channel];
             for (int i = 0; i < 4; ++i) {
-                dataTO.heap[targetIndex + bytePos] = bytesAsFloat.b[i];
+                heap.at(targetIndex + bytePos) = bytesAsFloat.b[i];
                 ++bytePos;
             }
         }
         for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
-            dataTO.heap[targetIndex + bytePos] = neuralNetDesc._activationFunctions[channel];
+            heap.at(targetIndex + bytePos) = neuralNetDesc._activationFunctions[channel];
             ++bytePos;
         }
     }
 }
-
-DescriptionConverterService::DescriptionConverterService(SimulationParameters const& parameters)
-    : _parameters(parameters)
-{}
 
 ClusteredDataDescription DescriptionConverterService::convertTOtoClusteredDataDescription(DataTO const& dataTO) const
 {
@@ -213,51 +208,92 @@ OverlayDescription DescriptionConverterService::convertTOtoOverlayDescription(Da
     return result;
 }
 
-void DescriptionConverterService::convertDescriptionToTO(DataTO& result, ClusteredDataDescription const& description) const
+namespace
 {
-    std::unordered_map<uint64_t, int> cellIndexByIds;
+    DataTO createDataTO(std::vector<CellTO> const& cellTOs, std::vector<ParticleTO> const& particleTOs, std::vector<uint8_t> const& heap)
+    {
+        DataTO result;
+        result.init({cellTOs.size(), particleTOs.size(), heap.size()});
+
+        *result.numCells = cellTOs.size();
+        *result.numParticles = particleTOs.size();
+        *result.heapSize = heap.size();
+
+        std::memcpy(result.cells, cellTOs.data(), cellTOs.size() * sizeof(CellTO));
+        std::memcpy(result.particles, particleTOs.data(), particleTOs.size() * sizeof(ParticleTO));
+        std::memcpy(result.heap, heap.data(), heap.size());
+
+        return result;
+    }
+}
+
+DataTO DescriptionConverterService::convertDescriptionToTO(ClusteredDataDescription const& description) const
+{
+    std::vector<CellTO> cellTOs;
+    std::vector<ParticleTO> particleTOs;
+    std::vector<uint8_t> heap;
+
+    std::unordered_map<uint64_t, uint64_t> cellIndexByIds;
     for (auto const& cluster: description._clusters) {
         for (auto const& cell : cluster._cells) {
-            addCell(result, cell, cellIndexByIds);
+            addCell(cellTOs, heap, cell, cellIndexByIds);
         }
     }
     for (auto const& cluster : description._clusters) {
         for (auto const& cell : cluster._cells) {
             if (cell._id != 0) {
-                setConnections(result, cell, cellIndexByIds);
+                setConnections(cellTOs, cell, cellIndexByIds);
             }
         }
     }
     for (auto const& particle : description._particles) {
-        addParticle(result, particle);
+        addParticle(particleTOs, particle);
     }
+
+    return createDataTO(cellTOs, particleTOs, heap);
 }
 
-void DescriptionConverterService::convertDescriptionToTO(DataTO& result, DataDescription const& description) const
+DataTO DescriptionConverterService::convertDescriptionToTO(DataDescription const& description) const
 {
-    std::unordered_map<uint64_t, int> cellIndexByIds;
+    std::vector<CellTO> cellTOs;
+    std::vector<ParticleTO> particleTOs;
+    std::vector<uint8_t> heap;
+
+    std::unordered_map<uint64_t, uint64_t> cellIndexByIds;
     for (auto const& cell : description._cells) {
-        addCell(result, cell, cellIndexByIds);
+        addCell(cellTOs, heap, cell, cellIndexByIds);
     }
     for (auto const& cell : description._cells) {
         if (cell._id != 0) {
-            setConnections(result, cell, cellIndexByIds);
+            setConnections(cellTOs, cell, cellIndexByIds);
         }
     }
     for (auto const& particle : description._particles) {
-        addParticle(result, particle);
+        addParticle(particleTOs, particle);
     }
+
+    return createDataTO(cellTOs, particleTOs, heap);
 }
 
-void DescriptionConverterService::convertDescriptionToTO(DataTO& result, CellDescription const& cell) const
+DataTO DescriptionConverterService::convertDescriptionToTO(CellDescription const& cell) const
 {
-    std::unordered_map<uint64_t, int> cellIndexByIds;
-    addCell(result, cell, cellIndexByIds);
+    std::vector<CellTO> cellTOs;
+    std::vector<uint8_t> heap;
+
+    std::unordered_map<uint64_t, uint64_t> cellIndexByIds;
+    addCell(cellTOs, heap, cell, cellIndexByIds);
+
+    return createDataTO(cellTOs, {}, heap);
 }
 
-void DescriptionConverterService::convertDescriptionToTO(DataTO& result, ParticleDescription const& particle) const
+DataTO DescriptionConverterService::convertDescriptionToTO(ParticleDescription const& particle) const
 {
-    addParticle(result, particle);
+    std::vector<ParticleTO> particleTOs;
+    std::vector<uint8_t> heap;
+
+    addParticle(particleTOs, particle);
+
+    return createDataTO({}, particleTOs, heap);
 }
 
 namespace
@@ -528,11 +564,10 @@ namespace
     }
 }
 
-void DescriptionConverterService::addParticle(DataTO const& dataTO, ParticleDescription const& particleDesc) const
+void DescriptionConverterService::addParticle(std::vector<ParticleTO>& particleTOs, ParticleDescription const& particleDesc) const
 {
-    auto particleIndex = (*dataTO.numParticles)++;
+    auto& particleTO = particleTOs.emplace_back();
 
-	ParticleTO& particleTO = dataTO.particles[particleIndex];
 	particleTO.id = particleDesc._id == 0 ? NumberGenerator::get().getId() : particleDesc._id;
     particleTO.pos = {particleDesc._pos.x, particleDesc._pos.y};
     particleTO.vel = {particleDesc._vel.x, particleDesc._vel.y};
@@ -541,10 +576,16 @@ void DescriptionConverterService::addParticle(DataTO const& dataTO, ParticleDesc
     particleTO.color = particleDesc._color;
 }
 
-void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription const& cellDesc, std::unordered_map<uint64_t, int>& cellIndexTOByIds) const
+void DescriptionConverterService::addCell(
+    std::vector<CellTO>& cellTOs,
+    std::vector<uint8_t>& heap,
+    CellDescription const& cellDesc,
+    std::unordered_map<uint64_t, uint64_t>& cellIndexTOByIds) const
 {
-    int cellIndex = (*dataTO.numCells)++;
-    CellTO& cellTO = dataTO.cells[cellIndex];
+    auto cellIndex = cellTOs.size();
+    cellTOs.resize(cellIndex + 1);
+
+    CellTO& cellTO = cellTOs.at(cellIndex);
     cellTO.id = cellDesc._id == 0 ? NumberGenerator::get().getId() : cellDesc._id;
     cellTO.pos = {cellDesc._pos.x, cellDesc._pos.y};
     cellTO.vel = {cellDesc._vel.x, cellDesc._vel.y};
@@ -563,7 +604,7 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
 
     auto cellType = cellDesc.getCellType();
     if (cellType != CellType_Structure && cellType != CellType_Free) {
-        convertToNeuronData(dataTO, *cellDesc._neuralNetwork, cellTO.neuralNetwork.dataIndex);
+        convertToNeuronData(heap, cellTO.neuralNetwork.dataIndex, * cellDesc._neuralNetwork);
     }
     switch (cellType) {
     case CellType_Base: {
@@ -581,7 +622,7 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
         constructorTO.autoTriggerInterval = constructorDesc._autoTriggerInterval;
         constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
         CHECK(constructorDesc._genome.size() >= Const::GenomeHeaderSize)
-        convert(dataTO, constructorDesc._genome, constructorTO.genomeSize, constructorTO.genomeDataIndex);
+        convert(heap, constructorTO.genomeSize, constructorTO.genomeDataIndex, constructorDesc._genome);
         constructorTO.numInheritedGenomeNodes = static_cast<uint16_t>(constructorDesc._numInheritedGenomeNodes);
         constructorTO.lastConstructedCellId = constructorDesc._lastConstructedCellId;
         constructorTO.genomeCurrentNodeIndex = static_cast<uint16_t>(constructorDesc._genomeCurrentNodeIndex);
@@ -620,7 +661,7 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
         injectorTO.mode = injectorDesc._mode;
         injectorTO.counter = injectorDesc._counter;
         CHECK(injectorDesc._genome.size() >= Const::GenomeHeaderSize)
-        convert(dataTO, injectorDesc._genome, injectorTO.genomeSize, injectorTO.genomeDataIndex);
+        convert(heap, injectorTO.genomeSize, injectorTO.genomeDataIndex, injectorDesc._genome);
         injectorTO.genomeGeneration = injectorDesc._genomeGeneration;
     } break;
     case CellType_Muscle: {
@@ -713,15 +754,18 @@ void DescriptionConverterService::addCell(DataTO const& dataTO, CellDescription 
     cellTO.age = cellDesc._age;
     cellTO.color = cellDesc._color;
     cellTO.genomeComplexity = cellDesc._genomeComplexity;
-    convert(dataTO, cellDesc._metadata._name, cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex);
-    convert(dataTO, cellDesc._metadata._description, cellTO.metadata.descriptionSize, cellTO.metadata.descriptionDataIndex);
+    convert(heap, cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, cellDesc._metadata._name);
+    convert(heap, cellTO.metadata.descriptionSize, cellTO.metadata.descriptionDataIndex, cellDesc._metadata._description);
 	cellIndexTOByIds.insert_or_assign(cellTO.id, cellIndex);
 }
 
-void DescriptionConverterService::setConnections(DataTO const& dataTO, CellDescription const& cellToAdd, std::unordered_map<uint64_t, int> const& cellIndexByIds) const
+void DescriptionConverterService::setConnections(
+    std::vector<CellTO>& cellTOs,
+    CellDescription const& cellToAdd,
+    std::unordered_map<uint64_t, uint64_t> const& cellIndexByIds) const
 {
     int index = 0;
-    auto& cellTO = dataTO.cells[cellIndexByIds.at(cellToAdd._id)];
+    auto& cellTO = cellTOs.at(cellIndexByIds.at(cellToAdd._id));
     float angleOffset = 0;
     for (ConnectionDescription const& connection : cellToAdd._connections) {
         if (connection._cellId != 0) {

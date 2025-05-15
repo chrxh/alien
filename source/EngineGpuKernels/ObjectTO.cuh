@@ -290,7 +290,7 @@ struct DataTO
     uint64_t* heapSize = nullptr;
     uint8_t* heap = nullptr;
 
-    void init(ObjectTOArraySizes const& arraySizes)
+    void init(ObjectTOArraySizes const& capacities)
     {
         numCells = new uint64_t;
         numParticles = new uint64_t;
@@ -298,9 +298,9 @@ struct DataTO
         *numCells = 0;
         *numParticles = 0;
         *heapSize = 0;
-        cells = new CellTO[arraySizes.cellArraySize];
-        particles = new ParticleTO[arraySizes.particleArraySize];
-        heap = new uint8_t[arraySizes.heapSize];
+        cells = new CellTO[capacities.cellArraySize];
+        particles = new ParticleTO[capacities.particleArraySize];
+        heap = new uint8_t[capacities.heapSize];
     }
 
     void destroy()

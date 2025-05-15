@@ -457,30 +457,6 @@ ObjectArraySizes _SimulationCudaFacade::estimateObjectArraySizes(ClusteredDataDe
     return result;
 }
 
-ObjectTOArraySizes _SimulationCudaFacade::estimateObjectTOArraySizes(DataDescription const& data) const
-{
-    ObjectTOArraySizes result;
-    result.cellArraySize = data._cells.size();
-    result.particleArraySize = data._particles.size();
-    for (auto const& cell : data._cells) {
-        sumDependentDataSize(cell, result.heapSize);
-    }
-    return result;
-}
-
-ObjectTOArraySizes _SimulationCudaFacade::estimateObjectTOArraySizes(ClusteredDataDescription const& data) const
-{
-    ObjectTOArraySizes result;
-    for (auto const& cluster : data._clusters) {
-        result.cellArraySize += cluster._cells.size();
-        for (auto const& cell : cluster._cells) {
-            sumDependentDataSize(cell, result.heapSize);
-        }
-    }
-    result.particleArraySize = data._particles.size();
-    return result;
-}
-
 ObjectTOArraySizes _SimulationCudaFacade::getActualObjectArraySizes() const
 {
     return _dataAccessKernels->getActualArraySizes(_settings.gpuSettings, getSimulationDataIntern());

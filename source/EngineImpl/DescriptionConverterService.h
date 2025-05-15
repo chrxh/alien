@@ -2,6 +2,7 @@
 
 #include <unordered_map>
 
+#include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/OverlayDescriptions.h"
@@ -11,16 +12,16 @@
 
 class DescriptionConverterService
 {
-public:
-    DescriptionConverterService(SimulationParameters const& parameters);
+    MAKE_SINGLETON(DescriptionConverterService);
 
+public:
     ClusteredDataDescription convertTOtoClusteredDataDescription(DataTO const& dataTO) const;
     DataDescription convertTOtoDataDescription(DataTO const& dataTO) const;
     OverlayDescription convertTOtoOverlayDescription(DataTO const& dataTO) const;
-    void convertDescriptionToTO(DataTO& result, ClusteredDataDescription const& description) const;
-    void convertDescriptionToTO(DataTO& result, DataDescription const& description) const;
-    void convertDescriptionToTO(DataTO& result, CellDescription const& cell) const;
-    void convertDescriptionToTO(DataTO& result, ParticleDescription const& particle) const;
+    DataTO convertDescriptionToTO(ClusteredDataDescription const& description) const;
+    DataTO convertDescriptionToTO(DataDescription const& description) const;
+    DataTO convertDescriptionToTO(CellDescription const& cell) const;
+    DataTO convertDescriptionToTO(ParticleDescription const& particle) const;
 
 private:
 	struct CreateClusterReturnData
@@ -35,12 +36,12 @@ private:
     CellDescription createCellDescription(DataTO const& dataTO, int cellIndex) const;
 
 	void addCell(
-        DataTO const& dataTO, CellDescription const& cellToAdd, std::unordered_map<uint64_t, int>& cellIndexTOByIds) const;
-    void addParticle(DataTO const& dataTO, ParticleDescription const& particleDesc) const;
+        std::vector<CellTO>& cellTOs,
+        std::vector<uint8_t>& heap,
+        CellDescription const& cellToAdd,
+        std::unordered_map<uint64_t, uint64_t>& cellIndexTOByIds) const;
+    void addParticle(std::vector<ParticleTO>& particleTOs, ParticleDescription const& particleDesc) const;
 
-	void setConnections(
-        DataTO const& dataTO, CellDescription const& cellToAdd, std::unordered_map<uint64_t, int> const& cellIndexByIds) const;
+	void setConnections(std::vector<CellTO>& cellTOs, CellDescription const& cellToAdd, std::unordered_map<uint64_t, uint64_t> const& cellIndexByIds) const;
 
-private:
-	SimulationParameters _parameters;
 };
