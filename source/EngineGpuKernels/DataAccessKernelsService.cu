@@ -11,7 +11,7 @@ _DataAccessKernelsService::_DataAccessKernelsService()
     _editKernels = std::make_shared<_EditKernelsService>();
 
     CudaMemoryManager::getInstance().acquireMemory<Cell*>(1, _cudaCellArray);
-    CudaMemoryManager::getInstance().acquireMemory<ObjectTOArraySizes>(1, _arraySizes);
+    CudaMemoryManager::getInstance().acquireMemory<ArraySizesForObjectTOs>(1, _arraySizes);
 }
 
 _DataAccessKernelsService::~_DataAccessKernelsService()
@@ -20,9 +20,9 @@ _DataAccessKernelsService::~_DataAccessKernelsService()
     CudaMemoryManager::getInstance().freeMemory(_arraySizes);
 }
 
-ObjectTOArraySizes _DataAccessKernelsService::getActualArraySizes(GpuSettings const& gpuSettings, SimulationData const& data)
+ArraySizesForObjectTOs _DataAccessKernelsService::getActualArraySizes(GpuSettings const& gpuSettings, SimulationData const& data)
 {
-    setValueToDevice(_arraySizes, ObjectTOArraySizes{});
+    setValueToDevice(_arraySizes, ArraySizesForObjectTOs{});
     KERNEL_CALL(cudaGetActualArraySizes, data, _arraySizes);
     return copyToHost(_arraySizes);
 }

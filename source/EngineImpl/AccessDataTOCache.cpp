@@ -10,7 +10,7 @@ _AccessDataTOCache::~_AccessDataTOCache()
     }
 }
 
-DataTO _AccessDataTOCache::getDataTO(ObjectTOArraySizes const& arraySizes)
+DataTO _AccessDataTOCache::getDataTO(ArraySizesForObjectTOs const& arraySizes)
 {
     if (_dataTO) {
         auto existingArraySizes = getArraySizes(*_dataTO);
@@ -33,13 +33,13 @@ DataTO _AccessDataTOCache::getDataTO(ObjectTOArraySizes const& arraySizes)
     }
 }
 
-bool _AccessDataTOCache::fits(ObjectTOArraySizes const& left, ObjectTOArraySizes const& right) const
+bool _AccessDataTOCache::fits(ArraySizesForObjectTOs const& left, ArraySizesForObjectTOs const& right) const
 {
     return left.cellArraySize >= right.cellArraySize && left.particleArraySize >= right.particleArraySize
         && left.heapSize >= right.heapSize;
 }
 
-auto _AccessDataTOCache::getArraySizes(DataTO const& dataTO) const -> ObjectTOArraySizes
+auto _AccessDataTOCache::getArraySizes(DataTO const& dataTO) const -> ArraySizesForObjectTOs
 {
     return {*dataTO.numCells, *dataTO.numParticles, *dataTO.heapSize};
 }

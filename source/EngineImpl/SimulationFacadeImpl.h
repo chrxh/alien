@@ -118,7 +118,7 @@ public:
     void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2) override;
     void testOnly_cleanupAfterTimestep() override;
     void testOnly_cleanupAfterDataManipulation() override;
-    void testOnly_resizeArrays(ObjectArraySizes const& sizeDelta) override;
+    void testOnly_resizeArrays(ArraySizesForObjects const& sizeDelta) override;
     bool testOnly_areArraysValid() override;
 
 private:

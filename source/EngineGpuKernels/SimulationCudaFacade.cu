@@ -429,9 +429,9 @@ namespace
     }
 }
 
-ObjectArraySizes _SimulationCudaFacade::estimateObjectArraySizes(DataDescription const& data) const
+ArraySizesForObjects _SimulationCudaFacade::estimateObjectArraySizes(DataDescription const& data) const
 {
-    ObjectArraySizes result;
+    ArraySizesForObjects result;
     result.cellArraySize = data._cells.size();
     result.particleArraySize = data._particles.size();
     result.heapSize = data._cells.size() * (sizeof(Cell) + 16);
@@ -442,9 +442,9 @@ ObjectArraySizes _SimulationCudaFacade::estimateObjectArraySizes(DataDescription
     return result;
 }
 
-ObjectArraySizes _SimulationCudaFacade::estimateObjectArraySizes(ClusteredDataDescription const& data) const
+ArraySizesForObjects _SimulationCudaFacade::estimateObjectArraySizes(ClusteredDataDescription const& data) const
 {
-    ObjectArraySizes result;
+    ArraySizesForObjects result;
     for (auto const& cluster : data._clusters) {
         result.cellArraySize += cluster._cells.size();
         result.heapSize += cluster._cells.size() * (sizeof(Cell) + 16);
@@ -457,7 +457,7 @@ ObjectArraySizes _SimulationCudaFacade::estimateObjectArraySizes(ClusteredDataDe
     return result;
 }
 
-ObjectTOArraySizes _SimulationCudaFacade::getActualObjectArraySizes() const
+ArraySizesForObjectTOs _SimulationCudaFacade::getActualObjectArraySizes() const
 {
     return _dataAccessKernels->getActualArraySizes(_settings.gpuSettings, getSimulationDataIntern());
 }
@@ -520,7 +520,7 @@ void _SimulationCudaFacade::clear()
     syncAndCheck();
 }
 
-void _SimulationCudaFacade::resizeArraysIfNecessary(ObjectArraySizes const& sizeDelta)
+void _SimulationCudaFacade::resizeArraysIfNecessary(ArraySizesForObjects const& sizeDelta)
 {
     if (_cudaSimulationData->shouldResize(sizeDelta)) {
         resizeArrays(sizeDelta);
@@ -564,7 +564,7 @@ void _SimulationCudaFacade::testOnly_cleanupAfterDataManipulation()
     syncAndCheck();
 }
 
-void _SimulationCudaFacade::testOnly_resizeArrays(ObjectArraySizes const& sizeDelta)
+void _SimulationCudaFacade::testOnly_resizeArrays(ArraySizesForObjects const& sizeDelta)
 {
     checkAndProcessSimulationParameterChanges();
     resizeArrays(sizeDelta);
@@ -681,7 +681,7 @@ void _SimulationCudaFacade::automaticResizeArrays()
     }
 }
 
-void _SimulationCudaFacade::resizeArrays(ObjectArraySizes const& sizeDelta)
+void _SimulationCudaFacade::resizeArrays(ArraySizesForObjects const& sizeDelta)
 {
     log(Priority::Important, "resize arrays");
 

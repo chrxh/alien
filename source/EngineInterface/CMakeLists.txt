@@ -1,5 +1,7 @@
 
 add_library(EngineInterface
+    ArraySizesForObjects.h
+    ArraySizesForObjectTOs.h
     CellTypeConstants.h
     CellTypeStrings.h
     Colors.h
@@ -20,8 +22,6 @@ add_library(EngineInterface
     LocationHelper.cpp
     LocationHelper.h
     MutationType.h
-    ObjectArraySizes.h
-    ObjectTOArraySizes.h
     OverlayDescriptions.h
     ParametersEditService.cpp
     ParametersEditService.h
