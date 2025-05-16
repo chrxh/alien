@@ -47,11 +47,11 @@ using TestKernelsService = std::shared_ptr<_TestKernelsService>;
 class _MaxAgeBalancer;
 using MaxAgeBalancer = std::shared_ptr<_MaxAgeBalancer>;
 
-class _CudaDataTOCache;
-using CudaDataTOCache = std::shared_ptr<_CudaDataTOCache>;
+class _CudaDataTOProvider;
+using CudaDataTOProvider = std::shared_ptr<_CudaDataTOProvider>;
 
-class _DataTOCache;
-using DataTOCache = std::shared_ptr<_DataTOCache>;
+class _DataTOProvider;
+using DataTOProvider = std::shared_ptr<_DataTOProvider>;
 
 
 struct ApplyForceData

@@ -171,7 +171,7 @@ private:
     //internals
     std::optional<GLuint> _imageResource;
     void* _cudaResource = nullptr;
-    DataTOCache _dataTOCache;
+    DataTOProvider _dataTOProvider;
 };
 
 class EngineWorkerGuard

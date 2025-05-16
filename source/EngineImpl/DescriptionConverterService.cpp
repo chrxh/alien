@@ -9,7 +9,7 @@
 #include "Base/Exceptions.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/GenomeConstants.h"
-#include "EngineGpuKernels/DataTOCache.cuh"
+#include "EngineGpuKernels/DataTOProvider.cuh"
 
 
 namespace
@@ -280,7 +280,7 @@ DataTO DescriptionConverterService::convertDescriptionToTO(ParticleDescription c
 
 DescriptionConverterService::DescriptionConverterService()
 {
-    _dataTOCache = std::make_shared<_DataTOCache>();
+    _dataTOProvider = std::make_shared<_DataTOProvider>();
 }
 
 namespace
@@ -776,7 +776,7 @@ DataTO DescriptionConverterService::provideDataTO(
     std::vector<ParticleTO> const& particleTOs,
     std::vector<uint8_t> const& heap) const
 {
-    DataTO result = _dataTOCache->provideDataTO({cellTOs.size(), particleTOs.size(), heap.size()});
+    DataTO result = _dataTOProvider->provideDataTO({cellTOs.size(), particleTOs.size(), heap.size()});
 
     *result.numCells = cellTOs.size();
     *result.numParticles = particleTOs.size();

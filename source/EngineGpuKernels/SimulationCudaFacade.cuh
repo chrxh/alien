@@ -23,7 +23,7 @@
 #include "EngineInterface/StatisticsHistory.h"
 
 #include "Definitions.cuh"
-#include "DataTOCache.cuh"
+#include "DataTOProvider.cuh"
 
 struct cudaGraphicsResource;
 
@@ -46,7 +46,7 @@ public:
     void applyCataclysm(int power);
 
     void drawVectorGraphics(float2 const& rectUpperLeft, float2 const& rectLowerRight, void* cudaResource, int2 const& imageSize, double zoom);
-    DataTO getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);  // DataTO is unmanaged
+    DataTO getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);  // DataTO is unmanaged (i.e. must be deleted by the caller)
     DataTO getSelectedSimulationData(bool includeClusters);
     DataTO getInspectedSimulationData(std::vector<uint64_t> entityIds);
     DataTO getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight);
@@ -128,8 +128,8 @@ private:
 
     std::shared_ptr<RenderingData> _cudaRenderingData;
     std::shared_ptr<SelectionResult> _cudaSelectionResult;
-    CudaDataTOCache _cudaDataTOCache;
-    DataTOCache _dataTOCache;
+    CudaDataTOProvider _cudaDataTOProvider;
+    DataTOProvider _dataTOProvider;
 
     mutable std::mutex _mutexForStatistics;
     std::optional<std::chrono::steady_clock::time_point> _lastStatisticsUpdateTime;
