@@ -12,10 +12,13 @@ public:
     ~_DataTOCache();
 
     DataTO provideDataTO(ArraySizesForTO const& requiredCapacity);
+    DataTO provideNewUnmanagedDataTO(ArraySizesForTO const& requiredCapacity);
+
+    static void destroyUnmanagedDataTO(DataTO const& dataTO);
 
 private:
     bool fits(ArraySizesForTO const& left, ArraySizesForTO const& right) const;
-    void destroy();
+    static void destroy(DataTO const& dataTO);
 
     std::optional<DataTO> _dataTO;
 };

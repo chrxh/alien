@@ -107,9 +107,9 @@ void EngineWorker::setSyncSimulationWithRenderingRatio(int value)
 
 ClusteredDataDescription EngineWorker::getClusteredSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
 {
-    // TODO use other DataTO? (concurrency?)
-
     DataTO dataTO;
+    ExitScopeGuard guard([&dataTO]() { _DataTOCache::destroyUnmanagedDataTO(dataTO); });
+
     {
         EngineWorkerGuard access(this);
 
@@ -124,6 +124,7 @@ DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft
     EngineWorkerGuard access(this);
 
     auto dataTO = _simulationCudaFacade->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y});
+    ExitScopeGuard guard([&dataTO]() { _DataTOCache::destroyUnmanagedDataTO(dataTO); });
 
     return DescriptionConverterService::get().convertTOtoDataDescription(dataTO);
 }
