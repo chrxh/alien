@@ -208,7 +208,7 @@ DataTO _SimulationCudaFacade::getSimulationData(
     _dataAccessKernels->getData(_settings.gpuSettings, getSimulationDataIntern(), rectUpperLeft, rectLowerRight, cudaDataTO);
     syncAndCheck();
 
-    auto dataTO = _dataTOCache->provideDataTO(cudaDataTO.capacities);
+    auto dataTO = _dataTOCache->provideNewUnmanagedDataTO(cudaDataTO.capacities);
     copyDataTOtoHost(dataTO, cudaDataTO);
 
     return dataTO;

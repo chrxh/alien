@@ -46,7 +46,7 @@ public:
     void applyCataclysm(int power);
 
     void drawVectorGraphics(float2 const& rectUpperLeft, float2 const& rectLowerRight, void* cudaResource, int2 const& imageSize, double zoom);
-    DataTO getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);
+    DataTO getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);  // DataTO is unmanaged
     DataTO getSelectedSimulationData(bool includeClusters);
     DataTO getInspectedSimulationData(std::vector<uint64_t> entityIds);
     DataTO getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight);

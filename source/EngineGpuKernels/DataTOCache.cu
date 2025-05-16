@@ -8,7 +8,7 @@ _DataTOCache::_DataTOCache()
 _DataTOCache::~_DataTOCache()
 {
     if (_dataTO) {
-        destroy();
+        destroy(_dataTO.value());
     }
 }
 
@@ -19,15 +19,14 @@ DataTO _DataTOCache::provideDataTO(ArraySizesForTO const& requiredCapacity)
             *_dataTO->numCells = 0;
             *_dataTO->numParticles = 0;
             *_dataTO->heapSize = 0;
-            return *_dataTO;
+            return _dataTO.value();
         } else {
-            destroy();
+            destroy(_dataTO.value());
         }
     }
     try {
         DataTO result;
         result.capacities = requiredCapacity;
-
         result.numCells = new uint64_t;
         result.numParticles = new uint64_t;
         result.heapSize = new uint64_t;
@@ -37,12 +36,36 @@ DataTO _DataTOCache::provideDataTO(ArraySizesForTO const& requiredCapacity)
         result.cells = new CellTO[requiredCapacity.cellArray];
         result.particles = new ParticleTO[requiredCapacity.particleArray];
         result.heap = new uint8_t[requiredCapacity.heap];
-
         _dataTO = result;
         return result;
     } catch (std::bad_alloc const&) {
         throw std::runtime_error("There is not sufficient CPU memory available.");
     }
+}
+
+DataTO _DataTOCache::provideNewUnmanagedDataTO(ArraySizesForTO const& requiredCapacity)
+{
+    try {
+        DataTO result;
+        result.capacities = requiredCapacity;
+        result.numCells = new uint64_t;
+        result.numParticles = new uint64_t;
+        result.heapSize = new uint64_t;
+        *result.numCells = 0;
+        *result.numParticles = 0;
+        *result.heapSize = 0;
+        result.cells = new CellTO[requiredCapacity.cellArray];
+        result.particles = new ParticleTO[requiredCapacity.particleArray];
+        result.heap = new uint8_t[requiredCapacity.heap];
+        return result;
+    } catch (std::bad_alloc const&) {
+        throw std::runtime_error("There is not sufficient CPU memory available.");
+    }
+}
+
+void _DataTOCache::destroyUnmanagedDataTO(DataTO const& dataTO)
+{
+    destroy(dataTO);
 }
 
 bool _DataTOCache::fits(ArraySizesForTO const& left, ArraySizesForTO const& right) const
@@ -51,12 +74,12 @@ bool _DataTOCache::fits(ArraySizesForTO const& left, ArraySizesForTO const& righ
         && left.heap >= right.heap;
 }
 
-void _DataTOCache::destroy()
+void _DataTOCache::destroy(DataTO const& dataTO)
 {
-    delete _dataTO->numCells;
-    delete _dataTO->numParticles;
-    delete _dataTO->heapSize;
-    delete[] _dataTO->cells;
-    delete[] _dataTO->particles;
-    delete[] _dataTO->heap;
+    delete dataTO.numCells;
+    delete dataTO.numParticles;
+    delete dataTO.heapSize;
+    delete[] dataTO.cells;
+    delete[] dataTO.particles;
+    delete[] dataTO.heap;
 }
