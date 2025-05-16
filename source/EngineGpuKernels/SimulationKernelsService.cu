@@ -25,7 +25,7 @@ namespace
 void _SimulationKernelsService::calcTimestep(SettingsForSimulation const& settings, SimulationData const& data, SimulationStatistics const& statistics)
 {
     auto const gpuSettings = settings.gpuSettings;
-    KERNEL_CALL_1_1(cudaNextTimestep_prepare, data, statistics);
+    KERNEL_CALL_1_1(cudaNextTimestep_prepare, data);
 
     // Not all kernels need to be executed in each time step for performance reasons
     bool considerForcesFromAngleDifferences = (data.timestep % 3 == 0);

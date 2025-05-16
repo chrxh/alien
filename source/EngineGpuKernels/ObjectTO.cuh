@@ -3,6 +3,7 @@
 #include <cuda_runtime.h>
 #include <stdint.h>
 
+#include "GenomeTO.cuh"
 #include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/CellTypeConstants.h"
 #include "EngineInterface/ArraySizesForTO.h"
@@ -36,15 +37,16 @@ struct ConnectionTO
 
 struct NeuralNetworkTO
 {
-    static auto constexpr DataSize = sizeof(float) * MAX_CHANNELS * (MAX_CHANNELS + 1) + MAX_CHANNELS;
-    uint64_t dataIndex;
+    float weights[MAX_CHANNELS * MAX_CHANNELS];
+    float biases[MAX_CHANNELS];
+    ActivationFunction activationFunctions[MAX_CHANNELS];
 };
 
 struct BaseTO
 {
 };
 
-struct TransmitterTO
+struct DepotTO
 {
     EnergyDistributionMode mode;
 };
@@ -202,7 +204,7 @@ struct DefenderTO
 
 struct ReconnectorTO
 {
-    uint8_t restrictToColor;  //0 ... 6 = color restriction, 255 = no restriction
+    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
     ReconnectorRestrictToMutants restrictToMutants;
 };
 
@@ -212,10 +214,10 @@ struct DetonatorTO
     int32_t countdown;
 };
 
-union CellTypeTO
+union CellTypeDataTO
 {
     BaseTO base;
-    TransmitterTO transmitter;
+    DepotTO depot;
     ConstructorTO constructor;
     SensorTO sensor;
     OscillatorTO oscillator;
@@ -244,7 +246,8 @@ struct CellTO
 {
     // General
     uint64_t id;
-    uint64_t genomeIndex_New;
+    bool hasGenome;
+    uint64_t genomeIndex;
     ConnectionTO connections[MAX_CELL_BONDS];
     float2 pos;
     float2 vel;
@@ -259,19 +262,19 @@ struct CellTO
     LivingState livingState;
     uint32_t creatureId;
     uint32_t mutationId;
-    uint8_t ancestorMutationId;  //only the first 8 bits from ancestor mutation id
+    uint8_t ancestorMutationId;  // Only the first 8 bits from ancestor mutation id
     float genomeComplexity;
     uint16_t genomeNodeIndex;
 
     // Cell type data
-    NeuralNetworkTO neuralNetwork;  // not used for structure and base cells
+    uint64_t neuralNetworkDataIndex;  // Not used for structure and base cells
     CellType cellType;
-    CellTypeTO cellTypeData;
+    CellTypeDataTO cellTypeData;
     SignalRoutingRestrictionTO signalRoutingRestriction;
     uint8_t signalRelaxationTime;
     SignalTO signal;
     uint32_t activationTime;
-    uint16_t detectedByCreatureId;  // only the first 16 bits from the creature id
+    uint16_t detectedByCreatureId;  // Only the first 16 bits from the creature id
     CellTriggered cellTypeUsed;
 
     // Misc
@@ -281,7 +284,7 @@ struct CellTO
     uint8_t selected;
 };
 
-struct DataTO
+struct CollectionTO
 {
     ArraySizesForTO capacities;
 
@@ -289,9 +292,15 @@ struct DataTO
 	CellTO* cells = nullptr;
     uint64_t* numParticles = nullptr;
 	ParticleTO* particles = nullptr;
+    uint64_t* numGenomes = nullptr;
+    GenomeTO* genomes = nullptr;
+    uint64_t* numGenes = nullptr;
+    GeneTO* genes = nullptr;
+    uint64_t* numNodes = nullptr;
+    NodeTO* nodes = nullptr;
     uint64_t* heapSize = nullptr;
     uint8_t* heap = nullptr;
 
-	bool operator==(DataTO const& other) const = default;
+	bool operator==(CollectionTO const& other) const = default;
 };
 

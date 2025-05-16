@@ -16,13 +16,13 @@ class DescriptionConverterService
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(DescriptionConverterService);
 
 public:
-    ClusteredDataDescription convertTOtoClusteredDataDescription(DataTO const& dataTO) const;
-    DataDescription convertTOtoDataDescription(DataTO const& dataTO) const;
-    OverlayDescription convertTOtoOverlayDescription(DataTO const& dataTO) const;
-    DataTO convertDescriptionToTO(ClusteredDataDescription const& description) const;
-    DataTO convertDescriptionToTO(DataDescription const& description) const;
-    DataTO convertDescriptionToTO(CellDescription const& cell) const;
-    DataTO convertDescriptionToTO(ParticleDescription const& particle) const;
+    ClusteredDataDescription convertTOtoClusteredDataDescription(CollectionTO const& collectionTO) const;
+    DataDescription convertTOtoDataDescription(CollectionTO const& collectionTO) const;
+    OverlayDescription convertTOtoOverlayDescription(CollectionTO const& collectionTO) const;
+    CollectionTO convertDescriptionToTO(ClusteredDataDescription const& description) const;
+    CollectionTO convertDescriptionToTO(DataDescription const& description) const;
+    CollectionTO convertDescriptionToTO(CellDescription const& cell) const;
+    CollectionTO convertDescriptionToTO(ParticleDescription const& particle) const;
 
 private:
     DescriptionConverterService();
@@ -33,22 +33,37 @@ private:
         std::unordered_map<int, int> cellTOIndexToCellDescIndex;
 	};
     CreateClusterReturnData scanAndCreateClusterDescription(
-        DataTO const& dataTO,
+        CollectionTO const& collectionTO,
         int startCellIndex,
         std::unordered_set<int>& freeCellIndices) const;
-    CellDescription createCellDescription(DataTO const& dataTO, int cellIndex) const;
+    CellDescription createCellDescription(CollectionTO const& collectionTO, int cellIndex) const;
+    GenomeDescription_New createGenomeDescription(CollectionTO const& collectionTO, int genomeIndex) const;
 
-	void addCell(
+    void addGenome(
+        std::vector<GenomeTO>& genomeTOs,
+        std::vector<GeneTO>& geneTOs,
+        std::vector<NodeTO>& nodeTOs,
+        std::vector<uint8_t>& heap,
+        GenomeDescription_New const& genomeDesc,
+        std::unordered_map<uint64_t, uint64_t>& genomeTOIndexById) const;
+    void addCell(
         std::vector<CellTO>& cellTOs,
         std::vector<uint8_t>& heap,
+        std::unordered_map<uint64_t, uint64_t>& cellTOIndexById,
         CellDescription const& cellToAdd,
-        std::unordered_map<uint64_t, uint64_t>& cellIndexTOByIds) const;
+        std::unordered_map<uint64_t, uint64_t> const& genomeTOIndexById) const;
     void addParticle(std::vector<ParticleTO>& particleTOs, ParticleDescription const& particleDesc) const;
 
 	void setConnections(std::vector<CellTO>& cellTOs, CellDescription const& cellToAdd, std::unordered_map<uint64_t, uint64_t> const& cellIndexByIds) const;
 
-    DataTO provideDataTO(std::vector<CellTO> const& cellTOs, std::vector<ParticleTO> const& particleTOs, std::vector<uint8_t> const& heap) const;
+    CollectionTO provideDataTO(
+        std::vector<GenomeTO> const& genomeTOs,
+        std::vector<GeneTO> const& geneTOs,
+        std::vector<NodeTO> const& nodeTOs,
+        std::vector<CellTO> const& cellTOs,
+        std::vector<ParticleTO> const& particleTOs,
+        std::vector<uint8_t> const& heap) const;
 
 private:
-    mutable DataTOProvider _dataTOProvider;
+    mutable CollectionTOProvider _collectionTOProvider;
 };

@@ -36,7 +36,7 @@ private:
     __inline__ __device__ static void executeEvent(SimulationData& data, float probability, Func eventFunc);
     template <typename Func>
     __inline__ __device__ static void executeMultipleEvents(SimulationData& data, float probability, Func eventFunc);
-    __inline__ __device__ static void adaptMutationId(SimulationData& data, ConstructorType& constructor);
+    __inline__ __device__ static void adaptMutationId(SimulationData& data, Constructor& constructor);
     __inline__ __device__ static bool isRandomEvent(SimulationData& data, float probability);
     __inline__ __device__ static int getNewColorFromTransition(SimulationData& data, int origColor);
 };
@@ -46,7 +46,7 @@ private:
 /************************************************************************/
 __inline__ __device__ void MutationProcessor::applyRandomMutations(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -953,7 +953,7 @@ __inline__ __device__ void MutationProcessor::executeEvent(SimulationData& data,
     }
 }
 
-__inline__ __device__ void MutationProcessor::adaptMutationId(SimulationData& data, ConstructorType& constructor)
+__inline__ __device__ void MutationProcessor::adaptMutationId(SimulationData& data, Constructor& constructor)
 {
     if (GenomeDecoder::containsSelfReplication(constructor)) {
         constructor.offspringMutationId = data.numberGen1.createNewSmallId();

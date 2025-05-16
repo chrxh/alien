@@ -5,5 +5,5 @@
 class _SimulationCudaFacade;
 using CudaSimulationFacade = std::shared_ptr<_SimulationCudaFacade>;
 
-class _DataTOProvider;
-using DataTOProvider = std::shared_ptr<_DataTOProvider>;
+class _CollectionTOProvider;
+using CollectionTOProvider = std::shared_ptr<_CollectionTOProvider>;

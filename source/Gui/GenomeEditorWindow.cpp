@@ -833,7 +833,7 @@ void GenomeEditorWindow::processNode(
             AlienImGui::InputInt(
                 AlienImGui::InputIntParameters().name("Countdown").textWidth(ContentTextWidth).tooltip(Const::GenomeDetonatorCountdownTooltip),
                 detonator._countdown);
-            detonator._countdown = std::min(65535, std::max(0, detonator._countdown));
+            detonator._countdown = std::min(0xffff, std::max(0, detonator._countdown));
         } break;
         }
 

@@ -8,8 +8,8 @@
 
 struct Objects
 {
-    Array<Cell*> cellPointers;
-    Array<Particle*> particlePointers;
+    Array<Cell*> cells;
+    Array<Particle*> particles;
 
     Heap heap;
 

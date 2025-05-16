@@ -815,7 +815,7 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
     } break;
     case CellType_Detonator: {
         auto& detonator = std::get<DetonatorDescription>(cell._cellTypeData);
-        detonator._countdown = std::min(65535, std::max(0, detonator._countdown));
+        detonator._countdown = std::min(0xffff, std::max(0, detonator._countdown));
     } break;
     }
 }

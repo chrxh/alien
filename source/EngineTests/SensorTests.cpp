@@ -108,7 +108,7 @@ TEST_F(SensorTests, scanNeighborhood_wrongColor)
         {CellDescription()
              .id(1)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription().color(1)),
+             .cellType(SensorDescription().restrictToColor(1)),
          CellDescription()
              .id(2)
              .pos({101.0f, 100.0f})

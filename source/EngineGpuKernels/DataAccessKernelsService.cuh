@@ -17,13 +17,13 @@ public:
     ~_DataAccessKernelsService();
 
     ArraySizesForTO estimateCapacityNeededForTO(GpuSettings const& gpuSettings, SimulationData const& data);
-    void getData(GpuSettings const& gpuSettings, SimulationData const& data, int2 const& rectUpperLeft, int2 const& rectLowerRight, DataTO const& dataTO);
-    void getSelectedData(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters, DataTO const& dataTO);
-    void getInspectedData(GpuSettings const& gpuSettings, SimulationData const& data, InspectedEntityIds entityIds, DataTO const& dataTO);
-    void getOverlayData(GpuSettings const& gpuSettings, SimulationData const& data, int2 rectUpperLeft, int2 rectLowerRight, DataTO const& dataTO);
+    void getData(GpuSettings const& gpuSettings, SimulationData const& data, int2 const& rectUpperLeft, int2 const& rectLowerRight, CollectionTO const& dataTO);
+    void getSelectedData(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters, CollectionTO const& dataTO);
+    void getInspectedData(GpuSettings const& gpuSettings, SimulationData const& data, InspectedEntityIds entityIds, CollectionTO const& dataTO);
+    void getOverlayData(GpuSettings const& gpuSettings, SimulationData const& data, int2 rectUpperLeft, int2 rectLowerRight, CollectionTO const& dataTO);
 
-    ArraySizesForGpu estimateCapacityNeededForGpu(GpuSettings const& gpuSettings, DataTO const& dataTO);
-    void addData(GpuSettings const& gpuSettings, SimulationData const& data, DataTO const& dataTO, bool selectData, bool createIds);
+    ArraySizesForGpu estimateCapacityNeededForGpu(GpuSettings const& gpuSettings, CollectionTO const& dataTO);
+    void addData(GpuSettings const& gpuSettings, SimulationData const& data, CollectionTO const& dataTO, bool selectData, bool createIds);
     void clearData(GpuSettings const& gpuSettings, SimulationData const& data);
 
 private:
@@ -32,7 +32,7 @@ private:
 
     // Gpu memory
     Cell** _cudaCellArray;
-    ArraySizesForGpu* _arraySizes;
+    ArraySizesForGpu* _arraySizesGPU;
     ArraySizesForTO* _arraySizesTO;
 };
 

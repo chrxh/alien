@@ -914,7 +914,7 @@ TEST_F(ConstructorTests, constructTransmitterCell)
 
 TEST_F(ConstructorTests, constructSensorCell)
 {
-    auto sensorDesc = SensorGenomeDescription().color(2).minDensity(0.5f).restrictToMutants(SensorRestrictToMutants_RestrictToFreeCells);
+    auto sensorDesc = SensorGenomeDescription().restrictToColor(2).minDensity(0.5f).restrictToMutants(SensorRestrictToMutants_RestrictToFreeCells);
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription().cellType(sensorDesc)}));
 
     DataDescription data;
@@ -991,7 +991,7 @@ TEST_F(ConstructorTests, constructReconnectorCell)
 
 TEST_F(ConstructorTests, constructDetonatorCell)
 {
-    auto detonatorDesc = DetonatorGenomeDescription().countDown(25);
+    auto detonatorDesc = DetonatorGenomeDescription().countdown(25);
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription().cellType(detonatorDesc)}));
 
     DataDescription data;

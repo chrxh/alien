@@ -1,7 +1,7 @@
 ﻿#include "RenderingKernels.cuh"
 
 #include "SignalProcessor.cuh"
-#include "SpotCalculator.cuh"
+#include "ParameterCalculator.cuh"
 
 namespace
 {
@@ -22,15 +22,15 @@ namespace
         }
     }
 
-    __device__ __inline__ float3 colorToFloat3(unsigned int value)
+    __device__ __inline__ float3 floatColorRGBToFloat3(FloatColorRGB const& value)
     {
-        return float3{toFloat(value & 0xff) / 255, toFloat((value >> 8) & 0xff) / 255, toFloat((value >> 16) & 0xff) / 255};
+        return float3{value.r, value.g, value.b};
     }
 
     __device__ __inline__ float2 mapWorldPosToImagePos(float2 const& rectUpperLeft, float2 const& pos, float2 const& universeImageSize, float zoom)
     {
         auto result = float2{(pos.x - rectUpperLeft.x) * zoom, (pos.y - rectUpperLeft.y) * zoom};
-        if (cudaSimulationParameters.borderlessRendering) {
+        if (cudaSimulationParameters.borderlessRendering.value) {
             result.x = Math::modulo(result.x, universeImageSize.x);
             result.y = Math::modulo(result.y, universeImageSize.y);
         }
@@ -123,7 +123,7 @@ namespace
             }
             }
         }
-        if (cellColoring == CellColoring_MutationId || (cellColoring == CellColoring_MutationId_AllCellTypes && primary)) {
+        if (cellColoring == CellColoring_MutationId || (cellColoring == CellColoring_MutationId_EveryCellType && primary)) {
             auto colorNumber = cell->mutationId == 0 ? 30 : (cell->mutationId == 1 ? 18 : cell->mutationId + 17);   //6 for zero mutant color
             auto h = abs(toInt((colorNumber * 12107) % 360));
             auto s = 0.6f + toFloat(abs(toInt(colorNumber * 13111)) % 400) / 1000;
@@ -161,8 +161,8 @@ namespace
             cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
         }
 
-        if (cellColoring == CellColoring_CellType) {
-            if (cell->cellType == cudaSimulationParameters.highlightedCellType) {
+        if (cellColoring == CellColoring_SpecificCellType) {
+            if (cell->cellType == cudaSimulationParameters.highlightedCellType.value) {
                 auto h = (toFloat(cell->cellType) / toFloat(CellType_Count - 1)) * 360.0f;
                 auto rgb = convertHSVtoRGB(toFloat(h), 0.7f, 1.0f);
                 cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
@@ -172,7 +172,7 @@ namespace
             }
         }
 
-        if (cellColoring == CellColoring_AllCellTypes || (cellColoring == CellColoring_MutationId_AllCellTypes && !primary)) {
+        if (cellColoring == CellColoring_EveryCellType || (cellColoring == CellColoring_MutationId_EveryCellType && !primary)) {
             auto h = (toFloat(cell->cellType) / toFloat(CellType_Count - 1)) * 360.0f;
             auto rgb = convertHSVtoRGB(toFloat(h), 0.7f, 1.0f);
             cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
@@ -400,7 +400,7 @@ __global__ void cudaFilterParticlesForRendering(
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& particle = particles.at(index);
-        auto imagePos = mapWorldPosToImagePos(rectUpperLeft, particle->absPos, universeImageSize, zoom);
+        auto imagePos = mapWorldPosToImagePos(rectUpperLeft, particle->pos, universeImageSize, zoom);
         if (isContainedInRect({0, 0}, toFloat2(imageSize), imagePos)) {
             auto cellPtr = filteredParticles.getNewElement();
             *cellPtr = particle;
@@ -425,14 +425,14 @@ __global__ void cudaDrawCells(
 
     auto shadedCells = zoom >= ZoomLevelForShadedCells;
     auto universeImageSize = toFloat2(worldSize) * zoom;
-    auto coloring = cudaSimulationParameters.cellColoring;
+    auto coloring = cudaSimulationParameters.primaryCellColoring.value;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = cells.at(index);
 
         auto cellPos = cell->pos;
         auto cellImagePos = mapWorldPosToImagePos(rectUpperLeft, cellPos, universeImageSize, zoom);
 
-        auto cellRadius = zoom * cudaSimulationParameters.cellRadius;
+        auto cellRadius = zoom * cudaSimulationParameters.cellRadius.value;
 
         // draw primary color for cell
         auto primaryColor = calcColor(cell, cell->selected, coloring, true) * 0.85f;
@@ -440,7 +440,7 @@ __global__ void cudaDrawCells(
 
         // draw secondary color for cell
         auto secondaryColor =
-            coloring == CellColoring_MutationId_AllCellTypes ? calcColor(cell, cell->selected, coloring, false) * 0.5f : primaryColor * 0.6f;
+            coloring == CellColoring_MutationId_EveryCellType ? calcColor(cell, cell->selected, coloring, false) * 0.5f : primaryColor * 0.6f;
         drawCircle(imageData, imageSize, cellImagePos, secondaryColor, cellRadius, shadedCells, true);
 
         // draw signal restrictions
@@ -467,7 +467,7 @@ __global__ void cudaDrawCells(
         }
 
         // draw signal activity
-        if (zoom >= cudaSimulationParameters.zoomLevelNeuronalActivity) {
+        if (zoom >= cudaSimulationParameters.zoomLevelForNeuronVisualization.value) {
             if (cell->signalRelaxationTime == 2) {
                 drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, cellRadius, shadedCells);
             }
@@ -478,10 +478,10 @@ __global__ void cudaDrawCells(
 
         // draw events
         if (cell->eventCounter > 0) {
-            if (cudaSimulationParameters.attackVisualization && cell->event == CellEvent_Attacking) {
+            if (cudaSimulationParameters.attackVisualization.value && cell->event == CellEvent_Attacking) {
                 drawDisc(imageData, imageSize, cellImagePos, {0.0f, 0.5f, 0.0f}, cellRadius * 1.4f, cellRadius * 2.0f);
             }
-            if (cudaSimulationParameters.attackVisualization && cell->event == CellEvent_Attacked) {
+            if (cudaSimulationParameters.attackVisualization.value && cell->event == CellEvent_Attacked) {
                 float3 color{0.5f, 0.0f, 0.0f};
                 drawDisc(imageData, imageSize, cellImagePos, color, cellRadius * 1.4f, cellRadius * 2.0f);
 
@@ -493,7 +493,7 @@ __global__ void cudaDrawCells(
         }
 
         // draw muscle movements
-        if (cudaSimulationParameters.muscleMovementVisualization && cell->cellType == CellType_Muscle
+        if (cudaSimulationParameters.muscleMovementVisualization.value && cell->cellType == CellType_Muscle
             && (cell->cellTypeData.muscle.lastMovementX != 0 || cell->cellTypeData.muscle.lastMovementY != 0)) {
             float2 lastMovement{cell->cellTypeData.muscle.lastMovementX, cell->cellTypeData.muscle.lastMovementY};
             auto lastMovementLength = Math::length(lastMovement);
@@ -527,7 +527,7 @@ __global__ void cudaDrawCells(
             if (detonator.state == DetonatorState_Activated && detonator.countdown < 2) {
                 auto radius = toFloat(6 - detonator.countdown * 6);
                 radius *= radius;
-                radius *= cudaSimulationParameters.cellTypeDetonatorRadius[cell->color] * zoom / 36;
+                radius *= cudaSimulationParameters.detonatorRadius.value[cell->color] * zoom / 36;
                 drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.0f}, radius, shadedCells);
             }
         }
@@ -541,7 +541,7 @@ __global__ void cudaDrawCells(
                 auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
                 otherCellPos += topologyCorrection;
 
-                auto distFromCellCenter = Math::normalized(otherCellPos - cellPos) * cudaSimulationParameters.cellRadius * 6 / 5 * 11 / 10;
+                auto distFromCellCenter = Math::normalized(otherCellPos - cellPos) * cudaSimulationParameters.cellRadius.value * 6 / 5 * 11 / 10;
                 auto const startImagePos = mapWorldPosToImagePos(rectUpperLeft, cellPos + distFromCellCenter, universeImageSize, zoom);
                 auto const endImagePos = mapWorldPosToImagePos(rectUpperLeft, otherCellPos - distFromCellCenter, universeImageSize, zoom);
                 if (isLineVisible(startImagePos, endImagePos, universeImageSize)) {
@@ -568,7 +568,7 @@ __global__ void cudaDrawCells(
                     auto otherCellPos = otherCell->pos;
                     auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
                     otherCellPos += topologyCorrection;
-                    auto distFromCellCenter = Math::normalized(otherCellPos - cellPos) * cudaSimulationParameters.cellRadius * 6 / 5 * 11 / 10;
+                    auto distFromCellCenter = Math::normalized(otherCellPos - cellPos) * cudaSimulationParameters.cellRadius.value * 6 / 5 * 11 / 10;
                     auto const startImagePos = mapWorldPosToImagePos(rectUpperLeft, cellPos + distFromCellCenter, universeImageSize, zoom);
                     auto const endImagePos = mapWorldPosToImagePos(rectUpperLeft, otherCellPos - distFromCellCenter, universeImageSize, zoom);
                     auto direction = Math::normalized(endImagePos - startImagePos);
@@ -608,7 +608,7 @@ __global__ void cudaDrawCellGlow(int2 worldSize, float2 rectUpperLeft, Array<Cel
     __syncthreads();
 
     auto universeImageSize = toFloat2(worldSize) * zoom;
-    auto coloring = cudaSimulationParameters.cellGlowColoring;
+    auto coloring = cudaSimulationParameters.cellGlowColoring.value;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = cells.at(index);
 
@@ -627,7 +627,7 @@ __global__ void cudaDrawCellGlow(int2 worldSize, float2 rectUpperLeft, Array<Cel
             __syncthreads();
 
             drawCircle_block(
-                imageData, imageSize, cellImagePos, color * cudaSimulationParameters.cellGlowStrength * 0.1f, zoom * cudaSimulationParameters.cellGlowRadius);
+                imageData, imageSize, cellImagePos, color * cudaSimulationParameters.cellGlowStrength.value[cell->color] * 0.1f, zoom * cudaSimulationParameters.cellGlowRadius.value);
         }
     }
 }
@@ -642,7 +642,7 @@ __global__ void cudaDrawParticles(int2 worldSize, float2 rectUpperLeft, float2 r
     auto universeImageSize = toFloat2(worldSize) * zoom;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& particle = particles.at(index);
-        auto particlePos = particle->absPos;
+        auto particlePos = particle->pos;
         map.correctPosition(particlePos);
 
         auto const particleImagePos = mapWorldPosToImagePos(rectUpperLeft, particlePos, universeImageSize, zoom);
@@ -655,8 +655,11 @@ __global__ void cudaDrawParticles(int2 worldSize, float2 rectUpperLeft, float2 r
 __global__ void cudaDrawRadiationSources(uint64_t* targetImage, float2 rectUpperLeft, int2 worldSize, int2 imageSize, float zoom)
 {
     auto universeImageSize = toFloat2(worldSize) * zoom;
-    for (int i = 0; i < cudaSimulationParameters.numRadiationSources; ++i) {
-        float2 sourcePos{cudaSimulationParameters.radiationSource[i].posX, cudaSimulationParameters.radiationSource[i].posY};
+    for (int i = 0; i < cudaSimulationParameters.numSources; ++i) {
+        if (!cudaSimulationParameters.sourceShowRadiationCenter.sourceValues[i]) {
+            continue;
+        }
+        float2 sourcePos{cudaSimulationParameters.sourcePosition.sourceValues[i].x, cudaSimulationParameters.sourcePosition.sourceValues[i].y};
         auto imagePos = mapWorldPosToImagePos(rectUpperLeft, sourcePos, universeImageSize, zoom);
         if (isContainedInRect({0, 0}, toFloat2(imageSize), imagePos)) {
             for (int dx = -5; dx <= 5; ++dx) {
@@ -711,13 +714,7 @@ __global__ void cudaDrawSpotsAndGridlines(uint64_t* imageData, int2 imageSize, i
         imageSize.x - max(toInt((rectLowerRight.x - toFloat(worldSize.x)) * zoom), 0),
         imageSize.y - max(toInt((rectLowerRight.y - toFloat(worldSize.y)) * zoom), 0)};
 
-    auto baseColor = colorToFloat3(cudaSimulationParameters.backgroundColor);
-    float3 spotColors[MAX_ZONES];
-    for (int i = 0; i < cudaSimulationParameters.numZones; ++i) {
-        spotColors[i] = colorToFloat3(cudaSimulationParameters.zone[i].color);
-    }
-
-    auto const partition = calcAllThreadsPartition(imageSize.x * imageSize.y * sizeof(unsigned int));
+    auto const partition = calcAllThreadsPartition(imageSize.x * imageSize.y);
     auto const viewWidth = max(1.0f, rectLowerRight.x - rectUpperLeft.x);
     auto const PixelInWorldSize = viewWidth / toFloat(worldSize.x);
     auto const gridDistance = powf(10.0f, truncf(log10f(viewWidth))) / 10.0f;
@@ -728,15 +725,15 @@ __global__ void cudaDrawSpotsAndGridlines(uint64_t* imageData, int2 imageSize, i
         auto y = index / imageSize.x;
         float2 worldPos = {toFloat(x) / zoom + rectUpperLeft.x, toFloat(y) / zoom + rectUpperLeft.y};
 
-        if (!cudaSimulationParameters.borderlessRendering
+        if (!cudaSimulationParameters.borderlessRendering.value
             && (x < outsideRectUpperLeft.x || y < outsideRectUpperLeft.y || x >= outsideRectLowerRight.x || y >= outsideRectLowerRight.y)) {
             imageData[index] = 0;
         } else {
-            auto color = SpotCalculator::calcResultingValue(map, worldPos, baseColor, spotColors);
+            auto color = floatColorRGBToFloat3(ParameterCalculator::calcParameter(cudaSimulationParameters.backgroundColor, map, worldPos));
             drawPixel(imageData, index, color);
         }
 
-        if (cudaSimulationParameters.gridLines) {
+        if (cudaSimulationParameters.gridLines.value) {
             {
                 auto distanceX = Math::modulo(worldPos.x + gridDistance / 2, gridDistance) - gridDistance / 2;
                 auto distanceY = Math::modulo(worldPos.y + gridDistance / 2, gridDistance) - gridDistance / 2;

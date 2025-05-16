@@ -10,10 +10,8 @@
 #include "EngineConstants.h"
 #include "CellTypeConstants.h"
 
-struct MakeGenomeCopy
-{
-    auto operator<=>(MakeGenomeCopy const&) const = default;
-};
+struct MakeGenomeCopy;
+struct BaseGenomeDescription;
 
 struct NeuralNetworkGenomeDescription
 {
@@ -44,9 +42,9 @@ struct NeuralNetworkGenomeDescription
     // auto getWeights() const { return std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
     // auto getWeights() { return std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
 
-    std::vector<float> _weights;
-    std::vector<float> _biases;
-    std::vector<ActivationFunction> _activationFunctions;
+    MEMBER(NeuralNetworkGenomeDescription, std::vector<float>, weights, {});
+    MEMBER(NeuralNetworkGenomeDescription, std::vector<float>, biases, {});
+    MEMBER(NeuralNetworkGenomeDescription, std::vector<ActivationFunction>, activationFunctions, {});
 };
 
 struct BaseGenomeDescription
@@ -58,13 +56,206 @@ struct DepotGenomeDescription
 {
     auto operator<=>(DepotGenomeDescription const&) const = default;
 
-    DepotGenomeDescription& mode(EnergyDistributionMode value)
-    {
-        _mode = value;
-        return *this;
-    }
+    MEMBER(DepotGenomeDescription, EnergyDistributionMode, mode, EnergyDistributionMode_TransmittersAndConstructors);
+};
 
-    EnergyDistributionMode _mode = EnergyDistributionMode_TransmittersAndConstructors;
+struct ConstructorGenomeDescription_New
+{
+    auto operator<=>(ConstructorGenomeDescription_New const&) const = default;
+
+    MEMBER(ConstructorGenomeDescription_New, int, autoTriggerInterval, 100);    // 0 = manual (triggered by signal), > 0 = auto trigger
+    MEMBER(ConstructorGenomeDescription_New, int, constructionActivationTime, 100);
+    MEMBER(ConstructorGenomeDescription_New, float, constructionAngle1, 0.0f);
+    MEMBER(ConstructorGenomeDescription_New, float, constructionAngle2, 0.0f);
+};
+
+struct SensorGenomeDescription
+{
+    auto operator<=>(SensorGenomeDescription const&) const = default;
+
+    MEMBER(SensorGenomeDescription, int, autoTriggerInterval, 10);  // 0 = manual (triggered by signal), > 0 = auto trigger
+    MEMBER(SensorGenomeDescription, float, minDensity, 0.05f);
+    MEMBER(SensorGenomeDescription, std::optional<int>, minRange, std::nullopt);
+    MEMBER(SensorGenomeDescription, std::optional<int>, maxRange, std::nullopt);
+    MEMBER(SensorGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(SensorGenomeDescription, SensorRestrictToMutants, restrictToMutants, SensorRestrictToMutants_NoRestriction);
+};
+
+struct OscillatorGenomeDescription
+{
+    auto operator<=>(OscillatorGenomeDescription const&) const = default;
+
+    MEMBER(OscillatorGenomeDescription, int, autoTriggerInterval, 100);  // 0 = no triggering, > 0 = auto trigger
+    MEMBER(OscillatorGenomeDescription, int, alternationInterval, 0);  // 0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
+};
+
+struct AttackerGenomeDescription
+{
+    auto operator<=>(AttackerGenomeDescription const&) const = default;
+};
+
+struct InjectorGenomeDescription_New
+{
+    auto operator<=>(InjectorGenomeDescription_New const&) const = default;
+
+    MEMBER(InjectorGenomeDescription_New, InjectorMode, mode, InjectorMode_InjectAll); // 0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
+};
+
+
+struct AutoBendingGenomeDescription
+{
+    auto operator<=>(AutoBendingGenomeDescription const&) const = default;
+
+    MEMBER(AutoBendingGenomeDescription, float, maxAngleDeviation, 0.2f);  // Between 0 and 1
+    MEMBER(AutoBendingGenomeDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
+};
+
+struct ManualBendingGenomeDescription
+{
+    auto operator<=>(ManualBendingGenomeDescription const&) const = default;
+
+    MEMBER(ManualBendingGenomeDescription, float, maxAngleDeviation, 0.2f);  // Between 0 and 1
+    MEMBER(ManualBendingGenomeDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
+};
+
+struct AngleBendingGenomeDescription
+{
+    auto operator<=>(AngleBendingGenomeDescription const&) const = default;
+
+    MEMBER(AngleBendingGenomeDescription, float, maxAngleDeviation, 0.2f);  // Between 0 and 1
+    MEMBER(AngleBendingGenomeDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
+};
+
+struct AutoCrawlingGenomeDescription
+{
+    auto operator<=>(AutoCrawlingGenomeDescription const&) const = default;
+
+    MEMBER(AutoCrawlingGenomeDescription, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
+    MEMBER(AutoCrawlingGenomeDescription, float, frontBackVelRatio, 0.2f);     // Between 0 and 1
+};
+
+struct ManualCrawlingGenomeDescription
+{
+    auto operator<=>(ManualCrawlingGenomeDescription const&) const = default;
+
+    MEMBER(ManualCrawlingGenomeDescription, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
+    MEMBER(ManualCrawlingGenomeDescription, float, frontBackVelRatio, 0.2f);     // Between 0 and 1
+};
+
+struct DirectMovementGenomeDescription
+{
+    auto operator<=>(DirectMovementGenomeDescription const&) const = default;
+};
+
+using MuscleModeGenomeDescription = std::variant<
+    AutoBendingGenomeDescription,
+    ManualBendingGenomeDescription,
+    AngleBendingGenomeDescription,
+    AutoCrawlingGenomeDescription,
+    ManualCrawlingGenomeDescription,
+    DirectMovementGenomeDescription>;
+
+struct MuscleGenomeDescription
+{
+    auto operator<=>(MuscleGenomeDescription const&) const = default;
+
+    MEMBER(MuscleGenomeDescription, MuscleModeGenomeDescription, mode, MuscleModeGenomeDescription());
+
+    MuscleMode getMode() const;
+};
+
+struct DefenderGenomeDescription
+{
+    auto operator<=>(DefenderGenomeDescription const&) const = default;
+
+    MEMBER(DefenderGenomeDescription, DefenderMode, mode, DefenderMode_DefendAgainstAttacker);
+};
+
+struct ReconnectorGenomeDescription
+{
+    auto operator<=>(ReconnectorGenomeDescription const&) const = default;
+
+    MEMBER(ReconnectorGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(ReconnectorGenomeDescription, ReconnectorRestrictToMutants, restrictToMutants, ReconnectorRestrictToMutants_NoRestriction);
+};
+
+struct DetonatorGenomeDescription
+{
+    auto operator<=>(DetonatorGenomeDescription const&) const = default;
+
+    MEMBER(DetonatorGenomeDescription, int, countdown, 10);
+};
+
+using CellTypeGenomeDescription_New = std::variant<
+    BaseGenomeDescription,
+    DepotGenomeDescription,
+    ConstructorGenomeDescription_New,
+    SensorGenomeDescription,
+    OscillatorGenomeDescription,
+    AttackerGenomeDescription,
+    InjectorGenomeDescription_New,
+    MuscleGenomeDescription,
+    DefenderGenomeDescription,
+    ReconnectorGenomeDescription,
+    DetonatorGenomeDescription>;
+
+struct SignalRoutingRestrictionGenomeDescription
+{
+    auto operator<=>(SignalRoutingRestrictionGenomeDescription const&) const = default;
+
+    MEMBER(SignalRoutingRestrictionGenomeDescription, bool, active, false);
+    MEMBER(SignalRoutingRestrictionGenomeDescription, float, baseAngle, 0.0f);
+    MEMBER(SignalRoutingRestrictionGenomeDescription, float, openingAngle, 0.0f);
+};
+
+struct NodeDescription
+{
+    auto operator<=>(NodeDescription const&) const = default;
+
+    MEMBER(NodeDescription, float, referenceAngle, 0.0f);
+    MEMBER(NodeDescription, int, color, 0);
+    MEMBER(NodeDescription, int, numRequiredAdditionalConnections, 0);
+
+    MEMBER(NodeDescription, NeuralNetworkGenomeDescription, neuralNetwork, NeuralNetworkGenomeDescription());
+    MEMBER(NodeDescription, CellTypeGenomeDescription_New, cellTypeData, BaseGenomeDescription());
+    MEMBER(NodeDescription, SignalRoutingRestrictionGenomeDescription, signalRoutingRestriction, SignalRoutingRestrictionGenomeDescription());
+
+    CellTypeGenome getCellType() const;
+};
+
+struct GeneDescription
+{
+    auto operator<=>(GeneDescription const&) const = default;
+
+    MEMBER(GeneDescription, std::vector<NodeDescription>, nodes, {});
+    MEMBER(GeneDescription, ConstructionShape, shape, ConstructionShape_Custom);
+    MEMBER(GeneDescription, int, numBranches, 1);   // Between 1 and 6 in modulo
+    MEMBER(GeneDescription, bool, separateConstruction, true);
+    MEMBER(GeneDescription, ConstructorAngleAlignment, angleAlignment, ConstructorAngleAlignment_60);
+    MEMBER(GeneDescription, float, stiffness, 1.0f);
+    MEMBER(GeneDescription, float, connectionDistance, 1.0f);
+    MEMBER(GeneDescription, int, numRepetitions, 1);
+    MEMBER(GeneDescription, float, concatenationAngle1, 0.0f);
+    MEMBER(GeneDescription, float, concatenationAngle2, 0.0f);
+};
+
+struct GenomeDescription_New
+{
+    auto operator<=>(GenomeDescription_New const&) const = default;
+
+    MEMBER(GenomeDescription_New, uint64_t, id, 0);
+    MEMBER(GenomeDescription_New, std::vector<GeneDescription>, genes, {})
+    MEMBER(GenomeDescription_New, float, frontAngle, 0.0f);
+};
+
+
+//*******************************************
+//* OLD MODEL
+//*******************************************
+
+struct MakeGenomeCopy
+{
+    auto operator<=>(MakeGenomeCopy const&) const = default;
 };
 
 struct ConstructorGenomeDescription
@@ -102,59 +293,6 @@ struct ConstructorGenomeDescription
     float _constructionAngle2 = 0;
 };
 
-struct SensorGenomeDescription
-{
-    auto operator<=>(SensorGenomeDescription const&) const = default;
-
-    SensorGenomeDescription& minDensity(float const& value)
-    {
-        _minDensity = value;
-        return *this;
-    }
-
-    SensorGenomeDescription& color(int value)
-    {
-        _restrictToColor = value;
-        return *this;
-    }
-    SensorGenomeDescription& restrictToMutants(SensorRestrictToMutants value)
-    {
-        _restrictToMutants = value;
-        return *this;
-    }
-
-    int _autoTriggerInterval = 10;  // 0 = manual (triggered by signal), > 0 = auto trigger
-    float _minDensity = 0.05f;
-    std::optional<int> _minRange;
-    std::optional<int> _maxRange;
-    std::optional<int> _restrictToColor;
-    SensorRestrictToMutants _restrictToMutants = SensorRestrictToMutants_NoRestriction;
-};
-
-struct OscillatorGenomeDescription
-{
-    auto operator<=>(OscillatorGenomeDescription const&) const = default;
-
-    OscillatorGenomeDescription& autoTriggerInterval(int value)
-    {
-        _autoTriggerInterval = value;
-        return *this;
-    }
-    OscillatorGenomeDescription& alternationInterval(int value)
-    {
-        _alternationInterval = value;
-        return *this;
-    }
-
-    int _autoTriggerInterval = 100;  // 0 = no triggering, > 0 = auto trigger
-    int _alternationInterval = 0;  // 0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
-};
-
-struct AttackerGenomeDescription
-{
-    auto operator<=>(AttackerGenomeDescription const&) const = default;
-};
-
 struct InjectorGenomeDescription
 {
     auto operator<=>(InjectorGenomeDescription const&) const = default;
@@ -182,134 +320,6 @@ struct InjectorGenomeDescription
     std::variant<MakeGenomeCopy, std::vector<uint8_t>> _genome = std::vector<uint8_t>();
 };
 
-struct AutoBendingGenomeDescription
-{
-    auto operator<=>(AutoBendingGenomeDescription const&) const = default;
-
-    MEMBER(AutoBendingGenomeDescription, float, maxAngleDeviation, 0.2f);    // Between 0 and 1
-    MEMBER(AutoBendingGenomeDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
-};
-
-struct ManualBendingGenomeDescription
-{
-    auto operator<=>(ManualBendingGenomeDescription const&) const = default;
-
-    MEMBER(ManualBendingGenomeDescription, float, maxAngleDeviation, 0.2f);  // Between 0 and 1
-    MEMBER(ManualBendingGenomeDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
-};
-
-struct AngleBendingGenomeDescription
-{
-    auto operator<=>(AngleBendingGenomeDescription const&) const = default;
-
-    MEMBER(AngleBendingGenomeDescription, float, maxAngleDeviation, 0.2f);  // Between 0 and 1
-    MEMBER(AngleBendingGenomeDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
-};
-
-struct AutoCrawlingGenomeDescription
-{
-    auto operator<=>(AutoCrawlingGenomeDescription const&) const = default;
-
-    MEMBER(AutoCrawlingGenomeDescription, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
-    MEMBER(AutoCrawlingGenomeDescription, float, frontBackVelRatio, 0.2f);      // Between 0 and 1
-};
-
-struct ManualCrawlingGenomeDescription
-{
-    auto operator<=>(ManualCrawlingGenomeDescription const&) const = default;
-
-    MEMBER(ManualCrawlingGenomeDescription, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
-    MEMBER(ManualCrawlingGenomeDescription, float, frontBackVelRatio, 0.2f);     // Between 0 and 1
-};
-
-struct DirectMovementGenomeDescription
-{
-    auto operator<=>(DirectMovementGenomeDescription const&) const = default;
-};
-
-using MuscleModeGenomeDescription = std::variant<
-    AutoBendingGenomeDescription,
-    ManualBendingGenomeDescription,
-    AngleBendingGenomeDescription,
-    AutoCrawlingGenomeDescription,
-    ManualCrawlingGenomeDescription,
-    DirectMovementGenomeDescription>;
-
-struct MuscleGenomeDescription
-{
-    auto operator<=>(MuscleGenomeDescription const&) const = default;
-
-    MuscleMode getMode() const
-    {
-        if (std::holds_alternative<AutoBendingGenomeDescription>(_mode)) {
-            return MuscleMode_AutoBending;
-        } else if (std::holds_alternative<ManualBendingGenomeDescription>(_mode)) {
-            return MuscleMode_ManualBending;
-        } else if (std::holds_alternative<AngleBendingGenomeDescription>(_mode)) {
-            return MuscleMode_AngleBending;
-        } else if (std::holds_alternative<AutoCrawlingGenomeDescription>(_mode)) {
-            return MuscleMode_AutoCrawling;
-        } else if (std::holds_alternative<ManualCrawlingGenomeDescription>(_mode)) {
-            return MuscleMode_ManualCrawling;
-        } else if (std::holds_alternative<DirectMovementGenomeDescription>(_mode)) {
-            return MuscleMode_DirectMovement;
-        }
-        THROW_NOT_IMPLEMENTED();
-    }
-    MuscleGenomeDescription& mode(MuscleModeGenomeDescription const& value)
-    {
-        _mode = value;
-        return *this;
-    }
-
-    MuscleModeGenomeDescription _mode;
-};
-
-struct DefenderGenomeDescription
-{
-    auto operator<=>(DefenderGenomeDescription const&) const = default;
-
-    DefenderGenomeDescription& mode(DefenderMode value)
-    {
-        _mode = value;
-        return *this;
-    }
-
-    DefenderMode _mode = DefenderMode_DefendAgainstAttacker;
-};
-
-struct ReconnectorGenomeDescription
-{
-    auto operator<=>(ReconnectorGenomeDescription const&) const = default;
-
-    ReconnectorGenomeDescription& restrictToColor(int value)
-    {
-        _restrictToColor = value;
-        return *this;
-    }
-    ReconnectorGenomeDescription& restrictToMutants(ReconnectorRestrictToMutants value)
-    {
-        _restrictToMutants = value;
-        return *this;
-    }
-
-    std::optional<int> _restrictToColor;
-    ReconnectorRestrictToMutants _restrictToMutants = ReconnectorRestrictToMutants_NoRestriction;
-};
-
-struct DetonatorGenomeDescription
-{
-    auto operator<=>(DetonatorGenomeDescription const&) const = default;
-
-    DetonatorGenomeDescription& countDown(int value)
-    {
-        _countdown = value;
-        return *this;
-    }
-
-    int _countdown = 10;
-};
-
 using CellTypeGenomeDescription = std::variant<
     BaseGenomeDescription,
     DepotGenomeDescription,
@@ -322,15 +332,6 @@ using CellTypeGenomeDescription = std::variant<
     DefenderGenomeDescription,
     ReconnectorGenomeDescription,
     DetonatorGenomeDescription>;
-
-struct SignalRoutingRestrictionGenomeDescription
-{
-    auto operator<=>(SignalRoutingRestrictionGenomeDescription const&) const = default;
-
-    bool _active = false;
-    float _baseAngle = 0;
-    float _openingAngle = 0;
-};
 
 struct CellGenomeDescription
 {
@@ -566,27 +567,4 @@ struct GenomeDescription
 
     GenomeHeaderDescription _header;
     std::vector<CellGenomeDescription> _cells;
-};
-
-
-struct NodeDescription
-{
-    auto operator<=>(NodeDescription const&) const = default;
-
-    MEMBER(NodeDescription, CellType, cellType, CellType_Base);
-};
-
-struct GeneDescription
-{
-    auto operator<=>(GeneDescription const&) const = default;
-
-    MEMBER(GeneDescription, std::vector<NodeDescription>, nodes, {})
-};
-
-struct GenomeDescription_New
-{
-    auto operator<=>(GenomeDescription_New const&) const = default;
-
-    MEMBER(GenomeDescription_New, uint64_t, id, 0);
-    MEMBER(GenomeDescription_New, std::vector<GeneDescription>, genes, {})
 };

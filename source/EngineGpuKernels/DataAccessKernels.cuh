@@ -15,19 +15,22 @@
 #include "SimulationData.cuh"
 
 //tags cell with cellTO index and tags cellTO connections with cell index
-__global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, DataTO dataTO);
-__global__ void cudaGetSelectedParticleData(SimulationData data, DataTO access);
-__global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds ids, SimulationData data, DataTO dataTO);
-__global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationData data, DataTO access);
-__global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataTO dataTO);
-__global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataTO dataTO);
-__global__ void cudaResolveConnections(SimulationData data, DataTO dataTO);
-__global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataTO access);
-__global__ void cudaGetArraysBasedOnTO(SimulationData data, DataTO dataTO, Cell** cellArray);
-__global__ void cudaCreateDataFromTO(SimulationData data, DataTO dataTO, Cell** cellArray, bool selectNewData, bool createIds);
-__global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataTO dataTO);
-__global__ void cudaClearDataTO(DataTO dataTO);
+__global__ void cudaPrepareGenomesForConversionToTO(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data);
+__global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, CollectionTO collectionTO);
+__global__ void cudaGetSelectedParticleData(SimulationData data, CollectionTO access);
+__global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds ids, SimulationData data, CollectionTO collectionTO);
+__global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationData data, CollectionTO access);
+__global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, CollectionTO collectionTO);
+__global__ void cudaGetGenomeData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, CollectionTO collectionTO);
+__global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, CollectionTO collectionTO);
+__global__ void cudaResolveConnections(SimulationData data, CollectionTO collectionTO);
+__global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, CollectionTO access);
+__global__ void cudaGetArraysBasedOnTO(SimulationData data, CollectionTO collectionTO, Cell** cellArray);
+__global__ void cudaSetGenomeDataFromTO(SimulationData data, CollectionTO collectionTO, bool createIds);
+__global__ void cudaSetDataFromTO(SimulationData data, CollectionTO collectionTO, Cell** cellArray, bool selectNewData, bool createIds);
+__global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, CollectionTO collectionTO);
+__global__ void cudaClearDataTO(CollectionTO collectionTO);
 __global__ void cudaSaveNumEntries(SimulationData data);
 __global__ void cudaClearData(SimulationData data);
 __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesForTO* arraySizes);
-__global__ void cudaEstimateCapacityNeededForGpu(DataTO dataTO, ArraySizesForGpu* arraySizes);
+__global__ void cudaEstimateCapacityNeededForGpu(CollectionTO collectionTO, ArraySizesForGpu* arraySizes);

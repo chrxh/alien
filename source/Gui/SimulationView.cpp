@@ -175,7 +175,7 @@ void SimulationView::draw()
         glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        if (_simulationFacade->getSimulationParameters().markReferenceDomain) {
+        if (_simulationFacade->getSimulationParameters().markReferenceDomain.value) {
             markReferenceDomain();
         }
 
@@ -307,7 +307,7 @@ void SimulationView::updateImageFromSimulation()
             if (_cellDetailOverlayActive && overlayElement.cell) {
                 {
                     auto fontSizeUnit = std::min(40.0f, Viewport::get().getZoomFactor()) / 2;
-                    auto viewPos = Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.3f}, parameters.borderlessRendering);
+                    auto viewPos = Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.3f}, parameters.borderlessRendering.value);
                     auto text = Const::CellTypeToStringMap.at(overlayElement.cellType);
                     drawList->AddText(
                         StyleRepository::get().getMediumFont(),
@@ -325,7 +325,7 @@ void SimulationView::updateImageFromSimulation()
             }
 
             if (overlayElement.selected == 1) {
-                auto viewPos = Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y}, parameters.borderlessRendering);
+                auto viewPos = Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y}, parameters.borderlessRendering.value);
                 if (Viewport::get().isVisible(viewPos)) {
                     drawList->AddCircle({viewPos.x, viewPos.y}, Viewport::get().getZoomFactor() * 0.45f, Const::SelectedCellOverlayColor, 0, 2.0f);
                 }

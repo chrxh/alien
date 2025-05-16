@@ -37,6 +37,7 @@ void SpecificationGuiService::createWidgetsForParameters(
         auto isGroupVisibleActive = true;
         auto name = groupSpec._name;
         if (isExpertSettings) {
+            ImGui::PushID("expert settings");
             isGroupVisibleActive = *evaluationService.getExpertToggleRef(groupSpec._expertToggle, parameters);
             name = "Expert settings: " + name;
         }

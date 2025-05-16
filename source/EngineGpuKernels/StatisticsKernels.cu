@@ -10,7 +10,7 @@ __global__ void cudaUpdateTimestepStatistics_substep1(SimulationData data, Simul
 __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, SimulationStatistics statistics)
 {
     {
-        auto& cells = data.objects.cellPointers;
+        auto& cells = data.objects.cells;
         auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -33,7 +33,7 @@ __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, Simul
         }
     }
     {
-        auto& particles = data.objects.particlePointers;
+        auto& particles = data.objects.particles;
         auto const partition = calcAllThreadsPartition(particles.getNumEntries());
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -52,7 +52,7 @@ __global__ void cudaUpdateTimestepStatistics_substep3(SimulationData data, Simul
     statistics.calcStatisticsForColonies();
 
     {
-        auto& cells = data.objects.cellPointers;
+        auto& cells = data.objects.cells;
         auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
         auto numReplicators = toDouble(statistics.getNumReplicators());
@@ -76,7 +76,7 @@ __global__ void cudaUpdateHistogramData_substep1(SimulationData data, Simulation
 
 __global__ void cudaUpdateHistogramData_substep2(SimulationData data, SimulationStatistics statistics)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -90,7 +90,7 @@ __global__ void cudaUpdateHistogramData_substep2(SimulationData data, Simulation
 
 __global__ void cudaUpdateHistogramData_substep3(SimulationData data, SimulationStatistics statistics)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     auto maxAge = statistics.getMaxValue();

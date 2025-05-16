@@ -23,7 +23,6 @@
 #include "EngineInterface/StatisticsHistory.h"
 
 #include "Definitions.cuh"
-#include "DataTOProvider.cuh"
 
 struct cudaGraphicsResource;
 
@@ -46,19 +45,19 @@ public:
     void applyCataclysm(int power);
 
     void drawVectorGraphics(float2 const& rectUpperLeft, float2 const& rectLowerRight, void* cudaResource, int2 const& imageSize, double zoom);
-    DataTO getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);  // DataTO is unmanaged (i.e. must be deleted by the caller)
-    DataTO getSelectedSimulationData(bool includeClusters);
-    DataTO getInspectedSimulationData(std::vector<uint64_t> entityIds);
-    DataTO getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight);
-    void addAndSelectSimulationData(DataTO const& dataTO);
-    void setSimulationData(DataTO const& dataTO);
+    CollectionTO getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);  // DataTO is unmanaged (i.e. must be deleted by the caller)
+    CollectionTO getSelectedSimulationData(bool includeClusters);
+    CollectionTO getInspectedSimulationData(std::vector<uint64_t> entityIds);
+    CollectionTO getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight);
+    void addAndSelectSimulationData(CollectionTO const& dataTO);
+    void setSimulationData(CollectionTO const& dataTO);
     void removeSelectedObjects(bool includeClusters);
     void relaxSelectedObjects(bool includeClusters);
     void uniformVelocitiesForSelectedObjects(bool includeClusters);
     void makeSticky(bool includeClusters);
     void removeStickiness(bool includeClusters);
     void setBarrier(bool value, bool includeClusters);
-    void changeInspectedSimulationData(DataTO const& changeDataTO);
+    void changeInspectedSimulationData(CollectionTO const& changeDataTO);
 
     void applyForce(ApplyForceData const& applyData);
     void switchSelection(PointSelectionData const& switchData);
@@ -106,13 +105,13 @@ private:
     void initCuda();
 
     void syncAndCheck();
-    void copyDataTOtoGpu(DataTO const& cudaDataTO, DataTO const& dataTO);
-    void copyDataTOtoHost(DataTO const& dataTO, DataTO const& cudaDataTO);
+    void copyDataTOtoGpu(CollectionTO const& cudaDataTO, CollectionTO const& dataTO);
+    void copyDataTOtoHost(CollectionTO const& dataTO, CollectionTO const& cudaDataTO);
     void automaticResizeArrays();
     void resizeArrays(ArraySizesForGpu const& sizeDelta = ArraySizesForGpu());
     void checkAndProcessSimulationParameterChanges();
 
-    SimulationData getSimulationDataIntern() const;
+    SimulationData getSimulationDataPtrCopy() const;
 
     GpuInfo _gpuInfo;
     cudaGraphicsResource* _cudaResource = nullptr;
@@ -124,12 +123,11 @@ private:
     SettingsForSimulation _settings;
 
     mutable std::mutex _mutexForSimulationData;
-    std::shared_ptr<SimulationData> _cudaSimulationData;
-
+    std::shared_ptr<SimulationData> _cudaSimulationData;    // std::shared_ptr to prevent include in header
     std::shared_ptr<RenderingData> _cudaRenderingData;
     std::shared_ptr<SelectionResult> _cudaSelectionResult;
-    CudaDataTOProvider _cudaDataTOProvider;
-    DataTOProvider _dataTOProvider;
+    CudaCollectionTOProvider _cudaCollectionTOProvider;
+    CollectionTOProvider _collectionTOProvider;
 
     mutable std::mutex _mutexForStatistics;
     std::optional<std::chrono::steady_clock::time_point> _lastStatisticsUpdateTime;

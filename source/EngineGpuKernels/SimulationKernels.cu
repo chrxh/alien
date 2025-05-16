@@ -15,9 +15,24 @@
 #include "ReconnectorProcessor.cuh"
 #include "DetonatorProcessor.cuh"
 
-__global__ void cudaNextTimestep_prepare(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_prepare(SimulationData data)
 {
-    data.prepareForNextTimestep();
+    data.cellMap.reset();
+    data.particleMap.reset();
+    data.processMemory.reset();
+
+    // Heuristics
+    auto maxStructureOperations = 1000 + data.objects.cells.getNumEntries() / 2;
+    auto maxCellTypeOperations = data.objects.cells.getNumEntries();
+
+    data.structuralOperations.setMemory(data.processMemory.getTypedSubArray<StructuralOperation>(maxStructureOperations), maxStructureOperations);
+
+    for (int i = CellType_Base; i < CellType_Count; ++i) {
+        data.cellTypeOperations[i].setMemory(data.processMemory.getTypedSubArray<CellTypeOperation>(maxCellTypeOperations), maxCellTypeOperations);
+    }
+    *data.externalEnergy = cudaSimulationParameters.externalEnergy.value;
+
+    data.objects.saveNumEntries();
 }
 
 __global__ void cudaNextTimestep_physics_init(SimulationData data)

@@ -6,11 +6,6 @@ void IntVector2D::operator-=(IntVector2D const& vec)
     y -= vec.y;
 }
 
-bool RealVector2D::operator==(RealVector2D const& other) const
-{
-    return x == other.x && y == other.y;
-}
-
 void RealVector2D::operator+=(RealVector2D const& vec)
 {
     x += vec.x;

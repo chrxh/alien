@@ -57,7 +57,7 @@ VersionParserService::VersionParts VersionParserService::getVersionParts(std::st
         } else if (versionParts.at(3) == "beta") {
             result.versionType = VersionType_Beta;
         } else {
-            std::runtime_error("Unexpected version number.");
+            throw std::runtime_error("Unexpected version number.");
         }
         result.preRelease = std::stoi(versionParts.at(4));
     }
