@@ -11,6 +11,8 @@ add_library(EngineGpuKernels
     ConstantMemory.cu
     ConstantMemory.cuh
     ConstructorProcessor.cuh
+    CudaDataTOCache.cu
+    CudaDataTOCache.cuh
     CudaMemoryManager.cuh
     CudaNumberGenerator.cuh
     CudaShapeGenerator.cuh
@@ -18,6 +20,8 @@ add_library(EngineGpuKernels
     DataAccessKernels.cuh
     DataAccessKernelsService.cu
     DataAccessKernelsService.cuh
+    DataTOCache.cu
+    DataTOCache.cuh
     DebugKernels.cu
     DebugKernels.cuh
     Definitions.cuh

@@ -4,6 +4,7 @@ add_library(Base
     Definitions.cpp
     Definitions.h
     Exceptions.h
+    ExitScopeGuard.h
     FileLogger.cpp
     FileLogger.h
     GlobalSettings.cpp
@@ -17,7 +18,6 @@ add_library(Base
     Math.h
     NumberGenerator.cpp
     NumberGenerator.h
-    OutOfScopeGuard.h
     Physics.cpp
     Physics.h
     Resources.h

@@ -5,7 +5,7 @@
 
 #include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/CellTypeConstants.h"
-#include "EngineInterface/ArraySizesForObjectTOs.h"
+#include "EngineInterface/ArraySizesForTO.h"
 
 struct ParticleTO
 {
@@ -283,7 +283,7 @@ struct CellTO
 
 struct DataTO
 {
-    ArraySizesForObjectTOs capacities;
+    ArraySizesForTO capacities;
 
 	uint64_t* numCells = nullptr;
 	CellTO* cells = nullptr;
@@ -292,39 +292,6 @@ struct DataTO
     uint64_t* heapSize = nullptr;
     uint8_t* heap = nullptr;
 
-    void init(ArraySizesForObjectTOs const& capacities_)
-    {
-        capacities = capacities_;
-
-        numCells = new uint64_t;
-        numParticles = new uint64_t;
-        heapSize = new uint64_t;
-        *numCells = 0;
-        *numParticles = 0;
-        *heapSize = 0;
-        cells = new CellTO[capacities.cellArray];
-        particles = new ParticleTO[capacities.particleArray];
-        heap = new uint8_t[capacities.heap];
-    }
-
-    void destroy()
-    {
-        delete numCells;
-        delete numParticles;
-        delete heapSize;
-        delete[] cells;
-        delete[] particles;
-        delete[] heap;
-    }
-
-	bool operator==(DataTO const& other) const
-	{
-		return numCells == other.numCells
-			&& cells == other.cells
-			&& numParticles == other.numParticles
-			&& particles == other.particles
-            && heapSize == other.heapSize
-            && heap == other.heap;
-	}
+	bool operator==(DataTO const& other) const = default;
 };
 

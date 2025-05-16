@@ -25,7 +25,7 @@ using std::uint64_t;
 class _FileLogger;
 using FileLogger = std::shared_ptr<_FileLogger>;
 
-constexpr float NEAR_ZERO = 1.0e-4f;
+inline constexpr float NEAR_ZERO = 1.0e-4f;
 
 template <typename T>
 inline float toFloat(T const& value)

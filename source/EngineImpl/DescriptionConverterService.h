@@ -8,11 +8,12 @@
 #include "EngineInterface/OverlayDescriptions.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineGpuKernels/ObjectTO.cuh"
+#include "EngineGpuKernels/Definitions.h"
 #include "Definitions.h"
 
 class DescriptionConverterService
 {
-    MAKE_SINGLETON(DescriptionConverterService);
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(DescriptionConverterService);
 
 public:
     ClusteredDataDescription convertTOtoClusteredDataDescription(DataTO const& dataTO) const;
@@ -24,6 +25,8 @@ public:
     DataTO convertDescriptionToTO(ParticleDescription const& particle) const;
 
 private:
+    DescriptionConverterService();
+
 	struct CreateClusterReturnData
     {
         ClusterDescription cluster;
@@ -44,4 +47,8 @@ private:
 
 	void setConnections(std::vector<CellTO>& cellTOs, CellDescription const& cellToAdd, std::unordered_map<uint64_t, uint64_t> const& cellIndexByIds) const;
 
+    DataTO provideDataTO(std::vector<CellTO> const& cellTOs, std::vector<ParticleTO> const& particleTOs, std::vector<uint8_t> const& heap) const;
+
+private:
+    mutable DataTOCache _dataTOCache;
 };

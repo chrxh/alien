@@ -10,21 +10,23 @@ _DataAccessKernelsService::_DataAccessKernelsService()
     _garbageCollectorKernels = std::make_shared<_GarbageCollectorKernelsService>();
     _editKernels = std::make_shared<_EditKernelsService>();
 
-    CudaMemoryManager::getInstance().acquireMemory<Cell*>(1, _cudaCellArray);
-    CudaMemoryManager::getInstance().acquireMemory<ArraySizesForObjectTOs>(1, _arraySizes);
+    CudaMemoryManager::getInstance().acquireMemory(1, _cudaCellArray);
+    CudaMemoryManager::getInstance().acquireMemory(1, _arraySizes);
+    CudaMemoryManager::getInstance().acquireMemory(1, _arraySizesTO);
 }
 
 _DataAccessKernelsService::~_DataAccessKernelsService()
 {
     CudaMemoryManager::getInstance().freeMemory(_cudaCellArray);
     CudaMemoryManager::getInstance().freeMemory(_arraySizes);
+    CudaMemoryManager::getInstance().freeMemory(_arraySizesTO);
 }
 
-ArraySizesForObjectTOs _DataAccessKernelsService::getActualArraySizes(GpuSettings const& gpuSettings, SimulationData const& data)
+ArraySizesForTO _DataAccessKernelsService::estimateCapacityNeededForTO(GpuSettings const& gpuSettings, SimulationData const& data)
 {
-    setValueToDevice(_arraySizes, ArraySizesForObjectTOs{});
-    KERNEL_CALL(cudaGetActualArraySizes, data, _arraySizes);
-    return copyToHost(_arraySizes);
+    setValueToDevice(_arraySizesTO, ArraySizesForTO{});
+    KERNEL_CALL(cudaEstimateCapacityNeededForTO, data, _arraySizesTO);
+    return copyToHost(_arraySizesTO);
 }
 
 void _DataAccessKernelsService::getData(
@@ -73,6 +75,13 @@ void _DataAccessKernelsService::getOverlayData(
 {
     KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
     KERNEL_CALL(cudaGetOverlayData, rectUpperLeft, rectLowerRight, data, dataTO);
+}
+
+ArraySizesForGpu _DataAccessKernelsService::estimateCapacityNeededForGpu(GpuSettings const& gpuSettings, DataTO const& dataTO)
+{
+    setValueToDevice(_arraySizes, ArraySizesForGpu{});
+    KERNEL_CALL(cudaEstimateCapacityNeededForGpu, dataTO, _arraySizes);
+    return copyToHost(_arraySizes);
 }
 
 void _DataAccessKernelsService::addData(GpuSettings const& gpuSettings, SimulationData const& data, DataTO const& dataTO, bool selectData, bool createIds)
