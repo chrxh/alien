@@ -26,7 +26,7 @@
 #include "EngineGpuKernels/Definitions.h"
 
 #include "Definitions.h"
-#include "EngineInterface/ObjectArraySizes.h"
+#include "EngineInterface/ArraySizesForGpu.h"
 
 struct ExceptionData
 {
@@ -119,7 +119,7 @@ public:
     void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2);
     void testOnly_cleanupAfterTimestep();
     void testOnly_cleanupAfterDataManipulation();
-    void testOnly_resizeArrays(ObjectArraySizes const& sizeDelta);
+    void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta);
     bool testOnly_areArraysValid();
 
 private:
@@ -171,7 +171,7 @@ private:
     //internals
     std::optional<GLuint> _imageResource;
     void* _cudaResource = nullptr;
-    AccessDataTOCache _dataTOCache;
+    DataTOCache _dataTOCache;
 };
 
 class EngineWorkerGuard

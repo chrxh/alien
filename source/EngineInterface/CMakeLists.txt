@@ -1,7 +1,7 @@
 
 add_library(EngineInterface
-    ArraySizesForObjects.h
-    ArraySizesForObjectTOs.h
+    ArraySizesForGpu.h
+    ArraySizesForTO.h
     CellTypeConstants.h
     CellTypeStrings.h
     Colors.h

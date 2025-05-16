@@ -47,6 +47,13 @@ using TestKernelsService = std::shared_ptr<_TestKernelsService>;
 class _MaxAgeBalancer;
 using MaxAgeBalancer = std::shared_ptr<_MaxAgeBalancer>;
 
+class _CudaDataTOCache;
+using CudaDataTOCache = std::shared_ptr<_CudaDataTOCache>;
+
+class _DataTOCache;
+using DataTOCache = std::shared_ptr<_DataTOCache>;
+
+
 struct ApplyForceData
 {
     float2 startPos;

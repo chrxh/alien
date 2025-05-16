@@ -2,13 +2,13 @@
 
 #include <functional>
 
-class OutOfScopeGuard
+class ExitScopeGuard
 {
 public:
-    OutOfScopeGuard(std::function<void()> func)
+    ExitScopeGuard(std::function<void()> func)
         : _func(func)
     {}
-    ~OutOfScopeGuard() { _func(); }
+    ~ExitScopeGuard() { _func(); }
 
 private:
     std::function<void()> _func;

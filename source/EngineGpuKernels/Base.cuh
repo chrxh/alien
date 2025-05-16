@@ -8,6 +8,7 @@
 #include "Definitions.cuh"
 #include "HashSet.cuh"
 #include "Util.cuh"
+#include "Macros.cuh"
 
 template<typename T>
 __device__ __host__ inline float toFloat(T value)

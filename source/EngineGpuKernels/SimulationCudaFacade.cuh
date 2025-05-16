@@ -13,8 +13,8 @@
 #include <GL/gl.h>
 
 #include "EngineInterface/MutationType.h"
-#include "EngineInterface/ArraySizesForObjects.h"
-#include "EngineInterface/ArraySizesForObjectTOs.h"
+#include "EngineInterface/ArraySizesForGpu.h"
+#include "EngineInterface/ArraySizesForTO.h"
 #include "EngineInterface/SettingsForSimulation.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
@@ -23,6 +23,7 @@
 #include "EngineInterface/StatisticsHistory.h"
 
 #include "Definitions.cuh"
+#include "DataTOCache.cuh"
 
 struct cudaGraphicsResource;
 
@@ -45,10 +46,10 @@ public:
     void applyCataclysm(int power);
 
     void drawVectorGraphics(float2 const& rectUpperLeft, float2 const& rectLowerRight, void* cudaResource, int2 const& imageSize, double zoom);
-    void getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataTO const& dataTO);
-    void getSelectedSimulationData(bool includeClusters, DataTO const& dataTO);
-    void getInspectedSimulationData(std::vector<uint64_t> entityIds, DataTO const& dataTO);
-    void getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataTO const& dataTO);
+    DataTO getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);
+    DataTO getSelectedSimulationData(bool includeClusters);
+    DataTO getInspectedSimulationData(std::vector<uint64_t> entityIds);
+    DataTO getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight);
     void addAndSelectSimulationData(DataTO const& dataTO);
     void setSimulationData(DataTO const& dataTO);
     void removeSelectedObjects(bool includeClusters);
@@ -77,9 +78,7 @@ public:
         SimulationParameters const& parameters,
         SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All);
 
-    ArraySizesForObjects estimateObjectArraySizes(DataDescription const& data) const;
-    ArraySizesForObjects estimateObjectArraySizes(ClusteredDataDescription const& data) const;
-    ArraySizesForObjectTOs getActualObjectArraySizes() const;
+    ArraySizesForTO estimateCapacityNeededForTO() const;
 
     StatisticsRawData getStatisticsRawData();
     void updateStatistics();
@@ -92,7 +91,7 @@ public:
 
     void clear();
 
-    void resizeArraysIfNecessary(ArraySizesForObjects const& sizeDelta = ArraySizesForObjects());
+    void resizeArraysIfNecessary(ArraySizesForGpu const& sizeDelta = ArraySizesForGpu());
 
     // Only for tests
     void testOnly_mutate(uint64_t cellId, MutationType mutationType);
@@ -100,17 +99,17 @@ public:
     void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2);
     void testOnly_cleanupAfterTimestep();
     void testOnly_cleanupAfterDataManipulation();
-    void testOnly_resizeArrays(ArraySizesForObjects const& sizeDelta);
+    void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta);
     bool testOnly_areArraysValid();
 
 private:
     void initCuda();
 
     void syncAndCheck();
-    void copyDataTOtoDevice(DataTO const& dataTO);
-    void copyDataTOtoHost(DataTO const& dataTO);
+    void copyDataTOtoGpu(DataTO const& cudaDataTO, DataTO const& dataTO);
+    void copyDataTOtoHost(DataTO const& dataTO, DataTO const& cudaDataTO);
     void automaticResizeArrays();
-    void resizeArrays(ArraySizesForObjects const& sizeDelta = ArraySizesForObjects());
+    void resizeArrays(ArraySizesForGpu const& sizeDelta = ArraySizesForGpu());
     void checkAndProcessSimulationParameterChanges();
 
     SimulationData getSimulationDataIntern() const;
@@ -129,7 +128,8 @@ private:
 
     std::shared_ptr<RenderingData> _cudaRenderingData;
     std::shared_ptr<SelectionResult> _cudaSelectionResult;
-    std::shared_ptr<DataTO> _cudaAccessTO;
+    CudaDataTOCache _cudaDataTOCache;
+    DataTOCache _dataTOCache;
 
     mutable std::mutex _mutexForStatistics;
     std::optional<std::chrono::steady_clock::time_point> _lastStatisticsUpdateTime;

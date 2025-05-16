@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-struct ArraySizesForObjects
+struct ArraySizesForGpu
 {
     uint64_t cellArray = 0;
     uint64_t particleArray = 0;

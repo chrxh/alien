@@ -470,7 +470,7 @@ __global__ void cudaClearData(SimulationData data)
     data.objects.heap.reset();
 }
 
-__global__ void cudaGetActualArraySizes(SimulationData data, ArraySizesForObjectTOs* arraySizes)
+__global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesForTO* arraySizes)
 {
     auto const& cells = data.objects.cellPointers;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -491,5 +491,30 @@ __global__ void cudaGetActualArraySizes(SimulationData data, ArraySizesForObject
             dependentDataSize += sizeof(NeuralNetwork) + 16;
         }
         atomicAdd(&arraySizes->heap, dependentDataSize);
+    }
+}
+
+__global__ void cudaEstimateCapacityNeededForGpu(DataTO dataTO, ArraySizesForGpu* arraySizes)
+{
+    if (threadIdx.x == 0 && blockIdx.x == 0) {
+        arraySizes->cellArray = *dataTO.numCells;
+        arraySizes->particleArray = *dataTO.numParticles;
+        atomicAdd(&arraySizes->heap, *dataTO.numCells * sizeof(Cell) + *dataTO.numParticles * sizeof(Particle));
+    }
+
+    {
+        auto partition = calcAllThreadsPartition(*dataTO.numCells);
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto& cell = dataTO.cells[index];
+            uint64_t dependentDataSize = sizeof(Cell) + cell.metadata.nameSize + cell.metadata.descriptionSize + 32;
+            if (cell.cellType == CellType_Constructor) {
+                dependentDataSize += cell.cellTypeData.constructor.genomeSize + 16;
+            } else if (cell.cellType == CellType_Injector) {
+                dependentDataSize += cell.cellTypeData.injector.genomeSize + 16;
+            } else if (cell.cellType != CellType_Structure && cell.cellType != CellType_Free) {
+                dependentDataSize += sizeof(NeuralNetwork) + 16;
+            }
+            atomicAdd(&arraySizes->heap, dependentDataSize);
+        }
     }
 }

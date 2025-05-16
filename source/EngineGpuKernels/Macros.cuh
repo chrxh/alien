@@ -60,7 +60,7 @@ void checkAndThrowError(T result, char const *const func, const char *const file
 
 #define ABORT() asm("trap;");
 
-#define NEAR_ZERO 0.00001f
+#define NEAR_ZERO 1.0e-4f
 
 #define CUDA_CHECK(condition) \
     if (!(condition)) { \

@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "DataPointCollection.h"
-#include "Definitions.h"
 
 using StatisticsHistoryData = std::vector<DataPointCollection>;
 

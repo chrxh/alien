@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ArraySizesForObjects.h"
+#include "ArraySizesForGpu.h"
 #include "Definitions.h"
 #include "OverlayDescriptions.h"
 #include "SelectionShallowData.h"
@@ -111,6 +111,6 @@ public:
     virtual void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2) = 0;
     virtual void testOnly_cleanupAfterTimestep() = 0;
     virtual void testOnly_cleanupAfterDataManipulation() = 0;
-    virtual void testOnly_resizeArrays(ArraySizesForObjects const& sizeDelta) = 0;
+    virtual void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta) = 0;
     virtual bool testOnly_areArraysValid() = 0;
 };

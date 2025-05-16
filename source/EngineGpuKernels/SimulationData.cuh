@@ -2,7 +2,7 @@
 
 #include <atomic>
 
-#include "EngineInterface/ArraySizesForObjects.h"
+#include "EngineInterface/ArraySizesForGpu.h"
 #include "EngineInterface/CellTypeConstants.h"
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/GpuSettings.h"
@@ -41,8 +41,8 @@ struct SimulationData
     CudaNumberGenerator numberGen2;  //second random number generator used in combination with the first generator for evaluating very low probabilities
 
     void init(int2 const& worldSize, uint64_t timestep);
-    bool shouldResize(ArraySizesForObjects const& sizeDelta);
-    void resizeTargetObjects(ArraySizesForObjects const& size);
+    bool shouldResize(ArraySizesForGpu const& sizeDelta);
+    void resizeTargetObjects(ArraySizesForGpu const& size);
     void resizeObjects();
     bool isEmpty();
     void free();

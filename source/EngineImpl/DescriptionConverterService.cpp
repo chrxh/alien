@@ -9,6 +9,7 @@
 #include "Base/Exceptions.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/GenomeConstants.h"
+#include "EngineGpuKernels/DataTOCache.cuh"
 
 
 namespace
@@ -208,25 +209,6 @@ OverlayDescription DescriptionConverterService::convertTOtoOverlayDescription(Da
     return result;
 }
 
-namespace
-{
-    DataTO createDataTO(std::vector<CellTO> const& cellTOs, std::vector<ParticleTO> const& particleTOs, std::vector<uint8_t> const& heap)
-    {
-        DataTO result;
-        result.init({cellTOs.size(), particleTOs.size(), heap.size()});
-
-        *result.numCells = cellTOs.size();
-        *result.numParticles = particleTOs.size();
-        *result.heapSize = heap.size();
-
-        std::memcpy(result.cells, cellTOs.data(), cellTOs.size() * sizeof(CellTO));
-        std::memcpy(result.particles, particleTOs.data(), particleTOs.size() * sizeof(ParticleTO));
-        std::memcpy(result.heap, heap.data(), heap.size());
-
-        return result;
-    }
-}
-
 DataTO DescriptionConverterService::convertDescriptionToTO(ClusteredDataDescription const& description) const
 {
     std::vector<CellTO> cellTOs;
@@ -250,7 +232,7 @@ DataTO DescriptionConverterService::convertDescriptionToTO(ClusteredDataDescript
         addParticle(particleTOs, particle);
     }
 
-    return createDataTO(cellTOs, particleTOs, heap);
+    return provideDataTO(cellTOs, particleTOs, heap);
 }
 
 DataTO DescriptionConverterService::convertDescriptionToTO(DataDescription const& description) const
@@ -272,7 +254,7 @@ DataTO DescriptionConverterService::convertDescriptionToTO(DataDescription const
         addParticle(particleTOs, particle);
     }
 
-    return createDataTO(cellTOs, particleTOs, heap);
+    return provideDataTO(cellTOs, particleTOs, heap);
 }
 
 DataTO DescriptionConverterService::convertDescriptionToTO(CellDescription const& cell) const
@@ -283,7 +265,7 @@ DataTO DescriptionConverterService::convertDescriptionToTO(CellDescription const
     std::unordered_map<uint64_t, uint64_t> cellIndexByIds;
     addCell(cellTOs, heap, cell, cellIndexByIds);
 
-    return createDataTO(cellTOs, {}, heap);
+    return provideDataTO(cellTOs, {}, heap);
 }
 
 DataTO DescriptionConverterService::convertDescriptionToTO(ParticleDescription const& particle) const
@@ -293,7 +275,12 @@ DataTO DescriptionConverterService::convertDescriptionToTO(ParticleDescription c
 
     addParticle(particleTOs, particle);
 
-    return createDataTO({}, particleTOs, heap);
+    return provideDataTO({}, particleTOs, heap);
+}
+
+DescriptionConverterService::DescriptionConverterService()
+{
+    _dataTOCache = std::make_shared<_DataTOCache>();
 }
 
 namespace
@@ -782,4 +769,22 @@ void DescriptionConverterService::setConnections(
         cellTO.connections[0].angleFromPrevious += angleOffset;
     }
     cellTO.numConnections = index;
+}
+
+DataTO DescriptionConverterService::provideDataTO(
+    std::vector<CellTO> const& cellTOs,
+    std::vector<ParticleTO> const& particleTOs,
+    std::vector<uint8_t> const& heap) const
+{
+    DataTO result = _dataTOCache->provideDataTO({cellTOs.size(), particleTOs.size(), heap.size()});
+
+    *result.numCells = cellTOs.size();
+    *result.numParticles = particleTOs.size();
+    *result.heapSize = heap.size();
+
+    std::memcpy(result.cells, cellTOs.data(), cellTOs.size() * sizeof(CellTO));
+    std::memcpy(result.particles, particleTOs.data(), particleTOs.size() * sizeof(ParticleTO));
+    std::memcpy(result.heap, heap.data(), heap.size());
+
+    return result;
 }
