@@ -50,5 +50,5 @@ private:
     DataTO provideDataTO(std::vector<CellTO> const& cellTOs, std::vector<ParticleTO> const& particleTOs, std::vector<uint8_t> const& heap) const;
 
 private:
-    mutable DataTOCache _dataTOCache;
+    mutable DataTOProvider _dataTOProvider;
 };

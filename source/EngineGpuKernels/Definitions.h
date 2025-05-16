@@ -5,5 +5,5 @@
 class _SimulationCudaFacade;
 using CudaSimulationFacade = std::shared_ptr<_SimulationCudaFacade>;
 
-class _DataTOCache;
-using DataTOCache = std::shared_ptr<_DataTOCache>;
+class _DataTOProvider;
+using DataTOProvider = std::shared_ptr<_DataTOProvider>;

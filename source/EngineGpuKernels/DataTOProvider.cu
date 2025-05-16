@@ -1,18 +1,18 @@
-#include "DataTOCache.cuh"
+#include "DataTOProvider.cuh"
 
 #include <stdexcept>
 
-_DataTOCache::_DataTOCache()
+_DataTOProvider::_DataTOProvider()
 {}
 
-_DataTOCache::~_DataTOCache()
+_DataTOProvider::~_DataTOProvider()
 {
     if (_dataTO) {
         destroy(_dataTO.value());
     }
 }
 
-DataTO _DataTOCache::provideDataTO(ArraySizesForTO const& requiredCapacity)
+DataTO _DataTOProvider::provideDataTO(ArraySizesForTO const& requiredCapacity)
 {
     if (_dataTO) {
         if (fits(_dataTO->capacities, requiredCapacity)) {
@@ -43,7 +43,7 @@ DataTO _DataTOCache::provideDataTO(ArraySizesForTO const& requiredCapacity)
     }
 }
 
-DataTO _DataTOCache::provideNewUnmanagedDataTO(ArraySizesForTO const& requiredCapacity)
+DataTO _DataTOProvider::provideNewUnmanagedDataTO(ArraySizesForTO const& requiredCapacity)
 {
     try {
         DataTO result;
@@ -63,18 +63,18 @@ DataTO _DataTOCache::provideNewUnmanagedDataTO(ArraySizesForTO const& requiredCa
     }
 }
 
-void _DataTOCache::destroyUnmanagedDataTO(DataTO const& dataTO)
+void _DataTOProvider::destroyUnmanagedDataTO(DataTO const& dataTO)
 {
     destroy(dataTO);
 }
 
-bool _DataTOCache::fits(ArraySizesForTO const& left, ArraySizesForTO const& right) const
+bool _DataTOProvider::fits(ArraySizesForTO const& left, ArraySizesForTO const& right) const
 {
     return left.cellArray >= right.cellArray && left.particleArray >= right.particleArray
         && left.heap >= right.heap;
 }
 
-void _DataTOCache::destroy(DataTO const& dataTO)
+void _DataTOProvider::destroy(DataTO const& dataTO)
 {
     delete dataTO.numCells;
     delete dataTO.numParticles;

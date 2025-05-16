@@ -6,11 +6,11 @@
 
 #include "ObjectTO.cuh"
 
-class _CudaDataTOCache
+class _CudaDataTOProvider
 {
 public:
-    _CudaDataTOCache();
-    ~_CudaDataTOCache();
+    _CudaDataTOProvider();
+    ~_CudaDataTOProvider();
 
     DataTO provideDataTO(ArraySizesForTO const& requiredCapacity);
 

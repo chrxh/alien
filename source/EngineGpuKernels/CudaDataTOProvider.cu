@@ -1,17 +1,17 @@
-#include "CudaDataTOCache.cuh"
+#include "CudaDataTOProvider.cuh"
 
 #include "CudaMemoryManager.cuh"
 
-_CudaDataTOCache::_CudaDataTOCache() {}
+_CudaDataTOProvider::_CudaDataTOProvider() {}
 
-_CudaDataTOCache::~_CudaDataTOCache()
+_CudaDataTOProvider::~_CudaDataTOProvider()
 {
     if (_dataTO) {
         destroy();
     }
 }
 
-DataTO _CudaDataTOCache::provideDataTO(ArraySizesForTO const& requiredCapacity)
+DataTO _CudaDataTOProvider::provideDataTO(ArraySizesForTO const& requiredCapacity)
 {
     if (_dataTO) {
         if (fits(_dataTO->capacities, requiredCapacity)) {
@@ -44,13 +44,13 @@ DataTO _CudaDataTOCache::provideDataTO(ArraySizesForTO const& requiredCapacity)
     }
 }
 
-bool _CudaDataTOCache::fits(ArraySizesForTO const& left, ArraySizesForTO const& right) const
+bool _CudaDataTOProvider::fits(ArraySizesForTO const& left, ArraySizesForTO const& right) const
 {
     return left.cellArray >= right.cellArray && left.particleArray >= right.particleArray
         && left.heap >= right.heap;
 }
 
-void _CudaDataTOCache::destroy()
+void _CudaDataTOProvider::destroy()
 {
     CudaMemoryManager::getInstance().freeMemory(_dataTO->cells);
     CudaMemoryManager::getInstance().freeMemory(_dataTO->particles);
