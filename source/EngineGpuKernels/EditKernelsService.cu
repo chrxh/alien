@@ -3,6 +3,7 @@
 #include "DataAccessKernels.cuh"
 #include "EditKernels.cuh"
 #include "GarbageCollectorKernelsService.cuh"
+#include "SimulationKernels.cuh"
 
 _EditKernelsService::_EditKernelsService()
 {
@@ -88,7 +89,7 @@ void _EditKernelsService::shallowUpdateSelectedObjects(
     if (reconnectionRequired) {
         int counter = 10;
         do {
-            KERNEL_CALL_1_1(cudaPrepareForUpdate, data);
+            KERNEL_CALL_1_1(cudaNextTimestep_prepare, data);
 
             setValueToDevice(_cudaUpdateResult, 0);
             KERNEL_CALL(cudaScheduleDisconnectSelectionFromRemainings, data, _cudaUpdateResult);
@@ -128,7 +129,7 @@ void _EditKernelsService::shallowUpdateSelectedObjects(
 
         int counter = 10;
         do {
-            KERNEL_CALL_1_1(cudaPrepareForUpdate, data);
+            KERNEL_CALL_1_1(cudaNextTimestep_prepare, data);
 
             setValueToDevice(_cudaUpdateResult, 0);
             KERNEL_CALL(cudaPrepareMapForReconnection, data);
@@ -195,7 +196,7 @@ void _EditKernelsService::reconnect(GpuSettings const& gpuSettings, SimulationDa
 {
     int counter = 10;
     do {
-        KERNEL_CALL_1_1(cudaPrepareForUpdate, data);
+        KERNEL_CALL_1_1(cudaNextTimestep_prepare, data);
 
         setValueToDevice(_cudaUpdateResult, 0);
         KERNEL_CALL(cudaScheduleDisconnectSelectionFromRemainings, data, _cudaUpdateResult);
@@ -209,7 +210,7 @@ void _EditKernelsService::reconnect(GpuSettings const& gpuSettings, SimulationDa
 
     counter = 10;
     do {
-        KERNEL_CALL_1_1(cudaPrepareForUpdate, data);
+        KERNEL_CALL_1_1(cudaNextTimestep_prepare, data);
 
         setValueToDevice(_cudaUpdateResult, 0);
         KERNEL_CALL(cudaPrepareMapForReconnection, data);
@@ -227,7 +228,7 @@ void _EditKernelsService::reconnect(GpuSettings const& gpuSettings, SimulationDa
     updateSelection(gpuSettings, data);
 }
 
-void _EditKernelsService::changeSimulationData(GpuSettings const& gpuSettings, SimulationData const& data, DataTO const& changeDataTO)
+void _EditKernelsService::changeSimulationData(GpuSettings const& gpuSettings, SimulationData const& data, CollectionTO const& changeDataTO)
 {
     KERNEL_CALL_1_1(cudaSaveNumEntries, data);
 

@@ -9,11 +9,23 @@
 __global__ void cudaPreparePointerArraysForCleanup(SimulationData data);
 __global__ void cudaPrepareHeapForCleanup(SimulationData data);
 
-template<typename Entity>
+__global__ void cudaCleanupParticles(Array<Particle*> particlePointers, Heap newHeap);
+__global__ void cudaCleanupGenomesStep1(Array<Cell*> cells);
+__global__ void cudaCleanupGenomesStep2(Array<Cell*> cells, Heap newHeap);
+__global__ void cudaCleanupGenomesStep3(Array<Cell*> cells, Heap newHeap);
+__global__ void cudaCleanupCellsStep1(Array<Cell*> cells, Heap newHeap);
+__global__ void cudaCleanupCellsStep2(Array<Cell*> cellPointers, Heap newHeap);
+__global__ void cudaCleanupDependentCellData(Array<Cell*> cells, Heap newHeap);
+__global__ void cudaCleanupCellMap(SimulationData data);
+__global__ void cudaCleanupParticleMap(SimulationData data);
+__global__ void cudaSwapPointerArrays(SimulationData data);
+__global__ void cudaSwapHeaps(SimulationData data);
+__global__ void cudaCheckIfCleanupIsNecessary(SimulationData data, bool* result);
+
+template <typename Entity>
 __global__ void cudaCleanupPointerArray(Array<Entity> entityArray, Array<Entity> newEntityArray)
 {
-    auto partition =
-        calcPartition(entityArray.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto partition = calcPartition(entityArray.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     __shared__ int numEntities;
     if (0 == threadIdx.x) {
@@ -46,13 +58,3 @@ __global__ void cudaCleanupPointerArray(Array<Entity> entityArray, Array<Entity>
     }
     __syncthreads();
 }
-
-__global__ void cudaCleanupParticles(Array<Particle*> particlePointers, Heap rawMemory);
-__global__ void cudaCleanupCellsStep1(Array<Cell*> cellPointers, Heap newHeap);
-__global__ void cudaCleanupCellsStep2(Array<Cell*> cellPointers, Heap newHeap);
-__global__ void cudaCleanupDependentCellData(Array<Cell*> cellPointers, Heap stringBytes);
-__global__ void cudaCleanupCellMap(SimulationData data);
-__global__ void cudaCleanupParticleMap(SimulationData data);
-__global__ void cudaSwapPointerArrays(SimulationData data);
-__global__ void cudaSwapHeaps(SimulationData data);
-__global__ void cudaCheckIfCleanupIsNecessary(SimulationData data, bool* result);

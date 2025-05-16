@@ -31,7 +31,7 @@ TEST_F(DataTransferTests, singleCell)
                      .color(2)
                      .barrier(true)
                      .livingState(false)
-                     .constructionId(3534)
+                     .creatureId(3534)
                      .signal({1, 0, -1, 0, 0, 0, 0, 0}));
 
     _simulationFacade->setSimulationData(data);

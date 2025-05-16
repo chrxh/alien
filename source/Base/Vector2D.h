@@ -36,7 +36,8 @@ struct RealVector2D
     float x = 0.0f;
     float y = 0.0f;
 
-    bool operator==(RealVector2D const& other) const;
+    auto operator<=>(RealVector2D const& other) const = default;
+    bool operator==(RealVector2D const& other) const = default;
     void operator+=(RealVector2D const& vec);
     void operator-=(RealVector2D const& vec);
     template <typename T>

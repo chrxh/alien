@@ -77,16 +77,15 @@ struct NeuralNetwork
     ActivationFunction activationFunctions[MAX_CHANNELS];
 };
 
-struct BaseType
-{
-};
+struct Base
+{};
 
-struct TransmitterType
+struct Depot
 {
     EnergyDistributionMode mode;
 };
 
-struct ConstructorType
+struct Constructor
 {
     // Properties
     uint8_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
@@ -112,7 +111,7 @@ struct ConstructorType
     bool isReady;
 };
 
-struct SensorType
+struct Sensor
 {
     uint8_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
     float minDensity;
@@ -122,7 +121,7 @@ struct SensorType
     SensorRestrictToMutants restrictToMutants;
 };
 
-struct OscillatorType
+struct Oscillator
 {
     uint8_t autoTriggerInterval;
     uint8_t alternationInterval;  // 0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
@@ -131,11 +130,11 @@ struct OscillatorType
     int numPulses;
 };
 
-struct AttackerType
+struct Attacker
 {
 };
 
-struct InjectorType
+struct Injector
 {
     InjectorMode mode;
     uint32_t counter;
@@ -223,7 +222,7 @@ union MuscleModeData
     DirectMovement directMovement;
 };
 
-struct MuscleType
+struct Muscle
 {
     // Fixed data
     MuscleMode mode;
@@ -234,18 +233,18 @@ struct MuscleType
     float lastMovementY;
 };
 
-struct DefenderType
+struct Defender
 {
     DefenderMode mode;
 };
 
-struct ReconnectorType
+struct Reconnector
 {
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
     ReconnectorRestrictToMutants restrictToMutants;
 };
 
-struct DetonatorType
+struct Detonator
 {
     DetonatorState state;
     int32_t countdown;
@@ -253,17 +252,17 @@ struct DetonatorType
 
 union CellTypeData
 {
-    BaseType base;
-    TransmitterType transmitter;
-    ConstructorType constructor;
-    SensorType sensor;
-    OscillatorType oscillator;
-    AttackerType attacker;
-    InjectorType injector;
-    MuscleType muscle;
-    DefenderType defender;
-    ReconnectorType reconnector;
-    DetonatorType detonator;
+    Base base;
+    Depot depot;
+    Constructor constructor;
+    Sensor sensor;
+    Oscillator oscillator;
+    Attacker attacker;
+    Injector injector;
+    Muscle muscle;
+    Defender defender;
+    Reconnector reconnector;
+    Detonator detonator;
 };
 
 struct SignalRoutingRestriction
@@ -283,7 +282,7 @@ struct Cell
 {
     // General
     uint64_t id;
-    Genome_New* genome_New;
+    Genome* genome;
     CellConnection connections[MAX_CELL_BONDS];
     float2 pos;
     float2 vel;
@@ -298,7 +297,7 @@ struct Cell
     LivingState livingState;
     uint32_t creatureId;
     uint32_t mutationId;
-    uint8_t ancestorMutationId; // Only the first 8 bits from ancestor mutation id
+    uint8_t ancestorMutationId;  // Only the first 8 bits from ancestor mutation id
     float genomeComplexity;
     uint16_t genomeNodeIndex;
 
@@ -330,11 +329,11 @@ struct Cell
 
     // Internal algorithm data
     int locked;  // 0 = unlocked, 1 = locked
-    int64_t tag;
+    int64_t tempValue;
     float density;
-    Cell* nextCell; // Linked list for finding all overlapping cells
+    Cell* nextCell;                   // Linked list for finding all overlapping cells
     int32_t scheduledOperationIndex;  // -1 = no operation scheduled
-    float2 shared1; // Variable with different meanings depending on context
+    float2 shared1;                   // Variable with different meanings depending on context
     float2 shared2;
 
     // Cluster data

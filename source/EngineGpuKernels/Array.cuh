@@ -18,7 +18,7 @@ template <typename T>
 class Array
 {
 protected:
-    uint64_t* _size;
+    uint64_t* _capacity;
     uint64_t* _numEntries;
     uint64_t* _numOrigEntries;
 
@@ -33,12 +33,12 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<T*>(1, _data);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _numEntries);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _numOrigEntries);
-        CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _size);
+        CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _capacity);
 
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &data, sizeof(T*), cudaMemcpyHostToDevice));
         CHECK_FOR_CUDA_ERROR(cudaMemset(_numEntries, 0, sizeof(uint64_t)));
         CHECK_FOR_CUDA_ERROR(cudaMemset(_numOrigEntries, 0, sizeof(uint64_t)));
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_size, 0, sizeof(uint64_t)));
+        CHECK_FOR_CUDA_ERROR(cudaMemset(_capacity, 0, sizeof(uint64_t)));
     }
 
     __host__ __inline__ void init(uint64_t size)
@@ -48,12 +48,12 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<T*>(1, _data);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _numEntries);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _numOrigEntries);
-        CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _size);
+        CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, _capacity);
 
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &data, sizeof(T*), cudaMemcpyHostToDevice));
         CHECK_FOR_CUDA_ERROR(cudaMemset(_numEntries, 0, sizeof(uint64_t)));
         CHECK_FOR_CUDA_ERROR(cudaMemset(_numOrigEntries, 0, sizeof(uint64_t)));
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_size, size, sizeof(uint64_t)));
+        CHECK_FOR_CUDA_ERROR(cudaMemset(_capacity, size, sizeof(uint64_t)));
     }
 
     __host__ __inline__ void free()
@@ -65,12 +65,12 @@ public:
         CudaMemoryManager::getInstance().freeMemory(_data);
         CudaMemoryManager::getInstance().freeMemory(_numEntries);
         CudaMemoryManager::getInstance().freeMemory(_numOrigEntries);
-        CudaMemoryManager::getInstance().freeMemory(_size);
+        CudaMemoryManager::getInstance().freeMemory(_capacity);
     }
 
     __host__ __inline__ void resize(uint64_t newSize) const
     {
-        auto size = getSize_host();
+        auto size = getCapacity_host();
 
         if (size == newSize) {
             return;
@@ -83,7 +83,7 @@ public:
         T* newData;
         CudaMemoryManager::getInstance().acquireMemory<T>(newSize, newData);
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &newData, sizeof(T*), cudaMemcpyHostToDevice));
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_size, &newSize, sizeof(uint64_t), cudaMemcpyHostToDevice));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_capacity, &newSize, sizeof(uint64_t), cudaMemcpyHostToDevice));
     }
 
     __host__ __inline__ T* getArray_host() const
@@ -94,10 +94,10 @@ public:
     }
     __host__ __inline__ void setArray_host(T* data) const { CHECK_FOR_CUDA_ERROR(cudaMemcpy(_data, &data, sizeof(T*), cudaMemcpyHostToDevice)); }
 
-    __host__ __inline__ uint64_t getSize_host() const
+    __host__ __inline__ uint64_t getCapacity_host() const
     {
         uint64_t result;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _size, sizeof(uint64_t), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _capacity, sizeof(uint64_t), cudaMemcpyDeviceToHost));
         return result;
     }
 
@@ -111,13 +111,13 @@ public:
 
     __host__ __inline__ bool shouldResize_host(uint64_t arraySizeInc) const
     {
-        return getNumEntries_host() + arraySizeInc > toUInt64(getSize_host() * Const::ArrayFillPercentage);
+        return getNumEntries_host() + arraySizeInc > toUInt64(getCapacity_host() * Const::ArrayFillPercentage);
     }
 
     //methods for device
     __device__ __inline__ T* getArray() const { return *_data; }
 
-    __device__ __inline__ uint64_t getSize() const { return *_size; }
+    __device__ __inline__ uint64_t getCapacity() const { return *_capacity; }
 
     __device__ __inline__ uint64_t getNumEntries() const { return *_numEntries; }
     __device__ __inline__ void setNumEntries(uint64_t value) const { *_numEntries = value; }
@@ -135,7 +135,7 @@ public:
     __device__ __inline__ T* getSubArray(uint64_t size)
     {
         uint64_t oldIndex = alienAtomicAdd64(_numEntries, static_cast<uint64_t>(size));
-        if (oldIndex + size - 1 >= *_size) {
+        if (oldIndex + size - 1 >= *_capacity) {
             alienAtomicAdd64(_numEntries, -size);
             printf("Not enough fixed memory! Acquired size: %llu, total size: %llu\n", size, oldIndex + size - 1);
             ABORT();
@@ -146,7 +146,7 @@ public:
     __device__ __inline__ T* getNewElement(uint64_t* index = nullptr)
     {
         uint64_t oldIndex = alienAtomicAdd64(_numEntries, uint64_t(1));
-        if (oldIndex >= *_size) {
+        if (oldIndex >= *_capacity) {
             alienAtomicAdd64(_numEntries, uint64_t(-1));
             printf("Not enough fixed memory!\n");
             ABORT();
@@ -164,7 +164,7 @@ public:
 
     __device__ __inline__ bool shouldResize(uint64_t arraySizeInc) const
     {
-        return getNumEntries() + arraySizeInc > getSize() * Const::ArrayFillPercentage;
+        return getNumEntries() + arraySizeInc > getCapacity() * Const::ArrayFillPercentage;
     }
 };
 

@@ -42,7 +42,7 @@ struct PartitionData
     __inline__ __device__ int numElements() const { return endIndex - startIndex + 1; }
 };
 
-__device__ __inline__ PartitionData calcPartition(int numEntities, int index, int numIndices)
+__device__ __inline__ PartitionData calcPartition(uint64_t numEntities, uint64_t index, uint64_t numIndices)
 {
     PartitionData result;
     int entitiesByDivisions = numEntities / numIndices;
@@ -56,13 +56,13 @@ __device__ __inline__ PartitionData calcPartition(int numEntities, int index, in
     return result;
 }
 
-__device__ __inline__ PartitionData calcAllThreadsPartition(int numEntities)
+__device__ __inline__ PartitionData calcAllThreadsPartition(uint64_t numEntities)
 {
     return calcPartition(
         numEntities, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 }
 
-__device__ __inline__ PartitionData calcBlockPartition(int numEntities)
+__device__ __inline__ PartitionData calcBlockPartition(uint64_t numEntities)
 {
     return calcPartition(numEntities, blockIdx.x, gridDim.x);
 }

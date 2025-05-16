@@ -2,7 +2,7 @@
 
 #include "SimulationData.cuh"
 
-__global__ void cudaNextTimestep_prepare(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_prepare(SimulationData data);
 __global__ void cudaNextTimestep_physics_init(SimulationData data);
 __global__ void cudaNextTimestep_physics_fillMaps(SimulationData data);
 __global__ void cudaNextTimestep_physics_calcFluidForces(SimulationData data);  //requires threads/block = (ceilf(smoothingLength * 2) * 2 + 1)^2

@@ -69,7 +69,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
         statistics.incNumTransmitterActivities(cell->color);
     }
 
-    if (cell->cellTypeData.transmitter.mode == EnergyDistributionMode_ConnectedCells) {
+    if (cell->cellTypeData.depot.mode == EnergyDistributionMode_ConnectedCells) {
         int numReceivers = cell->numConnections;
         for (int i = 0; i < cell->numConnections; ++i) {
             numReceivers += cell->connections[i].cell->numConnections;
@@ -95,7 +95,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
             }
         }
     }
-    if (cell->cellTypeData.transmitter.mode == EnergyDistributionMode_TransmittersAndConstructors) {
+    if (cell->cellTypeData.depot.mode == EnergyDistributionMode_TransmittersAndConstructors) {
         auto matchActiveConstructorFunc = [&](Cell* const& otherCell) {
             if (otherCell->livingState != LivingState_Ready) {
                 return false;

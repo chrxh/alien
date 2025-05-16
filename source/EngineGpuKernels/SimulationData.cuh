@@ -47,8 +47,6 @@ struct SimulationData
     bool isEmpty();
     void free();
 
-    __device__ void prepareForNextTimestep();
-
 private:
     template <typename Entity>
     void resizeTargetIntern(Array<Entity> const& sourceArray, Array<Entity>& targetArray, uint64_t additionalEntities);

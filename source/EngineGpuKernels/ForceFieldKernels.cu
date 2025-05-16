@@ -61,7 +61,7 @@ __global__ void cudaApplyForceFieldSettings(SimulationData data)
         return ParameterCalculator::calcParameter(float2{0, 0}, accelerations, data, pos);
     };
     {
-        auto& cells = data.objects.cellPointers;
+        auto& cells = data.objects.cells;
         auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -73,7 +73,7 @@ __global__ void cudaApplyForceFieldSettings(SimulationData data)
         }
     }
     {
-        auto& particles = data.objects.particlePointers;
+        auto& particles = data.objects.particles;
         auto partition = calcAllThreadsPartition(particles.getNumEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& particle = particles.at(index);

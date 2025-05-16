@@ -10,49 +10,23 @@
 #include "EngineInterface/EngineConstants.h"
 
 #include "Definitions.h"
+#include "GenomeDescriptions.h"
 
 struct CellMetadataDescription
 {
     auto operator<=>(CellMetadataDescription const&) const = default;
 
-    CellMetadataDescription& name(std::string const& value)
-    {
-        _name = value;
-        return *this;
-    }
-    CellMetadataDescription& description(std::string const& value)
-    {
-        _description = value;
-        return *this;
-    }
-
-    std::string _name;
-    std::string _description;
+    MEMBER(CellMetadataDescription, std::string, name, "");
+    MEMBER(CellMetadataDescription, std::string, description, "");
 };
 
 struct ConnectionDescription
 {
     auto operator<=>(ConnectionDescription const&) const = default;
 
-    ConnectionDescription& cellId(uint64_t const& value)
-    {
-        _cellId = value;
-        return *this;
-    }
-    ConnectionDescription& distance(float const& value)
-    {
-        _distance = value;
-        return *this;
-    }
-    ConnectionDescription& angleFromPrevious(float const& value)
-    {
-        _angleFromPrevious = value;
-        return *this;
-    }
-
-    uint64_t _cellId = 0;  //value of 0 means cell not present in DataDescription
-    float _distance = 0;
-    float _angleFromPrevious = 0;
+    MEMBER(ConnectionDescription, uint64_t, cellId, 0ull);  // value of 0 means cell not present in DataDescription
+    MEMBER(ConnectionDescription, float, distance, 0.0f);
+    MEMBER(ConnectionDescription, float, angleFromPrevious, 0.0f);
 };
 
 struct StructureCellDescription
@@ -82,6 +56,10 @@ struct NeuralNetworkDescription
     }
     auto operator<=>(NeuralNetworkDescription const&) const = default;
 
+    MEMBER(NeuralNetworkDescription, std::vector<float>, weights, {});
+    MEMBER(NeuralNetworkDescription, std::vector<float>, biases, {});
+    MEMBER(NeuralNetworkDescription, std::vector<ActivationFunction>, activationFunctions, {});
+
     NeuralNetworkDescription& weight(int row, int col, float value)
     {
         // #TODO GCC incompatibily:
@@ -93,10 +71,6 @@ struct NeuralNetworkDescription
     // #TODO GCC incompatibily:
     // auto getWeights() const { return std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
     // auto getWeights() { return std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
-
-    std::vector<float> _weights;
-    std::vector<float> _biases;
-    std::vector<ActivationFunction> _activationFunctions;
 };
 
 struct BaseDescription
@@ -108,13 +82,7 @@ struct DepotDescription
 {
     auto operator<=>(DepotDescription const&) const = default;
 
-    DepotDescription& mode(EnergyDistributionMode value)
-    {
-        _mode = value;
-        return *this;
-    }
-
-    EnergyDistributionMode _mode = EnergyDistributionMode_TransmittersAndConstructors;
+    MEMBER(DepotDescription, EnergyDistributionMode, mode, EnergyDistributionMode_TransmittersAndConstructors);
 };
 
 struct ConstructorDescription
@@ -122,148 +90,50 @@ struct ConstructorDescription
     ConstructorDescription();
     auto operator<=>(ConstructorDescription const&) const = default;
 
-    ConstructorDescription& autoTriggerInterval(int value)
-    {
-        _autoTriggerInterval = static_cast<uint8_t>(value);
-        return *this;
-    }
-    ConstructorDescription& constructionActivationTime(int value)
-    {
-        _constructionActivationTime = value;
-        return *this;
-    }
-    ConstructorDescription& genome(std::vector<uint8_t> const& value)
-    {
-        _genome = value;
-        return *this;
-    }
-    ConstructorDescription& genomeCurrentNodeIndex(int value)
-    {
-        _genomeCurrentNodeIndex = value;
-        return *this;
-    }
-    ConstructorDescription& genomeCurrentRepetition(int value)
-    {
-        _genomeCurrentRepetition = value;
-        return *this;
-    }
-    ConstructorDescription& genomeCurrentBranch(int value)
-    {
-        _genomeCurrentBranch = value;
-        return *this;
-    }
-    int getNumInheritedGenomeNodes() const { return _numInheritedGenomeNodes; }
-    bool isGenomeInherited() const { return _numInheritedGenomeNodes != 0; }
-    ConstructorDescription& numInheritedGenomeNodes(int value)
-    {
-        _numInheritedGenomeNodes = value;
-        return *this;
-    }
-    ConstructorDescription& genomeGeneration(int value)
-    {
-        _genomeGeneration = value;
-        return *this;
-    }
-    ConstructorDescription& constructionAngle1(float value)
-    {
-        _constructionAngle1 = value;
-        return *this;
-    }
-    ConstructorDescription& constructionAngle2(float value)
-    {
-        _constructionAngle2 = value;
-        return *this;
-    }
-    ConstructorDescription& lastConstructedCellId(uint64_t value)
-    {
-        _lastConstructedCellId = value;
-        return *this;
-    }
-
     // Properties
-    int _autoTriggerInterval = 100;  // 0 = manual (triggered by signal), > 0 = auto trigger
-    int _constructionActivationTime = 100;
+    MEMBER(ConstructorDescription, int, autoTriggerInterval, 100);  // 0 = manual (triggered by signal), > 0 = auto trigger
+    MEMBER(ConstructorDescription, int, constructionActivationTime, 100);
 
     // Genome data
-    std::vector<uint8_t> _genome;
-    int _numInheritedGenomeNodes = 0;
-    int _genomeGeneration = 0;
-    float _constructionAngle1 = 0;
-    float _constructionAngle2 = 0;
+    MEMBER(ConstructorDescription, std::vector<uint8_t>, genome, {});
+    MEMBER(ConstructorDescription, int, numInheritedGenomeNodes, 0);
+    MEMBER(ConstructorDescription, int, genomeGeneration, 0);
+    MEMBER(ConstructorDescription, float, constructionAngle1, 0);
+    MEMBER(ConstructorDescription, float, constructionAngle2, 0);
 
     // Process data
-    uint64_t _lastConstructedCellId = 0;
-    int _genomeCurrentNodeIndex = 0;
-    int _genomeCurrentRepetition = 0;
-    int _genomeCurrentBranch = 0;
-    int _offspringCreatureId = 0;
-    int _offspringMutationId = 0;
+    MEMBER(ConstructorDescription, uint64_t, lastConstructedCellId, 0);
+    MEMBER(ConstructorDescription, int, genomeCurrentNodeIndex, 0);
+    MEMBER(ConstructorDescription, int, genomeCurrentRepetition, 0);
+    MEMBER(ConstructorDescription, int, genomeCurrentBranch, 0);
+    MEMBER(ConstructorDescription, int, offspringCreatureId, 0);
+    MEMBER(ConstructorDescription, int, offspringMutationId, 0);
+
+    bool isGenomeInherited() const { return _numInheritedGenomeNodes != 0; }
 };
 
 struct SensorDescription
 {
     auto operator<=>(SensorDescription const&) const = default;
 
-    SensorDescription& autoTriggerInterval(int value)
-    {
-        _autoTriggerInterval = value;
-        return *this;
-    }
-    SensorDescription& color(int value)
-    {
-        _restrictToColor = value;
-        return *this;
-    }
-    SensorDescription& minDensity(float value)
-    {
-        _minDensity = value;
-        return *this;
-    }
-    SensorDescription& minRange(int value)
-    {
-        _minRange = value;
-        return *this;
-    }
-    SensorDescription& maxRange(int value)
-    {
-        _maxRange = value;
-        return *this;
-    }
-    SensorDescription& restrictToMutants(SensorRestrictToMutants value)
-    {
-        _restrictToMutants = value;
-        return *this;
-    }
-
-    int _autoTriggerInterval = 100;  // 0 = manual (triggered by signal), > 0 = auto trigger
-    float _minDensity = 0.05f;
-    std::optional<int> _minRange;
-    std::optional<int> _maxRange;
-    std::optional<int> _restrictToColor;
-    SensorRestrictToMutants _restrictToMutants = SensorRestrictToMutants_NoRestriction;
+    MEMBER(SensorDescription, int, autoTriggerInterval, 100);  // 0 = manual (triggered by signal), > 0 = auto trigger
+    MEMBER(SensorDescription, float, minDensity, 0.05f);
+    MEMBER(SensorDescription, std::optional<int>, minRange, std::nullopt);
+    MEMBER(SensorDescription, std::optional<int>, maxRange, std::nullopt);
+    MEMBER(SensorDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(SensorDescription, SensorRestrictToMutants, restrictToMutants, SensorRestrictToMutants_NoRestriction);
 };
 
 struct OscillatorDescription
 {
     auto operator<=>(OscillatorDescription const&) const = default;
 
-    OscillatorDescription& autoTriggerInterval(int value)
-    {
-        _autoTriggerInterval = value;
-        return *this;
-    }
-    OscillatorDescription& alternationInterval(int value)
-    {
-        _alternationInterval = value;
-        return *this;
-    }
-
     // Fixed data
-    int _autoTriggerInterval = 100;
-    int _alternationInterval = 0;  // 0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
+    MEMBER(OscillatorDescription, int, autoTriggerInterval, 100);
+    MEMBER(OscillatorDescription, int, alternationInterval, 0);  // 0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
 
     // Process data
-    int _numPulses = 0;
+    MEMBER(OscillatorDescription, int, numPulses, 0);
 };
 
 struct AttackerDescription
@@ -276,26 +146,10 @@ struct InjectorDescription
     InjectorDescription();
     auto operator<=>(InjectorDescription const&) const = default;
 
-    InjectorDescription& mode(InjectorMode value)
-    {
-        _mode = value;
-        return *this;
-    }
-    InjectorDescription& genome(std::vector<uint8_t> const& value)
-    {
-        _genome = value;
-        return *this;
-    }
-    InjectorDescription& genomeGeneration(int value)
-    {
-        _genomeGeneration = value;
-        return *this;
-    }
-
-    InjectorMode _mode = InjectorMode_InjectAll;
-    int _counter = 0;
-    std::vector<uint8_t> _genome;
-    int _genomeGeneration = 0;
+    MEMBER(InjectorDescription, InjectorMode, mode, InjectorMode_InjectAll);
+    MEMBER(InjectorDescription, int, counter, 0);
+    MEMBER(InjectorDescription, std::vector<uint8_t>, genome, {});
+    MEMBER(InjectorDescription, int, genomeGeneration, 0);
 };
 
 struct AutoBendingDescription
@@ -391,6 +245,12 @@ struct MuscleDescription
 {
     auto operator<=>(MuscleDescription const&) const = default;
 
+    MEMBER(MuscleDescription, MuscleModeDescription, mode, MuscleModeDescription());
+
+    // Additional rendering data
+    MEMBER(MuscleDescription, float, lastMovementX, 0.0f);
+    MEMBER(MuscleDescription, float, lastMovementY, 0.0f);
+
     MuscleMode getMode() const
     {
         if (std::holds_alternative<AutoBendingDescription>(_mode)) {
@@ -408,69 +268,29 @@ struct MuscleDescription
         }
         THROW_NOT_IMPLEMENTED();
     }
-    MuscleDescription& mode(MuscleModeDescription const& value)
-    {
-        _mode = value;
-        return *this;
-    }
-
-    MuscleModeDescription _mode;
-
-    // Additional rendering data
-    float _lastMovementX = 0;
-    float _lastMovementY = 0;
 };
 
 struct DefenderDescription
 {
     auto operator<=>(DefenderDescription const&) const = default;
 
-    DefenderDescription& mode(DefenderMode value)
-    {
-        _mode = value;
-        return *this;
-    }
-
-    DefenderMode _mode = DefenderMode_DefendAgainstAttacker;
+    MEMBER(DefenderDescription, DefenderMode, mode, DefenderMode_DefendAgainstAttacker);
 };
 
 struct ReconnectorDescription
 {
     auto operator<=>(ReconnectorDescription const&) const = default;
 
-    ReconnectorDescription& restrictToColor(int value)
-    {
-        _restrictToColor = value;
-        return *this;
-    }
-    ReconnectorDescription& restrictToMutants(ReconnectorRestrictToMutants value)
-    {
-        _restrictToMutants = value;
-        return *this;
-    }
-
-    std::optional<int> _restrictToColor;
-    ReconnectorRestrictToMutants _restrictToMutants = ReconnectorRestrictToMutants_NoRestriction;
+    MEMBER(ReconnectorDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(ReconnectorDescription, ReconnectorRestrictToMutants, restrictToMutants, ReconnectorRestrictToMutants_NoRestriction);
 };
 
 struct DetonatorDescription
 {
     auto operator<=>(DetonatorDescription const&) const = default;
 
-    DetonatorDescription& state(DetonatorState value)
-    {
-        _state = value;
-        return *this;
-    }
-
-    DetonatorDescription& countDown(int value)
-    {
-        _countdown = value;
-        return *this;
-    }
-
-    DetonatorState _state = DetonatorState_Ready;
-    int _countdown = 10;
+    MEMBER(DetonatorDescription, DetonatorState, state, DetonatorState_Ready);
+    MEMBER(DetonatorDescription, int, countdown, 10);
 };
 
 using CellTypeDescription = std::variant<
@@ -492,27 +312,17 @@ struct SignalRoutingRestrictionDescription
 {
     auto operator<=>(SignalRoutingRestrictionDescription const&) const = default;
 
-    bool _active = false;
-    float _baseAngle = 0;
-    float _openingAngle = 0;
+    MEMBER(SignalRoutingRestrictionDescription, bool, active, false);
+    MEMBER(SignalRoutingRestrictionDescription, float, baseAngle, 0);
+    MEMBER(SignalRoutingRestrictionDescription, float, openingAngle, 0);
 };
 
 struct SignalDescription
 {
-    SignalDescription()
-    {
-        _channels.resize(MAX_CHANNELS, 0);
-    }
+    SignalDescription() { _channels.resize(MAX_CHANNELS, 0); }
     auto operator<=>(SignalDescription const&) const = default;
 
-    SignalDescription& channels(std::vector<float> const& value)
-    {
-        CHECK(value.size() == MAX_CHANNELS);
-        _channels = value;
-        return *this;
-    }
-
-    std::vector<float> _channels;
+    MEMBER(SignalDescription, std::vector<float>, channels, {});
 };
 
 struct CellDescription
@@ -520,72 +330,39 @@ struct CellDescription
     CellDescription() = default;
     auto operator<=>(CellDescription const&) const = default;
 
-    CellDescription& id(uint64_t value)
-    {
-        _id = value;
-        return *this;
-    }
-    CellDescription& pos(RealVector2D const& value)
-    {
-        _pos = value;
-        return *this;
-    }
-    CellDescription& vel(RealVector2D const& value)
-    {
-        _vel = value;
-        return *this;
-    }
-    CellDescription& energy(float value)
-    {
-        _energy = value;
-        return *this;
-    }
-    CellDescription& stiffness(float value)
-    {
-        _stiffness = value;
-        return *this;
-    }
-    CellDescription& color(int value)
-    {
-        _color = value;
-        return *this;
-    }
-    CellDescription& angleToFront(float value)
-    {
-        _angleToFront = value;
-        return *this;
-    }
-    CellDescription& barrier(bool value)
-    {
-        _barrier = value;
-        return *this;
-    }
-    CellDescription& sticky(bool value)
-    {
-        _sticky = value;
-        return *this;
-    }
-    CellDescription& age(int value)
-    {
-        _age = value;
-        return *this;
-    }
+    // General
+    MEMBER(CellDescription, uint64_t, id, 0ull);
+    MEMBER(CellDescription, std::optional<uint64_t>, genomeId, std::nullopt);
+    MEMBER(CellDescription, std::vector<ConnectionDescription>, connections, {});
+    MEMBER(CellDescription, RealVector2D, pos, RealVector2D());
+    MEMBER(CellDescription, RealVector2D, vel, RealVector2D());
+    MEMBER(CellDescription, float, energy, 100.0f);
+    MEMBER(CellDescription, float, stiffness, 1.0f);
+    MEMBER(CellDescription, int, color, 0);
+    MEMBER(CellDescription, float, angleToFront, 0);  // Angle between [cell, cell->connection[0]] and front direction in reference configuration
+    MEMBER(CellDescription, bool, barrier, false);
+    MEMBER(CellDescription, bool, sticky, false);
+    MEMBER(CellDescription, int, age, 0);
+    MEMBER(CellDescription, LivingState, livingState, LivingState_Ready);
+    MEMBER(CellDescription, int, creatureId, 0);
+    MEMBER(CellDescription, int, mutationId, 0);
+    MEMBER(CellDescription, uint8_t, ancestorMutationId, 0);
+    MEMBER(CellDescription, float, genomeComplexity, 0);
+    MEMBER(CellDescription, uint16_t, genomeNodeIndex, 0);
 
-    CellDescription& connectingCells(std::vector<ConnectionDescription> const& value)
-    {
-        _connections = value;
-        return *this;
-    }
-    CellDescription& livingState(LivingState value)
-    {
-        _livingState = value;
-        return *this;
-    }
-    CellDescription& constructionId(int value)
-    {
-        _creatureId = value;
-        return *this;
-    }
+    // Cell type-specific data
+    MEMBER(CellDescription, std::optional<NeuralNetworkDescription>, neuralNetwork, NeuralNetworkDescription());
+    CellTypeDescription _cellTypeData = BaseDescription();
+    MEMBER(CellDescription, SignalRoutingRestrictionDescription, signalRoutingRestriction, SignalRoutingRestrictionDescription());
+    MEMBER(CellDescription, uint8_t, signalRelaxationTime, 0);
+    std::optional<SignalDescription> _signal;
+    MEMBER(CellDescription, int, activationTime, 0);
+    MEMBER(CellDescription, int, detectedByCreatureId, 0);  // Only the first 16 bits from the creature id
+    MEMBER(CellDescription, CellTriggered, cellTypeUsed, CellTriggered_No);
+
+    // Misc
+    MEMBER(CellDescription, CellMetadataDescription, metadata, CellMetadataDescription());
+
     CellType getCellType() const;
     template <typename CellTypeDesc>
     CellDescription& cellType(CellTypeDesc const& value)
@@ -597,21 +374,6 @@ struct CellDescription
         } else if (!_neuralNetwork.has_value()) {
             _neuralNetwork = NeuralNetworkDescription();
         }
-        return *this;
-    }
-    CellDescription& neuralNetwork(NeuralNetworkDescription const& value)
-    {
-        _neuralNetwork = value;
-        return *this;
-    }
-    CellDescription& metadata(CellMetadataDescription const& value)
-    {
-        _metadata = value;
-        return *this;
-    }
-    CellDescription& signalRelaxationTime(uint8_t value)
-    {
-        _signalRelaxationTime = value;
         return *this;
     }
     CellDescription& signal(SignalDescription const& value)
@@ -639,70 +401,18 @@ struct CellDescription
         _signalRoutingRestriction = routingRestriction;
         return *this;
     }
-    CellDescription& activationTime(int value)
-    {
-        _activationTime = value;
-        return *this;
-    }
-    CellDescription& creatureId(int value)
-    {
-        _creatureId = value;
-        return *this;
-    }
-    CellDescription& mutationId(int value)
-    {
-        _mutationId = value;
-        return *this;
-    }
-    CellDescription& genomeComplexity(float value)
-    {
-        _genomeComplexity = value;
-        return *this;
-    }
-
     bool hasGenome() const;
     std::vector<uint8_t>& getGenomeRef();
 
     bool isConnectedTo(uint64_t id) const;
-
-    // General
-    uint64_t _id = 0;
-    uint64_t _genomeId_New = 0;
-    std::vector<ConnectionDescription> _connections;
-    RealVector2D _pos;
-    RealVector2D _vel;
-    float _energy = 100.0f;
-    float _stiffness = 1.0f;
-    int _color = 0;
-    float _angleToFront = 0;  // Angle between [cell, cell->connection[0]] and front direction in reference configuration
-    bool _barrier = false;
-    bool _sticky = false;
-    int _age = 0;
-    LivingState _livingState = LivingState_Ready;
-    int _creatureId = 0;
-    int _mutationId = 0;
-    uint8_t _ancestorMutationId = 0;
-    float _genomeComplexity = 0;
-    uint16_t _genomeNodeIndex = 0;
-
-    // Cell type data
-    std::optional<NeuralNetworkDescription> _neuralNetwork = NeuralNetworkDescription();
-    CellTypeDescription _cellTypeData = BaseDescription();
-    SignalRoutingRestrictionDescription _signalRoutingRestriction;
-    uint8_t _signalRelaxationTime = 0;
-    std::optional<SignalDescription> _signal;
-    int _activationTime = 0;
-    int _detectedByCreatureId = 0;  //only the first 16 bits from the creature id
-    CellTriggered _cellTypeUsed = CellTriggered_No;
-
-    // Misc
-    CellMetadataDescription _metadata;
 };
 
 struct ClusterDescription
 {
     ClusterDescription() = default;
     auto operator<=>(ClusterDescription const&) const = default;
+
+    MEMBER(ClusterDescription, std::vector<CellDescription>, cells, {});
 
     ClusterDescription& addCells(std::vector<CellDescription> const& value)
     {
@@ -716,8 +426,6 @@ struct ClusterDescription
     }
 
     RealVector2D getClusterPosFromCells() const;
-
-    std::vector<CellDescription> _cells;
 };
 
 struct ParticleDescription
@@ -725,44 +433,21 @@ struct ParticleDescription
     ParticleDescription() = default;
     auto operator<=>(ParticleDescription const&) const = default;
 
-    ParticleDescription& id(uint64_t value)
-    {
-        _id = value;
-        return *this;
-    }
-    ParticleDescription& pos(RealVector2D const& value)
-    {
-        _pos = value;
-        return *this;
-    }
-    ParticleDescription& vel(RealVector2D const& value)
-    {
-        _vel = value;
-        return *this;
-    }
-    ParticleDescription& energy(float value)
-    {
-        _energy = value;
-        return *this;
-    }
-    ParticleDescription& color(int value)
-    {
-        _color = value;
-        return *this;
-    }
-
-    uint64_t _id = 0;
-
-    RealVector2D _pos;
-    RealVector2D _vel;
-    float _energy = 0;
-    int _color = 0;
+    MEMBER(ParticleDescription, uint64_t, id, 0ull);
+    MEMBER(ParticleDescription, RealVector2D, pos, RealVector2D());
+    MEMBER(ParticleDescription, RealVector2D, vel, RealVector2D());
+    MEMBER(ParticleDescription, float, energy, 0.0f);
+    MEMBER(ParticleDescription, int, color, 0);
 };
 
 struct ClusteredDataDescription
 {
     ClusteredDataDescription() = default;
     auto operator<=>(ClusteredDataDescription const&) const = default;
+
+    MEMBER(ClusteredDataDescription, std::vector<ClusterDescription>, clusters, {});
+    MEMBER(ClusteredDataDescription, std::vector<ParticleDescription>, particles, {});
+    MEMBER(ClusteredDataDescription, std::vector<GenomeDescription_New>, genomes, {});
 
     ClusteredDataDescription& addClusters(std::vector<ClusterDescription> const& value)
     {
@@ -805,9 +490,6 @@ struct ClusteredDataDescription
     RealVector2D calcCenter() const;
     void shift(RealVector2D const& delta);
     int getNumberOfCellAndParticles() const;
-
-    std::vector<ClusterDescription> _clusters;
-    std::vector<ParticleDescription> _particles;
 };
 
 struct DataDescription
@@ -815,6 +497,10 @@ struct DataDescription
     DataDescription() = default;
     explicit DataDescription(ClusteredDataDescription const& clusteredData);
     auto operator<=>(DataDescription const&) const = default;
+
+    MEMBER(DataDescription, std::vector<CellDescription>, cells, {});
+    MEMBER(DataDescription, std::vector<ParticleDescription>, particles, {});
+    MEMBER(DataDescription, std::vector<GenomeDescription_New>, genomes, {});
 
     DataDescription& add(DataDescription const& other);
     DataDescription& addCells(std::vector<CellDescription> const& value);
@@ -834,10 +520,8 @@ struct DataDescription
     std::unordered_set<uint64_t> getCellIds() const;
 
     DataDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>* cache = nullptr);
-    DataDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, RealVector2D const& refPosCell2, std::unordered_map<uint64_t, int>* cache = nullptr);
-
-    std::vector<CellDescription> _cells;
-    std::vector<ParticleDescription> _particles;
+    DataDescription&
+    addConnection(uint64_t const& cellId1, uint64_t const& cellId2, RealVector2D const& refPosCell2, std::unordered_map<uint64_t, int>* cache = nullptr);
 
 private:
     CellDescription& getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>* cache = nullptr);

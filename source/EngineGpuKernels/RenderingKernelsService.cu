@@ -16,11 +16,11 @@ void _RenderingKernelsService::drawImage(
     auto const& gpuSettings = settings.gpuSettings;
 
     KERNEL_CALL(cudaDrawSpotsAndGridlines, targetImage, imageSize, data.worldSize, zoom, rectUpperLeft, rectLowerRight);
-    KERNEL_CALL_1_1(cudaPrepareFilteringForRendering, data.tempObjects.cellPointers, data.tempObjects.particlePointers);
-    KERNEL_CALL(cudaFilterCellsForRendering, data.worldSize, rectUpperLeft, data.objects.cellPointers, data.tempObjects.cellPointers, imageSize, zoom);
-    KERNEL_CALL(cudaFilterParticlesForRendering, data.worldSize, rectUpperLeft, data.objects.particlePointers, data.tempObjects.particlePointers, imageSize, zoom);
-    KERNEL_CALL(cudaDrawCells, data.timestep, data.worldSize, rectUpperLeft, rectLowerRight, data.tempObjects.cellPointers, targetImage, imageSize, zoom);
-    KERNEL_CALL(cudaDrawParticles, data.worldSize, rectUpperLeft, rectLowerRight, data.tempObjects.particlePointers, targetImage, imageSize, zoom);
+    KERNEL_CALL_1_1(cudaPrepareFilteringForRendering, data.tempObjects.cells, data.tempObjects.particles);
+    KERNEL_CALL(cudaFilterCellsForRendering, data.worldSize, rectUpperLeft, data.objects.cells, data.tempObjects.cells, imageSize, zoom);
+    KERNEL_CALL(cudaFilterParticlesForRendering, data.worldSize, rectUpperLeft, data.objects.particles, data.tempObjects.particles, imageSize, zoom);
+    KERNEL_CALL(cudaDrawCells, data.timestep, data.worldSize, rectUpperLeft, rectLowerRight, data.tempObjects.cells, targetImage, imageSize, zoom);
+    KERNEL_CALL(cudaDrawParticles, data.worldSize, rectUpperLeft, rectLowerRight, data.tempObjects.particles, targetImage, imageSize, zoom);
     KERNEL_CALL_1_1(cudaDrawRadiationSources, targetImage, rectUpperLeft, data.worldSize, imageSize, zoom);
 
     if (settings.simulationParameters.cellGlowToggle.value) {
@@ -36,7 +36,7 @@ void _RenderingKernelsService::drawImage(
             blocks = 32;
             threadsPerBlock = 1024;
         }
-        cudaDrawCellGlow<<<blocks, threadsPerBlock>>>(data.worldSize, rectUpperLeft, data.tempObjects.cellPointers, targetImage, imageSize, zoom);
+        cudaDrawCellGlow<<<blocks, threadsPerBlock>>>(data.worldSize, rectUpperLeft, data.tempObjects.cells, targetImage, imageSize, zoom);
     }
 
     if (settings.simulationParameters.borderlessRendering.value) {

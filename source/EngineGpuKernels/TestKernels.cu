@@ -4,7 +4,7 @@
 
 __global__ void cudaTestMutate(SimulationData data, uint64_t cellId, MutationType mutationType)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -56,7 +56,7 @@ __global__ void cudaTestCreateConnection(SimulationData data, uint64_t cellId1, 
 {
     CUDA_CHECK(blockDim.x == 1 && gridDim.x == 1);
 
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
     Cell* cell1 = nullptr;
     Cell* cell2 = nullptr;
@@ -71,7 +71,21 @@ __global__ void cudaTestCreateConnection(SimulationData data, uint64_t cellId1, 
     }
 
     if (cell1 != nullptr && cell2 != nullptr) {
-        data.prepareForNextTimestep();
+        data.cellMap.reset();
+        data.particleMap.reset();
+        data.processMemory.reset();
+
+        // Heuristics
+        auto maxStructureOperations = 1000 + data.objects.cells.getNumEntries() / 2;
+        auto maxCellTypeOperations = data.objects.cells.getNumEntries();
+
+        data.structuralOperations.setMemory(data.processMemory.getTypedSubArray<StructuralOperation>(maxStructureOperations), maxStructureOperations);
+        for (int i = CellType_Base; i < CellType_Count; ++i) {
+            data.cellTypeOperations[i].setMemory(data.processMemory.getTypedSubArray<CellTypeOperation>(maxCellTypeOperations), maxCellTypeOperations);
+        }
+        *data.externalEnergy = cudaSimulationParameters.externalEnergy.value;
+        data.objects.saveNumEntries();
+
         CellConnectionProcessor::scheduleAddConnectionPair(data, cell1, cell2);
         data.structuralOperations.saveNumEntries();
         CellConnectionProcessor::processAddOperations(data);
@@ -80,7 +94,7 @@ __global__ void cudaTestCreateConnection(SimulationData data, uint64_t cellId1, 
 
 __global__ void cudaTestAreArraysValid(SimulationData data, bool* result)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -88,7 +102,7 @@ __global__ void cudaTestAreArraysValid(SimulationData data, bool* result)
 
             bool isValid = true;
             if (reinterpret_cast<uint64_t>(cell) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
-                || reinterpret_cast<uint64_t>(cell) >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getSize())) {
+                || reinterpret_cast<uint64_t>(cell) >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity())) {
                 *result = false;
                 isValid = false;
             }
@@ -98,7 +112,7 @@ __global__ void cudaTestAreArraysValid(SimulationData data, bool* result)
                     auto connectingCell = cell->connections[i].cell;
                     if (reinterpret_cast<uint64_t>(connectingCell) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
                         || reinterpret_cast<uint64_t>(connectingCell)
-                            >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getSize())) {
+                            >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity())) {
                         *result = false;
                     }
                 }
@@ -109,7 +123,7 @@ __global__ void cudaTestAreArraysValid(SimulationData data, bool* result)
 
 __global__ void cudaTestMutationCheck(SimulationData data, uint64_t cellId)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {

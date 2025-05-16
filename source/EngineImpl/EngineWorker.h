@@ -34,7 +34,7 @@ struct ExceptionData
     std::optional<std::string> errorMessage;
 };
 
-struct DataTO;
+struct CollectionTO;
 
 class EngineWorker
 {
@@ -171,7 +171,7 @@ private:
     //internals
     std::optional<GLuint> _imageResource;
     void* _cudaResource = nullptr;
-    DataTOProvider _dataTOProvider;
+    CollectionTOProvider _collectionTOProvider;
 };
 
 class EngineWorkerGuard

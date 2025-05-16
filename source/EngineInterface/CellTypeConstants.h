@@ -21,6 +21,23 @@ enum CellType_
     CellType_Count,
 };
 
+using CellTypeGenome = int;
+enum CellTypeGenome_
+{
+    CellTypeGenome_Base,
+    CellTypeGenome_Depot,
+    CellTypeGenome_Constructor,
+    CellTypeGenome_Sensor,
+    CellTypeGenome_Oscillator,
+    CellTypeGenome_Attacker,
+    CellTypeGenome_Injector,
+    CellTypeGenome_Muscle,
+    CellTypeGenome_Defender,
+    CellTypeGenome_Reconnector,
+    CellTypeGenome_Detonator,
+    CellTypeGenome_Count,
+};
+
 using LivingState = int;
 enum LivingState_
 {

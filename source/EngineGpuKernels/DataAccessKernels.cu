@@ -1,26 +1,40 @@
 ﻿#include "DataAccessKernels.cuh"
 
+#include "Base/Macros.h"
+
 namespace
 {
     template <typename T>
     __device__ void
-    copyAuxiliaryData(T sourceSize, uint8_t* source, T& targetSize, uint64_t& targetIndex, uint64_t& auxiliaryDataSize, uint8_t*& auxiliaryData)
+    copyDataToHeap(T sourceSize, uint8_t* source, T& targetSize, uint64_t& targetIndex, CollectionTO& collectionTO)
     {
         targetSize = sourceSize;
         if (sourceSize > 0) {
-            targetIndex = alienAtomicAdd64(&auxiliaryDataSize, static_cast<uint64_t>(sourceSize));
+            targetIndex = alienAtomicAdd64(collectionTO.heapSize, static_cast<uint64_t>(sourceSize));
+            if (targetIndex + sourceSize >= collectionTO.capacities.heap) {
+                printf("Insufficient heap memory for transfer objects.\n");
+                ABORT();
+            }
             for (int i = 0; i < sourceSize; ++i) {
-                auxiliaryData[targetIndex + i] = source[i];
+                collectionTO.heap[targetIndex + i] = source[i];
             }
         }
     }
 
-    __device__ void createCellTO(Cell* cell, DataTO& dataTO, uint8_t* memoryBlockStart)
+    __device__ void createCellTO(Cell* cell, CollectionTO& collectionTO, uint8_t* heap)
     {
-        auto cellTOIndex = alienAtomicAdd64(dataTO.numCells, uint64_t(1));
-        auto& cellTO = dataTO.cells[cellTOIndex];
+        auto cellTOIndex = alienAtomicAdd64(collectionTO.numCells, 1ull);
+        if (cellTOIndex >= collectionTO.capacities.cells) {
+            printf("Insufficient cell memory for transfer objects.\n");
+            ABORT();
+        }
+        auto& cellTO = collectionTO.cells[cellTOIndex];
 
         cellTO.id = cell->id;
+        cellTO.hasGenome = (cell->genome != nullptr);
+        if (cellTO.hasGenome) {
+            cellTO.genomeIndex = cell->genome->genomeIndex;
+        }
         cellTO.pos = cell->pos;
         cellTO.vel = cell->vel;
         cellTO.barrier = cell->barrier;
@@ -50,55 +64,51 @@ namespace
         cellTO.cellTypeUsed = cell->cellTypeUsed;
         cellTO.genomeNodeIndex = cell->genomeNodeIndex;
 
-        copyAuxiliaryData(
+        copyDataToHeap(
             cell->metadata.nameSize,
             cell->metadata.name,
             cellTO.metadata.nameSize,
             cellTO.metadata.nameDataIndex,
-            *dataTO.heapSize,
-            dataTO.heap);
-        copyAuxiliaryData(
+            collectionTO);
+        copyDataToHeap(
             cell->metadata.descriptionSize,
             cell->metadata.description,
             cellTO.metadata.descriptionSize,
             cellTO.metadata.descriptionDataIndex,
-            *dataTO.heapSize,
-            dataTO.heap);
+            collectionTO);
 
-        cell->tag = cellTOIndex;
+        cell->tempValue = cellTOIndex;
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectingCell = cell->connections[i].cell;
-            cellTO.connections[i].cellIndex = reinterpret_cast<uint8_t*>(connectingCell) - memoryBlockStart;
+            cellTO.connections[i].cellIndex = reinterpret_cast<uint8_t*>(connectingCell) - heap;
             cellTO.connections[i].distance = cell->connections[i].distance;
             cellTO.connections[i].angleFromPrevious = cell->connections[i].angleFromPrevious;
         }
 
         if (cell->cellType != CellType_Structure && cell->cellType != CellType_Free) {
             int targetSize;  //not used
-            copyAuxiliaryData<int>(
+            copyDataToHeap<int>(
                 sizeof(NeuralNetwork),
                 reinterpret_cast<uint8_t*>(cell->neuralNetwork),
                 targetSize,
-                cellTO.neuralNetwork.dataIndex,
-                *dataTO.heapSize,
-                dataTO.heap);
+                cellTO.neuralNetworkDataIndex,
+                collectionTO);
         }
         switch (cell->cellType) {
         case CellType_Base: {
         } break;
         case CellType_Depot: {
-            cellTO.cellTypeData.transmitter.mode = cell->cellTypeData.transmitter.mode;
+            cellTO.cellTypeData.depot.mode = cell->cellTypeData.depot.mode;
         } break;
         case CellType_Constructor: {
             cellTO.cellTypeData.constructor.autoTriggerInterval = cell->cellTypeData.constructor.autoTriggerInterval;
             cellTO.cellTypeData.constructor.constructionActivationTime = cell->cellTypeData.constructor.constructionActivationTime;
-            copyAuxiliaryData(
+            copyDataToHeap(
                 cell->cellTypeData.constructor.genomeSize,
                 cell->cellTypeData.constructor.genome,
                 cellTO.cellTypeData.constructor.genomeSize,
                 cellTO.cellTypeData.constructor.genomeDataIndex,
-                *dataTO.heapSize,
-                dataTO.heap);
+                collectionTO);
             cellTO.cellTypeData.constructor.numInheritedGenomeNodes = cell->cellTypeData.constructor.numInheritedGenomeNodes;
             cellTO.cellTypeData.constructor.lastConstructedCellId = cell->cellTypeData.constructor.lastConstructedCellId;
             cellTO.cellTypeData.constructor.genomeCurrentNodeIndex = cell->cellTypeData.constructor.genomeCurrentNodeIndex;
@@ -128,13 +138,12 @@ namespace
         case CellType_Injector: {
             cellTO.cellTypeData.injector.mode = cell->cellTypeData.injector.mode;
             cellTO.cellTypeData.injector.counter = cell->cellTypeData.injector.counter;
-            copyAuxiliaryData(
+            copyDataToHeap(
                 cell->cellTypeData.injector.genomeSize,
                 cell->cellTypeData.injector.genome,
                 cellTO.cellTypeData.injector.genomeSize,
                 cellTO.cellTypeData.injector.genomeDataIndex,
-                *dataTO.heapSize,
-                dataTO.heap);
+                collectionTO);
             cellTO.cellTypeData.injector.genomeGeneration = cell->cellTypeData.injector.genomeGeneration;
         } break;
         case CellType_Muscle: {
@@ -197,10 +206,15 @@ namespace
         }
     }
 
-    __device__ void createParticleTO(Particle* particle, DataTO& dataTO)
+    __device__ void createParticleTO(Particle* particle, CollectionTO& collectionTO)
     {
-        int particleTOIndex = alienAtomicAdd64(dataTO.numParticles, uint64_t(1));
-        ParticleTO& particleTO = dataTO.particles[particleTOIndex];
+        int particleTOIndex = alienAtomicAdd64(collectionTO.numParticles, uint64_t(1));
+        if (particleTOIndex >= collectionTO.capacities.particles) {
+            printf("Insufficient particle memory for transfer objects.\n");
+            ABORT();
+        }
+
+        ParticleTO& particleTO = collectionTO.particles[particleTOIndex];
 
         particleTO.id = particle->id;
         particleTO.pos = particle->pos;
@@ -214,28 +228,44 @@ namespace
 /************************************************************************/
 /* Main                                                                 */
 /************************************************************************/
-__global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, DataTO dataTO)
+__global__ void cudaPrepareGenomesForConversionToTO(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data)
 {
-    auto const& cells = data.objects.cellPointers;
+    auto const& cells = data.objects.cells;
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+
+        auto pos = cell->pos;
+        data.cellMap.correctPosition(pos);
+        if (isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
+            cell->genome->genomeIndex = Genome::GenomeIndex_NotSet;
+        }
+    }
+}
+
+__global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, CollectionTO collectionTO)
+{
+    auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
     auto const cellArrayStart = data.objects.heap.getArray();
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if ((includeClusters && cell->selected == 0) || (!includeClusters && cell->selected != 1)) {
-            cell->tag = -1;
+            cell->tempValue = -1;
             continue;
         }
-        createCellTO(cell, dataTO, cellArrayStart);
+        createCellTO(cell, collectionTO, cellArrayStart);
     }
 }
 
-__global__ void cudaGetSelectedParticleData(SimulationData data, DataTO access)
+__global__ void cudaGetSelectedParticleData(SimulationData data, CollectionTO access)
 {
-    PartitionData particleBlock = calcPartition(data.objects.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    PartitionData particleBlock = calcPartition(data.objects.particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
-        auto const& particle = data.objects.particlePointers.at(particleIndex);
+        auto const& particle = data.objects.particles.at(particleIndex);
         if (particle->selected == 0) {
             continue;
         }
@@ -244,9 +274,9 @@ __global__ void cudaGetSelectedParticleData(SimulationData data, DataTO access)
     }
 }
 
-__global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds ids, SimulationData data, DataTO dataTO)
+__global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds ids, SimulationData data, CollectionTO collectionTO)
 {
-    auto const& cells = data.objects.cellPointers;
+    auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
     auto const cellArrayStart = data.objects.heap.getArray();
 
@@ -268,20 +298,20 @@ __global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds id
             }
         }
         if (!found) {
-            cell->tag = -1;
+            cell->tempValue = -1;
             continue;
         }
 
-        createCellTO(cell, dataTO, cellArrayStart);
+        createCellTO(cell, collectionTO, cellArrayStart);
     }
 }
 
-__global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationData data, DataTO access)
+__global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationData data, CollectionTO access)
 {
-    PartitionData particleBlock = calcAllThreadsPartition(data.objects.particlePointers.getNumEntries());
+    PartitionData particleBlock = calcAllThreadsPartition(data.objects.particles.getNumEntries());
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
-        auto const& particle = data.objects.particlePointers.at(particleIndex);
+        auto const& particle = data.objects.particles.at(particleIndex);
         bool found = false;
         for (int i = 0; i < Const::MaxInspectedObjects; ++i) {
             if (ids.values[i] == 0) {
@@ -299,10 +329,10 @@ __global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationD
     }
 }
 
-__global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataTO dataTO)
+__global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, CollectionTO collectionTO)
 {
     {
-        auto const& cells = data.objects.cellPointers;
+        auto const& cells = data.objects.cells;
         auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -315,8 +345,8 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
                 continue;
             }
 
-            auto cellTOIndex = alienAtomicAdd64(dataTO.numCells, uint64_t(1));
-            auto& cellTO = dataTO.cells[cellTOIndex];
+            auto cellTOIndex = alienAtomicAdd64(collectionTO.numCells, uint64_t(1));
+            auto& cellTO = collectionTO.cells[cellTOIndex];
 
             cellTO.id = cell->id;
             cellTO.pos = cell->pos;
@@ -325,7 +355,7 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
         }
     }
     {
-        auto const& particles = data.objects.particlePointers;
+        auto const& particles = data.objects.particles;
         auto const partition = calcAllThreadsPartition(particles.getNumEntries());
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -336,8 +366,8 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
             if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
                 continue;
             }
-            auto particleTOIndex = alienAtomicAdd64(dataTO.numParticles, uint64_t(1));
-            auto& particleTO = dataTO.particles[particleTOIndex];
+            auto particleTOIndex = alienAtomicAdd64(collectionTO.numParticles, uint64_t(1));
+            auto& particleTO = collectionTO.particles[particleTOIndex];
 
             particleTO.id = particle->id;
             particleTO.pos = particle->pos;
@@ -346,12 +376,11 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
     }
 }
 
-// tags cell with cellTO index and tags cellTO connections with cell index
-__global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataTO dataTO)
+__global__ void cudaGetGenomeData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, CollectionTO collectionTO)
 {
-    auto const& cells = data.objects.cellPointers;
+    auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
-    auto const cellArrayStart = data.objects.heap.getArray();
+    auto const heap = data.objects.heap.getArray();
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
@@ -359,34 +388,180 @@ __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectL
         auto pos = cell->pos;
         data.cellMap.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
-            cell->tag = -1;
+            continue;
+        }
+        if (!cell->genome) {
             continue;
         }
 
-        createCellTO(cell, dataTO, cellArrayStart);
-    }
-}
+        auto origGenomeIndex = atomicExch(&cell->genome->genomeIndex, 0);  // 0 = member is currently initialized
+        if (origGenomeIndex == Genome::GenomeIndex_NotSet) {
+            auto genomeTOIndex = atomicAdd(collectionTO.numGenomes, 1ull);
+            if (genomeTOIndex >= collectionTO.capacities.cells) {
+                printf("Insufficient genome memory for transfer objects.\n");
+                ABORT();
+            }
+            auto& genomeTO = collectionTO.genomes[genomeTOIndex];
+            auto const& genome = cell->genome;
+            genomeTO.id = genome->id;
+            genomeTO.frontAngle = genome->frontAngle;
+            genomeTO.numGenes = genome->numGenes;
 
-__global__ void cudaResolveConnections(SimulationData data, DataTO dataTO)
-{
-    auto const partition = calcAllThreadsPartition(*dataTO.numCells);
+            auto geneTOArrayStartIndex = atomicAdd(collectionTO.numGenes, genome->numGenes);
+            for (int i = 0, j = genome->numGenes; i < j; ++i) {
+                auto& geneTO = collectionTO.genes[geneTOArrayStartIndex + i];
+                auto const& gene = genome->genes[i];
+                geneTO.shape = gene.shape;
+                geneTO.numBranches = gene.numBranches;
+                geneTO.separateConstruction = gene.separateConstruction;
+                geneTO.angleAlignment = gene.angleAlignment;
+                geneTO.stiffness = gene.stiffness;
+                geneTO.connectionDistance = gene.connectionDistance;
+                geneTO.numRepetitions = gene.numRepetitions;
+                geneTO.concatenationAngle1 = gene.concatenationAngle1;
+                geneTO.concatenationAngle2 = gene.concatenationAngle2;
+                geneTO.numNodes = gene.numNodes;
+                auto nodeTOArrayStartIndex = atomicAdd(collectionTO.numNodes, gene.numNodes);
+                for (int i = 0, j = gene.numNodes; i < j; ++i) {
+                    auto& nodeTO = collectionTO.nodes[nodeTOArrayStartIndex + i];
+                    auto const& node = gene.nodes[i];
+                    nodeTO.referenceAngle = node.referenceAngle;
+                    nodeTO.color = node.color;
+                    nodeTO.numRequiredAdditionalConnections = node.numRequiredAdditionalConnections;
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& cellTO = dataTO.cells[index];
+                    int targetSize;  //not used
+                    copyDataToHeap<int>(
+                        sizeof(NeuralNetworkGenome), reinterpret_cast<uint8_t*>(node.neuralNetwork), targetSize, nodeTO.neuralNetworkDataIndex, collectionTO);
 
-        for (int i = 0; i < cellTO.numConnections; ++i) {
-            auto const cellIndex = cellTO.connections[i].cellIndex;
-            cellTO.connections[i].cellIndex = data.objects.heap.atType<Cell>(cellIndex).tag;
+                    nodeTO.signalRoutingRestriction.active = node.signalRoutingRestriction.active;
+                    nodeTO.signalRoutingRestriction.baseAngle = node.signalRoutingRestriction.baseAngle;
+                    nodeTO.signalRoutingRestriction.openingAngle = node.signalRoutingRestriction.openingAngle;
+                    nodeTO.cellType = node.cellType;
+                    switch (node.cellType) {
+                    case CellTypeGenome_Base:
+                        break;
+                    case CellTypeGenome_Depot:
+                        nodeTO.cellTypeData.depot.mode = node.cellTypeData.depot.mode;
+                        break;
+                    case CellTypeGenome_Constructor:
+                        nodeTO.cellTypeData.constructor.autoTriggerInterval = node.cellTypeData.constructor.autoTriggerInterval;
+                        nodeTO.cellTypeData.constructor.constructionActivationTime = node.cellTypeData.constructor.constructionActivationTime;
+                        nodeTO.cellTypeData.constructor.constructionAngle1 = node.cellTypeData.constructor.constructionAngle1;
+                        nodeTO.cellTypeData.constructor.constructionAngle2 = node.cellTypeData.constructor.constructionAngle2;
+                        break;
+                    case CellTypeGenome_Sensor:
+                        nodeTO.cellTypeData.sensor.autoTriggerInterval = node.cellTypeData.sensor.autoTriggerInterval;
+                        nodeTO.cellTypeData.sensor.minDensity = node.cellTypeData.sensor.minDensity;
+                        nodeTO.cellTypeData.sensor.minRange = node.cellTypeData.sensor.minRange;
+                        nodeTO.cellTypeData.sensor.maxRange = node.cellTypeData.sensor.maxRange;
+                        nodeTO.cellTypeData.sensor.restrictToColor = node.cellTypeData.sensor.restrictToColor;
+                        nodeTO.cellTypeData.sensor.restrictToMutants = node.cellTypeData.sensor.restrictToMutants;
+                        break;
+                    case CellTypeGenome_Oscillator:
+                        nodeTO.cellTypeData.oscillator.autoTriggerInterval = node.cellTypeData.oscillator.autoTriggerInterval;
+                        nodeTO.cellTypeData.oscillator.alternationInterval = node.cellTypeData.oscillator.alternationInterval;
+                        break;
+                    case CellTypeGenome_Attacker:
+                        break;
+                    case CellTypeGenome_Injector:
+                        nodeTO.cellTypeData.injector.mode = node.cellTypeData.injector.mode;
+                        break;
+                    case CellTypeGenome_Muscle:
+                        nodeTO.cellTypeData.muscle.mode = node.cellTypeData.muscle.mode;
+                        switch (nodeTO.cellTypeData.muscle.mode) {
+                        case MuscleMode_AutoBending:
+                            nodeTO.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation = node.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation;
+                            nodeTO.cellTypeData.muscle.modeData.autoBending.frontBackVelRatio = node.cellTypeData.muscle.modeData.autoBending.frontBackVelRatio;
+                            break;
+                        case MuscleMode_ManualBending:
+                            nodeTO.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation =
+                                node.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
+                            nodeTO.cellTypeData.muscle.modeData.manualBending.frontBackVelRatio =
+                                node.cellTypeData.muscle.modeData.manualBending.frontBackVelRatio;
+                            break;
+                        case MuscleMode_AngleBending:
+                            nodeTO.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation =
+                                node.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
+                            nodeTO.cellTypeData.muscle.modeData.angleBending.frontBackVelRatio =
+                                node.cellTypeData.muscle.modeData.angleBending.frontBackVelRatio;
+                            break;
+                        case MuscleMode_AutoCrawling:
+                            nodeTO.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation =
+                                node.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation;
+                            nodeTO.cellTypeData.muscle.modeData.autoCrawling.frontBackVelRatio =
+                                node.cellTypeData.muscle.modeData.autoCrawling.frontBackVelRatio;
+                            break;
+                        case MuscleMode_ManualCrawling:
+                            nodeTO.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation =
+                                node.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation;
+                            nodeTO.cellTypeData.muscle.modeData.manualCrawling.frontBackVelRatio =
+                                node.cellTypeData.muscle.modeData.manualCrawling.frontBackVelRatio;
+                            break;
+                        case MuscleMode_DirectMovement:
+                            break;
+                        }
+                    case CellTypeGenome_Defender:
+                        nodeTO.cellTypeData.defender.mode = node.cellTypeData.defender.mode;
+                        break;
+                    case CellTypeGenome_Reconnector:
+                        nodeTO.cellTypeData.reconnector.restrictToColor = node.cellTypeData.reconnector.restrictToColor;
+                        nodeTO.cellTypeData.reconnector.restrictToMutants = node.cellTypeData.reconnector.restrictToMutants;
+                        break;
+                    case CellTypeGenome_Detonator:
+                        nodeTO.cellTypeData.detonator.countdown = node.cellTypeData.detonator.countdown;
+                        break;
+                    }
+                }
+            }
+
+            atomicExch(&cell->genome->genomeIndex, genomeTOIndex);
+        } else if (origGenomeIndex != 0) {
+            atomicExch(&cell->genome->genomeIndex, origGenomeIndex);
         }
     }
 }
 
-__global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, DataTO access)
+// tags cell with cellTO index and tags cellTO connections with cell index
+__global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, CollectionTO collectionTO)
 {
-    PartitionData particleBlock = calcPartition(data.objects.particlePointers.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto const& cells = data.objects.cells;
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
+    auto const heap = data.objects.heap.getArray();
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+
+        auto pos = cell->pos;
+        data.cellMap.correctPosition(pos);
+        if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
+            cell->tempValue = -1;
+            continue;
+        }
+
+        createCellTO(cell, collectionTO, heap);
+    }
+}
+
+__global__ void cudaResolveConnections(SimulationData data, CollectionTO collectionTO)
+{
+    auto const partition = calcAllThreadsPartition(*collectionTO.numCells);
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cellTO = collectionTO.cells[index];
+
+        for (int i = 0; i < cellTO.numConnections; ++i) {
+            auto const cellIndex = cellTO.connections[i].cellIndex;
+            cellTO.connections[i].cellIndex = data.objects.heap.atType<Cell>(cellIndex).tempValue;
+        }
+    }
+}
+
+__global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, CollectionTO access)
+{
+    PartitionData particleBlock = calcPartition(data.objects.particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
-        auto const& particle = data.objects.particlePointers.at(particleIndex);
+        auto const& particle = data.objects.particles.at(particleIndex);
         auto pos = particle->pos;
         data.particleMap.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
@@ -397,12 +572,12 @@ __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, Sim
     }
 }
 
-__global__ void cudaGetArraysBasedOnTO(SimulationData data, DataTO dataTO, Cell** cellArray)
+__global__ void cudaGetArraysBasedOnTO(SimulationData data, CollectionTO collectionTO, Cell** cellArray)
 {
-    *cellArray = data.objects.heap.getTypedSubArray<Cell>(*dataTO.numCells);
+    *cellArray = data.objects.heap.getTypedSubArray<Cell>(*collectionTO.numCells);
 }
 
-__global__ void cudaCreateDataFromTO(SimulationData data, DataTO dataTO, Cell** cellArray, bool selectNewData, bool createIds)
+__global__ void cudaSetGenomeDataFromTO(SimulationData data, CollectionTO collectionTO, bool createIds)
 {
     __shared__ ObjectFactory factory;
     if (0 == threadIdx.x) {
@@ -410,30 +585,44 @@ __global__ void cudaCreateDataFromTO(SimulationData data, DataTO dataTO, Cell** 
     }
     __syncthreads();
 
-    auto particlePartition = calcPartition(*dataTO.numParticles, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto cellPartition = calcAllThreadsPartition(*collectionTO.numGenomes);
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
+        factory.createGenomeFromTO(collectionTO, index, createIds);
+    }
+}
+
+__global__ void cudaSetDataFromTO(SimulationData data, CollectionTO collectionTO, Cell** cellArray, bool selectNewData, bool createIds)
+{
+    __shared__ ObjectFactory factory;
+    if (0 == threadIdx.x) {
+        factory.init(&data);
+    }
+    __syncthreads();
+
+    auto particlePartition = calcPartition(*collectionTO.numParticles, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
-        auto particle = factory.createParticleFromTO(dataTO.particles[index], createIds);
+        auto particle = factory.createParticleFromTO(collectionTO.particles[index], createIds);
         if (selectNewData) {
             particle->selected = 1;
         }
     }
 
-    auto cellPartition = calcAllThreadsPartition(*dataTO.numCells);
+    auto cellPartition = calcAllThreadsPartition(*collectionTO.numCells);
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
-        auto cell = factory.createCellFromTO(dataTO, dataTO.cells[index], index, *cellArray, createIds);
+        auto cell = factory.createCellFromTO(collectionTO, index, *cellArray, createIds);
         if (selectNewData) {
             cell->selected = 1;
         }
     }
 }
 
-__global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataTO dataTO)
+__global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, CollectionTO collectionTO)
 {
     {
-        auto const partition = calcAllThreadsPartition(*dataTO.numCells);
+        auto const partition = calcAllThreadsPartition(*collectionTO.numCells);
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto const& cell = dataTO.cells[index];
+            auto const& cell = collectionTO.cells[index];
             numberGen.adaptMaxId(cell.id);
             numberGen.adaptMaxSmallId(cell.mutationId);
             if (cell.cellType == CellType_Constructor) {
@@ -442,20 +631,20 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, DataTO d
         }
     }
     {
-        auto const partition = calcPartition(*dataTO.numParticles, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        auto const partition = calcPartition(*collectionTO.numParticles, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto const& particle = dataTO.particles[index];
+            auto const& particle = collectionTO.particles[index];
             numberGen.adaptMaxId(particle.id);
         }
     }
 }
 
-__global__ void cudaClearDataTO(DataTO dataTO)
+__global__ void cudaClearDataTO(CollectionTO collectionTO)
 {
-    *dataTO.numCells = 0;
-    *dataTO.numParticles = 0;
-    *dataTO.heapSize = 0;
+    *collectionTO.numCells = 0;
+    *collectionTO.numParticles = 0;
+    *collectionTO.heapSize = 0;
 }
 
 __global__ void cudaSaveNumEntries(SimulationData data)
@@ -465,54 +654,68 @@ __global__ void cudaSaveNumEntries(SimulationData data)
 
 __global__ void cudaClearData(SimulationData data)
 {
-    data.objects.cellPointers.reset();
-    data.objects.particlePointers.reset();
+    data.objects.cells.reset();
+    data.objects.particles.reset();
     data.objects.heap.reset();
 }
 
 __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesForTO* arraySizes)
 {
-    auto const& cells = data.objects.cellPointers;
-    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+    auto const& cells = data.objects.cells;
+    auto const& particles = data.objects.particles;
 
     if (threadIdx.x == 0 && blockIdx.x == 0) {
-        arraySizes->cellArray = cells.getNumEntries();
-        arraySizes->particleArray = cells.getNumEntries();
+        arraySizes->cells = cells.getNumEntries();
+        arraySizes->particles = particles.getNumEntries();
     }
 
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         uint64_t dependentDataSize = cell->metadata.nameSize + cell->metadata.descriptionSize + 32;
+        if (cell->cellType != CellType_Structure && cell->cellType != CellType_Free) {
+            dependentDataSize += sizeof(NeuralNetwork) + 16;
+            if (cell->genome) {
+                atomicAdd(&arraySizes->genomes, 1ull);
+                auto const& genome = cell->genome;
+                atomicAdd(&arraySizes->genes, static_cast<uint64_t>(genome->numGenes));
+                for (int i = 0, j = genome->numGenes; i < j; ++i) {
+                    atomicAdd(&arraySizes->nodes, static_cast<uint64_t>(genome->genes[i].numNodes));
+                }
+            }
+        }
         if (cell->cellType == CellType_Constructor) {
             dependentDataSize += cell->cellTypeData.constructor.genomeSize + 16;
         } else if (cell->cellType == CellType_Injector) {
             dependentDataSize += cell->cellTypeData.injector.genomeSize + 16;
-        } else if (cell->cellType != CellType_Structure && cell->cellType != CellType_Free) {
-            dependentDataSize += sizeof(NeuralNetwork) + 16;
         }
         atomicAdd(&arraySizes->heap, dependentDataSize);
     }
 }
 
-__global__ void cudaEstimateCapacityNeededForGpu(DataTO dataTO, ArraySizesForGpu* arraySizes)
+__global__ void cudaEstimateCapacityNeededForGpu(CollectionTO collectionTO, ArraySizesForGpu* arraySizes)
 {
     if (threadIdx.x == 0 && blockIdx.x == 0) {
-        arraySizes->cellArray = *dataTO.numCells;
-        arraySizes->particleArray = *dataTO.numParticles;
-        atomicAdd(&arraySizes->heap, *dataTO.numCells * sizeof(Cell) + *dataTO.numParticles * sizeof(Particle));
+        arraySizes->cellArray = *collectionTO.numCells;
+        arraySizes->particleArray = *collectionTO.numParticles;
+        atomicAdd(
+            &arraySizes->heap,
+            *collectionTO.numCells * sizeof(Cell) + *collectionTO.numParticles * sizeof(Particle) + *collectionTO.numGenomes * sizeof(Genome)
+                + *collectionTO.numGenes * sizeof(Gene) + *collectionTO.numNodes * sizeof(Node) + *collectionTO.numNodes * sizeof(NeuralNetwork) + 16ull * 6);
     }
 
     {
-        auto partition = calcAllThreadsPartition(*dataTO.numCells);
+        auto partition = calcAllThreadsPartition(*collectionTO.numCells);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto& cell = dataTO.cells[index];
+            auto& cell = collectionTO.cells[index];
             uint64_t dependentDataSize = sizeof(Cell) + cell.metadata.nameSize + cell.metadata.descriptionSize + 32;
+            if (cell.cellType != CellType_Structure && cell.cellType != CellType_Free) {
+                dependentDataSize += sizeof(NeuralNetwork) + 16;
+            }
             if (cell.cellType == CellType_Constructor) {
                 dependentDataSize += cell.cellTypeData.constructor.genomeSize + 16;
             } else if (cell.cellType == CellType_Injector) {
                 dependentDataSize += cell.cellTypeData.injector.genomeSize + 16;
-            } else if (cell.cellType != CellType_Structure && cell.cellType != CellType_Free) {
-                dependentDataSize += sizeof(NeuralNetwork) + 16;
             }
             atomicAdd(&arraySizes->heap, dependentDataSize);
         }

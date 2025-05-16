@@ -33,9 +33,9 @@ private:
 
 __inline__ __device__ void RadiationProcessor::updateMap(SimulationData& data)
 {
-    auto partition = calcPartition(data.objects.particlePointers.getNumOrigEntries(), blockIdx.x, gridDim.x);
+    auto partition = calcPartition(data.objects.particles.getNumOrigEntries(), blockIdx.x, gridDim.x);
 
-    Particle** particlePointers = &data.objects.particlePointers.at(partition.startIndex);
+    Particle** particlePointers = &data.objects.particles.at(partition.startIndex);
     data.particleMap.set_block(partition.numElements(), particlePointers);
 }
 
@@ -59,10 +59,10 @@ __inline__ __device__ void RadiationProcessor::calcActiveSources(SimulationData&
 
 __inline__ __device__ void RadiationProcessor::movement(SimulationData& data)
 {
-    auto partition = calcAllThreadsPartition(data.objects.particlePointers.getNumOrigEntries());
+    auto partition = calcAllThreadsPartition(data.objects.particles.getNumOrigEntries());
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
-        auto& particle = data.objects.particlePointers.at(particleIndex);
+        auto& particle = data.objects.particles.at(particleIndex);
         particle->pos = particle->pos + particle->vel * cudaSimulationParameters.timestepSize.value;
         data.particleMap.correctPosition(particle->pos);
     }
@@ -70,10 +70,10 @@ __inline__ __device__ void RadiationProcessor::movement(SimulationData& data)
 
 __inline__ __device__ void RadiationProcessor::collision(SimulationData& data)
 {
-    auto partition = calcAllThreadsPartition(data.objects.particlePointers.getNumOrigEntries());
+    auto partition = calcAllThreadsPartition(data.objects.particles.getNumOrigEntries());
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
-        auto& particle = data.objects.particlePointers.at(particleIndex);
+        auto& particle = data.objects.particles.at(particleIndex);
         auto otherParticle = data.particleMap.get(particle->pos);
         if (otherParticle && otherParticle != particle
             && Math::lengthSquared(particle->pos - otherParticle->pos) < 0.5) {
@@ -157,10 +157,10 @@ __inline__ __device__ void RadiationProcessor::collision(SimulationData& data)
 
 __inline__ __device__ void RadiationProcessor::splitting(SimulationData& data)
 {
-    auto partition = calcAllThreadsPartition(data.objects.particlePointers.getNumOrigEntries());
+    auto partition = calcAllThreadsPartition(data.objects.particles.getNumOrigEntries());
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
-        auto& particle = data.objects.particlePointers.at(particleIndex);
+        auto& particle = data.objects.particles.at(particleIndex);
         if (particle == nullptr) {
             continue;
         }
@@ -194,9 +194,9 @@ __inline__ __device__ void RadiationProcessor::transformation(SimulationData& da
     if (!cudaSimulationParameters.particleTransformationAllowed.value) {
         return;
     }
-    auto const partition = calcAllThreadsPartition(data.objects.particlePointers.getNumOrigEntries());
+    auto const partition = calcAllThreadsPartition(data.objects.particles.getNumOrigEntries());
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
-        if (auto& particle = data.objects.particlePointers.at(particleIndex)) {
+        if (auto& particle = data.objects.particles.at(particleIndex)) {
             
             if (particle->energy >= cudaSimulationParameters.normalCellEnergy.value[particle->color]) {
                 ObjectFactory factory;

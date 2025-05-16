@@ -159,7 +159,7 @@ __inline__ __device__ void CellConnectionProcessor::processDeleteCellOperations(
             auto cellIndex = operation.data.delCell.cellIndex;
 
             Cell* empty = nullptr;
-            auto origCell = alienAtomicExch(&data.objects.cellPointers.at(cellIndex), empty);
+            auto origCell = alienAtomicExch(&data.objects.cells.at(cellIndex), empty);
             if (origCell) {
                 RadiationProcessor::createEnergyParticle(data, origCell->pos, origCell->vel, origCell->color, origCell->energy);
 
@@ -182,10 +182,10 @@ __inline__ __device__ void CellConnectionProcessor::processDeleteCellOperations(
 
 __inline__ __device__ void CellConnectionProcessor::processDeleteConnectionOperations(SimulationData& data)
 {
-    auto partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
+    auto partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& cell = data.objects.cellPointers.at(index);
+        auto& cell = data.objects.cells.at(index);
         if (!cell) {
             continue;
         }
@@ -293,9 +293,10 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
         return false;
     }
 
-    if (checkConnectedCellsForCrossingConnection(cell1, cell2->pos)) {
-        return false;
-    }
+    // !!! Performance intensive !!!
+    //if (checkConnectedCellsForCrossingConnection(cell1, cell2->pos)) {
+    //    return false;
+    //}
 
     angleAlignment %= ConstructorAngleAlignment_Count;
 

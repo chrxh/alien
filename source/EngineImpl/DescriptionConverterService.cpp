@@ -3,64 +3,131 @@
 #include <cmath>
 #include <algorithm>
 
+#include <boost/range/adaptor/indexed.hpp>
 #include <boost/range/adaptor/map.hpp>
 
 #include "Base/NumberGenerator.h"
 #include "Base/Exceptions.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/GenomeConstants.h"
-#include "EngineGpuKernels/DataTOProvider.cuh"
+#include "EngineGpuKernels/CollectionTOProvider.cuh"
 
 
 namespace
 {
-    union BytesAsFloat
+    template<typename T>
+    T* getFromHeap(uint8_t* heap, uint64_t sourceIndex)
     {
-        float f;
-        uint8_t b[4];
-    };
+        return reinterpret_cast<T*>(&heap[sourceIndex]);
+    }
 
-    void convert(DataTO const& dataTO, uint64_t sourceSize, uint64_t sourceIndex, std::vector<uint8_t>& target)
+    NeuralNetworkGenomeDescription convert(NeuralNetworkGenomeTO const& neuralNetworkGenomeTO)
+    {
+        NeuralNetworkGenomeDescription result;
+        for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+            result._weights[i] = neuralNetworkGenomeTO.weights[i];
+        }
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            result._biases[i] = neuralNetworkGenomeTO.biases[i];
+        }
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            result._activationFunctions[i] = neuralNetworkGenomeTO.activationFunctions[i];
+        }
+        return result;
+    }
+
+    NeuralNetworkDescription convert(NeuralNetworkTO const& neuralNetworkTO)
+    {
+        NeuralNetworkDescription result;
+        for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+            result._weights[i] = neuralNetworkTO.weights[i];
+        }
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            result._biases[i] = neuralNetworkTO.biases[i];
+        }
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            result._activationFunctions[i] = neuralNetworkTO.activationFunctions[i];
+        }
+        return result;
+    }
+
+    NeuralNetworkGenomeTO convert(NeuralNetworkGenomeDescription const& neuralNetworkDesc)
+    {
+        NeuralNetworkGenomeTO result;
+        for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+            result.weights[i] = neuralNetworkDesc._weights[i];
+        }
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            result.biases[i] = neuralNetworkDesc._biases[i];
+        }
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            result.activationFunctions[i] = neuralNetworkDesc._activationFunctions[i];
+        }
+        return result;
+    }
+
+    NeuralNetworkTO convert(NeuralNetworkDescription const& neuralNetworkDesc)
+    {
+        NeuralNetworkTO result;
+        for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+            result.weights[i] = neuralNetworkDesc._weights[i];
+        }
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            result.biases[i] = neuralNetworkDesc._biases[i];
+        }
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            result.activationFunctions[i] = neuralNetworkDesc._activationFunctions[i];
+        }
+        return result;
+    }
+
+    //union BytesAsFloat
+    //{
+    //    float f;
+    //    uint8_t b[4];
+    //};
+
+    void convert(CollectionTO const& collectionTO, uint64_t sourceSize, uint64_t sourceIndex, std::vector<uint8_t>& target)
     {
         target.resize(sourceSize);
         for (int i = 0; i < sourceSize; ++i) {
-            target[i] = dataTO.heap[sourceIndex + i];
+            target[i] = collectionTO.heap[sourceIndex + i];
         }
     }
 
-    NeuralNetworkDescription convertToNeuronDescription(DataTO const& dataTO, uint64_t sourceIndex)
-    {
-        NeuralNetworkDescription result;
-        // #TODO GCC incompatibily:
-        // auto weights_span = std::mdspan(result._weights.data(), MAX_CHANNELS, MAX_CHANNELS);
+    //NeuralNetworkDescription convertToNeuronDescription(CollectionTO const& collectionTO, uint64_t sourceIndex)
+    //{
+    //    NeuralNetworkDescription result;
+    //    // #TODO GCC incompatibily:
+    //    // auto weights_span = std::mdspan(result._weights.data(), MAX_CHANNELS, MAX_CHANNELS);
 
-        BytesAsFloat bytesAsFloat;
-        int index = 0;
-        for (int row = 0; row < MAX_CHANNELS; ++row) {
-            for (int col = 0; col < MAX_CHANNELS; ++col) {
-                for (int i = 0; i < 4; ++i) {
-                    bytesAsFloat.b[i] = dataTO.heap[sourceIndex + index];
-                    ++index;
-                }
-                result._weights[row * MAX_CHANNELS + col] = bytesAsFloat.f;
-                // #TODO GCC incompatibily:
-                // weights_span[row, col] = bytesAsFloat.f;
-            }
-        }
-        for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
-            for (int i = 0; i < 4; ++i) {
-                bytesAsFloat.b[i] = dataTO.heap[sourceIndex + index];
-                ++index;
-            }
-            result._biases[channel] = bytesAsFloat.f;
-        }
-        for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
-            result._activationFunctions[channel] = dataTO.heap[sourceIndex + index];
-            ++index;
-        }
+    //    BytesAsFloat bytesAsFloat;
+    //    int index = 0;
+    //    for (int row = 0; row < MAX_CHANNELS; ++row) {
+    //        for (int col = 0; col < MAX_CHANNELS; ++col) {
+    //            for (int i = 0; i < 4; ++i) {
+    //                bytesAsFloat.b[i] = collectionTO.heap[sourceIndex + index];
+    //                ++index;
+    //            }
+    //            result._weights[row * MAX_CHANNELS + col] = bytesAsFloat.f;
+    //            // #TODO GCC incompatibily:
+    //            // weights_span[row, col] = bytesAsFloat.f;
+    //        }
+    //    }
+    //    for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
+    //        for (int i = 0; i < 4; ++i) {
+    //            bytesAsFloat.b[i] = collectionTO.heap[sourceIndex + index];
+    //            ++index;
+    //        }
+    //        result._biases[channel] = bytesAsFloat.f;
+    //    }
+    //    for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
+    //        result._activationFunctions[channel] = collectionTO.heap[sourceIndex + index];
+    //        ++index;
+    //    }
 
-        return result;
-    }
+    //    return result;
+    //}
 
     template<typename Container, typename SizeType>
     void convert(std::vector<uint8_t>& heap, SizeType& targetSize, uint64_t& targetIndex, Container const& source)
@@ -75,50 +142,56 @@ namespace
         }
     }
 
-    void convertToNeuronData(std::vector<uint8_t>& heap, uint64_t& targetIndex, NeuralNetworkDescription const& neuralNetDesc)
-    {
-        targetIndex = heap.size();
-        heap.resize(targetIndex + NeuralNetworkTO::DataSize);
+    //void convertToNeuronData(std::vector<uint8_t>& heap, uint64_t& targetIndex, NeuralNetworkDescription const& neuralNetDesc)
+    //{
+    //    targetIndex = heap.size();
+    //    heap.resize(targetIndex + NeuralNetworkTO::DataSize);
 
-        // #TODO GCC incompatibily:
-        // auto weights_span = std::mdspan(neuralNetDesc._weights.data(), MAX_CHANNELS, MAX_CHANNELS);
+    //    // #TODO GCC incompatibily:
+    //    // auto weights_span = std::mdspan(neuralNetDesc._weights.data(), MAX_CHANNELS, MAX_CHANNELS);
 
-        BytesAsFloat bytesAsFloat;
-        int bytePos = 0;
-        for (int row = 0; row < MAX_CHANNELS; ++row) {
-            for (int col = 0; col < MAX_CHANNELS; ++col) {
-                bytesAsFloat.f = neuralNetDesc._weights[row * MAX_CHANNELS + col];
-                // #TODO GCC incompatibily:
-                // weights_span[row, col];
+    //    BytesAsFloat bytesAsFloat;
+    //    int bytePos = 0;
+    //    for (int row = 0; row < MAX_CHANNELS; ++row) {
+    //        for (int col = 0; col < MAX_CHANNELS; ++col) {
+    //            bytesAsFloat.f = neuralNetDesc._weights[row * MAX_CHANNELS + col];
+    //            // #TODO GCC incompatibily:
+    //            // weights_span[row, col];
 
-                for (int i = 0; i < 4; ++i) {
-                    heap.at(targetIndex + bytePos) = bytesAsFloat.b[i];
-                    ++bytePos;
-                }
-            }
-        }
-        for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
-            bytesAsFloat.f = neuralNetDesc._biases[channel];
-            for (int i = 0; i < 4; ++i) {
-                heap.at(targetIndex + bytePos) = bytesAsFloat.b[i];
-                ++bytePos;
-            }
-        }
-        for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
-            heap.at(targetIndex + bytePos) = neuralNetDesc._activationFunctions[channel];
-            ++bytePos;
-        }
-    }
+    //            for (int i = 0; i < 4; ++i) {
+    //                heap.at(targetIndex + bytePos) = bytesAsFloat.b[i];
+    //                ++bytePos;
+    //            }
+    //        }
+    //    }
+    //    for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
+    //        bytesAsFloat.f = neuralNetDesc._biases[channel];
+    //        for (int i = 0; i < 4; ++i) {
+    //            heap.at(targetIndex + bytePos) = bytesAsFloat.b[i];
+    //            ++bytePos;
+    //        }
+    //    }
+    //    for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
+    //        heap.at(targetIndex + bytePos) = neuralNetDesc._activationFunctions[channel];
+    //        ++bytePos;
+    //    }
+    //}
 }
 
-ClusteredDataDescription DescriptionConverterService::convertTOtoClusteredDataDescription(DataTO const& dataTO) const
+ClusteredDataDescription DescriptionConverterService::convertTOtoClusteredDataDescription(CollectionTO const& collectionTO) const
 {
 	ClusteredDataDescription result;
 
-    //cells
+    // Genomes
+    std::vector<GenomeDescription_New> genomes;
+    for (int i = 0; i < *collectionTO.numGenomes; ++i) {
+        result._genomes.emplace_back(createGenomeDescription(collectionTO, i));
+    }
+
+    // Cells
     std::vector<ClusterDescription> clusters;
     std::unordered_set<int> freeCellIndices;
-    for (int i = 0; i < *dataTO.numCells; ++i) {
+    for (int i = 0; i < *collectionTO.numCells; ++i) {
         freeCellIndices.insert(i);
     }
     std::unordered_map<int, int> cellTOIndexToCellDescIndex;
@@ -126,10 +199,10 @@ ClusteredDataDescription DescriptionConverterService::convertTOtoClusteredDataDe
     int clusterDescIndex = 0;
     while (!freeCellIndices.empty()) {
         auto freeCellIndex = *freeCellIndices.begin();
-        auto createClusterData = scanAndCreateClusterDescription(dataTO, freeCellIndex, freeCellIndices);
+        auto createClusterData = scanAndCreateClusterDescription(collectionTO, freeCellIndex, freeCellIndices);
         clusters.emplace_back(createClusterData.cluster);
 
-        //update index maps
+        // Update index maps
         cellTOIndexToCellDescIndex.insert(
             createClusterData.cellTOIndexToCellDescIndex.begin(), createClusterData.cellTOIndexToCellDescIndex.end());
         for (auto const& cellTOIndex : createClusterData.cellTOIndexToCellDescIndex | boost::adaptors::map_keys) {
@@ -139,10 +212,10 @@ ClusteredDataDescription DescriptionConverterService::convertTOtoClusteredDataDe
     }
     result.addClusters(clusters);
 
-    //particles
+    // Particles
     std::vector<ParticleDescription> particles;
-    for (int i = 0; i < *dataTO.numParticles; ++i) {
-        ParticleTO const& particle = dataTO.particles[i];
+    for (int i = 0; i < *collectionTO.numParticles; ++i) {
+        ParticleTO const& particle = collectionTO.particles[i];
         particles.emplace_back(ParticleDescription()
                                    .id(particle.id)
                                    .pos({particle.pos.x, particle.pos.y})
@@ -155,39 +228,41 @@ ClusteredDataDescription DescriptionConverterService::convertTOtoClusteredDataDe
     return result;
 }
 
-DataDescription DescriptionConverterService::convertTOtoDataDescription(DataTO const& dataTO) const
+DataDescription DescriptionConverterService::convertTOtoDataDescription(CollectionTO const& collectionTO) const
 {
     DataDescription result;
 
-    //cells
-    std::vector<CellDescription> cells;
-    for (int i = 0; i < *dataTO.numCells; ++i) {
-        cells.emplace_back(createCellDescription(dataTO, i));
+    // Genomes
+    std::vector<GenomeDescription_New> genomes;
+    for (int i = 0; i < *collectionTO.numGenomes; ++i) {
+        result._genomes.emplace_back(createGenomeDescription(collectionTO, i));
     }
-    result.addCells(cells);
 
-    //particles
-    std::vector<ParticleDescription> particles;
-    for (int i = 0; i < *dataTO.numParticles; ++i) {
-        ParticleTO const& particle = dataTO.particles[i];
-        particles.emplace_back(ParticleDescription()
+    // Cells
+    for (int i = 0; i < *collectionTO.numCells; ++i) {
+        result._cells.emplace_back(createCellDescription(collectionTO, i));
+    }
+
+    // Particles
+    for (int i = 0; i < *collectionTO.numParticles; ++i) {
+        ParticleTO const& particle = collectionTO.particles[i];
+        result._particles.emplace_back(ParticleDescription()
                                    .id(particle.id)
                                    .pos({particle.pos.x, particle.pos.y})
                                    .vel({particle.vel.x, particle.vel.y})
                                    .energy(particle.energy)
                                    .color(particle.color));
     }
-    result.addParticles(particles);
 
     return result;
 }
 
-OverlayDescription DescriptionConverterService::convertTOtoOverlayDescription(DataTO const& dataTO) const
+OverlayDescription DescriptionConverterService::convertTOtoOverlayDescription(CollectionTO const& collectionTO) const
 {
     OverlayDescription result;
-    result.elements.reserve(*dataTO.numCells + *dataTO.numParticles);
-    for (int i = 0; i < *dataTO.numCells; ++i) {
-        auto const& cellTO = dataTO.cells[i];
+    result.elements.reserve(*collectionTO.numCells + *collectionTO.numParticles);
+    for (int i = 0; i < *collectionTO.numCells; ++i) {
+        auto const& cellTO = collectionTO.cells[i];
         OverlayElementDescription element;
         element.id = cellTO.id;
         element.cell = true;
@@ -197,8 +272,8 @@ OverlayDescription DescriptionConverterService::convertTOtoOverlayDescription(Da
         result.elements.emplace_back(element);
     }
 
-    for (int i = 0; i < *dataTO.numParticles; ++i) {
-        auto const& particleTO = dataTO.particles[i];
+    for (int i = 0; i < *collectionTO.numParticles; ++i) {
+        auto const& particleTO = collectionTO.particles[i];
         OverlayElementDescription element;
         element.id = particleTO.id;
         element.cell = false;
@@ -209,22 +284,29 @@ OverlayDescription DescriptionConverterService::convertTOtoOverlayDescription(Da
     return result;
 }
 
-DataTO DescriptionConverterService::convertDescriptionToTO(ClusteredDataDescription const& description) const
+CollectionTO DescriptionConverterService::convertDescriptionToTO(ClusteredDataDescription const& description) const
 {
+    std::vector<GenomeTO> genomeTOs;
+    std::vector<GeneTO> geneTOs;
+    std::vector<NodeTO> nodeTOs;
     std::vector<CellTO> cellTOs;
     std::vector<ParticleTO> particleTOs;
     std::vector<uint8_t> heap;
 
-    std::unordered_map<uint64_t, uint64_t> cellIndexByIds;
+    std::unordered_map<uint64_t, uint64_t> genomeTOIndexById;
+    for (auto const& genome : description._genomes) {
+        addGenome(genomeTOs, geneTOs, nodeTOs, heap, genome, genomeTOIndexById);
+    }
+    std::unordered_map<uint64_t, uint64_t> cellIndexTOById;
     for (auto const& cluster: description._clusters) {
         for (auto const& cell : cluster._cells) {
-            addCell(cellTOs, heap, cell, cellIndexByIds);
+            addCell(cellTOs, heap, cellIndexTOById, cell, genomeTOIndexById);
         }
     }
     for (auto const& cluster : description._clusters) {
         for (auto const& cell : cluster._cells) {
             if (cell._id != 0) {
-                setConnections(cellTOs, cell, cellIndexByIds);
+                setConnections(cellTOs, cell, cellIndexTOById);
             }
         }
     }
@@ -232,55 +314,63 @@ DataTO DescriptionConverterService::convertDescriptionToTO(ClusteredDataDescript
         addParticle(particleTOs, particle);
     }
 
-    return provideDataTO(cellTOs, particleTOs, heap);
+    return provideDataTO(genomeTOs, geneTOs, nodeTOs, cellTOs, particleTOs, heap);
 }
 
-DataTO DescriptionConverterService::convertDescriptionToTO(DataDescription const& description) const
+CollectionTO DescriptionConverterService::convertDescriptionToTO(DataDescription const& description) const
 {
+    std::vector<GenomeTO> genomeTOs;
+    std::vector<GeneTO> geneTOs;
+    std::vector<NodeTO> nodeTOs;
     std::vector<CellTO> cellTOs;
     std::vector<ParticleTO> particleTOs;
     std::vector<uint8_t> heap;
 
-    std::unordered_map<uint64_t, uint64_t> cellIndexByIds;
+    std::unordered_map<uint64_t, uint64_t> genomeTOIndexById;
+    for (auto const& genome : description._genomes) {
+        addGenome(genomeTOs, geneTOs, nodeTOs, heap, genome, genomeTOIndexById);
+    }
+
+    std::unordered_map<uint64_t, uint64_t> cellIndexTOById;
     for (auto const& cell : description._cells) {
-        addCell(cellTOs, heap, cell, cellIndexByIds);
+        addCell(cellTOs, heap, cellIndexTOById, cell, genomeTOIndexById);
     }
     for (auto const& cell : description._cells) {
         if (cell._id != 0) {
-            setConnections(cellTOs, cell, cellIndexByIds);
+            setConnections(cellTOs, cell, cellIndexTOById);
         }
     }
     for (auto const& particle : description._particles) {
         addParticle(particleTOs, particle);
     }
 
-    return provideDataTO(cellTOs, particleTOs, heap);
+    return provideDataTO(genomeTOs, geneTOs, nodeTOs, cellTOs, particleTOs, heap);
 }
 
-DataTO DescriptionConverterService::convertDescriptionToTO(CellDescription const& cell) const
+CollectionTO DescriptionConverterService::convertDescriptionToTO(CellDescription const& cell) const
 {
     std::vector<CellTO> cellTOs;
     std::vector<uint8_t> heap;
 
-    std::unordered_map<uint64_t, uint64_t> cellIndexByIds;
-    addCell(cellTOs, heap, cell, cellIndexByIds);
+    std::unordered_map<uint64_t, uint64_t> cellIndexTOById;
+    std::unordered_map<uint64_t, uint64_t> genomeTOIndexById;
+    addCell(cellTOs, heap, cellIndexTOById, cell, genomeTOIndexById);
 
-    return provideDataTO(cellTOs, {}, heap);
+    return provideDataTO({}, {}, {}, cellTOs, {}, heap);
 }
 
-DataTO DescriptionConverterService::convertDescriptionToTO(ParticleDescription const& particle) const
+CollectionTO DescriptionConverterService::convertDescriptionToTO(ParticleDescription const& particle) const
 {
     std::vector<ParticleTO> particleTOs;
     std::vector<uint8_t> heap;
-
     addParticle(particleTOs, particle);
 
-    return provideDataTO({}, particleTOs, heap);
+    return provideDataTO({}, {}, {}, {}, particleTOs, heap);
 }
 
 DescriptionConverterService::DescriptionConverterService()
 {
-    _dataTOProvider = std::make_shared<_DataTOProvider>();
+    _collectionTOProvider = std::make_shared<_CollectionTOProvider>();
 }
 
 namespace
@@ -295,7 +385,7 @@ namespace
 }
 
 auto DescriptionConverterService::scanAndCreateClusterDescription(
-    DataTO const& dataTO,
+    CollectionTO const& collectionTO,
     int startCellIndex,
     std::unordered_set<int>& freeCellIndices) const
     -> CreateClusterReturnData
@@ -311,9 +401,9 @@ auto DescriptionConverterService::scanAndCreateClusterDescription(
     int cellDescIndex = 0;
     do {
         for (auto const& currentCellIndex : currentCellIndices) {
-            cells.emplace_back(createCellDescription(dataTO, currentCellIndex));
+            cells.emplace_back(createCellDescription(collectionTO, currentCellIndex));
             result.cellTOIndexToCellDescIndex.emplace(currentCellIndex, cellDescIndex);
-            auto const& cellTO = dataTO.cells[currentCellIndex];
+            auto const& cellTO = collectionTO.cells[currentCellIndex];
             for (int i = 0; i < cellTO.numConnections; ++i) {
                 auto connectionTO = cellTO.connections[i];
                 if (connectionTO.cellIndex != -1) {
@@ -336,11 +426,14 @@ auto DescriptionConverterService::scanAndCreateClusterDescription(
     return result;
 }
 
-CellDescription DescriptionConverterService::createCellDescription(DataTO const& dataTO, int cellIndex) const
+CellDescription DescriptionConverterService::createCellDescription(CollectionTO const& collectionTO, int cellIndex) const
 {
     CellDescription result;
 
-    auto const& cellTO = dataTO.cells[cellIndex];
+    auto const& cellTO = collectionTO.cells[cellIndex];
+    if (cellTO.hasGenome) {
+        result._genomeId = collectionTO.genomes[cellTO.genomeIndex].id;
+    }
     result._id = cellTO.id;
     result._pos = RealVector2D(cellTO.pos.x, cellTO.pos.y);
     result._vel = RealVector2D(cellTO.vel.x, cellTO.vel.y);
@@ -351,7 +444,7 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
         auto const& connectionTO = cellTO.connections[i];
         ConnectionDescription connection;
         if (connectionTO.cellIndex != -1) {
-            connection._cellId = dataTO.cells[connectionTO.cellIndex].id;
+            connection._cellId = collectionTO.cells[connectionTO.cellIndex].id;
         } else {
             connection._cellId = 0;
         }
@@ -374,21 +467,22 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
     result._cellTypeUsed = cellTO.cellTypeUsed;
     result._genomeNodeIndex = cellTO.genomeNodeIndex;
 
-    auto const& metadataTO = cellTO.metadata;
+    auto const& metacollectionTO = cellTO.metadata;
     auto metadata = CellMetadataDescription();
-    if (metadataTO.nameSize > 0) {
-        auto const name = std::string(reinterpret_cast<char*>(&dataTO.heap[metadataTO.nameDataIndex]), metadataTO.nameSize);
+    if (metacollectionTO.nameSize > 0) {
+        auto const name = std::string(reinterpret_cast<char*>(&collectionTO.heap[metacollectionTO.nameDataIndex]), metacollectionTO.nameSize);
         metadata.name(name);
     }
-    if (metadataTO.descriptionSize > 0) {
+    if (metacollectionTO.descriptionSize > 0) {
         auto const description =
-            std::string(reinterpret_cast<char*>(&dataTO.heap[metadataTO.descriptionDataIndex]), metadataTO.descriptionSize);
+            std::string(reinterpret_cast<char*>(&collectionTO.heap[metacollectionTO.descriptionDataIndex]), metacollectionTO.descriptionSize);
         metadata.description(description);
     }
     result._metadata = metadata;
 
     if (cellTO.cellType != CellType_Structure && cellTO.cellType != CellType_Free) {
-        result._neuralNetwork = convertToNeuronDescription(dataTO, cellTO.neuralNetwork.dataIndex);
+        auto const& neuralNetworkTO = getFromHeap<NeuralNetworkTO>(collectionTO.heap, cellTO.neuralNetworkDataIndex);
+        result._neuralNetwork = convert(*neuralNetworkTO);
     }
     switch (cellTO.cellType) {
     case CellType_Base: {
@@ -397,14 +491,14 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
     } break;
     case CellType_Depot: {
         DepotDescription transmitter;
-        transmitter._mode = cellTO.cellTypeData.transmitter.mode;
+        transmitter._mode = cellTO.cellTypeData.depot.mode;
         result._cellTypeData = transmitter;
     } break;
     case CellType_Constructor: {
         ConstructorDescription constructor;
         constructor._autoTriggerInterval = cellTO.cellTypeData.constructor.autoTriggerInterval;
         constructor._constructionActivationTime = cellTO.cellTypeData.constructor.constructionActivationTime;
-        convert(dataTO, cellTO.cellTypeData.constructor.genomeSize, cellTO.cellTypeData.constructor.genomeDataIndex, constructor._genome);
+        convert(collectionTO, cellTO.cellTypeData.constructor.genomeSize, cellTO.cellTypeData.constructor.genomeDataIndex, constructor._genome);
         constructor._numInheritedGenomeNodes = cellTO.cellTypeData.constructor.numInheritedGenomeNodes;
         constructor._lastConstructedCellId = cellTO.cellTypeData.constructor.lastConstructedCellId;
         constructor._genomeCurrentNodeIndex = cellTO.cellTypeData.constructor.genomeCurrentNodeIndex;
@@ -443,7 +537,7 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
         InjectorDescription injector;
         injector._mode = cellTO.cellTypeData.injector.mode;
         injector._counter = cellTO.cellTypeData.injector.counter;
-        convert(dataTO, cellTO.cellTypeData.injector.genomeSize, cellTO.cellTypeData.injector.genomeDataIndex, injector._genome);
+        convert(collectionTO, cellTO.cellTypeData.injector.genomeSize, cellTO.cellTypeData.injector.genomeDataIndex, injector._genome);
         injector._genomeGeneration = cellTO.cellTypeData.injector.genomeGeneration;
         result._cellTypeData = injector;
     } break;
@@ -541,6 +635,303 @@ CellDescription DescriptionConverterService::createCellDescription(DataTO const&
     return result;
 }
 
+GenomeDescription_New DescriptionConverterService::createGenomeDescription(CollectionTO const& collectionTO, int genomeIndex) const
+{
+    GenomeDescription_New result;
+
+    auto const& genomeTO = collectionTO.genomes[genomeIndex];
+    result._id = genomeTO.id;
+    result._genes.reserve(genomeTO.numGenes);
+    result._frontAngle = genomeTO.frontAngle;
+
+    for (int i = 0; i < genomeTO.numGenes; ++i) {
+        auto geneTO = collectionTO.genes + genomeTO.geneArrayIndex + i;
+
+        GeneDescription geneDesc;
+        geneDesc._numBranches = geneTO->numBranches;
+        geneDesc._shape = geneTO->shape;
+        geneDesc._separateConstruction = geneTO->separateConstruction;
+        geneDesc._angleAlignment = geneTO->angleAlignment;
+        geneDesc._stiffness = geneTO->stiffness;
+        geneDesc._connectionDistance = geneTO->connectionDistance;
+        geneDesc._numRepetitions = geneTO->numRepetitions;
+        geneDesc._concatenationAngle1 = geneTO->concatenationAngle1;
+        geneDesc._concatenationAngle2 = geneTO->concatenationAngle2;
+
+        for (int j = 0; j < geneTO->numNodes; ++j) {
+            auto nodeTO = collectionTO.nodes + geneTO->nodeArrayIndex + j;
+
+            NodeDescription nodeDesc;
+            nodeDesc._referenceAngle = nodeTO->referenceAngle;
+            nodeDesc._color = nodeTO->color;
+            nodeDesc._numRequiredAdditionalConnections = nodeTO->numRequiredAdditionalConnections;
+
+            auto neuralNetworkGenomeTO = getFromHeap<NeuralNetworkGenomeTO>(collectionTO.heap, nodeTO->neuralNetworkDataIndex);
+            nodeDesc._neuralNetwork = convert(*neuralNetworkGenomeTO);
+            nodeDesc._numRequiredAdditionalConnections = nodeTO->numRequiredAdditionalConnections;
+
+            switch (nodeTO->cellType) {
+            case CellTypeGenome_Base: {
+                BaseGenomeDescription baseDesc;
+                nodeDesc._cellTypeData = baseDesc;
+            } break;
+            case CellTypeGenome_Depot: {
+                DepotGenomeDescription depotDesc;
+                depotDesc._mode = nodeTO->cellTypeData.depot.mode;
+                nodeDesc._cellTypeData = depotDesc;
+            } break;
+            case CellTypeGenome_Constructor: {
+                ConstructorGenomeDescription_New constructorDesc;
+                constructorDesc._autoTriggerInterval = nodeTO->cellTypeData.constructor.autoTriggerInterval;
+                constructorDesc._constructionActivationTime = nodeTO->cellTypeData.constructor.constructionActivationTime;
+                constructorDesc._constructionAngle1 = nodeTO->cellTypeData.constructor.constructionAngle1;
+                constructorDesc._constructionAngle2 = nodeTO->cellTypeData.constructor.constructionAngle2;
+                nodeDesc._cellTypeData = constructorDesc;
+            } break;
+            case CellTypeGenome_Sensor: {
+                SensorGenomeDescription sensorDesc;
+                sensorDesc._autoTriggerInterval = nodeTO->cellTypeData.sensor.autoTriggerInterval;
+                sensorDesc._minDensity = nodeTO->cellTypeData.sensor.minDensity;
+                sensorDesc._minRange = nodeTO->cellTypeData.sensor.minRange;
+                sensorDesc._maxRange = nodeTO->cellTypeData.sensor.maxRange;
+                sensorDesc._minRange = nodeTO->cellTypeData.sensor.minRange >= 0 ? std::make_optional(nodeTO->cellTypeData.sensor.minRange) : std::nullopt;
+                sensorDesc._maxRange = nodeTO->cellTypeData.sensor.maxRange >= 0 ? std::make_optional(nodeTO->cellTypeData.sensor.maxRange) : std::nullopt;
+                sensorDesc._restrictToColor =
+                    nodeTO->cellTypeData.sensor.restrictToColor != 255 ? std::make_optional(nodeTO->cellTypeData.sensor.restrictToColor) : std::nullopt;
+                sensorDesc._restrictToMutants = nodeTO->cellTypeData.sensor.restrictToMutants;
+                nodeDesc._cellTypeData = sensorDesc;
+            } break;
+            case CellTypeGenome_Oscillator: {
+                OscillatorGenomeDescription oscillatorDesc;
+                oscillatorDesc._autoTriggerInterval = nodeTO->cellTypeData.oscillator.autoTriggerInterval;
+                oscillatorDesc._alternationInterval = nodeTO->cellTypeData.oscillator.alternationInterval;
+                nodeDesc._cellTypeData = oscillatorDesc;
+            } break;
+            case CellTypeGenome_Attacker: {
+                AttackerGenomeDescription attackerDesc;
+                nodeDesc._cellTypeData = attackerDesc;
+            } break;
+            case CellTypeGenome_Injector: {
+                InjectorGenomeDescription_New injectorDesc;
+                injectorDesc._mode = nodeTO->cellTypeData.injector.mode;
+                nodeDesc._cellTypeData = injectorDesc;
+            } break;
+            case CellTypeGenome_Muscle: {
+                MuscleGenomeDescription muscleDesc;
+                switch (nodeTO->cellTypeData.muscle.mode) {
+                case MuscleMode_AutoBending: {
+                    AutoBendingGenomeDescription bendingDesc;
+                    bendingDesc._maxAngleDeviation = nodeTO->cellTypeData.muscle.modeData.autoBending.maxAngleDeviation;
+                    bendingDesc._frontBackVelRatio = nodeTO->cellTypeData.muscle.modeData.autoBending.frontBackVelRatio;
+                    muscleDesc._mode = bendingDesc;
+                } break;
+                case MuscleMode_ManualBending: {
+                    ManualBendingGenomeDescription bendingDesc;
+                    bendingDesc._maxAngleDeviation = nodeTO->cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
+                    bendingDesc._frontBackVelRatio = nodeTO->cellTypeData.muscle.modeData.manualBending.frontBackVelRatio;
+                    muscleDesc._mode = bendingDesc;
+                } break;
+                case MuscleMode_AngleBending: {
+                    AngleBendingGenomeDescription bendingDesc;
+                    bendingDesc._maxAngleDeviation = nodeTO->cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
+                    bendingDesc._frontBackVelRatio = nodeTO->cellTypeData.muscle.modeData.angleBending.frontBackVelRatio;
+                    muscleDesc._mode = bendingDesc;
+                } break;
+                case MuscleMode_AutoCrawling: {
+                    AutoCrawlingGenomeDescription crawlingDesc;
+                    crawlingDesc._maxDistanceDeviation = nodeTO->cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation;
+                    crawlingDesc._frontBackVelRatio = nodeTO->cellTypeData.muscle.modeData.autoCrawling.frontBackVelRatio;
+                    muscleDesc._mode = crawlingDesc;
+                } break;
+                case MuscleMode_ManualCrawling: {
+                    ManualCrawlingGenomeDescription crawlingDesc;
+                    crawlingDesc._maxDistanceDeviation = nodeTO->cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation;
+                    crawlingDesc._frontBackVelRatio = nodeTO->cellTypeData.muscle.modeData.manualCrawling.frontBackVelRatio;
+                    muscleDesc._mode = crawlingDesc;
+                } break;
+                case MuscleMode_DirectMovement: {
+                    DirectMovementGenomeDescription directMovementDesc;
+                    muscleDesc._mode = directMovementDesc;
+                } break;
+                }
+                nodeDesc._cellTypeData = muscleDesc;
+            } break;
+            case CellTypeGenome_Defender: {
+                DefenderGenomeDescription defenderDesc;
+                defenderDesc._mode = nodeTO->cellTypeData.defender.mode;
+                nodeDesc._cellTypeData = defenderDesc;
+            } break;
+            case CellTypeGenome_Reconnector: {
+                ReconnectorGenomeDescription reconnectorDesc;
+                reconnectorDesc._restrictToColor = nodeTO->cellTypeData.reconnector.restrictToColor;
+                reconnectorDesc._restrictToMutants = nodeTO->cellTypeData.reconnector.restrictToMutants;
+                nodeDesc._cellTypeData = reconnectorDesc;
+            } break;
+            case CellTypeGenome_Detonator: {
+                DetonatorGenomeDescription detonatorDesc;
+                detonatorDesc._countdown = nodeTO->cellTypeData.detonator.countdown;
+                nodeDesc._cellTypeData = detonatorDesc;
+            } break;
+            }
+            geneDesc._nodes.emplace_back(nodeDesc);
+        }
+
+        result._genes.emplace_back(geneDesc);
+    }
+
+    return result;
+}
+
+void DescriptionConverterService::addGenome(
+    std::vector<GenomeTO>& genomeTOs,
+    std::vector<GeneTO>& geneTOs,
+    std::vector<NodeTO>& nodeTOs,
+    std::vector<uint8_t>& heap,
+    GenomeDescription_New const& genomeDesc,
+    std::unordered_map<uint64_t, uint64_t>& genomeTOIndexById) const
+{
+    auto genomeIndex = genomeTOs.size();
+    genomeTOs.resize(genomeIndex + 1);
+
+    GenomeTO& genomeTO = genomeTOs.at(genomeIndex);
+    genomeTO.id = genomeDesc._id == 0 ? NumberGenerator::get().getId() : genomeDesc._id;
+    genomeTOIndexById.insert_or_assign(genomeTO.id, genomeIndex);
+
+    auto geneArrayStartIndex = geneTOs.size();
+    geneTOs.resize(geneArrayStartIndex + genomeDesc._genes.size());
+
+    genomeTO.numGenes = toInt(genomeDesc._genes.size());
+    genomeTO.geneArrayIndex = geneArrayStartIndex;
+
+    for (auto const& [geneIndex, geneDesc] : genomeDesc._genes | boost::adaptors::indexed(0)) {
+        GeneTO& geneTO = geneTOs.at(geneArrayStartIndex + geneIndex);
+
+        geneTO.shape = geneDesc._shape;
+        geneTO.numBranches = geneDesc._numBranches;
+        geneTO.separateConstruction = geneDesc._separateConstruction;
+        geneTO.angleAlignment = geneDesc._angleAlignment;
+        geneTO.stiffness = geneDesc._stiffness;
+        geneTO.connectionDistance = geneDesc._connectionDistance;
+        geneTO.numRepetitions = geneDesc._numRepetitions;
+        geneTO.concatenationAngle1 = geneDesc._concatenationAngle1;
+        geneTO.concatenationAngle2 = geneDesc._concatenationAngle2;
+        geneTO.numNodes = toInt(geneDesc._nodes.size());
+
+        auto nodeArrayStartIndex = nodeTOs.size();
+        nodeTOs.resize(nodeArrayStartIndex + geneDesc._nodes.size());
+
+        geneTO.nodeArrayIndex = nodeArrayStartIndex;
+        for (auto const& [nodeIndex, nodeDesc] : geneDesc._nodes | boost::adaptors::indexed(0)) {
+            NodeTO& nodeTO = nodeTOs.at(nodeArrayStartIndex + nodeIndex);
+            nodeTO.referenceAngle = nodeDesc._referenceAngle;
+            nodeTO.color = nodeDesc._color;
+            nodeTO.numRequiredAdditionalConnections = nodeDesc._numRequiredAdditionalConnections;
+
+            nodeTO.neuralNetworkDataIndex = heap.size();
+            heap.resize(heap.size() + sizeof(NeuralNetworkGenomeTO));
+            auto neuralNetworkTO = reinterpret_cast<NeuralNetworkGenomeTO*>(heap.data() + heap.size() - sizeof(NeuralNetworkGenomeTO));
+            *neuralNetworkTO = convert(nodeDesc._neuralNetwork);
+
+            nodeTO.cellType = nodeDesc.getCellType();
+            switch (nodeDesc.getCellType()) {
+            case CellTypeGenome_Base: {
+            } break;
+            case CellTypeGenome_Depot: {
+                auto const& depotDesc = std::get<DepotGenomeDescription>(nodeDesc._cellTypeData);
+                auto& depotTO = nodeTO.cellTypeData.depot;
+                depotTO.mode = depotDesc._mode;
+            } break;
+            case CellTypeGenome_Constructor: {
+                auto const& constructorDesc = std::get<ConstructorGenomeDescription_New>(nodeDesc._cellTypeData);
+                auto& constructorTO = nodeTO.cellTypeData.constructor;
+                constructorTO.autoTriggerInterval = constructorDesc._autoTriggerInterval;
+                constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
+                constructorTO.constructionAngle1 = constructorDesc._constructionAngle1;
+                constructorTO.constructionAngle2 = constructorDesc._constructionAngle2;
+            } break;
+            case CellTypeGenome_Sensor: {
+                auto const& sensorDesc = std::get<SensorGenomeDescription>(nodeDesc._cellTypeData);
+                auto& sensorTO = nodeTO.cellTypeData.sensor;
+                sensorTO.autoTriggerInterval = sensorDesc._autoTriggerInterval;
+                sensorTO.minDensity = sensorDesc._minDensity;
+                sensorTO.minRange = static_cast<int8_t>(sensorDesc._minRange.value_or(-1));
+                sensorTO.maxRange = static_cast<int8_t>(sensorDesc._maxRange.value_or(-1));
+                sensorTO.restrictToColor = sensorDesc._restrictToColor.value_or(255);
+                sensorTO.restrictToMutants = sensorDesc._restrictToMutants;
+            } break;
+            case CellTypeGenome_Oscillator: {
+                auto const& oscillatorDesc = std::get<OscillatorGenomeDescription>(nodeDesc._cellTypeData);
+                auto& oscillatorTO = nodeTO.cellTypeData.oscillator;
+                oscillatorTO.autoTriggerInterval = oscillatorDesc._autoTriggerInterval;
+                oscillatorTO.alternationInterval = oscillatorDesc._alternationInterval;
+            } break;
+            case CellTypeGenome_Attacker: {
+            } break;
+            case CellTypeGenome_Injector: {
+                auto const& injectorDesc = std::get<InjectorGenomeDescription_New>(nodeDesc._cellTypeData);
+                auto& injectorTO = nodeTO.cellTypeData.injector;
+                injectorTO.mode = injectorDesc._mode;
+            } break;
+            case CellTypeGenome_Muscle: {
+                auto const& muscleDesc = std::get<MuscleGenomeDescription>(nodeDesc._cellTypeData);
+                auto& muscleTO = nodeTO.cellTypeData.muscle;
+                muscleTO.mode = muscleDesc.getMode();
+                switch (muscleDesc.getMode()) {
+                case MuscleMode_AutoBending: {
+                    auto const& autoBendingDesc = std::get<AutoBendingGenomeDescription>(muscleDesc._mode);
+                    auto& autoBendingTO = muscleTO.modeData.autoBending;
+                    autoBendingTO.maxAngleDeviation = autoBendingDesc._maxAngleDeviation;
+                    autoBendingTO.frontBackVelRatio = autoBendingDesc._frontBackVelRatio;
+                } break;
+                case MuscleMode_ManualBending: {
+                    auto const& manualBendingDesc = std::get<ManualBendingGenomeDescription>(muscleDesc._mode);
+                    auto& manualBendingTO = muscleTO.modeData.manualBending;
+                    manualBendingTO.maxAngleDeviation = manualBendingDesc._maxAngleDeviation;
+                    manualBendingTO.frontBackVelRatio = manualBendingDesc._frontBackVelRatio;
+                } break;
+                case MuscleMode_AngleBending: {
+                    auto const& angleBendingDesc = std::get<AngleBendingGenomeDescription>(muscleDesc._mode);
+                    auto& angleBendingTO = muscleTO.modeData.angleBending;
+                    angleBendingTO.maxAngleDeviation = angleBendingDesc._maxAngleDeviation;
+                    angleBendingTO.frontBackVelRatio = angleBendingDesc._frontBackVelRatio;
+                } break;
+                case MuscleMode_AutoCrawling: {
+                    auto const& autoCrawlingDesc = std::get<AutoCrawlingGenomeDescription>(muscleDesc._mode);
+                    auto& autoCrawlingTO = muscleTO.modeData.autoCrawling;
+                    autoCrawlingTO.maxDistanceDeviation = autoCrawlingDesc._maxDistanceDeviation;
+                    autoCrawlingTO.frontBackVelRatio = autoCrawlingDesc._frontBackVelRatio;
+                } break;
+                case MuscleMode_ManualCrawling: {
+                    auto const& manualCrawlingDesc = std::get<ManualCrawlingGenomeDescription>(muscleDesc._mode);
+                    auto& manualCrawlingTO = muscleTO.modeData.manualCrawling;
+                    manualCrawlingTO.maxDistanceDeviation = manualCrawlingDesc._maxDistanceDeviation;
+                    manualCrawlingTO.frontBackVelRatio = manualCrawlingDesc._frontBackVelRatio;
+                } break;
+                case MuscleMode_DirectMovement: {
+                } break;
+                }
+            } break;
+            case CellTypeGenome_Defender: {
+                auto const& defenderDesc = std::get<DefenderGenomeDescription>(nodeDesc._cellTypeData);
+                auto& defenderTO = nodeTO.cellTypeData.defender;
+                defenderTO.mode = defenderDesc._mode;
+            } break;
+            case CellTypeGenome_Reconnector: {
+                auto const& reconnectorDesc = std::get<ReconnectorGenomeDescription>(nodeDesc._cellTypeData);
+                auto& reconnectorTO = nodeTO.cellTypeData.reconnector;
+                reconnectorTO.restrictToColor = reconnectorDesc._restrictToColor.value_or(255);
+                reconnectorTO.restrictToMutants = reconnectorDesc._restrictToMutants;
+            } break;
+            case CellTypeGenome_Detonator: {
+                auto const& detonatorDesc = std::get<DetonatorGenomeDescription>(nodeDesc._cellTypeData);
+                auto& detonatorTO = nodeTO.cellTypeData.detonator;
+                detonatorTO.countdown = detonatorDesc._countdown;
+            } break;
+            }
+        }
+    }
+}
+
 namespace
 {
     void checkAndCorrectInvalidEnergy(float& energy)
@@ -551,29 +942,27 @@ namespace
     }
 }
 
-void DescriptionConverterService::addParticle(std::vector<ParticleTO>& particleTOs, ParticleDescription const& particleDesc) const
-{
-    auto& particleTO = particleTOs.emplace_back();
-
-	particleTO.id = particleDesc._id == 0 ? NumberGenerator::get().getId() : particleDesc._id;
-    particleTO.pos = {particleDesc._pos.x, particleDesc._pos.y};
-    particleTO.vel = {particleDesc._vel.x, particleDesc._vel.y};
-    particleTO.energy = particleDesc._energy;
-    checkAndCorrectInvalidEnergy(particleTO.energy);
-    particleTO.color = particleDesc._color;
-}
-
 void DescriptionConverterService::addCell(
     std::vector<CellTO>& cellTOs,
     std::vector<uint8_t>& heap,
+    std::unordered_map<uint64_t, uint64_t>& cellTOIndexById,
     CellDescription const& cellDesc,
-    std::unordered_map<uint64_t, uint64_t>& cellIndexTOByIds) const
+    std::unordered_map<uint64_t, uint64_t> const& genomeTOIndexById) const
 {
     auto cellIndex = cellTOs.size();
     cellTOs.resize(cellIndex + 1);
 
     CellTO& cellTO = cellTOs.at(cellIndex);
     cellTO.id = cellDesc._id == 0 ? NumberGenerator::get().getId() : cellDesc._id;
+    cellTOIndexById.insert_or_assign(cellTO.id, cellIndex);
+
+    cellTO.hasGenome = cellDesc._genomeId.has_value();
+    if (cellTO.hasGenome) {
+        auto findResult = genomeTOIndexById.find(cellDesc._genomeId.value());
+        if (findResult != genomeTOIndexById.end()) {
+            cellTO.genomeIndex = findResult->second;
+        }
+    }
     cellTO.pos = {cellDesc._pos.x, cellDesc._pos.y};
     cellTO.vel = {cellDesc._vel.x, cellDesc._vel.y};
     cellTO.energy = cellDesc._energy;
@@ -591,7 +980,10 @@ void DescriptionConverterService::addCell(
 
     auto cellType = cellDesc.getCellType();
     if (cellType != CellType_Structure && cellType != CellType_Free) {
-        convertToNeuronData(heap, cellTO.neuralNetwork.dataIndex, * cellDesc._neuralNetwork);
+        cellTO.neuralNetworkDataIndex = heap.size();
+        heap.resize(heap.size() + sizeof(NeuralNetworkTO));
+        auto neuralNetworkTO = reinterpret_cast<NeuralNetworkTO*>(heap.data() + heap.size() - sizeof(NeuralNetworkTO));
+        *neuralNetworkTO = convert(*cellDesc._neuralNetwork);
     }
     switch (cellType) {
     case CellType_Base: {
@@ -600,7 +992,7 @@ void DescriptionConverterService::addCell(
     } break;
     case CellType_Depot: {
         auto const& transmitterDesc = std::get<DepotDescription>(cellDesc._cellTypeData);
-        TransmitterTO& transmitterTO = cellTO.cellTypeData.transmitter;
+        DepotTO& transmitterTO = cellTO.cellTypeData.depot;
         transmitterTO.mode = transmitterDesc._mode;
     } break;
     case CellType_Constructor: {
@@ -743,7 +1135,18 @@ void DescriptionConverterService::addCell(
     cellTO.genomeComplexity = cellDesc._genomeComplexity;
     convert(heap, cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, cellDesc._metadata._name);
     convert(heap, cellTO.metadata.descriptionSize, cellTO.metadata.descriptionDataIndex, cellDesc._metadata._description);
-	cellIndexTOByIds.insert_or_assign(cellTO.id, cellIndex);
+}
+
+void DescriptionConverterService::addParticle(std::vector<ParticleTO>& particleTOs, ParticleDescription const& particleDesc) const
+{
+    auto& particleTO = particleTOs.emplace_back();
+
+    particleTO.id = particleDesc._id == 0 ? NumberGenerator::get().getId() : particleDesc._id;
+    particleTO.pos = {particleDesc._pos.x, particleDesc._pos.y};
+    particleTO.vel = {particleDesc._vel.x, particleDesc._vel.y};
+    particleTO.energy = particleDesc._energy;
+    checkAndCorrectInvalidEnergy(particleTO.energy);
+    particleTO.color = particleDesc._color;
 }
 
 void DescriptionConverterService::setConnections(
@@ -771,17 +1174,32 @@ void DescriptionConverterService::setConnections(
     cellTO.numConnections = index;
 }
 
-DataTO DescriptionConverterService::provideDataTO(
+CollectionTO DescriptionConverterService::provideDataTO(
+    std::vector<GenomeTO> const& genomeTOs,
+    std::vector<GeneTO> const& geneTOs,
+    std::vector<NodeTO> const& nodeTOs,
     std::vector<CellTO> const& cellTOs,
     std::vector<ParticleTO> const& particleTOs,
     std::vector<uint8_t> const& heap) const
 {
-    DataTO result = _dataTOProvider->provideDataTO({cellTOs.size(), particleTOs.size(), heap.size()});
+    CollectionTO result = _collectionTOProvider->provideDataTO(
+        {.genomes = genomeTOs.size(),
+         .genes = geneTOs.size(),
+         .nodes = nodeTOs.size(),
+         .cells = cellTOs.size(),
+         .particles = particleTOs.size(),
+         .heap = heap.size()});
 
+    *result.numGenomes = genomeTOs.size();
+    *result.numGenes = geneTOs.size();
+    *result.numNodes = nodeTOs.size();
     *result.numCells = cellTOs.size();
     *result.numParticles = particleTOs.size();
     *result.heapSize = heap.size();
 
+    std::memcpy(result.genomes, genomeTOs.data(), genomeTOs.size() * sizeof(GenomeTO));
+    std::memcpy(result.genes, geneTOs.data(), geneTOs.size() * sizeof(GeneTO));
+    std::memcpy(result.nodes, nodeTOs.data(), nodeTOs.size() * sizeof(NodeTO));
     std::memcpy(result.cells, cellTOs.data(), cellTOs.size() * sizeof(CellTO));
     std::memcpy(result.particles, particleTOs.data(), particleTOs.size() * sizeof(ParticleTO));
     std::memcpy(result.heap, heap.data(), heap.size());

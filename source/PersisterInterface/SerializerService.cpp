@@ -109,7 +109,11 @@ namespace
 
     auto constexpr Id_DetonatorGenome_Countdown = 0;
 
-    auto constexpr Id_Particle_Color = 0;
+    auto constexpr Id_Particle_Id = 0;
+    auto constexpr Id_Particle_Pos = 1;
+    auto constexpr Id_Particle_Vel = 2;
+    auto constexpr Id_Particle_Energy = 3;
+    auto constexpr Id_Particle_Color = 4;
 
     auto constexpr Id_Cell_Id = 0;
     auto constexpr Id_Cell_Energy = 1;
@@ -223,6 +227,30 @@ namespace
 
     auto constexpr Id_Detonator_State = 0;
     auto constexpr Id_Detonator_Countdown = 1;
+
+    auto constexpr Id_Genome_Id = 0;
+    auto constexpr Id_Genome_FrontAngle = 1;
+
+    auto constexpr Id_Gene_Shape = 0;
+    auto constexpr Id_Gene_NumBranches = 1;
+    auto constexpr Id_Gene_SeparateConstruction = 2;
+    auto constexpr Id_Gene_AngleAlignment = 3;
+    auto constexpr Id_Gene_Stiffness = 4;
+    auto constexpr Id_Gene_ConnectionDistance = 5;
+    auto constexpr Id_Gene_NumRepetitions = 6;
+    auto constexpr Id_Gene_ConcatenationAngle1 = 7;
+    auto constexpr Id_Gene_ConcatenationAngle2 = 8;
+
+    auto constexpr Id_Node_ReferenceAngle = 0;
+    auto constexpr Id_Node_Color = 1;
+    auto constexpr Id_Node_NumRequiredAdditionalConnections = 2;
+
+    auto constexpr Id_ConstructorGenome_New_AutoTriggerInterval = 0;
+    auto constexpr Id_ConstructorGenome_New_ConstructionActivationTime = 1;
+    auto constexpr Id_ConstructorGenome_New_ConstructionAngle1 = 2;
+    auto constexpr Id_ConstructorGenome_New_ConstructionAngle2 = 3;
+
+    auto constexpr Id_InjectorGenome_New_Mode = 0;
 
     enum class SerializationTask
     {
@@ -338,39 +366,17 @@ namespace cereal
     SPLIT_SERIALIZATION(DepotGenomeDescription)
 
     template <class Archive>
-    void serialize(Archive& ar, MakeGenomeCopy& data)
-    {}
-
-    template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, ConstructorGenomeDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, ConstructorGenomeDescription_New& data)
     {
-        ConstructorGenomeDescription defaultObject;
+        ConstructorGenomeDescription_New defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_ConstructorGenome_Mode, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
-        loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
-        loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle1, data._constructionAngle1, defaultObject._constructionAngle1);
-        loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle2, data._constructionAngle2, defaultObject._constructionAngle2);
+        loadSave(task, auxiliaries, Id_ConstructorGenome_New_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
+        loadSave(task, auxiliaries, Id_ConstructorGenome_New_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
+        loadSave(task, auxiliaries, Id_ConstructorGenome_New_ConstructionAngle1, data._constructionAngle1, defaultObject._constructionAngle1);
+        loadSave(task, auxiliaries, Id_ConstructorGenome_New_ConstructionAngle2, data._constructionAngle2, defaultObject._constructionAngle2);
         processLoadSaveMap(task, ar, auxiliaries);
-
-        if (task == SerializationTask::Load) {
-            std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
-            ar(genomeData);
-            if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
-                data._genome = MakeGenomeCopy();
-            } else {
-                data._genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
-            }
-        } else {
-            std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
-            if (std::holds_alternative<MakeGenomeCopy>(data._genome)) {
-                genomeData = MakeGenomeCopy();
-            } else {
-                genomeData = GenomeDescriptionConverterService::get().convertBytesToDescription(std::get<std::vector<uint8_t>>(data._genome));
-            }
-            ar(genomeData);
-        }
     }
-    SPLIT_SERIALIZATION(ConstructorGenomeDescription)
+    SPLIT_SERIALIZATION(ConstructorGenomeDescription_New)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, SensorGenomeDescription& data)
@@ -407,32 +413,14 @@ namespace cereal
     SPLIT_SERIALIZATION(AttackerGenomeDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, InjectorGenomeDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, InjectorGenomeDescription_New& data)
     {
-        InjectorGenomeDescription defaultObject;
+        InjectorGenomeDescription_New defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_InjectorGenome_Mode, data._mode, defaultObject._mode);
+        loadSave(task, auxiliaries, Id_InjectorGenome_New_Mode, data._mode, defaultObject._mode);
         processLoadSaveMap(task, ar, auxiliaries);
-
-        if (task == SerializationTask::Load) {
-            std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
-            ar(genomeData);
-            if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
-                data._genome = MakeGenomeCopy();
-            } else {
-                data._genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
-            }
-        } else {
-            std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
-            if (std::holds_alternative<MakeGenomeCopy>(data._genome)) {
-                genomeData = MakeGenomeCopy();
-            } else {
-                genomeData = GenomeDescriptionConverterService::get().convertBytesToDescription(std::get<std::vector<uint8_t>>(data._genome));
-            }
-            ar(genomeData);
-        }
     }
-    SPLIT_SERIALIZATION(InjectorGenomeDescription)
+    SPLIT_SERIALIZATION(InjectorGenomeDescription_New)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, AutoBendingGenomeDescription& data)
@@ -551,6 +539,125 @@ namespace cereal
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalRoutingRestrictionGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, NodeDescription& data)
+    {
+        NodeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_Node_ReferenceAngle, data._referenceAngle, defaultObject._referenceAngle);
+        loadSave(task, auxiliaries, Id_Node_Color, data._color, defaultObject._color);
+        loadSave(
+            task,
+            auxiliaries,
+            Id_Node_NumRequiredAdditionalConnections,
+            data._numRequiredAdditionalConnections,
+            defaultObject._numRequiredAdditionalConnections);
+        processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._neuralNetwork, data._cellTypeData, data._signalRoutingRestriction);
+    }
+    SPLIT_SERIALIZATION(NodeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, GeneDescription& data)
+    {
+        GeneDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_Gene_Shape, data._shape, defaultObject._shape);
+        loadSave(task, auxiliaries, Id_Gene_NumBranches, data._numBranches, defaultObject._numBranches);
+        loadSave(task, auxiliaries, Id_Gene_SeparateConstruction, data._separateConstruction, defaultObject._separateConstruction);
+        loadSave(task, auxiliaries, Id_Gene_AngleAlignment, data._angleAlignment, defaultObject._angleAlignment);
+        loadSave(task, auxiliaries, Id_Gene_Stiffness, data._stiffness, defaultObject._stiffness);
+        loadSave(task, auxiliaries, Id_Gene_ConnectionDistance, data._connectionDistance, defaultObject._connectionDistance);
+        loadSave(task, auxiliaries, Id_Gene_NumRepetitions, data._numRepetitions, defaultObject._numRepetitions);
+        loadSave(task, auxiliaries, Id_Gene_ConcatenationAngle1, data._concatenationAngle1, defaultObject._concatenationAngle1);
+        loadSave(task, auxiliaries, Id_Gene_ConcatenationAngle2, data._concatenationAngle2, defaultObject._concatenationAngle2);
+        processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._nodes);
+    }
+    SPLIT_SERIALIZATION(GeneDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, GenomeDescription_New& data)
+    {
+        GenomeDescription_New defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_Genome_Id, data._id, defaultObject._id);
+        loadSave(task, auxiliaries, Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
+        processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._genes);
+    }
+    SPLIT_SERIALIZATION(GenomeDescription_New)
+
+    //*********************************
+    //* Old genome model
+    //*********************************
+
+    template <class Archive>
+    void serialize(Archive& ar, MakeGenomeCopy& data)
+    {}
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, ConstructorGenomeDescription& data)
+    {
+        ConstructorGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_ConstructorGenome_Mode, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
+        loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
+        loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle1, data._constructionAngle1, defaultObject._constructionAngle1);
+        loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle2, data._constructionAngle2, defaultObject._constructionAngle2);
+        processLoadSaveMap(task, ar, auxiliaries);
+
+        if (task == SerializationTask::Load) {
+            std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
+            ar(genomeData);
+            if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
+                data._genome = MakeGenomeCopy();
+            } else {
+                data._genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
+            }
+        } else {
+            std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
+            if (std::holds_alternative<MakeGenomeCopy>(data._genome)) {
+                genomeData = MakeGenomeCopy();
+            } else {
+                genomeData = GenomeDescriptionConverterService::get().convertBytesToDescription(std::get<std::vector<uint8_t>>(data._genome));
+            }
+            ar(genomeData);
+        }
+    }
+    SPLIT_SERIALIZATION(ConstructorGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, InjectorGenomeDescription& data)
+    {
+        InjectorGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_InjectorGenome_Mode, data._mode, defaultObject._mode);
+        processLoadSaveMap(task, ar, auxiliaries);
+
+        if (task == SerializationTask::Load) {
+            std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
+            ar(genomeData);
+            if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
+                data._genome = MakeGenomeCopy();
+            } else {
+                data._genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
+            }
+        } else {
+            std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
+            if (std::holds_alternative<MakeGenomeCopy>(data._genome)) {
+                genomeData = MakeGenomeCopy();
+            } else {
+                genomeData = GenomeDescriptionConverterService::get().convertBytesToDescription(std::get<std::vector<uint8_t>>(data._genome));
+            }
+            ar(genomeData);
+        }
+    }
+    SPLIT_SERIALIZATION(InjectorGenomeDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, CellGenomeDescription& data)
@@ -913,6 +1020,7 @@ namespace cereal
     }
     SPLIT_SERIALIZATION(CellDescription)
 
+
     template <class Archive>
     void serialize(Archive& ar, ClusterDescription& data)
     {
@@ -924,17 +1032,19 @@ namespace cereal
     {
         ParticleDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_Particle_Id, data._id, defaultObject._id);
+        loadSave(task, auxiliaries, Id_Particle_Pos, data._pos, defaultObject._pos);
+        loadSave(task, auxiliaries, Id_Particle_Vel, data._vel, defaultObject._vel);
+        loadSave(task, auxiliaries, Id_Particle_Energy, data._energy, defaultObject._energy);
         loadSave(task, auxiliaries, Id_Particle_Color, data._color, defaultObject._color);
         processLoadSaveMap(task, ar, auxiliaries);
-
-        ar(data._id, data._pos, data._vel, data._energy);
     }
     SPLIT_SERIALIZATION(ParticleDescription)
 
     template <class Archive>
     void serialize(Archive& ar, ClusteredDataDescription& data)
     {
-        ar(data._clusters, data._particles);
+        ar(data._clusters, data._particles, data._genomes);
     }
 }
 

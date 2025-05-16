@@ -59,7 +59,7 @@ private:
 
 __inline__ __device__ void CellProcessor::init(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -67,14 +67,14 @@ __inline__ __device__ void CellProcessor::init(SimulationData& data)
 
         cell->shared1 = {0, 0};
         cell->nextCell = nullptr;
-        cell->tag = 0;
+        cell->tempValue = 0;
     }
 }
 
 __inline__ __device__ void CellProcessor::updateMap(SimulationData& data)
 {
-    auto const partition = calcPartition(data.objects.cellPointers.getNumEntries(), blockIdx.x, gridDim.x);
-    Cell** cellPointers = &data.objects.cellPointers.at(partition.startIndex);
+    auto const partition = calcPartition(data.objects.cells.getNumEntries(), blockIdx.x, gridDim.x);
+    Cell** cellPointers = &data.objects.cells.at(partition.startIndex);
     data.cellMap.set_block(partition.numElements(), cellPointers);
 }
 
@@ -85,9 +85,9 @@ __inline__ __device__ void CellProcessor::clearDensityMap(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::fillDensityMap(SimulationData& data)
 {
-    auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
+    auto const partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        data.preprocessedSimulationData.densityMap.addCell(data.timestep, data.objects.cellPointers.at(index));
+        data.preprocessedSimulationData.densityMap.addCell(data.timestep, data.objects.cells.at(index));
     }
 }
 
@@ -125,7 +125,7 @@ namespace
 
 __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correctOverlap(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto blockPartition = calcBlockPartition(cells.getNumEntries());
     auto const& smoothingLength = cudaSimulationParameters.smoothingLength.value;
 
@@ -287,7 +287,7 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
 
 __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctOverlap(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -361,7 +361,7 @@ __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctO
 
 __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (auto index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -381,7 +381,7 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::applyForces(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto const partition =
         calcAllThreadsPartition(cells.getNumEntries());
 
@@ -401,7 +401,7 @@ __inline__ __device__ void CellProcessor::applyForces(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& data, bool considerAngles)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -486,7 +486,7 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
 
 __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -518,7 +518,7 @@ __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::verletPositionUpdate(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto const partition =
         calcAllThreadsPartition(cells.getNumEntries());
 
@@ -539,7 +539,7 @@ __inline__ __device__ void CellProcessor::verletPositionUpdate(SimulationData& d
 
 __inline__ __device__ void CellProcessor::verletVelocityUpdate(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumOrigEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -554,9 +554,9 @@ __inline__ __device__ void CellProcessor::verletVelocityUpdate(SimulationData& d
 
 __inline__ __device__ void CellProcessor::aging(SimulationData& data)
 {
-    auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
+    auto const partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& cell = data.objects.cellPointers.at(index);
+        auto& cell = data.objects.cells.at(index);
         if (cell->barrier) {
             continue;
         }
@@ -589,7 +589,7 @@ __inline__ __device__ void CellProcessor::aging(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::livingStateTransition_calcFutureState(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -667,25 +667,25 @@ __inline__ __device__ void CellProcessor::livingStateTransition_calcFutureState(
                 }
             }
         }
-        cell->tag = livingState;
+        cell->tempValue = livingState;
     }
 }
 
 __inline__ __device__ void CellProcessor::livingStateTransition_applyNextState(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        cell->livingState = cell->tag;
-        cell->tag = 0;
+        cell->livingState = cell->tempValue;
+        cell->tempValue = 0;
     }
 }
 
 __inline__ __device__ void CellProcessor::applyInnerFriction(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto const partition =
         calcAllThreadsPartition(cells.getNumEntries());
 
@@ -714,7 +714,7 @@ __inline__ __device__ void CellProcessor::applyInnerFriction(SimulationData& dat
 
 __inline__ __device__ void CellProcessor::applyFriction(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto const partition =
         calcAllThreadsPartition(cells.getNumEntries());
 
@@ -731,7 +731,7 @@ __inline__ __device__ void CellProcessor::applyFriction(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
 
     auto partition =
         calcAllThreadsPartition(cells.getNumEntries());
@@ -776,7 +776,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::decay(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto partition =
         calcAllThreadsPartition(cells.getNumEntries());
 
@@ -844,7 +844,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::resetDensity(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -856,7 +856,7 @@ __inline__ __device__ void CellProcessor::resetDensity(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::updateRenderingData(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -869,7 +869,7 @@ __inline__ __device__ void CellProcessor::updateRenderingData(SimulationData& da
 
 __inline__ __device__ void CellProcessor::applyEnergyFlow(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {

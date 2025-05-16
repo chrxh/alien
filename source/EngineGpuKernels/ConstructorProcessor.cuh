@@ -116,7 +116,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
     }
 
     uint32_t tagBit = 1 << toInt(cell->id % 30);
-    atomicOr(&cell->tag, toInt(tagBit));
+    atomicOr(&cell->tempValue, toInt(tagBit));
     auto actualCells = 1;
 
     auto constexpr QueueLength = 512;
@@ -131,7 +131,7 @@ __inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationDat
             for (int i = 0, j = currentCell->numConnections; i < j; ++i) {
                 auto& nextCell = currentCell->connections[i].cell;
                 if (nextCell->creatureId == cell->creatureId) {
-                    auto origTagBit = static_cast<uint32_t>(atomicOr(&nextCell->tag, toInt(tagBit)));
+                    auto origTagBit = static_cast<uint32_t>(atomicOr(&nextCell->tempValue, toInt(tagBit)));
                     if ((origTagBit & tagBit) == 0) {
                         taggedCells[numTaggedCells] = nextCell;
                         numTaggedCells = (numTaggedCells + 1) % QueueLength;
@@ -345,7 +345,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     }
 
     if (constructionData.containsSelfReplication) {
-        constructor.offspringCreatureId = 1 + data.numberGen1.random(65535);
+        constructor.offspringCreatureId = 1 + data.numberGen1.random(0xffff);
 
         hostCell->genomeComplexity = calcGenomeComplexity(hostCell->color, constructor.genome, constructor.genomeSize);
     } else {
@@ -474,9 +474,6 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
             adaptReferenceAngle = true;
         }
     }
-
-    Math::normalize(posDelta);
-    Math::rotateQuarterClockwise(posDelta);
 
     // get surrounding cells
     if (numCellsToConnect > 0 && constructionData.numRequiredAdditionalConnections != 0) {
@@ -738,7 +735,7 @@ ConstructorProcessor::constructCellIntern(
     case CellType_Base: {
     } break;
     case CellType_Depot: {
-        result->cellTypeData.transmitter.mode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % EnergyDistributionMode_Count;
+        result->cellTypeData.depot.mode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % EnergyDistributionMode_Count;
     } break;
     case CellType_Constructor: {
         auto& newConstructor = result->cellTypeData.constructor;
@@ -753,7 +750,7 @@ ConstructorProcessor::constructCellIntern(
         GenomeDecoder::copyGenome(data, constructor, genomeCurrentBytePosition, newConstructor);
         auto numInheritedGenomeNodes = 
             GenomeDecoder::getNumNodesRecursively(newConstructor.genome, newConstructor.genomeSize, true, false);
-        newConstructor.numInheritedGenomeNodes = static_cast<uint16_t>(min(65535, numInheritedGenomeNodes));
+        newConstructor.numInheritedGenomeNodes = static_cast<uint16_t>(min(0xffff, numInheritedGenomeNodes));
         newConstructor.genomeGeneration = constructor.genomeGeneration + 1;
         newConstructor.offspringMutationId = constructor.offspringMutationId;
         if (GenomeDecoder::containsSelfReplication(newConstructor)) {

@@ -19,9 +19,8 @@
 #include "SimulationData.cuh"
 
 __global__ void cudaColorSelectedCells(SimulationData data, unsigned char color, bool includeClusters);
-__global__ void cudaPrepareForUpdate(SimulationData data);
-__global__ void cudaChangeCell(SimulationData data, DataTO changeDataTO);  //assumes that *changeDataTO.numCells == 1
-__global__ void cudaChangeParticle(SimulationData data, DataTO changeDataTO); //assumes that *changeDataTO.numParticles == 1
+__global__ void cudaChangeCell(SimulationData data, CollectionTO changeDataTO);  //assumes that *changeDataTO.numCells == 1
+__global__ void cudaChangeParticle(SimulationData data, CollectionTO changeDataTO); //assumes that *changeDataTO.numParticles == 1
 __global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClusters);
 __global__ void cudaRemoveSelectedCellConnections(SimulationData data, bool includeClusters);
 __global__ void cudaRelaxSelectedEntities(SimulationData data, bool includeClusters);

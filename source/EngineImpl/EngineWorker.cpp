@@ -5,7 +5,7 @@
 #include "Base/ExitScopeGuard.h"
 #include "EngineGpuKernels/ObjectTO.cuh"
 #include "EngineGpuKernels/SimulationCudaFacade.cuh"
-#include "EngineGpuKernels/DataTOProvider.cuh"
+#include "EngineGpuKernels/CollectionTOProvider.cuh"
 
 #include "DescriptionConverterService.h"
 
@@ -18,7 +18,7 @@ void EngineWorker::newSimulation(uint64_t timestep, SettingsForSimulation const&
 {
     _accessState = 0;
     _settings = settings;
-    _dataTOProvider = std::make_shared<_DataTOProvider>();
+    _collectionTOProvider = std::make_shared<_CollectionTOProvider>();
     _simulationCudaFacade = std::make_shared<_SimulationCudaFacade>(timestep, settings);
     _cudaResource = nullptr;
 }
@@ -107,8 +107,8 @@ void EngineWorker::setSyncSimulationWithRenderingRatio(int value)
 
 ClusteredDataDescription EngineWorker::getClusteredSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
 {
-    DataTO dataTO;
-    ExitScopeGuard guard([&dataTO]() { _DataTOProvider::destroyUnmanagedDataTO(dataTO); });
+    CollectionTO dataTO;
+    ExitScopeGuard guard([&dataTO]() { _CollectionTOProvider::destroyUnmanagedDataTO(dataTO); });
 
     {
         EngineWorkerGuard access(this);
@@ -124,7 +124,7 @@ DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft
     EngineWorkerGuard access(this);
 
     auto dataTO = _simulationCudaFacade->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y});
-    ExitScopeGuard guard([&dataTO]() { _DataTOProvider::destroyUnmanagedDataTO(dataTO); });
+    ExitScopeGuard guard([&dataTO]() { _CollectionTOProvider::destroyUnmanagedDataTO(dataTO); });
 
     return DescriptionConverterService::get().convertTOtoDataDescription(dataTO);
 }
