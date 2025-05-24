@@ -5,6 +5,7 @@ PUBLIC
     ConstructorTests.cpp
     ConstructorTests_New.cpp
     DataTransferTests.cpp
+    DataTransferTests_New.cpp
     DefenderTests.cpp
     DescriptionEditTests.cpp
     DetonatorTests.cpp
