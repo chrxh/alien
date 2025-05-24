@@ -40,6 +40,7 @@ void _DataAccessKernelsService::getData(
 {
     KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
     KERNEL_CALL(cudaPrepareGenomesForConversionToTO, rectUpperLeft, rectLowerRight, data);
+    KERNEL_CALL(cudaGetGenomeData, rectUpperLeft, rectLowerRight, data, dataTO);
     KERNEL_CALL(cudaGetCellDataWithoutConnections, rectUpperLeft, rectLowerRight, data, dataTO);
     KERNEL_CALL(cudaResolveConnections, data, dataTO);
     KERNEL_CALL(cudaGetParticleData, rectUpperLeft, rectLowerRight, data, dataTO);
@@ -52,6 +53,7 @@ void _DataAccessKernelsService::getSelectedData(
     CollectionTO const& dataTO)
 {
     KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
+    KERNEL_CALL(cudaGetSelectedGenomeData, data, includeClusters, dataTO);
     KERNEL_CALL(cudaGetSelectedCellDataWithoutConnections, data, includeClusters, dataTO);
     KERNEL_CALL(cudaResolveConnections, data, dataTO);
     KERNEL_CALL(cudaGetSelectedParticleData, data, dataTO);
