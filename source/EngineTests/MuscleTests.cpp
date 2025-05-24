@@ -30,7 +30,7 @@ public:
 
 //TEST_F(MuscleTests, doNothing)
 //{
-//    DataDescription data;
+//    CollectionDescription data;
 //    data.addCells(
 //        {CellDescription()
 //             .id(1)
@@ -61,7 +61,7 @@ public:
 //
 //TEST_F(MuscleTests, moveForward)
 //{
-//    DataDescription data;
+//    CollectionDescription data;
 //    data.addCells(
 //        {CellDescription()
 //             .id(1)
@@ -92,7 +92,7 @@ public:
 //
 //TEST_F(MuscleTests, moveBackward)
 //{
-//    DataDescription data;
+//    CollectionDescription data;
 //    data.addCells(
 //        {CellDescription()
 //             .id(1)
@@ -122,7 +122,7 @@ public:
 //
 //TEST_F(MuscleTests, multipleMovementDirections)
 //{
-//    DataDescription data;
+//    CollectionDescription data;
 //    data.addCells({
 //        CellDescription()
 //            .id(1)
@@ -157,7 +157,7 @@ public:
 //{
 //    auto const smallDistance = _parameters.cellMinDistance * 1.1f;
 //
-//    DataDescription data;
+//    CollectionDescription data;
 //    data.addCells(
 //        {CellDescription()
 //             .id(1)
@@ -189,7 +189,7 @@ public:
 //{
 //    auto const largeDistance = _parameters.cellMaxBindingDistance[0] * 0.9f;
 //
-//    DataDescription data;
+//    CollectionDescription data;
 //    data.addCells(
 //        {CellDescription()
 //             .id(1)
@@ -217,7 +217,7 @@ public:
 //{
 //    auto const largeDistance = _parameters.cellMaxBindingDistance[0] * 0.9f;
 //
-//    DataDescription data;
+//    CollectionDescription data;
 //    data.addCells(
 //        {CellDescription()
 //             .id(1)
@@ -246,7 +246,7 @@ public:
 //{
 //    auto const largeDistance = _parameters.cellMaxBindingDistance[0] * 0.9f;
 //
-//    DataDescription data;
+//    CollectionDescription data;
 //    data.addCells({
 //        CellDescription()
 //            .id(1)
@@ -283,7 +283,7 @@ public:
 //{
 //    auto const smallDistance = _parameters.cellMinDistance * 1.1f;
 //
-//    DataDescription data;
+//    CollectionDescription data;
 //    data.addCells(
 //        {CellDescription()
 //             .id(1)
@@ -309,7 +309,7 @@ public:
 //
 //TEST_F(MuscleTests, bendClockwise)
 //{
-//    DataDescription data;
+//    CollectionDescription data;
 //    data.addCells({
 //        CellDescription().id(1).pos({9.0f, 10.0f}),
 //        CellDescription()
@@ -345,7 +345,7 @@ public:
 //
 //TEST_F(MuscleTests, bendCounterClockwise)
 //{
-//    DataDescription data;
+//    CollectionDescription data;
 //    data.addCells({
 //        CellDescription().id(1).pos({9.0f, 10.0f}),
 //        CellDescription()

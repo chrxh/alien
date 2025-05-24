@@ -16,7 +16,7 @@ public:
     virtual ~DescriptionEditTests() = default;
 
 protected:
-    bool areAngelsCorrect(ClusteredDataDescription const& clusteredData) const
+    bool areAngelsCorrect(ClusteredCollectionDescription const& clusteredData) const
     {
         for (auto const& cluster : clusteredData._clusters) {
             for (auto const& cell : cluster._cells) {
@@ -50,7 +50,7 @@ TEST_F(DescriptionEditTests, correctConnections)
 
 TEST_F(DescriptionEditTests, addThirdConnection1)
 {
-    auto data = DataDescription().addCells({
+    auto data = CollectionDescription().addCells({
         CellDescription().id(1).pos({0, 0}),
         CellDescription().id(2).pos({1, 0}),
         CellDescription().id(3).pos({0, 1}),
@@ -80,7 +80,7 @@ TEST_F(DescriptionEditTests, addThirdConnection1)
 
 TEST_F(DescriptionEditTests, addThirdConnection2)
 {
-    auto data = DataDescription().addCells({
+    auto data = CollectionDescription().addCells({
         CellDescription().id(1).pos({0, 0}),
         CellDescription().id(2).pos({1, 0}),
         CellDescription().id(3).pos({-1, 0}),

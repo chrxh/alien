@@ -22,7 +22,7 @@ TEST_F(EnergyFlowTests_New, energyFlowsLeadsEqualDistribution)
 {
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 
-    DataDescription data;
+    CollectionDescription data;
     for (int i = 0; i < 20; ++i) {
         auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
         data.addCell(cell);
@@ -48,7 +48,7 @@ TEST_F(EnergyFlowTests_New, energyFlowsToActiveConstructor)
 {
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 
-    DataDescription data;
+    CollectionDescription data;
     for (int i = 0; i < 20; ++i) {
         auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
         if (i == 19) {
@@ -85,7 +85,7 @@ TEST_F(EnergyFlowTests_New, energyFlowsToClosestActiveConstructor)
     auto constructorId1 = 10 + 1;
     auto constructorId2 = 20 + 19 + 1;
 
-    DataDescription data;
+    CollectionDescription data;
     for (int j = 0; j < 2; ++j) {
         for (int i = 0; i < 20; ++i) {
             auto id = i + j * 20 + 1;
@@ -124,7 +124,7 @@ TEST_F(EnergyFlowTests_New, energyFlowsNotToActiveConstructor)
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
         GenomeDescription().header(GenomeHeaderDescription().separateConstruction(false)).cells({CellGenomeDescription()}));
 
-    DataDescription data;
+    CollectionDescription data;
     for (int i = 0; i < 20; ++i) {
         auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
         if (i == 19) {

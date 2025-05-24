@@ -36,16 +36,16 @@ public:
 
     bool serializeStatisticsToFile(std::filesystem::path const& filename, StatisticsHistoryData const& statistics);
 
-    bool serializeContentToFile(std::filesystem::path const& filename, DataDescription const& content);
-    bool deserializeContentFromFile(DataDescription& content, std::filesystem::path const& filename);
+    bool serializeContentToFile(std::filesystem::path const& filename, CollectionDescription const& content);
+    bool deserializeContentFromFile(CollectionDescription& content, std::filesystem::path const& filename);
 
 private:
-    void serializeDataDescription(DataDescription const& data, std::ostream& stream);
-    bool deserializeDataDescription(DataDescription& data, std::filesystem::path const& filename);
-    void deserializeDataDescription(DataDescription& data, std::istream& stream);
+    void serializeDescription(CollectionDescription const& data, std::ostream& stream);
+    bool deserializeDescription(CollectionDescription& data, std::filesystem::path const& filename);
+    void deserializeDescription(CollectionDescription& data, std::istream& stream);
 
-    void serializeAuxiliaryData(SettingsForSerialization const& auxiliaryData, std::ostream& stream);
-    void deserializeAuxiliaryData(SettingsForSerialization& auxiliaryData, std::istream& stream);
+    void serializeSettings(SettingsForSerialization const& settings, std::ostream& stream);
+    void deserializeSettings(SettingsForSerialization& settings, std::istream& stream);
 
     void serializeSimulationParameters(SimulationParameters const& parameters, std::ostream& stream);
     void deserializeSimulationParameters(SimulationParameters& parameters, std::istream& stream);
@@ -53,6 +53,6 @@ private:
     void serializeStatistics(StatisticsHistoryData const& statistics, std::ostream& stream);
     void deserializeStatistics(StatisticsHistoryData& statistics, std::istream& stream);
 
-    bool wrapGenome(DataDescription& output, std::vector<uint8_t> const& input);
-    bool unwrapGenome(std::vector<uint8_t>& output, DataDescription const& input);
+    bool wrapGenome(CollectionDescription& output, std::vector<uint8_t> const& input);
+    bool unwrapGenome(std::vector<uint8_t>& output, CollectionDescription const& input);
 };

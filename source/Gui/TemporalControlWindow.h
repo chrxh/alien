@@ -40,7 +40,7 @@ private:
         uint64_t timestep;
         std::chrono::milliseconds realTime;
         SimulationParameters parameters;
-        DataDescription data;
+        CollectionDescription data;
     };
     Snapshot createSnapshot();
     void applySnapshot(Snapshot const& snapshot);

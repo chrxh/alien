@@ -31,7 +31,7 @@ TEST_F(StatisticsTests, selfReplicatorWithRepetitionsInGenome)
                 CellGenomeDescription().cellType(ConstructorGenomeDescription().makeSelfCopy()),
             }));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription().id(1).cellType(ConstructorDescription().genome(mainGenome)),
     });
@@ -56,7 +56,7 @@ TEST_F(StatisticsTests, selfReplicatorWithInfiniteRepetitionsInGenome)
                 CellGenomeDescription().cellType(ConstructorGenomeDescription().makeSelfCopy()),
             }));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription().id(1).cellType(ConstructorDescription().genome(mainGenome)),
     });
@@ -80,7 +80,7 @@ TEST_F(StatisticsTests, nonSelfReplicatorWithRepetitionsInGenome)
                 CellGenomeDescription().cellType(ConstructorGenomeDescription().genome(subGenome)),
             }));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription().id(1).cellType(ConstructorDescription().genome(mainGenome)),
     });

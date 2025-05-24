@@ -26,7 +26,7 @@ public:
         MEMBER(CreateRectParameters, int, mutationId, 0);
         MEMBER(CreateRectParameters, float, genomeComplexity, 0);
     };
-    DataDescription createRect(CreateRectParameters const& parameters);
+    CollectionDescription createRect(CreateRectParameters const& parameters);
 
     struct CreateHexParameters
     {
@@ -40,7 +40,7 @@ public:
         MEMBER(CreateHexParameters, bool, barrier, false);
         MEMBER(CreateHexParameters, bool, randomCreatureId, true);
     };
-    DataDescription createHex(CreateHexParameters const& parameters);
+    CollectionDescription createHex(CreateHexParameters const& parameters);
 
     struct CreateUnconnectedCircleParameters
     {
@@ -54,9 +54,9 @@ public:
         MEMBER(CreateUnconnectedCircleParameters, bool, sticky, false);
         MEMBER(CreateUnconnectedCircleParameters, bool, randomCreatureId, true);
     };
-    DataDescription createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters);
+    CollectionDescription createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters);
 
-    void duplicate(ClusteredDataDescription& data, IntVector2D const& origWorldSize, IntVector2D const& worldSize);
+    void duplicate(ClusteredCollectionDescription& data, IntVector2D const& origWorldSize, IntVector2D const& worldSize);
 
     struct GridMultiplyParameters
     {
@@ -73,7 +73,7 @@ public:
         MEMBER(GridMultiplyParameters, float, verticalVelYinc, 0);
         MEMBER(GridMultiplyParameters, float, verticalAngularVelInc, 0);
     };
-    DataDescription gridMultiply(DataDescription const& input, GridMultiplyParameters const& parameters);
+    CollectionDescription gridMultiply(CollectionDescription const& input, GridMultiplyParameters const& parameters);
 
     struct RandomMultiplyParameters
     {
@@ -88,35 +88,35 @@ public:
         MEMBER(RandomMultiplyParameters, float, maxAngularVel, 0);
         MEMBER(RandomMultiplyParameters, bool, overlappingCheck, false);
     };
-    DataDescription randomMultiply(
-        DataDescription const& input,
+    CollectionDescription randomMultiply(
+        CollectionDescription const& input,
         RandomMultiplyParameters const& parameters,
         IntVector2D const& worldSize,
-        DataDescription&& existentData,
+        CollectionDescription&& existentData,
         bool& overlappingCheckSuccessful);
 
     using Occupancy = std::unordered_map<IntVector2D, std::vector<RealVector2D>>;
     void
-    addIfSpaceAvailable(DataDescription& result, Occupancy& cellOccupancy, DataDescription const& toAdd, float distance, IntVector2D const& worldSize);
+    addIfSpaceAvailable(CollectionDescription& result, Occupancy& cellOccupancy, CollectionDescription const& toAdd, float distance, IntVector2D const& worldSize);
 
-    void reconnectCells(DataDescription& data, float maxDistance);
-    void correctConnections(ClusteredDataDescription& data, IntVector2D const& worldSize);
+    void reconnectCells(CollectionDescription& data, float maxDistance);
+    void correctConnections(ClusteredCollectionDescription& data, IntVector2D const& worldSize);
 
-    void randomizeCellColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes);
-    void randomizeGenomeColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes);
-    void randomizeEnergies(ClusteredDataDescription& data, float minEnergy, float maxEnergy);
-    void randomizeAges(ClusteredDataDescription& data, int minAge, int maxAge);
-    void randomizeCountdowns(ClusteredDataDescription& data, int minValue, int maxValue);
-    void randomizeMutationIds(ClusteredDataDescription& data);
+    void randomizeCellColors(ClusteredCollectionDescription& data, std::vector<int> const& colorCodes);
+    void randomizeGenomeColors(ClusteredCollectionDescription& data, std::vector<int> const& colorCodes);
+    void randomizeEnergies(ClusteredCollectionDescription& data, float minEnergy, float maxEnergy);
+    void randomizeAges(ClusteredCollectionDescription& data, int minAge, int maxAge);
+    void randomizeCountdowns(ClusteredCollectionDescription& data, int minValue, int maxValue);
+    void randomizeMutationIds(ClusteredCollectionDescription& data);
 
     uint64_t getId(CellOrParticleDescription const& entity);
     RealVector2D getPos(CellOrParticleDescription const& entity);
-    std::vector<CellOrParticleDescription> getObjects(DataDescription const& data);
-    std::vector<CellOrParticleDescription> getConstructorToMainGenomes(DataDescription const& data);
+    std::vector<CellOrParticleDescription> getObjects(CollectionDescription const& data);
+    std::vector<CellOrParticleDescription> getConstructorToMainGenomes(CollectionDescription const& data);
 
-    void removeMetadata(DataDescription& data);
-    void generateNewCreatureIds(DataDescription& data);
-    void generateNewCreatureIds(ClusteredDataDescription& data);
+    void removeMetadata(CollectionDescription& data);
+    void generateNewCreatureIds(CollectionDescription& data);
+    void generateNewCreatureIds(ClusteredCollectionDescription& data);
 
 private:
     void removeMetadata(CellDescription& cell);

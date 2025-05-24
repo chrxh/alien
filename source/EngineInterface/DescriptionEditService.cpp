@@ -10,9 +10,9 @@
 #include "SpaceCalculator.h"
 #include "GenomeDescriptionConverterService.h"
 
-DataDescription DescriptionEditService::createRect(CreateRectParameters const& parameters)
+CollectionDescription DescriptionEditService::createRect(CreateRectParameters const& parameters)
 {
-    DataDescription result;
+    CollectionDescription result;
     auto creatureId = parameters._randomCreatureId ? toInt(NumberGenerator::get().getRandomInt(std::numeric_limits<int>::max())) : 0;
     for (int i = 0; i < parameters._width; ++i) {
         for (int j = 0; j < parameters._height; ++j) {
@@ -35,9 +35,9 @@ DataDescription DescriptionEditService::createRect(CreateRectParameters const& p
     return result;
 }
 
-DataDescription DescriptionEditService::createHex(CreateHexParameters const& parameters)
+CollectionDescription DescriptionEditService::createHex(CreateHexParameters const& parameters)
 {
-    DataDescription result;
+    CollectionDescription result;
     auto creatureId = parameters._randomCreatureId ? toInt(NumberGenerator::get().getRandomInt(std::numeric_limits<int>::max())) : 0;
     auto incY = sqrt(3.0) * parameters._cellDistance / 2.0;
     for (int j = 0; j < parameters._layers; ++j) {
@@ -76,9 +76,9 @@ DataDescription DescriptionEditService::createHex(CreateHexParameters const& par
     return result;
 }
 
-DataDescription DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters)
+CollectionDescription DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters)
 {
-    DataDescription result;
+    CollectionDescription result;
     auto creatureId = parameters._randomCreatureId ? toInt(NumberGenerator::get().getRandomInt(std::numeric_limits<int>::max())) : 0;
 
     if (parameters._radius <= 1 + NEAR_ZERO) {
@@ -126,7 +126,7 @@ DataDescription DescriptionEditService::createUnconnectedCircle(CreateUnconnecte
 
 namespace
 {
-    void generateNewIds(DataDescription& data)
+    void generateNewIds(CollectionDescription& data)
     {
         auto& numberGen = NumberGenerator::get();
         std::unordered_map<uint64_t, uint64_t> newByOldIds;
@@ -162,9 +162,9 @@ namespace
     }
 }
 
-void DescriptionEditService::duplicate(ClusteredDataDescription& data, IntVector2D const& origSize, IntVector2D const& size)
+void DescriptionEditService::duplicate(ClusteredCollectionDescription& data, IntVector2D const& origSize, IntVector2D const& size)
 {
-    ClusteredDataDescription result;
+    ClusteredCollectionDescription result;
 
     for (int incX = 0; incX < size.x; incX += origSize.x) {
         for (int incY = 0; incY < size.y; incY += origSize.y) {
@@ -201,7 +201,7 @@ void DescriptionEditService::duplicate(ClusteredDataDescription& data, IntVector
 namespace
 {
     std::vector<int> getCellIndicesWithinRadius(
-        DataDescription const& data,
+        CollectionDescription const& data,
         std::unordered_map<int, std::unordered_map<int, std::vector<int>>> const& cellIndicesBySlot,
         RealVector2D const& pos,
         float radius)
@@ -232,9 +232,9 @@ namespace
     }
 }
 
-DataDescription DescriptionEditService::gridMultiply(DataDescription const& input, GridMultiplyParameters const& parameters)
+CollectionDescription DescriptionEditService::gridMultiply(CollectionDescription const& input, GridMultiplyParameters const& parameters)
 {
-    DataDescription result;
+    CollectionDescription result;
     auto clone = input;
     auto cloneWithoutMetadata = input;
     removeMetadata(cloneWithoutMetadata);
@@ -261,11 +261,11 @@ DataDescription DescriptionEditService::gridMultiply(DataDescription const& inpu
     return result;
 }
 
-DataDescription DescriptionEditService::randomMultiply(
-    DataDescription const& input,
+CollectionDescription DescriptionEditService::randomMultiply(
+    CollectionDescription const& input,
     RandomMultiplyParameters const& parameters,
     IntVector2D const& worldSize,
-    DataDescription&& existentData,
+    CollectionDescription&& existentData,
     bool& overlappingCheckSuccessful)
 {
     overlappingCheckSuccessful = true;
@@ -283,12 +283,12 @@ DataDescription DescriptionEditService::randomMultiply(
     }
 
     //do multiplication
-    DataDescription result = input;
+    CollectionDescription result = input;
     generateNewIds(result);
     auto& numberGen = NumberGenerator::get();
     for (int i = 0; i < parameters._number; ++i) {
         bool overlapping = false;
-        DataDescription copy;
+        CollectionDescription copy;
         int attempts = 0;
         do {
             copy = input;
@@ -335,9 +335,9 @@ DataDescription DescriptionEditService::randomMultiply(
 }
 
 void DescriptionEditService::addIfSpaceAvailable(
-    DataDescription& result,
+    CollectionDescription& result,
     Occupancy& cellOccupancy,
-    DataDescription const& toAdd,
+    CollectionDescription const& toAdd,
     float distance,
     IntVector2D const& worldSize)
 {
@@ -351,7 +351,7 @@ void DescriptionEditService::addIfSpaceAvailable(
     }
 }
 
-void DescriptionEditService::reconnectCells(DataDescription& data, float maxDistance)
+void DescriptionEditService::reconnectCells(CollectionDescription& data, float maxDistance)
 {
     std::unordered_map<int, std::unordered_map<int, std::vector<int>>> cellIndicesBySlot;
 
@@ -378,7 +378,7 @@ void DescriptionEditService::reconnectCells(DataDescription& data, float maxDist
     }
 }
 
-void DescriptionEditService::correctConnections(ClusteredDataDescription& data, IntVector2D const& worldSize)
+void DescriptionEditService::correctConnections(ClusteredCollectionDescription& data, IntVector2D const& worldSize)
 {
     auto threshold = std::min(worldSize.x, worldSize.y) /3;
     std::unordered_map<uint64_t, CellDescription&> cellById;
@@ -409,7 +409,7 @@ void DescriptionEditService::correctConnections(ClusteredDataDescription& data, 
     }
 }
 
-void DescriptionEditService::randomizeCellColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes)
+void DescriptionEditService::randomizeCellColors(ClusteredCollectionDescription& data, std::vector<int> const& colorCodes)
 {
     for (auto& cluster : data._clusters) {
         auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
@@ -434,7 +434,7 @@ namespace
     }
 }
 
-void DescriptionEditService::randomizeGenomeColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes)
+void DescriptionEditService::randomizeGenomeColors(ClusteredCollectionDescription& data, std::vector<int> const& colorCodes)
 {
     for (auto& cluster : data._clusters) {
         auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
@@ -446,7 +446,7 @@ void DescriptionEditService::randomizeGenomeColors(ClusteredDataDescription& dat
     }
 }
 
-void DescriptionEditService::randomizeEnergies(ClusteredDataDescription& data, float minEnergy, float maxEnergy)
+void DescriptionEditService::randomizeEnergies(ClusteredCollectionDescription& data, float minEnergy, float maxEnergy)
 {
     for (auto& cluster : data._clusters) {
         auto energy = NumberGenerator::get().getRandomReal(toDouble(minEnergy), toDouble(maxEnergy));
@@ -456,7 +456,7 @@ void DescriptionEditService::randomizeEnergies(ClusteredDataDescription& data, f
     }
 }
 
-void DescriptionEditService::randomizeAges(ClusteredDataDescription& data, int minAge, int maxAge)
+void DescriptionEditService::randomizeAges(ClusteredCollectionDescription& data, int minAge, int maxAge)
 {
     for (auto& cluster : data._clusters) {
         auto age = NumberGenerator::get().getRandomReal(toDouble(minAge), toDouble(maxAge));
@@ -466,7 +466,7 @@ void DescriptionEditService::randomizeAges(ClusteredDataDescription& data, int m
     }
 }
 
-void DescriptionEditService::randomizeCountdowns(ClusteredDataDescription& data, int minValue, int maxValue)
+void DescriptionEditService::randomizeCountdowns(ClusteredCollectionDescription& data, int minValue, int maxValue)
 {
     for (auto& cluster : data._clusters) {
         auto countdown = NumberGenerator::get().getRandomReal(toDouble(minValue), toDouble(maxValue));
@@ -478,7 +478,7 @@ void DescriptionEditService::randomizeCountdowns(ClusteredDataDescription& data,
     }
 }
 
-void DescriptionEditService::randomizeMutationIds(ClusteredDataDescription& data)
+void DescriptionEditService::randomizeMutationIds(ClusteredCollectionDescription& data)
 {
     for (auto& cluster : data._clusters) {
         auto mutationId = NumberGenerator::get().getRandomInt() % 65536;
@@ -491,7 +491,7 @@ void DescriptionEditService::randomizeMutationIds(ClusteredDataDescription& data
     }
 }
 
-void DescriptionEditService::removeMetadata(DataDescription& data)
+void DescriptionEditService::removeMetadata(CollectionDescription& data)
 {
     for(auto& cell : data._cells) {
         removeMetadata(cell);
@@ -517,7 +517,7 @@ namespace
 
 }
 
-void DescriptionEditService::generateNewCreatureIds(DataDescription& data)
+void DescriptionEditService::generateNewCreatureIds(CollectionDescription& data)
 {
     std::unordered_map<int, int> origToNewCreatureIdMap;
     for (auto& cell : data._cells) {
@@ -531,7 +531,7 @@ void DescriptionEditService::generateNewCreatureIds(DataDescription& data)
     }
 }
 
-void DescriptionEditService::generateNewCreatureIds(ClusteredDataDescription& data)
+void DescriptionEditService::generateNewCreatureIds(ClusteredCollectionDescription& data)
 {
     std::unordered_map<int, int> origToNewCreatureIdMap;
     for (auto& cluster: data._clusters) {
@@ -604,7 +604,7 @@ RealVector2D DescriptionEditService::getPos(CellOrParticleDescription const& ent
 }
 
 std::vector<CellOrParticleDescription> DescriptionEditService::getObjects(
-    DataDescription const& data)
+    CollectionDescription const& data)
 {
     std::vector<CellOrParticleDescription> result;
     for (auto const& particle : data._particles) {
@@ -640,7 +640,7 @@ namespace
     }
 }
 
-std::vector<CellOrParticleDescription> DescriptionEditService::getConstructorToMainGenomes(DataDescription const& data)
+std::vector<CellOrParticleDescription> DescriptionEditService::getConstructorToMainGenomes(CollectionDescription const& data)
 {
     std::map<std::vector<uint8_t>, size_t> genomeToCellIndex;
     for (auto const& [index, cell] : data._cells | boost::adaptors::indexed(0)) {

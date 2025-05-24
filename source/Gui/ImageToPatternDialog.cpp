@@ -89,7 +89,7 @@ void ImageToPatternDialog::show()
         int width, height, nrChannels;
         unsigned char* dataImage = stbi_load(firstFilename.string().c_str(), &width, &height, &nrChannels, 0);
 
-        DataDescription dataDesc;
+        CollectionDescription dataDesc;
         for (int x = 0; x < width; ++x) {
             for (int y = 0; y < height; ++y) {
                 auto address = (x + y * width) * nrChannels;

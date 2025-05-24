@@ -320,11 +320,11 @@ void PatternEditorWindow::onOpenPattern()
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;
             _startingPath = firstFilenameCopy.remove_filename().string();
-            DataDescription content;
+            CollectionDescription content;
             if (SerializerService::get().deserializeContentFromFile(content, firstFilename.string())) {
                 auto center = Viewport::get().getCenterInWorldPos();
                 content.setCenter(center);
-                _simulationFacade->addAndSelectSimulationData(DataDescription(content));
+                _simulationFacade->addAndSelectSimulationData(CollectionDescription(content));
                 EditorModel::get().update();
             } else {
                 GenericMessageDialog::get().information("Open pattern", "The selected file could not be opened.");

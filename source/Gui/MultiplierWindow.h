@@ -41,6 +41,6 @@ private:
     DescriptionEditService::GridMultiplyParameters _gridParameters;
     DescriptionEditService::RandomMultiplyParameters _randomParameters;
 
-    DataDescription _origSelection;
+    CollectionDescription _origSelection;
     std::optional<SelectionShallowData> _selectionDataAfterMultiplication;
 };

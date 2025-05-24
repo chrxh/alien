@@ -49,5 +49,5 @@ private:
     bool _on = false;   //#TODO weg!
 
     std::vector<InspectorWindow> _inspectorWindows;
-    DataDescription _drawing;
+    CollectionDescription _drawing;
 };

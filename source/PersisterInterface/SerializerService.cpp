@@ -1035,7 +1035,7 @@ namespace cereal
     SPLIT_SERIALIZATION(ParticleDescription)
 
     template <class Archive>
-    void serialize(Archive& ar, DataDescription& data)
+    void serialize(Archive& ar, CollectionDescription& data)
     {
         ar(data._cells, data._particles, data._genomes);
     }
@@ -1055,14 +1055,14 @@ bool SerializerService::serializeSimulationToFiles(std::filesystem::path const& 
             if (!stream) {
                 return false;
             }
-            serializeDataDescription(data.mainData, stream);
+            serializeDescription(data.mainData, stream);
         }
         {
             std::ofstream stream(settingsFilename.string(), std::ios::binary);
             if (!stream) {
                 return false;
             }
-            serializeAuxiliaryData(data.auxiliaryData, stream);
+            serializeSettings(data.auxiliaryData, stream);
         }
         {
             std::ofstream stream(statisticsFilename.string(), std::ios::binary);
@@ -1086,7 +1086,7 @@ bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& d
         std::filesystem::path statisticsFilename(filename);
         statisticsFilename.replace_extension(std::filesystem::path(".statistics.csv"));
 
-        if (!deserializeDataDescription(data.mainData, filename)) {
+        if (!deserializeDescription(data.mainData, filename)) {
             return false;
         }
         {
@@ -1094,7 +1094,7 @@ bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& d
             if (!stream) {
                 return false;
             }
-            deserializeAuxiliaryData(data.auxiliaryData, stream);
+            deserializeSettings(data.auxiliaryData, stream);
         }
         {
             std::ifstream stream(statisticsFilename.string(), std::ios::binary);
@@ -1142,13 +1142,13 @@ bool SerializerService::serializeSimulationToStrings(SerializedSimulation& outpu
             if (!stream) {
                 return false;
             }
-            serializeDataDescription(input.mainData, stream);
+            serializeDescription(input.mainData, stream);
             stream.flush();
             output.mainData = stdStream.str();
         }
         {
             std::stringstream stream;
-            serializeAuxiliaryData(input.auxiliaryData, stream);
+            serializeSettings(input.auxiliaryData, stream);
             output.auxiliaryData = stream.str();
         }
         {
@@ -1171,11 +1171,11 @@ bool SerializerService::deserializeSimulationFromStrings(DeserializedSimulation&
             if (!stream) {
                 return false;
             }
-            deserializeDataDescription(output.mainData, stream);
+            deserializeDescription(output.mainData, stream);
         }
         {
             std::stringstream stream(input.auxiliaryData);
-            deserializeAuxiliaryData(output.auxiliaryData, stream);
+            deserializeSettings(output.auxiliaryData, stream);
         }
         {
             std::stringstream stream(input.statistics);
@@ -1192,7 +1192,7 @@ bool SerializerService::serializeGenomeToFile(std::filesystem::path const& filen
     try {
         log(Priority::Important, "save genome to " + filename.string());
         //wrap constructor cell around genome
-        DataDescription data;
+        CollectionDescription data;
         if (!wrapGenome(data, genome)) {
             return false;
         }
@@ -1201,7 +1201,7 @@ bool SerializerService::serializeGenomeToFile(std::filesystem::path const& filen
         if (!stream) {
             return false;
         }
-        serializeDataDescription(data, stream);
+        serializeDescription(data, stream);
 
         return true;
     } catch (...) {
@@ -1213,8 +1213,8 @@ bool SerializerService::deserializeGenomeFromFile(std::vector<uint8_t>& genome, 
 {
     try {
         log(Priority::Important, "load genome from " + filename.string());
-        DataDescription data;
-        if (!deserializeDataDescription(data, filename)) {
+        CollectionDescription data;
+        if (!deserializeDescription(data, filename)) {
             return false;
         }
         if (!unwrapGenome(genome, data)) {
@@ -1235,12 +1235,12 @@ bool SerializerService::serializeGenomeToString(std::string& output, std::vector
             return false;
         }
 
-        DataDescription data;
+        CollectionDescription data;
         if (!wrapGenome(data, input)) {
             return false;
         }
 
-        serializeDataDescription(data, stream);
+        serializeDescription(data, stream);
         stream.flush();
         output = stdStream.str();
         return true;
@@ -1258,8 +1258,8 @@ bool SerializerService::deserializeGenomeFromString(std::vector<uint8_t>& output
             return false;
         }
 
-        DataDescription data;
-        deserializeDataDescription(data, stream);
+        CollectionDescription data;
+        deserializeDescription(data, stream);
 
         if (!unwrapGenome(output, data)) {
             return false;
@@ -1318,14 +1318,14 @@ bool SerializerService::serializeStatisticsToFile(std::filesystem::path const& f
     }
 }
 
-bool SerializerService::serializeContentToFile(std::filesystem::path const& filename, DataDescription const& content)
+bool SerializerService::serializeContentToFile(std::filesystem::path const& filename, CollectionDescription const& content)
 {
     try {
         zstr::ofstream fileStream(filename.string(), std::ios::binary);
         if (!fileStream) {
             return false;
         }
-        serializeDataDescription(content, fileStream);
+        serializeDescription(content, fileStream);
 
         return true;
     } catch (...) {
@@ -1333,10 +1333,10 @@ bool SerializerService::serializeContentToFile(std::filesystem::path const& file
     }
 }
 
-bool SerializerService::deserializeContentFromFile(DataDescription& content, std::filesystem::path const& filename)
+bool SerializerService::deserializeContentFromFile(CollectionDescription& content, std::filesystem::path const& filename)
 {
     try {
-        if (!deserializeDataDescription(content, filename)) {
+        if (!deserializeDescription(content, filename)) {
             return false;
         }
         return true;
@@ -1345,24 +1345,24 @@ bool SerializerService::deserializeContentFromFile(DataDescription& content, std
     }
 }
 
-void SerializerService::serializeDataDescription(DataDescription const& data, std::ostream& stream)
+void SerializerService::serializeDescription(CollectionDescription const& data, std::ostream& stream)
 {
     cereal::PortableBinaryOutputArchive archive(stream);
     archive(Const::ProgramVersion);
     archive(data);
 }
 
-bool SerializerService::deserializeDataDescription(DataDescription& data, std::filesystem::path const& filename)
+bool SerializerService::deserializeDescription(CollectionDescription& data, std::filesystem::path const& filename)
 {
     zstr::ifstream stream(filename.string(), std::ios::binary);
     if (!stream) {
         return false;
     }
-    deserializeDataDescription(data, stream);
+    deserializeDescription(data, stream);
     return true;
 }
 
-void SerializerService::deserializeDataDescription(DataDescription& data, std::istream& stream)
+void SerializerService::deserializeDescription(CollectionDescription& data, std::istream& stream)
 {
     cereal::PortableBinaryInputArchive archive(stream);
     std::string version;
@@ -1377,16 +1377,16 @@ void SerializerService::deserializeDataDescription(DataDescription& data, std::i
     archive(data);
 }
 
-void SerializerService::serializeAuxiliaryData(SettingsForSerialization const& auxiliaryData, std::ostream& stream)
+void SerializerService::serializeSettings(SettingsForSerialization const& settings, std::ostream& stream)
 {
-    boost::property_tree::json_parser::write_json(stream, SettingsParserService::get().encodeSettings(auxiliaryData));
+    boost::property_tree::json_parser::write_json(stream, SettingsParserService::get().encodeSettings(settings));
 }
 
-void SerializerService::deserializeAuxiliaryData(SettingsForSerialization& auxiliaryData, std::istream& stream)
+void SerializerService::deserializeSettings(SettingsForSerialization& settings, std::istream& stream)
 {
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(stream, tree);
-    auxiliaryData = SettingsParserService::get().decodeSettings(tree);
+    settings = SettingsParserService::get().decodeSettings(tree);
 }
 
 void SerializerService::serializeSimulationParameters(SimulationParameters const& parameters, std::ostream& stream)
@@ -1677,7 +1677,7 @@ void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics,
     }
 }
 
-bool SerializerService::wrapGenome(DataDescription& output, std::vector<uint8_t> const& input)
+bool SerializerService::wrapGenome(CollectionDescription& output, std::vector<uint8_t> const& input)
 {
     output.clear();
     output.addCell(CellDescription().cellType(ConstructorDescription().genome(input)));
@@ -1685,7 +1685,7 @@ bool SerializerService::wrapGenome(DataDescription& output, std::vector<uint8_t>
 }
 
 
-bool SerializerService::unwrapGenome(std::vector<uint8_t>& output, DataDescription const& input)
+bool SerializerService::unwrapGenome(std::vector<uint8_t>& output, CollectionDescription const& input)
 {
     if (input._cells.size() != 1) {
         return false;

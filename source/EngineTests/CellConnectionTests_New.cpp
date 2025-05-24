@@ -36,7 +36,7 @@ TEST_F(CellConnectionTests_New, decay)
 
 TEST_F(CellConnectionTests_New, addFirstConnection)
 {
-    auto data = DataDescription().addCells({
+    auto data = CollectionDescription().addCells({
         CellDescription().id(1).pos({0, 0}),
         CellDescription().id(2).pos({1, 0}),
     });
@@ -62,7 +62,7 @@ TEST_F(CellConnectionTests_New, addFirstConnection)
 
 TEST_F(CellConnectionTests_New, addSecondConnection)
 {
-    auto data = DataDescription().addCells({
+    auto data = CollectionDescription().addCells({
         CellDescription().id(1).pos({0, 0}),
         CellDescription().id(2).pos({1, 0}),
         CellDescription().id(3).pos({0, 1}),
@@ -89,7 +89,7 @@ TEST_F(CellConnectionTests_New, addSecondConnection)
 
 TEST_F(CellConnectionTests_New, addThirdConnection1)
 {
-    auto data = DataDescription().addCells({
+    auto data = CollectionDescription().addCells({
         CellDescription().id(1).pos({0, 0}),
         CellDescription().id(2).pos({1, 0}),
         CellDescription().id(3).pos({0, 1}),
@@ -124,7 +124,7 @@ TEST_F(CellConnectionTests_New, addThirdConnection1)
 
 TEST_F(CellConnectionTests_New, addThirdConnection2)
 {
-    auto data = DataDescription().addCells({
+    auto data = CollectionDescription().addCells({
         CellDescription().id(1).pos({0, 0}),
         CellDescription().id(2).pos({1, 0}),
         CellDescription().id(3).pos({-1, 0}),

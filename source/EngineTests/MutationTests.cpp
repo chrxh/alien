@@ -641,7 +641,7 @@ TEST_F(MutationTests, propertiesMutation)
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
     int byteIndex = 0;
 
-    auto data = DataDescription().addCells(
+    auto data = CollectionDescription().addCells(
         {CellDescription().id(1).cellType(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(byteIndex))});
 
     _simulationFacade->setSimulationData(data);
@@ -662,7 +662,7 @@ TEST_F(MutationTests, neuronDataMutation)
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
     int byteIndex = 0;
 
-    auto data = DataDescription().addCells(
+    auto data = CollectionDescription().addCells(
         {CellDescription().id(1).cellType(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(byteIndex))});
 
     _simulationFacade->setSimulationData(data);
@@ -683,7 +683,7 @@ TEST_F(MutationTests, geometryMutation)
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
     int byteIndex = 0;
 
-    auto data = DataDescription().addCells(
+    auto data = CollectionDescription().addCells(
         {CellDescription().id(1).cellType(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(byteIndex))});
 
     _simulationFacade->setSimulationData(data);
@@ -704,7 +704,7 @@ TEST_F(MutationTests, individualGeometryMutation)
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
     int byteIndex = 0;
 
-    auto data = DataDescription().addCells(
+    auto data = CollectionDescription().addCells(
         {CellDescription().id(1).cellType(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(byteIndex))});
 
     _simulationFacade->setSimulationData(data);
@@ -724,7 +724,7 @@ TEST_F(MutationTests, cellTypeMutation)
 {
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
-    auto data = DataDescription().addCells(
+    auto data = CollectionDescription().addCells(
         {CellDescription().id(1).cellType(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(3))});
 
     _simulationFacade->setSimulationData(data);
@@ -743,7 +743,7 @@ TEST_F(MutationTests, cellTypeMutation)
 TEST_F(MutationTests, insertMutation_emptyGenome)
 {
     auto cellColor = 3;
-    auto data = DataDescription().addCells(
+    auto data = CollectionDescription().addCells(
         {CellDescription().id(1).cellType(ConstructorDescription()).color(cellColor)});
 
     _simulationFacade->setSimulationData(data);
@@ -763,7 +763,7 @@ TEST_F(MutationTests, insertMutation)
 {
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
-    auto data = DataDescription().addCells({CellDescription()
+    auto data = CollectionDescription().addCells({CellDescription()
                                                 .id(1)
                                                 .cellType(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(0))
                                                 
@@ -788,7 +788,7 @@ TEST_F(MutationTests, deleteMutation_eraseSmallGenome)
         CellGenomeDescription().cellType(BaseGenomeDescription()),
     }));
 
-    auto data = DataDescription().addCells(
+    auto data = CollectionDescription().addCells(
         {CellDescription().id(1).cellType(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
@@ -806,7 +806,7 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_preserveSelfReplication)
 {
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
-    auto data = DataDescription().addCells(
+    auto data = CollectionDescription().addCells(
         {CellDescription().id(1).cellType(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
@@ -836,7 +836,7 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_changeSelfReplication)
 
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
-    auto data = DataDescription().addCells(
+    auto data = CollectionDescription().addCells(
         {CellDescription().id(1).cellType(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
@@ -857,7 +857,7 @@ TEST_F(MutationTests, deleteMutation_partiallyEraseGenome)
 {
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
-    auto data = DataDescription().addCells(
+    auto data = CollectionDescription().addCells(
         {CellDescription().id(1).cellType(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
@@ -885,7 +885,7 @@ TEST_F(MutationTests, deleteMutation_selfReplicatorWithGenomeBelowMinSize)
         CellGenomeDescription(),
     }));
 
-    auto data = DataDescription().addCells(
+    auto data = CollectionDescription().addCells(
         {CellDescription().id(1).cellType(ConstructorDescription().genome(genome)).livingState(LivingState_Activating)});
 
     _simulationFacade->setSimulationData(data);
@@ -914,7 +914,7 @@ TEST_F(MutationTests, deleteMutation_selfReplicatorWithGenomeAboveMinSize)
         CellGenomeDescription(),
     }));
 
-    auto data = DataDescription().addCells(
+    auto data = CollectionDescription().addCells(
         {CellDescription().id(1).cellType(ConstructorDescription().genome(genome)).livingState(LivingState_Activating)});
 
     _simulationFacade->setSimulationData(data);
@@ -935,7 +935,7 @@ TEST_F(MutationTests, duplicateMutation)
 {
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
-    auto data = DataDescription().addCells(
+    auto data = CollectionDescription().addCells(
         {CellDescription().id(1).cellType(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
@@ -955,7 +955,7 @@ TEST_F(MutationTests, translateMutation)
 {
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
-    auto data = DataDescription().addCells(
+    auto data = CollectionDescription().addCells(
         {CellDescription().id(1).cellType(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
@@ -983,7 +983,7 @@ TEST_F(MutationTests, cellColorMutation)
 
     auto genome = createGenomeWithUniformColorPerSubgenome();
 
-    auto data = DataDescription().addCells(
+    auto data = CollectionDescription().addCells(
         {CellDescription().id(1).cellType(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
@@ -1013,7 +1013,7 @@ TEST_F(MutationTests, subgenomeColorMutation)
 
     auto genome = createGenomeWithUniformColorPerSubgenome();
 
-    auto data = DataDescription().addCells(
+    auto data = CollectionDescription().addCells(
         {CellDescription().id(1).cellType(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
@@ -1043,7 +1043,7 @@ TEST_F(MutationTests, genomeColorMutation)
 
     auto genome = createGenomeWithUniformColor();
 
-    auto data = DataDescription().addCells(
+    auto data = CollectionDescription().addCells(
         {CellDescription().id(1).cellType(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);

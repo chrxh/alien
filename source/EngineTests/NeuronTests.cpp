@@ -25,7 +25,7 @@ TEST_F(NeuronTests, bias)
     NeuralNetworkDescription nn;
     nn._biases = {0, 0, 1, 0, 0, 0, 0, -1};
 
-    auto data = DataDescription().addCells({CellDescription().id(1).neuralNetwork(nn)});
+    auto data = CollectionDescription().addCells({CellDescription().id(1).neuralNetwork(nn)});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -46,7 +46,7 @@ TEST_F(NeuronTests, weight)
     SignalDescription signal;
     signal._channels = {0, 0, 0, 1, 0, 0, 0, 0.5f};
 
-    auto data = DataDescription().addCells({
+    auto data = CollectionDescription().addCells({
         CellDescription()
             .id(1)
             .pos({1.0f, 1.0f})
@@ -78,7 +78,7 @@ TEST_F(NeuronTests, activationFunctionBinaryStep)
     SignalDescription signal;
     signal._channels = {0, 0, 0, 1, 0, 0, 0, 0.5f};
 
-    auto data = DataDescription().addCells({
+    auto data = CollectionDescription().addCells({
         CellDescription()
             .id(1)
             .pos({1.0f, 1.0f})

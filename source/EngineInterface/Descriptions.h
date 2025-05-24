@@ -24,7 +24,7 @@ struct ConnectionDescription
 {
     auto operator<=>(ConnectionDescription const&) const = default;
 
-    MEMBER(ConnectionDescription, uint64_t, cellId, 0ull);  // value of 0 means cell not present in DataDescription
+    MEMBER(ConnectionDescription, uint64_t, cellId, 0ull);  // value of 0 means cell not present in CollectionDescription
     MEMBER(ConnectionDescription, float, distance, 0.0f);
     MEMBER(ConnectionDescription, float, angleFromPrevious, 0.0f);
 };
@@ -440,32 +440,32 @@ struct ParticleDescription
     MEMBER(ParticleDescription, int, color, 0);
 };
 
-struct ClusteredDataDescription
+struct ClusteredCollectionDescription
 {
-    ClusteredDataDescription() = default;
-    auto operator<=>(ClusteredDataDescription const&) const = default;
+    ClusteredCollectionDescription() = default;
+    auto operator<=>(ClusteredCollectionDescription const&) const = default;
 
-    MEMBER(ClusteredDataDescription, std::vector<ClusterDescription>, clusters, {});
-    MEMBER(ClusteredDataDescription, std::vector<ParticleDescription>, particles, {});
-    MEMBER(ClusteredDataDescription, std::vector<GenomeDescription_New>, genomes, {});
+    MEMBER(ClusteredCollectionDescription, std::vector<ClusterDescription>, clusters, {});
+    MEMBER(ClusteredCollectionDescription, std::vector<ParticleDescription>, particles, {});
+    MEMBER(ClusteredCollectionDescription, std::vector<GenomeDescription_New>, genomes, {});
 
-    ClusteredDataDescription& addClusters(std::vector<ClusterDescription> const& value)
+    ClusteredCollectionDescription& addClusters(std::vector<ClusterDescription> const& value)
     {
         _clusters.insert(_clusters.end(), value.begin(), value.end());
         return *this;
     }
-    ClusteredDataDescription& addCluster(ClusterDescription const& value)
+    ClusteredCollectionDescription& addCluster(ClusterDescription const& value)
     {
         addClusters({value});
         return *this;
     }
 
-    ClusteredDataDescription& addParticles(std::vector<ParticleDescription> const& value)
+    ClusteredCollectionDescription& addParticles(std::vector<ParticleDescription> const& value)
     {
         _particles.insert(_particles.end(), value.begin(), value.end());
         return *this;
     }
-    ClusteredDataDescription& addParticle(ParticleDescription const& value)
+    ClusteredCollectionDescription& addParticle(ParticleDescription const& value)
     {
         addParticles({value});
         return *this;
@@ -492,24 +492,24 @@ struct ClusteredDataDescription
     int getNumberOfCellAndParticles() const;
 };
 
-struct DataDescription
+struct CollectionDescription
 {
-    DataDescription() = default;
-    explicit DataDescription(ClusteredDataDescription const& clusteredData);
-    auto operator<=>(DataDescription const&) const = default;
+    CollectionDescription() = default;
+    explicit CollectionDescription(ClusteredCollectionDescription const& clusteredData);
+    auto operator<=>(CollectionDescription const&) const = default;
 
-    MEMBER(DataDescription, std::vector<CellDescription>, cells, {});
-    MEMBER(DataDescription, std::vector<ParticleDescription>, particles, {});
-    MEMBER(DataDescription, std::vector<GenomeDescription_New>, genomes, {});
+    MEMBER(CollectionDescription, std::vector<CellDescription>, cells, {});
+    MEMBER(CollectionDescription, std::vector<ParticleDescription>, particles, {});
+    MEMBER(CollectionDescription, std::vector<GenomeDescription_New>, genomes, {});
 
-    DataDescription& add(DataDescription const& other);
-    DataDescription& addCells(std::vector<CellDescription> const& value);
-    DataDescription& addCell(CellDescription const& value);
+    CollectionDescription& add(CollectionDescription const& other);
+    CollectionDescription& addCells(std::vector<CellDescription> const& value);
+    CollectionDescription& addCell(CellDescription const& value);
 
-    DataDescription& addParticles(std::vector<ParticleDescription> const& value);
-    DataDescription& addParticle(ParticleDescription const& value);
+    CollectionDescription& addParticles(std::vector<ParticleDescription> const& value);
+    CollectionDescription& addParticle(ParticleDescription const& value);
 
-    DataDescription& addCreature(GenomeDescription_New const& genome, std::vector<CellDescription> const& cells);
+    CollectionDescription& addCreature(GenomeDescription_New const& genome, std::vector<CellDescription> const& cells);
 
     void clear();
     bool isEmpty() const;
@@ -522,8 +522,8 @@ struct DataDescription
 
     std::unordered_set<uint64_t> getCellIds() const;
 
-    DataDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>* cache = nullptr);
-    DataDescription&
+    CollectionDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>* cache = nullptr);
+    CollectionDescription&
     addConnection(uint64_t const& cellId1, uint64_t const& cellId2, RealVector2D const& refPosCell2, std::unordered_map<uint64_t, int>* cache = nullptr);
 
 private:

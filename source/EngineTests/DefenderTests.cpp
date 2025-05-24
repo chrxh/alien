@@ -33,7 +33,7 @@ public:
 
 TEST_F(DefenderTests, attackerVsAntiAttacker)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -72,7 +72,7 @@ TEST_F(DefenderTests, attackerVsAntiAttacker)
 
 TEST_F(DefenderTests, attackerVsAntiInjector)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -110,7 +110,7 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
 {
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -155,7 +155,7 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
 {
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
