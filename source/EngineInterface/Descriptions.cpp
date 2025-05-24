@@ -169,6 +169,29 @@ DataDescription& DataDescription::addParticle(ParticleDescription const& value)
     return *this;
 }
 
+DataDescription& DataDescription::addCreature(GenomeDescription_New const& genome, std::vector<CellDescription> const& cells)
+{
+    auto highestGenomeId = 0ull;
+    for (auto const& cell : _cells) {
+        if (cell._genomeId.has_value()) {
+            highestGenomeId = std::max(highestGenomeId, cell._genomeId.value());
+        }
+    }
+
+    auto newGenomeId = highestGenomeId + 1;
+    auto& newGenome = _genomes.emplace_back(genome);
+    newGenome._id = newGenomeId;
+
+    auto originalSize = _cells.size();
+    _cells.insert(_cells.end(), cells.begin(), cells.end());
+
+    for (auto i = originalSize; i < _cells.size(); ++i) {
+        _cells[i]._genomeId = newGenomeId;
+    }
+
+    return *this;
+}
+
 void DataDescription::clear()
 {
     _cells.clear();

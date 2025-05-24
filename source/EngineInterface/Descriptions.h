@@ -508,6 +508,9 @@ struct DataDescription
 
     DataDescription& addParticles(std::vector<ParticleDescription> const& value);
     DataDescription& addParticle(ParticleDescription const& value);
+
+    DataDescription& addCreature(GenomeDescription_New const& genome, std::vector<CellDescription> const& cells);
+
     void clear();
     bool isEmpty() const;
     void setCenter(RealVector2D const& center);
