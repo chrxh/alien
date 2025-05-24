@@ -147,6 +147,38 @@ bool IntegrationTestFramework::compare(CollectionDescription left, CollectionDes
     std::sort(right._cells.begin(), right._cells.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(left._particles.begin(), left._particles.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(right._particles.begin(), right._particles.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+
+    // Equalize genome ids since they are generated during GPU -> CPU transfer
+    if (left._cells.size() != right._cells.size()) {
+        return false;
+    }
+    std::unordered_map<uint64_t, uint64_t> leftByRightGenomeId;
+    for (auto const& [leftCell, rightCell] : boost::combine(left._cells, right._cells)) {
+        if (leftCell._genomeId.has_value() != rightCell._genomeId.has_value()) {
+            return false;
+        }
+        if (leftCell._genomeId.has_value()) {
+            leftByRightGenomeId.insert_or_assign(rightCell._genomeId.value(), leftCell._genomeId.value());
+        }
+    }
+    for (auto& genome : right._genomes) {
+        if (!leftByRightGenomeId.contains(genome._id)) {
+            return false;
+        }
+        genome._id = leftByRightGenomeId.at(genome._id);
+    }
+    for (auto& cells : right._cells) {
+        if (cells._genomeId.has_value()) {
+            if (!leftByRightGenomeId.contains(cells._genomeId.value())) {
+                return false;
+            }
+            cells._genomeId = leftByRightGenomeId.at(cells._genomeId.value());
+        }
+    }
+
+    std::sort(left._genomes.begin(), left._genomes.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+    std::sort(right._genomes.begin(), right._genomes.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+
     return left == right;
 }
 

@@ -48,7 +48,7 @@ CellType CellDescription::getCellType() const
     CHECK(false);
 }
 
-bool CellDescription::hasGenome() const
+bool CellDescription::DEPRECATED_hasGenome() const
 {
     auto cellTypeEnum = getCellType();
     if (cellTypeEnum == CellType_Constructor || cellTypeEnum == CellType_Injector) {

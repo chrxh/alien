@@ -11,7 +11,7 @@ namespace
         targetSize = sourceSize;
         if (sourceSize > 0) {
             targetIndex = alienAtomicAdd64(collectionTO.heapSize, static_cast<uint64_t>(sourceSize));
-            if (targetIndex + sourceSize >= collectionTO.capacities.heap) {
+            if (targetIndex + sourceSize > collectionTO.capacities.heap) {
                 printf("Insufficient heap memory for transfer objects.\n");
                 ABORT();
             }
@@ -25,8 +25,9 @@ namespace
     {
         auto origGenomeIndex = atomicExch(&cell->genome->genomeIndex, 0);  // 0 = member is currently initialized
         if (origGenomeIndex == Genome::GenomeIndex_NotSet) {
+
             auto genomeTOIndex = atomicAdd(collectionTO.numGenomes, 1ull);
-            if (genomeTOIndex >= collectionTO.capacities.cells) {
+            if (genomeTOIndex >= collectionTO.capacities.genomes) {
                 printf("Insufficient genome memory for transfer objects.\n");
                 ABORT();
             }
@@ -667,6 +668,9 @@ __global__ void cudaClearDataTO(CollectionTO collectionTO)
 {
     *collectionTO.numCells = 0;
     *collectionTO.numParticles = 0;
+    *collectionTO.numGenomes = 0;
+    *collectionTO.numGenes = 0;
+    *collectionTO.numNodes = 0;
     *collectionTO.heapSize = 0;
 }
 
@@ -695,9 +699,9 @@ __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesF
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        uint64_t dependentDataSize = cell->metadata.nameSize + cell->metadata.descriptionSize + 32;
+        uint64_t dependentDataSize = cell->metadata.nameSize + cell->metadata.descriptionSize + GpuMemoryAlignmentBytes * 2;
         if (cell->cellType != CellType_Structure && cell->cellType != CellType_Free) {
-            dependentDataSize += sizeof(NeuralNetwork) + 16;
+            dependentDataSize += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
             if (cell->genome) {
                 atomicAdd(&arraySizes->genomes, 1ull);
                 auto const& genome = cell->genome;
@@ -708,9 +712,9 @@ __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesF
             }
         }
         if (cell->cellType == CellType_Constructor) {
-            dependentDataSize += cell->cellTypeData.constructor.genomeSize + 16;
+            dependentDataSize += cell->cellTypeData.constructor.genomeSize + GpuMemoryAlignmentBytes;
         } else if (cell->cellType == CellType_Injector) {
-            dependentDataSize += cell->cellTypeData.injector.genomeSize + 16;
+            dependentDataSize += cell->cellTypeData.injector.genomeSize + GpuMemoryAlignmentBytes;
         }
         atomicAdd(&arraySizes->heap, dependentDataSize);
     }
@@ -724,21 +728,22 @@ __global__ void cudaEstimateCapacityNeededForGpu(CollectionTO collectionTO, Arra
         atomicAdd(
             &arraySizes->heap,
             *collectionTO.numCells * sizeof(Cell) + *collectionTO.numParticles * sizeof(Particle) + *collectionTO.numGenomes * sizeof(Genome)
-                + *collectionTO.numGenes * sizeof(Gene) + *collectionTO.numNodes * sizeof(Node) + *collectionTO.numNodes * sizeof(NeuralNetwork) + 16ull * 6);
+                + *collectionTO.numGenes * sizeof(Gene) + *collectionTO.numNodes * sizeof(Node) + *collectionTO.numNodes * sizeof(NeuralNetwork)
+                + GpuMemoryAlignmentBytes * 6);
     }
 
     {
         auto partition = calcAllThreadsPartition(*collectionTO.numCells);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& cell = collectionTO.cells[index];
-            uint64_t dependentDataSize = sizeof(Cell) + cell.metadata.nameSize + cell.metadata.descriptionSize + 32;
+            uint64_t dependentDataSize = sizeof(Cell) + cell.metadata.nameSize + cell.metadata.descriptionSize + GpuMemoryAlignmentBytes * 2;
             if (cell.cellType != CellType_Structure && cell.cellType != CellType_Free) {
-                dependentDataSize += sizeof(NeuralNetwork) + 16;
+                dependentDataSize += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
             }
             if (cell.cellType == CellType_Constructor) {
-                dependentDataSize += cell.cellTypeData.constructor.genomeSize + 16;
+                dependentDataSize += cell.cellTypeData.constructor.genomeSize + GpuMemoryAlignmentBytes;
             } else if (cell.cellType == CellType_Injector) {
-                dependentDataSize += cell.cellTypeData.injector.genomeSize + 16;
+                dependentDataSize += cell.cellTypeData.injector.genomeSize + GpuMemoryAlignmentBytes;
             }
             atomicAdd(&arraySizes->heap, dependentDataSize);
         }
