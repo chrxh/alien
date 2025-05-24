@@ -168,7 +168,6 @@ struct Gene
 
 struct Genome
 {
-    uint64_t id;
     float frontAngle;
 
     int numGenes;

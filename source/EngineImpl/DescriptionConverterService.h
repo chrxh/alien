@@ -35,9 +35,10 @@ private:
     CreateClusterReturnData scanAndCreateClusterDescription(
         CollectionTO const& collectionTO,
         int startCellIndex,
-        std::unordered_set<int>& freeCellIndices) const;
-    CellDescription createCellDescription(CollectionTO const& collectionTO, int cellIndex) const;
-    GenomeDescription_New createGenomeDescription(CollectionTO const& collectionTO, int genomeIndex) const;
+        std::unordered_set<int>& freeCellIndices,
+        std::unordered_map<uint64_t, uint64_t> const& genomeIdByTOIndex) const;
+    CellDescription createCellDescription(CollectionTO const& collectionTO, int cellIndex, std::unordered_map<uint64_t, uint64_t> const& genomeIdByTOIndex) const;
+    GenomeDescription_New createGenomeDescription(CollectionTO const& collectionTO, int genomeIndex, std::unordered_map<uint64_t, uint64_t>& genomeIdByTOIndex) const;
 
     void addGenome(
         std::vector<GenomeTO>& genomeTOs,

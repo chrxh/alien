@@ -81,12 +81,6 @@ namespace
         return result;
     }
 
-    //union BytesAsFloat
-    //{
-    //    float f;
-    //    uint8_t b[4];
-    //};
-
     void convert(CollectionTO const& collectionTO, uint64_t sourceSize, uint64_t sourceIndex, std::vector<uint8_t>& target)
     {
         target.resize(sourceSize);
@@ -94,40 +88,6 @@ namespace
             target[i] = collectionTO.heap[sourceIndex + i];
         }
     }
-
-    //NeuralNetworkDescription convertToNeuronDescription(CollectionTO const& collectionTO, uint64_t sourceIndex)
-    //{
-    //    NeuralNetworkDescription result;
-    //    // #TODO GCC incompatibily:
-    //    // auto weights_span = std::mdspan(result._weights.data(), MAX_CHANNELS, MAX_CHANNELS);
-
-    //    BytesAsFloat bytesAsFloat;
-    //    int index = 0;
-    //    for (int row = 0; row < MAX_CHANNELS; ++row) {
-    //        for (int col = 0; col < MAX_CHANNELS; ++col) {
-    //            for (int i = 0; i < 4; ++i) {
-    //                bytesAsFloat.b[i] = collectionTO.heap[sourceIndex + index];
-    //                ++index;
-    //            }
-    //            result._weights[row * MAX_CHANNELS + col] = bytesAsFloat.f;
-    //            // #TODO GCC incompatibily:
-    //            // weights_span[row, col] = bytesAsFloat.f;
-    //        }
-    //    }
-    //    for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
-    //        for (int i = 0; i < 4; ++i) {
-    //            bytesAsFloat.b[i] = collectionTO.heap[sourceIndex + index];
-    //            ++index;
-    //        }
-    //        result._biases[channel] = bytesAsFloat.f;
-    //    }
-    //    for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
-    //        result._activationFunctions[channel] = collectionTO.heap[sourceIndex + index];
-    //        ++index;
-    //    }
-
-    //    return result;
-    //}
 
     template<typename Container, typename SizeType>
     void convert(std::vector<uint8_t>& heap, SizeType& targetSize, uint64_t& targetIndex, Container const& source)
@@ -141,41 +101,6 @@ namespace
             }
         }
     }
-
-    //void convertToNeuronData(std::vector<uint8_t>& heap, uint64_t& targetIndex, NeuralNetworkDescription const& neuralNetDesc)
-    //{
-    //    targetIndex = heap.size();
-    //    heap.resize(targetIndex + NeuralNetworkTO::DataSize);
-
-    //    // #TODO GCC incompatibily:
-    //    // auto weights_span = std::mdspan(neuralNetDesc._weights.data(), MAX_CHANNELS, MAX_CHANNELS);
-
-    //    BytesAsFloat bytesAsFloat;
-    //    int bytePos = 0;
-    //    for (int row = 0; row < MAX_CHANNELS; ++row) {
-    //        for (int col = 0; col < MAX_CHANNELS; ++col) {
-    //            bytesAsFloat.f = neuralNetDesc._weights[row * MAX_CHANNELS + col];
-    //            // #TODO GCC incompatibily:
-    //            // weights_span[row, col];
-
-    //            for (int i = 0; i < 4; ++i) {
-    //                heap.at(targetIndex + bytePos) = bytesAsFloat.b[i];
-    //                ++bytePos;
-    //            }
-    //        }
-    //    }
-    //    for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
-    //        bytesAsFloat.f = neuralNetDesc._biases[channel];
-    //        for (int i = 0; i < 4; ++i) {
-    //            heap.at(targetIndex + bytePos) = bytesAsFloat.b[i];
-    //            ++bytePos;
-    //        }
-    //    }
-    //    for (int channel = 0; channel < MAX_CHANNELS; ++channel) {
-    //        heap.at(targetIndex + bytePos) = neuralNetDesc._activationFunctions[channel];
-    //        ++bytePos;
-    //    }
-    //}
 }
 
 ClusteredDataDescription DescriptionConverterService::convertTOtoClusteredDataDescription(CollectionTO const& collectionTO) const
@@ -184,8 +109,9 @@ ClusteredDataDescription DescriptionConverterService::convertTOtoClusteredDataDe
 
     // Genomes
     std::vector<GenomeDescription_New> genomes;
+    std::unordered_map<uint64_t, uint64_t> genomeIdByTOIndex;
     for (int i = 0; i < *collectionTO.numGenomes; ++i) {
-        result._genomes.emplace_back(createGenomeDescription(collectionTO, i));
+        result._genomes.emplace_back(createGenomeDescription(collectionTO, i, genomeIdByTOIndex));
     }
 
     // Cells
@@ -199,7 +125,7 @@ ClusteredDataDescription DescriptionConverterService::convertTOtoClusteredDataDe
     int clusterDescIndex = 0;
     while (!freeCellIndices.empty()) {
         auto freeCellIndex = *freeCellIndices.begin();
-        auto createClusterData = scanAndCreateClusterDescription(collectionTO, freeCellIndex, freeCellIndices);
+        auto createClusterData = scanAndCreateClusterDescription(collectionTO, freeCellIndex, freeCellIndices, genomeIdByTOIndex);
         clusters.emplace_back(createClusterData.cluster);
 
         // Update index maps
@@ -234,13 +160,14 @@ DataDescription DescriptionConverterService::convertTOtoDataDescription(Collecti
 
     // Genomes
     std::vector<GenomeDescription_New> genomes;
+    std::unordered_map<uint64_t, uint64_t> genomeIdByTOIndex;
     for (int i = 0; i < *collectionTO.numGenomes; ++i) {
-        result._genomes.emplace_back(createGenomeDescription(collectionTO, i));
+        result._genomes.emplace_back(createGenomeDescription(collectionTO, i, genomeIdByTOIndex));
     }
 
     // Cells
     for (int i = 0; i < *collectionTO.numCells; ++i) {
-        result._cells.emplace_back(createCellDescription(collectionTO, i));
+        result._cells.emplace_back(createCellDescription(collectionTO, i, genomeIdByTOIndex));
     }
 
     // Particles
@@ -387,7 +314,8 @@ namespace
 auto DescriptionConverterService::scanAndCreateClusterDescription(
     CollectionTO const& collectionTO,
     int startCellIndex,
-    std::unordered_set<int>& freeCellIndices) const
+    std::unordered_set<int>& freeCellIndices,
+    std::unordered_map<uint64_t, uint64_t> const& genomeIdByTOIndex) const
     -> CreateClusterReturnData
 {
     CreateClusterReturnData result; 
@@ -401,7 +329,7 @@ auto DescriptionConverterService::scanAndCreateClusterDescription(
     int cellDescIndex = 0;
     do {
         for (auto const& currentCellIndex : currentCellIndices) {
-            cells.emplace_back(createCellDescription(collectionTO, currentCellIndex));
+            cells.emplace_back(createCellDescription(collectionTO, currentCellIndex, genomeIdByTOIndex));
             result.cellTOIndexToCellDescIndex.emplace(currentCellIndex, cellDescIndex);
             auto const& cellTO = collectionTO.cells[currentCellIndex];
             for (int i = 0; i < cellTO.numConnections; ++i) {
@@ -426,13 +354,16 @@ auto DescriptionConverterService::scanAndCreateClusterDescription(
     return result;
 }
 
-CellDescription DescriptionConverterService::createCellDescription(CollectionTO const& collectionTO, int cellIndex) const
+CellDescription DescriptionConverterService::createCellDescription(
+    CollectionTO const& collectionTO,
+    int cellIndex,
+    std::unordered_map<uint64_t, uint64_t> const& genomeIdByTOIndex) const
 {
     CellDescription result;
 
     auto const& cellTO = collectionTO.cells[cellIndex];
     if (cellTO.hasGenome) {
-        result._genomeId = collectionTO.genomes[cellTO.genomeIndex].id;
+        result._genomeId = genomeIdByTOIndex.at(cellTO.genomeIndex);
     }
     result._id = cellTO.id;
     result._pos = RealVector2D(cellTO.pos.x, cellTO.pos.y);
@@ -635,12 +566,16 @@ CellDescription DescriptionConverterService::createCellDescription(CollectionTO 
     return result;
 }
 
-GenomeDescription_New DescriptionConverterService::createGenomeDescription(CollectionTO const& collectionTO, int genomeIndex) const
+GenomeDescription_New DescriptionConverterService::createGenomeDescription(
+    CollectionTO const& collectionTO,
+    int genomeIndex,
+    std::unordered_map<uint64_t, uint64_t>& genomeIdByTOIndex) const
 {
     GenomeDescription_New result;
 
     auto const& genomeTO = collectionTO.genomes[genomeIndex];
-    result._id = genomeTO.id;
+    result._id = NumberGenerator::get().getId();
+    genomeIdByTOIndex.emplace(genomeIndex, result._id);
     result._genes.reserve(genomeTO.numGenes);
     result._frontAngle = genomeTO.frontAngle;
 
@@ -794,8 +729,7 @@ void DescriptionConverterService::addGenome(
     genomeTOs.resize(genomeIndex + 1);
 
     GenomeTO& genomeTO = genomeTOs.at(genomeIndex);
-    genomeTO.id = genomeDesc._id == 0 ? NumberGenerator::get().getId() : genomeDesc._id;
-    genomeTOIndexById.insert_or_assign(genomeTO.id, genomeIndex);
+    genomeTOIndexById.insert_or_assign(genomeDesc._id, genomeIndex);
 
     auto geneArrayStartIndex = geneTOs.size();
     geneTOs.resize(geneArrayStartIndex + genomeDesc._genes.size());

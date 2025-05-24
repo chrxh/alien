@@ -32,7 +32,6 @@ namespace
             }
             auto& genomeTO = collectionTO.genomes[genomeTOIndex];
             auto const& genome = cell->genome;
-            genomeTO.id = genome->id;
             genomeTO.frontAngle = genome->frontAngle;
             genomeTO.numGenes = genome->numGenes;
 
