@@ -1020,13 +1020,6 @@ namespace cereal
     }
     SPLIT_SERIALIZATION(CellDescription)
 
-
-    template <class Archive>
-    void serialize(Archive& ar, ClusterDescription& data)
-    {
-        ar(data._cells);
-    }
-
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ParticleDescription& data)
     {
@@ -1042,9 +1035,9 @@ namespace cereal
     SPLIT_SERIALIZATION(ParticleDescription)
 
     template <class Archive>
-    void serialize(Archive& ar, ClusteredDataDescription& data)
+    void serialize(Archive& ar, DataDescription& data)
     {
-        ar(data._clusters, data._particles, data._genomes);
+        ar(data._cells, data._particles, data._genomes);
     }
 }
 
@@ -1199,7 +1192,7 @@ bool SerializerService::serializeGenomeToFile(std::filesystem::path const& filen
     try {
         log(Priority::Important, "save genome to " + filename.string());
         //wrap constructor cell around genome
-        ClusteredDataDescription data;
+        DataDescription data;
         if (!wrapGenome(data, genome)) {
             return false;
         }
@@ -1220,7 +1213,7 @@ bool SerializerService::deserializeGenomeFromFile(std::vector<uint8_t>& genome, 
 {
     try {
         log(Priority::Important, "load genome from " + filename.string());
-        ClusteredDataDescription data;
+        DataDescription data;
         if (!deserializeDataDescription(data, filename)) {
             return false;
         }
@@ -1242,7 +1235,7 @@ bool SerializerService::serializeGenomeToString(std::string& output, std::vector
             return false;
         }
 
-        ClusteredDataDescription data;
+        DataDescription data;
         if (!wrapGenome(data, input)) {
             return false;
         }
@@ -1265,7 +1258,7 @@ bool SerializerService::deserializeGenomeFromString(std::vector<uint8_t>& output
             return false;
         }
 
-        ClusteredDataDescription data;
+        DataDescription data;
         deserializeDataDescription(data, stream);
 
         if (!unwrapGenome(output, data)) {
@@ -1325,7 +1318,7 @@ bool SerializerService::serializeStatisticsToFile(std::filesystem::path const& f
     }
 }
 
-bool SerializerService::serializeContentToFile(std::filesystem::path const& filename, ClusteredDataDescription const& content)
+bool SerializerService::serializeContentToFile(std::filesystem::path const& filename, DataDescription const& content)
 {
     try {
         zstr::ofstream fileStream(filename.string(), std::ios::binary);
@@ -1340,7 +1333,7 @@ bool SerializerService::serializeContentToFile(std::filesystem::path const& file
     }
 }
 
-bool SerializerService::deserializeContentFromFile(ClusteredDataDescription& content, std::filesystem::path const& filename)
+bool SerializerService::deserializeContentFromFile(DataDescription& content, std::filesystem::path const& filename)
 {
     try {
         if (!deserializeDataDescription(content, filename)) {
@@ -1352,14 +1345,14 @@ bool SerializerService::deserializeContentFromFile(ClusteredDataDescription& con
     }
 }
 
-void SerializerService::serializeDataDescription(ClusteredDataDescription const& data, std::ostream& stream)
+void SerializerService::serializeDataDescription(DataDescription const& data, std::ostream& stream)
 {
     cereal::PortableBinaryOutputArchive archive(stream);
     archive(Const::ProgramVersion);
     archive(data);
 }
 
-bool SerializerService::deserializeDataDescription(ClusteredDataDescription& data, std::filesystem::path const& filename)
+bool SerializerService::deserializeDataDescription(DataDescription& data, std::filesystem::path const& filename)
 {
     zstr::ifstream stream(filename.string(), std::ios::binary);
     if (!stream) {
@@ -1369,7 +1362,7 @@ bool SerializerService::deserializeDataDescription(ClusteredDataDescription& dat
     return true;
 }
 
-void SerializerService::deserializeDataDescription(ClusteredDataDescription& data, std::istream& stream)
+void SerializerService::deserializeDataDescription(DataDescription& data, std::istream& stream)
 {
     cereal::PortableBinaryInputArchive archive(stream);
     std::string version;
@@ -1684,24 +1677,20 @@ void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics,
     }
 }
 
-bool SerializerService::wrapGenome(ClusteredDataDescription& output, std::vector<uint8_t> const& input)
+bool SerializerService::wrapGenome(DataDescription& output, std::vector<uint8_t> const& input)
 {
     output.clear();
-    output.addCluster(ClusterDescription().addCell(CellDescription().cellType(ConstructorDescription().genome(input))));
+    output.addCell(CellDescription().cellType(ConstructorDescription().genome(input)));
     return true;
 }
 
 
-bool SerializerService::unwrapGenome(std::vector<uint8_t>& output, ClusteredDataDescription const& input)
+bool SerializerService::unwrapGenome(std::vector<uint8_t>& output, DataDescription const& input)
 {
-    if (input._clusters.size() != 1) {
+    if (input._cells.size() != 1) {
         return false;
     }
-    auto cluster = input._clusters.front();
-    if (cluster._cells.size() != 1) {
-        return false;
-    }
-    auto cell = cluster._cells.front();
+    auto cell = input._cells.front();
     if (cell.getCellType() != CellType_Constructor) {
         return false;
     }

@@ -213,7 +213,7 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveSi
         deserializedData.auxiliaryData.worldSize = _simulationFacade->getWorldSize();
         deserializedData.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
         deserializedData.auxiliaryData.timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
-        deserializedData.mainData = _simulationFacade->getClusteredSimulationData();
+        deserializedData.mainData = _simulationFacade->getSimulationData();
     } catch (...) {
         return std::make_shared<_PersisterRequestError>(
             request->getRequestId(),
@@ -262,7 +262,7 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, ReadSi
                 _simulationFacade->closeSimulation();
                 _simulationFacade->newSimulation(
                     deserializedData.auxiliaryData.timestep, deserializedData.auxiliaryData.worldSize, deserializedData.auxiliaryData.simulationParameters);
-                _simulationFacade->setClusteredSimulationData(deserializedData.mainData);
+                _simulationFacade->setSimulationData(deserializedData.mainData);
                 _simulationFacade->setStatisticsHistory(deserializedData.statistics);
                 _simulationFacade->setRealTime(deserializedData.auxiliaryData.realTime);
             } catch (CudaMemoryAllocationException const& exception) {
@@ -412,7 +412,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             deserializedSim.auxiliaryData.worldSize = _simulationFacade->getWorldSize();
             deserializedSim.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
             deserializedSim.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
-            deserializedSim.mainData = _simulationFacade->getClusteredSimulationData();
+            deserializedSim.mainData = _simulationFacade->getSimulationData();
         } catch (...) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(),
@@ -431,7 +431,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         settings = serializedSim.auxiliaryData;
         statistics = serializedSim.statistics;
         size = {deserializedSim.auxiliaryData.worldSize.x, deserializedSim.auxiliaryData.worldSize.y};
-        numObjects = deserializedSim.mainData.getNumberOfCellAndParticles();
+        numObjects = toInt(deserializedSim.mainData._cells.size() + deserializedSim.mainData._particles.size());
     } else {
         auto genome = std::get<UploadNetworkResourceRequestData::GenomeData>(requestData.data).description;
         if (genome._cells.empty()) {
@@ -502,7 +502,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             deserializedSim.auxiliaryData.worldSize = _simulationFacade->getWorldSize();
             deserializedSim.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
             deserializedSim.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
-            deserializedSim.mainData = _simulationFacade->getClusteredSimulationData();
+            deserializedSim.mainData = _simulationFacade->getSimulationData();
         } catch (...) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(),
@@ -519,7 +519,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         settings = serializedSim.auxiliaryData;
         statistics = serializedSim.statistics;
         worldSize = {deserializedSim.auxiliaryData.worldSize.x, deserializedSim.auxiliaryData.worldSize.y};
-        numObjects = deserializedSim.mainData.getNumberOfCellAndParticles();
+        numObjects = toInt(deserializedSim.mainData._cells.size() + deserializedSim.mainData._particles.size());
     } else {
         auto genome = std::get<ReplaceNetworkResourceRequestData::GenomeData>(requestData.data).description;
         if (genome._cells.empty()) {
@@ -656,7 +656,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             deserializedSimulation.auxiliaryData.worldSize = _simulationFacade->getWorldSize();
             deserializedSimulation.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
             deserializedSimulation.auxiliaryData.timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
-            deserializedSimulation.mainData = _simulationFacade->getClusteredSimulationData();
+            deserializedSimulation.mainData = _simulationFacade->getSimulationData();
             requestData.peakDeserializedSimulation->setDeserializedSimulation(std::move(deserializedSimulation));
             requestData.peakDeserializedSimulation->setLastStatisticsData(currentRawStatistics);
         }

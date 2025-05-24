@@ -49,7 +49,7 @@ int main(int argc, char** argv)
 
         auto simulationFacade = std::make_shared<_SimulationFacadeImpl>();
         simulationFacade->newSimulation(simData.auxiliaryData.timestep, simData.auxiliaryData.worldSize, simData.auxiliaryData.simulationParameters);
-        simulationFacade->setClusteredSimulationData(simData.mainData);
+        simulationFacade->setSimulationData(simData.mainData);
         simulationFacade->setStatisticsHistory(simData.statistics);
         simulationFacade->setRealTime(simData.auxiliaryData.realTime);
         std::cout << "Device: " << simulationFacade->getGpuName() << std::endl;
@@ -66,7 +66,7 @@ int main(int argc, char** argv)
         //write output simulation file
         std::cout << "Writing output" << std::endl;
         simData.auxiliaryData.timestep = static_cast<uint32_t>(simulationFacade->getCurrentTimestep());
-        simData.mainData = simulationFacade->getClusteredSimulationData();
+        simData.mainData = simulationFacade->getSimulationData();
         simData.auxiliaryData.simulationParameters = simulationFacade->getSimulationParameters();
         simData.statistics = simulationFacade->getStatisticsHistory().getCopiedData();
         simData.auxiliaryData.realTime = simulationFacade->getRealTime();

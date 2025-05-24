@@ -84,8 +84,8 @@ void PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string cons
         clusterFilename.remove_filename();
         clusterFilename /= clusterNameStream.str();
 
-        ClusteredDataDescription pattern;
-        pattern._clusters = std::vector<ClusterDescription>{partitionClassData.representant};
+        DataDescription pattern;
+        pattern._cells = partitionClassData.representant._cells;
 
         SerializerService::get().serializeContentToFile(clusterFilename.string(), pattern);
     }

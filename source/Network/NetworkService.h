@@ -55,7 +55,7 @@ public:
         std::string const& resourceName,
         std::string const& description,
         IntVector2D const& worldSize,
-        int numParticles,
+        int numObjects,
         std::string const& data,
         std::string const& settings,
         std::string const& statistics,
@@ -64,7 +64,7 @@ public:
     bool replaceResource(
         std::string const& resourceId,
         IntVector2D const& worldSize,
-        int numParticles,
+        int numObjects,
         std::string const& data,
         std::string const& settings,
         std::string const& statistics);

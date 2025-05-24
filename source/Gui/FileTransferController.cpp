@@ -43,7 +43,7 @@ void FileTransferController::onOpenSimulation(std::filesystem::path const& filen
                     data.deserializedSimulation.auxiliaryData.timestep,
                     data.deserializedSimulation.auxiliaryData.worldSize,
                     data.deserializedSimulation.auxiliaryData.simulationParameters);
-                _simulationFacade->setClusteredSimulationData(data.deserializedSimulation.mainData);
+                _simulationFacade->setSimulationData(data.deserializedSimulation.mainData);
                 _simulationFacade->setStatisticsHistory(data.deserializedSimulation.statistics);
                 _simulationFacade->setRealTime(data.deserializedSimulation.auxiliaryData.realTime);
             } catch (CudaMemoryAllocationException const& exception) {
