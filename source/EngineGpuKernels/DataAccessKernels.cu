@@ -21,6 +21,134 @@ namespace
         }
     }
 
+    __device__ void createGenomeTO(Cell* cell, CollectionTO& collectionTO)
+    {
+        auto origGenomeIndex = atomicExch(&cell->genome->genomeIndex, 0);  // 0 = member is currently initialized
+        if (origGenomeIndex == Genome::GenomeIndex_NotSet) {
+            auto genomeTOIndex = atomicAdd(collectionTO.numGenomes, 1ull);
+            if (genomeTOIndex >= collectionTO.capacities.cells) {
+                printf("Insufficient genome memory for transfer objects.\n");
+                ABORT();
+            }
+            auto& genomeTO = collectionTO.genomes[genomeTOIndex];
+            auto const& genome = cell->genome;
+            genomeTO.id = genome->id;
+            genomeTO.frontAngle = genome->frontAngle;
+            genomeTO.numGenes = genome->numGenes;
+
+            auto geneTOArrayStartIndex = atomicAdd(collectionTO.numGenes, genome->numGenes);
+            for (int i = 0, j = genome->numGenes; i < j; ++i) {
+                auto& geneTO = collectionTO.genes[geneTOArrayStartIndex + i];
+                auto const& gene = genome->genes[i];
+                geneTO.shape = gene.shape;
+                geneTO.numBranches = gene.numBranches;
+                geneTO.separateConstruction = gene.separateConstruction;
+                geneTO.angleAlignment = gene.angleAlignment;
+                geneTO.stiffness = gene.stiffness;
+                geneTO.connectionDistance = gene.connectionDistance;
+                geneTO.numRepetitions = gene.numRepetitions;
+                geneTO.concatenationAngle1 = gene.concatenationAngle1;
+                geneTO.concatenationAngle2 = gene.concatenationAngle2;
+                geneTO.numNodes = gene.numNodes;
+                auto nodeTOArrayStartIndex = atomicAdd(collectionTO.numNodes, gene.numNodes);
+                for (int i = 0, j = gene.numNodes; i < j; ++i) {
+                    auto& nodeTO = collectionTO.nodes[nodeTOArrayStartIndex + i];
+                    auto const& node = gene.nodes[i];
+                    nodeTO.referenceAngle = node.referenceAngle;
+                    nodeTO.color = node.color;
+                    nodeTO.numRequiredAdditionalConnections = node.numRequiredAdditionalConnections;
+
+                    int targetSize;  //not used
+                    copyDataToHeap<int>(
+                        sizeof(NeuralNetworkGenome), reinterpret_cast<uint8_t*>(node.neuralNetwork), targetSize, nodeTO.neuralNetworkDataIndex, collectionTO);
+
+                    nodeTO.signalRoutingRestriction.active = node.signalRoutingRestriction.active;
+                    nodeTO.signalRoutingRestriction.baseAngle = node.signalRoutingRestriction.baseAngle;
+                    nodeTO.signalRoutingRestriction.openingAngle = node.signalRoutingRestriction.openingAngle;
+                    nodeTO.cellType = node.cellType;
+                    switch (node.cellType) {
+                    case CellTypeGenome_Base:
+                        break;
+                    case CellTypeGenome_Depot:
+                        nodeTO.cellTypeData.depot.mode = node.cellTypeData.depot.mode;
+                        break;
+                    case CellTypeGenome_Constructor:
+                        nodeTO.cellTypeData.constructor.autoTriggerInterval = node.cellTypeData.constructor.autoTriggerInterval;
+                        nodeTO.cellTypeData.constructor.constructionActivationTime = node.cellTypeData.constructor.constructionActivationTime;
+                        nodeTO.cellTypeData.constructor.constructionAngle1 = node.cellTypeData.constructor.constructionAngle1;
+                        nodeTO.cellTypeData.constructor.constructionAngle2 = node.cellTypeData.constructor.constructionAngle2;
+                        break;
+                    case CellTypeGenome_Sensor:
+                        nodeTO.cellTypeData.sensor.autoTriggerInterval = node.cellTypeData.sensor.autoTriggerInterval;
+                        nodeTO.cellTypeData.sensor.minDensity = node.cellTypeData.sensor.minDensity;
+                        nodeTO.cellTypeData.sensor.minRange = node.cellTypeData.sensor.minRange;
+                        nodeTO.cellTypeData.sensor.maxRange = node.cellTypeData.sensor.maxRange;
+                        nodeTO.cellTypeData.sensor.restrictToColor = node.cellTypeData.sensor.restrictToColor;
+                        nodeTO.cellTypeData.sensor.restrictToMutants = node.cellTypeData.sensor.restrictToMutants;
+                        break;
+                    case CellTypeGenome_Oscillator:
+                        nodeTO.cellTypeData.oscillator.autoTriggerInterval = node.cellTypeData.oscillator.autoTriggerInterval;
+                        nodeTO.cellTypeData.oscillator.alternationInterval = node.cellTypeData.oscillator.alternationInterval;
+                        break;
+                    case CellTypeGenome_Attacker:
+                        break;
+                    case CellTypeGenome_Injector:
+                        nodeTO.cellTypeData.injector.mode = node.cellTypeData.injector.mode;
+                        break;
+                    case CellTypeGenome_Muscle:
+                        nodeTO.cellTypeData.muscle.mode = node.cellTypeData.muscle.mode;
+                        switch (nodeTO.cellTypeData.muscle.mode) {
+                        case MuscleMode_AutoBending:
+                            nodeTO.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation = node.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation;
+                            nodeTO.cellTypeData.muscle.modeData.autoBending.frontBackVelRatio = node.cellTypeData.muscle.modeData.autoBending.frontBackVelRatio;
+                            break;
+                        case MuscleMode_ManualBending:
+                            nodeTO.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation =
+                                node.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
+                            nodeTO.cellTypeData.muscle.modeData.manualBending.frontBackVelRatio =
+                                node.cellTypeData.muscle.modeData.manualBending.frontBackVelRatio;
+                            break;
+                        case MuscleMode_AngleBending:
+                            nodeTO.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation =
+                                node.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
+                            nodeTO.cellTypeData.muscle.modeData.angleBending.frontBackVelRatio =
+                                node.cellTypeData.muscle.modeData.angleBending.frontBackVelRatio;
+                            break;
+                        case MuscleMode_AutoCrawling:
+                            nodeTO.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation =
+                                node.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation;
+                            nodeTO.cellTypeData.muscle.modeData.autoCrawling.frontBackVelRatio =
+                                node.cellTypeData.muscle.modeData.autoCrawling.frontBackVelRatio;
+                            break;
+                        case MuscleMode_ManualCrawling:
+                            nodeTO.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation =
+                                node.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation;
+                            nodeTO.cellTypeData.muscle.modeData.manualCrawling.frontBackVelRatio =
+                                node.cellTypeData.muscle.modeData.manualCrawling.frontBackVelRatio;
+                            break;
+                        case MuscleMode_DirectMovement:
+                            break;
+                        }
+                    case CellTypeGenome_Defender:
+                        nodeTO.cellTypeData.defender.mode = node.cellTypeData.defender.mode;
+                        break;
+                    case CellTypeGenome_Reconnector:
+                        nodeTO.cellTypeData.reconnector.restrictToColor = node.cellTypeData.reconnector.restrictToColor;
+                        nodeTO.cellTypeData.reconnector.restrictToMutants = node.cellTypeData.reconnector.restrictToMutants;
+                        break;
+                    case CellTypeGenome_Detonator:
+                        nodeTO.cellTypeData.detonator.countdown = node.cellTypeData.detonator.countdown;
+                        break;
+                    }
+                }
+            }
+
+            atomicExch(&cell->genome->genomeIndex, genomeTOIndex);
+        } else if (origGenomeIndex != 0) {
+            atomicExch(&cell->genome->genomeIndex, origGenomeIndex);
+        }
+    }
+
     __device__ void createCellTO(Cell* cell, CollectionTO& collectionTO, uint8_t* heap)
     {
         auto cellTOIndex = alienAtomicAdd64(collectionTO.numCells, 1ull);
@@ -235,7 +363,9 @@ __global__ void cudaPrepareGenomesForConversionToTO(int2 rectUpperLeft, int2 rec
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-
+        if (!cell->genome) {
+            continue;
+        }
         auto pos = cell->pos;
         data.cellMap.correctPosition(pos);
         if (isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
@@ -380,7 +510,6 @@ __global__ void cudaGetGenomeData(int2 rectUpperLeft, int2 rectLowerRight, Simul
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
-    auto const heap = data.objects.heap.getArray();
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
@@ -394,130 +523,25 @@ __global__ void cudaGetGenomeData(int2 rectUpperLeft, int2 rectLowerRight, Simul
             continue;
         }
 
-        auto origGenomeIndex = atomicExch(&cell->genome->genomeIndex, 0);  // 0 = member is currently initialized
-        if (origGenomeIndex == Genome::GenomeIndex_NotSet) {
-            auto genomeTOIndex = atomicAdd(collectionTO.numGenomes, 1ull);
-            if (genomeTOIndex >= collectionTO.capacities.cells) {
-                printf("Insufficient genome memory for transfer objects.\n");
-                ABORT();
-            }
-            auto& genomeTO = collectionTO.genomes[genomeTOIndex];
-            auto const& genome = cell->genome;
-            genomeTO.id = genome->id;
-            genomeTO.frontAngle = genome->frontAngle;
-            genomeTO.numGenes = genome->numGenes;
+        createGenomeTO(cell, collectionTO);
+    }
+}
 
-            auto geneTOArrayStartIndex = atomicAdd(collectionTO.numGenes, genome->numGenes);
-            for (int i = 0, j = genome->numGenes; i < j; ++i) {
-                auto& geneTO = collectionTO.genes[geneTOArrayStartIndex + i];
-                auto const& gene = genome->genes[i];
-                geneTO.shape = gene.shape;
-                geneTO.numBranches = gene.numBranches;
-                geneTO.separateConstruction = gene.separateConstruction;
-                geneTO.angleAlignment = gene.angleAlignment;
-                geneTO.stiffness = gene.stiffness;
-                geneTO.connectionDistance = gene.connectionDistance;
-                geneTO.numRepetitions = gene.numRepetitions;
-                geneTO.concatenationAngle1 = gene.concatenationAngle1;
-                geneTO.concatenationAngle2 = gene.concatenationAngle2;
-                geneTO.numNodes = gene.numNodes;
-                auto nodeTOArrayStartIndex = atomicAdd(collectionTO.numNodes, gene.numNodes);
-                for (int i = 0, j = gene.numNodes; i < j; ++i) {
-                    auto& nodeTO = collectionTO.nodes[nodeTOArrayStartIndex + i];
-                    auto const& node = gene.nodes[i];
-                    nodeTO.referenceAngle = node.referenceAngle;
-                    nodeTO.color = node.color;
-                    nodeTO.numRequiredAdditionalConnections = node.numRequiredAdditionalConnections;
+__global__ void cudaGetSelectedGenomeData(SimulationData data, bool includeClusters, CollectionTO collectionTO)
+{
+    auto const& cells = data.objects.cells;
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
-                    int targetSize;  //not used
-                    copyDataToHeap<int>(
-                        sizeof(NeuralNetworkGenome), reinterpret_cast<uint8_t*>(node.neuralNetwork), targetSize, nodeTO.neuralNetworkDataIndex, collectionTO);
-
-                    nodeTO.signalRoutingRestriction.active = node.signalRoutingRestriction.active;
-                    nodeTO.signalRoutingRestriction.baseAngle = node.signalRoutingRestriction.baseAngle;
-                    nodeTO.signalRoutingRestriction.openingAngle = node.signalRoutingRestriction.openingAngle;
-                    nodeTO.cellType = node.cellType;
-                    switch (node.cellType) {
-                    case CellTypeGenome_Base:
-                        break;
-                    case CellTypeGenome_Depot:
-                        nodeTO.cellTypeData.depot.mode = node.cellTypeData.depot.mode;
-                        break;
-                    case CellTypeGenome_Constructor:
-                        nodeTO.cellTypeData.constructor.autoTriggerInterval = node.cellTypeData.constructor.autoTriggerInterval;
-                        nodeTO.cellTypeData.constructor.constructionActivationTime = node.cellTypeData.constructor.constructionActivationTime;
-                        nodeTO.cellTypeData.constructor.constructionAngle1 = node.cellTypeData.constructor.constructionAngle1;
-                        nodeTO.cellTypeData.constructor.constructionAngle2 = node.cellTypeData.constructor.constructionAngle2;
-                        break;
-                    case CellTypeGenome_Sensor:
-                        nodeTO.cellTypeData.sensor.autoTriggerInterval = node.cellTypeData.sensor.autoTriggerInterval;
-                        nodeTO.cellTypeData.sensor.minDensity = node.cellTypeData.sensor.minDensity;
-                        nodeTO.cellTypeData.sensor.minRange = node.cellTypeData.sensor.minRange;
-                        nodeTO.cellTypeData.sensor.maxRange = node.cellTypeData.sensor.maxRange;
-                        nodeTO.cellTypeData.sensor.restrictToColor = node.cellTypeData.sensor.restrictToColor;
-                        nodeTO.cellTypeData.sensor.restrictToMutants = node.cellTypeData.sensor.restrictToMutants;
-                        break;
-                    case CellTypeGenome_Oscillator:
-                        nodeTO.cellTypeData.oscillator.autoTriggerInterval = node.cellTypeData.oscillator.autoTriggerInterval;
-                        nodeTO.cellTypeData.oscillator.alternationInterval = node.cellTypeData.oscillator.alternationInterval;
-                        break;
-                    case CellTypeGenome_Attacker:
-                        break;
-                    case CellTypeGenome_Injector:
-                        nodeTO.cellTypeData.injector.mode = node.cellTypeData.injector.mode;
-                        break;
-                    case CellTypeGenome_Muscle:
-                        nodeTO.cellTypeData.muscle.mode = node.cellTypeData.muscle.mode;
-                        switch (nodeTO.cellTypeData.muscle.mode) {
-                        case MuscleMode_AutoBending:
-                            nodeTO.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation = node.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation;
-                            nodeTO.cellTypeData.muscle.modeData.autoBending.frontBackVelRatio = node.cellTypeData.muscle.modeData.autoBending.frontBackVelRatio;
-                            break;
-                        case MuscleMode_ManualBending:
-                            nodeTO.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation =
-                                node.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
-                            nodeTO.cellTypeData.muscle.modeData.manualBending.frontBackVelRatio =
-                                node.cellTypeData.muscle.modeData.manualBending.frontBackVelRatio;
-                            break;
-                        case MuscleMode_AngleBending:
-                            nodeTO.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation =
-                                node.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
-                            nodeTO.cellTypeData.muscle.modeData.angleBending.frontBackVelRatio =
-                                node.cellTypeData.muscle.modeData.angleBending.frontBackVelRatio;
-                            break;
-                        case MuscleMode_AutoCrawling:
-                            nodeTO.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation =
-                                node.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation;
-                            nodeTO.cellTypeData.muscle.modeData.autoCrawling.frontBackVelRatio =
-                                node.cellTypeData.muscle.modeData.autoCrawling.frontBackVelRatio;
-                            break;
-                        case MuscleMode_ManualCrawling:
-                            nodeTO.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation =
-                                node.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation;
-                            nodeTO.cellTypeData.muscle.modeData.manualCrawling.frontBackVelRatio =
-                                node.cellTypeData.muscle.modeData.manualCrawling.frontBackVelRatio;
-                            break;
-                        case MuscleMode_DirectMovement:
-                            break;
-                        }
-                    case CellTypeGenome_Defender:
-                        nodeTO.cellTypeData.defender.mode = node.cellTypeData.defender.mode;
-                        break;
-                    case CellTypeGenome_Reconnector:
-                        nodeTO.cellTypeData.reconnector.restrictToColor = node.cellTypeData.reconnector.restrictToColor;
-                        nodeTO.cellTypeData.reconnector.restrictToMutants = node.cellTypeData.reconnector.restrictToMutants;
-                        break;
-                    case CellTypeGenome_Detonator:
-                        nodeTO.cellTypeData.detonator.countdown = node.cellTypeData.detonator.countdown;
-                        break;
-                    }
-                }
-            }
-
-            atomicExch(&cell->genome->genomeIndex, genomeTOIndex);
-        } else if (origGenomeIndex != 0) {
-            atomicExch(&cell->genome->genomeIndex, origGenomeIndex);
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if ((includeClusters && cell->selected == 0) || (!includeClusters && cell->selected != 1)) {
+            continue;
         }
+        if (!cell->genome) {
+            continue;
+        }
+
+        createGenomeTO(cell, collectionTO);
     }
 }
 

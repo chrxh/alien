@@ -16,13 +16,17 @@
 
 //tags cell with cellTO index and tags cellTO connections with cell index
 __global__ void cudaPrepareGenomesForConversionToTO(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data);
-__global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, CollectionTO collectionTO);
 __global__ void cudaGetSelectedParticleData(SimulationData data, CollectionTO access);
-__global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds ids, SimulationData data, CollectionTO collectionTO);
 __global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationData data, CollectionTO access);
 __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, CollectionTO collectionTO);
+
 __global__ void cudaGetGenomeData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, CollectionTO collectionTO);
+__global__ void cudaGetSelectedGenomeData(SimulationData data, bool includeClusters, CollectionTO collectionTO);
+
 __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, CollectionTO collectionTO);
+__global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, CollectionTO collectionTO);
+__global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds ids, SimulationData data, CollectionTO collectionTO);
+
 __global__ void cudaResolveConnections(SimulationData data, CollectionTO collectionTO);
 __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, CollectionTO access);
 __global__ void cudaGetArraysBasedOnTO(SimulationData data, CollectionTO collectionTO, Cell** cellArray);
