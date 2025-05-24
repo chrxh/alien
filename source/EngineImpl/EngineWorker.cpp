@@ -105,7 +105,7 @@ void EngineWorker::setSyncSimulationWithRenderingRatio(int value)
     _syncSimulationWithRenderingRatio = value;
 }
 
-ClusteredDataDescription EngineWorker::getClusteredSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
+ClusteredCollectionDescription EngineWorker::getClusteredSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
 {
     CollectionTO dataTO;
     ExitScopeGuard guard([&dataTO]() { _CollectionTOProvider::destroyUnmanagedDataTO(dataTO); });
@@ -116,44 +116,44 @@ ClusteredDataDescription EngineWorker::getClusteredSimulationData(IntVector2D co
         dataTO = _simulationCudaFacade->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y});
     }
 
-    return DescriptionConverterService::get().convertTOtoClusteredDataDescription(dataTO);
+    return DescriptionConverterService::get().convertTOtoClusteredDescription(dataTO);
 }
 
-DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
+CollectionDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
 {
     EngineWorkerGuard access(this);
 
     auto dataTO = _simulationCudaFacade->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y});
     ExitScopeGuard guard([&dataTO]() { _CollectionTOProvider::destroyUnmanagedDataTO(dataTO); });
 
-    return DescriptionConverterService::get().convertTOtoDataDescription(dataTO);
+    return DescriptionConverterService::get().convertTOtoDescription(dataTO);
 }
 
-ClusteredDataDescription EngineWorker::getSelectedClusteredSimulationData(bool includeClusters)
+ClusteredCollectionDescription EngineWorker::getSelectedClusteredSimulationData(bool includeClusters)
 {
     EngineWorkerGuard access(this);
 
     auto dataTO = _simulationCudaFacade->getSelectedSimulationData(includeClusters);
 
-    return DescriptionConverterService::get().convertTOtoClusteredDataDescription(dataTO);
+    return DescriptionConverterService::get().convertTOtoClusteredDescription(dataTO);
 }
 
-DataDescription EngineWorker::getSelectedSimulationData(bool includeClusters)
+CollectionDescription EngineWorker::getSelectedSimulationData(bool includeClusters)
 {
     EngineWorkerGuard access(this);
 
     auto dataTO = _simulationCudaFacade->getSelectedSimulationData(includeClusters);
 
-    return DescriptionConverterService::get().convertTOtoDataDescription(dataTO);
+    return DescriptionConverterService::get().convertTOtoDescription(dataTO);
 }
 
-DataDescription EngineWorker::getInspectedSimulationData(std::vector<uint64_t> objectsIds)
+CollectionDescription EngineWorker::getInspectedSimulationData(std::vector<uint64_t> objectsIds)
 {
     EngineWorkerGuard access(this);
 
     auto dataTO = _simulationCudaFacade->getInspectedSimulationData(objectsIds);
 
-    return DescriptionConverterService::get().convertTOtoDataDescription(dataTO);
+    return DescriptionConverterService::get().convertTOtoDescription(dataTO);
 }
 
 StatisticsRawData EngineWorker::getStatisticsRawData() const
@@ -171,7 +171,7 @@ void EngineWorker::setStatisticsHistory(StatisticsHistoryData const& data)
     _simulationCudaFacade->setStatisticsHistory(data);
 }
 
-void EngineWorker::addAndSelectSimulationData(DataDescription const& dataToUpdate)
+void EngineWorker::addAndSelectSimulationData(CollectionDescription const& dataToUpdate)
 {
     EngineWorkerGuard access(this);
 
@@ -180,7 +180,7 @@ void EngineWorker::addAndSelectSimulationData(DataDescription const& dataToUpdat
     _simulationCudaFacade->addAndSelectSimulationData(dataTO);
 }
 
-void EngineWorker::setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate)
+void EngineWorker::setClusteredSimulationData(ClusteredCollectionDescription const& dataToUpdate)
 {
     EngineWorkerGuard access(this);
 
@@ -189,7 +189,7 @@ void EngineWorker::setClusteredSimulationData(ClusteredDataDescription const& da
     _simulationCudaFacade->setSimulationData(dataTO);
 }
 
-void EngineWorker::setSimulationData(DataDescription const& dataToUpdate)
+void EngineWorker::setSimulationData(CollectionDescription const& dataToUpdate)
 {
     EngineWorkerGuard access(this);
 

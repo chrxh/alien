@@ -84,14 +84,14 @@ RealVector2D ClusterDescription::getClusterPosFromCells() const
     return result;
 }
 
-void ClusteredDataDescription::setCenter(RealVector2D const& center)
+void ClusteredCollectionDescription::setCenter(RealVector2D const& center)
 {
     auto origCenter = calcCenter();
     auto delta = center - origCenter;
     shift(delta);
 }
 
-RealVector2D ClusteredDataDescription::calcCenter() const
+RealVector2D ClusteredCollectionDescription::calcCenter() const
 {
     RealVector2D result;
     int numEntities = 0;
@@ -109,7 +109,7 @@ RealVector2D ClusteredDataDescription::calcCenter() const
     return result;
 }
 
-void ClusteredDataDescription::shift(RealVector2D const& delta)
+void ClusteredCollectionDescription::shift(RealVector2D const& delta)
 {
     for (auto& cluster : _clusters) {
         for (auto& cell : cluster._cells) {
@@ -121,7 +121,7 @@ void ClusteredDataDescription::shift(RealVector2D const& delta)
     }
 }
 
-int ClusteredDataDescription::getNumberOfCellAndParticles() const
+int ClusteredCollectionDescription::getNumberOfCellAndParticles() const
 {
     int result = static_cast<int>(_particles.size());
     for (auto const& cluster : _clusters) {
@@ -130,7 +130,7 @@ int ClusteredDataDescription::getNumberOfCellAndParticles() const
     return result;
 }
 
-DataDescription::DataDescription(ClusteredDataDescription const& clusteredData)
+CollectionDescription::CollectionDescription(ClusteredCollectionDescription const& clusteredData)
 {
     for (auto const& cluster : clusteredData._clusters) {
         addCells(cluster._cells);
@@ -138,38 +138,38 @@ DataDescription::DataDescription(ClusteredDataDescription const& clusteredData)
     _particles = clusteredData._particles;
 }
 
-DataDescription& DataDescription::add(DataDescription const& other)
+CollectionDescription& CollectionDescription::add(CollectionDescription const& other)
 {
     _cells.insert(_cells.end(), other._cells.begin(), other._cells.end());
     _particles.insert(_particles.end(), other._particles.begin(), other._particles.end());
     return *this;
 }
 
-DataDescription& DataDescription::addCells(std::vector<CellDescription> const& value)
+CollectionDescription& CollectionDescription::addCells(std::vector<CellDescription> const& value)
 {
     _cells.insert(_cells.end(), value.begin(), value.end());
     return *this;
 }
 
-DataDescription& DataDescription::addCell(CellDescription const& value)
+CollectionDescription& CollectionDescription::addCell(CellDescription const& value)
 {
     addCells({value});
     return *this;
 }
 
-DataDescription& DataDescription::addParticles(std::vector<ParticleDescription> const& value)
+CollectionDescription& CollectionDescription::addParticles(std::vector<ParticleDescription> const& value)
 {
     _particles.insert(_particles.end(), value.begin(), value.end());
     return *this;
 }
 
-DataDescription& DataDescription::addParticle(ParticleDescription const& value)
+CollectionDescription& CollectionDescription::addParticle(ParticleDescription const& value)
 {
     addParticles({value});
     return *this;
 }
 
-DataDescription& DataDescription::addCreature(GenomeDescription_New const& genome, std::vector<CellDescription> const& cells)
+CollectionDescription& CollectionDescription::addCreature(GenomeDescription_New const& genome, std::vector<CellDescription> const& cells)
 {
     auto highestGenomeId = 0ull;
     for (auto const& cell : _cells) {
@@ -192,13 +192,13 @@ DataDescription& DataDescription::addCreature(GenomeDescription_New const& genom
     return *this;
 }
 
-void DataDescription::clear()
+void CollectionDescription::clear()
 {
     _cells.clear();
     _particles.clear();
 }
 
-bool DataDescription::isEmpty() const
+bool CollectionDescription::isEmpty() const
 {
     if (!_cells.empty()) {
         return false;
@@ -209,14 +209,14 @@ bool DataDescription::isEmpty() const
     return true;
 }
 
-void DataDescription::setCenter(RealVector2D const& center)
+void CollectionDescription::setCenter(RealVector2D const& center)
 {
     auto origCenter = calcCenter();
     auto delta = center - origCenter;
     shift(delta);
 }
 
-RealVector2D DataDescription::calcCenter() const
+RealVector2D CollectionDescription::calcCenter() const
 {
     RealVector2D result;
     auto numEntities = _cells.size() + _particles.size();
@@ -230,7 +230,7 @@ RealVector2D DataDescription::calcCenter() const
     return result;
 }
 
-void DataDescription::shift(RealVector2D const& delta)
+void CollectionDescription::shift(RealVector2D const& delta)
 {
     for (auto& cell : _cells) {
         cell._pos += delta;
@@ -240,7 +240,7 @@ void DataDescription::shift(RealVector2D const& delta)
     }
 }
 
-void DataDescription::rotate(float angle)
+void CollectionDescription::rotate(float angle)
 {
     auto rotationMatrix = Math::calcRotationMatrix(angle);
     auto center = calcCenter();
@@ -258,7 +258,7 @@ void DataDescription::rotate(float angle)
     }
 }
 
-void DataDescription::accelerate(RealVector2D const& velDelta, float angularVelDelta)
+void CollectionDescription::accelerate(RealVector2D const& velDelta, float angularVelDelta)
 {
     auto center = calcCenter();
 
@@ -274,7 +274,7 @@ void DataDescription::accelerate(RealVector2D const& velDelta, float angularVelD
     }
 }
 
-std::unordered_set<uint64_t> DataDescription::getCellIds() const
+std::unordered_set<uint64_t> CollectionDescription::getCellIds() const
 {
     std::unordered_set<uint64_t> result;
     for (auto const& cell : _cells) {
@@ -283,14 +283,14 @@ std::unordered_set<uint64_t> DataDescription::getCellIds() const
     return result;
 }
 
-DataDescription&
-DataDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>* cache)
+CollectionDescription&
+CollectionDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>* cache)
 {
     auto& cell2 = getCellRef(cellId2, cache);
     return addConnection(cellId1, cellId2, cell2._pos, cache);
 }
 
-DataDescription& DataDescription::addConnection(
+CollectionDescription& CollectionDescription::addConnection(
     uint64_t const& cellId1,
     uint64_t const& cellId2,
     RealVector2D const& refPosCell2,
@@ -383,7 +383,7 @@ DataDescription& DataDescription::addConnection(
     return *this;
 }
 
-CellDescription& DataDescription::getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>* cache)
+CellDescription& CollectionDescription::getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>* cache)
 {
     if (cache) {
         auto findResult = cache->find(cellId);

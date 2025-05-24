@@ -79,47 +79,47 @@ void _SimulationFacadeImpl::setSyncSimulationWithRenderingRatio(int value)
     _worker.setSyncSimulationWithRenderingRatio(value);
 }
 
-ClusteredDataDescription _SimulationFacadeImpl::getClusteredSimulationData()
+ClusteredCollectionDescription _SimulationFacadeImpl::getClusteredSimulationData()
 {
     auto size = getWorldSize();
     return _worker.getClusteredSimulationData({-10, -10}, {size.x + 10, size.y + 10});
 }
 
-DataDescription _SimulationFacadeImpl::getSimulationData()
+CollectionDescription _SimulationFacadeImpl::getSimulationData()
 {
     auto size = getWorldSize();
     return _worker.getSimulationData({-10, -10}, {size.x + 10, size.y + 10});
 }
 
-ClusteredDataDescription _SimulationFacadeImpl::getSelectedClusteredSimulationData(bool includeClusters)
+ClusteredCollectionDescription _SimulationFacadeImpl::getSelectedClusteredSimulationData(bool includeClusters)
 {
     _worker.updateSelection();
     return _worker.getSelectedClusteredSimulationData(includeClusters);
 }
 
-DataDescription _SimulationFacadeImpl::getSelectedSimulationData(bool includeClusters)
+CollectionDescription _SimulationFacadeImpl::getSelectedSimulationData(bool includeClusters)
 {
     _worker.updateSelection();
     return _worker.getSelectedSimulationData(includeClusters);
 }
 
-DataDescription _SimulationFacadeImpl::getInspectedSimulationData(std::vector<uint64_t> objectIds)
+CollectionDescription _SimulationFacadeImpl::getInspectedSimulationData(std::vector<uint64_t> objectIds)
 {
     return _worker.getInspectedSimulationData(objectIds);
 }
 
-void _SimulationFacadeImpl::addAndSelectSimulationData(DataDescription const& dataToAdd)
+void _SimulationFacadeImpl::addAndSelectSimulationData(CollectionDescription const& dataToAdd)
 {
     _worker.addAndSelectSimulationData(dataToAdd);
 }
 
-void _SimulationFacadeImpl::setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate)
+void _SimulationFacadeImpl::setClusteredSimulationData(ClusteredCollectionDescription const& dataToUpdate)
 {
     _worker.setClusteredSimulationData(dataToUpdate);
     _selectionNeedsUpdate = true;
 }
 
-void _SimulationFacadeImpl::setSimulationData(DataDescription const& dataToUpdate)
+void _SimulationFacadeImpl::setSimulationData(CollectionDescription const& dataToUpdate)
 {
     _worker.setSimulationData(dataToUpdate);
     _selectionNeedsUpdate = true;

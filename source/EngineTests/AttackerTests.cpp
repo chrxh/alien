@@ -30,7 +30,7 @@ public:
 
 TEST_F(AttackerTests, nothingFound)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -56,7 +56,7 @@ TEST_F(AttackerTests, nothingFound)
 
 TEST_F(AttackerTests, successNoTransmitter)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -92,7 +92,7 @@ TEST_F(AttackerTests, successNoTransmitter)
 
 TEST_F(AttackerTests, successDistributeToOneTransmitter)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -129,7 +129,7 @@ TEST_F(AttackerTests, successDistributeToOneTransmitter)
 
 TEST_F(AttackerTests, successDistributeToTwoTransmitters)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -166,7 +166,7 @@ TEST_F(AttackerTests, successDistributeToTwoTransmitters)
 
 TEST_F(AttackerTests, successDistributeToTwoTransmittersWithDifferentColor)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -206,7 +206,7 @@ TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
 {
     auto otherGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -246,7 +246,7 @@ TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
 
 TEST_F(AttackerTests, successDistributeToConnectedCells)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -283,7 +283,7 @@ TEST_F(AttackerTests, successDistributeToConnectedCells)
 
 TEST_F(AttackerTests, successTwoTargets)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)

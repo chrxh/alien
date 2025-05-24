@@ -41,7 +41,7 @@ TEST_P(LivingStateTransitionTests, ready_ready)
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription().id(1).pos({10.0f, 10.0f}).livingState(LivingState_Ready),
         CellDescription().id(2).pos({11.0f, 10.0f}).livingState(LivingState_Ready),
@@ -60,7 +60,7 @@ TEST_P(LivingStateTransitionTests, ready_dying)
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription().id(1).pos({10.0f, 10.0f}).livingState(LivingState_Ready),
         CellDescription().id(2).pos({11.0f, 10.0f}).livingState(LivingState_Dying),
@@ -79,7 +79,7 @@ TEST_P(LivingStateTransitionTests, ready_detaching)
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription().id(1).pos({10.0f, 10.0f}).livingState(LivingState_Ready),
         CellDescription().id(2).pos({11.0f, 10.0f}).livingState(LivingState_Detaching),
@@ -112,7 +112,7 @@ TEST_P(LivingStateTransitionTests, ready_detaching_onSelfReplicator)
             .header(GenomeHeaderDescription())
             .cells({CellGenomeDescription().cellType(ConstructorGenomeDescription().makeSelfCopy())}));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -147,7 +147,7 @@ TEST_P(LivingStateTransitionTests, ready_detaching_differentCreature)
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription().id(1).pos({10.0f, 10.0f}).creatureId(1).livingState(LivingState_Ready),
         CellDescription().id(2).pos({11.0f, 10.0f}).creatureId(2).livingState(LivingState_Detaching),
@@ -175,7 +175,7 @@ TEST_P(LivingStateTransitionTests, detaching_reviving)
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription().id(1).pos({10.0f, 10.0f}).livingState(LivingState_Detaching),
         CellDescription().id(2).pos({11.0f, 10.0f}).livingState(LivingState_Reviving),
@@ -203,7 +203,7 @@ TEST_P(LivingStateTransitionTests, underConstruction_activating)
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription().id(1).pos({10.0f, 10.0f}).livingState(LivingState_UnderConstruction),
         CellDescription().id(2).pos({11.0f, 10.0f}).livingState(LivingState_Activating),
@@ -222,7 +222,7 @@ TEST_P(LivingStateTransitionTests, noDyingForBarrierCells)
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription().id(1).barrier(true).pos({10.0f, 10.0f}).livingState(LivingState_Dying),
     });

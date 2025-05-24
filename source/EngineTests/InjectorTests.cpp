@@ -33,7 +33,7 @@ public:
 
 TEST_F(InjectorTests, nothingFound)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -64,7 +64,7 @@ TEST_F(InjectorTests, matchButNoInjection)
 {
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -104,7 +104,7 @@ TEST_F(InjectorTests, injection)
 {
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -144,7 +144,7 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_failed)
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
     auto otherGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription(), CellGenomeDescription()}));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -187,7 +187,7 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_success)
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
     auto otherGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription(), CellGenomeDescription()}));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)

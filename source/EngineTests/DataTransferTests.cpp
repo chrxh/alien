@@ -18,7 +18,7 @@ public:
 
 TEST_F(DataTransferTests, singleCell)
 {
-    DataDescription data;
+    CollectionDescription data;
     NeuralNetworkDescription nn;
     nn.weight(2, 1, 1.0f);
     data.addCell(CellDescription()
@@ -42,7 +42,7 @@ TEST_F(DataTransferTests, singleCell)
 
 TEST_F(DataTransferTests, singleParticle)
 {
-    DataDescription data;
+    CollectionDescription data;
 
     data.addParticle(ParticleDescription().id(1).pos({2.0f, 4.0f}).vel({0.5f, 1.0f}).energy(100.0f).color(2));
 
@@ -59,7 +59,7 @@ TEST_F(DataTransferTests, cellCluster)
     NeuralNetworkDescription nn2;
     nn2.weight(5, 3, 1.0f);
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription().id(1).pos({2.0f, 4.0f}).vel({0.5f, 1.0f}).age(1).color(2).barrier(false).livingState(false).neuralNetwork(nn1),
         CellDescription().id(2).pos({3.0f, 4.0f}).vel({0.2f, 1.0f}).age(1).color(4).barrier(true).livingState(false).neuralNetwork(nn2),
@@ -75,7 +75,7 @@ TEST_F(DataTransferTests, cellCluster)
 TEST_F(DataTransferTests, largeData)
 {
     auto& numberGen = NumberGenerator::get();
-    auto addCellAndParticles = [&](DataDescription& data) {
+    auto addCellAndParticles = [&](CollectionDescription& data) {
         data.addCell(CellDescription()
                          .id(numberGen.getId())
                 .pos({numberGen.getRandomFloat(0.0f, 100.0f), numberGen.getRandomFloat(0.0f, 100.0f)})
@@ -92,7 +92,7 @@ TEST_F(DataTransferTests, largeData)
                              .energy(numberGen.getRandomFloat(0.0f, 100.0f)));
     };
 
-    DataDescription data;
+    CollectionDescription data;
     for (int i = 0; i < 100000; ++i) {
         addCellAndParticles(data);
     }
@@ -102,7 +102,7 @@ TEST_F(DataTransferTests, largeData)
         EXPECT_TRUE(compare(data, actualData));
     }
 
-    DataDescription newData;
+    CollectionDescription newData;
     for (int i = 0; i < 1000000; ++i) {
         addCellAndParticles(newData);
     }

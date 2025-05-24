@@ -28,7 +28,7 @@ public:
 
 TEST_F(ReconnectorTests, establishConnection_noRestriction_nothingFound)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -56,7 +56,7 @@ TEST_F(ReconnectorTests, establishConnection_noRestriction_nothingFound)
 
 TEST_F(ReconnectorTests, establishConnection_noRestriction_success)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -90,7 +90,7 @@ TEST_F(ReconnectorTests, establishConnection_noRestriction_success)
 
 TEST_F(ReconnectorTests, establishConnection_restrictToColor_failed)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -122,7 +122,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToColor_failed)
 
 TEST_F(ReconnectorTests, establishConnection_restrictToColor_success)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -156,7 +156,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToColor_success)
 
 TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_success)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -191,7 +191,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_success)
 
 TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_failed)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -223,7 +223,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_failed)
 
 TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_success)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -257,7 +257,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_success)
 
 TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_zeroMutant)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -289,7 +289,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_zeroM
 
 TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_respawnedCell)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -321,7 +321,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_respa
 
 TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_sameMutant)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -353,7 +353,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_sameM
 
 TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_success)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -387,7 +387,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_success)
 
 TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_failed)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -419,7 +419,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_failed)
 
 TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_success)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -453,7 +453,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_success)
 
 TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_failed)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -485,7 +485,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_failed)
 
 TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_success)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -511,7 +511,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_succes
 
 TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_failed)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -537,7 +537,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_failed
 
 TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_success)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -563,7 +563,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_succes
 
 TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_failed)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -589,7 +589,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_failed
 
 TEST_F(ReconnectorTests, deleteConnections_success)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)

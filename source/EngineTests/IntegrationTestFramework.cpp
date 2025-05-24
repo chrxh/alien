@@ -26,7 +26,7 @@ IntegrationTestFramework::~IntegrationTestFramework()
     _simulationFacade->closeSimulation();
 }
 
-double IntegrationTestFramework::getEnergy(DataDescription const& data) const
+double IntegrationTestFramework::getEnergy(CollectionDescription const& data) const
 {
     double result = 0;
     for (auto const& cell : data._cells) {
@@ -38,7 +38,7 @@ double IntegrationTestFramework::getEnergy(DataDescription const& data) const
     return result;
 }
 
-std::unordered_map<uint64_t, CellDescription> IntegrationTestFramework::getCellById(DataDescription const& data) const
+std::unordered_map<uint64_t, CellDescription> IntegrationTestFramework::getCellById(CollectionDescription const& data) const
 {
     std::unordered_map<uint64_t, CellDescription> result;
     for(auto const& cell : data._cells) {
@@ -47,7 +47,7 @@ std::unordered_map<uint64_t, CellDescription> IntegrationTestFramework::getCellB
     return result;
 }
 
-CellDescription IntegrationTestFramework::getCell(DataDescription const& data, uint64_t id) const
+CellDescription IntegrationTestFramework::getCell(CollectionDescription const& data, uint64_t id) const
 {
     for (auto const& cell : data._cells) {
         if (cell._id == id) {
@@ -57,7 +57,7 @@ CellDescription IntegrationTestFramework::getCell(DataDescription const& data, u
     THROW_NOT_IMPLEMENTED();
 }
 
-ConnectionDescription IntegrationTestFramework::getConnection(DataDescription const& data, uint64_t id, uint64_t otherId) const
+ConnectionDescription IntegrationTestFramework::getConnection(CollectionDescription const& data, uint64_t id, uint64_t otherId) const
 {
     auto cell = getCell(data, id);
     for (auto const& connection : cell._connections) {
@@ -78,7 +78,7 @@ ConnectionDescription IntegrationTestFramework::getConnection(CellDescription co
     THROW_NOT_IMPLEMENTED();
 }
 
-bool IntegrationTestFramework::hasConnection(DataDescription const& data, uint64_t id, uint64_t otherId) const
+bool IntegrationTestFramework::hasConnection(CollectionDescription const& data, uint64_t id, uint64_t otherId) const
 {
     auto cell = getCell(data, id);
     for (auto const& connection : cell._connections) {
@@ -89,7 +89,7 @@ bool IntegrationTestFramework::hasConnection(DataDescription const& data, uint64
     return false;
 }
 
-CellDescription IntegrationTestFramework::getOtherCell(DataDescription const& data, uint64_t id) const
+CellDescription IntegrationTestFramework::getOtherCell(CollectionDescription const& data, uint64_t id) const
 {
     for (auto const& cell : data._cells) {
         if (cell._id != id) {
@@ -99,7 +99,7 @@ CellDescription IntegrationTestFramework::getOtherCell(DataDescription const& da
     THROW_NOT_IMPLEMENTED();
 }
 
-CellDescription IntegrationTestFramework::getOtherCell(DataDescription const& data, std::set<uint64_t> ids) const
+CellDescription IntegrationTestFramework::getOtherCell(CollectionDescription const& data, std::set<uint64_t> ids) const
 {
     for (auto const& cell : data._cells) {
         if (!ids.contains(cell._id)) {
@@ -141,7 +141,7 @@ bool IntegrationTestFramework::approxCompare(std::vector<float> const& expected,
     return true;
 }
 
-bool IntegrationTestFramework::compare(DataDescription left, DataDescription right) const
+bool IntegrationTestFramework::compare(CollectionDescription left, CollectionDescription right) const
 {
     std::sort(left._cells.begin(), left._cells.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(right._cells.begin(), right._cells.end(), [](auto const& left, auto const& right) { return left._id < right._id; });

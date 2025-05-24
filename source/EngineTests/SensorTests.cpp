@@ -27,7 +27,7 @@ public:
 
 TEST_F(SensorTests, scanNeighborhood_noSignal)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -52,7 +52,7 @@ TEST_F(SensorTests, scanNeighborhood_noSignal)
 
 TEST_F(SensorTests, scanNeighborhood_noOtherCell)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -76,7 +76,7 @@ TEST_F(SensorTests, scanNeighborhood_noOtherCell)
 
 TEST_F(SensorTests, scanNeighborhood_densityTooLow)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -103,7 +103,7 @@ TEST_F(SensorTests, scanNeighborhood_densityTooLow)
 
 TEST_F(SensorTests, scanNeighborhood_wrongColor)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -129,7 +129,7 @@ TEST_F(SensorTests, scanNeighborhood_wrongColor)
 
 TEST_F(SensorTests, scanNeighborhood_foundAtFront)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -160,7 +160,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtFront)
 
 TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -191,7 +191,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
 
 TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -222,7 +222,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
 
 TEST_F(SensorTests, scanNeighborhood_foundAtBack)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -253,7 +253,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtBack)
 
 TEST_F(SensorTests, scanNeighborhood_twoMasses)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -287,7 +287,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found)
 {
     _parameters.attackerSensorDetectionFactor.value[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -323,7 +323,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found_wallBehi
 {
     _parameters.attackerSensorDetectionFactor.value[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -357,7 +357,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound)
 {
     _parameters.attackerSensorDetectionFactor.value[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -388,7 +388,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound_wallI
 {
     _parameters.attackerSensorDetectionFactor.value[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -422,7 +422,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_found)
 {
     _parameters.attackerSensorDetectionFactor.value[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -459,7 +459,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_notFound)
         if (otherMutantId == MutantId) {
             continue;
         }
-        DataDescription data;
+        CollectionDescription data;
         data.addCells(
             {CellDescription()
                  .id(1)
@@ -493,7 +493,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_found)
 {
     _parameters.attackerSensorDetectionFactor.value[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -524,7 +524,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_notFound)
 {
     _parameters.attackerSensorDetectionFactor.value[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -555,7 +555,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_found)
 {
     _parameters.attackerSensorDetectionFactor.value[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -586,7 +586,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_notFound)
 {
     _parameters.attackerSensorDetectionFactor.value[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -619,7 +619,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_found)
     _simulationFacade->setSimulationParameters(_parameters);
 
     for (int otherGenomeComplexity = 0; otherGenomeComplexity < 500; ++otherGenomeComplexity) {
-        DataDescription data;
+        CollectionDescription data;
         data.addCells(
             {CellDescription()
                  .id(1)
@@ -661,7 +661,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
     _simulationFacade->setSimulationParameters(_parameters);
 
     for (int otherGenomeComplexity = 1000; otherGenomeComplexity < 2001; ++otherGenomeComplexity) {
-        DataDescription data;
+        CollectionDescription data;
         data.addCells(
             {CellDescription()
                  .id(1)
@@ -701,7 +701,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
 {
     _parameters.attackerSensorDetectionFactor.value[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -733,7 +733,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
 {
     _parameters.attackerSensorDetectionFactor.value[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -767,7 +767,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_found)
     _simulationFacade->setSimulationParameters(_parameters);
 
     for (int otherGenomeComplexity = 1000; otherGenomeComplexity < 2001; ++otherGenomeComplexity) {
-        DataDescription data;
+        CollectionDescription data;
         data.addCells(
             {CellDescription()
                  .id(1)
@@ -809,7 +809,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
     _simulationFacade->setSimulationParameters(_parameters);
 
     for (int otherGenomeComplexity = 0; otherGenomeComplexity < 500; ++otherGenomeComplexity) {
-        DataDescription data;
+        CollectionDescription data;
         data.addCells(
             {CellDescription()
                  .id(1)
@@ -849,7 +849,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
 {
     _parameters.attackerSensorDetectionFactor.value[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -881,7 +881,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
 {
     _parameters.attackerSensorDetectionFactor.value[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -911,7 +911,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
 
 TEST_F(SensorTests, scanNeighborhood_minRange_found)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -938,7 +938,7 @@ TEST_F(SensorTests, scanNeighborhood_minRange_found)
 
 TEST_F(SensorTests, scanNeighborhood_minRange_notFound)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -965,7 +965,7 @@ TEST_F(SensorTests, scanNeighborhood_minRange_notFound)
 
 TEST_F(SensorTests, scanNeighborhood_maxRange_found)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)
@@ -992,7 +992,7 @@ TEST_F(SensorTests, scanNeighborhood_maxRange_found)
 
 TEST_F(SensorTests, scanNeighborhood_maxRange_notFound)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells(
         {CellDescription()
              .id(1)

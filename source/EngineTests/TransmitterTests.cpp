@@ -31,7 +31,7 @@ public:
 
 TEST_F(TransmitterTests, distributeToOtherTransmitter)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -73,7 +73,7 @@ TEST_F(TransmitterTests, distributeToOneOtherTransmitter_forwardSignal)
     SignalDescription signal;
     signal.channels({0.5f, -0.7f, 0, 0, 0, 0, 0, 0});
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -115,7 +115,7 @@ TEST_F(TransmitterTests, distributeToOneOtherTransmitter_forwardSignal)
 
 TEST_F(TransmitterTests, distributeToConnectedCells)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -155,7 +155,7 @@ TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
 {
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -192,7 +192,7 @@ TEST_F(TransmitterTests, distributeOnlyToActiveConstructors)
 {
     auto genome = GenomeDescription().header(GenomeHeaderDescription().numBranches(1));
     
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -230,7 +230,7 @@ TEST_F(TransmitterTests, distributeOnlyToActiveConstructors)
 
 TEST_F(TransmitterTests, distributeToTwoTransmittersWithDifferentColor)
 {
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -276,7 +276,7 @@ TEST_F(TransmitterTests, distributeNotToNotReadyConstructors)
         CellGenomeDescription().cellType(ConstructorGenomeDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))),
     });
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -329,7 +329,7 @@ TEST_F(TransmitterTests, distributeToReadyConstructors)
         CellGenomeDescription().cellType(ConstructorGenomeDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))),
     });
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)

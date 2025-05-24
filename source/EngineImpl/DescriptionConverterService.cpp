@@ -103,9 +103,9 @@ namespace
     }
 }
 
-ClusteredDataDescription DescriptionConverterService::convertTOtoClusteredDataDescription(CollectionTO const& collectionTO) const
+ClusteredCollectionDescription DescriptionConverterService::convertTOtoClusteredDescription(CollectionTO const& collectionTO) const
 {
-	ClusteredDataDescription result;
+	ClusteredCollectionDescription result;
 
     // Genomes
     std::vector<GenomeDescription_New> genomes;
@@ -154,9 +154,9 @@ ClusteredDataDescription DescriptionConverterService::convertTOtoClusteredDataDe
     return result;
 }
 
-DataDescription DescriptionConverterService::convertTOtoDataDescription(CollectionTO const& collectionTO) const
+CollectionDescription DescriptionConverterService::convertTOtoDescription(CollectionTO const& collectionTO) const
 {
-    DataDescription result;
+    CollectionDescription result;
 
     // Genomes
     std::vector<GenomeDescription_New> genomes;
@@ -211,7 +211,7 @@ OverlayDescription DescriptionConverterService::convertTOtoOverlayDescription(Co
     return result;
 }
 
-CollectionTO DescriptionConverterService::convertDescriptionToTO(ClusteredDataDescription const& description) const
+CollectionTO DescriptionConverterService::convertDescriptionToTO(ClusteredCollectionDescription const& description) const
 {
     std::vector<GenomeTO> genomeTOs;
     std::vector<GeneTO> geneTOs;
@@ -244,7 +244,7 @@ CollectionTO DescriptionConverterService::convertDescriptionToTO(ClusteredDataDe
     return provideDataTO(genomeTOs, geneTOs, nodeTOs, cellTOs, particleTOs, heap);
 }
 
-CollectionTO DescriptionConverterService::convertDescriptionToTO(DataDescription const& description) const
+CollectionTO DescriptionConverterService::convertDescriptionToTO(CollectionDescription const& description) const
 {
     std::vector<GenomeTO> genomeTOs;
     std::vector<GeneTO> geneTOs;

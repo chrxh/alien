@@ -7,7 +7,7 @@
 
 struct DeserializedSimulation
 {
-    DataDescription mainData;
+    CollectionDescription mainData;
     SettingsForSerialization auxiliaryData;
     StatisticsHistoryData statistics;
 };

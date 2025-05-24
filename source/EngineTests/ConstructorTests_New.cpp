@@ -36,7 +36,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_upperSid
             .header(GenomeHeaderDescription().separateConstruction(false))
             .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(1)}));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -87,7 +87,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_bottomSi
             .header(GenomeHeaderDescription().separateConstruction(false))
             .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(1)}));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -137,7 +137,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_bothSide
             .header(GenomeHeaderDescription().separateConstruction(false))
             .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(1)}));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -198,7 +198,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_threeCel
 
     auto offset = Math::rotateClockwise({-1.0f, 0.0f}, 60.0f);
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -258,7 +258,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_threeCel
             .header(GenomeHeaderDescription().separateConstruction(false))
             .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(2)}));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -321,7 +321,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_threeCel
 
     auto offset = Math::rotateClockwise({-1.0f, 0.0f}, 60.0f);
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -382,7 +382,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_90degAli
             .header(GenomeHeaderDescription().separateConstruction(false).angleAlignment(ConstructorAngleAlignment_90))
             .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(1)}));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -439,7 +439,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToNoExistingCells_90deg
             .header(GenomeHeaderDescription().separateConstruction(false).angleAlignment(ConstructorAngleAlignment_90))
             .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(0)}));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -486,7 +486,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToCellWithAngleSpace_90
             .header(GenomeHeaderDescription().separateConstruction(false).angleAlignment(ConstructorAngleAlignment_90))
             .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(1)}));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -543,7 +543,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_onSpike)
             .header(GenomeHeaderDescription().separateConstruction(false))
             .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(0)}));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription().id(1).pos({10.0f, 10.0f}),
         CellDescription()
@@ -590,7 +590,7 @@ TEST_F(ConstructorTests_New, finishCreature_angleToFront_upperSide)
             .header(GenomeHeaderDescription().separateConstruction(true).frontAngle(45.0f))
             .cells({CellGenomeDescription(), CellGenomeDescription(), CellGenomeDescription().cellType(ConstructorGenomeDescription().makeSelfCopy())}));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -630,7 +630,7 @@ TEST_F(ConstructorTests_New, finishCreature_angleToFront_lowerSide)
             .header(GenomeHeaderDescription().separateConstruction(true).frontAngle(45.0f))
             .cells({CellGenomeDescription(), CellGenomeDescription(), CellGenomeDescription().cellType(ConstructorGenomeDescription().makeSelfCopy())}));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
@@ -670,7 +670,7 @@ TEST_F(ConstructorTests_New, finishBodyPart_angleToFront_leftSide)
             .header(GenomeHeaderDescription().separateConstruction(false).frontAngle(45.0f))
             .cells({CellGenomeDescription()}));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription().id(1).pos({10.0f, 10.0f}),
         CellDescription()
@@ -701,7 +701,7 @@ TEST_F(ConstructorTests_New, finishBodyPart_angleToFront_rightSide)
     auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
         GenomeDescription().header(GenomeHeaderDescription().separateConstruction(false).frontAngle(-45.0f)).cells({CellGenomeDescription()}));
 
-    DataDescription data;
+    CollectionDescription data;
     data.addCells({
         CellDescription().id(1).pos({8.0f, 10.0f}),
         CellDescription()

@@ -45,5 +45,5 @@ private:
     float _angle = 0;
     float _angularVel = 0;
     std::optional<SelectionShallowData> _lastSelection;
-    std::optional<DataDescription> _copiedSelection;
+    std::optional<CollectionDescription> _copiedSelection;
 };

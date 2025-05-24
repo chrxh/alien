@@ -173,7 +173,7 @@ void CreatorWindow::onDrawing()
 {
     auto mousePos = ImGui::GetMousePos();
     auto pos = Viewport::get().mapViewToWorldPosition({mousePos.x, mousePos.y});
-    if (!_drawingDataDescription.isEmpty()) {
+    if (!_drawingDescription.isEmpty()) {
         _simulationFacade->removeSelectedObjects(false);
     }
 
@@ -193,8 +193,8 @@ void CreatorWindow::onDrawing()
                                                               .barrier(_barrier));
     };
 
-    if (_drawingDataDescription.isEmpty()) {
-        DescriptionEditService::get().addIfSpaceAvailable(_drawingDataDescription, _drawingOccupancy, createAlignedCircle(pos), 0.5f, _simulationFacade->getWorldSize());
+    if (_drawingDescription.isEmpty()) {
+        DescriptionEditService::get().addIfSpaceAvailable(_drawingDescription, _drawingOccupancy, createAlignedCircle(pos), 0.5f, _simulationFacade->getWorldSize());
         _lastDrawPos = pos;
     } else {
         auto posDelta = Math::length(pos - _lastDrawPos);
@@ -203,13 +203,13 @@ void CreatorWindow::onDrawing()
             for (float interDelta = 0; interDelta < posDelta; interDelta += 1.0f) {
                 auto drawPos = lastDrawPos + (pos - lastDrawPos) * interDelta / posDelta;
                 auto toAdd = createAlignedCircle(drawPos);
-                DescriptionEditService::get().addIfSpaceAvailable(_drawingDataDescription, _drawingOccupancy, toAdd, 0.5f, _simulationFacade->getWorldSize());
+                DescriptionEditService::get().addIfSpaceAvailable(_drawingDescription, _drawingOccupancy, toAdd, 0.5f, _simulationFacade->getWorldSize());
                 _lastDrawPos = drawPos;
             }
         }
     }
-    DescriptionEditService::get().reconnectCells(_drawingDataDescription, 1.5f);
-    _simulationFacade->addAndSelectSimulationData(_drawingDataDescription);
+    DescriptionEditService::get().reconnectCells(_drawingDescription, 1.5f);
+    _simulationFacade->addAndSelectSimulationData(_drawingDescription);
 
     _simulationFacade->reconnectSelectedObjects();
     EditorModel::get().update();
@@ -217,7 +217,7 @@ void CreatorWindow::onDrawing()
 
 void CreatorWindow::finishDrawing()
 {
-    _drawingDataDescription.clear();
+    _drawingDescription.clear();
     _drawingOccupancy.clear();
 }
 
@@ -237,14 +237,14 @@ void CreatorWindow::createCell()
                     .barrier(_barrier)
                     .sticky(_makeSticky)
                     .creatureId(creatureId);
-    auto data = DataDescription().addCell(cell);
+    auto data = CollectionDescription().addCell(cell);
     _simulationFacade->addAndSelectSimulationData(data);
 }
 
 void CreatorWindow::createParticle()
 {
     auto particle = ParticleDescription().pos(getRandomPos()).energy(_energy);
-    auto data = DataDescription().addParticle(particle);
+    auto data = CollectionDescription().addParticle(particle);
     _simulationFacade->addAndSelectSimulationData(data);
 }
 
@@ -273,7 +273,7 @@ void CreatorWindow::createHexagon()
     if (_layers <= 0) {
         return;
     }
-    DataDescription data = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters()
+    CollectionDescription data = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters()
                                                             .layers(_layers)
                                                             .cellDistance(_cellDistance)
                                                             .energy(_energy)
@@ -291,7 +291,7 @@ void CreatorWindow::createDisc()
         return;
     }
 
-    DataDescription data;
+    CollectionDescription data;
     auto constexpr SmallValue = 0.01f;
     for (float radius = _innerRadius; radius - SmallValue <= _outerRadius; radius += _cellDistance) {
         float angleInc =

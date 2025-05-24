@@ -184,7 +184,7 @@ void MassOperationsDialog::onExecute()
 
     if (_restrictToSelectedClusters) {
         _simulationFacade->removeSelectedObjects(true);
-        _simulationFacade->addAndSelectSimulationData(DataDescription(content));
+        _simulationFacade->addAndSelectSimulationData(CollectionDescription(content));
     } else {
         _simulationFacade->closeSimulation();
         _simulationFacade->newSimulation(timestep, worldSize, parameters);

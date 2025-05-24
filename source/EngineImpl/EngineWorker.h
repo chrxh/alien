@@ -55,18 +55,18 @@ public:
     int getSyncSimulationWithRenderingRatio() const;
     void setSyncSimulationWithRenderingRatio(int value);
 
-    ClusteredDataDescription getClusteredSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
-    DataDescription getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
-    ClusteredDataDescription getSelectedClusteredSimulationData(bool includeClusters);
-    DataDescription getSelectedSimulationData(bool includeClusters);
-    DataDescription getInspectedSimulationData(std::vector<uint64_t> objectsIds);
+    ClusteredCollectionDescription getClusteredSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
+    CollectionDescription getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
+    ClusteredCollectionDescription getSelectedClusteredSimulationData(bool includeClusters);
+    CollectionDescription getSelectedSimulationData(bool includeClusters);
+    CollectionDescription getInspectedSimulationData(std::vector<uint64_t> objectsIds);
     StatisticsRawData getStatisticsRawData() const;
     StatisticsHistory const& getStatisticsHistory() const;
     void setStatisticsHistory(StatisticsHistoryData const& data);
 
-    void addAndSelectSimulationData(DataDescription const& dataToUpdate);
-    void setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate);
-    void setSimulationData(DataDescription const& dataToUpdate);
+    void addAndSelectSimulationData(CollectionDescription const& dataToUpdate);
+    void setClusteredSimulationData(ClusteredCollectionDescription const& dataToUpdate);
+    void setSimulationData(CollectionDescription const& dataToUpdate);
     void removeSelectedObjects(bool includeClusters);
     void relaxSelectedObjects(bool includeClusters);
     void uniformVelocitiesForSelectedObjects(bool includeClusters);
