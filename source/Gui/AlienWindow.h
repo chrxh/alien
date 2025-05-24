@@ -70,7 +70,7 @@ void AlienWindow<Dependencies...>::process()
 
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::SetNextWindowSize({scale(650.0f), scale(350.0f)}, ImGuiCond_FirstUseEver);
-    if (ImGui::Begin(_title.c_str(), &_on)) {
+    //if (ImGui::Begin(_title.c_str(), &_on)) {
         if (!_sizeInitialized) {
             auto size = ImGui::GetWindowSize();
             auto factor = WindowController::get().getContentScaleFactor() / WindowController::get().getLastContentScaleFactor();
@@ -78,7 +78,7 @@ void AlienWindow<Dependencies...>::process()
             _sizeInitialized = true;
         }
         processIntern();
-    }
+    //}
     ImGui::End();
 
     ImGui::PopID();

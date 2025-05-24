@@ -47,7 +47,7 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                         deserializedSimulation.auxiliaryData.worldSize,
                         deserializedSimulation.auxiliaryData.simulationParameters);
                     _simulationFacade->setRealTime(deserializedSimulation.auxiliaryData.realTime);
-                    _simulationFacade->setClusteredSimulationData(deserializedSimulation.mainData);
+                    _simulationFacade->setSimulationData(deserializedSimulation.mainData);
                     _simulationFacade->setStatisticsHistory(deserializedSimulation.statistics);
                 } catch (CudaMemoryAllocationException const& exception) {
                     errorMessage = exception.what();

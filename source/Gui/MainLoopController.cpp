@@ -166,7 +166,7 @@ void MainLoopController::processLoadingScreen()
 
         _simulationFacade->newSimulation(
             deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.worldSize, deserializedSim.auxiliaryData.simulationParameters);
-        _simulationFacade->setClusteredSimulationData(deserializedSim.mainData);
+        _simulationFacade->setSimulationData(deserializedSim.mainData);
         _simulationFacade->setStatisticsHistory(deserializedSim.statistics);
         _simulationFacade->setRealTime(deserializedSim.auxiliaryData.realTime);
         Viewport::get().setCenterInWorldPos(deserializedSim.auxiliaryData.center);

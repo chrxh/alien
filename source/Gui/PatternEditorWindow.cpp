@@ -320,7 +320,7 @@ void PatternEditorWindow::onOpenPattern()
             auto firstFilename = ifd::FileDialog::Instance().GetResult();
             auto firstFilenameCopy = firstFilename;
             _startingPath = firstFilenameCopy.remove_filename().string();
-            ClusteredDataDescription content;
+            DataDescription content;
             if (SerializerService::get().deserializeContentFromFile(content, firstFilename.string())) {
                 auto center = Viewport::get().getCenterInWorldPos();
                 content.setCenter(center);
@@ -340,7 +340,7 @@ void PatternEditorWindow::onSavePattern()
             auto firstFilenameCopy = firstFilename;
             _startingPath = firstFilenameCopy.remove_filename().string();
 
-            auto content = _simulationFacade->getSelectedClusteredSimulationData(EditorModel::get().isRolloutToClusters());
+            auto content = _simulationFacade->getSelectedSimulationData(EditorModel::get().isRolloutToClusters());
             if (!SerializerService::get().serializeContentToFile(firstFilename.string(), content)) {
                 GenericMessageDialog::get().information("Save pattern", "The selected pattern could not be saved to the specified file.");
             }

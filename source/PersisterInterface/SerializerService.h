@@ -36,13 +36,13 @@ public:
 
     bool serializeStatisticsToFile(std::filesystem::path const& filename, StatisticsHistoryData const& statistics);
 
-    bool serializeContentToFile(std::filesystem::path const& filename, ClusteredDataDescription const& content);
-    bool deserializeContentFromFile(ClusteredDataDescription& content, std::filesystem::path const& filename);
+    bool serializeContentToFile(std::filesystem::path const& filename, DataDescription const& content);
+    bool deserializeContentFromFile(DataDescription& content, std::filesystem::path const& filename);
 
 private:
-    void serializeDataDescription(ClusteredDataDescription const& data, std::ostream& stream);
-    bool deserializeDataDescription(ClusteredDataDescription& data, std::filesystem::path const& filename);
-    void deserializeDataDescription(ClusteredDataDescription& data, std::istream& stream);
+    void serializeDataDescription(DataDescription const& data, std::ostream& stream);
+    bool deserializeDataDescription(DataDescription& data, std::filesystem::path const& filename);
+    void deserializeDataDescription(DataDescription& data, std::istream& stream);
 
     void serializeAuxiliaryData(SettingsForSerialization const& auxiliaryData, std::ostream& stream);
     void deserializeAuxiliaryData(SettingsForSerialization& auxiliaryData, std::istream& stream);
@@ -53,6 +53,6 @@ private:
     void serializeStatistics(StatisticsHistoryData const& statistics, std::ostream& stream);
     void deserializeStatistics(StatisticsHistoryData& statistics, std::istream& stream);
 
-    bool wrapGenome(ClusteredDataDescription& output, std::vector<uint8_t> const& input);
-    bool unwrapGenome(std::vector<uint8_t>& output, ClusteredDataDescription const& input);
+    bool wrapGenome(DataDescription& output, std::vector<uint8_t> const& input);
+    bool unwrapGenome(std::vector<uint8_t>& output, DataDescription const& input);
 };
