@@ -401,7 +401,7 @@ struct CellDescription
         _signalRoutingRestriction = routingRestriction;
         return *this;
     }
-    bool hasGenome() const;
+    bool DEPRECATED_hasGenome() const;
     std::vector<uint8_t>& getGenomeRef();
 
     bool isConnectedTo(uint64_t id) const;

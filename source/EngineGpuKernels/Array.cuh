@@ -7,6 +7,7 @@
 #include "CudaMemoryManager.cuh"
 #include "Util.cuh"
 #include "Base.cuh"
+#include "Constants.cuh"
 
 namespace Const
 {
@@ -178,7 +179,7 @@ public:
             return nullptr;
         }
         uint64_t size = numElements * sizeof(T);
-        size = size + 16 - (size % 16);
+        size = size + GpuMemoryAlignmentBytes - (size % GpuMemoryAlignmentBytes);
         return reinterpret_cast<T*>(getSubArray(size));
     }
 
@@ -187,7 +188,7 @@ public:
         if (0 == size) {
             return nullptr;
         }
-        size = size + 16 - (size % 16);
+        size = size + GpuMemoryAlignmentBytes - (size % GpuMemoryAlignmentBytes);
         return getSubArray(size);
     }
 
