@@ -32,12 +32,12 @@ TEST_F(SensorTests, scanNeighborhood_noSignal)
         {CellDescription()
              .id(1)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription()),
+             .cellTypeData(SensorDescription()),
          CellDescription()
              .id(2)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({0, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({0, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -57,12 +57,12 @@ TEST_F(SensorTests, scanNeighborhood_noOtherCell)
         {CellDescription()
              .id(1)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription()),
+             .cellTypeData(SensorDescription()),
          CellDescription()
              .id(2)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -81,12 +81,12 @@ TEST_F(SensorTests, scanNeighborhood_densityTooLow)
         {CellDescription()
              .id(1)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription().minDensity(0.3f)),
+             .cellTypeData(SensorDescription().minDensity(0.3f)),
          CellDescription()
              .id(2)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().get().createRect(
@@ -108,12 +108,12 @@ TEST_F(SensorTests, scanNeighborhood_wrongColor)
         {CellDescription()
              .id(1)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription().restrictToColor(1)),
+             .cellTypeData(SensorDescription().restrictToColor(1)),
          CellDescription()
              .id(2)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(10).height(10).cellDistance(2.5f)));
@@ -134,12 +134,12 @@ TEST_F(SensorTests, scanNeighborhood_foundAtFront)
         {CellDescription()
              .id(1)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription()),
+             .cellTypeData(SensorDescription()),
          CellDescription()
              .id(2)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
@@ -165,12 +165,12 @@ TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
         {CellDescription()
              .id(1)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription()),
+             .cellTypeData(SensorDescription()),
          CellDescription()
              .id(2)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(0.5f)));
@@ -196,12 +196,12 @@ TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
         {CellDescription()
              .id(1)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription()),
+             .cellTypeData(SensorDescription()),
          CellDescription()
              .id(2)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(0.5f)));
@@ -227,12 +227,12 @@ TEST_F(SensorTests, scanNeighborhood_foundAtBack)
         {CellDescription()
              .id(1)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription()),
+             .cellTypeData(SensorDescription()),
          CellDescription()
              .id(2)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({190.0f, 100.0f}).width(16).height(16).cellDistance(0.5f)));
@@ -258,12 +258,12 @@ TEST_F(SensorTests, scanNeighborhood_twoMasses)
         {CellDescription()
              .id(1)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription().minDensity(0.7f)),
+             .cellTypeData(SensorDescription().minDensity(0.7f)),
          CellDescription()
              .id(2)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(1.5f)));
@@ -293,13 +293,13 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found)
              .id(1)
              .mutationId(6)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
+             .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
          CellDescription()
              .id(2)
              .mutationId(6)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -329,13 +329,13 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found_wallBehi
              .id(1)
              .mutationId(6)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
+             .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
          CellDescription()
              .id(2)
              .mutationId(6)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     //data.add(DescriptionEditService::get().createRect(
@@ -363,13 +363,13 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound)
              .id(1)
              .mutationId(7)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
+             .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
          CellDescription()
              .id(2)
              .mutationId(7)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -394,13 +394,13 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound_wallI
              .id(1)
              .mutationId(7)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
+             .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
          CellDescription()
              .id(2)
              .mutationId(7)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -428,13 +428,13 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_found)
              .id(1)
              .mutationId(6)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
+             .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
          CellDescription()
              .id(2)
              .mutationId(6)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -465,13 +465,13 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_notFound)
                  .id(1)
                  .mutationId(MutantId)
                  .pos({100.0f, 100.0f})
-                 .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
+                 .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
              CellDescription()
                  .id(2)
                  .mutationId(MutantId)
                  .pos({101.0f, 100.0f})
-                 .cellType(OscillatorDescription())
-                 .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+                 .cellTypeData(OscillatorDescription())
+                 .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
 
         data.add(DescriptionEditService::get().createRect(
@@ -499,13 +499,13 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_found)
              .id(1)
              .mutationId(6)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToStructures)),
+             .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToStructures)),
          CellDescription()
              .id(2)
              .mutationId(6)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -530,13 +530,13 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_notFound)
              .id(1)
              .mutationId(6)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToStructures)),
+             .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToStructures)),
          CellDescription()
              .id(2)
              .mutationId(6)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -561,13 +561,13 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_found)
              .id(1)
              .mutationId(6)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToFreeCells)),
+             .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToFreeCells)),
          CellDescription()
              .id(2)
              .mutationId(6)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -592,13 +592,13 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_notFound)
              .id(1)
              .mutationId(6)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToFreeCells)),
+             .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToFreeCells)),
          CellDescription()
              .id(2)
              .mutationId(6)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -626,13 +626,13 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_found)
                  .mutationId(5)
                  .pos({100.0f, 100.0f})
                  .genomeComplexity(1000.0f)
-                 .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
+                 .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
              CellDescription()
                  .id(2)
                  .mutationId(5)
                  .pos({101.0f, 100.0f})
-                 .cellType(OscillatorDescription())
-                 .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+                 .cellTypeData(OscillatorDescription())
+                 .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
 
         data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
@@ -668,13 +668,13 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
                  .mutationId(5)
                  .pos({100.0f, 100.0f})
                  .genomeComplexity(1000.0f)
-                 .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
+                 .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
              CellDescription()
                  .id(2)
                  .mutationId(5)
                  .pos({101.0f, 100.0f})
-                 .cellType(OscillatorDescription())
-                 .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+                 .cellTypeData(OscillatorDescription())
+                 .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
 
         data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
@@ -708,13 +708,13 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
              .mutationId(100)
              .pos({100.0f, 100.0f})
              .genomeComplexity(1000.0f)
-             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
+             .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
          CellDescription()
              .id(2)
              .mutationId(100)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -740,13 +740,13 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
              .mutationId(100)
              .genomeComplexity(1000.0f)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
+             .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
          CellDescription()
              .id(2)
              .mutationId(100)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -774,13 +774,13 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_found)
                  .mutationId(5)
                  .pos({100.0f, 100.0f})
                  .genomeComplexity(500.0f)
-                 .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
+                 .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
              CellDescription()
                  .id(2)
                  .mutationId(5)
                  .pos({101.0f, 100.0f})
-                 .cellType(OscillatorDescription())
-                 .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+                 .cellTypeData(OscillatorDescription())
+                 .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
 
         data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
@@ -816,13 +816,13 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
                  .mutationId(5)
                  .pos({100.0f, 100.0f})
                  .genomeComplexity(500.0f)
-                 .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
+                 .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
              CellDescription()
                  .id(2)
                  .mutationId(5)
                  .pos({101.0f, 100.0f})
-                 .cellType(OscillatorDescription())
-                 .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+                 .cellTypeData(OscillatorDescription())
+                 .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
         data.addConnection(1, 2);
 
         data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
@@ -856,13 +856,13 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
              .mutationId(100)
              .genomeComplexity(100.0f)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
+             .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
          CellDescription()
              .id(2)
              .mutationId(100)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -888,13 +888,13 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
              .mutationId(100)
              .genomeComplexity(100.0f)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
+             .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
          CellDescription()
              .id(2)
              .mutationId(100)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -916,12 +916,12 @@ TEST_F(SensorTests, scanNeighborhood_minRange_found)
         {CellDescription()
              .id(1)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription().minRange(50)),
+             .cellTypeData(SensorDescription().minRange(50)),
          CellDescription()
              .id(2)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(
@@ -943,12 +943,12 @@ TEST_F(SensorTests, scanNeighborhood_minRange_notFound)
         {CellDescription()
              .id(1)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription().minRange(120)),
+             .cellTypeData(SensorDescription().minRange(120)),
          CellDescription()
              .id(2)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(
@@ -970,12 +970,12 @@ TEST_F(SensorTests, scanNeighborhood_maxRange_found)
         {CellDescription()
              .id(1)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription().maxRange(120)),
+             .cellTypeData(SensorDescription().maxRange(120)),
          CellDescription()
              .id(2)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(
@@ -997,12 +997,12 @@ TEST_F(SensorTests, scanNeighborhood_maxRange_notFound)
         {CellDescription()
              .id(1)
              .pos({100.0f, 100.0f})
-             .cellType(SensorDescription().maxRange(50)),
+             .cellTypeData(SensorDescription().maxRange(50)),
          CellDescription()
              .id(2)
              .pos({101.0f, 100.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(

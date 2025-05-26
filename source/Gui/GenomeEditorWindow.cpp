@@ -1024,7 +1024,7 @@ void GenomeEditorWindow::onCreateSpore()
                     .energy(energy)
                     .stiffness(1.0f)
                     .color(EditorModel::get().getDefaultColorCode())
-                    .cellType(ConstructorDescription().genome(genome));
+                    .cellTypeData(ConstructorDescription().genome(genome));
     auto data = CollectionDescription().addCell(cell);
     _simulationFacade->addAndSelectSimulationData(data);
     EditorModel::get().update();

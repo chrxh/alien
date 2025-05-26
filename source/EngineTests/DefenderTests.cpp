@@ -38,20 +38,20 @@ TEST_F(DefenderTests, attackerVsAntiAttacker)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(AttackerDescription()),
+            .cellTypeData(AttackerDescription()),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(OscillatorDescription().autoTriggerInterval(1))
-            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+            .cellTypeData(OscillatorDescription().autoTriggerInterval(1))
+            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .id(3)
             .pos({9.0f, 10.0f})
-            .cellType(OscillatorDescription()),
+            .cellTypeData(OscillatorDescription()),
         CellDescription()
             .id(4)
             .pos({7.0f, 10.0f})
-            .cellType(DefenderDescription().mode(DefenderMode_DefendAgainstAttacker)),
+            .cellTypeData(DefenderDescription().mode(DefenderMode_DefendAgainstAttacker)),
     });
     data.addConnection(1, 2);
     data.addConnection(3, 4);
@@ -77,17 +77,17 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(AttackerDescription()),
+            .cellTypeData(AttackerDescription()),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(OscillatorDescription().autoTriggerInterval(1))
-            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(OscillatorDescription()),
+            .cellTypeData(OscillatorDescription().autoTriggerInterval(1))
+            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(OscillatorDescription()),
         CellDescription()
             .id(4)
             .pos({7.0f, 10.0f})
-            .cellType(DefenderDescription().mode(DefenderMode_DefendAgainstInjector)),
+            .cellTypeData(DefenderDescription().mode(DefenderMode_DefendAgainstInjector)),
     });
     data.addConnection(1, 2);
     data.addConnection(3, 4);
@@ -115,17 +115,17 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(InjectorDescription().mode(InjectorMode_InjectAll).genome(genome)),
+            .cellTypeData(InjectorDescription().mode(InjectorMode_InjectAll).genome(genome)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(OscillatorDescription().autoTriggerInterval(1))
-            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(ConstructorDescription()),
+            .cellTypeData(OscillatorDescription().autoTriggerInterval(1))
+            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(ConstructorDescription()),
         CellDescription()
             .id(4)
             .pos({7.0f, 10.0f})
-            .cellType(DefenderDescription().mode(DefenderMode_DefendAgainstAttacker)),
+            .cellTypeData(DefenderDescription().mode(DefenderMode_DefendAgainstAttacker)),
     });
     data.addConnection(1, 2);
     data.addConnection(3, 4);
@@ -160,17 +160,17 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(InjectorDescription().mode(InjectorMode_InjectAll).genome(genome)),
+            .cellTypeData(InjectorDescription().mode(InjectorMode_InjectAll).genome(genome)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(OscillatorDescription().autoTriggerInterval(1))
-            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(ConstructorDescription()),
+            .cellTypeData(OscillatorDescription().autoTriggerInterval(1))
+            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(ConstructorDescription()),
         CellDescription()
             .id(4)
             .pos({7.0f, 10.0f})
-            .cellType(DefenderDescription().mode(DefenderMode_DefendAgainstInjector)),
+            .cellTypeData(DefenderDescription().mode(DefenderMode_DefendAgainstInjector)),
     });
     data.addConnection(1, 2);
     data.addConnection(3, 4);

@@ -32,7 +32,7 @@ TEST_F(DetonatorTests, doNothing)
 {
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(DetonatorDescription().countdown(14)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(DetonatorDescription().countdown(14)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -55,12 +55,12 @@ TEST_F(DetonatorTests, activateDetonator)
         {CellDescription()
              .id(1)
              .pos({10.0f, 10.0f})
-             .cellType(DetonatorDescription().countdown(10)),
+             .cellTypeData(DetonatorDescription().countdown(10)),
          CellDescription()
              .id(2)
              .pos({11.0f, 10.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -80,7 +80,7 @@ TEST_F(DetonatorTests, explosion)
 {
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(DetonatorDescription().state(DetonatorState_Activated).countdown(10)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(DetonatorDescription().state(DetonatorState_Activated).countdown(10)),
         CellDescription().id(2).pos({12.0f, 10.0f}),
     });
 
@@ -106,11 +106,11 @@ TEST_F(DetonatorTests, chainExplosion)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(DetonatorDescription().state(DetonatorState_Activated).countdown(10)),
+            .cellTypeData(DetonatorDescription().state(DetonatorState_Activated).countdown(10)),
         CellDescription()
             .id(2)
             .pos({12.0f, 10.0f})
-            .cellType(DetonatorDescription().state(DetonatorState_Ready).countdown(10)),
+            .cellTypeData(DetonatorDescription().state(DetonatorState_Ready).countdown(10)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -134,7 +134,7 @@ TEST_F(DetonatorTests, explosionIfDying)
             .pos({10.0f, 10.0f})
             .livingState(LivingState_Dying)
             .activationTime(100)
-            .cellType(DetonatorDescription().state(DetonatorState_Activated).countdown(10)),
+            .cellTypeData(DetonatorDescription().state(DetonatorState_Activated).countdown(10)),
     });
 
     _simulationFacade->setSimulationData(data);

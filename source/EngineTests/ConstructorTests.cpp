@@ -57,7 +57,7 @@ TEST_F(ConstructorTests, noEnergy)
     data.addCell(CellDescription()
                      .id(1)
                      .energy(_parameters.normalCellEnergy.value[0] * 2 - 1.0f)
-                     .cellType(ConstructorDescription().genome(genome)));
+                     .cellTypeData(ConstructorDescription().genome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -85,7 +85,7 @@ TEST_F(ConstructorTests, alreadyFinished)
         CellDescription()
             .id(1)
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(constructor));
+            .cellTypeData(constructor));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -110,7 +110,7 @@ TEST_F(ConstructorTests, notActivated)
     data.addCell(CellDescription()
                      .id(1)
                      .energy(_parameters.normalCellEnergy.value[0] * 3)
-                     .cellType(constructor)
+                     .cellTypeData(constructor)
                      .activationTime(2));
 
     _simulationFacade->setSimulationData(data);
@@ -131,7 +131,7 @@ TEST_F(ConstructorTests, manualConstruction_noInputSignal)
     data.addCell(CellDescription()
                      .id(1)
                      .energy(_parameters.normalCellEnergy.value[0] * 3)
-                     .cellType(ConstructorDescription().autoTriggerInterval(0).genome(genome)));
+                     .cellTypeData(ConstructorDescription().autoTriggerInterval(0).genome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -156,7 +156,7 @@ TEST_F(ConstructorTests, constructFirstCell_correctCycle)
     data.addCell(CellDescription()
                      .id(1)
                      .energy(_parameters.normalCellEnergy.value[0] * 3)
-                     .cellType(ConstructorDescription().autoTriggerInterval(3 * 6).genome(genome)));
+                     .cellTypeData(ConstructorDescription().autoTriggerInterval(3 * 6).genome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(3 * 6);
@@ -176,7 +176,7 @@ TEST_F(ConstructorTests, constructFirstCell_oneCellGenome_infiniteRepetitions)
     data.addCell(CellDescription()
                      .id(1)
                      .energy(_parameters.normalCellEnergy.value[0] * 3)
-                     .cellType(ConstructorDescription().autoTriggerInterval(3 * 6).genome(genome)));
+                     .cellTypeData(ConstructorDescription().autoTriggerInterval(3 * 6).genome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(3 * 6);
@@ -201,7 +201,7 @@ TEST_F(ConstructorTests, constructFirstCell_twoCellGenome_infiniteRepetitions)
     data.addCell(CellDescription()
                      .id(1)
                      .energy(_parameters.normalCellEnergy.value[0] * 3)
-                     .cellType(ConstructorDescription().autoTriggerInterval(3 * 6).genome(genome)));
+                     .cellTypeData(ConstructorDescription().autoTriggerInterval(3 * 6).genome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -226,7 +226,7 @@ TEST_F(ConstructorTests, constructFirstCell_wrongCycle)
     data.addCell(CellDescription()
                      .id(1)
                      .energy(_parameters.normalCellEnergy.value[0] * 3)
-                     .cellType(ConstructorDescription().autoTriggerInterval(3 * 6).genome(genome)));
+                     .cellTypeData(ConstructorDescription().autoTriggerInterval(3 * 6).genome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(3 * 6 - 1);
@@ -248,13 +248,13 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_constructionNotBui
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genome(genome).numInheritedGenomeNodes(4)),
-        CellDescription().id(2).pos({11.0f, 10.0f}).energy(100).cellType(OscillatorDescription()),
+            .cellTypeData(ConstructorDescription().genome(genome).numInheritedGenomeNodes(4)),
+        CellDescription().id(2).pos({11.0f, 10.0f}).energy(100).cellTypeData(OscillatorDescription()),
         CellDescription()
             .id(3)
             .pos({12.0f, 10.0f})
             .energy(100)
-            .cellType(ConstructorDescription().genome(otherGenome)),
+            .cellTypeData(ConstructorDescription().genome(otherGenome)),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -282,13 +282,13 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_repeatedConstructi
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genome(genome).numInheritedGenomeNodes(5)),
-        CellDescription().id(2).pos({11.0f, 10.0f}).energy(100).cellType(OscillatorDescription()),
+            .cellTypeData(ConstructorDescription().genome(genome).numInheritedGenomeNodes(5)),
+        CellDescription().id(2).pos({11.0f, 10.0f}).energy(100).cellTypeData(OscillatorDescription()),
         CellDescription()
             .id(3)
             .pos({12.0f, 10.0f})
             .energy(100)
-            .cellType(ConstructorDescription().genome(otherGenome).genomeCurrentRepetition(1)),
+            .cellTypeData(ConstructorDescription().genome(otherGenome).genomeCurrentRepetition(1)),
         CellDescription().id(4).pos({10.0f, 11.0f}).energy(100),
     });
     data.addConnection(1, 2);
@@ -319,13 +319,13 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_constructionBuilt)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genome(genome).numInheritedGenomeNodes(4)),
-        CellDescription().id(2).pos({11.0f, 10.0f}).energy(100).cellType(OscillatorDescription()),
+            .cellTypeData(ConstructorDescription().genome(genome).numInheritedGenomeNodes(4)),
+        CellDescription().id(2).pos({11.0f, 10.0f}).energy(100).cellTypeData(OscillatorDescription()),
         CellDescription()
             .id(3)
             .pos({12.0f, 10.0f})
             .energy(100)
-            .cellType(ConstructorDescription().genome(otherGenome).genomeCurrentBranch(1)),
+            .cellTypeData(ConstructorDescription().genome(otherGenome).genomeCurrentBranch(1)),
         CellDescription().id(4).pos({10.0f, 11.0f}).energy(100),
     });
     data.addConnection(1, 2);
@@ -357,13 +357,13 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_infiniteConstructi
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genome(genome).numInheritedGenomeNodes(4)),
-        CellDescription().id(2).pos({11.0f, 10.0f}).energy(100).cellType(OscillatorDescription()),
+            .cellTypeData(ConstructorDescription().genome(genome).numInheritedGenomeNodes(4)),
+        CellDescription().id(2).pos({11.0f, 10.0f}).energy(100).cellTypeData(OscillatorDescription()),
         CellDescription()
             .id(3)
             .pos({12.0f, 10.0f})
             .energy(100)
-            .cellType(ConstructorDescription().genome(otherGenome).genomeCurrentBranch(1)),
+            .cellTypeData(ConstructorDescription().genome(otherGenome).genomeCurrentBranch(1)),
         CellDescription().id(4).pos({10.0f, 11.0f}).energy(100),
     });
     data.addConnection(1, 2);
@@ -391,7 +391,7 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_largeCluster)
 
     auto& cell1 = rect._cells.at(0);
     cell1.energy(_parameters.normalCellEnergy.value[0] * 3)
-        .cellType(ConstructorDescription().genome(genome).numInheritedGenomeNodes(RectLength * RectLength));
+        .cellTypeData(ConstructorDescription().genome(genome).numInheritedGenomeNodes(RectLength * RectLength));
 
     _parameters.constructorCompletenessCheck.value = true;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -420,37 +420,37 @@ TEST_F(ConstructorTests, constructFirstCell_completenessCheck_thinCluster)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genome(genome).numInheritedGenomeNodes(5))
+            .cellTypeData(ConstructorDescription().genome(genome).numInheritedGenomeNodes(5))
             .creatureId(1),
         CellDescription()
             .id(2)
             .pos({10.0f, 9.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .creatureId(1),
         CellDescription()
             .id(3)
             .pos({10.0f, 8.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .creatureId(1),
         CellDescription()
             .id(4)
             .pos({10.0f, 11.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .creatureId(1),
         CellDescription()
             .id(5)
             .pos({10.0f, 12.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .creatureId(1),
         CellDescription()
             .id(6)
             .pos({11.0f, 10.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .creatureId(2),
     });
     data.addConnection(1, 2);
@@ -501,18 +501,18 @@ TEST_F(ConstructorTests, DISABLED_constructFirstCell_completenessCheck_underCons
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genome(genome)),
+            .cellTypeData(ConstructorDescription().genome(genome)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .energy(100)
-            .cellType(ConstructorDescription().genome(otherGenome).genomeCurrentBranch(1)),
+            .cellTypeData(ConstructorDescription().genome(otherGenome).genomeCurrentBranch(1)),
         CellDescription()
             .id(3)
             .pos({12.0f, 10.0f})
             .energy(100)
             .livingState(LivingState_UnderConstruction)
-            .cellType(ConstructorDescription().genome(otherGenome).genomeCurrentBranch(0)),
+            .cellTypeData(ConstructorDescription().genome(otherGenome).genomeCurrentBranch(0)),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -539,7 +539,7 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genome(genome).constructionActivationTime(123)));
+            .cellTypeData(ConstructorDescription().genome(genome).constructionActivationTime(123)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -579,7 +579,7 @@ TEST_F(ConstructorTests, constructFirstCell_notFinished)
                      .id(1)
                      .pos({10.0f, 10.0f})
                      .energy(_parameters.normalCellEnergy.value[0] * 3)
-                     .cellType(ConstructorDescription().genome(genome)));
+                     .cellTypeData(ConstructorDescription().genome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -609,7 +609,7 @@ TEST_F(ConstructorTests, constructFirstCell_separation)
     data.addCell(CellDescription()
                      .id(1)
                      .energy(_parameters.normalCellEnergy.value[0] * 3)
-                     .cellType(ConstructorDescription()
+                     .cellTypeData(ConstructorDescription()
                                           .genome(genome)));
 
     _simulationFacade->setSimulationData(data);
@@ -641,13 +641,13 @@ TEST_F(ConstructorTests, constructFirstCell_manualConstruction)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().autoTriggerInterval(0).genome(genome)),
+            .cellTypeData(ConstructorDescription().autoTriggerInterval(0).genome(genome)),
         CellDescription()
              .id(2)
              .pos({11.0f, 10.0f})
              .energy(100)
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})
     });
     data.addConnection(1, 2);
 
@@ -678,13 +678,13 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle1)
              .id(1)
              .pos({10.0f, 10.0f})
              .energy(_parameters.normalCellEnergy.value[0] * 3)
-             .cellType(ConstructorDescription().autoTriggerInterval(0).genome(genome).constructionAngle1(90.0f)),
+             .cellTypeData(ConstructorDescription().autoTriggerInterval(0).genome(genome).constructionAngle1(90.0f)),
         CellDescription()
              .id(2)
              .pos({11.0f, 10.0f})
              .energy(100)
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -709,13 +709,13 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle2)
              .id(1)
              .pos({10.0f, 10.0f})
              .energy(_parameters.normalCellEnergy.value[0] * 3)
-             .cellType(ConstructorDescription().autoTriggerInterval(0).genome(genome).constructionAngle1(-90.0f)),
+             .cellTypeData(ConstructorDescription().autoTriggerInterval(0).genome(genome).constructionAngle1(-90.0f)),
          CellDescription()
              .id(2)
              .pos({11.0f, 10.0f})
              .energy(100)
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -744,7 +744,7 @@ TEST_F(ConstructorTests, constructNeuronCell)
         CellDescription()
                      .id(1)
                      .energy(_parameters.normalCellEnergy.value[0] * 3)
-                     .cellType(ConstructorDescription().genome(genome)));
+                     .cellTypeData(ConstructorDescription().genome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -775,7 +775,7 @@ TEST_F(ConstructorTests, constructConstructorCell)
     data.addCell(CellDescription()
                      .id(1)
                      .energy(_parameters.normalCellEnergy.value[0] * 3)
-                     .cellType(ConstructorDescription().genome(genome)));
+                     .cellTypeData(ConstructorDescription().genome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -801,7 +801,7 @@ TEST_F(ConstructorTests, constructOscillatorCell)
     data.addCell(CellDescription()
                      .id(1)
                      .energy(_parameters.normalCellEnergy.value[0] * 3)
-                     .cellType(ConstructorDescription().genome(genome)));
+                     .cellTypeData(ConstructorDescription().genome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -825,7 +825,7 @@ TEST_F(ConstructorTests, constructAttackerCell)
     data.addCell(CellDescription()
                      .id(1)
                      .energy(_parameters.normalCellEnergy.value[0] * 3)
-                     .cellType(ConstructorDescription().genome(genome)));
+                     .cellTypeData(ConstructorDescription().genome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -846,7 +846,7 @@ TEST_F(ConstructorTests, constructDefenderCell)
     data.addCell(CellDescription()
                      .id(1)
                      .energy(_parameters.normalCellEnergy.value[0] * 3)
-                     .cellType(ConstructorDescription().genome(genome)));
+                     .cellTypeData(ConstructorDescription().genome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -871,7 +871,7 @@ TEST_F(ConstructorTests, constructTransmitterCell)
     data.addCell(CellDescription()
                      .id(1)
                      .energy(_parameters.normalCellEnergy.value[0] * 3)
-                     .cellType(ConstructorDescription().genome(genome)));
+                     .cellTypeData(ConstructorDescription().genome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -921,7 +921,7 @@ TEST_F(ConstructorTests, constructSensorCell)
     data.addCell(CellDescription()
                      .id(1)
                      .energy(_parameters.normalCellEnergy.value[0] * 3)
-                     .cellType(ConstructorDescription().genome(genome)));
+                     .cellTypeData(ConstructorDescription().genome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -947,7 +947,7 @@ TEST_F(ConstructorTests, constructInjectorCell)
     data.addCell(CellDescription()
                      .id(1)
                      .energy(_parameters.normalCellEnergy.value[0] * 3)
-                     .cellType(ConstructorDescription().genome(genome)));
+                     .cellTypeData(ConstructorDescription().genome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -973,7 +973,7 @@ TEST_F(ConstructorTests, constructReconnectorCell)
     data.addCell(CellDescription()
                      .id(1)
                      .energy(_parameters.normalCellEnergy.value[0] * 3)
-                     .cellType(ConstructorDescription().genome(genome)));
+                     .cellTypeData(ConstructorDescription().genome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -998,7 +998,7 @@ TEST_F(ConstructorTests, constructDetonatorCell)
     data.addCell(CellDescription()
                      .id(1)
                      .energy(_parameters.normalCellEnergy.value[0] * 3)
-                     .cellType(ConstructorDescription().genome(genome)));
+                     .cellTypeData(ConstructorDescription().genome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -1025,7 +1025,7 @@ TEST_F(ConstructorTests, constructConstructorCell_nestingGenomeTooLarge)
     data.addCell(CellDescription()
                      .id(1)
                      .energy(_parameters.normalCellEnergy.value[0] * 3)
-                     .cellType(ConstructorDescription().genome(genome)));
+                     .cellTypeData(ConstructorDescription().genome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -1054,7 +1054,7 @@ TEST_F(ConstructorTests, constructConstructorCell_copyGenome)
     data.addCell(CellDescription()
                      .id(1)
                      .energy(_parameters.normalCellEnergy.value[0] * 3)
-                     .cellType(ConstructorDescription().genome(genome)));
+                     .cellTypeData(ConstructorDescription().genome(genome)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -1080,12 +1080,12 @@ TEST_F(ConstructorTests, constructSecondCell_separation)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(1).genome(genome)),
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(1).genome(genome)),
         CellDescription()
             .id(2)
             .pos({10.0f - getOffspringDistance(), 10.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .livingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1122,12 +1122,12 @@ TEST_F(ConstructorTests, constructSecondCell_constructionStateTransitions)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(1).genome(genome)),
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(1).genome(genome)),
         CellDescription()
             .id(2)
             .pos({10.0f - getOffspringDistance(), 10.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .livingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1173,12 +1173,12 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(1).genome(genome)),
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(1).genome(genome)),
         CellDescription()
             .id(2)
             .pos({10.0f - getOffspringDistance(), 10.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .livingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1223,12 +1223,12 @@ TEST_F(ConstructorTests, constructSecondCell_noSpace)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(1).genome(genome)),
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(1).genome(genome)),
         CellDescription()
             .id(2)
             .pos({10.0f - 1.0f - _parameters.minCellDistance.value / 2, 10.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .livingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1260,12 +1260,12 @@ TEST_F(ConstructorTests, constructSecondCell_notFinished)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(1).genome(genome)),
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(1).genome(genome)),
         CellDescription()
             .id(2)
             .pos({10.0f - getOffspringDistance(), 10.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .livingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1300,12 +1300,12 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle1)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genome(genome).constructionAngle2(90.0f).genomeCurrentNodeIndex(1)),
+            .cellTypeData(ConstructorDescription().genome(genome).constructionAngle2(90.0f).genomeCurrentNodeIndex(1)),
         CellDescription()
             .id(2)
             .pos({10.0f - getOffspringDistance(), 10.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .livingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1345,12 +1345,12 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genome(genome).constructionAngle2(-90.0f).genomeCurrentNodeIndex(1)),
+            .cellTypeData(ConstructorDescription().genome(genome).constructionAngle2(-90.0f).genomeCurrentNodeIndex(1)),
         CellDescription()
             .id(2)
             .pos({10.0f - getOffspringDistance(), 10.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .livingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1390,7 +1390,7 @@ TEST_F(ConstructorTests, constructSecondCell_twoCellGenome_infiniteRepetitions)
             .id(1)
             .pos({10.0f - getOffspringDistance(), 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(1).genome(genome)),
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(1).genome(genome)),
         CellDescription().id(2).pos({11.0f, 10.0f}).livingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1419,18 +1419,18 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_upperPart)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(2).genome(genome)),
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(2).genome(genome)),
         CellDescription()
             .id(2)
             .pos({10.0f - getOffspringDistance(), 10.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .livingState(LivingState_UnderConstruction),
         CellDescription()
             .id(3)
             .pos({10.0f - getOffspringDistance(), 9.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .livingState(LivingState_UnderConstruction),
         CellDescription().id(4).pos({10.0f, 9.5f}).energy(_parameters.normalCellEnergy.value[0] * 3),
         CellDescription().id(5).pos({10.0f, 9.0f}).energy(_parameters.normalCellEnergy.value[0] * 3),
@@ -1472,18 +1472,18 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_bottomPart)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(2).genome(genome)),
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(2).genome(genome)),
         CellDescription()
             .id(2)
             .pos({10.0f - getOffspringDistance(), 10.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .livingState(LivingState_UnderConstruction),
         CellDescription()
             .id(3)
             .pos({10.0f - getOffspringDistance(), 11.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .livingState(LivingState_UnderConstruction),
         CellDescription().id(4).pos({10.0f, 10.5f}).energy(_parameters.normalCellEnergy.value[0] * 3),
         CellDescription().id(5).pos({10.0f, 11.0f}).energy(_parameters.normalCellEnergy.value[0] * 3),
@@ -1524,12 +1524,12 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation_singleConstruction)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genome(genome)),
+            .cellTypeData(ConstructorDescription().genome(genome)),
         CellDescription()
             .id(2)
             .pos({10.0f - getOffspringDistance(), 10.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .livingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1561,18 +1561,18 @@ TEST_F(ConstructorTests, constructFourthCell_noOverlappingConnection)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(4).genome(genome)),
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(4).genome(genome)),
         CellDescription()
             .id(2)
             .pos({10.0f - getOffspringDistance(), 10.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .livingState(LivingState_UnderConstruction),
         CellDescription()
             .id(3)
             .pos({10.0f - getOffspringDistance(), 11.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .livingState(LivingState_UnderConstruction),
         CellDescription()
             .id(4)
@@ -1616,12 +1616,12 @@ TEST_F(ConstructorTests, constructLastCellFirstRepetition)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(1)),
+            .cellTypeData(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(1)),
         CellDescription()
             .id(2)
             .pos({10.0f - getOffspringDistance(), 10.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .livingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1647,18 +1647,18 @@ TEST_F(ConstructorTests, constructLastCellLastRepetition)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(1).genomeCurrentRepetition(1)),
+            .cellTypeData(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(1).genomeCurrentRepetition(1)),
         CellDescription()
             .id(2)
             .pos({10.0f - getOffspringDistance(), 10.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .livingState(LivingState_UnderConstruction),
         CellDescription()
             .id(3)
             .pos({9.0f - getOffspringDistance(), 10.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .livingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1687,13 +1687,13 @@ TEST_F(ConstructorTests, restartIfNoLastConstructedCellFound)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(1).genomeCurrentRepetition(1)),
+            .cellTypeData(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(1).genomeCurrentRepetition(1)),
         CellDescription()
             .id(2)
             .pos({10.0f - getOffspringDistance(), 10.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
-            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+            .cellTypeData(OscillatorDescription())
+            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
     });
     data.addConnection(1, 2);
 
@@ -1722,12 +1722,12 @@ TEST_F(ConstructorTests, restartIfLastConstructedCellHasLowNumConnections)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(1).genomeCurrentRepetition(1).numInheritedGenomeNodes(3)),
+            .cellTypeData(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(1).genomeCurrentRepetition(1).numInheritedGenomeNodes(3)),
         CellDescription()
             .id(2)
             .pos({10.0f - getOffspringDistance(), 10.0f})
             .energy(100)
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .livingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -1755,7 +1755,7 @@ TEST_F(ConstructorTests, allowLargeConstructionAngle1)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genome(genome).constructionAngle1(180.0f)),
+            .cellTypeData(ConstructorDescription().genome(genome).constructionAngle1(180.0f)),
         CellDescription().id(2).pos({11.0f, 9.0f}).energy(100),
         CellDescription().id(3).pos({11.0f, 11.0f}).energy(100),
     });
@@ -1784,7 +1784,7 @@ TEST_F(ConstructorTests, allowLargeConstructionAngle2)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 3)
-            .cellType(ConstructorDescription().genome(genome).constructionAngle1(-180.0f)),
+            .cellTypeData(ConstructorDescription().genome(genome).constructionAngle1(-180.0f)),
         CellDescription().id(2).pos({11.0f, 9.0f}).energy(100),
         CellDescription().id(3).pos({11.0f, 11.0f}).energy(100),
     });
@@ -1815,7 +1815,7 @@ TEST_F(ConstructorTests, repetitionsAndBranches)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 2 * 3 * 4 * 3)
-            .cellType(ConstructorDescription().genome(genome).autoTriggerInterval(20)),
+            .cellTypeData(ConstructorDescription().genome(genome).autoTriggerInterval(20)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -1841,7 +1841,7 @@ TEST_F(ConstructorTests, severalRepetitionsOfSingleCell)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 2 * 3 * 4 * 3)
-            .cellType(ConstructorDescription().genome(genome)),
+            .cellTypeData(ConstructorDescription().genome(genome)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -1869,7 +1869,7 @@ TEST_F(ConstructorTests, severalRepetitionsAndBranchesOfSingleCell)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 2 * 3 * 4 * 3)
-            .cellType(ConstructorDescription().genome(genome)),
+            .cellTypeData(ConstructorDescription().genome(genome)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -1899,7 +1899,7 @@ TEST_F(ConstructorTests, severalRepetitionsOfSingleCell_ignoreNumRequiredConnect
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(_parameters.normalCellEnergy.value[0] * 2 * 3 * 4 * 3)
-            .cellType(ConstructorDescription().genome(genome).numInheritedGenomeNodes(3)),
+            .cellTypeData(ConstructorDescription().genome(genome).numInheritedGenomeNodes(3)),
     });
 
     _simulationFacade->setSimulationData(data);

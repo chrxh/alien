@@ -116,7 +116,7 @@ TEST_P(LivingStateTransitionTests, ready_detaching_onSelfReplicator)
     data.addCells({
         CellDescription()
             .id(1)
-            .cellType(ConstructorDescription().genome(genome))
+            .cellTypeData(ConstructorDescription().genome(genome))
             .pos({10.0f, 10.0f})
             .livingState(LivingState_Ready),
         CellDescription()

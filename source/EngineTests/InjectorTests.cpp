@@ -38,12 +38,12 @@ TEST_F(InjectorTests, nothingFound)
         {CellDescription()
              .id(1)
              .pos({10.0f, 10.0f})
-             .cellType(InjectorDescription().mode(InjectorMode_InjectAll)),
+             .cellTypeData(InjectorDescription().mode(InjectorMode_InjectAll)),
          CellDescription()
              .id(2)
              .pos({11.0f, 10.0f})
-             .cellType(OscillatorDescription().autoTriggerInterval(1))
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription().autoTriggerInterval(1))
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -69,16 +69,16 @@ TEST_F(InjectorTests, matchButNoInjection)
         {CellDescription()
              .id(1)
              .pos({10.0f, 10.0f})
-             .cellType(InjectorDescription().mode(InjectorMode_InjectAll).genome(genome)),
+             .cellTypeData(InjectorDescription().mode(InjectorMode_InjectAll).genome(genome)),
          CellDescription()
              .id(2)
              .pos({11.0f, 10.0f})
-             .cellType(OscillatorDescription().autoTriggerInterval(1))
-             .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+             .cellTypeData(OscillatorDescription().autoTriggerInterval(1))
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .id(3)
             .pos({9.0f, 10.0f})
-            .cellType(ConstructorDescription().numInheritedGenomeNodes(1)),
+            .cellTypeData(ConstructorDescription().numInheritedGenomeNodes(1)),
     });
     data.addConnection(1, 2);
 
@@ -109,13 +109,13 @@ TEST_F(InjectorTests, injection)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(InjectorDescription().mode(InjectorMode_InjectAll).genome(genome)),
+            .cellTypeData(InjectorDescription().mode(InjectorMode_InjectAll).genome(genome)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(OscillatorDescription().autoTriggerInterval(1))
-            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(ConstructorDescription().numInheritedGenomeNodes(1)),
+            .cellTypeData(OscillatorDescription().autoTriggerInterval(1))
+            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(ConstructorDescription().numInheritedGenomeNodes(1)),
     });
     data.addConnection(1, 2);
 
@@ -149,16 +149,16 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_failed)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(InjectorDescription().mode(InjectorMode_InjectOnlyEmptyCells).genome(genome)),
+            .cellTypeData(InjectorDescription().mode(InjectorMode_InjectOnlyEmptyCells).genome(genome)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(OscillatorDescription().autoTriggerInterval(1))
-            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+            .cellTypeData(OscillatorDescription().autoTriggerInterval(1))
+            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .id(3)
             .pos({9.0f, 10.0f})
-            .cellType(ConstructorDescription().genome(otherGenome).numInheritedGenomeNodes(2)),
+            .cellTypeData(ConstructorDescription().genome(otherGenome).numInheritedGenomeNodes(2)),
     });
     data.addConnection(1, 2);
 
@@ -192,20 +192,20 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_success)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(InjectorDescription().mode(InjectorMode_InjectOnlyEmptyCells).genome(genome)),
+            .cellTypeData(InjectorDescription().mode(InjectorMode_InjectOnlyEmptyCells).genome(genome)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(OscillatorDescription().autoTriggerInterval(1))
-            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+            .cellTypeData(OscillatorDescription().autoTriggerInterval(1))
+            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .id(3)
             .pos({9.0f, 10.0f})
-            .cellType(ConstructorDescription().genome(otherGenome)),
+            .cellTypeData(ConstructorDescription().genome(otherGenome)),
         CellDescription()
             .id(4)
             .pos({7.0f, 10.0f})
-            .cellType(ConstructorDescription().numInheritedGenomeNodes(2)),
+            .cellTypeData(ConstructorDescription().numInheritedGenomeNodes(2)),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);

@@ -35,12 +35,12 @@ TEST_F(AttackerTests, nothingFound)
         {CellDescription()
              .id(1)
              .pos({10.0f, 10.0f})
-             .cellType(AttackerDescription()),
+             .cellTypeData(AttackerDescription()),
          CellDescription()
              .id(2)
              .pos({11.0f, 10.0f})
-             .cellType(OscillatorDescription())
-             .signal({1, 0, 0, 0, 0, 0, 0, 0})});
+             .cellTypeData(OscillatorDescription())
+             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -61,12 +61,12 @@ TEST_F(AttackerTests, successNoTransmitter)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(AttackerDescription()),
+            .cellTypeData(AttackerDescription()),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(OscillatorDescription())
-            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+            .cellTypeData(OscillatorDescription())
+            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription()
             .id(3)
             .pos({9.0f, 10.0f}),
@@ -97,13 +97,13 @@ TEST_F(AttackerTests, successDistributeToOneTransmitter)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(AttackerDescription()),
+            .cellTypeData(AttackerDescription()),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(OscillatorDescription())
-            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({12.0f, 10.0f}).cellType(DepotDescription()),
+            .cellTypeData(OscillatorDescription())
+            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({12.0f, 10.0f}).cellTypeData(DepotDescription()),
         CellDescription().id(4).pos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);
@@ -134,14 +134,14 @@ TEST_F(AttackerTests, successDistributeToTwoTransmitters)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(AttackerDescription()),
+            .cellTypeData(AttackerDescription()),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(OscillatorDescription())
-            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({12.0f, 10.0f}).cellType(DepotDescription()),
-        CellDescription().id(4).pos({11.0f, 9.0f}).cellType(DepotDescription()),
+            .cellTypeData(OscillatorDescription())
+            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({12.0f, 10.0f}).cellTypeData(DepotDescription()),
+        CellDescription().id(4).pos({11.0f, 9.0f}).cellTypeData(DepotDescription()),
         CellDescription().id(5).pos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);
@@ -171,14 +171,14 @@ TEST_F(AttackerTests, successDistributeToTwoTransmittersWithDifferentColor)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(AttackerDescription()),
+            .cellTypeData(AttackerDescription()),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(OscillatorDescription())
-            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({12.0f, 10.0f}).cellType(DepotDescription()),
-        CellDescription().id(4).pos({11.0f, 9.0f}).cellType(DepotDescription()).color(1),
+            .cellTypeData(OscillatorDescription())
+            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({12.0f, 10.0f}).cellTypeData(DepotDescription()),
+        CellDescription().id(4).pos({11.0f, 9.0f}).cellTypeData(DepotDescription()).color(1),
         CellDescription().id(5).pos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);
@@ -211,17 +211,17 @@ TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(AttackerDescription()),
+            .cellTypeData(AttackerDescription()),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(OscillatorDescription())
-            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({12.0f, 10.0f}).cellType(DepotDescription()),
+            .cellTypeData(OscillatorDescription())
+            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({12.0f, 10.0f}).cellTypeData(DepotDescription()),
         CellDescription()
             .id(4)
             .pos({11.0f, 9.0f})
-            .cellType(ConstructorDescription().genome(otherGenome)),
+            .cellTypeData(ConstructorDescription().genome(otherGenome)),
         CellDescription().id(5).pos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);
@@ -251,13 +251,13 @@ TEST_F(AttackerTests, successDistributeToConnectedCells)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(AttackerDescription()),
+            .cellTypeData(AttackerDescription()),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(OscillatorDescription())
-            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({12.0f, 10.0f}).cellType(OscillatorDescription()),
+            .cellTypeData(OscillatorDescription())
+            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(3).pos({12.0f, 10.0f}).cellTypeData(OscillatorDescription()),
         CellDescription().id(4).pos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);
@@ -288,12 +288,12 @@ TEST_F(AttackerTests, successTwoTargets)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(AttackerDescription()),
+            .cellTypeData(AttackerDescription()),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(OscillatorDescription())
-            .signal({1, 0, 0, 0, 0, 0, 0, 0}),
+            .cellTypeData(OscillatorDescription())
+            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().id(3).pos({9.0f, 10.0f}),
         CellDescription().id(4).pos({9.0f, 11.0f}),
     });

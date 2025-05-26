@@ -150,23 +150,26 @@ TEST_P(DataTransferTests_AllCellType_New, singleCell_noGenome)
     auto cellTypeGenomeDesc = createSomeCellTypeDescription(cellParameter);
 
     CollectionDescription data;
-    NeuralNetworkDescription nn;
-    nn.weight(2, 1, 1.0f);
-    data.addCell(CellDescription()
-                     .neuralNetwork(nn)
-                     .id(1)
-                     .pos({2.0f, 4.0f})
-                     .vel({0.5f, 1.0f})
-                     .energy(100.0f)
-                     .age(1)
-                     .color(2)
-                     .barrier(true)
-                     .livingState(false)
-                     .creatureId(3534)
-                     .signal({1, 0, -1, 0, 0, 0, 0, 0})
-                     .signalRoutingRestriction(SignalRoutingRestrictionDescription().active(true).baseAngle(23.0f).openingAngle(42.0f))
-                     .cellType(cellTypeGenomeDesc)
-                     .metadata(CellMetadataDescription().name("Test1").description("Test2")));
+    auto cell = CellDescription()
+                    .id(1)
+                    .pos({2.0f, 4.0f})
+                    .vel({0.5f, 1.0f})
+                    .energy(100.0f)
+                    .age(1)
+                    .color(2)
+                    .barrier(true)
+                    .livingState(false)
+                    .creatureId(3534)
+                    .signalAndRelaxTime({1, 0, -1, 0, 0, 0, 0, 0})
+                    .signalRoutingRestriction(SignalRoutingRestrictionDescription().active(true).baseAngle(23.0f).openingAngle(42.0f))
+                    .cellTypeData(cellTypeGenomeDesc)
+                    .metadata(CellMetadataDescription().name("Test1").description("Test2"));
+    if (cellParameter.cellType != CellType_Structure && cellParameter.cellType != CellType_Free) {
+        NeuralNetworkDescription nn;
+        nn.weight(2, 1, 1.0f);
+        cell._neuralNetwork = nn;
+    }
+    data.addCell(cell);
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();
@@ -287,7 +290,7 @@ TEST_P(DataTransferTests_AllCellTypeGenome_New, singleCell_genome_oneGene_oneNod
              .barrier(true)
              .livingState(false)
              .creatureId(3534)
-             .signal({1, 0, -1, 0, 0, 0, 0, 0})});
+             .signalAndRelaxTime({1, 0, -1, 0, 0, 0, 0, 0})});
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();

@@ -89,12 +89,12 @@ TEST_P(MuscleTests_AutoBending_New, muscleWithTwoConnections)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({side == Side::Left ? 10.0f : 12.0f, 10.0f}).cellType(OscillatorDescription().autoTriggerInterval(20)),
+        CellDescription().id(1).pos({side == Side::Left ? 10.0f : 12.0f, 10.0f}).cellTypeData(OscillatorDescription().autoTriggerInterval(20)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .angleToFront(side == Side::Left ? 90.0f : -90.0f)
-            .cellType(MuscleDescription().mode(AutoBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
+            .cellTypeData(MuscleDescription().mode(AutoBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)).weight(1, 0, getValue(channel1) / 4)),
         CellDescription().id(3).pos({side == Side::Left ? 12.0f : 10.0f, 10.0f}),
     });
@@ -158,13 +158,13 @@ TEST_P(MuscleTests_AutoBending_New, muscleWithOneConnection)
     CollectionDescription data;
     data.addCells({
         CellDescription().id(1).pos({10.0f, 10.0f}),
-        CellDescription().id(2).pos({10.0f, 11.0f}).cellType(OscillatorDescription().autoTriggerInterval(20)),
+        CellDescription().id(2).pos({10.0f, 11.0f}).cellTypeData(OscillatorDescription().autoTriggerInterval(20)),
         CellDescription().id(3).pos({10.0f, 12.0f}),
         CellDescription()
             .id(4)
             .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
             .angleToFront(side == Side::Left ? -90.0f : 90.0f)
-            .cellType(MuscleDescription().mode(AutoBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f)))
+            .cellTypeData(MuscleDescription().mode(AutoBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)).weight(1, 0, getValue(channel1) / 4)),
     });
     data.addConnection(1, 2);
@@ -246,12 +246,12 @@ TEST_P(MuscleTests_ManualBending_New, muscleWithTwoConnections)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({side == Side::Left ? 10.0f : 12.0f, 10.0f}).cellType(OscillatorDescription().autoTriggerInterval(20)),
+        CellDescription().id(1).pos({side == Side::Left ? 10.0f : 12.0f, 10.0f}).cellTypeData(OscillatorDescription().autoTriggerInterval(20)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .angleToFront(side == Side::Left ? 90.0f : -90.0f)
-            .cellType(MuscleDescription().mode(ManualBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
+            .cellTypeData(MuscleDescription().mode(ManualBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0))),
         CellDescription().id(3).pos({side == Side::Left ? 12.0f : 10.0f, 10.0f}),
     });
@@ -338,13 +338,13 @@ TEST_P(MuscleTests_ManualBending_New, muscleWithOneConnection)
     CollectionDescription data;
     data.addCells({
         CellDescription().id(1).pos({10.0f, 10.0f}),
-        CellDescription().id(2).pos({10.0f, 11.0f}).cellType(OscillatorDescription().autoTriggerInterval(20)),
+        CellDescription().id(2).pos({10.0f, 11.0f}).cellTypeData(OscillatorDescription().autoTriggerInterval(20)),
         CellDescription().id(3).pos({10.0f, 12.0f}),
         CellDescription()
             .id(4)
             .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
             .angleToFront(side == Side::Left ? -90.0f : 90.0f)
-            .cellType(MuscleDescription().mode(ManualBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).frontBackVelRatio(0.2f)))
+            .cellTypeData(MuscleDescription().mode(ManualBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).frontBackVelRatio(0.2f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0))),
     });
     data.addConnection(1, 2);
@@ -455,12 +455,12 @@ TEST_P(MuscleTests_AngleBending_New, muscleWithTwoConnections)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({side == Side::Left ? 10.0f : 12.0f, 10.0f}).cellType(OscillatorDescription().autoTriggerInterval(10)),
+        CellDescription().id(1).pos({side == Side::Left ? 10.0f : 12.0f, 10.0f}).cellTypeData(OscillatorDescription().autoTriggerInterval(10)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .angleToFront(side == Side::Left ? 90.0f : -90.0f)
-            .cellType(MuscleDescription().mode(AngleBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
+            .cellTypeData(MuscleDescription().mode(AngleBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, 1.0f).weight(1, 0, targetAngle / 180.0f)),
         CellDescription().id(3).pos({side == Side::Left ? 12.0f : 10.0f, 10.0f}),
     });
@@ -502,13 +502,13 @@ TEST_P(MuscleTests_AngleBending_New, muscleWithOneConnection)
     CollectionDescription data;
     data.addCells({
         CellDescription().id(1).pos({10.0f, 10.0f}),
-        CellDescription().id(2).pos({10.0f, 11.0f}).cellType(OscillatorDescription().autoTriggerInterval(10)),
+        CellDescription().id(2).pos({10.0f, 11.0f}).cellTypeData(OscillatorDescription().autoTriggerInterval(10)),
         CellDescription().id(3).pos({10.0f, 12.0f}),
         CellDescription()
             .id(4)
             .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
             .angleToFront(side == Side::Left ? -90.0f : 90.0f)
-            .cellType(MuscleDescription().mode(AngleBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).frontBackVelRatio(0.2f)))
+            .cellTypeData(MuscleDescription().mode(AngleBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).frontBackVelRatio(0.2f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, 1.0f).weight(1, 0, targetAngle / 180.0f)),
     });
     data.addConnection(1, 2);
@@ -564,11 +564,11 @@ TEST_P(MuscleTests_AutoCrawling_New, muscleWithTwoConnections)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(OscillatorDescription().autoTriggerInterval(10)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(OscillatorDescription().autoTriggerInterval(10)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(MuscleDescription().mode(AutoCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation)))
+            .cellTypeData(MuscleDescription().mode(AutoCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0))),
         CellDescription().id(3).pos({12.0f, 10.0f}),
     });
@@ -630,11 +630,11 @@ TEST_P(MuscleTests_AutoCrawling_New, muscleWithOneConnection)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(OscillatorDescription().autoTriggerInterval(10)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(OscillatorDescription().autoTriggerInterval(10)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(MuscleDescription().mode(AutoCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation)))
+            .cellTypeData(MuscleDescription().mode(AutoCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0))),
     });
     data.addConnection(1, 2);
@@ -700,11 +700,11 @@ TEST_P(MuscleTests_ManualCrawling_New, muscleWithTwoConnections)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(OscillatorDescription().autoTriggerInterval(10)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(OscillatorDescription().autoTriggerInterval(10)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(MuscleDescription().mode(ManualCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation)))
+            .cellTypeData(MuscleDescription().mode(ManualCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0))),
         CellDescription().id(3).pos({12.0f, 10.0f}),
     });
@@ -751,11 +751,11 @@ TEST_P(MuscleTests_ManualCrawling_New, muscleWithOneConnection)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(OscillatorDescription().autoTriggerInterval(10)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(OscillatorDescription().autoTriggerInterval(10)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(MuscleDescription().mode(ManualCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation)))
+            .cellTypeData(MuscleDescription().mode(ManualCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0))),
     });
     data.addConnection(1, 2);
@@ -818,11 +818,11 @@ TEST_P(MuscleTests_DirectMovement_New, muscleWithTwoConnections)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(OscillatorDescription().autoTriggerInterval(3)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(OscillatorDescription().autoTriggerInterval(3)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(MuscleDescription().mode(DirectMovementDescription()))
+            .cellTypeData(MuscleDescription().mode(DirectMovementDescription()))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)).weight(1, 0, getValue(channel1) / 2)),
         CellDescription().id(3).pos({12.0f, 10.0f}),
     });

@@ -52,7 +52,7 @@ TEST_F(EnergyFlowTests_New, energyFlowsToActiveConstructor)
     for (int i = 0; i < 20; ++i) {
         auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
         if (i == 19) {
-            cell.cellType(ConstructorDescription().genome(genome).autoTriggerInterval(0));
+            cell.cellTypeData(ConstructorDescription().genome(genome).autoTriggerInterval(0));
         }
         data.addCell(cell);
         if (i > 0) {
@@ -91,7 +91,7 @@ TEST_F(EnergyFlowTests_New, energyFlowsToClosestActiveConstructor)
             auto id = i + j * 20 + 1;
             auto cell = CellDescription().id(id).pos({100.0f + toFloat(i), 100.0f});
             if (id == constructorId1 || id == constructorId2) {
-                cell.cellType(ConstructorDescription().genome(genome).autoTriggerInterval(0));
+                cell.cellTypeData(ConstructorDescription().genome(genome).autoTriggerInterval(0));
             }
             data.addCell(cell);
             if (i > 0) {
@@ -128,7 +128,7 @@ TEST_F(EnergyFlowTests_New, energyFlowsNotToActiveConstructor)
     for (int i = 0; i < 20; ++i) {
         auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
         if (i == 19) {
-            cell.cellType(ConstructorDescription().genome(genome).autoTriggerInterval(0).genomeCurrentBranch(1));
+            cell.cellTypeData(ConstructorDescription().genome(genome).autoTriggerInterval(0).genomeCurrentBranch(1));
         }
         data.addCell(cell);
         if (i > 0) {
