@@ -428,6 +428,17 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
     auto n = Math::normalized(hostCell->pos - lastConstructionCell->pos);
     Math::rotateQuarterClockwise(n);
 
+    Cell* nearCells[MAX_CELL_BONDS * 4];
+    int numNearCells = 0;
+    data.cellMap.getMatchingCells(
+        nearCells,
+        MAX_CELL_BONDS * 4,
+        numNearCells,
+        newCellPos,
+        cudaSimulationParameters.cellFunctionConstructorConnectingCellMaxDistance[hostCell->color],
+        hostCell->detached,
+        [&](Cell* const& otherCell) { return otherCell != hostCell && otherCell != constructionData.lastConstructionCell; });
+
     // assemble surrounding cell candidates
     Cell* otherCellCandidates[MAX_CELL_BONDS * 2];
     int numOtherCellCandidates = 0;
@@ -460,14 +471,38 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
             return true;
         });
 
-    // evaluate candidates
+    // evaluate candidates (locking is needed for the evaluation)
     Cell* otherCells[MAX_CELL_BONDS];
     int numOtherCells = 0;
     for (int i = 0; i < numOtherCellCandidates; ++i) {
         Cell* otherCell = otherCellCandidates[i];
         if (otherCell->tryLock()) {
-            if (!CellConnectionProcessor::wouldResultInOverlappingConnection(otherCell, newCellPos)) {
-                otherCells[numOtherCells++] = otherCell;
+            bool crossingLinks = false;
+            for (int j = 0; j < numNearCells; ++j) {
+                if (i == j) {
+                    continue;
+                }
+                auto nearCell = nearCells[j];
+                for (int counter = 0; counter < 10; ++counter) {
+                    if (nearCell->tryLock()) {
+                        for (int k = 0; k < nearCell->numConnections; ++k) {
+                            if (nearCell->connections[k].cell == otherCell) {
+                                continue;
+                            }
+                            if (Math::crossing(newCellPos, otherCell->pos, nearCell->pos, nearCell->connections[k].cell->pos)) {
+                                crossingLinks = true;
+                            }
+                        }
+                        nearCell->releaseLock();
+                        break;
+                    }
+                }
+            }
+            if (!crossingLinks) {
+                auto delta = data.cellMap.getCorrectedDirection(newCellPos - otherCell->pos);
+                if (CellConnectionProcessor::hasAngleSpace(data, otherCell, Math::angleOfVector(delta), constructionData.genomeHeader.angleAlignment)) {
+                    otherCells[numOtherCells++] = otherCell;
+                }
             }
             otherCell->releaseLock();
         }
@@ -558,7 +593,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
     Math::rotateQuarterClockwise(posDelta);
 
     //get surrounding cells
-    if (numOtherCells > 0) {
+    if (numOtherCells > 0 && constructionData.numRequiredAdditionalConnections != 0) {
 
         //sort surrounding cells by distance from newCell
         bubbleSort(otherCells, numOtherCells, [&](auto const& cell1, auto const& cell2) {
