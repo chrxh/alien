@@ -360,8 +360,10 @@ void AutosaveWindow::onLoadSavepoint(SavepointEntry const& entry)
 
 void AutosaveWindow::processStateUpdates()
 {
-    for (int row = 0, size = _savepointTable->getSize(); row < size; ++row) {
-        updateSavepoint(row);
+    if (_savepointTable.has_value()) {
+        for (int row = 0, size = _savepointTable->getSize(); row < size; ++row) {
+            updateSavepoint(row);
+        }
     }
 }
 
