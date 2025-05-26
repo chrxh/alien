@@ -302,7 +302,7 @@ struct Cell
     uint16_t genomeNodeIndex;
 
     // Cell type data
-    NeuralNetwork* neuralNetwork;
+    NeuralNetwork* neuralNetwork;  // Not used for structure and base cells
     CellType cellType;
     CellTypeData cellTypeData;
     SignalRoutingRestriction signalRoutingRestriction;

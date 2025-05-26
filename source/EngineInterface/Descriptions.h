@@ -351,7 +351,7 @@ struct CellDescription
     MEMBER(CellDescription, uint16_t, genomeNodeIndex, 0);
 
     // Cell type-specific data
-    MEMBER(CellDescription, std::optional<NeuralNetworkDescription>, neuralNetwork, NeuralNetworkDescription());
+    MEMBER(CellDescription, std::optional<NeuralNetworkDescription>, neuralNetwork, std::nullopt);
     CellTypeDescription _cellTypeData = BaseDescription();
     MEMBER(CellDescription, SignalRoutingRestrictionDescription, signalRoutingRestriction, SignalRoutingRestrictionDescription());
     MEMBER(CellDescription, uint8_t, signalRelaxationTime, 0);

@@ -31,6 +31,10 @@ protected:
         auto const& type = cellParameter.cellType;
         auto const& muscleMode = cellParameter.muscleMode;
         switch (type) {
+        case CellType_Structure:
+            return StructureCellDescription();
+        case CellType_Free:
+            return FreeCellDescription();
         case CellType_Base:
             return BaseDescription();
         case CellType_Depot:
@@ -121,6 +125,8 @@ INSTANTIATE_TEST_SUITE_P(
     DataTransferTests_AllCellType_New,
     DataTransferTests_AllCellType_New,
     ::testing::Values(
+        CellParameter{CellType_Structure},
+        CellParameter{CellType_Free},
         CellParameter{CellType_Base},
         CellParameter{CellType_Depot},
         CellParameter{CellType_Constructor},
@@ -158,7 +164,9 @@ TEST_P(DataTransferTests_AllCellType_New, singleCell_noGenome)
                      .livingState(false)
                      .creatureId(3534)
                      .signal({1, 0, -1, 0, 0, 0, 0, 0})
-                     .cellType(cellTypeGenomeDesc));
+                     .signalRoutingRestriction(SignalRoutingRestrictionDescription().active(true).baseAngle(23.0f).openingAngle(42.0f))
+                     .cellType(cellTypeGenomeDesc)
+                     .metadata(CellMetadataDescription().name("Test1").description("Test2")));
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();
@@ -267,7 +275,7 @@ TEST_P(DataTransferTests_AllCellTypeGenome_New, singleCell_genome_oneGene_oneNod
     nn2.weight(1, 3, -1.0f);
 
     auto data = CollectionDescription().addCreature(
-        GenomeDescription_New().id(1).genes({GeneDescription().nodes({NodeDescription().neuralNetwork(nn2).cellTypeData(cellTypeGenomeDesc)})}),
+        GenomeDescription_New().genes({GeneDescription().nodes({NodeDescription().neuralNetwork(nn2).cellTypeData(cellTypeGenomeDesc)})}),
         {CellDescription()
              .neuralNetwork(nn1)
              .id(1)
@@ -287,6 +295,18 @@ TEST_P(DataTransferTests_AllCellTypeGenome_New, singleCell_genome_oneGene_oneNod
     EXPECT_TRUE(compare(data, actualData));
 }
 
-// TODO Tests with cell connections
-// TODO Tests for larger genomes
-// TODO Include metadata
+TEST_F(DataTransferTests_New, multipleCells_genome_multipleGenes_multiple_Nodes)
+{
+    auto hexagon = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().center({100.0f, 100.0f}));
+    CollectionDescription data;
+    data.addCreature(
+        GenomeDescription_New().genes(
+            {GeneDescription().nodes({NodeDescription(), NodeDescription()}),
+             GeneDescription().nodes({NodeDescription(), NodeDescription(), NodeDescription()})}),
+        hexagon._cells);
+
+    _simulationFacade->setSimulationData(data);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    EXPECT_TRUE(compare(data, actualData));
+}
