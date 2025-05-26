@@ -27,7 +27,7 @@ CollectionDescription DescriptionEditService::createRect(CreateRectParameters co
                                .creatureId(creatureId)
                                .mutationId(parameters._mutationId)
                                .genomeComplexity(parameters._genomeComplexity)
-                               .cellType(parameters._cellType));
+                               .cellTypeData(parameters._cellType));
         }
     }
     reconnectCells(result, parameters._cellDistance * 1.1f);
@@ -46,7 +46,7 @@ CollectionDescription DescriptionEditService::createHex(CreateHexParameters cons
             //create cell: upper layer
             result.addCell(CellDescription()
                                .id(NumberGenerator::get().getId())
-                               .cellType(StructureCellDescription())
+                               .cellTypeData(StructureCellDescription())
                                .energy(parameters._energy)
                                .stiffness(parameters._stiffness)
                                .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
@@ -59,7 +59,7 @@ CollectionDescription DescriptionEditService::createHex(CreateHexParameters cons
             if (j > 0) {
                 result.addCell(CellDescription()
                                  .id(NumberGenerator::get().getId())
-                                   .cellType(StructureCellDescription())
+                                   .cellTypeData(StructureCellDescription())
                                    .energy(parameters._energy)
                                    .stiffness(parameters._stiffness)
                                    .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(j * incY)})
@@ -84,7 +84,7 @@ CollectionDescription DescriptionEditService::createUnconnectedCircle(CreateUnco
     if (parameters._radius <= 1 + NEAR_ZERO) {
         result.addCell(CellDescription()
                            .id(NumberGenerator::get().getId())
-                           .cellType(StructureCellDescription())
+                           .cellTypeData(StructureCellDescription())
                            .pos(parameters._center)
                            .energy(parameters._energy)
                            .stiffness(parameters._stiffness)
@@ -110,7 +110,7 @@ CollectionDescription DescriptionEditService::createUnconnectedCircle(CreateUnco
             }
             result.addCell(CellDescription()
                                .id(NumberGenerator::get().getId())
-                               .cellType(StructureCellDescription())
+                               .cellTypeData(StructureCellDescription())
                                .energy(parameters._energy)
                                .stiffness(parameters._stiffness)
                                .pos({parameters._center.x + dxMod, parameters._center.y + dy})

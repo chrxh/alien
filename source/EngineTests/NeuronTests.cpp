@@ -50,7 +50,7 @@ TEST_F(NeuronTests, weight)
         CellDescription()
             .id(1)
             .pos({1.0f, 1.0f})
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .signal(signal),
         CellDescription().id(2).pos({2.0f, 1.0f}).neuralNetwork(nn),
     });
@@ -82,7 +82,7 @@ TEST_F(NeuronTests, activationFunctionBinaryStep)
         CellDescription()
             .id(1)
             .pos({1.0f, 1.0f})
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .signal(signal),
         CellDescription().id(2).pos({2.0f, 1.0f}).neuralNetwork(nn),
     });

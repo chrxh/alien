@@ -253,7 +253,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
 
     cell->cellType = cellTO.cellType;
 
-    if (cellTO.cellType != CellType_Structure && cellTO.cellType != CellType_Free) {
+    if (cellTO.neuralNetworkDataIndex != CellTO::NeuralNetworkDataIndex_NotSet) {
         copyDataToHeap(
             sizeof(NeuralNetworkTO), cellTO.neuralNetworkDataIndex, collectionTO.heap, reinterpret_cast<uint8_t*&>(cell->neuralNetwork));
     } else {

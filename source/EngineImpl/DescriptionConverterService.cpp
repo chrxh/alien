@@ -552,7 +552,7 @@ CellDescription DescriptionConverterService::createCellDescription(
         result._cellTypeData = detonator;
     } break;
     }
-    if (cellTO.cellType != CellType_Structure && cellTO.cellType != CellType_Free) {
+    if (cellTO.neuralNetworkDataIndex != CellTO::NeuralNetworkDataIndex_NotSet) {
         auto const& neuralNetworkTO = getFromHeap<NeuralNetworkTO>(collectionTO.heap, cellTO.neuralNetworkDataIndex);
         result._neuralNetwork = convert(*neuralNetworkTO);
     }
@@ -921,11 +921,13 @@ void DescriptionConverterService::addCell(
     cellTO.angleToFront = cellDesc._angleToFront;
 
     auto cellType = cellDesc.getCellType();
-    if (cellType != CellType_Structure && cellType != CellType_Free) {
+    if (cellDesc._neuralNetwork.has_value()) {
         cellTO.neuralNetworkDataIndex = heap.size();
         heap.resize(heap.size() + sizeof(NeuralNetworkTO));
         auto neuralNetworkTO = reinterpret_cast<NeuralNetworkTO*>(heap.data() + heap.size() - sizeof(NeuralNetworkTO));
         *neuralNetworkTO = convert(*cellDesc._neuralNetwork);
+    } else {
+        cellTO.neuralNetworkDataIndex = CellTO::NeuralNetworkDataIndex_NotSet;
     }
     switch (cellType) {
     case CellType_Base: {

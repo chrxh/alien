@@ -30,7 +30,7 @@ __device__ __inline__ void NeuronProcessor::process(SimulationData& data, Simula
 
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         auto& cell = cells.at(i);
-        if (cell->cellType != CellType_Structure && cell->cellType != CellType_Free) {
+        if (cell->neuralNetwork) {
             processCell(data, statistics, cell);
         }
     }

@@ -268,6 +268,7 @@ struct CellTO
 
     // Cell type data
     uint64_t neuralNetworkDataIndex;  // Not used for structure and base cells
+    static auto constexpr NeuralNetworkDataIndex_NotSet = 0xffffffffffffffff;
     CellType cellType;
     CellTypeDataTO cellTypeData;
     SignalRoutingRestrictionTO signalRoutingRestriction;

@@ -36,13 +36,13 @@ TEST_F(TransmitterTests, distributeToOtherTransmitter)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
+            .cellTypeData(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
             .energy(_parameters.normalCellEnergy.value[0] * 2),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(OscillatorDescription()),
-        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(DepotDescription()),
+            .cellTypeData(OscillatorDescription()),
+        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(DepotDescription()),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -78,14 +78,14 @@ TEST_F(TransmitterTests, distributeToOneOtherTransmitter_forwardSignal)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
+            .cellTypeData(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
             .energy(_parameters.normalCellEnergy.value[0] * 2),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(OscillatorDescription())
+            .cellTypeData(OscillatorDescription())
             .signal(signal),
-        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(DepotDescription()),
+        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(DepotDescription()),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -120,13 +120,13 @@ TEST_F(TransmitterTests, distributeToConnectedCells)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(DepotDescription().mode(EnergyDistributionMode_ConnectedCells))
+            .cellTypeData(DepotDescription().mode(EnergyDistributionMode_ConnectedCells))
             .energy(_parameters.normalCellEnergy.value[0] * 2),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(OscillatorDescription()),
-        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(DepotDescription()),
+            .cellTypeData(OscillatorDescription()),
+        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(DepotDescription()),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -160,10 +160,10 @@ TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
+            .cellTypeData(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
             .energy(_parameters.normalCellEnergy.value[0] * 2),
-        CellDescription().id(2).pos({11.0f, 10.0f}).cellType(ConstructorDescription().genome(genome)),
-        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(DepotDescription()),
+        CellDescription().id(2).pos({11.0f, 10.0f}).cellTypeData(ConstructorDescription().genome(genome)),
+        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(DepotDescription()),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -197,13 +197,13 @@ TEST_F(TransmitterTests, distributeOnlyToActiveConstructors)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
+            .cellTypeData(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
             .energy(_parameters.normalCellEnergy.value[0] * 2),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellType(ConstructorDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))),
-        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(DepotDescription()),
+            .cellTypeData(ConstructorDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))),
+        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(DepotDescription()),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -235,10 +235,10 @@ TEST_F(TransmitterTests, distributeToTwoTransmittersWithDifferentColor)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
+            .cellTypeData(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
             .energy(_parameters.normalCellEnergy.value[0] * 2),
-        CellDescription().id(2).pos({11.0f, 10.0f}).cellType(DepotDescription()).color(1),
-        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(DepotDescription()),
+        CellDescription().id(2).pos({11.0f, 10.0f}).cellTypeData(DepotDescription()).color(1),
+        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(DepotDescription()),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -281,16 +281,16 @@ TEST_F(TransmitterTests, distributeNotToNotReadyConstructors)
         CellDescription()
             .id(1)
             .pos({9.0f, 10.0f})
-            .cellType(ConstructorDescription().numInheritedGenomeNodes(4).genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))),
+            .cellTypeData(ConstructorDescription().numInheritedGenomeNodes(4).genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))),
         CellDescription()
             .id(2)
             .pos({10.0f, 10.0f})
-            .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
+            .cellTypeData(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
             .energy(_parameters.normalCellEnergy.value[0] * 2),
         CellDescription()
             .id(3)
             .pos({11.0f, 10.0f})
-            .cellType(ConstructorDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))),
+            .cellTypeData(ConstructorDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -334,16 +334,16 @@ TEST_F(TransmitterTests, distributeToReadyConstructors)
         CellDescription()
             .id(1)
             .pos({9.0f, 10.0f})
-            .cellType(ConstructorDescription().numInheritedGenomeNodes(4).genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))),
+            .cellTypeData(ConstructorDescription().numInheritedGenomeNodes(4).genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))),
         CellDescription()
             .id(2)
             .pos({10.0f, 10.0f})
-            .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
+            .cellTypeData(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
             .energy(_parameters.normalCellEnergy.value[0] * 2),
         CellDescription()
             .id(3)
             .pos({11.0f, 10.0f})
-            .cellType(ConstructorDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))),
+            .cellTypeData(ConstructorDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))),
         CellDescription()
             .id(4)
             .pos({12.0f, 10.0f})

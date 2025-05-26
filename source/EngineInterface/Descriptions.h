@@ -352,10 +352,10 @@ struct CellDescription
 
     // Cell type-specific data
     MEMBER(CellDescription, std::optional<NeuralNetworkDescription>, neuralNetwork, std::nullopt);
-    CellTypeDescription _cellTypeData = BaseDescription();
+    MEMBER(CellDescription, CellTypeDescription, cellTypeData, BaseDescription());
     MEMBER(CellDescription, SignalRoutingRestrictionDescription, signalRoutingRestriction, SignalRoutingRestrictionDescription());
     MEMBER(CellDescription, uint8_t, signalRelaxationTime, 0);
-    std::optional<SignalDescription> _signal;
+    MEMBER(CellDescription, std::optional<SignalDescription>, signal, std::nullopt);
     MEMBER(CellDescription, int, activationTime, 0);
     MEMBER(CellDescription, int, detectedByCreatureId, 0);  // Only the first 16 bits from the creature id
     MEMBER(CellDescription, CellTriggered, cellTypeUsed, CellTriggered_No);
@@ -364,25 +364,7 @@ struct CellDescription
     MEMBER(CellDescription, CellMetadataDescription, metadata, CellMetadataDescription());
 
     CellType getCellType() const;
-    template <typename CellTypeDesc>
-    CellDescription& cellType(CellTypeDesc const& value)
-    {
-        _cellTypeData = value;
-        auto cellTypeEnum = getCellType();
-        if (cellTypeEnum == CellType_Structure || cellTypeEnum == CellType_Free) {
-            _neuralNetwork.reset();
-        } else if (!_neuralNetwork.has_value()) {
-            _neuralNetwork = NeuralNetworkDescription();
-        }
-        return *this;
-    }
-    CellDescription& signal(SignalDescription const& value)
-    {
-        _signal = value;
-        _signalRelaxationTime = MAX_SIGNAL_RELAXATION_TIME;
-        return *this;
-    }
-    CellDescription& signal(std::vector<float> const& value)
+    CellDescription& signalAndRelaxTime(std::vector<float> const& value)
     {
         CHECK(value.size() == MAX_CHANNELS);
 

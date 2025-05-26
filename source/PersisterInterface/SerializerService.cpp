@@ -1680,7 +1680,7 @@ void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics,
 bool SerializerService::wrapGenome(CollectionDescription& output, std::vector<uint8_t> const& input)
 {
     output.clear();
-    output.addCell(CellDescription().cellType(ConstructorDescription().genome(input)));
+    output.addCell(CellDescription().cellTypeData(ConstructorDescription().genome(input)));
     return true;
 }
 

@@ -32,7 +32,7 @@ TEST_F(DataTransferTests, singleCell)
                      .barrier(true)
                      .livingState(false)
                      .creatureId(3534)
-                     .signal({1, 0, -1, 0, 0, 0, 0, 0}));
+                     .signalAndRelaxTime({1, 0, -1, 0, 0, 0, 0, 0}));
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();

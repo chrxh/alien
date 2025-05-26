@@ -35,7 +35,7 @@ TEST_F(SignalTests_New, forwardSignal)
 {
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
     auto data = CollectionDescription().addCells({
-        CellDescription().id(1).pos({0, 0}).signal(signal),
+        CellDescription().id(1).pos({0, 0}).signalAndRelaxTime(signal),
         CellDescription().id(2).pos({1, 0}),
     });
     data.addConnection(1, 2);
@@ -60,7 +60,7 @@ TEST_F(SignalTests_New, vanishSignal_singleCell)
 {
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
     auto data = CollectionDescription().addCells({
-        CellDescription().id(1).pos({0, 0}).signal(signal),
+        CellDescription().id(1).pos({0, 0}).signalAndRelaxTime(signal),
     });
     
     _simulationFacade->setSimulationData(data);
@@ -97,9 +97,9 @@ TEST_F(SignalTests_New, mergeSignals)
     std::vector<float> signal1 = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 1.0f, -1.0f, 0.0f};
     std::vector<float> signal2 = {-0.5f, -1.0f, 0.5f, 1.0f, 0.7f, -0.7f, 0.5f, -0.5f};
     auto data = CollectionDescription().addCells({
-        CellDescription().id(1).pos({0, 0}).signal(signal1),
+        CellDescription().id(1).pos({0, 0}).signalAndRelaxTime(signal1),
         CellDescription().id(2).pos({1, 0}),
-        CellDescription().id(3).pos({2, 0}).signal(signal2),
+        CellDescription().id(3).pos({2, 0}).signalAndRelaxTime(signal2),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -135,7 +135,7 @@ TEST_F(SignalTests_New, forkSignals)
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
     auto data = CollectionDescription().addCells({
         CellDescription().id(1).pos({0, 0}),
-        CellDescription().id(2).pos({1, 0}).signal(signal),
+        CellDescription().id(2).pos({1, 0}).signalAndRelaxTime(signal),
         CellDescription().id(3).pos({2, 0}),
     });
     data.addConnection(1, 2);
@@ -181,7 +181,7 @@ TEST_P(SignalTests_BothSides_New, routeSignalOnRight_sharpMatch)
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
     auto data = CollectionDescription().addCells({
         CellDescription().id(1).pos({0, 0}),
-        CellDescription().id(2).pos({1, 0}).signal(signal).signalRoutingRestriction(side == AngleRange::Start ? -44.0f : 44.0f, 90.0f),
+        CellDescription().id(2).pos({1, 0}).signalAndRelaxTime(signal).signalRoutingRestriction(side == AngleRange::Start ? -44.0f : 44.0f, 90.0f),
         CellDescription().id(3).pos({2, 0}),
     });
     data.addConnection(1, 2);
@@ -213,7 +213,7 @@ TEST_P(SignalTests_BothSides_New, routeSignalOnRight_sharpMismatch)
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
     auto data = CollectionDescription().addCells({
         CellDescription().id(1).pos({0, 0}),
-        CellDescription().id(2).pos({1, 0}).signal(signal).signalRoutingRestriction(side == AngleRange::Start ? -45.0f : 45.0f, 90.0f),
+        CellDescription().id(2).pos({1, 0}).signalAndRelaxTime(signal).signalRoutingRestriction(side == AngleRange::Start ? -45.0f : 45.0f, 90.0f),
         CellDescription().id(3).pos({2, 0}),
     });
     data.addConnection(1, 2);

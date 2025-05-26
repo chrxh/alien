@@ -42,7 +42,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_upperSid
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(getConstructorEnergy())
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
         CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(LivingState_UnderConstruction),
         CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.5f}).livingState(LivingState_UnderConstruction),
     });
@@ -93,7 +93,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_bottomSi
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(getConstructorEnergy())
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
         CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(LivingState_UnderConstruction),
         CellDescription().id(3).pos({10.0f + getOffspringDistance(), 10.5f}).livingState(LivingState_UnderConstruction),
     });
@@ -143,7 +143,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_bothSide
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(getConstructorEnergy())
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
         CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(LivingState_UnderConstruction),
         CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.5f}).livingState(LivingState_UnderConstruction),
         CellDescription().id(4).pos({10.0f + getOffspringDistance(), 10.5f}).livingState(LivingState_UnderConstruction),
@@ -204,7 +204,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_threeCel
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(getConstructorEnergy())
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
         CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(LivingState_UnderConstruction),
         CellDescription().id(3).pos(RealVector2D(10.0f + getOffspringDistance() + 0.2f, 10.0f) + offset * 0.1f).livingState(LivingState_UnderConstruction),
         CellDescription().id(4).pos(RealVector2D(10.0f + getOffspringDistance(), 10.0f) + offset * 0.2f).livingState(LivingState_UnderConstruction),
@@ -264,7 +264,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_threeCel
             .id(1)
             .pos({458.20f, 239.23f})
             .energy(getConstructorEnergy())
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
         CellDescription().id(2).pos({456.40f, 238.88f}).livingState(LivingState_UnderConstruction),
         CellDescription().id(3).pos({455.96f, 239.75f})
             .livingState(LivingState_UnderConstruction),
@@ -327,7 +327,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_threeCel
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(getConstructorEnergy())
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
         CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(LivingState_UnderConstruction),
         CellDescription()
             .id(3)
@@ -388,7 +388,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_90degAli
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(getConstructorEnergy())
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
         CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(LivingState_UnderConstruction),
         CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).livingState(LivingState_UnderConstruction),
         CellDescription().id(4).pos({10.0f + getOffspringDistance() - 1.0f, 9.0f - 0.2f}).livingState(LivingState_UnderConstruction),
@@ -445,7 +445,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToNoExistingCells_90deg
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(getConstructorEnergy())
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
         CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(LivingState_UnderConstruction),
         CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).livingState(LivingState_UnderConstruction),
     });
@@ -492,7 +492,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_connectToCellWithAngleSpace_90
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(getConstructorEnergy())
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
         CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(LivingState_UnderConstruction),
         CellDescription().id(3).pos({10.0f + getOffspringDistance(), 10.0f - 0.5f}).livingState(LivingState_UnderConstruction),
         CellDescription().id(4).pos({10.0f + getOffspringDistance(), 10.0f - 1.0f}).livingState(LivingState_UnderConstruction),
@@ -550,7 +550,7 @@ TEST_F(ConstructorTests_New, constructFurtherCell_onSpike)
             .id(2)
             .pos({11.0f, 10.0f})
             .energy(getConstructorEnergy())
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(3)),
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(3)),
         CellDescription().id(3).pos({11.0f + getOffspringDistance(), 10.0f}).livingState(LivingState_UnderConstruction),
     });
     data.addConnection(1, 2);
@@ -596,7 +596,7 @@ TEST_F(ConstructorTests_New, finishCreature_angleToFront_upperSide)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(getConstructorEnergy())
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(2).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(2).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
         CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(LivingState_UnderConstruction),
         CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).livingState(LivingState_UnderConstruction),
     });
@@ -636,7 +636,7 @@ TEST_F(ConstructorTests_New, finishCreature_angleToFront_lowerSide)
             .id(1)
             .pos({10.0f, 10.0f})
             .energy(getConstructorEnergy())
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(2).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(2).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
         CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(LivingState_UnderConstruction),
         CellDescription().id(3).pos({10.0f + getOffspringDistance(), 11.0f}).livingState(LivingState_UnderConstruction),
     });
@@ -677,7 +677,7 @@ TEST_F(ConstructorTests_New, finishBodyPart_angleToFront_leftSide)
             .id(2)
             .pos({9.0f, 10.0f})
             .energy(getConstructorEnergy())
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(0).autoTriggerInterval(1).genome(genome))
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(0).autoTriggerInterval(1).genome(genome))
             .angleToFront(-45.0f),
         CellDescription().id(3).pos({9.0f, 11.0f}),
     });
@@ -708,7 +708,7 @@ TEST_F(ConstructorTests_New, finishBodyPart_angleToFront_rightSide)
             .id(2)
             .pos({9.0f, 10.0f})
             .energy(getConstructorEnergy())
-            .cellType(ConstructorDescription().genomeCurrentNodeIndex(0).autoTriggerInterval(1).genome(genome))
+            .cellTypeData(ConstructorDescription().genomeCurrentNodeIndex(0).autoTriggerInterval(1).genome(genome))
             .angleToFront(45.0f),
         CellDescription().id(3).pos({9.0f, 11.0f}),
     });
