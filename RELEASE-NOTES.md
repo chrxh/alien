@@ -1,5 +1,9 @@
 # Release notes
 
+## [4.12.2] - 2025-05-26
+### Fixed
+- engine: Nvidia Blackwell support (compatibility with CUDA Toolkit v12.8)
+
 ## [4.12.1] - 2025-01-03
 ### Fixed
 - engine: heuristics for reconnecting cells in constructors improved (yields less defective offspring)
