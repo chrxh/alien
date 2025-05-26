@@ -411,11 +411,15 @@ CellDescription DescriptionConverterService::createCellDescription(
     }
     result._metadata = metadata;
 
-    if (cellTO.cellType != CellType_Structure && cellTO.cellType != CellType_Free) {
-        auto const& neuralNetworkTO = getFromHeap<NeuralNetworkTO>(collectionTO.heap, cellTO.neuralNetworkDataIndex);
-        result._neuralNetwork = convert(*neuralNetworkTO);
-    }
     switch (cellTO.cellType) {
+    case CellType_Structure: {
+        StructureCellDescription base;
+        result._cellTypeData = base;
+    } break;
+    case CellType_Free: {
+        FreeCellDescription base;
+        result._cellTypeData = base;
+    } break;
     case CellType_Base: {
         BaseDescription base;
         result._cellTypeData = base;
@@ -547,6 +551,10 @@ CellDescription DescriptionConverterService::createCellDescription(
         detonator._countdown = cellTO.cellTypeData.detonator.countdown;
         result._cellTypeData = detonator;
     } break;
+    }
+    if (cellTO.cellType != CellType_Structure && cellTO.cellType != CellType_Free) {
+        auto const& neuralNetworkTO = getFromHeap<NeuralNetworkTO>(collectionTO.heap, cellTO.neuralNetworkDataIndex);
+        result._neuralNetwork = convert(*neuralNetworkTO);
     }
 
     SignalRoutingRestrictionDescription routingRestriction;
