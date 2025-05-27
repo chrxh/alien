@@ -102,7 +102,7 @@ void PatternAnalysisDialog::saveRepetitiveActiveClustersToFiles(std::string cons
 
 auto PatternAnalysisDialog::calcPartitionData() const -> std::map<ClusterAnalysisDescription, PartitionClassData>
 {
-    auto data = _simulationFacade->getClusteredSimulationData();
+    auto data = ClusteredCollectionDescription(_simulationFacade->getSimulationData());
 
     std::map<ClusterAnalysisDescription, PartitionClassData> result;
 

@@ -104,57 +104,6 @@ namespace
     }
 }
 
-ClusteredCollectionDescription DescriptionConverterService::convertTOtoClusteredDescription(CollectionTO const& collectionTO) const
-{
-	ClusteredCollectionDescription result;
-
-    // Genomes
-    std::vector<GenomeDescription_New> genomes;
-    std::unordered_map<uint64_t, uint64_t> genomeIdByTOIndex;
-    for (int i = 0; i < *collectionTO.numGenomes; ++i) {
-        result._genomes.emplace_back(createGenomeDescription(collectionTO, i, genomeIdByTOIndex));
-    }
-
-    // Cells
-    std::vector<ClusterDescription> clusters;
-    std::unordered_set<int> freeCellIndices;
-    for (int i = 0; i < *collectionTO.numCells; ++i) {
-        freeCellIndices.insert(i);
-    }
-    std::unordered_map<int, int> cellTOIndexToCellDescIndex;
-    std::unordered_map<int, int> cellTOIndexToClusterDescIndex;
-    int clusterDescIndex = 0;
-    while (!freeCellIndices.empty()) {
-        auto freeCellIndex = *freeCellIndices.begin();
-        auto createClusterData = scanAndCreateClusterDescription(collectionTO, freeCellIndex, freeCellIndices, genomeIdByTOIndex);
-        clusters.emplace_back(createClusterData.cluster);
-
-        // Update index maps
-        cellTOIndexToCellDescIndex.insert(
-            createClusterData.cellTOIndexToCellDescIndex.begin(), createClusterData.cellTOIndexToCellDescIndex.end());
-        for (auto const& cellTOIndex : createClusterData.cellTOIndexToCellDescIndex | boost::adaptors::map_keys) {
-            cellTOIndexToClusterDescIndex.emplace(cellTOIndex, clusterDescIndex);
-        }
-        ++clusterDescIndex;
-    }
-    result.addClusters(clusters);
-
-    // Particles
-    std::vector<ParticleDescription> particles;
-    for (int i = 0; i < *collectionTO.numParticles; ++i) {
-        ParticleTO const& particle = collectionTO.particles[i];
-        particles.emplace_back(ParticleDescription()
-                                   .id(particle.id)
-                                   .pos({particle.pos.x, particle.pos.y})
-                                   .vel({particle.vel.x, particle.vel.y})
-                                   .energy(particle.energy)
-                                   .color(particle.color));
-    }
-    result.addParticles(particles);
-
-    return result;
-}
-
 CollectionDescription DescriptionConverterService::convertTOtoDescription(CollectionTO const& collectionTO) const
 {
     CollectionDescription result;
@@ -212,39 +161,6 @@ OverlayDescription DescriptionConverterService::convertTOtoOverlayDescription(Co
     return result;
 }
 
-CollectionTO DescriptionConverterService::convertDescriptionToTO(ClusteredCollectionDescription const& description) const
-{
-    std::vector<GenomeTO> genomeTOs;
-    std::vector<GeneTO> geneTOs;
-    std::vector<NodeTO> nodeTOs;
-    std::vector<CellTO> cellTOs;
-    std::vector<ParticleTO> particleTOs;
-    std::vector<uint8_t> heap;
-
-    std::unordered_map<uint64_t, uint64_t> genomeTOIndexById;
-    for (auto const& genome : description._genomes) {
-        addGenome(genomeTOs, geneTOs, nodeTOs, heap, genome, genomeTOIndexById);
-    }
-    std::unordered_map<uint64_t, uint64_t> cellIndexTOById;
-    for (auto const& cluster: description._clusters) {
-        for (auto const& cell : cluster._cells) {
-            addCell(cellTOs, heap, cellIndexTOById, cell, genomeTOIndexById);
-        }
-    }
-    for (auto const& cluster : description._clusters) {
-        for (auto const& cell : cluster._cells) {
-            if (cell._id != 0) {
-                setConnections(cellTOs, cell, cellIndexTOById);
-            }
-        }
-    }
-    for (auto const& particle : description._particles) {
-        addParticle(particleTOs, particle);
-    }
-
-    return provideDataTO(genomeTOs, geneTOs, nodeTOs, cellTOs, particleTOs, heap);
-}
-
 CollectionTO DescriptionConverterService::convertDescriptionToTO(CollectionDescription const& description) const
 {
     std::vector<GenomeTO> genomeTOs;
@@ -256,12 +172,12 @@ CollectionTO DescriptionConverterService::convertDescriptionToTO(CollectionDescr
 
     std::unordered_map<uint64_t, uint64_t> genomeTOIndexById;
     for (auto const& genome : description._genomes) {
-        addGenome(genomeTOs, geneTOs, nodeTOs, heap, genome, genomeTOIndexById);
+        convertGenomeToTO(genomeTOs, geneTOs, nodeTOs, heap, genome, genomeTOIndexById);
     }
 
     std::unordered_map<uint64_t, uint64_t> cellIndexTOById;
     for (auto const& cell : description._cells) {
-        addCell(cellTOs, heap, cellIndexTOById, cell, genomeTOIndexById);
+        convertCellToTO(cellTOs, heap, cellIndexTOById, cell, genomeTOIndexById);
     }
     for (auto const& cell : description._cells) {
         if (cell._id != 0) {
@@ -282,7 +198,7 @@ CollectionTO DescriptionConverterService::convertDescriptionToTO(CellDescription
 
     std::unordered_map<uint64_t, uint64_t> cellIndexTOById;
     std::unordered_map<uint64_t, uint64_t> genomeTOIndexById;
-    addCell(cellTOs, heap, cellIndexTOById, cell, genomeTOIndexById);
+    convertCellToTO(cellTOs, heap, cellIndexTOById, cell, genomeTOIndexById);
 
     return provideDataTO({}, {}, {}, cellTOs, {}, heap);
 }
@@ -310,49 +226,6 @@ namespace
             a.erase(element);
         }
     }
-}
-
-auto DescriptionConverterService::scanAndCreateClusterDescription(
-    CollectionTO const& collectionTO,
-    int startCellIndex,
-    std::unordered_set<int>& freeCellIndices,
-    std::unordered_map<uint64_t, uint64_t> const& genomeIdByTOIndex) const
-    -> CreateClusterReturnData
-{
-    CreateClusterReturnData result; 
-
-    std::unordered_set<int> currentCellIndices;
-    currentCellIndices.insert(startCellIndex);
-    std::unordered_set<int> scannedCellIndices = currentCellIndices;
-
-    std::vector<CellDescription> cells;
-    std::unordered_set<int> nextCellIndices;
-    int cellDescIndex = 0;
-    do {
-        for (auto const& currentCellIndex : currentCellIndices) {
-            cells.emplace_back(createCellDescription(collectionTO, currentCellIndex, genomeIdByTOIndex));
-            result.cellTOIndexToCellDescIndex.emplace(currentCellIndex, cellDescIndex);
-            auto const& cellTO = collectionTO.cells[currentCellIndex];
-            for (int i = 0; i < cellTO.numConnections; ++i) {
-                auto connectionTO = cellTO.connections[i];
-                if (connectionTO.cellIndex != -1) {
-                    if (scannedCellIndices.find(connectionTO.cellIndex) == scannedCellIndices.end()) {
-                        nextCellIndices.insert(connectionTO.cellIndex);
-                        scannedCellIndices.insert(connectionTO.cellIndex);
-                    }
-                }
-            }
-            ++cellDescIndex;
-        }
-        currentCellIndices = nextCellIndices;
-        nextCellIndices.clear();
-    } while (!currentCellIndices.empty());
-
-    setInplaceDifference(freeCellIndices, scannedCellIndices);
-
-    result.cluster.addCells(cells);
-
-    return result;
 }
 
 CellDescription DescriptionConverterService::createCellDescription(
@@ -726,7 +599,7 @@ GenomeDescription_New DescriptionConverterService::createGenomeDescription(
     return result;
 }
 
-void DescriptionConverterService::addGenome(
+void DescriptionConverterService::convertGenomeToTO(
     std::vector<GenomeTO>& genomeTOs,
     std::vector<GeneTO>& geneTOs,
     std::vector<NodeTO>& nodeTOs,
@@ -885,7 +758,7 @@ namespace
     }
 }
 
-void DescriptionConverterService::addCell(
+void DescriptionConverterService::convertCellToTO(
     std::vector<CellTO>& cellTOs,
     std::vector<uint8_t>& heap,
     std::unordered_map<uint64_t, uint64_t>& cellTOIndexById,

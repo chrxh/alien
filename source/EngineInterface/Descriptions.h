@@ -425,6 +425,8 @@ struct ParticleDescription
 struct ClusteredCollectionDescription
 {
     ClusteredCollectionDescription() = default;
+    explicit ClusteredCollectionDescription(CollectionDescription const& data);
+
     auto operator<=>(ClusteredCollectionDescription const&) const = default;
 
     MEMBER(ClusteredCollectionDescription, std::vector<ClusterDescription>, clusters, {});

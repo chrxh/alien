@@ -55,9 +55,7 @@ public:
     int getSyncSimulationWithRenderingRatio() const;
     void setSyncSimulationWithRenderingRatio(int value);
 
-    ClusteredCollectionDescription getClusteredSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
     CollectionDescription getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
-    ClusteredCollectionDescription getSelectedClusteredSimulationData(bool includeClusters);
     CollectionDescription getSelectedSimulationData(bool includeClusters);
     CollectionDescription getInspectedSimulationData(std::vector<uint64_t> objectsIds);
     StatisticsRawData getStatisticsRawData() const;
@@ -65,7 +63,6 @@ public:
     void setStatisticsHistory(StatisticsHistoryData const& data);
 
     void addAndSelectSimulationData(CollectionDescription&& dataToUpdate);
-    void setClusteredSimulationData(ClusteredCollectionDescription const& dataToUpdate);
     void setSimulationData(CollectionDescription const& dataToUpdate);
     void removeSelectedObjects(bool includeClusters);
     void relaxSelectedObjects(bool includeClusters);

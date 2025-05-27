@@ -125,13 +125,14 @@ CollectionDescription DescriptionEditService::createUnconnectedCircle(CreateUnco
     return result;
 }
 
-void DescriptionEditService::duplicate(ClusteredCollectionDescription& data, IntVector2D const& origSize, IntVector2D const& size)
+void DescriptionEditService::duplicate(CollectionDescription& data, IntVector2D const& origSize, IntVector2D const& size)
 {
-    ClusteredCollectionDescription result;
+    auto clusteredData = ClusteredCollectionDescription(data);
 
+    ClusteredCollectionDescription result;
     for (int incX = 0; incX < size.x; incX += origSize.x) {
         for (int incY = 0; incY < size.y; incY += origSize.y) {
-            for (auto cluster : data._clusters) {
+            for (auto cluster : clusteredData._clusters) {
                 auto origPos = cluster.getClusterPosFromCells();
                 RealVector2D clusterPos = {origPos.x + incX, origPos.y + incY};
                 if (clusterPos.x < size.x && clusterPos.y < size.y) {
@@ -153,7 +154,8 @@ void DescriptionEditService::duplicate(ClusteredCollectionDescription& data, Int
             }
         }
     }
-    data = result;
+
+    data = CollectionDescription(result);
     assignNewObjectAndCreatureIds(data);
 }
 
@@ -332,34 +334,30 @@ void DescriptionEditService::reconnectCells(CollectionDescription& data, float m
     }
 }
 
-void DescriptionEditService::correctConnections(ClusteredCollectionDescription& data, IntVector2D const& worldSize)
+void DescriptionEditService::correctConnections(CollectionDescription& data, IntVector2D const& worldSize)
 {
     auto threshold = std::min(worldSize.x, worldSize.y) /3;
     std::unordered_map<uint64_t, CellDescription&> cellById;
-    for (auto& cluster : data._clusters) {
-        for (auto& cell : cluster._cells) {
-            cellById.emplace(cell._id, cell);
-        }
+    for (auto& cell : data._cells) {
+        cellById.emplace(cell._id, cell);
     }
-    for (auto& cluster : data._clusters) {
-        for (auto& cell: cluster._cells) {
-            std::vector<ConnectionDescription> newConnections;
-            float angleToAdd = 0;
-            for (auto connection : cell._connections) {
-                auto& connectingCell = cellById.at(connection._cellId);
-                if (/*spaceCalculator.distance*/Math::length(cell._pos - connectingCell._pos) > threshold) {
-                    angleToAdd += connection._angleFromPrevious;
-                } else {
-                    connection._angleFromPrevious += angleToAdd;
-                    angleToAdd = 0;
-                    newConnections.emplace_back(connection);
-                }
+    for (auto& cell: data._cells) {
+        std::vector<ConnectionDescription> newConnections;
+        float angleToAdd = 0;
+        for (auto connection : cell._connections) {
+            auto& connectingCell = cellById.at(connection._cellId);
+            if (/*spaceCalculator.distance*/Math::length(cell._pos - connectingCell._pos) > threshold) {
+                angleToAdd += connection._angleFromPrevious;
+            } else {
+                connection._angleFromPrevious += angleToAdd;
+                angleToAdd = 0;
+                newConnections.emplace_back(connection);
             }
-            if (angleToAdd > NEAR_ZERO && !newConnections.empty()) {
-                newConnections.front()._angleFromPrevious += angleToAdd;
-            }
-            cell._connections = newConnections;
         }
+        if (angleToAdd > NEAR_ZERO && !newConnections.empty()) {
+            newConnections.front()._angleFromPrevious += angleToAdd;
+        }
+        cell._connections = newConnections;
     }
 }
 
@@ -490,29 +488,6 @@ void DescriptionEditService::assignNewObjectAndCreatureIds(CollectionDescription
     for (auto& particle : data._particles) {
         particle._id = NumberGenerator::get().createObjectId();
     }
-}
-
-void DescriptionEditService::assignNewObjectAndCreatureIds(ClusteredCollectionDescription& data)
-{
-}
-
-namespace
-{
-    int getNewCreatureId(int origCreatureId, std::unordered_map<int, int>& origToNewCreatureIdMap)
-    {
-        auto findResult = origToNewCreatureIdMap.find(origCreatureId);
-        if (findResult != origToNewCreatureIdMap.end()) {
-            return findResult->second;
-        } else {
-            int newCreatureId = 0;
-            while (newCreatureId == 0) {
-                newCreatureId = NumberGenerator::get().getRandomInt();
-            }
-            origToNewCreatureIdMap.emplace(origCreatureId, newCreatureId);
-            return newCreatureId;
-        }
-    };
-
 }
 
 void DescriptionEditService::removeMetadata(CellDescription& cell)

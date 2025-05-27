@@ -38,14 +38,11 @@ public:
     virtual int getSyncSimulationWithRenderingRatio() const = 0;
     virtual void setSyncSimulationWithRenderingRatio(int value) = 0;
 
-    virtual ClusteredCollectionDescription getClusteredSimulationData() = 0;
     virtual CollectionDescription getSimulationData() = 0;
-    virtual ClusteredCollectionDescription getSelectedClusteredSimulationData(bool includeClusters) = 0;
     virtual CollectionDescription getSelectedSimulationData(bool includeClusters) = 0;
     virtual CollectionDescription getInspectedSimulationData(std::vector<uint64_t> objectsIds) = 0;
 
     virtual void addAndSelectSimulationData(CollectionDescription&& dataToAdd) = 0;
-    virtual void setClusteredSimulationData(ClusteredCollectionDescription const& dataToUpdate) = 0;
     virtual void setSimulationData(CollectionDescription const& dataToUpdate) = 0;
     virtual void removeSelectedObjects(bool includeClusters) = 0;
     virtual void relaxSelectedObjects(bool includeClusters) = 0;
