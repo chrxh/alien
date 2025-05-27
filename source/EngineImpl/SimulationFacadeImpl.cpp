@@ -79,22 +79,10 @@ void _SimulationFacadeImpl::setSyncSimulationWithRenderingRatio(int value)
     _worker.setSyncSimulationWithRenderingRatio(value);
 }
 
-ClusteredCollectionDescription _SimulationFacadeImpl::getClusteredSimulationData()
-{
-    auto size = getWorldSize();
-    return _worker.getClusteredSimulationData({-10, -10}, {size.x + 10, size.y + 10});
-}
-
 CollectionDescription _SimulationFacadeImpl::getSimulationData()
 {
     auto size = getWorldSize();
     return _worker.getSimulationData({-10, -10}, {size.x + 10, size.y + 10});
-}
-
-ClusteredCollectionDescription _SimulationFacadeImpl::getSelectedClusteredSimulationData(bool includeClusters)
-{
-    _worker.updateSelection();
-    return _worker.getSelectedClusteredSimulationData(includeClusters);
 }
 
 CollectionDescription _SimulationFacadeImpl::getSelectedSimulationData(bool includeClusters)
@@ -111,12 +99,6 @@ CollectionDescription _SimulationFacadeImpl::getInspectedSimulationData(std::vec
 void _SimulationFacadeImpl::addAndSelectSimulationData(CollectionDescription&& dataToAdd)
 {
     _worker.addAndSelectSimulationData(std::move(dataToAdd));
-}
-
-void _SimulationFacadeImpl::setClusteredSimulationData(ClusteredCollectionDescription const& dataToUpdate)
-{
-    _worker.setClusteredSimulationData(dataToUpdate);
-    _selectionNeedsUpdate = true;
 }
 
 void _SimulationFacadeImpl::setSimulationData(CollectionDescription const& dataToUpdate)

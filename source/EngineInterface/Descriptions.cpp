@@ -84,6 +84,54 @@ RealVector2D ClusterDescription::getClusterPosFromCells() const
     return result;
 }
 
+ClusteredCollectionDescription::ClusteredCollectionDescription(CollectionDescription const& data)
+{
+    std::unordered_map<uint64_t, int> idToIndex;
+    for (int i = 0, j = data._cells.size(); i < j; ++i) {
+        auto const& cell = data._cells[i];
+        idToIndex.emplace(cell._id, i);
+    }
+
+    while (!idToIndex.empty()) {
+        std::unordered_set<uint64_t> allVisitedCellIds;
+        std::vector<uint64_t> lastVisitedCellIds;
+        auto currentCellId = data._cells.at(idToIndex.begin()->second)._id;
+
+        ClusterDescription cluster;
+        auto clusterCompleted = false;
+        do {
+            auto const& currentCell = data._cells.at(idToIndex.at(currentCellId));
+            allVisitedCellIds.insert(currentCell._id);
+            lastVisitedCellIds.emplace_back(currentCell._id);
+            cluster.addCell(currentCell);
+
+            auto newCellFound = false;
+            for (auto const& connection : currentCell._connections) {
+                if (allVisitedCellIds.contains(connection._cellId)) {
+                    continue;
+                }
+
+                currentCellId = connection._cellId;
+                newCellFound = true;
+            }
+            if (!newCellFound) {
+                lastVisitedCellIds.pop_back();
+                if (!lastVisitedCellIds.empty()) {
+                    currentCellId = lastVisitedCellIds.back();
+                } else {
+                    clusterCompleted = true;
+                }
+            }
+        } while (!clusterCompleted);
+
+        std::erase_if(idToIndex, [&allVisitedCellIds](const auto& item) { return allVisitedCellIds.contains(item.first); });
+        _clusters.emplace_back(cluster);
+    }
+
+    _particles = data._particles;
+    _genomes = data._genomes;
+}
+
 void ClusteredCollectionDescription::setCenter(RealVector2D const& center)
 {
     auto origCenter = calcCenter();

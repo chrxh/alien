@@ -56,7 +56,7 @@ public:
     };
     CollectionDescription createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters);
 
-    void duplicate(ClusteredCollectionDescription& data, IntVector2D const& origWorldSize, IntVector2D const& worldSize);
+    void duplicate(CollectionDescription& data, IntVector2D const& origWorldSize, IntVector2D const& worldSize);
 
     struct GridMultiplyParameters
     {
@@ -100,7 +100,7 @@ public:
     addIfSpaceAvailable(CollectionDescription& result, Occupancy& cellOccupancy, CollectionDescription const& toAdd, float distance, IntVector2D const& worldSize);
 
     void reconnectCells(CollectionDescription& data, float maxDistance);
-    void correctConnections(ClusteredCollectionDescription& data, IntVector2D const& worldSize);
+    void correctConnections(CollectionDescription& data, IntVector2D const& worldSize);
 
     void randomizeCellColors(ClusteredCollectionDescription& data, std::vector<int> const& colorCodes);
     void randomizeGenomeColors(ClusteredCollectionDescription& data, std::vector<int> const& colorCodes);

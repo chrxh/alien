@@ -78,7 +78,7 @@ void ResizeWorldDialog::onResizing()
     auto timestep = _simulationFacade->getCurrentTimestep();
     auto worldSize = _simulationFacade->getWorldSize();
     auto parameters = _simulationFacade->getSimulationParameters();
-    auto content = _simulationFacade->getClusteredSimulationData();
+    auto content = _simulationFacade->getSimulationData();
     auto realtime = _simulationFacade->getRealTime();
     auto const& statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
     _simulationFacade->closeSimulation();
@@ -93,7 +93,7 @@ void ResizeWorldDialog::onResizing()
     if (_scaleContent) {
         DescriptionEditService::get().duplicate(content, origWorldSize, {_width, _height});
     }
-    _simulationFacade->setClusteredSimulationData(content);
+    _simulationFacade->setSimulationData(content);
     _simulationFacade->setStatisticsHistory(statistics);
     _simulationFacade->setRealTime(realtime);
     TemporalControlWindow::get().onSnapshot();

@@ -16,10 +16,8 @@ class DescriptionConverterService
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(DescriptionConverterService);
 
 public:
-    ClusteredCollectionDescription convertTOtoClusteredDescription(CollectionTO const& collectionTO) const;
     CollectionDescription convertTOtoDescription(CollectionTO const& collectionTO) const;
     OverlayDescription convertTOtoOverlayDescription(CollectionTO const& collectionTO) const;
-    CollectionTO convertDescriptionToTO(ClusteredCollectionDescription const& description) const;
     CollectionTO convertDescriptionToTO(CollectionDescription const& description) const;
     CollectionTO convertDescriptionToTO(CellDescription const& cell) const;
     CollectionTO convertDescriptionToTO(ParticleDescription const& particle) const;
@@ -27,27 +25,17 @@ public:
 private:
     DescriptionConverterService();
 
-	struct CreateClusterReturnData
-    {
-        ClusterDescription cluster;
-        std::unordered_map<int, int> cellTOIndexToCellDescIndex;
-	};
-    CreateClusterReturnData scanAndCreateClusterDescription(
-        CollectionTO const& collectionTO,
-        int startCellIndex,
-        std::unordered_set<int>& freeCellIndices,
-        std::unordered_map<uint64_t, uint64_t> const& genomeIdByTOIndex) const;
     CellDescription createCellDescription(CollectionTO const& collectionTO, int cellIndex, std::unordered_map<uint64_t, uint64_t> const& genomeIdByTOIndex) const;
     GenomeDescription_New createGenomeDescription(CollectionTO const& collectionTO, int genomeIndex, std::unordered_map<uint64_t, uint64_t>& genomeIdByTOIndex) const;
 
-    void addGenome(
+    void convertGenomeToTO(
         std::vector<GenomeTO>& genomeTOs,
         std::vector<GeneTO>& geneTOs,
         std::vector<NodeTO>& nodeTOs,
         std::vector<uint8_t>& heap,
         GenomeDescription_New const& genomeDesc,
         std::unordered_map<uint64_t, uint64_t>& genomeTOIndexById) const;
-    void addCell(
+    void convertCellToTO(
         std::vector<CellTO>& cellTOs,
         std::vector<uint8_t>& heap,
         std::unordered_map<uint64_t, uint64_t>& cellTOIndexById,

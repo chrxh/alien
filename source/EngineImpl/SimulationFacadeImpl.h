@@ -45,14 +45,11 @@ public:
     int getSyncSimulationWithRenderingRatio() const override;
     void setSyncSimulationWithRenderingRatio(int value) override;
 
-    ClusteredCollectionDescription getClusteredSimulationData() override;
     CollectionDescription getSimulationData() override;
-    ClusteredCollectionDescription getSelectedClusteredSimulationData(bool includeClusters) override;
     CollectionDescription getSelectedSimulationData(bool includeClusters) override;
     CollectionDescription getInspectedSimulationData(std::vector<uint64_t> objectIds) override;
 
     void addAndSelectSimulationData(CollectionDescription&& dataToAdd) override;
-    void setClusteredSimulationData(ClusteredCollectionDescription const& dataToUpdate) override;
     void setSimulationData(CollectionDescription const& dataToUpdate) override;
     void removeSelectedObjects(bool includeClusters) override;
     void relaxSelectedObjects(bool includeClusters) override;

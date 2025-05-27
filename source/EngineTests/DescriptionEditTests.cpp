@@ -16,18 +16,16 @@ public:
     virtual ~DescriptionEditTests() = default;
 
 protected:
-    bool areAngelsCorrect(ClusteredCollectionDescription const& clusteredData) const
+    bool areAngelsCorrect(CollectionDescription const& data) const
     {
-        for (auto const& cluster : clusteredData._clusters) {
-            for (auto const& cell : cluster._cells) {
-                if (!cell._connections.empty()) {
-                    float sumAngles = 0;
-                    for (auto const& connection : cell._connections) {
-                        sumAngles += connection._angleFromPrevious;
-                    }
-                    if (std::abs(sumAngles - 360.0f) > NEAR_ZERO) {
-                        return false;
-                    }
+        for (auto const& cell : data._cells) {
+            if (!cell._connections.empty()) {
+                float sumAngles = 0;
+                for (auto const& connection : cell._connections) {
+                    sumAngles += connection._angleFromPrevious;
+                }
+                if (std::abs(sumAngles - 360.0f) > NEAR_ZERO) {
+                    return false;
                 }
             }
         }
@@ -38,13 +36,14 @@ protected:
 
 TEST_F(DescriptionEditTests, correctConnections)
 {
-    auto data = DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().width(10).height(10).center({50.0f, 99.0f}));
-    _simulationFacade->setSimulationData(data);
-    auto clusteredData = _simulationFacade->getClusteredSimulationData();
+    auto origData = DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().width(10).height(10).center({50.0f, 99.0f}));
+    _simulationFacade->setSimulationData(origData);
 
-    DescriptionEditService::get().correctConnections(clusteredData, {100, 100});
+    auto data = _simulationFacade->getSimulationData();
 
-    EXPECT_TRUE(areAngelsCorrect(clusteredData));
+    DescriptionEditService::get().correctConnections(data, {100, 100});
+
+    EXPECT_TRUE(areAngelsCorrect(data));
 }
 
 
