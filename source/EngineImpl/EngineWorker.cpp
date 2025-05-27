@@ -3,11 +3,14 @@
 #include <chrono>
 
 #include "Base/ExitScopeGuard.h"
+#include "EngineInterface/Ids.h"
 #include "EngineGpuKernels/ObjectTO.cuh"
 #include "EngineGpuKernels/SimulationCudaFacade.cuh"
 #include "EngineGpuKernels/CollectionTOProvider.cuh"
 
 #include "DescriptionConverterService.h"
+#include "EngineInterface/DescriptionEditService.h"
+#include "EngineInterface/NumberGenerator.h"
 
 namespace
 {
@@ -171,9 +174,14 @@ void EngineWorker::setStatisticsHistory(StatisticsHistoryData const& data)
     _simulationCudaFacade->setStatisticsHistory(data);
 }
 
-void EngineWorker::addAndSelectSimulationData(CollectionDescription const& dataToUpdate)
+void EngineWorker::addAndSelectSimulationData(CollectionDescription&& dataToUpdate)
 {
     EngineWorkerGuard access(this);
+
+    auto maxIds = _simulationCudaFacade->getMaxIds();
+    NumberGenerator::get().adaptMaxIds(maxIds);
+
+    DescriptionEditService::get().assignNewObjectAndCreatureIds(dataToUpdate);
 
     auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(dataToUpdate);
 

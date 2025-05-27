@@ -8,10 +8,10 @@
 #include "Fonts/IconsFontAwesome5.h"
 #include "Fonts/AlienIconFont.h"
 
-#include "Base/NumberGenerator.h"
 #include "Base/Math.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/DescriptionEditService.h"
+#include "EngineInterface/NumberGenerator.h"
 #include "EngineInterface/SimulationFacade.h"
 
 #include "StyleRepository.h"
@@ -209,7 +209,7 @@ void CreatorWindow::onDrawing()
         }
     }
     DescriptionEditService::get().reconnectCells(_drawingDescription, 1.5f);
-    _simulationFacade->addAndSelectSimulationData(_drawingDescription);
+    _simulationFacade->addAndSelectSimulationData(CollectionDescription(_drawingDescription));
 
     _simulationFacade->reconnectSelectedObjects();
     EditorModel::get().update();
@@ -238,14 +238,14 @@ void CreatorWindow::createCell()
                     .sticky(_makeSticky)
                     .creatureId(creatureId);
     auto data = CollectionDescription().addCell(cell);
-    _simulationFacade->addAndSelectSimulationData(data);
+    _simulationFacade->addAndSelectSimulationData(std::move(data));
 }
 
 void CreatorWindow::createParticle()
 {
     auto particle = ParticleDescription().pos(getRandomPos()).energy(_energy);
     auto data = CollectionDescription().addParticle(particle);
-    _simulationFacade->addAndSelectSimulationData(data);
+    _simulationFacade->addAndSelectSimulationData(std::move(data));
 }
 
 void CreatorWindow::createRectangle()
@@ -265,7 +265,7 @@ void CreatorWindow::createRectangle()
                                                   .center(getRandomPos())
                                                   .barrier(_barrier));
 
-    _simulationFacade->addAndSelectSimulationData(data);
+    _simulationFacade->addAndSelectSimulationData(std::move(data));
 }
 
 void CreatorWindow::createHexagon()
@@ -282,7 +282,7 @@ void CreatorWindow::createHexagon()
                                                             .color(EditorModel::get().getDefaultColorCode())
                                                             .center(getRandomPos())
                                                             .barrier(_barrier));
-    _simulationFacade->addAndSelectSimulationData(data);
+    _simulationFacade->addAndSelectSimulationData(std::move(data));
 }
 
 void CreatorWindow::createDisc()
@@ -307,7 +307,7 @@ void CreatorWindow::createDisc()
             auto relPos = Math::unitVectorOfAngle(angle) * radius;
 
             data.addCell(CellDescription()
-                             .id(NumberGenerator::get().getId())
+                             .id(NumberGenerator::get().createObjectId())
                              .energy(_energy)
                              .stiffness(_stiffness)
                              .sticky(_makeSticky)
@@ -319,7 +319,7 @@ void CreatorWindow::createDisc()
 
     DescriptionEditService::get().reconnectCells(data, _cellDistance * 1.7f);
     data.setCenter(getRandomPos());
-    _simulationFacade->addAndSelectSimulationData(data);
+    _simulationFacade->addAndSelectSimulationData(std::move(data));
 }
 
 void CreatorWindow::validateAndCorrect()

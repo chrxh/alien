@@ -19,10 +19,13 @@ add_library(EngineInterface
     GenomeDescriptions.cpp
     GenomeDescriptions.h
     GpuSettings.h
+    Ids.h
     InspectedEntityIds.h
     LocationHelper.cpp
     LocationHelper.h
     MutationType.h
+    NumberGenerator.cpp
+    NumberGenerator.h
     OverlayDescriptions.h
     ParametersEditService.cpp
     ParametersEditService.h

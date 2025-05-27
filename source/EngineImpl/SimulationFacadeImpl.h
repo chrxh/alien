@@ -51,7 +51,7 @@ public:
     CollectionDescription getSelectedSimulationData(bool includeClusters) override;
     CollectionDescription getInspectedSimulationData(std::vector<uint64_t> objectIds) override;
 
-    void addAndSelectSimulationData(CollectionDescription const& dataToAdd) override;
+    void addAndSelectSimulationData(CollectionDescription&& dataToAdd) override;
     void setClusteredSimulationData(ClusteredCollectionDescription const& dataToUpdate) override;
     void setSimulationData(CollectionDescription const& dataToUpdate) override;
     void removeSelectedObjects(bool includeClusters) override;

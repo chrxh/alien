@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Definitions.h"
-#include "Singleton.h"
+#include "Base/Singleton.h"
+
+#include "Ids.h"
 
 class NumberGenerator
 {
@@ -15,17 +16,21 @@ public:
     double getRandomReal();
     double getRandomReal(double min, double max);
     float getRandomFloat(float min, float max);
+    uint32_t getLargeRandomInt(uint32_t range);
 
-	uint64_t getId();
+    uint64_t createObjectId();
+    uint64_t createCreatureId();
 
-	uint32_t getLargeRandomInt(uint32_t range);
-    uint32_t getNumberFromArray();
+    void adaptMaxIds(Ids const& ids);
 
 private:
     NumberGenerator();
 
-	int _index = 0;
+    uint32_t getNumberFromArray();
+
+	int _currentRandomNumberIndex = 0;
 	std::vector<uint32_t> _arrayOfRandomNumbers;
-	uint64_t _runningNumber = 0;
+
+    Ids _ids;
 };
 

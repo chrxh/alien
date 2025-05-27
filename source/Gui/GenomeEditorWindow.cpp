@@ -1026,7 +1026,7 @@ void GenomeEditorWindow::onCreateSpore()
                     .color(EditorModel::get().getDefaultColorCode())
                     .cellTypeData(ConstructorDescription().genome(genome));
     auto data = CollectionDescription().addCell(cell);
-    _simulationFacade->addAndSelectSimulationData(data);
+    _simulationFacade->addAndSelectSimulationData(std::move(data));
     EditorModel::get().update();
 
     printOverlayMessage("Spore created");

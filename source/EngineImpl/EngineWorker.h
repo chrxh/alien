@@ -64,7 +64,7 @@ public:
     StatisticsHistory const& getStatisticsHistory() const;
     void setStatisticsHistory(StatisticsHistoryData const& data);
 
-    void addAndSelectSimulationData(CollectionDescription const& dataToUpdate);
+    void addAndSelectSimulationData(CollectionDescription&& dataToUpdate);
     void setClusteredSimulationData(ClusteredCollectionDescription const& dataToUpdate);
     void setSimulationData(CollectionDescription const& dataToUpdate);
     void removeSelectedObjects(bool includeClusters);

@@ -17,6 +17,7 @@
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/GpuSettings.h"
 #include "EngineInterface/SpaceCalculator.h"
+#include "EngineInterface/Ids.h"
 
 #include "DataAccessKernels.cuh"
 #include "ObjectTO.cuh"
@@ -301,6 +302,11 @@ void _SimulationCudaFacade::relaxSelectedObjects(bool includeClusters)
 {
     _editKernels->relaxSelectedObjects(_settings.gpuSettings, getSimulationDataPtrCopy(), includeClusters);
     syncAndCheck();
+}
+
+Ids _SimulationCudaFacade::getMaxIds() const
+{
+    return _cudaSimulationData->primaryNumberGen.getIds_host();
 }
 
 void _SimulationCudaFacade::uniformVelocitiesForSelectedObjects(bool includeClusters)

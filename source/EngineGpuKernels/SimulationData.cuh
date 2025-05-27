@@ -37,8 +37,8 @@ struct SimulationData
     UnmanagedArray<CellTypeOperation> cellTypeOperations[CellType_Count];
 
     // Number generators
-    CudaNumberGenerator numberGen1;
-    CudaNumberGenerator numberGen2;  //second random number generator used in combination with the first generator for evaluating very low probabilities
+    CudaNumberGenerator primaryNumberGen;
+    CudaNumberGenerator secondaryNumberGen;  // Secondary random number generator used in combination with the primary generator for evaluating very low probabilities
 
     void init(int2 const& worldSize, uint64_t timestep);
     bool shouldResize(ArraySizesForGpu const& sizeDelta);

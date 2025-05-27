@@ -41,3 +41,5 @@ class ShapeGeneratorResult;
 class StatisticsHistory;
 
 class SimulationParametersService;
+
+struct Ids;

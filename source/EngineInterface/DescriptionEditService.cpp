@@ -4,8 +4,9 @@
 #include <boost/range/adaptor/indexed.hpp>
 #include <boost/range/adaptor/map.hpp>
 
-#include "Base/NumberGenerator.h"
 #include "Base/Math.h"
+#include "EngineInterface/NumberGenerator.h"
+
 #include "GenomeDescriptions.h"
 #include "SpaceCalculator.h"
 #include "GenomeDescriptionConverterService.h"
@@ -17,7 +18,7 @@ CollectionDescription DescriptionEditService::createRect(CreateRectParameters co
     for (int i = 0; i < parameters._width; ++i) {
         for (int j = 0; j < parameters._height; ++j) {
             result.addCell(CellDescription()
-                               .id(NumberGenerator::get().getId())
+                               .id(NumberGenerator::get().createObjectId())
                                .pos({toFloat(i) * parameters._cellDistance, toFloat(j) * parameters._cellDistance})
                                .energy(parameters._energy)
                                .stiffness(parameters._stiffness)
@@ -45,7 +46,7 @@ CollectionDescription DescriptionEditService::createHex(CreateHexParameters cons
 
             //create cell: upper layer
             result.addCell(CellDescription()
-                               .id(NumberGenerator::get().getId())
+                               .id(NumberGenerator::get().createObjectId())
                                .cellTypeData(StructureCellDescription())
                                .energy(parameters._energy)
                                .stiffness(parameters._stiffness)
@@ -58,7 +59,7 @@ CollectionDescription DescriptionEditService::createHex(CreateHexParameters cons
             //create cell: under layer (except for 0-layer)
             if (j > 0) {
                 result.addCell(CellDescription()
-                                 .id(NumberGenerator::get().getId())
+                                   .id(NumberGenerator::get().createObjectId())
                                    .cellTypeData(StructureCellDescription())
                                    .energy(parameters._energy)
                                    .stiffness(parameters._stiffness)
@@ -83,7 +84,7 @@ CollectionDescription DescriptionEditService::createUnconnectedCircle(CreateUnco
 
     if (parameters._radius <= 1 + NEAR_ZERO) {
         result.addCell(CellDescription()
-                           .id(NumberGenerator::get().getId())
+                           .id(NumberGenerator::get().createObjectId())
                            .cellTypeData(StructureCellDescription())
                            .pos(parameters._center)
                            .energy(parameters._energy)
@@ -109,7 +110,7 @@ CollectionDescription DescriptionEditService::createUnconnectedCircle(CreateUnco
                 continue;
             }
             result.addCell(CellDescription()
-                               .id(NumberGenerator::get().getId())
+                               .id(NumberGenerator::get().createObjectId())
                                .cellTypeData(StructureCellDescription())
                                .energy(parameters._energy)
                                .stiffness(parameters._stiffness)
@@ -124,52 +125,12 @@ CollectionDescription DescriptionEditService::createUnconnectedCircle(CreateUnco
     return result;
 }
 
-namespace
-{
-    void generateNewIds(CollectionDescription& data)
-    {
-        auto& numberGen = NumberGenerator::get();
-        std::unordered_map<uint64_t, uint64_t> newByOldIds;
-        for (auto& cell : data._cells) {
-            uint64_t newId = numberGen.getId();
-            newByOldIds.insert_or_assign(cell._id, newId);
-            cell._id = newId;
-        }
-
-        for (auto& cell : data._cells) {
-            for (auto& connection : cell._connections) {
-                connection._cellId = newByOldIds.at(connection._cellId);
-            }
-        }
-    }
-
-    void generateNewIds(ClusterDescription& cluster)
-    {
-        auto& numberGen = NumberGenerator::get();
-        //cluster.id = numberGen.getId();
-        std::unordered_map<uint64_t, uint64_t> newByOldIds;
-        for (auto& cell : cluster._cells) {
-            uint64_t newId = numberGen.getId();
-            newByOldIds.insert_or_assign(cell._id, newId);
-            cell._id = newId;
-        }
-
-        for (auto& cell : cluster._cells) {
-            for (auto& connection : cell._connections) {
-                connection._cellId = newByOldIds.at(connection._cellId);
-            }
-        }
-    }
-}
-
 void DescriptionEditService::duplicate(ClusteredCollectionDescription& data, IntVector2D const& origSize, IntVector2D const& size)
 {
     ClusteredCollectionDescription result;
 
     for (int incX = 0; incX < size.x; incX += origSize.x) {
         for (int incY = 0; incY < size.y; incY += origSize.y) {
-            generateNewCreatureIds(data);
-
             for (auto cluster : data._clusters) {
                 auto origPos = cluster.getClusterPosFromCells();
                 RealVector2D clusterPos = {origPos.x + incX, origPos.y + incY};
@@ -180,8 +141,6 @@ void DescriptionEditService::duplicate(ClusteredCollectionDescription& data, Int
                             removeMetadata(cell);
                         }
                     }
-                    generateNewIds(cluster);
-
                     result.addCluster(cluster);
                 }
             }
@@ -189,13 +148,13 @@ void DescriptionEditService::duplicate(ClusteredCollectionDescription& data, Int
                 auto origPos = particle._pos;
                 particle._pos = RealVector2D{origPos.x + incX, origPos.y + incY};
                 if (particle._pos.x < size.x && particle._pos.y < size.y) {
-                    particle.id(NumberGenerator::get().getId());
                     result.addParticle(particle);
                 }
             }
         }
     }
     data = result;
+    assignNewObjectAndCreatureIds(data);
 }
 
 namespace
@@ -252,8 +211,6 @@ CollectionDescription DescriptionEditService::gridMultiply(CollectionDescription
                 {i * parameters._horizontalVelXinc + j * parameters._verticalVelXinc, i * parameters._horizontalVelYinc + j * parameters._verticalVelYinc},
                 i * parameters._horizontalAngularVelInc + j * parameters._verticalAngularVelInc);
 
-            generateNewIds(templateData);
-            generateNewCreatureIds(templateData);
             result.add(templateData);
         }
     }
@@ -284,7 +241,6 @@ CollectionDescription DescriptionEditService::randomMultiply(
 
     //do multiplication
     CollectionDescription result = input;
-    generateNewIds(result);
     auto& numberGen = NumberGenerator::get();
     for (int i = 0; i < parameters._number; ++i) {
         bool overlapping = false;
@@ -316,8 +272,6 @@ CollectionDescription DescriptionEditService::randomMultiply(
             overlappingCheckSuccessful = false;
         }
 
-        generateNewIds(copy);
-        generateNewCreatureIds(copy);
         result.add(copy);
 
         //add copy to existentData for overlapping check
@@ -498,6 +452,50 @@ void DescriptionEditService::removeMetadata(CollectionDescription& data)
     }
 }
 
+void DescriptionEditService::assignNewObjectAndCreatureIds(CollectionDescription& data)
+{
+    std::unordered_map<uint64_t, uint64_t> oldToNewObjectIds;
+    std::unordered_map<uint64_t, uint64_t> oldToNewCreatureIds;
+
+    auto replaceCreatureId = [&](uint64_t& oldCreatureId) {
+        auto findResult = oldToNewCreatureIds.find(oldCreatureId);
+        if (findResult != oldToNewCreatureIds.end()) {
+            oldCreatureId = findResult->second;
+        } else {
+            auto newCreatureId = NumberGenerator::get().createObjectId();
+            oldToNewCreatureIds.emplace(oldCreatureId, newCreatureId);
+            oldCreatureId = newCreatureId;
+        }
+    };
+    for (auto& cell : data._cells) {
+        auto newObjectId = NumberGenerator::get().createObjectId();
+        oldToNewObjectIds.emplace(cell._id, newObjectId);
+        cell._id = newObjectId;
+
+        replaceCreatureId(cell._creatureId);
+
+        if (cell.getCellType() == CellType_Constructor) {
+            auto& offspringCreatureId = std::get<ConstructorDescription>(cell._cellTypeData)._offspringCreatureId;
+            replaceCreatureId(offspringCreatureId);
+        }
+    }
+    for (auto& cell : data._cells) {
+        for (auto& connection : cell._connections) {
+            auto findResult = oldToNewObjectIds.find(connection._cellId);
+            if (findResult != oldToNewObjectIds.end()) {
+                connection._cellId = findResult->second;
+            }
+        }
+    }
+    for (auto& particle : data._particles) {
+        particle._id = NumberGenerator::get().createObjectId();
+    }
+}
+
+void DescriptionEditService::assignNewObjectAndCreatureIds(ClusteredCollectionDescription& data)
+{
+}
+
 namespace
 {
     int getNewCreatureId(int origCreatureId, std::unordered_map<int, int>& origToNewCreatureIdMap)
@@ -516,37 +514,6 @@ namespace
     };
 
 }
-
-void DescriptionEditService::generateNewCreatureIds(CollectionDescription& data)
-{
-    std::unordered_map<int, int> origToNewCreatureIdMap;
-    for (auto& cell : data._cells) {
-        if (cell._creatureId != 0) {
-            cell._creatureId = getNewCreatureId(cell._creatureId, origToNewCreatureIdMap);
-        }
-        if (cell.getCellType() == CellType_Constructor) {
-            auto& offspringCreatureId = std::get<ConstructorDescription>(cell._cellTypeData)._offspringCreatureId;
-            offspringCreatureId = getNewCreatureId(offspringCreatureId, origToNewCreatureIdMap);
-        }
-    }
-}
-
-void DescriptionEditService::generateNewCreatureIds(ClusteredCollectionDescription& data)
-{
-    std::unordered_map<int, int> origToNewCreatureIdMap;
-    for (auto& cluster: data._clusters) {
-        for (auto& cell : cluster._cells) {
-            if (cell._creatureId != 0) {
-                cell._creatureId = getNewCreatureId(cell._creatureId, origToNewCreatureIdMap);
-            }
-            if (cell.getCellType() == CellType_Constructor) {
-                auto& offspringCreatureId = std::get<ConstructorDescription>(cell._cellTypeData)._offspringCreatureId;
-                offspringCreatureId = getNewCreatureId(offspringCreatureId, origToNewCreatureIdMap);
-            }
-        }
-    }
-}
-
 
 void DescriptionEditService::removeMetadata(CellDescription& cell)
 {

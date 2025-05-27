@@ -171,7 +171,7 @@ void MultiplierWindow::onBuild()
         }
     }();
     _simulationFacade->removeSelectedObjects(true);
-    _simulationFacade->addAndSelectSimulationData(multiplicationResult);
+    _simulationFacade->addAndSelectSimulationData(std::move(multiplicationResult));
 
     EditorModel::get().update();
     _selectionDataAfterMultiplication = EditorModel::get().getSelectionShallowData();
@@ -180,7 +180,7 @@ void MultiplierWindow::onBuild()
 void MultiplierWindow::onUndo()
 {
     _simulationFacade->removeSelectedObjects(true);
-    _simulationFacade->addAndSelectSimulationData(_origSelection);
+    _simulationFacade->addAndSelectSimulationData(CollectionDescription(_origSelection));
     _selectionDataAfterMultiplication = std::nullopt;
 }
 

@@ -27,7 +27,7 @@ public:
     T** _data;
     Array() {}
 
-    //methods for host
+    // Methods for host
     __host__ __inline__ void init()
     {
         T* data = nullptr;
@@ -115,7 +115,7 @@ public:
         return getNumEntries_host() + arraySizeInc > toUInt64(getCapacity_host() * Const::ArrayFillPercentage);
     }
 
-    //methods for device
+    // Methods for device
     __device__ __inline__ T* getArray() const { return *_data; }
 
     __device__ __inline__ uint64_t getCapacity() const { return *_capacity; }
@@ -204,7 +204,7 @@ public:
     }
 };
 
-//data of UnmanagedArray is stored elsewhere
+// Data of UnmanagedArray is stored elsewhere
 template <typename T>
 class UnmanagedArray
 {
