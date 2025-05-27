@@ -372,7 +372,7 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
         }
 
         if (Math::length(cell->shared1) > ParameterCalculator::calcParameter(cudaSimulationParameters.maxForce, data, cell->pos, cell->color)) {
-            if (data.numberGen1.random() < cudaSimulationParameters.maxForceDecayProbability) {
+            if (data.primaryNumberGen.random() < cudaSimulationParameters.maxForceDecayProbability) {
                 CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
             }
         }
@@ -740,7 +740,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
         if (cell->barrier) {
             continue;
         }
-        if (data.numberGen1.random() < cudaSimulationParameters.radiationProbability) {
+        if (data.primaryNumberGen.random() < cudaSimulationParameters.radiationProbability) {
 
             auto radiationFactor = 0.0f;
             if (cell->energy > cudaSimulationParameters.radiationType2_energyThreshold.value[cell->color]) {
@@ -755,11 +755,11 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
                 auto const& cellEnergy = cell->energy;
                 auto energyLoss = cellEnergy * radiationFactor;
                 energyLoss = energyLoss / cudaSimulationParameters.radiationProbability;
-                energyLoss = 2 * energyLoss * data.numberGen1.random();
+                energyLoss = 2 * energyLoss * data.primaryNumberGen.random();
                 if (cellEnergy > 1) {
 
                     float2 particleVel = cell->vel * cudaSimulationParameters.radiationVelocityMultiplier
-                        + Math::unitVectorOfAngle(data.numberGen1.random() * 360) * cudaSimulationParameters.radiationVelocityPerturbation;
+                        + Math::unitVectorOfAngle(data.primaryNumberGen.random() * 360) * cudaSimulationParameters.radiationVelocityPerturbation;
                     float2 particlePos = cell->pos + Math::normalized(particleVel) * 1.5f
                         - particleVel;  // minus particleVel because particle will still be moved in current time step
                     data.cellMap.correctPosition(particlePos);
@@ -794,7 +794,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
 
         if (cell->livingState == LivingState_Dying || cell->livingState == LivingState_Detaching) {
             auto cellDeathProbability = ParameterCalculator::calcParameter(cudaSimulationParameters.cellDeathProbability, data, cell->pos, cell->color);
-            if (data.numberGen1.random() < cellDeathProbability) {
+            if (data.primaryNumberGen.random() < cellDeathProbability) {
                 CellConnectionProcessor::scheduleDeleteCell(data, index);
             }
         }

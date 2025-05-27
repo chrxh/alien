@@ -50,7 +50,7 @@ __inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleTO c
     Particle* particle = _data->objects.heap.getTypedSubArray<Particle>(1);
     *particlePointer = particle;
     
-    particle->id = createIds ? _data->numberGen1.createNewId() : particleTO.id;
+    particle->id = createIds ? _data->primaryNumberGen.createObjectId() : particleTO.id;
     particle->pos = particleTO.pos;
     _map.correctPosition(particle->pos);
     particle->vel = particleTO.vel;
@@ -185,7 +185,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromTO(CollectionTO const& 
     *cellPointer = cell;
 
     changeCellFromTO(collectionTO, cellTO, cell, createIds);
-    cell->id = createIds ? _data->numberGen1.createNewId() : cellTO.id;
+    cell->id = createIds ? _data->primaryNumberGen.createObjectId() : cellTO.id;
     cell->locked = 0;
     cell->detached = 0;
     cell->selected = 0;
@@ -399,7 +399,7 @@ ObjectFactory::createParticle(float energy, float2 const& pos, float2 const& vel
     Particle** particlePointer = _data->objects.particles.getNewElement();
     Particle* particle = _data->objects.heap.getTypedSubArray<Particle>(1);
     *particlePointer = particle;
-    particle->id = _data->numberGen1.createNewId();
+    particle->id = _data->primaryNumberGen.createObjectId();
     particle->selected = 0;
     particle->locked = 0;
     particle->energy = energy;
@@ -416,11 +416,11 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     auto cellPointers = _data->objects.cells.getNewElement();
     *cellPointers = cell;
 
-    cell->id = _data->numberGen1.createNewId();
+    cell->id = _data->primaryNumberGen.createObjectId();
     cell->pos = pos;
     cell->vel = vel;
     cell->energy = energy;
-    cell->stiffness = _data->numberGen1.random();
+    cell->stiffness = _data->primaryNumberGen.random();
     cell->numConnections = 0;
     cell->livingState = LivingState_Ready;
     cell->locked = 0;
@@ -459,7 +459,7 @@ __inline__ __device__ Cell* ObjectFactory::createCell(uint64_t& cellPointerIndex
     auto cellPointer = _data->objects.cells.getNewElement(&cellPointerIndex);
     *cellPointer = cell;
 
-    cell->id = _data->numberGen1.createNewId();
+    cell->id = _data->primaryNumberGen.createObjectId();
     cell->stiffness = 1.0f;
     cell->selected = 0;
     cell->detached = 0;

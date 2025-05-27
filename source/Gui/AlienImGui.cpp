@@ -10,10 +10,10 @@
 #include "Fonts/IconsFontAwesome5.h"
 
 #include "Base/Math.h"
-#include "Base/NumberGenerator.h"
 #include "Base/StringHelper.h"
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/EngineConstants.h"
+#include "EngineInterface/NumberGenerator.h"
 #include "EngineInterface/SimulationParameters.h"
 
 #include "CellTypeStrings.h"

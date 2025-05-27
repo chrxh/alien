@@ -164,13 +164,13 @@ __inline__ __device__ void RadiationProcessor::splitting(SimulationData& data)
         if (particle == nullptr) {
             continue;
         }
-        if (data.numberGen1.random() >= 0.01f) {
+        if (data.primaryNumberGen.random() >= 0.01f) {
             continue;
         }
 
         if (particle->energy > cudaSimulationParameters.particleSplitEnergy.value[particle->color]) {
             particle->energy *= 0.5f;
-            auto velPerturbation = Math::unitVectorOfAngle(data.numberGen1.random() * 360);
+            auto velPerturbation = Math::unitVectorOfAngle(data.primaryNumberGen.random() * 360);
 
             float2 otherPos = particle->pos + velPerturbation / 5;
             data.particleMap.correctPosition(otherPos);
@@ -223,8 +223,8 @@ __inline__ __device__ void RadiationProcessor::radiate(SimulationData& data, Cel
 
     float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
         + float2{
-            (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
-            (data.numberGen1.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
+            (data.primaryNumberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
+            (data.primaryNumberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
     float2 particlePos = cell->pos + Math::normalized(particleVel) * 1.5f - particleVel;
     data.cellMap.correctPosition(particlePos);
 
@@ -242,7 +242,7 @@ __inline__ __device__ void RadiationProcessor::createEnergyParticle(SimulationDa
             sumActiveRatios += cudaSimulationParameters.sourceRelativeStrength.sourceValues[index].value;
         }
         if (sumActiveRatios > 0) {
-            auto randomRatioValue = data.numberGen1.random(1.0f);
+            auto randomRatioValue = data.primaryNumberGen.random(1.0f);
             sumActiveRatios = 0.0f;
             auto sourceIndex = 0;
             auto matchSource = false;
@@ -263,8 +263,8 @@ __inline__ __device__ void RadiationProcessor::createEnergyParticle(SimulationDa
                     auto radius = max(1.0f, cudaSimulationParameters.sourceCircularRadius.sourceValues[sourceIndex]);
                     float2 delta{0, 0};
                     for (int i = 0; i < 10; ++i) {
-                        delta.x = data.numberGen1.random() * radius * 2 - radius;
-                        delta.y = data.numberGen1.random() * radius * 2 - radius;
+                        delta.x = data.primaryNumberGen.random() * radius * 2 - radius;
+                        delta.y = data.primaryNumberGen.random() * radius * 2 - radius;
                         if (Math::length(delta) <= radius) {
                             break;
                         }
@@ -272,20 +272,20 @@ __inline__ __device__ void RadiationProcessor::createEnergyParticle(SimulationDa
                     pos += delta;
                     if (cudaSimulationParameters.sourceRadiationAngle.sourceValues[sourceIndex].enabled) {
                         vel = Math::unitVectorOfAngle(cudaSimulationParameters.sourceRadiationAngle.sourceValues[sourceIndex].value)
-                            * data.numberGen1.random(0.5f, 1.0f);
+                            * data.primaryNumberGen.random(0.5f, 1.0f);
                     } else {
-                        vel = Math::normalized(delta) * data.numberGen1.random(0.5f, 1.0f);
+                        vel = Math::normalized(delta) * data.primaryNumberGen.random(0.5f, 1.0f);
                     }
                 }
                 if (cudaSimulationParameters.sourceShapeType.sourceValues[sourceIndex] == SourceShapeType_Rectangular) {
                     auto const& rect = cudaSimulationParameters.sourceRectangularRect.sourceValues[sourceIndex];
                     float2 delta;
-                    delta.x = data.numberGen1.random() * rect.x - rect.x / 2;
-                    delta.y = data.numberGen1.random() * rect.y - rect.y / 2;
+                    delta.x = data.primaryNumberGen.random() * rect.x - rect.x / 2;
+                    delta.y = data.primaryNumberGen.random() * rect.y - rect.y / 2;
                     pos += delta;
                     if (cudaSimulationParameters.sourceRadiationAngle.sourceValues[sourceIndex].enabled) {
                         vel = Math::unitVectorOfAngle(cudaSimulationParameters.sourceRadiationAngle.sourceValues[sourceIndex].value)
-                            * data.numberGen1.random(0.5f, 1.0f);
+                            * data.primaryNumberGen.random(0.5f, 1.0f);
                     } else {
                         auto roundSize = min(rect.x, rect.y) / 2;
                         float2 corner1{-rect.x / 2, -rect.y / 2};
@@ -320,7 +320,7 @@ __inline__ __device__ void RadiationProcessor::createEnergyParticle(SimulationDa
                                 vel.y = 1;
                             }
                         }
-                        vel = vel * data.numberGen1.random(0.5f, 1.0f);
+                        vel = vel * data.primaryNumberGen.random(0.5f, 1.0f);
                     }
                 }
             }

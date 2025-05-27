@@ -94,7 +94,7 @@ ArraySizesForGpu _DataAccessKernelsService::estimateCapacityNeededForGpu(GpuSett
 void _DataAccessKernelsService::addData(GpuSettings const& gpuSettings, SimulationData const& data, CollectionTO const& dataTO, bool selectData, bool createIds)
 {
     KERNEL_CALL_1_1(cudaSaveNumEntries, data);
-    KERNEL_CALL(cudaAdaptNumberGenerator, data.numberGen1, dataTO);
+    KERNEL_CALL(cudaAdaptNumberGenerator, data.primaryNumberGen, dataTO);
 
     KERNEL_CALL_1_1(cudaGetArraysBasedOnTO, data, dataTO, _cudaCellArray);
     KERNEL_CALL(cudaSetGenomeDataFromTO, data, dataTO, createIds);
@@ -103,7 +103,7 @@ void _DataAccessKernelsService::addData(GpuSettings const& gpuSettings, Simulati
     if (selectData) {
         _editKernels->rolloutSelection(gpuSettings, data);
     }
-    KERNEL_CALL(cudaAdaptNumberGenerator, data.numberGen1, dataTO);
+    KERNEL_CALL(cudaAdaptNumberGenerator, data.primaryNumberGen, dataTO);
 }
 
 void _DataAccessKernelsService::clearData(GpuSettings const& gpuSettings, SimulationData const& data)

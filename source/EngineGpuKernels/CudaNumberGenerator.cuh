@@ -7,6 +7,8 @@
 
 #include <cuda/helper_cuda.h>
 
+#include "EngineInterface/Ids.h"
+
 #include "Array.cuh"
 #include "CudaMemoryManager.cuh"
 #include "Base.cuh"
@@ -14,38 +16,43 @@
 
 class CudaNumberGenerator
 {
-private:
-    unsigned int* _currentIndex;
-    int* _array;
-    int _size;
-
-    unsigned long long int* _currentId;
-    unsigned int* _currentSmallId;
-
 public:
-    void init(int size)
+
+    // Methods for host
+    __host__ void init(int size)
     {
         _size = size;
 
-        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(1, _currentIndex);
-        CudaMemoryManager::getInstance().acquireMemory<int>(size, _array);
-        CudaMemoryManager::getInstance().acquireMemory<unsigned long long int>(1, _currentId);
-        CudaMemoryManager::getInstance().acquireMemory<unsigned int>(1, _currentSmallId);
+        CudaMemoryManager::getInstance().acquireMemory(1, _currentRandomNumberIndex);
+        CudaMemoryManager::getInstance().acquireMemory(size, _array);
+        CudaMemoryManager::getInstance().acquireMemory(size, _ids);
 
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_currentIndex, 0, sizeof(unsigned int)));
-        unsigned long long int hostCurrentId = 1;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_currentId, &hostCurrentId, sizeof(unsigned long long int), cudaMemcpyHostToDevice));
-        unsigned int hostCurrentSmallId = 1;
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_currentSmallId, &hostCurrentSmallId, sizeof(unsigned int), cudaMemcpyHostToDevice));
-
+        CHECK_FOR_CUDA_ERROR(cudaMemset(_currentRandomNumberIndex, 0, sizeof(_currentRandomNumberIndex)));
         std::vector<int> randomNumbers(size);
         for (int i = 0; i < size; ++i) {
             randomNumbers[i] = rand();
         }
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(_array, randomNumbers.data(), sizeof(int) * size, cudaMemcpyHostToDevice));
+
+        Ids hostIds;
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(_ids, &hostIds, sizeof(hostIds), cudaMemcpyHostToDevice));
     }
 
+    __host__ void free()
+    {
+        CudaMemoryManager::getInstance().freeMemory(_currentRandomNumberIndex);
+        CudaMemoryManager::getInstance().freeMemory(_array);
+        CudaMemoryManager::getInstance().freeMemory(_ids);
+    }
 
+    __host__ __inline__ Ids getIds_host()
+    {
+        Ids hostIds;
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&hostIds, _ids, sizeof(hostIds), cudaMemcpyDeviceToHost));
+        return hostIds;
+    }
+
+    // Methods for device
     __device__ __inline__ int random(int maxVal)
     {
         int number = getRandomNumber();
@@ -81,24 +88,27 @@ public:
         }
     }
 
-    __device__ __inline__ unsigned long long int createNewId() { return atomicAdd(_currentId, 1); }
-    __device__ __inline__ unsigned int createNewSmallId() { return atomicAdd(_currentSmallId, 1); }
+    __device__ __inline__ uint64_t createObjectId() { return atomicAdd(&_ids->currentObjectId, 1); }
+    __device__ __inline__ uint64_t createCreatureId() { return atomicAdd(&_ids->currentCreatureId, 1); }
+    __device__ __inline__ uint32_t createMutationId() { return atomicAdd(&_ids->currentMutationId, 1); }
 
-    __device__ __inline__ void adaptMaxId(unsigned long long int id) { atomicMax(_currentId, id + 1); }
-    __device__ __inline__ void adaptMaxSmallId(unsigned int id) { atomicMax(_currentSmallId, id + 1); }
-
-    void free()
+    __device__ __inline__ void adaptMaxIds(Ids const& ids)
     {
-        CudaMemoryManager::getInstance().freeMemory(_currentIndex);
-        CudaMemoryManager::getInstance().freeMemory(_array);
-        CudaMemoryManager::getInstance().freeMemory(_currentId);
-        CudaMemoryManager::getInstance().freeMemory(_currentSmallId);
+        atomicMax(&_ids->currentObjectId, ids.currentObjectId + 1);
+        atomicMax(&_ids->currentCreatureId, ids.currentCreatureId + 1);
+        atomicMax(&_ids->currentMutationId, ids.currentMutationId + 1);
     }
 
 private:
     __device__ __inline__ int getRandomNumber()
     {
-        int index = atomicInc(_currentIndex, _size - 1);
+        int index = atomicInc(_currentRandomNumberIndex, _size - 1);
         return _array[index];
     }
+
+    uint32_t* _currentRandomNumberIndex = nullptr;
+    int* _array = nullptr;
+    int _size = 0;
+
+    Ids* _ids = nullptr;
 };

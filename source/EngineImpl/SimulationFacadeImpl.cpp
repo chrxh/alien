@@ -108,9 +108,9 @@ CollectionDescription _SimulationFacadeImpl::getInspectedSimulationData(std::vec
     return _worker.getInspectedSimulationData(objectIds);
 }
 
-void _SimulationFacadeImpl::addAndSelectSimulationData(CollectionDescription const& dataToAdd)
+void _SimulationFacadeImpl::addAndSelectSimulationData(CollectionDescription&& dataToAdd)
 {
-    _worker.addAndSelectSimulationData(dataToAdd);
+    _worker.addAndSelectSimulationData(std::move(dataToAdd));
 }
 
 void _SimulationFacadeImpl::setClusteredSimulationData(ClusteredCollectionDescription const& dataToUpdate)

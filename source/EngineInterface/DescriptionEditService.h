@@ -115,8 +115,8 @@ public:
     std::vector<CellOrParticleDescription> getConstructorToMainGenomes(CollectionDescription const& data);
 
     void removeMetadata(CollectionDescription& data);
-    void generateNewCreatureIds(CollectionDescription& data);
-    void generateNewCreatureIds(ClusteredCollectionDescription& data);
+
+    void assignNewObjectAndCreatureIds(CollectionDescription& data);
 
 private:
     void removeMetadata(CellDescription& cell);

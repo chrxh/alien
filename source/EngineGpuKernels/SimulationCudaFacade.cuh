@@ -21,6 +21,7 @@
 #include "EngineInterface/SimulationParametersUpdateConfig.h"
 #include "EngineInterface/StatisticsRawData.h"
 #include "EngineInterface/StatisticsHistory.h"
+#include "EngineInterface/Definitions.h"
 
 #include "Definitions.cuh"
 
@@ -43,6 +44,8 @@ public:
 
     void calcTimestep(uint64_t timesteps, bool forceUpdateStatistics);
     void applyCataclysm(int power);
+
+    Ids getMaxIds() const;
 
     void drawVectorGraphics(float2 const& rectUpperLeft, float2 const& rectLowerRight, void* cudaResource, int2 const& imageSize, double zoom);
     CollectionTO getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);  // DataTO is unmanaged (i.e. must be deleted by the caller)

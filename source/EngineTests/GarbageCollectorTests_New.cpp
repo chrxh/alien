@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "Base/NumberGenerator.h"
+#include "EngineInterface/NumberGenerator.h"
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationFacade.h"
@@ -42,7 +42,6 @@ TEST_P(GarbageCollectorTests_AllCleanupActions_New, cleanupAfterTimestep)
     auto data = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().layers(10).center({100.0f, 100.0}));
     for (int i = 0; i < 100; ++i) {
         data.addParticle(ParticleDescription()
-                             .id(numberGen.getId())
                              .pos({numberGen.getRandomFloat(0.0f, 100.0f), numberGen.getRandomFloat(0.0f, 100.0f)})
                              .vel({numberGen.getRandomFloat(-1.0f, 1.0f), numberGen.getRandomFloat(-1.0f, 1.0f)})
                              .energy(numberGen.getRandomFloat(0.0f, 100.0f)));

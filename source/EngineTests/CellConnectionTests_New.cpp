@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "Base/NumberGenerator.h"
+#include "EngineInterface/NumberGenerator.h"
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationFacade.h"

@@ -16,8 +16,6 @@ add_library(Base
     Macros.h
     Math.cpp
     Math.h
-    NumberGenerator.cpp
-    NumberGenerator.h
     Physics.cpp
     Physics.h
     Resources.h

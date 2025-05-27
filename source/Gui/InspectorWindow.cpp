@@ -195,8 +195,11 @@ void _InspectorWindow::processCellGeneralTab(CellDescription& cell)
             }
 
             if (ImGui::TreeNodeEx("Associated creature##Base", TreeNodeFlags)) {
-                AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters().name("Creature id").textWidth(BaseTabTextWidth).tooltip(Const::CellCreatureIdTooltip), cell._creatureId);
+                std::stringstream ss;
+                ss << "0x" << std::hex << std::uppercase << cell._id;
+                auto creatureId = ss.str();
+                AlienImGui::InputText(
+                    AlienImGui::InputTextParameters().name("Creature id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true), creatureId);
                 AlienImGui::InputInt(
                     AlienImGui::InputIntParameters().name("Mutation id").textWidth(BaseTabTextWidth).tooltip(Const::CellMutationIdTooltip), cell._mutationId);
                 AlienImGui::InputFloat(

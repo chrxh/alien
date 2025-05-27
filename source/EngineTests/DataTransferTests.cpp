@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "Base/NumberGenerator.h"
+#include "EngineInterface/NumberGenerator.h"
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationFacade.h"
@@ -77,7 +77,7 @@ TEST_F(DataTransferTests, largeData)
     auto& numberGen = NumberGenerator::get();
     auto addCellAndParticles = [&](CollectionDescription& data) {
         data.addCell(CellDescription()
-                         .id(numberGen.getId())
+                         .id(numberGen.createObjectId())
                 .pos({numberGen.getRandomFloat(0.0f, 100.0f), numberGen.getRandomFloat(0.0f, 100.0f)})
                          .vel({numberGen.getRandomFloat(-1.0f, 1.0f), numberGen.getRandomFloat(-1.0f, 1.0f)})
                         .energy(numberGen.getRandomFloat(0.0f, 100.0f))
@@ -86,7 +86,7 @@ TEST_F(DataTransferTests, largeData)
                          .barrier(true)
                          .livingState(false));
         data.addParticle(ParticleDescription()
-                             .id(numberGen.getId())
+                             .id(numberGen.createObjectId())
                              .pos({numberGen.getRandomFloat(0.0f, 100.0f), numberGen.getRandomFloat(0.0f, 100.0f)})
                              .vel({numberGen.getRandomFloat(-1.0f, 1.0f), numberGen.getRandomFloat(-1.0f, 1.0f)})
                              .energy(numberGen.getRandomFloat(0.0f, 100.0f)));
@@ -107,7 +107,7 @@ TEST_F(DataTransferTests, largeData)
         addCellAndParticles(newData);
     }
     {
-        _simulationFacade->addAndSelectSimulationData(newData);
+        _simulationFacade->addAndSelectSimulationData(std::move(newData));
         auto actualData = _simulationFacade->getSimulationData();
         EXPECT_EQ(data._cells.size() + newData._cells.size(), actualData._cells.size());
         EXPECT_EQ(data._particles.size() + newData._particles.size(), actualData._particles.size());

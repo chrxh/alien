@@ -644,15 +644,17 @@ __global__ void cudaSetDataFromTO(SimulationData data, CollectionTO collectionTO
 
 __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, CollectionTO collectionTO)
 {
+    Ids maxIds;
     {
         auto const partition = calcAllThreadsPartition(*collectionTO.numCells);
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& cell = collectionTO.cells[index];
-            numberGen.adaptMaxId(cell.id);
-            numberGen.adaptMaxSmallId(cell.mutationId);
+            maxIds.currentObjectId = max(maxIds.currentObjectId, cell.id);
+            maxIds.currentCreatureId = max(maxIds.currentCreatureId, toUInt64(cell.creatureId));
+            maxIds.currentMutationId = max(maxIds.currentMutationId, cell.mutationId);
             if (cell.cellType == CellType_Constructor) {
-                numberGen.adaptMaxSmallId(cell.cellTypeData.constructor.offspringMutationId);
+                maxIds.currentMutationId = max(maxIds.currentMutationId, cell.cellTypeData.constructor.offspringMutationId);
             }
         }
     }
@@ -661,9 +663,10 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, Collecti
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& particle = collectionTO.particles[index];
-            numberGen.adaptMaxId(particle.id);
+            maxIds.currentObjectId = max(maxIds.currentObjectId, particle.id);
         }
     }
+    numberGen.adaptMaxIds(maxIds);
 }
 
 __global__ void cudaClearDataTO(CollectionTO collectionTO)

@@ -6,8 +6,9 @@
 #include <boost/range/adaptor/indexed.hpp>
 #include <boost/range/adaptor/map.hpp>
 
-#include "Base/NumberGenerator.h"
 #include "Base/Exceptions.h"
+
+#include "EngineInterface/NumberGenerator.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/GenomeConstants.h"
 #include "EngineGpuKernels/CollectionTOProvider.cuh"
@@ -582,7 +583,7 @@ GenomeDescription_New DescriptionConverterService::createGenomeDescription(
     GenomeDescription_New result;
 
     auto const& genomeTO = collectionTO.genomes[genomeIndex];
-    result._id = NumberGenerator::get().getId();
+    result._id = NumberGenerator::get().createObjectId();
     genomeIdByTOIndex.emplace(genomeIndex, result._id);
     result._genes.reserve(genomeTO.numGenes);
     result._frontAngle = genomeTO.frontAngle;
@@ -895,7 +896,7 @@ void DescriptionConverterService::addCell(
     cellTOs.resize(cellIndex + 1);
 
     CellTO& cellTO = cellTOs.at(cellIndex);
-    cellTO.id = cellDesc._id == 0 ? NumberGenerator::get().getId() : cellDesc._id;
+    cellTO.id = cellDesc._id == 0 ? NumberGenerator::get().createObjectId() : cellDesc._id;
     cellTOIndexById.insert_or_assign(cellTO.id, cellIndex);
 
     cellTO.hasGenome = cellDesc._genomeId.has_value();
@@ -1085,7 +1086,7 @@ void DescriptionConverterService::addParticle(std::vector<ParticleTO>& particleT
 {
     auto& particleTO = particleTOs.emplace_back();
 
-    particleTO.id = particleDesc._id == 0 ? NumberGenerator::get().getId() : particleDesc._id;
+    particleTO.id = particleDesc._id == 0 ? NumberGenerator::get().createObjectId() : particleDesc._id;
     particleTO.pos = {particleDesc._pos.x, particleDesc._pos.y};
     particleTO.vel = {particleDesc._vel.x, particleDesc._vel.y};
     particleTO.energy = particleDesc._energy;

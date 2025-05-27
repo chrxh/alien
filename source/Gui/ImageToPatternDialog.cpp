@@ -7,7 +7,7 @@
 
 #include "Base/Definitions.h"
 #include "Base/GlobalSettings.h"
-#include "Base/NumberGenerator.h"
+#include "EngineInterface/NumberGenerator.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/SimulationFacade.h"
@@ -102,7 +102,7 @@ void ImageToPatternDialog::show()
                     float matchedCellIntensity;
                     getMatchedCellColor(ImColor(r, g, b, 255), matchedCellColor, matchedCellIntensity);
                     dataDesc.addCell(CellDescription()
-                                         .id(NumberGenerator::get().getId())
+                                         .id(NumberGenerator::get().createObjectId())
                                          .cellTypeData(StructureCellDescription())
                                          .energy(matchedCellIntensity * 200)
                                          .pos({toFloat(x) + xOffset, toFloat(y)})
@@ -115,7 +115,7 @@ void ImageToPatternDialog::show()
         DescriptionEditService::get().reconnectCells(dataDesc, 1 * 1.5f);
         dataDesc.setCenter(Viewport::get().getCenterInWorldPos());
 
-        _simulationFacade->addAndSelectSimulationData(dataDesc);
+        _simulationFacade->addAndSelectSimulationData(std::move(dataDesc));
         //TODO: update pattern editor
     });
 }

@@ -106,7 +106,7 @@ struct ConstructorDescription
     MEMBER(ConstructorDescription, int, genomeCurrentNodeIndex, 0);
     MEMBER(ConstructorDescription, int, genomeCurrentRepetition, 0);
     MEMBER(ConstructorDescription, int, genomeCurrentBranch, 0);
-    MEMBER(ConstructorDescription, int, offspringCreatureId, 0);
+    MEMBER(ConstructorDescription, uint64_t, offspringCreatureId, 0);
     MEMBER(ConstructorDescription, int, offspringMutationId, 0);
 
     bool isGenomeInherited() const { return _numInheritedGenomeNodes != 0; }
@@ -344,7 +344,7 @@ struct CellDescription
     MEMBER(CellDescription, bool, sticky, false);
     MEMBER(CellDescription, int, age, 0);
     MEMBER(CellDescription, LivingState, livingState, LivingState_Ready);
-    MEMBER(CellDescription, int, creatureId, 0);
+    MEMBER(CellDescription, uint64_t, creatureId, 0);
     MEMBER(CellDescription, int, mutationId, 0);
     MEMBER(CellDescription, uint8_t, ancestorMutationId, 0);
     MEMBER(CellDescription, float, genomeComplexity, 0);

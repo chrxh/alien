@@ -201,7 +201,7 @@ __inline__ __device__ int GenomeDecoder::getRandomGenomeNodeAddress(
         return Const::GenomeHeaderSize;
     }
     if (randomRefIndex == 0) {
-        randomRefIndex = data.numberGen1.random(genomeSize - 1);
+        randomRefIndex = data.primaryNumberGen.random(genomeSize - 1);
     }
 
     int result = 0;
@@ -226,7 +226,7 @@ __inline__ __device__ int GenomeDecoder::getRandomGenomeNodeAddress(
                 auto subGenomeStartIndex = nodeAddress + Const::CellBasicBytes + cellTypeFixedBytes + 3;
                 auto subGenomeSize = getNextSubGenomeSize(genome, genomeSize, nodeAddress);
                 if (subGenomeSize == Const::GenomeHeaderSize) {
-                    if (considerZeroSubGenomes && data.numberGen1.randomBool()) {
+                    if (considerZeroSubGenomes && data.primaryNumberGen.randomBool()) {
                         result += Const::CellBasicBytes + cellTypeFixedBytes + 3 + Const::GenomeHeaderSize;
                     } else {
                         if (numSubGenomesSizeIndices) {
@@ -490,7 +490,7 @@ __inline__ __device__ void GenomeDecoder::setRandomCellTypeData(
     int subGenomeSize)
 {
     auto newCellTypeSize = getCellTypeDataSize(cellType, makeSelfCopy, subGenomeSize);
-    data.numberGen1.randomBytes(genome + nodeAddress, newCellTypeSize);
+    data.primaryNumberGen.randomBytes(genome + nodeAddress, newCellTypeSize);
     if (cellType == CellType_Constructor || cellType == CellType_Injector) {
         auto cellTypeFixedBytes = cellType == CellType_Constructor ? Const::ConstructorFixedBytes : Const::InjectorFixedBytes;
         genome[nodeAddress + cellTypeFixedBytes] = makeSelfCopy ? 1 : 0;

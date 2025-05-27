@@ -377,8 +377,7 @@ void PatternEditorWindow::onPaste()
     auto data = *_copiedSelection;
     auto center = Viewport::get().getCenterInWorldPos();
     data.setCenter(center);
-    DescriptionEditService::get().generateNewCreatureIds(data);
-    _simulationFacade->addAndSelectSimulationData(data);
+    _simulationFacade->addAndSelectSimulationData(std::move(data));
     EditorModel::get().update();
 }
 

@@ -3,7 +3,7 @@
 #include <boost/range/combine.hpp>
 
 #include "Base/Math.h"
-#include "Base/NumberGenerator.h"
+#include "EngineInterface/NumberGenerator.h"
 #include "EngineInterface/GenomeConstants.h"
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"

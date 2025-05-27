@@ -345,7 +345,7 @@ ConstructorProcessor::startNewConstruction(SimulationData& data, SimulationStati
     }
 
     if (constructionData.containsSelfReplication) {
-        constructor.offspringCreatureId = 1 + data.numberGen1.random(0xffff);
+        constructor.offspringCreatureId = data.primaryNumberGen.createCreatureId();
 
         hostCell->genomeComplexity = calcGenomeComplexity(hostCell->color, constructor.genome, constructor.genomeSize);
     } else {
