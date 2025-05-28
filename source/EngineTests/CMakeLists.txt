@@ -7,7 +7,7 @@ PUBLIC
     DataTransferTests.cpp
     DataTransferTests_New.cpp
     DefenderTests.cpp
-    DescriptionEditTests.cpp
+    DescriptionEditTests_New.cpp
     DetonatorTests.cpp
     EnergyFlowTests_New.cpp
     GarbageCollectorTests_New.cpp

@@ -327,7 +327,7 @@ struct SignalDescription
 
 struct CellDescription
 {
-    CellDescription() = default;
+    CellDescription();
     auto operator<=>(CellDescription const&) const = default;
 
     // General
@@ -412,7 +412,7 @@ struct ClusterDescription
 
 struct ParticleDescription
 {
-    ParticleDescription() = default;
+    ParticleDescription();
     auto operator<=>(ParticleDescription const&) const = default;
 
     MEMBER(ParticleDescription, uint64_t, id, 0ull);
@@ -492,6 +492,8 @@ struct CollectionDescription
 
     CollectionDescription& addParticles(std::vector<ParticleDescription> const& value);
     CollectionDescription& addParticle(ParticleDescription const& value);
+
+    CollectionDescription& addGenome(GenomeDescription_New const& value);
 
     CollectionDescription& addCreature(GenomeDescription_New const& genome, std::vector<CellDescription> const& cells);
 
