@@ -324,7 +324,7 @@ __inline__ __device__ bool GenomeDecoder::isLastRepetition(Constructor const& co
 
 __inline__ __device__ bool GenomeDecoder::hasInfiniteRepetitions(Constructor const& constructor)
 {
-    return getNumRepetitions(constructor.genome) == 2147483647;  // 2147483647 is the max value of int32_t
+    return getNumRepetitions(constructor.genome) == 0x7fffffff;
 }
 
 __inline__ __device__ bool GenomeDecoder::hasEmptyGenome(Constructor const& constructor)
@@ -382,7 +382,7 @@ __inline__ __device__ int GenomeDecoder::getNumRepetitions(uint8_t* genome, bool
 {
     int result = max(1, toInt(genome[Const::GenomeHeaderNumRepetitionsPos]));
     if (!countInfinityAsOne) {
-        return result == 255 ? 2147483647 : result;  // 2147483647 is the max value of int32_t
+        return result == 255 ? 0x7fffffff : result;
     } else {
         return result == 255 ? 1 : result;
     }
