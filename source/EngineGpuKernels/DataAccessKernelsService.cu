@@ -91,14 +91,14 @@ ArraySizesForGpu _DataAccessKernelsService::estimateCapacityNeededForGpu(GpuSett
     return copyToHost(_arraySizesGPU);
 }
 
-void _DataAccessKernelsService::addData(GpuSettings const& gpuSettings, SimulationData const& data, CollectionTO const& dataTO, bool selectData, bool createIds)
+void _DataAccessKernelsService::addData(GpuSettings const& gpuSettings, SimulationData const& data, CollectionTO const& dataTO, bool selectData)
 {
     KERNEL_CALL_1_1(cudaSaveNumEntries, data);
     KERNEL_CALL(cudaAdaptNumberGenerator, data.primaryNumberGen, dataTO);
 
     KERNEL_CALL_1_1(cudaGetArraysBasedOnTO, data, dataTO, _cudaCellArray);
-    KERNEL_CALL(cudaSetGenomeDataFromTO, data, dataTO, createIds);
-    KERNEL_CALL(cudaSetDataFromTO, data, dataTO, _cudaCellArray, selectData, createIds);
+    KERNEL_CALL(cudaSetGenomeDataFromTO, data, dataTO);
+    KERNEL_CALL(cudaSetDataFromTO, data, dataTO, _cudaCellArray, selectData);
     _garbageCollectorKernels->cleanupAfterDataManipulation(gpuSettings, data);
     if (selectData) {
         _editKernels->rolloutSelection(gpuSettings, data);

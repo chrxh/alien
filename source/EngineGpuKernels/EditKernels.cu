@@ -31,7 +31,7 @@ __global__ void cudaChangeCell(SimulationData data, CollectionTO changeDataTO)
         if (cell->id == cellTO.id) {
             ObjectFactory entityFactory;
             entityFactory.init(&data);
-            entityFactory.changeCellFromTO(changeDataTO, cellTO, cell, false);
+            entityFactory.changeCellFromTO(changeDataTO, cellTO, cell);
         }
     }
 }

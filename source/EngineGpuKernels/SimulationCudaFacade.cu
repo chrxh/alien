@@ -270,7 +270,7 @@ void _SimulationCudaFacade::addAndSelectSimulationData(CollectionTO const& dataT
     resizeArraysIfNecessary(sizeDelta);
 
     _editKernels->removeSelection(_settings.gpuSettings, getSimulationDataPtrCopy());
-    _dataAccessKernels->addData(_settings.gpuSettings, getSimulationDataPtrCopy(), cudaDataTO, true, true);
+    _dataAccessKernels->addData(_settings.gpuSettings, getSimulationDataPtrCopy(), cudaDataTO, true);
     syncAndCheck();
     updateStatistics();
 }
@@ -284,7 +284,7 @@ void _SimulationCudaFacade::setSimulationData(CollectionTO const& dataTO)
     resizeArraysIfNecessary(sizeDelta);
 
     _dataAccessKernels->clearData(_settings.gpuSettings, getSimulationDataPtrCopy());
-    _dataAccessKernels->addData(_settings.gpuSettings, getSimulationDataPtrCopy(), cudaDataTO, false, false);
+    _dataAccessKernels->addData(_settings.gpuSettings, getSimulationDataPtrCopy(), cudaDataTO, false);
     syncAndCheck();
 
     updateStatistics();

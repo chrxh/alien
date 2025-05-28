@@ -196,7 +196,7 @@ void _InspectorWindow::processCellGeneralTab(CellDescription& cell)
 
             if (ImGui::TreeNodeEx("Associated creature##Base", TreeNodeFlags)) {
                 std::stringstream ss;
-                ss << "0x" << std::hex << std::uppercase << cell._id;
+                ss << "0x" << std::hex << std::uppercase << cell._creatureId;
                 auto creatureId = ss.str();
                 AlienImGui::InputText(
                     AlienImGui::InputTextParameters().name("Creature id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true), creatureId);

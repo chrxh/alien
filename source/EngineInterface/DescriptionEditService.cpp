@@ -460,7 +460,7 @@ void DescriptionEditService::assignNewObjectAndCreatureIds(CollectionDescription
         if (findResult != oldToNewCreatureIds.end()) {
             oldCreatureId = findResult->second;
         } else {
-            auto newCreatureId = NumberGenerator::get().createObjectId();
+            auto newCreatureId = NumberGenerator::get().createCreatureId();
             oldToNewCreatureIds.emplace(oldCreatureId, newCreatureId);
             oldCreatureId = newCreatureId;
         }
