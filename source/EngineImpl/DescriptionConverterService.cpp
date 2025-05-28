@@ -769,7 +769,7 @@ void DescriptionConverterService::convertCellToTO(
     cellTOs.resize(cellIndex + 1);
 
     CellTO& cellTO = cellTOs.at(cellIndex);
-    cellTO.id = cellDesc._id == 0 ? NumberGenerator::get().createObjectId() : cellDesc._id;
+    cellTO.id = cellDesc._id;
     cellTOIndexById.insert_or_assign(cellTO.id, cellIndex);
 
     cellTO.hasGenome = cellDesc._genomeId.has_value();
@@ -959,7 +959,7 @@ void DescriptionConverterService::addParticle(std::vector<ParticleTO>& particleT
 {
     auto& particleTO = particleTOs.emplace_back();
 
-    particleTO.id = particleDesc._id == 0 ? NumberGenerator::get().createObjectId() : particleDesc._id;
+    particleTO.id = particleDesc._id;
     particleTO.pos = {particleDesc._pos.x, particleDesc._pos.y};
     particleTO.vel = {particleDesc._vel.x, particleDesc._vel.y};
     particleTO.energy = particleDesc._energy;

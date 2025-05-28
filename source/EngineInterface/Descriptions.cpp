@@ -105,37 +105,43 @@ ClusteredCollectionDescription::ClusteredCollectionDescription(CollectionDescrip
     }
 
     while (!idToIndex.empty()) {
-        std::unordered_set<uint64_t> allVisitedCellIds;
-        std::vector<uint64_t> lastVisitedCellIds;
         auto currentCell = data._cells.at(idToIndex.begin()->second);
         auto currentCellId = currentCell._id;
-        allVisitedCellIds.insert(currentCellId);
-        lastVisitedCellIds.emplace_back(currentCellId);
 
         ClusterDescription cluster;
-        cluster.addCell(currentCell);
 
         auto clusterCompleted = false;
+        auto startConnectionIndex = 0;
+        std::unordered_set<uint64_t> allVisitedCellIds;
+        std::vector<uint64_t> lastVisitedCellIds;
+        std::vector<int> lastVisitedConnectionIndices;
         do {
             currentCell = data._cells.at(idToIndex.at(currentCellId));
+            if (!allVisitedCellIds.contains(currentCellId)) {
+                cluster.addCell(currentCell);
+                allVisitedCellIds.insert(currentCellId);
+            }
 
             auto newCellFound = false;
-            for (auto const& connection : currentCell._connections) {
+            for (int connectionIndex = startConnectionIndex, j = toInt(currentCell._connections.size()); connectionIndex < j; ++connectionIndex) {
+                auto const& connection = currentCell._connections[connectionIndex];
                 if (allVisitedCellIds.contains(connection._cellId)) {
                     continue;
                 }
 
-                currentCellId = connection._cellId;
                 newCellFound = true;
-                allVisitedCellIds.insert(currentCellId);
                 lastVisitedCellIds.emplace_back(currentCellId);
-                cluster.addCell(currentCell);
+                lastVisitedConnectionIndices.emplace_back(connectionIndex);
+                currentCellId = connection._cellId;
+                startConnectionIndex = 0;
                 break;
             }
             if (!newCellFound) {
-                lastVisitedCellIds.pop_back();
                 if (!lastVisitedCellIds.empty()) {
                     currentCellId = lastVisitedCellIds.back();
+                    startConnectionIndex = lastVisitedConnectionIndices.back() + 1;
+                    lastVisitedCellIds.pop_back();
+                    lastVisitedConnectionIndices.pop_back();
                 } else {
                     clusterCompleted = true;
                 }
