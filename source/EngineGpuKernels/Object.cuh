@@ -51,7 +51,7 @@ struct GenomeHeader
     float concatenationAngle2;
     float frontAngle;
 
-    __inline__ __device__ bool hasInfiniteRepetitions() const { return numRepetitions == 2147483647; }  // 2147483647 is the max value of int32_t
+    __inline__ __device__ bool hasInfiniteRepetitions() const { return numRepetitions == 0x7fffffff; }
 };
 
 struct CellMetadata
