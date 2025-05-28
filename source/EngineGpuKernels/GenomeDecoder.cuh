@@ -1,7 +1,5 @@
 #pragma once
 
-#include <nppdefs.h>
-
 #include "EngineInterface/CellFunctionConstants.h"
 #include "EngineInterface/GenomeConstants.h"
 #include "Base.cuh"
@@ -326,7 +324,7 @@ __inline__ __device__ bool GenomeDecoder::isLastRepetition(ConstructorFunction c
 
 __inline__ __device__ bool GenomeDecoder::hasInfiniteRepetitions(ConstructorFunction const& constructor)
 {
-    return getNumRepetitions(constructor.genome) == NPP_MAX_32S;
+    return getNumRepetitions(constructor.genome) == 0x7fffffff;
 }
 
 __inline__ __device__ bool GenomeDecoder::hasEmptyGenome(ConstructorFunction const& constructor)
@@ -384,7 +382,7 @@ __inline__ __device__ int GenomeDecoder::getNumRepetitions(uint8_t* genome, bool
 {
     int result = max(1, toInt(genome[Const::GenomeHeaderNumRepetitionsPos]));
     if (!countInfinityAsOne) {
-        return result == 255 ? NPP_MAX_32S : result;
+        return result == 255 ? 0x7fffffff : result;
     } else {
         return result == 255 ? 1 : result;
     }
