@@ -109,7 +109,6 @@ TEST_F(DescriptionEditTests_New, addThirdConnection2)
     EXPECT_TRUE(approxCompare(90.0f, connection3._angleFromPrevious));
 }
 
-// Alt: 1892 ms - 2200ms
 TEST_F(DescriptionEditTests_New, calcCluster)
 {
     CollectionDescription data;
@@ -119,15 +118,10 @@ TEST_F(DescriptionEditTests_New, calcCluster)
         expectedClusterSize = hex._cells.size();
         data.add(hex);
     }
-    printf("cells: %llu\n", data._cells.size());
     data.addParticle(ParticleDescription());
     data.addGenome(GenomeDescription_New());
 
-    auto start = std::chrono::high_resolution_clock::now();
     ClusteredCollectionDescription clusteredData(data);
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    std::cout << "Cluster calculation took " << duration << " ms" << std::endl;
     
     EXPECT_EQ(1000, clusteredData._clusters.size());
     for (auto const& cluster : clusteredData._clusters) {

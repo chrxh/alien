@@ -241,6 +241,8 @@ struct GeneDescription
 
 struct GenomeDescription_New
 {
+    GenomeDescription_New();
+
     auto operator<=>(GenomeDescription_New const&) const = default;
 
     MEMBER(GenomeDescription_New, uint64_t, id, 0);

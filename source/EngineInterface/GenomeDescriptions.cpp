@@ -1,5 +1,7 @@
 #include "GenomeDescriptions.h"
 
+#include "NumberGenerator.h"
+
 MuscleMode MuscleGenomeDescription::getMode() const
 {
     if (std::holds_alternative<AutoBendingGenomeDescription>(_mode)) {
@@ -44,4 +46,9 @@ CellTypeGenome NodeDescription::getCellType() const
         return CellTypeGenome_Detonator;
     }
     CHECK(false);
+}
+
+GenomeDescription_New::GenomeDescription_New()
+{
+    _id = NumberGenerator::get().createObjectId();
 }
