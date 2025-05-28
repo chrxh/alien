@@ -2,9 +2,11 @@
 
 #include <boost/range/adaptors.hpp>
 
-#include "GenomeDescriptionConverterService.h"
 #include "Base/Math.h"
 #include "Base/Physics.h"
+
+#include "GenomeDescriptionConverterService.h"
+#include "NumberGenerator.h"
 
 ConstructorDescription::ConstructorDescription()
 {
@@ -14,6 +16,11 @@ ConstructorDescription::ConstructorDescription()
 InjectorDescription::InjectorDescription()
 {
     _genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription());
+}
+
+CellDescription::CellDescription()
+{
+    _id = NumberGenerator::get().createObjectId();
 }
 
 CellType CellDescription::getCellType() const
@@ -84,6 +91,11 @@ RealVector2D ClusterDescription::getClusterPosFromCells() const
     return result;
 }
 
+ParticleDescription::ParticleDescription()
+{
+    _id = NumberGenerator::get().createObjectId();
+}
+
 ClusteredCollectionDescription::ClusteredCollectionDescription(CollectionDescription const& data)
 {
     std::unordered_map<uint64_t, int> idToIndex;
@@ -95,15 +107,17 @@ ClusteredCollectionDescription::ClusteredCollectionDescription(CollectionDescrip
     while (!idToIndex.empty()) {
         std::unordered_set<uint64_t> allVisitedCellIds;
         std::vector<uint64_t> lastVisitedCellIds;
-        auto currentCellId = data._cells.at(idToIndex.begin()->second)._id;
+        auto currentCell = data._cells.at(idToIndex.begin()->second);
+        auto currentCellId = currentCell._id;
+        allVisitedCellIds.insert(currentCellId);
+        lastVisitedCellIds.emplace_back(currentCellId);
 
         ClusterDescription cluster;
+        cluster.addCell(currentCell);
+
         auto clusterCompleted = false;
         do {
-            auto const& currentCell = data._cells.at(idToIndex.at(currentCellId));
-            allVisitedCellIds.insert(currentCell._id);
-            lastVisitedCellIds.emplace_back(currentCell._id);
-            cluster.addCell(currentCell);
+            currentCell = data._cells.at(idToIndex.at(currentCellId));
 
             auto newCellFound = false;
             for (auto const& connection : currentCell._connections) {
@@ -113,6 +127,10 @@ ClusteredCollectionDescription::ClusteredCollectionDescription(CollectionDescrip
 
                 currentCellId = connection._cellId;
                 newCellFound = true;
+                allVisitedCellIds.insert(currentCellId);
+                lastVisitedCellIds.emplace_back(currentCellId);
+                cluster.addCell(currentCell);
+                break;
             }
             if (!newCellFound) {
                 lastVisitedCellIds.pop_back();
@@ -214,6 +232,12 @@ CollectionDescription& CollectionDescription::addParticles(std::vector<ParticleD
 CollectionDescription& CollectionDescription::addParticle(ParticleDescription const& value)
 {
     addParticles({value});
+    return *this;
+}
+
+CollectionDescription& CollectionDescription::addGenome(GenomeDescription_New const& value)
+{
+    _genomes.emplace_back(value);
     return *this;
 }
 

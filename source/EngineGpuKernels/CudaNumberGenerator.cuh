@@ -27,7 +27,7 @@ public:
         CudaMemoryManager::getInstance().acquireMemory(size, _array);
         CudaMemoryManager::getInstance().acquireMemory(size, _ids);
 
-        CHECK_FOR_CUDA_ERROR(cudaMemset(_currentRandomNumberIndex, 0, sizeof(_currentRandomNumberIndex)));
+        CHECK_FOR_CUDA_ERROR(cudaMemset(_currentRandomNumberIndex, 0, sizeof(uint32_t)));
         std::vector<int> randomNumbers(size);
         for (int i = 0; i < size; ++i) {
             randomNumbers[i] = rand();

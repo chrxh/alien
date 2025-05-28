@@ -260,7 +260,7 @@ struct CellTO
     bool sticky;
     uint32_t age;
     LivingState livingState;
-    uint32_t creatureId;
+    uint64_t creatureId;
     uint32_t mutationId;
     uint8_t ancestorMutationId;  // Only the first 8 bits from ancestor mutation id
     float genomeComplexity;

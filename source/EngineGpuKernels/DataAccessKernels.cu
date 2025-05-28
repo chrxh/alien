@@ -651,7 +651,7 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, Collecti
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& cell = collectionTO.cells[index];
             maxIds.currentObjectId = max(maxIds.currentObjectId, cell.id);
-            maxIds.currentCreatureId = max(maxIds.currentCreatureId, toUInt64(cell.creatureId));
+            maxIds.currentCreatureId = max(maxIds.currentCreatureId, cell.creatureId);
             maxIds.currentMutationId = max(maxIds.currentMutationId, cell.mutationId);
             if (cell.cellType == CellType_Constructor) {
                 maxIds.currentMutationId = max(maxIds.currentMutationId, cell.cellTypeData.constructor.offspringMutationId);
