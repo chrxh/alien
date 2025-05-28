@@ -603,7 +603,7 @@ __global__ void cudaGetArraysBasedOnTO(SimulationData data, CollectionTO collect
     *cellArray = data.objects.heap.getTypedSubArray<Cell>(*collectionTO.numCells);
 }
 
-__global__ void cudaSetGenomeDataFromTO(SimulationData data, CollectionTO collectionTO, bool createIds)
+__global__ void cudaSetGenomeDataFromTO(SimulationData data, CollectionTO collectionTO)
 {
     __shared__ ObjectFactory factory;
     if (0 == threadIdx.x) {
@@ -613,11 +613,11 @@ __global__ void cudaSetGenomeDataFromTO(SimulationData data, CollectionTO collec
 
     auto cellPartition = calcAllThreadsPartition(*collectionTO.numGenomes);
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
-        factory.createGenomeFromTO(collectionTO, index, createIds);
+        factory.createGenomeFromTO(collectionTO, index);
     }
 }
 
-__global__ void cudaSetDataFromTO(SimulationData data, CollectionTO collectionTO, Cell** cellArray, bool selectNewData, bool createIds)
+__global__ void cudaSetDataFromTO(SimulationData data, CollectionTO collectionTO, Cell** cellArray, bool selectNewData)
 {
     __shared__ ObjectFactory factory;
     if (0 == threadIdx.x) {
@@ -627,7 +627,7 @@ __global__ void cudaSetDataFromTO(SimulationData data, CollectionTO collectionTO
 
     auto particlePartition = calcPartition(*collectionTO.numParticles, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
-        auto particle = factory.createParticleFromTO(collectionTO.particles[index], createIds);
+        auto particle = factory.createParticleFromTO(collectionTO.particles[index]);
         if (selectNewData) {
             particle->selected = 1;
         }
@@ -635,7 +635,7 @@ __global__ void cudaSetDataFromTO(SimulationData data, CollectionTO collectionTO
 
     auto cellPartition = calcAllThreadsPartition(*collectionTO.numCells);
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
-        auto cell = factory.createCellFromTO(collectionTO, index, *cellArray, createIds);
+        auto cell = factory.createCellFromTO(collectionTO, index, *cellArray);
         if (selectNewData) {
             cell->selected = 1;
         }

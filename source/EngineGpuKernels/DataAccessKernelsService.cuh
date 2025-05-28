@@ -23,7 +23,7 @@ public:
     void getOverlayData(GpuSettings const& gpuSettings, SimulationData const& data, int2 rectUpperLeft, int2 rectLowerRight, CollectionTO const& dataTO);
 
     ArraySizesForGpu estimateCapacityNeededForGpu(GpuSettings const& gpuSettings, CollectionTO const& dataTO);
-    void addData(GpuSettings const& gpuSettings, SimulationData const& data, CollectionTO const& dataTO, bool selectData, bool createIds);
+    void addData(GpuSettings const& gpuSettings, SimulationData const& data, CollectionTO const& dataTO, bool selectData);
     void clearData(GpuSettings const& gpuSettings, SimulationData const& data);
 
 private:

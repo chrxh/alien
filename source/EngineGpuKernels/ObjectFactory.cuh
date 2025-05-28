@@ -16,10 +16,10 @@ class ObjectFactory
 {
 public:
     __inline__ __device__ void init(SimulationData* data);
-    __inline__ __device__ Particle* createParticleFromTO(ParticleTO const& particleTO, bool createIds);
-    __inline__ __device__ void createGenomeFromTO(CollectionTO const& collectionTO, int genomeIndex, bool createIds);
-    __inline__ __device__ Cell* createCellFromTO(CollectionTO const& collectionTO, int cellIndex, Cell* cellArray, bool createIds);
-    __inline__ __device__ void changeCellFromTO(CollectionTO const& collectionTO, CellTO const& cellTO, Cell* cell, bool createIds);
+    __inline__ __device__ Particle* createParticleFromTO(ParticleTO const& particleTO);
+    __inline__ __device__ void createGenomeFromTO(CollectionTO const& collectionTO, int genomeIndex);
+    __inline__ __device__ Cell* createCellFromTO(CollectionTO const& collectionTO, int cellIndex, Cell* cellArray);
+    __inline__ __device__ void changeCellFromTO(CollectionTO const& collectionTO, CellTO const& cellTO, Cell* cell);
     __inline__ __device__ void changeParticleFromTO(ParticleTO const& particleTO, Particle* particle);
     __inline__ __device__ Particle* createParticle(float energy, float2 const& pos, float2 const& vel, int color);
     __inline__ __device__ Cell* createFreeCell(float energy, float2 const& pos, float2 const& vel);
@@ -44,13 +44,13 @@ __inline__ __device__ void ObjectFactory::init(SimulationData* data)
     _map.init(data->worldSize);
 }
 
-__inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleTO const& particleTO, bool createIds)
+__inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleTO const& particleTO)
 {
     Particle** particlePointer = _data->objects.particles.getNewElement();
     Particle* particle = _data->objects.heap.getTypedSubArray<Particle>(1);
     *particlePointer = particle;
     
-    particle->id = createIds ? _data->primaryNumberGen.createObjectId() : particleTO.id;
+    particle->id = particleTO.id;
     particle->pos = particleTO.pos;
     _map.correctPosition(particle->pos);
     particle->vel = particleTO.vel;
@@ -62,7 +62,7 @@ __inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleTO c
     return particle;
 }
 
-__inline__ __device__ void ObjectFactory::createGenomeFromTO(CollectionTO const& collectionTO, int genomeIndex, bool createIds)
+__inline__ __device__ void ObjectFactory::createGenomeFromTO(CollectionTO const& collectionTO, int genomeIndex)
 {
     auto& genomeTO = collectionTO.genomes[genomeIndex];
     auto genome = _data->objects.heap.getTypedSubArray<Genome>(1);
@@ -177,15 +177,15 @@ __inline__ __device__ void ObjectFactory::createGenomeFromTO(CollectionTO const&
     }
 }
 
-__inline__ __device__ Cell* ObjectFactory::createCellFromTO(CollectionTO const& collectionTO, int cellIndex, Cell* cellArray, bool createIds)
+__inline__ __device__ Cell* ObjectFactory::createCellFromTO(CollectionTO const& collectionTO, int cellIndex, Cell* cellArray)
 {
     auto cellTO = collectionTO.cells[cellIndex];
     Cell** cellPointer = _data->objects.cells.getNewElement();
     Cell* cell = cellArray + cellIndex;
     *cellPointer = cell;
 
-    changeCellFromTO(collectionTO, cellTO, cell, createIds);
-    cell->id = createIds ? _data->primaryNumberGen.createObjectId() : cellTO.id;
+    changeCellFromTO(collectionTO, cellTO, cell);
+    cell->id = cellTO.id;
     cell->locked = 0;
     cell->detached = 0;
     cell->selected = 0;
@@ -208,7 +208,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromTO(CollectionTO const& 
     return cell;
 }
 
-__inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& collectionTO, CellTO const& cellTO, Cell* cell, bool createIds)
+__inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& collectionTO, CellTO const& cellTO, Cell* cell)
 {
     cell->id = cellTO.id;
     cell->pos = cellTO.pos;
@@ -275,7 +275,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
             cell->cellTypeData.constructor.genomeSize,
             cell->cellTypeData.constructor.genome);
         cell->cellTypeData.constructor.numInheritedGenomeNodes = cellTO.cellTypeData.constructor.numInheritedGenomeNodes;
-        cell->cellTypeData.constructor.lastConstructedCellId = createIds ? 0 : cellTO.cellTypeData.constructor.lastConstructedCellId;
+        cell->cellTypeData.constructor.lastConstructedCellId = cellTO.cellTypeData.constructor.lastConstructedCellId;
         cell->cellTypeData.constructor.genomeCurrentNodeIndex = cellTO.cellTypeData.constructor.genomeCurrentNodeIndex;
         cell->cellTypeData.constructor.genomeCurrentRepetition = cellTO.cellTypeData.constructor.genomeCurrentRepetition;
         cell->cellTypeData.constructor.genomeCurrentBranch = cellTO.cellTypeData.constructor.genomeCurrentBranch;
