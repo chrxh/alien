@@ -233,7 +233,7 @@ CellDescription DescriptionConverterService::createCellDescription(
     int cellIndex,
     std::unordered_map<uint64_t, uint64_t> const& genomeIdByTOIndex) const
 {
-    CellDescription result;
+    CellDescription result(false);
 
     auto const& cellTO = collectionTO.cells[cellIndex];
     if (cellTO.hasGenome) {

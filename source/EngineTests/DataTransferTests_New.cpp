@@ -313,3 +313,58 @@ TEST_F(DataTransferTests_New, multipleCells_genome_multipleGenes_multiple_Nodes)
 
     EXPECT_TRUE(compare(data, actualData));
 }
+
+TEST_F(DataTransferTests_New, createCellIds)
+{
+    auto data = CollectionDescription().cells({CellDescription(), CellDescription()});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->addAndSelectSimulationData(std::move(data));
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    std::unordered_set<uint64_t> ids;
+    for (auto const& cell : actualData._cells) {
+        ids.insert(cell._id);
+    }
+
+    EXPECT_EQ(4, ids.size());
+}
+
+TEST_F(DataTransferTests_New, createParticleIds)
+{
+    auto data = CollectionDescription().particles({ParticleDescription(), ParticleDescription()});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->addAndSelectSimulationData(std::move(data));
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    std::unordered_set<uint64_t> ids;
+    for (auto const& cell : actualData._particles) {
+        ids.insert(cell._id);
+    }
+
+    EXPECT_EQ(4, ids.size());
+}
+
+TEST_F(DataTransferTests_New, createGenomeIds)
+{
+    CollectionDescription data;
+    data.addCreature(GenomeDescription_New(), {CellDescription()});
+    data.addCreature(GenomeDescription_New(), {CellDescription()});
+
+    _simulationFacade->setSimulationData(data);
+    //_simulationFacade->addAndSelectSimulationData(std::move(data));
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    std::unordered_set<uint64_t> ids;
+    for (auto const& genome : actualData._genomes) {
+        ids.insert(genome._id);
+    }
+
+    EXPECT_EQ(4, ids.size());
+}
+
+// TODO creature ids
