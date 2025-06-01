@@ -18,9 +18,11 @@ InjectorDescription::InjectorDescription()
     _genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription());
 }
 
-CellDescription::CellDescription()
+CellDescription::CellDescription(bool createId)
 {
-    _id = NumberGenerator::get().createObjectId();
+    if (createId) {
+        _id = NumberGenerator::get().createObjectId();
+    }
 }
 
 CellType CellDescription::getCellType() const
