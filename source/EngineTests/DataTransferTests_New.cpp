@@ -314,7 +314,7 @@ TEST_F(DataTransferTests_New, multipleCells_genome_multipleGenes_multiple_Nodes)
     EXPECT_TRUE(compare(data, actualData));
 }
 
-TEST_F(DataTransferTests_New, createCellIds)
+TEST_F(DataTransferTests_New, createCellIds_differentIdsOnDescription)
 {
     auto data = CollectionDescription().cells({CellDescription(), CellDescription()});
 
@@ -331,12 +331,47 @@ TEST_F(DataTransferTests_New, createCellIds)
     EXPECT_EQ(4, ids.size());
 }
 
-TEST_F(DataTransferTests_New, createParticleIds)
+TEST_F(DataTransferTests_New, createCellIds_sameIdsOnDescription)
+{
+    auto data1 = CollectionDescription().cells({CellDescription().id(0), CellDescription().id(0)});
+    _simulationFacade->addAndSelectSimulationData(std::move(data1));
+    auto data2 = CollectionDescription().cells({CellDescription().id(0), CellDescription().id(0)});
+    _simulationFacade->addAndSelectSimulationData(std::move(data2));
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    std::unordered_set<uint64_t> ids;
+    for (auto const& cell : actualData._cells) {
+        ids.insert(cell._id);
+    }
+
+    EXPECT_EQ(4, ids.size());
+}
+
+TEST_F(DataTransferTests_New, createParticleIds_differentIdsOnDescription)
 {
     auto data = CollectionDescription().particles({ParticleDescription(), ParticleDescription()});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->addAndSelectSimulationData(std::move(data));
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    std::unordered_set<uint64_t> ids;
+    for (auto const& cell : actualData._particles) {
+        ids.insert(cell._id);
+    }
+
+    EXPECT_EQ(4, ids.size());
+}
+
+TEST_F(DataTransferTests_New, createParticleIds_sameIdsOnDescription)
+{
+    auto data1 = CollectionDescription().particles({ParticleDescription().id(0), ParticleDescription().id(0)});
+    _simulationFacade->addAndSelectSimulationData(std::move(data1));
+
+    auto data2 = CollectionDescription().particles({ParticleDescription().id(0), ParticleDescription().id(0)});
+    _simulationFacade->addAndSelectSimulationData(std::move(data2));
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -367,4 +402,66 @@ TEST_F(DataTransferTests_New, createGenomeIds)
     EXPECT_EQ(4, ids.size());
 }
 
-// TODO creature ids
+TEST_F(DataTransferTests_New, keepObjectIdsStable)
+{
+    auto data = CollectionDescription().cells({CellDescription(), CellDescription()}).particles({ParticleDescription(), ParticleDescription()});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->setSimulationData(data);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    std::unordered_set<uint64_t> expectedCellIds;
+    for (auto const& cell : data._cells) {
+        expectedCellIds.insert(cell._id);
+    }
+    std::unordered_set<uint64_t> actualCellIds;
+    for (auto const& cell : actualData._cells) {
+        actualCellIds.insert(cell._id);
+    }
+    EXPECT_EQ(expectedCellIds, actualCellIds);
+
+    std::unordered_set<uint64_t> expectedParticleIds;
+    for (auto const& particle : data._particles) {
+        expectedParticleIds.insert(particle._id);
+    }
+    std::unordered_set<uint64_t> actualParticleIds;
+    for (auto const& particle : actualData._particles) {
+        actualParticleIds.insert(particle._id);
+    }
+    EXPECT_EQ(expectedParticleIds, actualParticleIds);
+}
+
+TEST_F(DataTransferTests_New, createCreatureIds_differentIdsOnDescription)
+{
+    auto data = CollectionDescription().cells({CellDescription(), CellDescription()});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->addAndSelectSimulationData(std::move(data));
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    std::unordered_set<uint64_t> ids;
+    for (auto const& cell : actualData._cells) {
+        ids.insert(cell._creatureId);
+    }
+
+    EXPECT_EQ(4, ids.size());
+}
+
+TEST_F(DataTransferTests_New, createCreatureIds_sameIdsOnDescription)
+{
+    auto data = CollectionDescription().cells({CellDescription().creatureId(0), CellDescription().creatureId(0)});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->addAndSelectSimulationData(std::move(data));
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    std::unordered_set<uint64_t> ids;
+    for (auto const& cell : actualData._cells) {
+        ids.insert(cell._creatureId);
+    }
+
+    EXPECT_EQ(2, ids.size());
+}

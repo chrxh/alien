@@ -327,7 +327,7 @@ struct SignalDescription
 
 struct CellDescription
 {
-    CellDescription(bool createId = true);
+    CellDescription(bool createIds = true);
     auto operator<=>(CellDescription const&) const = default;
 
     // General
