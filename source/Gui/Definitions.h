@@ -107,6 +107,8 @@ class ChangeColorDialog;
 
 class AutosaveWindow;
 
+class CreatureEditorWindow;
+
 class FileTransferController;
 
 class _LocationWidgets;
