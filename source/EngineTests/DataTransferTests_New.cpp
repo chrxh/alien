@@ -316,7 +316,7 @@ TEST_F(DataTransferTests_New, multipleCells_genome_multipleGenes_multiple_Nodes)
 
 TEST_F(DataTransferTests_New, createCellIds_differentIdsOnDescription)
 {
-    auto data = CollectionDescription().cells({CellDescription(), CellDescription()});
+    auto data = CollectionDescription().cells({CellDescription().id(0), CellDescription().id(1)});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->addAndSelectSimulationData(std::move(data));
@@ -350,7 +350,7 @@ TEST_F(DataTransferTests_New, createCellIds_sameIdsOnDescription)
 
 TEST_F(DataTransferTests_New, createParticleIds_differentIdsOnDescription)
 {
-    auto data = CollectionDescription().particles({ParticleDescription(), ParticleDescription()});
+    auto data = CollectionDescription().particles({ParticleDescription().id(0), ParticleDescription().id(1)});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->addAndSelectSimulationData(std::move(data));
@@ -404,7 +404,8 @@ TEST_F(DataTransferTests_New, createGenomeIds)
 
 TEST_F(DataTransferTests_New, keepObjectIdsStable)
 {
-    auto data = CollectionDescription().cells({CellDescription(), CellDescription()}).particles({ParticleDescription(), ParticleDescription()});
+    auto data =
+        CollectionDescription().cells({CellDescription().id(0), CellDescription().id(1)}).particles({ParticleDescription().id(2), ParticleDescription().id(3)});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->setSimulationData(data);
@@ -434,7 +435,7 @@ TEST_F(DataTransferTests_New, keepObjectIdsStable)
 
 TEST_F(DataTransferTests_New, createCreatureIds_differentIdsOnDescription)
 {
-    auto data = CollectionDescription().cells({CellDescription(), CellDescription()});
+    auto data = CollectionDescription().cells({CellDescription().creatureId(0), CellDescription().creatureId(1)});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->addAndSelectSimulationData(std::move(data));

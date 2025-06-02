@@ -22,7 +22,6 @@ CellDescription::CellDescription(bool createIds)
 {
     if (createIds) {
         _id = NumberGenerator::get().createObjectId();
-        _creatureId= NumberGenerator::get().createCreatureId();
     }
 }
 
@@ -266,8 +265,10 @@ CollectionDescription& CollectionDescription::addCreature(GenomeDescription_New 
     auto originalSize = _cells.size();
     _cells.insert(_cells.end(), cells.begin(), cells.end());
 
+    auto newCreatureId = NumberGenerator::get().createObjectId();
     for (auto i = originalSize; i < _cells.size(); ++i) {
         _cells[i]._genomeId = newGenomeId;
+        _cells[i]._creatureId = newCreatureId;
     }
 
     return *this;
