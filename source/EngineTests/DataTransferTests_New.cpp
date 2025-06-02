@@ -355,7 +355,7 @@ TEST_F(DataTransferTests_New, createGenomeIds)
     data.addCreature(GenomeDescription_New(), {CellDescription()});
 
     _simulationFacade->setSimulationData(data);
-    //_simulationFacade->addAndSelectSimulationData(std::move(data));
+    _simulationFacade->addAndSelectSimulationData(std::move(data));
 
     auto actualData = _simulationFacade->getSimulationData();
 

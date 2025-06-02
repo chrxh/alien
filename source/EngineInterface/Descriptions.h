@@ -332,7 +332,6 @@ struct CellDescription
 
     // General
     MEMBER(CellDescription, uint64_t, id, 0ull);
-    MEMBER(CellDescription, std::optional<uint64_t>, genomeId, std::nullopt);
     MEMBER(CellDescription, std::vector<ConnectionDescription>, connections, {});
     MEMBER(CellDescription, RealVector2D, pos, RealVector2D());
     MEMBER(CellDescription, RealVector2D, vel, RealVector2D());
@@ -344,11 +343,14 @@ struct CellDescription
     MEMBER(CellDescription, bool, sticky, false);
     MEMBER(CellDescription, int, age, 0);
     MEMBER(CellDescription, LivingState, livingState, LivingState_Ready);
+
+    // Genome data
+    MEMBER(CellDescription, std::optional<uint64_t>, genomeId, std::nullopt);
     MEMBER(CellDescription, uint64_t, creatureId, 0);
     MEMBER(CellDescription, int, mutationId, 0);
     MEMBER(CellDescription, uint8_t, ancestorMutationId, 0);
-    MEMBER(CellDescription, float, genomeComplexity, 0);
     MEMBER(CellDescription, uint16_t, genomeNodeIndex, 0);
+    MEMBER(CellDescription, float, genomeComplexity, 0);
 
     // Cell type-specific data
     MEMBER(CellDescription, std::optional<NeuralNetworkDescription>, neuralNetwork, std::nullopt);

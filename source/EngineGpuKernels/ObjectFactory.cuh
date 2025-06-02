@@ -200,8 +200,8 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromTO(CollectionTO const& 
         connectingCell.angleFromPrevious = cellTO.connections[i].angleFromPrevious;
     }
     if (cellTO.hasGenome) {
-        auto const& genome = collectionTO.genomes[cellTO.genomeNodeIndex];
-        cell->genome = &_data->objects.heap.atType<Genome>(genome.genomeIndexOnGpu);
+        auto const& genomeTO = collectionTO.genomes[cellTO.genomeIndex];
+        cell->genome = &_data->objects.heap.atType<Genome>(genomeTO.genomeIndexOnGpu);
     } else {
         cell->genome = nullptr;
     }
