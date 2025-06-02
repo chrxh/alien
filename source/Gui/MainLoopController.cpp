@@ -15,8 +15,8 @@
 #include "Base/Resources.h"
 #include "Base/LoggingService.h"
 #include "PersisterInterface/SerializerService.h"
-#include "EngineInterface/SimulationFacade.h"
 #include "PersisterInterface/PersisterFacade.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "OpenGLHelper.h"
 #include "Viewport.h"
@@ -50,6 +50,7 @@
 #include "AutosaveWindow.h"
 #include "BrowserWindow.h"
 #include "CreatorWindow.h"
+#include "CreatureEditorWindow.h"
 #include "DeleteUserDialog.h"
 #include "DisplaySettingsDialog.h"
 #include "EditorController.h"
@@ -473,13 +474,21 @@ void MainLoopController::processMenubar()
         [&] { PatternEditorWindow::get().setOn(!PatternEditorWindow::get().isOn()); });
     AlienImGui::MenuItem(
         AlienImGui::MenuItemParameters()
-            .name("Genome editor")
+            .name("Genome editor (old)")
             .keyAlt(true)
             .key(ImGuiKey_B)
             .selected(GenomeEditorWindow::get().isOn())
             .disabled(!SimulationInteractionController::get().isEditMode())
             .closeMenuWhenItemClicked(false),
         [&] { GenomeEditorWindow::get().setOn(!GenomeEditorWindow::get().isOn()); });
+    AlienImGui::MenuItem(
+        AlienImGui::MenuItemParameters()
+            .name("Creature editor")
+            //.keyAlt(true)
+            .selected(CreatureEditorWindow::get().isOn())
+            .disabled(!SimulationInteractionController::get().isEditMode())
+            .closeMenuWhenItemClicked(false),
+        [&] { CreatureEditorWindow::get().setOn(!CreatureEditorWindow::get().isOn()); });
     AlienImGui::MenuItem(
         AlienImGui::MenuItemParameters()
             .name("Multiplier")

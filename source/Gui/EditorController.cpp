@@ -14,6 +14,7 @@
 #include "SelectionWindow.h"
 #include "PatternEditorWindow.h"
 #include "CreatorWindow.h"
+#include "CreatureEditorWindow.h"
 #include "MultiplierWindow.h"
 #include "GenomeEditorWindow.h"
 #include "GenericMessageDialog.h"
@@ -32,6 +33,7 @@ void EditorController::init(SimulationFacade simulationFacade)
     SelectionWindow::get().setup();
     EditorModel::get().setup(_simulationFacade);
     GenomeEditorWindow::get().setup(_simulationFacade);
+    CreatureEditorWindow::get().setup(_simulationFacade);
     PatternEditorWindow::get().setup(_simulationFacade);
     CreatorWindow::get().setup(_simulationFacade);
     MultiplierWindow::get().setup(_simulationFacade);

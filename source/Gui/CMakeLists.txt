@@ -19,6 +19,8 @@ PUBLIC
     CreateUserDialog.h
     CreatorWindow.cpp
     CreatorWindow.h
+    CreatureEditorWindow.cpp
+    CreatureEditorWindow.h
     Definitions.h
     DelayedExecutionController.cpp
     DelayedExecutionController.h
