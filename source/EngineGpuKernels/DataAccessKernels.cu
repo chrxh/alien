@@ -707,13 +707,13 @@ __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesF
         uint64_t dependentDataSize = cell->metadata.nameSize + cell->metadata.descriptionSize + GpuMemoryAlignmentBytes * 2;
         if (cell->neuralNetwork) {
             dependentDataSize += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
-            if (cell->genome) {
-                atomicAdd(&arraySizes->genomes, 1ull);
-                auto const& genome = cell->genome;
-                atomicAdd(&arraySizes->genes, static_cast<uint64_t>(genome->numGenes));
-                for (int i = 0, j = genome->numGenes; i < j; ++i) {
-                    atomicAdd(&arraySizes->nodes, static_cast<uint64_t>(genome->genes[i].numNodes));
-                }
+        }
+        if (cell->genome) {
+            atomicAdd(&arraySizes->genomes, 1ull);
+            auto const& genome = cell->genome;
+            atomicAdd(&arraySizes->genes, static_cast<uint64_t>(genome->numGenes));
+            for (int i = 0, j = genome->numGenes; i < j; ++i) {
+                atomicAdd(&arraySizes->nodes, static_cast<uint64_t>(genome->genes[i].numNodes));
             }
         }
         if (cell->cellType == CellType_Constructor) {

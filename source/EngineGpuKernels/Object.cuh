@@ -282,7 +282,6 @@ struct Cell
 {
     // General
     uint64_t id;
-    Genome* genome;
     CellConnection connections[MAX_CELL_BONDS];
     float2 pos;
     float2 vel;
@@ -295,11 +294,14 @@ struct Cell
     bool sticky;
     uint32_t age;
     LivingState livingState;
+
+    // Genome data
+    Genome* genome;
     uint64_t creatureId;
     uint32_t mutationId;
     uint8_t ancestorMutationId;  // Only the first 8 bits from ancestor mutation id
-    float genomeComplexity;
     uint16_t genomeNodeIndex;
+    float genomeComplexity;
 
     // Cell type data
     NeuralNetwork* neuralNetwork;  // Not used for structure and base cells

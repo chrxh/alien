@@ -246,8 +246,6 @@ struct CellTO
 {
     // General
     uint64_t id;
-    bool hasGenome;
-    uint64_t genomeIndex;
     ConnectionTO connections[MAX_CELL_BONDS];
     float2 pos;
     float2 vel;
@@ -260,11 +258,15 @@ struct CellTO
     bool sticky;
     uint32_t age;
     LivingState livingState;
+
+    // Genome data
+    bool hasGenome;
+    uint64_t genomeIndex;
     uint64_t creatureId;
     uint32_t mutationId;
     uint8_t ancestorMutationId;  // Only the first 8 bits from ancestor mutation id
-    float genomeComplexity;
     uint16_t genomeNodeIndex;
+    float genomeComplexity;
 
     // Cell type data
     uint64_t neuralNetworkDataIndex;  // Not used for structure and base cells
