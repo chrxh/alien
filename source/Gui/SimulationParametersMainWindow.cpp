@@ -223,7 +223,7 @@ void SimulationParametersMainWindow::processMasterWidget()
 
     if (_masterWidgetOpen && (_detailWidgetOpen || _expertWidgetOpen)) {
         ImGui::PushID("master");
-        AlienImGui::MovableSeparator(AlienImGui::MovableSeparatorParameters(), _masterWidgetHeight);
+        AlienImGui::MovableHorizontalSeparator(AlienImGui::MovableHorizontalSeparatorParameters(), _masterWidgetHeight);
         ImGui::PopID();
     }
 }
@@ -264,7 +264,7 @@ void SimulationParametersMainWindow::processDetailWidget()
 
     if (_detailWidgetOpen && _expertWidgetOpen) {
         ImGui::PushID("detail");
-        AlienImGui::MovableSeparator(AlienImGui::MovableSeparatorParameters().additive(false), _expertWidgetHeight);
+        AlienImGui::MovableHorizontalSeparator(AlienImGui::MovableHorizontalSeparatorParameters().additive(false), _expertWidgetHeight);
         ImGui::PopID();
     }
 }

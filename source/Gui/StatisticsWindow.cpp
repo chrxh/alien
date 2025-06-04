@@ -260,7 +260,7 @@ void StatisticsWindow::processSettings()
     ImGui::Spacing();
     ImGui::Spacing();
     if (_settingsOpen) {
-        AlienImGui::MovableSeparator(AlienImGui::MovableSeparatorParameters().additive(false), _settingsHeight);
+        AlienImGui::MovableHorizontalSeparator(AlienImGui::MovableHorizontalSeparatorParameters().additive(false), _settingsHeight);
     }
 
     _settingsOpen =

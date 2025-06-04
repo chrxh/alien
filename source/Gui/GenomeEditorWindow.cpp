@@ -297,7 +297,7 @@ void GenomeEditorWindow::processTab(TabData& tab)
     }
     ImGui::EndChild();
 
-    AlienImGui::MovableSeparator(AlienImGui::MovableSeparatorParameters().additive(false), _previewHeight);
+    AlienImGui::MovableHorizontalSeparator(AlienImGui::MovableHorizontalSeparatorParameters().additive(false), _previewHeight);
 
     AlienImGui::Group("Preview (reference configuration)", Const::GenomePreviewTooltip);
     ImGui::SameLine();

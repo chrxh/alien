@@ -1123,14 +1123,27 @@ void AlienImGui::Separator()
     ImGui::Spacing();
 }
 
-void AlienImGui::MovableSeparator(MovableSeparatorParameters const& parameters, float& height)
+void AlienImGui::MovableHorizontalSeparator(MovableHorizontalSeparatorParameters const& parameters, float& height)
 {
-    ImGui::Button("##MovableSeparator", ImVec2(-1, scale(5.0f)));
+    ImGui::Button("###MovableHorizontalSeparator", ImVec2(-1, scale(5.0f)));
     if (ImGui::IsItemActive()) {
         if (parameters._additive) {
             height += ImGui::GetIO().MouseDelta.y;
         } else {
             height -= ImGui::GetIO().MouseDelta.y;
+        }
+    }
+}
+
+void AlienImGui::MovableVerticalSeparator(MovableVerticalSeparatorParameters const& parameters, float& width)
+{
+    auto sizeAvailable = ImGui::GetContentRegionAvail();
+    ImGui::Button("###MovableVerticalSeparator", ImVec2(scale(5.0f), sizeAvailable.y - scale(parameters._bottomSpace)));
+    if (ImGui::IsItemActive()) {
+        if (parameters._additive) {
+            width += ImGui::GetIO().MouseDelta.x;
+        } else {
+            width -= ImGui::GetIO().MouseDelta.x;
         }
     }
 }
