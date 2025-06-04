@@ -96,8 +96,6 @@ void AlienWindow<Dependencies...>::process()
 
     _savedWindowMinSize = ImGui::GetStyle().WindowMinSize;
 
-    auto flags = returnFlagsAndConfigureNextWindow();
-
     if (_state == WindowState::Normal) {
         _savedPos = ImGui::GetWindowPos();
         _savedSize = ImGui::GetWindowSize();
@@ -344,13 +342,12 @@ void AlienWindow<Dependencies...>::processCloseButton()
         drawList->AddCircleFilled(iconCenter, radius, bgColor, 12);
     }
 
-    // Draw icon
+    // Draw cross
     {
-        drawList->AddText(
-            StyleRepository::get().getIconFont(),
-            iconSize * 0.7f,
-            ImVec2(center.x - iconSize * 0.25f, center.y - iconSize * 0.22f),
-            ImGui::GetColorU32(ImGuiCol_Text),
-            ICON_FA_TIMES);
+        auto iconColor = ImGui::GetColorU32(ImGuiCol_Text);
+        auto radius = iconSize * 0.3f;
+        auto thickness = scale(1.0f);
+        drawList->AddLine(ImVec2(center.x - radius, center.y - radius), ImVec2(center.x + radius, center.y + radius), iconColor, thickness);
+        drawList->AddLine(ImVec2(center.x + radius, center.y - radius), ImVec2(center.x - radius, center.y + radius), iconColor, thickness);
     }
 }
