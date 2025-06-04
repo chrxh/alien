@@ -11,6 +11,7 @@
 namespace Const
 {
     float const WindowAlpha = 0.9f;
+    float const MaximizedWindowAlpha = 0.95f;
     float const SliderBarWidth = 30.0f;
     float const WindowsRounding = 10.0f;
 

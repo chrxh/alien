@@ -147,19 +147,20 @@ void AlienWindow<Dependencies...>::shutdown()
 template <typename ... Dependencies>
 ImGuiWindowFlags AlienWindow<Dependencies...>::returnFlagsAndConfigureNextWindow()
 {
-    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
-
     if (_state == WindowState::Maximized) {
+        ImGui::SetNextWindowBgAlpha(Const::MaximizedWindowAlpha * ImGui::GetStyle().Alpha);
         ImGui::SetNextWindowPos({0, ImGui::GetFrameHeight()}, ImGuiCond_Always);
         auto size = toRealVector2D(Viewport::get().getViewSize());
         ImGui::SetNextWindowSize({size.x, size.y - ImGui::GetFrameHeight()}, ImGuiCond_Always);
         return ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar;
     } else if (_state == WindowState::Collapsed) {
+        ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
         ImGui::GetStyle().WindowMinSize.y = ImGui::GetTextLineHeightWithSpacing() + 1.0f;
         auto titlebarHeight = ImGui::GetTextLineHeightWithSpacing();
         ImGui::SetNextWindowSize({_savedSize.x, titlebarHeight}, ImGuiCond_Always);
         return ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar;
     } else {
+        ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
         ImGui::SetNextWindowSize({scale(650.0f), scale(350.0f)}, ImGuiCond_FirstUseEver);
         return ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar;
     }

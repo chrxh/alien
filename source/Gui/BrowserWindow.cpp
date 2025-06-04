@@ -59,7 +59,7 @@ namespace
 }
 
 BrowserWindow::BrowserWindow()
-    : AlienWindow("Browser", "windows.browser", true)
+    : AlienWindow("Browser", "windows.browser", true, true)
 {}
 
 namespace

@@ -26,7 +26,7 @@ namespace
 }
 
 AutosaveWindow::AutosaveWindow()
-    : AlienWindow("Autosave", "windows.autosave", false)
+    : AlienWindow("Autosave", "windows.autosave", false, true)
 {}
 
 void AutosaveWindow::initIntern(SimulationFacade simulationFacade, PersisterFacade persisterFacade)

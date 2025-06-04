@@ -18,12 +18,13 @@ private:
     void initIntern(SimulationFacade simulationFacade) override;
     void shutdownIntern() override;
     void processIntern() override;
-
+    bool isShown() override;
 
     void processToolbar();
     void processGenomeEditor();
     void processPreviews();
 
-
     SimulationFacade _simulationFacade;
+
+    float _previewsHeight = 300.0f;
 };
