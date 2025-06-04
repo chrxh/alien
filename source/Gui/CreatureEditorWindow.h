@@ -19,5 +19,11 @@ private:
     void shutdownIntern() override;
     void processIntern() override;
 
+
+    void processToolbar();
+    void processGenomeEditor();
+    void processPreviews();
+
+
     SimulationFacade _simulationFacade;
 };
