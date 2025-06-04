@@ -302,15 +302,15 @@ void AlienWindow<Dependencies...>::processMaximizeButton()
         if (_state == WindowState::Maximized) {
             drawList->AddText(
                 StyleRepository::get().getIconFont(),
-                scale(iconSize * 0.7f),
-                ImVec2(center.x - iconSize * 0.31f, center.y - iconSize * 0.20f),
+                iconSize * 0.7f,
+                ImVec2(center.x - iconSize * 0.31f, center.y - iconSize * 0.22f),
                 ImGui::GetColorU32(ImGuiCol_Text),
                 ICON_FA_COMPRESS_ARROWS_ALT);
         } else {
             drawList->AddText(
                 StyleRepository::get().getIconFont(),
-                scale(iconSize * 0.7f),
-                ImVec2(center.x - iconSize * 0.31f, center.y - iconSize * 0.20f),
+                iconSize * 0.7f,
+                ImVec2(center.x - iconSize * 0.31f, center.y - iconSize * 0.22f),
                 ImGui::GetColorU32(ImGuiCol_Text),
                 ICON_FA_EXPAND_ARROWS_ALT);
         }
@@ -348,8 +348,8 @@ void AlienWindow<Dependencies...>::processCloseButton()
     {
         drawList->AddText(
             StyleRepository::get().getIconFont(),
-            scale(iconSize * 0.7f),
-            ImVec2(center.x - iconSize * 0.25f, center.y - iconSize * 0.20f),
+            iconSize * 0.7f,
+            ImVec2(center.x - iconSize * 0.25f, center.y - iconSize * 0.22f),
             ImGui::GetColorU32(ImGuiCol_Text),
             ICON_FA_TIMES);
     }
