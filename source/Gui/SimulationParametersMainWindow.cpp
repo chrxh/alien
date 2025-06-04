@@ -33,7 +33,7 @@ namespace
 }
 
 SimulationParametersMainWindow::SimulationParametersMainWindow()
-    : AlienWindow("Simulation parameters", "windows.simulation parameters", false)
+    : AlienWindow("Simulation parameters", "windows.simulation parameters", false, true)
 {}
 
 void SimulationParametersMainWindow::initIntern(SimulationFacade simulationFacade)

@@ -301,7 +301,7 @@ void GenomeEditorWindow::processTab(TabData& tab)
 
     AlienImGui::Group("Preview (reference configuration)", Const::GenomePreviewTooltip);
     ImGui::SameLine();
-    if (ImGui::BeginChild("##child4", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+    if (ImGui::BeginChild("##preview", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
         showPreview(tab);
     }
     ImGui::EndChild();

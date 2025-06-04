@@ -3,7 +3,8 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include "AlienImGui.h"
- 
+#include "EditorController.h"
+
 CreatureEditorWindow::CreatureEditorWindow()
     : AlienWindow("Creature editor", "windows.creature editor", false, true)
 {
@@ -21,8 +22,25 @@ void CreatureEditorWindow::shutdownIntern()
 void CreatureEditorWindow::processIntern()
 {
     processToolbar();
-    processGenomeEditor();
-    processPreviews();
+
+    _previewsHeight = std::min(ImGui::GetContentRegionAvail().y - scale(10.0f), std::max(scale(10.0f), _previewsHeight));
+
+    if (ImGui::BeginChild("GenomeEditor", ImVec2(0, ImGui::GetContentRegionAvail().y - _previewsHeight), 0)) {
+        processGenomeEditor();
+    }
+    ImGui::EndChild();
+
+    AlienImGui::MovableSeparator(AlienImGui::MovableSeparatorParameters().additive(false), _previewsHeight);
+
+    if (ImGui::BeginChild("Previews", ImVec2(0, 0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
+        processPreviews();
+    }
+    ImGui::EndChild();
+}
+
+bool CreatureEditorWindow::isShown()
+{
+    return _on && EditorController::get().isOn();
 }
 
 void CreatureEditorWindow::processToolbar()
@@ -46,6 +64,7 @@ void CreatureEditorWindow::processToolbar()
 
 void CreatureEditorWindow::processGenomeEditor()
 {
+
 }
 
 void CreatureEditorWindow::processPreviews()
