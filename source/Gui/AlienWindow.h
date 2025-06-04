@@ -179,6 +179,11 @@ void AlienWindow<Dependencies...>::processTitlebar()
     processCollapseButton();
     processMaximizeButton();
     processCloseButton();
+
+    auto windowPos = ImGui::GetWindowPos();
+    auto titlebarHeight = ImGui::GetTextLineHeightWithSpacing();
+    auto const& framePadding = ImGui::GetStyle().FramePadding;
+    ImGui::SetCursorScreenPos({windowPos.x + framePadding.x * 2, windowPos.y + titlebarHeight + framePadding.y * 2});
 }
 
 template <typename ... Dependencies>

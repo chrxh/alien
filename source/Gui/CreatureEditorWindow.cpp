@@ -64,17 +64,34 @@ void CreatureEditorWindow::processToolbar()
 
 void CreatureEditorWindow::processEditors()
 {
+    _genomeEditorWidth = std::max(scale(10.0f), _genomeEditorWidth);
+    _geneEditorWidth = std::max(scale(10.0f), _geneEditorWidth);
+    auto origGenomeEditorWidth = _genomeEditorWidth;
+
     if (ImGui::BeginChild("GenomeEditor", ImVec2(_genomeEditorWidth, 0), ImGuiChildFlags_Border)) {
     }
     ImGui::EndChild();
 
     ImGui::SameLine();
+    ImGui::PushID(1);
     AlienImGui::MovableVerticalSeparator(AlienImGui::MovableVerticalSeparatorParameters().additive(true), _genomeEditorWidth);
+    ImGui::PopID();
 
     ImGui::SameLine();
-    if (ImGui::BeginChild("GeneNodeEditor", ImVec2(0, 0), ImGuiChildFlags_Border)) {
+    if (ImGui::BeginChild("GeneEditor", ImVec2(_geneEditorWidth, 0), ImGuiChildFlags_Border)) {
     }
     ImGui::EndChild();
+
+    ImGui::SameLine();
+    ImGui::PushID(2);
+    AlienImGui::MovableVerticalSeparator(AlienImGui::MovableVerticalSeparatorParameters().additive(true), _geneEditorWidth);
+    ImGui::PopID();
+
+    ImGui::SameLine();
+    if (ImGui::BeginChild("NodeEditor", ImVec2(0, 0), ImGuiChildFlags_Border)) {
+    }
+    ImGui::EndChild();
+    _geneEditorWidth += origGenomeEditorWidth - _genomeEditorWidth;
 }
 
 void CreatureEditorWindow::processPreviews()
