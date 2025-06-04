@@ -27,5 +27,6 @@ private:
     SimulationFacade _simulationFacade;
 
     float _genomeEditorWidth = 200.0f;
+    float _geneEditorWidth = 200.0f;
     float _previewsHeight = 300.0f;
 };
