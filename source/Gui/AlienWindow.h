@@ -1,6 +1,7 @@
 #pragma once
 
 #include <imgui.h>
+#include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/GlobalSettings.h"
 
@@ -9,12 +10,13 @@
 #include "MainLoopEntity.h"
 #include "MainLoopEntityController.h"
 #include "WindowController.h"
+#include "Viewport.h"
 
 template<typename ...Dependencies>
 class AlienWindow : public MainLoopEntity<Dependencies...>
 {
 public:
-    AlienWindow(std::string const& title, std::string const& settingsNode, bool defaultOn);
+    AlienWindow(std::string const& title, std::string const& settingsNode, bool defaultOn, bool maximizable = false);
 
     bool isOn() const;
     void setOn(bool value);
@@ -34,10 +36,33 @@ protected:
     std::string _title; 
     std::string _settingsNode;
 
+    bool _isMaximizable = false;
+    enum class WindowState
+    {
+        Normal,
+        Maximized,
+        Collapsed
+    };
+    WindowState _state = WindowState::Normal;
+    bool _isFocused = false;
+    ImVec2 _savedPos;
+    ImVec2 _savedSize;
+    ImVec2 _savedWindowMinSize;
+
 private:
     void init(Dependencies... dependencies) override;
     void process() override;
     void shutdown() override;
+
+    ImGuiWindowFlags returnFlagsAndConfigureNextWindow();
+
+    void processTitlebar();
+
+    void drawTitlebarBackground();
+    void drawTitle();
+    void processCollapseButton();
+    void processMaximizeButton();
+    void processCloseButton();
 };
 
 /************************************************************************/
@@ -45,10 +70,11 @@ private:
 /************************************************************************/
 
 template <typename ... Dependencies>
-AlienWindow<Dependencies...>::AlienWindow(std::string const& title, std::string const& settingsNode, bool defaultOn)
+AlienWindow<Dependencies...>::AlienWindow(std::string const& title, std::string const& settingsNode, bool defaultOn, bool maximizable)
     : _title(title)
     , _settingsNode(settingsNode)
     , _defaultOn(defaultOn)
+    , _isMaximizable(maximizable)
 {}
 
 template <typename ... Dependencies>
@@ -68,18 +94,32 @@ void AlienWindow<Dependencies...>::process()
     }
     ImGui::PushID(_title.c_str());
 
-    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
-    ImGui::SetNextWindowSize({scale(650.0f), scale(350.0f)}, ImGuiCond_FirstUseEver);
-    //if (ImGui::Begin(_title.c_str(), &_on)) {
-        if (!_sizeInitialized) {
-            auto size = ImGui::GetWindowSize();
-            auto factor = WindowController::get().getContentScaleFactor() / WindowController::get().getLastContentScaleFactor();
-            ImGui::SetWindowSize({size.x * factor, size.y * factor});
-            _sizeInitialized = true;
+    _savedWindowMinSize = ImGui::GetStyle().WindowMinSize;
+
+    auto flags = returnFlagsAndConfigureNextWindow();
+
+    if (_state == WindowState::Normal) {
+        _savedPos = ImGui::GetWindowPos();
+        _savedSize = ImGui::GetWindowSize();
+    }
+    _isFocused = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows);
+
+    processTitlebar();
+
+    if (!_sizeInitialized) {
+        auto size = ImGui::GetWindowSize();
+        auto factor = WindowController::get().getContentScaleFactor() / WindowController::get().getLastContentScaleFactor();
+        ImGui::SetWindowSize({size.x * factor, size.y * factor});
+        _sizeInitialized = true;
+    }
+    if (_state != WindowState::Collapsed) {
+        if (ImGui::BeginChild("child")) {
+            processIntern();
         }
-        processIntern();
-    //}
-    ImGui::End();
+        ImGui::EndChild();
+    }
+
+    ImGui::GetStyle().WindowMinSize.y = _savedWindowMinSize.y;
 
     ImGui::PopID();
 }
@@ -104,4 +144,213 @@ void AlienWindow<Dependencies...>::shutdown()
 {
     shutdownIntern();
     GlobalSettings::get().setValue(_settingsNode + ".active", _on);
+}
+
+template <typename ... Dependencies>
+ImGuiWindowFlags AlienWindow<Dependencies...>::returnFlagsAndConfigureNextWindow()
+{
+    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
+
+    if (_state == WindowState::Maximized) {
+        ImGui::SetNextWindowPos({0, ImGui::GetFrameHeight()}, ImGuiCond_Always);
+        auto size = toRealVector2D(Viewport::get().getViewSize());
+        ImGui::SetNextWindowSize({size.x, size.y - ImGui::GetFrameHeight()}, ImGuiCond_Always);
+        return ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar;
+    } else if (_state == WindowState::Collapsed) {
+        ImGui::GetStyle().WindowMinSize.y = ImGui::GetTextLineHeightWithSpacing() + 1.0f;
+        auto titlebarHeight = ImGui::GetTextLineHeightWithSpacing();
+        ImGui::SetNextWindowSize({_savedSize.x, titlebarHeight}, ImGuiCond_Always);
+        return ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar;
+    } else {
+        ImGui::SetNextWindowSize({scale(650.0f), scale(350.0f)}, ImGuiCond_FirstUseEver);
+        return ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar;
+    }
+}
+
+template <typename ... Dependencies>
+void AlienWindow<Dependencies...>::processTitlebar()
+{
+    drawTitlebarBackground();
+    drawTitle();
+    processCollapseButton();
+    processMaximizeButton();
+    processCloseButton();
+}
+
+template <typename ... Dependencies>
+void AlienWindow<Dependencies...>::drawTitlebarBackground()
+{
+    auto titlebarHeight = ImGui::GetTextLineHeightWithSpacing();
+    auto windowPos = ImGui::GetWindowPos();
+    auto windowSize = ImGui::GetWindowSize();
+
+    auto bgColor = _state == WindowState::Collapsed || !_isFocused ? ImGui::GetColorU32(ImGuiCol_TitleBgCollapsed) : ImGui::GetColorU32(ImGuiCol_TitleBgActive);
+    auto rounding = ImGui::GetStyle().WindowRounding;
+    ImGui::GetWindowDrawList()->AddRectFilled(
+        windowPos,
+        ImVec2(windowPos.x + windowSize.x, windowPos.y + titlebarHeight + 1.0f),
+        bgColor,
+        rounding,
+        ImDrawFlags_RoundCornersTopLeft | ImDrawFlags_RoundCornersTopRight);
+}
+
+template <typename ... Dependencies>
+void AlienWindow<Dependencies...>::drawTitle()
+{
+    auto windowPos = ImGui::GetWindowPos();
+    auto iconSize = ImGui::GetFontSize();
+    ImGui::SetCursorScreenPos(ImVec2(windowPos.x + iconSize + ImGui::GetStyle().FramePadding.x * 3 + 1, windowPos.y + ImGui::GetStyle().FramePadding.y));
+    ImGui::TextUnformatted(_title.c_str());
+}
+
+template <typename ... Dependencies>
+void AlienWindow<Dependencies...>::processCollapseButton()
+{
+    if (_state == WindowState::Maximized) {
+        return;
+    }
+
+    auto titlebarHeight = ImGui::GetTextLineHeightWithSpacing();
+    auto windowPos = ImGui::GetWindowPos();
+    auto iconSize = ImGui::GetFontSize();
+    auto iconPos = ImVec2(windowPos.x + 4, windowPos.y + (titlebarHeight - iconSize) * 0.5f);
+    auto iconCenter = ImVec2(iconPos.x + iconSize * 0.5f, iconPos.y + iconSize * 0.5f);
+
+    // Process interaction field
+    ImGui::SetCursorScreenPos(iconPos);
+    if (ImGui::InvisibleButton("CollapseButton", ImVec2(iconSize, iconSize))) {
+        if (_state == WindowState::Collapsed) {
+            ImGui::SetWindowSize(_savedSize);
+            _state = WindowState::Normal;
+        } else {
+            _state = WindowState::Collapsed;
+        }
+    }
+
+    // Draw background circle
+    auto pressed =ImGui::IsItemActive();
+    bool hovered = ImGui::IsItemHovered();
+    auto drawList = ImGui::GetWindowDrawList();
+    auto center = ImVec2(iconPos.x + iconSize * 0.5f, iconPos.y + iconSize * 0.5f);
+    if (hovered || pressed) {
+        auto bgColor = hovered && pressed ? ImGui::GetColorU32(ImGuiCol_ButtonActive) : ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+        auto radius = iconSize * 0.6f;
+        drawList->AddCircleFilled(iconCenter, radius, bgColor, 12);
+    }
+
+    // Draw icon
+    {
+        auto color = ImGui::GetColorU32(ImGuiCol_Text);
+        auto radius = iconSize * 0.35f;
+        if (_state == WindowState::Collapsed) {
+            // Triangle pointing right
+            drawList->AddTriangleFilled(
+                ImVec2(center.x - radius * 0.5f, center.y - radius),
+                ImVec2(center.x - radius * 0.5f, center.y + radius),
+                ImVec2(center.x + radius, center.y),
+                color);
+        } else {
+            // Triangle pointing down
+            drawList->AddTriangleFilled(
+                ImVec2(center.x - radius, center.y - radius * 0.5f),
+                ImVec2(center.x + radius, center.y - radius * 0.5f),
+                ImVec2(center.x, center.y + radius),
+                color);
+        }
+    }
+}
+
+template <typename ... Dependencies>
+void AlienWindow<Dependencies...>::processMaximizeButton()
+{
+    if (!_isMaximizable) {
+        return;
+    }
+
+    auto titlebarHeight = ImGui::GetTextLineHeightWithSpacing();
+    auto windowPos = ImGui::GetWindowPos();
+    auto windowSize = ImGui::GetWindowSize();
+    auto iconSize = ImGui::GetFontSize();
+    auto iconPos = ImVec2(windowPos.x + windowSize.x - scale(24.0f) * 2, windowPos.y + (titlebarHeight - iconSize) * 0.5f);
+    auto iconCenter = ImVec2(iconPos.x + iconSize * 0.5f, iconPos.y + iconSize * 0.5f);
+
+    // Process interaction field
+    ImGui::SetCursorScreenPos(iconPos);
+    if (ImGui::InvisibleButton("MaximizeButton", ImVec2(iconSize, iconSize))) {
+        if (_state == WindowState::Maximized) {
+            ImGui::SetWindowPos(_savedPos);
+            ImGui::SetWindowSize(_savedSize);
+            _state = WindowState::Normal;
+        } else {
+            _state = WindowState::Maximized;
+        }
+    }
+
+    // Draw background circle
+    auto pressed = ImGui::IsItemActive();
+    bool hovered = ImGui::IsItemHovered();
+    auto drawList = ImGui::GetWindowDrawList();
+    auto center = ImVec2(iconPos.x + iconSize * 0.5f, iconPos.y + iconSize * 0.5f);
+    if (hovered || pressed) {
+        auto bgColor = hovered && pressed ? ImGui::GetColorU32(ImGuiCol_ButtonActive) : ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+        auto radius = iconSize * 0.6f;
+        drawList->AddCircleFilled(iconCenter, radius, bgColor, 12);
+    }
+
+    // Draw icon
+    {
+        if (_state == WindowState::Maximized) {
+            drawList->AddText(
+                StyleRepository::get().getIconFont(),
+                scale(iconSize * 0.7f),
+                ImVec2(center.x - iconSize * 0.31f, center.y - iconSize * 0.20f),
+                ImGui::GetColorU32(ImGuiCol_Text),
+                ICON_FA_COMPRESS_ARROWS_ALT);
+        } else {
+            drawList->AddText(
+                StyleRepository::get().getIconFont(),
+                scale(iconSize * 0.7f),
+                ImVec2(center.x - iconSize * 0.31f, center.y - iconSize * 0.20f),
+                ImGui::GetColorU32(ImGuiCol_Text),
+                ICON_FA_EXPAND_ARROWS_ALT);
+        }
+    }
+}
+
+template <typename ... Dependencies>
+void AlienWindow<Dependencies...>::processCloseButton()
+{
+    auto titlebarHeight = ImGui::GetTextLineHeightWithSpacing();
+    auto windowPos = ImGui::GetWindowPos();
+    auto windowSize = ImGui::GetWindowSize();
+    auto iconSize = ImGui::GetFontSize();
+    auto iconPos = ImVec2(windowPos.x + windowSize.x - scale(24.0f), windowPos.y + (titlebarHeight - iconSize) * 0.5f);
+    auto iconCenter = ImVec2(iconPos.x + iconSize * 0.5f, iconPos.y + iconSize * 0.5f);
+
+    // Process interaction field
+    ImGui::SetCursorScreenPos(iconPos);
+    if (ImGui::InvisibleButton("CloseButton", ImVec2(iconSize, iconSize))) {
+        _on = false;
+    }
+
+    // Draw background circle
+    auto pressed = ImGui::IsItemActive();
+    bool hovered = ImGui::IsItemHovered();
+    auto drawList = ImGui::GetWindowDrawList();
+    auto center = ImVec2(iconPos.x + iconSize * 0.5f, iconPos.y + iconSize * 0.5f);
+    if (hovered || pressed) {
+        auto bgColor = hovered && pressed ? ImGui::GetColorU32(ImGuiCol_ButtonActive) : ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+        auto radius = iconSize * 0.6f;
+        drawList->AddCircleFilled(iconCenter, radius, bgColor, 12);
+    }
+
+    // Draw icon
+    {
+        drawList->AddText(
+            StyleRepository::get().getIconFont(),
+            scale(iconSize * 0.7f),
+            ImVec2(center.x - iconSize * 0.25f, center.y - iconSize * 0.20f),
+            ImGui::GetColorU32(ImGuiCol_Text),
+            ICON_FA_TIMES);
+    }
 }
