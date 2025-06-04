@@ -96,26 +96,31 @@ void AlienWindow<Dependencies...>::process()
 
     _savedWindowMinSize = ImGui::GetStyle().WindowMinSize;
 
-    if (_state == WindowState::Normal) {
-        _savedPos = ImGui::GetWindowPos();
-        _savedSize = ImGui::GetWindowSize();
-    }
-    _isFocused = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows);
+    auto flags = returnFlagsAndConfigureNextWindow();
 
-    processTitlebar();
-
-    if (!_sizeInitialized) {
-        auto size = ImGui::GetWindowSize();
-        auto factor = WindowController::get().getContentScaleFactor() / WindowController::get().getLastContentScaleFactor();
-        ImGui::SetWindowSize({size.x * factor, size.y * factor});
-        _sizeInitialized = true;
-    }
-    if (_state != WindowState::Collapsed) {
-        if (ImGui::BeginChild("child")) {
-            processIntern();
+    if (ImGui::Begin(_title.c_str(), nullptr, flags)) {
+        if (_state == WindowState::Normal) {
+            _savedPos = ImGui::GetWindowPos();
+            _savedSize = ImGui::GetWindowSize();
         }
-        ImGui::EndChild();
+        _isFocused = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows);
+
+        processTitlebar();
+
+        if (!_sizeInitialized) {
+            auto size = ImGui::GetWindowSize();
+            auto factor = WindowController::get().getContentScaleFactor() / WindowController::get().getLastContentScaleFactor();
+            ImGui::SetWindowSize({size.x * factor, size.y * factor});
+            _sizeInitialized = true;
+        }
+        if (_state != WindowState::Collapsed) {
+            if (ImGui::BeginChild("child")) {
+                processIntern();
+            }
+            ImGui::EndChild();
+        }
     }
+    ImGui::End();
 
     ImGui::GetStyle().WindowMinSize.y = _savedWindowMinSize.y;
 
@@ -227,7 +232,7 @@ void AlienWindow<Dependencies...>::processCollapseButton()
     }
 
     // Draw background circle
-    auto pressed =ImGui::IsItemActive();
+    auto pressed = ImGui::IsItemActive();
     bool hovered = ImGui::IsItemHovered();
     auto drawList = ImGui::GetWindowDrawList();
     auto center = ImVec2(iconPos.x + iconSize * 0.5f, iconPos.y + iconSize * 0.5f);

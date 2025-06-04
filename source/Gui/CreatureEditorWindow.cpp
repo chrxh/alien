@@ -25,12 +25,12 @@ void CreatureEditorWindow::processIntern()
 
     _previewsHeight = std::min(ImGui::GetContentRegionAvail().y - scale(10.0f), std::max(scale(10.0f), _previewsHeight));
 
-    if (ImGui::BeginChild("GenomeEditor", ImVec2(0, ImGui::GetContentRegionAvail().y - _previewsHeight), 0)) {
-        processGenomeEditor();
+    if (ImGui::BeginChild("Editors", ImVec2(0, ImGui::GetContentRegionAvail().y - _previewsHeight), 0)) {
+        processEditors();
     }
     ImGui::EndChild();
 
-    AlienImGui::MovableSeparator(AlienImGui::MovableSeparatorParameters().additive(false), _previewsHeight);
+    AlienImGui::MovableHorizontalSeparator(AlienImGui::MovableHorizontalSeparatorParameters().additive(false), _previewsHeight);
 
     if (ImGui::BeginChild("Previews", ImVec2(0, 0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
         processPreviews();
@@ -62,9 +62,19 @@ void CreatureEditorWindow::processToolbar()
     AlienImGui::Separator();
 }
 
-void CreatureEditorWindow::processGenomeEditor()
+void CreatureEditorWindow::processEditors()
 {
+    if (ImGui::BeginChild("GenomeEditor", ImVec2(_genomeEditorWidth, 0), ImGuiChildFlags_Border)) {
+    }
+    ImGui::EndChild();
 
+    ImGui::SameLine();
+    AlienImGui::MovableVerticalSeparator(AlienImGui::MovableVerticalSeparatorParameters().additive(true), _genomeEditorWidth);
+
+    ImGui::SameLine();
+    if (ImGui::BeginChild("GeneNodeEditor", ImVec2(0, 0), ImGuiChildFlags_Border)) {
+    }
+    ImGui::EndChild();
 }
 
 void CreatureEditorWindow::processPreviews()

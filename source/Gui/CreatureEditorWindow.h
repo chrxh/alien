@@ -21,10 +21,11 @@ private:
     bool isShown() override;
 
     void processToolbar();
-    void processGenomeEditor();
+    void processEditors();
     void processPreviews();
 
     SimulationFacade _simulationFacade;
 
+    float _genomeEditorWidth = 200.0f;
     float _previewsHeight = 300.0f;
 };

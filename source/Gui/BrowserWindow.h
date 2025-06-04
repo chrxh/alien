@@ -56,7 +56,6 @@ private:
     void processToolbar();
     void processWorkspaceSelectionAndFilter();
     void processWorkspace();
-    void processVerticalMovableSeparator();
     void processUserList();
     void processStatusBar();
 

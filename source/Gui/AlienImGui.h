@@ -316,11 +316,18 @@ public:
     static void NegativeSpacing();
     static void Separator();
 
-    struct MovableSeparatorParameters
+    struct MovableHorizontalSeparatorParameters
     {
-        MEMBER(MovableSeparatorParameters, bool, additive, true);
+        MEMBER(MovableHorizontalSeparatorParameters, bool, additive, true);
     };
-    static void MovableSeparator(MovableSeparatorParameters const& parameters, float& height);
+    static void MovableHorizontalSeparator(MovableHorizontalSeparatorParameters const& parameters, float& height);
+
+    struct MovableVerticalSeparatorParameters
+    {
+        MEMBER(MovableVerticalSeparatorParameters, bool, additive, true);
+        MEMBER(MovableVerticalSeparatorParameters, float, bottomSpace, 0);
+    };
+    static void MovableVerticalSeparator(MovableVerticalSeparatorParameters const& parameters, float& width);
 
     static void Group(std::string const& text, std::optional<std::string> const& tooltip = std::nullopt);
 

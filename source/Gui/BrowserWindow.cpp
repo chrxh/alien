@@ -194,7 +194,7 @@ void BrowserWindow::processIntern()
         processWorkspace();
 
         ImGui::SameLine();
-        processVerticalMovableSeparator();
+        AlienImGui::MovableVerticalSeparator(AlienImGui::MovableVerticalSeparatorParameters().additive(false).bottomSpace(BrowserBottomSpace), _userTableWidth);
 
         ImGui::SameLine();
         processUserList();
@@ -410,15 +410,6 @@ void BrowserWindow::processWorkspaceSelectionAndFilter()
         }
 
         ImGui::EndTable();
-    }
-}
-
-void BrowserWindow::processVerticalMovableSeparator()
-{
-    auto sizeAvailable = ImGui::GetContentRegionAvail();
-    ImGui::Button("##MovableSeparator", ImVec2(scale(5.0f), sizeAvailable.y - scale(BrowserBottomSpace)));
-    if (ImGui::IsItemActive()) {
-        _userTableWidth -= ImGui::GetIO().MouseDelta.x;
     }
 }
 
