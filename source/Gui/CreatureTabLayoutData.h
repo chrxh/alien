@@ -2,9 +2,8 @@
 
 #include "Definitions.h"
 
-class _CreatureTabLayoutData
+struct CreatureTabLayoutData
 {
-public:
     float _genomeEditorWidth = 0;
     float _geneEditorWidth = 0;
     float _previewsHeight = 0;
