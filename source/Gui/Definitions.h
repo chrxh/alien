@@ -114,6 +114,12 @@ class FileTransferController;
 class _LocationWidgets;
 using LocationWidgets = std::shared_ptr<_LocationWidgets>;
 
+class _CreatureTabWidget;
+using CreatureTabWidget = std::shared_ptr<_CreatureTabWidget>;
+
+class _CreatureTabLayoutData;
+using CreatureTabLayoutData = std::shared_ptr<_CreatureTabLayoutData>;
+
 struct UserInfo;
 
 struct GLFWvidmode;

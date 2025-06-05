@@ -21,6 +21,9 @@ PUBLIC
     CreatorWindow.h
     CreatureEditorWindow.cpp
     CreatureEditorWindow.h
+    CreatureTabLayoutData.h
+    CreatureTabWidget.cpp
+    CreatureTabWidget.h
     Definitions.h
     DelayedExecutionController.cpp
     DelayedExecutionController.h

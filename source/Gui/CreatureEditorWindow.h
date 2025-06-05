@@ -1,9 +1,10 @@
 #pragma once
 
 #include "Base/Singleton.h"
-#include "Definitions.h"
 #include "EngineInterface/SimulationFacade.h"
+#include "EngineInterface/GenomeDescriptions.h"
 
+#include "Definitions.h"
 #include "AlienWindow.h"
 
 class CreatureEditorWindow : public AlienWindow<SimulationFacade>
@@ -21,12 +22,23 @@ private:
     bool isShown() override;
 
     void processToolbar();
-    void processEditors();
-    void processPreviews();
+    void processTabWidget();
+
+    struct TempLayoutData
+    {
+        float origGenomeEditorWidth;
+    };
+    TempLayoutData beginCorrectingLayout();
+    void endCorrectingLayout(TempLayoutData const& tempLayoutData);
 
     SimulationFacade _simulationFacade;
 
-    float _genomeEditorWidth = 200.0f;
-    float _geneEditorWidth = 200.0f;
-    float _previewsHeight = 300.0f;
+    // Layout data
+    CreatureTabLayoutData _creatureTabLayoutData;
+    std::optional<RealVector2D> _lastWindowSize;
+
+    // Tab data
+    std::vector<CreatureTabWidget> _tabs;
+    int _selectedTabIndex = 0;
+    //std::optional<TabData> _tabToAdd;
 };

@@ -474,9 +474,7 @@ void MainLoopController::processMenubar()
         [&] { PatternEditorWindow::get().setOn(!PatternEditorWindow::get().isOn()); });
     AlienImGui::MenuItem(
         AlienImGui::MenuItemParameters()
-            .name("Genome editor (old)")
-            .keyAlt(true)
-            .key(ImGuiKey_B)
+            .name("Genome editor (deprecated)")
             .selected(GenomeEditorWindow::get().isOn())
             .disabled(!SimulationInteractionController::get().isEditMode())
             .closeMenuWhenItemClicked(false),
@@ -484,7 +482,8 @@ void MainLoopController::processMenubar()
     AlienImGui::MenuItem(
         AlienImGui::MenuItemParameters()
             .name("Creature editor")
-            //.keyAlt(true)
+            .keyAlt(true)
+            .key(ImGuiKey_B)
             .selected(CreatureEditorWindow::get().isOn())
             .disabled(!SimulationInteractionController::get().isEditMode())
             .closeMenuWhenItemClicked(false),
