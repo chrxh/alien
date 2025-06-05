@@ -10,7 +10,7 @@
 #include "EditorController.h"
 
 CreatureEditorWindow::CreatureEditorWindow()
-    : AlienWindow("Creature editor", "windows.creature editor", false, true)
+    : AlienWindow("Creature editor", "windows.creature editor", false, true, {500.0f, 300.0f})
 {
 }
 
