@@ -2,10 +2,10 @@
 
 #include "Definitions.h"
 
-class _LocationWidgets
+class _LocationWidget
 {
 public:
-    virtual ~_LocationWidgets() = default;
+    virtual ~_LocationWidget() = default;
 
     virtual void process() = 0;
     virtual std::string getLocationName() = 0;

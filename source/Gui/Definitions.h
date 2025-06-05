@@ -111,8 +111,8 @@ class CreatureEditorWindow;
 
 class FileTransferController;
 
-class _LocationWidgets;
-using LocationWidgets = std::shared_ptr<_LocationWidgets>;
+class _LocationWidget;
+using LocationWidget = std::shared_ptr<_LocationWidget>;
 
 class _CreatureTabWidget;
 using CreatureTabWidget = std::shared_ptr<_CreatureTabWidget>;

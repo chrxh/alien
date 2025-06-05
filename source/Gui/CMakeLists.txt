@@ -68,7 +68,7 @@ PUBLIC
     LayerColorPalette.h
     LocationController.cpp
     LocationController.h
-    LocationWidgets.h
+    LocationWidget.h
     LocationWindow.cpp
     LocationWindow.h
     LoginController.cpp
@@ -118,14 +118,14 @@ PUBLIC
     ShaderWindow.h
     SimulationInteractionController.cpp
     SimulationInteractionController.h
-    SimulationParametersBaseWidgets.cpp
-    SimulationParametersBaseWidgets.h
+    SimulationParametersBaseWidget.cpp
+    SimulationParametersBaseWidget.h
     SimulationParametersMainWindow.cpp
     SimulationParametersMainWindow.h
-    SimulationParametersSourceWidgets.cpp
-    SimulationParametersSourceWidgets.h
-    SimulationParametersLayerWidgets.cpp
-    SimulationParametersLayerWidgets.h
+    SimulationParametersSourceWidget.cpp
+    SimulationParametersSourceWidget.h
+    SimulationParametersLayerWidget.cpp
+    SimulationParametersLayerWidget.h
     SimulationScrollbar.cpp
     SimulationScrollbar.h
     SimulationView.cpp

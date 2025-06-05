@@ -1,15 +1,14 @@
 #pragma once
 
-#include <string>
-
 #include "EngineInterface/Definitions.h"
-#include "LocationWidgets.h"
-#include "LayerColorPalette.h"
+#include "EngineInterface/SimulationParametersSpecification.h"
 
-class _SimulationParametersSourceWidgets : public _LocationWidgets
+#include "LocationWidget.h"
+
+class _SimulationParametersBaseWidget : public _LocationWidget
 {
 public:
-    void init(SimulationFacade const& simulationFacade, int orderNumber);
+    void init(SimulationFacade const& simulationFacade);
     void process() override;
     std::string getLocationName() override;
     int getOrderNumber() const override;
@@ -17,7 +16,4 @@ public:
 
 private:
     SimulationFacade _simulationFacade;
-
-    int _orderNumber = 0;
-    std::string _sourceName;
 };

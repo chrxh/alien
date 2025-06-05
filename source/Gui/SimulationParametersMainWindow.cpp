@@ -14,8 +14,8 @@
 #include "GenericMessageDialog.h"
 #include "LocationController.h"
 #include "OverlayController.h"
-#include "SimulationParametersSourceWidgets.h"
-#include "SimulationParametersLayerWidgets.h"
+#include "SimulationParametersSourceWidget.h"
+#include "SimulationParametersLayerWidget.h"
 #include "AlienImGui.h"
 #include "SpecificationGuiService.h"
 #include "Viewport.h"
@@ -46,11 +46,11 @@ void SimulationParametersMainWindow::initIntern(SimulationFacade simulationFacad
     _masterWidgetHeight = GlobalSettings::get().getValue("windows.simulation parameters.master widget.height", scale(MasterHeight));
     _expertWidgetHeight = GlobalSettings::get().getValue("windows.simulation parameters.expert widget height", scale(ExpertWidgetHeight));
 
-    auto baseWidgets = std::make_shared<_SimulationParametersBaseWidgets>();
+    auto baseWidgets = std::make_shared<_SimulationParametersBaseWidget>();
     baseWidgets->init(_simulationFacade);
     _baseWidgets = baseWidgets;
 
-    auto layerWidgets = std::make_shared<_SimulationParametersLayerWidgets>();
+    auto layerWidgets = std::make_shared<_SimulationParameterLayerWidget>();
     layerWidgets->init(_simulationFacade, 0);
     _layerWidgets = layerWidgets;
 

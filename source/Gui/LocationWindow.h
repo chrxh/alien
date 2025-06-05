@@ -1,11 +1,11 @@
 #pragma once
 
-#include "LocationWidgets.h"
+#include "LocationWidget.h"
 
 class LocationWindow
 {
 public:
-    void init(LocationWidgets const& widgets, RealVector2D const& initialPos);
+    void init(LocationWidget const& widgets, RealVector2D const& initialPos);
     void process();
 
     bool isOn() const;
@@ -14,7 +14,7 @@ public:
     void setOrderNumber(int orderNumber);
 
 private:
-    LocationWidgets _widgets;
+    LocationWidget _widget;
     int _id = 0;
     RealVector2D _initialPos;
     bool _on = false;
