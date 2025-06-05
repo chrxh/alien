@@ -7,7 +7,7 @@
 class _CreatureTabWidget
 {
 public:
-    _CreatureTabWidget(CreatureTabLayoutData const& creatureTabLayoutData);
+    _CreatureTabWidget(GenomeDescription_New const& genome, CreatureTabLayoutData const& creatureTabLayoutData);
 
     void process();
 
@@ -22,10 +22,11 @@ private:
     void processDesiredConfigurationPreview();
     void processActualConfigurationPreview();
 
-    CreatureTabLayoutData _creatureTabLayoutData;
+    int _id = 0;
+    GenomeDescription_New _genome;
+    std::optional<int> _selectedGene;
+    std::optional<int> _selectedNode;
+    float _previewZoom = 30.0f;
 
-    GenomeDescription_New genome;
-    std::optional<int> selectedGene;
-    std::optional<int> selectedNode;
-    float previewZoom = 30.0f;
+    CreatureTabLayoutData _creatureTabLayoutData;
 };
