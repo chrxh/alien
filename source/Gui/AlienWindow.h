@@ -16,7 +16,12 @@ template<typename ...Dependencies>
 class AlienWindow : public MainLoopEntity<Dependencies...>
 {
 public:
-    AlienWindow(std::string const& title, std::string const& settingsNode, bool defaultOn, bool maximizable = false);
+    AlienWindow(
+        std::string const& title,
+        std::string const& settingsNode,
+        bool defaultOn,
+        bool maximizable = false,
+        RealVector2D const& minSize = {scale(300.0f), scale(100.0f)});
 
     bool isOn() const;
     void setOn(bool value);
@@ -41,7 +46,6 @@ private:
     void shutdown() override;
 
     std::string _title;
-    std::optional<float> _cachedTitleWidth;
 
     bool _isMaximizable = false;
     enum class WindowState
@@ -51,6 +55,7 @@ private:
         Collapsed
     };
     WindowState _state = WindowState::Normal;
+    RealVector2D _minSize;
     bool _isFocused = false;
     ImVec2 _savedPos;
     ImVec2 _savedSize;
@@ -72,11 +77,17 @@ private:
 /************************************************************************/
 
 template <typename ... Dependencies>
-AlienWindow<Dependencies...>::AlienWindow(std::string const& title, std::string const& settingsNode, bool defaultOn, bool maximizable)
+AlienWindow<Dependencies...>::AlienWindow(
+    std::string const& title,
+    std::string const& settingsNode,
+    bool defaultOn,
+    bool maximizable,
+    RealVector2D const& minSize)
     : _title(title)
     , _settingsNode(settingsNode)
     , _defaultOn(defaultOn)
     , _isMaximizable(maximizable)
+    , _minSize(minSize)
 {
 }
 
@@ -155,10 +166,6 @@ void AlienWindow<Dependencies...>::shutdown()
 template <typename ... Dependencies>
 ImGuiWindowFlags AlienWindow<Dependencies...>::returnFlagsAndConfigureNextWindow()
 {
-    if (!_cachedTitleWidth.has_value()) {
-        _cachedTitleWidth = ImGui::CalcTextSize(_title.c_str()).x;
-    }
-
     if (_state == WindowState::Maximized) {
         ImGui::SetNextWindowBgAlpha(Const::MaximizedWindowAlpha * ImGui::GetStyle().Alpha);
         ImGui::SetNextWindowPos({0, ImGui::GetFrameHeight()}, ImGuiCond_Always);
@@ -167,7 +174,7 @@ ImGuiWindowFlags AlienWindow<Dependencies...>::returnFlagsAndConfigureNextWindow
         return ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar;
     } else if (_state == WindowState::Collapsed) {
         ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
-        ImGui::GetStyle().WindowMinSize.x = _cachedTitleWidth.value() + scale(100);
+        ImGui::GetStyle().WindowMinSize.x = _minSize.x;
         ImGui::GetStyle().WindowMinSize.y = ImGui::GetTextLineHeightWithSpacing() + 1.0f;
         auto titlebarHeight = ImGui::GetTextLineHeightWithSpacing();
         ImGui::SetNextWindowSize({_savedSize.x, titlebarHeight}, ImGuiCond_Always);
@@ -175,7 +182,8 @@ ImGuiWindowFlags AlienWindow<Dependencies...>::returnFlagsAndConfigureNextWindow
     } else {
         ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
         ImGui::SetNextWindowSize({scale(650.0f), scale(350.0f)}, ImGuiCond_FirstUseEver);
-        ImGui::GetStyle().WindowMinSize.x = _cachedTitleWidth.value() + scale(100);
+        ImGui::GetStyle().WindowMinSize.x = _minSize.x;
+        ImGui::GetStyle().WindowMinSize.y = _minSize.y;
         return ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar;
     }
 }
