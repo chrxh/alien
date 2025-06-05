@@ -4,14 +4,19 @@
 
 #include "AlienImGui.h"
 #include "CreatureTabLayoutData.h"
+#include "EngineInterface/NumberGenerator.h"
 
-_CreatureTabWidget::_CreatureTabWidget(CreatureTabLayoutData const& creatureTabLayoutData)
-    : _creatureTabLayoutData(creatureTabLayoutData)
+_CreatureTabWidget::_CreatureTabWidget(GenomeDescription_New const& genome, CreatureTabLayoutData const& creatureTabLayoutData)
+    : _genome(genome), _creatureTabLayoutData(creatureTabLayoutData)
 {
+    static int _sequence = 0;
+    _id = ++_sequence;
 }
 
 void _CreatureTabWidget::process()
 {
+    ImGui::PushID(_id);
+
     if (ImGui::BeginChild("Editors", ImVec2(0, ImGui::GetContentRegionAvail().y - _creatureTabLayoutData->_previewsHeight), 0)) {
         processEditors();
     }
@@ -23,6 +28,8 @@ void _CreatureTabWidget::process()
         processPreviews();
     }
     ImGui::EndChild();
+
+    ImGui::PopID();
 }
 
 void _CreatureTabWidget::processEditors()

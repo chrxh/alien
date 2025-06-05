@@ -24,21 +24,19 @@ private:
     void processToolbar();
     void processTabWidget();
 
-    struct TempLayoutData
-    {
-        float origGenomeEditorWidth;
-    };
-    TempLayoutData beginCorrectingLayout();
-    void endCorrectingLayout(TempLayoutData const& tempLayoutData);
+    void scheduleAddTab(GenomeDescription_New const& genome);
+
+    void correctingLayout();
 
     SimulationFacade _simulationFacade;
 
     // Layout data
     CreatureTabLayoutData _creatureTabLayoutData;
     std::optional<RealVector2D> _lastWindowSize;
+    std::optional<float> _lastGenomeEditorWidth;
 
     // Tab data
     std::vector<CreatureTabWidget> _tabs;
     int _selectedTabIndex = 0;
-    //std::optional<TabData> _tabToAdd;
+    std::optional<CreatureTabWidget> _tabToAdd;
 };

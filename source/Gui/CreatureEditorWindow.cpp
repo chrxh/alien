@@ -34,7 +34,7 @@ void CreatureEditorWindow::initIntern(SimulationFacade simulationFacade)
     _creatureTabLayoutData->_desiredConfigurationPreviewWidth =
         GlobalSettings::get().getValue("windows.creature editor.desired configuration preview width", scale(DesiredConfigurationPreviewWidth));
 
-    _tabs = {std::make_shared<_CreatureTabWidget>(_creatureTabLayoutData)};
+    scheduleAddTab(GenomeDescription_New());
 }
 
 void CreatureEditorWindow::shutdownIntern()
@@ -47,12 +47,11 @@ void CreatureEditorWindow::shutdownIntern()
 
 void CreatureEditorWindow::processIntern()
 {
-    auto tempLayoutData = beginCorrectingLayout();
+    correctingLayout();
 
     processToolbar();
     processTabWidget();
 
-    endCorrectingLayout(tempLayoutData);
 }
 
 bool CreatureEditorWindow::isShown()
@@ -84,7 +83,7 @@ void CreatureEditorWindow::processTabWidget()
     if (ImGui::BeginTabBar("##", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
 
         if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
-            //scheduleAddTab(GenomeDescription());
+            scheduleAddTab(GenomeDescription_New());
         }
         AlienImGui::Tooltip("New creature");
 
@@ -118,18 +117,26 @@ void CreatureEditorWindow::processTabWidget()
         }
 
         // Add tab
-        //if (_tabToAdd.has_value()) {
-        //    tab.emplace_back(*_tabToAdd);
-        //    _tabToAdd.reset();
-        //}
+        if (_tabToAdd.has_value()) {
+            _tabs.emplace_back(_tabToAdd.value());
+            _tabToAdd.reset();
+        }
 
         ImGui::EndTabBar();
     }
 }
 
-
-auto CreatureEditorWindow::beginCorrectingLayout() -> TempLayoutData
+void CreatureEditorWindow::scheduleAddTab(GenomeDescription_New const& genome)
 {
+    _tabToAdd = std::make_shared<_CreatureTabWidget>(genome, _creatureTabLayoutData);
+}
+
+void CreatureEditorWindow::correctingLayout()
+{
+    if (_lastGenomeEditorWidth.has_value()) {
+        _creatureTabLayoutData->_geneEditorWidth += _lastGenomeEditorWidth.value() - _creatureTabLayoutData->_genomeEditorWidth;
+    }
+
     auto windowSize = ImGui::GetWindowSize();
     if (_lastWindowSize.has_value() && _lastWindowSize->x > 0 && _lastWindowSize->y > 0) {
         if (_lastWindowSize->x != windowSize.x || _lastWindowSize->y != windowSize.y) {
@@ -149,10 +156,5 @@ auto CreatureEditorWindow::beginCorrectingLayout() -> TempLayoutData
     _creatureTabLayoutData->_previewsHeight =
         std::min(ImGui::GetContentRegionAvail().y - scale(50.0f), std::max(scale(50.0f), _creatureTabLayoutData->_previewsHeight));
 
-    return {_creatureTabLayoutData->_genomeEditorWidth};
-}
-
-void CreatureEditorWindow::endCorrectingLayout(TempLayoutData const& tempLayoutData)
-{
-    _creatureTabLayoutData->_geneEditorWidth += tempLayoutData.origGenomeEditorWidth - _creatureTabLayoutData->_genomeEditorWidth;
+    _lastGenomeEditorWidth = _creatureTabLayoutData->_genomeEditorWidth;
 }
