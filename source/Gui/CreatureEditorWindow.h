@@ -26,16 +26,8 @@ private:
 
     void scheduleAddTab(GenomeDescription_New const& genome);
 
-    void correctingLayout();
-
     SimulationFacade _simulationFacade;
 
-    // Layout data
-    CreatureTabLayoutData _creatureTabLayoutData;
-    std::optional<RealVector2D> _lastWindowSize;
-    std::optional<float> _lastGenomeEditorWidth;
-
-    // Tab data
     std::vector<CreatureTabWidget> _tabs;
     int _selectedTabIndex = 0;
     std::optional<CreatureTabWidget> _tabToAdd;
