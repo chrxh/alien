@@ -1155,28 +1155,18 @@ void AlienImGui::Group(std::string const& text, std::optional<std::string> const
 
     ImGui::Spacing();
     ImGui::Spacing();
-    {
-        auto cursorPos = ImGui::GetCursorScreenPos();
-        auto color = Const::TreeNodeDefaultColor;
-        //ImColor(ImGui::GetStyle().Colors[ImGuiCol_Border]);
-        drawList->AddRectFilled(
-            ImVec2(cursorPos.x, cursorPos.y - style.FramePadding.y),
-            ImVec2(cursorPos.x + scale(ImGui::GetContentRegionAvail().x), cursorPos.y + ImGui::GetTextLineHeight() + style.FramePadding.y),
-            color,
-            2.0f);
-    }
+
+    auto cursorPos = ImGui::GetCursorScreenPos();
+    drawList->AddRectFilled(
+        ImVec2(cursorPos.x, cursorPos.y - style.FramePadding.y),
+        ImVec2(cursorPos.x + scale(ImGui::GetContentRegionAvail().x), cursorPos.y + ImGui::GetTextLineHeight() + style.FramePadding.y),
+        Const::GroupColor,
+        2.0f);
     ImGui::TextUnformatted((" "  + text).c_str());
     if (tooltip.has_value()) {
         AlienImGui::HelpMarker(*tooltip);
     }
 
-    //auto cursorPos = ImGui::GetCursorScreenPos();
-    //auto color = ImColor(ImGui::GetStyle().Colors[ImGuiCol_Border]);
-    //color.Value.w *= ImGui::GetStyle().Alpha;
-    //drawList->AddLine(ImVec2(cursorPos.x, cursorPos.y/* - ImGui::GetStyle().FramePadding.y*/), ImVec2(cursorPos.x + scale(ImGui::GetContentRegionAvail().x), cursorPos.y), color, 2.0f);
-    //ImGui::Dummy(ImVec2(ImGui::GetStyle().FramePadding.x * 2, 1));
-
-    //ImGui::Separator();
     ImGui::Spacing();
     ImGui::Spacing();
 }

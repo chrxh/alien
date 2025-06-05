@@ -54,6 +54,8 @@ namespace Const
     ImColor const TreeNodeLowHoveredColor = ImColor::HSV(0.0f, 0.0f, 0.25f);
     ImColor const TreeNodeLowActiveColor = ImColor::HSV(0.0f, 0.0f, 0.35f);
 
+    ImColor const GroupColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
+
     ImColor const TableHeaderColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
 
     ImColor const MonospaceColor = ImColor::HSV(0.3f, 1.0f, 1.0f);
