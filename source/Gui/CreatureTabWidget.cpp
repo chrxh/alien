@@ -7,12 +7,17 @@
 #include "StyleRepository.h"
 
 _CreatureTabWidget::_CreatureTabWidget(GenomeDescription_New const& genome, std::optional<CreatureTabLayoutData> const& creatureTabLayoutData)
-    : _genome(genome)
 {
     static int _sequence = 0;
     _id = ++_sequence;
 
+    _creature = DraftCreature{._genome = genome};
     _creatureTabLayoutData = creatureTabLayoutData;
+}
+
+CreatureTabWidget _CreatureTabWidget::createDraftCreatureTab(GenomeDescription_New const& genome, std::optional<CreatureTabLayoutData> const& creatureTabLayoutData)
+{
+    return CreatureTabWidget(new _CreatureTabWidget(genome, creatureTabLayoutData));
 }
 
 void _CreatureTabWidget::process()
@@ -34,6 +39,14 @@ void _CreatureTabWidget::process()
     ImGui::EndChild();
 
     ImGui::PopID();
+}
+
+std::string _CreatureTabWidget::getName() const
+{
+    if (std::holds_alternative<DraftCreature>(_creature)) {
+        return "Draft " + std::to_string(_id);
+    }
+    return "";
 }
 
 void _CreatureTabWidget::processEditors()

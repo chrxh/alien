@@ -5,7 +5,7 @@
 #include "EngineInterface/SimulationParameters.h"
 
 #include "AlienWindow.h"
-#include "SimulationParametersBaseWidgets.h"
+#include "SimulationParametersBaseWidget.h"
 #include "LayerColorPalette.h"
 
 class SimulationParametersMainWindow : public AlienWindow<SimulationFacade>
@@ -63,9 +63,9 @@ private:
 private:
     SimulationFacade _simulationFacade;
 
-    LocationWidgets _baseWidgets;
-    LocationWidgets _layerWidgets;
-    LocationWidgets _sourceWidgets;
+    LocationWidget _baseWidgets;
+    LocationWidget _layerWidgets;
+    LocationWidget _sourceWidgets;
 
     bool _masterWidgetOpen = true;
     bool _detailWidgetOpen = true;

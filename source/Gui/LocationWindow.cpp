@@ -4,9 +4,9 @@
 
 #include "StyleRepository.h"
 
-void LocationWindow::init(LocationWidgets const& widgets, RealVector2D const& initialPos)
+void LocationWindow::init(LocationWidget const& widgets, RealVector2D const& initialPos)
 {
-    _widgets = widgets;
+    _widget = widgets;
 
     static int id = 0;
     _id = ++id;
@@ -21,9 +21,9 @@ void LocationWindow::process()
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::SetNextWindowSize({scale(650.0f), scale(350.0f)}, ImGuiCond_Once);
     ImGui::SetNextWindowPos({_initialPos.x, _initialPos.y}, ImGuiCond_Once);
-    auto title = _widgets->getLocationName();
+    auto title = _widget->getLocationName();
     if (ImGui::Begin((title + "###" + std::to_string(_id)).c_str(), &_on)) {
-        _widgets->process();
+        _widget->process();
     }
     ImGui::End();
 
@@ -37,10 +37,10 @@ bool LocationWindow::isOn() const
 
 int LocationWindow::getOrderNumber() const
 {
-    return _widgets->getOrderNumber();
+    return _widget->getOrderNumber();
 }
 
 void LocationWindow::setOrderNumber(int orderNumber)
 {
-    _widgets->setOrderNumber(orderNumber);
+    _widget->setOrderNumber(orderNumber);
 }

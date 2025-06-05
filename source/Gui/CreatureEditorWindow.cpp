@@ -80,7 +80,7 @@ void CreatureEditorWindow::processTabWidget()
         std::optional<int> tabToDelete;
 
         // Process tabs
-        for (auto const& [index, tab] : _tabs | boost::adaptors::indexed(0)) {
+        for (auto const& [index, creatureTab] : _tabs | boost::adaptors::indexed(0)) {
 
             bool open = true;
             bool* openPtr = nullptr;
@@ -88,9 +88,9 @@ void CreatureEditorWindow::processTabWidget()
                 openPtr = &open;
             }
             int flags = ImGuiTabItemFlags_None;
-            if (ImGui::BeginTabItem(("Creature " + std::to_string(index + 1)).c_str(), openPtr, flags)) {
+            if (ImGui::BeginTabItem(creatureTab->getName().c_str(), openPtr, flags)) {
                 _selectedTabIndex = toInt(index);
-                tab->process();
+                creatureTab->process();
                 ImGui::EndTabItem();
             }
             if (openPtr && *openPtr == false) {
@@ -118,5 +118,5 @@ void CreatureEditorWindow::processTabWidget()
 
 void CreatureEditorWindow::scheduleAddTab(GenomeDescription_New const& genome)
 {
-    _tabToAdd = std::make_shared<_CreatureTabWidget>(genome);
+    _tabToAdd = _CreatureTabWidget::createDraftCreatureTab(genome);
 }

@@ -1,4 +1,4 @@
-#include "SimulationParametersBaseWidgets.h"
+#include "SimulationParametersBaseWidget.h"
 
 #include <imgui.h>
 
@@ -11,12 +11,12 @@
 #include "AlienImGui.h"
 #include "SpecificationGuiService.h"
 
-void _SimulationParametersBaseWidgets::init(SimulationFacade const& simulationFacade)
+void _SimulationParametersBaseWidget::init(SimulationFacade const& simulationFacade)
 {
     _simulationFacade = simulationFacade;
 }
 
-void _SimulationParametersBaseWidgets::process()
+void _SimulationParametersBaseWidget::process()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
@@ -30,17 +30,17 @@ void _SimulationParametersBaseWidgets::process()
     }
 }
 
-std::string _SimulationParametersBaseWidgets::getLocationName()
+std::string _SimulationParametersBaseWidget::getLocationName()
 {
     return "Simulation parameters for 'Base'";
 }
 
-int _SimulationParametersBaseWidgets::getOrderNumber() const
+int _SimulationParametersBaseWidget::getOrderNumber() const
 {
     return 0;
 }
 
-void _SimulationParametersBaseWidgets::setOrderNumber(int orderNumber)
+void _SimulationParametersBaseWidget::setOrderNumber(int orderNumber)
 {
     // do nothing
 }

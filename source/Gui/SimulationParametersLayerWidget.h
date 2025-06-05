@@ -2,10 +2,10 @@
 
 #include "EngineInterface/Definitions.h"
 
-#include "LocationWidgets.h"
+#include "LocationWidget.h"
 #include "LayerColorPalette.h"
 
-class _SimulationParametersLayerWidgets : public _LocationWidgets
+class _SimulationParameterLayerWidget : public _LocationWidget
 {
 public:
     void init(SimulationFacade const& simulationFacade, int orderNumber);

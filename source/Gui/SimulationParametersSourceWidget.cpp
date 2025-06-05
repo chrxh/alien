@@ -1,29 +1,31 @@
-#include "SimulationParametersLayerWidgets.h"
+#include "SimulationParametersSourceWidget.h"
 
-#include "EngineInterface/LocationHelper.h"
+#include <imgui.h>
+
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/ParametersValidationService.h"
+#include "EngineInterface/LocationHelper.h"
 
-#include "AlienImGui.h"
-#include "SpecificationGuiService.h"
 #include "SimulationInteractionController.h"
+#include "SpecificationGuiService.h"
 
-void _SimulationParametersLayerWidgets::init(SimulationFacade const& simulationFacade, int orderNumber)
+void _SimulationParametersSourceWidgets::init(SimulationFacade const& simulationFacade, int orderNumber)
 {
     _simulationFacade = simulationFacade;
     _orderNumber = orderNumber;
 }
 
-void _SimulationParametersLayerWidgets::process()
+void _SimulationParametersSourceWidgets::process()
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
     auto lastParameters = parameters;
 
-    auto layerIndex = LocationHelper::findLocationArrayIndex(parameters, _orderNumber);
-    _layerName = std::string(parameters.layerName.layerValues[layerIndex]);
+    auto sourceIndex = LocationHelper::findLocationArrayIndex(parameters, _orderNumber);
 
-    ImGui::PushID("Layer");
+    _sourceName = std::string(parameters.sourceName.sourceValues[sourceIndex]);
+
+    ImGui::PushID("Source");
     SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _simulationFacade, _orderNumber);
     ImGui::PopID();
 
@@ -35,17 +37,17 @@ void _SimulationParametersLayerWidgets::process()
     }
 }
 
-std::string _SimulationParametersLayerWidgets::getLocationName()
+std::string _SimulationParametersSourceWidgets::getLocationName()
 {
-    return "Simulation parameters for '" + _layerName + "'";
+    return "Simulation parameters for '" + _sourceName + "'";
 }
 
-int _SimulationParametersLayerWidgets::getOrderNumber() const
+int _SimulationParametersSourceWidgets::getOrderNumber() const
 {
     return _orderNumber;
 }
 
-void _SimulationParametersLayerWidgets::setOrderNumber(int orderNumber)
+void _SimulationParametersSourceWidgets::setOrderNumber(int orderNumber)
 {
     _orderNumber = orderNumber;
 }
