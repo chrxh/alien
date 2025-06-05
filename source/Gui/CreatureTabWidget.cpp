@@ -2,20 +2,9 @@
 
 #include <imgui.h>
 
-#include "EngineInterface/NumberGenerator.h"
-
 #include "AlienImGui.h"
 #include "CreatureTabLayoutData.h"
 #include "StyleRepository.h"
-
-namespace
-{
-    auto constexpr GenomeEditorWidth = 300.0f;
-    auto constexpr GeneEditorWidth = 300.0f;
-    auto constexpr PreviewsHeight = 200.0f;
-    auto constexpr DesiredConfigurationPreviewWidth = 300.0f;
-}
-
 
 _CreatureTabWidget::_CreatureTabWidget(GenomeDescription_New const& genome, std::optional<CreatureTabLayoutData> const& creatureTabLayoutData)
     : _genome(genome)
