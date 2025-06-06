@@ -6,15 +6,6 @@
 #include "CreatureTabLayoutData.h"
 #include "StyleRepository.h"
 
-_CreatureTabWidget::_CreatureTabWidget(GenomeDescription_New const& genome, std::optional<CreatureTabLayoutData> const& creatureTabLayoutData)
-{
-    static int _sequence = 0;
-    _id = ++_sequence;
-
-    _creature = DraftCreature{._genome = genome};
-    _creatureTabLayoutData = creatureTabLayoutData;
-}
-
 CreatureTabWidget _CreatureTabWidget::createDraftCreatureTab(GenomeDescription_New const& genome, std::optional<CreatureTabLayoutData> const& creatureTabLayoutData)
 {
     return CreatureTabWidget(new _CreatureTabWidget(genome, creatureTabLayoutData));
@@ -22,7 +13,7 @@ CreatureTabWidget _CreatureTabWidget::createDraftCreatureTab(GenomeDescription_N
 
 void _CreatureTabWidget::process()
 {
-    correctingLayout();
+    doLayout();
 
     ImGui::PushID(_id);
 
@@ -48,6 +39,16 @@ std::string _CreatureTabWidget::getName() const
     }
     return "";
 }
+
+_CreatureTabWidget::_CreatureTabWidget(GenomeDescription_New const& genome, std::optional<CreatureTabLayoutData> const& creatureTabLayoutData)
+{
+    static int _sequence = 0;
+    _id = ++_sequence;
+
+    _creature = DraftCreature{._genome = genome};
+    _creatureTabLayoutData = creatureTabLayoutData;
+}
+
 
 void _CreatureTabWidget::processEditors()
 {
@@ -99,12 +100,34 @@ void _CreatureTabWidget::processPreviews()
 
 void _CreatureTabWidget::processGenomeEditor()
 {
-    AlienImGui::Group("Genome");
+    if (ImGui::BeginChild("GenomeHeader", ImVec2(0, ImGui::GetContentRegionAvail().y - _creatureTabLayoutData->_geneListHeight), 0)) {
+        AlienImGui::Group("Genome");
+    }
+    ImGui::EndChild();
+
+    AlienImGui::MovableHorizontalSeparator(AlienImGui::MovableHorizontalSeparatorParameters().additive(false), _creatureTabLayoutData->_geneListHeight);
+
+    if (ImGui::BeginChild("GeneList", ImVec2(0, 0))) {
+        //AlienImGui::Group("Genes");
+        processGeneList();
+    }
+    ImGui::EndChild();
 }
 
 void _CreatureTabWidget::processGeneEditor()
 {
-    AlienImGui::Group("Selected gene");
+    if (ImGui::BeginChild("GeneHeader", ImVec2(0, ImGui::GetContentRegionAvail().y - _creatureTabLayoutData->_nodeListHeight), 0)) {
+        AlienImGui::Group("Selected gene");
+    }
+    ImGui::EndChild();
+
+    AlienImGui::MovableHorizontalSeparator(AlienImGui::MovableHorizontalSeparatorParameters().additive(false), _creatureTabLayoutData->_nodeListHeight);
+
+    if (ImGui::BeginChild("NodeList", ImVec2(0, 0))) {
+        //AlienImGui::Group("Genes");
+        processNodeList();
+    }
+    ImGui::EndChild();
 }
 
 void _CreatureTabWidget::processNodeEditor()
@@ -114,15 +137,79 @@ void _CreatureTabWidget::processNodeEditor()
 
 void _CreatureTabWidget::processDesiredConfigurationPreview()
 {
-    AlienImGui::Group("Preview (desired)");
+    AlienImGui::Group("Preview (prediction)");
 }
 
 void _CreatureTabWidget::processActualConfigurationPreview()
 {
-    AlienImGui::Group("Preview (actual)");
+    AlienImGui::Group("Preview (simulated)");
 }
 
-void _CreatureTabWidget::correctingLayout()
+void _CreatureTabWidget::processGeneList()
+{
+    static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
+        | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
+
+    if (ImGui::BeginTable("Gene list", 3, flags, ImVec2(-1, -1), 0.0f)) {
+        ImGui::TableSetupColumn("Gene", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
+        ImGui::TableSetupColumn("Nodes", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
+        ImGui::TableSetupColumn("Shape", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
+        ImGui::TableSetupScrollFreeze(0, 1);
+        ImGui::TableHeadersRow();
+        ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
+
+        ImGuiListClipper clipper;
+        clipper.Begin(/*size*/10);
+        while (clipper.Step()) {
+            for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
+                //auto const& entry = _savepointTable->at(row);
+
+                ImGui::PushID(row);
+                ImGui::TableNextRow(0, scale(23.0f));
+
+                ImGui::TableNextColumn();
+                ImGui::TableNextColumn();
+                ImGui::TableNextColumn();
+                ImGui::PopID();
+            }
+        }
+        ImGui::EndTable();
+    }
+}
+
+void _CreatureTabWidget::processNodeList()
+{
+    static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
+        | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
+
+    if (ImGui::BeginTable("Node list", 3, flags, ImVec2(-1, -1), 0.0f)) {
+        ImGui::TableSetupColumn("Node", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
+        ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
+        ImGui::TableSetupColumn("Angle", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
+        ImGui::TableSetupScrollFreeze(0, 1);
+        ImGui::TableHeadersRow();
+        ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
+
+        ImGuiListClipper clipper;
+        clipper.Begin(/*size*/ 10);
+        while (clipper.Step()) {
+            for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
+                //auto const& entry = _savepointTable->at(row);
+
+                ImGui::PushID(row);
+                ImGui::TableNextRow(0, scale(23.0f));
+
+                ImGui::TableNextColumn();
+                ImGui::TableNextColumn();
+                ImGui::TableNextColumn();
+                ImGui::PopID();
+            }
+        }
+        ImGui::EndTable();
+    }
+}
+
+void _CreatureTabWidget::doLayout()
 {
     if (_lastGenomeEditorWidth.has_value()) {
         _creatureTabLayoutData->_geneEditorWidth += _lastGenomeEditorWidth.value() - _creatureTabLayoutData->_genomeEditorWidth;
@@ -136,6 +223,8 @@ void _CreatureTabWidget::correctingLayout()
         creatureTabLayoutData._geneEditorWidth = width / 3;
         creatureTabLayoutData._previewsHeight = height / 2;
         creatureTabLayoutData._desiredConfigurationPreviewWidth = width / 2;
+        creatureTabLayoutData._geneListHeight = height / 4;
+        creatureTabLayoutData._nodeListHeight = height / 4;
         _creatureTabLayoutData = creatureTabLayoutData;
     }
 
@@ -146,8 +235,10 @@ void _CreatureTabWidget::correctingLayout()
             auto scalingY = windowSize.y / _lastWindowSize->y;
             _creatureTabLayoutData->_genomeEditorWidth *= scalingX;
             _creatureTabLayoutData->_geneEditorWidth *= scalingX;
-            _creatureTabLayoutData->_desiredConfigurationPreviewWidth *= scalingX;
             _creatureTabLayoutData->_previewsHeight *= scalingY;
+            _creatureTabLayoutData->_desiredConfigurationPreviewWidth *= scalingX;
+            _creatureTabLayoutData->_geneListHeight *= scalingY;
+            _creatureTabLayoutData->_nodeListHeight *= scalingY;
         }
     }
     _lastWindowSize = {windowSize.x, windowSize.y};

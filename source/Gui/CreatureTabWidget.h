@@ -28,7 +28,10 @@ private:
     void processDesiredConfigurationPreview();
     void processActualConfigurationPreview();
 
-    void correctingLayout();
+    void processGeneList();
+    void processNodeList();
+
+    void doLayout();
 
     int _id = 0;
 
