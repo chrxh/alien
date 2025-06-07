@@ -4,12 +4,10 @@
 #include <windows.h>
 #endif
 
-#include <ranges>
-
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/regex.hpp>
-
 #include <imgui.h>
+#include <ranges>
 
 #include "Fonts/IconsFontAwesome5.h"
 
@@ -18,31 +16,34 @@
 #include "Base/Resources.h"
 #include "Base/StringHelper.h"
 #include "Base/VersionParserService.h"
+
 #include "EngineInterface/GenomeDescriptionConverterService.h"
-#include "PersisterInterface/SerializerService.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "Network/NetworkResourceService.h"
-#include "Network/NetworkService.h"
-#include "Network/NetworkResourceParserService.h"
-#include "Network/NetworkResourceTreeTO.h"
+
+#include "PersisterInterface/SerializerService.h"
 #include "PersisterInterface/TaskProcessor.h"
 
+#include "Network/NetworkResourceParserService.h"
+#include "Network/NetworkResourceService.h"
+#include "Network/NetworkResourceTreeTO.h"
+#include "Network/NetworkService.h"
+
 #include "AlienImGui.h"
-#include "StyleRepository.h"
-#include "StatisticsWindow.h"
-#include "Viewport.h"
-#include "GenericMessageDialog.h"
-#include "LoginDialog.h"
-#include "UploadSimulationDialog.h"
 #include "DelayedExecutionController.h"
-#include "EditorController.h"
 #include "EditSimulationDialog.h"
-#include "OpenGLHelper.h"
-#include "OverlayController.h"
+#include "EditorController.h"
+#include "GenericMessageDialog.h"
 #include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
 #include "LoginController.h"
+#include "LoginDialog.h"
 #include "NetworkTransferController.h"
+#include "OpenGLHelper.h"
+#include "OverlayController.h"
+#include "StatisticsWindow.h"
+#include "StyleRepository.h"
+#include "UploadSimulationDialog.h"
+#include "Viewport.h"
 
 namespace
 {
@@ -106,7 +107,8 @@ void BrowserWindow::initIntern(SimulationFacade simulationFacade, PersisterFacad
     refreshIntern(firstStart);
 
     for (auto& [workspaceId, workspace] : _workspaces) {
-        auto initialCollapsedSimulationFolders = NetworkResourceService::get().convertFolderNamesToSettings(NetworkResourceService::get().getFolderNames(workspace.rawTOs));
+        auto initialCollapsedSimulationFolders =
+            NetworkResourceService::get().convertFolderNamesToSettings(NetworkResourceService::get().getFolderNames(workspace.rawTOs));
         auto collapsedSimulationFolders = GlobalSettings::get().getValue(
             "windows.browser.collapsed folders." + networkResourceTypeToString.at(workspaceId.resourceType) + "."
                 + workspaceTypeToString.at(workspaceId.workspaceType),
@@ -206,7 +208,7 @@ void BrowserWindow::processIntern()
     processRefreshingScreen({startPos.x, startPos.y});
 
     processEmojiWindow();
-}    
+}
 
 void BrowserWindow::processBackground()
 {
@@ -272,7 +274,8 @@ void BrowserWindow::processToolbar()
     AlienImGui::Tooltip(
         "Upload your current " + resourceTypeString
         + " to the server and made visible in the browser. You can choose whether you want to share it with other users or whether it should only be visible "
-          "in your private workspace.\nIf you have already selected a folder, your " + resourceTypeString + " will be uploaded there.");
+          "in your private workspace.\nIf you have already selected a folder, your "
+        + resourceTypeString + " will be uploaded there.");
 
     //edit button
     ImGui::SameLine();
@@ -290,7 +293,8 @@ void BrowserWindow::processToolbar()
         onReplaceResource(_selectedTreeTO->getLeaf());
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Replace the selected " + resourceTypeString + " with the one that is currently open. The name, description and reactions will be preserved.");
+    AlienImGui::Tooltip(
+        "Replace the selected " + resourceTypeString + " with the one that is currently open. The name, description and reactions will be preserved.");
 
     //move to other workspace button
     ImGui::SameLine();
@@ -544,8 +548,8 @@ void BrowserWindow::processSimulationList()
 {
     ImGui::PushID("SimulationList");
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
-        | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV
-        | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
+        | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY
+        | ImGuiTableFlags_ScrollX;
 
     if (ImGui::BeginTable("Browser", 11, flags, ImVec2(-1, -scale(WorkspaceBottomSpace)), 0.0f)) {
         ImGui::TableSetupColumn("Simulation", ImGuiTableColumnFlags_WidthFixed, scale(210.0f), NetworkResourceColumnId_SimulationName);
@@ -1121,13 +1125,14 @@ namespace
 {
     std::vector<std::string> splitString(const std::string& str)
     {
-        std::vector<std::string> tokens; 
+        std::vector<std::string> tokens;
         boost::algorithm::split_regex(tokens, str, boost::regex("(\n)+"));
         return tokens;
     }
 }
 
-void BrowserWindow::processShortenedText(std::string const& text, bool bold) {
+void BrowserWindow::processShortenedText(std::string const& text, bool bold)
+{
     auto substrings = splitString(text);
     if (substrings.empty()) {
         return;
@@ -1158,7 +1163,7 @@ bool BrowserWindow::processActionButton(std::string const& text)
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImU32)Const::ToolbarButtonHoveredColor);
     auto result = ImGui::Button(text.c_str());
     ImGui::PopStyleColor(2);
-   
+
     return result;
 }
 
@@ -1184,7 +1189,8 @@ void BrowserWindow::processRefreshingScreen(RealVector2D const& startPos)
         if (ImGui::BeginChild("##overlay", {size.x, size.y}, 0, ImGuiWindowFlags_NoScrollbar)) {
             ImDrawList* drawList = ImGui::GetWindowDrawList();
             drawList->AddRectFilledMultiColor(
-                {startPos.x, startPos.y}, {startPos.x + size.x, startPos.y + size.y},
+                {startPos.x, startPos.y},
+                {startPos.x + size.x, startPos.y + size.y},
                 Const::DisabledOverlayColor1,
                 Const::DisabledOverlayColor2,
                 Const::DisabledOverlayColor1,
@@ -1252,16 +1258,14 @@ void BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
     auto func = [&] {
         auto data = [&]() -> std::variant<ReplaceNetworkResourceRequestData::SimulationData, ReplaceNetworkResourceRequestData::GenomeData> {
             if (_currentWorkspace.resourceType == NetworkResourceType_Simulation) {
-                return ReplaceNetworkResourceRequestData::SimulationData{.zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos()};
+                return ReplaceNetworkResourceRequestData::SimulationData{
+                    .zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos()};
             } else {
                 return ReplaceNetworkResourceRequestData::GenomeData{.description = GenomeEditorWindow::get().getCurrentGenome()};
             }
         }();
         NetworkTransferController::get().onReplace(ReplaceNetworkResourceRequestData{
-            .resourceId = leaf.rawTO->id,
-            .workspaceType = leaf.rawTO->workspaceType,
-            .downloadCache = getSimulationCache(),
-            .data = data});
+            .resourceId = leaf.rawTO->id, .workspaceType = leaf.rawTO->workspaceType, .downloadCache = getSimulationCache(), .data = data});
     };
     GenericMessageDialog::get().yesNo("Delete", "Do you really want to replace the content of the selected item?", func);
 }
@@ -1319,7 +1323,6 @@ void BrowserWindow::onDeleteResource(NetworkResourceTreeTO const& treeTO)
 
     auto message = treeTO->isLeaf() ? "Do you really want to delete the selected item?" : "Do you really want to delete the selected folder?";
     GenericMessageDialog::get().yesNo("Delete", message, [rawTOs = rawTOs, this]() {
-
         //remove resources form workspace
         for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
             auto& workspace = _workspaces.at(WorkspaceId{_currentWorkspace.resourceType, workspaceType});
@@ -1357,7 +1360,7 @@ void BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType)
             }
             _ownEmojiTypeBySimId.erase(findResult);
             _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.rawTO->id, origEmojiType));  //invalidate cache entry
-            onlyRemoveLike = origEmojiType == emojiType;  //remove like if same like icon has been clicked
+            onlyRemoveLike = origEmojiType == emojiType;                                             //remove like if same like icon has been clicked
         }
 
         //create new like

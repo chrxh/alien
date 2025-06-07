@@ -5,8 +5,6 @@
 class _MainWindow;
 using MainWindow = std::shared_ptr<_MainWindow>;
 
-//class AlienWindow;
-
 class SimulationView;
 
 class _Shader;
@@ -116,6 +114,21 @@ using LocationWidget = std::shared_ptr<_LocationWidget>;
 
 class _CreatureTabWidget;
 using CreatureTabWidget = std::shared_ptr<_CreatureTabWidget>;
+
+struct _CreatureTabLayoutData;
+using CreatureTabLayoutData = std::shared_ptr<_CreatureTabLayoutData>;
+
+struct _CreatureTabGenomeData;
+using CreatureTabGenomeData = std::shared_ptr<_CreatureTabGenomeData>;
+
+class _GenomeEditorWidget;
+using GenomeEditorWidget = std::shared_ptr<_GenomeEditorWidget>;
+
+class _GeneEditorWidget;
+using GeneEditorWidget = std::shared_ptr<_GeneEditorWidget>;
+
+class _NodeEditorWidget;
+using NodeEditorWidget = std::shared_ptr<_NodeEditorWidget>;
 
 struct UserInfo;
 

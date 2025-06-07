@@ -21,6 +21,7 @@ PUBLIC
     CreatorWindow.h
     CreatureEditorWindow.cpp
     CreatureEditorWindow.h
+    CreatureTabGenomeData.h
     CreatureTabLayoutData.h
     CreatureTabWidget.cpp
     CreatureTabWidget.h
@@ -47,6 +48,10 @@ PUBLIC
     GenericFileDialog.h
     GenericMessageDialog.cpp
     GenericMessageDialog.h
+    GeneEditorWidget.cpp
+    GeneEditorWidget.h
+    GenomeEditorWidget.cpp
+    GenomeEditorWidget.h
     GenomeEditorWindow.cpp
     GenomeEditorWindow.h
     GettingStartedWindow.cpp
@@ -98,6 +103,8 @@ PUBLIC
     NewSimulationDialog.h
     NewPasswordDialog.cpp
     NewPasswordDialog.h
+    NodeEditorWidget.cpp
+    NodeEditorWidget.h
     OpenGLHelper.cpp
     OpenGLHelper.h
     OverlayController.cpp
