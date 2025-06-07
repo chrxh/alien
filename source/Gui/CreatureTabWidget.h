@@ -20,7 +20,6 @@ private:
     void processEditors();
     void processPreviews();
 
-    void processNodeEditor();
     void processDesiredConfigurationPreview();
     void processActualConfigurationPreview();
 
