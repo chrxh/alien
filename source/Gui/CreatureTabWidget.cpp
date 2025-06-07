@@ -102,11 +102,6 @@ void _CreatureTabWidget::processPreviews()
     ImGui::EndChild();
 }
 
-void _CreatureTabWidget::processNodeEditor()
-{
-    AlienImGui::Group("Selected node");
-}
-
 void _CreatureTabWidget::processDesiredConfigurationPreview()
 {
     AlienImGui::Group("Preview (predicted)");

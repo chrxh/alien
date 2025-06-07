@@ -1,5 +1,6 @@
 #include "NodeEditorWidget.h"
 
+#include "AlienImGui.h"
 #include "LoginDialog.h"
 
 NodeEditorWidget _NodeEditorWidget::create(CreatureTabGenomeData const& genome, CreatureTabLayoutData const& layoutData)
@@ -10,6 +11,7 @@ NodeEditorWidget _NodeEditorWidget::create(CreatureTabGenomeData const& genome, 
 void _NodeEditorWidget::process()
 {
     if (ImGui::BeginChild("NodeEditor", ImVec2(0, 0))) {
+        AlienImGui::Group("Selected node");
     }
     ImGui::EndChild();
 }
