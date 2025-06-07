@@ -32,6 +32,7 @@ struct SensorGenome
 struct ConstructorGenome
 {
     int autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
+    int constructGeneIndex;
     int constructionActivationTime;
     float constructionAngle1;
     float constructionAngle2;

@@ -500,6 +500,7 @@ GenomeDescription_New DescriptionConverterService::createGenomeDescription(
             case CellTypeGenome_Constructor: {
                 ConstructorGenomeDescription_New constructorDesc;
                 constructorDesc._autoTriggerInterval = nodeTO->cellTypeData.constructor.autoTriggerInterval;
+                constructorDesc._constructGeneIndex = nodeTO->cellTypeData.constructor.constructGeneIndex;
                 constructorDesc._constructionActivationTime = nodeTO->cellTypeData.constructor.constructionActivationTime;
                 constructorDesc._constructionAngle1 = nodeTO->cellTypeData.constructor.constructionAngle1;
                 constructorDesc._constructionAngle2 = nodeTO->cellTypeData.constructor.constructionAngle2;
@@ -661,6 +662,7 @@ void DescriptionConverterService::convertGenomeToTO(
                 auto const& constructorDesc = std::get<ConstructorGenomeDescription_New>(nodeDesc._cellTypeData);
                 auto& constructorTO = nodeTO.cellTypeData.constructor;
                 constructorTO.autoTriggerInterval = constructorDesc._autoTriggerInterval;
+                constructorTO.constructGeneIndex = constructorDesc._constructGeneIndex;
                 constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
                 constructorTO.constructionAngle1 = constructorDesc._constructionAngle1;
                 constructorTO.constructionAngle2 = constructorDesc._constructionAngle2;
