@@ -8,50 +8,39 @@
 class _CreatureTabWidget
 {
 public:
-    static CreatureTabWidget createDraftCreatureTab(
-        GenomeDescription_New const& genome,
-        std::optional<CreatureTabLayoutData> const& creatureTabLayoutData = std::nullopt);
+    static CreatureTabWidget createDraftCreatureTab(GenomeDescription_New const& genome, CreatureTabLayoutData const& layoutData = nullptr);
 
     void process();
 
     std::string getName() const;
 
 private:
-    _CreatureTabWidget(GenomeDescription_New const& genome, std::optional<CreatureTabLayoutData> const& creatureTabLayoutData = std::nullopt);
+    _CreatureTabWidget(GenomeDescription_New const& genome, CreatureTabLayoutData const& layoutData);
 
     void processEditors();
     void processPreviews();
 
-    void processGenomeEditor();
-    void processGeneEditor();
     void processNodeEditor();
     void processDesiredConfigurationPreview();
     void processActualConfigurationPreview();
-
-    void processGeneList();
-    void processNodeList();
 
     void doLayout();
 
     int _id = 0;
 
-    struct DraftCreature
-    {
-        GenomeDescription_New _genome;
-    };
-    struct SimulatedCreature
-    {
-        GenomeDescription_New _genome;
-        uint64_t creatureId = 0;
-    };
-    std::variant<DraftCreature, SimulatedCreature> _creature;
+    // Widgets
+    GenomeEditorWidget _genomeEditorWidget;
+    GeneEditorWidget _geneEditorWidget;
+    NodeEditorWidget _nodeEditorWidget;
 
-    std::optional<int> _selectedGene;
-    std::optional<int> _selectedNode;
-    float _previewZoom = 30.0f;
+    // Creature data
+    CreatureTabGenomeData _genomeData;
+    std::optional<uint64_t> _creatureId;
 
     // Layout data
-    std::optional<CreatureTabLayoutData> _creatureTabLayoutData;
+    CreatureTabLayoutData _layoutData;
     std::optional<RealVector2D> _lastWindowSize;
     std::optional<float> _lastGenomeEditorWidth;
+
+    float _previewZoom = 30.0f;
 };

@@ -2,12 +2,13 @@
 
 #include "Definitions.h"
 
-struct CreatureTabLayoutData
+struct _CreatureTabLayoutData
 {
-    float _genomeEditorWidth = 0;
-    float _geneEditorWidth = 0;
-    float _previewsHeight = 0;
-    float _desiredConfigurationPreviewWidth = 300.0f;
-    float _geneListHeight = 0;
-    float _nodeListHeight = 0;
+    bool initialized = false;
+    float genomeEditorWidth = 0;
+    float geneEditorWidth = 0;
+    float previewsHeight = 0;
+    float desiredConfigurationPreviewWidth = 300.0f;
+    float geneListHeight = 0;
+    float nodeListHeight = 0;
 };
