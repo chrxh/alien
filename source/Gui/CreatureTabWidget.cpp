@@ -137,7 +137,7 @@ void _CreatureTabWidget::processNodeEditor()
 
 void _CreatureTabWidget::processDesiredConfigurationPreview()
 {
-    AlienImGui::Group("Preview (prediction)");
+    AlienImGui::Group("Preview (predicted)");
 }
 
 void _CreatureTabWidget::processActualConfigurationPreview()
