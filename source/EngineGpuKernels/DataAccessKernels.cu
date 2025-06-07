@@ -74,6 +74,7 @@ namespace
                         break;
                     case CellTypeGenome_Constructor:
                         nodeTO.cellTypeData.constructor.autoTriggerInterval = node.cellTypeData.constructor.autoTriggerInterval;
+                        nodeTO.cellTypeData.constructor.constructGeneIndex = node.cellTypeData.constructor.constructGeneIndex;
                         nodeTO.cellTypeData.constructor.constructionActivationTime = node.cellTypeData.constructor.constructionActivationTime;
                         nodeTO.cellTypeData.constructor.constructionAngle1 = node.cellTypeData.constructor.constructionAngle1;
                         nodeTO.cellTypeData.constructor.constructionAngle2 = node.cellTypeData.constructor.constructionAngle2;

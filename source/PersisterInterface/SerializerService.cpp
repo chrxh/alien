@@ -246,9 +246,10 @@ namespace
     auto constexpr Id_Node_NumRequiredAdditionalConnections = 2;
 
     auto constexpr Id_ConstructorGenome_New_AutoTriggerInterval = 0;
-    auto constexpr Id_ConstructorGenome_New_ConstructionActivationTime = 1;
-    auto constexpr Id_ConstructorGenome_New_ConstructionAngle1 = 2;
-    auto constexpr Id_ConstructorGenome_New_ConstructionAngle2 = 3;
+    auto constexpr Id_ConstructorGenome_New_ConstructGeneIndex = 1;
+    auto constexpr Id_ConstructorGenome_New_ConstructionActivationTime = 2;
+    auto constexpr Id_ConstructorGenome_New_ConstructionAngle1 = 3;
+    auto constexpr Id_ConstructorGenome_New_ConstructionAngle2 = 4;
 
     auto constexpr Id_InjectorGenome_New_Mode = 0;
 
@@ -371,6 +372,7 @@ namespace cereal
         ConstructorGenomeDescription_New defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_ConstructorGenome_New_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
+        loadSave(task, auxiliaries, Id_ConstructorGenome_New_ConstructGeneIndex, data._constructGeneIndex, defaultObject._constructGeneIndex);
         loadSave(task, auxiliaries, Id_ConstructorGenome_New_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
         loadSave(task, auxiliaries, Id_ConstructorGenome_New_ConstructionAngle1, data._constructionAngle1, defaultObject._constructionAngle1);
         loadSave(task, auxiliaries, Id_ConstructorGenome_New_ConstructionAngle2, data._constructionAngle2, defaultObject._constructionAngle2);

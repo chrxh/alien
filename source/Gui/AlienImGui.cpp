@@ -369,6 +369,7 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
     ImGuiInputTextFlags flags = 0;
     if (parameters._readOnly) {
         flags |= ImGuiInputTextFlags_ReadOnly;
+        ImGui::BeginDisabled();
     }
     if (parameters._password) {
         flags |= ImGuiInputTextFlags_Password;
@@ -379,6 +380,10 @@ bool AlienImGui::InputText(InputTextParameters const& parameters, char* buffer, 
         }
         return ImGui::InputText(("##" + parameters._name).c_str(), buffer, bufferSize, flags);
     }();
+    if (parameters._readOnly) {
+        ImGui::EndDisabled();
+    }
+
     if (parameters._monospaceFont || parameters._bold) {
         ImGui::PopFont();
     }
