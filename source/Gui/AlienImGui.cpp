@@ -1133,6 +1133,9 @@ void AlienImGui::MovableHorizontalSeparator(MovableHorizontalSeparatorParameters
             height -= ImGui::GetIO().MouseDelta.y;
         }
     }
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
+    }
 }
 
 void AlienImGui::MovableVerticalSeparator(MovableVerticalSeparatorParameters const& parameters, float& width)
@@ -1145,6 +1148,9 @@ void AlienImGui::MovableVerticalSeparator(MovableVerticalSeparatorParameters con
         } else {
             width -= ImGui::GetIO().MouseDelta.x;
         }
+    }
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
     }
 }
 
