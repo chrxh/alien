@@ -11,7 +11,7 @@
 
 #include <imgui.h>
 
-#include "Fonts/IconsFontAwesome5.h"
+#include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/GlobalSettings.h"
 #include "Base/LoggingService.h"
@@ -1189,8 +1189,7 @@ void BrowserWindow::processRefreshingScreen(RealVector2D const& startPos)
 
         ImGui::SetCursorScreenPos({startPos.x, startPos.y});
         if (ImGui::BeginChild("##overlay", {size.x, size.y}, 0, ImGuiWindowFlags_NoScrollbar)) {
-            ImDrawList* drawList = ImGui::GetWindowDrawList();
-            drawList->AddRectFilledMultiColor(
+            ImGui::GetWindowDrawList()->AddRectFilledMultiColor(
                 {startPos.x, startPos.y},
                 {startPos.x + size.x, startPos.y + size.y},
                 Const::DisabledOverlayColor1,

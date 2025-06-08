@@ -75,12 +75,12 @@ IncludeCategories:
   - Regex: '^<imgui\.h>$'
     Priority: 101
 
-#  # 2. C/C++ standard library headers (e.g. <vector>, <string>)
-#  - Regex: '^<.*>$'
-#    Priority: 102
+  # 4. ImGui main header
+  - Regex: '^<imgui\.h>$'
+    Priority: 102
 
   # 5. Fonts module includes
-  - Regex: '^"Fonts/.*"$'
+  - Regex: '^<Fonts/.*>$'
     Priority: 103
 
   # 6. Base module includes

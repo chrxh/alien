@@ -5,7 +5,7 @@
 class _GenomeEditorWidget
 {
 public:
-    static GenomeEditorWidget create(CreatureTabGenomeData const& genome, CreatureTabLayoutData const& layoutData);
+    static GenomeEditorWidget create(CreatureTabGenomeData const& editData, CreatureTabLayoutData const& layoutData);
 
     void process();
 
@@ -14,7 +14,11 @@ private:
 
     void processHeaderData();
     void processGeneList();
+    void processGeneListButtons();
 
-    CreatureTabGenomeData _genome;
+    void onAddGene();
+    void onRemoveGene();
+
+    CreatureTabGenomeData _editData;
     CreatureTabLayoutData _layoutData;
 };

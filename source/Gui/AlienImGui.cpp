@@ -7,7 +7,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-#include "Fonts/IconsFontAwesome5.h"
+#include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/Math.h"
 #include "Base/StringHelper.h"
@@ -1440,7 +1440,15 @@ bool AlienImGui::ActionButton(ActionButtonParameters const& parameters)
     ImGui::PushStyleColor(ImGuiCol_Button, Const::ActionButtonBackgroundColor.Value);
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Const::ActionButtonHoveredColor.Value);
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, Const::ActionButtonActiveColor.Value);
-    auto result = ImGui::Button(parameters._buttonText.c_str());
+    auto size = ImGui::CalcTextSize(parameters._buttonText.c_str());
+    auto padding = ImGui::GetStyle().FramePadding;
+    size.x += padding.x * 2;
+    size.y += padding.y * 2;
+    auto cursorPos = ImGui::GetCursorScreenPos();
+    auto result = ImGui::Button(parameters._buttonText.c_str(), size);
+    if (parameters._frame) {
+        ImGui::GetWindowDrawList()->AddRect(cursorPos, {cursorPos.x + size.x, cursorPos.y + size.y}, ImColor::HSV(0.54f, 0.43f, 0.5f));
+    }
     ImGui::PopStyleColor(4);
 
     if (parameters._tooltip) {
@@ -2532,6 +2540,11 @@ void AlienImGui::RotateEnd(float angle, ImDrawList* drawList)
 }
 
 //<<<<<<<<<<
+
+void AlienImGui::PaddingLeft()
+{
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() - ImGui::GetStyle().FramePadding.x);
+}
 
 int AlienImGui::DynamicTableLayout::calcNumColumns(float tableWidth, float columnWidth)
 {
