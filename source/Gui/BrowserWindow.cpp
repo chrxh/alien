@@ -4,10 +4,12 @@
 #include <windows.h>
 #endif
 
+#include <ranges>
+
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/regex.hpp>
+
 #include <imgui.h>
-#include <ranges>
 
 #include "Fonts/IconsFontAwesome5.h"
 

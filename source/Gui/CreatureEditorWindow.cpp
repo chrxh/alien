@@ -26,7 +26,22 @@ void CreatureEditorWindow::initIntern(SimulationFacade simulationFacade)
     //_creatureTabLayoutData->_desiredConfigurationPreviewWidth =
     //    GlobalSettings::get().getValue("windows.creature editor.desired configuration preview width", scale(DesiredConfigurationPreviewWidth));
 
-    scheduleAddTab(GenomeDescription_New());
+    auto genome = GenomeDescription_New().genes({
+        GeneDescription().nodes({
+            NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(1)),
+            NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(2)),
+        }),
+        GeneDescription().nodes({
+            NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(2)),
+            NodeDescription(),
+        }),
+        GeneDescription().nodes({
+            NodeDescription(),
+            NodeDescription(),
+            NodeDescription(),
+        }),
+    });
+    scheduleAddTab(genome);
 }
 
 void CreatureEditorWindow::shutdownIntern()

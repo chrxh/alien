@@ -64,48 +64,52 @@ IncludeCategories:
     Priority: 0
 
   # 2. C/C++ standard library headers (e.g. <vector>, <string>)
-  - Regex: '^<.*>$'
+  - Regex: '^<(algorithm|string|vector|map|set|ranges|unordered_map|unordered_set|memory|utility|tuple|array|iterator|limits|type_traits|cstddef|cstdint|cmath|cassert|iostream|fstream|sstream|iomanip|chrono|thread|mutex|atomic|condition_variable)>$'
     Priority: 1
 
   # 3. Boost headers
   - Regex: '^<boost/.*>$'
-    Priority: 2
+    Priority: 100
 
   # 4. ImGui main header
-  - Regex: '^"imgui\.h"$'
-    Priority: 3
+  - Regex: '^<imgui\.h>$'
+    Priority: 101
+
+#  # 2. C/C++ standard library headers (e.g. <vector>, <string>)
+#  - Regex: '^<.*>$'
+#    Priority: 102
 
   # 5. Fonts module includes
   - Regex: '^"Fonts/.*"$'
-    Priority: 4
+    Priority: 103
 
   # 6. Base module includes
   - Regex: '^"Base/.*"$'
-    Priority: 5
+    Priority: 104
 
   # 7. Engine interface includes
   - Regex: '^"EngineInterface/.*"$'
-    Priority: 6
+    Priority: 105
 
   # 8. Persister interface includes
   - Regex: '^"PersisterInterface/.*"$'
-    Priority: 7
+    Priority: 106
 
   # 9. Network module includes
   - Regex: '^"Network/.*"$'
-    Priority: 8
+    Priority: 107
 
   # 10. Engine implementation includes
   - Regex: '^"EngineImpl/.*"$'
-    Priority: 9
+    Priority: 108
 
   # 11. Persister implementation includes
   - Regex: '^"PersisterImpl/.*"$'
-    Priority: 10
+    Priority: 109
 
   # 12. All other local project includes without path (from current directory)
   - Regex: '^"[a-zA-Z0-9_]+\.h"$'
-    Priority: 11
+    Priority: 110
 IndentCaseLabels: false
 IndentPPDirectives: None
 IndentWidth:     4
