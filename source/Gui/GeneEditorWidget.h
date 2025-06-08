@@ -5,7 +5,7 @@
 class _GeneEditorWidget
 {
 public:
-    static GeneEditorWidget create(CreatureTabGenomeData const& genome, CreatureTabLayoutData const& layoutData);
+    static GeneEditorWidget create(CreatureTabGenomeData const& editData, CreatureTabLayoutData const& layoutData);
 
     void process();
 
@@ -15,6 +15,6 @@ private:
     void processHeaderData();
     void processNodeList();
 
-    CreatureTabGenomeData _genome;
+    CreatureTabGenomeData _editData;
     CreatureTabLayoutData _layoutData;
 };

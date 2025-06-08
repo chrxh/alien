@@ -39,7 +39,9 @@ namespace
 
 int GenomeDescriptionInfoService::getNumberOfResultingCells(GenomeDescription_New const& genome) const
 {
-    auto result = 0;
+    if (genome._genes.empty()) {
+        return 0;
+    }
     std::vector<int> lastGenes;
     return countNodes(genome, 0, lastGenes);
 }

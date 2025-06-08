@@ -12,9 +12,9 @@ namespace
     auto constexpr HeaderRightColumnWidth = 120.0f;
 }
 
-GeneEditorWidget _GeneEditorWidget::create(CreatureTabGenomeData const& genome, CreatureTabLayoutData const& layoutData)
+GeneEditorWidget _GeneEditorWidget::create(CreatureTabGenomeData const& editData, CreatureTabLayoutData const& layoutData)
 {
-    return GeneEditorWidget(new _GeneEditorWidget(genome, layoutData));
+    return GeneEditorWidget(new _GeneEditorWidget(editData, layoutData));
 }
 
 void _GeneEditorWidget::process()
@@ -30,7 +30,7 @@ void _GeneEditorWidget::process()
 }
 
 _GeneEditorWidget::_GeneEditorWidget(CreatureTabGenomeData const& genome, CreatureTabLayoutData const& layoutData)
-    : _genome(genome)
+    : _editData(genome)
     , _layoutData(layoutData)
 {}
 

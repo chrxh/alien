@@ -5,7 +5,7 @@
 
 #include <imgui.h>
 
-#include "Fonts/IconsFontAwesome5.h"
+#include <Fonts/IconsFontAwesome5.h>
 #include "Fonts/AlienIconFont.h"
 
 #include "Base/Math.h"

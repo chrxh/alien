@@ -381,6 +381,7 @@ public:
     struct ActionButtonParameters
     {
         MEMBER(ActionButtonParameters, std::string, buttonText, "");
+        MEMBER(ActionButtonParameters, bool, frame, false);
         MEMBER(ActionButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool ActionButton(ActionButtonParameters const& parameters);
@@ -451,6 +452,8 @@ public:
 
     static void RotateStart(ImDrawList* drawList);
     static void RotateEnd(float angle, ImDrawList* drawList);
+
+    static void PaddingLeft();
 
 private:
 

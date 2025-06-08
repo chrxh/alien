@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include "Fonts/IconsFontAwesome5.h"
+#include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/GlobalSettings.h"
 #include "Base/StringHelper.h"

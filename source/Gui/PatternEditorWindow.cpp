@@ -3,7 +3,7 @@
 #include <ImFileDialog.h>
 #include <imgui.h>
 
-#include "Fonts/IconsFontAwesome5.h"
+#include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/GlobalSettings.h"
 #include "EngineInterface/Colors.h"

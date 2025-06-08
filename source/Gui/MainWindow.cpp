@@ -19,7 +19,7 @@
 
 #include "ImFileDialog.h"
 #include "implot.h"
-#include "Fonts/IconsFontAwesome5.h"
+#include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/Resources.h"
 #include "Base/Exceptions.h"

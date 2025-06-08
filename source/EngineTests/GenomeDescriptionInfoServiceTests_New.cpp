@@ -10,6 +10,14 @@ public:
     virtual ~GenomeDescriptionInfoServiceTests_New() = default;
 };
 
+TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_Empty)
+{
+    auto genome = GenomeDescription_New();
+    auto result = GenomeDescriptionInfoService::get().getNumberOfResultingCells(genome);
+
+    EXPECT_EQ(0, result);
+}
+
 TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_oneReferencesOneSingleTimes)
 {
     auto genome = GenomeDescription_New().genes({
@@ -28,6 +36,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_oneRefer
 
     EXPECT_EQ(6, result);
 }
+
 TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_oneReferencesOneMultipleTimes)
 {
     auto genome = GenomeDescription_New().genes({

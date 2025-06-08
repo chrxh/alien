@@ -18,14 +18,7 @@ void CreatureEditorWindow::initIntern(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
 
-    //_creatureTabLayoutData = std::make_shared<CreatureTabLayoutData>();
-
-    //_creatureTabLayoutData->_genomeEditorWidth = GlobalSettings::get().getValue("windows.creature editor.genome editor width", scale(GenomeEditorWidth));
-    //_creatureTabLayoutData->_geneEditorWidth = GlobalSettings::get().getValue("windows.creature editor.gene editor width", scale(GeneEditorWidth));
-    //_creatureTabLayoutData->_previewsHeight = GlobalSettings::get().getValue("windows.creature editor.previews height", scale(PreviewsHeight));
-    //_creatureTabLayoutData->_desiredConfigurationPreviewWidth =
-    //    GlobalSettings::get().getValue("windows.creature editor.desired configuration preview width", scale(DesiredConfigurationPreviewWidth));
-
+    // Test genome for the editor
     auto genome = GenomeDescription_New().genes({
         GeneDescription().nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(1)),
@@ -46,10 +39,6 @@ void CreatureEditorWindow::initIntern(SimulationFacade simulationFacade)
 
 void CreatureEditorWindow::shutdownIntern()
 {
-    //GlobalSettings::get().setValue("windows.creature editor.genome editor width", _creatureTabLayoutData->_genomeEditorWidth);
-    //GlobalSettings::get().setValue("windows.creature editor.gene editor width", _creatureTabLayoutData->_geneEditorWidth);
-    //GlobalSettings::get().setValue("windows.creature editor.previews height", _creatureTabLayoutData->_previewsHeight);
-    //GlobalSettings::get().setValue("windows.creature editor.desired configuration preview width", _creatureTabLayoutData->_desiredConfigurationPreviewWidth);
 }
 
 void CreatureEditorWindow::processIntern()
