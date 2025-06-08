@@ -132,7 +132,7 @@ void _GenomeEditorWidget::processGeneList()
 
                     // Column 5: Referencing genes
                     ImGui::TableNextColumn();
-                    auto referencingGenes = GenomeDescriptionInfoService::get().getReferencedGeneIndices(gene);
+                    auto referencingGenes = GenomeDescriptionInfoService::get().getReferencingGeneIndices(genome, row);
                     auto referencingGenesStrings =
                         referencingGenes | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex + 1); });
                     auto referencingGenesString = boost::algorithm::join(std::vector(referencingGenesStrings.begin(), referencingGenesStrings.end()), ", ");
