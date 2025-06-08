@@ -16,8 +16,5 @@ private:
     void processGeneList();
 
     CreatureTabGenomeData _genome;
-    std::optional<int> _selectedGene;
-
-    // Layout data
     CreatureTabLayoutData _layoutData;
 };

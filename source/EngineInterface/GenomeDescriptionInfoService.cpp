@@ -11,38 +11,64 @@ int GenomeDescriptionInfoService::getNumberOfNodes(GenomeDescription_New const& 
 
 namespace 
 {
-    int countNodes(GenomeDescription_New const& genome, int geneIndex, std::unordered_set<int>& countedGenes)
+    int countNodes(GenomeDescription_New const& genome, int geneIndex, std::vector<int>& lastGenes)
     {
-        if (countedGenes.find(geneIndex) != countedGenes.end()) {
+        if (std::ranges::find(lastGenes, geneIndex) != lastGenes.end()) {
             return -1;
         }
-        countedGenes.insert(geneIndex);
+        lastGenes.emplace_back(geneIndex);
 
         auto const& gene = genome._genes[geneIndex];
         auto result = gene._nodes.size();
         for (auto const& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
                 auto const& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
-                auto numNodes = countNodes(genome, constructor._constructGeneIndex, countedGenes);
-                if (numNodes == -1) {
-                    return -1;  // Cycle detected
+                if (constructor._constructGeneIndex != 0) {  // First gene is for self-replication and should not be counted
+                    auto numNodes = countNodes(genome, constructor._constructGeneIndex, lastGenes);
+                    if (numNodes == -1) {
+                        return -1;  // Cycle detected
+                    }
+                    result += numNodes;
                 }
-                result += numNodes;
             }
         }
+        lastGenes.pop_back();
         return toInt(result);
     }
 }
+
 int GenomeDescriptionInfoService::getNumberOfResultingCells(GenomeDescription_New const& genome) const
 {
     auto result = 0;
-    std::unordered_set<int> countedGenes;
-    for (int i = 0; i < genome._genes.size(); ++i) {
-        auto numNodes = countNodes(genome, i, countedGenes);
-        if (numNodes == -1) {
-            return -1; // Cycle detected
+    std::vector<int> lastGenes;
+    return countNodes(genome, 0, lastGenes);
+}
+
+std::vector<int> GenomeDescriptionInfoService::getReferencedGeneIndices(GeneDescription const& gene) const
+{
+    std::vector<int> result;
+    for (auto const& node : gene._nodes) {
+        if (node.getCellType() == CellTypeGenome_Constructor) {
+            auto const& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
+            result.emplace_back(constructor._constructGeneIndex);
         }
-        result += numNodes;
+    }
+    return result;
+}
+
+std::vector<int> GenomeDescriptionInfoService::getReferencingGeneIndices(GenomeDescription_New const& genome, int geneIndex) const
+{
+    std::vector<int> result;
+    for (int i = 0; i < genome._genes.size(); ++i) {
+        auto const& gene = genome._genes[i];
+        for (auto const& node : gene._nodes) {
+            if (node.getCellType() == CellTypeGenome_Constructor) {
+                auto const& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
+                if (constructor._constructGeneIndex == geneIndex) {
+                    result.emplace_back(i);
+                }
+            }
+        }
     }
     return result;
 }

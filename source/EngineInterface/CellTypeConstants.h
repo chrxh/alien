@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstdint>
+#include <map>
+#include <string>
 
 using CellType = int;
 enum CellType_
@@ -159,6 +161,20 @@ enum ConstructionShape_
     ConstructionShape_Count
 };
 
+namespace Const
+{
+    std::map<ConstructionShape, std::string> const ConstructionShapeNames = {
+        {ConstructionShape_Custom, "Custom"},
+        {ConstructionShape_Segment, "Segment"},
+        {ConstructionShape_Triangle, "Triangle"},
+        {ConstructionShape_Rectangle, "Rectangle"},
+        {ConstructionShape_Hexagon, "Hexagon"},
+        {ConstructionShape_Loop, "Loop"},
+        {ConstructionShape_Tube, "Tube"},
+        {ConstructionShape_Lolli, "Lolli"},
+        {ConstructionShape_SmallLolli, "Small Lolli"},
+        {ConstructionShape_Zigzag, "Zigzag"}};
+}
 
 //**********************
 //* Injector constants *
