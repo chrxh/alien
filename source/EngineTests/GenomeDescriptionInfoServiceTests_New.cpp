@@ -228,7 +228,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_infinity
     EXPECT_EQ(-1, result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests_New, getReferencedGeneIndices)
+TEST_F(GenomeDescriptionInfoServiceTests_New, getReferences)
 {
     auto genome = GenomeDescription_New().genes({
         GeneDescription().nodes({
@@ -243,7 +243,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getReferencedGeneIndices)
             NodeDescription(),
         }),
     });
-    auto result = GenomeDescriptionInfoService::get().getReferencedGeneIndices(genome._genes.at(0));
+    auto result = GenomeDescriptionInfoService::get().getReferences(genome._genes.at(0));
 
     ASSERT_EQ(3, result.size());
     EXPECT_EQ(1, result.at(0));
@@ -251,7 +251,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getReferencedGeneIndices)
     EXPECT_EQ(1, result.at(2));
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests_New, getReferencingGeneIndices)
+TEST_F(GenomeDescriptionInfoServiceTests_New, getReferencedBy)
 {
     auto genome = GenomeDescription_New().genes({
         GeneDescription().nodes({
@@ -266,7 +266,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getReferencingGeneIndices)
             NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(0)),
         }),
     });
-    auto result = GenomeDescriptionInfoService::get().getReferencingGeneIndices(genome, 0);
+    auto result = GenomeDescriptionInfoService::get().getReferencedBy(genome, 0);
 
     ASSERT_EQ(3, result.size());
     EXPECT_EQ(1, result.at(0));

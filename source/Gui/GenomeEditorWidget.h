@@ -19,6 +19,8 @@ private:
     void onAddGene();
     void onRemoveGene();
 
+    void removeGeneIntern();
+
     CreatureTabGenomeData _editData;
     CreatureTabLayoutData _layoutData;
 };
