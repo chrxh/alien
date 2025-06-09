@@ -1,8 +1,11 @@
 #pragma once
 
 #include <cstdint>
-#include <map>
+#include <vector>
 #include <string>
+#include <map>
+
+using namespace std::string_literals;
 
 using CellType = int;
 enum CellType_
@@ -23,6 +26,12 @@ enum CellType_
     CellType_Count,
 };
 
+namespace Const
+{
+    std::vector<std::string> const CellTypeStrings =
+        {"Structure", "Free", "Base", "Depot", "Constructor", "Sensor", "Oscillator", "Attacker", "Injector", "Muscle", "Defender", "Reconnector", "Detonator"};
+}
+
 using CellTypeGenome = int;
 enum CellTypeGenome_
 {
@@ -39,6 +48,12 @@ enum CellTypeGenome_
     CellTypeGenome_Detonator,
     CellTypeGenome_Count,
 };
+
+namespace Const
+{
+    std::vector<std::string> const CellTypeGenomeStrings =
+        {"Base", "Depot", "Constructor", "Sensor", "Oscillator", "Attacker", "Injector", "Muscle", "Defender", "Reconnector", "Detonator"};
+}
 
 using LivingState = int;
 enum LivingState_
@@ -163,17 +178,8 @@ enum ConstructionShape_
 
 namespace Const
 {
-    std::map<ConstructionShape, std::string> const ConstructionShapeNames = {
-        {ConstructionShape_Custom, "Custom"},
-        {ConstructionShape_Segment, "Segment"},
-        {ConstructionShape_Triangle, "Triangle"},
-        {ConstructionShape_Rectangle, "Rectangle"},
-        {ConstructionShape_Hexagon, "Hexagon"},
-        {ConstructionShape_Loop, "Loop"},
-        {ConstructionShape_Tube, "Tube"},
-        {ConstructionShape_Lolli, "Lolli"},
-        {ConstructionShape_SmallLolli, "Small Lolli"},
-        {ConstructionShape_Zigzag, "Zigzag"}};
+    std::vector<std::string> const ConstructionShapeStrings =
+        {"Custom", "Segment", "Triangle", "Rectangle", "Hexagon", "Loop", "Tube", "Lolli", "Small Lolli", "Zigzag"};
 }
 
 //**********************

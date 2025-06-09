@@ -2,6 +2,8 @@
 
 #include <imgui.h>
 
+#include "Base/StringHelper.h"
+
 #include "AlienImGui.h"
 #include "CreatureTabGenomeData.h"
 #include "CreatureTabLayoutData.h"
@@ -79,25 +81,34 @@ void _GeneEditorWidget::processNodeList()
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
         if (ImGui::BeginTable("Node list", 3, flags, ImVec2(-1, -1), 0.0f)) {
-            ImGui::TableSetupColumn("Node", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
-            ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
+            ImGui::TableSetupColumn("No.", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
+            ImGui::TableSetupColumn("Node type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
             ImGui::TableSetupColumn("Angle", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
             ImGui::TableSetupScrollFreeze(0, 1);
             ImGui::TableHeadersRow();
             ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
 
+            auto const& genome = _editData->genome;
+            auto const& gene = genome._genes.at(_editData->selectedGene.value());
+
             ImGuiListClipper clipper;
-            clipper.Begin(/*size*/ 10);
+            clipper.Begin(gene._nodes.size());
             while (clipper.Step()) {
                 for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                    //auto const& entry = _savepointTable->at(row);
+                    auto const& node = gene._nodes.at(row);
 
                     ImGui::PushID(row);
                     ImGui::TableNextRow(0, scale(23.0f));
 
+                    // Column 0: No.
                     ImGui::TableNextColumn();
+                    AlienImGui::Text(std::to_string(row + 1));
+
                     ImGui::TableNextColumn();
+                    AlienImGui::Text(Const::CellTypeGenomeStrings.at(node.getCellType()));
+
                     ImGui::TableNextColumn();
+                    AlienImGui::Text(StringHelper::format(node._referenceAngle, 1));
                     ImGui::PopID();
                 }
             }
