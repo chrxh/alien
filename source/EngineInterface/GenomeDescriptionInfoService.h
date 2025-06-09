@@ -14,6 +14,6 @@ class GenomeDescriptionInfoService
 public:
     int getNumberOfNodes(GenomeDescription_New const& genome) const;
     int getNumberOfResultingCells(GenomeDescription_New const& genome) const;  // Returns -1 for infinite
-    std::vector<int> getReferencedGeneIndices(GeneDescription const& gene) const;
-    std::vector<int> getReferencingGeneIndices(GenomeDescription_New const& genome, int geneIndex) const;
+    std::vector<int> getReferences(GeneDescription const& gene) const;
+    std::vector<int> getReferencedBy(GenomeDescription_New const& genome, int geneIndex) const;
 };

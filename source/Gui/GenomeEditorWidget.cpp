@@ -76,8 +76,8 @@ void _GenomeEditorWidget::processGeneList()
             ImGui::TableSetupColumn("Gene type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(80.0f));
             ImGui::TableSetupColumn("Node count", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
             ImGui::TableSetupColumn("Shape", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
-            ImGui::TableSetupColumn("Referenced genes", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(120.0f));
-            ImGui::TableSetupColumn("Referencing genes", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(120.0f));
+            ImGui::TableSetupColumn("References", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(120.0f));
+            ImGui::TableSetupColumn("Referenced by", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(120.0f));
             ImGui::TableSetupScrollFreeze(0, 1);
             ImGui::TableHeadersRow();
             ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
@@ -123,20 +123,23 @@ void _GenomeEditorWidget::processGeneList()
                     ImGui::TableNextColumn();
                     AlienImGui::Text(Const::ConstructionShapeNames.at(gene._shape));
 
-                    // Column 4: Referenced genes
+                    // Column 4: References
                     ImGui::TableNextColumn();
-                    auto referencedGenes = GenomeDescriptionInfoService::get().getReferencedGeneIndices(gene);
-                    auto referencedGenesStrings = referencedGenes | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex + 1); });
-                    auto referencedGenesString = boost::algorithm::join(std::vector(referencedGenesStrings.begin(), referencedGenesStrings.end()), ", ");
-                    AlienImGui::Text(referencedGenesString);
+                    auto references = GenomeDescriptionInfoService::get().getReferences(gene);
+                    auto referencesStrings = references | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex + 1); });
+                    auto referencesString = boost::algorithm::join(std::vector(referencesStrings.begin(), referencesStrings.end()), ", ");
+                    AlienImGui::Text(referencesString);
 
-                    // Column 5: Referencing genes
+                    // Column 5: Referenced by
                     ImGui::TableNextColumn();
-                    auto referencingGenes = GenomeDescriptionInfoService::get().getReferencingGeneIndices(genome, row);
-                    auto referencingGenesStrings =
-                        referencingGenes | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex + 1); });
-                    auto referencingGenesString = boost::algorithm::join(std::vector(referencingGenesStrings.begin(), referencingGenesStrings.end()), ", ");
-                    AlienImGui::Text(referencingGenesString);
+                    auto referencedBy = GenomeDescriptionInfoService::get().getReferencedBy(genome, row);
+                    if (!referencedBy.empty()) {
+                        auto referencedByStrings = referencedBy | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex + 1); });
+                        auto referencedByString = boost::algorithm::join(std::vector(referencedByStrings.begin(), referencedByStrings.end()), ", ");
+                        AlienImGui::Text(referencedByString);
+                    } else {
+                        AlienImGui::Text("Unused");
+                    }
 
                     ImGui::PopID();
                 }
@@ -161,7 +164,7 @@ void _GenomeEditorWidget::processGeneListButtons()
         }
         ImGui::SameLine();
         AlienImGui::PaddingLeft();
-        ImGui::BeginDisabled(!_editData->selectedGene.has_value() || _editData->selectedGene.value() == 0);
+        ImGui::BeginDisabled(!_editData->selectedGene.has_value());
         if (AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_MINUS_CIRCLE))) {
             onRemoveGene();
         }
@@ -169,14 +172,14 @@ void _GenomeEditorWidget::processGeneListButtons()
 
         ImGui::SameLine();
         AlienImGui::PaddingLeft();
-        ImGui::BeginDisabled(!_editData->selectedGene.has_value() || _editData->selectedGene.value() == 0);
+        ImGui::BeginDisabled(!_editData->selectedGene.has_value());
         if (AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_UP))) {
         }
         ImGui::EndDisabled();
 
         ImGui::SameLine();
         AlienImGui::PaddingLeft();
-        ImGui::BeginDisabled(!_editData->selectedGene.has_value() || _editData->selectedGene.value() == 0);
+        ImGui::BeginDisabled(!_editData->selectedGene.has_value());
         if (AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_DOWN))) {
         }
         ImGui::EndDisabled();
@@ -193,9 +196,9 @@ void _GenomeEditorWidget::onAddGene()
     } else {
         int insertIndex;
         if (_editData->selectedGene.has_value()) {
-            insertIndex = _editData->selectedGene.value() + 1;
+            insertIndex = _editData->selectedGene.value();
         } else {
-            insertIndex = static_cast<int>(genome._genes.size());
+            insertIndex = toInt(genome._genes.size()) - 1;
         }
 
         GenomeDescriptionEditService::get().addEmptyGene(genome, insertIndex);
@@ -209,6 +212,27 @@ void _GenomeEditorWidget::onRemoveGene()
     if (!_editData->selectedGene.has_value()) {
         return;
     }
+    auto referencedBy = GenomeDescriptionInfoService::get().getReferencedBy(_editData->genome, _editData->selectedGene.value());
+    if (!referencedBy.empty()) {
+        auto referencedByStrings = referencedBy | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex + 1); });
+        auto referencedByString = boost::algorithm::join(std::vector(referencedByStrings.begin(), referencedByStrings.end()), ", ");
+        auto text = referencedBy.size() == 1 ? "This gene could not be removed since it is still used by gene "
+                                             : "This gene could not be removed since it is still used by genes ";
+        GenericMessageDialog::get().information("Error", text + referencedByString + ".");
+        return;
+    }
+    if (_editData->selectedGene.value() == 0) {
+        GenericMessageDialog::get().yesNo(
+            "Delete principal gene",
+            "Do you really want to delete the principal gene? If you decide to do so, the following gene will become the new principal gene.",
+            [this] { this->removeGeneIntern(); });
+        return;
+    }
+    removeGeneIntern();
+}
+
+void _GenomeEditorWidget::removeGeneIntern()
+{
     int removeIndex = _editData->selectedGene.value();
     auto& genes = _editData->genome._genes;
 

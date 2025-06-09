@@ -46,7 +46,7 @@ int GenomeDescriptionInfoService::getNumberOfResultingCells(GenomeDescription_Ne
     return countNodes(genome, 0, lastGenes);
 }
 
-std::vector<int> GenomeDescriptionInfoService::getReferencedGeneIndices(GeneDescription const& gene) const
+std::vector<int> GenomeDescriptionInfoService::getReferences(GeneDescription const& gene) const
 {
     std::vector<int> result;
     for (auto const& node : gene._nodes) {
@@ -58,7 +58,7 @@ std::vector<int> GenomeDescriptionInfoService::getReferencedGeneIndices(GeneDesc
     return result;
 }
 
-std::vector<int> GenomeDescriptionInfoService::getReferencingGeneIndices(GenomeDescription_New const& genome, int geneIndex) const
+std::vector<int> GenomeDescriptionInfoService::getReferencedBy(GenomeDescription_New const& genome, int geneIndex) const
 {
     std::vector<int> result;
     for (int i = 0; i < genome._genes.size(); ++i) {
