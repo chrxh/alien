@@ -15,6 +15,9 @@ private:
     void processNoSelection();
     void processHeaderData();
     void processNodeList();
+    void processNodeListButtons();
+
+    void onAddNode();
 
     CreatureTabEditData _editData;
     CreatureTabLayoutData _layoutData;

@@ -15,8 +15,6 @@ private:
     void processNodeAttributes();
     void processNoSelection();
 
-    std::optional<int> getSelectedNode() const;
-
     CreatureTabEditData _editData;
     CreatureTabLayoutData _layoutData;
 };

@@ -2,7 +2,11 @@
 
 #include <imgui.h>
 
+#include <Fonts/IconsFontAwesome5.h>
+
 #include "Base/StringHelper.h"
+
+#include "EngineInterface/GenomeDescriptionEditService.h"
 
 #include "AlienGui.h"
 #include "CreatureTabEditData.h"
@@ -24,11 +28,14 @@ void _GeneEditorWidget::process()
 {
     if (ImGui::BeginChild("GeneEditor", ImVec2(_layoutData->geneEditorWidth, 0))) {
         if (_editData->selectedGene.has_value()) {
+            ImGui::PushID(_editData->selectedGene.value());
             processHeaderData();
 
             AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _layoutData->nodeListHeight);
 
             processNodeList();
+            processNodeListButtons();
+            ImGui::PopID();
         } else {
             processNoSelection();
         }
@@ -75,9 +82,9 @@ void _GeneEditorWidget::processNodeList()
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
         if (ImGui::BeginTable("Node list", 3, flags, ImVec2(-1, -1), 0.0f)) {
-            ImGui::TableSetupColumn("No.", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
-            ImGui::TableSetupColumn("Node type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
-            ImGui::TableSetupColumn("Angle", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
+            ImGui::TableSetupColumn("No.", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(30.0f));
+            ImGui::TableSetupColumn("Node type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(80.0f));
+            ImGui::TableSetupColumn("Angle", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(40.0f));
             ImGui::TableSetupScrollFreeze(0, 1);
             ImGui::TableHeadersRow();
             ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
@@ -92,11 +99,23 @@ void _GeneEditorWidget::processNodeList()
                     auto const& node = gene._nodes.at(row);
 
                     ImGui::PushID(row);
-                    ImGui::TableNextRow(0, scale(23.0f));
+                    ImGui::TableNextRow(0, scale(21.0f));
 
                     // Column 0: No.
                     ImGui::TableNextColumn();
                     AlienGui::Text(std::to_string(row + 1));
+                    ImGui::SameLine();
+                    auto selectedNode = _editData->getSelectedNode();
+                    auto selected = selectedNode ? selectedNode.value() == row : false;
+                    if (ImGui::Selectable(
+                            "",
+                            &selected,
+                            ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap,
+                            ImVec2(0, scale(ImGui::GetTextLineHeightWithSpacing()) - ImGui::GetStyle().FramePadding.y))) {
+                        if (selected) {
+                            _editData->setSelectedNode(row);
+                        }
+                    }
 
                     // Column 1: Node type
                     ImGui::TableNextColumn();
@@ -112,4 +131,63 @@ void _GeneEditorWidget::processNodeList()
         }
     }
     ImGui::EndChild();
+}
+
+void _GeneEditorWidget::processNodeListButtons()
+{
+    auto cursorPos = ImGui::GetCursorScreenPos();
+
+    ImVec2 buttonGroupSize = {scale(108.0f), scale(22.0f)};
+    ImGui::SetCursorScreenPos(
+        ImVec2(cursorPos.x + ImGui::GetContentRegionAvail().x - buttonGroupSize.x - scale(10.0f), cursorPos.y - buttonGroupSize.y - scale(20.0f)));
+    if (ImGui::BeginChild("ButtonGroup", buttonGroupSize)) {
+        auto selectedNode = _editData->getSelectedNode();
+        auto const& gene = _editData->genome._genes.at(_editData->selectedGene.value());
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_PLUS_CIRCLE))) {
+            onAddNode();
+        }
+        ImGui::SameLine();
+        AlienGui::PaddingLeft();
+        ImGui::BeginDisabled(!selectedNode.has_value());
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_MINUS_CIRCLE))) {
+        }
+        ImGui::EndDisabled();
+
+        ImGui::SameLine();
+        AlienGui::PaddingLeft();
+        ImGui::BeginDisabled(!selectedNode.has_value() || selectedNode.value() == 0);
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_UP))) {
+        }
+        ImGui::EndDisabled();
+
+        ImGui::SameLine();
+        AlienGui::PaddingLeft();
+        ImGui::BeginDisabled(!selectedNode.has_value() || selectedNode.value() == gene._nodes.size() - 1);
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_DOWN))) {
+        }
+        ImGui::EndDisabled();
+    }
+    ImGui::EndChild();
+}
+
+void _GeneEditorWidget::onAddNode()
+{
+    auto& gene = _editData->genome._genes.at(_editData->selectedGene.value());
+    auto selectedNode = _editData->getSelectedNode();
+    if (gene._nodes.empty()) {
+        GenomeDescriptionEditService::get().addEmptyNode(gene, 0);
+        _editData->setSelectedNode(0);
+    } else {
+        int insertIndex;
+        if (selectedNode.has_value()) {
+            insertIndex = selectedNode.value();
+        } else {
+            insertIndex = toInt(gene._nodes.size()) - 1;
+        }
+
+        GenomeDescriptionEditService::get().addEmptyNode(gene, insertIndex);
+
+        // Adapt gene selection
+        _editData->setSelectedNode(insertIndex + 1);
+    }
 }
