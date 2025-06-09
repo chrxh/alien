@@ -5,17 +5,17 @@
 class _GeneEditorWidget
 {
 public:
-    static GeneEditorWidget create(CreatureTabGenomeData const& editData, CreatureTabLayoutData const& layoutData);
+    static GeneEditorWidget create(CreatureTabEditData const& editData, CreatureTabLayoutData const& layoutData);
 
     void process();
 
 private:
-    _GeneEditorWidget(CreatureTabGenomeData const& genome, CreatureTabLayoutData const& layoutData);
+    _GeneEditorWidget(CreatureTabEditData const& genome, CreatureTabLayoutData const& layoutData);
 
     void processNoSelection();
     void processHeaderData();
     void processNodeList();
 
-    CreatureTabGenomeData _editData;
+    CreatureTabEditData _editData;
     CreatureTabLayoutData _layoutData;
 };

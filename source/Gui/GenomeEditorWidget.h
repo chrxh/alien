@@ -5,12 +5,12 @@
 class _GenomeEditorWidget
 {
 public:
-    static GenomeEditorWidget create(CreatureTabGenomeData const& editData, CreatureTabLayoutData const& layoutData);
+    static GenomeEditorWidget create(CreatureTabEditData const& editData, CreatureTabLayoutData const& layoutData);
 
     void process();
 
 private:
-    _GenomeEditorWidget(CreatureTabGenomeData const& genome, CreatureTabLayoutData const& layoutData);
+    _GenomeEditorWidget(CreatureTabEditData const& genome, CreatureTabLayoutData const& layoutData);
 
     void processHeaderData();
     void processGeneList();
@@ -25,6 +25,6 @@ private:
     void moveGeneUpwardIntern();
     void moveGeneDownwardIntern();
 
-    CreatureTabGenomeData _editData;
+    CreatureTabEditData _editData;
     CreatureTabLayoutData _layoutData;
 };

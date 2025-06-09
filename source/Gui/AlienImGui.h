@@ -430,8 +430,7 @@ public:
         std::vector<float>& biases,
         std::vector<ActivationFunction>& activationFunctions);
 
-    static void OnlineSymbol();
-    static void LastDayOnlineSymbol();
+    static void DisabledField();
 
     class DynamicTableLayout
     {

@@ -111,6 +111,9 @@ private:
     void pushTextColor(NetworkResourceTreeTO const& to);
     void popTextColor();
 
+    void drawOnlineSymbol();
+    void drawLastDayOnlineSymbol();
+
     TaskProcessor _refreshProcessor;
     TaskProcessor _emojiUserNameProcessor;
     TaskProcessor _reactionProcessor;

@@ -2063,22 +2063,18 @@ void AlienImGui::NeuronSelection(
     ImGui::EndChild();
 }
 
-void AlienImGui::OnlineSymbol()
-{
-    auto counter = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    counter = (((counter % 2000) + 2000) % 2000);
-    auto color = ImColor::HSV(0.0f, counter < 1000 ? toFloat(counter) / 1000.0f : 2.0f - toFloat(counter) / 1000.0f, 1.0f);
-    ImGui::PushStyleColor(ImGuiCol_Text, color.Value);
-    ImGui::Text(ICON_FA_GENDERLESS);
-    ImGui::PopStyleColor();
-}
 
-void AlienImGui::LastDayOnlineSymbol()
+void AlienImGui::DisabledField()
 {
-    auto color = ImColor::HSV(0.16f, 0.5f, 0.66f);
-    ImGui::PushStyleColor(ImGuiCol_Text, color.Value);
-    ImGui::Text(ICON_FA_GENDERLESS);
-    ImGui::PopStyleColor();
+    auto startPos = ImGui::GetCursorScreenPos();
+    auto size = ImGui::GetContentRegionAvail();
+    ImGui::GetWindowDrawList()->AddRectFilledMultiColor(
+        {startPos.x, startPos.y},
+        {startPos.x + size.x, startPos.y + size.y},
+        Const::DisabledOverlayColor1,
+        Const::DisabledOverlayColor2,
+        Const::DisabledOverlayColor1,
+        Const::DisabledOverlayColor2);
 }
 
 namespace

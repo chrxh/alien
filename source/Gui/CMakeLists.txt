@@ -21,7 +21,7 @@ PUBLIC
     CreatorWindow.h
     CreatureEditorWindow.cpp
     CreatureEditorWindow.h
-    CreatureTabGenomeData.h
+    CreatureTabEditData.h
     CreatureTabLayoutData.h
     CreatureTabWidget.cpp
     CreatureTabWidget.h

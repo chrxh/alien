@@ -475,10 +475,10 @@ void BrowserWindow::processUserList()
                             auto isBoldFont = isLoggedIn && *NetworkService::get().getLoggedInUserName() == item->userName;
 
                             if (item->online) {
-                                AlienImGui::OnlineSymbol();
+                                drawOnlineSymbol();
                                 ImGui::SameLine();
                             } else if (item->lastDayOnline) {
-                                AlienImGui::LastDayOnlineSymbol();
+                                drawLastDayOnlineSymbol();
                                 ImGui::SameLine();
                             }
                             processShortenedText(item->userName, isBoldFont);
@@ -1189,13 +1189,8 @@ void BrowserWindow::processRefreshingScreen(RealVector2D const& startPos)
 
         ImGui::SetCursorScreenPos({startPos.x, startPos.y});
         if (ImGui::BeginChild("##overlay", {size.x, size.y}, 0, ImGuiWindowFlags_NoScrollbar)) {
-            ImGui::GetWindowDrawList()->AddRectFilledMultiColor(
-                {startPos.x, startPos.y},
-                {startPos.x + size.x, startPos.y + size.y},
-                Const::DisabledOverlayColor1,
-                Const::DisabledOverlayColor2,
-                Const::DisabledOverlayColor1,
-                Const::DisabledOverlayColor2);
+
+            AlienImGui::DisabledField();
             AlienImGui::Spinner(AlienImGui::SpinnerParameters().pos({startPos.x + size.x / 2, startPos.y + size.y / 2}));
         }
         ImGui::EndChild();
@@ -1479,5 +1474,23 @@ void BrowserWindow::pushTextColor(NetworkResourceTreeTO const& to)
 
 void BrowserWindow::popTextColor()
 {
+    ImGui::PopStyleColor();
+}
+
+void BrowserWindow::drawOnlineSymbol()
+{
+    auto counter = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    counter = (((counter % 2000) + 2000) % 2000);
+    auto color = ImColor::HSV(0.0f, counter < 1000 ? toFloat(counter) / 1000.0f : 2.0f - toFloat(counter) / 1000.0f, 1.0f);
+    ImGui::PushStyleColor(ImGuiCol_Text, color.Value);
+    ImGui::Text(ICON_FA_GENDERLESS);
+    ImGui::PopStyleColor();
+}
+
+void BrowserWindow::drawLastDayOnlineSymbol()
+{
+    auto color = ImColor::HSV(0.16f, 0.5f, 0.66f);
+    ImGui::PushStyleColor(ImGuiCol_Text, color.Value);
+    ImGui::Text(ICON_FA_GENDERLESS);
     ImGui::PopStyleColor();
 }
