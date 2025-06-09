@@ -172,15 +172,17 @@ void _GenomeEditorWidget::processGeneListButtons()
 
         ImGui::SameLine();
         AlienImGui::PaddingLeft();
-        ImGui::BeginDisabled(!_editData->selectedGene.has_value());
+        ImGui::BeginDisabled(!_editData->selectedGene.has_value() || _editData->selectedGene.value() == 0);
         if (AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_UP))) {
+            onMoveGeneUpward();
         }
         ImGui::EndDisabled();
 
         ImGui::SameLine();
         AlienImGui::PaddingLeft();
-        ImGui::BeginDisabled(!_editData->selectedGene.has_value());
+        ImGui::BeginDisabled(!_editData->selectedGene.has_value() || _editData->selectedGene.value() == _editData->genome._genes.size() - 1);
         if (AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_DOWN))) {
+            onMoveGeneDownward();
         }
         ImGui::EndDisabled();
     }
@@ -209,9 +211,6 @@ void _GenomeEditorWidget::onAddGene()
 
 void _GenomeEditorWidget::onRemoveGene()
 {
-    if (!_editData->selectedGene.has_value()) {
-        return;
-    }
     auto referencedBy = GenomeDescriptionInfoService::get().getReferencedBy(_editData->genome, _editData->selectedGene.value());
     if (!referencedBy.empty()) {
         auto referencedByStrings = referencedBy | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex + 1); });
@@ -231,13 +230,31 @@ void _GenomeEditorWidget::onRemoveGene()
     removeGeneIntern();
 }
 
+void _GenomeEditorWidget::onMoveGeneUpward()
+{
+    if (_editData->selectedGene.value() == 1) {
+        GenericMessageDialog::get().yesNo("Swap principal gene", "Do you really want to swap the principal gene?", [this] { this->moveGeneUpwardIntern(); });
+        return;
+    }
+    moveGeneUpwardIntern();
+}
+
+void _GenomeEditorWidget::onMoveGeneDownward()
+{
+    if (_editData->selectedGene.value() == 0) {
+        GenericMessageDialog::get().yesNo("Swap principal gene", "Do you really want to swap the principal gene?", [this] { this->moveGeneDownwardIntern(); });
+        return;
+    }
+    moveGeneDownwardIntern();
+}
+
 void _GenomeEditorWidget::removeGeneIntern()
 {
     int removeIndex = _editData->selectedGene.value();
-    auto& genes = _editData->genome._genes;
 
     GenomeDescriptionEditService::get().removeGene(_editData->genome, removeIndex);
 
+    auto& genes = _editData->genome._genes;
     if (genes.empty()) {
         _editData->selectedGene.reset();
     } else if (removeIndex >= toInt(genes.size())) {
@@ -245,4 +262,18 @@ void _GenomeEditorWidget::removeGeneIntern()
     } else {
         _editData->selectedGene = removeIndex;
     }
+}
+
+void _GenomeEditorWidget::moveGeneUpwardIntern()
+{
+    int index = _editData->selectedGene.value();
+    GenomeDescriptionEditService::get().swapGenes(_editData->genome, index - 1);
+    --_editData->selectedGene.value();
+}
+
+void _GenomeEditorWidget::moveGeneDownwardIntern()
+{
+    int index = _editData->selectedGene.value();
+    GenomeDescriptionEditService::get().swapGenes(_editData->genome, index);
+    ++_editData->selectedGene.value();
 }

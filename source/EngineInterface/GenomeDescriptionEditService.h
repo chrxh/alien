@@ -14,4 +14,5 @@ class GenomeDescriptionEditService
 public:
     void addEmptyGene(GenomeDescription_New& genome, int index);    // Adds empty gene after index
     void removeGene(GenomeDescription_New& genome, int index);
+    void swapGenes(GenomeDescription_New& genome, int index);   // Swaps gene at index with gene at index + 1
 };
