@@ -11,7 +11,7 @@
 #include "PersisterInterface/SerializerService.h"
 #include "PersisterInterface/TaskProcessor.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "FileTransferController.h"
 #include "GenericMessageDialog.h"
 #include "OverlayController.h"
@@ -110,29 +110,29 @@ void AutosaveWindow::processToolbar()
 {
     ImGui::SameLine();
     ImGui::BeginDisabled(!_savepointTable.has_value());
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PLUS))) {
         onCreateSavepoint(false);
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Create save point");
+    AlienGui::Tooltip("Create save point");
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!static_cast<bool>(_selectedEntry));
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_MINUS))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_MINUS))) {
         onDeleteSavepoint(_selectedEntry);
     }
-    AlienImGui::Tooltip("Delete save point");
+    AlienGui::Tooltip("Delete save point");
     ImGui::EndDisabled();
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!_savepointTable.has_value() || _savepointTable->isEmpty());
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_BROOM))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_BROOM))) {
         GenericMessageDialog::get().yesNo("Delete", "Do you really want to delete all savepoints?", [&]() { scheduleCleanup(); });
     }
-    AlienImGui::Tooltip("Delete all save points");
+    AlienGui::Tooltip("Delete all save points");
     ImGui::EndDisabled();
 
-    AlienImGui::Separator();
+    AlienGui::Separator();
 }
 
 void AutosaveWindow::processHeader()
@@ -142,7 +142,7 @@ void AutosaveWindow::processHeader()
 void AutosaveWindow::processTable()
 {
     if (!_savepointTable.has_value()) {
-        AlienImGui::Text("Error: Savepoint files could not be read or created in the specified directory.");
+        AlienGui::Text("Error: Savepoint files could not be read or created in the specified directory.");
         return;
     }
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
@@ -170,23 +170,23 @@ void AutosaveWindow::processTable()
                 ImGui::TableNextColumn();
                 if (entry->state == SavepointState_InQueue) {
                     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextLightDecentColor.Value);
-                    AlienImGui::Text("In queue");
+                    AlienGui::Text("In queue");
                     ImGui::PopStyleColor();
                 } else if (entry->state == SavepointState_InProgress) {
                     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextLightDecentColor.Value);
-                    AlienImGui::Text("In progress");
+                    AlienGui::Text("In progress");
                     ImGui::PopStyleColor();
                 } else if (entry->state == SavepointState_Persisted) {
-                    auto triggerLoadSavepoint = AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_DOWNLOAD));
-                    AlienImGui::Tooltip("Load save point", false);
+                    auto triggerLoadSavepoint = AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_DOWNLOAD));
+                    AlienGui::Tooltip("Load save point", false);
                     if (triggerLoadSavepoint) {
                         onLoadSavepoint(entry);
                     }
 
                     ImGui::SameLine();
-                    AlienImGui::Text(entry->name);
+                    AlienGui::Text(entry->name);
                 } else if (entry->state == SavepointState_Error) {
-                    AlienImGui::Text("Error");
+                    AlienGui::Text("Error");
                 }
                 ImGui::SameLine();
                 ImGui::Dummy({0, scale(22.0f)});
@@ -204,23 +204,23 @@ void AutosaveWindow::processTable()
                 // timestamp
                 ImGui::TableNextColumn();
                 if (entry->state == SavepointState_Persisted) {
-                    AlienImGui::Text(entry->timestamp);
+                    AlienGui::Text(entry->timestamp);
                 }
 
                 // timestep
                 ImGui::TableNextColumn();
                 if (entry->state == SavepointState_Persisted) {
-                    AlienImGui::Text(StringHelper::format(entry->timestep));
+                    AlienGui::Text(StringHelper::format(entry->timestep));
                 }
 
                 // peak
                 ImGui::TableNextColumn();
-                AlienImGui::Text(entry->peak);
+                AlienGui::Text(entry->peak);
 
                 if (!entry->peakType.empty()) {
                     ImGui::SameLine();
                     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextLightDecentColor.Value);
-                    AlienImGui::Text(" (" + entry->peakType + ")");
+                    AlienGui::Text(" (" + entry->peakType + ")");
                     ImGui::PopStyleColor();
                 }
 
@@ -236,23 +236,23 @@ void AutosaveWindow::processSettings()
     ImGui::Spacing();
     ImGui::Spacing();
     if (_settingsOpen) {
-        AlienImGui::MovableHorizontalSeparator(AlienImGui::MovableHorizontalSeparatorParameters().additive(false), _settingsHeight);
+        AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _settingsHeight);
     }
 
     _settingsOpen =
-        AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Settings").rank(AlienImGui::TreeNodeRank::High).defaultOpen(_settingsOpen));
+        AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Settings").rank(AlienGui::TreeNodeRank::High).defaultOpen(_settingsOpen));
     if (_settingsOpen) {
         if (ImGui::BeginChild("##autosaveSettings", {scale(0), 0})) {
-            if (AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters().name("Autosave interval (min)").textWidth(RightColumnWidth).defaultValue(_origAutosaveInterval),
+            if (AlienGui::InputInt(
+                    AlienGui::InputIntParameters().name("Autosave interval (min)").textWidth(RightColumnWidth).defaultValue(_origAutosaveInterval),
                     _autosaveInterval,
                     &_autosaveEnabled)) {
                 if (_autosaveEnabled) {
                     _lastAutosaveTimepoint = std::chrono::steady_clock::now();
                 }
             }
-            if (AlienImGui::Switcher(
-                    AlienImGui::SwitcherParameters()
+            if (AlienGui::Switcher(
+                    AlienGui::SwitcherParameters()
                         .name("Catch peaks")
                         .textWidth(RightColumnWidth)
                         .defaultValue(_origCatchPeaks)
@@ -267,8 +267,8 @@ void AutosaveWindow::processSettings()
                 _peakDeserializedSimulation->setDeserializedSimulation(DeserializedSimulation());
             }
 
-            if (AlienImGui::InputText(
-                    AlienImGui::InputTextParameters()
+            if (AlienGui::InputText(
+                    AlienGui::InputTextParameters()
                         .name("Directory")
                         .textWidth(RightColumnWidth)
                         .defaultValue(_origDirectory)
@@ -278,21 +278,21 @@ void AutosaveWindow::processSettings()
                     _directory)) {
                 updateSavepointTableFromFile();
             }
-            AlienImGui::Switcher(
-                AlienImGui::SwitcherParameters()
+            AlienGui::Switcher(
+                AlienGui::SwitcherParameters()
                     .name("Mode")
                     .values({"Limited save files", "Unlimited save files"})
                     .textWidth(RightColumnWidth)
                     .defaultValue(_origSaveMode),
                 _saveMode);
             if (_saveMode == SaveMode_Circular) {
-                AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters().name("Number of files").textWidth(RightColumnWidth).defaultValue(_origNumberOfFiles), _numberOfFiles);
+                AlienGui::InputInt(
+                    AlienGui::InputIntParameters().name("Number of files").textWidth(RightColumnWidth).defaultValue(_origNumberOfFiles), _numberOfFiles);
             }
         }
         ImGui::EndChild();
     }
-    AlienImGui::EndTreeNode();
+    AlienGui::EndTreeNode();
 }
 
 void AutosaveWindow::processStatusBar()
@@ -310,7 +310,7 @@ void AutosaveWindow::processStatusBar()
         statusItems.emplace_back(std::to_string(_savepointTable->getSize()) + " save points");
     }
 
-    AlienImGui::StatusBar(statusItems);
+    AlienGui::StatusBar(statusItems);
 }
 
 void AutosaveWindow::onCreateSavepoint(bool usePeakSimulation)

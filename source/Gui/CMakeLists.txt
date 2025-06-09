@@ -6,8 +6,8 @@ PUBLIC
     ActivateUserDialog.cpp
     ActivateUserDialog.h
     AlienDialog.h
-    AlienImGui.cpp
-    AlienImGui.h
+    AlienGui.cpp
+    AlienGui.h
     AlienWindow.h
     AutosaveWindow.cpp
     AutosaveWindow.h

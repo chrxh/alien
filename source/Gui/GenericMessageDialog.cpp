@@ -6,7 +6,7 @@
 
 #include "Base/LoggingService.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "WindowController.h"
 #include "StyleRepository.h"
 
@@ -70,9 +70,9 @@ void GenericMessageDialog::processInformation()
     ImGui::TextWrapped("%s", _message.c_str());
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
-    AlienImGui::Separator();
+    AlienGui::Separator();
 
-    if (AlienImGui::Button("OK")) {
+    if (AlienGui::Button("OK")) {
         close();
     }
 }
@@ -89,14 +89,14 @@ void GenericMessageDialog::processYesNo()
     ImGui::TextWrapped("%s", _message.c_str());
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
-    AlienImGui::Separator();
+    AlienGui::Separator();
 
-    if (AlienImGui::Button("Yes")) {
+    if (AlienGui::Button("Yes")) {
         close();
         _execFunction();
     }
     ImGui::SameLine();
-    if (AlienImGui::Button("No")) {
+    if (AlienGui::Button("No")) {
         close();
     }
 }

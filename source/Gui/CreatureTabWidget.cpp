@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "CreatureTabEditData.h"
 #include "CreatureTabLayoutData.h"
 #include "GeneEditorWidget.h"
@@ -27,7 +27,7 @@ void _CreatureTabWidget::process()
         }
         ImGui::EndChild();
 
-        AlienImGui::MovableHorizontalSeparator(AlienImGui::MovableHorizontalSeparatorParameters().additive(false), _layoutData->previewsHeight);
+        AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _layoutData->previewsHeight);
 
         if (ImGui::BeginChild("Previews", ImVec2(0, 0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
             processPreviews();
@@ -69,7 +69,7 @@ void _CreatureTabWidget::processEditors()
 
     ImGui::SameLine();
     ImGui::PushID(1);
-    AlienImGui::MovableVerticalSeparator(AlienImGui::MovableVerticalSeparatorParameters().additive(true), _layoutData->genomeEditorWidth);
+    AlienGui::MovableVerticalSeparator(AlienGui::MovableVerticalSeparatorParameters().additive(true), _layoutData->genomeEditorWidth);
     ImGui::PopID();
 
     ImGui::SameLine();
@@ -77,7 +77,7 @@ void _CreatureTabWidget::processEditors()
 
     ImGui::SameLine();
     ImGui::PushID(2);
-    AlienImGui::MovableVerticalSeparator(AlienImGui::MovableVerticalSeparatorParameters().additive(true), _layoutData->geneEditorWidth);
+    AlienGui::MovableVerticalSeparator(AlienGui::MovableVerticalSeparatorParameters().additive(true), _layoutData->geneEditorWidth);
     ImGui::PopID();
 
     ImGui::SameLine();
@@ -92,8 +92,8 @@ void _CreatureTabWidget::processPreviews()
     ImGui::EndChild();
 
     ImGui::SameLine();
-    AlienImGui::MovableVerticalSeparator(
-        AlienImGui::MovableVerticalSeparatorParameters().additive(true), _layoutData->desiredConfigurationPreviewWidth);
+    AlienGui::MovableVerticalSeparator(
+        AlienGui::MovableVerticalSeparatorParameters().additive(true), _layoutData->desiredConfigurationPreviewWidth);
 
     ImGui::SameLine();
     if (ImGui::BeginChild("ActualConfigurationPreview", ImVec2(0, 0))) {
@@ -104,12 +104,12 @@ void _CreatureTabWidget::processPreviews()
 
 void _CreatureTabWidget::processDesiredConfigurationPreview()
 {
-    AlienImGui::Group("Preview (predicted)");
+    AlienGui::Group("Preview (predicted)");
 }
 
 void _CreatureTabWidget::processActualConfigurationPreview()
 {
-    AlienImGui::Group("Preview (simulated)");
+    AlienGui::Group("Preview (simulated)");
 }
 
 void _CreatureTabWidget::doLayout()

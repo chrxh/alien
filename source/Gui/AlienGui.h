@@ -32,7 +32,7 @@ struct TreeNodeInfo
     bool isEmpty = false;
 };
 
-class AlienImGui
+class AlienGui
 {
 public:
     static void HelpMarker(std::string const& text);

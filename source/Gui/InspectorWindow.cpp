@@ -1,23 +1,24 @@
 #include "InspectorWindow.h"
 
 #include <sstream>
-#include <imgui.h>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/range/adaptor/indexed.hpp>
 
+#include <imgui.h>
+
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/GenomeDescriptionConverterService.h"
 #include "EngineInterface/PreviewDescriptionService.h"
+#include "EngineInterface/SimulationFacade.h"
 
-#include "StyleRepository.h"
-#include "Viewport.h"
+#include "AlienGui.h"
 #include "EditorModel.h"
-#include "AlienImGui.h"
 #include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
 #include "OverlayController.h"
+#include "StyleRepository.h"
+#include "Viewport.h"
 
 using namespace std::string_literals;
 
@@ -41,8 +42,7 @@ _InspectorWindow::_InspectorWindow(SimulationFacade const& simulationFacade, uin
     , _initialPos(initialPos)
     , _simulationFacade(simulationFacade)
     , _selectGenomeTab(selectGenomeTab)
-{
-}
+{}
 
 _InspectorWindow::~_InspectorWindow() {}
 
@@ -52,8 +52,7 @@ void _InspectorWindow::process()
         return;
     }
     auto width = calcWindowWidth();
-    auto height = isCell() ? StyleRepository::get().scale(370.0f)
-                           : StyleRepository::get().scale(70.0f);
+    auto height = isCell() ? StyleRepository::get().scale(370.0f) : StyleRepository::get().scale(70.0f);
     auto borderlessRendering = _simulationFacade->getSimulationParameters().borderlessRendering.value;
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::SetNextWindowSize({width, height}, ImGuiCond_Appearing);
@@ -70,24 +69,11 @@ void _InspectorWindow::process()
         auto entityPos = Viewport::get().mapWorldToViewPosition(DescriptionEditService::get().getPos(entity), borderlessRendering);
         auto factor = StyleRepository::get().scale(1);
 
-        drawList->AddLine(
-            {windowPos.x + 15.0f * factor, windowPos.y - 5.0f * factor},
-            {entityPos.x, entityPos.y},
-            Const::InspectorLineColor,
-            1.5f);
+        drawList->AddLine({windowPos.x + 15.0f * factor, windowPos.y - 5.0f * factor}, {entityPos.x, entityPos.y}, Const::InspectorLineColor, 1.5f);
         drawList->AddRectFilled(
-            {windowPos.x + 5.0f * factor, windowPos.y - 10.0f * factor},
-            {windowPos.x + 25.0f * factor, windowPos.y},
-            Const::InspectorRectColor,
-            1.0,
-            0);
+            {windowPos.x + 5.0f * factor, windowPos.y - 10.0f * factor}, {windowPos.x + 25.0f * factor, windowPos.y}, Const::InspectorRectColor, 1.0, 0);
         drawList->AddRect(
-            {windowPos.x + 5.0f * factor, windowPos.y - 10.0f * factor},
-            {windowPos.x + 25.0f * factor, windowPos.y},
-            Const::InspectorLineColor,
-            1.0,
-            0,
-            2.0f);
+            {windowPos.x + 5.0f * factor, windowPos.y - 10.0f * factor}, {windowPos.x + 25.0f * factor, windowPos.y}, Const::InspectorLineColor, 1.0, 0, 2.0f);
     }
     ImGui::End();
 }
@@ -122,8 +108,7 @@ std::string _InspectorWindow::generateTitle() const
 
 void _InspectorWindow::processCell(CellDescription cell)
 {
-    if (ImGui::BeginTabBar(
-            "##CellInspect", /*ImGuiTabBarFlags_AutoSelectNewTabs | */ImGuiTabBarFlags_FittingPolicyResizeDown)) {
+    if (ImGui::BeginTabBar("##CellInspect", /*ImGuiTabBarFlags_AutoSelectNewTabs | */ ImGuiTabBarFlags_FittingPolicyResizeDown)) {
         auto origCell = cell;
         processCellGeneralTab(cell);
         processCellTypeTab(cell);
@@ -154,40 +139,44 @@ void _InspectorWindow::processCellGeneralTab(CellDescription& cell)
                 ss << "0x" << std::hex << std::uppercase << cell._id;
                 auto cellId = ss.str();
 
-                AlienImGui::ComboColor(
-                    AlienImGui::ComboColorParameters().name("Color").textWidth(BaseTabTextWidth).tooltip(Const::GenomeColorTooltip), cell._color);
-                AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(BaseTabTextWidth).tooltip(Const::CellEnergyTooltip),
-                    cell._energy);
-                AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Age").textWidth(BaseTabTextWidth).tooltip(Const::CellAgeTooltip), cell._age);
-                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Position X").format("%.2f").textWidth(BaseTabTextWidth), cell._pos.x);
-                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Position Y").format("%.2f").textWidth(BaseTabTextWidth), cell._pos.y);
-                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Velocity X").format("%.2f").textWidth(BaseTabTextWidth), cell._vel.x);
-                AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Velocity Y").format("%.2f").textWidth(BaseTabTextWidth), cell._vel.y);
-                AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(BaseTabTextWidth).tooltip(Const::CellStiffnessTooltip),
+                AlienGui::ComboColor(
+                    AlienGui::ComboColorParameters().name("Color").textWidth(BaseTabTextWidth).tooltip(Const::GenomeColorTooltip), cell._color);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(BaseTabTextWidth).tooltip(Const::CellEnergyTooltip), cell._energy);
+                AlienGui::InputInt(AlienGui::InputIntParameters().name("Age").textWidth(BaseTabTextWidth).tooltip(Const::CellAgeTooltip), cell._age);
+                AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Position X").format("%.2f").textWidth(BaseTabTextWidth), cell._pos.x);
+                AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Position Y").format("%.2f").textWidth(BaseTabTextWidth), cell._pos.y);
+                AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Velocity X").format("%.2f").textWidth(BaseTabTextWidth), cell._vel.x);
+                AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Velocity Y").format("%.2f").textWidth(BaseTabTextWidth), cell._vel.y);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters()
+                        .name("Stiffness")
+                        .format("%.2f")
+                        .step(0.05f)
+                        .textWidth(BaseTabTextWidth)
+                        .tooltip(Const::CellStiffnessTooltip),
                     cell._stiffness);
-                AlienImGui::Checkbox(
-                    AlienImGui::CheckboxParameters().name("Sticky").textWidth(BaseTabTextWidth).tooltip(Const::CellIndestructibleTooltip),
-                    cell._sticky);
-                AlienImGui::Checkbox(
-                    AlienImGui::CheckboxParameters().name("Indestructible wall").textWidth(BaseTabTextWidth).tooltip(Const::CellIndestructibleTooltip), cell._barrier);
-                AlienImGui::InputText(
-                    AlienImGui::InputTextParameters().name("Cell id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true), cellId);
-                AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters().name("TEMP: abs angle to conn0").format("%.1f").textWidth(BaseTabTextWidth), cell._angleToFront);
+                AlienGui::Checkbox(
+                    AlienGui::CheckboxParameters().name("Sticky").textWidth(BaseTabTextWidth).tooltip(Const::CellIndestructibleTooltip), cell._sticky);
+                AlienGui::Checkbox(
+                    AlienGui::CheckboxParameters().name("Indestructible wall").textWidth(BaseTabTextWidth).tooltip(Const::CellIndestructibleTooltip),
+                    cell._barrier);
+                AlienGui::InputText(
+                    AlienGui::InputTextParameters().name("Cell id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true), cellId);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("TEMP: abs angle to conn0").format("%.1f").textWidth(BaseTabTextWidth), cell._angleToFront);
                 ImGui::TreePop();
             }
 
             if (ImGui::TreeNodeEx("Signal routing", TreeNodeFlags)) {
-                AlienImGui::Checkbox(
-                    AlienImGui::CheckboxParameters().name("Signal routing restriction").textWidth(BaseTabTextWidth), cell._signalRoutingRestriction._active);
+                AlienGui::Checkbox(
+                    AlienGui::CheckboxParameters().name("Signal routing restriction").textWidth(BaseTabTextWidth), cell._signalRoutingRestriction._active);
                 if (cell._signalRoutingRestriction._active) {
-                    AlienImGui::InputFloat(
-                        AlienImGui::InputFloatParameters().name("Signal base angle").format("%.1f").step(2.0f).textWidth(BaseTabTextWidth),
+                    AlienGui::InputFloat(
+                        AlienGui::InputFloatParameters().name("Signal base angle").format("%.1f").step(2.0f).textWidth(BaseTabTextWidth),
                         cell._signalRoutingRestriction._baseAngle);
-                    AlienImGui::InputFloat(
-                        AlienImGui::InputFloatParameters().name("Signal opening angle").format("%.1f").step(2.0f).textWidth(BaseTabTextWidth),
+                    AlienGui::InputFloat(
+                        AlienGui::InputFloatParameters().name("Signal opening angle").format("%.1f").step(2.0f).textWidth(BaseTabTextWidth),
                         cell._signalRoutingRestriction._openingAngle);
                 }
                 ImGui::TreePop();
@@ -197,12 +186,12 @@ void _InspectorWindow::processCellGeneralTab(CellDescription& cell)
                 std::stringstream ss;
                 ss << "0x" << std::hex << std::uppercase << cell._creatureId;
                 auto creatureId = ss.str();
-                AlienImGui::InputText(
-                    AlienImGui::InputTextParameters().name("Creature id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true), creatureId);
-                AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters().name("Mutation id").textWidth(BaseTabTextWidth).tooltip(Const::CellMutationIdTooltip), cell._mutationId);
-                AlienImGui::InputFloat(
-                    AlienImGui::InputFloatParameters().name("Genome complexity").textWidth(BaseTabTextWidth).tooltip(Const::GenomeComplexityTooltip),
+                AlienGui::InputText(
+                    AlienGui::InputTextParameters().name("Creature id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true), creatureId);
+                AlienGui::InputInt(
+                    AlienGui::InputIntParameters().name("Mutation id").textWidth(BaseTabTextWidth).tooltip(Const::CellMutationIdTooltip), cell._mutationId);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Genome complexity").textWidth(BaseTabTextWidth).tooltip(Const::GenomeComplexityTooltip),
                     cell._genomeComplexity);
 
                 ImGui::TreePop();
@@ -214,19 +203,18 @@ void _InspectorWindow::processCellGeneralTab(CellDescription& cell)
                         ss << "0x" << std::hex << std::uppercase << connection._cellId;
                         auto cellId = ss.str();
 
-                        AlienImGui::InputText(
-                            AlienImGui::InputTextParameters().name("Cell id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true),
-                            cellId);
-                        AlienImGui::InputFloat(
-                            AlienImGui::InputFloatParameters()
+                        AlienGui::InputText(
+                            AlienGui::InputTextParameters().name("Cell id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true), cellId);
+                        AlienGui::InputFloat(
+                            AlienGui::InputFloatParameters()
                                 .name("Reference distance")
                                 .format("%.2f")
                                 .textWidth(BaseTabTextWidth)
                                 .readOnly(true)
                                 .tooltip(Const::CellReferenceDistanceTooltip),
                             connection._distance);
-                        AlienImGui::InputFloat(
-                            AlienImGui::InputFloatParameters()
+                        AlienGui::InputFloat(
+                            AlienGui::InputFloatParameters()
                                 .name("Reference angle")
                                 .format("%.2f")
                                 .textWidth(BaseTabTextWidth)
@@ -255,8 +243,8 @@ void _InspectorWindow::processCellTypeTab(CellDescription& cell)
             }
 
             if (ImGui::TreeNodeEx("Properties###type", TreeNodeFlags)) {
-                if (AlienImGui::CellTypeCombo(
-                        AlienImGui::CellTypeComboParameters()
+                if (AlienGui::CellTypeCombo(
+                        AlienGui::CellTypeComboParameters()
                             .name("Function")
                             .textWidth(CellTypeBaseTabTextWidth)
                             .includeStructureAndFreeCells(true)
@@ -305,14 +293,14 @@ void _InspectorWindow::processCellTypeTab(CellDescription& cell)
                     }
                 }
 
-                AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters()
+                AlienGui::InputInt(
+                    AlienGui::InputIntParameters()
                         .name("Activation time")
                         .textWidth(CellTypeBaseTabTextWidth)
                         .tooltip(Const::GenomeConstructorOffspringActivationTime),
                     cell._activationTime);
-                AlienImGui::Combo(
-                    AlienImGui::ComboParameters()
+                AlienGui::Combo(
+                    AlienGui::ComboParameters()
                         .name("Living state")
                         .textWidth(CellTypeBaseTabTextWidth)
                         .values({"Ready", "Under construction", "Activating", "Detached", "Reviving", "Dying"})
@@ -325,8 +313,8 @@ void _InspectorWindow::processCellTypeTab(CellDescription& cell)
             if (ImGui::TreeNodeEx("Signals", TreeNodeFlags)) {
                 int index = 0;
                 for (auto& channel : cell._signal->_channels) {
-                    AlienImGui::InputFloat(
-                        AlienImGui::InputFloatParameters().name("Channel #" + std::to_string(index)).format("%.3f").step(0.1f).textWidth(SignalTextWidth),
+                    AlienGui::InputFloat(
+                        AlienGui::InputFloatParameters().name("Channel #" + std::to_string(index)).format("%.3f").step(0.1f).textWidth(SignalTextWidth),
                         channel);
                     ++index;
                 }
@@ -402,21 +390,21 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
             auto previewNodeResult = ImGui::TreeNodeEx("Preview (reference configuration)", TreeNodeFlags);
-            AlienImGui::HelpMarker(Const::GenomePreviewTooltip);
+            AlienGui::HelpMarker(Const::GenomePreviewTooltip);
             if (previewNodeResult) {
                 if (ImGui::BeginChild("##child", ImVec2(0, scale(200)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
                     auto genomDesc = GenomeDescriptionConverterService::get().convertBytesToDescription(desc._genome);
                     auto previewDesc = PreviewDescriptionService::get().convert(genomDesc, std::nullopt, parameters);
                     std::optional<int> selectedNodeDummy;
-                    AlienImGui::ShowPreviewDescription(previewDesc, _genomeZoom, selectedNodeDummy);
+                    AlienGui::ShowPreviewDescription(previewDesc, _genomeZoom, selectedNodeDummy);
                 }
                 ImGui::EndChild();
-                if (AlienImGui::Button("Edit")) {
+                if (AlienGui::Button("Edit")) {
                     GenomeEditorWindow::get().openTab(GenomeDescriptionConverterService::get().convertBytesToDescription(desc._genome));
                 }
 
                 ImGui::SameLine();
-                if (AlienImGui::Button(AlienImGui::ButtonParameters().buttonText("Inject from editor").textWidth(ImGui::GetContentRegionAvail().x))) {
+                if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Inject from editor").textWidth(ImGui::GetContentRegionAvail().x))) {
                     printOverlayMessage("Genome injected");
                     desc._genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeEditorWindow::get().getCurrentGenome());
                     if constexpr (std::is_same<Description, ConstructorDescription>()) {
@@ -429,8 +417,8 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
 
             if (ImGui::TreeNodeEx("Properties (entire genome)", TreeNodeFlags)) {
                 auto numNodes = toInt(GenomeDescriptionConverterService::get().getNumNodesRecursively(desc._genome, true));
-                AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters()
+                AlienGui::InputInt(
+                    AlienGui::InputIntParameters()
                         .name("Number of cells")
                         .textWidth(GenomeTabTextWidth)
                         .readOnly(true)
@@ -438,16 +426,11 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                     numNodes);
 
                 auto numBytes = toInt(desc._genome.size());
-                AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters()
-                        .name("Bytes")
-                        .textWidth(GenomeTabTextWidth)
-                        .readOnly(true)
-                        .tooltip(Const::GenomeBytesTooltip),
-                    numBytes);
+                AlienGui::InputInt(
+                    AlienGui::InputIntParameters().name("Bytes").textWidth(GenomeTabTextWidth).readOnly(true).tooltip(Const::GenomeBytesTooltip), numBytes);
 
-                AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters().name("Generation").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeGenerationTooltip),
+                AlienGui::InputInt(
+                    AlienGui::InputIntParameters().name("Generation").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeGenerationTooltip),
                     desc._genomeGeneration);
                 ImGui::TreePop();
             }
@@ -456,8 +439,8 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
 
                 auto genomeDesc = GenomeDescriptionConverterService::get().convertBytesToDescription(desc._genome);
                 auto numBranches = genomeDesc._header.getNumBranches();
-                AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters()
+                AlienGui::InputInt(
+                    AlienGui::InputIntParameters()
                         .name("Number of branches")
                         .textWidth(GenomeTabTextWidth)
                         .readOnly(true)
@@ -465,8 +448,8 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                     numBranches);
 
                 auto numRepetitions = genomeDesc._header._numRepetitions;
-                AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters()
+                AlienGui::InputInt(
+                    AlienGui::InputIntParameters()
                         .name("Repetitions per branch")
                         .textWidth(GenomeTabTextWidth)
                         .infinity(true)
@@ -475,8 +458,8 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                     numRepetitions);
 
                 auto numNodes = toInt(genomeDesc._cells.size());
-                AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters()
+                AlienGui::InputInt(
+                    AlienGui::InputIntParameters()
                         .name("Cells per repetition")
                         .textWidth(GenomeTabTextWidth)
                         .readOnly(true)
@@ -484,19 +467,17 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                     numNodes);
 
                 if constexpr (std::is_same<Description, ConstructorDescription>()) {
-                    AlienImGui::InputInt(
-                        AlienImGui::InputIntParameters()
-                            .name("Current branch index")
-                            .textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentBranchTooltip),
+                    AlienGui::InputInt(
+                        AlienGui::InputIntParameters().name("Current branch index").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentBranchTooltip),
                         desc._genomeCurrentBranch);
-                    AlienImGui::InputInt(
-                        AlienImGui::InputIntParameters()
+                    AlienGui::InputInt(
+                        AlienGui::InputIntParameters()
                             .name("Current repetition index")
                             .textWidth(GenomeTabTextWidth)
                             .tooltip(Const::GenomeCurrentRepetitionTooltip),
                         desc._genomeCurrentRepetition);
-                    AlienImGui::InputInt(
-                        AlienImGui::InputIntParameters().name("Current cell index").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentCellTooltip),
+                    AlienGui::InputInt(
+                        AlienGui::InputIntParameters().name("Current cell index").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentCellTooltip),
                         desc._genomeCurrentNodeIndex);
                 }
                 ImGui::TreePop();
@@ -511,9 +492,9 @@ void _InspectorWindow::processCellMetadataTab(CellDescription& cell)
 {
     if (ImGui::BeginTabItem("Annotation", nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, 0)) {
-            AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Name").textWidth(0), cell._metadata._name);
+            AlienGui::InputText(AlienGui::InputTextParameters().hint("Name").textWidth(0), cell._metadata._name);
 
-            AlienImGui::InputTextMultiline(AlienImGui::InputTextMultilineParameters().hint("Notes").textWidth(0).height(100), cell._metadata._description);
+            AlienGui::InputTextMultiline(AlienGui::InputTextMultilineParameters().hint("Notes").textWidth(0).height(100), cell._metadata._description);
         }
         ImGui::EndChild();
         ImGui::EndTabItem();
@@ -524,16 +505,18 @@ void _InspectorWindow::processOscillatorContent(OscillatorDescription& oscillato
 {
     if (ImGui::TreeNodeEx("Properties###oscillator", TreeNodeFlags)) {
 
-        AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Pulse interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeOscillatorPulseIntervalTooltip), oscillator._autoTriggerInterval);
+        AlienGui::InputInt(
+            AlienGui::InputIntParameters().name("Pulse interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeOscillatorPulseIntervalTooltip),
+            oscillator._autoTriggerInterval);
         bool alternation = oscillator._alternationInterval > 0;
-        if (AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters().name("Alternating pulses").textWidth(CellTypeTextWidth).tooltip(Const::GenomeOscillatorAlternatingPulsesTooltip),
+        if (AlienGui::Checkbox(
+                AlienGui::CheckboxParameters().name("Alternating pulses").textWidth(CellTypeTextWidth).tooltip(Const::GenomeOscillatorAlternatingPulsesTooltip),
                 alternation)) {
             oscillator._alternationInterval = alternation ? 1 : 0;
         }
         if (alternation) {
-            AlienImGui::InputInt(
-                AlienImGui::InputIntParameters().name("Pulses per phase").textWidth(CellTypeTextWidth).tooltip(Const::GenomeOscillatorPulsesPerPhaseTooltip),
+            AlienGui::InputInt(
+                AlienGui::InputIntParameters().name("Pulses per phase").textWidth(CellTypeTextWidth).tooltip(Const::GenomeOscillatorPulsesPerPhaseTooltip),
                 oscillator._alternationInterval);
         }
         ImGui::TreePop();
@@ -543,8 +526,8 @@ void _InspectorWindow::processOscillatorContent(OscillatorDescription& oscillato
 void _InspectorWindow::processNeuronContent(CellDescription& cell)
 {
     if (ImGui::TreeNodeEx("Neural network", TreeNodeFlags)) {
-        AlienImGui::NeuronSelection(
-            AlienImGui::NeuronSelectionParameters().rightMargin(0),
+        AlienGui::NeuronSelection(
+            AlienGui::NeuronSelectionParameters().rightMargin(0),
             cell._neuralNetwork->_weights,
             cell._neuralNetwork->_biases,
             cell._neuralNetwork->_activationFunctions);
@@ -556,8 +539,8 @@ void _InspectorWindow::processConstructorContent(ConstructorDescription& constru
 {
     if (ImGui::TreeNodeEx("Properties###constructor", TreeNodeFlags)) {
         int constructorMode = constructor._autoTriggerInterval == 0 ? 0 : 1;
-        if (AlienImGui::Combo(
-                AlienImGui::ComboParameters()
+        if (AlienGui::Combo(
+                AlienGui::ComboParameters()
                     .name("Activation mode")
                     .textWidth(CellTypeTextWidth)
                     .values({"Manual", "Automatic"})
@@ -566,42 +549,40 @@ void _InspectorWindow::processConstructorContent(ConstructorDescription& constru
             constructor._autoTriggerInterval = constructorMode;
         }
         if (constructorMode == 1) {
-            AlienImGui::InputInt(
-                AlienImGui::InputIntParameters().name("Interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip),
+            AlienGui::InputInt(
+                AlienGui::InputIntParameters().name("Interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip),
                 constructor._autoTriggerInterval);
             constructor._autoTriggerInterval = std::max(1, constructor._autoTriggerInterval);
-
         }
-        AlienImGui::InputInt(
-            AlienImGui::InputIntParameters()
+        AlienGui::InputInt(
+            AlienGui::InputIntParameters()
                 .name("Offspring activation time")
                 .textWidth(CellTypeTextWidth)
                 .tooltip(Const::GenomeConstructorOffspringActivationTime),
             constructor._constructionActivationTime);
-        AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters()
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters()
                 .name("Construction angle #1")
                 .textWidth(CellTypeTextWidth)
                 .format("%.1f")
                 .tooltip(Const::GenomeConstructorAngle1Tooltip),
             constructor._constructionAngle1);
-        AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters()
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters()
                 .name("Construction angle #2")
                 .textWidth(CellTypeTextWidth)
                 .format("%.1f")
                 .tooltip(Const::GenomeConstructorAngle2Tooltip),
             constructor._constructionAngle2);
         ImGui::TreePop();
-
     }
 }
 
 void _InspectorWindow::processInjectorContent(InjectorDescription& injector)
 {
     if (ImGui::TreeNodeEx("Properties###injector", TreeNodeFlags)) {
-        AlienImGui::Combo(
-            AlienImGui::ComboParameters()
+        AlienGui::Combo(
+            AlienGui::ComboParameters()
                 .name("Mode")
                 .textWidth(CellTypeTextWidth)
                 .values({"Only empty cells", "All cells"})
@@ -610,8 +591,8 @@ void _InspectorWindow::processInjectorContent(InjectorDescription& injector)
         ImGui::TreePop();
     }
     if (ImGui::TreeNodeEx("Process data", TreeNodeFlags)) {
-        AlienImGui::InputInt(
-            AlienImGui::InputIntParameters().name("Counter").textWidth(CellTypeTextWidth).tooltip(Const::CellInjectorCounterTooltip), injector._counter);
+        AlienGui::InputInt(
+            AlienGui::InputIntParameters().name("Counter").textWidth(CellTypeTextWidth).tooltip(Const::CellInjectorCounterTooltip), injector._counter);
         ImGui::TreePop();
     }
 }
@@ -626,8 +607,8 @@ void _InspectorWindow::processAttackerContent(AttackerDescription& attacker)
 void _InspectorWindow::processDefenderContent(DefenderDescription& defender)
 {
     if (ImGui::TreeNodeEx("Properties###defender", TreeNodeFlags)) {
-        AlienImGui::Combo(
-            AlienImGui::ComboParameters()
+        AlienGui::Combo(
+            AlienGui::ComboParameters()
                 .name("Mode")
                 .values({"Anti-attacker", "Anti-injector"})
                 .textWidth(CellTypeDefenderWidth)
@@ -640,8 +621,8 @@ void _InspectorWindow::processDefenderContent(DefenderDescription& defender)
 void _InspectorWindow::processTransmitterContent(DepotDescription& transmitter)
 {
     if (ImGui::TreeNodeEx("Properties###transmitter", TreeNodeFlags)) {
-        AlienImGui::Combo(
-            AlienImGui::ComboParameters()
+        AlienGui::Combo(
+            AlienGui::ComboParameters()
                 .name("Energy distribution")
                 .values({"Connected cells", "Transmitters and Constructors"})
                 .tooltip(Const::GenomeTransmitterEnergyDistributionTooltip)
@@ -669,8 +650,8 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
 {
     if (ImGui::TreeNodeEx("Properties###sensor", TreeNodeFlags)) {
         int constructorMode = sensor._autoTriggerInterval == 0 ? 0 : 1;
-        if (AlienImGui::Combo(
-                AlienImGui::ComboParameters()
+        if (AlienGui::Combo(
+                AlienGui::ComboParameters()
                     .name("Activation mode")
                     .textWidth(CellTypeTextWidth)
                     .values({"Manual", "Automatic"})
@@ -679,34 +660,35 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
             sensor._autoTriggerInterval = constructorMode;
         }
         if (constructorMode == 1) {
-            AlienImGui::InputInt(
-                AlienImGui::InputIntParameters().name("Interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip),
+            AlienGui::InputInt(
+                AlienGui::InputIntParameters().name("Interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip),
                 sensor._autoTriggerInterval);
             sensor._autoTriggerInterval = std::max(1, sensor._autoTriggerInterval);
         }
 
-        AlienImGui::ComboOptionalColor(
-            AlienImGui::ComboColorParameters().name("Scan color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeSensorScanColorTooltip), sensor._restrictToColor);
+        AlienGui::ComboOptionalColor(
+            AlienGui::ComboColorParameters().name("Scan color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeSensorScanColorTooltip),
+            sensor._restrictToColor);
 
-        AlienImGui::Combo(
-            AlienImGui::ComboParameters()
+        AlienGui::Combo(
+            AlienGui::ComboParameters()
                 .name("Scan mutants")
                 .values({"None", "Same mutants", "Other mutants", "Free cells", "Handcrafted cells", "Less complex mutants", "More complex mutants"})
                 .textWidth(CellTypeTextWidth)
                 .tooltip(Const::SensorRestrictToMutantsTooltip),
             sensor._restrictToMutants);
-        AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters()
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters()
                 .name("Min density")
                 .format("%.2f")
                 .step(0.05f)
                 .textWidth(CellTypeTextWidth)
                 .tooltip(Const::GenomeSensorMinDensityTooltip),
             sensor._minDensity);
-        AlienImGui::InputOptionalInt(
-            AlienImGui::InputIntParameters().name("Min range").textWidth(CellTypeTextWidth).tooltip(Const::GenomeSensorMinRangeTooltip), sensor._minRange);
-        AlienImGui::InputOptionalInt(
-            AlienImGui::InputIntParameters().name("Max range").textWidth(CellTypeTextWidth).tooltip(Const::GenomeSensorMaxRangeTooltip), sensor._maxRange);
+        AlienGui::InputOptionalInt(
+            AlienGui::InputIntParameters().name("Min range").textWidth(CellTypeTextWidth).tooltip(Const::GenomeSensorMinRangeTooltip), sensor._minRange);
+        AlienGui::InputOptionalInt(
+            AlienGui::InputIntParameters().name("Max range").textWidth(CellTypeTextWidth).tooltip(Const::GenomeSensorMaxRangeTooltip), sensor._maxRange);
         ImGui::TreePop();
     }
 }
@@ -714,11 +696,11 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
 void _InspectorWindow::processReconnectorContent(ReconnectorDescription& reconnector)
 {
     if (ImGui::TreeNodeEx("Properties###reconnector", TreeNodeFlags)) {
-        AlienImGui::ComboOptionalColor(
-            AlienImGui::ComboColorParameters().name("Restrict to color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeReconnectorRestrictToColorTooltip),
+        AlienGui::ComboOptionalColor(
+            AlienGui::ComboColorParameters().name("Restrict to color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeReconnectorRestrictToColorTooltip),
             reconnector._restrictToColor);
-        AlienImGui::Combo(
-            AlienImGui::ComboParameters()
+        AlienGui::Combo(
+            AlienGui::ComboParameters()
                 .name("Restrict to mutants")
                 .values({"None", "Same mutants", "Other mutants", "Free cells", "Handcrafted cells", "Less complex mutants", "More complex mutants"})
                 .textWidth(CellTypeTextWidth)
@@ -732,16 +714,16 @@ void _InspectorWindow::processReconnectorContent(ReconnectorDescription& reconne
 void _InspectorWindow::processDetonatorContent(DetonatorDescription& detonator)
 {
     if (ImGui::TreeNodeEx("Properties###detonator", TreeNodeFlags)) {
-        AlienImGui::Combo(
-            AlienImGui::ComboParameters()
+        AlienGui::Combo(
+            AlienGui::ComboParameters()
                 .name("State")
                 .values({"Ready", "Activated", "Exploded"})
                 .textWidth(CellTypeTextWidth)
                 .tooltip(Const::DetonatorStateTooltip),
             detonator._state);
 
-        AlienImGui::InputInt(
-            AlienImGui::InputIntParameters().name("Countdown").textWidth(CellTypeTextWidth).tooltip(Const::GenomeDetonatorCountdownTooltip),
+        AlienGui::InputInt(
+            AlienGui::InputIntParameters().name("Countdown").textWidth(CellTypeTextWidth).tooltip(Const::GenomeDetonatorCountdownTooltip),
             detonator._countdown);
         ImGui::TreePop();
     }
@@ -751,7 +733,7 @@ void _InspectorWindow::processParticle(ParticleDescription particle)
 {
     auto origParticle = particle;
     auto energy = toFloat(particle._energy);
-    AlienImGui::InputFloat(AlienImGui::InputFloatParameters().name("Energy").textWidth(ParticleContentTextWidth), energy);
+    AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Energy").textWidth(ParticleContentTextWidth), energy);
 
     particle._energy = energy;
     if (particle != origParticle) {

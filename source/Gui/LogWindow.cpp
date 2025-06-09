@@ -8,7 +8,7 @@
 
 #include "StyleRepository.h"
 #include "GuiLogger.h"
-#include "AlienImGui.h"
+#include "AlienGui.h"
 
 void LogWindow::initIntern(GuiLogger logger)
 {
@@ -43,5 +43,5 @@ void LogWindow::processIntern()
 
     ImGui::Spacing();
     ImGui::Spacing();
-    AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Verbose"), _verbose);
+    AlienGui::ToggleButton(AlienGui::ToggleButtonParameters().name("Verbose"), _verbose);
 }

@@ -11,7 +11,7 @@
 #include "EngineInterface/SpecificationEvaluationService.h"
 
 #include "SimulationInteractionController.h"
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "StyleRepository.h"
 
 namespace
@@ -41,11 +41,11 @@ void SpecificationGuiService::createWidgetsForParameters(
             name = "Expert settings: " + name;
         }
         ImGui::PushID(name.c_str());
-        if (AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name(name).visible(isGroupVisibleActive).blinkWhenActivated(isExpertSettings))) {
+        if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).visible(isGroupVisibleActive).blinkWhenActivated(isExpertSettings))) {
             createWidgetsForParameterGroup(groupSpec._parameters, true, parameters, origParameters, simulationFacade, orderNumber);
         }
         ImGui::PopID();
-        AlienImGui::EndTreeNode();
+        AlienGui::EndTreeNode();
     }
 }
 
@@ -58,8 +58,8 @@ void SpecificationGuiService::createWidgetsForExpertToggles(SimulationParameters
         if (groupSpec._expertToggle) {
             auto expertToggleValue = evaluationService.getExpertToggleRef(groupSpec._expertToggle, parameters);
             auto origExpertToggleValue = evaluationService.getExpertToggleRef(groupSpec._expertToggle, origParameters);
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters()
+            AlienGui::Checkbox(
+                AlienGui::CheckboxParameters()
                     .name(groupSpec._name)
                     .textWidth(0)
                     .defaultValue(*origExpertToggleValue).tooltip(groupSpec._description),
@@ -137,8 +137,8 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
     auto origRef = evaluationService.getRef(boolSpec._member, origParameters, orderNumber);
     if (ref.colorDependence == ColorDependence::ColorMatrix) {
 
-        AlienImGui::CheckboxColorMatrix(
-            AlienImGui::CheckboxColorMatrixParameters()
+        AlienGui::CheckboxColorMatrix(
+            AlienGui::CheckboxColorMatrixParameters()
                 .name(parameterSpec._name)
                 .textWidth(RightColumnWidth)
                 .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(origRef.value)))
@@ -146,8 +146,8 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
             *reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(ref.value));
 
     } else {
-        AlienImGui::Checkbox(
-            AlienImGui::CheckboxParameters()
+        AlienGui::Checkbox(
+            AlienGui::CheckboxParameters()
                 .name(parameterSpec._name)
                 .textWidth(RightColumnWidth)
                 .defaultValue(*origRef.value)
@@ -172,8 +172,8 @@ void SpecificationGuiService::createWidgetsForIntSpec(
         evaluationService.getRef(intSpec._member, origParameters, orderNumber);
 
     if (valueType == ColorDependence::ColorMatrix) {
-        AlienImGui::InputIntColorMatrix(
-            AlienImGui::InputIntColorMatrixParameters()
+        AlienGui::InputIntColorMatrix(
+            AlienGui::InputIntColorMatrixParameters()
                 .name(parameterSpec._name)
                 .max(intSpec._min)
                 .max(intSpec._max)
@@ -184,8 +184,8 @@ void SpecificationGuiService::createWidgetsForIntSpec(
             *reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(value));
 
     } else {
-        AlienImGui::SliderInt(
-            AlienImGui::SliderIntParameters()
+        AlienGui::SliderInt(
+            AlienGui::SliderIntParameters()
                 .name(parameterSpec._name)
                 .textWidth(RightColumnWidth)
                 .min(intSpec._min)
@@ -228,8 +228,8 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
     }();
 
     if (valueType == ColorDependence::ColorMatrix) {
-        AlienImGui::InputFloatColorMatrix(
-            AlienImGui::InputFloatColorMatrixParameters()
+        AlienGui::InputFloatColorMatrix(
+            AlienGui::InputFloatColorMatrixParameters()
                 .name(parameterSpec._name)
                 .min(min)
                 .max(max)
@@ -255,8 +255,8 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
             origValue = &tempOrigValue;
         }
 
-        if (AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
+        if (AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters()
                     .name(parameterSpec._name)
                     .textWidth(RightColumnWidth)
                     .min(min)
@@ -310,8 +310,8 @@ void SpecificationGuiService::createWidgetsForFloat2Spec(
     auto setMousePickerEnabledFunc = [&](bool value) { SimulationInteractionController::get().setPositionSelectionMode(value); };
     auto getMousePickerPositionFunc = [&]() { return SimulationInteractionController::get().getPositionSelectionData(); };
 
-    AlienImGui::SliderFloat2(
-        AlienImGui::SliderFloat2Parameters()
+    AlienGui::SliderFloat2(
+        AlienGui::SliderFloat2Parameters()
             .name(parameterSpec._name)
             .textWidth(RightColumnWidth)
             .min(min)
@@ -340,8 +340,8 @@ void SpecificationGuiService::createWidgetsForChar64Spec(
     auto [origValue, origDisabledValue, origEnabledValue, origPinnedValue, origValueType] =
         evaluationService.getRef(char64Spec._member, origParameters, orderNumber);
 
-    AlienImGui::InputText(
-        AlienImGui::InputTextParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue).tooltip(parameterSpec._description),
+    AlienGui::InputText(
+        AlienGui::InputTextParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue).tooltip(parameterSpec._description),
         *value,
         sizeof(Char64) / sizeof(char));
 }
@@ -366,8 +366,8 @@ void SpecificationGuiService::createWidgetsForAlternativeSpec(
     for (auto const& name : alternativeSpec._alternatives | std::views::keys) {
         values.emplace_back(name);
     }
-    AlienImGui::Switcher(
-        AlienImGui::SwitcherParameters()
+    AlienGui::Switcher(
+        AlienGui::SwitcherParameters()
             .name(parameterSpec._name)
             .textWidth(RightColumnWidth)
             .defaultValue(*origValue)
@@ -409,8 +409,8 @@ void SpecificationGuiService::createWidgetsForColorPickerSpec(
     auto [origValue, origDisabledValue, origEnabledValue, origPinnedValue, origValueType] =
         evaluationService.getRef(colorPickerSpec._member, origParameters, orderNumber);
    
-    AlienImGui::ColorButtonWithPicker(
-        AlienImGui::ColorButtonWithPickerParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue), *value);
+    AlienGui::ColorButtonWithPicker(
+        AlienGui::ColorButtonWithPickerParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue), *value);
 }
 
 void SpecificationGuiService::createWidgetsForColorTransitionRulesSpec(
@@ -429,7 +429,7 @@ void SpecificationGuiService::createWidgetsForColorTransitionRulesSpec(
 
     for (int color = 0; color < MAX_COLORS; ++color) {
         ImGui::PushID(color);
-        auto widgetParameters = AlienImGui::InputColorTransitionParameters()
+        auto widgetParameters = AlienGui::InputColorTransitionParameters()
                                     .textWidth(RightColumnWidth)
                                     .color(color)
                                     .defaultTargetColor(origValue[color].targetColor)
@@ -439,7 +439,7 @@ void SpecificationGuiService::createWidgetsForColorTransitionRulesSpec(
         if (0 == color) {
             widgetParameters.name(parameterSpec._name).tooltip(parameterSpec._description);
         }
-        AlienImGui::InputColorTransition(widgetParameters, color, value[color].targetColor, value[color].duration);
+        AlienGui::InputColorTransition(widgetParameters, color, value[color].targetColor, value[color].duration);
         ImGui::PopID();
     }
 }

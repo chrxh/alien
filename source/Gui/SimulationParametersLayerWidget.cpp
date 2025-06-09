@@ -4,7 +4,7 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/ParametersValidationService.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "SpecificationGuiService.h"
 #include "SimulationInteractionController.h"
 

@@ -8,7 +8,7 @@
 #include "EngineInterface/SimulationParametersUpdateConfig.h"
 #include "EngineInterface/ParametersValidationService.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "SpecificationGuiService.h"
 
 void _SimulationParametersBaseWidget::init(SimulationFacade const& simulationFacade)

@@ -5,7 +5,7 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "Network/NetworkService.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "GenericMessageDialog.h"
 #include "BrowserWindow.h"
 #include "CreateUserDialog.h"
@@ -30,17 +30,17 @@ ActivateUserDialog::ActivateUserDialog()
 
 void ActivateUserDialog::processIntern()
 {
-    AlienImGui::Text("Please enter the confirmation code sent to your email address.");
-    AlienImGui::HelpMarker(
+    AlienGui::Text("Please enter the confirmation code sent to your email address.");
+    AlienGui::HelpMarker(
         "Please check your spam folder if you did not find an email. If you did not receive an email there, try signing up with possibly another "
         "email address. If this still does not work, please contact info@alien-project.org.");
-    AlienImGui::Separator();
-    AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Code (case sensitive)").textWidth(0), _confirmationCode);
+    AlienGui::Separator();
+    AlienGui::InputText(AlienGui::InputTextParameters().hint("Code (case sensitive)").textWidth(0), _confirmationCode);
 
-    AlienImGui::Separator();
+    AlienGui::Separator();
 
     ImGui::BeginDisabled(_confirmationCode.empty());
-    if (AlienImGui::Button("OK")) {
+    if (AlienGui::Button("OK")) {
         close();
         onActivateUser();
     }
@@ -48,24 +48,24 @@ void ActivateUserDialog::processIntern()
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
-    AlienImGui::VerticalSeparator();
+    AlienGui::VerticalSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::Button("Resend")) {
+    if (AlienGui::Button("Resend")) {
         CreateUserDialog::get().onCreateUser();
     }
 
     ImGui::SameLine();
-    if (AlienImGui::Button("Resend to other email address")) {
+    if (AlienGui::Button("Resend to other email address")) {
         close();
         CreateUserDialog::get().open(_userName, _password, _userInfo);
     }
 
     ImGui::SameLine();
-    AlienImGui::VerticalSeparator();
+    AlienGui::VerticalSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::Button("Cancel")) {
+    if (AlienGui::Button("Cancel")) {
         close();
     }
 }

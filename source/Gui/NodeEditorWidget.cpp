@@ -1,6 +1,6 @@
 #include "NodeEditorWidget.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "CreatureTabEditData.h"
 #include "LoginDialog.h"
 
@@ -29,16 +29,16 @@ _NodeEditorWidget::_NodeEditorWidget(CreatureTabEditData const& editData, Creatu
 
 void _NodeEditorWidget::processNodeAttributes()
 {
-    AlienImGui::Group("Selected node");
+    AlienGui::Group("Selected node");
 }
 
 void _NodeEditorWidget::processNoSelection()
 {
-    AlienImGui::Group("Selected node");
+    AlienGui::Group("Selected node");
     if (ImGui::BeginChild("overlay", ImVec2(0, 0), 0)) {
         auto startPos = ImGui::GetCursorScreenPos();
         auto size = ImGui::GetContentRegionAvail();
-        AlienImGui::DisabledField();
+        AlienGui::DisabledField();
         auto text = "No node is selected";
         auto textSize = ImGui::CalcTextSize(text);
         ImVec2 textPos(startPos.x + size.x / 2 - textSize.x / 2, startPos.y + size.y / 2 - textSize.y / 2);

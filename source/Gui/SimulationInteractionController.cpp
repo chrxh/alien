@@ -10,7 +10,7 @@
 #include "EditorController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "EditorModel.h"
 #include "SimulationView.h"
 #include "CreatorWindow.h"
@@ -394,7 +394,7 @@ void SimulationInteractionController::drawCursor()
             auto radius = EditorModel::get().getPencilWidth() * zoom;
             auto color = Const::IndividualCellColors[EditorModel::get().getDefaultColorCode()];
             float h, s, v;
-            AlienImGui::ConvertRGBtoHSV(color, h, s, v);
+            AlienGui::ConvertRGBtoHSV(color, h, s, v);
             drawList->AddCircleFilled(mousePos, radius, ImColor::HSV(h, s, v, 0.6f));
         }
         return;

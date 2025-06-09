@@ -1,6 +1,6 @@
 #include "ShaderWindow.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "SimulationView.h"
 
 namespace
@@ -22,16 +22,16 @@ void ShaderWindow::processIntern()
     auto brightness = SimulationView::get().getBrightness();
     auto contrast = SimulationView::get().getContrast();
     auto motionBlur = SimulationView::get().getMotionBlur();
-    if (AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters().name("Brightness").min(0).max(3.0f).textWidth(RightColumnWidth).defaultValue(&defaultBrightness), &brightness)) {
+    if (AlienGui::SliderFloat(
+            AlienGui::SliderFloatParameters().name("Brightness").min(0).max(3.0f).textWidth(RightColumnWidth).defaultValue(&defaultBrightness), &brightness)) {
         SimulationView::get().setBrightness(brightness);
     }
-    if (AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters().name("Contrast").min(0).max(2.0f).textWidth(RightColumnWidth).defaultValue(&defaultContrast), &contrast)) {
+    if (AlienGui::SliderFloat(
+            AlienGui::SliderFloatParameters().name("Contrast").min(0).max(2.0f).textWidth(RightColumnWidth).defaultValue(&defaultContrast), &contrast)) {
         SimulationView::get().setContrast(contrast);
     }
-    if (AlienImGui::SliderFloat(
-            AlienImGui::SliderFloatParameters()
+    if (AlienGui::SliderFloat(
+            AlienGui::SliderFloatParameters()
                 .name("Motion blur")
                 .min(0)
                 .max(10.0f)
