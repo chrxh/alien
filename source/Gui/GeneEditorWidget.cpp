@@ -3,6 +3,7 @@
 #include <imgui.h>
 
 #include "AlienImGui.h"
+#include "CreatureTabGenomeData.h"
 #include "CreatureTabLayoutData.h"
 #include "StyleRepository.h"
 
@@ -20,11 +21,15 @@ GeneEditorWidget _GeneEditorWidget::create(CreatureTabGenomeData const& editData
 void _GeneEditorWidget::process()
 {
     if (ImGui::BeginChild("GeneEditor", ImVec2(_layoutData->geneEditorWidth, 0))) {
-        processHeaderData();
+        if (_editData->selectedGene.has_value()) {
+            processHeaderData();
 
-        AlienImGui::MovableHorizontalSeparator(AlienImGui::MovableHorizontalSeparatorParameters().additive(false), _layoutData->nodeListHeight);
+            AlienImGui::MovableHorizontalSeparator(AlienImGui::MovableHorizontalSeparatorParameters().additive(false), _layoutData->nodeListHeight);
 
-        processNodeList();
+            processNodeList();
+        } else {
+            processNoSelection();
+        }
     }
     ImGui::EndChild();
 }
@@ -33,6 +38,27 @@ _GeneEditorWidget::_GeneEditorWidget(CreatureTabGenomeData const& genome, Creatu
     : _editData(genome)
     , _layoutData(layoutData)
 {}
+
+void _GeneEditorWidget::processNoSelection()
+{
+    AlienImGui::Group("Selected gene");
+    if (ImGui::BeginChild("overlay", ImVec2(0, 0), 0)) {
+        auto startPos = ImGui::GetCursorScreenPos();
+        auto size = ImGui::GetContentRegionAvail();
+        ImGui::GetWindowDrawList()->AddRectFilledMultiColor(
+            {startPos.x, startPos.y},
+            {startPos.x + size.x, startPos.y + size.y},
+            Const::DisabledOverlayColor1,
+            Const::DisabledOverlayColor2,
+            Const::DisabledOverlayColor1,
+            Const::DisabledOverlayColor2);
+        auto text = "No gene is selected";
+        auto textSize = ImGui::CalcTextSize(text);
+        ImVec2 textPos(startPos.x + size.x / 2 - textSize.x / 2, startPos.y + size.y / 2 - textSize.y / 2);
+        ImGui::GetWindowDrawList()->AddText(textPos, ImGui::GetColorU32(ImGuiCol_Text), text);
+    }
+    ImGui::EndChild();
+}
 
 void _GeneEditorWidget::processHeaderData()
 {

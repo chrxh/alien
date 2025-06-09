@@ -12,6 +12,7 @@ public:
 private:
     _GeneEditorWidget(CreatureTabGenomeData const& genome, CreatureTabLayoutData const& layoutData);
 
+    void processNoSelection();
     void processHeaderData();
     void processNodeList();
 
