@@ -5,13 +5,18 @@
 class _NodeEditorWidget
 {
 public:
-    static NodeEditorWidget create(CreatureTabGenomeData const& genome, CreatureTabLayoutData const& layoutData);
+    static NodeEditorWidget create(CreatureTabEditData const& editData, CreatureTabLayoutData const& layoutData);
 
     void process();
 
 private:
-    _NodeEditorWidget(CreatureTabGenomeData const& genome, CreatureTabLayoutData const& layoutData);
+    _NodeEditorWidget(CreatureTabEditData const& editData, CreatureTabLayoutData const& layoutData);
 
-    CreatureTabGenomeData _genome;
+    void processNodeAttributes();
+    void processNoSelection();
+
+    std::optional<int> getSelectedNode() const;
+
+    CreatureTabEditData _editData;
     CreatureTabLayoutData _layoutData;
 };

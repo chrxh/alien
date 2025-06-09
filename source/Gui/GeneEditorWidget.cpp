@@ -5,7 +5,7 @@
 #include "Base/StringHelper.h"
 
 #include "AlienImGui.h"
-#include "CreatureTabGenomeData.h"
+#include "CreatureTabEditData.h"
 #include "CreatureTabLayoutData.h"
 #include "StyleRepository.h"
 
@@ -15,7 +15,7 @@ namespace
     auto constexpr HeaderRightColumnWidth = 120.0f;
 }
 
-GeneEditorWidget _GeneEditorWidget::create(CreatureTabGenomeData const& editData, CreatureTabLayoutData const& layoutData)
+GeneEditorWidget _GeneEditorWidget::create(CreatureTabEditData const& editData, CreatureTabLayoutData const& layoutData)
 {
     return GeneEditorWidget(new _GeneEditorWidget(editData, layoutData));
 }
@@ -36,7 +36,7 @@ void _GeneEditorWidget::process()
     ImGui::EndChild();
 }
 
-_GeneEditorWidget::_GeneEditorWidget(CreatureTabGenomeData const& genome, CreatureTabLayoutData const& layoutData)
+_GeneEditorWidget::_GeneEditorWidget(CreatureTabEditData const& genome, CreatureTabLayoutData const& layoutData)
     : _editData(genome)
     , _layoutData(layoutData)
 {}
@@ -47,13 +47,7 @@ void _GeneEditorWidget::processNoSelection()
     if (ImGui::BeginChild("overlay", ImVec2(0, 0), 0)) {
         auto startPos = ImGui::GetCursorScreenPos();
         auto size = ImGui::GetContentRegionAvail();
-        ImGui::GetWindowDrawList()->AddRectFilledMultiColor(
-            {startPos.x, startPos.y},
-            {startPos.x + size.x, startPos.y + size.y},
-            Const::DisabledOverlayColor1,
-            Const::DisabledOverlayColor2,
-            Const::DisabledOverlayColor1,
-            Const::DisabledOverlayColor2);
+        AlienImGui::DisabledField();
         auto text = "No gene is selected";
         auto textSize = ImGui::CalcTextSize(text);
         ImVec2 textPos(startPos.x + size.x / 2 - textSize.x / 2, startPos.y + size.y / 2 - textSize.y / 2);
@@ -104,9 +98,11 @@ void _GeneEditorWidget::processNodeList()
                     ImGui::TableNextColumn();
                     AlienImGui::Text(std::to_string(row + 1));
 
+                    // Column 1: Node type
                     ImGui::TableNextColumn();
                     AlienImGui::Text(Const::CellTypeGenomeStrings.at(node.getCellType()));
 
+                    // Column 2: Angle
                     ImGui::TableNextColumn();
                     AlienImGui::Text(StringHelper::format(node._referenceAngle, 1));
                     ImGui::PopID();

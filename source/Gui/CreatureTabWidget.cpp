@@ -3,7 +3,7 @@
 #include <imgui.h>
 
 #include "AlienImGui.h"
-#include "CreatureTabGenomeData.h"
+#include "CreatureTabEditData.h"
 #include "CreatureTabLayoutData.h"
 #include "GeneEditorWidget.h"
 #include "GenomeEditorWidget.h"
@@ -52,7 +52,7 @@ _CreatureTabWidget::_CreatureTabWidget(GenomeDescription_New const& genome, Crea
     static int _sequence = 0;
     _id = ++_sequence;
 
-    _genomeData = std::make_shared<_CreatureTabGenomeData>(genome);
+    _genomeData = std::make_shared<_CreatureTabEditData>(genome);
     _layoutData = layoutData;
     if (!_layoutData) {
         _layoutData = std::make_shared<_CreatureTabLayoutData>();

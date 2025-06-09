@@ -118,8 +118,8 @@ using CreatureTabWidget = std::shared_ptr<_CreatureTabWidget>;
 struct _CreatureTabLayoutData;
 using CreatureTabLayoutData = std::shared_ptr<_CreatureTabLayoutData>;
 
-struct _CreatureTabGenomeData;
-using CreatureTabGenomeData = std::shared_ptr<_CreatureTabGenomeData>;
+struct _CreatureTabEditData;
+using CreatureTabEditData = std::shared_ptr<_CreatureTabEditData>;
 
 class _GenomeEditorWidget;
 using GenomeEditorWidget = std::shared_ptr<_GenomeEditorWidget>;

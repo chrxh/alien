@@ -13,7 +13,7 @@
 #include "EngineInterface/GenomeDescriptionInfoService.h"
 
 #include "AlienImGui.h"
-#include "CreatureTabGenomeData.h"
+#include "CreatureTabEditData.h"
 #include "CreatureTabLayoutData.h"
 #include "GenericMessageDialog.h"
 #include "StyleRepository.h"
@@ -24,7 +24,7 @@ namespace
     auto constexpr HeaderRightColumnWidth = 120.0f;
 }
 
-GenomeEditorWidget _GenomeEditorWidget::create(CreatureTabGenomeData const& editData, CreatureTabLayoutData const& layoutData)
+GenomeEditorWidget _GenomeEditorWidget::create(CreatureTabEditData const& editData, CreatureTabLayoutData const& layoutData)
 {
     return GenomeEditorWidget(new _GenomeEditorWidget(editData, layoutData));
 }
@@ -42,7 +42,7 @@ void _GenomeEditorWidget::process()
     ImGui::EndChild();
 }
 
-_GenomeEditorWidget::_GenomeEditorWidget(CreatureTabGenomeData const& genome, CreatureTabLayoutData const& layoutData)
+_GenomeEditorWidget::_GenomeEditorWidget(CreatureTabEditData const& genome, CreatureTabLayoutData const& layoutData)
     : _editData(genome)
     , _layoutData(layoutData)
 {}
@@ -205,7 +205,7 @@ void _GenomeEditorWidget::onAddGene()
 
         GenomeDescriptionEditService::get().addEmptyGene(genome, insertIndex);
 
-        _editData->selectedGene = insertIndex;
+        _editData->selectedGene = insertIndex + 1;
     }
 }
 
