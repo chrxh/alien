@@ -15,7 +15,6 @@
 #include "Viewport.h"
 #include "EditorModel.h"
 #include "AlienImGui.h"
-#include "CellTypeStrings.h"
 #include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
 #include "OverlayController.h"
@@ -346,7 +345,7 @@ void _InspectorWindow::processCellTypePropertiesTab(CellDescription& cell)
         return;
     }
 
-    std::string title = Const::CellTypeToStringMap.at(cell.getCellType());
+    std::string title = Const::CellTypeStrings.at(cell.getCellType());
     if (ImGui::BeginTabItem(title.c_str(), nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
             switch (cell.getCellType()) {

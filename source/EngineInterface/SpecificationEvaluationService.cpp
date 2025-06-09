@@ -2,7 +2,6 @@
 
 #include <algorithm>
 
-#include "CellTypeStrings.h"
 #include "LocationHelper.h"
 
 ValueRef<bool> SpecificationEvaluationService::getRef(BoolMemberVariant const& member, SimulationParameters& parameters, int orderNumber) const

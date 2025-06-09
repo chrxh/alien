@@ -16,7 +16,6 @@
 #include "EngineInterface/NumberGenerator.h"
 #include "EngineInterface/SimulationParameters.h"
 
-#include "CellTypeStrings.h"
 #include "GenericFileDialog.h"
 #include "StyleRepository.h"
 #include "HelpStrings.h"

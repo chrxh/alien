@@ -2,7 +2,6 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "CellTypeStrings.h"
 #include "LocationHelper.h"
 #include "ParametersEditService.h"
 #include "SimulationParametersSpecification.h"
@@ -13,7 +12,7 @@ ParametersSpec const& SimulationParameters::getSpec()
     if (!spec.has_value()) {
         std::vector<std::pair<std::string, std::vector<ParameterSpec>>> cellTypeStrings;
         for (int i = 0; i < CellType_Count; ++i) {
-            cellTypeStrings.emplace_back(std::make_pair(Const::CellTypeToStringMap.at(i), std::vector<ParameterSpec>()));
+            cellTypeStrings.emplace_back(std::make_pair(Const::CellTypeStrings.at(i), std::vector<ParameterSpec>()));
         }
 
         auto radiationStrengthGetter = [](SimulationParameters const& parameters, int orderNumber) {

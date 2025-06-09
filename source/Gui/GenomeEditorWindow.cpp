@@ -18,7 +18,6 @@
 #include "EngineInterface/ShapeGenerator.h"
 
 #include "AlienImGui.h"
-#include "CellTypeStrings.h"
 #include "DelayedExecutionController.h"
 #include "EditorModel.h"
 #include "GenericFileDialog.h"
@@ -98,8 +97,8 @@ namespace
     std::string
     generateShortDescription(int index, CellGenomeDescription const& cell, std::optional<ShapeGeneratorResult> const& shapeGeneratorResult, bool isFirstOrLast)
     {
-        auto result = "No. " + std::to_string(index + 1) + ", Type: " + Const::CellTypeToStringMap.at(cell.getCellType())
-            + ", Color: " + std::to_string(cell._color);
+        auto result =
+            "No. " + std::to_string(index + 1) + ", Type: " + Const::CellTypeStrings.at(cell.getCellType()) + ", Color: " + std::to_string(cell._color);
         if (!isFirstOrLast) {
             auto referenceAngle = shapeGeneratorResult ? shapeGeneratorResult->angle : cell._referenceAngle;
             result += ", Angle: " + StringHelper::format(referenceAngle, 1);

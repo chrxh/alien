@@ -121,7 +121,7 @@ void _GenomeEditorWidget::processGeneList()
 
                     // Column 3: Shape
                     ImGui::TableNextColumn();
-                    AlienImGui::Text(Const::ConstructionShapeNames.at(gene._shape));
+                    AlienImGui::Text(Const::ConstructionShapeStrings.at(gene._shape));
 
                     // Column 4: References
                     ImGui::TableNextColumn();
@@ -154,7 +154,7 @@ void _GenomeEditorWidget::processGeneListButtons()
 {
     auto cursorPos = ImGui::GetCursorScreenPos();
 
-    ImVec2 buttonGroupSize = {scale(105.0f), scale(22.0f)};
+    ImVec2 buttonGroupSize = {scale(108.0f), scale(22.0f)};
     ImGui::SetCursorScreenPos(
         ImVec2(cursorPos.x + ImGui::GetContentRegionAvail().x - buttonGroupSize.x - scale(10.0f), cursorPos.y - buttonGroupSize.y - scale(20.0f)));
     if (ImGui::BeginChild("ButtonGroup", buttonGroupSize)) {
