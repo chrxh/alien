@@ -246,9 +246,9 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getReferencedGeneIndices)
     auto result = GenomeDescriptionInfoService::get().getReferencedGeneIndices(genome._genes.at(0));
 
     ASSERT_EQ(3, result.size());
-    ASSERT_EQ(1, result.at(0));
-    ASSERT_EQ(2, result.at(1));
-    ASSERT_EQ(1, result.at(2));
+    EXPECT_EQ(1, result.at(0));
+    EXPECT_EQ(2, result.at(1));
+    EXPECT_EQ(1, result.at(2));
 }
 
 TEST_F(GenomeDescriptionInfoServiceTests_New, getReferencingGeneIndices)
@@ -269,7 +269,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getReferencingGeneIndices)
     auto result = GenomeDescriptionInfoService::get().getReferencingGeneIndices(genome, 0);
 
     ASSERT_EQ(3, result.size());
-    ASSERT_EQ(1, result.at(0));
-    ASSERT_EQ(1, result.at(1));
-    ASSERT_EQ(2, result.at(2));
+    EXPECT_EQ(1, result.at(0));
+    EXPECT_EQ(1, result.at(1));
+    EXPECT_EQ(2, result.at(2));
 }
