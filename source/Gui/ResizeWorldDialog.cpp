@@ -5,7 +5,7 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/SimulationFacade.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "TemporalControlWindow.h"
 
 void ResizeWorldDialog::initIntern(SimulationFacade simulationFacade)
@@ -54,18 +54,18 @@ void ResizeWorldDialog::processIntern()
 
         ImGui::EndTable();
     }
-    AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Scale content"), _scaleContent);
+    AlienGui::ToggleButton(AlienGui::ToggleButtonParameters().name("Scale content"), _scaleContent);
 
-    AlienImGui::Separator();
+    AlienGui::Separator();
 
-    if (AlienImGui::Button("OK")) {
+    if (AlienGui::Button("OK")) {
         onResizing();
         close();
     }
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
-    if (AlienImGui::Button("Cancel")) {
+    if (AlienGui::Button("Cancel")) {
         close();
     }
 

@@ -15,7 +15,7 @@
 #include "EngineInterface/SimulationFacade.h"
 
 #include "StyleRepository.h"
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "EditorController.h"
 #include "Viewport.h"
 #include "EditorModel.h"
@@ -43,39 +43,39 @@ void CreatorWindow::initIntern(SimulationFacade simulationFacade)
 
 void CreatorWindow::processIntern()
 {
-    AlienImGui::SelectableToolbarButton(ICON_FA_SUN, _mode, CreationMode_CreateParticle, CreationMode_CreateParticle);
-    AlienImGui::Tooltip(ModeText.at(CreationMode_CreateParticle));
+    AlienGui::SelectableToolbarButton(ICON_FA_SUN, _mode, CreationMode_CreateParticle, CreationMode_CreateParticle);
+    AlienGui::Tooltip(ModeText.at(CreationMode_CreateParticle));
 
     ImGui::SameLine();
-    AlienImGui::SelectableToolbarButton(ICON_DOT, _mode, CreationMode_CreateCell, CreationMode_CreateCell);
-    AlienImGui::Tooltip(ModeText.at(CreationMode_CreateCell));
+    AlienGui::SelectableToolbarButton(ICON_DOT, _mode, CreationMode_CreateCell, CreationMode_CreateCell);
+    AlienGui::Tooltip(ModeText.at(CreationMode_CreateCell));
 
     ImGui::SameLine();
-    AlienImGui::SelectableToolbarButton(ICON_RECTANGLE, _mode, CreationMode_CreateRectangle, CreationMode_CreateRectangle);
-    AlienImGui::Tooltip(ModeText.at(CreationMode_CreateRectangle));
+    AlienGui::SelectableToolbarButton(ICON_RECTANGLE, _mode, CreationMode_CreateRectangle, CreationMode_CreateRectangle);
+    AlienGui::Tooltip(ModeText.at(CreationMode_CreateRectangle));
 
     ImGui::SameLine();
-    AlienImGui::SelectableToolbarButton(ICON_HEXAGON, _mode, CreationMode_CreateHexagon, CreationMode_CreateHexagon);
-    AlienImGui::Tooltip(ModeText.at(CreationMode_CreateHexagon));
+    AlienGui::SelectableToolbarButton(ICON_HEXAGON, _mode, CreationMode_CreateHexagon, CreationMode_CreateHexagon);
+    AlienGui::Tooltip(ModeText.at(CreationMode_CreateHexagon));
 
     ImGui::SameLine();
-    AlienImGui::SelectableToolbarButton(ICON_DISC, _mode, CreationMode_CreateDisc, CreationMode_CreateDisc);
-    AlienImGui::Tooltip(ModeText.at(CreationMode_CreateDisc));
+    AlienGui::SelectableToolbarButton(ICON_DISC, _mode, CreationMode_CreateDisc, CreationMode_CreateDisc);
+    AlienGui::Tooltip(ModeText.at(CreationMode_CreateDisc));
 
     ImGui::SameLine();
-    AlienImGui::SelectableToolbarButton(ICON_FA_PAINT_BRUSH, _mode, CreationMode_Drawing, CreationMode_Drawing);
-    AlienImGui::Tooltip(ModeText.at(CreationMode_Drawing));
+    AlienGui::SelectableToolbarButton(ICON_FA_PAINT_BRUSH, _mode, CreationMode_Drawing, CreationMode_Drawing);
+    AlienGui::Tooltip(ModeText.at(CreationMode_Drawing));
 
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50.0f)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-        AlienImGui::Group(ModeText.at(_mode));
+        AlienGui::Group(ModeText.at(_mode));
 
         auto color = EditorModel::get().getDefaultColorCode();
-        AlienImGui::ComboColor(AlienImGui::ComboColorParameters().name("Color").textWidth(RightColumnWidth).tooltip(Const::GenomeColorTooltip), color);
+        AlienGui::ComboColor(AlienGui::ComboColorParameters().name("Color").textWidth(RightColumnWidth).tooltip(Const::GenomeColorTooltip), color);
         EditorModel::get().setDefaultColorCode(color);
         if (_mode == CreationMode_Drawing) {
             auto pencilWidth = EditorModel::get().getPencilWidth();
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters()
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters()
                     .name("Pencil radius")
                     .min(1.0f)
                     .max(8.0f)
@@ -85,37 +85,37 @@ void CreatorWindow::processIntern()
                 &pencilWidth);
             EditorModel::get().setPencilWidth(pencilWidth);
         }
-        AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(RightColumnWidth).tooltip(Const::CellEnergyTooltip), _energy);
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(RightColumnWidth).tooltip(Const::CellEnergyTooltip), _energy);
         if (_mode != CreationMode_CreateParticle) {
-            AlienImGui::SliderFloat(
-                AlienImGui::SliderFloatParameters().name("Stiffness").max(1.0f).min(0.0f).textWidth(RightColumnWidth).tooltip(Const::CellStiffnessTooltip),
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters().name("Stiffness").max(1.0f).min(0.0f).textWidth(RightColumnWidth).tooltip(Const::CellStiffnessTooltip),
                 &_stiffness);
         }
         
         if (_mode == CreationMode_CreateRectangle) {
-            AlienImGui::InputInt(
-                AlienImGui::InputIntParameters().name("Horizontal cells").textWidth(RightColumnWidth).tooltip(Const::CreatorRectangleWidthTooltip),
+            AlienGui::InputInt(
+                AlienGui::InputIntParameters().name("Horizontal cells").textWidth(RightColumnWidth).tooltip(Const::CreatorRectangleWidthTooltip),
                 _rectHorizontalCells);
-            AlienImGui::InputInt(
-                AlienImGui::InputIntParameters().name("Vertical cells").textWidth(RightColumnWidth).tooltip(Const::CreatorRectangleHeightTooltip),
+            AlienGui::InputInt(
+                AlienGui::InputIntParameters().name("Vertical cells").textWidth(RightColumnWidth).tooltip(Const::CreatorRectangleHeightTooltip),
                 _rectVerticalCells);
         }
         if (_mode == CreationMode_CreateHexagon) {
-            AlienImGui::InputInt(
-                AlienImGui::InputIntParameters().name("Layers").textWidth(RightColumnWidth).tooltip(Const::CreatorHexagonLayersTooltip), _layers);
+            AlienGui::InputInt(
+                AlienGui::InputIntParameters().name("Layers").textWidth(RightColumnWidth).tooltip(Const::CreatorHexagonLayersTooltip), _layers);
         }
         if (_mode == CreationMode_CreateDisc) {
-            AlienImGui::InputFloat(
-                AlienImGui::InputFloatParameters().name("Outer radius").textWidth(RightColumnWidth).format("%.2f").tooltip(Const::CreatorDiscOuterRadiusTooltip),
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Outer radius").textWidth(RightColumnWidth).format("%.2f").tooltip(Const::CreatorDiscOuterRadiusTooltip),
                 _outerRadius);
-            AlienImGui::InputFloat(
-                AlienImGui::InputFloatParameters().name("Inner radius").textWidth(RightColumnWidth).format("%.2f").tooltip(Const::CreatorDiscInnerRadiusTooltip),
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Inner radius").textWidth(RightColumnWidth).format("%.2f").tooltip(Const::CreatorDiscInnerRadiusTooltip),
                 _innerRadius);
         }
         if (_mode == CreationMode_CreateRectangle || _mode == CreationMode_CreateHexagon || _mode == CreationMode_CreateDisc) {
-            AlienImGui::InputFloat(
-                AlienImGui::InputFloatParameters()
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters()
                     .name("Cell distance")
                     .format("%.2f")
                     .step(0.1)
@@ -124,25 +124,25 @@ void CreatorWindow::processIntern()
                 _cellDistance);
         }
         if (_mode != CreationMode_CreateParticle & _mode != CreationMode_CreateCell) {
-            AlienImGui::Checkbox(AlienImGui::CheckboxParameters().name("Sticky").textWidth(RightColumnWidth).tooltip(Const::CreatorStickyTooltip), _makeSticky);
+            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Sticky").textWidth(RightColumnWidth).tooltip(Const::CreatorStickyTooltip), _makeSticky);
         }
         if (_mode != CreationMode_CreateParticle) {
-            AlienImGui::Checkbox(
-                AlienImGui::CheckboxParameters().name("Indestructible wall").textWidth(RightColumnWidth).tooltip(Const::CellIndestructibleTooltip), _barrier);
+            AlienGui::Checkbox(
+                AlienGui::CheckboxParameters().name("Indestructible wall").textWidth(RightColumnWidth).tooltip(Const::CellIndestructibleTooltip), _barrier);
         }
     }
     ImGui::EndChild();
 
-    AlienImGui::Separator();
+    AlienGui::Separator();
     auto& simInteractionController = SimulationInteractionController::get();
     if (_mode == CreationMode_Drawing) {
         auto text = simInteractionController.isDrawMode() ? "End drawing" : "Start drawing";
-        if (AlienImGui::Button(text)) {
+        if (AlienGui::Button(text)) {
             simInteractionController.setDrawMode(!simInteractionController.isDrawMode());
         }
     } else {
         simInteractionController.setDrawMode(false);
-        if (AlienImGui::Button("Build")) {
+        if (AlienGui::Button("Build")) {
             if (_mode == CreationMode_CreateCell) {
                 createCell();
             }

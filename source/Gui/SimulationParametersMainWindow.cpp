@@ -16,7 +16,7 @@
 #include "OverlayController.h"
 #include "SimulationParametersSourceWidget.h"
 #include "SimulationParametersLayerWidget.h"
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "SpecificationGuiService.h"
 #include "Viewport.h"
 
@@ -99,34 +99,34 @@ void SimulationParametersMainWindow::shutdownIntern()
 
 void SimulationParametersMainWindow::processToolbar()
 {
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN).tooltip("Open simulation parameters from file"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN).tooltip("Open simulation parameters from file"))) {
         onOpenParameters();
     }
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_SAVE).tooltip("Save simulation parameters to file"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SAVE).tooltip("Save simulation parameters to file"))) {
         onSaveParameters();
     }
 
     ImGui::SameLine();
-    AlienImGui::ToolbarSeparator();
+    AlienGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_COPY).tooltip("Copy simulation parameters to clipboard"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COPY).tooltip("Copy simulation parameters to clipboard"))) {
         _copiedParameters = _simulationFacade->getSimulationParameters();
         printOverlayMessage("Simulation parameters copied");
     }
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(
-            AlienImGui::ToolbarButtonParameters().text(ICON_FA_PASTE).tooltip("Paste simulation parameters from clipboard").disabled(!_copiedParameters))) {
+    if (AlienGui::ToolbarButton(
+            AlienGui::ToolbarButtonParameters().text(ICON_FA_PASTE).tooltip("Paste simulation parameters from clipboard").disabled(!_copiedParameters))) {
         _simulationFacade->setSimulationParameters(*_copiedParameters);
         _simulationFacade->setOriginalSimulationParameters(*_copiedParameters);
         printOverlayMessage("Simulation parameters pasted");
     }
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
                                       .text(ICON_FA_PASTE)
                                       .secondText(ICON_FA_UNDO)
                                       .secondTextOffset(RealVector2D{32.0f, 28.0f})
@@ -146,20 +146,20 @@ void SimulationParametersMainWindow::processToolbar()
     }
 
     ImGui::SameLine();
-    AlienImGui::ToolbarSeparator();
+    AlienGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_LAYER_GROUP).tooltip("Add parameter layer"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_LAYER_GROUP).tooltip("Add parameter layer"))) {
         onInsertDefaultLayer();
     }
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_SUN).tooltip("Add radiation source"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PLUS).secondText(ICON_FA_SUN).tooltip("Add radiation source"))) {
         onInsertDefaultSource();
     }
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
                                       .text(ICON_FA_PLUS)
                                       .secondText(ICON_FA_CLONE)
                                       .disabled(_selectedOrderNumber == 0)
@@ -168,16 +168,16 @@ void SimulationParametersMainWindow::processToolbar()
     }
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(
-            AlienImGui::ToolbarButtonParameters().text(ICON_FA_MINUS).disabled(_selectedOrderNumber == 0).tooltip("Delete selected layer/radiation source"))) {
+    if (AlienGui::ToolbarButton(
+            AlienGui::ToolbarButtonParameters().text(ICON_FA_MINUS).disabled(_selectedOrderNumber == 0).tooltip("Delete selected layer/radiation source"))) {
         onDeleteLocation();
     }
 
     ImGui::SameLine();
-    AlienImGui::ToolbarSeparator();
+    AlienGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
                                       .text(ICON_FA_CHEVRON_UP)
                                       .disabled(_selectedOrderNumber <= 1)
                                       .tooltip("Move selected layer/radiation source upward"))) {
@@ -185,7 +185,7 @@ void SimulationParametersMainWindow::processToolbar()
     }
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
                                       .text(ICON_FA_CHEVRON_DOWN)
                                       .tooltip("Move selected layer/radiation source downward")
                                       .disabled(_selectedOrderNumber >= _locations.size() - 1 || _selectedOrderNumber == 0))) {
@@ -193,37 +193,37 @@ void SimulationParametersMainWindow::processToolbar()
     }
 
     ImGui::SameLine();
-    AlienImGui::ToolbarSeparator();
+    AlienGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters()
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
                                       .text(ICON_FA_EXTERNAL_LINK_SQUARE_ALT)
                                       .tooltip("Open parameters for selected layer/radiation source in a new window"))) {
         onOpenInLocationWindow();
     }
 
-    AlienImGui::Separator();
+    AlienGui::Separator();
 }
 
 void SimulationParametersMainWindow::processMasterWidget()
 {
     if (ImGui::BeginChild("##master", {0, getMasterWidgetHeight()})) {
 
-        if (_masterWidgetOpen = AlienImGui::BeginTreeNode(
-                AlienImGui::TreeNodeParameters().name("Overview").rank(AlienImGui::TreeNodeRank::High).defaultOpen(_masterWidgetOpen))) {
+        if (_masterWidgetOpen = AlienGui::BeginTreeNode(
+                AlienGui::TreeNodeParameters().name("Overview").rank(AlienGui::TreeNodeRank::High).defaultOpen(_masterWidgetOpen))) {
             ImGui::Spacing();
             if (ImGui::BeginChild("##master2", {0, -ImGui::GetStyle().FramePadding.y})) {
                 processLocationTable();
             }
             ImGui::EndChild();
         }
-        AlienImGui::EndTreeNode();
+        AlienGui::EndTreeNode();
     }
     ImGui::EndChild();
 
     if (_masterWidgetOpen && (_detailWidgetOpen || _expertWidgetOpen)) {
         ImGui::PushID("master");
-        AlienImGui::MovableHorizontalSeparator(AlienImGui::MovableHorizontalSeparatorParameters(), _masterWidgetHeight);
+        AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters(), _masterWidgetHeight);
         ImGui::PopID();
     }
 }
@@ -233,12 +233,12 @@ void SimulationParametersMainWindow::processDetailWidget()
     auto height = getDetailWidgetHeight();
     if (ImGui::BeginChild("##detail", {0, height})) {
         auto title = _filter.empty() ? "Parameters" : "Parameters (filtered)";
-        if (_detailWidgetOpen = AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters()
+        if (_detailWidgetOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters()
                                                               .name((std::string(title) + "###parameters").c_str())
-                                                              .rank(AlienImGui::TreeNodeRank::High)
+                                                              .rank(AlienGui::TreeNodeRank::High)
                                                               .defaultOpen(_detailWidgetOpen))) {
             ImGui::Spacing();
-            AlienImGui::SetFilterText(_filter);
+            AlienGui::SetFilterText(_filter);
             if (ImGui::BeginChild(
                     "##detail2", {0, -ImGui::GetStyle().FramePadding.y - scale(33.0f)}, ImGuiChildFlags_Border, ImGuiWindowFlags_HorizontalScrollbar)) {
                 auto type = _locations.at(_selectedOrderNumber).type;
@@ -253,18 +253,18 @@ void SimulationParametersMainWindow::processDetailWidget()
                 }
             }
             ImGui::EndChild();
-            AlienImGui::ResetFilterText();
+            AlienGui::ResetFilterText();
 
             ImGui::Spacing();
-            AlienImGui::InputFilter(AlienImGui::InputFilterParameters().width(250.0f), _filter);
+            AlienGui::InputFilter(AlienGui::InputFilterParameters().width(250.0f), _filter);
         }
-        AlienImGui::EndTreeNode();
+        AlienGui::EndTreeNode();
     }
     ImGui::EndChild();
 
     if (_detailWidgetOpen && _expertWidgetOpen) {
         ImGui::PushID("detail");
-        AlienImGui::MovableHorizontalSeparator(AlienImGui::MovableHorizontalSeparatorParameters().additive(false), _expertWidgetHeight);
+        AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _expertWidgetHeight);
         ImGui::PopID();
     }
 }
@@ -272,14 +272,14 @@ void SimulationParametersMainWindow::processDetailWidget()
 void SimulationParametersMainWindow::processExpertWidget()
 {
     if (ImGui::BeginChild("##expert", {0, 0})) {
-        if (_expertWidgetOpen = AlienImGui::BeginTreeNode(
-                AlienImGui::TreeNodeParameters().name("Expert settings").rank(AlienImGui::TreeNodeRank::High).defaultOpen(_expertWidgetOpen))) {
+        if (_expertWidgetOpen = AlienGui::BeginTreeNode(
+                AlienGui::TreeNodeParameters().name("Expert settings").rank(AlienGui::TreeNodeRank::High).defaultOpen(_expertWidgetOpen))) {
             if (ImGui::BeginChild("##expert2", {0, 0}, ImGuiChildFlags_Border, ImGuiWindowFlags_HorizontalScrollbar)) {
                 processExpertSettings();
             }
             ImGui::EndChild();
         }
-        AlienImGui::EndTreeNode();
+        AlienGui::EndTreeNode();
     }
     ImGui::EndChild();
 }
@@ -289,7 +289,7 @@ void SimulationParametersMainWindow::processStatusBar()
     std::vector<std::string> statusItems;
     statusItems.emplace_back("CTRL + click on a slider to type in a precise value");
 
-    AlienImGui::StatusBar(statusItems);
+    AlienGui::StatusBar(statusItems);
 }
 
 void SimulationParametersMainWindow::processLocationTable()
@@ -335,41 +335,41 @@ void SimulationParametersMainWindow::processLocationTable()
                 } else if (entry.type == LocationType::Source) {
                     icon = ICON_FA_SUN " ";
                 }
-                AlienImGui::Text(icon + entry.name);
+                AlienGui::Text(icon + entry.name);
 
 
                 // Column: Type
                 ImGui::TableNextColumn();
                 if (entry.type == LocationType::Base) {
-                    AlienImGui::Text("Base parameters");
+                    AlienGui::Text("Base parameters");
                 } else if (entry.type == LocationType::Layer) {
-                    AlienImGui::Text("Layer");
+                    AlienGui::Text("Layer");
                 } else if (entry.type == LocationType::Source) {
-                    AlienImGui::Text("Radiation");
+                    AlienGui::Text("Radiation");
                 }
 
                 // Column: Position
                 ImGui::TableNextColumn();
                 if (row > 0) {
-                    if (AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH))) {
+                    if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH))) {
                         onCenterLocation(row);
                         _selectedOrderNumber = row;
                     }
                     ImGui::SameLine();
                 }
-                AlienImGui::Text(entry.position);
+                AlienGui::Text(entry.position);
 
                 // Column: Strength
                 ImGui::TableNextColumn();
-                AlienImGui::Text(entry.strength);
+                AlienGui::Text(entry.strength);
                 ImGui::SameLine();
                 auto pos = ImGui::GetCursorScreenPos();
                 ImGui::SetCursorScreenPos({pos.x + scale(3.0f), pos.y});
                 ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextLightDecentColor);
                 if (entry.type == LocationType::Base || entry.type == LocationType::Source) {
-                    AlienImGui::Text("(radiation)");
+                    AlienGui::Text("(radiation)");
                 } else {
-                    AlienImGui::Text("(opacity)");
+                    AlienGui::Text("(opacity)");
                 }
                 ImGui::PopStyleColor();
 

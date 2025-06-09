@@ -12,7 +12,7 @@
 #include "EngineInterface/GenomeDescriptionEditService.h"
 #include "EngineInterface/GenomeDescriptionInfoService.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "CreatureTabEditData.h"
 #include "CreatureTabLayoutData.h"
 #include "GenericMessageDialog.h"
@@ -34,7 +34,7 @@ void _GenomeEditorWidget::process()
     if (ImGui::BeginChild("GenomeEditor", ImVec2(_layoutData->genomeEditorWidth, 0))) {
         processHeaderData();
 
-        AlienImGui::MovableHorizontalSeparator(AlienImGui::MovableHorizontalSeparatorParameters().additive(false), _layoutData->geneListHeight);
+        AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _layoutData->geneListHeight);
 
         processGeneList();
         processGeneListButtons();
@@ -49,18 +49,18 @@ _GenomeEditorWidget::_GenomeEditorWidget(CreatureTabEditData const& genome, Crea
 
 void _GenomeEditorWidget::processHeaderData()
 {
-    AlienImGui::Group("Genome");
+    AlienGui::Group("Genome");
 
     auto availableWidth = scaleInverse(ImGui::GetContentRegionAvail().x);
     auto width = scale(std::min(availableWidth, HeaderTotalWidth));
     if (ImGui::BeginChild("GenomeHeader", ImVec2(width, ImGui::GetContentRegionAvail().y - _layoutData->geneListHeight), 0)) {
         auto numNodesString = std::to_string(GenomeDescriptionInfoService::get().getNumberOfNodes(_editData->genome));
-        AlienImGui::InputText(AlienImGui::InputTextParameters().name("Node count").readOnly(true).textWidth(HeaderRightColumnWidth), numNodesString);
+        AlienGui::InputText(AlienGui::InputTextParameters().name("Node count").readOnly(true).textWidth(HeaderRightColumnWidth), numNodesString);
         auto numCells = GenomeDescriptionInfoService::get().getNumberOfResultingCells(_editData->genome);
         auto numCellsString = numCells != -1 ? std::to_string(numCells) : std::string("Infinity");
-        AlienImGui::InputText(AlienImGui::InputTextParameters().name("Resulting cells").readOnly(true).textWidth(HeaderRightColumnWidth), numCellsString);
-        AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters().name("Front angle").format("%.1f").textWidth(HeaderRightColumnWidth), _editData->genome._frontAngle);
+        AlienGui::InputText(AlienGui::InputTextParameters().name("Resulting cells").readOnly(true).textWidth(HeaderRightColumnWidth), numCellsString);
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters().name("Front angle").format("%.1f").textWidth(HeaderRightColumnWidth), _editData->genome._frontAngle);
     }
     ImGui::EndChild();
 }
@@ -95,7 +95,7 @@ void _GenomeEditorWidget::processGeneList()
 
                     // Column 0: No.
                     ImGui::TableNextColumn();
-                    AlienImGui::Text(std::to_string(row + 1));
+                    AlienGui::Text(std::to_string(row + 1));
                     ImGui::SameLine();
                     auto selected = _editData->selectedGene.has_value() ? _editData->selectedGene == row : false;
                     if (ImGui::Selectable(
@@ -110,25 +110,25 @@ void _GenomeEditorWidget::processGeneList()
                     // Column 1: Gene type
                     ImGui::TableNextColumn();
                     if (row == 0) {
-                        AlienImGui::Text("Principal");
+                        AlienGui::Text("Principal");
                     } else {
-                        AlienImGui::Text("Auxiliary");
+                        AlienGui::Text("Auxiliary");
                     }
 
                     // Column 2: Node count
                     ImGui::TableNextColumn();
-                    AlienImGui::Text(std::to_string(gene._nodes.size()));
+                    AlienGui::Text(std::to_string(gene._nodes.size()));
 
                     // Column 3: Shape
                     ImGui::TableNextColumn();
-                    AlienImGui::Text(Const::ConstructionShapeStrings.at(gene._shape));
+                    AlienGui::Text(Const::ConstructionShapeStrings.at(gene._shape));
 
                     // Column 4: References
                     ImGui::TableNextColumn();
                     auto references = GenomeDescriptionInfoService::get().getReferences(gene);
                     auto referencesStrings = references | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex + 1); });
                     auto referencesString = boost::algorithm::join(std::vector(referencesStrings.begin(), referencesStrings.end()), ", ");
-                    AlienImGui::Text(referencesString);
+                    AlienGui::Text(referencesString);
 
                     // Column 5: Referenced by
                     ImGui::TableNextColumn();
@@ -136,9 +136,9 @@ void _GenomeEditorWidget::processGeneList()
                     if (!referencedBy.empty()) {
                         auto referencedByStrings = referencedBy | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex + 1); });
                         auto referencedByString = boost::algorithm::join(std::vector(referencedByStrings.begin(), referencedByStrings.end()), ", ");
-                        AlienImGui::Text(referencedByString);
+                        AlienGui::Text(referencedByString);
                     } else {
-                        AlienImGui::Text("Unused");
+                        AlienGui::Text("Unused");
                     }
 
                     ImGui::PopID();
@@ -159,29 +159,29 @@ void _GenomeEditorWidget::processGeneListButtons()
         ImVec2(cursorPos.x + ImGui::GetContentRegionAvail().x - buttonGroupSize.x - scale(10.0f), cursorPos.y - buttonGroupSize.y - scale(20.0f)));
     if (ImGui::BeginChild("ButtonGroup", buttonGroupSize)) {
 
-        if (AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_PLUS_CIRCLE))) {
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_PLUS_CIRCLE))) {
             onAddGene();
         }
         ImGui::SameLine();
-        AlienImGui::PaddingLeft();
+        AlienGui::PaddingLeft();
         ImGui::BeginDisabled(!_editData->selectedGene.has_value());
-        if (AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_MINUS_CIRCLE))) {
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_MINUS_CIRCLE))) {
             onRemoveGene();
         }
         ImGui::EndDisabled();
 
         ImGui::SameLine();
-        AlienImGui::PaddingLeft();
+        AlienGui::PaddingLeft();
         ImGui::BeginDisabled(!_editData->selectedGene.has_value() || _editData->selectedGene.value() == 0);
-        if (AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_UP))) {
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_UP))) {
             onMoveGeneUpward();
         }
         ImGui::EndDisabled();
 
         ImGui::SameLine();
-        AlienImGui::PaddingLeft();
+        AlienGui::PaddingLeft();
         ImGui::BeginDisabled(!_editData->selectedGene.has_value() || _editData->selectedGene.value() == _editData->genome._genes.size() - 1);
-        if (AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_DOWN))) {
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_DOWN))) {
             onMoveGeneDownward();
         }
         ImGui::EndDisabled();

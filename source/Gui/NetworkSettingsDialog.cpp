@@ -4,7 +4,7 @@
 
 #include "Network/NetworkService.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "BrowserWindow.h"
 #include "StyleRepository.h"
 
@@ -19,20 +19,20 @@ NetworkSettingsDialog::NetworkSettingsDialog()
 
 void NetworkSettingsDialog::processIntern()
 {
-    AlienImGui::InputText(
-        AlienImGui::InputTextParameters().name("Blocks").defaultValue(_origServerAddress).name("Server address").textWidth(RightColumnWidth), _serverAddress);
+    AlienGui::InputText(
+        AlienGui::InputTextParameters().name("Blocks").defaultValue(_origServerAddress).name("Server address").textWidth(RightColumnWidth), _serverAddress);
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
-    AlienImGui::Separator();
+    AlienGui::Separator();
 
-    if (AlienImGui::Button("OK")) {
+    if (AlienGui::Button("OK")) {
         close();
         onChangeSettings();
     }
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
-    if (AlienImGui::Button("Cancel")) {
+    if (AlienGui::Button("Cancel")) {
         close();
     }
 }

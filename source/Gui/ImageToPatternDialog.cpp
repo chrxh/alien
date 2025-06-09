@@ -13,7 +13,7 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/Colors.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "Viewport.h"
 #include "GenericFileDialog.h"
 
@@ -42,7 +42,7 @@ namespace
         static std::vector<Color> cellColors;
         auto toHsv = [](uint32_t color) {
             float h, s, v;
-            AlienImGui::ConvertRGBtoHSV(color, h, s, v);
+            AlienGui::ConvertRGBtoHSV(color, h, s, v);
             return Color{h, s, v}; 
         };
         if (cellColors.empty()) {

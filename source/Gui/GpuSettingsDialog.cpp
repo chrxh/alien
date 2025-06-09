@@ -7,7 +7,7 @@
 #include "EngineInterface/SimulationFacade.h"
 
 #include "StyleRepository.h"
-#include "AlienImGui.h"
+#include "AlienGui.h"
 
 namespace
 {
@@ -40,8 +40,8 @@ void GpuSettingsDialog::processIntern()
     auto origGpuSettings = _simulationFacade->getOriginalGpuSettings();
     auto lastGpuSettings = gpuSettings;
 
-    AlienImGui::InputInt(
-        AlienImGui::InputIntParameters()
+    AlienGui::InputInt(
+        AlienGui::InputIntParameters()
             .name("Blocks")
             .textWidth(RightColumnWidth)
             .defaultValue(origGpuSettings.numBlocks)
@@ -50,15 +50,15 @@ void GpuSettingsDialog::processIntern()
         gpuSettings.numBlocks);
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
-    AlienImGui::Separator();
+    AlienGui::Separator();
 
-    if (AlienImGui::Button("Adopt")) {
+    if (AlienGui::Button("Adopt")) {
         close();
     }
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
-    if (AlienImGui::Button("Cancel")) {
+    if (AlienGui::Button("Cancel")) {
         close();
         gpuSettings = _gpuSettings;
     }

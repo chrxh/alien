@@ -13,7 +13,7 @@
 
 #include "EditorModel.h"
 #include "StyleRepository.h"
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "EditorController.h"
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
@@ -45,70 +45,70 @@ void PatternEditorWindow::processIntern()
     }
 
     //load button
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN))) {
         onOpenPattern();
     }
-    AlienImGui::Tooltip("Open pattern");
+    AlienGui::Tooltip("Open pattern");
 
     //save button
     ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_SAVE))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SAVE))) {
         onSavePattern();
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Save pattern");
+    AlienGui::Tooltip("Save pattern");
 
     ImGui::SameLine();
-    AlienImGui::ToolbarSeparator();
+    AlienGui::ToolbarSeparator();
 
     //copy button
     ImGui::SameLine();
     ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_COPY))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COPY))) {
         onCopy();
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Copy pattern");
+    AlienGui::Tooltip("Copy pattern");
 
     //paste button
     ImGui::SameLine();
     ImGui::BeginDisabled(!_copiedSelection.has_value());
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PASTE))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PASTE))) {
         onPaste();
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Paste pattern");
+    AlienGui::Tooltip("Paste pattern");
 
     //delete button
     ImGui::SameLine();
     ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_TRASH))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_TRASH))) {
         onDelete();
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Delete Pattern");
+    AlienGui::Tooltip("Delete Pattern");
 
     ImGui::SameLine();
-    AlienImGui::ToolbarSeparator();
+    AlienGui::ToolbarSeparator();
 
     //inspect objects button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isObjectInspectionPossible());
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_MICROSCOPE))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_MICROSCOPE))) {
         EditorController::get().onInspectSelectedObjects();
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Inspect Objects");
+    AlienGui::Tooltip("Inspect Objects");
 
     //inspect genomes button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isGenomeInspectionPossible());
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_DNA))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_DNA))) {
         EditorController::get().onInspectSelectedGenomes();
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Inspect principal genome");
+    AlienGui::Tooltip("Inspect principal genome");
 
     if (ImGui::BeginChild(
         "##",
@@ -117,14 +117,14 @@ void PatternEditorWindow::processIntern()
         ImGuiWindowFlags_HorizontalScrollbar)) {
 
         ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
-        AlienImGui::Group("Center position and velocity");
+        AlienGui::Group("Center position and velocity");
 
         auto const& selectionData = EditorModel::get().getSelectionShallowData();
 
         auto centerPosX = EditorModel::get().isRolloutToClusters() ? selectionData.clusterCenterPosX : selectionData.centerPosX;
         auto origCenterPosX = centerPosX;
-        AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters()
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters()
                 .name("Position X")
                 .textWidth(RightColumnWidth)
                 .format("%.3f"),
@@ -132,8 +132,8 @@ void PatternEditorWindow::processIntern()
 
         auto centerPosY = EditorModel::get().isRolloutToClusters() ? selectionData.clusterCenterPosY : selectionData.centerPosY;
         auto origCenterPosY = centerPosY;
-        AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters()
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters()
                 .name("Position Y")
                 .textWidth(RightColumnWidth)
                 .format("%.3f"),
@@ -141,8 +141,8 @@ void PatternEditorWindow::processIntern()
 
         auto centerVelX = EditorModel::get().isRolloutToClusters() ? selectionData.clusterCenterVelX : selectionData.centerVelX;
         auto origCenterVelX = centerVelX;
-        AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters()
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters()
                 .name("Velocity X")
                 .textWidth(RightColumnWidth)
                 .step(0.1f)
@@ -151,18 +151,18 @@ void PatternEditorWindow::processIntern()
 
         auto centerVelY = EditorModel::get().isRolloutToClusters() ? selectionData.clusterCenterVelY : selectionData.centerVelY;
         auto origCenterVelY = centerVelY;
-        AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters()
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters()
                 .name("Velocity Y")
                 .textWidth(RightColumnWidth)
                 .step(0.1f)
                 .format("%.3f"),
             centerVelY);
 
-        AlienImGui::Group("Center rotation");
+        AlienGui::Group("Center rotation");
         auto origAngle = _angle;
-        AlienImGui::SliderInputFloat(
-            AlienImGui::SliderInputFloatParameters()
+        AlienGui::SliderInputFloat(
+            AlienGui::SliderInputFloatParameters()
                 .name("Angle")
                 .textWidth(RightColumnWidth)
                 .inputWidth(StyleRepository::get().scale(50.0f))
@@ -172,8 +172,8 @@ void PatternEditorWindow::processIntern()
             _angle);
 
         auto origAngularVel = _angularVel;
-        AlienImGui::InputFloat(
-            AlienImGui::InputFloatParameters()
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters()
                 .name("Angular velocity")
                 .textWidth(RightColumnWidth)
                 .step(0.01f)
@@ -216,7 +216,7 @@ void PatternEditorWindow::processIntern()
         ImGui::EndDisabled();
 
 
-        AlienImGui::Group("Color");
+        AlienGui::Group("Color");
         if (colorButton("    ##color1", Const::IndividualCellColor1)) {
             _simulationFacade->colorSelectedObjects(0, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(0);
@@ -251,59 +251,59 @@ void PatternEditorWindow::processIntern()
             _simulationFacade->colorSelectedObjects(6, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(6);
         }
-        AlienImGui::Group("Tools");
+        AlienGui::Group("Tools");
         ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
         if (ImGui::Button(ICON_FA_WIND)) {
             _simulationFacade->uniformVelocitiesForSelectedObjects(EditorModel::get().isRolloutToClusters());
         }
         ImGui::EndDisabled();
-        AlienImGui::Tooltip("Make uniform velocities");
+        AlienGui::Tooltip("Make uniform velocities");
 
         ImGui::SameLine();
         ImGui::BeginDisabled(EditorModel::get().isCellSelectionEmpty());
         if (ImGui::Button(ICON_FA_BALANCE_SCALE)) {
             _simulationFacade->relaxSelectedObjects(EditorModel::get().isRolloutToClusters());
         }
-        AlienImGui::Tooltip("Release stresses");
+        AlienGui::Tooltip("Release stresses");
 
         ImGui::SameLine();
         if (ImGui::Button(ICON_FA_TINT)) {
             onMakeSticky();
         }
-        AlienImGui::Tooltip("Make sticky");
+        AlienGui::Tooltip("Make sticky");
 
         ImGui::SameLine();
         if (ImGui::Button(ICON_FA_TINT_SLASH)) {
             onRemoveStickiness();
         }
-        AlienImGui::Tooltip("Make unsticky");
+        AlienGui::Tooltip("Make unsticky");
 
         ImGui::SameLine();
         if (ImGui::Button(ICON_FA_LINK)) {
             onSetBarrier(true);
         }
-        AlienImGui::Tooltip("Convert to indestructible wall");
+        AlienGui::Tooltip("Convert to indestructible wall");
 
         ImGui::SameLine();
         if (ImGui::Button(ICON_FA_UNLINK)) {
             onSetBarrier(false);
         }
-        AlienImGui::Tooltip("Convert to destructible cell");
+        AlienGui::Tooltip("Convert to destructible cell");
         ImGui::EndDisabled();
 
         _lastSelection = selection;
     }
     ImGui::EndChild();
 
-    AlienImGui::Separator();
+    AlienGui::Separator();
     auto rolloutToClusters = EditorModel::get().isRolloutToClusters();
-    if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Roll out changes to cell networks"), rolloutToClusters)) {
+    if (AlienGui::ToggleButton(AlienGui::ToggleButtonParameters().name("Roll out changes to cell networks"), rolloutToClusters)) {
         EditorModel::get().setRolloutToClusters(rolloutToClusters);
         _angle = 0;
         _angularVel = 0;
     }
     ImGui::SameLine();
-    AlienImGui::HelpMarker("If turned on, all changes made in this window or with the mouse cursor are applied to the cell networks of the selected cell.\n"
+    AlienGui::HelpMarker("If turned on, all changes made in this window or with the mouse cursor are applied to the cell networks of the selected cell.\n"
                            "If this option is disabled, the changes will be applied only to the selected cells. In this case, the connections between the cells and the neighboring cells are recalculated when the positions are changed.\n"
                            "If you hold down the SHIFT key, this toggle button is temporarily turned off.");
 }
@@ -419,7 +419,7 @@ void PatternEditorWindow::onSetBarrier(bool value)
 bool PatternEditorWindow::colorButton(std::string id, uint32_t cellColor)
 {
     ImGui::PushID(id.c_str());
-    auto result = AlienImGui::ColorField(cellColor);
+    auto result = AlienGui::ColorField(cellColor);
     ImGui::PopID();
     return result;
 }

@@ -8,7 +8,7 @@
 #include "Viewport.h"
 #include "StatisticsWindow.h"
 #include "TemporalControlWindow.h"
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "StyleRepository.h"
 
 namespace
@@ -35,15 +35,15 @@ NewSimulationDialog::NewSimulationDialog()
 
 void NewSimulationDialog::processIntern()
 {
-    AlienImGui::InputText(AlienImGui::InputTextParameters().name("Project name").textWidth(ContentTextInputWidth), _projectName, ProjectNameSize);
-    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Width").textWidth(ContentTextInputWidth), _width);
-    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Height").textWidth(ContentTextInputWidth), _height);
-    AlienImGui::Checkbox(
-        AlienImGui::CheckboxParameters().name("Adopt simulation parameters").textWidth(0), _adoptSimulationParameters);
+    AlienGui::InputText(AlienGui::InputTextParameters().name("Project name").textWidth(ContentTextInputWidth), _projectName, ProjectNameSize);
+    AlienGui::InputInt(AlienGui::InputIntParameters().name("Width").textWidth(ContentTextInputWidth), _width);
+    AlienGui::InputInt(AlienGui::InputIntParameters().name("Height").textWidth(ContentTextInputWidth), _height);
+    AlienGui::Checkbox(
+        AlienGui::CheckboxParameters().name("Adopt simulation parameters").textWidth(0), _adoptSimulationParameters);
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
-    AlienImGui::Separator();
-    if (AlienImGui::Button("OK")) {
+    AlienGui::Separator();
+    if (AlienGui::Button("OK")) {
         ImGui::CloseCurrentPopup();
         onNewSimulation();
         close();
@@ -51,7 +51,7 @@ void NewSimulationDialog::processIntern()
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
-    if (AlienImGui::Button("Cancel")) {
+    if (AlienGui::Button("Cancel")) {
         ImGui::CloseCurrentPopup();
         close();
     }

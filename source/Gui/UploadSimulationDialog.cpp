@@ -7,7 +7,7 @@
 #include "Network/NetworkService.h"
 #include "Network/NetworkValidationService.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "GenericMessageDialog.h"
 #include "StyleRepository.h"
 #include "BrowserWindow.h"
@@ -67,12 +67,12 @@ void UploadSimulationDialog::processIntern()
 {
     auto resourceTypeString = BrowserDataTypeToLowerString.at(_resourceType);
     if (ImGui::BeginChild("##header", ImVec2(0, scale(52.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
-        AlienImGui::Text("Data privacy policy");
-        AlienImGui::HelpMarker(
+        AlienGui::Text("Data privacy policy");
+        AlienGui::HelpMarker(
             "The " + resourceTypeString + " file, name and description are stored on the server. It cannot be guaranteed that the data will not be deleted.");
 
-        AlienImGui::Text("How to use or create folders?");
-        AlienImGui::HelpMarker(
+        AlienGui::Text("How to use or create folders?");
+        AlienGui::HelpMarker(
             "If you want to upload the " + resourceTypeString
             + " to a folder, you can use the `/`-notation. The folder will be created automatically if it does not exist.\nFor instance, naming a simulation "
               "as `Biome/Water "
@@ -82,39 +82,39 @@ void UploadSimulationDialog::processIntern()
 
     if (!_folder.empty()) {
         if (ImGui::BeginChild("##folder info", ImVec2(0, scale(85.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
-            AlienImGui::Text("The following folder has been selected in the browser\nand will used for the upload:\n\n");
-            AlienImGui::BoldText(_folder);
+            AlienGui::Text("The following folder has been selected in the browser\nand will used for the upload:\n\n");
+            AlienGui::BoldText(_folder);
         }
         ImGui::EndChild();
     }
 
-    AlienImGui::Separator();
+    AlienGui::Separator();
 
-    AlienImGui::InputText(AlienImGui::InputTextParameters().hint(BrowserDataTypeToUpperString.at(_resourceType)  + " name").textWidth(0), _resourceName);
+    AlienGui::InputText(AlienGui::InputTextParameters().hint(BrowserDataTypeToUpperString.at(_resourceType)  + " name").textWidth(0), _resourceName);
 
-    AlienImGui::Separator();
+    AlienGui::Separator();
 
     ImGui::PushID("description");
-    AlienImGui::InputTextMultiline(
-        AlienImGui::InputTextMultilineParameters()
+    AlienGui::InputTextMultiline(
+        AlienGui::InputTextMultilineParameters()
             .hint("Description (optional)")
             .textWidth(0)
             .height(ImGui::GetContentRegionAvail().y - StyleRepository::get().scale(70.0f)),
         _resourceDescription);
     ImGui::PopID();
 
-    AlienImGui::ToggleButton(
-        AlienImGui::ToggleButtonParameters()
+    AlienGui::ToggleButton(
+        AlienGui::ToggleButtonParameters()
             .name("Make public")
             .tooltip(
                 "If true, the " + resourceTypeString + " will be visible to all users. If false, the " + resourceTypeString
                 + " will only be visible in the private workspace. This property can also be changed later if desired."),
         _share);
 
-    AlienImGui::Separator();
+    AlienGui::Separator();
 
     ImGui::BeginDisabled(_resourceName.empty());
-    if (AlienImGui::Button("OK")) {
+    if (AlienGui::Button("OK")) {
         if (NetworkValidationService::get().isStringValidForDatabase(_resourceName) && NetworkValidationService::get().isStringValidForDatabase(_resourceDescription)) {
             close();
             onUpload();
@@ -128,7 +128,7 @@ void UploadSimulationDialog::processIntern()
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
-    if (AlienImGui::Button("Cancel")) {
+    if (AlienGui::Button("Cancel")) {
         close();
     }
 }

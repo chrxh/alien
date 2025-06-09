@@ -6,7 +6,7 @@
 
 #include "EngineInterface/GenomeDescriptionConverterService.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "StyleRepository.h"
 
 void ChangeColorDialog::initIntern(std::function<GenomeDescription()> getGenomeFunc, std::function<void(GenomeDescription const&)> setGenomeFunc)
@@ -21,7 +21,7 @@ ChangeColorDialog::ChangeColorDialog()
 
 void ChangeColorDialog::processIntern()
 {
-    AlienImGui::Group("Color transition rule");
+    AlienGui::Group("Color transition rule");
     if (ImGui::BeginTable("##", 3, ImGuiTableFlags_SizingStretchProp)) {
         ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 0);
         ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, scale(20));
@@ -30,28 +30,28 @@ void ChangeColorDialog::processIntern()
 
         ImGui::TableSetColumnIndex(0);
         ImGui::PushID("##1");
-        AlienImGui::ComboColor(AlienImGui::ComboColorParameters().textWidth(0).width(0), _sourceColor);
+        AlienGui::ComboColor(AlienGui::ComboColorParameters().textWidth(0).width(0), _sourceColor);
         ImGui::PopID();
 
         ImGui::TableSetColumnIndex(1);
-        AlienImGui::Text(ICON_FA_LONG_ARROW_ALT_RIGHT);
+        AlienGui::Text(ICON_FA_LONG_ARROW_ALT_RIGHT);
 
         ImGui::TableSetColumnIndex(2);
         ImGui::PushID("target color");
-        AlienImGui::ComboColor(AlienImGui::ComboColorParameters().textWidth(0).width(0), _targetColor);
+        AlienGui::ComboColor(AlienGui::ComboColorParameters().textWidth(0).width(0), _targetColor);
         ImGui::PopID();
 
         ImGui::EndTable();
     }
-    AlienImGui::Group("Options");
+    AlienGui::Group("Options");
     ImGui::Checkbox("##includeSubgenomes", &_includeSubGenomes);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
-    AlienImGui::Text("Include sub-genomes");
+    AlienGui::Text("Include sub-genomes");
     
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
-    AlienImGui::Separator();
+    AlienGui::Separator();
 
-    if (AlienImGui::Button("OK")) {
+    if (AlienGui::Button("OK")) {
         auto genome = _getGenomeFunc();
         onChangeColor(genome);
         _setGenomeFunc(genome);
@@ -59,7 +59,7 @@ void ChangeColorDialog::processIntern()
     }
     ImGui::SetItemDefaultFocus();
     ImGui::SameLine();
-    if (AlienImGui::Button("Cancel")) {
+    if (AlienGui::Button("Cancel")) {
         close();
     }
 }

@@ -4,7 +4,7 @@
 
 #include "Network/NetworkService.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "BrowserWindow.h"
 #include "CreateUserDialog.h"
 #include "GenericMessageDialog.h"
@@ -15,16 +15,16 @@ DeleteUserDialog::DeleteUserDialog()
 
 void DeleteUserDialog::processIntern()
 {
-    AlienImGui::Text(
+    AlienGui::Text(
         "Warning: All the data of the user '" + *NetworkService::get().getLoggedInUserName()
         + "' will be deleted on the server side.\nThese include the likes, the simulations and the account data.");
-    AlienImGui::Separator();
+    AlienGui::Separator();
 
-    AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Re-enter password").password(true).textWidth(0), _reenteredPassword);
-    AlienImGui::Separator();
+    AlienGui::InputText(AlienGui::InputTextParameters().hint("Re-enter password").password(true).textWidth(0), _reenteredPassword);
+    AlienGui::Separator();
 
     ImGui::BeginDisabled(_reenteredPassword.empty());
-    if (AlienImGui::Button("Delete")) {
+    if (AlienGui::Button("Delete")) {
         close();
         if (_reenteredPassword == *NetworkService::get().getPassword()) {
             onDelete();
@@ -37,7 +37,7 @@ void DeleteUserDialog::processIntern()
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
-    if (AlienImGui::Button("Cancel")) {
+    if (AlienGui::Button("Cancel")) {
         close();
         _reenteredPassword.clear();
     }

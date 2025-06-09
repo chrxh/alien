@@ -4,7 +4,7 @@
 
 #include "Base/StringHelper.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "CreatureTabEditData.h"
 #include "CreatureTabLayoutData.h"
 #include "StyleRepository.h"
@@ -26,7 +26,7 @@ void _GeneEditorWidget::process()
         if (_editData->selectedGene.has_value()) {
             processHeaderData();
 
-            AlienImGui::MovableHorizontalSeparator(AlienImGui::MovableHorizontalSeparatorParameters().additive(false), _layoutData->nodeListHeight);
+            AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _layoutData->nodeListHeight);
 
             processNodeList();
         } else {
@@ -43,11 +43,11 @@ _GeneEditorWidget::_GeneEditorWidget(CreatureTabEditData const& genome, Creature
 
 void _GeneEditorWidget::processNoSelection()
 {
-    AlienImGui::Group("Selected gene");
+    AlienGui::Group("Selected gene");
     if (ImGui::BeginChild("overlay", ImVec2(0, 0), 0)) {
         auto startPos = ImGui::GetCursorScreenPos();
         auto size = ImGui::GetContentRegionAvail();
-        AlienImGui::DisabledField();
+        AlienGui::DisabledField();
         auto text = "No gene is selected";
         auto textSize = ImGui::CalcTextSize(text);
         ImVec2 textPos(startPos.x + size.x / 2 - textSize.x / 2, startPos.y + size.y / 2 - textSize.y / 2);
@@ -58,7 +58,7 @@ void _GeneEditorWidget::processNoSelection()
 
 void _GeneEditorWidget::processHeaderData()
 {
-    AlienImGui::Group("Selected gene");
+    AlienGui::Group("Selected gene");
 
     auto availableWidth = scaleInverse(ImGui::GetContentRegionAvail().x);
     auto width = scale(std::min(availableWidth, HeaderTotalWidth));
@@ -96,15 +96,15 @@ void _GeneEditorWidget::processNodeList()
 
                     // Column 0: No.
                     ImGui::TableNextColumn();
-                    AlienImGui::Text(std::to_string(row + 1));
+                    AlienGui::Text(std::to_string(row + 1));
 
                     // Column 1: Node type
                     ImGui::TableNextColumn();
-                    AlienImGui::Text(Const::CellTypeGenomeStrings.at(node.getCellType()));
+                    AlienGui::Text(Const::CellTypeGenomeStrings.at(node.getCellType()));
 
                     // Column 2: Angle
                     ImGui::TableNextColumn();
-                    AlienImGui::Text(StringHelper::format(node._referenceAngle, 1));
+                    AlienGui::Text(StringHelper::format(node._referenceAngle, 1));
                     ImGui::PopID();
                 }
             }

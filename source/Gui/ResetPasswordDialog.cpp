@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "GenericMessageDialog.h"
 #include "NewPasswordDialog.h"
 
@@ -20,22 +20,22 @@ void ResetPasswordDialog::open(std::string const& userName, UserInfo const& user
 
 void ResetPasswordDialog::processIntern()
 {
-    AlienImGui::Text("Security information");
-    AlienImGui::HelpMarker("The data transfer to the server is encrypted via https. On the server side, the email address is not stored in cleartext, but "
+    AlienGui::Text("Security information");
+    AlienGui::HelpMarker("The data transfer to the server is encrypted via https. On the server side, the email address is not stored in cleartext, but "
                            "as a SHA-256 hash value in the database.");
-    AlienImGui::Text("Data privacy policy");
-    AlienImGui::HelpMarker(
+    AlienGui::Text("Data privacy policy");
+    AlienGui::HelpMarker(
         "The entered e-mail address will not be passed on to third parties and is used only for the following two reasons: 1) To send the confirmation code. "
         "2) A SHA-256 hash value of the email address is stored on the server to verify that it is not yet in use.");
-    AlienImGui::Separator();
-    AlienImGui::Text("Please enter your email address to receive the\nconfirmation code to reset the password.");
-    AlienImGui::Separator();
-    AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Email").textWidth(0), _email);
+    AlienGui::Separator();
+    AlienGui::Text("Please enter your email address to receive the\nconfirmation code to reset the password.");
+    AlienGui::Separator();
+    AlienGui::InputText(AlienGui::InputTextParameters().hint("Email").textWidth(0), _email);
 
-    AlienImGui::Separator();
+    AlienGui::Separator();
 
     ImGui::BeginDisabled(_email.empty());
-    if (AlienImGui::Button("OK")) {
+    if (AlienGui::Button("OK")) {
         close();
 
         onResetPassword();
@@ -44,7 +44,7 @@ void ResetPasswordDialog::processIntern()
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
-    if (AlienImGui::Button("Cancel")) {
+    if (AlienGui::Button("Cancel")) {
         close();
     }
 }

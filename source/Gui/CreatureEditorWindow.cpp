@@ -4,7 +4,7 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "CreatureTabLayoutData.h"
 #include "CreatureTabWidget.h"
 #include "EditorController.h"
@@ -55,21 +55,21 @@ bool CreatureEditorWindow::isShown()
 
 void CreatureEditorWindow::processToolbar()
 {
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN))) {
     }
-    AlienImGui::Tooltip("Open creature from file");
+    AlienGui::Tooltip("Open creature from file");
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_SAVE))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SAVE))) {
     }
-    AlienImGui::Tooltip("Save creature to file");
+    AlienGui::Tooltip("Save creature to file");
 
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_UPLOAD))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_UPLOAD))) {
     }
-    AlienImGui::Tooltip("Share your creature with other users:\nYour current creature will be uploaded to the server and made visible in the browser.");
+    AlienGui::Tooltip("Share your creature with other users:\nYour current creature will be uploaded to the server and made visible in the browser.");
 
-    AlienImGui::Separator();
+    AlienGui::Separator();
 }
 
 void CreatureEditorWindow::processTabWidget()
@@ -79,7 +79,7 @@ void CreatureEditorWindow::processTabWidget()
         if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
             scheduleAddTab(GenomeDescription_New());
         }
-        AlienImGui::Tooltip("New creature");
+        AlienGui::Tooltip("New creature");
 
         std::optional<int> tabToDelete;
 

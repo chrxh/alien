@@ -38,7 +38,7 @@
 #include "Viewport.h"
 #include "NewSimulationDialog.h"
 #include "MainLoopController.h"
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "AboutDialog.h"
 #include "MassOperationsDialog.h"
 #include "LogWindow.h"

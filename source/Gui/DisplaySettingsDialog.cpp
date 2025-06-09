@@ -7,7 +7,7 @@
 
 #include "Base/LoggingService.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "WindowController.h"
 #include "StyleRepository.h"
 
@@ -31,7 +31,7 @@ void DisplaySettingsDialog::processIntern()
 {
     auto isFullscreen = !WindowController::get().isWindowedMode();
 
-    if (AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Full screen"), isFullscreen)) {
+    if (AlienGui::ToggleButton(AlienGui::ToggleButtonParameters().name("Full screen"), isFullscreen)) {
         if (isFullscreen) {
             setFullscreen(_selectionIndex);
         } else {
@@ -42,8 +42,8 @@ void DisplaySettingsDialog::processIntern()
 
     ImGui::BeginDisabled(!isFullscreen);
 
-    if (AlienImGui::Combo(
-            AlienImGui::ComboParameters().name("Resolution").textWidth(RightColumnWidth).defaultValue(_origSelectionIndex).values(_videoModeStrings),
+    if (AlienGui::Combo(
+            AlienGui::ComboParameters().name("Resolution").textWidth(RightColumnWidth).defaultValue(_origSelectionIndex).values(_videoModeStrings),
             _selectionIndex)) {
 
         setFullscreen(_selectionIndex);
@@ -51,8 +51,8 @@ void DisplaySettingsDialog::processIntern()
     ImGui::EndDisabled();
 
     auto fps = WindowController::get().getFps();
-    if (AlienImGui::SliderInt(
-            AlienImGui::SliderIntParameters()
+    if (AlienGui::SliderInt(
+            AlienGui::SliderIntParameters()
                 .name("Frames per second")
                 .textWidth(RightColumnWidth)
                 .defaultValue(&_origFps)
@@ -64,15 +64,15 @@ void DisplaySettingsDialog::processIntern()
     }
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
-    AlienImGui::Separator();
+    AlienGui::Separator();
 
-    if (AlienImGui::Button("OK")) {
+    if (AlienGui::Button("OK")) {
         close();
     }
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
-    if (AlienImGui::Button("Cancel")) {
+    if (AlienGui::Button("Cancel")) {
         close();
         WindowController::get().setMode(_origMode);
         WindowController::get().setFps(_origFps);

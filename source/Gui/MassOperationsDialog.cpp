@@ -8,7 +8,7 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/SimulationFacade.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "StyleRepository.h"
 
 namespace
@@ -23,7 +23,7 @@ void MassOperationsDialog::initIntern(SimulationFacade simulationFacade)
 
 void MassOperationsDialog::processIntern()
 {
-    AlienImGui::Group("Cell colors");
+    AlienGui::Group("Cell colors");
     ImGui::PushID("cell");
     ImGui::Checkbox("##colors", &_randomizeCellColors);
     ImGui::BeginDisabled(!_randomizeCellColors);
@@ -44,7 +44,7 @@ void MassOperationsDialog::processIntern()
     ImGui::EndDisabled();
     ImGui::PopID();
 
-    AlienImGui::Group("Genome colors");
+    AlienGui::Group("Genome colors");
     ImGui::PushID("genome");
     ImGui::Checkbox("##colors", &_randomizeGenomeColors);
     ImGui::BeginDisabled(!_randomizeGenomeColors);
@@ -65,51 +65,51 @@ void MassOperationsDialog::processIntern()
     ImGui::EndDisabled();
     ImGui::PopID();
 
-    AlienImGui::Group("Cell Energies");
+    AlienGui::Group("Cell Energies");
     ImGui::Checkbox("##energies", &_randomizeEnergies);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
     auto posX = ImGui::GetCursorPos().x;
     ImGui::BeginDisabled(!_randomizeEnergies);
-    AlienImGui::InputFloat(AlienImGui::InputFloatParameters().format("%.1f").name("Minimum energy").textWidth(RightColumnWidth), _minEnergy);
+    AlienGui::InputFloat(AlienGui::InputFloatParameters().format("%.1f").name("Minimum energy").textWidth(RightColumnWidth), _minEnergy);
     ImGui::SetCursorPosX(posX);
-    AlienImGui::InputFloat(AlienImGui::InputFloatParameters().format("%.1f").name("Maximum energy").textWidth(RightColumnWidth), _maxEnergy);
+    AlienGui::InputFloat(AlienGui::InputFloatParameters().format("%.1f").name("Maximum energy").textWidth(RightColumnWidth), _maxEnergy);
     ImGui::EndDisabled();
 
-    AlienImGui::Group("Cell ages");
+    AlienGui::Group("Cell ages");
     ImGui::Checkbox("##ages", &_randomizeAges);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
     posX = ImGui::GetCursorPos().x;
     ImGui::BeginDisabled(!_randomizeAges);
-    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Minimum age").textWidth(RightColumnWidth), _minAge);
+    AlienGui::InputInt(AlienGui::InputIntParameters().name("Minimum age").textWidth(RightColumnWidth), _minAge);
     ImGui::SetCursorPosX(posX);
-    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Maximum age").textWidth(RightColumnWidth), _maxAge);
+    AlienGui::InputInt(AlienGui::InputIntParameters().name("Maximum age").textWidth(RightColumnWidth), _maxAge);
     ImGui::EndDisabled();
 
-    AlienImGui::Group("Detonation countdown");
+    AlienGui::Group("Detonation countdown");
     ImGui::Checkbox("##countdown", &_randomizeCountdowns);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
     posX = ImGui::GetCursorPos().x;
     ImGui::BeginDisabled(!_randomizeCountdowns);
-    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Minimum value").textWidth(RightColumnWidth), _minCountdown);
+    AlienGui::InputInt(AlienGui::InputIntParameters().name("Minimum value").textWidth(RightColumnWidth), _minCountdown);
     ImGui::SetCursorPosX(posX);
-    AlienImGui::InputInt(AlienImGui::InputIntParameters().name("Maximum value").textWidth(RightColumnWidth), _maxCountdown);
+    AlienGui::InputInt(AlienGui::InputIntParameters().name("Maximum value").textWidth(RightColumnWidth), _maxCountdown);
     ImGui::EndDisabled();
 
-    AlienImGui::Group("Mutants");
+    AlienGui::Group("Mutants");
     ImGui::Checkbox("##mutationId", &_randomizeMutationId);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
-    AlienImGui::Text("Randomize mutation ids");
+    AlienGui::Text("Randomize mutation ids");
 
-    AlienImGui::Group("Options");
+    AlienGui::Group("Options");
     ImGui::Checkbox("##restrictToSelectedClusters", &_restrictToSelectedClusters);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
-    AlienImGui::Text("Restrict to selected cell networks");
+    AlienGui::Text("Restrict to selected cell networks");
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
-    AlienImGui::Separator();
+    AlienGui::Separator();
 
     ImGui::BeginDisabled(!isOkEnabled());
-    if (AlienImGui::Button("OK")) {
+    if (AlienGui::Button("OK")) {
         onExecute();
         close();
     }
@@ -117,7 +117,7 @@ void MassOperationsDialog::processIntern()
 
     ImGui::SameLine();
     ImGui::SetItemDefaultFocus();
-    if (AlienImGui::Button("Cancel")) {
+    if (AlienGui::Button("Cancel")) {
         close();
     }
 
@@ -132,7 +132,7 @@ MassOperationsDialog::MassOperationsDialog()
 void MassOperationsDialog::colorCheckbox(std::string id, uint32_t cellColor, bool& check)
 {
     float h, s, v;
-    AlienImGui::ConvertRGBtoHSV(cellColor, h, s, v);
+    AlienGui::ConvertRGBtoHSV(cellColor, h, s, v);
     ImGui::PushStyleColor(ImGuiCol_FrameBg, (ImVec4)ImColor::HSV(h, s * 0.6f, v * 0.3f));
     ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, (ImVec4)ImColor::HSV(h, s * 0.7f, v * 0.5f));
     ImGui::PushStyleColor(ImGuiCol_FrameBgActive, (ImVec4)ImColor::HSV(h, s * 0.8f, v * 0.8f));

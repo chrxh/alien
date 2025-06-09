@@ -4,7 +4,7 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include "StyleRepository.h"
-#include "AlienImGui.h"
+#include "AlienGui.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -401,8 +401,8 @@ void GettingStartedWindow::processIntern()
     }
     ImGui::EndChild();
 
-    AlienImGui::Separator();
-    AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Show after startup"), _showAfterStartup);
+    AlienGui::Separator();
+    AlienGui::ToggleButton(AlienGui::ToggleButtonParameters().name("Show after startup"), _showAfterStartup);
 }
 
 void GettingStartedWindow::drawTitle()
@@ -414,72 +414,72 @@ void GettingStartedWindow::drawTitle()
     ImGui::PopFont();
 
     ImGui::SameLine();
-    AlienImGui::NegativeSpacing();
+    AlienGui::NegativeSpacing();
     ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
     ImGui::Text("A");
     ImGui::PopFont();
 
     ImGui::SameLine();
-    AlienImGui::NegativeSpacing();
-    AlienImGui::NegativeSpacing();
+    AlienGui::NegativeSpacing();
+    AlienGui::NegativeSpacing();
     ImGui::PushFont(StyleRepository::get().getMediumFont());
     ImGui::Text("rtificial ");
     ImGui::PopFont();
 
     ImGui::SameLine();
-    AlienImGui::NegativeSpacing();
+    AlienGui::NegativeSpacing();
     ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
     ImGui::Text("LI");
     ImGui::PopFont();
 
     ImGui::SameLine();
-    AlienImGui::NegativeSpacing();
-    AlienImGui::NegativeSpacing();
+    AlienGui::NegativeSpacing();
+    AlienGui::NegativeSpacing();
     ImGui::PushFont(StyleRepository::get().getMediumFont());
     ImGui::Text("fe ");
     ImGui::PopFont();
 
     ImGui::SameLine();
-    AlienImGui::NegativeSpacing();
+    AlienGui::NegativeSpacing();
     ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
     ImGui::Text("EN");
     ImGui::PopFont();
 
     ImGui::SameLine();
-    AlienImGui::NegativeSpacing();
-    AlienImGui::NegativeSpacing();
+    AlienGui::NegativeSpacing();
+    AlienGui::NegativeSpacing();
     ImGui::PushFont(StyleRepository::get().getMediumFont());
     ImGui::Text("vironment ?");
     ImGui::PopFont();
 
     ImGui::PopStyleColor();
-    AlienImGui::Separator();
+    AlienGui::Separator();
 }
 
 void GettingStartedWindow::drawHeading1(std::string const& text)
 {
-    AlienImGui::Separator();
+    AlienGui::Separator();
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
-    AlienImGui::BoldText(text);
+    AlienGui::BoldText(text);
     ImGui::PopStyleColor();
-    AlienImGui::Separator();
+    AlienGui::Separator();
 }
 
 void GettingStartedWindow::drawHeading2(std::string const& text)
 {
     ImGui::Spacing();
-    AlienImGui::BoldText(text);
+    AlienGui::BoldText(text);
 }
 
 void GettingStartedWindow::drawItemText(std::string const& text)
 {
     ImGui::Text(ICON_FA_CHEVRON_RIGHT);
     ImGui::SameLine();
-    AlienImGui::Text(text);
+    AlienGui::Text(text);
 }
 
 void GettingStartedWindow::drawParagraph(std::string const& text)
 {
-    AlienImGui::Text(text);
+    AlienGui::Text(text);
 }
  

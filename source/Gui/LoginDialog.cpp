@@ -6,7 +6,7 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "Network/NetworkService.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "GenericMessageDialog.h"
 #include "CreateUserDialog.h"
 #include "BrowserWindow.h"
@@ -28,46 +28,46 @@ LoginDialog::LoginDialog()
 
 void LoginDialog::processIntern()
 {
-    AlienImGui::Text("How to create a new user?");
-    AlienImGui::HelpMarker(Const::LoginHowToCreateNewUseTooltip);
+    AlienGui::Text("How to create a new user?");
+    AlienGui::HelpMarker(Const::LoginHowToCreateNewUseTooltip);
 
-    AlienImGui::Text("Forgot your password?");
-    AlienImGui::HelpMarker(Const::LoginForgotYourPasswordTooltip);
+    AlienGui::Text("Forgot your password?");
+    AlienGui::HelpMarker(Const::LoginForgotYourPasswordTooltip);
 
-    AlienImGui::Text("Security information");
-    AlienImGui::HelpMarker(Const::LoginSecurityInformationTooltip);
+    AlienGui::Text("Security information");
+    AlienGui::HelpMarker(Const::LoginSecurityInformationTooltip);
 
-    AlienImGui::Separator();
+    AlienGui::Separator();
 
     auto& loginController = LoginController::get();
     auto userName = loginController.getUserName();
-    AlienImGui::InputText(AlienImGui::InputTextParameters().hint("User name").textWidth(0), userName);
+    AlienGui::InputText(AlienGui::InputTextParameters().hint("User name").textWidth(0), userName);
     loginController.setUserName(userName);
 
     auto password= loginController.getPassword();
-    AlienImGui::InputText(AlienImGui::InputTextParameters().hint("Password").password(true).textWidth(0), password);
+    AlienGui::InputText(AlienGui::InputTextParameters().hint("Password").password(true).textWidth(0), password);
     loginController.setPassword(password);
 
-    AlienImGui::Separator();
+    AlienGui::Separator();
     ImGui::Spacing();
 
     auto remember = loginController.isRemember();
-    AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Remember").tooltip(Const::LoginRememberTooltip), remember);
+    AlienGui::ToggleButton(AlienGui::ToggleButtonParameters().name("Remember").tooltip(Const::LoginRememberTooltip), remember);
     loginController.setRemember(remember);
 
     auto shareGpuInfo = loginController.shareGpuInfo();
-    AlienImGui::ToggleButton(
-        AlienImGui::ToggleButtonParameters()
+    AlienGui::ToggleButton(
+        AlienGui::ToggleButtonParameters()
             .name("Share GPU model info")
             .tooltip(Const::LoginShareGpuInfoTooltip1 + _simulationFacade->getGpuName() + "\n" + Const::LoginShareGpuInfoTooltip2),
         shareGpuInfo);
     loginController.setShareGpuInfo(shareGpuInfo);
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
-    AlienImGui::Separator();
+    AlienGui::Separator();
 
     ImGui::BeginDisabled(userName.empty() || password.empty());
-    if (AlienImGui::Button("Login")) {
+    if (AlienGui::Button("Login")) {
         close();
         loginController.onLogin();
     }
@@ -75,11 +75,11 @@ void LoginDialog::processIntern()
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
-    AlienImGui::VerticalSeparator();
+    AlienGui::VerticalSeparator();
 
     ImGui::SameLine();
     ImGui::BeginDisabled(userName.empty() || password.empty());
-    if (AlienImGui::Button("Create user")) {
+    if (AlienGui::Button("Create user")) {
         close();
         CreateUserDialog::get().open(userName, password, LoginController::get().getUserInfo());
     }
@@ -87,17 +87,17 @@ void LoginDialog::processIntern()
 
     ImGui::SameLine();
     ImGui::BeginDisabled(userName.empty());
-    if (AlienImGui::Button("Reset password")) {
+    if (AlienGui::Button("Reset password")) {
         close();
         ResetPasswordDialog::get().open(userName, LoginController::get().getUserInfo());
     }
     ImGui::EndDisabled();
 
     ImGui::SameLine();
-    AlienImGui::VerticalSeparator();
+    AlienGui::VerticalSeparator();
 
     ImGui::SameLine();
-    if (AlienImGui::Button("Cancel")) {
+    if (AlienGui::Button("Cancel")) {
         close();
     }
 }
