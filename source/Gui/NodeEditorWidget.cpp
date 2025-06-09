@@ -12,7 +12,7 @@ NodeEditorWidget _NodeEditorWidget::create(CreatureTabEditData const& editData, 
 void _NodeEditorWidget::process()
 {
     if (ImGui::BeginChild("NodeEditor", ImVec2(0, 0))) {
-        if (getSelectedNode()) {
+        if (_editData->getSelectedNode()) {
             processNodeAttributes();
         } else {
             processNoSelection();
@@ -45,18 +45,4 @@ void _NodeEditorWidget::processNoSelection()
         ImGui::GetWindowDrawList()->AddText(textPos, ImGui::GetColorU32(ImGuiCol_Text), text);
     }
     ImGui::EndChild();
-}
-
-std::optional<int> _NodeEditorWidget::getSelectedNode() const
-{
-    if (!_editData->selectedGene.has_value()) {
-        return std::nullopt;
-    }
-
-    auto geneIndex = _editData->selectedGene.value();
-    if (!_editData->selectedNodeByGeneIndex.contains(geneIndex)) {
-        return std::nullopt;
-    }
-
-    return _editData->selectedNodeByGeneIndex.at(geneIndex);
 }

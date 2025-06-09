@@ -97,7 +97,7 @@ void _GenomeEditorWidget::processGeneList()
                     ImGui::TableNextColumn();
                     AlienGui::Text(std::to_string(row + 1));
                     ImGui::SameLine();
-                    auto selected = _editData->selectedGene.has_value() ? _editData->selectedGene == row : false;
+                    auto selected = _editData->selectedGene.has_value() ? _editData->selectedGene.value() == row : false;
                     if (ImGui::Selectable(
                             "",
                             &selected,
@@ -107,6 +107,7 @@ void _GenomeEditorWidget::processGeneList()
                             _editData->selectedGene = row;
                         }
                     }
+
                     // Column 1: Gene type
                     ImGui::TableNextColumn();
                     if (row == 0) {
@@ -205,7 +206,19 @@ void _GenomeEditorWidget::onAddGene()
 
         GenomeDescriptionEditService::get().addEmptyGene(genome, insertIndex);
 
+        // Adapt gene selection
         _editData->selectedGene = insertIndex + 1;
+
+        // Adapt node selection
+        std::map<int, int> newSelectedNodeByGeneIndex;
+        for (auto const& [index, selectedNode] : _editData->selectedNodeByGeneIndex) {
+            if (index <= insertIndex) {
+                newSelectedNodeByGeneIndex.emplace(index, selectedNode);
+            } else {
+                newSelectedNodeByGeneIndex.emplace(index + 1, selectedNode);
+            }
+        }
+        _editData->selectedNodeByGeneIndex = newSelectedNodeByGeneIndex;
     }
 }
 
@@ -254,6 +267,7 @@ void _GenomeEditorWidget::removeGeneIntern()
 
     GenomeDescriptionEditService::get().removeGene(_editData->genome, removeIndex);
 
+    // Adapt gene selection
     auto& genes = _editData->genome._genes;
     if (genes.empty()) {
         _editData->selectedGene.reset();
@@ -262,18 +276,59 @@ void _GenomeEditorWidget::removeGeneIntern()
     } else {
         _editData->selectedGene = removeIndex;
     }
+
+    // Adapt node selection
+    std::map<int, int> newSelectedNodeByGeneIndex;
+    for (auto const& [index, selectedNode] : _editData->selectedNodeByGeneIndex) {
+        if (index < removeIndex) {
+            newSelectedNodeByGeneIndex.emplace(index, selectedNode);
+        } else {
+            newSelectedNodeByGeneIndex.emplace(index - 1, selectedNode);
+        }
+    }
+    _editData->selectedNodeByGeneIndex = newSelectedNodeByGeneIndex;
 }
 
 void _GenomeEditorWidget::moveGeneUpwardIntern()
 {
-    int index = _editData->selectedGene.value();
-    GenomeDescriptionEditService::get().swapGenes(_editData->genome, index - 1);
+    int indexToMove = _editData->selectedGene.value();
+    GenomeDescriptionEditService::get().swapGenes(_editData->genome, indexToMove - 1);
+
+    // Adapt gene selection
     --_editData->selectedGene.value();
+
+    // Adapt node selection
+    std::map<int, int> newSelectedNodeByGeneIndex;
+    for (auto const& [index, selectedNode] : _editData->selectedNodeByGeneIndex) {
+        if (index == indexToMove) {
+            newSelectedNodeByGeneIndex.emplace(index - 1, selectedNode);
+        } else if (index == indexToMove - 1) {
+            newSelectedNodeByGeneIndex.emplace(index + 1, selectedNode);
+        } else {
+            newSelectedNodeByGeneIndex.emplace(index, selectedNode);
+        }
+    }
+    _editData->selectedNodeByGeneIndex = newSelectedNodeByGeneIndex;
 }
 
 void _GenomeEditorWidget::moveGeneDownwardIntern()
 {
-    int index = _editData->selectedGene.value();
-    GenomeDescriptionEditService::get().swapGenes(_editData->genome, index);
+    int indexToMove = _editData->selectedGene.value();
+    GenomeDescriptionEditService::get().swapGenes(_editData->genome, indexToMove);
+
+    // Adapt gene selection
     ++_editData->selectedGene.value();
+
+    // Adapt node selection
+    std::map<int, int> newSelectedNodeByGeneIndex;
+    for (auto const& [index, selectedNode] : _editData->selectedNodeByGeneIndex) {
+        if (index == indexToMove) {
+            newSelectedNodeByGeneIndex.emplace(index + 1, selectedNode);
+        } else if (index == indexToMove + 1) {
+            newSelectedNodeByGeneIndex.emplace(index - 1, selectedNode);
+        } else {
+            newSelectedNodeByGeneIndex.emplace(index, selectedNode);
+        }
+    }
+    _editData->selectedNodeByGeneIndex = newSelectedNodeByGeneIndex;
 }
