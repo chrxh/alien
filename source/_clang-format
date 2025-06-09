@@ -59,57 +59,57 @@ ForEachMacros:
 IncludeBlocks: Regroup
 IncludeIsMainRegex:  '(Test|Tests)?$'
 IncludeCategories:
-  # 1. The corresponding header for the source file (e.g. "MyClass.h" in "MyClass.cpp")
+  # The corresponding header for the source file (e.g. "MyClass.h" in "MyClass.cpp")
   - Regex: '^[^<"].*\.h"$'
     Priority: 0
 
-  # 2. C/C++ standard library headers (e.g. <vector>, <string>)
+  # C/C++ standard library headers (e.g. <vector>, <string>)
   - Regex: '^<(algorithm|string|vector|map|set|ranges|unordered_map|unordered_set|memory|utility|tuple|array|iterator|limits|type_traits|cstddef|cstdint|cmath|cassert|iostream|fstream|sstream|iomanip|chrono|thread|mutex|atomic|condition_variable)>$'
     Priority: 1
 
-  # 3. Boost headers
+  # Boost headers
   - Regex: '^<boost/.*>$'
     Priority: 100
 
-  # 4. ImGui main header
-  - Regex: '^<imgui\.h>$'
+  # Boost headers
+  - Regex: '^<gtest/.*>$'
     Priority: 101
 
-  # 4. ImGui main header
+  # ImGui main header
   - Regex: '^<imgui\.h>$'
-    Priority: 102
-
-  # 5. Fonts module includes
-  - Regex: '^<Fonts/.*>$'
     Priority: 103
 
-  # 6. Base module includes
-  - Regex: '^"Base/.*"$'
+  # Fonts module includes
+  - Regex: '^<Fonts/.*>$'
     Priority: 104
 
-  # 7. Engine interface includes
+  # Base module includes
+  - Regex: '^"Base/.*"$'
+    Priority: 200
+
+  # Engine interface includes
   - Regex: '^"EngineInterface/.*"$'
-    Priority: 105
+    Priority: 201
 
-  # 8. Persister interface includes
+  # Persister interface includes
   - Regex: '^"PersisterInterface/.*"$'
-    Priority: 106
+    Priority: 202
 
-  # 9. Network module includes
+  # Network module includes
   - Regex: '^"Network/.*"$'
-    Priority: 107
+    Priority: 203
 
-  # 10. Engine implementation includes
+  # Engine implementation includes
   - Regex: '^"EngineImpl/.*"$'
-    Priority: 108
+    Priority: 204
 
-  # 11. Persister implementation includes
+  # Persister implementation includes
   - Regex: '^"PersisterImpl/.*"$'
-    Priority: 109
+    Priority: 205
 
-  # 12. All other local project includes without path (from current directory)
+  # All other local project includes without path (from current directory)
   - Regex: '^"[a-zA-Z0-9_]+\.h"$'
-    Priority: 110
+    Priority: 300
 IndentCaseLabels: false
 IndentPPDirectives: None
 IndentWidth:     4

@@ -40,3 +40,21 @@ void GenomeDescriptionEditService::removeGene(GenomeDescription_New& genome, int
     }
     genome._genes.erase(genome._genes.begin() + index);
 }
+
+void GenomeDescriptionEditService::swapGenes(GenomeDescription_New& genome, int index)
+{
+    std::swap(genome._genes.at(index), genome._genes.at(index + 1));
+
+    for (auto& gene : genome._genes) {
+        for (auto& node : gene._nodes) {
+            if (node.getCellType() == CellTypeGenome_Constructor) {
+                auto& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
+                if (constructor._constructGeneIndex == index) {
+                    constructor._constructGeneIndex = index + 1;
+                } else if (constructor._constructGeneIndex == index + 1) {
+                    constructor._constructGeneIndex = index;
+                }
+            }
+        }
+    }
+}

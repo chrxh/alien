@@ -18,8 +18,12 @@ private:
 
     void onAddGene();
     void onRemoveGene();
+    void onMoveGeneUpward();
+    void onMoveGeneDownward();
 
     void removeGeneIntern();
+    void moveGeneUpwardIntern();
+    void moveGeneDownwardIntern();
 
     CreatureTabGenomeData _editData;
     CreatureTabLayoutData _layoutData;
