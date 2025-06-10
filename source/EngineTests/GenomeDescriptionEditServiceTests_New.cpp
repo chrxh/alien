@@ -44,7 +44,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyGene_onEmptyGenome)
     EXPECT_EQ(1, genome._genes.size());
 }
 
-TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyGene_onNonEmptyGenome_beginning)
+TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyGene_onNonEmptyGenome_start)
 {
     auto genome = GenomeDescription_New().genes({
         GeneDescription().nodes({
@@ -160,7 +160,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, swapGenes)
     }
 }
 
-TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyNode_beginning)
+TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyNode_start)
 {
     auto gene = GeneDescription().nodes({
         NodeDescription().cellTypeData(DepotGenomeDescription()),
@@ -206,4 +206,61 @@ TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyNode_end)
     EXPECT_EQ(CellTypeGenome_Constructor, gene._nodes.at(1).getCellType());
     EXPECT_EQ(CellTypeGenome_Sensor, gene._nodes.at(2).getCellType());
     EXPECT_EQ(CellTypeGenome_Base, gene._nodes.at(3).getCellType());
+}
+
+TEST_F(GenomeDescriptionEditServiceTests_New, removeNode_start)
+{
+    auto gene = GeneDescription().nodes({
+        NodeDescription().cellTypeData(DepotGenomeDescription()),
+        NodeDescription().cellTypeData(ConstructorGenomeDescription_New()),
+        NodeDescription().cellTypeData(SensorGenomeDescription()),
+    });
+    GenomeDescriptionEditService::get().removeNode(gene, 0);
+
+    ASSERT_EQ(2, gene._nodes.size());
+    EXPECT_EQ(CellTypeGenome_Constructor, gene._nodes.at(0).getCellType());
+    EXPECT_EQ(CellTypeGenome_Sensor, gene._nodes.at(1).getCellType());
+}
+
+TEST_F(GenomeDescriptionEditServiceTests_New, removeNode_middle)
+{
+    auto gene = GeneDescription().nodes({
+        NodeDescription().cellTypeData(DepotGenomeDescription()),
+        NodeDescription().cellTypeData(ConstructorGenomeDescription_New()),
+        NodeDescription().cellTypeData(SensorGenomeDescription()),
+    });
+    GenomeDescriptionEditService::get().removeNode(gene, 1);
+
+    ASSERT_EQ(2, gene._nodes.size());
+    EXPECT_EQ(CellTypeGenome_Depot, gene._nodes.at(0).getCellType());
+    EXPECT_EQ(CellTypeGenome_Sensor, gene._nodes.at(1).getCellType());
+}
+
+TEST_F(GenomeDescriptionEditServiceTests_New, removeNode_end)
+{
+    auto gene = GeneDescription().nodes({
+        NodeDescription().cellTypeData(DepotGenomeDescription()),
+        NodeDescription().cellTypeData(ConstructorGenomeDescription_New()),
+        NodeDescription().cellTypeData(SensorGenomeDescription()),
+    });
+    GenomeDescriptionEditService::get().removeNode(gene, 2);
+
+    ASSERT_EQ(2, gene._nodes.size());
+    EXPECT_EQ(CellTypeGenome_Depot, gene._nodes.at(0).getCellType());
+    EXPECT_EQ(CellTypeGenome_Constructor, gene._nodes.at(1).getCellType());
+}
+
+TEST_F(GenomeDescriptionEditServiceTests_New, swapNodes)
+{
+    auto gene = GeneDescription().nodes({
+        NodeDescription().cellTypeData(DepotGenomeDescription()),
+        NodeDescription().cellTypeData(ConstructorGenomeDescription_New()),
+        NodeDescription().cellTypeData(SensorGenomeDescription()),
+    });
+    GenomeDescriptionEditService::get().swapNodes(gene, 1);
+
+    ASSERT_EQ(3, gene._nodes.size());
+    EXPECT_EQ(CellTypeGenome_Depot, gene._nodes.at(0).getCellType());
+    EXPECT_EQ(CellTypeGenome_Sensor, gene._nodes.at(1).getCellType());
+    EXPECT_EQ(CellTypeGenome_Constructor, gene._nodes.at(2).getCellType());
 }

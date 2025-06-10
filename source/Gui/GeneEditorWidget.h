@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EngineInterface/Definitions.h"
+
 #include "Definitions.h"
 
 class _GeneEditorWidget
@@ -18,6 +20,9 @@ private:
     void processNodeListButtons();
 
     void onAddNode();
+    void onRemoveNode();
+    void onMoveNodeUpward();
+    void onMoveNodeDownward();
 
     CreatureTabEditData _editData;
     CreatureTabLayoutData _layoutData;

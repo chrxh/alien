@@ -518,13 +518,7 @@ void GenomeEditorWindow::processNode(
 
     AlienGui::DynamicTableLayout table(DynamicTableColumnWidth);
     if (table.begin()) {
-        if (AlienGui::CellTypeCombo(
-                AlienGui::CellTypeComboParameters()
-                    .name("Function")
-                    .textWidth(ContentTextWidth)
-                    .includeStructureAndFreeCells(false)
-                    .tooltip(Const::getCellTypeTooltip(type)),
-                type)) {
+        if (AlienGui::Combo(AlienGui::ComboParameters().name("Function").values(Const::CellTypeGenomeStrings).textWidth(ContentTextWidth), type)) {
             applyNewCellType(cell, type);
         }
         table.next();
