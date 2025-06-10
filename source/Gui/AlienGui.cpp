@@ -1793,25 +1793,6 @@ bool AlienGui::ShowPreviewDescription(PreviewDescription const& desc, float& zoo
     return result;
 }
 
-bool AlienGui::CellTypeCombo(CellTypeComboParameters& parameters, int& value)
-{
-    auto modCellTypeStrings = Const::CellTypeStrings;
-    auto noneString = modCellTypeStrings.back();
-
-    if (!parameters._includeStructureAndFreeCells) {
-        modCellTypeStrings.erase(modCellTypeStrings.begin());
-        modCellTypeStrings.erase(modCellTypeStrings.begin());
-        value -= 2;
-    }
-    auto result = AlienGui::Combo(
-        AlienGui::ComboParameters().name(parameters._name).values(modCellTypeStrings).textWidth(parameters._textWidth).tooltip(parameters._tooltip),
-        value);
-    if (!parameters._includeStructureAndFreeCells) {
-        value += 2;
-    }
-    return result;
-}
-
 bool AlienGui::AngleAlignmentCombo(AngleAlignmentComboParameters& parameters, int& value)
 {
     std::vector const AngleAlignmentStrings = {"None"s, "180 deg"s, "120 deg"s, "90 deg"s, "72 deg"s, "60 deg"s};

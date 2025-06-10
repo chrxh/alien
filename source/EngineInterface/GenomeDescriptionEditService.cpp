@@ -68,3 +68,13 @@ void GenomeDescriptionEditService::addEmptyNode(GeneDescription& gene, int index
 
     gene._nodes.insert(gene._nodes.begin() + index + 1, NodeDescription());
 }
+
+void GenomeDescriptionEditService::removeNode(GeneDescription& gene, int index)
+{
+    gene._nodes.erase(gene._nodes.begin() + index);
+}
+
+void GenomeDescriptionEditService::swapNodes(GeneDescription& gene, int index)
+{
+    std::swap(gene._nodes.at(index), gene._nodes.at(index + 1));
+}

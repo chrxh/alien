@@ -27,8 +27,8 @@ GeneEditorWidget _GeneEditorWidget::create(CreatureTabEditData const& editData, 
 void _GeneEditorWidget::process()
 {
     if (ImGui::BeginChild("GeneEditor", ImVec2(_layoutData->geneEditorWidth, 0))) {
-        if (_editData->selectedGene.has_value()) {
-            ImGui::PushID(_editData->selectedGene.value());
+        if (_editData->selectedGeneIndex.has_value()) {
+            ImGui::PushID(_editData->selectedGeneIndex.value());
             processHeaderData();
 
             AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _layoutData->nodeListHeight);
@@ -89,8 +89,7 @@ void _GeneEditorWidget::processNodeList()
             ImGui::TableHeadersRow();
             ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
 
-            auto const& genome = _editData->genome;
-            auto const& gene = genome._genes.at(_editData->selectedGene.value());
+            auto const& gene = _editData->getSelectedGeneRef();
 
             ImGuiListClipper clipper;
             clipper.Begin(gene._nodes.size());
@@ -105,7 +104,7 @@ void _GeneEditorWidget::processNodeList()
                     ImGui::TableNextColumn();
                     AlienGui::Text(std::to_string(row + 1));
                     ImGui::SameLine();
-                    auto selectedNode = _editData->getSelectedNode();
+                    auto selectedNode = _editData->getSelectedNodeIndex();
                     auto selected = selectedNode ? selectedNode.value() == row : false;
                     if (ImGui::Selectable(
                             "",
@@ -113,7 +112,7 @@ void _GeneEditorWidget::processNodeList()
                             ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap,
                             ImVec2(0, scale(ImGui::GetTextLineHeightWithSpacing()) - ImGui::GetStyle().FramePadding.y))) {
                         if (selected) {
-                            _editData->setSelectedNode(row);
+                            _editData->setSelectedNodeIndex(row);
                         }
                     }
 
@@ -139,10 +138,10 @@ void _GeneEditorWidget::processNodeListButtons()
 
     ImVec2 buttonGroupSize = {scale(108.0f), scale(22.0f)};
     ImGui::SetCursorScreenPos(
-        ImVec2(cursorPos.x + ImGui::GetContentRegionAvail().x - buttonGroupSize.x - scale(10.0f), cursorPos.y - buttonGroupSize.y - scale(20.0f)));
+        ImVec2(cursorPos.x + ImGui::GetContentRegionAvail().x - buttonGroupSize.x - scale(15.0f), cursorPos.y - buttonGroupSize.y - scale(20.0f)));
     if (ImGui::BeginChild("ButtonGroup", buttonGroupSize)) {
-        auto selectedNode = _editData->getSelectedNode();
-        auto const& gene = _editData->genome._genes.at(_editData->selectedGene.value());
+        auto selectedNode = _editData->getSelectedNodeIndex();
+        auto const& gene = _editData->genome._genes.at(_editData->selectedGeneIndex.value());
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_PLUS_CIRCLE))) {
             onAddNode();
         }
@@ -150,6 +149,7 @@ void _GeneEditorWidget::processNodeListButtons()
         AlienGui::PaddingLeft();
         ImGui::BeginDisabled(!selectedNode.has_value());
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_MINUS_CIRCLE))) {
+            onRemoveNode();
         }
         ImGui::EndDisabled();
 
@@ -157,6 +157,7 @@ void _GeneEditorWidget::processNodeListButtons()
         AlienGui::PaddingLeft();
         ImGui::BeginDisabled(!selectedNode.has_value() || selectedNode.value() == 0);
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_UP))) {
+            onMoveNodeUpward();
         }
         ImGui::EndDisabled();
 
@@ -164,6 +165,7 @@ void _GeneEditorWidget::processNodeListButtons()
         AlienGui::PaddingLeft();
         ImGui::BeginDisabled(!selectedNode.has_value() || selectedNode.value() == gene._nodes.size() - 1);
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_DOWN))) {
+            onMoveNodeDownward();
         }
         ImGui::EndDisabled();
     }
@@ -172,11 +174,11 @@ void _GeneEditorWidget::processNodeListButtons()
 
 void _GeneEditorWidget::onAddNode()
 {
-    auto& gene = _editData->genome._genes.at(_editData->selectedGene.value());
-    auto selectedNode = _editData->getSelectedNode();
+    auto& gene = _editData->getSelectedGeneRef();
+    auto selectedNode = _editData->getSelectedNodeIndex();
     if (gene._nodes.empty()) {
         GenomeDescriptionEditService::get().addEmptyNode(gene, 0);
-        _editData->setSelectedNode(0);
+        _editData->setSelectedNodeIndex(0);
     } else {
         int insertIndex;
         if (selectedNode.has_value()) {
@@ -187,7 +189,44 @@ void _GeneEditorWidget::onAddNode()
 
         GenomeDescriptionEditService::get().addEmptyNode(gene, insertIndex);
 
-        // Adapt gene selection
-        _editData->setSelectedNode(insertIndex + 1);
+        _editData->setSelectedNodeIndex(insertIndex + 1);
     }
+}
+
+void _GeneEditorWidget::onRemoveNode()
+{
+    int removeIndex = _editData->getSelectedNodeIndex().value();
+    auto& gene = _editData->getSelectedGeneRef();
+
+    GenomeDescriptionEditService::get().removeNode(gene, removeIndex);
+
+    // Adapt node selection
+    auto& nodes = gene._nodes;
+    if (nodes.empty()) {
+        _editData->setSelectedNodeIndex(std::nullopt);
+    } else if (removeIndex >= toInt(nodes.size())) {
+        _editData->setSelectedNodeIndex(toInt(nodes.size()) - 1);
+    } else {
+        _editData->setSelectedNodeIndex(removeIndex);
+    }
+}
+
+void _GeneEditorWidget::onMoveNodeUpward()
+{
+    auto indexToMove = _editData->getSelectedNodeIndex().value();
+    auto& gene = _editData->getSelectedGeneRef();
+    GenomeDescriptionEditService::get().swapNodes(gene, indexToMove - 1);
+
+    // Adapt gene selection
+    _editData->setSelectedNodeIndex(_editData->getSelectedNodeIndex().value() - 1);
+}
+
+void _GeneEditorWidget::onMoveNodeDownward()
+{
+    auto indexToMove = _editData->getSelectedNodeIndex().value();
+    auto& gene = _editData->getSelectedGeneRef();
+    GenomeDescriptionEditService::get().swapNodes(gene, indexToMove);
+
+    // Adapt gene selection
+    _editData->setSelectedNodeIndex(_editData->getSelectedNodeIndex().value() + 1);
 }

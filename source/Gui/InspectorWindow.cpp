@@ -243,11 +243,11 @@ void _InspectorWindow::processCellTypeTab(CellDescription& cell)
             }
 
             if (ImGui::TreeNodeEx("Properties###type", TreeNodeFlags)) {
-                if (AlienGui::CellTypeCombo(
-                        AlienGui::CellTypeComboParameters()
+                if (AlienGui::Combo(
+                        AlienGui::ComboParameters()
                             .name("Function")
+                            .values(Const::CellTypeStrings)
                             .textWidth(CellTypeBaseTabTextWidth)
-                            .includeStructureAndFreeCells(true)
                             .tooltip(Const::getCellTypeTooltip(type)),
                         type)) {
                     switch (type) {

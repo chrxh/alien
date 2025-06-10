@@ -20,6 +20,7 @@ struct ClusterDescription;
 struct CellDescription;
 struct ParticleDescription;
 struct GenomeDescription_New;
+struct GeneDescription;
 
 struct GpuSettings;
 

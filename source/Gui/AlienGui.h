@@ -401,14 +401,6 @@ public:
 
     static bool ShowPreviewDescription(PreviewDescription const& desc, float& zoom, std::optional<int>& selectedNode);
 
-    struct CellTypeComboParameters
-    {
-        MEMBER(CellTypeComboParameters, std::string, name, "");
-        MEMBER(CellTypeComboParameters, float, textWidth, 100);
-        MEMBER(CellTypeComboParameters, bool, includeStructureAndFreeCells, false);
-        MEMBER(CellTypeComboParameters, std::optional<std::string>, tooltip, std::nullopt);
-    };
-    static bool CellTypeCombo(CellTypeComboParameters& parameters, int& value);
     struct AngleAlignmentComboParameters
     {
         MEMBER(AngleAlignmentComboParameters, std::string, name, "");

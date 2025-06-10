@@ -97,14 +97,14 @@ void _GenomeEditorWidget::processGeneList()
                     ImGui::TableNextColumn();
                     AlienGui::Text(std::to_string(row + 1));
                     ImGui::SameLine();
-                    auto selected = _editData->selectedGene.has_value() ? _editData->selectedGene.value() == row : false;
+                    auto selected = _editData->selectedGeneIndex.has_value() ? _editData->selectedGeneIndex.value() == row : false;
                     if (ImGui::Selectable(
                             "",
                             &selected,
                             ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap,
                             ImVec2(0, scale(ImGui::GetTextLineHeightWithSpacing()) - ImGui::GetStyle().FramePadding.y))) {
                         if (selected) {
-                            _editData->selectedGene = row;
+                            _editData->selectedGeneIndex = row;
                         }
                     }
 
@@ -157,7 +157,7 @@ void _GenomeEditorWidget::processGeneListButtons()
 
     ImVec2 buttonGroupSize = {scale(108.0f), scale(22.0f)};
     ImGui::SetCursorScreenPos(
-        ImVec2(cursorPos.x + ImGui::GetContentRegionAvail().x - buttonGroupSize.x - scale(10.0f), cursorPos.y - buttonGroupSize.y - scale(20.0f)));
+        ImVec2(cursorPos.x + ImGui::GetContentRegionAvail().x - buttonGroupSize.x - scale(15.0f), cursorPos.y - buttonGroupSize.y - scale(20.0f)));
     if (ImGui::BeginChild("ButtonGroup", buttonGroupSize)) {
 
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_PLUS_CIRCLE))) {
@@ -165,7 +165,7 @@ void _GenomeEditorWidget::processGeneListButtons()
         }
         ImGui::SameLine();
         AlienGui::PaddingLeft();
-        ImGui::BeginDisabled(!_editData->selectedGene.has_value());
+        ImGui::BeginDisabled(!_editData->selectedGeneIndex.has_value());
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_MINUS_CIRCLE))) {
             onRemoveGene();
         }
@@ -173,7 +173,7 @@ void _GenomeEditorWidget::processGeneListButtons()
 
         ImGui::SameLine();
         AlienGui::PaddingLeft();
-        ImGui::BeginDisabled(!_editData->selectedGene.has_value() || _editData->selectedGene.value() == 0);
+        ImGui::BeginDisabled(!_editData->selectedGeneIndex.has_value() || _editData->selectedGeneIndex.value() == 0);
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_UP))) {
             onMoveGeneUpward();
         }
@@ -181,7 +181,7 @@ void _GenomeEditorWidget::processGeneListButtons()
 
         ImGui::SameLine();
         AlienGui::PaddingLeft();
-        ImGui::BeginDisabled(!_editData->selectedGene.has_value() || _editData->selectedGene.value() == _editData->genome._genes.size() - 1);
+        ImGui::BeginDisabled(!_editData->selectedGeneIndex.has_value() || _editData->selectedGeneIndex.value() == _editData->genome._genes.size() - 1);
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_DOWN))) {
             onMoveGeneDownward();
         }
@@ -195,11 +195,11 @@ void _GenomeEditorWidget::onAddGene()
     auto& genome = _editData->genome;
     if (genome._genes.empty()) {
         GenomeDescriptionEditService::get().addEmptyGene(genome, 0);
-        _editData->selectedGene = 0;
+        _editData->selectedGeneIndex = 0;
     } else {
         int insertIndex;
-        if (_editData->selectedGene.has_value()) {
-            insertIndex = _editData->selectedGene.value();
+        if (_editData->selectedGeneIndex.has_value()) {
+            insertIndex = _editData->selectedGeneIndex.value();
         } else {
             insertIndex = toInt(genome._genes.size()) - 1;
         }
@@ -207,7 +207,7 @@ void _GenomeEditorWidget::onAddGene()
         GenomeDescriptionEditService::get().addEmptyGene(genome, insertIndex);
 
         // Adapt gene selection
-        _editData->selectedGene = insertIndex + 1;
+        _editData->selectedGeneIndex = insertIndex + 1;
 
         // Adapt node selection
         std::map<int, int> newSelectedNodeByGeneIndex;
@@ -224,7 +224,7 @@ void _GenomeEditorWidget::onAddGene()
 
 void _GenomeEditorWidget::onRemoveGene()
 {
-    auto referencedBy = GenomeDescriptionInfoService::get().getReferencedBy(_editData->genome, _editData->selectedGene.value());
+    auto referencedBy = GenomeDescriptionInfoService::get().getReferencedBy(_editData->genome, _editData->selectedGeneIndex.value());
     if (!referencedBy.empty()) {
         auto referencedByStrings = referencedBy | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex + 1); });
         auto referencedByString = boost::algorithm::join(std::vector(referencedByStrings.begin(), referencedByStrings.end()), ", ");
@@ -233,7 +233,7 @@ void _GenomeEditorWidget::onRemoveGene()
         GenericMessageDialog::get().information("Error", text + referencedByString + ".");
         return;
     }
-    if (_editData->selectedGene.value() == 0) {
+    if (_editData->selectedGeneIndex.value() == 0) {
         GenericMessageDialog::get().yesNo(
             "Delete principal gene",
             "Do you really want to delete the principal gene? If you decide to do so, the following gene will become the new principal gene.",
@@ -245,7 +245,7 @@ void _GenomeEditorWidget::onRemoveGene()
 
 void _GenomeEditorWidget::onMoveGeneUpward()
 {
-    if (_editData->selectedGene.value() == 1) {
+    if (_editData->selectedGeneIndex.value() == 1) {
         GenericMessageDialog::get().yesNo("Swap principal gene", "Do you really want to swap the principal gene?", [this] { this->moveGeneUpwardIntern(); });
         return;
     }
@@ -254,7 +254,7 @@ void _GenomeEditorWidget::onMoveGeneUpward()
 
 void _GenomeEditorWidget::onMoveGeneDownward()
 {
-    if (_editData->selectedGene.value() == 0) {
+    if (_editData->selectedGeneIndex.value() == 0) {
         GenericMessageDialog::get().yesNo("Swap principal gene", "Do you really want to swap the principal gene?", [this] { this->moveGeneDownwardIntern(); });
         return;
     }
@@ -263,18 +263,18 @@ void _GenomeEditorWidget::onMoveGeneDownward()
 
 void _GenomeEditorWidget::removeGeneIntern()
 {
-    int removeIndex = _editData->selectedGene.value();
+    int removeIndex = _editData->selectedGeneIndex.value();
 
     GenomeDescriptionEditService::get().removeGene(_editData->genome, removeIndex);
 
     // Adapt gene selection
     auto& genes = _editData->genome._genes;
     if (genes.empty()) {
-        _editData->selectedGene.reset();
+        _editData->selectedGeneIndex.reset();
     } else if (removeIndex >= toInt(genes.size())) {
-        _editData->selectedGene = toInt(genes.size()) - 1;
+        _editData->selectedGeneIndex = toInt(genes.size()) - 1;
     } else {
-        _editData->selectedGene = removeIndex;
+        _editData->selectedGeneIndex = removeIndex;
     }
 
     // Adapt node selection
@@ -291,11 +291,11 @@ void _GenomeEditorWidget::removeGeneIntern()
 
 void _GenomeEditorWidget::moveGeneUpwardIntern()
 {
-    int indexToMove = _editData->selectedGene.value();
+    int indexToMove = _editData->selectedGeneIndex.value();
     GenomeDescriptionEditService::get().swapGenes(_editData->genome, indexToMove - 1);
 
     // Adapt gene selection
-    --_editData->selectedGene.value();
+    --_editData->selectedGeneIndex.value();
 
     // Adapt node selection
     std::map<int, int> newSelectedNodeByGeneIndex;
@@ -313,11 +313,11 @@ void _GenomeEditorWidget::moveGeneUpwardIntern()
 
 void _GenomeEditorWidget::moveGeneDownwardIntern()
 {
-    int indexToMove = _editData->selectedGene.value();
+    int indexToMove = _editData->selectedGeneIndex.value();
     GenomeDescriptionEditService::get().swapGenes(_editData->genome, indexToMove);
 
     // Adapt gene selection
-    ++_editData->selectedGene.value();
+    ++_editData->selectedGeneIndex.value();
 
     // Adapt node selection
     std::map<int, int> newSelectedNodeByGeneIndex;
