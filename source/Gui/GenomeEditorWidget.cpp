@@ -20,8 +20,8 @@
 
 namespace
 {
-    auto constexpr HeaderTotalWidth = 400.0f;
-    auto constexpr HeaderRightColumnWidth = 120.0f;
+    auto constexpr HeaderMinRightColumnWidth = 120.0f;
+    auto constexpr HeaderMaxLeftColumnWidth = 250.0f;
 }
 
 GenomeEditorWidget _GenomeEditorWidget::create(CreatureTabEditData const& editData, CreatureTabLayoutData const& layoutData)
@@ -51,19 +51,18 @@ void _GenomeEditorWidget::processHeaderData()
 {
     AlienGui::Group("Genome");
 
-    auto availableWidth = scaleInverse(ImGui::GetContentRegionAvail().x);
-    auto width = scale(std::min(availableWidth, HeaderTotalWidth));
-    if (ImGui::BeginChild("GenomeHeader", ImVec2(width, ImGui::GetContentRegionAvail().y - _layoutData->geneListHeight), 0)) {
+    auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
+    if (ImGui::BeginChild("GenomeHeader", ImVec2(0, ImGui::GetContentRegionAvail().y - _layoutData->geneListHeight), 0)) {
 
         auto numNodesString = std::to_string(GenomeDescriptionInfoService::get().getNumberOfNodes(_editData->genome));
-        AlienGui::InputText(AlienGui::InputTextParameters().name("Node count").readOnly(true).textWidth(HeaderRightColumnWidth), numNodesString);
+        AlienGui::InputText(AlienGui::InputTextParameters().name("Node count").readOnly(true).textWidth(rightColumnWidth), numNodesString);
 
         auto numCells = GenomeDescriptionInfoService::get().getNumberOfResultingCells(_editData->genome);
         auto numCellsString = numCells != -1 ? std::to_string(numCells) : std::string("Infinity");
-        AlienGui::InputText(AlienGui::InputTextParameters().name("Resulting cells").readOnly(true).textWidth(HeaderRightColumnWidth), numCellsString);
+        AlienGui::InputText(AlienGui::InputTextParameters().name("Resulting cells").readOnly(true).textWidth(rightColumnWidth), numCellsString);
 
         AlienGui::InputFloat(
-            AlienGui::InputFloatParameters().name("Front angle").format("%.1f").textWidth(HeaderRightColumnWidth), _editData->genome._frontAngle);
+            AlienGui::InputFloatParameters().name("Front angle").format("%.1f").textWidth(rightColumnWidth), _editData->genome._frontAngle);
     }
     ImGui::EndChild();
 }
