@@ -160,6 +160,11 @@ enum ConstructorAlignment_
     ConstructorAngleAlignment_Count = 6
 };
 
+namespace Const
+{
+    std::vector<std::string> const ConstructorAlignmentStrings = {"None"s, "180 deg"s, "120 deg"s, "90 deg"s, "72 deg"s, "60 deg"s};
+}
+
 using ConstructionShape = int;
 enum ConstructionShape_
 {

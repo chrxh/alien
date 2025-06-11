@@ -337,9 +337,10 @@ void GenomeEditorWindow::processGenomeHeader(TabData& tab)
             tab.genome._header._stiffness);
         if (tab.genome._header._shape == ConstructionShape_Custom) {
             table.next();
-            AlienGui::AngleAlignmentCombo(
-                AlienGui::AngleAlignmentComboParameters()
+            AlienGui::Combo(
+                AlienGui::ComboParameters()
                     .name("Angle alignment")
+                    .values(Const::ConstructorAlignmentStrings)
                     .textWidth(ContentHeaderTextWidth)
                     .tooltip(Const::GenomeAngleAlignmentTooltip),
                 tab.genome._header._angleAlignment);

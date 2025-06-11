@@ -1794,13 +1794,6 @@ bool AlienGui::ShowPreviewDescription(PreviewDescription const& desc, float& zoo
     return result;
 }
 
-bool AlienGui::AngleAlignmentCombo(AngleAlignmentComboParameters& parameters, int& value)
-{
-    std::vector const AngleAlignmentStrings = {"None"s, "180 deg"s, "120 deg"s, "90 deg"s, "72 deg"s, "60 deg"s};
-    return AlienGui::Combo(
-        AlienGui::ComboParameters().name(parameters._name).values(AngleAlignmentStrings).textWidth(parameters._textWidth).tooltip(parameters._tooltip), value);
-}
-
 namespace
 {
     template<typename T>

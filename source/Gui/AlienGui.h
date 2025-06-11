@@ -399,14 +399,6 @@ public:
 
     static bool ShowPreviewDescription(PreviewDescription const& desc, float& zoom, std::optional<int>& selectedNode);
 
-    struct AngleAlignmentComboParameters
-    {
-        MEMBER(AngleAlignmentComboParameters, std::string, name, "");
-        MEMBER(AngleAlignmentComboParameters, float, textWidth, 100);
-        MEMBER(AngleAlignmentComboParameters, std::optional<std::string>, tooltip, std::nullopt);
-    };
-    static bool AngleAlignmentCombo(AngleAlignmentComboParameters& parameters, int& value);
-
     struct NeuronSelectionParameters
     {
         MEMBER(NeuronSelectionParameters, std::string, name, "");
