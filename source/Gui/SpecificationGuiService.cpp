@@ -264,7 +264,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
                     .logarithmic(floatSpec._logarithmic)
                     .format(floatSpec._format)
                     .infinity(floatSpec._infinity)
-                    .disabled(!enabled)
+                    .readOnly(!enabled)
                     .disabledValue(disabledValue)
                     .defaultValue(origValue)
                     .defaultEnabledValue(origEnabledValue)
@@ -372,7 +372,7 @@ void SpecificationGuiService::createWidgetsForAlternativeSpec(
             .textWidth(RightColumnWidth)
             .defaultValue(*origValue)
             .values(values)
-            .disabled(!enabled)
+            .readOnly(!enabled)
             .tooltip(parameterSpec._description),
         *value,
         enabledValue);

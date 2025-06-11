@@ -81,7 +81,7 @@ void _GeneEditorWidget::processHeaderData()
         if (!gene._separateConstruction) {
             AlienGui::InputInt(AlienGui::InputIntParameters().name("Branches").textWidth(HeaderRightColumnWidth), gene._numBranches);
         } else {
-            std::string text = "-";
+            std::string text = "1";
             AlienGui::InputText(AlienGui::InputTextParameters().name("Branches").textWidth(HeaderRightColumnWidth).readOnly(true), text);
         }
 
@@ -89,8 +89,12 @@ void _GeneEditorWidget::processHeaderData()
             AlienGui::InputIntParameters().name("Concatenations").infinity(true).textWidth(HeaderRightColumnWidth), gene._numConcatenations);
 
         if (gene._shape == ConstructionShape_Custom) {
-            AlienGui::AngleAlignmentCombo(
-                AlienGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(HeaderRightColumnWidth), gene._angleAlignment);
+            AlienGui::Combo(
+                AlienGui::ComboParameters().name("Angle alignment").values(Const::ConstructorAlignmentStrings).textWidth(HeaderRightColumnWidth),
+                gene._angleAlignment);
+        } else {
+            std::string text = Const::ConstructorAlignmentStrings.at(gene._angleAlignment);
+            AlienGui::InputText(AlienGui::InputTextParameters().name("Angle alignment").textWidth(HeaderRightColumnWidth).readOnly(true), text);
         }
 
         AlienGui::InputFloat(
@@ -99,12 +103,10 @@ void _GeneEditorWidget::processHeaderData()
 
         AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(HeaderRightColumnWidth), gene._stiffness);
 
-        if (gene._numConcatenations > 1) {
-            AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Concatenation angle #1").format("%.1f").textWidth(HeaderRightColumnWidth), gene._concatenationAngle1);
-            AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Concatenation angle #2").format("%.1f").textWidth(HeaderRightColumnWidth), gene._concatenationAngle2);
-        }
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters().name("Concatenation angle #1").format("%.1f").textWidth(HeaderRightColumnWidth), gene._concatenationAngle1);
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters().name("Concatenation angle #2").format("%.1f").textWidth(HeaderRightColumnWidth), gene._concatenationAngle2);
     }
     ImGui::EndChild();
 }
