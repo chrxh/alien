@@ -114,10 +114,11 @@ void _CreatureTabWidget::processActualConfigurationPreview()
 
 void _CreatureTabWidget::doLayout()
 {
-    if (_lastGenomeEditorWidth.has_value()) {
-        _layoutData->geneEditorWidth += _lastGenomeEditorWidth.value() - _layoutData->genomeEditorWidth;
-    }
+    //if (_lastGenomeEditorWidth.has_value()) {
+    //    _layoutData->geneEditorWidth += _lastGenomeEditorWidth.value() - _layoutData->genomeEditorWidth;
+    //}
 
+    // Initial layout setup
     if (!_layoutData->initialized) {
         auto width = ImGui::GetContentRegionAvail().x;
         auto height = ImGui::GetContentRegionAvail().y;
@@ -128,28 +129,52 @@ void _CreatureTabWidget::doLayout()
         _layoutData->geneListHeight = height / 4;
         _layoutData->nodeListHeight = height / 4;
         _layoutData->initialized = true;
+        _origLayoutData = std::make_shared<_CreatureTabLayoutData>();
+        *_origLayoutData = *_layoutData;
+        return;
     }
 
+    // Window size changes
     auto windowSize = ImGui::GetWindowSize();
-    if (_lastWindowSize.has_value() && _lastWindowSize->x > 0 && _lastWindowSize->y > 0) {
-        if (_lastWindowSize->x != windowSize.x || _lastWindowSize->y != windowSize.y) {
-            auto scalingX = windowSize.x / _lastWindowSize->x;
-            auto scalingY = windowSize.y / _lastWindowSize->y;
+    auto lastWindowSize = _lastWindowSize;
+    _lastWindowSize = {windowSize.x, windowSize.y};
+    if (lastWindowSize.has_value() && lastWindowSize->x > 0 && lastWindowSize->y > 0) {
+        if (lastWindowSize->x != windowSize.x || lastWindowSize->y != windowSize.y) {
+            auto scalingX = windowSize.x / lastWindowSize->x;
+            auto scalingY = windowSize.y / lastWindowSize->y;
             _layoutData->genomeEditorWidth *= scalingX;
             _layoutData->geneEditorWidth *= scalingX;
             _layoutData->previewsHeight *= scalingY;
             _layoutData->desiredConfigurationPreviewWidth *= scalingX;
             _layoutData->geneListHeight *= scalingY;
             _layoutData->nodeListHeight *= scalingY;
+            *_origLayoutData = *_layoutData;
+            return;
         }
     }
-    _lastWindowSize = {windowSize.x, windowSize.y};
 
-    _layoutData->genomeEditorWidth = std::max(scale(50.0f), _layoutData->genomeEditorWidth);
-    _layoutData->geneEditorWidth = std::max(scale(50.0f), _layoutData->geneEditorWidth);
-    _layoutData->desiredConfigurationPreviewWidth = std::max(scale(50.0f), _layoutData->desiredConfigurationPreviewWidth);
-    _layoutData->previewsHeight =
-        std::min(ImGui::GetContentRegionAvail().y - scale(50.0f), std::max(scale(50.0f), _layoutData->previewsHeight));
+    // Editor sizes changes
+    if (_origLayoutData->genomeEditorWidth != _layoutData->genomeEditorWidth) {
+        if (_layoutData->genomeEditorWidth < scale(200.0f) || _layoutData->geneEditorWidth < scale(200.0f)) {
+            *_layoutData = *_origLayoutData;
+            return;
+        }
+        _layoutData->geneEditorWidth += _origLayoutData->genomeEditorWidth - _layoutData->genomeEditorWidth;
+    }
+    if (_origLayoutData->geneEditorWidth != _layoutData->geneEditorWidth) {
+        auto nodeEditorWidth = ImGui::GetContentRegionAvail().x - _layoutData->genomeEditorWidth - _layoutData->geneEditorWidth;
+        if (_layoutData->geneEditorWidth < scale(200.0f) || nodeEditorWidth < scale(200.0f)) {
+            *_layoutData = *_origLayoutData;
+            return;
+        }
+    }
+    if (_origLayoutData->previewsHeight != _layoutData->previewsHeight) {
+        auto editorHeight = ImGui::GetContentRegionAvail().y - _layoutData->previewsHeight;
+        if (_layoutData->previewsHeight < scale(200.0f) || editorHeight < scale(200.0f)) {
+            *_layoutData = *_origLayoutData;
+            return;
+        }
+    }
 
-    _lastGenomeEditorWidth = _layoutData->genomeEditorWidth;
+    *_origLayoutData = *_layoutData;
 }

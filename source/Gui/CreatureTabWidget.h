@@ -37,9 +37,10 @@ private:
     std::optional<uint64_t> _creatureId;
 
     // Layout data
+    CreatureTabLayoutData _origLayoutData;
     CreatureTabLayoutData _layoutData;
     std::optional<RealVector2D> _lastWindowSize;
-    std::optional<float> _lastGenomeEditorWidth;
+    //std::optional<float> _lastGenomeEditorWidth;
 
     float _previewZoom = 30.0f;
 };
