@@ -20,8 +20,7 @@
 
 namespace
 {
-    auto constexpr HeaderMinRightColumnWidth = 120.0f;
-    auto constexpr HeaderMaxLeftColumnWidth = 250.0f;
+    auto constexpr HeaderLeftColumnWidth = 140.0f;
 }
 
 GenomeEditorWidget _GenomeEditorWidget::create(CreatureTabEditData const& editData, CreatureTabLayoutData const& layoutData)
@@ -51,7 +50,7 @@ void _GenomeEditorWidget::processHeaderData()
 {
     AlienGui::Group("Genome");
 
-    auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
+    auto rightColumnWidth = scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderLeftColumnWidth));
     if (ImGui::BeginChild("GenomeHeader", ImVec2(0, ImGui::GetContentRegionAvail().y - _layoutData->geneListHeight), 0)) {
 
         auto numNodesString = std::to_string(GenomeDescriptionInfoService::get().getNumberOfNodes(_editData->genome));
