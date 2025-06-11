@@ -256,7 +256,7 @@ void AutosaveWindow::processSettings()
                         .name("Catch peaks")
                         .textWidth(RightColumnWidth)
                         .defaultValue(_origCatchPeaks)
-                        .disabled(!_autosaveEnabled)
+                        .readOnly(!_autosaveEnabled)
                         .values({
                             "None",
                             "Genome complexity variance",

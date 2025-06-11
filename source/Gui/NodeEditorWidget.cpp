@@ -89,6 +89,9 @@ void _NodeEditorWidget::processNodeAttributes()
                     node._referenceAngle)) {
                 gene._shape = ConstructionShape_Custom;
             }
+        } else {
+            std::string text = "-";
+            AlienGui::InputText(AlienGui::InputTextParameters().name("Angle").textWidth(RightColumnWidth).readOnly(true), text);
         }
 
         AlienGui::ComboColor(AlienGui::ComboColorParameters().name("Color").textWidth(RightColumnWidth), node._color);

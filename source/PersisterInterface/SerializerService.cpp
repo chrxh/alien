@@ -49,7 +49,7 @@ namespace
     auto constexpr Id_GenomeHeader_AngleAlignment = 2;
     auto constexpr Id_GenomeHeader_Stiffness = 3;
     auto constexpr Id_GenomeHeader_ConnectionDistance = 4;
-    auto constexpr Id_GenomeHeader_NumRepetitions = 5;
+    auto constexpr Id_GenomeHeader_NumConcatenations = 5;
     auto constexpr Id_GenomeHeader_ConcatenationAngle1 = 6;
     auto constexpr Id_GenomeHeader_ConcatenationAngle2 = 7;
     auto constexpr Id_GenomeHeader_NumBranches = 8;
@@ -572,7 +572,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Gene_AngleAlignment, data._angleAlignment, defaultObject._angleAlignment);
         loadSave(task, auxiliaries, Id_Gene_Stiffness, data._stiffness, defaultObject._stiffness);
         loadSave(task, auxiliaries, Id_Gene_ConnectionDistance, data._connectionDistance, defaultObject._connectionDistance);
-        loadSave(task, auxiliaries, Id_Gene_NumRepetitions, data._numRepetitions, defaultObject._numRepetitions);
+        loadSave(task, auxiliaries, Id_Gene_NumRepetitions, data._numConcatenations, defaultObject._numConcatenations);
         loadSave(task, auxiliaries, Id_Gene_ConcatenationAngle1, data._concatenationAngle1, defaultObject._concatenationAngle1);
         loadSave(task, auxiliaries, Id_Gene_ConcatenationAngle2, data._concatenationAngle2, defaultObject._concatenationAngle2);
         processLoadSaveMap(task, ar, auxiliaries);
@@ -687,7 +687,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_GenomeHeader_AngleAlignment, data._angleAlignment, defaultObject._angleAlignment);
         loadSave(task, auxiliaries, Id_GenomeHeader_Stiffness, data._stiffness, defaultObject._stiffness);
         loadSave(task, auxiliaries, Id_GenomeHeader_ConnectionDistance, data._connectionDistance, defaultObject._connectionDistance);
-        loadSave(task, auxiliaries, Id_GenomeHeader_NumRepetitions, data._numRepetitions, defaultObject._numRepetitions);
+        loadSave(task, auxiliaries, Id_GenomeHeader_NumConcatenations, data._numRepetitions, defaultObject._numRepetitions);
         loadSave(task, auxiliaries, Id_GenomeHeader_ConcatenationAngle1, data._concatenationAngle1, defaultObject._concatenationAngle1);
         loadSave(task, auxiliaries, Id_GenomeHeader_ConcatenationAngle2, data._concatenationAngle2, defaultObject._concatenationAngle2);
         loadSave(task, auxiliaries, Id_GenomeHeader_FrontAngle, data._frontAngle, defaultObject._frontAngle);

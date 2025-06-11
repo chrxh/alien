@@ -166,13 +166,19 @@ bool AlienGui::InputInt(InputIntParameters const& parameters, int& value, bool* 
         inputWidth -= scale(infinityButtonWidth) + ImGui::GetStyle().FramePadding.x;
     }
 
+    if (parameters._readOnly) {
+        ImGui::BeginDisabled();
+    }
+
     if (!isInfinity) {
         ImGui::SetNextItemWidth(inputWidth);
-        ImGuiInputTextFlags flags = parameters._readOnly ? ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_None;
-        result |= ImGui::InputInt(("##" + parameters._name).c_str(), &value, 1, 100, flags);
+        result |= ImGui::InputInt(("##" + parameters._name).c_str(), &value, 1, 100, ImGuiInputTextFlags_None);
     } else {
         std::string text = "infinity";
         result |= InputText(InputTextParameters().readOnly(true).width(inputWidth).textWidth(0), text);
+    }
+    if (parameters._readOnly) {
+        ImGui::EndDisabled();
     }
     if (parameters._defaultValue) {
         ImGui::SameLine();
@@ -185,6 +191,8 @@ bool AlienGui::InputInt(InputIntParameters const& parameters, int& value, bool* 
     }
     if (showInfinity) {
         ImGui::SameLine();
+        PaddingLeft();
+
         ImGui::BeginDisabled(parameters._readOnly);
         if (SelectableButton(SelectableButtonParameters().name(ICON_FA_INFINITY).tooltip(parameters._tooltip).width(infinityButtonWidth), isInfinity)) {
             if (isInfinity) {
@@ -197,13 +205,10 @@ bool AlienGui::InputInt(InputIntParameters const& parameters, int& value, bool* 
     }
 
     ImGui::SameLine();
-    if (enabled && parameters._keepTextEnabled) {
+    if (enabled) {
         ImGui::EndDisabled();
     }
     AlienGui::Text(parameters._name);
-    if (enabled && !parameters._keepTextEnabled) {
-        ImGui::EndDisabled();
-    }
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
     }
@@ -216,7 +221,6 @@ namespace
     bool optionalWidgetAdaptor(Parameters parameters, std::optional<T>& optionalValue, T const& defaultValue, Callable const& func)
     {
         auto newParameters = parameters;
-        newParameters.keepTextEnabled(true);
 
         auto enabled = optionalValue.has_value();
         auto value = optionalValue.value_or(parameters._defaultValue.value_or(defaultValue));
@@ -501,7 +505,7 @@ bool AlienGui::Combo(ComboParameters& parameters, int& value, bool* enabled)
         items[i] = parameters._values[i].c_str();
     }
 
-    if (parameters._disabled) {
+    if (parameters._readOnly) {
         ImGui::BeginDisabled();
     }
 
@@ -525,7 +529,7 @@ bool AlienGui::Combo(ComboParameters& parameters, int& value, bool* enabled)
         ImGui::EndDisabled();
     }
 
-    if (parameters._disabled) {
+    if (parameters._readOnly) {
         ImGui::EndDisabled();
     }
 
@@ -560,7 +564,7 @@ bool AlienGui::Switcher(SwitcherParameters& parameters, int& value, bool* enable
 
     ImGui::PushID(parameters._name.c_str());
 
-    if (parameters._disabled) {
+    if (parameters._readOnly) {
         ImGui::BeginDisabled();
     }
 
@@ -614,7 +618,7 @@ bool AlienGui::Switcher(SwitcherParameters& parameters, int& value, bool* enable
     if (enabled) {
         ImGui::EndDisabled();
     }
-    if (parameters._disabled) {
+    if (parameters._readOnly) {
         ImGui::EndDisabled();
     }
 
@@ -678,13 +682,10 @@ bool AlienGui::ComboColor(ComboColorParameters const& parameters, int& value, bo
         ImColor::HSV(h, s, v));
 
 
-    if (enabled && parameters._keepTextEnabled) {
+    if (enabled) {
         ImGui::EndDisabled();
     }
     AlienGui::Text(parameters._name);
-    if (enabled && !parameters._keepTextEnabled) {
-        ImGui::EndDisabled();
-    }
 
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
@@ -2086,7 +2087,7 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
 
     ImGui::PushID(parameters._name.c_str());
 
-    if (parameters._disabled) {
+    if (parameters._readOnly) {
         ImGui::BeginDisabled();
     }
 
@@ -2245,11 +2246,11 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
                 if (enabled) {
                     ImGui::EndDisabled();
                 }
-                if (parameters._disabled) {
+                if (parameters._readOnly) {
                     ImGui::EndDisabled();
                 }
                 AlienGui::Text(parameters._name);
-                if (parameters._disabled) {
+                if (parameters._readOnly) {
                     ImGui::BeginDisabled();
                 }
                 if (enabled) {
@@ -2272,7 +2273,7 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
     if (enabled) {
         ImGui::EndDisabled();
     }
-    if (parameters._disabled) {
+    if (parameters._readOnly) {
         ImGui::EndDisabled();
     }
     ImGui::PopID();

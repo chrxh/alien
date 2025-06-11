@@ -47,7 +47,7 @@ public:
         MEMBER(SliderFloatParameters, bool, infinity, false);
         MEMBER(SliderFloatParameters, float, textWidth, 100);
         MEMBER(SliderFloatParameters, bool, colorDependence, false);
-        MEMBER(SliderFloatParameters, bool, disabled, false);
+        MEMBER(SliderFloatParameters, bool, readOnly, false);
         MEMBER(SliderFloatParameters, float const*, defaultValue, nullptr);
         MEMBER(SliderFloatParameters, float const*, disabledValue, nullptr);
         MEMBER(SliderFloatParameters, bool const*, defaultEnabledValue, nullptr);
@@ -65,7 +65,7 @@ public:
         MEMBER(SliderIntParameters, bool, infinity, false);
         MEMBER(SliderIntParameters, float, textWidth, 100);
         MEMBER(SliderIntParameters, bool, colorDependence, false);
-        MEMBER(SliderIntParameters, bool, disabled, false);
+        MEMBER(SliderIntParameters, bool, readOnly, false);
         MEMBER(SliderIntParameters, int const*, defaultValue, nullptr);
         MEMBER(SliderIntParameters, int const*, disabledValue, nullptr);
         MEMBER(SliderIntParameters, bool const*, defaultEnabledValue, nullptr);
@@ -103,7 +103,6 @@ public:
     {
         MEMBER(InputIntParameters, std::string, name, "");
         MEMBER(InputIntParameters, float, textWidth, 100);
-        MEMBER(InputIntParameters, bool, keepTextEnabled, false);
         MEMBER(InputIntParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER(InputIntParameters, bool, infinity, false);
         MEMBER(InputIntParameters, std::optional<std::string>, tooltip, std::nullopt);
@@ -210,7 +209,7 @@ public:
     {
         MEMBER(ComboParameters, std::string, name, "");
         MEMBER(ComboParameters, float, textWidth, 100);
-        MEMBER(ComboParameters, bool, disabled, false);
+        MEMBER(ComboParameters, bool, readOnly, false);
         MEMBER(ComboParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER(ComboParameters, bool const*, defaultEnabledValue, nullptr);
         MEMBER(ComboParameters, std::vector<std::string>, values, std::vector<std::string>());
@@ -223,7 +222,7 @@ public:
         MEMBER(SwitcherParameters, std::string, name, "");
         MEMBER(SwitcherParameters, float, width, 0);
         MEMBER(SwitcherParameters, float, textWidth, 100);
-        MEMBER(SwitcherParameters, bool, disabled, false);
+        MEMBER(SwitcherParameters, bool, readOnly, false);
         MEMBER(SwitcherParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER(SwitcherParameters, std::vector<std::string>, values, std::vector<std::string>());
         MEMBER(SwitcherParameters, std::optional<int>, disabledValue, std::nullopt);
@@ -236,7 +235,6 @@ public:
         MEMBER(ComboColorParameters, std::string, name, "");
         MEMBER(ComboColorParameters, float, width, 0);
         MEMBER(ComboColorParameters, float, textWidth, 100);
-        MEMBER(ComboColorParameters, bool, keepTextEnabled, false);
         MEMBER(ComboColorParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER(ComboColorParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
