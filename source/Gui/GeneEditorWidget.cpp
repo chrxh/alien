@@ -15,8 +15,8 @@
 
 namespace
 {
-    auto constexpr HeaderTotalWidth = 400.0f;
-    auto constexpr HeaderRightColumnWidth = 160.0f;
+    auto constexpr HeaderMinRightColumnWidth = 160.0f;
+    auto constexpr HeaderMaxLeftColumnWidth = 250.0f;
 }
 
 GeneEditorWidget _GeneEditorWidget::create(CreatureTabEditData const& editData, CreatureTabLayoutData const& layoutData)
@@ -67,46 +67,41 @@ void _GeneEditorWidget::processHeaderData()
 {
     AlienGui::Group("Selected gene");
 
-    auto availableWidth = scaleInverse(ImGui::GetContentRegionAvail().x);
-    auto width = scale(std::min(availableWidth, HeaderTotalWidth));
-
-    if (ImGui::BeginChild("GeneHeader", ImVec2(width, ImGui::GetContentRegionAvail().y - _layoutData->nodeListHeight), 0)) {
+    auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
+    if (ImGui::BeginChild("GeneHeader", ImVec2(0, ImGui::GetContentRegionAvail().y - _layoutData->nodeListHeight), 0)) {
         auto& gene = _editData->getSelectedGeneRef();
 
         _editData->updateGeometry(gene._shape); // Do it every time in order to avoid check for changes
-        AlienGui::Combo(AlienGui::ComboParameters().name("Shape").values(Const::ConstructionShapeStrings).textWidth(HeaderRightColumnWidth), gene._shape);
+        AlienGui::Combo(AlienGui::ComboParameters().name("Shape").values(Const::ConstructionShapeStrings).textWidth(rightColumnWidth), gene._shape);
 
-        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separation").textWidth(HeaderRightColumnWidth), gene._separateConstruction);
+        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separation").textWidth(rightColumnWidth), gene._separateConstruction);
 
         if (!gene._separateConstruction) {
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Branches").textWidth(HeaderRightColumnWidth), gene._numBranches);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Branches").textWidth(rightColumnWidth), gene._numBranches);
         } else {
             std::string text = "1";
-            AlienGui::InputText(AlienGui::InputTextParameters().name("Branches").textWidth(HeaderRightColumnWidth).readOnly(true), text);
+            AlienGui::InputText(AlienGui::InputTextParameters().name("Branches").textWidth(rightColumnWidth).readOnly(true), text);
         }
 
-        AlienGui::InputInt(
-            AlienGui::InputIntParameters().name("Concatenations").infinity(true).textWidth(HeaderRightColumnWidth), gene._numConcatenations);
+        AlienGui::InputInt(AlienGui::InputIntParameters().name("Concatenations").infinity(true).textWidth(rightColumnWidth), gene._numConcatenations);
 
         if (gene._shape == ConstructionShape_Custom) {
             AlienGui::Combo(
-                AlienGui::ComboParameters().name("Angle alignment").values(Const::ConstructorAlignmentStrings).textWidth(HeaderRightColumnWidth),
+                AlienGui::ComboParameters().name("Angle alignment").values(Const::ConstructorAlignmentStrings).textWidth(rightColumnWidth),
                 gene._angleAlignment);
         } else {
             std::string text = Const::ConstructorAlignmentStrings.at(gene._angleAlignment);
-            AlienGui::InputText(AlienGui::InputTextParameters().name("Angle alignment").textWidth(HeaderRightColumnWidth).readOnly(true), text);
+            AlienGui::InputText(AlienGui::InputTextParameters().name("Angle alignment").textWidth(rightColumnWidth).readOnly(true), text);
         }
 
         AlienGui::InputFloat(
-            AlienGui::InputFloatParameters().name("Connection distance").format("%.2f").step(0.05f).textWidth(HeaderRightColumnWidth),
+            AlienGui::InputFloatParameters().name("Connection distance").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
             gene._connectionDistance);
 
-        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(HeaderRightColumnWidth), gene._stiffness);
+        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(rightColumnWidth), gene._stiffness);
 
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters().name("Concatenation angle #1").format("%.1f").textWidth(HeaderRightColumnWidth), gene._concatenationAngle1);
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters().name("Concatenation angle #2").format("%.1f").textWidth(HeaderRightColumnWidth), gene._concatenationAngle2);
+        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Concatenation angle #1").format("%.1f").textWidth(rightColumnWidth), gene._concatenationAngle1);
+        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Concatenation angle #2").format("%.1f").textWidth(rightColumnWidth), gene._concatenationAngle2);
     }
     ImGui::EndChild();
 }
