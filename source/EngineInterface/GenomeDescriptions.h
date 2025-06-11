@@ -231,11 +231,11 @@ struct GeneDescription
     MEMBER(GeneDescription, std::vector<NodeDescription>, nodes, {});
     MEMBER(GeneDescription, ConstructionShape, shape, ConstructionShape_Custom);
     MEMBER(GeneDescription, int, numBranches, 1);   // Between 1 and 6 in modulo
+    MEMBER(GeneDescription, int, numConcatenations, 1);
     MEMBER(GeneDescription, bool, separateConstruction, true);
     MEMBER(GeneDescription, ConstructorAngleAlignment, angleAlignment, ConstructorAngleAlignment_60);
     MEMBER(GeneDescription, float, stiffness, 1.0f);
     MEMBER(GeneDescription, float, connectionDistance, 1.0f);
-    MEMBER(GeneDescription, int, numRepetitions, 1);
     MEMBER(GeneDescription, float, concatenationAngle1, 0.0f);
     MEMBER(GeneDescription, float, concatenationAngle2, 0.0f);
 };

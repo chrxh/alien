@@ -16,7 +16,7 @@
 namespace
 {
     auto constexpr HeaderTotalWidth = 400.0f;
-    auto constexpr HeaderRightColumnWidth = 120.0f;
+    auto constexpr HeaderRightColumnWidth = 160.0f;
 }
 
 GeneEditorWidget _GeneEditorWidget::create(CreatureTabEditData const& editData, CreatureTabLayoutData const& layoutData)
@@ -71,6 +71,40 @@ void _GeneEditorWidget::processHeaderData()
     auto width = scale(std::min(availableWidth, HeaderTotalWidth));
 
     if (ImGui::BeginChild("GeneHeader", ImVec2(width, ImGui::GetContentRegionAvail().y - _layoutData->nodeListHeight), 0)) {
+        auto& gene = _editData->getSelectedGeneRef();
+
+        _editData->updateGeometry(gene._shape); // Do it every time in order to avoid check for changes
+        AlienGui::Combo(AlienGui::ComboParameters().name("Shape").values(Const::ConstructionShapeStrings).textWidth(HeaderRightColumnWidth), gene._shape);
+
+        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separation").textWidth(HeaderRightColumnWidth), gene._separateConstruction);
+
+        if (!gene._separateConstruction) {
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Branches").textWidth(HeaderRightColumnWidth), gene._numBranches);
+        } else {
+            std::string text = "-";
+            AlienGui::InputText(AlienGui::InputTextParameters().name("Branches").textWidth(HeaderRightColumnWidth).readOnly(true), text);
+        }
+
+        AlienGui::InputInt(
+            AlienGui::InputIntParameters().name("Concatenations").infinity(true).textWidth(HeaderRightColumnWidth), gene._numConcatenations);
+
+        if (gene._shape == ConstructionShape_Custom) {
+            AlienGui::AngleAlignmentCombo(
+                AlienGui::AngleAlignmentComboParameters().name("Angle alignment").textWidth(HeaderRightColumnWidth), gene._angleAlignment);
+        }
+
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters().name("Connection distance").format("%.2f").step(0.05f).textWidth(HeaderRightColumnWidth),
+            gene._connectionDistance);
+
+        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(HeaderRightColumnWidth), gene._stiffness);
+
+        if (gene._numConcatenations > 1) {
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Concatenation angle #1").format("%.1f").textWidth(HeaderRightColumnWidth), gene._concatenationAngle1);
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Concatenation angle #2").format("%.1f").textWidth(HeaderRightColumnWidth), gene._concatenationAngle2);
+        }
     }
     ImGui::EndChild();
 }
@@ -122,7 +156,11 @@ void _GeneEditorWidget::processNodeList()
 
                     // Column 2: Angle
                     ImGui::TableNextColumn();
-                    AlienGui::Text(StringHelper::format(node._referenceAngle, 1));
+                    if (row != 0 && row != gene._nodes.size() - 1) {
+                        AlienGui::Text(StringHelper::format(node._referenceAngle, 1));
+                    } else {
+                        AlienGui::Text("-");
+                    }
                     ImGui::PopID();
                 }
             }

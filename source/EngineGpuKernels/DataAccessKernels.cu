@@ -46,7 +46,7 @@ namespace
                 geneTO.angleAlignment = gene.angleAlignment;
                 geneTO.stiffness = gene.stiffness;
                 geneTO.connectionDistance = gene.connectionDistance;
-                geneTO.numRepetitions = gene.numRepetitions;
+                geneTO.numConcatenations = gene.numConcatenations;
                 geneTO.concatenationAngle1 = gene.concatenationAngle1;
                 geneTO.concatenationAngle2 = gene.concatenationAngle2;
                 geneTO.numNodes = gene.numNodes;

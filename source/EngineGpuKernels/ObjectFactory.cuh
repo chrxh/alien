@@ -83,7 +83,7 @@ __inline__ __device__ void ObjectFactory::createGenomeFromTO(CollectionTO const&
         gene.angleAlignment = geneTO.angleAlignment;
         gene.stiffness = geneTO.stiffness;
         gene.connectionDistance = geneTO.connectionDistance;
-        gene.numRepetitions = geneTO.numRepetitions;
+        gene.numConcatenations = geneTO.numConcatenations;
         gene.concatenationAngle1 = geneTO.concatenationAngle1;
         gene.concatenationAngle2 = geneTO.concatenationAngle2;
         gene.numNodes = geneTO.numNodes;

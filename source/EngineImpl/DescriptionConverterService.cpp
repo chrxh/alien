@@ -471,7 +471,7 @@ GenomeDescription_New DescriptionConverterService::createGenomeDescription(
         geneDesc._angleAlignment = geneTO->angleAlignment;
         geneDesc._stiffness = geneTO->stiffness;
         geneDesc._connectionDistance = geneTO->connectionDistance;
-        geneDesc._numRepetitions = geneTO->numRepetitions;
+        geneDesc._numConcatenations = geneTO->numConcatenations;
         geneDesc._concatenationAngle1 = geneTO->concatenationAngle1;
         geneDesc._concatenationAngle2 = geneTO->concatenationAngle2;
 
@@ -629,7 +629,7 @@ void DescriptionConverterService::convertGenomeToTO(
         geneTO.angleAlignment = geneDesc._angleAlignment;
         geneTO.stiffness = geneDesc._stiffness;
         geneTO.connectionDistance = geneDesc._connectionDistance;
-        geneTO.numRepetitions = geneDesc._numRepetitions;
+        geneTO.numConcatenations = geneDesc._numConcatenations;
         geneTO.concatenationAngle1 = geneDesc._concatenationAngle1;
         geneTO.concatenationAngle2 = geneDesc._concatenationAngle2;
         geneTO.numNodes = toInt(geneDesc._nodes.size());

@@ -228,6 +228,58 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_infinity
     EXPECT_EQ(-1, result);
 }
 
+TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_multipleBranchesAndConcatenations_withoutSeparation)
+{
+    auto genome = GenomeDescription_New().genes({
+        GeneDescription().nodes({
+            NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(1)),
+            NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(2)),
+        }),
+        GeneDescription().nodes({
+            NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(2)),
+            NodeDescription(),
+        }),
+        GeneDescription()
+            .nodes({
+                NodeDescription(),
+                NodeDescription(),
+                NodeDescription(),
+            })
+            .numBranches(2)
+            .numConcatenations(3)
+            .separateConstruction(false),
+    });
+    auto result = GenomeDescriptionInfoService::get().getNumberOfResultingCells(genome);
+
+    EXPECT_EQ(2 + 2 + 3 * 2 * 3 + 3 * 2 * 3, result);
+}
+
+TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_multipleBranchesAndConcatenations_withSeparation)
+{
+    auto genome = GenomeDescription_New().genes({
+        GeneDescription().nodes({
+            NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(1)),
+            NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(2)),
+        }),
+        GeneDescription().nodes({
+            NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(2)),
+            NodeDescription(),
+        }),
+        GeneDescription()
+            .nodes({
+                NodeDescription(),
+                NodeDescription(),
+                NodeDescription(),
+            })
+            .numBranches(2)
+            .numConcatenations(3)
+            .separateConstruction(true),
+    });
+    auto result = GenomeDescriptionInfoService::get().getNumberOfResultingCells(genome);
+
+    EXPECT_EQ(2 + 2 + 3 * 3 + 3 * 3, result);
+}
+
 TEST_F(GenomeDescriptionInfoServiceTests_New, getReferences)
 {
     auto genome = GenomeDescription_New().genes({

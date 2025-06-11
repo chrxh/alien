@@ -161,7 +161,7 @@ struct GeneTO
     ConstructorAngleAlignment angleAlignment;
     float stiffness;
     float connectionDistance;
-    int numRepetitions;
+    int numConcatenations;
     float concatenationAngle1;
     float concatenationAngle2;
 
