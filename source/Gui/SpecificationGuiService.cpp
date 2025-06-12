@@ -384,14 +384,12 @@ void SpecificationGuiService::createWidgetsForAlternativeSpec(
     });
 
     if (containsWidgets) {
-        ImGui::Dummy(ImVec2(scale(22), 0));
-        ImGui::SameLine();
-        ImGui::BeginGroup();
+        AlienGui::BeginIndent();
         if (enabled) {
             enabled = enabledValue != nullptr ? *enabledValue : true;
         }
         createWidgetsForParameterGroup(alternativeSpec._alternatives.at(*value).second, enabled, parameters, origParameters, simulationFacade, orderNumber);
-        ImGui::EndGroup();
+        AlienGui::EndIndent();
     }
 }
 

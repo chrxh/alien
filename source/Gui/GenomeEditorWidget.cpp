@@ -51,13 +51,13 @@ void _GenomeEditorWidget::processHeaderData()
     AlienGui::Group("Genome");
 
     auto rightColumnWidth = scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderLeftColumnWidth));
-    if (ImGui::BeginChild("GenomeHeader", ImVec2(0, ImGui::GetContentRegionAvail().y - _layoutData->geneListHeight), 0)) {
+    if (ImGui::BeginChild("GenomeHeader", ImVec2(0, - _layoutData->geneListHeight), 0)) {
 
         auto numNodesString = std::to_string(GenomeDescriptionInfoService::get().getNumberOfNodes(_editData->genome));
         AlienGui::InputText(AlienGui::InputTextParameters().name("Node count").readOnly(true).textWidth(rightColumnWidth), numNodesString);
 
         auto numCells = GenomeDescriptionInfoService::get().getNumberOfResultingCells(_editData->genome);
-        auto numCellsString = numCells != -1 ? std::to_string(numCells) : std::string("Infinity");
+        auto numCellsString = numCells != -1 ? std::to_string(numCells) : std::string("infinity");
         AlienGui::InputText(AlienGui::InputTextParameters().name("Resulting cells").readOnly(true).textWidth(rightColumnWidth), numCellsString);
 
         AlienGui::InputFloat(

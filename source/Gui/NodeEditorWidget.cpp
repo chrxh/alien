@@ -6,8 +6,7 @@
 
 namespace
 {
-    auto constexpr TotalWidth = 400.0f;
-    auto constexpr RightColumnWidth = 120.0f;
+    auto constexpr HeaderLeftColumnWidth = 140.0f;
 }
 
 NodeEditorWidget _NodeEditorWidget::create(CreatureTabEditData const& editData, CreatureTabLayoutData const& layoutData)
@@ -70,31 +69,66 @@ void _NodeEditorWidget::processNodeAttributes()
 {
     AlienGui::Group("Selected node");
 
-    auto availableWidth = scaleInverse(ImGui::GetContentRegionAvail().x);
-    auto width = scale(std::min(availableWidth, TotalWidth));
-
-    if (ImGui::BeginChild("NodeData", ImVec2(width, 0), 0)) {
+    auto rightColumnWidth = scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderLeftColumnWidth));
+    if (ImGui::BeginChild("NodeData", ImVec2(0, 0), 0)) {
         auto& gene = _editData->getSelectedGeneRef();
         auto& node = _editData->getSelectedNodeRef();
         auto nodeType = node.getCellType();
 
         if (AlienGui::Combo(
-            AlienGui::ComboParameters().name("Type").values(Const::CellTypeGenomeStrings).textWidth(RightColumnWidth), nodeType)) {
+            AlienGui::ComboParameters().name("Type").values(Const::CellTypeGenomeStrings).textWidth(rightColumnWidth), nodeType)) {
             node._cellTypeData = createEmptyCellTypeGenomeDescription(nodeType);
         }
 
         auto nodeIndex = _editData->getSelectedNodeIndex();
         if (nodeIndex != 0 && nodeIndex != gene._nodes.size() - 1) {
-            if (AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Angle").textWidth(RightColumnWidth).format("%.1f"),
+            if (AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Angle").textWidth(rightColumnWidth).format("%.1f"),
                     node._referenceAngle)) {
                 gene._shape = ConstructionShape_Custom;
             }
         } else {
             std::string text = "-";
-            AlienGui::InputText(AlienGui::InputTextParameters().name("Angle").textWidth(RightColumnWidth).readOnly(true), text);
+            AlienGui::InputText(AlienGui::InputTextParameters().name("Angle").textWidth(rightColumnWidth).readOnly(true), text);
         }
 
-        AlienGui::ComboColor(AlienGui::ComboColorParameters().name("Color").textWidth(RightColumnWidth), node._color);
+        if (nodeIndex != 0) {
+            auto numRequiredAdditionalConnections = node._numRequiredAdditionalConnections + 1;
+            if (AlienGui::InputInt(
+                    AlienGui::InputIntParameters().name("Prev nodes connections").textWidth(rightColumnWidth), node._numRequiredAdditionalConnections)) {
+                gene._shape = ConstructionShape_Custom;
+            }
+            node._numRequiredAdditionalConnections = numRequiredAdditionalConnections - 1;
+        } else {
+            std::string text = "-";
+            AlienGui::InputText(AlienGui::InputTextParameters().name("Prev nodes connections").textWidth(rightColumnWidth).readOnly(true), text);
+        }
+
+        AlienGui::Checkbox(
+            AlienGui::CheckboxParameters().name("Signal routing restriction").textWidth(rightColumnWidth), node._signalRoutingRestriction._active);
+
+        AlienGui::BeginIndent();
+
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters()
+                .name("Signal base angle")
+                .format("%.1f")
+                .step(0.5f)
+                .readOnly(!node._signalRoutingRestriction._active)
+                .textWidth(rightColumnWidth),
+            node._signalRoutingRestriction._baseAngle);
+
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters()
+                .name("Signal opening angle")
+                .format("%.1f")
+                .step(0.5f)
+                .readOnly(!node._signalRoutingRestriction._active)
+                .textWidth(rightColumnWidth),
+            node._signalRoutingRestriction._openingAngle);
+
+        AlienGui::EndIndent();
+
+        AlienGui::ComboColor(AlienGui::ComboColorParameters().name("Color").textWidth(rightColumnWidth), node._color);
     }
     ImGui::EndChild();
 }
