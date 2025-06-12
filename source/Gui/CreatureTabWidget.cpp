@@ -114,10 +114,6 @@ void _CreatureTabWidget::processActualConfigurationPreview()
 
 void _CreatureTabWidget::doLayout()
 {
-    //if (_lastGenomeEditorWidth.has_value()) {
-    //    _layoutData->geneEditorWidth += _lastGenomeEditorWidth.value() - _layoutData->genomeEditorWidth;
-    //}
-
     // Initial layout setup
     if (!_layoutData->initialized) {
         auto width = ImGui::GetContentRegionAvail().x;
@@ -128,6 +124,7 @@ void _CreatureTabWidget::doLayout()
         _layoutData->desiredConfigurationPreviewWidth = width / 2;
         _layoutData->geneListHeight = height / 4;
         _layoutData->nodeListHeight = height / 4;
+        _layoutData->neuralNetEditorHeight = height / 4;
         _layoutData->initialized = true;
         _origLayoutData = std::make_shared<_CreatureTabLayoutData>();
         *_origLayoutData = *_layoutData;
@@ -148,6 +145,7 @@ void _CreatureTabWidget::doLayout()
             _layoutData->desiredConfigurationPreviewWidth *= scalingX;
             _layoutData->geneListHeight *= scalingY;
             _layoutData->nodeListHeight *= scalingY;
+            _layoutData->neuralNetEditorHeight *= scalingY;
             *_origLayoutData = *_layoutData;
             return;
         }

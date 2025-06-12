@@ -15,6 +15,10 @@ private:
     void processNodeAttributes();
     void processNoSelection();
 
+    void processNeuralNetEditor();
+
     CreatureTabEditData _editData;
     CreatureTabLayoutData _layoutData;
+
+    NeuralNetWidget _neuralNetWidget;
 };

@@ -99,6 +99,8 @@ PUBLIC
     NetworkSettingsDialog.h
     NetworkTransferController.cpp
     NetworkTransferController.h
+    NeuralNetWidget.cpp
+    NeuralNetWidget.h
     NewSimulationDialog.cpp
     NewSimulationDialog.h
     NewPasswordDialog.cpp

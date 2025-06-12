@@ -11,4 +11,5 @@ struct _CreatureTabLayoutData
     float desiredConfigurationPreviewWidth = 300.0f;
     float geneListHeight = 0;
     float nodeListHeight = 0;
+    float neuralNetEditorHeight = 0;
 };
