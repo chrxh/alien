@@ -397,6 +397,9 @@ public:
 
     static void ConvertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v);
 
+    static void BeginIndent();
+    static void EndIndent();
+
     static bool ShowPreviewDescription(PreviewDescription const& desc, float& zoom, std::optional<int>& selectedNode);
 
     struct NeuronSelectionParameters

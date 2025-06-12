@@ -242,7 +242,9 @@ bool AlienGui::InputFloat(InputFloatParameters const& parameters, float& value)
 
     ImGuiInputTextFlags flags = parameters._readOnly ? ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_None;
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - textWidth);
+    ImGui::BeginDisabled(parameters._readOnly);
     auto result = ImGui::InputFloat(("##" + parameters._name).c_str(), &value, parameters._step, 0, parameters._format.c_str(), flags);
+    ImGui::EndDisabled();
     ImGui::SameLine();
     if (parameters._defaultValue) {
         ImGui::BeginDisabled(value == *parameters._defaultValue);
@@ -274,7 +276,11 @@ void AlienGui::InputFloat2(InputFloat2Parameters const& parameters, float& value
     static float value[2];
     value[0] = value1;
     value[1] = value2;
+
+    ImGui::BeginDisabled(parameters._readOnly);
     ImGui::InputFloat2(("##" + parameters._name).c_str(), value, parameters._format.c_str(), flags);
+    ImGui::EndDisabled();
+
     value1 = value[0];
     value2 = value[1];
     ImGui::SameLine();
@@ -764,12 +770,10 @@ bool AlienGui::Checkbox(CheckboxParameters const& parameters, bool& value)
     if (!matchWithFilter(parameters._name)) {
         return false;
     }
+    ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x - scale(parameters._textWidth) - scale(30.0f), 0.0f));
+    ImGui::SameLine();
 
     auto result = ImGui::Checkbox(("##" + parameters._name).c_str(), &value);
-    if (parameters._textWidth != 0) {
-        ImGui::SameLine();
-        ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x - scale(parameters._textWidth), 0.0f));
-    }
 
     ImGui::SameLine();
     if (parameters._defaultValue) {
@@ -1527,6 +1531,18 @@ void AlienGui::ConvertRGBtoHSV(uint32_t rgb, float& h, float& s, float& v)
 {
     return ImGui::ColorConvertRGBtoHSV(
         toFloat((rgb >> 16) & 0xff) / 255, toFloat((rgb >> 8) & 0xff) / 255, toFloat((rgb & 0xff)) / 255, h, s, v);
+}
+
+void AlienGui::BeginIndent()
+{
+    ImGui::Dummy(ImVec2(scale(22), 0));
+    ImGui::SameLine();
+    ImGui::BeginGroup();
+}
+
+void AlienGui::EndIndent()
+{
+    ImGui::EndGroup();
 }
 
 bool AlienGui::ToggleButton(ToggleButtonParameters const& parameters, bool& value)
