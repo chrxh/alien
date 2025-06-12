@@ -186,7 +186,7 @@ void _GeneEditorWidget::processNodeListButtons()
             onAddNode();
         }
         ImGui::SameLine();
-        AlienGui::PaddingLeft();
+        AlienGui::MoveTickLeft();
         ImGui::BeginDisabled(!selectedNode.has_value());
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_MINUS_CIRCLE))) {
             onRemoveNode();
@@ -194,7 +194,7 @@ void _GeneEditorWidget::processNodeListButtons()
         ImGui::EndDisabled();
 
         ImGui::SameLine();
-        AlienGui::PaddingLeft();
+        AlienGui::MoveTickLeft();
         ImGui::BeginDisabled(!selectedNode.has_value() || selectedNode.value() == 0);
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_UP))) {
             onMoveNodeUpward();
@@ -202,7 +202,7 @@ void _GeneEditorWidget::processNodeListButtons()
         ImGui::EndDisabled();
 
         ImGui::SameLine();
-        AlienGui::PaddingLeft();
+        AlienGui::MoveTickLeft();
         ImGui::BeginDisabled(!selectedNode.has_value() || selectedNode.value() == gene._nodes.size() - 1);
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_DOWN))) {
             onMoveNodeDownward();

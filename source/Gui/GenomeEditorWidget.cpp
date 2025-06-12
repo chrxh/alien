@@ -165,7 +165,7 @@ void _GenomeEditorWidget::processGeneListButtons()
             onAddGene();
         }
         ImGui::SameLine();
-        AlienGui::PaddingLeft();
+        AlienGui::MoveTickLeft();
         ImGui::BeginDisabled(!_editData->selectedGeneIndex.has_value());
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_MINUS_CIRCLE))) {
             onRemoveGene();
@@ -173,7 +173,7 @@ void _GenomeEditorWidget::processGeneListButtons()
         ImGui::EndDisabled();
 
         ImGui::SameLine();
-        AlienGui::PaddingLeft();
+        AlienGui::MoveTickLeft();
         ImGui::BeginDisabled(!_editData->selectedGeneIndex.has_value() || _editData->selectedGeneIndex.value() == 0);
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_UP))) {
             onMoveGeneUpward();
@@ -181,7 +181,7 @@ void _GenomeEditorWidget::processGeneListButtons()
         ImGui::EndDisabled();
 
         ImGui::SameLine();
-        AlienGui::PaddingLeft();
+        AlienGui::MoveTickLeft();
         ImGui::BeginDisabled(!_editData->selectedGeneIndex.has_value() || _editData->selectedGeneIndex.value() == _editData->genome._genes.size() - 1);
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_DOWN))) {
             onMoveGeneDownward();

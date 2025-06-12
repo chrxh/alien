@@ -191,7 +191,7 @@ bool AlienGui::InputInt(InputIntParameters const& parameters, int& value, bool* 
     }
     if (showInfinity) {
         ImGui::SameLine();
-        PaddingLeft();
+        MoveTickLeft();
 
         ImGui::BeginDisabled(parameters._readOnly);
         if (SelectableButton(SelectableButtonParameters().name(ICON_FA_INFINITY).tooltip(parameters._tooltip).width(infinityButtonWidth), isInfinity)) {
@@ -1117,10 +1117,14 @@ void AlienGui::ColorButtonWithPicker(ColorButtonWithPickerParameters const& para
     }
 }
 
-void AlienGui::NegativeSpacing()
+void AlienGui::MoveTickLeft()
 {
-    ImVec2 pos = ImGui::GetCursorScreenPos();
-    ImGui::SetCursorScreenPos(ImVec2(pos.x - ImGui::GetStyle().FramePadding.x, pos.y));
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() - ImGui::GetStyle().FramePadding.x);
+}
+
+void AlienGui::MoveTickUp()
+{
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ImGui::GetStyle().FramePadding.y);
 }
 
 void AlienGui::Separator()
@@ -2526,11 +2530,6 @@ void AlienGui::RotateEnd(float angle, ImDrawList* drawList)
 }
 
 //<<<<<<<<<<
-
-void AlienGui::PaddingLeft()
-{
-    ImGui::SetCursorPosX(ImGui::GetCursorPosX() - ImGui::GetStyle().FramePadding.x);
-}
 
 int AlienGui::DynamicTableLayout::calcNumColumns(float tableWidth, float columnWidth)
 {

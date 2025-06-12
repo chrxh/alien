@@ -2,7 +2,9 @@
 
 #include "AlienGui.h"
 #include "CreatureTabEditData.h"
+#include "CreatureTabLayoutData.h"
 #include "LoginDialog.h"
+#include "NeuralNetWidget.h"
 
 namespace
 {
@@ -17,8 +19,17 @@ NodeEditorWidget _NodeEditorWidget::create(CreatureTabEditData const& editData, 
 void _NodeEditorWidget::process()
 {
     if (ImGui::BeginChild("NodeEditor", ImVec2(0, 0))) {
-        if (_editData->getSelectedNodeIndex()) {
+        auto nodeIndex = _editData->getSelectedNodeIndex();
+        if (nodeIndex.has_value()) {
+            ImGui::PushID(_editData->selectedGeneIndex.value());
+            ImGui::PushID(nodeIndex.value());
             processNodeAttributes();
+
+            AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _layoutData->neuralNetEditorHeight);
+
+            processNeuralNetEditor();
+            ImGui::PopID();
+            ImGui::PopID();
         } else {
             processNoSelection();
         }
@@ -30,6 +41,7 @@ _NodeEditorWidget::_NodeEditorWidget(CreatureTabEditData const& editData, Creatu
     : _editData(editData)
     , _layoutData(layoutData)
 {
+    _neuralNetWidget = _NeuralNetWidget::create();
 }
 
 namespace
@@ -70,20 +82,18 @@ void _NodeEditorWidget::processNodeAttributes()
     AlienGui::Group("Selected node");
 
     auto rightColumnWidth = scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderLeftColumnWidth));
-    if (ImGui::BeginChild("NodeData", ImVec2(0, 0), 0)) {
+    if (ImGui::BeginChild("NodeData", ImVec2(0, -_layoutData->neuralNetEditorHeight), 0)) {
         auto& gene = _editData->getSelectedGeneRef();
         auto& node = _editData->getSelectedNodeRef();
         auto nodeType = node.getCellType();
 
-        if (AlienGui::Combo(
-            AlienGui::ComboParameters().name("Type").values(Const::CellTypeGenomeStrings).textWidth(rightColumnWidth), nodeType)) {
+        if (AlienGui::Combo(AlienGui::ComboParameters().name("Type").values(Const::CellTypeGenomeStrings).textWidth(rightColumnWidth), nodeType)) {
             node._cellTypeData = createEmptyCellTypeGenomeDescription(nodeType);
         }
 
         auto nodeIndex = _editData->getSelectedNodeIndex();
         if (nodeIndex != 0 && nodeIndex != gene._nodes.size() - 1) {
-            if (AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Angle").textWidth(rightColumnWidth).format("%.1f"),
-                    node._referenceAngle)) {
+            if (AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Angle").textWidth(rightColumnWidth).format("%.1f"), node._referenceAngle)) {
                 gene._shape = ConstructionShape_Custom;
             }
         } else {
@@ -146,4 +156,14 @@ void _NodeEditorWidget::processNoSelection()
         ImGui::GetWindowDrawList()->AddText(textPos, ImGui::GetColorU32(ImGuiCol_Text), text);
     }
     ImGui::EndChild();
+}
+
+void _NodeEditorWidget::processNeuralNetEditor()
+{
+    AlienGui::MoveTickUp();
+    AlienGui::MoveTickUp();
+    AlienGui::Group("Neural net");
+
+    auto& node = _editData->getSelectedNodeRef();
+    _neuralNetWidget->process(node._neuralNetwork._weights, node._neuralNetwork._biases, node._neuralNetwork._activationFunctions);
 }

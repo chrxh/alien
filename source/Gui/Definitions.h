@@ -130,6 +130,9 @@ using GeneEditorWidget = std::shared_ptr<_GeneEditorWidget>;
 class _NodeEditorWidget;
 using NodeEditorWidget = std::shared_ptr<_NodeEditorWidget>;
 
+class _NeuralNetWidget;
+using NeuralNetWidget = std::shared_ptr<_NeuralNetWidget>;
+
 struct UserInfo;
 
 struct GLFWvidmode;

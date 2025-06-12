@@ -414,40 +414,40 @@ void GettingStartedWindow::drawTitle()
     ImGui::PopFont();
 
     ImGui::SameLine();
-    AlienGui::NegativeSpacing();
+    AlienGui::MoveTickLeft();
     ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
     ImGui::Text("A");
     ImGui::PopFont();
 
     ImGui::SameLine();
-    AlienGui::NegativeSpacing();
-    AlienGui::NegativeSpacing();
+    AlienGui::MoveTickLeft();
+    AlienGui::MoveTickLeft();
     ImGui::PushFont(StyleRepository::get().getMediumFont());
     ImGui::Text("rtificial ");
     ImGui::PopFont();
 
     ImGui::SameLine();
-    AlienGui::NegativeSpacing();
+    AlienGui::MoveTickLeft();
     ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
     ImGui::Text("LI");
     ImGui::PopFont();
 
     ImGui::SameLine();
-    AlienGui::NegativeSpacing();
-    AlienGui::NegativeSpacing();
+    AlienGui::MoveTickLeft();
+    AlienGui::MoveTickLeft();
     ImGui::PushFont(StyleRepository::get().getMediumFont());
     ImGui::Text("fe ");
     ImGui::PopFont();
 
     ImGui::SameLine();
-    AlienGui::NegativeSpacing();
+    AlienGui::MoveTickLeft();
     ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
     ImGui::Text("EN");
     ImGui::PopFont();
 
     ImGui::SameLine();
-    AlienGui::NegativeSpacing();
-    AlienGui::NegativeSpacing();
+    AlienGui::MoveTickLeft();
+    AlienGui::MoveTickLeft();
     ImGui::PushFont(StyleRepository::get().getMediumFont());
     ImGui::Text("vironment ?");
     ImGui::PopFont();

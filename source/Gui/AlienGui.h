@@ -311,7 +311,8 @@ public:
     };
     static void ColorButtonWithPicker(ColorButtonWithPickerParameters const& parameters, FloatColorRGB& color);
 
-    static void NegativeSpacing();
+    static void MoveTickLeft();
+    static void MoveTickUp();
     static void Separator();
 
     struct MovableHorizontalSeparatorParameters
@@ -436,8 +437,6 @@ public:
 
     static void RotateStart(ImDrawList* drawList);
     static void RotateEnd(float angle, ImDrawList* drawList);
-
-    static void PaddingLeft();
 
 private:
 
