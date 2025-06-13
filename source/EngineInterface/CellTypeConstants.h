@@ -78,6 +78,11 @@ enum ActivationFunction_
     ActivationFunction_Count
 };
 
+namespace Const
+{
+    std::vector<std::string> const ActivationFunctionStrings = {"Sigmoid", "Binary step", "Identity", "Absolute value", "Gaussian"};
+}
+
 //************************
 //* Oscillator constants *
 //************************

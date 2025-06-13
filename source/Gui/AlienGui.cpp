@@ -2001,7 +2001,7 @@ void AlienGui::NeuronSelection(
                 AlienGui::ComboParameters()
                     .name("Activation function")
                     .textWidth(editorColumnTextWidth)
-                    .values(Const::ActivationFunctions)
+                    .values(Const::ActivationFunctionStrings)
                     .tooltip(Const::GenomeNeuronActivationFunctionTooltip),
                 activationFunction);
             activationFunctions.at(selectedOutput) = static_cast<ActivationFunction>(activationFunction);
