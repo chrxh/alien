@@ -162,7 +162,7 @@ void _NodeEditorWidget::processNeuralNetEditor()
 {
     AlienGui::MoveTickUp();
     AlienGui::MoveTickUp();
-    AlienGui::Group("Neural net");
+    AlienGui::Group("Neural network");
 
     auto& node = _editData->getSelectedNodeRef();
     _neuralNetWidget->process(node._neuralNetwork._weights, node._neuralNetwork._biases, node._neuralNetwork._activationFunctions);

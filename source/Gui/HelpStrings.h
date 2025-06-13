@@ -489,8 +489,6 @@ namespace Const
     std::string const LoginShareGpuInfoTooltip2 =
         "As a result, you will be able to see the GPU information of other registered users who have shared it.";
 
-    std::vector<std::string> const ActivationFunctions = {"Sigmoid", "Binary step", "Identity", "Absolute value", "Gaussian"};
-
     std::string const BrowserWorkspaceTooltip =
         "There are three different workspaces where you can find and possibly upload simulations and genomes:\n\n" ICON_FA_CHEVRON_RIGHT " alien-project: This "
         "workspace contains simulations that come along with the released versions. They cover a wide range and exploit different "

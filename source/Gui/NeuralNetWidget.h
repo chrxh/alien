@@ -14,6 +14,22 @@ public:
 private:
     _NeuralNetWidget();
 
-    std::unordered_map<unsigned int, int> _neuronSelectedInput;
-    std::unordered_map<unsigned int, int> _neuronSelectedOutput;
+    struct SelectionData
+    {
+        int inputNeuronIndex = 0;
+        int outputNeuronIndex = 0;
+    };
+
+    void
+    processNetwork(SelectionData& selectionData, std::vector<float>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
+    void processEditWidgets(
+        SelectionData& selectionData,
+        std::vector<float>& weights,
+        std::vector<float>& biases,
+        std::vector<ActivationFunction>& activationFunctions);
+
+    template <typename T>
+    SelectionData& getValueRef(std::unordered_map<unsigned int, T>& idToValueMap);
+
+    std::unordered_map<unsigned int, SelectionData> _dataById;
 };
