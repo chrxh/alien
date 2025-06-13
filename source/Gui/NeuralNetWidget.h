@@ -20,13 +20,13 @@ private:
         int outputNeuronIndex = 0;
     };
 
-    void
-    processNetwork(SelectionData& selectionData, std::vector<float>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
+    void processNetwork(SelectionData& selectionData, std::vector<float>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
     void processEditWidgets(
         SelectionData& selectionData,
         std::vector<float>& weights,
         std::vector<float>& biases,
         std::vector<ActivationFunction>& activationFunctions);
+    void processActionButtons(std::vector<float>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
 
     template <typename T>
     SelectionData& getValueRef(std::unordered_map<unsigned int, T>& idToValueMap);
