@@ -198,7 +198,7 @@ protected:
         case CellTypeGenome_Depot:
             return DepotGenomeDescription();
         case CellTypeGenome_Constructor:
-            return ConstructorGenomeDescription_New().autoTriggerInterval(7).constructionActivationTime(4).constructionAngle1(34.4f).constructionAngle2(-45.5f);
+            return ConstructorGenomeDescription_New().autoTriggerInterval(7).constructionActivationTime(4).constructionAngle(34.4f);
         case CellTypeGenome_Sensor:
             return SensorGenomeDescription().autoTriggerInterval(3).restrictToColor(5).minRange(34).maxRange(67).minDensity(0.25f).restrictToMutants(
                 SensorRestrictToMutants_RestrictToLessComplexMutants);

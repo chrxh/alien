@@ -84,8 +84,6 @@ __inline__ __device__ void ObjectFactory::createGenomeFromTO(CollectionTO const&
         gene.stiffness = geneTO.stiffness;
         gene.connectionDistance = geneTO.connectionDistance;
         gene.numConcatenations = geneTO.numConcatenations;
-        gene.concatenationAngle1 = geneTO.concatenationAngle1;
-        gene.concatenationAngle2 = geneTO.concatenationAngle2;
         gene.numNodes = geneTO.numNodes;
 
         auto const& nodeTOs = collectionTO.nodes + geneTO.nodeArrayIndex;
@@ -115,8 +113,6 @@ __inline__ __device__ void ObjectFactory::createGenomeFromTO(CollectionTO const&
                 node.cellTypeData.constructor.autoTriggerInterval = nodeTO.cellTypeData.constructor.autoTriggerInterval;
                 node.cellTypeData.constructor.constructGeneIndex = nodeTO.cellTypeData.constructor.constructGeneIndex;
                 node.cellTypeData.constructor.constructionActivationTime = nodeTO.cellTypeData.constructor.constructionActivationTime;
-                node.cellTypeData.constructor.constructionAngle1 = nodeTO.cellTypeData.constructor.constructionAngle1;
-                node.cellTypeData.constructor.constructionAngle2 = nodeTO.cellTypeData.constructor.constructionAngle2;
                 break;
             case CellTypeGenome_Sensor:
                 node.cellTypeData.sensor.autoTriggerInterval = nodeTO.cellTypeData.sensor.autoTriggerInterval;

@@ -1,5 +1,7 @@
 #include "NodeEditorWidget.h"
 
+#include <boost/range/adaptors.hpp>
+
 #include "AlienGui.h"
 #include "CreatureTabEditData.h"
 #include "CreatureTabLayoutData.h"
@@ -89,10 +91,53 @@ void _NodeEditorWidget::processNodeAttributes()
         auto& node = _editData->getSelectedNodeRef();
         auto nodeType = node.getCellType();
 
+        // Type
         if (AlienGui::Combo(AlienGui::ComboParameters().name("Type").values(Const::CellTypeGenomeStrings).textWidth(rightColumnWidth), nodeType)) {
             node._cellTypeData = createEmptyCellTypeGenomeDescription(nodeType);
         }
 
+        if (nodeType == CellTypeGenome_Base) {
+        } else if (nodeType == CellTypeGenome_Depot) {
+        } else if (nodeType == CellTypeGenome_Constructor) {
+            AlienGui::BeginIndent();
+
+            // Activation mode
+            auto& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
+            int isAutoTriggered = constructor._autoTriggerInterval == 0 ? 0 : 1;
+            if (AlienGui::Combo(
+                    AlienGui::ComboParameters().name("Activation mode").textWidth(rightColumnWidth).values({"Manual", "Automatic"}), isAutoTriggered)) {
+                constructor._autoTriggerInterval = isAutoTriggered;
+            }
+            if (isAutoTriggered == 1) {
+                AlienGui::BeginIndent();
+                AlienGui::InputInt(AlienGui::InputIntParameters().name("Interval").textWidth(rightColumnWidth), constructor._autoTriggerInterval);
+                constructor._autoTriggerInterval = std::max(1, constructor._autoTriggerInterval);
+                AlienGui::EndIndent();
+            }
+
+            // Gene index
+            std::vector<std::string> genes;
+            for (auto const& [index, gene] : _editData->genome._genes | boost::adaptors::indexed(0)) {
+                auto text = "No. " + std::to_string(index + 1);
+                if (index == 0) {
+                    text += " (reproduction)";
+                }
+                genes.emplace_back(text);
+            }
+            AlienGui::Combo(AlienGui::ComboParameters().name("Gene").values(genes).textWidth(rightColumnWidth), constructor._constructGeneIndex);
+
+            // Construction activation time
+            AlienGui::InputInt(
+                AlienGui::InputIntParameters().name("Offspring activation time").textWidth(rightColumnWidth), constructor._constructionActivationTime);
+
+            // Construction angle
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Construction angle").format("%.1f").textWidth(rightColumnWidth), constructor._constructionAngle);
+
+            AlienGui::EndIndent();
+        }
+
+        // Angle
         auto nodeIndex = _editData->getSelectedNodeIndex();
         if (nodeIndex != 0 && nodeIndex != gene._nodes.size() - 1) {
             if (AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Angle").textWidth(rightColumnWidth).format("%.1f"), node._referenceAngle)) {
@@ -103,10 +148,11 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::InputText(AlienGui::InputTextParameters().name("Angle").textWidth(rightColumnWidth).readOnly(true), text);
         }
 
+        // Previous nodes connections
         if (nodeIndex != 0) {
             auto numRequiredAdditionalConnections = node._numRequiredAdditionalConnections + 1;
             if (AlienGui::InputInt(
-                    AlienGui::InputIntParameters().name("Prev nodes connections").textWidth(rightColumnWidth), node._numRequiredAdditionalConnections)) {
+                    AlienGui::InputIntParameters().name("Prev nodes connections").textWidth(rightColumnWidth), numRequiredAdditionalConnections)) {
                 gene._shape = ConstructionShape_Custom;
             }
             node._numRequiredAdditionalConnections = numRequiredAdditionalConnections - 1;
