@@ -86,7 +86,8 @@ struct OscillatorGenomeDescription
     auto operator<=>(OscillatorGenomeDescription const&) const = default;
 
     MEMBER(OscillatorGenomeDescription, int, autoTriggerInterval, 100);  // 0 = no triggering, > 0 = auto trigger
-    MEMBER(OscillatorGenomeDescription, int, alternationInterval, 0);  // 0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
+    MEMBER(OscillatorGenomeDescription, OscillatorPulseType, pulseType, OscillatorPulseType_Positive);
+    MEMBER(OscillatorGenomeDescription, int, alternationInterval, 1);  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
 };
 
 struct AttackerGenomeDescription
@@ -98,7 +99,7 @@ struct InjectorGenomeDescription_New
 {
     auto operator<=>(InjectorGenomeDescription_New const&) const = default;
 
-    MEMBER(InjectorGenomeDescription_New, InjectorMode, mode, InjectorMode_InjectAll); // 0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
+    MEMBER(InjectorGenomeDescription_New, InjectorMode, mode, InjectorMode_InjectAll);
 };
 
 
