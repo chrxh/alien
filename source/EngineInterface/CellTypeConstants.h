@@ -133,7 +133,7 @@ namespace Channels
     auto constexpr MuscleAngle = 1;
 }
 
-using MuscleMode = uint8_t;
+using MuscleMode = int;
 enum MuscleMode_
 {
     MuscleMode_AutoBending,
@@ -144,6 +144,12 @@ enum MuscleMode_
     MuscleMode_DirectMovement,
     MuscleMode_Count
 };
+
+namespace Const
+{
+    std::vector<std::string> const MuscleModeStrings =
+        {"Auto bending", "Manual bending", "Angle bending", "Auto crawling", "Manual crawling", "Direct movement"};
+}
 
 //**********************
 //* Defender constants *
@@ -219,6 +225,11 @@ enum InjectorMode_
     InjectorMode_InjectAll,
     InjectorMode_Count
 };
+
+namespace Const
+{
+    std::vector<std::string> const InjectorModeStrings = {"Only empty cells", "All cells"};
+}
 
 //***********************
 //* Detonator constants *

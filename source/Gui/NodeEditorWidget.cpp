@@ -50,7 +50,7 @@ _NodeEditorWidget::_NodeEditorWidget(CreatureTabEditData const& editData, Creatu
 
 namespace
 {
-    CellTypeGenomeDescription_New createEmptyCellTypeGenomeDescription(CellTypeGenome cellType)
+    CellTypeGenomeDescription_New createCellTypeGenomeDescription(CellTypeGenome cellType)
     {
         switch (cellType) {
         case CellTypeGenome_Base:
@@ -79,6 +79,26 @@ namespace
             CHECK(false);
         }
     }
+
+    MuscleModeGenomeDescription createMuscleModeGenomeDescription(MuscleMode mode)
+    {
+        switch (mode) {
+        case MuscleMode_AutoBending:
+            return AutoBendingGenomeDescription();
+        case MuscleMode_ManualBending:
+            return ManualBendingGenomeDescription();
+        case MuscleMode_AngleBending:
+            return AngleBendingGenomeDescription();
+        case MuscleMode_AutoCrawling:
+            return AutoCrawlingGenomeDescription();
+        case MuscleMode_ManualCrawling:
+            return ManualCrawlingGenomeDescription();
+        case MuscleMode_DirectMovement:
+            return DirectMovementGenomeDescription();
+        default:
+            CHECK(false);
+        }
+    }
 }
 
 void _NodeEditorWidget::processNodeAttributes()
@@ -93,7 +113,7 @@ void _NodeEditorWidget::processNodeAttributes()
 
         // Type
         if (AlienGui::Combo(AlienGui::ComboParameters().name("Type").values(Const::CellTypeGenomeStrings).textWidth(rightColumnWidth), nodeType)) {
-            node._cellTypeData = createEmptyCellTypeGenomeDescription(nodeType);
+            node._cellTypeData = createCellTypeGenomeDescription(nodeType);
         }
 
         if (nodeType == CellTypeGenome_Base) {
@@ -136,18 +156,17 @@ void _NodeEditorWidget::processNodeAttributes()
 
             // Auto activation interval
             auto& sensor = std::get<SensorGenomeDescription_New>(node._cellTypeData);
-            AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Auto activation interval").textWidth(rightColumnWidth), sensor._autoTriggerInterval);
+            AlienGui::InputOptionalInt(
+                AlienGui::InputIntParameters().name("Auto activation interval").textWidth(rightColumnWidth), sensor._autoTriggerInterval);
 
             // Minimum density
             AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Min density").format("%.2f").textWidth(rightColumnWidth), sensor._minDensity);
 
             // Minimum range
-            AlienGui::InputOptionalInt(
-                AlienGui::InputIntParameters().name("Min range").textWidth(rightColumnWidth), sensor._minRange);
+            AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Min range").textWidth(rightColumnWidth), sensor._minRange);
 
             // Maximum range
-            AlienGui::InputOptionalInt(
-                AlienGui::InputIntParameters().name("Max range").textWidth(rightColumnWidth), sensor._maxRange);
+            AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max range").textWidth(rightColumnWidth), sensor._maxRange);
 
             // Scan color
             AlienGui::ComboOptionalColor(AlienGui::ComboColorParameters().name("Scan color").textWidth(rightColumnWidth), sensor._restrictToColor);
@@ -165,11 +184,11 @@ void _NodeEditorWidget::processNodeAttributes()
 
             // Activation interval
             auto& oscillator = std::get<OscillatorGenomeDescription>(node._cellTypeData);
-            AlienGui::InputInt(
-                AlienGui::InputIntParameters().name("Activation interval").textWidth(rightColumnWidth), oscillator._autoTriggerInterval);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Activation interval").textWidth(rightColumnWidth), oscillator._autoTriggerInterval);
 
             // Pulse type
-            AlienGui::Combo(AlienGui::ComboParameters().name("Pulse type").values({"Positive", "Alternation"}).textWidth(rightColumnWidth), oscillator._pulseType);
+            AlienGui::Combo(
+                AlienGui::ComboParameters().name("Pulse type").values({"Positive", "Alternation"}).textWidth(rightColumnWidth), oscillator._pulseType);
 
             if (oscillator._pulseType != OscillatorPulseType_Alternation) {
 
@@ -180,6 +199,79 @@ void _NodeEditorWidget::processNodeAttributes()
 
                 AlienGui::EndIndent();
             }
+
+            AlienGui::EndIndent();
+
+        } else if (nodeType == CellTypeGenome_Attacker) {
+        } else if (nodeType == CellTypeGenome_Injector) {
+
+            AlienGui::BeginIndent();
+
+            // Mode
+            auto& injector = std::get<InjectorGenomeDescription_New>(node._cellTypeData);
+            AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::InjectorModeStrings).textWidth(rightColumnWidth), injector._mode);
+
+            AlienGui::EndIndent();
+
+        } else if (nodeType == CellTypeGenome_Muscle) {
+
+            AlienGui::BeginIndent();
+
+            // Mode
+            auto& muscle = std::get<MuscleGenomeDescription>(node._cellTypeData);
+            auto mode = muscle.getMode();
+            if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::MuscleModeStrings).textWidth(rightColumnWidth), mode)) {
+                muscle._mode = createMuscleModeGenomeDescription(mode);
+            }
+
+            if (mode == MuscleMode_AutoBending) {
+                AlienGui::BeginIndent();
+
+                // Max angle deviation
+                auto& autoBending = std::get<AutoBendingGenomeDescription>(muscle._mode);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Max angle deviation").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
+                    autoBending._maxAngleDeviation);
+                
+                // Front back ratio
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Front back ratio").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
+                    autoBending._frontBackVelRatio);
+
+                AlienGui::EndIndent();
+
+            } else if (mode == MuscleMode_ManualBending) {
+                AlienGui::BeginIndent();
+
+                // Max angle deviation
+                auto& manualBending = std::get<ManualBendingGenomeDescription>(muscle._mode);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Max angle deviation").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
+                    manualBending._maxAngleDeviation);
+
+                // Front back ratio
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Front back ratio").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
+                    manualBending._frontBackVelRatio);
+
+                AlienGui::EndIndent();
+            } else if (mode == MuscleMode_AngleBending) {
+                AlienGui::BeginIndent();
+
+                // Max angle deviation
+                auto& angleBending = std::get<AngleBendingGenomeDescription>(muscle._mode);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Max angle deviation").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
+                    angleBending._maxAngleDeviation);
+
+                // Front back ratio
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Front back ratio").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
+                    angleBending._frontBackVelRatio);
+
+                AlienGui::EndIndent();
+            }
+
 
             AlienGui::EndIndent();
         }
