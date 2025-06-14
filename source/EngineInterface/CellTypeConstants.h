@@ -115,6 +115,12 @@ enum SensorRestrictToMutants_
     SensorRestrictToMutants_Count
 };
 
+namespace Const
+{
+    std::vector<std::string> const SensorRestrictToMutantStrings =
+        {"None", "Same mutants", "Other mutants", "Free cells", "Handcrafted cells", "Less complex mutants", "More complex mutants"};
+}
+
 //********************
 //* Muscle constants *
 //********************

@@ -79,7 +79,6 @@ __inline__ __device__ void ObjectFactory::createGenomeFromTO(CollectionTO const&
         auto& gene = genes[i];
         gene.shape = geneTO.shape;
         gene.numBranches = geneTO.numBranches;
-        gene.separateConstruction = geneTO.separateConstruction;
         gene.angleAlignment = geneTO.angleAlignment;
         gene.stiffness = geneTO.stiffness;
         gene.connectionDistance = geneTO.connectionDistance;

@@ -246,8 +246,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_multiple
                 NodeDescription(),
             })
             .numBranches(2)
-            .numConcatenations(3)
-            .separateConstruction(false),
+            .numConcatenations(3),
     });
     auto result = GenomeDescriptionInfoService::get().getNumberOfResultingCells(genome);
 
@@ -271,9 +270,8 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_multiple
                 NodeDescription(),
                 NodeDescription(),
             })
-            .numBranches(2)
-            .numConcatenations(3)
-            .separateConstruction(true),
+            .numBranches(std::nullopt)
+            .numConcatenations(3),
     });
     auto result = GenomeDescriptionInfoService::get().getNumberOfResultingCells(genome);
 

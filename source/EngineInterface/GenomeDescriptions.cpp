@@ -28,7 +28,7 @@ CellTypeGenome NodeDescription::getCellType() const
         return CellTypeGenome_Depot;
     } else if (std::holds_alternative<ConstructorGenomeDescription_New>(_cellTypeData)) {
         return CellTypeGenome_Constructor;
-    } else if (std::holds_alternative<SensorGenomeDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<SensorGenomeDescription_New>(_cellTypeData)) {
         return CellTypeGenome_Sensor;
     } else if (std::holds_alternative<OscillatorGenomeDescription>(_cellTypeData)) {
         return CellTypeGenome_Oscillator;

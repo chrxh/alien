@@ -63,22 +63,22 @@ struct ConstructorGenomeDescription_New
 {
     auto operator<=>(ConstructorGenomeDescription_New const&) const = default;
 
-    MEMBER(ConstructorGenomeDescription_New, int, autoTriggerInterval, 100);    // 0 = manual (triggered by signal), > 0 = auto trigger
+    MEMBER(ConstructorGenomeDescription_New, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering
     MEMBER(ConstructorGenomeDescription_New, int, constructGeneIndex, 0);
     MEMBER(ConstructorGenomeDescription_New, int, constructionActivationTime, 100);
     MEMBER(ConstructorGenomeDescription_New, float, constructionAngle, 0.0f);
 };
 
-struct SensorGenomeDescription
+struct SensorGenomeDescription_New
 {
-    auto operator<=>(SensorGenomeDescription const&) const = default;
+    auto operator<=>(SensorGenomeDescription_New const&) const = default;
 
-    MEMBER(SensorGenomeDescription, int, autoTriggerInterval, 10);  // 0 = manual (triggered by signal), > 0 = auto trigger
-    MEMBER(SensorGenomeDescription, float, minDensity, 0.05f);
-    MEMBER(SensorGenomeDescription, std::optional<int>, minRange, std::nullopt);
-    MEMBER(SensorGenomeDescription, std::optional<int>, maxRange, std::nullopt);
-    MEMBER(SensorGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
-    MEMBER(SensorGenomeDescription, SensorRestrictToMutants, restrictToMutants, SensorRestrictToMutants_NoRestriction);
+    MEMBER(SensorGenomeDescription_New, std::optional<int>, autoTriggerInterval, 10);  // std::nullopt = manual triggering
+    MEMBER(SensorGenomeDescription_New, float, minDensity, 0.05f);
+    MEMBER(SensorGenomeDescription_New, std::optional<int>, minRange, std::nullopt);
+    MEMBER(SensorGenomeDescription_New, std::optional<int>, maxRange, std::nullopt);
+    MEMBER(SensorGenomeDescription_New, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(SensorGenomeDescription_New, SensorRestrictToMutants, restrictToMutants, SensorRestrictToMutants_NoRestriction);
 };
 
 struct OscillatorGenomeDescription
@@ -190,7 +190,7 @@ using CellTypeGenomeDescription_New = std::variant<
     BaseGenomeDescription,
     DepotGenomeDescription,
     ConstructorGenomeDescription_New,
-    SensorGenomeDescription,
+    SensorGenomeDescription_New,
     OscillatorGenomeDescription,
     AttackerGenomeDescription,
     InjectorGenomeDescription_New,
@@ -229,9 +229,8 @@ struct GeneDescription
 
     MEMBER(GeneDescription, std::vector<NodeDescription>, nodes, {});
     MEMBER(GeneDescription, ConstructionShape, shape, ConstructionShape_Custom);
-    MEMBER(GeneDescription, int, numBranches, 1);   // Between 1 and 6 in modulo
+    MEMBER(GeneDescription, std::optional<int>, numBranches, std::nullopt);  // std::nullopt = separation
     MEMBER(GeneDescription, int, numConcatenations, 1);
-    MEMBER(GeneDescription, bool, separateConstruction, true);
     MEMBER(GeneDescription, ConstructorAngleAlignment, angleAlignment, ConstructorAngleAlignment_60);
     MEMBER(GeneDescription, float, stiffness, 1.0f);
     MEMBER(GeneDescription, float, connectionDistance, 1.0f);
@@ -318,6 +317,18 @@ struct InjectorGenomeDescription
 
     InjectorMode _mode = InjectorMode_InjectAll;
     std::variant<MakeGenomeCopy, std::vector<uint8_t>> _genome = std::vector<uint8_t>();
+};
+
+struct SensorGenomeDescription
+{
+    auto operator<=>(SensorGenomeDescription const&) const = default;
+
+    MEMBER(SensorGenomeDescription, int, autoTriggerInterval, 10);  // 0 = manual (triggered by signal), > 0 = auto trigger
+    MEMBER(SensorGenomeDescription, float, minDensity, 0.05f);
+    MEMBER(SensorGenomeDescription, std::optional<int>, minRange, std::nullopt);
+    MEMBER(SensorGenomeDescription, std::optional<int>, maxRange, std::nullopt);
+    MEMBER(SensorGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(SensorGenomeDescription, SensorRestrictToMutants, restrictToMutants, SensorRestrictToMutants_NoRestriction);
 };
 
 using CellTypeGenomeDescription = std::variant<

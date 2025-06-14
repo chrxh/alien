@@ -42,7 +42,6 @@ namespace
                 auto const& gene = genome->genes[i];
                 geneTO.shape = gene.shape;
                 geneTO.numBranches = gene.numBranches;
-                geneTO.separateConstruction = gene.separateConstruction;
                 geneTO.angleAlignment = gene.angleAlignment;
                 geneTO.stiffness = gene.stiffness;
                 geneTO.connectionDistance = gene.connectionDistance;
