@@ -2,6 +2,8 @@
 
 #include <imgui.h>
 
+#include "EngineInterface/GenomeDescriptionValidationService.h"
+
 #include "AlienGui.h"
 #include "CreatureTabEditData.h"
 #include "CreatureTabLayoutData.h"
@@ -37,6 +39,8 @@ void _CreatureTabWidget::process()
         ImGui::PopID();
     }
     ImGui::EndChild();
+
+    GenomeDescriptionValidationService::get().validateAndCorrect(_editData->genome);
 }
 
 std::string _CreatureTabWidget::getName() const
@@ -52,14 +56,14 @@ _CreatureTabWidget::_CreatureTabWidget(GenomeDescription_New const& genome, Crea
     static int _sequence = 0;
     _id = ++_sequence;
 
-    _genomeData = std::make_shared<_CreatureTabEditData>(genome);
+    _editData = std::make_shared<_CreatureTabEditData>(genome);
     _layoutData = layoutData;
     if (!_layoutData) {
         _layoutData = std::make_shared<_CreatureTabLayoutData>();
     }
-    _genomeEditorWidget = _GenomeEditorWidget::create(_genomeData, _layoutData);
-    _geneEditorWidget = _GeneEditorWidget::create(_genomeData, _layoutData);
-    _nodeEditorWidget = _NodeEditorWidget::create(_genomeData, _layoutData);
+    _genomeEditorWidget = _GenomeEditorWidget::create(_editData, _layoutData);
+    _geneEditorWidget = _GeneEditorWidget::create(_editData, _layoutData);
+    _nodeEditorWidget = _NodeEditorWidget::create(_editData, _layoutData);
 }
 
 

@@ -178,9 +178,6 @@ void _NodeEditorWidget::processNodeAttributes()
                 gene._shape = ConstructionShape_Custom;
             }
             node._numRequiredAdditionalConnections = numRequiredAdditionalConnections - 1;
-        } else {
-            std::string text = "-";
-            AlienGui::InputText(AlienGui::InputTextParameters().name("Prev nodes connections").textWidth(rightColumnWidth).readOnly(true), text);
         }
 
         AlienGui::Checkbox(
