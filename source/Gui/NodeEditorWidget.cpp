@@ -10,7 +10,7 @@
 
 namespace
 {
-    auto constexpr HeaderMinRightColumnWidth = 160.0f;
+    auto constexpr HeaderMinRightColumnWidth = 170.0f;
     auto constexpr HeaderMaxLeftColumnWidth = 200.0f;
 }
 
