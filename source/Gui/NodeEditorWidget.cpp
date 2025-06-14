@@ -86,7 +86,7 @@ void _NodeEditorWidget::processNodeAttributes()
     AlienGui::Group("Selected node");
 
     auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
-    if (ImGui::BeginChild("NodeData", ImVec2(0, -_layoutData->neuralNetEditorHeight), 0)) {
+    if (ImGui::BeginChild("NodeData", ImVec2(0, -_layoutData->neuralNetEditorHeight), 0, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
         auto& gene = _editData->getSelectedGeneRef();
         auto& node = _editData->getSelectedNodeRef();
         auto nodeType = node.getCellType();

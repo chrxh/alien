@@ -69,7 +69,7 @@ void _GeneEditorWidget::processHeaderData()
     AlienGui::Group("Selected gene");
 
     auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
-    if (ImGui::BeginChild("GeneHeader", ImVec2(0, -_layoutData->nodeListHeight), 0)) {
+    if (ImGui::BeginChild("GeneHeader", ImVec2(0, -_layoutData->nodeListHeight), 0, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
         auto& gene = _editData->getSelectedGeneRef();
 
         _editData->updateGeometry(gene._shape); // Do it every time in order to avoid check for changes
@@ -90,11 +90,20 @@ void _GeneEditorWidget::processHeaderData()
         AlienGui::EndIndent();
 
         // Number of branches
-        if (AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Attach to host").textWidth(rightColumnWidth), gene._numBranches)) {
-            if (gene._numBranches.has_value() && gene._numBranches.value() == 0) {
-                gene._numBranches = 1;
-            }
+        auto numBranches = gene._numBranches;
+        if (numBranches.has_value()) {
+            --numBranches.value();
         }
+        AlienGui::ComboOptional(
+            AlienGui::ComboParameters()
+                .name("Attach to host")
+                .values({"1 branch", "2 branches", "3 branches", "4 branches", "5 branches"})
+                .textWidth(rightColumnWidth),
+            numBranches);
+        if (numBranches.has_value()) {
+            ++numBranches.value();
+        }
+        gene._numBranches = numBranches;
 
         // Concatenations
         AlienGui::InputInt(AlienGui::InputIntParameters().name("Concatenations").infinity(true).textWidth(rightColumnWidth), gene._numConcatenations);
