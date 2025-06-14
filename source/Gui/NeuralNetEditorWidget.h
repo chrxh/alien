@@ -4,15 +4,15 @@
 
 #include "Definitions.h"
 
-class _NeuralNetWidget
+class _NeuralNetEditorWidget
 {
 public:
-    static NeuralNetWidget create();
+    static NeuralNetEditorWidget create();
 
     void process(std::vector<float>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
 
 private:
-    _NeuralNetWidget();
+    _NeuralNetEditorWidget();
 
     struct SelectionData
     {

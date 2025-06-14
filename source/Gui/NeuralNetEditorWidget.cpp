@@ -1,4 +1,4 @@
-#include "NeuralNetWidget.h"
+#include "NeuralNetEditorWidget.h"
 
 #include <imgui.h>
 
@@ -15,12 +15,12 @@ namespace
     auto constexpr WidgetTextColumnWidth = 60.0f;
 }
 
-NeuralNetWidget _NeuralNetWidget::create()
+NeuralNetEditorWidget _NeuralNetEditorWidget::create()
 {
-    return NeuralNetWidget(new _NeuralNetWidget());
+    return NeuralNetEditorWidget(new _NeuralNetEditorWidget());
 }
 
-void _NeuralNetWidget::process(std::vector<float>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions)
+void _NeuralNetEditorWidget::process(std::vector<float>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions)
 {
     if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, 0))) {
         auto& selectionData = getValueRef(_dataById);
@@ -35,9 +35,9 @@ void _NeuralNetWidget::process(std::vector<float>& weights, std::vector<float>& 
     ImGui::EndChild();
 }
 
-_NeuralNetWidget::_NeuralNetWidget() {}
+_NeuralNetEditorWidget::_NeuralNetEditorWidget() {}
 
-void _NeuralNetWidget::processNetwork(
+void _NeuralNetEditorWidget::processNetwork(
     SelectionData& selectionData,
     std::vector<float>& weights,
     std::vector<float>& biases,
@@ -200,7 +200,7 @@ void _NeuralNetWidget::processNetwork(
     ImGui::EndChild();
 }
 
-void _NeuralNetWidget::processEditWidgets(
+void _NeuralNetEditorWidget::processEditWidgets(
     SelectionData& selectionData,
     std::vector<float>& weights,
     std::vector<float>& biases,
@@ -222,7 +222,7 @@ void _NeuralNetWidget::processEditWidgets(
     ImGui::EndChild();
 }
 
-void _NeuralNetWidget::processActionButtons(std::vector<float>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions)
+void _NeuralNetEditorWidget::processActionButtons(std::vector<float>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions)
 {
     if (ImGui::BeginChild("ActionButtons", ImVec2(0, scale(50.0f)))) {
         if (AlienGui::Button("Clear")) {
@@ -272,7 +272,7 @@ void _NeuralNetWidget::processActionButtons(std::vector<float>& weights, std::ve
 }
 
 template <typename T>
-_NeuralNetWidget::SelectionData& _NeuralNetWidget::getValueRef(std::unordered_map<unsigned, T>& idToValueMap)
+_NeuralNetEditorWidget::SelectionData& _NeuralNetEditorWidget::getValueRef(std::unordered_map<unsigned, T>& idToValueMap)
 {
     auto id = ImGui::GetID("");
     if (!idToValueMap.contains(id)) {
