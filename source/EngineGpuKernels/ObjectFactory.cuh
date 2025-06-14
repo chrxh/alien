@@ -112,6 +112,7 @@ __inline__ __device__ void ObjectFactory::createGenomeFromTO(CollectionTO const&
                 node.cellTypeData.constructor.autoTriggerInterval = nodeTO.cellTypeData.constructor.autoTriggerInterval;
                 node.cellTypeData.constructor.constructGeneIndex = nodeTO.cellTypeData.constructor.constructGeneIndex;
                 node.cellTypeData.constructor.constructionActivationTime = nodeTO.cellTypeData.constructor.constructionActivationTime;
+                node.cellTypeData.constructor.constructionAngle = nodeTO.cellTypeData.constructor.constructionAngle;
                 break;
             case CellTypeGenome_Sensor:
                 node.cellTypeData.sensor.autoTriggerInterval = nodeTO.cellTypeData.sensor.autoTriggerInterval;

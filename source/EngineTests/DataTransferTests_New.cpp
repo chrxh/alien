@@ -203,7 +203,7 @@ protected:
             return SensorGenomeDescription_New().autoTriggerInterval(3).restrictToColor(5).minRange(34).maxRange(67).minDensity(0.25f).restrictToMutants(
                 SensorRestrictToMutants_RestrictToLessComplexMutants);
         case CellTypeGenome_Oscillator:
-            return OscillatorGenomeDescription().autoTriggerInterval(27).alternationInterval(45);
+            return OscillatorGenomeDescription().autoTriggerInterval(27).pulseType(OscillatorPulseType_Alternation).alternationInterval(45);
         case CellTypeGenome_Attacker:
             return AttackerGenomeDescription();
         case CellTypeGenome_Injector:

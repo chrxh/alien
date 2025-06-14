@@ -504,6 +504,7 @@ GenomeDescription_New DescriptionConverterService::createGenomeDescription(
                     : std::nullopt;
                 constructorDesc._constructGeneIndex = nodeTO->cellTypeData.constructor.constructGeneIndex;
                 constructorDesc._constructionActivationTime = nodeTO->cellTypeData.constructor.constructionActivationTime;
+                constructorDesc._constructionAngle = nodeTO->cellTypeData.constructor.constructionAngle;
                 nodeDesc._cellTypeData = constructorDesc;
             } break;
             case CellTypeGenome_Sensor: {
