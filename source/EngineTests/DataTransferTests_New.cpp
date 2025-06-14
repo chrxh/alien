@@ -200,7 +200,7 @@ protected:
         case CellTypeGenome_Constructor:
             return ConstructorGenomeDescription_New().autoTriggerInterval(7).constructionActivationTime(4).constructionAngle(34.4f);
         case CellTypeGenome_Sensor:
-            return SensorGenomeDescription().autoTriggerInterval(3).restrictToColor(5).minRange(34).maxRange(67).minDensity(0.25f).restrictToMutants(
+            return SensorGenomeDescription_New().autoTriggerInterval(3).restrictToColor(5).minRange(34).maxRange(67).minDensity(0.25f).restrictToMutants(
                 SensorRestrictToMutants_RestrictToLessComplexMutants);
         case CellTypeGenome_Oscillator:
             return OscillatorGenomeDescription().autoTriggerInterval(27).alternationInterval(45);

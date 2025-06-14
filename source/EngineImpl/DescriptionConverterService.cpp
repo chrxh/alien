@@ -465,9 +465,9 @@ GenomeDescription_New DescriptionConverterService::createGenomeDescription(
         auto geneTO = collectionTO.genes + genomeTO.geneArrayIndex + i;
 
         GeneDescription geneDesc;
+        geneDesc._numBranches = geneTO->numBranches >= 0 ? std::make_optional(geneTO->numBranches) : std::nullopt;
         geneDesc._numBranches = geneTO->numBranches;
         geneDesc._shape = geneTO->shape;
-        geneDesc._separateConstruction = geneTO->separateConstruction;
         geneDesc._angleAlignment = geneTO->angleAlignment;
         geneDesc._stiffness = geneTO->stiffness;
         geneDesc._connectionDistance = geneTO->connectionDistance;
@@ -497,17 +497,18 @@ GenomeDescription_New DescriptionConverterService::createGenomeDescription(
             } break;
             case CellTypeGenome_Constructor: {
                 ConstructorGenomeDescription_New constructorDesc;
-                constructorDesc._autoTriggerInterval = nodeTO->cellTypeData.constructor.autoTriggerInterval;
+                constructorDesc._autoTriggerInterval = nodeTO->cellTypeData.constructor.autoTriggerInterval > 0
+                    ? std::make_optional(nodeTO->cellTypeData.constructor.autoTriggerInterval)
+                    : std::nullopt;
                 constructorDesc._constructGeneIndex = nodeTO->cellTypeData.constructor.constructGeneIndex;
                 constructorDesc._constructionActivationTime = nodeTO->cellTypeData.constructor.constructionActivationTime;
                 nodeDesc._cellTypeData = constructorDesc;
             } break;
             case CellTypeGenome_Sensor: {
-                SensorGenomeDescription sensorDesc;
-                sensorDesc._autoTriggerInterval = nodeTO->cellTypeData.sensor.autoTriggerInterval;
+                SensorGenomeDescription_New sensorDesc;
+                sensorDesc._autoTriggerInterval =
+                    nodeTO->cellTypeData.sensor.autoTriggerInterval > 0 ? std::make_optional(nodeTO->cellTypeData.sensor.autoTriggerInterval) : std::nullopt;
                 sensorDesc._minDensity = nodeTO->cellTypeData.sensor.minDensity;
-                sensorDesc._minRange = nodeTO->cellTypeData.sensor.minRange;
-                sensorDesc._maxRange = nodeTO->cellTypeData.sensor.maxRange;
                 sensorDesc._minRange = nodeTO->cellTypeData.sensor.minRange >= 0 ? std::make_optional(nodeTO->cellTypeData.sensor.minRange) : std::nullopt;
                 sensorDesc._maxRange = nodeTO->cellTypeData.sensor.maxRange >= 0 ? std::make_optional(nodeTO->cellTypeData.sensor.maxRange) : std::nullopt;
                 sensorDesc._restrictToColor =
@@ -620,8 +621,7 @@ void DescriptionConverterService::convertGenomeToTO(
         GeneTO& geneTO = geneTOs.at(geneArrayStartIndex + geneIndex);
 
         geneTO.shape = geneDesc._shape;
-        geneTO.numBranches = geneDesc._numBranches;
-        geneTO.separateConstruction = geneDesc._separateConstruction;
+        geneTO.numBranches = static_cast<int8_t>(geneDesc._numBranches.value_or(-1));
         geneTO.angleAlignment = geneDesc._angleAlignment;
         geneTO.stiffness = geneDesc._stiffness;
         geneTO.connectionDistance = geneDesc._connectionDistance;
@@ -655,15 +655,15 @@ void DescriptionConverterService::convertGenomeToTO(
             case CellTypeGenome_Constructor: {
                 auto const& constructorDesc = std::get<ConstructorGenomeDescription_New>(nodeDesc._cellTypeData);
                 auto& constructorTO = nodeTO.cellTypeData.constructor;
-                constructorTO.autoTriggerInterval = constructorDesc._autoTriggerInterval;
+                constructorTO.autoTriggerInterval = static_cast<uint8_t>(constructorDesc._autoTriggerInterval.value_or(0));
                 constructorTO.constructGeneIndex = constructorDesc._constructGeneIndex;
                 constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
                 constructorTO.constructionAngle = constructorDesc._constructionAngle;
             } break;
             case CellTypeGenome_Sensor: {
-                auto const& sensorDesc = std::get<SensorGenomeDescription>(nodeDesc._cellTypeData);
+                auto const& sensorDesc = std::get<SensorGenomeDescription_New>(nodeDesc._cellTypeData);
                 auto& sensorTO = nodeTO.cellTypeData.sensor;
-                sensorTO.autoTriggerInterval = sensorDesc._autoTriggerInterval;
+                sensorTO.autoTriggerInterval = static_cast<uint8_t>(sensorDesc._autoTriggerInterval.value_or(0));
                 sensorTO.minDensity = sensorDesc._minDensity;
                 sensorTO.minRange = static_cast<int8_t>(sensorDesc._minRange.value_or(-1));
                 sensorTO.maxRange = static_cast<int8_t>(sensorDesc._maxRange.value_or(-1));

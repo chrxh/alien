@@ -44,212 +44,6 @@
 
 namespace
 {
-    auto constexpr Id_GenomeHeader_Shape = 0;
-    auto constexpr Id_GenomeHeader_SeparateConstruction = 1;
-    auto constexpr Id_GenomeHeader_AngleAlignment = 2;
-    auto constexpr Id_GenomeHeader_Stiffness = 3;
-    auto constexpr Id_GenomeHeader_ConnectionDistance = 4;
-    auto constexpr Id_GenomeHeader_NumConcatenations = 5;
-    auto constexpr Id_GenomeHeader_ConcatenationAngle1 = 6;
-    auto constexpr Id_GenomeHeader_ConcatenationAngle2 = 7;
-    auto constexpr Id_GenomeHeader_NumBranches = 8;
-    auto constexpr Id_GenomeHeader_FrontAngle = 9;
-
-    auto constexpr Id_SignalRoutingGenome_Active = 0;
-    auto constexpr Id_SignalRoutingGenome_BaseAngle = 1;
-    auto constexpr Id_SignalRoutingGenome_OpeneningAngle = 2;
-
-    auto constexpr Id_CellGenome_ReferenceAngle = 0;
-    auto constexpr Id_CellGenome_Energy = 1;
-    auto constexpr Id_CellGenome_Color = 2;
-    auto constexpr Id_CellGenome_NumRequiredAdditionalConnections = 3;
-
-    auto constexpr Id_NeuralNetworkGenome_Weights = 0;
-    auto constexpr Id_NeuralNetworkGenome_Biases = 1;
-    auto constexpr Id_NeuralNetworkGenome_ActivationFunctions = 2;
-
-    auto constexpr Id_TransmitterGenome_Mode = 0;
-
-    auto constexpr Id_ConstructorGenome_Mode = 0;
-    auto constexpr Id_ConstructorGenome_ConstructionActivationTime = 1;
-    auto constexpr Id_ConstructorGenome_ConstructionAngle1 = 2;
-    auto constexpr Id_ConstructorGenome_ConstructionAngle2 = 3;
-
-    auto constexpr Id_DefenderGenome_Mode = 0;
-
-    auto constexpr Id_MuscleModeGenome_AutoBending_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleModeGenome_AutoBending_FrontBackVelRatio = 4;
-
-    auto constexpr Id_MuscleModeGenome_ManualBending_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleModeGenome_ManualBending_FrontBackVelRatio = 1;
-
-    auto constexpr Id_MuscleModeGenome_AngleBending_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleModeGenome_AngleBending_FrontBackVelRatio = 1;
-
-    auto constexpr Id_MuscleModeGenome_AutoCrawling_MaxDistanceDeviation = 0;
-    auto constexpr Id_MuscleModeGenome_AutoCrawling_FrontBackVelRatio = 1;
-
-    auto constexpr Id_MuscleModeGenome_ManualCrawling_MaxDistanceDeviation = 0;
-    auto constexpr Id_MuscleModeGenome_ManualCrawling_FrontBackVelRatio = 1;
-
-    auto constexpr Id_InjectorGenome_Mode = 0;
-
-    auto constexpr Id_OscillatorGenome_AutoTriggerInterval = 0;
-    auto constexpr Id_OscillatorGenome_AlternationInterval = 1;
-
-    auto constexpr Id_SensorGenome_MinDensity = 0;
-    auto constexpr Id_SensorGenome_RestrictToColor = 1;
-    auto constexpr Id_SensorGenome_RestrictToMutants = 2;
-    auto constexpr Id_SensorGenome_MinRange = 3;
-    auto constexpr Id_SensorGenome_MaxRange = 4;
-    auto constexpr Id_SensorGenome_AutoTriggerInterval = 5;
-
-    auto constexpr Id_ReconnectorGenome_RestrictToColor = 0;
-    auto constexpr Id_ReconnectorGenome_RestrictToMutants = 1;
-
-    auto constexpr Id_DetonatorGenome_Countdown = 0;
-
-    auto constexpr Id_Particle_Id = 0;
-    auto constexpr Id_Particle_Pos = 1;
-    auto constexpr Id_Particle_Vel = 2;
-    auto constexpr Id_Particle_Energy = 3;
-    auto constexpr Id_Particle_Color = 4;
-
-    auto constexpr Id_Cell_Id = 0;
-    auto constexpr Id_Cell_Energy = 1;
-    auto constexpr Id_Cell_Pos = 2;
-    auto constexpr Id_Cell_Vel = 3;
-    auto constexpr Id_Cell_Stiffness = 4;
-    auto constexpr Id_Cell_Color = 5;
-    auto constexpr Id_Cell_Barrier = 6;
-    auto constexpr Id_Cell_Age = 7;
-    auto constexpr Id_Cell_LivingState = 8;
-    auto constexpr Id_Cell_ActivationTime = 9;
-    auto constexpr Id_Cell_CreatureId = 10;
-    auto constexpr Id_Cell_MutationId = 11;
-    auto constexpr Id_Cell_CellTypeUsed = 12;
-    auto constexpr Id_Cell_AncestorMutationId = 13;
-    auto constexpr Id_Cell_GenomeComplexity = 14;
-    auto constexpr Id_Cell_DetectedByCreatureId = 15;
-    auto constexpr Id_Cell_GenomeNodeIndex = 20;
-    auto constexpr Id_Cell_SignalRelaxationTime = 21;
-    auto constexpr Id_Cell_AngleToFront = 22;
-    auto constexpr Id_Cell_Sticky = 23;
-
-    auto constexpr Id_Signal_Channels = 0;
-
-    auto constexpr Id_SignalRouting_Active = 0;
-    auto constexpr Id_SignalRouting_BaseAngle = 1;
-    auto constexpr Id_SignalRouting_OpeneningAngle = 2;
-
-    auto constexpr Id_Connection_CellId = 0;
-    auto constexpr Id_Connection_Distance = 1;
-    auto constexpr Id_Connection_AngleFromPrevious = 2;
-
-    auto constexpr Id_Metadata_Name = 0;
-    auto constexpr Id_Metadata_Description = 1;
-
-    auto constexpr Id_NeuralNetwork_Weights = 0;
-    auto constexpr Id_NeuralNetwork_Biases = 1;
-    auto constexpr Id_NeuralNetwork_ActivationFunctions = 2;
-
-    auto constexpr Id_Constructor_AutoTriggerInterval = 0;
-    auto constexpr Id_Constructor_ConstructionActivationTime = 1;
-    auto constexpr Id_Constructor_GenomeCurrentNodeIndex = 2;
-    auto constexpr Id_Constructor_GenomeGeneration = 3;
-    auto constexpr Id_Constructor_ConstructionAngle1 = 4;
-    auto constexpr Id_Constructor_ConstructionAngle2 = 5;
-    auto constexpr Id_Constructor_OffspringCreatureId = 6;
-    auto constexpr Id_Constructor_OffspringMutationId = 7;
-    auto constexpr Id_Constructor_GenomeCurrentRepetition = 8;
-    auto constexpr Id_Constructor_LastConstructedCellId = 9;
-    auto constexpr Id_Constructor_NumInheritedGenomeNodes = 10;
-    auto constexpr Id_Constructor_GenomeCurrentBranch = 11;
-
-    auto constexpr Id_Defender_Mode = 0;
-
-    auto constexpr Id_Muscle_LastMovementX = 4;
-    auto constexpr Id_Muscle_LastMovementY = 5;
-
-    auto constexpr Id_MuscleMode_AutoBending_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleMode_AutoBending_FrontBackVelRatio = 6;
-    auto constexpr Id_MuscleMode_AutoBending_InitialAngle = 7;
-    auto constexpr Id_MuscleMode_AutoBending_Forward = 8;
-    auto constexpr Id_MuscleMode_AutoBending_Activation = 9;
-    auto constexpr Id_MuscleMode_AutoBending_ActivationCountdown = 10;
-    auto constexpr Id_MuscleMode_AutoBending_LastActualAngle = 11;
-    auto constexpr Id_MuscleMode_AutoBending_ImpulseAlreadyApplied = 12;
-
-    auto constexpr Id_MuscleMode_ManualBending_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleMode_ManualBending_FrontBackVelRatio = 1;
-    auto constexpr Id_MuscleMode_ManualBending_InitialAngle = 2;
-    auto constexpr Id_MuscleMode_ManualBending_LastActualAngle = 3;
-    auto constexpr Id_MuscleMode_ManualBending_ImpulseAlreadyApplied = 4;
-    auto constexpr Id_MuscleMode_ManualBending_LastAngleDelta = 5;
-
-    auto constexpr Id_MuscleMode_AngleBending_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleMode_AngleBending_FrontBackVelRatio = 1;
-    auto constexpr Id_MuscleMode_AngleBending_InitialAngle = 2;
-
-    auto constexpr Id_MuscleMode_AutoCrawling_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleMode_AutoCrawling_FrontBackVelRatio = 1;
-    auto constexpr Id_MuscleMode_AutoCrawling_InitialDistance = 2;
-    auto constexpr Id_MuscleMode_AutoCrawling_Forward = 3;
-    auto constexpr Id_MuscleMode_AutoCrawling_Activation = 4;
-    auto constexpr Id_MuscleMode_AutoCrawling_ActivationCountdown = 5;
-    auto constexpr Id_MuscleMode_AutoCrawling_LastActualDistance = 6;
-    auto constexpr Id_MuscleMode_AutoCrawling_ImpulseAlreadyApplied = 7;
-
-    auto constexpr Id_MuscleMode_ManualCrawling_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleMode_ManualCrawling_FrontBackVelRatio = 1;
-    auto constexpr Id_MuscleMode_ManualCrawling_InitialDistance = 2;
-    auto constexpr Id_MuscleMode_ManualCrawling_LastActualDistance = 3;
-    auto constexpr Id_MuscleMode_ManualCrawling_LastDistanceDelta = 4;
-    auto constexpr Id_MuscleMode_ManualCrawling_ImpulseAlreadyApplied = 5;
-
-    auto constexpr Id_Injector_Mode = 0;
-    auto constexpr Id_Injector_Counter = 1;
-
-    auto constexpr Id_Oscillator_PulseMode = 0;
-    auto constexpr Id_Oscillator_AlternationMode = 1;
-
-    auto constexpr Id_Sensor_MinDensity = 0;
-    auto constexpr Id_Sensor_RestrictToColor = 4;
-    auto constexpr Id_Sensor_RestrictToMutants = 5;
-    auto constexpr Id_Sensor_MinRange = 8;
-    auto constexpr Id_Sensor_MaxRange = 9;
-    auto constexpr Id_Sensor_AutoTriggerInterval = 10;
-
-    auto constexpr Id_Transmitter_Mode = 0;
-
-    auto constexpr Id_Reconnector_RestrictToColor = 0;
-    auto constexpr Id_Reconnector_RestrictToMutants = 1;
-
-    auto constexpr Id_Detonator_State = 0;
-    auto constexpr Id_Detonator_Countdown = 1;
-
-    auto constexpr Id_Genome_Id = 0;
-    auto constexpr Id_Genome_FrontAngle = 1;
-
-    auto constexpr Id_Gene_Shape = 0;
-    auto constexpr Id_Gene_NumBranches = 1;
-    auto constexpr Id_Gene_SeparateConstruction = 2;
-    auto constexpr Id_Gene_AngleAlignment = 3;
-    auto constexpr Id_Gene_Stiffness = 4;
-    auto constexpr Id_Gene_ConnectionDistance = 5;
-    auto constexpr Id_Gene_NumRepetitions = 6;
-
-    auto constexpr Id_Node_ReferenceAngle = 0;
-    auto constexpr Id_Node_Color = 1;
-    auto constexpr Id_Node_NumRequiredAdditionalConnections = 2;
-
-    auto constexpr Id_ConstructorGenome_New_AutoTriggerInterval = 0;
-    auto constexpr Id_ConstructorGenome_New_ConstructGeneIndex = 1;
-    auto constexpr Id_ConstructorGenome_New_ConstructionActivationTime = 2;
-    auto constexpr Id_ConstructorGenome_New_ConstructionAngle = 3;
-
-    auto constexpr Id_InjectorGenome_New_Mode = 0;
-
     enum class SerializationTask
     {
         Load,
@@ -286,8 +80,7 @@ namespace cereal
         std::vector<std::vector<uint8_t>>,
         std::vector<std::vector<int8_t>>,
         std::vector<std::vector<int>>,
-        std::vector<std::vector<float>>
-    >;
+        std::vector<std::vector<float>>>;
 
     template <class Archive>
     std::unordered_map<int, VariantData> getLoadSaveMap(SerializationTask task, Archive& ar)
@@ -331,7 +124,84 @@ namespace cereal
     {
         ar(data.x, data.y);
     }
+}
 
+/************************************************************************/
+/* Genome                                                               */
+/************************************************************************/
+namespace
+{
+    auto constexpr Id_Genome_Id = 0;
+    auto constexpr Id_Genome_FrontAngle = 1;
+
+    auto constexpr Id_Gene_Shape = 0;
+    auto constexpr Id_Gene_NumBranches = 1;
+    auto constexpr Id_Gene_AngleAlignment = 2;
+    auto constexpr Id_Gene_Stiffness = 3;
+    auto constexpr Id_Gene_ConnectionDistance = 4;
+    auto constexpr Id_Gene_NumRepetitions = 5;
+
+    auto constexpr Id_Node_ReferenceAngle = 0;
+    auto constexpr Id_Node_Color = 1;
+    auto constexpr Id_Node_NumRequiredAdditionalConnections = 2;
+
+    auto constexpr Id_SignalRoutingGenome_Active = 0;
+    auto constexpr Id_SignalRoutingGenome_BaseAngle = 1;
+    auto constexpr Id_SignalRoutingGenome_OpeneningAngle = 2;
+
+    auto constexpr Id_CellGenome_ReferenceAngle = 0;
+    auto constexpr Id_CellGenome_Energy = 1;
+    auto constexpr Id_CellGenome_Color = 2;
+    auto constexpr Id_CellGenome_NumRequiredAdditionalConnections = 3;
+
+    auto constexpr Id_NeuralNetworkGenome_Weights = 0;
+    auto constexpr Id_NeuralNetworkGenome_Biases = 1;
+    auto constexpr Id_NeuralNetworkGenome_ActivationFunctions = 2;
+
+    auto constexpr Id_DepotGenome_Mode = 0;
+
+    auto constexpr Id_DefenderGenome_Mode = 0;
+
+    auto constexpr Id_ConstructorGenome_New_AutoTriggerInterval = 0;
+    auto constexpr Id_ConstructorGenome_New_ConstructGeneIndex = 1;
+    auto constexpr Id_ConstructorGenome_New_ConstructionActivationTime = 2;
+    auto constexpr Id_ConstructorGenome_New_ConstructionAngle = 3;
+
+    auto constexpr Id_SensorGenome_New_MinDensity = 0;
+    auto constexpr Id_SensorGenome_New_RestrictToColor = 1;
+    auto constexpr Id_SensorGenome_New_RestrictToMutants = 2;
+    auto constexpr Id_SensorGenome_New_MinRange = 3;
+    auto constexpr Id_SensorGenome_New_MaxRange = 4;
+    auto constexpr Id_SensorGenome_New_AutoTriggerInterval = 5;
+
+    auto constexpr Id_MuscleModeGenome_AutoBending_MaxAngleDeviation = 0;
+    auto constexpr Id_MuscleModeGenome_AutoBending_FrontBackVelRatio = 4;
+
+    auto constexpr Id_MuscleModeGenome_ManualBending_MaxAngleDeviation = 0;
+    auto constexpr Id_MuscleModeGenome_ManualBending_FrontBackVelRatio = 1;
+
+    auto constexpr Id_MuscleModeGenome_AngleBending_MaxAngleDeviation = 0;
+    auto constexpr Id_MuscleModeGenome_AngleBending_FrontBackVelRatio = 1;
+
+    auto constexpr Id_MuscleModeGenome_AutoCrawling_MaxDistanceDeviation = 0;
+    auto constexpr Id_MuscleModeGenome_AutoCrawling_FrontBackVelRatio = 1;
+
+    auto constexpr Id_MuscleModeGenome_ManualCrawling_MaxDistanceDeviation = 0;
+    auto constexpr Id_MuscleModeGenome_ManualCrawling_FrontBackVelRatio = 1;
+
+    auto constexpr Id_OscillatorGenome_AutoTriggerInterval = 0;
+    auto constexpr Id_OscillatorGenome_AlternationInterval = 1;
+
+    auto constexpr Id_InjectorGenome_New_Mode = 0;
+
+    auto constexpr Id_ReconnectorGenome_RestrictToColor = 0;
+    auto constexpr Id_ReconnectorGenome_RestrictToMutants = 1;
+
+    auto constexpr Id_DetonatorGenome_Countdown = 0;
+}
+
+namespace cereal
+{
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, NeuralNetworkGenomeDescription& data)
     {
@@ -358,7 +228,7 @@ namespace cereal
     {
         DepotGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_TransmitterGenome_Mode, data._mode, defaultObject._mode);
+        loadSave(task, auxiliaries, Id_DepotGenome_Mode, data._mode, defaultObject._mode);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(DepotGenomeDescription)
@@ -370,26 +240,31 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_ConstructorGenome_New_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
         loadSave(task, auxiliaries, Id_ConstructorGenome_New_ConstructGeneIndex, data._constructGeneIndex, defaultObject._constructGeneIndex);
-        loadSave(task, auxiliaries, Id_ConstructorGenome_New_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
+        loadSave(
+            task,
+            auxiliaries,
+            Id_ConstructorGenome_New_ConstructionActivationTime,
+            data._constructionActivationTime,
+            defaultObject._constructionActivationTime);
         loadSave(task, auxiliaries, Id_ConstructorGenome_New_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ConstructorGenomeDescription_New)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, SensorGenomeDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, SensorGenomeDescription_New& data)
     {
-        SensorGenomeDescription defaultObject;
+        SensorGenomeDescription_New defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_SensorGenome_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
-        loadSave(task, auxiliaries, Id_SensorGenome_MinDensity, data._minDensity, defaultObject._minDensity);
-        loadSave(task, auxiliaries, Id_SensorGenome_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
-        loadSave(task, auxiliaries, Id_SensorGenome_RestrictToMutants, data._restrictToMutants, defaultObject._restrictToMutants);
-        loadSave(task, auxiliaries, Id_SensorGenome_MinRange, data._minRange, defaultObject._minRange);
-        loadSave(task, auxiliaries, Id_SensorGenome_MaxRange, data._maxRange, defaultObject._maxRange);
+        loadSave(task, auxiliaries, Id_SensorGenome_New_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
+        loadSave(task, auxiliaries, Id_SensorGenome_New_MinDensity, data._minDensity, defaultObject._minDensity);
+        loadSave(task, auxiliaries, Id_SensorGenome_New_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
+        loadSave(task, auxiliaries, Id_SensorGenome_New_RestrictToMutants, data._restrictToMutants, defaultObject._restrictToMutants);
+        loadSave(task, auxiliaries, Id_SensorGenome_New_MinRange, data._minRange, defaultObject._minRange);
+        loadSave(task, auxiliaries, Id_SensorGenome_New_MaxRange, data._maxRange, defaultObject._maxRange);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(SensorGenomeDescription)
+    SPLIT_SERIALIZATION(SensorGenomeDescription_New)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, OscillatorGenomeDescription& data)
@@ -564,7 +439,6 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Gene_Shape, data._shape, defaultObject._shape);
         loadSave(task, auxiliaries, Id_Gene_NumBranches, data._numBranches, defaultObject._numBranches);
-        loadSave(task, auxiliaries, Id_Gene_SeparateConstruction, data._separateConstruction, defaultObject._separateConstruction);
         loadSave(task, auxiliaries, Id_Gene_AngleAlignment, data._angleAlignment, defaultObject._angleAlignment);
         loadSave(task, auxiliaries, Id_Gene_Stiffness, data._stiffness, defaultObject._stiffness);
         loadSave(task, auxiliaries, Id_Gene_ConnectionDistance, data._connectionDistance, defaultObject._connectionDistance);
@@ -587,11 +461,41 @@ namespace cereal
         ar(data._genes);
     }
     SPLIT_SERIALIZATION(GenomeDescription_New)
+}
 
-    //*********************************
-    //* Old genome model
-    //*********************************
+/************************************************************************/
+/* Old genome model                                                     */
+/************************************************************************/
+namespace
+{
+    auto constexpr Id_GenomeHeader_Shape = 0;
+    auto constexpr Id_GenomeHeader_SeparateConstruction = 1;
+    auto constexpr Id_GenomeHeader_AngleAlignment = 2;
+    auto constexpr Id_GenomeHeader_Stiffness = 3;
+    auto constexpr Id_GenomeHeader_ConnectionDistance = 4;
+    auto constexpr Id_GenomeHeader_NumConcatenations = 5;
+    auto constexpr Id_GenomeHeader_ConcatenationAngle1 = 6;
+    auto constexpr Id_GenomeHeader_ConcatenationAngle2 = 7;
+    auto constexpr Id_GenomeHeader_NumBranches = 8;
+    auto constexpr Id_GenomeHeader_FrontAngle = 9;
 
+    auto constexpr Id_ConstructorGenome_Mode = 0;
+    auto constexpr Id_ConstructorGenome_ConstructionActivationTime = 1;
+    auto constexpr Id_ConstructorGenome_ConstructionAngle1 = 2;
+    auto constexpr Id_ConstructorGenome_ConstructionAngle2 = 3;
+
+    auto constexpr Id_InjectorGenome_Mode = 0;
+
+    auto constexpr Id_SensorGenome_MinDensity = 0;
+    auto constexpr Id_SensorGenome_RestrictToColor = 1;
+    auto constexpr Id_SensorGenome_RestrictToMutants = 2;
+    auto constexpr Id_SensorGenome_MinRange = 3;
+    auto constexpr Id_SensorGenome_MaxRange = 4;
+    auto constexpr Id_SensorGenome_AutoTriggerInterval = 5;
+}
+
+namespace cereal
+{
     template <class Archive>
     void serialize(Archive& ar, MakeGenomeCopy& data)
     {}
@@ -602,7 +506,8 @@ namespace cereal
         ConstructorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_ConstructorGenome_Mode, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
-        loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
+        loadSave(
+            task, auxiliaries, Id_ConstructorGenome_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
         loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle1, data._constructionAngle1, defaultObject._constructionAngle1);
         loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle2, data._constructionAngle2, defaultObject._constructionAngle2);
         processLoadSaveMap(task, ar, auxiliaries);
@@ -656,6 +561,21 @@ namespace cereal
     SPLIT_SERIALIZATION(InjectorGenomeDescription)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SensorGenomeDescription& data)
+    {
+        SensorGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SensorGenome_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
+        loadSave(task, auxiliaries, Id_SensorGenome_MinDensity, data._minDensity, defaultObject._minDensity);
+        loadSave(task, auxiliaries, Id_SensorGenome_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
+        loadSave(task, auxiliaries, Id_SensorGenome_RestrictToMutants, data._restrictToMutants, defaultObject._restrictToMutants);
+        loadSave(task, auxiliaries, Id_SensorGenome_MinRange, data._minRange, defaultObject._minRange);
+        loadSave(task, auxiliaries, Id_SensorGenome_MaxRange, data._maxRange, defaultObject._maxRange);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SensorGenomeDescription)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, CellGenomeDescription& data)
     {
         CellGenomeDescription defaultObject;
@@ -663,7 +583,12 @@ namespace cereal
         loadSave(task, auxiliaries, Id_CellGenome_ReferenceAngle, data._referenceAngle, defaultObject._referenceAngle);
         loadSave(task, auxiliaries, Id_CellGenome_Energy, data._energy, defaultObject._energy);
         loadSave(task, auxiliaries, Id_CellGenome_Color, data._color, defaultObject._color);
-        loadSave(task, auxiliaries, Id_CellGenome_NumRequiredAdditionalConnections, data._numRequiredAdditionalConnections, defaultObject._numRequiredAdditionalConnections);
+        loadSave(
+            task,
+            auxiliaries,
+            Id_CellGenome_NumRequiredAdditionalConnections,
+            data._numRequiredAdditionalConnections,
+            defaultObject._numRequiredAdditionalConnections);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._signalRoutingRestriction, data._neuralNetwork, data._cellTypeData);
@@ -696,6 +621,135 @@ namespace cereal
         ar(data._header, data._cells);
     }
 
+}
+
+/************************************************************************/
+/* Objects                                                              */
+/************************************************************************/
+namespace
+{
+    auto constexpr Id_Particle_Id = 0;
+    auto constexpr Id_Particle_Pos = 1;
+    auto constexpr Id_Particle_Vel = 2;
+    auto constexpr Id_Particle_Energy = 3;
+    auto constexpr Id_Particle_Color = 4;
+
+    auto constexpr Id_Cell_Id = 0;
+    auto constexpr Id_Cell_Energy = 1;
+    auto constexpr Id_Cell_Pos = 2;
+    auto constexpr Id_Cell_Vel = 3;
+    auto constexpr Id_Cell_Stiffness = 4;
+    auto constexpr Id_Cell_Color = 5;
+    auto constexpr Id_Cell_Barrier = 6;
+    auto constexpr Id_Cell_Age = 7;
+    auto constexpr Id_Cell_LivingState = 8;
+    auto constexpr Id_Cell_ActivationTime = 9;
+    auto constexpr Id_Cell_CreatureId = 10;
+    auto constexpr Id_Cell_MutationId = 11;
+    auto constexpr Id_Cell_CellTypeUsed = 12;
+    auto constexpr Id_Cell_AncestorMutationId = 13;
+    auto constexpr Id_Cell_GenomeComplexity = 14;
+    auto constexpr Id_Cell_DetectedByCreatureId = 15;
+    auto constexpr Id_Cell_GenomeNodeIndex = 20;
+    auto constexpr Id_Cell_SignalRelaxationTime = 21;
+    auto constexpr Id_Cell_AngleToFront = 22;
+    auto constexpr Id_Cell_Sticky = 23;
+
+    auto constexpr Id_Signal_Channels = 0;
+
+    auto constexpr Id_SignalRouting_Active = 0;
+    auto constexpr Id_SignalRouting_BaseAngle = 1;
+    auto constexpr Id_SignalRouting_OpeneningAngle = 2;
+
+    auto constexpr Id_Connection_CellId = 0;
+    auto constexpr Id_Connection_Distance = 1;
+    auto constexpr Id_Connection_AngleFromPrevious = 2;
+
+    auto constexpr Id_Metadata_Name = 0;
+    auto constexpr Id_Metadata_Description = 1;
+
+    auto constexpr Id_NeuralNetwork_Weights = 0;
+    auto constexpr Id_NeuralNetwork_Biases = 1;
+    auto constexpr Id_NeuralNetwork_ActivationFunctions = 2;
+
+    auto constexpr Id_Constructor_AutoTriggerInterval = 0;
+    auto constexpr Id_Constructor_ConstructionActivationTime = 1;
+    auto constexpr Id_Constructor_GenomeCurrentNodeIndex = 2;
+    auto constexpr Id_Constructor_GenomeGeneration = 3;
+    auto constexpr Id_Constructor_ConstructionAngle1 = 4;
+    auto constexpr Id_Constructor_ConstructionAngle2 = 5;
+    auto constexpr Id_Constructor_OffspringCreatureId = 6;
+    auto constexpr Id_Constructor_OffspringMutationId = 7;
+    auto constexpr Id_Constructor_GenomeCurrentRepetition = 8;
+    auto constexpr Id_Constructor_LastConstructedCellId = 9;
+    auto constexpr Id_Constructor_NumInheritedGenomeNodes = 10;
+    auto constexpr Id_Constructor_GenomeCurrentBranch = 11;
+
+    auto constexpr Id_Defender_Mode = 0;
+
+    auto constexpr Id_Muscle_LastMovementX = 4;
+    auto constexpr Id_Muscle_LastMovementY = 5;
+
+    auto constexpr Id_MuscleMode_AutoBending_MaxAngleDeviation = 0;
+    auto constexpr Id_MuscleMode_AutoBending_FrontBackVelRatio = 6;
+    auto constexpr Id_MuscleMode_AutoBending_InitialAngle = 7;
+    auto constexpr Id_MuscleMode_AutoBending_Forward = 8;
+    auto constexpr Id_MuscleMode_AutoBending_Activation = 9;
+    auto constexpr Id_MuscleMode_AutoBending_ActivationCountdown = 10;
+    auto constexpr Id_MuscleMode_AutoBending_LastActualAngle = 11;
+    auto constexpr Id_MuscleMode_AutoBending_ImpulseAlreadyApplied = 12;
+
+    auto constexpr Id_MuscleMode_ManualBending_MaxAngleDeviation = 0;
+    auto constexpr Id_MuscleMode_ManualBending_FrontBackVelRatio = 1;
+    auto constexpr Id_MuscleMode_ManualBending_InitialAngle = 2;
+    auto constexpr Id_MuscleMode_ManualBending_LastActualAngle = 3;
+    auto constexpr Id_MuscleMode_ManualBending_ImpulseAlreadyApplied = 4;
+    auto constexpr Id_MuscleMode_ManualBending_LastAngleDelta = 5;
+
+    auto constexpr Id_MuscleMode_AngleBending_MaxAngleDeviation = 0;
+    auto constexpr Id_MuscleMode_AngleBending_FrontBackVelRatio = 1;
+    auto constexpr Id_MuscleMode_AngleBending_InitialAngle = 2;
+
+    auto constexpr Id_MuscleMode_AutoCrawling_MaxAngleDeviation = 0;
+    auto constexpr Id_MuscleMode_AutoCrawling_FrontBackVelRatio = 1;
+    auto constexpr Id_MuscleMode_AutoCrawling_InitialDistance = 2;
+    auto constexpr Id_MuscleMode_AutoCrawling_Forward = 3;
+    auto constexpr Id_MuscleMode_AutoCrawling_Activation = 4;
+    auto constexpr Id_MuscleMode_AutoCrawling_ActivationCountdown = 5;
+    auto constexpr Id_MuscleMode_AutoCrawling_LastActualDistance = 6;
+    auto constexpr Id_MuscleMode_AutoCrawling_ImpulseAlreadyApplied = 7;
+
+    auto constexpr Id_MuscleMode_ManualCrawling_MaxAngleDeviation = 0;
+    auto constexpr Id_MuscleMode_ManualCrawling_FrontBackVelRatio = 1;
+    auto constexpr Id_MuscleMode_ManualCrawling_InitialDistance = 2;
+    auto constexpr Id_MuscleMode_ManualCrawling_LastActualDistance = 3;
+    auto constexpr Id_MuscleMode_ManualCrawling_LastDistanceDelta = 4;
+    auto constexpr Id_MuscleMode_ManualCrawling_ImpulseAlreadyApplied = 5;
+
+    auto constexpr Id_Injector_Mode = 0;
+    auto constexpr Id_Injector_Counter = 1;
+
+    auto constexpr Id_Oscillator_PulseMode = 0;
+    auto constexpr Id_Oscillator_AlternationMode = 1;
+
+    auto constexpr Id_Sensor_MinDensity = 0;
+    auto constexpr Id_Sensor_RestrictToColor = 4;
+    auto constexpr Id_Sensor_RestrictToMutants = 5;
+    auto constexpr Id_Sensor_MinRange = 8;
+    auto constexpr Id_Sensor_MaxRange = 9;
+    auto constexpr Id_Sensor_AutoTriggerInterval = 10;
+
+    auto constexpr Id_Transmitter_Mode = 0;
+
+    auto constexpr Id_Reconnector_RestrictToColor = 0;
+    auto constexpr Id_Reconnector_RestrictToMutants = 1;
+
+    auto constexpr Id_Detonator_State = 0;
+    auto constexpr Id_Detonator_Countdown = 1;
+}
+
+namespace cereal
+{
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, CellMetadataDescription& data)
     {

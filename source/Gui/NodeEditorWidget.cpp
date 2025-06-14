@@ -60,7 +60,7 @@ namespace
         case CellTypeGenome_Constructor:
             return ConstructorGenomeDescription_New();
         case CellTypeGenome_Sensor:
-            return SensorGenomeDescription();
+            return SensorGenomeDescription_New();
         case CellTypeGenome_Oscillator:
             return OscillatorGenomeDescription();
         case CellTypeGenome_Attacker:
@@ -97,23 +97,17 @@ void _NodeEditorWidget::processNodeAttributes()
         }
 
         if (nodeType == CellTypeGenome_Base) {
+
         } else if (nodeType == CellTypeGenome_Depot) {
+
         } else if (nodeType == CellTypeGenome_Constructor) {
+
             AlienGui::BeginIndent();
 
-            // Activation mode
+            // Activation interval
             auto& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
-            int isAutoTriggered = constructor._autoTriggerInterval == 0 ? 0 : 1;
-            if (AlienGui::Combo(
-                    AlienGui::ComboParameters().name("Activation mode").textWidth(rightColumnWidth).values({"Manual", "Automatic"}), isAutoTriggered)) {
-                constructor._autoTriggerInterval = isAutoTriggered;
-            }
-            if (isAutoTriggered == 1) {
-                AlienGui::BeginIndent();
-                AlienGui::InputInt(AlienGui::InputIntParameters().name("Interval").textWidth(rightColumnWidth), constructor._autoTriggerInterval);
-                constructor._autoTriggerInterval = std::max(1, constructor._autoTriggerInterval);
-                AlienGui::EndIndent();
-            }
+            AlienGui::InputOptionalInt(
+                AlienGui::InputIntParameters().name("Auto activation interval").textWidth(rightColumnWidth), constructor._autoTriggerInterval);
 
             // Gene index
             std::vector<std::string> genes;
@@ -135,12 +129,45 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::InputFloatParameters().name("Construction angle").format("%.1f").textWidth(rightColumnWidth), constructor._constructionAngle);
 
             AlienGui::EndIndent();
+
+        } else if (nodeType == CellTypeGenome_Sensor) {
+
+            AlienGui::BeginIndent();
+
+            // Activation mode
+            auto& sensor = std::get<SensorGenomeDescription_New>(node._cellTypeData);
+            AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Auto activation interval").textWidth(rightColumnWidth), sensor._autoTriggerInterval);
+
+            // Minimum density
+            AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Min density").format("%.2f").textWidth(rightColumnWidth), sensor._minDensity);
+
+            // Minimum range
+            AlienGui::InputOptionalInt(
+                AlienGui::InputIntParameters().name("Min range").textWidth(rightColumnWidth), sensor._minRange);
+
+            // Maximum range
+            AlienGui::InputOptionalInt(
+                AlienGui::InputIntParameters().name("Max range").textWidth(rightColumnWidth), sensor._maxRange);
+
+            // Scan color
+            AlienGui::ComboOptionalColor(AlienGui::ComboColorParameters().name("Scan color").textWidth(rightColumnWidth), sensor._restrictToColor);
+
+            // Scan mutants
+            AlienGui::Combo(
+                AlienGui::ComboParameters().name("Scan mutants").values(Const::SensorRestrictToMutantStrings).textWidth(rightColumnWidth),
+                sensor._restrictToMutants);
+
+            AlienGui::EndIndent();
+
+        } else if (nodeType == CellTypeGenome_Oscillator) {
         }
 
         // Angle
         auto nodeIndex = _editData->getSelectedNodeIndex();
         if (AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Angle").textWidth(rightColumnWidth).format("%.1f"), node._referenceAngle)) {
-            gene._shape = ConstructionShape_Custom;
+            if (nodeIndex.value() != 0 && nodeIndex != gene._nodes.size() - 1) {
+                gene._shape = ConstructionShape_Custom;
+            }
         }
 
         // Previous nodes connections

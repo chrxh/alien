@@ -153,8 +153,7 @@ struct Node
 struct Gene
 {
     ConstructionShape shape;
-    int numBranches;  // Between 1 and 6 in modulo
-    bool separateConstruction;
+    int8_t numBranches;  // < 0 = no separation
     ConstructorAngleAlignment angleAlignment;
     float stiffness;
     float connectionDistance;

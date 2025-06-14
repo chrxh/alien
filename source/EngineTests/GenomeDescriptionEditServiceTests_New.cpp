@@ -165,7 +165,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyNode_start)
     auto gene = GeneDescription().nodes({
         NodeDescription().cellTypeData(DepotGenomeDescription()),
         NodeDescription().cellTypeData(ConstructorGenomeDescription_New()),
-        NodeDescription().cellTypeData(SensorGenomeDescription()),
+        NodeDescription().cellTypeData(SensorGenomeDescription_New()),
     });
     GenomeDescriptionEditService::get().addEmptyNode(gene, 0);
 
@@ -181,7 +181,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyNode_middle)
     auto gene = GeneDescription().nodes({
         NodeDescription().cellTypeData(DepotGenomeDescription()),
         NodeDescription().cellTypeData(ConstructorGenomeDescription_New()),
-        NodeDescription().cellTypeData(SensorGenomeDescription()),
+        NodeDescription().cellTypeData(SensorGenomeDescription_New()),
     });
     GenomeDescriptionEditService::get().addEmptyNode(gene, 1);
 
@@ -197,7 +197,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyNode_end)
     auto gene = GeneDescription().nodes({
         NodeDescription().cellTypeData(DepotGenomeDescription()),
         NodeDescription().cellTypeData(ConstructorGenomeDescription_New()),
-        NodeDescription().cellTypeData(SensorGenomeDescription()),
+        NodeDescription().cellTypeData(SensorGenomeDescription_New()),
     });
     GenomeDescriptionEditService::get().addEmptyNode(gene, 2);
 
@@ -213,7 +213,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, removeNode_start)
     auto gene = GeneDescription().nodes({
         NodeDescription().cellTypeData(DepotGenomeDescription()),
         NodeDescription().cellTypeData(ConstructorGenomeDescription_New()),
-        NodeDescription().cellTypeData(SensorGenomeDescription()),
+        NodeDescription().cellTypeData(SensorGenomeDescription_New()),
     });
     GenomeDescriptionEditService::get().removeNode(gene, 0);
 
@@ -227,7 +227,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, removeNode_middle)
     auto gene = GeneDescription().nodes({
         NodeDescription().cellTypeData(DepotGenomeDescription()),
         NodeDescription().cellTypeData(ConstructorGenomeDescription_New()),
-        NodeDescription().cellTypeData(SensorGenomeDescription()),
+        NodeDescription().cellTypeData(SensorGenomeDescription_New()),
     });
     GenomeDescriptionEditService::get().removeNode(gene, 1);
 
@@ -241,7 +241,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, removeNode_end)
     auto gene = GeneDescription().nodes({
         NodeDescription().cellTypeData(DepotGenomeDescription()),
         NodeDescription().cellTypeData(ConstructorGenomeDescription_New()),
-        NodeDescription().cellTypeData(SensorGenomeDescription()),
+        NodeDescription().cellTypeData(SensorGenomeDescription_New()),
     });
     GenomeDescriptionEditService::get().removeNode(gene, 2);
 
@@ -255,7 +255,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, swapNodes)
     auto gene = GeneDescription().nodes({
         NodeDescription().cellTypeData(DepotGenomeDescription()),
         NodeDescription().cellTypeData(ConstructorGenomeDescription_New()),
-        NodeDescription().cellTypeData(SensorGenomeDescription()),
+        NodeDescription().cellTypeData(SensorGenomeDescription_New()),
     });
     GenomeDescriptionEditService::get().swapNodes(gene, 1);
 

@@ -22,7 +22,7 @@ namespace
         if (gene._numConcatenations == std::numeric_limits<int>::max()) {
             return -1;
         }
-        auto numBranches = !gene._separateConstruction ? gene._numBranches : 1;
+        auto numBranches = gene._numBranches.value_or(1);
         auto result = gene._nodes.size() * gene._numConcatenations * numBranches;
         for (auto const& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {

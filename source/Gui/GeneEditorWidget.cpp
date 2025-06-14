@@ -73,8 +73,11 @@ void _GeneEditorWidget::processHeaderData()
         auto& gene = _editData->getSelectedGeneRef();
 
         _editData->updateGeometry(gene._shape); // Do it every time in order to avoid check for changes
+
+        // Shape
         AlienGui::Combo(AlienGui::ComboParameters().name("Shape").values(Const::ConstructionShapeStrings).textWidth(rightColumnWidth), gene._shape);
 
+        // Angle alignment
         AlienGui::BeginIndent();
         if (gene._shape == ConstructionShape_Custom) {
             AlienGui::Combo(
@@ -86,25 +89,22 @@ void _GeneEditorWidget::processHeaderData()
         }
         AlienGui::EndIndent();
 
+        // Number of branches
+        if (AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Attach to host").textWidth(rightColumnWidth), gene._numBranches)) {
+            if (gene._numBranches.has_value() && gene._numBranches.value() == 0) {
+                gene._numBranches = 1;
+            }
+        }
+
+        // Concatenations
         AlienGui::InputInt(AlienGui::InputIntParameters().name("Concatenations").infinity(true).textWidth(rightColumnWidth), gene._numConcatenations);
 
-        auto connected = !gene._separateConstruction;
-        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Connect to host cell").textWidth(rightColumnWidth), connected);
-        gene._separateConstruction = !connected;
-
-        AlienGui::BeginIndent();
-        if (!gene._separateConstruction) {
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Branches").textWidth(rightColumnWidth), gene._numBranches);
-        } else {
-            std::string text = "1";
-            AlienGui::InputText(AlienGui::InputTextParameters().name("Branches").textWidth(rightColumnWidth).readOnly(true), text);
-        }
-        AlienGui::EndIndent();
-
+        // Connection distance
         AlienGui::InputFloat(
             AlienGui::InputFloatParameters().name("Connection distance").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
             gene._connectionDistance);
 
+        // Stiffness
         AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(rightColumnWidth), gene._stiffness);
     }
     ImGui::EndChild();
