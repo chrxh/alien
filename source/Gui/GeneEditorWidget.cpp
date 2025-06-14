@@ -106,9 +106,6 @@ void _GeneEditorWidget::processHeaderData()
             gene._connectionDistance);
 
         AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(rightColumnWidth), gene._stiffness);
-
-        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Concatenation angle #1").format("%.1f").textWidth(rightColumnWidth), gene._concatenationAngle1);
-        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Concatenation angle #2").format("%.1f").textWidth(rightColumnWidth), gene._concatenationAngle2);
     }
     ImGui::EndChild();
 }
@@ -160,11 +157,7 @@ void _GeneEditorWidget::processNodeList()
 
                     // Column 2: Angle
                     ImGui::TableNextColumn();
-                    if (row != 0 && row != gene._nodes.size() - 1) {
-                        AlienGui::Text(StringHelper::format(node._referenceAngle, 1));
-                    } else {
-                        AlienGui::Text("-");
-                    }
+                    AlienGui::Text(StringHelper::format(node._referenceAngle, 1));
                     ImGui::PopID();
                 }
             }

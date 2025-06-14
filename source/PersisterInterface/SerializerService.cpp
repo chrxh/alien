@@ -238,8 +238,6 @@ namespace
     auto constexpr Id_Gene_Stiffness = 4;
     auto constexpr Id_Gene_ConnectionDistance = 5;
     auto constexpr Id_Gene_NumRepetitions = 6;
-    auto constexpr Id_Gene_ConcatenationAngle1 = 7;
-    auto constexpr Id_Gene_ConcatenationAngle2 = 8;
 
     auto constexpr Id_Node_ReferenceAngle = 0;
     auto constexpr Id_Node_Color = 1;
@@ -248,8 +246,7 @@ namespace
     auto constexpr Id_ConstructorGenome_New_AutoTriggerInterval = 0;
     auto constexpr Id_ConstructorGenome_New_ConstructGeneIndex = 1;
     auto constexpr Id_ConstructorGenome_New_ConstructionActivationTime = 2;
-    auto constexpr Id_ConstructorGenome_New_ConstructionAngle1 = 3;
-    auto constexpr Id_ConstructorGenome_New_ConstructionAngle2 = 4;
+    auto constexpr Id_ConstructorGenome_New_ConstructionAngle = 3;
 
     auto constexpr Id_InjectorGenome_New_Mode = 0;
 
@@ -374,8 +371,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_ConstructorGenome_New_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
         loadSave(task, auxiliaries, Id_ConstructorGenome_New_ConstructGeneIndex, data._constructGeneIndex, defaultObject._constructGeneIndex);
         loadSave(task, auxiliaries, Id_ConstructorGenome_New_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
-        loadSave(task, auxiliaries, Id_ConstructorGenome_New_ConstructionAngle1, data._constructionAngle1, defaultObject._constructionAngle1);
-        loadSave(task, auxiliaries, Id_ConstructorGenome_New_ConstructionAngle2, data._constructionAngle2, defaultObject._constructionAngle2);
+        loadSave(task, auxiliaries, Id_ConstructorGenome_New_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ConstructorGenomeDescription_New)
@@ -573,8 +569,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Gene_Stiffness, data._stiffness, defaultObject._stiffness);
         loadSave(task, auxiliaries, Id_Gene_ConnectionDistance, data._connectionDistance, defaultObject._connectionDistance);
         loadSave(task, auxiliaries, Id_Gene_NumRepetitions, data._numConcatenations, defaultObject._numConcatenations);
-        loadSave(task, auxiliaries, Id_Gene_ConcatenationAngle1, data._concatenationAngle1, defaultObject._concatenationAngle1);
-        loadSave(task, auxiliaries, Id_Gene_ConcatenationAngle2, data._concatenationAngle2, defaultObject._concatenationAngle2);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._nodes);

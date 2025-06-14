@@ -472,8 +472,6 @@ GenomeDescription_New DescriptionConverterService::createGenomeDescription(
         geneDesc._stiffness = geneTO->stiffness;
         geneDesc._connectionDistance = geneTO->connectionDistance;
         geneDesc._numConcatenations = geneTO->numConcatenations;
-        geneDesc._concatenationAngle1 = geneTO->concatenationAngle1;
-        geneDesc._concatenationAngle2 = geneTO->concatenationAngle2;
 
         for (int j = 0; j < geneTO->numNodes; ++j) {
             auto nodeTO = collectionTO.nodes + geneTO->nodeArrayIndex + j;
@@ -502,8 +500,6 @@ GenomeDescription_New DescriptionConverterService::createGenomeDescription(
                 constructorDesc._autoTriggerInterval = nodeTO->cellTypeData.constructor.autoTriggerInterval;
                 constructorDesc._constructGeneIndex = nodeTO->cellTypeData.constructor.constructGeneIndex;
                 constructorDesc._constructionActivationTime = nodeTO->cellTypeData.constructor.constructionActivationTime;
-                constructorDesc._constructionAngle1 = nodeTO->cellTypeData.constructor.constructionAngle1;
-                constructorDesc._constructionAngle2 = nodeTO->cellTypeData.constructor.constructionAngle2;
                 nodeDesc._cellTypeData = constructorDesc;
             } break;
             case CellTypeGenome_Sensor: {
@@ -630,8 +626,6 @@ void DescriptionConverterService::convertGenomeToTO(
         geneTO.stiffness = geneDesc._stiffness;
         geneTO.connectionDistance = geneDesc._connectionDistance;
         geneTO.numConcatenations = geneDesc._numConcatenations;
-        geneTO.concatenationAngle1 = geneDesc._concatenationAngle1;
-        geneTO.concatenationAngle2 = geneDesc._concatenationAngle2;
         geneTO.numNodes = toInt(geneDesc._nodes.size());
 
         auto nodeArrayStartIndex = nodeTOs.size();
@@ -664,8 +658,7 @@ void DescriptionConverterService::convertGenomeToTO(
                 constructorTO.autoTriggerInterval = constructorDesc._autoTriggerInterval;
                 constructorTO.constructGeneIndex = constructorDesc._constructGeneIndex;
                 constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
-                constructorTO.constructionAngle1 = constructorDesc._constructionAngle1;
-                constructorTO.constructionAngle2 = constructorDesc._constructionAngle2;
+                constructorTO.constructionAngle = constructorDesc._constructionAngle;
             } break;
             case CellTypeGenome_Sensor: {
                 auto const& sensorDesc = std::get<SensorGenomeDescription>(nodeDesc._cellTypeData);

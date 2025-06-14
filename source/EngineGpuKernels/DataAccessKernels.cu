@@ -47,8 +47,6 @@ namespace
                 geneTO.stiffness = gene.stiffness;
                 geneTO.connectionDistance = gene.connectionDistance;
                 geneTO.numConcatenations = gene.numConcatenations;
-                geneTO.concatenationAngle1 = gene.concatenationAngle1;
-                geneTO.concatenationAngle2 = gene.concatenationAngle2;
                 geneTO.numNodes = gene.numNodes;
                 auto nodeTOArrayStartIndex = atomicAdd(collectionTO.numNodes, gene.numNodes);
                 for (int i = 0, j = gene.numNodes; i < j; ++i) {
@@ -76,8 +74,7 @@ namespace
                         nodeTO.cellTypeData.constructor.autoTriggerInterval = node.cellTypeData.constructor.autoTriggerInterval;
                         nodeTO.cellTypeData.constructor.constructGeneIndex = node.cellTypeData.constructor.constructGeneIndex;
                         nodeTO.cellTypeData.constructor.constructionActivationTime = node.cellTypeData.constructor.constructionActivationTime;
-                        nodeTO.cellTypeData.constructor.constructionAngle1 = node.cellTypeData.constructor.constructionAngle1;
-                        nodeTO.cellTypeData.constructor.constructionAngle2 = node.cellTypeData.constructor.constructionAngle2;
+                        nodeTO.cellTypeData.constructor.constructionAngle = node.cellTypeData.constructor.constructionAngle;
                         break;
                     case CellTypeGenome_Sensor:
                         nodeTO.cellTypeData.sensor.autoTriggerInterval = node.cellTypeData.sensor.autoTriggerInterval;

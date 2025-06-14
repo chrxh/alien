@@ -66,8 +66,7 @@ struct ConstructorGenomeDescription_New
     MEMBER(ConstructorGenomeDescription_New, int, autoTriggerInterval, 100);    // 0 = manual (triggered by signal), > 0 = auto trigger
     MEMBER(ConstructorGenomeDescription_New, int, constructGeneIndex, 0);
     MEMBER(ConstructorGenomeDescription_New, int, constructionActivationTime, 100);
-    MEMBER(ConstructorGenomeDescription_New, float, constructionAngle1, 0.0f);
-    MEMBER(ConstructorGenomeDescription_New, float, constructionAngle2, 0.0f);
+    MEMBER(ConstructorGenomeDescription_New, float, constructionAngle, 0.0f);
 };
 
 struct SensorGenomeDescription
@@ -236,8 +235,6 @@ struct GeneDescription
     MEMBER(GeneDescription, ConstructorAngleAlignment, angleAlignment, ConstructorAngleAlignment_60);
     MEMBER(GeneDescription, float, stiffness, 1.0f);
     MEMBER(GeneDescription, float, connectionDistance, 1.0f);
-    MEMBER(GeneDescription, float, concatenationAngle1, 0.0f);
-    MEMBER(GeneDescription, float, concatenationAngle2, 0.0f);
 };
 
 struct GenomeDescription_New
