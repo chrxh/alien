@@ -85,6 +85,7 @@ namespace
                         break;
                     case CellTypeGenome_Oscillator:
                         nodeTO.cellTypeData.oscillator.autoTriggerInterval = node.cellTypeData.oscillator.autoTriggerInterval;
+                        nodeTO.cellTypeData.oscillator.pulseType = node.cellTypeData.oscillator.pulseType;
                         nodeTO.cellTypeData.oscillator.alternationInterval = node.cellTypeData.oscillator.alternationInterval;
                         break;
                     case CellTypeGenome_Attacker:
@@ -257,6 +258,7 @@ namespace
         } break;
         case CellType_Oscillator: {
             cellTO.cellTypeData.oscillator.autoTriggerInterval = cell->cellTypeData.oscillator.autoTriggerInterval;
+            cellTO.cellTypeData.oscillator.pulseType = cell->cellTypeData.oscillator.pulseType;
             cellTO.cellTypeData.oscillator.alternationInterval = cell->cellTypeData.oscillator.alternationInterval;
             cellTO.cellTypeData.oscillator.numPulses = cell->cellTypeData.oscillator.numPulses;
         } break;

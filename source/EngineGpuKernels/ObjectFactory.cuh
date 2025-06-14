@@ -123,6 +123,7 @@ __inline__ __device__ void ObjectFactory::createGenomeFromTO(CollectionTO const&
                 break;
             case CellTypeGenome_Oscillator:
                 node.cellTypeData.oscillator.autoTriggerInterval = nodeTO.cellTypeData.oscillator.autoTriggerInterval;
+                node.cellTypeData.oscillator.pulseType = nodeTO.cellTypeData.oscillator.pulseType;
                 node.cellTypeData.oscillator.alternationInterval = nodeTO.cellTypeData.oscillator.alternationInterval;
                 break;
             case CellTypeGenome_Attacker:
@@ -292,6 +293,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
     } break;
     case CellType_Oscillator: {
         cell->cellTypeData.oscillator.autoTriggerInterval = cellTO.cellTypeData.oscillator.autoTriggerInterval;
+        cell->cellTypeData.oscillator.pulseType = cellTO.cellTypeData.oscillator.pulseType;
         cell->cellTypeData.oscillator.alternationInterval = cellTO.cellTypeData.oscillator.alternationInterval;
         cell->cellTypeData.oscillator.numPulses = cellTO.cellTypeData.oscillator.numPulses;
     } break;

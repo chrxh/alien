@@ -207,6 +207,7 @@ bool AlienGui::InputInt(InputIntParameters const& parameters, int& value, bool* 
     ImGui::SameLine();
     MoveTickLeft();
     if (ImGui::Button("-", {plusMinusButtonWidth, 0.0f})) {
+        result = true;
         --value;
     }
     if (ImGui::IsItemHovered() && ImGui::IsItemActive()) {
@@ -218,6 +219,7 @@ bool AlienGui::InputInt(InputIntParameters const& parameters, int& value, bool* 
     MoveTickLeft();
     if (ImGui::Button("+", {plusMinusButtonWidth, 0.0f})) {
         ++value;
+        result = true;
     }
     if (ImGui::IsItemHovered() && ImGui::IsItemActive()) {
         if (ImGui::GetIO().MouseDownDuration[0] > 0.5f) {

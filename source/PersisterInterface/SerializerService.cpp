@@ -190,7 +190,8 @@ namespace
     auto constexpr Id_MuscleModeGenome_ManualCrawling_FrontBackVelRatio = 1;
 
     auto constexpr Id_OscillatorGenome_AutoTriggerInterval = 0;
-    auto constexpr Id_OscillatorGenome_AlternationInterval = 1;
+    auto constexpr Id_OscillatorGenome_PulseType = 1;
+    auto constexpr Id_OscillatorGenome_AlternationInterval = 2;
 
     auto constexpr Id_InjectorGenome_New_Mode = 0;
 
@@ -272,6 +273,7 @@ namespace cereal
         OscillatorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_OscillatorGenome_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
+        loadSave(task, auxiliaries, Id_OscillatorGenome_PulseType, data._pulseType, defaultObject._pulseType);
         loadSave(task, auxiliaries, Id_OscillatorGenome_AlternationInterval, data._alternationInterval, defaultObject._alternationInterval);
         processLoadSaveMap(task, ar, auxiliaries);
     }
@@ -729,8 +731,9 @@ namespace
     auto constexpr Id_Injector_Mode = 0;
     auto constexpr Id_Injector_Counter = 1;
 
-    auto constexpr Id_Oscillator_PulseMode = 0;
-    auto constexpr Id_Oscillator_AlternationMode = 1;
+    auto constexpr Id_Oscillator_AutoTriggerInterval = 0;
+    auto constexpr Id_Oscillator_PulseType = 1;
+    auto constexpr Id_Oscillator_AlternationMode = 2;
 
     auto constexpr Id_Sensor_MinDensity = 0;
     auto constexpr Id_Sensor_RestrictToColor = 4;
@@ -875,7 +878,8 @@ namespace cereal
     {
         OscillatorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Oscillator_PulseMode, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
+        loadSave(task, auxiliaries, Id_Oscillator_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
+        loadSave(task, auxiliaries, Id_Oscillator_PulseType, data._pulseType, defaultObject._pulseType);
         loadSave(task, auxiliaries, Id_Oscillator_AlternationMode, data._alternationInterval, defaultObject._alternationInterval);
         processLoadSaveMap(task, ar, auxiliaries);
     }

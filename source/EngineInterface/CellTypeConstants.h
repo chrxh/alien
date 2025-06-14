@@ -198,6 +198,17 @@ namespace Const
         {"Custom", "Segment", "Triangle", "Rectangle", "Hexagon", "Loop", "Tube", "Lolli", "Small Lolli", "Zigzag"};
 }
 
+//************************
+//* Oscillator constants *
+//************************
+using OscillatorPulseType = int;
+enum OscillatorPulseType_
+{
+    OscillatorPulseType_Positive,
+    OscillatorPulseType_Alternation,
+    OscillatorPulseType_Count
+};
+
 //**********************
 //* Injector constants *
 //**********************

@@ -130,7 +130,8 @@ struct OscillatorDescription
 
     // Fixed data
     MEMBER(OscillatorDescription, int, autoTriggerInterval, 100);
-    MEMBER(OscillatorDescription, int, alternationInterval, 0);  // 0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
+    MEMBER(OscillatorDescription, OscillatorPulseType, pulseType, OscillatorPulseType_Positive);
+    MEMBER(OscillatorDescription, int, alternationInterval, 1);  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
 
     // Process data
     MEMBER(OscillatorDescription, int, numPulses, 0);

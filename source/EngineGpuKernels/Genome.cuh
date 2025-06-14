@@ -21,7 +21,7 @@ struct DepotGenome
 
 struct SensorGenome
 {
-    uint8_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
+    uint32_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
     float minDensity;
     int8_t minRange;          // < 0 = no restriction
     int8_t maxRange;          // < 0 = no restriction
@@ -31,16 +31,17 @@ struct SensorGenome
 
 struct ConstructorGenome
 {
-    int autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
-    int constructGeneIndex;
-    int constructionActivationTime;
+    uint32_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
+    uint16_t constructGeneIndex;
+    uint16_t constructionActivationTime;
     float constructionAngle;
 };
 
 struct OscillatorGenome
 {
-    uint8_t autoTriggerInterval;
-    uint8_t alternationInterval;  // 0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
+    uint32_t autoTriggerInterval;
+    OscillatorPulseType pulseType;
+    uint32_t alternationInterval;  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
 };
 
 struct AttackerGenome

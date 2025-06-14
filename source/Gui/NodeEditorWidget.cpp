@@ -104,7 +104,7 @@ void _NodeEditorWidget::processNodeAttributes()
 
             AlienGui::BeginIndent();
 
-            // Activation interval
+            // Auto activation interval
             auto& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
             AlienGui::InputOptionalInt(
                 AlienGui::InputIntParameters().name("Auto activation interval").textWidth(rightColumnWidth), constructor._autoTriggerInterval);
@@ -134,7 +134,7 @@ void _NodeEditorWidget::processNodeAttributes()
 
             AlienGui::BeginIndent();
 
-            // Activation mode
+            // Auto activation interval
             auto& sensor = std::get<SensorGenomeDescription_New>(node._cellTypeData);
             AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Auto activation interval").textWidth(rightColumnWidth), sensor._autoTriggerInterval);
 
@@ -160,6 +160,28 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::EndIndent();
 
         } else if (nodeType == CellTypeGenome_Oscillator) {
+
+            AlienGui::BeginIndent();
+
+            // Activation interval
+            auto& oscillator = std::get<OscillatorGenomeDescription>(node._cellTypeData);
+            AlienGui::InputInt(
+                AlienGui::InputIntParameters().name("Activation interval").textWidth(rightColumnWidth), oscillator._autoTriggerInterval);
+
+            // Pulse type
+            AlienGui::Combo(AlienGui::ComboParameters().name("Pulse type").values({"Positive", "Alternation"}).textWidth(rightColumnWidth), oscillator._pulseType);
+
+            if (oscillator._pulseType != OscillatorPulseType_Alternation) {
+
+                AlienGui::BeginIndent();
+
+                // Pulses per phase
+                AlienGui::InputInt(AlienGui::InputIntParameters().name("Pulses per phase").textWidth(rightColumnWidth), oscillator._alternationInterval);
+
+                AlienGui::EndIndent();
+            }
+
+            AlienGui::EndIndent();
         }
 
         // Angle

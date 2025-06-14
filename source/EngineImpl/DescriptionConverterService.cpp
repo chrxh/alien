@@ -336,6 +336,7 @@ CellDescription DescriptionConverterService::createCellDescription(
     case CellType_Oscillator: {
         OscillatorDescription oscillator;
         oscillator._autoTriggerInterval = cellTO.cellTypeData.oscillator.autoTriggerInterval;
+        oscillator._pulseType = cellTO.cellTypeData.oscillator.pulseType;
         oscillator._alternationInterval = cellTO.cellTypeData.oscillator.alternationInterval;
         oscillator._numPulses = cellTO.cellTypeData.oscillator.numPulses;
         result._cellTypeData = oscillator;
@@ -521,6 +522,7 @@ GenomeDescription_New DescriptionConverterService::createGenomeDescription(
             case CellTypeGenome_Oscillator: {
                 OscillatorGenomeDescription oscillatorDesc;
                 oscillatorDesc._autoTriggerInterval = nodeTO->cellTypeData.oscillator.autoTriggerInterval;
+                oscillatorDesc._pulseType = nodeTO->cellTypeData.oscillator.pulseType;
                 oscillatorDesc._alternationInterval = nodeTO->cellTypeData.oscillator.alternationInterval;
                 nodeDesc._cellTypeData = oscillatorDesc;
             } break;
@@ -676,6 +678,7 @@ void DescriptionConverterService::convertGenomeToTO(
                 auto const& oscillatorDesc = std::get<OscillatorGenomeDescription>(nodeDesc._cellTypeData);
                 auto& oscillatorTO = nodeTO.cellTypeData.oscillator;
                 oscillatorTO.autoTriggerInterval = oscillatorDesc._autoTriggerInterval;
+                oscillatorTO.pulseType = oscillatorDesc._pulseType;
                 oscillatorTO.alternationInterval = oscillatorDesc._alternationInterval;
             } break;
             case CellTypeGenome_Attacker: {
@@ -842,6 +845,7 @@ void DescriptionConverterService::convertCellToTO(
         auto const& oscillatorDesc = std::get<OscillatorDescription>(cellDesc._cellTypeData);
         OscillatorTO& oscillatorTO = cellTO.cellTypeData.oscillator;
         oscillatorTO.autoTriggerInterval = oscillatorDesc._autoTriggerInterval;
+        oscillatorTO.pulseType = oscillatorDesc._pulseType;
         oscillatorTO.alternationInterval = oscillatorDesc._alternationInterval;
         oscillatorTO.numPulses = oscillatorDesc._numPulses;
     } break;
