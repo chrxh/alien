@@ -603,6 +603,11 @@ bool AlienGui::Combo(ComboParameters& parameters, int& value, bool* enabled)
     return result;
 }
 
+bool AlienGui::ComboOptional(ComboParameters& parameters, std::optional<int>& value, bool* enabled)
+{
+    return optionalWidgetAdaptor(parameters, value, 0, &AlienGui::Combo);
+}
+
 bool AlienGui::Switcher(SwitcherParameters& parameters, int& value, bool* enabled /*= nullptr*/)
 {
     if (!matchWithFilter(parameters._name)) {

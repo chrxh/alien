@@ -216,6 +216,7 @@ public:
         MEMBER(ComboParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool Combo(ComboParameters& parameters, int& value, bool* enabled = nullptr);
+    static bool ComboOptional(ComboParameters& parameters, std::optional<int>& value, bool* enabled = nullptr);
 
     struct SwitcherParameters
     {
