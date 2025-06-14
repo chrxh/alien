@@ -154,7 +154,7 @@ bool AlienGui::InputInt(InputIntParameters const& parameters, int& value, bool* 
 
     auto result = false;
     if (enabled) {
-        result |= ImGui::Checkbox("", enabled);
+        result |= ImGui::Checkbox("###checkbox", enabled);
         if (!(*enabled) && parameters._disabledValue) {
             value = *parameters._disabledValue;
         }
@@ -175,9 +175,8 @@ bool AlienGui::InputInt(InputIntParameters const& parameters, int& value, bool* 
     // Draw input field
     if (!isInfinity) {
         ImGui::SetNextItemWidth(inputWidth - 2 * ImGui::GetStyle().FramePadding.x - 2 * plusMinusButtonWidth);
-        //result |= ImGui::InputInt(("##" + parameters._name).c_str(), &value, 1, 100, ImGuiInputTextFlags_None);
         auto valueAsFloat = toFloat(value);
-        result |= ImGui::InputFloat("", &valueAsFloat, 0, 0, "%.0f");
+        result |= ImGui::InputFloat("###input", &valueAsFloat, 0, 0, "%.0f");
         value = toInt(valueAsFloat);
 
     } else {
