@@ -20,11 +20,7 @@ struct NeuralNetworkGenomeDescription
         _weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
         _biases.resize(MAX_CHANNELS, 0);
         _activationFunctions.resize(MAX_CHANNELS, ActivationFunction_Identity);
-        // #TODO GCC incompatibily:
-        // auto md = std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS);
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            // #TODO GCC incompatibily:
-            // md[i, i] = 1.0f;
             _weights[i * MAX_CHANNELS + i] = 1.0f;
         }
     }
@@ -32,15 +28,9 @@ struct NeuralNetworkGenomeDescription
 
     NeuralNetworkGenomeDescription& weight(int row, int col, float value)
     {
-        // #TODO GCC incompatibily:
-        // auto md = std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS);
-        // md[row, col] = value;
         _weights[row * MAX_CHANNELS + col] = value;
         return *this;
     }
-    // #TODO GCC incompatibily:
-    // auto getWeights() const { return std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
-    // auto getWeights() { return std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
 
     MEMBER(NeuralNetworkGenomeDescription, std::vector<float>, weights, {});
     MEMBER(NeuralNetworkGenomeDescription, std::vector<float>, biases, {});

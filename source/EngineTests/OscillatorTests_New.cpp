@@ -84,7 +84,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeAfterFirstPulse)
 TEST_F(OscillatorTests_New, generatePulse_timeBeforeFirstPulseAlternation)
 {
     auto data = CollectionDescription().addCells({
-        CellDescription().id(1).cellTypeData(OscillatorDescription().autoTriggerInterval(97).alternationInterval(3)),
+        CellDescription().id(1).cellTypeData(OscillatorDescription().autoTriggerInterval(97).pulseType(OscillatorPulseType_Alternation).alternationInterval(3)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -101,7 +101,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeBeforeFirstPulseAlternation)
 TEST_F(OscillatorTests_New, generatePulse_timeAtFirstPulseAlternation)
 {
     auto data = CollectionDescription().addCells({
-        CellDescription().id(1).cellTypeData(OscillatorDescription().autoTriggerInterval(97).alternationInterval(3)),
+        CellDescription().id(1).cellTypeData(OscillatorDescription().autoTriggerInterval(97).pulseType(OscillatorPulseType_Alternation).alternationInterval(3)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -118,7 +118,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeAtFirstPulseAlternation)
 TEST_F(OscillatorTests_New, generatePulse_timeAtSecondPulseAlternation)
 {
     auto data = CollectionDescription().addCells({
-        CellDescription().id(1).cellTypeData(OscillatorDescription().autoTriggerInterval(97).alternationInterval(3)),
+        CellDescription().id(1).cellTypeData(OscillatorDescription().autoTriggerInterval(97).pulseType(OscillatorPulseType_Alternation).alternationInterval(3)),
     });
 
     _simulationFacade->setSimulationData(data);

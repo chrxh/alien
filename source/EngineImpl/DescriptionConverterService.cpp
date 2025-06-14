@@ -468,8 +468,7 @@ GenomeDescription_New DescriptionConverterService::createGenomeDescription(
         auto geneTO = collectionTO.genes + genomeTO.geneArrayIndex + i;
 
         GeneDescription geneDesc;
-        geneDesc._numBranches = geneTO->numBranches >= 0 ? std::make_optional(geneTO->numBranches) : std::nullopt;
-        geneDesc._numBranches = geneTO->numBranches;
+        geneDesc._numBranches = geneTO->numBranches > 0 ? std::make_optional(geneTO->numBranches) : std::nullopt;
         geneDesc._shape = geneTO->shape;
         geneDesc._angleAlignment = geneTO->angleAlignment;
         geneDesc._stiffness = geneTO->stiffness;
@@ -625,7 +624,7 @@ void DescriptionConverterService::convertGenomeToTO(
         GeneTO& geneTO = geneTOs.at(geneArrayStartIndex + geneIndex);
 
         geneTO.shape = geneDesc._shape;
-        geneTO.numBranches = static_cast<int8_t>(geneDesc._numBranches.value_or(-1));
+        geneTO.numBranches = static_cast<uint8_t>(geneDesc._numBranches.value_or(0));
         geneTO.angleAlignment = geneDesc._angleAlignment;
         geneTO.stiffness = geneDesc._stiffness;
         geneTO.connectionDistance = geneDesc._connectionDistance;
