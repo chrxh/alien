@@ -139,13 +139,8 @@ void _NodeEditorWidget::processNodeAttributes()
 
         // Angle
         auto nodeIndex = _editData->getSelectedNodeIndex();
-        if (nodeIndex != 0 && nodeIndex != gene._nodes.size() - 1) {
-            if (AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Angle").textWidth(rightColumnWidth).format("%.1f"), node._referenceAngle)) {
-                gene._shape = ConstructionShape_Custom;
-            }
-        } else {
-            std::string text = "-";
-            AlienGui::InputText(AlienGui::InputTextParameters().name("Angle").textWidth(rightColumnWidth).readOnly(true), text);
+        if (AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Angle").textWidth(rightColumnWidth).format("%.1f"), node._referenceAngle)) {
+            gene._shape = ConstructionShape_Custom;
         }
 
         // Previous nodes connections
