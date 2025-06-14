@@ -32,4 +32,12 @@ private:
     SelectionData& getValueRef(std::unordered_map<unsigned int, T>& idToValueMap);
 
     std::unordered_map<unsigned int, SelectionData> _dataById;
+
+    struct NetData
+    {
+        std::vector<float> weights;
+        std::vector<float> biases;
+        std::vector<ActivationFunction> activationFunctions;
+    };
+    std::optional<NetData> _copiedNet;
 };

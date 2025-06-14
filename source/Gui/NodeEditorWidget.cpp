@@ -8,8 +8,10 @@
 
 namespace
 {
-    auto constexpr HeaderLeftColumnWidth = 140.0f;
+    auto constexpr HeaderMinRightColumnWidth = 160.0f;
+    auto constexpr HeaderMaxLeftColumnWidth = 200.0f;
 }
+
 
 NodeEditorWidget _NodeEditorWidget::create(CreatureTabEditData const& editData, CreatureTabLayoutData const& layoutData)
 {
@@ -81,7 +83,7 @@ void _NodeEditorWidget::processNodeAttributes()
 {
     AlienGui::Group("Selected node");
 
-    auto rightColumnWidth = scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderLeftColumnWidth));
+    auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
     if (ImGui::BeginChild("NodeData", ImVec2(0, -_layoutData->neuralNetEditorHeight), 0)) {
         auto& gene = _editData->getSelectedGeneRef();
         auto& node = _editData->getSelectedNodeRef();
