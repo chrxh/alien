@@ -33,7 +33,7 @@ private:
     NodeEditorWidget _nodeEditorWidget;
 
     // Creature data
-    CreatureTabEditData _genomeData;
+    CreatureTabEditData _editData;
     std::optional<uint64_t> _creatureId;
 
     // Layout data
