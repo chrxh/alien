@@ -132,7 +132,7 @@ void _NeuralNetWidget::processNetwork(
             } else {
                 pushDefaultColors();
             }
-            if (ImGui::Button(("#" + std::to_string(i) + "###Input").c_str(), {ioButtonSize.x, ioButtonSize.y})) {
+            if (ImGui::Button(("i" + std::to_string(i + 1) + "###Input").c_str(), {ioButtonSize.x, ioButtonSize.y})) {
                 selectionData.inputNeuronIndex = i;
             }
             ImGui::PopStyleColor(3);
@@ -146,7 +146,7 @@ void _NeuralNetWidget::processNetwork(
             } else {
                 pushDefaultColors();
             }
-            if (ImGui::Button(("#" + std::to_string(i) + "###Output").c_str(), {ioButtonSize.x, ioButtonSize.y})) {
+            if (ImGui::Button(("o" + std::to_string(i + 1) + "###Output").c_str(), {ioButtonSize.x, ioButtonSize.y})) {
                 selectionData.outputNeuronIndex = i;
             }
             ImGui::PopStyleColor(3);
@@ -254,6 +254,19 @@ void _NeuralNetWidget::processActionButtons(std::vector<float>& weights, std::ve
                 activationFunctions[i] = NumberGenerator::get().getRandomInt(ActivationFunction_Count);
             }
         }
+        ImGui::SameLine();
+        if (AlienGui::Button("Copy")) {
+            NetData copiedNet{weights, biases, activationFunctions};
+            _copiedNet = copiedNet;
+        }
+        ImGui::SameLine();
+        ImGui::BeginDisabled(!_copiedNet.has_value());
+        if (AlienGui::Button("Paste")) {
+            weights = _copiedNet->weights;
+            biases = _copiedNet->biases;
+            activationFunctions = _copiedNet->activationFunctions;
+        }
+        ImGui::EndDisabled();
     }
     ImGui::EndChild();
 }
