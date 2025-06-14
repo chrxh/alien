@@ -4,7 +4,7 @@
 #include "CreatureTabEditData.h"
 #include "CreatureTabLayoutData.h"
 #include "LoginDialog.h"
-#include "NeuralNetWidget.h"
+#include "NeuralNetEditorWidget.h"
 
 namespace
 {
@@ -43,7 +43,7 @@ _NodeEditorWidget::_NodeEditorWidget(CreatureTabEditData const& editData, Creatu
     : _editData(editData)
     , _layoutData(layoutData)
 {
-    _neuralNetWidget = _NeuralNetWidget::create();
+    _neuralNetWidget = _NeuralNetEditorWidget::create();
 }
 
 namespace

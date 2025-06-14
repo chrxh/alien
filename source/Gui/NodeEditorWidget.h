@@ -20,5 +20,5 @@ private:
     CreatureTabEditData _editData;
     CreatureTabLayoutData _layoutData;
 
-    NeuralNetWidget _neuralNetWidget;
+    NeuralNetEditorWidget _neuralNetWidget;
 };
