@@ -146,14 +146,15 @@ void AlienGui::SliderInputFloat(SliderInputFloatParameters const& parameters, fl
 
 bool AlienGui::InputInt(InputIntParameters const& parameters, int& value, bool* enabled)
 {
+    ImGui::PushID(parameters._name.c_str());
     auto textWidth = scale(parameters._textWidth);
-    auto infinityButtonWidth = 30;
+    auto infinityButtonWidth = 30.0f;
     auto isInfinity = value == std::numeric_limits<int>::max();
     auto showInfinity = parameters._infinity && (!parameters._readOnly || isInfinity);
 
     auto result = false;
     if (enabled) {
-        result |= ImGui::Checkbox(("##checkbox" + parameters._name).c_str(), enabled);
+        result |= ImGui::Checkbox("", enabled);
         if (!(*enabled) && parameters._disabledValue) {
             value = *parameters._disabledValue;
         }
@@ -165,30 +166,27 @@ bool AlienGui::InputInt(InputIntParameters const& parameters, int& value, bool* 
     if (showInfinity) {
         inputWidth -= scale(infinityButtonWidth) + ImGui::GetStyle().FramePadding.x;
     }
+    auto const plusMinusButtonWidth = scale(22.0f);
 
     if (parameters._readOnly) {
         ImGui::BeginDisabled();
     }
 
+    // Draw input field
     if (!isInfinity) {
-        ImGui::SetNextItemWidth(inputWidth);
-        result |= ImGui::InputInt(("##" + parameters._name).c_str(), &value, 1, 100, ImGuiInputTextFlags_None);
+        ImGui::SetNextItemWidth(inputWidth - 2 * ImGui::GetStyle().FramePadding.x - 2 * plusMinusButtonWidth);
+        //result |= ImGui::InputInt(("##" + parameters._name).c_str(), &value, 1, 100, ImGuiInputTextFlags_None);
+        auto valueAsFloat = toFloat(value);
+        result |= ImGui::InputFloat("", &valueAsFloat, 0, 0, "%.0f");
+        value = toInt(valueAsFloat);
+
     } else {
         std::string text = "infinity";
-        result |= InputText(InputTextParameters().readOnly(true).width(inputWidth).textWidth(0), text);
+        result |= InputText(
+            InputTextParameters().readOnly(true).width(inputWidth - 2 * ImGui::GetStyle().FramePadding.x - 2 * plusMinusButtonWidth).textWidth(0), text);
     }
-    if (parameters._readOnly) {
-        ImGui::EndDisabled();
-    }
-    if (parameters._defaultValue) {
-        ImGui::SameLine();
-        ImGui::BeginDisabled(value == *parameters._defaultValue);
-        if (RevertButton(parameters._name)) {
-            value = *parameters._defaultValue;
-            result = true;
-        }
-        ImGui::EndDisabled();
-    }
+
+    // Draw infinity button if applicable
     if (showInfinity) {
         ImGui::SameLine();
         MoveTickLeft();
@@ -203,6 +201,47 @@ bool AlienGui::InputInt(InputIntParameters const& parameters, int& value, bool* 
         }
         ImGui::EndDisabled();
     }
+    // Draw + and - buttons
+    if (isInfinity) {
+        ImGui::BeginDisabled();
+    }
+    ImGui::SameLine();
+    MoveTickLeft();
+    if (ImGui::Button("-", {plusMinusButtonWidth, 0.0f})) {
+        --value;
+    }
+    if (ImGui::IsItemHovered() && ImGui::IsItemActive()) {
+        if (ImGui::GetIO().MouseDownDuration[0] > 0.5f) {
+            --value;
+        }
+    }
+    ImGui::SameLine();
+    MoveTickLeft();
+    if (ImGui::Button("+", {plusMinusButtonWidth, 0.0f})) {
+        ++value;
+    }
+    if (ImGui::IsItemHovered() && ImGui::IsItemActive()) {
+        if (ImGui::GetIO().MouseDownDuration[0] > 0.5f) {
+            ++value;
+        }
+    }
+    if (isInfinity) {
+        ImGui::EndDisabled();
+    }
+    if (parameters._readOnly) {
+        ImGui::EndDisabled();
+    }
+
+    // Draw revert button
+    if (parameters._defaultValue) {
+        ImGui::SameLine();
+        ImGui::BeginDisabled(value == *parameters._defaultValue);
+        if (RevertButton(parameters._name)) {
+            value = *parameters._defaultValue;
+            result = true;
+        }
+        ImGui::EndDisabled();
+    }
 
     ImGui::SameLine();
     if (enabled) {
@@ -212,6 +251,8 @@ bool AlienGui::InputInt(InputIntParameters const& parameters, int& value, bool* 
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
     }
+
+    ImGui::PopID();
     return result;
 }
 

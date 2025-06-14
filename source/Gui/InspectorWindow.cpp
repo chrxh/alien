@@ -549,10 +549,9 @@ void _InspectorWindow::processConstructorContent(ConstructorDescription& constru
             constructor._autoTriggerInterval = constructorMode;
         }
         if (constructorMode == 1) {
-            AlienGui::InputInt(
+            AlienGui::InputOptionalInt(
                 AlienGui::InputIntParameters().name("Interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip),
                 constructor._autoTriggerInterval);
-            constructor._autoTriggerInterval = std::max(1, constructor._autoTriggerInterval);
         }
         AlienGui::InputInt(
             AlienGui::InputIntParameters()
@@ -660,10 +659,9 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
             sensor._autoTriggerInterval = constructorMode;
         }
         if (constructorMode == 1) {
-            AlienGui::InputInt(
+            AlienGui::InputOptionalInt(
                 AlienGui::InputIntParameters().name("Interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeConstructorIntervalTooltip),
                 sensor._autoTriggerInterval);
-            sensor._autoTriggerInterval = std::max(1, sensor._autoTriggerInterval);
         }
 
         AlienGui::ComboOptionalColor(

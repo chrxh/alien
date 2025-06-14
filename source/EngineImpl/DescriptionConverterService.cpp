@@ -305,7 +305,8 @@ CellDescription DescriptionConverterService::createCellDescription(
     } break;
     case CellType_Constructor: {
         ConstructorDescription constructor;
-        constructor._autoTriggerInterval = cellTO.cellTypeData.constructor.autoTriggerInterval;
+        constructor._autoTriggerInterval =
+            cellTO.cellTypeData.constructor.autoTriggerInterval > 0 ? std::make_optional(cellTO.cellTypeData.constructor.autoTriggerInterval) : std::nullopt;
         constructor._constructionActivationTime = cellTO.cellTypeData.constructor.constructionActivationTime;
         convert(collectionTO, cellTO.cellTypeData.constructor.genomeSize, cellTO.cellTypeData.constructor.genomeDataIndex, constructor._genome);
         constructor._numInheritedGenomeNodes = cellTO.cellTypeData.constructor.numInheritedGenomeNodes;
@@ -322,7 +323,8 @@ CellDescription DescriptionConverterService::createCellDescription(
     } break;
     case CellType_Sensor: {
         SensorDescription sensor;
-        sensor._autoTriggerInterval = cellTO.cellTypeData.sensor.autoTriggerInterval;
+        sensor._autoTriggerInterval =
+            cellTO.cellTypeData.sensor.autoTriggerInterval > 0 ? std::make_optional(cellTO.cellTypeData.sensor.autoTriggerInterval) : std::nullopt;
         sensor._minDensity = cellTO.cellTypeData.sensor.minDensity;
         sensor._minRange = cellTO.cellTypeData.sensor.minRange >= 0 ? std::make_optional(cellTO.cellTypeData.sensor.minRange) : std::nullopt;
         sensor._maxRange = cellTO.cellTypeData.sensor.maxRange >= 0 ? std::make_optional(cellTO.cellTypeData.sensor.maxRange) : std::nullopt;
@@ -811,7 +813,7 @@ void DescriptionConverterService::convertCellToTO(
     case CellType_Constructor: {
         auto const& constructorDesc = std::get<ConstructorDescription>(cellDesc._cellTypeData);
         ConstructorTO& constructorTO = cellTO.cellTypeData.constructor;
-        constructorTO.autoTriggerInterval = constructorDesc._autoTriggerInterval;
+        constructorTO.autoTriggerInterval = static_cast<uint8_t>(constructorDesc._autoTriggerInterval.value_or(0));
         constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
         CHECK(constructorDesc._genome.size() >= Const::GenomeHeaderSize)
         convert(heap, constructorTO.genomeSize, constructorTO.genomeDataIndex, constructorDesc._genome);
@@ -829,7 +831,7 @@ void DescriptionConverterService::convertCellToTO(
     case CellType_Sensor: {
         auto const& sensorDesc = std::get<SensorDescription>(cellDesc._cellTypeData);
         SensorTO& sensorTO = cellTO.cellTypeData.sensor;
-        sensorTO.autoTriggerInterval = sensorDesc._autoTriggerInterval;
+        sensorTO.autoTriggerInterval = static_cast<uint8_t>(sensorDesc._autoTriggerInterval.value_or(0));
         sensorTO.restrictToColor = sensorDesc._restrictToColor.value_or(255);
         sensorTO.restrictToMutants = sensorDesc._restrictToMutants;
         sensorTO.minDensity = sensorDesc._minDensity;

@@ -91,7 +91,7 @@ struct ConstructorDescription
     auto operator<=>(ConstructorDescription const&) const = default;
 
     // Properties
-    MEMBER(ConstructorDescription, int, autoTriggerInterval, 100);  // 0 = manual (triggered by signal), > 0 = auto trigger
+    MEMBER(ConstructorDescription, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering
     MEMBER(ConstructorDescription, int, constructionActivationTime, 100);
 
     // Genome data
@@ -116,7 +116,7 @@ struct SensorDescription
 {
     auto operator<=>(SensorDescription const&) const = default;
 
-    MEMBER(SensorDescription, int, autoTriggerInterval, 100);  // 0 = manual (triggered by signal), > 0 = auto trigger
+    MEMBER(SensorDescription, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering
     MEMBER(SensorDescription, float, minDensity, 0.05f);
     MEMBER(SensorDescription, std::optional<int>, minRange, std::nullopt);
     MEMBER(SensorDescription, std::optional<int>, maxRange, std::nullopt);
