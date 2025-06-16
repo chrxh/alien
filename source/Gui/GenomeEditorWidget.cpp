@@ -59,7 +59,7 @@ void _GenomeEditorWidget::processHeaderData()
         AlienGui::InputText(AlienGui::InputTextParameters().name("Node count").readOnly(true).textWidth(rightColumnWidth), numNodesString);
 
         auto numCells = GenomeDescriptionInfoService::get().getNumberOfResultingCells(_editData->genome);
-        auto numCellsString = numCells != -1 ? std::to_string(numCells) : std::string("infinity");
+        auto numCellsString = numCells != -1 ? std::to_string(numCells) : std::string("Infinity");
         AlienGui::InputText(AlienGui::InputTextParameters().name("Resulting cells").readOnly(true).textWidth(rightColumnWidth), numCellsString);
 
         AlienGui::InputFloat(
@@ -74,11 +74,13 @@ void _GenomeEditorWidget::processGeneList()
         static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-        if (ImGui::BeginTable("Gene list", 6, flags, ImVec2(-1, -1), 0.0f)) {
+        if (ImGui::BeginTable("Gene list", 8, flags, ImVec2(-1, -1), 0.0f)) {
             ImGui::TableSetupColumn("No.", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(30.0f));
             ImGui::TableSetupColumn("Gene type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(80.0f));
-            ImGui::TableSetupColumn("Node count", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
             ImGui::TableSetupColumn("Shape", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
+            ImGui::TableSetupColumn("Attach to host", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
+            ImGui::TableSetupColumn("Concatenations", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
+            ImGui::TableSetupColumn("Node count", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
             ImGui::TableSetupColumn("References", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(120.0f));
             ImGui::TableSetupColumn("Referenced by", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(120.0f));
             ImGui::TableSetupScrollFreeze(0, 1);
@@ -119,22 +121,44 @@ void _GenomeEditorWidget::processGeneList()
                         AlienGui::Text("Auxiliary");
                     }
 
-                    // Column 2: Node count
-                    ImGui::TableNextColumn();
-                    AlienGui::Text(std::to_string(gene._nodes.size()));
-
-                    // Column 3: Shape
+                    // Column 2: Shape
                     ImGui::TableNextColumn();
                     AlienGui::Text(Const::ConstructionShapeStrings.at(gene._shape));
 
-                    // Column 4: References
+                    // Column 3: Branches
+                    ImGui::TableNextColumn();
+                    if (gene._numBranches.has_value()) {
+                        auto const& numBranches = gene._numBranches.value();
+                        CHECK(numBranches >= 1 && numBranches <= 6);
+                        if (numBranches == 1) {
+                            AlienGui::Text("1 branch");
+                        } else {
+                            AlienGui::Text(std::to_string(gene._numBranches.value()) + " branches");
+                        }
+                    } else {
+                        AlienGui::Text("Detach");
+                    }
+
+                    // Column 4: Concatenations
+                    ImGui::TableNextColumn();
+                    if (gene._numConcatenations != std::numeric_limits<int>::max()) {
+                        AlienGui::Text(std::to_string(gene._numConcatenations));
+                    } else {
+                        AlienGui::Text("Infinity");
+                    }
+
+                    // Column 5: Node count
+                    ImGui::TableNextColumn();
+                    AlienGui::Text(std::to_string(gene._nodes.size()));
+
+                    // Column 6: References
                     ImGui::TableNextColumn();
                     auto references = GenomeDescriptionInfoService::get().getReferences(gene);
                     auto referencesStrings = references | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex + 1); });
                     auto referencesString = boost::algorithm::join(std::vector(referencesStrings.begin(), referencesStrings.end()), ", ");
                     AlienGui::Text(referencesString);
 
-                    // Column 5: Referenced by
+                    // Column 7: Referenced by
                     ImGui::TableNextColumn();
                     auto referencedBy = GenomeDescriptionInfoService::get().getReferencedBy(genome, row);
                     if (!referencedBy.empty()) {

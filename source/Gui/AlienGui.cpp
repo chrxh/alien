@@ -180,7 +180,7 @@ bool AlienGui::InputInt(InputIntParameters const& parameters, int& value, bool* 
         value = toInt(valueAsFloat);
 
     } else {
-        std::string text = "infinity";
+        std::string text = "Infinity";
         result |= InputText(
             InputTextParameters().readOnly(true).width(inputWidth - 2 * ImGui::GetStyle().FramePadding.x - 2 * plusMinusButtonWidth).textWidth(0), text);
     }
@@ -779,7 +779,7 @@ void AlienGui::InputColorTransition(InputColorTransitionParameters const& parame
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - width);
     std::string format = "%d";
     if (parameters._infinity && transitionAge == Infinity<int>::value) {
-        format = "infinity";
+        format = "Infinity";
         transitionAge = parameters._max;
     }
     ImGui::SliderInt(
@@ -790,7 +790,7 @@ void AlienGui::InputColorTransition(InputColorTransitionParameters const& parame
         format.c_str(),
         parameters._logarithmic ? ImGuiSliderFlags_Logarithmic : 0);
     if (parameters._infinity && transitionAge == parameters._max) {
-        format = "infinity";
+        format = "Infinity";
         transitionAge = Infinity<int>::value;
     }
     if (parameters._defaultTransitionAge && parameters._defaultTargetColor) {
@@ -2125,7 +2125,7 @@ namespace
     std::string toString(T const& value, std::string const& format, bool allowInfinity = false, bool tryMaintainFormat = false)
     {
         if (allowInfinity && value == Infinity<T>::value) {
-            return "infinity";
+            return "Infinity";
         }
         if (tryMaintainFormat) {
             return format;
