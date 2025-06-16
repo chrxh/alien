@@ -39,7 +39,7 @@ protected:
 TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyGene_onEmptyGenome)
 {
     auto genome = GenomeDescription_New();
-    GenomeDescriptionEditService::get().addEmptyGene(genome, 0);
+    GenomeDescriptionEditService::get().addGene(genome, 0, GeneDescription());
 
     EXPECT_EQ(1, genome._genes.size());
 }
@@ -57,7 +57,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyGene_onNonEmptyGenome_star
             NodeDescription(),
         }),
     });
-    GenomeDescriptionEditService::get().addEmptyGene(genome, 0);
+    GenomeDescriptionEditService::get().addGene(genome, 0, GeneDescription());
 
     EXPECT_EQ(4, genome._genes.size());
     for (int i = 0; i < 4; ++i) {
@@ -78,7 +78,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyGene_onNonEmptyGenome_end)
             NodeDescription(),
         }),
     });
-    GenomeDescriptionEditService::get().addEmptyGene(genome, 2);
+    GenomeDescriptionEditService::get().addGene(genome, 2, GeneDescription());
 
     ASSERT_EQ(4, genome._genes.size());
     for (int i = 0; i < 4; ++i) {
@@ -89,7 +89,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyGene_onNonEmptyGenome_end)
 TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyGene_withReferences)
 {
     auto genome = createGenome_3genes_3_4_5nodes();
-    GenomeDescriptionEditService::get().addEmptyGene(genome, 1);
+    GenomeDescriptionEditService::get().addGene(genome, 1, GeneDescription());
 
     ASSERT_EQ(4, genome._genes.size());
     for (int i = 0; i < 4; ++i) {

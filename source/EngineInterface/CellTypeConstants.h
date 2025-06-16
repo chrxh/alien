@@ -162,6 +162,11 @@ enum DefenderMode_
     DefenderMode_Count
 };
 
+namespace Const
+{
+    std::vector<std::string> const DefenderModeStrings = {"Anti-attacker", "Anti-injector"};
+}
+
 //*************************
 //* Constructor constants *
 //*************************
@@ -257,6 +262,12 @@ enum ReconnectorRestrictToMutants_
     ReconnectorRestrictToMutants_RestrictToMoreComplexMutants,
     ReconnectorRestrictToMutants_Count
 };
+
+namespace Const
+{
+    std::vector<std::string> const ReconnectorRestrictToMutantStrings =
+        {"None", "Same mutants", "Other mutants", "Free cells", "Handcrafted cells", "Less complex mutants", "More complex mutants"};
+}
 
 using CellEvent = uint8_t;
 enum CellEvent_

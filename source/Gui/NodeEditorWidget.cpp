@@ -134,7 +134,7 @@ void _NodeEditorWidget::processNodeAttributes()
             for (auto const& [index, gene] : _editData->genome._genes | boost::adaptors::indexed(0)) {
                 auto text = "No. " + std::to_string(index + 1);
                 if (index == 0) {
-                    text += " (reproduction)";
+                    text += " (principal)";
                 }
                 genes.emplace_back(text);
             }
@@ -232,7 +232,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Max angle deviation").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
                     autoBending._maxAngleDeviation);
-                
+
                 // Front back ratio
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Front back ratio").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
@@ -255,6 +255,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     manualBending._frontBackVelRatio);
 
                 AlienGui::EndIndent();
+
             } else if (mode == MuscleMode_AngleBending) {
                 AlienGui::BeginIndent();
 
@@ -270,8 +271,88 @@ void _NodeEditorWidget::processNodeAttributes()
                     angleBending._frontBackVelRatio);
 
                 AlienGui::EndIndent();
+
+            } else if (mode == MuscleMode_AutoCrawling) {
+                AlienGui::BeginIndent();
+
+                // Max angle deviation
+                auto& autoCrawling = std::get<AutoCrawlingGenomeDescription>(muscle._mode);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Max distance deviation").format("%.2f").step(0.01f).textWidth(rightColumnWidth),
+                    autoCrawling._maxDistanceDeviation);
+
+                // Front back ratio
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Front back ratio").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
+                    autoCrawling._frontBackVelRatio);
+
+                AlienGui::EndIndent();
+
+            } else if (mode == MuscleMode_ManualCrawling) {
+                AlienGui::BeginIndent();
+
+                // Max angle deviation
+                auto& manualCrawling = std::get<ManualCrawlingGenomeDescription>(muscle._mode);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Max distance deviation").format("%.2f").step(0.01f).textWidth(rightColumnWidth),
+                    manualCrawling._maxDistanceDeviation);
+
+                // Front back ratio
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Front back ratio").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
+                    manualCrawling._frontBackVelRatio);
+
+                AlienGui::EndIndent();
+
+            } else if (mode == MuscleMode_DirectMovement) {
             }
 
+            AlienGui::EndIndent();
+
+        } else if (nodeType == CellTypeGenome_Defender) {
+
+            AlienGui::BeginIndent();
+
+            // Defender mode
+            auto& defender = std::get<DefenderGenomeDescription>(node._cellTypeData);
+            AlienGui::Combo(
+                AlienGui::ComboParameters()
+                    .name("Mode")
+                    .values(Const::DefenderModeStrings)
+                    .textWidth(rightColumnWidth),
+                defender._mode);
+
+            AlienGui::EndIndent();
+
+        } else if (nodeType == CellTypeGenome_Reconnector) {
+
+            AlienGui::BeginIndent();
+
+            // Restrict to color
+            auto& reconnector = std::get<ReconnectorGenomeDescription>(node._cellTypeData);
+            AlienGui::ComboOptionalColor(
+                AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth),
+                reconnector._restrictToColor);
+
+            // Restrict to mutants
+            AlienGui::Combo(
+                AlienGui::ComboParameters()
+                    .name("Restrict to mutants")
+                    .values(Const::ReconnectorRestrictToMutantStrings)
+                    .textWidth(rightColumnWidth),
+                reconnector._restrictToMutants);
+
+            AlienGui::EndIndent();
+
+        } else if (nodeType == CellTypeGenome_Detonator) {
+
+            AlienGui::BeginIndent();
+
+            // Countdown
+            auto& detonator = std::get<DetonatorGenomeDescription>(node._cellTypeData);
+            AlienGui::InputInt(
+                AlienGui::InputIntParameters().name("Countdown").textWidth(rightColumnWidth),
+                detonator._countdown);
 
             AlienGui::EndIndent();
         }

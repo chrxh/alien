@@ -97,7 +97,7 @@ void _GeneEditorWidget::processHeaderData()
         AlienGui::ComboOptional(
             AlienGui::ComboParameters()
                 .name("Attach to host")
-                .values({"1 branch", "2 branches", "3 branches", "4 branches", "5 branches"})
+                .values({"1 branch", "2 branches", "3 branches", "4 branches", "5 branches", "6 branches"})
                 .textWidth(rightColumnWidth),
             numBranches);
         if (numBranches.has_value()) {

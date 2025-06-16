@@ -12,7 +12,7 @@ class GenomeDescriptionEditService
     MAKE_SINGLETON(GenomeDescriptionEditService);
 
 public:
-    void addEmptyGene(GenomeDescription_New& genome, int index);    // Adds empty gene after index
+    void addGene(GenomeDescription_New& genome, int index, GeneDescription const& newGene);    // Adds gene after index
     void removeGene(GenomeDescription_New& genome, int index);
     void swapGenes(GenomeDescription_New& genome, int index);   // Swaps gene at index with gene at index + 1
 

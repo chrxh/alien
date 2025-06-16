@@ -1,9 +1,9 @@
 #include "GenomeDescriptionEditService.h"
 
-void GenomeDescriptionEditService::addEmptyGene(GenomeDescription_New& genome, int index)
+void GenomeDescriptionEditService::addGene(GenomeDescription_New& genome, int index, GeneDescription const& newGene)
 {
     if (genome._genes.empty()) {
-        genome._genes.emplace_back(GeneDescription());
+        genome._genes.emplace_back(newGene);
         return;
     }
 
@@ -19,7 +19,7 @@ void GenomeDescriptionEditService::addEmptyGene(GenomeDescription_New& genome, i
         }
     }
 
-    genome._genes.insert(genome._genes.begin() + index + 1, GeneDescription());
+    genome._genes.insert(genome._genes.begin() + index + 1, newGene);
 }
 
 void GenomeDescriptionEditService::removeGene(GenomeDescription_New& genome, int index)

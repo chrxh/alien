@@ -197,7 +197,7 @@ void _GenomeEditorWidget::onAddGene()
 {
     auto& genome = _editData->genome;
     if (genome._genes.empty()) {
-        GenomeDescriptionEditService::get().addEmptyGene(genome, 0);
+        GenomeDescriptionEditService::get().addGene(genome, 0, GeneDescription().numBranches(std::nullopt));
         _editData->selectedGeneIndex = 0;
     } else {
         int insertIndex;
@@ -207,7 +207,7 @@ void _GenomeEditorWidget::onAddGene()
             insertIndex = toInt(genome._genes.size()) - 1;
         }
 
-        GenomeDescriptionEditService::get().addEmptyGene(genome, insertIndex);
+        GenomeDescriptionEditService::get().addGene(genome, insertIndex, GeneDescription().numBranches(1));
 
         // Adapt gene selection
         _editData->selectedGeneIndex = insertIndex + 1;
