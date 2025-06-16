@@ -180,21 +180,18 @@ void _GeneEditorWidget::processNodeList()
 
                     // Column 3: Color
                     ImGui::TableNextColumn();
-                    AlienGui::ColorField(Const::IndividualCellColors[node._color], 40.0f, ImGui::GetTextLineHeight());
-                    if (ImGui::IsItemClicked()) {
-                        _editData->setSelectedNodeIndex(row);
+                    if (ImGui::BeginChild("color", {0, ImGui::GetTextLineHeight()}, 0, ImGuiWindowFlags_NoInputs)) {
+                        AlienGui::ColorField(Const::IndividualCellColors[node._color], 40.0f, ImGui::GetTextLineHeight());
                     }
+                    ImGui::EndChild();
 
                     // Column 4: Signal restriction
                     ImGui::TableNextColumn();
                     if (node._signalRoutingRestriction._active) {
-                        if (ImGui::BeginChild("signal", {0, scale(17.0f)})) {
+                        if (ImGui::BeginChild("signal", {0, scale(17.0f)}, 0, ImGuiWindowFlags_NoInputs)) {
                             AlienGui::Text(
                                 StringHelper::format(node._signalRoutingRestriction._baseAngle, 1) + " deg, "
                                 + StringHelper::format(node._signalRoutingRestriction._openingAngle, 1) + " deg");
-                            if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                                _editData->setSelectedNodeIndex(row);
-                            }
                         }
                         ImGui::EndChild();
                     }
