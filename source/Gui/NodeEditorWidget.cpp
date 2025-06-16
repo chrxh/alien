@@ -109,27 +109,65 @@ void _NodeEditorWidget::processNodeAttributes()
     if (ImGui::BeginChild("NodeData", ImVec2(0, -_layoutData->neuralNetEditorHeight), 0, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
         auto& gene = _editData->getSelectedGeneRef();
         auto& node = _editData->getSelectedNodeRef();
-        auto nodeType = node.getCellType();
+
+        // Angle
+        auto nodeIndex = _editData->getSelectedNodeIndex();
+        if (AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Angle").textWidth(rightColumnWidth).format("%.1f"), node._referenceAngle)) {
+            if (nodeIndex.value() != 0 && nodeIndex != gene._nodes.size() - 1) {
+                gene._shape = ConstructionShape_Custom;
+            }
+        }
+
+        // Previous nodes connections
+        if (nodeIndex != 0) {
+            auto numRequiredAdditionalConnections = node._numRequiredAdditionalConnections + 1;
+            if (AlienGui::InputInt(
+                    AlienGui::InputIntParameters().name("Prev nodes connections").textWidth(rightColumnWidth), numRequiredAdditionalConnections)) {
+                gene._shape = ConstructionShape_Custom;
+            }
+            node._numRequiredAdditionalConnections = numRequiredAdditionalConnections - 1;
+        }
+
+        AlienGui::Checkbox(
+            AlienGui::CheckboxParameters().name("Signal routing restriction").textWidth(rightColumnWidth), node._signalRoutingRestriction._active);
+
+        AlienGui::BeginIndent();
+
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters()
+                .name("Signal base angle")
+                .format("%.1f")
+                .step(0.5f)
+                .readOnly(!node._signalRoutingRestriction._active)
+                .textWidth(rightColumnWidth),
+            node._signalRoutingRestriction._baseAngle);
+
+        AlienGui::InputFloat(
+            AlienGui::InputFloatParameters()
+                .name("Signal opening angle")
+                .format("%.1f")
+                .step(0.5f)
+                .readOnly(!node._signalRoutingRestriction._active)
+                .textWidth(rightColumnWidth),
+            node._signalRoutingRestriction._openingAngle);
+
+        AlienGui::EndIndent();
+
+        AlienGui::ComboColor(AlienGui::ComboColorParameters().name("Color").textWidth(rightColumnWidth), node._color);
 
         // Type
+        auto nodeType = node.getCellType();
         if (AlienGui::Combo(AlienGui::ComboParameters().name("Type").values(Const::CellTypeGenomeStrings).textWidth(rightColumnWidth), nodeType)) {
             node._cellTypeData = createCellTypeGenomeDescription(nodeType);
         }
-
         if (nodeType == CellTypeGenome_Base) {
-
         } else if (nodeType == CellTypeGenome_Depot) {
-
         } else if (nodeType == CellTypeGenome_Constructor) {
 
             AlienGui::BeginIndent();
 
-            // Auto activation interval
-            auto& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
-            AlienGui::InputOptionalInt(
-                AlienGui::InputIntParameters().name("Auto activation interval").textWidth(rightColumnWidth), constructor._autoTriggerInterval);
-
             // Gene index
+            auto& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
             std::vector<std::string> genes;
             for (auto const& [index, gene] : _editData->genome._genes | boost::adaptors::indexed(0)) {
                 auto text = "No. " + std::to_string(index + 1);
@@ -139,6 +177,10 @@ void _NodeEditorWidget::processNodeAttributes()
                 genes.emplace_back(text);
             }
             AlienGui::Combo(AlienGui::ComboParameters().name("Gene").values(genes).textWidth(rightColumnWidth), constructor._constructGeneIndex);
+
+            // Auto activation interval
+            AlienGui::InputOptionalInt(
+                AlienGui::InputIntParameters().name("Auto activation interval").textWidth(rightColumnWidth), constructor._autoTriggerInterval);
 
             // Construction activation time
             AlienGui::InputInt(
@@ -315,12 +357,7 @@ void _NodeEditorWidget::processNodeAttributes()
 
             // Defender mode
             auto& defender = std::get<DefenderGenomeDescription>(node._cellTypeData);
-            AlienGui::Combo(
-                AlienGui::ComboParameters()
-                    .name("Mode")
-                    .values(Const::DefenderModeStrings)
-                    .textWidth(rightColumnWidth),
-                defender._mode);
+            AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::DefenderModeStrings).textWidth(rightColumnWidth), defender._mode);
 
             AlienGui::EndIndent();
 
@@ -330,16 +367,11 @@ void _NodeEditorWidget::processNodeAttributes()
 
             // Restrict to color
             auto& reconnector = std::get<ReconnectorGenomeDescription>(node._cellTypeData);
-            AlienGui::ComboOptionalColor(
-                AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth),
-                reconnector._restrictToColor);
+            AlienGui::ComboOptionalColor(AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), reconnector._restrictToColor);
 
             // Restrict to mutants
             AlienGui::Combo(
-                AlienGui::ComboParameters()
-                    .name("Restrict to mutants")
-                    .values(Const::ReconnectorRestrictToMutantStrings)
-                    .textWidth(rightColumnWidth),
+                AlienGui::ComboParameters().name("Restrict to mutants").values(Const::ReconnectorRestrictToMutantStrings).textWidth(rightColumnWidth),
                 reconnector._restrictToMutants);
 
             AlienGui::EndIndent();
@@ -350,57 +382,10 @@ void _NodeEditorWidget::processNodeAttributes()
 
             // Countdown
             auto& detonator = std::get<DetonatorGenomeDescription>(node._cellTypeData);
-            AlienGui::InputInt(
-                AlienGui::InputIntParameters().name("Countdown").textWidth(rightColumnWidth),
-                detonator._countdown);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Countdown").textWidth(rightColumnWidth), detonator._countdown);
 
             AlienGui::EndIndent();
         }
-
-        // Angle
-        auto nodeIndex = _editData->getSelectedNodeIndex();
-        if (AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Angle").textWidth(rightColumnWidth).format("%.1f"), node._referenceAngle)) {
-            if (nodeIndex.value() != 0 && nodeIndex != gene._nodes.size() - 1) {
-                gene._shape = ConstructionShape_Custom;
-            }
-        }
-
-        // Previous nodes connections
-        if (nodeIndex != 0) {
-            auto numRequiredAdditionalConnections = node._numRequiredAdditionalConnections + 1;
-            if (AlienGui::InputInt(
-                    AlienGui::InputIntParameters().name("Prev nodes connections").textWidth(rightColumnWidth), numRequiredAdditionalConnections)) {
-                gene._shape = ConstructionShape_Custom;
-            }
-            node._numRequiredAdditionalConnections = numRequiredAdditionalConnections - 1;
-        }
-
-        AlienGui::Checkbox(
-            AlienGui::CheckboxParameters().name("Signal routing restriction").textWidth(rightColumnWidth), node._signalRoutingRestriction._active);
-
-        AlienGui::BeginIndent();
-
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters()
-                .name("Signal base angle")
-                .format("%.1f")
-                .step(0.5f)
-                .readOnly(!node._signalRoutingRestriction._active)
-                .textWidth(rightColumnWidth),
-            node._signalRoutingRestriction._baseAngle);
-
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters()
-                .name("Signal opening angle")
-                .format("%.1f")
-                .step(0.5f)
-                .readOnly(!node._signalRoutingRestriction._active)
-                .textWidth(rightColumnWidth),
-            node._signalRoutingRestriction._openingAngle);
-
-        AlienGui::EndIndent();
-
-        AlienGui::ComboColor(AlienGui::ComboColorParameters().name("Color").textWidth(rightColumnWidth), node._color);
     }
     ImGui::EndChild();
 }

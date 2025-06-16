@@ -125,10 +125,12 @@ void _GeneEditorWidget::processNodeList()
         static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-        if (ImGui::BeginTable("Node list", 3, flags, ImVec2(-1, -1), 0.0f)) {
+        if (ImGui::BeginTable("Node list", 5, flags, ImVec2(-1, -1), 0.0f)) {
             ImGui::TableSetupColumn("No.", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(30.0f));
-            ImGui::TableSetupColumn("Node type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(80.0f));
+            ImGui::TableSetupColumn("Node type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(135.0f));
             ImGui::TableSetupColumn("Angle", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(40.0f));
+            ImGui::TableSetupColumn("Color", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(40.0f));
+            ImGui::TableSetupColumn("Signal restriction", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(120.0f));
             ImGui::TableSetupScrollFreeze(0, 1);
             ImGui::TableHeadersRow();
             ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
@@ -162,11 +164,41 @@ void _GeneEditorWidget::processNodeList()
 
                     // Column 1: Node type
                     ImGui::TableNextColumn();
-                    AlienGui::Text(Const::CellTypeGenomeStrings.at(node.getCellType()));
+                    {
+                        auto nodeType = node.getCellType();
+                        auto text = Const::CellTypeGenomeStrings.at(nodeType);
+                        if (nodeType == CellTypeGenome_Constructor) {
+                            auto const& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
+                            text += " (Gene " + std::to_string(constructor._constructGeneIndex + 1) + ")";
+                        }
+                        AlienGui::Text(text);
+                    }
 
                     // Column 2: Angle
                     ImGui::TableNextColumn();
                     AlienGui::Text(StringHelper::format(node._referenceAngle, 1));
+
+                    // Column 3: Color
+                    ImGui::TableNextColumn();
+                    AlienGui::ColorField(Const::IndividualCellColors[node._color], 40.0f, ImGui::GetTextLineHeight());
+                    if (ImGui::IsItemClicked()) {
+                        _editData->setSelectedNodeIndex(row);
+                    }
+
+                    // Column 4: Signal restriction
+                    ImGui::TableNextColumn();
+                    if (node._signalRoutingRestriction._active) {
+                        if (ImGui::BeginChild("signal", {0, scale(17.0f)})) {
+                            AlienGui::Text(
+                                StringHelper::format(node._signalRoutingRestriction._baseAngle, 1) + " deg, "
+                                + StringHelper::format(node._signalRoutingRestriction._openingAngle, 1) + " deg");
+                            if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+                                _editData->setSelectedNodeIndex(row);
+                            }
+                        }
+                        ImGui::EndChild();
+                    }
+
                     ImGui::PopID();
                 }
             }
