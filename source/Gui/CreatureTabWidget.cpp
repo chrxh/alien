@@ -2,6 +2,8 @@
 
 #include <imgui.h>
 
+#include "Base/StringHelper.h"
+
 #include "EngineInterface/GenomeDescriptionValidationService.h"
 
 #include "AlienGui.h"
@@ -15,6 +17,11 @@
 CreatureTabWidget _CreatureTabWidget::createDraftCreatureTab(GenomeDescription_New const& genome, CreatureTabLayoutData const& layoutData)
 {
     return CreatureTabWidget(new _CreatureTabWidget(genome, layoutData));
+}
+
+CreatureTabWidget _CreatureTabWidget::createRealCreatureTab(GenomeDescription_New const& genome, uint64_t creatureId)
+{
+    return CreatureTabWidget(new _CreatureTabWidget(genome, creatureId));
 }
 
 void _CreatureTabWidget::process()
@@ -43,12 +50,23 @@ void _CreatureTabWidget::process()
     GenomeDescriptionValidationService::get().validateAndCorrect(_editData->genome);
 }
 
+bool _CreatureTabWidget::isDraft() const
+{
+    return !_creatureId.has_value();
+}
+
+uint64_t _CreatureTabWidget::getCreatureId() const
+{
+    return _creatureId.value();
+}
+
 std::string _CreatureTabWidget::getName() const
 {
     if (!_creatureId.has_value()) {
         return "Draft " + std::to_string(_id);
+    } else {
+        return "Creature " + StringHelper::formatInHex(_creatureId.value());
     }
-    return "";
 }
 
 _CreatureTabWidget::_CreatureTabWidget(GenomeDescription_New const& genome, CreatureTabLayoutData const& layoutData)
@@ -66,6 +84,11 @@ _CreatureTabWidget::_CreatureTabWidget(GenomeDescription_New const& genome, Crea
     _nodeEditorWidget = _NodeEditorWidget::create(_editData, _layoutData);
 }
 
+_CreatureTabWidget::_CreatureTabWidget(GenomeDescription_New const& genome, uint64_t creatureId)
+    : _CreatureTabWidget(genome, nullptr)
+{
+    _creatureId = creatureId;
+}
 
 void _CreatureTabWidget::processEditors()
 {

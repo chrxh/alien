@@ -9,13 +9,17 @@ class _CreatureTabWidget
 {
 public:
     static CreatureTabWidget createDraftCreatureTab(GenomeDescription_New const& genome, CreatureTabLayoutData const& layoutData = nullptr);
+    static CreatureTabWidget createRealCreatureTab(GenomeDescription_New const& genome, uint64_t creatureId);
 
     void process();
 
+    bool isDraft() const;
+    uint64_t getCreatureId() const;
     std::string getName() const;
 
 private:
     _CreatureTabWidget(GenomeDescription_New const& genome, CreatureTabLayoutData const& layoutData);
+    _CreatureTabWidget(GenomeDescription_New const& genome, uint64_t creatureId);
 
     void processEditors();
     void processPreviews();

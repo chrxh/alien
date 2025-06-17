@@ -97,6 +97,13 @@ std::string StringHelper::format(std::chrono::system_clock::time_point const& ti
     return ss.str();
 }
 
+std::string StringHelper::formatInHex(uint64_t value)
+{
+    std::stringstream ss;
+    ss << "0x" << std::hex << std::uppercase << value;
+    return ss.str();
+}
+
 void StringHelper::copy(char* target, int maxSize, std::string const& source)
 {
     auto sourceSize = source.size();

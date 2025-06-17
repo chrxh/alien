@@ -34,7 +34,12 @@ void CreatureEditorWindow::initIntern(SimulationFacade simulationFacade)
             NodeDescription(),
         }),
     });
-    scheduleAddTab(genome);
+    //scheduleAddTab(genome);
+    _tabs.emplace_back(_CreatureTabWidget::createDraftCreatureTab(genome));
+    _tabs.emplace_back(_CreatureTabWidget::createRealCreatureTab(GenomeDescription_New(), 353));
+    _tabs.emplace_back(_CreatureTabWidget::createRealCreatureTab(GenomeDescription_New(), 12353));
+    _tabs.emplace_back(_CreatureTabWidget::createRealCreatureTab(GenomeDescription_New(), 3453));
+    _tabs.emplace_back(_CreatureTabWidget::createRealCreatureTab(GenomeDescription_New(), 355573));
 }
 
 void CreatureEditorWindow::shutdownIntern()
@@ -74,7 +79,7 @@ void CreatureEditorWindow::processToolbar()
 
 void CreatureEditorWindow::processTabWidget()
 {
-    if (ImGui::BeginTabBar("##", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown)) {
+    if (ImGui::BeginTabBar("##", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown | ImGuiTabBarFlags_Reorderable)) {
 
         if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
             scheduleAddTab(GenomeDescription_New());
@@ -92,11 +97,15 @@ void CreatureEditorWindow::processTabWidget()
                 openPtr = &open;
             }
             int flags = ImGuiTabItemFlags_None;
+
+            pushStyleColorForTab(creatureTab);
             if (ImGui::BeginTabItem(creatureTab->getName().c_str(), openPtr, flags)) {
                 _selectedTabIndex = toInt(index);
                 creatureTab->process();
                 ImGui::EndTabItem();
             }
+            ImGui::PopStyleColor(3);
+
             if (openPtr && *openPtr == false) {
                 tabToDelete = toInt(index);
             }
@@ -120,7 +129,31 @@ void CreatureEditorWindow::processTabWidget()
     }
 }
 
-void CreatureEditorWindow::scheduleAddTab(GenomeDescription_New const& genome)
+void CreatureEditorWindow::scheduleAddTab(GenomeDescription_New const& genome, std::optional<uint64_t> const& creatureId)
 {
-    _tabToAdd = _CreatureTabWidget::createDraftCreatureTab(genome);
+    if (creatureId.has_value()) {
+        _tabToAdd = _CreatureTabWidget::createRealCreatureTab(genome, creatureId.value());
+    } else {
+        _tabToAdd = _CreatureTabWidget::createDraftCreatureTab(genome);
+    }
+}
+
+void CreatureEditorWindow::pushStyleColorForTab(CreatureTabWidget const& creatureTab)
+{
+    if (creatureTab->isDraft()) {
+
+        // Use default colors
+        auto const& style = ImGui::GetStyle();
+        ImGui::PushStyleColor(ImGuiCol_Tab, style.Colors[ImGuiCol_Tab]);
+        ImGui::PushStyleColor(ImGuiCol_TabActive, style.Colors[ImGuiCol_TabActive]);
+        ImGui::PushStyleColor(ImGuiCol_TabHovered, style.Colors[ImGuiCol_TabHovered]);
+    } else {
+        // Use creature ID to create a unique color
+        auto creatureId = creatureTab->getCreatureId();
+        auto h  = toFloat(creatureId % 360) / 360.0f;
+        auto s = (toFloat(creatureId % 100) / 100.0f) * 0.4f;
+        ImGui::PushStyleColor(ImGuiCol_Tab, ImColor::HSV(h, s, 0.35f).Value);
+        ImGui::PushStyleColor(ImGuiCol_TabActive, ImColor::HSV(h, s, 0.7f).Value);
+        ImGui::PushStyleColor(ImGuiCol_TabHovered, ImColor::HSV(h, s, 0.8f).Value);
+    }
 }

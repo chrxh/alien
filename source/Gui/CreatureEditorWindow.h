@@ -24,7 +24,10 @@ private:
     void processToolbar();
     void processTabWidget();
 
-    void scheduleAddTab(GenomeDescription_New const& genome);
+    void scheduleAddTab(GenomeDescription_New const& genome, std::optional<uint64_t> const& creatureId = std::nullopt);
+
+    void pushStyleColorForTab(CreatureTabWidget const& creatureTab);
+
 
     SimulationFacade _simulationFacade;
 
