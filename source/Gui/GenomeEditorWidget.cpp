@@ -309,7 +309,7 @@ void _GenomeEditorWidget::removeGeneIntern()
     for (auto const& [index, selectedNode] : _editData->selectedNodeByGeneIndex) {
         if (index < removeIndex) {
             newSelectedNodeByGeneIndex.emplace(index, selectedNode);
-        } else {
+        } else if (index > removeIndex) {
             newSelectedNodeByGeneIndex.emplace(index - 1, selectedNode);
         }
     }

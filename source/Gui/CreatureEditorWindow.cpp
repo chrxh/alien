@@ -34,12 +34,11 @@ void CreatureEditorWindow::initIntern(SimulationFacade simulationFacade)
             NodeDescription(),
         }),
     });
-    //scheduleAddTab(genome);
+
     _tabs.emplace_back(_CreatureTabWidget::createDraftCreatureTab(genome));
-    _tabs.emplace_back(_CreatureTabWidget::createRealCreatureTab(GenomeDescription_New(), 353));
-    _tabs.emplace_back(_CreatureTabWidget::createRealCreatureTab(GenomeDescription_New(), 12353));
-    _tabs.emplace_back(_CreatureTabWidget::createRealCreatureTab(GenomeDescription_New(), 3453));
-    _tabs.emplace_back(_CreatureTabWidget::createRealCreatureTab(GenomeDescription_New(), 355573));
+    for (int i = 0; i < 10; ++i) {
+        _tabs.emplace_back(_CreatureTabWidget::createRealCreatureTab(GenomeDescription_New(), rand()));
+    }
 }
 
 void CreatureEditorWindow::shutdownIntern()
@@ -150,8 +149,8 @@ void CreatureEditorWindow::pushStyleColorForTab(CreatureTabWidget const& creatur
     } else {
         // Use creature ID to create a unique color
         auto creatureId = creatureTab->getCreatureId();
-        auto h  = toFloat(creatureId % 360) / 360.0f;
-        auto s = (toFloat(creatureId % 100) / 100.0f) * 0.4f;
+        auto h  = 0.0f + toFloat(creatureId % 360) / 360.0f * 0.5f;
+        auto s = 0.4f + toFloat(creatureId % 100) / 100.0f * 0.4f;
         ImGui::PushStyleColor(ImGuiCol_Tab, ImColor::HSV(h, s, 0.35f).Value);
         ImGui::PushStyleColor(ImGuiCol_TabActive, ImColor::HSV(h, s, 0.7f).Value);
         ImGui::PushStyleColor(ImGuiCol_TabHovered, ImColor::HSV(h, s, 0.8f).Value);
