@@ -1,4 +1,5 @@
 #include "CreatureTabWidget.h"
+#include "CreatureTabWidget.h"
 
 #include <imgui.h>
 
@@ -19,7 +20,7 @@ CreatureTabWidget _CreatureTabWidget::createDraftCreatureTab(GenomeDescription_N
     return CreatureTabWidget(new _CreatureTabWidget(genome, layoutData));
 }
 
-CreatureTabWidget _CreatureTabWidget::createRealCreatureTab(GenomeDescription_New const& genome, uint64_t creatureId)
+CreatureTabWidget _CreatureTabWidget::createPinnedCreatureTab(GenomeDescription_New const& genome, uint64_t creatureId)
 {
     return CreatureTabWidget(new _CreatureTabWidget(genome, creatureId));
 }
@@ -52,20 +53,29 @@ void _CreatureTabWidget::process()
 
 bool _CreatureTabWidget::isDraft() const
 {
-    return !_creatureId.has_value();
+    return !_pinnedCreatureData.has_value();
 }
 
 uint64_t _CreatureTabWidget::getCreatureId() const
 {
-    return _creatureId.value();
+    return _pinnedCreatureData->creatureId;
+}
+
+int _CreatureTabWidget::getTabId() const
+{
+    return _id;
 }
 
 std::string _CreatureTabWidget::getName() const
 {
-    if (!_creatureId.has_value()) {
+    if (isDraft()) {
         return "Draft " + std::to_string(_id);
     } else {
-        return "Creature " + StringHelper::formatInHex(_creatureId.value());
+        auto result = "Creature " + StringHelper::formatInHex(_pinnedCreatureData->creatureId);
+        if (_pinnedCreatureData->origGenome != _editData->genome) {
+            result = "* " + result;
+        }
+        return result;
     }
 }
 
@@ -87,7 +97,7 @@ _CreatureTabWidget::_CreatureTabWidget(GenomeDescription_New const& genome, Crea
 _CreatureTabWidget::_CreatureTabWidget(GenomeDescription_New const& genome, uint64_t creatureId)
     : _CreatureTabWidget(genome, nullptr)
 {
-    _creatureId = creatureId;
+    _pinnedCreatureData = PinnedCreatureData{.creatureId = creatureId, .origGenome = genome};
 }
 
 void _CreatureTabWidget::processEditors()

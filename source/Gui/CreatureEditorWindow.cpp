@@ -37,7 +37,7 @@ void CreatureEditorWindow::initIntern(SimulationFacade simulationFacade)
 
     _tabs.emplace_back(_CreatureTabWidget::createDraftCreatureTab(genome));
     for (int i = 0; i < 10; ++i) {
-        _tabs.emplace_back(_CreatureTabWidget::createRealCreatureTab(GenomeDescription_New(), rand()));
+        _tabs.emplace_back(_CreatureTabWidget::createPinnedCreatureTab(GenomeDescription_New(), rand()));
     }
 }
 
@@ -98,7 +98,7 @@ void CreatureEditorWindow::processTabWidget()
             int flags = ImGuiTabItemFlags_None;
 
             pushStyleColorForTab(creatureTab);
-            if (ImGui::BeginTabItem(creatureTab->getName().c_str(), openPtr, flags)) {
+            if (ImGui::BeginTabItem((creatureTab->getName() + "###" + std::to_string(creatureTab->getTabId())).c_str(), openPtr, flags)) {
                 _selectedTabIndex = toInt(index);
                 creatureTab->process();
                 ImGui::EndTabItem();
@@ -131,7 +131,7 @@ void CreatureEditorWindow::processTabWidget()
 void CreatureEditorWindow::scheduleAddTab(GenomeDescription_New const& genome, std::optional<uint64_t> const& creatureId)
 {
     if (creatureId.has_value()) {
-        _tabToAdd = _CreatureTabWidget::createRealCreatureTab(genome, creatureId.value());
+        _tabToAdd = _CreatureTabWidget::createPinnedCreatureTab(genome, creatureId.value());
     } else {
         _tabToAdd = _CreatureTabWidget::createDraftCreatureTab(genome);
     }
@@ -148,11 +148,11 @@ void CreatureEditorWindow::pushStyleColorForTab(CreatureTabWidget const& creatur
         ImGui::PushStyleColor(ImGuiCol_TabHovered, style.Colors[ImGuiCol_TabHovered]);
     } else {
         // Use creature ID to create a unique color
-        auto creatureId = creatureTab->getCreatureId();
-        auto h  = 0.0f + toFloat(creatureId % 360) / 360.0f * 0.5f;
-        auto s = 0.4f + toFloat(creatureId % 100) / 100.0f * 0.4f;
+        auto creatureId = creatureTab->getTabId();
+        auto h  = 0.1f + toFloat(creatureId % 20) / 20.0f * 0.5f;
+        auto s = 0.4f + toFloat(creatureId % 10) / 10.0f * 0.4f;
         ImGui::PushStyleColor(ImGuiCol_Tab, ImColor::HSV(h, s, 0.35f).Value);
-        ImGui::PushStyleColor(ImGuiCol_TabActive, ImColor::HSV(h, s, 0.7f).Value);
-        ImGui::PushStyleColor(ImGuiCol_TabHovered, ImColor::HSV(h, s, 0.8f).Value);
+        ImGui::PushStyleColor(ImGuiCol_TabActive, ImColor::HSV(h, s, 0.65f).Value);
+        ImGui::PushStyleColor(ImGuiCol_TabHovered, ImColor::HSV(h, s, 0.75f).Value);
     }
 }
