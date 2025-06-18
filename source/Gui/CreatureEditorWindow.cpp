@@ -152,7 +152,7 @@ void CreatureEditorWindow::pushStyleColorForTab(CreatureTabWidget const& creatur
         auto h  = 0.1f + toFloat(creatureId % 20) / 20.0f * 0.5f;
         auto s = 0.4f + toFloat(creatureId % 10) / 10.0f * 0.4f;
         ImGui::PushStyleColor(ImGuiCol_Tab, ImColor::HSV(h, s, 0.35f).Value);
-        ImGui::PushStyleColor(ImGuiCol_TabActive, ImColor::HSV(h, s, 0.65f).Value);
-        ImGui::PushStyleColor(ImGuiCol_TabHovered, ImColor::HSV(h, s, 0.75f).Value);
+        ImGui::PushStyleColor(ImGuiCol_TabActive, ImColor::HSV(h, s, 0.62f).Value);
+        ImGui::PushStyleColor(ImGuiCol_TabHovered, ImColor::HSV(h, s, 0.7f).Value);
     }
 }
