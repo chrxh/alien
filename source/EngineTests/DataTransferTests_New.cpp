@@ -466,3 +466,30 @@ TEST_F(DataTransferTests_New, createCreatureIds_sameIdsOnDescription)
 
     EXPECT_EQ(2, ids.size());
 }
+
+TEST_F(DataTransferTests_New, changeGenome)
+{
+    auto data = CollectionDescription().addCreature(GenomeDescription_New(), {CellDescription()});
+    auto creatureId = data._cells.at(0)._creatureId;
+
+    _simulationFacade->setSimulationData(data);
+
+    auto newGenome = GenomeDescription_New().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})});
+    _simulationFacade->changeGenome(creatureId, newGenome);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(1, actualData._cells.size());
+    ASSERT_EQ(1, actualData._genomes.size());
+
+    auto cell = actualData._cells.front();
+    EXPECT_EQ(creatureId, cell._creatureId);
+
+    auto genome = actualData._genomes.front();
+    EXPECT_EQ(cell._genomeId, genome._id);
+
+    ASSERT_EQ(1, genome._genes.size());
+
+    auto gene = genome._genes.front();
+    EXPECT_EQ(2, gene._nodes.size());
+}

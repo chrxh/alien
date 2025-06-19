@@ -55,7 +55,7 @@ __global__ void cudaAddGenome(SimulationData data, CollectionTO dataTO, Genome**
 {
     ObjectFactory factory;
     factory.init(&data);
-    factory.createGenomeFromTO(dataTO, 0);
+    *newGenome = factory.createGenomeFromTO(dataTO, 0);
 }
 
 __global__ void cudaSetGenome(SimulationData data, uint64_t creatureId, Genome** newGenome)

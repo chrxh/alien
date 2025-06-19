@@ -17,7 +17,7 @@ class ObjectFactory
 public:
     __inline__ __device__ void init(SimulationData* data);
     __inline__ __device__ Particle* createParticleFromTO(ParticleTO const& particleTO);
-    __inline__ __device__ void createGenomeFromTO(CollectionTO const& collectionTO, int genomeIndex);
+    __inline__ __device__ Genome* createGenomeFromTO(CollectionTO const& collectionTO, int genomeIndex);
     __inline__ __device__ Cell* createCellFromTO(CollectionTO const& collectionTO, int cellIndex, Cell* cellArray);
     __inline__ __device__ void changeCellFromTO(CollectionTO const& collectionTO, CellTO const& cellTO, Cell* cell);
     __inline__ __device__ void changeParticleFromTO(ParticleTO const& particleTO, Particle* particle);
@@ -62,7 +62,7 @@ __inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleTO c
     return particle;
 }
 
-__inline__ __device__ void ObjectFactory::createGenomeFromTO(CollectionTO const& collectionTO, int genomeIndex)
+__inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(CollectionTO const& collectionTO, int genomeIndex)
 {
     auto& genomeTO = collectionTO.genomes[genomeIndex];
     auto genome = _data->objects.heap.getTypedSubArray<Genome>(1);
@@ -173,6 +173,7 @@ __inline__ __device__ void ObjectFactory::createGenomeFromTO(CollectionTO const&
             }
         }
     }
+    return genome;
 }
 
 __inline__ __device__ Cell* ObjectFactory::createCellFromTO(CollectionTO const& collectionTO, int cellIndex, Cell* cellArray)
