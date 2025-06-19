@@ -21,6 +21,7 @@ public:
     CollectionTO convertDescriptionToTO(CollectionDescription const& description) const;
     CollectionTO convertDescriptionToTO(CellDescription const& cell) const;
     CollectionTO convertDescriptionToTO(ParticleDescription const& particle) const;
+    CollectionTO convertDescriptionToTO(GenomeDescription_New const& genome) const;
 
 private:
     DescriptionConverterService();

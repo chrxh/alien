@@ -4,8 +4,8 @@
 
 __global__ void cudaColorSelectedCells(SimulationData data, unsigned char color, bool includeClusters)
 {
-    auto const cellBlock = calcAllThreadsPartition(data.objects.cells.getNumEntries());
-    for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+    auto const cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
         if ((0 != cell->selected && includeClusters) || (1 == cell->selected && !includeClusters)) {
             cell->color = color;
@@ -47,6 +47,24 @@ __global__ void cudaChangeParticle(SimulationData data, CollectionTO changeDataT
             ObjectFactory entityFactory;
             entityFactory.init(&data);
             entityFactory.changeParticleFromTO(particleTO, particle);
+        }
+    }
+}
+
+__global__ void cudaAddGenome(SimulationData data, CollectionTO dataTO, Genome** newGenome)
+{
+    ObjectFactory factory;
+    factory.init(&data);
+    factory.createGenomeFromTO(dataTO, 0);
+}
+
+__global__ void cudaSetGenome(SimulationData data, uint64_t creatureId, Genome** newGenome)
+{
+    auto const partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto const& cell = data.objects.cells.at(index);
+        if (cell->creatureId == creatureId) {
+            cell->genome = *newGenome;
         }
     }
 }

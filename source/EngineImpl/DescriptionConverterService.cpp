@@ -212,6 +212,21 @@ CollectionTO DescriptionConverterService::convertDescriptionToTO(ParticleDescrip
     return provideDataTO({}, {}, {}, {}, particleTOs, heap);
 }
 
+CollectionTO DescriptionConverterService::convertDescriptionToTO(GenomeDescription_New const& genome) const
+{
+    std::vector<GenomeTO> genomeTOs;
+    std::vector<GeneTO> geneTOs;
+    std::vector<NodeTO> nodeTOs;
+    std::vector<CellTO> cellTOs;
+    std::vector<ParticleTO> particleTOs;
+    std::vector<uint8_t> heap;
+
+    std::unordered_map<uint64_t, uint64_t> genomeTOIndexById;
+    convertGenomeToTO(genomeTOs, geneTOs, nodeTOs, heap, genome, genomeTOIndexById);
+
+    return provideDataTO(genomeTOs, geneTOs, nodeTOs, {}, {}, heap);
+}
+
 DescriptionConverterService::DescriptionConverterService()
 {
     _collectionTOProvider = std::make_shared<_CollectionTOProvider>();

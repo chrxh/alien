@@ -12,6 +12,7 @@ struct Cell;
 struct Token;
 struct Particle;
 struct Objects;
+struct Genome;
 
 struct SimulationData;
 struct RenderingData;

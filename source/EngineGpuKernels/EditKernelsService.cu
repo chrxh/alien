@@ -7,27 +7,32 @@
 
 _EditKernelsService::_EditKernelsService()
 {
-    CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaRolloutResult);
-    CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaSwitchResult);
-    CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaUpdateResult);
-    CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaRemoveResult);
-    CudaMemoryManager::getInstance().acquireMemory<float2>(1, _cudaCenter);
-    CudaMemoryManager::getInstance().acquireMemory<float2>(1, _cudaVelocity);
-    CudaMemoryManager::getInstance().acquireMemory<int>(1, _cudaNumEntities);
-    CudaMemoryManager::getInstance().acquireMemory<unsigned long long int>(1, _cudaMinCellPosYAndIndex);
+    auto& memoryManager = CudaMemoryManager::getInstance();
+    memoryManager.acquireMemory(1, _cudaRolloutResult);
+    memoryManager.acquireMemory(1, _cudaSwitchResult);
+    memoryManager.acquireMemory(1, _cudaUpdateResult);
+    memoryManager.acquireMemory(1, _cudaRemoveResult);
+    memoryManager.acquireMemory(1, _cudaCenter);
+    memoryManager.acquireMemory(1, _cudaVelocity);
+    memoryManager.acquireMemory(1, _cudaNumEntities);
+    memoryManager.acquireMemory(1, _cudaMinCellPosYAndIndex);
+    memoryManager.acquireMemory(1, _cudaMinCellPosYAndIndex);
+    memoryManager.acquireMemory(1, _genomePtr);
     _garbageCollector = std::make_shared<_GarbageCollectorKernelsService>();
 }
 
 _EditKernelsService::~_EditKernelsService()
 {
-    CudaMemoryManager::getInstance().freeMemory(_cudaRolloutResult);
-    CudaMemoryManager::getInstance().freeMemory(_cudaSwitchResult);
-    CudaMemoryManager::getInstance().freeMemory(_cudaUpdateResult);
-    CudaMemoryManager::getInstance().freeMemory(_cudaRemoveResult);
-    CudaMemoryManager::getInstance().freeMemory(_cudaCenter);
-    CudaMemoryManager::getInstance().freeMemory(_cudaVelocity);
-    CudaMemoryManager::getInstance().freeMemory(_cudaNumEntities);
-    CudaMemoryManager::getInstance().freeMemory(_cudaMinCellPosYAndIndex);
+    auto& memoryManager = CudaMemoryManager::getInstance();
+    memoryManager.freeMemory(_cudaRolloutResult);
+    memoryManager.freeMemory(_cudaSwitchResult);
+    memoryManager.freeMemory(_cudaUpdateResult);
+    memoryManager.freeMemory(_cudaRemoveResult);
+    memoryManager.freeMemory(_cudaCenter);
+    memoryManager.freeMemory(_cudaVelocity);
+    memoryManager.freeMemory(_cudaNumEntities);
+    memoryManager.freeMemory(_cudaMinCellPosYAndIndex);
+    memoryManager.freeMemory(_genomePtr);
 }
 
 void _EditKernelsService::removeSelection(GpuSettings const& gpuSettings, SimulationData const& data)
@@ -250,6 +255,12 @@ void _EditKernelsService::changeSimulationData(GpuSettings const& gpuSettings, S
     cudaDeviceSynchronize();
 
     _garbageCollector->cleanupAfterDataManipulation(gpuSettings, data);
+}
+
+void _EditKernelsService::changeGenome(GpuSettings const& gpuSettings, SimulationData const& data, uint64_t creatureId, CollectionTO const& dataTO)
+{
+    KERNEL_CALL_1_1(cudaAddGenome, data, dataTO, _genomePtr);
+    KERNEL_CALL(cudaSetGenome, data, creatureId, _genomePtr);
 }
 
 void _EditKernelsService::colorSelectedCells(GpuSettings const& gpuSettings, SimulationData const& data, unsigned char color, bool includeClusters)

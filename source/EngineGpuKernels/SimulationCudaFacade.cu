@@ -346,6 +346,19 @@ void _SimulationCudaFacade::changeInspectedSimulationData(CollectionTO const& ch
     resizeArraysIfNecessary();
 }
 
+void _SimulationCudaFacade::changeGenome(uint64_t creatureId, CollectionTO const& dataTO)
+{
+    auto cudaDataTO = _cudaCollectionTOProvider->provideDataTO(dataTO.capacities);
+    copyDataTOtoGpu(cudaDataTO, dataTO);
+
+    _editKernels->changeGenome(_settings.gpuSettings, getSimulationDataPtrCopy(), creatureId, cudaDataTO);
+    syncAndCheck();
+
+    updateStatistics();
+
+    resizeArraysIfNecessary();
+}
+
 void _SimulationCudaFacade::applyForce(ApplyForceData const& applyData)
 {
     _editKernels->applyForce(_settings.gpuSettings, getSimulationDataPtrCopy(), applyData);
