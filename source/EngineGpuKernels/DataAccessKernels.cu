@@ -375,6 +375,37 @@ __global__ void cudaPrepareGenomesForConversionToTO(int2 rectUpperLeft, int2 rec
     }
 }
 
+__global__ void cudaPrepareSelectedGenomesForConversionToTO(bool includeClusters, SimulationData data)
+{
+    auto const& cells = data.objects.cells;
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (!cell->genome) {
+            continue;
+        }
+        if ((includeClusters && cell->selected == 0) || (!includeClusters && cell->selected != 1)) {
+            continue;
+        }
+        cell->genome->genomeIndex = Genome::GenomeIndex_NotSet;
+    }
+}
+
+__global__ void cudaPrepareGenomesForConversionToTO(InspectedEntityIds ids, SimulationData data)
+{
+    auto const& cells = data.objects.cells;
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (!cell->genome) {
+            continue;
+        }
+        cell->genome->genomeIndex = Genome::GenomeIndex_NotSet;
+    }
+}
+
 __global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, CollectionTO collectionTO)
 {
     auto const& cells = data.objects.cells;
@@ -413,10 +444,9 @@ __global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds id
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-
         bool found = false;
         for (int i = 0; i < Const::MaxInspectedObjects; ++i) {
-            if (ids.values[i] == 0) {
+            if (ids.values[i] == Const::MaxInspectedObjects_Break) {
                 break;
             }
             if (ids.values[i] == cell->id) {
@@ -445,7 +475,7 @@ __global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationD
         auto const& particle = data.objects.particles.at(particleIndex);
         bool found = false;
         for (int i = 0; i < Const::MaxInspectedObjects; ++i) {
-            if (ids.values[i] == 0) {
+            if (ids.values[i] == Const::MaxInspectedObjects_Break) {
                 break;
             }
             if (ids.values[i] == particle->id) {
@@ -539,6 +569,34 @@ __global__ void cudaGetSelectedGenomeData(SimulationData data, bool includeClust
             continue;
         }
         if (!cell->genome) {
+            continue;
+        }
+
+        createGenomeTO(cell, collectionTO);
+    }
+}
+
+__global__ void cudaGetGenomeData(InspectedEntityIds ids, SimulationData data, CollectionTO collectionTO)
+{
+    auto const& cells = data.objects.cells;
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (!cell->genome) {
+            continue;
+        }
+
+        bool found = false;
+        for (int i = 0; i < Const::MaxInspectedObjects; ++i) {
+            if (ids.values[i] == Const::MaxInspectedObjects_Break) {
+                break;
+            }
+            if (ids.values[i] == cell->id) {
+                found = true;
+            }
+        }
+        if (!found) {
             continue;
         }
 

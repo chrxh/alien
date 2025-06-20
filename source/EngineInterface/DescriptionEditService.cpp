@@ -529,26 +529,26 @@ bool DescriptionEditService::isCellPresent(Occupancy const& cellPosBySlot, Space
     return false;
 }
 
-uint64_t DescriptionEditService::getId(CellOrParticleDescription const& entity)
+uint64_t DescriptionEditService::getId(CreatureCellOrParticleDescription const& entity)
 {
-    if (std::holds_alternative<CellDescription>(entity)) {
-        return std::get<CellDescription>(entity)._id;
+    if (std::holds_alternative<CreatureCellDescription>(entity)) {
+        return std::get<CreatureCellDescription>(entity).cell._id;
     }
     return std::get<ParticleDescription>(entity)._id;
 }
 
-RealVector2D DescriptionEditService::getPos(CellOrParticleDescription const& entity)
+RealVector2D DescriptionEditService::getPos(CreatureCellOrParticleDescription const& entity)
 {
-    if (std::holds_alternative<CellDescription>(entity)) {
-        return std::get<CellDescription>(entity)._pos;
+    if (std::holds_alternative<CreatureCellDescription>(entity)) {
+        return std::get<CreatureCellDescription>(entity).cell._pos;
     }
     return std::get<ParticleDescription>(entity)._pos;
 }
 
-std::vector<CellOrParticleDescription> DescriptionEditService::getObjects(
+std::vector<CreatureCellOrParticleDescription> DescriptionEditService::getObjects(
     CollectionDescription const& data)
 {
-    std::vector<CellOrParticleDescription> result;
+    std::vector<CreatureCellOrParticleDescription> result;
     for (auto const& particle : data._particles) {
         result.emplace_back(particle);
     }
@@ -582,7 +582,7 @@ namespace
     }
 }
 
-std::vector<CellOrParticleDescription> DescriptionEditService::getConstructorToMainGenomes(CollectionDescription const& data)
+std::vector<CreatureCellOrParticleDescription> DescriptionEditService::getConstructorToMainGenomes(CollectionDescription const& data)
 {
     std::map<std::vector<uint8_t>, size_t> genomeToCellIndex;
     for (auto const& [index, cell] : data._cells | boost::adaptors::indexed(0)) {
@@ -599,7 +599,7 @@ std::vector<CellOrParticleDescription> DescriptionEditService::getConstructorToM
     }
     std::ranges::sort(genomeAndCellIndex, [](auto const& element1, auto const& element2) { return element1.first.size() > element2.first.size(); });
 
-    std::vector<CellOrParticleDescription> result;
+    std::vector<CreatureCellOrParticleDescription> result;
     for (auto it = genomeAndCellIndex.begin(); it != genomeAndCellIndex.end(); ++it) {
         bool alreadyContained = false;
         for (auto it2 = genomeAndCellIndex.begin(); it2 != it; ++it2) {

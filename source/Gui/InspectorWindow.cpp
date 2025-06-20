@@ -14,6 +14,7 @@
 
 #include "AlienGui.h"
 #include "EditorModel.h"
+#include "CreatureEditorWindow.h"
 #include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
 #include "OverlayController.h"

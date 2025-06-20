@@ -8,6 +8,30 @@
 #include "CreatureTabLayoutData.h"
 #include "CreatureTabWidget.h"
 #include "EditorController.h"
+#include "GenericMessageDialog.h"
+#include "OverlayController.h"
+
+void CreatureEditorWindow::openTab(GenomeDescription_New const& genome, uint64_t creatureId, bool openCreatureEditorIfClosed)
+{
+    if (openCreatureEditorIfClosed) {
+        setOn(false);
+        delayedExecution([this] { setOn(true); });
+    }
+    if (_tabs.size() == 1 && _tabs.front()->isEmpty() && _tabs.front()->isDraft()) {
+        _tabs.clear();
+    }
+    std::optional<int> tabIndex;
+    for (auto const& [index, tab] : _tabs | boost::adaptors::indexed(0)) {
+        if (!tab->isDraft() && tab->getCreatureId() == creatureId) {
+            tabIndex = toInt(index);
+        }
+    }
+    if (tabIndex) {
+        //_tabIndexToSelect = *tabIndex;
+    } else {
+        onScheduleAddTab(genome, creatureId);
+    }
+}
 
 CreatureEditorWindow::CreatureEditorWindow()
     : AlienWindow("Creature editor", "windows.creature editor", false, true, {500.0f, 300.0f})
@@ -59,19 +83,30 @@ bool CreatureEditorWindow::isShown()
 
 void CreatureEditorWindow::processToolbar()
 {
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN).tooltip("Open creature from file"))) {
     }
-    AlienGui::Tooltip("Open creature from file");
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SAVE))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SAVE).tooltip("Save creature to file"))) {
     }
-    AlienGui::Tooltip("Save creature to file");
+    
+    ImGui::SameLine();
+    if (AlienGui::ToolbarButton(
+            AlienGui::ToolbarButtonParameters()
+                .text(ICON_FA_UPLOAD)
+                .tooltip("Share your creature with other users:\nYour current creature will be uploaded to the server and made visible in the browser."))) {
+    }
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_UPLOAD))) {
+    AlienGui::ToolbarSeparator();
+
+    ImGui::SameLine();
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
+                                    .text(ICON_FA_SYRINGE)
+                                    .tooltip("Inject the changes to the creature in the simulation")
+                                    .disabled(!_tabs.at(_selectedTabIndex)->hasCreaturesGenomeBeChanged()))) {
+        onInjectGenome();
     }
-    AlienGui::Tooltip("Share your creature with other users:\nYour current creature will be uploaded to the server and made visible in the browser.");
 
     AlienGui::Separator();
 }
@@ -81,11 +116,13 @@ void CreatureEditorWindow::processTabWidget()
     if (ImGui::BeginTabBar("##", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown | ImGuiTabBarFlags_Reorderable)) {
 
         if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
-            scheduleAddTab(GenomeDescription_New());
+            onScheduleAddTab(GenomeDescription_New());
         }
         AlienGui::Tooltip("New creature");
 
+        std::optional<int> tabIndexToSelect = _tabIndexToSelect;
         std::optional<int> tabToDelete;
+        _tabIndexToSelect.reset();
 
         // Process tabs
         for (auto const& [index, creatureTab] : _tabs | boost::adaptors::indexed(0)) {
@@ -95,7 +132,7 @@ void CreatureEditorWindow::processTabWidget()
             if (_tabs.size() > 1) {
                 openPtr = &open;
             }
-            int flags = ImGuiTabItemFlags_None;
+            int flags = (tabIndexToSelect && *tabIndexToSelect == index) ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
 
             pushStyleColorForTab(creatureTab);
             if (ImGui::BeginTabItem((creatureTab->getName() + "###" + std::to_string(creatureTab->getTabId())).c_str(), openPtr, flags)) {
@@ -128,7 +165,20 @@ void CreatureEditorWindow::processTabWidget()
     }
 }
 
-void CreatureEditorWindow::scheduleAddTab(GenomeDescription_New const& genome, std::optional<uint64_t> const& creatureId)
+void CreatureEditorWindow::onInjectGenome()
+{
+    auto const& tab = _tabs.at(_selectedTabIndex);
+    auto creatureId = tab->getCreatureId();
+    auto const& genome = tab->getGenome();
+    auto success = _simulationFacade->changeGenome(creatureId, genome);
+    if (success) {
+        printOverlayMessage("Genome injected");
+    } else {
+        GenericMessageDialog::information("Error", "The genome could not be injected since the creature no longer exists.");
+    }
+}
+
+void CreatureEditorWindow::onScheduleAddTab(GenomeDescription_New const& genome, std::optional<uint64_t> const& creatureId)
 {
     if (creatureId.has_value()) {
         _tabToAdd = _CreatureTabWidget::createPinnedCreatureTab(genome, creatureId.value());

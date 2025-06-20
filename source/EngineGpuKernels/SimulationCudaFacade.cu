@@ -236,7 +236,7 @@ CollectionTO _SimulationCudaFacade::getInspectedSimulationData(std::vector<uint6
         ids.values[i] = entityIds.at(i);
     }
     if (entityIds.size() < Const::MaxInspectedObjects) {
-        ids.values[entityIds.size()] = 0;
+        ids.values[entityIds.size()] = Const::MaxInspectedObjects_Break;
     }
 
     auto cudaDataTO = _cudaCollectionTOProvider->provideDataTO(estimateCapacityNeededForTO());
@@ -346,17 +346,19 @@ void _SimulationCudaFacade::changeInspectedSimulationData(CollectionTO const& ch
     resizeArraysIfNecessary();
 }
 
-void _SimulationCudaFacade::changeGenome(uint64_t creatureId, CollectionTO const& dataTO)
+bool _SimulationCudaFacade::changeGenome(uint64_t creatureId, CollectionTO const& dataTO)
 {
     auto cudaDataTO = _cudaCollectionTOProvider->provideDataTO(dataTO.capacities);
     copyDataTOtoGpu(cudaDataTO, dataTO);
 
-    _editKernels->changeGenome(_settings.gpuSettings, getSimulationDataPtrCopy(), creatureId, cudaDataTO);
+    auto result = _editKernels->changeGenome(_settings.gpuSettings, getSimulationDataPtrCopy(), creatureId, cudaDataTO);
     syncAndCheck();
 
     updateStatistics();
 
     resizeArraysIfNecessary();
+
+    return result;
 }
 
 void _SimulationCudaFacade::applyForce(ApplyForceData const& applyData)

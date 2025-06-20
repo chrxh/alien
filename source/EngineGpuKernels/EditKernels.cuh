@@ -22,7 +22,7 @@ __global__ void cudaColorSelectedCells(SimulationData data, unsigned char color,
 __global__ void cudaChangeCell(SimulationData data, CollectionTO changeDataTO);  // changeDataTO contains only 1 cell
 __global__ void cudaChangeParticle(SimulationData data, CollectionTO changeDataTO); // changeDataTO contains only 1 particle
 __global__ void cudaAddGenome(SimulationData data, CollectionTO dataTO, Genome** newGenome);  // changeDataTO contains only 1 genome
-__global__ void cudaSetGenome(SimulationData data, uint64_t creatureId, Genome** newGenome);
+__global__ void cudaSetGenome(SimulationData data, uint64_t creatureId, Genome** newGenome, bool* result);
 __global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClusters);
 __global__ void cudaRemoveSelectedCellConnections(SimulationData data, bool includeClusters);
 __global__ void cudaRelaxSelectedEntities(SimulationData data, bool includeClusters);

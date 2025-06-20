@@ -99,7 +99,7 @@ void EditorController::onInspectSelectedGenomes()
     onInspectObjects(constructors, true);
 }
 
-void EditorController::onInspectObjects(std::vector<CellOrParticleDescription> const& entities, bool selectGenomeTab)
+void EditorController::onInspectObjects(std::vector<CreatureCellOrParticleDescription> const& entities, bool selectGenomeTab)
 {
     if (entities.empty()) {
         return;
@@ -115,7 +115,7 @@ void EditorController::onInspectObjects(std::vector<CellOrParticleDescription> c
         inspectedIds.insert(DescriptionEditService::get().getId(entity));
     }
 
-    std::vector<CellOrParticleDescription> newEntities;
+    std::vector<CreatureCellOrParticleDescription> newEntities;
     for (auto const& entity : entities) {
         if (origInspectedIds.find(DescriptionEditService::get().getId(entity)) == origInspectedIds.end()) {
             newEntities.emplace_back(entity);
@@ -201,7 +201,7 @@ void EditorController::processInspectorWindows()
 
     //inspector windows closed?
     std::vector<InspectorWindow> inspectorWindows;
-    std::vector<CellOrParticleDescription> inspectedEntities;
+    std::vector<CreatureCellOrParticleDescription> inspectedEntities;
     for (auto const& inspectorWindow : _inspectorWindows) {
         if (!inspectorWindow->isClosed()) {
             inspectorWindows.emplace_back(inspectorWindow);

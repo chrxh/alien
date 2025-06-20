@@ -58,13 +58,14 @@ __global__ void cudaAddGenome(SimulationData data, CollectionTO dataTO, Genome**
     *newGenome = factory.createGenomeFromTO(dataTO, 0);
 }
 
-__global__ void cudaSetGenome(SimulationData data, uint64_t creatureId, Genome** newGenome)
+__global__ void cudaSetGenome(SimulationData data, uint64_t creatureId, Genome** newGenome, bool* result)
 {
     auto const partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
         if (cell->creatureId == creatureId) {
             cell->genome = *newGenome;
+            *result = true;
         }
     }
 }

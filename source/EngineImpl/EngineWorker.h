@@ -72,7 +72,7 @@ public:
     void setBarrier(bool value, bool includeClusters);
     void changeCell(CellDescription const& changedCell);
     void changeParticle(ParticleDescription const& changedParticle);
-    void changeGenome(uint64_t creatureId, GenomeDescription_New const& genome);
+    bool changeGenome(uint64_t creatureId, GenomeDescription_New const& genome);
 
     void calcTimesteps(uint64_t timesteps);
     void applyCataclysm(int power);

@@ -109,10 +109,10 @@ public:
     void randomizeCountdowns(ClusteredCollectionDescription& data, int minValue, int maxValue);
     void randomizeMutationIds(ClusteredCollectionDescription& data);
 
-    uint64_t getId(CellOrParticleDescription const& entity);
-    RealVector2D getPos(CellOrParticleDescription const& entity);
-    std::vector<CellOrParticleDescription> getObjects(CollectionDescription const& data);
-    std::vector<CellOrParticleDescription> getConstructorToMainGenomes(CollectionDescription const& data);
+    uint64_t getId(CreatureCellOrParticleDescription const& entity);
+    RealVector2D getPos(CreatureCellOrParticleDescription const& entity);
+    std::vector<CreatureCellOrParticleDescription> getObjects(CollectionDescription const& data);
+    std::vector<CreatureCellOrParticleDescription> getConstructorToMainGenomes(CollectionDescription const& data);
 
     void removeMetadata(CollectionDescription& data);
 

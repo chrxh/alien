@@ -72,11 +72,29 @@ std::string _CreatureTabWidget::getName() const
         return "Draft " + std::to_string(_id);
     } else {
         auto result = "Creature " + StringHelper::formatInHex(_pinnedCreatureData->creatureId);
-        if (_pinnedCreatureData->origGenome != _editData->genome) {
+        if (_pinnedCreatureData->changesMade) {
             result = "* " + result;
         }
         return result;
     }
+}
+
+bool _CreatureTabWidget::hasCreaturesGenomeBeChanged() const
+{
+    if (!_pinnedCreatureData.has_value()) {
+        return false;
+    }
+    return _pinnedCreatureData->changesMade;
+}
+
+GenomeDescription_New const& _CreatureTabWidget::getGenome()
+{
+    return _editData->genome;
+}
+
+bool _CreatureTabWidget::isEmpty() const
+{
+    return _editData->genome == GenomeDescription_New();
 }
 
 _CreatureTabWidget::_CreatureTabWidget(GenomeDescription_New const& genome, CreatureTabLayoutData const& layoutData)
@@ -119,6 +137,10 @@ void _CreatureTabWidget::processEditors()
 
     ImGui::SameLine();
     _nodeEditorWidget->process();
+
+    if (_pinnedCreatureData.has_value()) {
+        _pinnedCreatureData->origGenome != _editData->genome;
+    }
 }
 
 void _CreatureTabWidget::processPreviews()

@@ -17,6 +17,9 @@ public:
     uint64_t getCreatureId() const;
     int getTabId() const;
     std::string getName() const;
+    bool hasCreaturesGenomeBeChanged() const;
+    GenomeDescription_New const& getGenome();
+    bool isEmpty() const;
 
 private:
     _CreatureTabWidget(GenomeDescription_New const& genome, CreatureTabLayoutData const& layoutData);
@@ -43,6 +46,7 @@ private:
     {
         uint64_t creatureId;
         GenomeDescription_New origGenome;
+        bool changesMade = false;
     };
     std::optional<PinnedCreatureData> _pinnedCreatureData;
 

@@ -519,4 +519,9 @@ private:
     CellDescription& getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>* cache = nullptr);
 };
 
-using CellOrParticleDescription = std::variant<CellDescription, ParticleDescription>;
+struct CreatureCellDescription
+{
+    CellDescription cell;
+    GenomeDescription_New genome;
+};
+using CreatureCellOrParticleDescription = std::variant<CreatureCellDescription, ParticleDescription>;

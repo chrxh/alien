@@ -467,7 +467,7 @@ TEST_F(DataTransferTests_New, createCreatureIds_sameIdsOnDescription)
     EXPECT_EQ(2, ids.size());
 }
 
-TEST_F(DataTransferTests_New, changeGenome)
+TEST_F(DataTransferTests_New, changeGenome_successful)
 {
     auto data = CollectionDescription().addCreature(GenomeDescription_New(), {CellDescription()});
     auto creatureId = data._cells.at(0)._creatureId;
@@ -475,7 +475,8 @@ TEST_F(DataTransferTests_New, changeGenome)
     _simulationFacade->setSimulationData(data);
 
     auto newGenome = GenomeDescription_New().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})});
-    _simulationFacade->changeGenome(creatureId, newGenome);
+    auto result = _simulationFacade->changeGenome(creatureId, newGenome);
+    ASSERT_TRUE(result);
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -487,6 +488,47 @@ TEST_F(DataTransferTests_New, changeGenome)
 
     auto genome = actualData._genomes.front();
     EXPECT_EQ(cell._genomeId, genome._id);
+
+    ASSERT_EQ(1, genome._genes.size());
+
+    auto gene = genome._genes.front();
+    EXPECT_EQ(2, gene._nodes.size());
+}
+
+TEST_F(DataTransferTests_New, changeGenome_failed)
+{
+    auto data = CollectionDescription().addCreature(GenomeDescription_New(), {CellDescription()});
+    auto creatureId = data._cells.at(0)._creatureId;
+
+    _simulationFacade->setSimulationData(data);
+
+    auto newGenome = GenomeDescription_New().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})});
+    auto result = _simulationFacade->changeGenome(creatureId + 1, newGenome);
+    ASSERT_FALSE(result);
+}
+
+TEST_F(DataTransferTests_New, getInspectedSimulationData)
+{
+    auto data =
+        CollectionDescription()
+            .addCreature(
+                GenomeDescription_New().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})}), {CellDescription(), CellDescription()})
+            .addCreature(GenomeDescription_New(), {CellDescription()});
+    auto cellId1 = data._cells.at(0)._id;
+    auto cellId2 = data._cells.at(1)._id;
+
+    _simulationFacade->setSimulationData(data);
+
+    auto inspectedData = _simulationFacade->getInspectedSimulationData({cellId1, cellId2});
+    ASSERT_EQ(2, inspectedData._cells.size());
+    ASSERT_EQ(1, inspectedData._genomes.size());
+
+    auto genome = inspectedData._genomes.front();
+    auto cell1 = getCell(inspectedData, cellId1);
+    EXPECT_EQ(genome._id, cell1._genomeId);
+
+    auto cell2 = getCell(inspectedData, cellId2);
+    EXPECT_EQ(genome._id, cell2._genomeId);
 
     ASSERT_EQ(1, genome._genes.size());
 
