@@ -22,8 +22,8 @@ private:
     bool isCell() const;
     std::string generateTitle() const;
 
-    void processCell(CellDescription cell);
-    void processCellGeneralTab(CellDescription& cell);
+    void processCell(ExtendedCellDescription& creatureCell);
+    void processCellGeneralTab(ExtendedCellDescription& creatureCell);
     void processCellTypeTab(CellDescription& cell);
     void processCellTypePropertiesTab(CellDescription& cell);
     template <typename Description>

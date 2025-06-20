@@ -139,7 +139,7 @@ void _CreatureTabWidget::processEditors()
     _nodeEditorWidget->process();
 
     if (_pinnedCreatureData.has_value()) {
-        _pinnedCreatureData->origGenome != _editData->genome;
+        _pinnedCreatureData->changesMade = _pinnedCreatureData->origGenome != _editData->genome;
     }
 }
 

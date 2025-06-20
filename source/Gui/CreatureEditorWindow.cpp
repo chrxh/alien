@@ -174,7 +174,7 @@ void CreatureEditorWindow::onInjectGenome()
     if (success) {
         printOverlayMessage("Genome injected");
     } else {
-        GenericMessageDialog::information("Error", "The genome could not be injected since the creature no longer exists.");
+        GenericMessageDialog::get().information("Error", "The genome could not be injected since the creature no longer exists.");
     }
 }
 

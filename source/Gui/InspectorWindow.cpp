@@ -62,7 +62,7 @@ void _InspectorWindow::process()
     if (ImGui::Begin(generateTitle().c_str(), &_on, ImGuiWindowFlags_HorizontalScrollbar)) {
         auto windowPos = ImGui::GetWindowPos();
         if (isCell()) {
-            processCell(std::get<CellDescription>(entity));
+            processCell(std::get<ExtendedCellDescription>(entity));
         } else {
             processParticle(std::get<ParticleDescription>(entity));
         }
@@ -92,7 +92,7 @@ uint64_t _InspectorWindow::getId() const
 bool _InspectorWindow::isCell() const
 {
     auto entity = EditorModel::get().getInspectedEntity(_entityId);
-    return std::holds_alternative<CellDescription>(entity);
+    return std::holds_alternative<ExtendedCellDescription>(entity);
 }
 
 std::string _InspectorWindow::generateTitle() const
@@ -107,11 +107,12 @@ std::string _InspectorWindow::generateTitle() const
     return ss.str();
 }
 
-void _InspectorWindow::processCell(CellDescription cell)
+void _InspectorWindow::processCell(ExtendedCellDescription& extendedCell)
 {
     if (ImGui::BeginTabBar("##CellInspect", /*ImGuiTabBarFlags_AutoSelectNewTabs | */ ImGuiTabBarFlags_FittingPolicyResizeDown)) {
+        auto& cell = extendedCell.cell;
         auto origCell = cell;
-        processCellGeneralTab(cell);
+        processCellGeneralTab(extendedCell);
         processCellTypeTab(cell);
         processCellTypePropertiesTab(cell);
         if (cell.getCellType() == CellType_Constructor) {
@@ -131,11 +132,18 @@ void _InspectorWindow::processCell(CellDescription cell)
     }
 }
 
-void _InspectorWindow::processCellGeneralTab(CellDescription& cell)
+void _InspectorWindow::processCellGeneralTab(ExtendedCellDescription& extendedCell)
 {
     if (ImGui::BeginTabItem("General", nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+            auto& cell = extendedCell.cell;
             if (ImGui::TreeNodeEx("Properties###general", TreeNodeFlags)) {
+                if (extendedCell.genome.has_value()) {
+                    if (AlienGui::Button("Edit creature")) {
+                        CreatureEditorWindow::get().openTab(extendedCell.genome.value(), cell._creatureId);
+                    }
+                }
+
                 std::stringstream ss;
                 ss << "0x" << std::hex << std::uppercase << cell._id;
                 auto cellId = ss.str();

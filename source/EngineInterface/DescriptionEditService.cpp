@@ -529,31 +529,41 @@ bool DescriptionEditService::isCellPresent(Occupancy const& cellPosBySlot, Space
     return false;
 }
 
-uint64_t DescriptionEditService::getId(CreatureCellOrParticleDescription const& entity)
+uint64_t DescriptionEditService::getId(ExtendedCellOrParticleDescription const& entity)
 {
-    if (std::holds_alternative<CreatureCellDescription>(entity)) {
-        return std::get<CreatureCellDescription>(entity).cell._id;
+    if (std::holds_alternative<ExtendedCellDescription>(entity)) {
+        return std::get<ExtendedCellDescription>(entity).cell._id;
     }
     return std::get<ParticleDescription>(entity)._id;
 }
 
-RealVector2D DescriptionEditService::getPos(CreatureCellOrParticleDescription const& entity)
+RealVector2D DescriptionEditService::getPos(ExtendedCellOrParticleDescription const& entity)
 {
-    if (std::holds_alternative<CreatureCellDescription>(entity)) {
-        return std::get<CreatureCellDescription>(entity).cell._pos;
+    if (std::holds_alternative<ExtendedCellDescription>(entity)) {
+        return std::get<ExtendedCellDescription>(entity).cell._pos;
     }
     return std::get<ParticleDescription>(entity)._pos;
 }
 
-std::vector<CreatureCellOrParticleDescription> DescriptionEditService::getObjects(
+std::vector<ExtendedCellOrParticleDescription> DescriptionEditService::getObjects(
     CollectionDescription const& data)
 {
-    std::vector<CreatureCellOrParticleDescription> result;
+    std::unordered_map<uint64_t, int> genomeIdToIndex;
+    for (auto const& [index, genome] : data._genomes | boost::adaptors::indexed(0)) {
+        genomeIdToIndex.emplace(genome._id, toInt(index));
+    }
+
+    std::vector<ExtendedCellOrParticleDescription> result;
     for (auto const& particle : data._particles) {
         result.emplace_back(particle);
     }
     for (auto const& cell : data._cells) {
-        result.emplace_back(cell);
+        ExtendedCellDescription creatureCell;
+        creatureCell.cell = cell;
+        if (cell._genomeId.has_value()) {
+            creatureCell.genome = data._genomes.at(genomeIdToIndex.at(cell._genomeId.value()));
+        }
+        result.emplace_back(creatureCell);
     }
     return result;
 }
@@ -582,8 +592,13 @@ namespace
     }
 }
 
-std::vector<CreatureCellOrParticleDescription> DescriptionEditService::getConstructorToMainGenomes(CollectionDescription const& data)
+std::vector<ExtendedCellOrParticleDescription> DescriptionEditService::getCellsForCreatureRepresentatives(CollectionDescription const& data)
 {
+    std::unordered_map<uint64_t, int> genomeIdToIndex;
+    for (auto const& [index, genome]: data._genomes | boost::adaptors::indexed(0)) {
+        genomeIdToIndex.emplace(genome._id, toInt(index));
+    }
+
     std::map<std::vector<uint8_t>, size_t> genomeToCellIndex;
     for (auto const& [index, cell] : data._cells | boost::adaptors::indexed(0)) {
         if (cell.getCellType() == CellType_Constructor) {
@@ -599,7 +614,7 @@ std::vector<CreatureCellOrParticleDescription> DescriptionEditService::getConstr
     }
     std::ranges::sort(genomeAndCellIndex, [](auto const& element1, auto const& element2) { return element1.first.size() > element2.first.size(); });
 
-    std::vector<CreatureCellOrParticleDescription> result;
+    std::vector<ExtendedCellOrParticleDescription> result;
     for (auto it = genomeAndCellIndex.begin(); it != genomeAndCellIndex.end(); ++it) {
         bool alreadyContained = false;
         for (auto it2 = genomeAndCellIndex.begin(); it2 != it; ++it2) {
@@ -611,7 +626,13 @@ std::vector<CreatureCellOrParticleDescription> DescriptionEditService::getConstr
             }
         }
         if (!alreadyContained) {
-            result.emplace_back(data._cells.at(it->second));
+            auto const& cell = data._cells.at(it->second);
+            ExtendedCellDescription creatureCell;
+            creatureCell.cell = cell;
+            if (cell._genomeId.has_value()) {
+                creatureCell.genome = data._genomes.at(genomeIdToIndex.at(cell._genomeId.value()));
+            }
+            result.emplace_back(creatureCell);
         }
     }
     return result;
