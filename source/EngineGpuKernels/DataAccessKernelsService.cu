@@ -69,7 +69,7 @@ void _DataAccessKernelsService::getInspectedData(
     KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
     KERNEL_CALL(cudaPrepareGenomesForConversionToTO, entityIds, data);
     KERNEL_CALL(cudaGetGenomeData, entityIds, data, dataTO);
-    KERNEL_CALL_1_1(cudaGetInspectedCellDataWithoutConnections, entityIds, data, dataTO);
+    KERNEL_CALL(cudaGetInspectedCellDataWithoutConnections, entityIds, data, dataTO);
     KERNEL_CALL(cudaResolveConnections, data, dataTO);
     KERNEL_CALL(cudaGetInspectedParticleData, entityIds, data, dataTO);
 }

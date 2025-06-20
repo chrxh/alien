@@ -26,6 +26,7 @@ private:
     void processTabWidget();
 
     void onInjectGenome();
+    void onCreateSeed();
     void onScheduleAddTab(GenomeDescription_New const& genome, std::optional<uint64_t> const& creatureId = std::nullopt);
 
     void pushStyleColorForTab(CreatureTabWidget const& creatureTab);

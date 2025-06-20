@@ -13,6 +13,8 @@ public:
 
     void process();
 
+    void onGenomeIntoCreatureInjected();
+
     bool isDraft() const;
     uint64_t getCreatureId() const;
     int getTabId() const;

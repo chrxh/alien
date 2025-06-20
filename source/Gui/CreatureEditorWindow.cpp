@@ -4,10 +4,13 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
+#include "EngineInterface/GenomeDescriptionInfoService.h"
+
 #include "AlienGui.h"
 #include "CreatureTabLayoutData.h"
 #include "CreatureTabWidget.h"
 #include "EditorController.h"
+#include "EditorModel.h"
 #include "GenericMessageDialog.h"
 #include "OverlayController.h"
 
@@ -35,8 +38,7 @@ void CreatureEditorWindow::openTab(GenomeDescription_New const& genome, uint64_t
 
 CreatureEditorWindow::CreatureEditorWindow()
     : AlienWindow("Creature editor", "windows.creature editor", false, true, {500.0f, 300.0f})
-{
-}
+{}
 
 void CreatureEditorWindow::initIntern(SimulationFacade simulationFacade)
 {
@@ -60,20 +62,17 @@ void CreatureEditorWindow::initIntern(SimulationFacade simulationFacade)
     });
 
     _tabs.emplace_back(_CreatureTabWidget::createDraftCreatureTab(genome));
-    for (int i = 0; i < 10; ++i) {
-        _tabs.emplace_back(_CreatureTabWidget::createPinnedCreatureTab(GenomeDescription_New(), rand()));
-    }
+    //for (int i = 0; i < 10; ++i) {
+    //    _tabs.emplace_back(_CreatureTabWidget::createPinnedCreatureTab(GenomeDescription_New(), rand()));
+    //}
 }
 
-void CreatureEditorWindow::shutdownIntern()
-{
-}
+void CreatureEditorWindow::shutdownIntern() {}
 
 void CreatureEditorWindow::processIntern()
 {
     processToolbar();
     processTabWidget();
-
 }
 
 bool CreatureEditorWindow::isShown()
@@ -89,7 +88,7 @@ void CreatureEditorWindow::processToolbar()
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SAVE).tooltip("Save creature to file"))) {
     }
-    
+
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(
             AlienGui::ToolbarButtonParameters()
@@ -103,9 +102,14 @@ void CreatureEditorWindow::processToolbar()
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
                                     .text(ICON_FA_SYRINGE)
-                                    .tooltip("Inject the changes to the creature in the simulation")
+                                    .tooltip("Inject the current genome to the creature in the simulation")
                                     .disabled(!_tabs.at(_selectedTabIndex)->hasCreaturesGenomeBeChanged()))) {
         onInjectGenome();
+    }
+
+    ImGui::SameLine();
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SEEDLING).tooltip("Create a seed with current genome"))) {
+        onCreateSeed();
     }
 
     AlienGui::Separator();
@@ -171,11 +175,37 @@ void CreatureEditorWindow::onInjectGenome()
     auto creatureId = tab->getCreatureId();
     auto const& genome = tab->getGenome();
     auto success = _simulationFacade->changeGenome(creatureId, genome);
+    tab->onGenomeIntoCreatureInjected();
     if (success) {
         printOverlayMessage("Genome injected");
     } else {
         GenericMessageDialog::get().information("Error", "The genome could not be injected since the creature no longer exists.");
     }
+}
+
+void CreatureEditorWindow::onCreateSeed()
+{
+    auto pos = Viewport::get().getCenterInWorldPos();
+    pos.x += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
+    pos.y += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
+
+    auto genome = _tabs.at(_selectedTabIndex)->getGenome();
+
+    auto parameter = _simulationFacade->getSimulationParameters();
+    auto numNodes = GenomeDescriptionInfoService::get().getNumberOfNodes(genome);
+    auto energy = parameter.normalCellEnergy.value[EditorModel::get().getDefaultColorCode()] * toFloat(numNodes * 2 + 1);
+    auto data =
+        CollectionDescription()
+            .genomes({
+                genome,
+            })
+            .cells({
+                CellDescription().pos(pos).energy(energy).stiffness(1.0f).color(EditorModel::get().getDefaultColorCode()).cellTypeData(ConstructorDescription()).genomeId(genome._id),
+            });
+    _simulationFacade->addAndSelectSimulationData(std::move(data));
+    EditorModel::get().update();
+
+    printOverlayMessage("Seed created");
 }
 
 void CreatureEditorWindow::onScheduleAddTab(GenomeDescription_New const& genome, std::optional<uint64_t> const& creatureId)
@@ -199,7 +229,7 @@ void CreatureEditorWindow::pushStyleColorForTab(CreatureTabWidget const& creatur
     } else {
         // Use creature ID to create a unique color
         auto creatureId = creatureTab->getTabId();
-        auto h  = 0.1f + toFloat(creatureId % 20) / 20.0f * 0.5f;
+        auto h = 0.1f + toFloat(creatureId % 20) / 20.0f * 0.5f;
         auto s = 0.4f + toFloat(creatureId % 10) / 10.0f * 0.4f;
         ImGui::PushStyleColor(ImGuiCol_Tab, ImColor::HSV(h, s, 0.35f).Value);
         ImGui::PushStyleColor(ImGuiCol_TabActive, ImColor::HSV(h, s, 0.62f).Value);

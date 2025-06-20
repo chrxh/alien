@@ -51,6 +51,11 @@ void _CreatureTabWidget::process()
     GenomeDescriptionValidationService::get().validateAndCorrect(_editData->genome);
 }
 
+void _CreatureTabWidget::onGenomeIntoCreatureInjected()
+{
+    _pinnedCreatureData->origGenome = _editData->genome;
+}
+
 bool _CreatureTabWidget::isDraft() const
 {
     return !_pinnedCreatureData.has_value();
