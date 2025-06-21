@@ -111,6 +111,11 @@ public:
     void pauseSimulation();
     bool isSimulationRunning() const;
 
+    // Simulated preview
+    void newPreview(CollectionDescription const& data);
+    void calcTimestepsForPreview(uint64_t timesteps);
+    CollectionDescription getPreviewData();
+
     // Only for tests
     void testOnly_mutate(uint64_t cellId, MutationType mutationType);
     void testOnly_mutationCheck(uint64_t cellId);

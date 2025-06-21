@@ -426,6 +426,32 @@ bool EngineWorker::isSimulationRunning() const
     return _isSimulationRunning.load();
 }
 
+void EngineWorker::newPreview(CollectionDescription const& data)
+{
+    EngineWorkerGuard access(this);
+
+    auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(data);
+
+    _simulationCudaFacade->setSimulationData(dataTO);
+}
+
+void EngineWorker::calcTimestepsForPreview(uint64_t timesteps)
+{
+    EngineWorkerGuard access(this);
+
+    _simulationCudaFacade->calcTimestepsForPreview(timesteps);
+}
+
+CollectionDescription EngineWorker::getPreviewData()
+{
+    EngineWorkerGuard access(this);
+
+    auto dataTO = _simulationCudaFacade->getPreviewData();
+    ExitScopeGuard guard([&dataTO]() { _CollectionTOProvider::destroyUnmanagedDataTO(dataTO); });
+
+    return DescriptionConverterService::get().convertTOtoDescription(dataTO);
+}
+
 void EngineWorker::testOnly_mutate(uint64_t cellId, MutationType mutationType)
 {
     EngineWorkerGuard access(this);

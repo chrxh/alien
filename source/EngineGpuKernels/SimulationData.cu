@@ -46,7 +46,7 @@ bool SimulationData::shouldResize(ArraySizesForGpu const& sizeDelta)
         || objects.heap.shouldResize_host(sizeDelta.heap);
 }
 
-void SimulationData::resizeTargetObjects(ArraySizesForGpu const& size)
+void SimulationData::resizeTempObjects(ArraySizesForGpu const& size)
 {
     uint64_t cellArraySizeResult, particleArraySizeResult;
     calcArraySizes(cellArraySizeResult, particleArraySizeResult, size.cellArray, size.particleArray);
@@ -56,20 +56,28 @@ void SimulationData::resizeTargetObjects(ArraySizesForGpu const& size)
     resizeTargetIntern(objects.heap, tempObjects.heap, size.heap);
 }
 
-void SimulationData::resizeObjects()
+void SimulationData::resizeObjectsAndTempObjects(ArraySizesForGpu const& size)
+{
+    uint64_t cellArraySizeResult, particleArraySizeResult;
+    calcArraySizes(cellArraySizeResult, particleArraySizeResult, size.cellArray, size.particleArray);
+
+    objects.cells.resize(cellArraySizeResult);
+    objects.particles.resize(particleArraySizeResult);
+    objects.heap.resize(size.heap);
+    tempObjects.cells.resize(cellArraySizeResult);
+    tempObjects.particles.resize(particleArraySizeResult);
+    tempObjects.heap.resize(size.heap);
+
+    resizeAuxiliaryData();
+}
+
+void SimulationData::resizeObjectsByMatchingTempObjects()
 {
     objects.cells.resize(tempObjects.cells.getCapacity_host());
     objects.particles.resize(tempObjects.particles.getCapacity_host());
     objects.heap.resize(tempObjects.heap.getCapacity_host());
 
-    auto estimatedMaxActiveCells = objects.cells.getCapacity_host();
-    cellMap.resize(estimatedMaxActiveCells);
-    auto estimatedMaxActiveParticles = objects.particles.getCapacity_host();
-    particleMap.resize(estimatedMaxActiveParticles);
-
-    auto upperBoundDynamicMemory =
-        (sizeof(StructuralOperation) + sizeof(CellTypeOperation) * CellType_Count + 200) * (estimatedMaxActiveCells + 1000);  // Heuristic
-    processMemory.resize(upperBoundDynamicMemory);
+    resizeAuxiliaryData();
 }
 
 bool SimulationData::isEmpty()
@@ -93,6 +101,18 @@ void SimulationData::free()
     for (int i = 0; i < CellType_Count; ++i) {
         cellTypeOperations[i].free();
     }
+}
+
+void SimulationData::resizeAuxiliaryData()
+{
+    auto estimatedMaxActiveCells = objects.cells.getCapacity_host();
+    cellMap.resize(estimatedMaxActiveCells);
+    auto estimatedMaxActiveParticles = objects.particles.getCapacity_host();
+    particleMap.resize(estimatedMaxActiveParticles);
+
+    auto upperBoundDynamicMemory =
+        (sizeof(StructuralOperation) + sizeof(CellTypeOperation) * CellType_Count + 200) * (estimatedMaxActiveCells + 1000);  // Heuristic
+    processMemory.resize(upperBoundDynamicMemory);
 }
 
 template <typename Entity>

@@ -103,6 +103,11 @@ public:
 
     virtual float getTps() const = 0;
 
+    // Simulated preview
+    virtual void newPreview(CollectionDescription const& data) = 0;
+    virtual void calcTimestepsForPreview(uint64_t timesteps) = 0;
+    virtual CollectionDescription getPreviewData() = 0;
+
     // Only for tests
     virtual void testOnly_mutate(uint64_t cellId, MutationType mutationType) = 0;
     virtual void testOnly_mutationCheck(uint64_t cellId) = 0;

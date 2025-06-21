@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EngineInterface/GenomeDescriptions.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "Definitions.h"
 #include "CreatureTabLayoutData.h"
@@ -8,8 +9,8 @@
 class _CreatureTabWidget
 {
 public:
-    static CreatureTabWidget createDraftCreatureTab(GenomeDescription_New const& genome, CreatureTabLayoutData const& layoutData = nullptr);
-    static CreatureTabWidget createPinnedCreatureTab(GenomeDescription_New const& genome, uint64_t creatureId);
+    static CreatureTabWidget createDraftCreatureTab(SimulationFacade const& simulationFacade, GenomeDescription_New const& genome, CreatureTabLayoutData const& layoutData = nullptr);
+    static CreatureTabWidget createPinnedCreatureTab(SimulationFacade const& simulationFacade, GenomeDescription_New const& genome, uint64_t creatureId);
 
     void process();
 
@@ -22,16 +23,17 @@ public:
     bool hasCreaturesGenomeBeChanged() const;
     GenomeDescription_New const& getGenome();
     bool isEmpty() const;
+    void convertToDraftTab();
 
 private:
-    _CreatureTabWidget(GenomeDescription_New const& genome, CreatureTabLayoutData const& layoutData);
-    _CreatureTabWidget(GenomeDescription_New const& genome, uint64_t creatureId);
+    _CreatureTabWidget(SimulationFacade const& simulationFacade, GenomeDescription_New const& genome, CreatureTabLayoutData const& layoutData);
+    _CreatureTabWidget(SimulationFacade const& simulationFacade, GenomeDescription_New const& genome, uint64_t creatureId);
 
     void processEditors();
     void processPreviews();
 
-    void processDesiredConfigurationPreview();
-    void processActualConfigurationPreview();
+    void processPredictedPreview();
+    void processSimulatedPreview();
 
     void doLayout();
 
@@ -41,6 +43,7 @@ private:
     GenomeEditorWidget _genomeEditorWidget;
     GeneEditorWidget _geneEditorWidget;
     NodeEditorWidget _nodeEditorWidget;
+    SimulatedPreviewWidget _simulatedPreviewWidget;
 
     // Creature data
     CreatureTabEditData _editData;

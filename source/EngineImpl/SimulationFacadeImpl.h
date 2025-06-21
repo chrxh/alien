@@ -110,6 +110,11 @@ public:
 
     float getTps() const override;
 
+    // Simulated preview
+    void newPreview(CollectionDescription const& data) override;
+    void calcTimestepsForPreview(uint64_t timesteps) override;
+    CollectionDescription getPreviewData() override;
+
     // for tests only
     void testOnly_mutate(uint64_t cellId, MutationType mutationType) override;
     void testOnly_mutationCheck(uint64_t cellId) override;

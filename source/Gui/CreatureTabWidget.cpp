@@ -13,16 +13,21 @@
 #include "GeneEditorWidget.h"
 #include "GenomeEditorWidget.h"
 #include "NodeEditorWidget.h"
+#include "SimulatedPreviewWidget.h"
 #include "StyleRepository.h"
 
-CreatureTabWidget _CreatureTabWidget::createDraftCreatureTab(GenomeDescription_New const& genome, CreatureTabLayoutData const& layoutData)
+CreatureTabWidget _CreatureTabWidget::createDraftCreatureTab(
+    SimulationFacade const& simulationFacade,
+    GenomeDescription_New const& genome,
+    CreatureTabLayoutData const& layoutData)
 {
-    return CreatureTabWidget(new _CreatureTabWidget(genome, layoutData));
+    return CreatureTabWidget(new _CreatureTabWidget(simulationFacade, genome, layoutData));
 }
 
-CreatureTabWidget _CreatureTabWidget::createPinnedCreatureTab(GenomeDescription_New const& genome, uint64_t creatureId)
+CreatureTabWidget
+_CreatureTabWidget::createPinnedCreatureTab(SimulationFacade const& simulationFacade, GenomeDescription_New const& genome, uint64_t creatureId)
 {
-    return CreatureTabWidget(new _CreatureTabWidget(genome, creatureId));
+    return CreatureTabWidget(new _CreatureTabWidget(simulationFacade, genome, creatureId));
 }
 
 void _CreatureTabWidget::process()
@@ -102,7 +107,12 @@ bool _CreatureTabWidget::isEmpty() const
     return _editData->genome == GenomeDescription_New();
 }
 
-_CreatureTabWidget::_CreatureTabWidget(GenomeDescription_New const& genome, CreatureTabLayoutData const& layoutData)
+void _CreatureTabWidget::convertToDraftTab()
+{
+    _pinnedCreatureData.reset();
+}
+
+_CreatureTabWidget::_CreatureTabWidget(SimulationFacade const& simulationFacade, GenomeDescription_New const& genome, CreatureTabLayoutData const& layoutData)
 {
     static int _sequence = 0;
     _id = ++_sequence;
@@ -115,10 +125,11 @@ _CreatureTabWidget::_CreatureTabWidget(GenomeDescription_New const& genome, Crea
     _genomeEditorWidget = _GenomeEditorWidget::create(_editData, _layoutData);
     _geneEditorWidget = _GeneEditorWidget::create(_editData, _layoutData);
     _nodeEditorWidget = _NodeEditorWidget::create(_editData, _layoutData);
+    _simulatedPreviewWidget = _SimulatedPreviewWidget::create(simulationFacade, _editData);
 }
 
-_CreatureTabWidget::_CreatureTabWidget(GenomeDescription_New const& genome, uint64_t creatureId)
-    : _CreatureTabWidget(genome, nullptr)
+_CreatureTabWidget::_CreatureTabWidget(SimulationFacade const& simulationFacade, GenomeDescription_New const& genome, uint64_t creatureId)
+    : _CreatureTabWidget(simulationFacade, genome, nullptr)
 {
     _pinnedCreatureData = PinnedCreatureData{.creatureId = creatureId, .origGenome = genome};
 }
@@ -151,7 +162,7 @@ void _CreatureTabWidget::processEditors()
 void _CreatureTabWidget::processPreviews()
 {
     if (ImGui::BeginChild("DesiredConfigurationPreview", ImVec2(_layoutData->desiredConfigurationPreviewWidth, 0))) {
-        processDesiredConfigurationPreview();
+        processPredictedPreview();
     }
     ImGui::EndChild();
 
@@ -161,19 +172,20 @@ void _CreatureTabWidget::processPreviews()
 
     ImGui::SameLine();
     if (ImGui::BeginChild("ActualConfigurationPreview", ImVec2(0, 0))) {
-        processActualConfigurationPreview();
+        processSimulatedPreview();
     }
     ImGui::EndChild();
 }
 
-void _CreatureTabWidget::processDesiredConfigurationPreview()
+void _CreatureTabWidget::processPredictedPreview()
 {
     AlienGui::Group("Preview (predicted)");
 }
 
-void _CreatureTabWidget::processActualConfigurationPreview()
+void _CreatureTabWidget::processSimulatedPreview()
 {
     AlienGui::Group("Preview (simulated)");
+    _simulatedPreviewWidget->process();
 }
 
 void _CreatureTabWidget::doLayout()

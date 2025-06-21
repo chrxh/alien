@@ -96,6 +96,11 @@ public:
 
     void resizeArraysIfNecessary(ArraySizesForGpu const& sizeDelta = ArraySizesForGpu());
 
+    // Simulated preview
+    void newPreview(CollectionTO const& dataTO);
+    void calcTimestepsForPreview(uint64_t timesteps);
+    CollectionTO getPreviewData();
+
     // Only for tests
     void testOnly_mutate(uint64_t cellId, MutationType mutationType);
     void testOnly_mutationCheck(uint64_t cellId);
@@ -128,6 +133,7 @@ private:
 
     mutable std::mutex _mutexForSimulationData;
     std::shared_ptr<SimulationData> _cudaSimulationData;    // std::shared_ptr to prevent include in header
+    std::shared_ptr<SimulationData> _cudaPreviewData;
     std::shared_ptr<RenderingData> _cudaRenderingData;
     std::shared_ptr<SelectionResult> _cudaSelectionResult;
     CudaCollectionTOProvider _cudaCollectionTOProvider;
@@ -138,6 +144,7 @@ private:
     std::optional<StatisticsRawData> _statisticsData;
     StatisticsHistory _statisticsHistory;
     std::shared_ptr<SimulationStatistics> _cudaSimulationStatistics;
+    std::shared_ptr<SimulationStatistics> _cudaPreviewStatistics;
     MaxAgeBalancer _maxAgeBalancer;
 
     SimulationKernelsService _simulationKernels;

@@ -61,7 +61,7 @@ void CreatureEditorWindow::initIntern(SimulationFacade simulationFacade)
         }),
     });
 
-    _tabs.emplace_back(_CreatureTabWidget::createDraftCreatureTab(genome));
+    _tabs.emplace_back(_CreatureTabWidget::createDraftCreatureTab(_simulationFacade, genome));
     //for (int i = 0; i < 10; ++i) {
     //    _tabs.emplace_back(_CreatureTabWidget::createPinnedCreatureTab(GenomeDescription_New(), rand()));
     //}
@@ -180,6 +180,7 @@ void CreatureEditorWindow::onInjectGenome()
         printOverlayMessage("Genome injected");
     } else {
         GenericMessageDialog::get().information("Error", "The genome could not be injected since the creature no longer exists.");
+        tab->convertToDraftTab();
     }
 }
 
@@ -211,9 +212,9 @@ void CreatureEditorWindow::onCreateSeed()
 void CreatureEditorWindow::onScheduleAddTab(GenomeDescription_New const& genome, std::optional<uint64_t> const& creatureId)
 {
     if (creatureId.has_value()) {
-        _tabToAdd = _CreatureTabWidget::createPinnedCreatureTab(genome, creatureId.value());
+        _tabToAdd = _CreatureTabWidget::createPinnedCreatureTab(_simulationFacade, genome, creatureId.value());
     } else {
-        _tabToAdd = _CreatureTabWidget::createDraftCreatureTab(genome);
+        _tabToAdd = _CreatureTabWidget::createDraftCreatureTab(_simulationFacade, genome);
     }
 }
 

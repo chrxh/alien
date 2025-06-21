@@ -63,6 +63,7 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     log(Priority::Important, "initialize simulation");
 
     _cudaSimulationData = std::make_shared<SimulationData>();
+    _cudaPreviewData = std::make_shared<SimulationData>();
     _cudaRenderingData = std::make_shared<RenderingData>();
     _cudaSelectionResult = std::make_shared<SelectionResult>();
     _collectionTOProvider = std::make_shared<_CollectionTOProvider>();
@@ -71,6 +72,7 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     _maxAgeBalancer = std::make_shared<_MaxAgeBalancer>();
 
     _cudaSimulationData->init({settings.worldSizeX, settings.worldSizeY}, timestep);
+    _cudaPreviewData->init({200, 200}, 0);
     _cudaRenderingData->init();
     _cudaSimulationStatistics->init();
     _cudaSelectionResult->init();
@@ -83,8 +85,9 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     _statisticsKernels = std::make_shared<_StatisticsKernelsService>();
     _testKernels = std::make_shared<_TestKernelsService>();
 
-    //default array sizes for empty simulation (will be resized later if not sufficient)
-    resizeArrays({100000, 100000, 100000});
+    // Default array sizes for empty simulation (will be resized later if not sufficient)
+    _cudaSimulationData->resizeObjectsAndTempObjects({100000, 100000, 10000000});
+    _cudaPreviewData->resizeObjectsAndTempObjects({100000, 100000, 10000000});
 }
 
 _SimulationCudaFacade::~_SimulationCudaFacade()
@@ -524,6 +527,32 @@ void _SimulationCudaFacade::resizeArraysIfNecessary(ArraySizesForGpu const& size
     }
 }
 
+void _SimulationCudaFacade::newPreview(CollectionTO const& dataTO)
+{
+    auto cudaDataTO = _cudaCollectionTOProvider->provideDataTO(dataTO.capacities);
+    copyDataTOtoGpu(cudaDataTO, dataTO);
+
+    _dataAccessKernels->clearData(_settings.gpuSettings, *_cudaPreviewData);
+    _dataAccessKernels->addData(_settings.gpuSettings, *_cudaPreviewData, cudaDataTO, false);
+    syncAndCheck();
+}
+
+void _SimulationCudaFacade::calcTimestepsForPreview(uint64_t timesteps)
+{
+    for (uint64_t i = 0; i < timesteps; ++i) {
+
+        _simulationKernels->calcTimestep(_settings, *_cudaPreviewData, *_cudaPreviewStatistics);
+        syncAndCheck();
+
+        ++_cudaPreviewData->timestep;
+    }
+}
+
+CollectionTO _SimulationCudaFacade::getPreviewData()
+{
+    return CollectionTO();
+}
+
 void _SimulationCudaFacade::testOnly_mutate(uint64_t cellId, MutationType mutationType)
 {
     checkAndProcessSimulationParameterChanges();
@@ -694,18 +723,18 @@ void _SimulationCudaFacade::resizeArrays(ArraySizesForGpu const& sizeDelta)
 {
     log(Priority::Important, "resize arrays");
 
-    _cudaSimulationData->resizeTargetObjects(sizeDelta);
+    _cudaSimulationData->resizeTempObjects(sizeDelta);
 
     if (!_cudaSimulationData->isEmpty()) {
         _garbageCollectorKernels->copyArrays(_settings.gpuSettings, getSimulationDataPtrCopy());
         syncAndCheck();
 
-        _cudaSimulationData->resizeObjects();
+        _cudaSimulationData->resizeObjectsByMatchingTempObjects();
 
         _garbageCollectorKernels->swapArrays(_settings.gpuSettings, getSimulationDataPtrCopy());
         syncAndCheck();
     } else {
-        _cudaSimulationData->resizeObjects();
+        _cudaSimulationData->resizeObjectsByMatchingTempObjects();
     }
 
     auto cellArraySize = _cudaSimulationData->objects.cells.getCapacity_host();

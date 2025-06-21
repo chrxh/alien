@@ -358,6 +358,21 @@ float _SimulationFacadeImpl::getTps() const
     return _worker.getTps();
 }
 
+void _SimulationFacadeImpl::newPreview(CollectionDescription const& data)
+{
+    _worker.newPreview(data);
+}
+
+void _SimulationFacadeImpl::calcTimestepsForPreview(uint64_t timesteps)
+{
+    _worker.calcTimestepsForPreview(timesteps);
+}
+
+CollectionDescription _SimulationFacadeImpl::getPreviewData()
+{
+    return _worker.getPreviewData();
+}
+
 void _SimulationFacadeImpl::testOnly_mutate(uint64_t cellId, MutationType mutationType)
 {
     _worker.testOnly_mutate(cellId, mutationType);

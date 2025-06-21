@@ -42,12 +42,15 @@ struct SimulationData
 
     void init(int2 const& worldSize, uint64_t timestep);
     bool shouldResize(ArraySizesForGpu const& sizeDelta);
-    void resizeTargetObjects(ArraySizesForGpu const& size);
-    void resizeObjects();
+    void resizeTempObjects(ArraySizesForGpu const& size);
+    void resizeObjectsAndTempObjects(ArraySizesForGpu const& size);
+    void resizeObjectsByMatchingTempObjects();
     bool isEmpty();
     void free();
 
 private:
+    void resizeAuxiliaryData();
+
     template <typename Entity>
     void resizeTargetIntern(Array<Entity> const& sourceArray, Array<Entity>& targetArray, uint64_t additionalEntities);
 };
