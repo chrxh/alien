@@ -69,12 +69,14 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     _collectionTOProvider = std::make_shared<_CollectionTOProvider>();
     _cudaCollectionTOProvider = std::make_shared<_CudaCollectionTOProvider>();
     _cudaSimulationStatistics = std::make_shared<SimulationStatistics>();
+    _cudaPreviewStatistics = std::make_shared<SimulationStatistics>();
     _maxAgeBalancer = std::make_shared<_MaxAgeBalancer>();
 
     _cudaSimulationData->init({settings.worldSizeX, settings.worldSizeY}, timestep);
     _cudaPreviewData->init({200, 200}, 0);
     _cudaRenderingData->init();
     _cudaSimulationStatistics->init();
+    _cudaPreviewStatistics->init();
     _cudaSelectionResult->init();
 
     _simulationKernels = std::make_shared<_SimulationKernelsService>();
@@ -537,11 +539,12 @@ void _SimulationCudaFacade::newPreview(CollectionTO const& dataTO)
     syncAndCheck();
 }
 
-void _SimulationCudaFacade::calcTimestepsForPreview(uint64_t timesteps)
+void _SimulationCudaFacade::calcTimestepsForPreview(std::chrono::milliseconds const& duration)
 {
-    for (uint64_t i = 0; i < timesteps; ++i) {
+    auto startTimepoint = std::chrono::steady_clock::now();
+    while (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - startTimepoint) < duration) {
 
-        _simulationKernels->calcTimestep(_settings, *_cudaPreviewData, *_cudaPreviewStatistics);
+        _simulationKernels->calcTimestepForPreview(_settings, *_cudaPreviewData, *_cudaPreviewStatistics);
         syncAndCheck();
 
         ++_cudaPreviewData->timestep;

@@ -281,7 +281,7 @@ TEST_F(TransmitterTests, distributeNotToNotReadyConstructors)
         CellDescription()
             .id(1)
             .pos({9.0f, 10.0f})
-            .cellTypeData(ConstructorDescription().numInheritedGenomeNodes(4).genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))),
+            .cellTypeData(ConstructorDescription().numExpectedCells(4).genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))),
         CellDescription()
             .id(2)
             .pos({10.0f, 10.0f})
@@ -334,7 +334,7 @@ TEST_F(TransmitterTests, distributeToReadyConstructors)
         CellDescription()
             .id(1)
             .pos({9.0f, 10.0f})
-            .cellTypeData(ConstructorDescription().numInheritedGenomeNodes(4).genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))),
+            .cellTypeData(ConstructorDescription().numExpectedCells(4).genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))),
         CellDescription()
             .id(2)
             .pos({10.0f, 10.0f})

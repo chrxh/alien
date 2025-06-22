@@ -299,12 +299,12 @@ __inline__ __device__ float GenomeDecoder::readAngle(Constructor& constructor, i
 
 __inline__ __device__ bool GenomeDecoder::isFirstNode(Constructor const& constructor)
 {
-    return constructor.genomeCurrentNodeIndex == 0;
+    return constructor.currentNodeIndex == 0;
 }
 
 __inline__ __device__ bool GenomeDecoder::isFirstRepetition(Constructor const& constructor)
 {
-    return constructor.genomeCurrentRepetition == 0;
+    return constructor.currentRepetition == 0;
 }
 
 __inline__ __device__ bool GenomeDecoder::isLastNode(Constructor const& constructor)
@@ -312,14 +312,14 @@ __inline__ __device__ bool GenomeDecoder::isLastNode(Constructor const& construc
     if (hasEmptyGenome(constructor)) {
         return true;
     }
-    auto nodeAddress = GenomeDecoder::getNodeAddress(constructor.genome, constructor.genomeSize, constructor.genomeCurrentNodeIndex);
+    auto nodeAddress = GenomeDecoder::getNodeAddress(constructor.genome, constructor.genomeSize, constructor.currentNodeIndex);
     auto nextNodeBytes = Const::CellBasicBytes + getNextCellTypeDataSize(constructor.genome, constructor.genomeSize, nodeAddress);
     return nodeAddress + nextNodeBytes >= constructor.genomeSize;
 }
 
 __inline__ __device__ bool GenomeDecoder::isLastRepetition(Constructor const& constructor)
 {
-    return getNumRepetitions(constructor.genome) - 1 == constructor.genomeCurrentRepetition;
+    return getNumRepetitions(constructor.genome) - 1 == constructor.currentRepetition;
 }
 
 __inline__ __device__ bool GenomeDecoder::hasInfiniteRepetitions(Constructor const& constructor)
@@ -331,7 +331,7 @@ __inline__ __device__ bool GenomeDecoder::hasEmptyGenome(Constructor const& cons
 {
     if (constructor.genomeSize <= Const::GenomeHeaderSize) {
         CUDA_CHECK(constructor.genomeSize == Const::GenomeHeaderSize)
-        CUDA_CHECK(constructor.genomeCurrentNodeIndex == 0)
+        CUDA_CHECK(constructor.currentNodeIndex == 0)
         return true;
     }
     return false;
@@ -342,7 +342,7 @@ __inline__ __device__ bool GenomeDecoder::isFinished(Constructor const& construc
     if (hasEmptyGenome(constructor)) {
         return true;
     }
-    return getNumBranches(constructor.genome) <= constructor.genomeCurrentBranch;
+    return getNumBranches(constructor.genome) <= constructor.currentBranch;
 }
 
 template <typename CellTypeSource, typename CellTypeTarget>

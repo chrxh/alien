@@ -113,7 +113,7 @@ public:
 
     // Simulated preview
     void newPreview(CollectionDescription const& data);
-    void calcTimestepsForPreview(uint64_t timesteps);
+    void calcTimestepsForPreview(std::chrono::milliseconds const& duration);
     CollectionDescription getPreviewData();
 
     // Only for tests
@@ -146,6 +146,7 @@ private:
     std::atomic<int> _syncSimulationWithRenderingRatio{2};
     std::atomic<int> _accessState{0};  //0 = worker thread has access, 1 = require access from other thread, 2 = access granted to other thread
     std::atomic<bool> _isSimulationRunning{false};
+    std::atomic<bool> _isPreviewRunning{false};
     std::atomic<bool> _isShutdown{false};
     ExceptionData _exceptionData;
 

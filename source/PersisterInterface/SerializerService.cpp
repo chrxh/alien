@@ -163,7 +163,7 @@ namespace
     auto constexpr Id_DefenderGenome_Mode = 0;
 
     auto constexpr Id_ConstructorGenome_New_AutoTriggerInterval = 0;
-    auto constexpr Id_ConstructorGenome_New_ConstructGeneIndex = 1;
+    auto constexpr Id_ConstructorGenome_New_GeneIndex = 1;
     auto constexpr Id_ConstructorGenome_New_ConstructionActivationTime = 2;
     auto constexpr Id_ConstructorGenome_New_ConstructionAngle = 3;
 
@@ -240,7 +240,7 @@ namespace cereal
         ConstructorGenomeDescription_New defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_ConstructorGenome_New_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
-        loadSave(task, auxiliaries, Id_ConstructorGenome_New_ConstructGeneIndex, data._constructGeneIndex, defaultObject._constructGeneIndex);
+        loadSave(task, auxiliaries, Id_ConstructorGenome_New_GeneIndex, data._geneIndex, defaultObject._geneIndex);
         loadSave(
             task,
             auxiliaries,
@@ -676,16 +676,17 @@ namespace
 
     auto constexpr Id_Constructor_AutoTriggerInterval = 0;
     auto constexpr Id_Constructor_ConstructionActivationTime = 1;
-    auto constexpr Id_Constructor_GenomeCurrentNodeIndex = 2;
-    auto constexpr Id_Constructor_GenomeGeneration = 3;
-    auto constexpr Id_Constructor_ConstructionAngle1 = 4;
-    auto constexpr Id_Constructor_ConstructionAngle2 = 5;
-    auto constexpr Id_Constructor_OffspringCreatureId = 6;
-    auto constexpr Id_Constructor_OffspringMutationId = 7;
-    auto constexpr Id_Constructor_GenomeCurrentRepetition = 8;
-    auto constexpr Id_Constructor_LastConstructedCellId = 9;
-    auto constexpr Id_Constructor_NumInheritedGenomeNodes = 10;
-    auto constexpr Id_Constructor_GenomeCurrentBranch = 11;
+    auto constexpr Id_Constructor_GeneIndex = 2;
+    auto constexpr Id_Constructor_CurrentNodeIndex = 3;
+    auto constexpr Id_Constructor_Generation = 4;
+    auto constexpr Id_Constructor_ConstructionAngle = 5;
+    auto constexpr Id_Constructor_ConstructionAngle2 = 6;
+    auto constexpr Id_Constructor_OffspringCreatureId = 7;
+    auto constexpr Id_Constructor_OffspringMutationId = 8;
+    auto constexpr Id_Constructor_CurrentRepetition = 9;
+    auto constexpr Id_Constructor_LastConstructedCellId = 10;
+    auto constexpr Id_Constructor_NumInheritedGenomeNodes = 11;
+    auto constexpr Id_Constructor_CurrentBranch = 12;
 
     auto constexpr Id_Defender_Mode = 0;
 
@@ -835,16 +836,17 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Constructor_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
         loadSave(task, auxiliaries, Id_Constructor_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
+        loadSave(task, auxiliaries, Id_Constructor_GeneIndex, data._geneIndex, defaultObject._geneIndex);
         loadSave(task, auxiliaries, Id_Constructor_LastConstructedCellId, data._lastConstructedCellId, defaultObject._lastConstructedCellId);
-        loadSave(task, auxiliaries, Id_Constructor_GenomeCurrentNodeIndex, data._genomeCurrentNodeIndex, defaultObject._genomeCurrentNodeIndex);
-        loadSave(task, auxiliaries, Id_Constructor_GenomeCurrentRepetition, data._genomeCurrentRepetition, defaultObject._genomeCurrentRepetition);
-        loadSave(task, auxiliaries, Id_Constructor_GenomeCurrentBranch, data._genomeCurrentBranch, defaultObject._genomeCurrentBranch);
+        loadSave(task, auxiliaries, Id_Constructor_CurrentNodeIndex, data._currentNodeIndex, defaultObject._currentNodeIndex);
+        loadSave(task, auxiliaries, Id_Constructor_CurrentRepetition, data._currentRepetition, defaultObject._currentRepetition);
+        loadSave(task, auxiliaries, Id_Constructor_CurrentBranch, data._currentBranch, defaultObject._currentBranch);
         loadSave(task, auxiliaries, Id_Constructor_OffspringCreatureId, data._offspringCreatureId, defaultObject._offspringCreatureId);
         loadSave(task, auxiliaries, Id_Constructor_OffspringMutationId, data._offspringMutationId, defaultObject._offspringMutationId);
-        loadSave(task, auxiliaries, Id_Constructor_GenomeGeneration, data._genomeGeneration, defaultObject._genomeGeneration);
-        loadSave(task, auxiliaries, Id_Constructor_ConstructionAngle1, data._constructionAngle1, defaultObject._constructionAngle1);
+        loadSave(task, auxiliaries, Id_Constructor_Generation, data._generation, defaultObject._generation);
+        loadSave(task, auxiliaries, Id_Constructor_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
         loadSave(task, auxiliaries, Id_Constructor_ConstructionAngle2, data._constructionAngle2, defaultObject._constructionAngle2);
-        loadSave(task, auxiliaries, Id_Constructor_NumInheritedGenomeNodes, data._numInheritedGenomeNodes, defaultObject._numInheritedGenomeNodes);
+        loadSave(task, auxiliaries, Id_Constructor_NumInheritedGenomeNodes, data._numExpectedCells, defaultObject._numExpectedCells);
         processLoadSaveMap(task, ar, auxiliaries);
 
         if (task == SerializationTask::Load) {

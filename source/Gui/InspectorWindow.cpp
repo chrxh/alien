@@ -417,8 +417,8 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                     printOverlayMessage("Genome injected");
                     desc._genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeEditorWindow::get().getCurrentGenome());
                     if constexpr (std::is_same<Description, ConstructorDescription>()) {
-                        desc._genomeCurrentNodeIndex = 0;
-                        desc.numInheritedGenomeNodes(0);
+                        desc._currentNodeIndex = 0;
+                        desc.numExpectedCells(0);
                     }
                 }
                 ImGui::TreePop();
@@ -440,7 +440,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
 
                 AlienGui::InputInt(
                     AlienGui::InputIntParameters().name("Generation").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeGenerationTooltip),
-                    desc._genomeGeneration);
+                    desc._generation);
                 ImGui::TreePop();
             }
 
@@ -478,16 +478,16 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
                 if constexpr (std::is_same<Description, ConstructorDescription>()) {
                     AlienGui::InputInt(
                         AlienGui::InputIntParameters().name("Current branch index").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentBranchTooltip),
-                        desc._genomeCurrentBranch);
+                        desc._currentBranch);
                     AlienGui::InputInt(
                         AlienGui::InputIntParameters()
                             .name("Current repetition index")
                             .textWidth(GenomeTabTextWidth)
                             .tooltip(Const::GenomeCurrentRepetitionTooltip),
-                        desc._genomeCurrentRepetition);
+                        desc._currentRepetition);
                     AlienGui::InputInt(
                         AlienGui::InputIntParameters().name("Current cell index").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentCellTooltip),
-                        desc._genomeCurrentNodeIndex);
+                        desc._currentNodeIndex);
                 }
                 ImGui::TreePop();
             }
@@ -574,7 +574,7 @@ void _InspectorWindow::processConstructorContent(ConstructorDescription& constru
                 .textWidth(CellTypeTextWidth)
                 .format("%.1f")
                 .tooltip(Const::GenomeConstructorAngle1Tooltip),
-            constructor._constructionAngle1);
+            constructor._constructionAngle);
         AlienGui::InputFloat(
             AlienGui::InputFloatParameters()
                 .name("Construction angle #2")
@@ -768,16 +768,16 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
         auto& constructor = std::get<ConstructorDescription>(cell._cellTypeData);
         auto numNodes = GenomeDescriptionConverterService::get().convertNodeAddressToNodeIndex(constructor._genome, toInt(constructor._genome.size()));
         if (numNodes > 0) {
-            constructor._genomeCurrentNodeIndex = ((constructor._genomeCurrentNodeIndex % numNodes) + numNodes) % numNodes;
+            constructor._currentNodeIndex = ((constructor._currentNodeIndex % numNodes) + numNodes) % numNodes;
         } else {
-            constructor._genomeCurrentNodeIndex = 0;
+            constructor._currentNodeIndex = 0;
         }
 
         auto numRepetitions = GenomeDescriptionConverterService::get().getNumRepetitions(constructor._genome);
         if (numRepetitions != std::numeric_limits<int>::max()) {
-            constructor._genomeCurrentRepetition = ((constructor._genomeCurrentRepetition % numRepetitions) + numRepetitions) % numRepetitions;
+            constructor._currentRepetition = ((constructor._currentRepetition % numRepetitions) + numRepetitions) % numRepetitions;
         } else {
-            constructor._genomeCurrentRepetition = 0;
+            constructor._currentRepetition = 0;
         }
 
         constructor._constructionActivationTime = ((constructor._constructionActivationTime % MAX_ACTIVATION_TIME) + MAX_ACTIVATION_TIME) % MAX_ACTIVATION_TIME;
@@ -787,7 +787,7 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
         if (constructor._autoTriggerInterval < 0) {
             constructor._autoTriggerInterval = 0;
         }
-        constructor._genomeGeneration = std::max(0, constructor._genomeGeneration);
+        constructor._generation = std::max(0, constructor._generation);
     } break;
     case CellType_Sensor: {
         auto& sensor = std::get<SensorDescription>(cell._cellTypeData);

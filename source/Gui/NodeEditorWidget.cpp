@@ -176,7 +176,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 }
                 genes.emplace_back(text);
             }
-            AlienGui::Combo(AlienGui::ComboParameters().name("Gene").values(genes).textWidth(rightColumnWidth), constructor._constructGeneIndex);
+            AlienGui::Combo(AlienGui::ComboParameters().name("Gene").values(genes).textWidth(rightColumnWidth), constructor._geneIndex);
 
             // Auto activation interval
             AlienGui::InputOptionalInt(

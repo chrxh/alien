@@ -435,11 +435,11 @@ void EngineWorker::newPreview(CollectionDescription const& data)
     _simulationCudaFacade->setSimulationData(dataTO);
 }
 
-void EngineWorker::calcTimestepsForPreview(uint64_t timesteps)
+void EngineWorker::calcTimestepsForPreview(std::chrono::milliseconds const& duration)
 {
     EngineWorkerGuard access(this);
 
-    _simulationCudaFacade->calcTimestepsForPreview(timesteps);
+    _simulationCudaFacade->calcTimestepsForPreview(duration);
 }
 
 CollectionDescription EngineWorker::getPreviewData()

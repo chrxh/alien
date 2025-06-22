@@ -9,13 +9,12 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/SpaceCalculator.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "Shader.h"
 #include "SimulationScrollbar.h"
 #include "Viewport.h"
 #include "SimulationInteractionController.h"
 #include "StyleRepository.h"
-#include "CellTypeStrings.h"
 
 namespace
 {
@@ -191,7 +190,7 @@ void SimulationView::draw()
         auto bottom = ImGui::GetMainViewport()->Pos.y + ImGui::GetMainViewport()->Size.y;
         auto maxLength = std::max(right, bottom);
 
-        AlienImGui::RotateStart(drawList);
+        AlienGui::RotateStart(drawList);
         auto font = styleRep.getReefLargeFont();
         auto text = "Rendering disabled";
         ImVec4 clipRect(-100000.0f, -100000.0f, 100000.0f, 100000.0f);
@@ -209,7 +208,7 @@ void SimulationView::draw()
                     false);
             }
         }
-        AlienImGui::RotateEnd(45.0f, drawList);
+        AlienGui::RotateEnd(45.0f, drawList);
     }
 }
 
@@ -302,13 +301,12 @@ void SimulationView::updateImageFromSimulation()
     if (_overlay) {
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
         auto parameters = _simulationFacade->getSimulationParameters();
-        auto timestep = _simulationFacade->getCurrentTimestep();
         for (auto const& overlayElement : _overlay->elements) {
             if (_cellDetailOverlayActive && overlayElement.cell) {
                 {
-                    auto fontSizeUnit = std::min(40.0f, Viewport::get().getZoomFactor()) / 2;
+                    auto fontSizeUnit = std::min(scale(40.0f), Viewport::get().getZoomFactor()) / 2;
                     auto viewPos = Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.3f}, parameters.borderlessRendering.value);
-                    auto text = Const::CellTypeToStringMap.at(overlayElement.cellType);
+                    auto text = Const::CellTypeStrings.at(overlayElement.cellType);
                     drawList->AddText(
                         StyleRepository::get().getMediumFont(),
                         fontSizeUnit,

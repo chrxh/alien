@@ -43,7 +43,7 @@ protected:
             return ConstructorDescription()
                 .autoTriggerInterval(7)
                 .constructionActivationTime(4)
-                .constructionAngle1(34.4f)
+                .constructionAngle(34.4f)
                 .constructionAngle2(-45.5f)
                 .lastConstructedCellId(45ull);
         case CellType_Sensor:

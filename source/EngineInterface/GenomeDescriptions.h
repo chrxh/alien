@@ -54,7 +54,7 @@ struct ConstructorGenomeDescription_New
     auto operator<=>(ConstructorGenomeDescription_New const&) const = default;
 
     MEMBER(ConstructorGenomeDescription_New, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering
-    MEMBER(ConstructorGenomeDescription_New, int, constructGeneIndex, 0);
+    MEMBER(ConstructorGenomeDescription_New, int, geneIndex, 0);
     MEMBER(ConstructorGenomeDescription_New, int, constructionActivationTime, 100);
     MEMBER(ConstructorGenomeDescription_New, float, constructionAngle, 0.0f);
 };

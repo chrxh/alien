@@ -324,15 +324,15 @@ CellDescription DescriptionConverterService::createCellDescription(
             cellTO.cellTypeData.constructor.autoTriggerInterval > 0 ? std::make_optional(cellTO.cellTypeData.constructor.autoTriggerInterval) : std::nullopt;
         constructor._constructionActivationTime = cellTO.cellTypeData.constructor.constructionActivationTime;
         convert(collectionTO, cellTO.cellTypeData.constructor.genomeSize, cellTO.cellTypeData.constructor.genomeDataIndex, constructor._genome);
-        constructor._numInheritedGenomeNodes = cellTO.cellTypeData.constructor.numInheritedGenomeNodes;
+        constructor._numExpectedCells = cellTO.cellTypeData.constructor.numExpectedCells;
         constructor._lastConstructedCellId = cellTO.cellTypeData.constructor.lastConstructedCellId;
-        constructor._genomeCurrentNodeIndex = cellTO.cellTypeData.constructor.genomeCurrentNodeIndex;
-        constructor._genomeCurrentRepetition = cellTO.cellTypeData.constructor.genomeCurrentRepetition;
-        constructor._genomeCurrentBranch = cellTO.cellTypeData.constructor.genomeCurrentBranch;
+        constructor._currentNodeIndex = cellTO.cellTypeData.constructor.currentNodeIndex;
+        constructor._currentRepetition = cellTO.cellTypeData.constructor.currentRepetition;
+        constructor._currentBranch = cellTO.cellTypeData.constructor.currentBranch;
         constructor._offspringCreatureId = cellTO.cellTypeData.constructor.offspringCreatureId;
         constructor._offspringMutationId = cellTO.cellTypeData.constructor.offspringMutationId;
-        constructor._genomeGeneration = cellTO.cellTypeData.constructor.genomeGeneration;
-        constructor._constructionAngle1 = cellTO.cellTypeData.constructor.constructionAngle1;
+        constructor._generation = cellTO.cellTypeData.constructor.generation;
+        constructor._constructionAngle = cellTO.cellTypeData.constructor.constructionAngle;
         constructor._constructionAngle2 = cellTO.cellTypeData.constructor.constructionAngle2;
         result._cellTypeData = constructor;
     } break;
@@ -365,7 +365,7 @@ CellDescription DescriptionConverterService::createCellDescription(
         injector._mode = cellTO.cellTypeData.injector.mode;
         injector._counter = cellTO.cellTypeData.injector.counter;
         convert(collectionTO, cellTO.cellTypeData.injector.genomeSize, cellTO.cellTypeData.injector.genomeDataIndex, injector._genome);
-        injector._genomeGeneration = cellTO.cellTypeData.injector.genomeGeneration;
+        injector._generation = cellTO.cellTypeData.injector.generation;
         result._cellTypeData = injector;
     } break;
     case CellType_Muscle: {
@@ -517,7 +517,7 @@ GenomeDescription_New DescriptionConverterService::createGenomeDescription(
                 constructorDesc._autoTriggerInterval = nodeTO->cellTypeData.constructor.autoTriggerInterval > 0
                     ? std::make_optional(nodeTO->cellTypeData.constructor.autoTriggerInterval)
                     : std::nullopt;
-                constructorDesc._constructGeneIndex = nodeTO->cellTypeData.constructor.constructGeneIndex;
+                constructorDesc._geneIndex = nodeTO->cellTypeData.constructor.geneIndex;
                 constructorDesc._constructionActivationTime = nodeTO->cellTypeData.constructor.constructionActivationTime;
                 constructorDesc._constructionAngle = nodeTO->cellTypeData.constructor.constructionAngle;
                 nodeDesc._cellTypeData = constructorDesc;
@@ -675,7 +675,7 @@ void DescriptionConverterService::convertGenomeToTO(
                 auto const& constructorDesc = std::get<ConstructorGenomeDescription_New>(nodeDesc._cellTypeData);
                 auto& constructorTO = nodeTO.cellTypeData.constructor;
                 constructorTO.autoTriggerInterval = static_cast<uint8_t>(constructorDesc._autoTriggerInterval.value_or(0));
-                constructorTO.constructGeneIndex = constructorDesc._constructGeneIndex;
+                constructorTO.geneIndex = constructorDesc._geneIndex;
                 constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
                 constructorTO.constructionAngle = constructorDesc._constructionAngle;
             } break;
@@ -835,15 +835,15 @@ void DescriptionConverterService::convertCellToTO(
         constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
         CHECK(constructorDesc._genome.size() >= Const::GenomeHeaderSize)
         convert(heap, constructorTO.genomeSize, constructorTO.genomeDataIndex, constructorDesc._genome);
-        constructorTO.numInheritedGenomeNodes = static_cast<uint16_t>(constructorDesc._numInheritedGenomeNodes);
+        constructorTO.numExpectedCells = static_cast<uint16_t>(constructorDesc._numExpectedCells);
         constructorTO.lastConstructedCellId = constructorDesc._lastConstructedCellId;
-        constructorTO.genomeCurrentNodeIndex = static_cast<uint16_t>(constructorDesc._genomeCurrentNodeIndex);
-        constructorTO.genomeCurrentRepetition = static_cast<uint16_t>(constructorDesc._genomeCurrentRepetition);
-        constructorTO.genomeCurrentBranch = static_cast<uint8_t>(constructorDesc._genomeCurrentBranch);
+        constructorTO.currentNodeIndex = static_cast<uint16_t>(constructorDesc._currentNodeIndex);
+        constructorTO.currentRepetition = static_cast<uint16_t>(constructorDesc._currentRepetition);
+        constructorTO.currentBranch = static_cast<uint8_t>(constructorDesc._currentBranch);
         constructorTO.offspringCreatureId = constructorDesc._offspringCreatureId;
         constructorTO.offspringMutationId = constructorDesc._offspringMutationId;
-        constructorTO.genomeGeneration = constructorDesc._genomeGeneration;
-        constructorTO.constructionAngle1 = constructorDesc._constructionAngle1;
+        constructorTO.generation = constructorDesc._generation;
+        constructorTO.constructionAngle = constructorDesc._constructionAngle;
         constructorTO.constructionAngle2 = constructorDesc._constructionAngle2;
     } break;
     case CellType_Sensor: {
@@ -875,7 +875,7 @@ void DescriptionConverterService::convertCellToTO(
         injectorTO.counter = injectorDesc._counter;
         CHECK(injectorDesc._genome.size() >= Const::GenomeHeaderSize)
         convert(heap, injectorTO.genomeSize, injectorTO.genomeDataIndex, injectorDesc._genome);
-        injectorTO.genomeGeneration = injectorDesc._genomeGeneration;
+        injectorTO.generation = injectorDesc._generation;
     } break;
     case CellType_Muscle: {
         auto const& muscleDesc = std::get<MuscleDescription>(cellDesc._cellTypeData);

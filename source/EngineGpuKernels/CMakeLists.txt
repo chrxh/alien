@@ -14,6 +14,7 @@ add_library(EngineGpuKernels
     ConstantMemory.cuh
     Constants.cuh
     ConstructorProcessor.cuh
+    ConstructorProcessor_New.cuh
     CudaCollectionTOProvider.cu
     CudaCollectionTOProvider.cuh
     CudaMemoryManager.cuh

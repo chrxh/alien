@@ -642,7 +642,7 @@ TEST_F(MutationTests, propertiesMutation)
     int byteIndex = 0;
 
     auto data = CollectionDescription().addCells(
-        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(byteIndex))});
+        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).currentNodeIndex(byteIndex))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -654,7 +654,7 @@ TEST_F(MutationTests, propertiesMutation)
 
     auto actualConstructor = std::get<ConstructorDescription>(actualCellById.at(1)._cellTypeData);
     EXPECT_TRUE(comparePropertiesMutation(genome, actualConstructor._genome));
-    EXPECT_EQ(byteIndex, actualConstructor._genomeCurrentNodeIndex);
+    EXPECT_EQ(byteIndex, actualConstructor._currentNodeIndex);
 }
 
 TEST_F(MutationTests, neuronDataMutation)
@@ -663,7 +663,7 @@ TEST_F(MutationTests, neuronDataMutation)
     int byteIndex = 0;
 
     auto data = CollectionDescription().addCells(
-        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(byteIndex))});
+        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).currentNodeIndex(byteIndex))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -675,7 +675,7 @@ TEST_F(MutationTests, neuronDataMutation)
 
     auto actualConstructor = std::get<ConstructorDescription>(actualCellById.at(1)._cellTypeData);
     EXPECT_TRUE(compareNeuronDataMutation(genome, actualConstructor._genome));
-    EXPECT_EQ(byteIndex, actualConstructor._genomeCurrentNodeIndex);
+    EXPECT_EQ(byteIndex, actualConstructor._currentNodeIndex);
 }
 
 TEST_F(MutationTests, geometryMutation)
@@ -684,7 +684,7 @@ TEST_F(MutationTests, geometryMutation)
     int byteIndex = 0;
 
     auto data = CollectionDescription().addCells(
-        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(byteIndex))});
+        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).currentNodeIndex(byteIndex))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -696,7 +696,7 @@ TEST_F(MutationTests, geometryMutation)
 
     auto actualConstructor = std::get<ConstructorDescription>(actualCellById.at(1)._cellTypeData);
     EXPECT_TRUE(compareGeometryMutation(genome, actualConstructor._genome));
-    EXPECT_EQ(byteIndex, actualConstructor._genomeCurrentNodeIndex);
+    EXPECT_EQ(byteIndex, actualConstructor._currentNodeIndex);
 }
 
 TEST_F(MutationTests, individualGeometryMutation)
@@ -705,7 +705,7 @@ TEST_F(MutationTests, individualGeometryMutation)
     int byteIndex = 0;
 
     auto data = CollectionDescription().addCells(
-        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(byteIndex))});
+        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).currentNodeIndex(byteIndex))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -717,7 +717,7 @@ TEST_F(MutationTests, individualGeometryMutation)
 
     auto actualConstructor = std::get<ConstructorDescription>(actualCellById.at(1)._cellTypeData);
     EXPECT_TRUE(compareIndividualGeometryMutation(genome, actualConstructor._genome));
-    EXPECT_EQ(byteIndex, actualConstructor._genomeCurrentNodeIndex);
+    EXPECT_EQ(byteIndex, actualConstructor._currentNodeIndex);
 }
 
 TEST_F(MutationTests, cellTypeMutation)
@@ -725,7 +725,7 @@ TEST_F(MutationTests, cellTypeMutation)
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
     auto data = CollectionDescription().addCells(
-        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(3))});
+        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).currentNodeIndex(3))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -737,7 +737,7 @@ TEST_F(MutationTests, cellTypeMutation)
 
     auto actualConstructor = std::get<ConstructorDescription>(actualCellById.at(1)._cellTypeData);
     EXPECT_TRUE(compareCellTypeMutation(genome, actualConstructor._genome));
-    EXPECT_EQ(3, actualConstructor._genomeCurrentNodeIndex);
+    EXPECT_EQ(3, actualConstructor._currentNodeIndex);
 }
 
 TEST_F(MutationTests, insertMutation_emptyGenome)
@@ -765,7 +765,7 @@ TEST_F(MutationTests, insertMutation)
 
     auto data = CollectionDescription().addCells({CellDescription()
                                                 .id(1)
-                                                .cellTypeData(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(0))
+                                                .cellTypeData(ConstructorDescription().genome(genome).currentNodeIndex(0))
                                                 
                                                 .color(genomeCellColors[0])});
 
@@ -779,7 +779,7 @@ TEST_F(MutationTests, insertMutation)
 
     auto actualConstructor = std::get<ConstructorDescription>(actualCellById.at(1)._cellTypeData);
     EXPECT_TRUE(compareInsertMutation(genome, actualConstructor._genome));
-    EXPECT_EQ(0, actualConstructor._genomeCurrentNodeIndex);
+    EXPECT_EQ(0, actualConstructor._currentNodeIndex);
 }
 
 TEST_F(MutationTests, deleteMutation_eraseSmallGenome)
@@ -789,7 +789,7 @@ TEST_F(MutationTests, deleteMutation_eraseSmallGenome)
     }));
 
     auto data = CollectionDescription().addCells(
-        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(0))});
+        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).currentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->testOnly_mutate(1, MutationType::Deletion);
@@ -799,7 +799,7 @@ TEST_F(MutationTests, deleteMutation_eraseSmallGenome)
 
     auto actualConstructor = std::get<ConstructorDescription>(actualCellById.at(1)._cellTypeData);
     EXPECT_EQ(GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription()).size(), actualConstructor._genome.size());
-    EXPECT_EQ(0, actualConstructor._genomeCurrentNodeIndex);
+    EXPECT_EQ(0, actualConstructor._currentNodeIndex);
 }
 
 TEST_F(MutationTests, deleteMutation_eraseLargeGenome_preserveSelfReplication)
@@ -807,7 +807,7 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_preserveSelfReplication)
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
     auto data = CollectionDescription().addCells(
-        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(0))});
+        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).currentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -826,7 +826,7 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_preserveSelfReplication)
         auto cellType = cell.getCellType();
         EXPECT_TRUE(cellType == CellType_Constructor || cellType == CellType_Injector);
     }
-    EXPECT_EQ(0, actualConstructor._genomeCurrentNodeIndex);
+    EXPECT_EQ(0, actualConstructor._currentNodeIndex);
 }
 
 TEST_F(MutationTests, deleteMutation_eraseLargeGenome_changeSelfReplication)
@@ -837,7 +837,7 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_changeSelfReplication)
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
     auto data = CollectionDescription().addCells(
-        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(0))});
+        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).currentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -850,7 +850,7 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_changeSelfReplication)
     auto actualConstructor = std::get<ConstructorDescription>(actualCellById.at(1)._cellTypeData);
 
     EXPECT_EQ(GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription()).size(), actualConstructor._genome.size());
-    EXPECT_EQ(0, actualConstructor._genomeCurrentNodeIndex);
+    EXPECT_EQ(0, actualConstructor._currentNodeIndex);
 }
 
 TEST_F(MutationTests, deleteMutation_partiallyEraseGenome)
@@ -858,7 +858,7 @@ TEST_F(MutationTests, deleteMutation_partiallyEraseGenome)
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
     auto data = CollectionDescription().addCells(
-        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(0))});
+        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).currentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -870,7 +870,7 @@ TEST_F(MutationTests, deleteMutation_partiallyEraseGenome)
 
     auto actualConstructor = std::get<ConstructorDescription>(actualCellById.at(1)._cellTypeData);
     EXPECT_TRUE(compareDeleteMutation(genome, actualConstructor._genome));
-    EXPECT_EQ(0, actualConstructor._genomeCurrentNodeIndex);
+    EXPECT_EQ(0, actualConstructor._currentNodeIndex);
 }
 
 TEST_F(MutationTests, deleteMutation_selfReplicatorWithGenomeBelowMinSize)
@@ -936,7 +936,7 @@ TEST_F(MutationTests, duplicateMutation)
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
     auto data = CollectionDescription().addCells(
-        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(0))});
+        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).currentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 100; ++i) {
@@ -948,7 +948,7 @@ TEST_F(MutationTests, duplicateMutation)
 
     auto actualConstructor = std::get<ConstructorDescription>(actualCellById.at(1)._cellTypeData);
     EXPECT_TRUE(compareInsertMutation(genome, actualConstructor._genome));
-    EXPECT_EQ(0, actualConstructor._genomeCurrentNodeIndex);
+    EXPECT_EQ(0, actualConstructor._currentNodeIndex);
 }
 
 TEST_F(MutationTests, translateMutation)
@@ -956,7 +956,7 @@ TEST_F(MutationTests, translateMutation)
     auto genome = createGenomeWithMultipleCellsWithDifferentFunctions();
 
     auto data = CollectionDescription().addCells(
-        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(0))});
+        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).currentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -984,7 +984,7 @@ TEST_F(MutationTests, cellColorMutation)
     auto genome = createGenomeWithUniformColorPerSubgenome();
 
     auto data = CollectionDescription().addCells(
-        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(0))});
+        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).currentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -1014,7 +1014,7 @@ TEST_F(MutationTests, subgenomeColorMutation)
     auto genome = createGenomeWithUniformColorPerSubgenome();
 
     auto data = CollectionDescription().addCells(
-        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(0))});
+        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).currentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {
@@ -1044,7 +1044,7 @@ TEST_F(MutationTests, genomeColorMutation)
     auto genome = createGenomeWithUniformColor();
 
     auto data = CollectionDescription().addCells(
-        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).genomeCurrentNodeIndex(0))});
+        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome).currentNodeIndex(0))});
 
     _simulationFacade->setSimulationData(data);
     for (int i = 0; i < 10000; ++i) {

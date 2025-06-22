@@ -112,7 +112,7 @@ public:
 
     // Simulated preview
     void newPreview(CollectionDescription const& data) override;
-    void calcTimestepsForPreview(uint64_t timesteps) override;
+    void calcTimestepsForPreview(std::chrono::milliseconds const& duration) override;
     CollectionDescription getPreviewData() override;
 
     // for tests only

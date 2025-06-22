@@ -78,7 +78,7 @@ TEST_F(InjectorTests, matchButNoInjection)
         CellDescription()
             .id(3)
             .pos({9.0f, 10.0f})
-            .cellTypeData(ConstructorDescription().numInheritedGenomeNodes(1)),
+            .cellTypeData(ConstructorDescription().numExpectedCells(1)),
     });
     data.addConnection(1, 2);
 
@@ -115,7 +115,7 @@ TEST_F(InjectorTests, injection)
             .pos({11.0f, 10.0f})
             .cellTypeData(OscillatorDescription().autoTriggerInterval(1))
             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(ConstructorDescription().numInheritedGenomeNodes(1)),
+        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(ConstructorDescription().numExpectedCells(1)),
     });
     data.addConnection(1, 2);
 
@@ -158,7 +158,7 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_failed)
         CellDescription()
             .id(3)
             .pos({9.0f, 10.0f})
-            .cellTypeData(ConstructorDescription().genome(otherGenome).numInheritedGenomeNodes(2)),
+            .cellTypeData(ConstructorDescription().genome(otherGenome).numExpectedCells(2)),
     });
     data.addConnection(1, 2);
 
@@ -205,7 +205,7 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_success)
         CellDescription()
             .id(4)
             .pos({7.0f, 10.0f})
-            .cellTypeData(ConstructorDescription().numInheritedGenomeNodes(2)),
+            .cellTypeData(ConstructorDescription().numExpectedCells(2)),
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);

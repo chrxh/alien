@@ -95,21 +95,26 @@ struct ConstructorDescription
     MEMBER(ConstructorDescription, int, constructionActivationTime, 100);
 
     // Genome data
+    MEMBER(ConstructorDescription, int, geneIndex, 0);
+    MEMBER(ConstructorDescription, float, constructionAngle, 0);
+    MEMBER(ConstructorDescription, int, numExpectedCells, 0);
+    MEMBER(ConstructorDescription, int, generation, 0);
+
+    // DEPRECATED
     MEMBER(ConstructorDescription, std::vector<uint8_t>, genome, {});
-    MEMBER(ConstructorDescription, int, numInheritedGenomeNodes, 0);
-    MEMBER(ConstructorDescription, int, genomeGeneration, 0);
-    MEMBER(ConstructorDescription, float, constructionAngle1, 0);
     MEMBER(ConstructorDescription, float, constructionAngle2, 0);
 
     // Process data
     MEMBER(ConstructorDescription, uint64_t, lastConstructedCellId, 0);
-    MEMBER(ConstructorDescription, int, genomeCurrentNodeIndex, 0);
-    MEMBER(ConstructorDescription, int, genomeCurrentRepetition, 0);
-    MEMBER(ConstructorDescription, int, genomeCurrentBranch, 0);
+    MEMBER(ConstructorDescription, int, currentNodeIndex, 0);
+    MEMBER(ConstructorDescription, int, currentRepetition, 0);
+    MEMBER(ConstructorDescription, int, currentBranch, 0);
+
+    // DEPRECATED
     MEMBER(ConstructorDescription, uint64_t, offspringCreatureId, 0);
     MEMBER(ConstructorDescription, int, offspringMutationId, 0);
 
-    bool isGenomeInherited() const { return _numInheritedGenomeNodes != 0; }
+    bool isGenomeInherited() const { return _numExpectedCells != 0; }
 };
 
 struct SensorDescription
@@ -150,7 +155,7 @@ struct InjectorDescription
     MEMBER(InjectorDescription, InjectorMode, mode, InjectorMode_InjectAll);
     MEMBER(InjectorDescription, int, counter, 0);
     MEMBER(InjectorDescription, std::vector<uint8_t>, genome, {});
-    MEMBER(InjectorDescription, int, genomeGeneration, 0);
+    MEMBER(InjectorDescription, int, generation, 0);
 };
 
 struct AutoBendingDescription

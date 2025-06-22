@@ -128,7 +128,7 @@ TEST_F(EnergyFlowTests_New, energyFlowsNotToActiveConstructor)
     for (int i = 0; i < 20; ++i) {
         auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
         if (i == 19) {
-            cell.cellTypeData(ConstructorDescription().genome(genome).autoTriggerInterval(0).genomeCurrentBranch(1));
+            cell.cellTypeData(ConstructorDescription().genome(genome).autoTriggerInterval(0).currentBranch(1));
         }
         data.addCell(cell);
         if (i > 0) {

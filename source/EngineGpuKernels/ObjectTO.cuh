@@ -58,19 +58,23 @@ struct ConstructorTO
     uint16_t constructionActivationTime;
 
     // Genome data
+    uint16_t geneIndex;
+    float constructionAngle;
+    uint16_t numExpectedCells;
+    uint32_t generation;
+
+    // DEPRECATED
     uint16_t genomeSize;
-    uint16_t numInheritedGenomeNodes;
-    uint16_t origGenomeSize;
     uint64_t genomeDataIndex;
-    uint32_t genomeGeneration;
-    float constructionAngle1;
     float constructionAngle2;
 
     // Process data
     uint64_t lastConstructedCellId;
-    uint16_t genomeCurrentNodeIndex;
-    uint16_t genomeCurrentRepetition;
-    uint8_t genomeCurrentBranch;
+    uint16_t currentNodeIndex;
+    uint16_t currentRepetition;
+    uint8_t currentBranch;
+
+    // DEPRECATED
     uint32_t offspringCreatureId;
     uint32_t offspringMutationId;
 };
@@ -105,7 +109,7 @@ struct InjectorTO
     uint32_t counter;
     uint16_t genomeSize;
     uint64_t genomeDataIndex;
-    uint32_t genomeGeneration;
+    uint32_t generation;
 };
 
 struct AutoBendingTO

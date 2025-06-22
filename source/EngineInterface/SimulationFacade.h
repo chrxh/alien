@@ -105,7 +105,7 @@ public:
 
     // Simulated preview
     virtual void newPreview(CollectionDescription const& data) = 0;
-    virtual void calcTimestepsForPreview(uint64_t timesteps) = 0;
+    virtual void calcTimestepsForPreview(std::chrono::milliseconds const& duration) = 0;
     virtual CollectionDescription getPreviewData() = 0;
 
     // Only for tests

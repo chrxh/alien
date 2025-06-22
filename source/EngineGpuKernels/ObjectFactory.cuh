@@ -110,7 +110,7 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(CollectionTO con
                 break;
             case CellTypeGenome_Constructor:
                 node.cellTypeData.constructor.autoTriggerInterval = nodeTO.cellTypeData.constructor.autoTriggerInterval;
-                node.cellTypeData.constructor.constructGeneIndex = nodeTO.cellTypeData.constructor.constructGeneIndex;
+                node.cellTypeData.constructor.geneIndex = nodeTO.cellTypeData.constructor.geneIndex;
                 node.cellTypeData.constructor.constructionActivationTime = nodeTO.cellTypeData.constructor.constructionActivationTime;
                 node.cellTypeData.constructor.constructionAngle = nodeTO.cellTypeData.constructor.constructionAngle;
                 break;
@@ -273,15 +273,15 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
             collectionTO.heap,
             cell->cellTypeData.constructor.genomeSize,
             cell->cellTypeData.constructor.genome);
-        cell->cellTypeData.constructor.numInheritedGenomeNodes = cellTO.cellTypeData.constructor.numInheritedGenomeNodes;
+        cell->cellTypeData.constructor.numExpectedCells = cellTO.cellTypeData.constructor.numExpectedCells;
         cell->cellTypeData.constructor.lastConstructedCellId = cellTO.cellTypeData.constructor.lastConstructedCellId;
-        cell->cellTypeData.constructor.genomeCurrentNodeIndex = cellTO.cellTypeData.constructor.genomeCurrentNodeIndex;
-        cell->cellTypeData.constructor.genomeCurrentRepetition = cellTO.cellTypeData.constructor.genomeCurrentRepetition;
-        cell->cellTypeData.constructor.genomeCurrentBranch = cellTO.cellTypeData.constructor.genomeCurrentBranch;
+        cell->cellTypeData.constructor.currentNodeIndex = cellTO.cellTypeData.constructor.currentNodeIndex;
+        cell->cellTypeData.constructor.currentRepetition = cellTO.cellTypeData.constructor.currentRepetition;
+        cell->cellTypeData.constructor.currentBranch = cellTO.cellTypeData.constructor.currentBranch;
         cell->cellTypeData.constructor.offspringCreatureId = cellTO.cellTypeData.constructor.offspringCreatureId;
         cell->cellTypeData.constructor.offspringMutationId = cellTO.cellTypeData.constructor.offspringMutationId;
-        cell->cellTypeData.constructor.genomeGeneration = cellTO.cellTypeData.constructor.genomeGeneration;
-        cell->cellTypeData.constructor.constructionAngle1 = cellTO.cellTypeData.constructor.constructionAngle1;
+        cell->cellTypeData.constructor.generation = cellTO.cellTypeData.constructor.generation;
+        cell->cellTypeData.constructor.constructionAngle = cellTO.cellTypeData.constructor.constructionAngle;
         cell->cellTypeData.constructor.constructionAngle2 = cellTO.cellTypeData.constructor.constructionAngle2;
         cell->cellTypeData.constructor.isReady = true;
     } break;
@@ -310,7 +310,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
             collectionTO.heap,
             cell->cellTypeData.injector.genomeSize,
             cell->cellTypeData.injector.genome);
-        cell->cellTypeData.injector.genomeGeneration = cellTO.cellTypeData.injector.genomeGeneration;
+        cell->cellTypeData.injector.generation = cellTO.cellTypeData.injector.generation;
     } break;
     case CellType_Muscle: {
         cell->cellTypeData.muscle.mode = cellTO.cellTypeData.muscle.mode;

@@ -48,7 +48,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
                     //if (otherCell->livingState == LivingState_UnderConstruction) {
                     //    return;
                     //}
-                    if (otherCell->cellTypeData.constructor.genomeCurrentNodeIndex != 0) {
+                    if (otherCell->cellTypeData.constructor.currentNodeIndex != 0) {
                         return;
                     }
                     if (!otherCell->tryLock()) {
@@ -74,7 +74,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
                     if (otherCell->cellType == CellType_Constructor) {
                         otherCell->cellTypeData.constructor.genome = targetGenome;
                         otherCell->cellTypeData.constructor.genomeSize = injector.genomeSize;
-                        otherCell->cellTypeData.constructor.numInheritedGenomeNodes = 0;
+                        otherCell->cellTypeData.constructor.numExpectedCells = 0;
                     } else {
                         otherCell->cellTypeData.injector.genome = targetGenome;
                         otherCell->cellTypeData.injector.genomeSize = injector.genomeSize;
@@ -109,7 +109,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
                     if (otherCell->cellType == CellType_Constructor) {
                         otherCell->cellTypeData.constructor.genome = targetGenome;
                         otherCell->cellTypeData.constructor.genomeSize = injector.genomeSize;
-                        otherCell->cellTypeData.constructor.numInheritedGenomeNodes = 0;
+                        otherCell->cellTypeData.constructor.numExpectedCells = 0;
                     } else {
                         otherCell->cellTypeData.injector.genome = targetGenome;
                         otherCell->cellTypeData.injector.genomeSize = injector.genomeSize;

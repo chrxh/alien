@@ -15,20 +15,20 @@ protected:
     {
         return GenomeDescription_New().genes({
             GeneDescription().nodes({
-                NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(0)),
-                NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(1)),
-                NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(2)),
+                NodeDescription().cellTypeData(ConstructorGenomeDescription_New().geneIndex(0)),
+                NodeDescription().cellTypeData(ConstructorGenomeDescription_New().geneIndex(1)),
+                NodeDescription().cellTypeData(ConstructorGenomeDescription_New().geneIndex(2)),
             }),
             GeneDescription().nodes({
-                NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(0)),
-                NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(1)),
-                NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(2)),
+                NodeDescription().cellTypeData(ConstructorGenomeDescription_New().geneIndex(0)),
+                NodeDescription().cellTypeData(ConstructorGenomeDescription_New().geneIndex(1)),
+                NodeDescription().cellTypeData(ConstructorGenomeDescription_New().geneIndex(2)),
                 NodeDescription(),
             }),
             GeneDescription().nodes({
-                NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(0)),
-                NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(1)),
-                NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(2)),
+                NodeDescription().cellTypeData(ConstructorGenomeDescription_New().geneIndex(0)),
+                NodeDescription().cellTypeData(ConstructorGenomeDescription_New().geneIndex(1)),
+                NodeDescription().cellTypeData(ConstructorGenomeDescription_New().geneIndex(2)),
                 NodeDescription(),
                 NodeDescription(),
             }),
@@ -104,9 +104,9 @@ TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyGene_withReferences)
             ASSERT_EQ(5, gene._nodes.size());
         }
         if (i != 2) {
-            EXPECT_EQ(0, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(0)._cellTypeData)._constructGeneIndex);
-            EXPECT_EQ(1, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(1)._cellTypeData)._constructGeneIndex);
-            EXPECT_EQ(3, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(2)._cellTypeData)._constructGeneIndex);
+            EXPECT_EQ(0, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(0)._cellTypeData)._geneIndex);
+            EXPECT_EQ(1, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(1)._cellTypeData)._geneIndex);
+            EXPECT_EQ(3, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(2)._cellTypeData)._geneIndex);
         }
     }
 }
@@ -121,9 +121,9 @@ TEST_F(GenomeDescriptionEditServiceTests_New, removeGene_middle)
     EXPECT_EQ(5, genome._genes.at(1)._nodes.size());
     for (int i = 0; i < 2; ++i) {
         auto const& gene = genome._genes.at(i);
-        EXPECT_EQ(0, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(0)._cellTypeData)._constructGeneIndex);
-        EXPECT_EQ(0, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(1)._cellTypeData)._constructGeneIndex);
-        EXPECT_EQ(1, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(2)._cellTypeData)._constructGeneIndex);
+        EXPECT_EQ(0, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(0)._cellTypeData)._geneIndex);
+        EXPECT_EQ(0, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(1)._cellTypeData)._geneIndex);
+        EXPECT_EQ(1, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(2)._cellTypeData)._geneIndex);
     }
 }
 
@@ -137,9 +137,9 @@ TEST_F(GenomeDescriptionEditServiceTests_New, removeGene_end)
     EXPECT_EQ(4, genome._genes.at(1)._nodes.size());
     for (int i = 0; i < 2; ++i) {
         auto const& gene = genome._genes.at(i);
-        EXPECT_EQ(0, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(0)._cellTypeData)._constructGeneIndex);
-        EXPECT_EQ(1, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(1)._cellTypeData)._constructGeneIndex);
-        EXPECT_EQ(1, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(2)._cellTypeData)._constructGeneIndex);
+        EXPECT_EQ(0, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(0)._cellTypeData)._geneIndex);
+        EXPECT_EQ(1, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(1)._cellTypeData)._geneIndex);
+        EXPECT_EQ(1, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(2)._cellTypeData)._geneIndex);
     }
 }
 
@@ -154,9 +154,9 @@ TEST_F(GenomeDescriptionEditServiceTests_New, swapGenes)
     EXPECT_EQ(4, genome._genes.at(2)._nodes.size());
     for (int i = 0; i < 3; ++i) {
         auto const& gene = genome._genes.at(i);
-        EXPECT_EQ(0, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(0)._cellTypeData)._constructGeneIndex);
-        EXPECT_EQ(2, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(1)._cellTypeData)._constructGeneIndex);
-        EXPECT_EQ(1, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(2)._cellTypeData)._constructGeneIndex);
+        EXPECT_EQ(0, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(0)._cellTypeData)._geneIndex);
+        EXPECT_EQ(2, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(1)._cellTypeData)._geneIndex);
+        EXPECT_EQ(1, std::get<ConstructorGenomeDescription_New>(gene._nodes.at(2)._cellTypeData)._geneIndex);
     }
 }
 

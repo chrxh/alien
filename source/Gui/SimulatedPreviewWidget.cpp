@@ -4,6 +4,7 @@
 #include "EngineInterface/SimulationFacade.h"
 
 #include "CreatureTabEditData.h"
+#include "WindowController.h"
 
 SimulatedPreviewWidget _SimulatedPreviewWidget::create(SimulationFacade const& simulationFacade, CreatureTabEditData const& editData)
 {
@@ -16,6 +17,10 @@ void _SimulatedPreviewWidget::process()
         CollectionDescription preview;
         _simulationFacade->newPreview(preview);
     }
+    auto fps = WindowController::get().getFps();
+    auto duration = std::chrono::milliseconds(1000 / fps / 2);
+    _simulationFacade->calcTimestepsForPreview(duration);
+
     _lastGenome = _editData->genome;
 }
 

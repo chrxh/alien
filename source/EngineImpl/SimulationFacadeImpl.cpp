@@ -363,9 +363,9 @@ void _SimulationFacadeImpl::newPreview(CollectionDescription const& data)
     _worker.newPreview(data);
 }
 
-void _SimulationFacadeImpl::calcTimestepsForPreview(uint64_t timesteps)
+void _SimulationFacadeImpl::calcTimestepsForPreview(std::chrono::milliseconds const& duration)
 {
-    _worker.calcTimestepsForPreview(timesteps);
+    _worker.calcTimestepsForPreview(duration);
 }
 
 CollectionDescription _SimulationFacadeImpl::getPreviewData()

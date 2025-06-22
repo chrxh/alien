@@ -71,7 +71,7 @@ namespace
                         break;
                     case CellTypeGenome_Constructor:
                         nodeTO.cellTypeData.constructor.autoTriggerInterval = node.cellTypeData.constructor.autoTriggerInterval;
-                        nodeTO.cellTypeData.constructor.constructGeneIndex = node.cellTypeData.constructor.constructGeneIndex;
+                        nodeTO.cellTypeData.constructor.geneIndex = node.cellTypeData.constructor.geneIndex;
                         nodeTO.cellTypeData.constructor.constructionActivationTime = node.cellTypeData.constructor.constructionActivationTime;
                         nodeTO.cellTypeData.constructor.constructionAngle = node.cellTypeData.constructor.constructionAngle;
                         break;
@@ -237,15 +237,15 @@ namespace
                 cellTO.cellTypeData.constructor.genomeSize,
                 cellTO.cellTypeData.constructor.genomeDataIndex,
                 collectionTO);
-            cellTO.cellTypeData.constructor.numInheritedGenomeNodes = cell->cellTypeData.constructor.numInheritedGenomeNodes;
+            cellTO.cellTypeData.constructor.numExpectedCells = cell->cellTypeData.constructor.numExpectedCells;
             cellTO.cellTypeData.constructor.lastConstructedCellId = cell->cellTypeData.constructor.lastConstructedCellId;
-            cellTO.cellTypeData.constructor.genomeCurrentNodeIndex = cell->cellTypeData.constructor.genomeCurrentNodeIndex;
-            cellTO.cellTypeData.constructor.genomeCurrentRepetition = cell->cellTypeData.constructor.genomeCurrentRepetition;
-            cellTO.cellTypeData.constructor.genomeCurrentBranch = cell->cellTypeData.constructor.genomeCurrentBranch;
+            cellTO.cellTypeData.constructor.currentNodeIndex = cell->cellTypeData.constructor.currentNodeIndex;
+            cellTO.cellTypeData.constructor.currentRepetition = cell->cellTypeData.constructor.currentRepetition;
+            cellTO.cellTypeData.constructor.currentBranch = cell->cellTypeData.constructor.currentBranch;
             cellTO.cellTypeData.constructor.offspringCreatureId = cell->cellTypeData.constructor.offspringCreatureId;
             cellTO.cellTypeData.constructor.offspringMutationId = cell->cellTypeData.constructor.offspringMutationId;
-            cellTO.cellTypeData.constructor.genomeGeneration = cell->cellTypeData.constructor.genomeGeneration;
-            cellTO.cellTypeData.constructor.constructionAngle1 = cell->cellTypeData.constructor.constructionAngle1;
+            cellTO.cellTypeData.constructor.generation = cell->cellTypeData.constructor.generation;
+            cellTO.cellTypeData.constructor.constructionAngle = cell->cellTypeData.constructor.constructionAngle;
             cellTO.cellTypeData.constructor.constructionAngle2 = cell->cellTypeData.constructor.constructionAngle2;
         } break;
         case CellType_Sensor: {
@@ -273,7 +273,7 @@ namespace
                 cellTO.cellTypeData.injector.genomeSize,
                 cellTO.cellTypeData.injector.genomeDataIndex,
                 collectionTO);
-            cellTO.cellTypeData.injector.genomeGeneration = cell->cellTypeData.injector.genomeGeneration;
+            cellTO.cellTypeData.injector.generation = cell->cellTypeData.injector.generation;
         } break;
         case CellType_Muscle: {
             cellTO.cellTypeData.muscle.mode = cell->cellTypeData.muscle.mode;

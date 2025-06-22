@@ -469,7 +469,7 @@ __inline__ __device__ void MutationProcessor::deleteMutation(SimulationData& dat
         auto subGenomeSize = GenomeDecoder::readWord(genome, subGenomesSizeIndices[i]);
         GenomeDecoder::writeWord(genome, subGenomesSizeIndices[i], subGenomeSize - deleteSize);
     }
-    constructor.genomeCurrentNodeIndex = 0;
+    constructor.currentNodeIndex = 0;
     constructor.genomeSize = targetGenomeSize;
     adaptMutationId(data, constructor);
 }
@@ -600,7 +600,7 @@ __inline__ __device__ void MutationProcessor::translateMutation(SimulationData& 
     }
 
     constructor.genome = targetGenome;
-    constructor.genomeCurrentNodeIndex = 0;
+    constructor.currentNodeIndex = 0;
     adaptMutationId(data, constructor);
 }
 

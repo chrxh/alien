@@ -12,8 +12,8 @@ void GenomeDescriptionEditService::addGene(GenomeDescription_New& genome, int in
         for (auto& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
                 auto& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
-                if (constructor._constructGeneIndex > index) {
-                    ++constructor._constructGeneIndex;
+                if (constructor._geneIndex > index) {
+                    ++constructor._geneIndex;
                 }
             }
         }
@@ -32,8 +32,8 @@ void GenomeDescriptionEditService::removeGene(GenomeDescription_New& genome, int
         for (auto& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
                 auto& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
-                if (constructor._constructGeneIndex >= index) {
-                    --constructor._constructGeneIndex;
+                if (constructor._geneIndex >= index) {
+                    --constructor._geneIndex;
                 }
             }
         }
@@ -49,10 +49,10 @@ void GenomeDescriptionEditService::swapGenes(GenomeDescription_New& genome, int 
         for (auto& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
                 auto& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
-                if (constructor._constructGeneIndex == index) {
-                    constructor._constructGeneIndex = index + 1;
-                } else if (constructor._constructGeneIndex == index + 1) {
-                    constructor._constructGeneIndex = index;
+                if (constructor._geneIndex == index) {
+                    constructor._geneIndex = index + 1;
+                } else if (constructor._geneIndex == index + 1) {
+                    constructor._geneIndex = index;
                 }
             }
         }

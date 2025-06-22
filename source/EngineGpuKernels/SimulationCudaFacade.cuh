@@ -98,7 +98,7 @@ public:
 
     // Simulated preview
     void newPreview(CollectionTO const& dataTO);
-    void calcTimestepsForPreview(uint64_t timesteps);
+    void calcTimestepsForPreview(std::chrono::milliseconds const& duration);
     CollectionTO getPreviewData();
 
     // Only for tests

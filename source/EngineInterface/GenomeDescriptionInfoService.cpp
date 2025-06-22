@@ -27,8 +27,8 @@ namespace
         for (auto const& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
                 auto const& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
-                if (constructor._constructGeneIndex != 0) {  // First gene is for self-replication and should not be counted
-                    auto numNodes = countNodes(genome, constructor._constructGeneIndex, lastGenes);
+                if (constructor._geneIndex != 0) {  // First gene is for self-replication and should not be counted
+                    auto numNodes = countNodes(genome, constructor._geneIndex, lastGenes);
                     if (numNodes == -1) {
                         return -1;  // Cycle detected
                     }
@@ -56,7 +56,7 @@ std::vector<int> GenomeDescriptionInfoService::getReferences(GeneDescription con
     for (auto const& node : gene._nodes) {
         if (node.getCellType() == CellTypeGenome_Constructor) {
             auto const& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
-            result.emplace_back(constructor._constructGeneIndex);
+            result.emplace_back(constructor._geneIndex);
         }
     }
     return result;
@@ -70,7 +70,7 @@ std::vector<int> GenomeDescriptionInfoService::getReferencedBy(GenomeDescription
         for (auto const& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
                 auto const& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
-                if (constructor._constructGeneIndex == geneIndex) {
+                if (constructor._geneIndex == geneIndex) {
                     result.emplace_back(i);
                 }
             }

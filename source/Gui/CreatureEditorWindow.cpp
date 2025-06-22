@@ -47,11 +47,11 @@ void CreatureEditorWindow::initIntern(SimulationFacade simulationFacade)
     // Test genome for the editor
     auto genome = GenomeDescription_New().genes({
         GeneDescription().nodes({
-            NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(1)),
-            NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(2)),
+            NodeDescription().cellTypeData(ConstructorGenomeDescription_New().geneIndex(1)),
+            NodeDescription().cellTypeData(ConstructorGenomeDescription_New().geneIndex(2)),
         }),
         GeneDescription().nodes({
-            NodeDescription().cellTypeData(ConstructorGenomeDescription_New().constructGeneIndex(2)),
+            NodeDescription().cellTypeData(ConstructorGenomeDescription_New().geneIndex(2)),
             NodeDescription(),
         }),
         GeneDescription().nodes({
