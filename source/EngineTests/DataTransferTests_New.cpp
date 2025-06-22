@@ -42,6 +42,7 @@ protected:
         case CellType_Constructor:
             return ConstructorDescription()
                 .autoTriggerInterval(7)
+                .geneIndex(3)
                 .constructionActivationTime(4)
                 .constructionAngle(34.4f)
                 .constructionAngle2(-45.5f)

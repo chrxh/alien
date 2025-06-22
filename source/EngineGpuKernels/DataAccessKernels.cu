@@ -231,6 +231,7 @@ namespace
         case CellType_Constructor: {
             cellTO.cellTypeData.constructor.autoTriggerInterval = cell->cellTypeData.constructor.autoTriggerInterval;
             cellTO.cellTypeData.constructor.constructionActivationTime = cell->cellTypeData.constructor.constructionActivationTime;
+            cellTO.cellTypeData.constructor.geneIndex = cell->cellTypeData.constructor.geneIndex;
             copyDataToHeap(
                 cell->cellTypeData.constructor.genomeSize,
                 cell->cellTypeData.constructor.genome,

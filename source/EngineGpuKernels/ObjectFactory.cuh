@@ -267,6 +267,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
     case CellType_Constructor: {
         cell->cellTypeData.constructor.autoTriggerInterval = cellTO.cellTypeData.constructor.autoTriggerInterval;
         cell->cellTypeData.constructor.constructionActivationTime = cellTO.cellTypeData.constructor.constructionActivationTime;
+        cell->cellTypeData.constructor.geneIndex = cellTO.cellTypeData.constructor.geneIndex;
         copyDataToHeap(
             cellTO.cellTypeData.constructor.genomeSize,
             cellTO.cellTypeData.constructor.genomeDataIndex,

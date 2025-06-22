@@ -323,6 +323,7 @@ CellDescription DescriptionConverterService::createCellDescription(
         constructor._autoTriggerInterval =
             cellTO.cellTypeData.constructor.autoTriggerInterval > 0 ? std::make_optional(cellTO.cellTypeData.constructor.autoTriggerInterval) : std::nullopt;
         constructor._constructionActivationTime = cellTO.cellTypeData.constructor.constructionActivationTime;
+        constructor._geneIndex = cellTO.cellTypeData.constructor.geneIndex;
         convert(collectionTO, cellTO.cellTypeData.constructor.genomeSize, cellTO.cellTypeData.constructor.genomeDataIndex, constructor._genome);
         constructor._numExpectedCells = cellTO.cellTypeData.constructor.numExpectedCells;
         constructor._lastConstructedCellId = cellTO.cellTypeData.constructor.lastConstructedCellId;
@@ -833,6 +834,7 @@ void DescriptionConverterService::convertCellToTO(
         ConstructorTO& constructorTO = cellTO.cellTypeData.constructor;
         constructorTO.autoTriggerInterval = static_cast<uint8_t>(constructorDesc._autoTriggerInterval.value_or(0));
         constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
+        constructorTO.geneIndex = static_cast<uint16_t>(constructorDesc._geneIndex);
         CHECK(constructorDesc._genome.size() >= Const::GenomeHeaderSize)
         convert(heap, constructorTO.genomeSize, constructorTO.genomeDataIndex, constructorDesc._genome);
         constructorTO.numExpectedCells = static_cast<uint16_t>(constructorDesc._numExpectedCells);
