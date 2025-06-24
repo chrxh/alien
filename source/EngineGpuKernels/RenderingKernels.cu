@@ -124,7 +124,8 @@ namespace
             }
         }
         if (cellColoring == CellColoring_MutationId || (cellColoring == CellColoring_MutationId_EveryCellType && primary)) {
-            auto colorNumber = cell->mutationId == 0 ? 30 : (cell->mutationId == 1 ? 18 : cell->mutationId + 17);   //6 for zero mutant color
+            auto colorNumber = 30;
+            //cell->mutationId == 0 ? 30 : (cell->mutationId == 1 ? 18 : cell->mutationId + 17);  //6 for zero mutant color
             auto h = abs(toInt((colorNumber * 12107) % 360));
             auto s = 0.6f + toFloat(abs(toInt(colorNumber * 13111)) % 400) / 1000;
             auto rgb = convertHSVtoRGB(toFloat(h), s, 1.0f);
@@ -156,8 +157,9 @@ namespace
             }
         }
 
-        if (cellColoring == CellColoring_GenomeSize) {
-            auto rgb = convertHSVtoRGB(toFloat(min(360.0f, 240.0f + powf(cell->genomeComplexity, 0.3f) * 15.0f)),  1.0f, 1.0f);
+        if (cellColoring == CellColoring_GenomeComplexity) {
+            //auto rgb = convertHSVtoRGB(toFloat(min(360.0f, 240.0f + powf(cell->genomeComplexity, 0.3f) * 15.0f)),  1.0f, 1.0f);
+            auto rgb = convertHSVtoRGB(0.0f,  1.0f, 1.0f);
             cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
         }
 

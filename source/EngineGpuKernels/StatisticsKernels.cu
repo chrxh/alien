@@ -1,7 +1,5 @@
 ﻿#include "StatisticsKernels.cuh"
 
-#include "GenomeDecoder.cuh"
-
 __global__ void cudaUpdateTimestepStatistics_substep1(SimulationData data, SimulationStatistics statistics)
 {
     statistics.resetTimestepData();
@@ -20,16 +18,16 @@ __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, Simul
                 statistics.incNumFreeCells(cell->color);
             }
             statistics.addEnergy(cell->color, cell->energy);
-            if (cell->cellType == CellType_Constructor && GenomeDecoder::containsSelfReplication(cell->cellTypeData.constructor)) {
-                statistics.incNumReplicator(cell->color);
-                statistics.incMutant(cell->color, cell->mutationId, cell->genomeComplexity);
-                auto numNodes = GenomeDecoder::getNumNodesRecursively(cell->cellTypeData.constructor.genome, cell->cellTypeData.constructor.genomeSize, true, true);
-                statistics.addNumGenomeNodes(cell->color, numNodes);
-                statistics.addGenomeComplexity(cell->color, cell->genomeComplexity);
-            }
-            if (cell->cellType == CellType_Injector && GenomeDecoder::containsSelfReplication(cell->cellTypeData.injector)) {
-                statistics.incNumViruses(cell->color);
-            }
+            //if (cell->cellType == CellType_Constructor && GenomeDecoder::containsSelfReplication(cell->cellTypeData.constructor)) {
+            //    statistics.incNumReplicator(cell->color);
+            //    statistics.incMutant(cell->color, cell->mutationId, cell->genomeComplexity);
+            //    auto numNodes = GenomeDecoder::getNumNodesRecursively(cell->cellTypeData.constructor.genome, cell->cellTypeData.constructor.genomeSize, true, true);
+            //    statistics.addNumGenomeNodes(cell->color, numNodes);
+            //    statistics.addGenomeComplexity(cell->color, cell->genomeComplexity);
+            //}
+            //if (cell->cellType == CellType_Injector && GenomeDecoder::containsSelfReplication(cell->cellTypeData.injector)) {
+            //    statistics.incNumViruses(cell->color);
+            //}
         }
     }
     {
@@ -60,11 +58,11 @@ __global__ void cudaUpdateTimestepStatistics_substep3(SimulationData data, Simul
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& cell = cells.at(index);
-            if (cell->cellType == CellType_Constructor && GenomeDecoder::containsSelfReplication(cell->cellTypeData.constructor)) {
-                auto variance = toDouble(cell->genomeComplexity) - averageGenomeComplexity;
-                variance = variance * variance / numReplicators;
-                statistics.addToGenomeComplexityVariance(cell->color, variance);
-            }
+            //if (cell->cellType == CellType_Constructor && GenomeDecoder::containsSelfReplication(cell->cellTypeData.constructor)) {
+            //    auto variance = toDouble(cell->genomeComplexity) - averageGenomeComplexity;
+            //    variance = variance * variance / numReplicators;
+            //    statistics.addToGenomeComplexityVariance(cell->color, variance);
+            //}
         }
     }
 }

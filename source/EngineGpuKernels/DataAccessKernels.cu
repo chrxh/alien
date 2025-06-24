@@ -170,9 +170,6 @@ namespace
         cellTO.numConnections = cell->numConnections;
         cellTO.livingState = cell->livingState;
         cellTO.creatureId = cell->creatureId;
-        cellTO.mutationId = cell->mutationId;
-        cellTO.ancestorMutationId = cell->ancestorMutationId;
-        cellTO.genomeComplexity = cell->genomeComplexity;
         cellTO.cellType = cell->cellType;
         cellTO.color = cell->color;
         cellTO.angleToFront = cell->angleToFront;
@@ -232,22 +229,13 @@ namespace
             cellTO.cellTypeData.constructor.autoTriggerInterval = cell->cellTypeData.constructor.autoTriggerInterval;
             cellTO.cellTypeData.constructor.constructionActivationTime = cell->cellTypeData.constructor.constructionActivationTime;
             cellTO.cellTypeData.constructor.geneIndex = cell->cellTypeData.constructor.geneIndex;
-            copyDataToHeap(
-                cell->cellTypeData.constructor.genomeSize,
-                cell->cellTypeData.constructor.genome,
-                cellTO.cellTypeData.constructor.genomeSize,
-                cellTO.cellTypeData.constructor.genomeDataIndex,
-                collectionTO);
             cellTO.cellTypeData.constructor.numExpectedCells = cell->cellTypeData.constructor.numExpectedCells;
             cellTO.cellTypeData.constructor.lastConstructedCellId = cell->cellTypeData.constructor.lastConstructedCellId;
             cellTO.cellTypeData.constructor.currentNodeIndex = cell->cellTypeData.constructor.currentNodeIndex;
             cellTO.cellTypeData.constructor.currentRepetition = cell->cellTypeData.constructor.currentRepetition;
             cellTO.cellTypeData.constructor.currentBranch = cell->cellTypeData.constructor.currentBranch;
-            cellTO.cellTypeData.constructor.offspringCreatureId = cell->cellTypeData.constructor.offspringCreatureId;
-            cellTO.cellTypeData.constructor.offspringMutationId = cell->cellTypeData.constructor.offspringMutationId;
             cellTO.cellTypeData.constructor.generation = cell->cellTypeData.constructor.generation;
             cellTO.cellTypeData.constructor.constructionAngle = cell->cellTypeData.constructor.constructionAngle;
-            cellTO.cellTypeData.constructor.constructionAngle2 = cell->cellTypeData.constructor.constructionAngle2;
         } break;
         case CellType_Sensor: {
             cellTO.cellTypeData.sensor.autoTriggerInterval = cell->cellTypeData.sensor.autoTriggerInterval;
@@ -268,13 +256,6 @@ namespace
         case CellType_Injector: {
             cellTO.cellTypeData.injector.mode = cell->cellTypeData.injector.mode;
             cellTO.cellTypeData.injector.counter = cell->cellTypeData.injector.counter;
-            copyDataToHeap(
-                cell->cellTypeData.injector.genomeSize,
-                cell->cellTypeData.injector.genome,
-                cellTO.cellTypeData.injector.genomeSize,
-                cellTO.cellTypeData.injector.genomeDataIndex,
-                collectionTO);
-            cellTO.cellTypeData.injector.generation = cell->cellTypeData.injector.generation;
         } break;
         case CellType_Muscle: {
             cellTO.cellTypeData.muscle.mode = cell->cellTypeData.muscle.mode;
@@ -710,10 +691,7 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, Collecti
             auto const& cell = collectionTO.cells[index];
             maxIds.currentObjectId = max(maxIds.currentObjectId, cell.id);
             maxIds.currentCreatureId = max(maxIds.currentCreatureId, cell.creatureId);
-            maxIds.currentMutationId = max(maxIds.currentMutationId, cell.mutationId);
-            if (cell.cellType == CellType_Constructor) {
-                maxIds.currentMutationId = max(maxIds.currentMutationId, cell.cellTypeData.constructor.offspringMutationId);
-            }
+            //maxIds.currentMutationId = max(maxIds.currentMutationId, cell.mutationId);
         }
     }
     {
@@ -778,11 +756,6 @@ __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesF
                 numNodes += genome->genes[i].numNodes;
             }
         }
-        if (cell->cellType == CellType_Constructor) {
-            heapBytes += cell->cellTypeData.constructor.genomeSize + GpuMemoryAlignmentBytes;
-        } else if (cell->cellType == CellType_Injector) {
-            heapBytes += cell->cellTypeData.injector.genomeSize + GpuMemoryAlignmentBytes;
-        }
     }
     heapBytes += numNodes * (sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes);
     atomicAdd(&arraySizes->genomes, numGenomes);
@@ -811,11 +784,6 @@ __global__ void cudaEstimateCapacityNeededForGpu(CollectionTO collectionTO, Arra
             heapBytes += sizeof(Cell) + cellTO.metadata.nameSize + cellTO.metadata.descriptionSize + GpuMemoryAlignmentBytes * 2;
             if (cellTO.neuralNetworkDataIndex != CellTO::NeuralNetworkDataIndex_NotSet) {
                 heapBytes += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
-            }
-            if (cellTO.cellType == CellType_Constructor) {
-                heapBytes += cellTO.cellTypeData.constructor.genomeSize + GpuMemoryAlignmentBytes;
-            } else if (cellTO.cellType == CellType_Injector) {
-                heapBytes += cellTO.cellTypeData.injector.genomeSize + GpuMemoryAlignmentBytes;
             }
         }
         atomicAdd(&arraySizes->heap, heapBytes);

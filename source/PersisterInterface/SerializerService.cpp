@@ -647,10 +647,7 @@ namespace
     auto constexpr Id_Cell_LivingState = 8;
     auto constexpr Id_Cell_ActivationTime = 9;
     auto constexpr Id_Cell_CreatureId = 10;
-    auto constexpr Id_Cell_MutationId = 11;
     auto constexpr Id_Cell_CellTypeUsed = 12;
-    auto constexpr Id_Cell_AncestorMutationId = 13;
-    auto constexpr Id_Cell_GenomeComplexity = 14;
     auto constexpr Id_Cell_DetectedByCreatureId = 15;
     auto constexpr Id_Cell_GenomeNodeIndex = 20;
     auto constexpr Id_Cell_SignalRelaxationTime = 21;
@@ -680,9 +677,6 @@ namespace
     auto constexpr Id_Constructor_CurrentNodeIndex = 3;
     auto constexpr Id_Constructor_Generation = 4;
     auto constexpr Id_Constructor_ConstructionAngle = 5;
-    auto constexpr Id_Constructor_ConstructionAngle2 = 6;
-    auto constexpr Id_Constructor_OffspringCreatureId = 7;
-    auto constexpr Id_Constructor_OffspringMutationId = 8;
     auto constexpr Id_Constructor_CurrentRepetition = 9;
     auto constexpr Id_Constructor_LastConstructedCellId = 10;
     auto constexpr Id_Constructor_NumInheritedGenomeNodes = 11;
@@ -841,22 +835,10 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Constructor_CurrentNodeIndex, data._currentNodeIndex, defaultObject._currentNodeIndex);
         loadSave(task, auxiliaries, Id_Constructor_CurrentRepetition, data._currentRepetition, defaultObject._currentRepetition);
         loadSave(task, auxiliaries, Id_Constructor_CurrentBranch, data._currentBranch, defaultObject._currentBranch);
-        loadSave(task, auxiliaries, Id_Constructor_OffspringCreatureId, data._offspringCreatureId, defaultObject._offspringCreatureId);
-        loadSave(task, auxiliaries, Id_Constructor_OffspringMutationId, data._offspringMutationId, defaultObject._offspringMutationId);
         loadSave(task, auxiliaries, Id_Constructor_Generation, data._generation, defaultObject._generation);
         loadSave(task, auxiliaries, Id_Constructor_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
-        loadSave(task, auxiliaries, Id_Constructor_ConstructionAngle2, data._constructionAngle2, defaultObject._constructionAngle2);
         loadSave(task, auxiliaries, Id_Constructor_NumInheritedGenomeNodes, data._numExpectedCells, defaultObject._numExpectedCells);
         processLoadSaveMap(task, ar, auxiliaries);
-
-        if (task == SerializationTask::Load) {
-            GenomeDescription genomeDesc;
-            ar(genomeDesc);
-            data._genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(genomeDesc);
-        } else {
-            GenomeDescription genomeDesc = GenomeDescriptionConverterService::get().convertBytesToDescription(data._genome);
-            ar(genomeDesc);
-        }
     }
     SPLIT_SERIALIZATION(ConstructorDescription)
 
@@ -903,15 +885,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Injector_Mode, data._mode, defaultObject._mode);
         loadSave(task, auxiliaries, Id_Injector_Counter, data._counter, defaultObject._counter);
         processLoadSaveMap(task, ar, auxiliaries);
-
-        if (task == SerializationTask::Load) {
-            GenomeDescription genomeDesc;
-            ar(genomeDesc);
-            data._genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(genomeDesc);
-        } else {
-            GenomeDescription genomeDesc = GenomeDescriptionConverterService::get().convertBytesToDescription(data._genome);
-            ar(genomeDesc);
-        }
     }
     SPLIT_SERIALIZATION(InjectorDescription)
 
@@ -1062,10 +1035,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_Age, data._age, defaultObject._age);
         loadSave(task, auxiliaries, Id_Cell_LivingState, data._livingState, defaultObject._livingState);
         loadSave(task, auxiliaries, Id_Cell_CreatureId, data._creatureId, defaultObject._creatureId);
-        loadSave(task, auxiliaries, Id_Cell_MutationId, data._mutationId, defaultObject._mutationId);
-        loadSave(task, auxiliaries, Id_Cell_AncestorMutationId, data._ancestorMutationId, defaultObject._ancestorMutationId);
         loadSave(task, auxiliaries, Id_Cell_ActivationTime, data._activationTime, defaultObject._activationTime);
-        loadSave(task, auxiliaries, Id_Cell_GenomeComplexity, data._genomeComplexity, defaultObject._genomeComplexity);
         loadSave(task, auxiliaries, Id_Cell_DetectedByCreatureId, data._detectedByCreatureId, defaultObject._detectedByCreatureId);
         loadSave(task, auxiliaries, Id_Cell_CellTypeUsed, data._cellTypeUsed, defaultObject._cellTypeUsed);
         loadSave(task, auxiliaries, Id_Cell_GenomeNodeIndex, data._genomeNodeIndex, defaultObject._genomeNodeIndex);
@@ -1249,9 +1219,9 @@ bool SerializerService::serializeGenomeToFile(std::filesystem::path const& filen
         log(Priority::Important, "save genome to " + filename.string());
         //wrap constructor cell around genome
         CollectionDescription data;
-        if (!wrapGenome(data, genome)) {
-            return false;
-        }
+        //if (!wrapGenome(data, genome)) {
+        //    return false;
+        //}
 
         zstr::ofstream stream(filename.string(), std::ios::binary);
         if (!stream) {
@@ -1273,9 +1243,9 @@ bool SerializerService::deserializeGenomeFromFile(std::vector<uint8_t>& genome, 
         if (!deserializeDescription(data, filename)) {
             return false;
         }
-        if (!unwrapGenome(genome, data)) {
-            return false;
-        }
+        //if (!unwrapGenome(genome, data)) {
+        //    return false;
+        //}
         return true;
     } catch (...) {
         return false;
@@ -1292,9 +1262,9 @@ bool SerializerService::serializeGenomeToString(std::string& output, std::vector
         }
 
         CollectionDescription data;
-        if (!wrapGenome(data, input)) {
-            return false;
-        }
+        //if (!wrapGenome(data, input)) {
+        //    return false;
+        //}
 
         serializeDescription(data, stream);
         stream.flush();
@@ -1317,9 +1287,9 @@ bool SerializerService::deserializeGenomeFromString(std::vector<uint8_t>& output
         CollectionDescription data;
         deserializeDescription(data, stream);
 
-        if (!unwrapGenome(output, data)) {
-            return false;
-        }
+        //if (!unwrapGenome(output, data)) {
+        //    return false;
+        //}
         return true;
     } catch (...) {
         return false;
@@ -1731,25 +1701,4 @@ void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics,
 
         statistics.emplace_back(dataPoints);
     }
-}
-
-bool SerializerService::wrapGenome(CollectionDescription& output, std::vector<uint8_t> const& input)
-{
-    output.clear();
-    output.addCell(CellDescription().cellTypeData(ConstructorDescription().genome(input)));
-    return true;
-}
-
-
-bool SerializerService::unwrapGenome(std::vector<uint8_t>& output, CollectionDescription const& input)
-{
-    if (input._cells.size() != 1) {
-        return false;
-    }
-    auto cell = input._cells.front();
-    if (cell.getCellType() != CellType_Constructor) {
-        return false;
-    }
-    output = std::get<ConstructorDescription>(cell._cellTypeData)._genome;
-    return true;
 }

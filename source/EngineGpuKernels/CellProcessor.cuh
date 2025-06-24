@@ -11,7 +11,7 @@
 #include "Map.cuh"
 #include "Physics.cuh"
 #include "CellConnectionProcessor.cuh"
-#include "GenomeDecoder.cuh"
+#include "ConstructorHelper.cuh"
 #include "RadiationProcessor.cuh"
 #include "ParameterCalculator.cuh"
 
@@ -660,7 +660,7 @@ __inline__ __device__ void CellProcessor::livingStateTransition_calcFutureState(
         } else if (origLivingState == LivingState_Ready) {
             if (isSameCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences.value != CellDeathConsquences_None) {
                 if (cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsquences_DetachedPartsDie && cell->cellType == CellType_Constructor
-                    && GenomeDecoder::containsSelfReplication(cell->cellTypeData.constructor)) {
+                    && ConstructorHelper::isSelfReplicator(cell->cellTypeData.constructor)) {
                     livingState = LivingState_Reviving;
                 } else {
                     livingState = LivingState_Detaching;
@@ -805,7 +805,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         }
 
         auto cellMaxAge = cudaSimulationParameters.maxCellAge.value[cell->color];
-        if (cudaSimulationParameters.cellAgeLimiterToggle.value && cell->mutationId != 1
+        if (cudaSimulationParameters.cellAgeLimiterToggle.value && cell->cellType != CellType_Free && cell->cellType != CellType_Structure
             && cell->cellTypeUsed == CellTriggered_No && cell->livingState == LivingState_Ready && cell->activationTime == 0) {
             bool adjacentCellsUsed = false;
             for (int i = 0; i < cell->numConnections; ++i) {
@@ -881,9 +881,10 @@ __inline__ __device__ void CellProcessor::applyEnergyFlow(SimulationData& data)
         auto& connectedCell = cell->connections[i].cell;
         auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
 
-        auto needCellEnergy = cell->cellType == CellType_Constructor && !GenomeDecoder::isFinished(cell->cellTypeData.constructor)
+        auto needCellEnergy = cell->cellType == CellType_Constructor && !ConstructorHelper::isFinished(cell)
             && connectedCell->energy > cudaSimulationParameters.normalCellEnergy.value[cell->color];
-        auto hasOtherCellMoreEnergy = (connectedCell->cellType != CellType_Constructor || GenomeDecoder::isFinished(connectedCell->cellTypeData.constructor))
+        auto hasOtherCellMoreEnergy =
+            (connectedCell->cellType != CellType_Constructor || ConstructorHelper::isFinished(connectedCell))
             && connectedCell->energy > cell->energy;
         float flow = 0;
         if (needCellEnergy) {

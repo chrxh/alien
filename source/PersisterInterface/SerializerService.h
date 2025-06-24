@@ -52,7 +52,4 @@ private:
 
     void serializeStatistics(StatisticsHistoryData const& statistics, std::ostream& stream);
     void deserializeStatistics(StatisticsHistoryData& statistics, std::istream& stream);
-
-    bool wrapGenome(CollectionDescription& output, std::vector<uint8_t> const& input);
-    bool unwrapGenome(std::vector<uint8_t>& output, CollectionDescription const& input);
 };

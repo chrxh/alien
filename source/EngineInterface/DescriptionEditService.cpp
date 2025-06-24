@@ -26,8 +26,6 @@ CollectionDescription DescriptionEditService::createRect(CreateRectParameters co
                                .barrier(parameters._barrier)
                                .sticky(parameters._sticky)
                                .creatureId(creatureId)
-                               .mutationId(parameters._mutationId)
-                               .genomeComplexity(parameters._genomeComplexity)
                                .cellTypeData(parameters._cellType));
         }
     }
@@ -432,15 +430,6 @@ void DescriptionEditService::randomizeCountdowns(ClusteredCollectionDescription&
 
 void DescriptionEditService::randomizeMutationIds(ClusteredCollectionDescription& data)
 {
-    for (auto& cluster : data._clusters) {
-        auto mutationId = NumberGenerator::get().getRandomInt() % 65536;
-        for (auto& cell : cluster._cells) {
-            cell._mutationId = toInt(mutationId);
-            if (cell.getCellType() == CellType_Constructor) {
-                std::get<ConstructorDescription>(cell._cellTypeData)._offspringMutationId = toInt(mutationId);
-            }
-        }
-    }
 }
 
 void DescriptionEditService::removeMetadata(CollectionDescription& data)
@@ -471,11 +460,6 @@ void DescriptionEditService::assignNewObjectAndCreatureIds(CollectionDescription
         cell._id = newObjectId;
 
         replaceCreatureId(cell._creatureId);
-
-        if (cell.getCellType() == CellType_Constructor) {
-            auto& offspringCreatureId = std::get<ConstructorDescription>(cell._cellTypeData)._offspringCreatureId;
-            replaceCreatureId(offspringCreatureId);
-        }
     }
     for (auto& cell : data._cells) {
         for (auto& connection : cell._connections) {
@@ -594,46 +578,5 @@ namespace
 
 std::vector<ExtendedCellOrParticleDescription> DescriptionEditService::getCellsForCreatureRepresentatives(CollectionDescription const& data)
 {
-    std::unordered_map<uint64_t, int> genomeIdToIndex;
-    for (auto const& [index, genome]: data._genomes | boost::adaptors::indexed(0)) {
-        genomeIdToIndex.emplace(genome._id, toInt(index));
-    }
-
-    std::map<std::vector<uint8_t>, size_t> genomeToCellIndex;
-    for (auto const& [index, cell] : data._cells | boost::adaptors::indexed(0)) {
-        if (cell.getCellType() == CellType_Constructor) {
-            auto const& genome = std::get<ConstructorDescription>(cell._cellTypeData)._genome;
-            if (!genomeToCellIndex.contains(genome) || cell._livingState != LivingState_UnderConstruction) {
-                genomeToCellIndex[genome] = index;
-            }
-        }
-    }
-    std::vector<std::pair<std::vector<uint8_t>, size_t>> genomeAndCellIndex;
-    for (auto const& [genome, index] : genomeToCellIndex) {
-        genomeAndCellIndex.emplace_back(std::make_pair(genome, index));
-    }
-    std::ranges::sort(genomeAndCellIndex, [](auto const& element1, auto const& element2) { return element1.first.size() > element2.first.size(); });
-
-    std::vector<ExtendedCellOrParticleDescription> result;
-    for (auto it = genomeAndCellIndex.begin(); it != genomeAndCellIndex.end(); ++it) {
-        bool alreadyContained = false;
-        for (auto it2 = genomeAndCellIndex.begin(); it2 != it; ++it2) {
-            auto const& genome1 = it->first;
-            auto const& genome2 = it2->first;
-            if (contains(genome2, genome1)) {
-                alreadyContained = true;
-                break;
-            }
-        }
-        if (!alreadyContained) {
-            auto const& cell = data._cells.at(it->second);
-            ExtendedCellDescription creatureCell;
-            creatureCell.cell = cell;
-            if (cell._genomeId.has_value()) {
-                creatureCell.genome = data._genomes.at(genomeIdToIndex.at(cell._genomeId.value()));
-            }
-            result.emplace_back(creatureCell);
-        }
-    }
-    return result;
+    return {};
 }

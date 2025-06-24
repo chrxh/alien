@@ -6,8 +6,6 @@
 #include "SimulationCudaFacade.cuh"
 #include "SimulationStatistics.cuh"
 #include "CellConnectionProcessor.cuh"
-#include "MutationProcessor.cuh"
-#include "GenomeDecoder.cuh"
 #include "CudaShapeGenerator.cuh"
 
 class ConstructorProcessor

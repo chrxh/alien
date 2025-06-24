@@ -67,26 +67,26 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
                 return;
             }
         }
-        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToSameMutants && otherCell->mutationId != cell->mutationId) {
-            return;
-        }
-        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToOtherMutants && otherCell->mutationId == cell->mutationId) {
-            return;
-        }
+        //if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToSameMutants && otherCell->mutationId != cell->mutationId) {
+        //    return;
+        //}
+        //if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToOtherMutants && otherCell->mutationId == cell->mutationId) {
+        //    return;
+        //}
         if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToFreeCells && otherCell->cellType != CellType_Free) {
             return;
         }
         if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToStructures && otherCell->cellType != CellType_Structure) {
             return;
         }
-        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToLessComplexMutants
-            && otherCell->genomeComplexity >= cell->genomeComplexity) {
-            return;
-        }
-        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToMoreComplexMutants
-            && otherCell->genomeComplexity <= cell->genomeComplexity) {
-            return;
-        }
+        //if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToLessComplexMutants
+        //    && otherCell->genomeComplexity >= cell->genomeComplexity) {
+        //    return;
+        //}
+        //if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToMoreComplexMutants
+        //    && otherCell->genomeComplexity <= cell->genomeComplexity) {
+        //    return;
+        //}
         if (CellConnectionProcessor::isConnectedConnected(cell, otherCell)) {
             return;
         }

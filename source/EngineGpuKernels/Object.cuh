@@ -93,14 +93,9 @@ struct Constructor
 
     // Genome data
     uint16_t geneIndex;
-    float constructionAngle;           // TODO rename to constructionAngle
-    uint16_t numExpectedCells;   // TODO rename to expectedCells
-    uint32_t generation;  // TODO rename to generation
-
-    // DEPRECATED
-    uint16_t genomeSize;
-    uint8_t* genome;
-    float constructionAngle2;
+    float constructionAngle;
+    uint16_t numExpectedCells;
+    uint32_t generation;
 
     // Process data
     uint64_t lastConstructedCellId;
@@ -108,11 +103,7 @@ struct Constructor
     uint16_t currentRepetition;
     uint8_t currentBranch;
 
-    // DEPRECATED
-    uint32_t offspringCreatureId;  // Will be filled when self-replication starts
-    uint32_t offspringMutationId;
-
-    // Temp data
+     // Temp data
     bool isReady;
 };
 
@@ -144,9 +135,6 @@ struct Injector
 {
     InjectorMode mode;
     uint32_t counter;
-    uint16_t genomeSize;
-    uint8_t* genome;
-    uint32_t generation;
 };
 
 struct AutoBending
@@ -304,10 +292,7 @@ struct Cell
     // Genome data
     Genome* genome;
     uint64_t creatureId;
-    uint32_t mutationId;
-    uint8_t ancestorMutationId;  // Only the first 8 bits from ancestor mutation id
     uint16_t genomeNodeIndex;
-    float genomeComplexity;
 
     // Cell type data
     NeuralNetwork* neuralNetwork;  // Not used for structure and base cells
@@ -352,30 +337,6 @@ struct Cell
     float clusterAngularMomentum;
     float clusterAngularMass;
     uint32_t numCellsInCluster;
-
-    __device__ __inline__ uint8_t* getGenome()
-    {
-        if (cellType == CellType_Constructor) {
-            return cellTypeData.constructor.genome;
-        }
-        if (cellType == CellType_Injector) {
-            return cellTypeData.injector.genome;
-        }
-        CUDA_CHECK(false);
-        return nullptr;
-    }
-
-    __device__ __inline__ int getGenomeSize()
-    {
-        if (cellType == CellType_Constructor) {
-            return cellTypeData.constructor.genomeSize;
-        }
-        if (cellType == CellType_Injector) {
-            return cellTypeData.injector.genomeSize;
-        }
-        CUDA_CHECK(false);
-        return 0;
-    }
 
     __device__ __inline__ float getRefDistance(Cell* connectedCell)
     {

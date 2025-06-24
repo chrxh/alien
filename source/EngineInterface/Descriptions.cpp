@@ -10,12 +10,10 @@
 
 ConstructorDescription::ConstructorDescription()
 {
-    _genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription());
 }
 
 InjectorDescription::InjectorDescription()
 {
-    _genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription());
 }
 
 CellDescription::CellDescription(bool createIds)
@@ -64,18 +62,6 @@ bool CellDescription::DEPRECATED_hasGenome() const
         return true;
     }
     return false;
-}
-
-std::vector<uint8_t>& CellDescription::getGenomeRef()
-{
-    auto cellTypeEnum = getCellType();
-    if (cellTypeEnum == CellType_Constructor) {
-        return std::get<ConstructorDescription>(_cellTypeData)._genome;
-    }
-    if (cellTypeEnum == CellType_Injector) {
-        return std::get<InjectorDescription>(_cellTypeData)._genome;
-    }
-    THROW_NOT_IMPLEMENTED();
 }
 
 bool CellDescription::isConnectedTo(uint64_t id) const

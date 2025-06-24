@@ -4,13 +4,13 @@
 #include "SignalProcessor.cuh"
 #include "OscillatorProcessor.cuh"
 #include "NeuronProcessor.cuh"
-#include "ConstructorProcessor.cuh"
 #include "AttackerProcessor.cuh"
 #include "InjectorProcessor.cuh"
 #include "TransmitterProcessor.cuh"
 #include "MuscleProcessor.cuh"
 #include "SensorProcessor.cuh"
 #include "CellProcessor.cuh"
+#include "ConstructorProcessor_New.cuh"
 #include "RadiationProcessor.cuh"
 #include "ReconnectorProcessor.cuh"
 #include "DetonatorProcessor.cuh"
@@ -115,7 +115,6 @@ __global__ void cudaNextTimestep_energyFlow(SimulationData data)
 __global__ void cudaNextTimestep_cellType_prepare_substep1(SimulationData data)
 {
     CellProcessor::aging(data);
-    MutationProcessor::applyRandomMutations(data);
     CellProcessor::livingStateTransition_calcFutureState(data);
 }
 
@@ -132,12 +131,12 @@ __global__ void cudaNextTimestep_cellType_oscillator(SimulationData data, Simula
 
 __global__ void cudaNextTimestep_cellType_constructor_completenessCheck(SimulationData data, SimulationStatistics statistics)
 {
-    ConstructorProcessor::preprocess(data, statistics);
+    ConstructorProcessor_New::preprocess(data);
 }
 
 __global__ void cudaNextTimestep_cellType_constructor(SimulationData data, SimulationStatistics statistics)
 {
-    ConstructorProcessor::process(data, statistics);
+    ConstructorProcessor_New::process(data, statistics);
 }
 
 __global__ void cudaNextTimestep_cellType_injector(SimulationData data, SimulationStatistics statistics)

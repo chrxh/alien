@@ -76,12 +76,6 @@ __global__ void cudaCleanupDependentCellData(Array<Cell*> cells, Heap newHeap)
             copyAndAssignNewHeapData(
                 reinterpret_cast<uint8_t*&>(cell->neuralNetwork), sizeof(*cell->neuralNetwork), newHeap);
         }
-        if (cell->cellType == CellType_Constructor) {
-            copyAndAssignNewHeapData(cell->cellTypeData.constructor.genome, cell->cellTypeData.constructor.genomeSize, newHeap);
-        }
-        if (cell->cellType == CellType_Injector) {
-            copyAndAssignNewHeapData(cell->cellTypeData.injector.genome, cell->cellTypeData.injector.genomeSize, newHeap);
-        }
     }
 }
 

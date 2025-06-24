@@ -215,8 +215,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
     cell->vel = cellTO.vel;
     cell->livingState = cellTO.livingState;
     cell->creatureId = cellTO.creatureId;
-    cell->mutationId = cellTO.mutationId;
-    cell->ancestorMutationId = cellTO.ancestorMutationId;
     cell->energy = cellTO.energy;
     cell->stiffness = cellTO.stiffness;
     cell->cellType = cellTO.cellType;
@@ -226,7 +224,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
     cell->color = cellTO.color;
     cell->angleToFront = cellTO.angleToFront;
     cell->activationTime = cellTO.activationTime;
-    cell->genomeComplexity = cellTO.genomeComplexity;
     cell->detectedByCreatureId = cellTO.detectedByCreatureId;
     cell->cellTypeUsed = cellTO.cellTypeUsed;
     cell->genomeNodeIndex = cellTO.genomeNodeIndex;
@@ -268,22 +265,13 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
         cell->cellTypeData.constructor.autoTriggerInterval = cellTO.cellTypeData.constructor.autoTriggerInterval;
         cell->cellTypeData.constructor.constructionActivationTime = cellTO.cellTypeData.constructor.constructionActivationTime;
         cell->cellTypeData.constructor.geneIndex = cellTO.cellTypeData.constructor.geneIndex;
-        copyDataToHeap(
-            cellTO.cellTypeData.constructor.genomeSize,
-            cellTO.cellTypeData.constructor.genomeDataIndex,
-            collectionTO.heap,
-            cell->cellTypeData.constructor.genomeSize,
-            cell->cellTypeData.constructor.genome);
         cell->cellTypeData.constructor.numExpectedCells = cellTO.cellTypeData.constructor.numExpectedCells;
         cell->cellTypeData.constructor.lastConstructedCellId = cellTO.cellTypeData.constructor.lastConstructedCellId;
         cell->cellTypeData.constructor.currentNodeIndex = cellTO.cellTypeData.constructor.currentNodeIndex;
         cell->cellTypeData.constructor.currentRepetition = cellTO.cellTypeData.constructor.currentRepetition;
         cell->cellTypeData.constructor.currentBranch = cellTO.cellTypeData.constructor.currentBranch;
-        cell->cellTypeData.constructor.offspringCreatureId = cellTO.cellTypeData.constructor.offspringCreatureId;
-        cell->cellTypeData.constructor.offspringMutationId = cellTO.cellTypeData.constructor.offspringMutationId;
         cell->cellTypeData.constructor.generation = cellTO.cellTypeData.constructor.generation;
         cell->cellTypeData.constructor.constructionAngle = cellTO.cellTypeData.constructor.constructionAngle;
-        cell->cellTypeData.constructor.constructionAngle2 = cellTO.cellTypeData.constructor.constructionAngle2;
         cell->cellTypeData.constructor.isReady = true;
     } break;
     case CellType_Sensor: {
@@ -305,13 +293,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
     case CellType_Injector: {
         cell->cellTypeData.injector.mode = cellTO.cellTypeData.injector.mode;
         cell->cellTypeData.injector.counter = cellTO.cellTypeData.injector.counter;
-        copyDataToHeap(
-            cellTO.cellTypeData.injector.genomeSize,
-            cellTO.cellTypeData.injector.genomeDataIndex,
-            collectionTO.heap,
-            cell->cellTypeData.injector.genomeSize,
-            cell->cellTypeData.injector.genome);
-        cell->cellTypeData.injector.generation = cellTO.cellTypeData.injector.generation;
     } break;
     case CellType_Muscle: {
         cell->cellTypeData.muscle.mode = cellTO.cellTypeData.muscle.mode;
@@ -436,14 +417,11 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->sticky = false;
     cell->age = 0;
     cell->activationTime = 0;
-    cell->genomeComplexity = 0;
     cell->signalRoutingRestriction.active = false;
     cell->signalRelaxationTime = 0;
     cell->signal.active = false;
     cell->density = 1.0f;
     cell->creatureId = 0;
-    cell->mutationId = 0;
-    cell->ancestorMutationId = 0;
     cell->detectedByCreatureId = 0;
     cell->event = CellEvent_No;
     cell->cellTypeUsed = CellTriggered_No;

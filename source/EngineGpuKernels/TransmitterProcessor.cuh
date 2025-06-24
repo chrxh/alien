@@ -5,6 +5,7 @@
 #include "Object.cuh"
 #include "SignalProcessor.cuh"
 #include "ConstantMemory.cuh"
+#include "ConstructorHelper.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
 
@@ -53,7 +54,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
             continue;
         }
         if (connectedCell->cellType == CellType_Constructor) {
-            if (!GenomeDecoder::isFinished(connectedCell->cellTypeData.constructor)) {
+            if (!ConstructorHelper::isFinished(connectedCell)) {
                 continue;
             }
         }
@@ -101,7 +102,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
                 return false;
             }
             if (otherCell->cellType == CellType_Constructor) {
-                if (!GenomeDecoder::isFinished(otherCell->cellTypeData.constructor)
+                if (!ConstructorHelper::isFinished(otherCell)
                     && (!cudaSimulationParameters.transmitterEnergyDistributionSameCreature.value || otherCell->creatureId == cell->creatureId)
                     && otherCell->cellTypeData.constructor.isReady) {
                     return true;

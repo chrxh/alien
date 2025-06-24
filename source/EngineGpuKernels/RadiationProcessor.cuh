@@ -128,9 +128,9 @@ __inline__ __device__ void RadiationProcessor::collision(SimulationData& data)
                             energyToTransfer *=
                                 powf(toFloat(cell->numConnections + 1) / 7.0f, cudaSimulationParameters.radiationAbsorptionLowConnectionPenalty.value[cell->color]);
 
-                            auto radiationAbsorptionLowGenomeComplexityPenalty = ParameterCalculator::calcParameter(
-                                cudaSimulationParameters.radiationAbsorptionLowGenomeComplexityPenalty, data, cell->pos, cell->color);
-                            energyToTransfer *= 1.0f - radiationAbsorptionLowGenomeComplexityPenalty / powf(1.0f + cell->genomeComplexity, 0.1f);
+                            //auto radiationAbsorptionLowGenomeComplexityPenalty = ParameterCalculator::calcParameter(
+                            //    cudaSimulationParameters.radiationAbsorptionLowGenomeComplexityPenalty, data, cell->pos, cell->color);
+                            //energyToTransfer *= 1.0f - radiationAbsorptionLowGenomeComplexityPenalty / powf(1.0f + cell->genomeComplexity, 0.1f);
                         }
 
                         if (particle->energy < 0.01f/* && energyToTransfer > 0.1f*/) {

@@ -154,53 +154,53 @@ public:
             } else if (cell->cellType == CellType_Free) {
                 alienAtomicAdd32(&_specificCellTypeDensityMap[index], static_cast<uint32_t>(0x100));
             } else {
-                {
-                    uint64_t bucket = calcOtherMutantsBucket(cell->mutationId, timestep);
-                    alienAtomicAdd64(&_otherMutantDensityMap[index], static_cast<uint64_t>(0x0101010101010101ull ^ (1ull << (bucket * 8))));
-                }
-                {
-                    uint64_t bucket1 = cell->mutationId % 3;
-                    uint64_t bucket2 = cell->mutationId % 5;
-                    uint64_t bucket3 = cell->mutationId % 7;
-                    alienAtomicAdd64(&_sameMutantDensityMap1[index], static_cast<uint64_t>((1ull << (bucket1 * 8)) | (1ull << ((bucket2 + 3) * 8))));
-                    alienAtomicAdd64(&_sameMutantDensityMap2[index], static_cast<uint64_t>(1ull << (bucket3 * 8)));
-                }
-                {
-                    auto bucket = 32 - __clz(convertGenomeComplexityToIntValue(cell->genomeComplexity));
-                    if (bucket < 8) {
-                        {
-                            auto bitset = static_cast<uint64_t>(1ull << bucket * 8);
-                            for (int i = 0; i < 7; ++i) {
-                                bitset |= (bitset << 8);
-                            }
-                            alienAtomicAdd64(&_lessGenomeComplexityDensityMap1[index], bitset);
-                            alienAtomicAdd64(&_lessGenomeComplexityDensityMap2[index], static_cast<uint64_t>(0x0101010101010101ull));
-                        }
-                        {
-                            auto bitset = static_cast<uint64_t>(1ull << bucket * 8);
-                            for (int i = 0; i < 7; ++i) {
-                                bitset |= (bitset >> 8);
-                            }
-                            alienAtomicAdd64(&_moreGenomeComplexityDensityMap1[index], bitset);
-                        }
-                    } else if (bucket < 16) {
-                        {
-                            auto bitset = static_cast<uint64_t>(1ull << ((bucket - 8) * 8));
-                            for (int i = 0; i < 7; ++i) {
-                                bitset |= (bitset << 8);
-                            }
-                            alienAtomicAdd64(&_lessGenomeComplexityDensityMap2[index], bitset);
-                        }
-                        {
-                            auto bitset = static_cast<uint64_t>(1ull << ((bucket - 8) * 8));
-                            for (int i = 0; i < 7; ++i) {
-                                bitset |= (bitset >> 8);
-                            }
-                            alienAtomicAdd64(&_moreGenomeComplexityDensityMap2[index], bitset);
-                            alienAtomicAdd64(&_moreGenomeComplexityDensityMap1[index], static_cast<uint64_t>(0x0101010101010101ull));
-                        }
-                    }
-                }
+                //{
+                //    uint64_t bucket = calcOtherMutantsBucket(cell->mutationId, timestep);
+                //    alienAtomicAdd64(&_otherMutantDensityMap[index], static_cast<uint64_t>(0x0101010101010101ull ^ (1ull << (bucket * 8))));
+                //}
+                //{
+                //    uint64_t bucket1 = cell->mutationId % 3;
+                //    uint64_t bucket2 = cell->mutationId % 5;
+                //    uint64_t bucket3 = cell->mutationId % 7;
+                //    alienAtomicAdd64(&_sameMutantDensityMap1[index], static_cast<uint64_t>((1ull << (bucket1 * 8)) | (1ull << ((bucket2 + 3) * 8))));
+                //    alienAtomicAdd64(&_sameMutantDensityMap2[index], static_cast<uint64_t>(1ull << (bucket3 * 8)));
+                //}
+                //{
+                //    auto bucket = 32 - __clz(convertGenomeComplexityToIntValue(cell->genomeComplexity));
+                //    if (bucket < 8) {
+                //        {
+                //            auto bitset = static_cast<uint64_t>(1ull << bucket * 8);
+                //            for (int i = 0; i < 7; ++i) {
+                //                bitset |= (bitset << 8);
+                //            }
+                //            alienAtomicAdd64(&_lessGenomeComplexityDensityMap1[index], bitset);
+                //            alienAtomicAdd64(&_lessGenomeComplexityDensityMap2[index], static_cast<uint64_t>(0x0101010101010101ull));
+                //        }
+                //        {
+                //            auto bitset = static_cast<uint64_t>(1ull << bucket * 8);
+                //            for (int i = 0; i < 7; ++i) {
+                //                bitset |= (bitset >> 8);
+                //            }
+                //            alienAtomicAdd64(&_moreGenomeComplexityDensityMap1[index], bitset);
+                //        }
+                //    } else if (bucket < 16) {
+                //        {
+                //            auto bitset = static_cast<uint64_t>(1ull << ((bucket - 8) * 8));
+                //            for (int i = 0; i < 7; ++i) {
+                //                bitset |= (bitset << 8);
+                //            }
+                //            alienAtomicAdd64(&_lessGenomeComplexityDensityMap2[index], bitset);
+                //        }
+                //        {
+                //            auto bitset = static_cast<uint64_t>(1ull << ((bucket - 8) * 8));
+                //            for (int i = 0; i < 7; ++i) {
+                //                bitset |= (bitset >> 8);
+                //            }
+                //            alienAtomicAdd64(&_moreGenomeComplexityDensityMap2[index], bitset);
+                //            alienAtomicAdd64(&_moreGenomeComplexityDensityMap1[index], static_cast<uint64_t>(0x0101010101010101ull));
+                //        }
+                //    }
+                //}
             }
         }
     }

@@ -13,6 +13,7 @@ add_library(EngineGpuKernels
     ConstantMemory.cu
     ConstantMemory.cuh
     Constants.cuh
+    ConstructorHelper.cuh
     ConstructorProcessor.cuh
     ConstructorProcessor_New.cuh
     CudaCollectionTOProvider.cu
@@ -41,7 +42,6 @@ add_library(EngineGpuKernels
     GarbageCollectorKernelsService.cu
     GarbageCollectorKernelsService.cuh
     Genome.cuh
-    GenomeDecoder.cuh
     GenomeTO.cuh
     HashMap.cuh
     HashSet.cuh
@@ -54,7 +54,6 @@ add_library(EngineGpuKernels
     MaxAgeBalancer.cu
     MaxAgeBalancer.cuh
     MuscleProcessor.cuh
-    MutationProcessor.cuh
     OscillatorProcessor.cuh
     NeuronProcessor.cuh
     Object.cuh

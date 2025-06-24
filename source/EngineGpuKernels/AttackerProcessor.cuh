@@ -71,27 +71,27 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             }
 
             // Evaluate genome complexity bonus
-            if (otherCell->genomeComplexity > cell->genomeComplexity) {
-                auto cellTypeAttackerGenomeComplexityBonus =
-                    ParameterCalculator::calcParameter(cudaSimulationParameters.attackerComplexCreatureProtection, data, cell->pos, color, otherColor);
-                energyToTransfer /=
-                    (1.0f + cellTypeAttackerGenomeComplexityBonus * (otherCell->genomeComplexity - cell->genomeComplexity));
-            }
+            //if (otherCell->genomeComplexity > cell->genomeComplexity) {
+            //    auto cellTypeAttackerGenomeComplexityBonus =
+            //        ParameterCalculator::calcParameter(cudaSimulationParameters.attackerComplexCreatureProtection, data, cell->pos, color, otherColor);
+            //    energyToTransfer /=
+            //        (1.0f + cellTypeAttackerGenomeComplexityBonus * (otherCell->genomeComplexity - cell->genomeComplexity));
+            //}
 
             // Evaluate same mutant penalty
-            if (cudaSimulationParameters.advancedAttackerControlToggle.value
-                && ((otherCell->mutationId == cell->mutationId) || (otherCell->ancestorMutationId == static_cast<uint8_t>(cell->mutationId & 0xff)))
-                && cell->mutationId != 0) {
-                energyToTransfer *= (1.0f - cudaSimulationParameters.attackerSameMutantProtection.value[color][otherColor]);
-            }
+            //if (cudaSimulationParameters.advancedAttackerControlToggle.value
+            //    && ((otherCell->mutationId == cell->mutationId) || (otherCell->ancestorMutationId == static_cast<uint8_t>(cell->mutationId & 0xff)))
+            //    && cell->mutationId != 0) {
+            //    energyToTransfer *= (1.0f - cudaSimulationParameters.attackerSameMutantProtection.value[color][otherColor]);
+            //}
 
             // Evaluate new complex mutant penalty
-            if (cudaSimulationParameters.advancedAttackerControlToggle.value && cell->mutationId < otherCell->mutationId
-                && cell->genomeComplexity <= otherCell->genomeComplexity) {
-                auto cellTypeAttackerArisingComplexMutantPenalty =
-                    ParameterCalculator::calcParameter(cudaSimulationParameters.attackerNewComplexMutantProtection, data, cell->pos, color, otherColor);
-                energyToTransfer *= (1.0f - cellTypeAttackerArisingComplexMutantPenalty);
-            }
+            //if (cudaSimulationParameters.advancedAttackerControlToggle.value && cell->mutationId < otherCell->mutationId
+            //    && cell->genomeComplexity <= otherCell->genomeComplexity) {
+            //    auto cellTypeAttackerArisingComplexMutantPenalty =
+            //        ParameterCalculator::calcParameter(cudaSimulationParameters.attackerNewComplexMutantProtection, data, cell->pos, color, otherColor);
+            //    energyToTransfer *= (1.0f - cellTypeAttackerArisingComplexMutantPenalty);
+            //}
 
             // Evaluate defender strength
             auto numDefenderCells = countAndTrackDefenderCells(statistics, otherCell);

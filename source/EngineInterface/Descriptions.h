@@ -100,19 +100,11 @@ struct ConstructorDescription
     MEMBER(ConstructorDescription, int, numExpectedCells, 0);
     MEMBER(ConstructorDescription, int, generation, 0);
 
-    // DEPRECATED
-    MEMBER(ConstructorDescription, std::vector<uint8_t>, genome, {});
-    MEMBER(ConstructorDescription, float, constructionAngle2, 0);
-
     // Process data
     MEMBER(ConstructorDescription, uint64_t, lastConstructedCellId, 0);
     MEMBER(ConstructorDescription, int, currentNodeIndex, 0);
     MEMBER(ConstructorDescription, int, currentRepetition, 0);
     MEMBER(ConstructorDescription, int, currentBranch, 0);
-
-    // DEPRECATED
-    MEMBER(ConstructorDescription, uint64_t, offspringCreatureId, 0);
-    MEMBER(ConstructorDescription, int, offspringMutationId, 0);
 
     bool isGenomeInherited() const { return _numExpectedCells != 0; }
 };
@@ -154,8 +146,6 @@ struct InjectorDescription
 
     MEMBER(InjectorDescription, InjectorMode, mode, InjectorMode_InjectAll);
     MEMBER(InjectorDescription, int, counter, 0);
-    MEMBER(InjectorDescription, std::vector<uint8_t>, genome, {});
-    MEMBER(InjectorDescription, int, generation, 0);
 };
 
 struct AutoBendingDescription
@@ -353,10 +343,7 @@ struct CellDescription
     // Genome data
     MEMBER(CellDescription, std::optional<uint64_t>, genomeId, std::nullopt);
     MEMBER(CellDescription, uint64_t, creatureId, 0);
-    MEMBER(CellDescription, int, mutationId, 0);
-    MEMBER(CellDescription, uint8_t, ancestorMutationId, 0);
     MEMBER(CellDescription, uint16_t, genomeNodeIndex, 0);
-    MEMBER(CellDescription, float, genomeComplexity, 0);
 
     // Cell type-specific data
     MEMBER(CellDescription, std::optional<NeuralNetworkDescription>, neuralNetwork, std::nullopt);

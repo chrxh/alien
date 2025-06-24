@@ -1,6 +1,7 @@
 #include "TestKernels.cuh"
 
-#include "MutationProcessor.cuh"
+#include "CellConnectionProcessor.cuh"
+#include "SimulationData.cuh"
 
 __global__ void cudaTestMutate(SimulationData data, uint64_t cellId, MutationType mutationType)
 {
@@ -9,46 +10,46 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t cellId, MutationTyp
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        if (cell->id == cellId) {
-            switch (mutationType) {
-            case MutationType::Properties:
-                MutationProcessor::propertiesMutation(data, cell);
-                break;
-            case MutationType::NeuronData:
-                MutationProcessor::neuronDataMutation(data, cell);
-                break;
-            case MutationType::Geometry:
-                MutationProcessor::geometryMutation(data, cell);
-                break;
-            case MutationType::CustomGeometry:
-                MutationProcessor::customGeometryMutation(data, cell);
-                break;
-            case MutationType::CellType:
-                MutationProcessor::cellTypeMutation(data, cell);
-                break;
-            case MutationType::Insertion:
-                MutationProcessor::insertMutation(data, cell);
-                break;
-            case MutationType::Deletion:
-                MutationProcessor::deleteMutation(data, cell);
-                break;
-            case MutationType::Translation:
-                MutationProcessor::translateMutation(data, cell);
-                break;
-            case MutationType::Duplication:
-                MutationProcessor::duplicateMutation(data, cell);
-                break;
-            case MutationType::CellColor:
-                MutationProcessor::cellColorMutation(data, cell);
-                break;
-            case MutationType::SubgenomeColor:
-                MutationProcessor::subgenomeColorMutation(data, cell);
-                break;
-            case MutationType::GenomeColor:
-                MutationProcessor::genomeColorMutation(data, cell);
-                break;
-            }
-        }
+        //if (cell->id == cellId) {
+        //    switch (mutationType) {
+        //    case MutationType::Properties:
+        //        MutationProcessor::propertiesMutation(data, cell);
+        //        break;
+        //    case MutationType::NeuronData:
+        //        MutationProcessor::neuronDataMutation(data, cell);
+        //        break;
+        //    case MutationType::Geometry:
+        //        MutationProcessor::geometryMutation(data, cell);
+        //        break;
+        //    case MutationType::CustomGeometry:
+        //        MutationProcessor::customGeometryMutation(data, cell);
+        //        break;
+        //    case MutationType::CellType:
+        //        MutationProcessor::cellTypeMutation(data, cell);
+        //        break;
+        //    case MutationType::Insertion:
+        //        MutationProcessor::insertMutation(data, cell);
+        //        break;
+        //    case MutationType::Deletion:
+        //        MutationProcessor::deleteMutation(data, cell);
+        //        break;
+        //    case MutationType::Translation:
+        //        MutationProcessor::translateMutation(data, cell);
+        //        break;
+        //    case MutationType::Duplication:
+        //        MutationProcessor::duplicateMutation(data, cell);
+        //        break;
+        //    case MutationType::CellColor:
+        //        MutationProcessor::cellColorMutation(data, cell);
+        //        break;
+        //    case MutationType::SubgenomeColor:
+        //        MutationProcessor::subgenomeColorMutation(data, cell);
+        //        break;
+        //    case MutationType::GenomeColor:
+        //        MutationProcessor::genomeColorMutation(data, cell);
+        //        break;
+        //    }
+        //}
     }
 }
 
@@ -123,14 +124,14 @@ __global__ void cudaTestAreArraysValid(SimulationData data, bool* result)
 
 __global__ void cudaTestMutationCheck(SimulationData data, uint64_t cellId)
 {
-    auto& cells = data.objects.cells;
-    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+    //auto& cells = data.objects.cells;
+    //auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& cell = cells.at(index);
-        if (cell->id == cellId) {
-            MutationProcessor::checkMutationsForCell(data, cell);
-        }
-    }
+    //for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    //    auto& cell = cells.at(index);
+    //    if (cell->id == cellId) {
+    //        MutationProcessor::checkMutationsForCell(data, cell);
+    //    }
+    //}
 }
 

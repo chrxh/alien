@@ -1,7 +1,5 @@
 ﻿#include "EditKernels.cuh"
 
-#include "MutationProcessor.cuh"
-
 __global__ void cudaColorSelectedCells(SimulationData data, unsigned char color, bool includeClusters)
 {
     auto const cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
@@ -645,33 +643,33 @@ __global__ void cudaSetDetached(SimulationData data, bool value)
 
 __global__ void cudaApplyCataclysm(SimulationData data)
 {
-    auto& cells = data.objects.cells;
-    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+    //auto& cells = data.objects.cells;
+    //auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& cell = cells.at(index);
+    //for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    //    auto& cell = cells.at(index);
 
-        if (cell->cellType == CellType_Constructor) {
-            if (data.primaryNumberGen.random() < 0.3f) {
-                for (int j = 0; j < 100; ++j) {
-                    MutationProcessor::neuronDataMutation(data, cell);
-                }
-                for (int j = 0; j < 50; ++j) {
-                    MutationProcessor::propertiesMutation(data, cell);
-                }
-                MutationProcessor::geometryMutation(data, cell);
-                MutationProcessor::customGeometryMutation(data, cell);
-                MutationProcessor::cellTypeMutation(data, cell);
-                int num = data.primaryNumberGen.random(5);
-                for (int i = 0; i < num; ++i) {
-                    MutationProcessor::insertMutation(data, cell);
-                }
-                //                MutationProcessor::translateMutation(data, cell);
-                for (int i = 0; i < 2; ++i) {
-                    MutationProcessor::duplicateMutation(data, cell);
-                }
-                //                MutationProcessor::deleteMutation(data, cell);
-            }
-        }
-    }
+    //    if (cell->cellType == CellType_Constructor) {
+    //        if (data.primaryNumberGen.random() < 0.3f) {
+    //            for (int j = 0; j < 100; ++j) {
+    //                MutationProcessor::neuronDataMutation(data, cell);
+    //            }
+    //            for (int j = 0; j < 50; ++j) {
+    //                MutationProcessor::propertiesMutation(data, cell);
+    //            }
+    //            MutationProcessor::geometryMutation(data, cell);
+    //            MutationProcessor::customGeometryMutation(data, cell);
+    //            MutationProcessor::cellTypeMutation(data, cell);
+    //            int num = data.primaryNumberGen.random(5);
+    //            for (int i = 0; i < num; ++i) {
+    //                MutationProcessor::insertMutation(data, cell);
+    //            }
+    //            //                MutationProcessor::translateMutation(data, cell);
+    //            for (int i = 0; i < 2; ++i) {
+    //                MutationProcessor::duplicateMutation(data, cell);
+    //            }
+    //            //                MutationProcessor::deleteMutation(data, cell);
+    //        }
+    //    }
+    //}
 }

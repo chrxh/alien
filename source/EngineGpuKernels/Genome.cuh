@@ -154,7 +154,7 @@ struct Node
 struct Gene
 {
     ConstructionShape shape;
-    uint8_t numBranches;  // 0 = no separation
+    uint8_t numBranches;  // 0 = separation
     ConstructorAngleAlignment angleAlignment;
     float stiffness;
     float connectionDistance;

@@ -63,20 +63,11 @@ struct ConstructorTO
     uint16_t numExpectedCells;
     uint32_t generation;
 
-    // DEPRECATED
-    uint16_t genomeSize;
-    uint64_t genomeDataIndex;
-    float constructionAngle2;
-
     // Process data
     uint64_t lastConstructedCellId;
     uint16_t currentNodeIndex;
     uint16_t currentRepetition;
     uint8_t currentBranch;
-
-    // DEPRECATED
-    uint32_t offspringCreatureId;
-    uint32_t offspringMutationId;
 };
 
 struct SensorTO
@@ -107,9 +98,6 @@ struct InjectorTO
 {
     InjectorMode mode;
     uint32_t counter;
-    uint16_t genomeSize;
-    uint64_t genomeDataIndex;
-    uint32_t generation;
 };
 
 struct AutoBendingTO
@@ -268,10 +256,7 @@ struct CellTO
     bool hasGenome;
     uint64_t genomeIndex;
     uint64_t creatureId;
-    uint32_t mutationId;
-    uint8_t ancestorMutationId;  // Only the first 8 bits from ancestor mutation id
     uint16_t genomeNodeIndex;
-    float genomeComplexity;
 
     // Cell type data
     uint64_t neuralNetworkDataIndex;  // Not used for structure and base cells

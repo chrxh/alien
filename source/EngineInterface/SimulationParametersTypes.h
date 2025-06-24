@@ -154,7 +154,7 @@ enum CellColoring_
     CellColoring_MutationId,
     CellColoring_MutationId_EveryCellType,
     CellColoring_LivingState,
-    CellColoring_GenomeSize,
+    CellColoring_GenomeComplexity,
     CellColoring_SpecificCellType,
     CellColoring_EveryCellType
 };
