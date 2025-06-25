@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Base/Singleton.h"
-#include "EngineInterface/GenomeDescriptions.h"
+#include "EngineInterface/CreatureDescription.h"
 #include "EngineInterface/PreviewDescriptions.h"
 #include "EngineInterface/SimulationFacade.h"
 

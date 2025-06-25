@@ -14,7 +14,7 @@
 #include "GenericMessageDialog.h"
 #include "OverlayController.h"
 
-void CreatureEditorWindow::openTab(GenomeDescription_New const& genome, uint64_t creatureId, bool openCreatureEditorIfClosed)
+void CreatureEditorWindow::openTab(CreatureDescription const& genome, uint64_t creatureId, bool openCreatureEditorIfClosed)
 {
     if (openCreatureEditorIfClosed) {
         setOn(false);
@@ -45,7 +45,7 @@ void CreatureEditorWindow::initIntern(SimulationFacade simulationFacade)
     _simulationFacade = simulationFacade;
 
     // Test genome for the editor
-    auto genome = GenomeDescription_New().genes({
+    auto genome = CreatureDescription().genes({
         GeneDescription().nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription_New().geneIndex(1)),
             NodeDescription().cellTypeData(ConstructorGenomeDescription_New().geneIndex(2)),
@@ -120,7 +120,7 @@ void CreatureEditorWindow::processTabWidget()
     if (ImGui::BeginTabBar("##", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown | ImGuiTabBarFlags_Reorderable)) {
 
         if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
-            onScheduleAddTab(GenomeDescription_New());
+            onScheduleAddTab(CreatureDescription());
         }
         AlienGui::Tooltip("New creature");
 
@@ -209,7 +209,7 @@ void CreatureEditorWindow::onCreateSeed()
     printOverlayMessage("Seed created");
 }
 
-void CreatureEditorWindow::onScheduleAddTab(GenomeDescription_New const& genome, std::optional<uint64_t> const& creatureId)
+void CreatureEditorWindow::onScheduleAddTab(CreatureDescription const& genome, std::optional<uint64_t> const& creatureId)
 {
     if (creatureId.has_value()) {
         _tabToAdd = _CreatureTabWidget::createPinnedCreatureTab(_simulationFacade, genome, creatureId.value());

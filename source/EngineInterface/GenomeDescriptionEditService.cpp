@@ -1,6 +1,6 @@
 #include "GenomeDescriptionEditService.h"
 
-void GenomeDescriptionEditService::addGene(GenomeDescription_New& genome, int index, GeneDescription const& newGene)
+void GenomeDescriptionEditService::addGene(CreatureDescription& genome, int index, GeneDescription const& newGene)
 {
     if (genome._genes.empty()) {
         genome._genes.emplace_back(newGene);
@@ -22,7 +22,7 @@ void GenomeDescriptionEditService::addGene(GenomeDescription_New& genome, int in
     genome._genes.insert(genome._genes.begin() + index + 1, newGene);
 }
 
-void GenomeDescriptionEditService::removeGene(GenomeDescription_New& genome, int index)
+void GenomeDescriptionEditService::removeGene(CreatureDescription& genome, int index)
 {
     for (int i = 0; i < genome._genes.size(); ++i) {
         if (i == index) {
@@ -41,7 +41,7 @@ void GenomeDescriptionEditService::removeGene(GenomeDescription_New& genome, int
     genome._genes.erase(genome._genes.begin() + index);
 }
 
-void GenomeDescriptionEditService::swapGenes(GenomeDescription_New& genome, int index)
+void GenomeDescriptionEditService::swapGenes(CreatureDescription& genome, int index)
 {
     std::swap(genome._genes.at(index), genome._genes.at(index + 1));
 

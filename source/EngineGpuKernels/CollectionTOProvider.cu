@@ -68,7 +68,7 @@ CollectionTO _CollectionTOProvider::provideNewUnmanagedDataTO(ArraySizesForTO co
 
         result.cells = new CellTO[requiredCapacity.cells];
         result.particles = new ParticleTO[requiredCapacity.particles];
-        result.genomes = new GenomeTO[requiredCapacity.genomes];
+        result.genomes = new CreatureTO[requiredCapacity.genomes];
         result.genes = new GeneTO[requiredCapacity.genes];
         result.nodes = new NodeTO[requiredCapacity.nodes];
         result.heap = new uint8_t[requiredCapacity.heap];

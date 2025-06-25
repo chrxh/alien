@@ -3,7 +3,7 @@
 
 #include "EngineInterface/GenomeDescriptionEditService.h"
 #include "EngineInterface/GenomeDescriptionInfoService.h"
-#include "EngineInterface/GenomeDescriptions.h"
+#include "EngineInterface/CreatureDescription.h"
 
 class GenomeDescriptionEditServiceTests_New : public ::testing::Test
 {
@@ -11,9 +11,9 @@ public:
     virtual ~GenomeDescriptionEditServiceTests_New() = default;
 
 protected:
-    GenomeDescription_New createGenome_3genes_3_4_5nodes()
+    CreatureDescription createGenome_3genes_3_4_5nodes()
     {
-        return GenomeDescription_New().genes({
+        return CreatureDescription().genes({
             GeneDescription().nodes({
                 NodeDescription().cellTypeData(ConstructorGenomeDescription_New().geneIndex(0)),
                 NodeDescription().cellTypeData(ConstructorGenomeDescription_New().geneIndex(1)),
@@ -38,7 +38,7 @@ protected:
 
 TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyGene_onEmptyGenome)
 {
-    auto genome = GenomeDescription_New();
+    auto genome = CreatureDescription();
     GenomeDescriptionEditService::get().addGene(genome, 0, GeneDescription());
 
     EXPECT_EQ(1, genome._genes.size());
@@ -46,7 +46,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyGene_onEmptyGenome)
 
 TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyGene_onNonEmptyGenome_start)
 {
-    auto genome = GenomeDescription_New().genes({
+    auto genome = CreatureDescription().genes({
         GeneDescription().nodes({
             NodeDescription(),
         }),
@@ -67,7 +67,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyGene_onNonEmptyGenome_star
 
 TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyGene_onNonEmptyGenome_end)
 {
-    auto genome = GenomeDescription_New().genes({
+    auto genome = CreatureDescription().genes({
         GeneDescription().nodes({
             NodeDescription(),
         }),

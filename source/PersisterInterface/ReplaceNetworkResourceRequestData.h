@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "EngineInterface/GenomeDescriptions.h"
+#include "EngineInterface/CreatureDescription.h"
 #include "Network/Definitions.h"
 #include "DownloadCache.h"
 

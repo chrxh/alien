@@ -2,7 +2,7 @@
 
 #include "Base/Singleton.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/GenomeDescriptions.h"
+#include "EngineInterface/CreatureDescription.h"
 
 #include "Definitions.h"
 #include "AlienWindow.h"
@@ -12,7 +12,7 @@ class CreatureEditorWindow : public AlienWindow<SimulationFacade>
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(CreatureEditorWindow);
 
 public:
-    void openTab(GenomeDescription_New const& genome, uint64_t creatureId, bool openCreatureEditorIfClosed = true);
+    void openTab(CreatureDescription const& genome, uint64_t creatureId, bool openCreatureEditorIfClosed = true);
 
 private:
     CreatureEditorWindow();
@@ -27,7 +27,7 @@ private:
 
     void onInjectGenome();
     void onCreateSeed();
-    void onScheduleAddTab(GenomeDescription_New const& genome, std::optional<uint64_t> const& creatureId = std::nullopt);
+    void onScheduleAddTab(CreatureDescription const& genome, std::optional<uint64_t> const& creatureId = std::nullopt);
 
     void pushStyleColorForTab(CreatureTabWidget const& creatureTab);
 

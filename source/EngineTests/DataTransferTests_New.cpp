@@ -278,7 +278,7 @@ TEST_P(DataTransferTests_AllCellTypeGenome_New, singleCell_genome_oneGene_oneNod
     nn2.weight(1, 3, -1.0f);
 
     auto data = CollectionDescription().addCreature(
-        GenomeDescription_New().genes(
+        CreatureDescription().genes(
             {GeneDescription()
                  .shape(ConstructionShape_Hexagon)
                  .numBranches(3)
@@ -311,7 +311,7 @@ TEST_F(DataTransferTests_New, multipleCells_genome_multipleGenes_multiple_Nodes)
     auto hexagon = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().center({100.0f, 100.0f}));
     CollectionDescription data;
     data.addCreature(
-        GenomeDescription_New().genes(
+        CreatureDescription().genes(
             {GeneDescription().nodes({NodeDescription(), NodeDescription()}),
              GeneDescription().nodes({NodeDescription(), NodeDescription(), NodeDescription()})}),
         hexagon._cells);
@@ -394,8 +394,8 @@ TEST_F(DataTransferTests_New, createParticleIds_sameIdsOnDescription)
 TEST_F(DataTransferTests_New, createGenomeIds)
 {
     CollectionDescription data;
-    data.addCreature(GenomeDescription_New(), {CellDescription()});
-    data.addCreature(GenomeDescription_New(), {CellDescription()});
+    data.addCreature(CreatureDescription(), {CellDescription()});
+    data.addCreature(CreatureDescription(), {CellDescription()});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->addAndSelectSimulationData(std::move(data));
@@ -477,12 +477,12 @@ TEST_F(DataTransferTests_New, createCreatureIds_sameIdsOnDescription)
 
 TEST_F(DataTransferTests_New, changeGenome_successful)
 {
-    auto data = CollectionDescription().addCreature(GenomeDescription_New(), {CellDescription()});
+    auto data = CollectionDescription().addCreature(CreatureDescription(), {CellDescription()});
     auto creatureId = data._cells.at(0)._creatureId;
 
     _simulationFacade->setSimulationData(data);
 
-    auto newGenome = GenomeDescription_New().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})});
+    auto newGenome = CreatureDescription().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})});
     auto result = _simulationFacade->changeGenome(creatureId, newGenome);
     ASSERT_TRUE(result);
 
@@ -505,12 +505,12 @@ TEST_F(DataTransferTests_New, changeGenome_successful)
 
 TEST_F(DataTransferTests_New, changeGenome_failed)
 {
-    auto data = CollectionDescription().addCreature(GenomeDescription_New(), {CellDescription()});
+    auto data = CollectionDescription().addCreature(CreatureDescription(), {CellDescription()});
     auto creatureId = data._cells.at(0)._creatureId;
 
     _simulationFacade->setSimulationData(data);
 
-    auto newGenome = GenomeDescription_New().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})});
+    auto newGenome = CreatureDescription().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})});
     auto result = _simulationFacade->changeGenome(creatureId + 1, newGenome);
     ASSERT_FALSE(result);
 }
@@ -520,8 +520,8 @@ TEST_F(DataTransferTests_New, getInspectedSimulationData)
     auto data =
         CollectionDescription()
             .addCreature(
-                GenomeDescription_New().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})}), {CellDescription(), CellDescription()})
-            .addCreature(GenomeDescription_New(), {CellDescription()});
+                CreatureDescription().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})}), {CellDescription(), CellDescription()})
+            .addCreature(CreatureDescription(), {CellDescription()});
     auto cellId1 = data._cells.at(0)._id;
     auto cellId2 = data._cells.at(1)._id;
 

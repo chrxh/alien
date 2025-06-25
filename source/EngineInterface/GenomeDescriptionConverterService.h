@@ -4,7 +4,7 @@
 
 #include "Base/Singleton.h"
 
-#include "GenomeDescriptions.h"
+#include "CreatureDescription.h"
 #include "SimulationParameters.h"
 
 class GenomeDescriptionConverterService

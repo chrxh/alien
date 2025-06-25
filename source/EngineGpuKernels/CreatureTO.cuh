@@ -166,7 +166,7 @@ struct GeneTO
     uint64_t nodeArrayIndex;
 };
 
-struct GenomeTO
+struct CreatureTO
 {
     float frontAngle;
 

@@ -10,7 +10,7 @@
 #include "EngineInterface/EngineConstants.h"
 
 #include "Definitions.h"
-#include "GenomeDescriptions.h"
+#include "CreatureDescription.h"
 
 struct CellMetadataDescription
 {
@@ -379,7 +379,6 @@ struct CellDescription
         return *this;
     }
     bool DEPRECATED_hasGenome() const;
-    std::vector<uint8_t>& getGenomeRef();
 
     bool isConnectedTo(uint64_t id) const;
 };
@@ -426,7 +425,7 @@ struct ClusteredCollectionDescription
 
     MEMBER(ClusteredCollectionDescription, std::vector<ClusterDescription>, clusters, {});
     MEMBER(ClusteredCollectionDescription, std::vector<ParticleDescription>, particles, {});
-    MEMBER(ClusteredCollectionDescription, std::vector<GenomeDescription_New>, genomes, {});
+    MEMBER(ClusteredCollectionDescription, std::vector<CreatureDescription>, genomes, {});
 
     ClusteredCollectionDescription& addClusters(std::vector<ClusterDescription> const& value)
     {
@@ -479,7 +478,7 @@ struct CollectionDescription
 
     MEMBER(CollectionDescription, std::vector<CellDescription>, cells, {});
     MEMBER(CollectionDescription, std::vector<ParticleDescription>, particles, {});
-    MEMBER(CollectionDescription, std::vector<GenomeDescription_New>, genomes, {});
+    MEMBER(CollectionDescription, std::vector<CreatureDescription>, genomes, {});
 
     CollectionDescription& add(CollectionDescription const& other);
     CollectionDescription& addCells(std::vector<CellDescription> const& value);
@@ -488,9 +487,9 @@ struct CollectionDescription
     CollectionDescription& addParticles(std::vector<ParticleDescription> const& value);
     CollectionDescription& addParticle(ParticleDescription const& value);
 
-    CollectionDescription& addGenome(GenomeDescription_New const& value);
+    CollectionDescription& addGenome(CreatureDescription const& value);
 
-    CollectionDescription& addCreature(GenomeDescription_New const& genome, std::vector<CellDescription> const& cells);
+    CollectionDescription& addCreature(CreatureDescription const& genome, std::vector<CellDescription> const& cells);
 
     void clear();
     bool isEmpty() const;
@@ -514,6 +513,6 @@ private:
 struct ExtendedCellDescription
 {
     CellDescription cell;
-    std::optional<GenomeDescription_New> genome;
+    std::optional<CreatureDescription> genome;
 };
 using ExtendedCellOrParticleDescription = std::variant<ExtendedCellDescription, ParticleDescription>;

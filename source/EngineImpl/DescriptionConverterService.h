@@ -21,20 +21,20 @@ public:
     CollectionTO convertDescriptionToTO(CollectionDescription const& description) const;
     CollectionTO convertDescriptionToTO(CellDescription const& cell) const;
     CollectionTO convertDescriptionToTO(ParticleDescription const& particle) const;
-    CollectionTO convertDescriptionToTO(GenomeDescription_New const& genome) const;
+    CollectionTO convertDescriptionToTO(CreatureDescription const& genome) const;
 
 private:
     DescriptionConverterService();
 
     CellDescription createCellDescription(CollectionTO const& collectionTO, int cellIndex, std::unordered_map<uint64_t, uint64_t> const& genomeIdByTOIndex) const;
-    GenomeDescription_New createGenomeDescription(CollectionTO const& collectionTO, int genomeIndex, std::unordered_map<uint64_t, uint64_t>& genomeIdByTOIndex) const;
+    CreatureDescription createGenomeDescription(CollectionTO const& collectionTO, int genomeIndex, std::unordered_map<uint64_t, uint64_t>& genomeIdByTOIndex) const;
 
     void convertGenomeToTO(
-        std::vector<GenomeTO>& genomeTOs,
+        std::vector<CreatureTO>& genomeTOs,
         std::vector<GeneTO>& geneTOs,
         std::vector<NodeTO>& nodeTOs,
         std::vector<uint8_t>& heap,
-        GenomeDescription_New const& genomeDesc,
+        CreatureDescription const& genomeDesc,
         std::unordered_map<uint64_t, uint64_t>& genomeTOIndexById) const;
     void convertCellToTO(
         std::vector<CellTO>& cellTOs,
@@ -47,7 +47,7 @@ private:
 	void setConnections(std::vector<CellTO>& cellTOs, CellDescription const& cellToAdd, std::unordered_map<uint64_t, uint64_t> const& cellIndexByIds) const;
 
     CollectionTO provideDataTO(
-        std::vector<GenomeTO> const& genomeTOs,
+        std::vector<CreatureTO> const& genomeTOs,
         std::vector<GeneTO> const& geneTOs,
         std::vector<NodeTO> const& nodeTOs,
         std::vector<CellTO> const& cellTOs,

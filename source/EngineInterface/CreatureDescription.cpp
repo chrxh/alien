@@ -1,4 +1,4 @@
-#include "GenomeDescriptions.h"
+#include "CreatureDescription.h"
 
 #include "NumberGenerator.h"
 
@@ -48,7 +48,7 @@ CellTypeGenome NodeDescription::getCellType() const
     CHECK(false);
 }
 
-GenomeDescription_New::GenomeDescription_New()
+CreatureDescription::CreatureDescription()
 {
     _id = NumberGenerator::get().createObjectId();
 }

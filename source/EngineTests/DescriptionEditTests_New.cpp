@@ -119,7 +119,7 @@ TEST_F(DescriptionEditTests_New, calcCluster)
         data.add(hex);
     }
     data.addParticle(ParticleDescription());
-    data.addGenome(GenomeDescription_New());
+    data.addGenome(CreatureDescription());
 
     ClusteredCollectionDescription clusteredData(data);
     

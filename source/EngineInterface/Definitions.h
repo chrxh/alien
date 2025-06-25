@@ -19,7 +19,7 @@ struct CollectionDescription;
 struct ClusterDescription;
 struct CellDescription;
 struct ParticleDescription;
-struct GenomeDescription_New;
+struct CreatureDescription;
 struct GeneDescription;
 
 struct GpuSettings;

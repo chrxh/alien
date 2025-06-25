@@ -4,7 +4,7 @@
 #include "EngineInterface/CellTypeConstants.h"
 
 #include "Base.cuh"
-#include "Genome.cuh"
+#include "Creature.cuh"
 #include "Math.cuh"
 
 struct Particle

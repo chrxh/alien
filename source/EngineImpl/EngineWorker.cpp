@@ -234,7 +234,7 @@ void EngineWorker::changeParticle(ParticleDescription const& changedParticle)
     _simulationCudaFacade->changeInspectedSimulationData(dataTO);
 }
 
-bool EngineWorker::changeGenome(uint64_t creatureId, GenomeDescription_New const& genome)
+bool EngineWorker::changeGenome(uint64_t creatureId, CreatureDescription const& genome)
 {
     EngineWorkerGuard access(this);
 

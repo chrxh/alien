@@ -4,7 +4,7 @@
 
 #include "Base/Singleton.h"
 
-#include "GenomeDescriptions.h"
+#include "CreatureDescription.h"
 #include "SimulationParameters.h"
 
 class GenomeDescriptionInfoService
@@ -12,8 +12,8 @@ class GenomeDescriptionInfoService
     MAKE_SINGLETON(GenomeDescriptionInfoService);
 
 public:
-    int getNumberOfNodes(GenomeDescription_New const& genome) const;
-    int getNumberOfResultingCells(GenomeDescription_New const& genome) const;  // Returns -1 for infinite
+    int getNumberOfNodes(CreatureDescription const& genome) const;
+    int getNumberOfResultingCells(CreatureDescription const& genome) const;  // Returns -1 for infinite
     std::vector<int> getReferences(GeneDescription const& gene) const;
-    std::vector<int> getReferencedBy(GenomeDescription_New const& genome, int geneIndex) const;
+    std::vector<int> getReferencedBy(CreatureDescription const& genome, int geneIndex) const;
 };

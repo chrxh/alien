@@ -22,8 +22,8 @@ add_library(EngineInterface
     GenomeDescriptionInfoService.h
     GenomeDescriptionValidationService.cpp
     GenomeDescriptionValidationService.h
-    GenomeDescriptions.cpp
-    GenomeDescriptions.h
+    CreatureDescription.cpp
+    CreatureDescription.h
     GpuSettings.h
     Ids.h
     InspectedEntityIds.h

@@ -227,15 +227,15 @@ struct GeneDescription
     MEMBER(GeneDescription, float, connectionDistance, 1.0f);
 };
 
-struct GenomeDescription_New
+struct CreatureDescription
 {
-    GenomeDescription_New();
+    CreatureDescription();
 
-    auto operator<=>(GenomeDescription_New const&) const = default;
+    auto operator<=>(CreatureDescription const&) const = default;
 
-    MEMBER(GenomeDescription_New, uint64_t, id, 0);
-    MEMBER(GenomeDescription_New, std::vector<GeneDescription>, genes, {})
-    MEMBER(GenomeDescription_New, float, frontAngle, 0.0f);
+    MEMBER(CreatureDescription, uint64_t, id, 0);
+    MEMBER(CreatureDescription, std::vector<GeneDescription>, genes, {})
+    MEMBER(CreatureDescription, float, frontAngle, 0.0f);
 };
 
 

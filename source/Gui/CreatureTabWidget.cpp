@@ -18,14 +18,14 @@
 
 CreatureTabWidget _CreatureTabWidget::createDraftCreatureTab(
     SimulationFacade const& simulationFacade,
-    GenomeDescription_New const& genome,
+    CreatureDescription const& genome,
     CreatureTabLayoutData const& layoutData)
 {
     return CreatureTabWidget(new _CreatureTabWidget(simulationFacade, genome, layoutData));
 }
 
 CreatureTabWidget
-_CreatureTabWidget::createPinnedCreatureTab(SimulationFacade const& simulationFacade, GenomeDescription_New const& genome, uint64_t creatureId)
+_CreatureTabWidget::createPinnedCreatureTab(SimulationFacade const& simulationFacade, CreatureDescription const& genome, uint64_t creatureId)
 {
     return CreatureTabWidget(new _CreatureTabWidget(simulationFacade, genome, creatureId));
 }
@@ -97,14 +97,14 @@ bool _CreatureTabWidget::hasCreaturesGenomeBeChanged() const
     return _pinnedCreatureData->changesMade;
 }
 
-GenomeDescription_New const& _CreatureTabWidget::getGenome()
+CreatureDescription const& _CreatureTabWidget::getGenome()
 {
     return _editData->genome;
 }
 
 bool _CreatureTabWidget::isEmpty() const
 {
-    return _editData->genome == GenomeDescription_New();
+    return _editData->genome == CreatureDescription();
 }
 
 void _CreatureTabWidget::convertToDraftTab()
@@ -112,7 +112,7 @@ void _CreatureTabWidget::convertToDraftTab()
     _pinnedCreatureData.reset();
 }
 
-_CreatureTabWidget::_CreatureTabWidget(SimulationFacade const& simulationFacade, GenomeDescription_New const& genome, CreatureTabLayoutData const& layoutData)
+_CreatureTabWidget::_CreatureTabWidget(SimulationFacade const& simulationFacade, CreatureDescription const& genome, CreatureTabLayoutData const& layoutData)
 {
     static int _sequence = 0;
     _id = ++_sequence;
@@ -128,7 +128,7 @@ _CreatureTabWidget::_CreatureTabWidget(SimulationFacade const& simulationFacade,
     _simulatedPreviewWidget = _SimulatedPreviewWidget::create(simulationFacade, _editData);
 }
 
-_CreatureTabWidget::_CreatureTabWidget(SimulationFacade const& simulationFacade, GenomeDescription_New const& genome, uint64_t creatureId)
+_CreatureTabWidget::_CreatureTabWidget(SimulationFacade const& simulationFacade, CreatureDescription const& genome, uint64_t creatureId)
     : _CreatureTabWidget(simulationFacade, genome, nullptr)
 {
     _pinnedCreatureData = PinnedCreatureData{.creatureId = creatureId, .origGenome = genome};

@@ -3,7 +3,7 @@
 #include <cuda_runtime.h>
 #include <stdint.h>
 
-#include "GenomeTO.cuh"
+#include "CreatureTO.cuh"
 #include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/CellTypeConstants.h"
 #include "EngineInterface/ArraySizesForTO.h"
@@ -286,7 +286,7 @@ struct CollectionTO
     uint64_t* numParticles = nullptr;
 	ParticleTO* particles = nullptr;
     uint64_t* numGenomes = nullptr;
-    GenomeTO* genomes = nullptr;
+    CreatureTO* genomes = nullptr;
     uint64_t* numGenes = nullptr;
     GeneTO* genes = nullptr;
     uint64_t* numNodes = nullptr;

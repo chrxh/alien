@@ -25,7 +25,7 @@
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/GenomeConstants.h"
-#include "EngineInterface/GenomeDescriptions.h"
+#include "EngineInterface/CreatureDescription.h"
 #include "EngineInterface/GenomeDescriptionConverterService.h"
 
 #include "SettingsParserService.h"
@@ -131,8 +131,8 @@ namespace cereal
 /************************************************************************/
 namespace
 {
-    auto constexpr Id_Genome_Id = 0;
-    auto constexpr Id_Genome_FrontAngle = 1;
+    auto constexpr Id_Creature_Id = 0;
+    auto constexpr Id_Creature_FrontAngle = 1;
 
     auto constexpr Id_Gene_Shape = 0;
     auto constexpr Id_Gene_NumBranches = 1;
@@ -452,17 +452,17 @@ namespace cereal
     SPLIT_SERIALIZATION(GeneDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, GenomeDescription_New& data)
+    void loadSave(SerializationTask task, Archive& ar, CreatureDescription& data)
     {
-        GenomeDescription_New defaultObject;
+        CreatureDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Genome_Id, data._id, defaultObject._id);
-        loadSave(task, auxiliaries, Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
+        loadSave(task, auxiliaries, Id_Creature_Id, data._id, defaultObject._id);
+        loadSave(task, auxiliaries, Id_Creature_FrontAngle, data._frontAngle, defaultObject._frontAngle);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._genes);
     }
-    SPLIT_SERIALIZATION(GenomeDescription_New)
+    SPLIT_SERIALIZATION(CreatureDescription)
 }
 
 /************************************************************************/

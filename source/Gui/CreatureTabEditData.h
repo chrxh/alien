@@ -1,13 +1,13 @@
 #pragma once
 
-#include "EngineInterface/GenomeDescriptions.h"
+#include "EngineInterface/CreatureDescription.h"
 #include "EngineInterface/ShapeGenerator.h"
 
 #include "Definitions.h"
 
 struct _CreatureTabEditData
 {
-    GenomeDescription_New genome;
+    CreatureDescription genome;
     std::optional<int> selectedGeneIndex;
     std::map<int, int> selectedNodeByGeneIndex;
 

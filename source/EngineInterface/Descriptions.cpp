@@ -229,13 +229,13 @@ CollectionDescription& CollectionDescription::addParticle(ParticleDescription co
     return *this;
 }
 
-CollectionDescription& CollectionDescription::addGenome(GenomeDescription_New const& value)
+CollectionDescription& CollectionDescription::addGenome(CreatureDescription const& value)
 {
     _genomes.emplace_back(value);
     return *this;
 }
 
-CollectionDescription& CollectionDescription::addCreature(GenomeDescription_New const& genome, std::vector<CellDescription> const& cells)
+CollectionDescription& CollectionDescription::addCreature(CreatureDescription const& genome, std::vector<CellDescription> const& cells)
 {
     auto highestGenomeId = 0ull;
     for (auto const& cell : _cells) {

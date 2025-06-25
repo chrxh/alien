@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/GenomeDescriptions.h"
+#include "EngineInterface/CreatureDescription.h"
 
 #include "Definitions.h"
 

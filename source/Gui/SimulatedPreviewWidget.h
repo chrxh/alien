@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/GenomeDescriptions.h"
+#include "EngineInterface/CreatureDescription.h"
 
 #include "Definitions.h"
 
@@ -20,5 +20,5 @@ private:
     CreatureTabEditData _editData;
     CreatureTabLayoutData _layoutData;
 
-    std::optional<GenomeDescription_New> _lastGenome;
+    std::optional<CreatureDescription> _lastGenome;
 };

@@ -7,7 +7,7 @@
 #include "Base/Math.h"
 #include "EngineInterface/NumberGenerator.h"
 
-#include "GenomeDescriptions.h"
+#include "CreatureDescription.h"
 #include "SpaceCalculator.h"
 #include "GenomeDescriptionConverterService.h"
 

@@ -163,7 +163,7 @@ void _SimulationFacadeImpl::changeParticle(ParticleDescription const& changedPar
     _worker.changeParticle(changedParticle);
 }
 
-bool _SimulationFacadeImpl::changeGenome(uint64_t creatureId, GenomeDescription_New const& genome)
+bool _SimulationFacadeImpl::changeGenome(uint64_t creatureId, CreatureDescription const& genome)
 {
     return _worker.changeGenome(creatureId, genome);
 }

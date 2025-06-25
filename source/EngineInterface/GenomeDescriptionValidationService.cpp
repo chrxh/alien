@@ -1,6 +1,6 @@
 #include "GenomeDescriptionValidationService.h"
 
-void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription_New& genome)
+void GenomeDescriptionValidationService::validateAndCorrect(CreatureDescription& genome)
 {
     for (auto& gene : genome._genes) {
         for (auto& node : gene._nodes) {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/GenomeDescriptions.h"
+#include "EngineInterface/CreatureDescription.h"
 #include "EngineInterface/SimulationFacade.h"
 
 #include "Definitions.h"
@@ -9,8 +9,8 @@
 class _CreatureTabWidget
 {
 public:
-    static CreatureTabWidget createDraftCreatureTab(SimulationFacade const& simulationFacade, GenomeDescription_New const& genome, CreatureTabLayoutData const& layoutData = nullptr);
-    static CreatureTabWidget createPinnedCreatureTab(SimulationFacade const& simulationFacade, GenomeDescription_New const& genome, uint64_t creatureId);
+    static CreatureTabWidget createDraftCreatureTab(SimulationFacade const& simulationFacade, CreatureDescription const& genome, CreatureTabLayoutData const& layoutData = nullptr);
+    static CreatureTabWidget createPinnedCreatureTab(SimulationFacade const& simulationFacade, CreatureDescription const& genome, uint64_t creatureId);
 
     void process();
 
@@ -21,13 +21,13 @@ public:
     int getTabId() const;
     std::string getName() const;
     bool hasCreaturesGenomeBeChanged() const;
-    GenomeDescription_New const& getGenome();
+    CreatureDescription const& getGenome();
     bool isEmpty() const;
     void convertToDraftTab();
 
 private:
-    _CreatureTabWidget(SimulationFacade const& simulationFacade, GenomeDescription_New const& genome, CreatureTabLayoutData const& layoutData);
-    _CreatureTabWidget(SimulationFacade const& simulationFacade, GenomeDescription_New const& genome, uint64_t creatureId);
+    _CreatureTabWidget(SimulationFacade const& simulationFacade, CreatureDescription const& genome, CreatureTabLayoutData const& layoutData);
+    _CreatureTabWidget(SimulationFacade const& simulationFacade, CreatureDescription const& genome, uint64_t creatureId);
 
     void processEditors();
     void processPreviews();
@@ -50,7 +50,7 @@ private:
     struct PinnedCreatureData
     {
         uint64_t creatureId;
-        GenomeDescription_New origGenome;
+        CreatureDescription origGenome;
         bool changesMade = false;
     };
     std::optional<PinnedCreatureData> _pinnedCreatureData;

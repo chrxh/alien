@@ -5,7 +5,7 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 #include "EngineInterface/GenomeDescriptionConverterService.h"
-#include "EngineInterface/GenomeDescriptions.h"
+#include "EngineInterface/CreatureDescription.h"
 
 class TransmitterTests : public IntegrationTestFramework
 {
