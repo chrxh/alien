@@ -386,14 +386,14 @@ namespace
 
 void DescriptionEditService::randomizeGenomeColors(ClusteredCollectionDescription& data, std::vector<int> const& colorCodes)
 {
-    for (auto& cluster : data._clusters) {
-        auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
-        for (auto& cell : cluster._cells) {
-            if (cell.DEPRECATED_hasGenome()) {
-                colorizeGenomeNodes(cell.getGenomeRef(), newColor);
-            }
-        }
-    }
+    //for (auto& cluster : data._clusters) {
+    //    auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
+    //    for (auto& cell : cluster._cells) {
+    //        if (cell.DEPRECATED_hasGenome()) {
+    //            colorizeGenomeNodes(cell.getGenomeRef(), newColor);
+    //        }
+    //    }
+    //}
 }
 
 void DescriptionEditService::randomizeEnergies(ClusteredCollectionDescription& data, float minEnergy, float maxEnergy)

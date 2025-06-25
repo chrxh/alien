@@ -82,14 +82,6 @@ namespace
         return result;
     }
 
-    void convert(CollectionTO const& collectionTO, uint64_t sourceSize, uint64_t sourceIndex, std::vector<uint8_t>& target)
-    {
-        target.resize(sourceSize);
-        for (int i = 0; i < sourceSize; ++i) {
-            target[i] = collectionTO.heap[sourceIndex + i];
-        }
-    }
-
     template<typename Container, typename SizeType>
     void convert(std::vector<uint8_t>& heap, SizeType& targetSize, uint64_t& targetIndex, Container const& source)
     {
@@ -275,14 +267,11 @@ CellDescription DescriptionConverterService::createCellDescription(
     result._connections = connections;
     result._livingState = cellTO.livingState;
     result._creatureId = cellTO.creatureId;
-    result._mutationId = cellTO.mutationId;
-    result._ancestorMutationId = cellTO.ancestorMutationId;
     result._barrier = cellTO.barrier;
     result._sticky = cellTO.sticky;
     result._age = cellTO.age;
     result._color = cellTO.color;
     result._angleToFront = cellTO.angleToFront;
-    result._genomeComplexity = cellTO.genomeComplexity;
     result._detectedByCreatureId = cellTO.detectedByCreatureId;
     result._cellTypeUsed = cellTO.cellTypeUsed;
     result._genomeNodeIndex = cellTO.genomeNodeIndex;
@@ -324,17 +313,13 @@ CellDescription DescriptionConverterService::createCellDescription(
             cellTO.cellTypeData.constructor.autoTriggerInterval > 0 ? std::make_optional(cellTO.cellTypeData.constructor.autoTriggerInterval) : std::nullopt;
         constructor._constructionActivationTime = cellTO.cellTypeData.constructor.constructionActivationTime;
         constructor._geneIndex = cellTO.cellTypeData.constructor.geneIndex;
-        convert(collectionTO, cellTO.cellTypeData.constructor.genomeSize, cellTO.cellTypeData.constructor.genomeDataIndex, constructor._genome);
         constructor._numExpectedCells = cellTO.cellTypeData.constructor.numExpectedCells;
         constructor._lastConstructedCellId = cellTO.cellTypeData.constructor.lastConstructedCellId;
         constructor._currentNodeIndex = cellTO.cellTypeData.constructor.currentNodeIndex;
         constructor._currentRepetition = cellTO.cellTypeData.constructor.currentRepetition;
         constructor._currentBranch = cellTO.cellTypeData.constructor.currentBranch;
-        constructor._offspringCreatureId = cellTO.cellTypeData.constructor.offspringCreatureId;
-        constructor._offspringMutationId = cellTO.cellTypeData.constructor.offspringMutationId;
         constructor._generation = cellTO.cellTypeData.constructor.generation;
         constructor._constructionAngle = cellTO.cellTypeData.constructor.constructionAngle;
-        constructor._constructionAngle2 = cellTO.cellTypeData.constructor.constructionAngle2;
         result._cellTypeData = constructor;
     } break;
     case CellType_Sensor: {
@@ -365,8 +350,6 @@ CellDescription DescriptionConverterService::createCellDescription(
         InjectorDescription injector;
         injector._mode = cellTO.cellTypeData.injector.mode;
         injector._counter = cellTO.cellTypeData.injector.counter;
-        convert(collectionTO, cellTO.cellTypeData.injector.genomeSize, cellTO.cellTypeData.injector.genomeDataIndex, injector._genome);
-        injector._generation = cellTO.cellTypeData.injector.generation;
         result._cellTypeData = injector;
     } break;
     case CellType_Muscle: {
@@ -802,8 +785,6 @@ void DescriptionConverterService::convertCellToTO(
     cellTO.stiffness = cellDesc._stiffness;
     cellTO.livingState = cellDesc._livingState;
     cellTO.creatureId = cellDesc._creatureId;
-    cellTO.mutationId = cellDesc._mutationId;
-    cellTO.ancestorMutationId = cellDesc._ancestorMutationId;
     cellTO.cellType = cellDesc.getCellType();
     cellTO.detectedByCreatureId = cellDesc._detectedByCreatureId;
     cellTO.cellTypeUsed = cellDesc._cellTypeUsed;
@@ -835,18 +816,13 @@ void DescriptionConverterService::convertCellToTO(
         constructorTO.autoTriggerInterval = static_cast<uint8_t>(constructorDesc._autoTriggerInterval.value_or(0));
         constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
         constructorTO.geneIndex = static_cast<uint16_t>(constructorDesc._geneIndex);
-        CHECK(constructorDesc._genome.size() >= Const::GenomeHeaderSize)
-        convert(heap, constructorTO.genomeSize, constructorTO.genomeDataIndex, constructorDesc._genome);
         constructorTO.numExpectedCells = static_cast<uint16_t>(constructorDesc._numExpectedCells);
         constructorTO.lastConstructedCellId = constructorDesc._lastConstructedCellId;
         constructorTO.currentNodeIndex = static_cast<uint16_t>(constructorDesc._currentNodeIndex);
         constructorTO.currentRepetition = static_cast<uint16_t>(constructorDesc._currentRepetition);
         constructorTO.currentBranch = static_cast<uint8_t>(constructorDesc._currentBranch);
-        constructorTO.offspringCreatureId = constructorDesc._offspringCreatureId;
-        constructorTO.offspringMutationId = constructorDesc._offspringMutationId;
         constructorTO.generation = constructorDesc._generation;
         constructorTO.constructionAngle = constructorDesc._constructionAngle;
-        constructorTO.constructionAngle2 = constructorDesc._constructionAngle2;
     } break;
     case CellType_Sensor: {
         auto const& sensorDesc = std::get<SensorDescription>(cellDesc._cellTypeData);
@@ -875,9 +851,6 @@ void DescriptionConverterService::convertCellToTO(
         InjectorTO& injectorTO = cellTO.cellTypeData.injector;
         injectorTO.mode = injectorDesc._mode;
         injectorTO.counter = injectorDesc._counter;
-        CHECK(injectorDesc._genome.size() >= Const::GenomeHeaderSize)
-        convert(heap, injectorTO.genomeSize, injectorTO.genomeDataIndex, injectorDesc._genome);
-        injectorTO.generation = injectorDesc._generation;
     } break;
     case CellType_Muscle: {
         auto const& muscleDesc = std::get<MuscleDescription>(cellDesc._cellTypeData);
@@ -968,7 +941,6 @@ void DescriptionConverterService::convertCellToTO(
     cellTO.sticky = cellDesc._sticky;
     cellTO.age = cellDesc._age;
     cellTO.color = cellDesc._color;
-    cellTO.genomeComplexity = cellDesc._genomeComplexity;
     convert(heap, cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, cellDesc._metadata._name);
     convert(heap, cellTO.metadata.descriptionSize, cellTO.metadata.descriptionDataIndex, cellDesc._metadata._description);
 }

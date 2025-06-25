@@ -396,102 +396,102 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
         _selectGenomeTab = false;
     }
     if (ImGui::BeginTabItem("Genome", nullptr, flags)) {
-        if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+        //if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
-            auto previewNodeResult = ImGui::TreeNodeEx("Preview (reference configuration)", TreeNodeFlags);
-            AlienGui::HelpMarker(Const::GenomePreviewTooltip);
-            if (previewNodeResult) {
-                if (ImGui::BeginChild("##child", ImVec2(0, scale(200)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
-                    auto genomDesc = GenomeDescriptionConverterService::get().convertBytesToDescription(desc._genome);
-                    auto previewDesc = PreviewDescriptionService::get().convert(genomDesc, std::nullopt, parameters);
-                    std::optional<int> selectedNodeDummy;
-                    AlienGui::ShowPreviewDescription(previewDesc, _genomeZoom, selectedNodeDummy);
-                }
-                ImGui::EndChild();
-                if (AlienGui::Button("Edit")) {
-                    GenomeEditorWindow::get().openTab(GenomeDescriptionConverterService::get().convertBytesToDescription(desc._genome));
-                }
+        //    auto previewNodeResult = ImGui::TreeNodeEx("Preview (reference configuration)", TreeNodeFlags);
+        //    AlienGui::HelpMarker(Const::GenomePreviewTooltip);
+        //    if (previewNodeResult) {
+        //        if (ImGui::BeginChild("##child", ImVec2(0, scale(200)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
+        //            auto genomDesc = GenomeDescriptionConverterService::get().convertBytesToDescription(desc._genome);
+        //            auto previewDesc = PreviewDescriptionService::get().convert(genomDesc, std::nullopt, parameters);
+        //            std::optional<int> selectedNodeDummy;
+        //            AlienGui::ShowPreviewDescription(previewDesc, _genomeZoom, selectedNodeDummy);
+        //        }
+        //        ImGui::EndChild();
+        //        if (AlienGui::Button("Edit")) {
+        //            GenomeEditorWindow::get().openTab(GenomeDescriptionConverterService::get().convertBytesToDescription(desc._genome));
+        //        }
 
-                ImGui::SameLine();
-                if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Inject from editor").textWidth(ImGui::GetContentRegionAvail().x))) {
-                    printOverlayMessage("Genome injected");
-                    desc._genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeEditorWindow::get().getCurrentGenome());
-                    if constexpr (std::is_same<Description, ConstructorDescription>()) {
-                        desc._currentNodeIndex = 0;
-                        desc.numExpectedCells(0);
-                    }
-                }
-                ImGui::TreePop();
-            }
+        //        ImGui::SameLine();
+        //        if (AlienGui::Button(AlienGui::ButtonParameters().buttonText("Inject from editor").textWidth(ImGui::GetContentRegionAvail().x))) {
+        //            printOverlayMessage("Genome injected");
+        //            desc._genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeEditorWindow::get().getCurrentGenome());
+        //            if constexpr (std::is_same<Description, ConstructorDescription>()) {
+        //                desc._currentNodeIndex = 0;
+        //                desc.numExpectedCells(0);
+        //            }
+        //        }
+        //        ImGui::TreePop();
+        //    }
 
-            if (ImGui::TreeNodeEx("Properties (entire genome)", TreeNodeFlags)) {
-                auto numNodes = toInt(GenomeDescriptionConverterService::get().getNumNodesRecursively(desc._genome, true));
-                AlienGui::InputInt(
-                    AlienGui::InputIntParameters()
-                        .name("Number of cells")
-                        .textWidth(GenomeTabTextWidth)
-                        .readOnly(true)
-                        .tooltip(Const::GenomeNumCellsRecursivelyTooltip),
-                    numNodes);
+        //    if (ImGui::TreeNodeEx("Properties (entire genome)", TreeNodeFlags)) {
+        //        auto numNodes = toInt(GenomeDescriptionConverterService::get().getNumNodesRecursively(desc._genome, true));
+        //        AlienGui::InputInt(
+        //            AlienGui::InputIntParameters()
+        //                .name("Number of cells")
+        //                .textWidth(GenomeTabTextWidth)
+        //                .readOnly(true)
+        //                .tooltip(Const::GenomeNumCellsRecursivelyTooltip),
+        //            numNodes);
 
-                auto numBytes = toInt(desc._genome.size());
-                AlienGui::InputInt(
-                    AlienGui::InputIntParameters().name("Bytes").textWidth(GenomeTabTextWidth).readOnly(true).tooltip(Const::GenomeBytesTooltip), numBytes);
+        //        auto numBytes = toInt(desc._genome.size());
+        //        AlienGui::InputInt(
+        //            AlienGui::InputIntParameters().name("Bytes").textWidth(GenomeTabTextWidth).readOnly(true).tooltip(Const::GenomeBytesTooltip), numBytes);
 
-                AlienGui::InputInt(
-                    AlienGui::InputIntParameters().name("Generation").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeGenerationTooltip),
-                    desc._generation);
-                ImGui::TreePop();
-            }
+        //        AlienGui::InputInt(
+        //            AlienGui::InputIntParameters().name("Generation").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeGenerationTooltip),
+        //            desc._generation);
+        //        ImGui::TreePop();
+        //    }
 
-            if (ImGui::TreeNodeEx("Properties (principal genome part)", TreeNodeFlags)) {
+        //    if (ImGui::TreeNodeEx("Properties (principal genome part)", TreeNodeFlags)) {
 
-                auto genomeDesc = GenomeDescriptionConverterService::get().convertBytesToDescription(desc._genome);
-                auto numBranches = genomeDesc._header.getNumBranches();
-                AlienGui::InputInt(
-                    AlienGui::InputIntParameters()
-                        .name("Number of branches")
-                        .textWidth(GenomeTabTextWidth)
-                        .readOnly(true)
-                        .tooltip(Const::GenomeNumBranchesTooltip),
-                    numBranches);
+        //        auto genomeDesc = GenomeDescriptionConverterService::get().convertBytesToDescription(desc._genome);
+        //        auto numBranches = genomeDesc._header.getNumBranches();
+        //        AlienGui::InputInt(
+        //            AlienGui::InputIntParameters()
+        //                .name("Number of branches")
+        //                .textWidth(GenomeTabTextWidth)
+        //                .readOnly(true)
+        //                .tooltip(Const::GenomeNumBranchesTooltip),
+        //            numBranches);
 
-                auto numRepetitions = genomeDesc._header._numRepetitions;
-                AlienGui::InputInt(
-                    AlienGui::InputIntParameters()
-                        .name("Repetitions per branch")
-                        .textWidth(GenomeTabTextWidth)
-                        .infinity(true)
-                        .readOnly(true)
-                        .tooltip(Const::GenomeRepetitionsPerBranchTooltip),
-                    numRepetitions);
+        //        auto numRepetitions = genomeDesc._header._numRepetitions;
+        //        AlienGui::InputInt(
+        //            AlienGui::InputIntParameters()
+        //                .name("Repetitions per branch")
+        //                .textWidth(GenomeTabTextWidth)
+        //                .infinity(true)
+        //                .readOnly(true)
+        //                .tooltip(Const::GenomeRepetitionsPerBranchTooltip),
+        //            numRepetitions);
 
-                auto numNodes = toInt(genomeDesc._cells.size());
-                AlienGui::InputInt(
-                    AlienGui::InputIntParameters()
-                        .name("Cells per repetition")
-                        .textWidth(GenomeTabTextWidth)
-                        .readOnly(true)
-                        .tooltip(Const::GenomeNumCellsTooltip),
-                    numNodes);
+        //        auto numNodes = toInt(genomeDesc._cells.size());
+        //        AlienGui::InputInt(
+        //            AlienGui::InputIntParameters()
+        //                .name("Cells per repetition")
+        //                .textWidth(GenomeTabTextWidth)
+        //                .readOnly(true)
+        //                .tooltip(Const::GenomeNumCellsTooltip),
+        //            numNodes);
 
-                if constexpr (std::is_same<Description, ConstructorDescription>()) {
-                    AlienGui::InputInt(
-                        AlienGui::InputIntParameters().name("Current branch index").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentBranchTooltip),
-                        desc._currentBranch);
-                    AlienGui::InputInt(
-                        AlienGui::InputIntParameters()
-                            .name("Current repetition index")
-                            .textWidth(GenomeTabTextWidth)
-                            .tooltip(Const::GenomeCurrentRepetitionTooltip),
-                        desc._currentRepetition);
-                    AlienGui::InputInt(
-                        AlienGui::InputIntParameters().name("Current cell index").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentCellTooltip),
-                        desc._currentNodeIndex);
-                }
-                ImGui::TreePop();
-            }
-        }
+        //        if constexpr (std::is_same<Description, ConstructorDescription>()) {
+        //            AlienGui::InputInt(
+        //                AlienGui::InputIntParameters().name("Current branch index").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentBranchTooltip),
+        //                desc._currentBranch);
+        //            AlienGui::InputInt(
+        //                AlienGui::InputIntParameters()
+        //                    .name("Current repetition index")
+        //                    .textWidth(GenomeTabTextWidth)
+        //                    .tooltip(Const::GenomeCurrentRepetitionTooltip),
+        //                desc._currentRepetition);
+        //            AlienGui::InputInt(
+        //                AlienGui::InputIntParameters().name("Current cell index").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentCellTooltip),
+        //                desc._currentNodeIndex);
+        //        }
+        //        ImGui::TreePop();
+        //    }
+        //}
         ImGui::EndChild();
         ImGui::EndTabItem();
     }
@@ -575,13 +575,6 @@ void _InspectorWindow::processConstructorContent(ConstructorDescription& constru
                 .format("%.1f")
                 .tooltip(Const::GenomeConstructorAngle1Tooltip),
             constructor._constructionAngle);
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters()
-                .name("Construction angle #2")
-                .textWidth(CellTypeTextWidth)
-                .format("%.1f")
-                .tooltip(Const::GenomeConstructorAngle2Tooltip),
-            constructor._constructionAngle2);
         ImGui::TreePop();
     }
 }
@@ -766,19 +759,19 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
     switch (cell.getCellType()) {
     case CellType_Constructor: {
         auto& constructor = std::get<ConstructorDescription>(cell._cellTypeData);
-        auto numNodes = GenomeDescriptionConverterService::get().convertNodeAddressToNodeIndex(constructor._genome, toInt(constructor._genome.size()));
-        if (numNodes > 0) {
-            constructor._currentNodeIndex = ((constructor._currentNodeIndex % numNodes) + numNodes) % numNodes;
-        } else {
-            constructor._currentNodeIndex = 0;
-        }
+        //auto numNodes = GenomeDescriptionConverterService::get().convertNodeAddressToNodeIndex(constructor._genome, toInt(constructor._genome.size()));
+        //if (numNodes > 0) {
+        //    constructor._currentNodeIndex = ((constructor._currentNodeIndex % numNodes) + numNodes) % numNodes;
+        //} else {
+        //    constructor._currentNodeIndex = 0;
+        //}
 
-        auto numRepetitions = GenomeDescriptionConverterService::get().getNumRepetitions(constructor._genome);
-        if (numRepetitions != std::numeric_limits<int>::max()) {
-            constructor._currentRepetition = ((constructor._currentRepetition % numRepetitions) + numRepetitions) % numRepetitions;
-        } else {
-            constructor._currentRepetition = 0;
-        }
+        //auto numRepetitions = GenomeDescriptionConverterService::get().getNumRepetitions(constructor._genome);
+        //if (numRepetitions != std::numeric_limits<int>::max()) {
+        //    constructor._currentRepetition = ((constructor._currentRepetition % numRepetitions) + numRepetitions) % numRepetitions;
+        //} else {
+        //    constructor._currentRepetition = 0;
+        //}
 
         constructor._constructionActivationTime = ((constructor._constructionActivationTime % MAX_ACTIVATION_TIME) + MAX_ACTIVATION_TIME) % MAX_ACTIVATION_TIME;
         if (constructor._constructionActivationTime < 0) {

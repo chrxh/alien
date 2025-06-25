@@ -161,14 +161,14 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_success)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .mutationId(5)
+            /*.mutationId(5)*/
             .cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToSameMutants)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .cellTypeData(OscillatorDescription())
             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(5),
+        CellDescription().id(3).pos({9.0f, 10.0f})/*.mutationId(5)*/,
     });
     data.addConnection(1, 2);
 
@@ -196,14 +196,14 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_failed)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .mutationId(5)
+            /*.mutationId(5)*/
             .cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToSameMutants)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .cellTypeData(OscillatorDescription())
             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(4),
+        CellDescription().id(3).pos({9.0f, 10.0f})/*.mutationId(4)*/,
     });
     data.addConnection(1, 2);
 
@@ -228,14 +228,14 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_success)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .mutationId(5)
+            /*.mutationId(5)*/
             .cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .cellTypeData(OscillatorDescription())
             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(4),
+        CellDescription().id(3).pos({9.0f, 10.0f})/*.mutationId(4)*/,
     });
     data.addConnection(1, 2);
 
@@ -262,14 +262,14 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_zeroM
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .mutationId(5)
+            /*.mutationId(5)*/
             .cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .cellTypeData(OscillatorDescription())
             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(0),
+        CellDescription().id(3).pos({9.0f, 10.0f})/*.mutationId(0)*/,
     });
     data.addConnection(1, 2);
 
@@ -294,14 +294,14 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_respa
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .mutationId(5)
+            /*.mutationId(5)*/
             .cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .cellTypeData(OscillatorDescription())
             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(1),
+        CellDescription().id(3).pos({9.0f, 10.0f})/*.mutationId(1)*/,
     });
     data.addConnection(1, 2);
 
@@ -326,14 +326,14 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_sameM
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .mutationId(5)
+            /*.mutationId(5)*/
             .cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .cellTypeData(OscillatorDescription())
             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(5),
+        CellDescription().id(3).pos({9.0f, 10.0f})/*.mutationId(5)*/,
     });
     data.addConnection(1, 2);
 
@@ -358,14 +358,14 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_success)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .mutationId(5)
+            /*.mutationId(5)*/
             .cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToStructures)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .cellTypeData(OscillatorDescription())
             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(0),
+        CellDescription().id(3).pos({9.0f, 10.0f})/*.mutationId(0)*/,
     });
     data.addConnection(1, 2);
 
@@ -392,14 +392,14 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_failed)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .mutationId(5)
+            /*.mutationId(5)*/
             .cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToStructures)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .cellTypeData(OscillatorDescription())
             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(4),
+        CellDescription().id(3).pos({9.0f, 10.0f})/*.mutationId(4)*/,
     });
     data.addConnection(1, 2);
 
@@ -424,14 +424,14 @@ TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_success)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .mutationId(5)
+            /*.mutationId(5)*/
             .cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToFreeCells)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .cellTypeData(OscillatorDescription())
             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(1),
+        CellDescription().id(3).pos({9.0f, 10.0f})/*.mutationId(1)*/,
     });
     data.addConnection(1, 2);
 
@@ -458,14 +458,14 @@ TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_failed)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .mutationId(5)
+            /*.mutationId(5)*/
             .cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToFreeCells)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .cellTypeData(OscillatorDescription())
             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(0),
+        CellDescription().id(3).pos({9.0f, 10.0f})/*.mutationId(0)*/,
     });
     data.addConnection(1, 2);
 
@@ -490,15 +490,15 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_succes
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .mutationId(5)
-            .genomeComplexity(1000.0f)
+            /*.mutationId(5)*/
+            /*.genomeComplexity(1000.0f)*/
             .cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToLessComplexMutants)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .cellTypeData(OscillatorDescription())
             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(1).genomeComplexity(999.0f),
+        CellDescription().id(3).pos({9.0f, 10.0f})/*.mutationId(1)*//*.genomeComplexity(999.0f)*/,
     });
     data.addConnection(1, 2);
 
@@ -516,15 +516,15 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_failed
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .mutationId(5)
-            .genomeComplexity(1000.0f)
+            /*.mutationId(5)*/
+            /*.genomeComplexity(1000.0f)*/
             .cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToLessComplexMutants)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .cellTypeData(OscillatorDescription())
             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(1).genomeComplexity(1001.0f),
+        CellDescription().id(3).pos({9.0f, 10.0f})/*.mutationId(1)*//*.genomeComplexity(1001.0f)*/,
     });
     data.addConnection(1, 2);
 
@@ -542,15 +542,15 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_succes
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .mutationId(5)
-            .genomeComplexity(1000.0f)
+            /*.mutationId(5)*/
+            /*.genomeComplexity(1000.0f)*/
             .cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToMoreComplexMutants)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .cellTypeData(OscillatorDescription())
             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(1).genomeComplexity(1001.0f),
+        CellDescription().id(3).pos({9.0f, 10.0f})/*.mutationId(1)*//*.genomeComplexity(1001.0f)*/,
     });
     data.addConnection(1, 2);
 
@@ -568,15 +568,15 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_failed
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .mutationId(5)
-            .genomeComplexity(1000.0f)
+            /*.mutationId(5)*/
+            /*.genomeComplexity(1000.0f)*/
             .cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToMoreComplexMutants)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
             .cellTypeData(OscillatorDescription())
             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-        CellDescription().id(3).pos({9.0f, 10.0f}).mutationId(1).genomeComplexity(1000.0f),
+        CellDescription().id(3).pos({9.0f, 10.0f})/*.mutationId(1)*//*.genomeComplexity(1000.0f)*/,
     });
     data.addConnection(1, 2);
 

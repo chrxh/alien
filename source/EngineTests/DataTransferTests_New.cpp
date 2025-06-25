@@ -45,7 +45,6 @@ protected:
                 .geneIndex(3)
                 .constructionActivationTime(4)
                 .constructionAngle(34.4f)
-                .constructionAngle2(-45.5f)
                 .lastConstructedCellId(45ull);
         case CellType_Sensor:
             return SensorDescription().autoTriggerInterval(3).restrictToColor(5).minRange(34).maxRange(67).minDensity(0.25f).restrictToMutants(
@@ -279,7 +278,15 @@ TEST_P(DataTransferTests_AllCellTypeGenome_New, singleCell_genome_oneGene_oneNod
     nn2.weight(1, 3, -1.0f);
 
     auto data = CollectionDescription().addCreature(
-        GenomeDescription_New().genes({GeneDescription().nodes({NodeDescription().neuralNetwork(nn2).cellTypeData(cellTypeGenomeDesc)})}),
+        GenomeDescription_New().genes(
+            {GeneDescription()
+                 .shape(ConstructionShape_Hexagon)
+                 .numBranches(3)
+                 .numConcatenations(2)
+                 .angleAlignment(ConstructorAngleAlignment_180)
+                 .stiffness(0.4f)
+                 .connectionDistance(0.7f)
+                 .nodes({NodeDescription().neuralNetwork(nn2).cellTypeData(cellTypeGenomeDesc).color(3).numRequiredAdditionalConnections(2)})}),
         {CellDescription()
              .neuralNetwork(nn1)
              .id(1)

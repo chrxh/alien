@@ -21,19 +21,19 @@ public:
 
 TEST_F(StatisticsTests, selfReplicatorWithRepetitionsInGenome)
 {
-    auto subGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
-        GenomeDescription().header(GenomeHeaderDescription().numRepetitions(3)).cells({CellGenomeDescription()}));
-    auto mainGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
-        GenomeDescription()
-            .header(GenomeHeaderDescription().numRepetitions(2))
-            .cells({
-                CellGenomeDescription().cellType(ConstructorGenomeDescription().genome(subGenome)),
-                CellGenomeDescription().cellType(ConstructorGenomeDescription().makeSelfCopy()),
-            }));
+    //auto subGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
+    //    GenomeDescription().header(GenomeHeaderDescription().numRepetitions(3)).cells({CellGenomeDescription()}));
+    //auto mainGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
+    //    GenomeDescription()
+    //        .header(GenomeHeaderDescription().numRepetitions(2))
+    //        .cells({
+    //            CellGenomeDescription().cellType(ConstructorGenomeDescription().genome(subGenome)),
+    //            CellGenomeDescription().cellType(ConstructorGenomeDescription().makeSelfCopy()),
+    //        }));
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).cellTypeData(ConstructorDescription().genome(mainGenome)),
+        CellDescription().id(1).cellTypeData(ConstructorDescription()/*.genome(mainGenome)*/),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -58,7 +58,7 @@ TEST_F(StatisticsTests, selfReplicatorWithInfiniteRepetitionsInGenome)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).cellTypeData(ConstructorDescription().genome(mainGenome)),
+        CellDescription().id(1).cellTypeData(ConstructorDescription()/*.genome(mainGenome)*/),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -71,18 +71,18 @@ TEST_F(StatisticsTests, selfReplicatorWithInfiniteRepetitionsInGenome)
 
 TEST_F(StatisticsTests, nonSelfReplicatorWithRepetitionsInGenome)
 {
-    auto subGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
-        GenomeDescription().header(GenomeHeaderDescription().numRepetitions(3)).cells({CellGenomeDescription()}));
-    auto mainGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
-        GenomeDescription()
-            .header(GenomeHeaderDescription().numRepetitions(2))
-            .cells({
-                CellGenomeDescription().cellType(ConstructorGenomeDescription().genome(subGenome)),
-            }));
+    //auto subGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
+    //    GenomeDescription().header(GenomeHeaderDescription().numRepetitions(3)).cells({CellGenomeDescription()}));
+    //auto mainGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
+    //    GenomeDescription()
+    //        .header(GenomeHeaderDescription().numRepetitions(2))
+    //        .cells({
+    //            CellGenomeDescription().cellType(ConstructorGenomeDescription().genome(subGenome)),
+    //        }));
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).cellTypeData(ConstructorDescription().genome(mainGenome)),
+        CellDescription().id(1).cellTypeData(ConstructorDescription()/*.genome(mainGenome)*/),
     });
 
     _simulationFacade->setSimulationData(data);

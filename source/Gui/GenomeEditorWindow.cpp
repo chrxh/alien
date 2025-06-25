@@ -1003,27 +1003,27 @@ void GenomeEditorWindow::onNodeIncreaseSequenceNumber()
 
 void GenomeEditorWindow::onCreateSpore()
 {
-    auto pos = Viewport::get().getCenterInWorldPos();
-    pos.x += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
-    pos.y += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
+    //auto pos = Viewport::get().getCenterInWorldPos();
+    //pos.x += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
+    //pos.y += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
 
-    auto genomeDesc = getCurrentGenome();
-    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(genomeDesc);
+    //auto genomeDesc = getCurrentGenome();
+    //auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(genomeDesc);
 
-    auto parameter = _simulationFacade->getSimulationParameters();
-    auto numNodes = GenomeDescriptionConverterService::get().getNumNodesRecursively(genome, true);
-    auto energy = parameter.normalCellEnergy.value[EditorModel::get().getDefaultColorCode()] * toFloat(numNodes * 2 + 1);
-    auto cell = CellDescription()
-                    .pos(pos)
-                    .energy(energy)
-                    .stiffness(1.0f)
-                    .color(EditorModel::get().getDefaultColorCode())
-                    .cellTypeData(ConstructorDescription().genome(genome));
-    auto data = CollectionDescription().addCell(cell);
-    _simulationFacade->addAndSelectSimulationData(std::move(data));
-    EditorModel::get().update();
+    //auto parameter = _simulationFacade->getSimulationParameters();
+    //auto numNodes = GenomeDescriptionConverterService::get().getNumNodesRecursively(genome, true);
+    //auto energy = parameter.normalCellEnergy.value[EditorModel::get().getDefaultColorCode()] * toFloat(numNodes * 2 + 1);
+    //auto cell = CellDescription()
+    //                .pos(pos)
+    //                .energy(energy)
+    //                .stiffness(1.0f)
+    //                .color(EditorModel::get().getDefaultColorCode())
+    //                .cellTypeData(ConstructorDescription().genome(genome));
+    //auto data = CollectionDescription().addCell(cell);
+    //_simulationFacade->addAndSelectSimulationData(std::move(data));
+    //EditorModel::get().update();
 
-    printOverlayMessage("Spore created");
+    //printOverlayMessage("Spore created");
 }
 
 void GenomeEditorWindow::showPreview(TabData& tab)

@@ -8,7 +8,7 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
-class LivingStateTransitionTests
+class LivingStateTransitionTests_New
     : public IntegrationTestFramework
     , public testing::WithParamInterface<CellDeathConsquences>
 {
@@ -24,19 +24,19 @@ public:
         return result;
     }
 
-    LivingStateTransitionTests()
+    LivingStateTransitionTests_New()
         : IntegrationTestFramework(getParameters())
     {}
 
-    ~LivingStateTransitionTests() = default;
+    ~LivingStateTransitionTests_New() = default;
 };
 
 INSTANTIATE_TEST_SUITE_P(
     LivingStateTransitionTests,
-    LivingStateTransitionTests,
+    LivingStateTransitionTests_New,
     ::testing::Values(CellDeathConsquences_None, CellDeathConsquences_DetachedPartsDie, CellDeathConsquences_CreatureDies));
 
-TEST_P(LivingStateTransitionTests, ready_ready)
+TEST_P(LivingStateTransitionTests_New, ready_ready)
 {
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
@@ -55,7 +55,7 @@ TEST_P(LivingStateTransitionTests, ready_ready)
     EXPECT_EQ(LivingState_Ready, getCell(actualData, 2)._livingState);
 }
 
-TEST_P(LivingStateTransitionTests, ready_dying)
+TEST_P(LivingStateTransitionTests_New, ready_dying)
 {
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
@@ -74,7 +74,7 @@ TEST_P(LivingStateTransitionTests, ready_dying)
     EXPECT_EQ(LivingState_Dying, getCell(actualData, 2)._livingState);
 }
 
-TEST_P(LivingStateTransitionTests, ready_detaching)
+TEST_P(LivingStateTransitionTests_New, ready_detaching)
 {
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
@@ -102,21 +102,22 @@ TEST_P(LivingStateTransitionTests, ready_detaching)
     }
 }
 
-TEST_P(LivingStateTransitionTests, ready_detaching_onSelfReplicator)
+TEST_P(LivingStateTransitionTests_New, ready_detaching_onSelfReplicator)
 {
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
-        GenomeDescription()
-            .header(GenomeHeaderDescription())
-            .cells({CellGenomeDescription().cellType(ConstructorGenomeDescription().makeSelfCopy())}));
+    // TODO
+    //auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
+    //    GenomeDescription()
+    //        .header(GenomeHeaderDescription())
+    //        .cells({CellGenomeDescription().cellType(ConstructorGenomeDescription().makeSelfCopy())}));
 
     CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
-            .cellTypeData(ConstructorDescription().genome(genome))
+            .cellTypeData(ConstructorDescription())
             .pos({10.0f, 10.0f})
             .livingState(LivingState_Ready),
         CellDescription()
@@ -142,7 +143,7 @@ TEST_P(LivingStateTransitionTests, ready_detaching_onSelfReplicator)
     }
 }
 
-TEST_P(LivingStateTransitionTests, ready_detaching_differentCreature)
+TEST_P(LivingStateTransitionTests_New, ready_detaching_differentCreature)
 {
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
@@ -170,7 +171,7 @@ TEST_P(LivingStateTransitionTests, ready_detaching_differentCreature)
     }
 }
 
-TEST_P(LivingStateTransitionTests, detaching_reviving)
+TEST_P(LivingStateTransitionTests_New, detaching_reviving)
 {
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
@@ -198,7 +199,7 @@ TEST_P(LivingStateTransitionTests, detaching_reviving)
     }
 }
 
-TEST_P(LivingStateTransitionTests, underConstruction_activating)
+TEST_P(LivingStateTransitionTests_New, underConstruction_activating)
 {
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
@@ -217,7 +218,7 @@ TEST_P(LivingStateTransitionTests, underConstruction_activating)
     EXPECT_EQ(LivingState_Ready, getCell(actualData, 2)._livingState);
 }
 
-TEST_P(LivingStateTransitionTests, noDyingForBarrierCells)
+TEST_P(LivingStateTransitionTests_New, noDyingForBarrierCells)
 {
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);

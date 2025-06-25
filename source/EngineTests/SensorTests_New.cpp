@@ -249,10 +249,10 @@ TEST_F(SensorTests_New, scanForOtherMutants_found)
     data.addCells(
         {CellDescription()
              .id(1)
-             .mutationId(6)
+             //.mutationId(6)   // TODO
              .pos({100.0f, 100.0f})
             .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
-        CellDescription().id(2).mutationId(6).pos({101.0f, 100.0f}),
+        CellDescription().id(2)/*.mutationId(6)*/.pos({101.0f, 100.0f}),        // TODO
     });
     data.addConnection(1, 2);
 
@@ -261,7 +261,7 @@ TEST_F(SensorTests_New, scanForOtherMutants_found)
                                                           .width(16)
                                                           .height(16)
                                                           .cellDistance(0.5f)
-                                                          .mutationId(7)
+                                                          /*.mutationId(7)*/
                                                           .cellType(BaseDescription())));
 
     _simulationFacade->setSimulationData(data);
@@ -284,10 +284,10 @@ TEST_F(SensorTests_New, scanForOtherMutants_found_wallBehind)
     data.addCells(
         {CellDescription()
              .id(1)
-             .mutationId(6)
+             //.mutationId(6)
              .pos({100.0f, 100.0f})
              .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
-        CellDescription().id(2).mutationId(6).pos({101.0f, 100.0f}),
+        CellDescription().id(2)/*.mutationId(6)*/.pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -299,7 +299,7 @@ TEST_F(SensorTests_New, scanForOtherMutants_found_wallBehind)
                                                           .width(16)
                                                           .height(16)
                                                           .cellDistance(0.5f)
-                                                          .mutationId(7)
+                                                          /*.mutationId(7)*/
                                                           .cellType(BaseDescription())));
 
     _simulationFacade->setSimulationData(data);
@@ -317,10 +317,10 @@ TEST_F(SensorTests_New, scanForOtherMutants_notFound_wallInBetween)
     data.addCells(
         {CellDescription()
              .id(1)
-             .mutationId(7)
+             //.mutationId(7)
              .pos({100.0f, 100.0f})
              .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
-         CellDescription().id(2).mutationId(7).pos({101.0f, 100.0f})});
+         CellDescription().id(2)/*.mutationId(7)*/.pos({101.0f, 100.0f})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -349,10 +349,10 @@ TEST_F(SensorTests_New, scanForOtherMutants_notFound_sameMutationId)
     data.addCells(
         {CellDescription()
              .id(1)
-             .mutationId(7)
+             //.mutationId(7)
              .pos({100.0f, 100.0f})
              .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
-        CellDescription().id(2).mutationId(7).pos({101.0f, 100.0f}),
+        CellDescription().id(2)/*.mutationId(7)*/.pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -379,10 +379,10 @@ TEST_F(SensorTests_New, scanForOtherMutants_notFound_structure)
     data.addCells({
         CellDescription()
             .id(1)
-            .mutationId(7)
+            //.mutationId(7)
             .pos({100.0f, 100.0f})
             .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
-        CellDescription().id(2).mutationId(7).pos({101.0f, 100.0f}),
+        CellDescription().id(2)/*.mutationId(7)*/.pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -391,7 +391,7 @@ TEST_F(SensorTests_New, scanForOtherMutants_notFound_structure)
                                                           .width(16)
                                                           .height(16)
                                                           .cellDistance(0.5f)
-                                                          .mutationId(6)
+                                                          /*.mutationId(6)*/
                                                           .cellType(StructureCellDescription())));
 
     _simulationFacade->setSimulationData(data);
@@ -409,10 +409,10 @@ TEST_F(SensorTests_New, scanForOtherMutants_notFound_freeCell)
     data.addCells({
         CellDescription()
             .id(1)
-            .mutationId(7)
+            //.mutationId(7)
             .pos({100.0f, 100.0f})
             .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToOtherMutants)),
-        CellDescription().id(2).mutationId(7).pos({101.0f, 100.0f}),
+        CellDescription().id(2)/*.mutationId(7)*/.pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -421,7 +421,7 @@ TEST_F(SensorTests_New, scanForOtherMutants_notFound_freeCell)
                                                           .width(16)
                                                           .height(16)
                                                           .cellDistance(0.5f)
-                                                          .mutationId(6)
+                                                          /*.mutationId(6)*/
                                                           .cellType(FreeCellDescription())));
 
     _simulationFacade->setSimulationData(data);
@@ -439,10 +439,10 @@ TEST_F(SensorTests_New, scanForSameMutants_found)
     data.addCells(
         {CellDescription()
              .id(1)
-             .mutationId(6)
+             /*.mutationId(6)*/
              .pos({100.0f, 100.0f})
              .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
-        CellDescription().id(2).mutationId(6).pos({101.0f, 100.0f}),
+        CellDescription().id(2)/*.mutationId(6)*/.pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -451,7 +451,7 @@ TEST_F(SensorTests_New, scanForSameMutants_found)
                                                           .width(16)
                                                           .height(16)
                                                           .cellDistance(0.5f)
-                                                          .mutationId(6)
+                                                          /*.mutationId(6)*/
                                                           .cellType(BaseDescription())));
 
     _simulationFacade->setSimulationData(data);
@@ -474,12 +474,12 @@ TEST_F(SensorTests_New, scanForSameMutants_notFound_otherMutationId)
         data.addCells(
             {CellDescription()
                  .id(1)
-                 .mutationId(MutantId)
+                 /*.mutationId(MutantId)*/
                  .pos({100.0f, 100.0f})
                  .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
              CellDescription()
                  .id(2)
-                 .mutationId(MutantId).pos({101.0f, 100.0f}),
+                 /*.mutationId(MutantId)*/.pos({101.0f, 100.0f}),
         });
         data.addConnection(1, 2);
 
@@ -510,10 +510,10 @@ TEST_F(SensorTests_New, scanForSameMutants_notFound_structure)
     data.addCells({
         CellDescription()
             .id(1)
-            .mutationId(MutantId)
+            /*.mutationId(MutantId)*/
             .pos({100.0f, 100.0f})
             .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
-        CellDescription().id(2).mutationId(MutantId).pos({101.0f, 100.0f}),
+        CellDescription().id(2)/*.mutationId(MutantId)*/.pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -522,7 +522,7 @@ TEST_F(SensorTests_New, scanForSameMutants_notFound_structure)
                                                           .width(16)
                                                           .height(16)
                                                           .cellDistance(0.5f)
-                                                          .mutationId(MutantId)
+                                                          /*.mutationId(MutantId)*/
                                                           .cellType(StructureCellDescription())));
 
     _simulationFacade->clear();
@@ -543,10 +543,10 @@ TEST_F(SensorTests_New, scanForSameMutants_notFound_freeCell)
     data.addCells({
         CellDescription()
             .id(1)
-            .mutationId(MutantId)
+            /*.mutationId(MutantId)*/
             .pos({100.0f, 100.0f})
             .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToSameMutants)),
-        CellDescription().id(2).mutationId(MutantId).pos({101.0f, 100.0f}),
+        CellDescription().id(2)/*.mutationId(MutantId)*/.pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -555,7 +555,7 @@ TEST_F(SensorTests_New, scanForSameMutants_notFound_freeCell)
                                                           .width(16)
                                                           .height(16)
                                                           .cellDistance(0.5f)
-                                                          .mutationId(MutantId)
+                                                          /*.mutationId(MutantId)*/
                                                           .cellType(FreeCellDescription())));
 
     _simulationFacade->clear();
@@ -673,7 +673,7 @@ TEST_F(SensorTests_New, scanForLessComplexMutants_found)
             {CellDescription()
                  .id(1)
                  .pos({100.0f, 100.0f})
-                 .genomeComplexity(1000.0f)
+                 //.genomeComplexity(1000.0f)
                  .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
             CellDescription().id(2).pos({101.0f, 100.0f}),
         });
@@ -707,9 +707,9 @@ TEST_F(SensorTests_New, scanForLessComplexMutants_notFound_otherMoreComplex)
             {CellDescription()
                  .id(1)
                  .pos({100.0f, 100.0f})
-                 .genomeComplexity(1000.0f)
+                 //.genomeComplexity(1000.0f)
                  .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
-            CellDescription().id(2).mutationId(5).pos({101.0f, 100.0f}),
+            CellDescription().id(2)/*.mutationId(5)*/.pos({101.0f, 100.0f}),
         });
         data.addConnection(1, 2);
 
@@ -739,11 +739,11 @@ TEST_F(SensorTests_New, scanForLessComplexMutants_notFound_structure)
     data.addCells(
         {CellDescription()
              .id(1)
-             .mutationId(100)
+             /*.mutationId(100)*/
              .pos({100.0f, 100.0f})
-             .genomeComplexity(1000.0f)
+             //.genomeComplexity(1000.0f)
              .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
-         CellDescription().id(2).mutationId(100).pos({101.0f, 100.0f}).cellTypeData(OscillatorDescription()).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
+         CellDescription().id(2)/*.mutationId(100)*/.pos({101.0f, 100.0f}).cellTypeData(OscillatorDescription()).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
@@ -769,11 +769,11 @@ TEST_F(SensorTests_New, scanForLessComplexMutants_notFound_freeCell)
     data.addCells(
         {CellDescription()
              .id(1)
-             .mutationId(100)
-             .genomeComplexity(1000.0f)
+             /*.mutationId(100)*/
+             //.genomeComplexity(1000.0f)
              .pos({100.0f, 100.0f})
              .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToLessComplexMutants)),
-        CellDescription().id(2).mutationId(100).pos({101.0f, 100.0f}),
+        CellDescription().id(2)/*.mutationId(100)*/.pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -802,9 +802,9 @@ TEST_F(SensorTests_New, scanForMoreComplexMutants_found)
             {CellDescription()
                  .id(1)
                  .pos({100.0f, 100.0f})
-                 .genomeComplexity(500.0f)
+                 //.genomeComplexity(500.0f)
                  .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
-            CellDescription().id(2).mutationId(5).pos({101.0f, 100.0f}),
+            CellDescription().id(2)/*.mutationId(5)*/.pos({101.0f, 100.0f}),
         });
         data.addConnection(1, 2);
 
@@ -836,9 +836,9 @@ TEST_F(SensorTests_New, scanForMoreComplexMutants_notFound_otherLessComplex)
             {CellDescription()
                  .id(1)
                  .pos({100.0f, 100.0f})
-                 .genomeComplexity(500.0f)
+                 //.genomeComplexity(500.0f)
                  .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
-            CellDescription().id(2).mutationId(5).pos({101.0f, 100.0f}),
+            CellDescription().id(2)/*.mutationId(5)*/.pos({101.0f, 100.0f}),
         });
         data.addConnection(1, 2);
 
@@ -868,11 +868,11 @@ TEST_F(SensorTests_New, scanForMoreComplexMutants_notFound_structure)
     data.addCells(
         {CellDescription()
              .id(1)
-             .mutationId(100)
-             .genomeComplexity(100.0f)
+             /*.mutationId(100)*/
+             //.genomeComplexity(100.0f)
              .pos({100.0f, 100.0f})
              .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
-        CellDescription().id(2).mutationId(100).pos({101.0f, 100.0f}),
+        CellDescription().id(2)/*.mutationId(100)*/.pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
@@ -901,11 +901,11 @@ TEST_F(SensorTests_New, scanForMoreComplexMutants_notFound_freeCell)
     data.addCells(
         {CellDescription()
              .id(1)
-             .mutationId(100)
-             .genomeComplexity(100.0f)
+             /*.mutationId(100)*/
+             //.genomeComplexity(100.0f)
              .pos({100.0f, 100.0f})
              .cellTypeData(SensorDescription().restrictToMutants(SensorRestrictToMutants_RestrictToMoreComplexMutants)),
-        CellDescription().id(2).mutationId(100).pos({101.0f, 100.0f}),
+        CellDescription().id(2)/*.mutationId(100)*/.pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 

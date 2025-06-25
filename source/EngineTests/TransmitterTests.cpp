@@ -153,7 +153,7 @@ TEST_F(TransmitterTests, distributeToConnectedCells)
 
 TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
 {
-    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
+    //auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 
     CollectionDescription data;
     data.addCells({
@@ -162,7 +162,7 @@ TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
             .pos({10.0f, 10.0f})
             .cellTypeData(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
             .energy(_parameters.normalCellEnergy.value[0] * 2),
-        CellDescription().id(2).pos({11.0f, 10.0f}).cellTypeData(ConstructorDescription().genome(genome)),
+        CellDescription().id(2).pos({11.0f, 10.0f}).cellTypeData(ConstructorDescription()/*.genome(genome)*/),
         CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(DepotDescription()),
     });
     data.addConnection(1, 2);
@@ -190,7 +190,7 @@ TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
 
 TEST_F(TransmitterTests, distributeOnlyToActiveConstructors)
 {
-    auto genome = GenomeDescription().header(GenomeHeaderDescription().numBranches(1));
+    //auto genome = GenomeDescription().header(GenomeHeaderDescription().numBranches(1));
     
     CollectionDescription data;
     data.addCells({
@@ -202,7 +202,7 @@ TEST_F(TransmitterTests, distributeOnlyToActiveConstructors)
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .cellTypeData(ConstructorDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))),
+            .cellTypeData(ConstructorDescription()/*.genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))*/),
         CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(DepotDescription()),
     });
     data.addConnection(1, 2);
@@ -281,7 +281,7 @@ TEST_F(TransmitterTests, distributeNotToNotReadyConstructors)
         CellDescription()
             .id(1)
             .pos({9.0f, 10.0f})
-            .cellTypeData(ConstructorDescription().numExpectedCells(4).genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))),
+            .cellTypeData(ConstructorDescription().numExpectedCells(4)/*.genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))*/),
         CellDescription()
             .id(2)
             .pos({10.0f, 10.0f})
@@ -290,7 +290,7 @@ TEST_F(TransmitterTests, distributeNotToNotReadyConstructors)
         CellDescription()
             .id(3)
             .pos({11.0f, 10.0f})
-            .cellTypeData(ConstructorDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))),
+            .cellTypeData(ConstructorDescription()/*.genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))*/),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -321,20 +321,20 @@ TEST_F(TransmitterTests, distributeToReadyConstructors)
     _parameters.constructorCompletenessCheck.value = true;
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto subgenome = GenomeDescription().cells({CellGenomeDescription()});
+    //auto subgenome = GenomeDescription().cells({CellGenomeDescription()});
 
-    auto genome = GenomeDescription().cells({
-        CellGenomeDescription().cellType(ConstructorGenomeDescription().makeSelfCopy()),
-        CellGenomeDescription().cellType(DepotGenomeDescription()),
-        CellGenomeDescription().cellType(ConstructorGenomeDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))),
-    });
+    //auto genome = GenomeDescription().cells({
+    //    CellGenomeDescription().cellType(ConstructorGenomeDescription().makeSelfCopy()),
+    //    CellGenomeDescription().cellType(DepotGenomeDescription()),
+    //    CellGenomeDescription().cellType(ConstructorGenomeDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))),
+    //});
 
     CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
             .pos({9.0f, 10.0f})
-            .cellTypeData(ConstructorDescription().numExpectedCells(4).genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))),
+            .cellTypeData(ConstructorDescription().numExpectedCells(4)/*.genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))*/),
         CellDescription()
             .id(2)
             .pos({10.0f, 10.0f})
@@ -343,7 +343,7 @@ TEST_F(TransmitterTests, distributeToReadyConstructors)
         CellDescription()
             .id(3)
             .pos({11.0f, 10.0f})
-            .cellTypeData(ConstructorDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))),
+            .cellTypeData(ConstructorDescription()/*.genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))*/),
         CellDescription()
             .id(4)
             .pos({12.0f, 10.0f})

@@ -16,7 +16,7 @@ PUBLIC
     InjectorTests.cpp
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h
-    LivingStateTransitionTests.cpp
+    LivingStateTransitionTests_New.cpp
     MuscleTests.cpp
     MuscleTests_New.cpp
     MutationTests.cpp

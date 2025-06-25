@@ -204,8 +204,6 @@ TEST_F(AttackerTests, successDistributeToTwoTransmittersWithDifferentColor)
 
 TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
 {
-    auto otherGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
-
     CollectionDescription data;
     data.addCells({
         CellDescription()
@@ -221,7 +219,7 @@ TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
         CellDescription()
             .id(4)
             .pos({11.0f, 9.0f})
-            .cellTypeData(ConstructorDescription().genome(otherGenome)),
+            .cellTypeData(ConstructorDescription()),
         CellDescription().id(5).pos({9.0f, 10.0f}),
     });
     data.addConnection(1, 2);
