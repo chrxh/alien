@@ -235,26 +235,14 @@ CollectionDescription& CollectionDescription::addCreature(CreatureDescription co
     return *this;
 }
 
-CollectionDescription& CollectionDescription::addCreature(CreatureDescription const& genome, std::vector<CellDescription> const& cells)
+CollectionDescription& CollectionDescription::addCreature(CreatureDescription const& creature, std::vector<CellDescription> const& cells)
 {
-    auto highestGenomeId = 0ull;
-    for (auto const& cell : _cells) {
-        if (cell._creatureId.has_value()) {
-            highestGenomeId = std::max(highestGenomeId, cell._creatureId.value());
-        }
-    }
-
-    auto newGenomeId = highestGenomeId + 1;
-    auto& newGenome = _creatures.emplace_back(genome);
-    newGenome._id = newGenomeId;
-
+    _creatures.emplace_back(creature);
+    
     auto originalSize = _cells.size();
     _cells.insert(_cells.end(), cells.begin(), cells.end());
-
-    auto newCreatureId = NumberGenerator::get().createObjectId();
-    for (auto i = originalSize; i < _cells.size(); ++i) {
-        _cells[i]._creatureId = newGenomeId;
-        _cells[i]._creatureId = newCreatureId;
+    for (auto i = originalSize, j = _cells.size(); i < j; ++i) {
+        _cells[i]._creatureId = creature._id;
     }
 
     return *this;

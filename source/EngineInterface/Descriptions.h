@@ -488,7 +488,7 @@ struct CollectionDescription
 
     CollectionDescription& addCreature(CreatureDescription const& value);
 
-    CollectionDescription& addCreature(CreatureDescription const& genome, std::vector<CellDescription> const& cells);
+    CollectionDescription& addCreature(CreatureDescription const& creature, std::vector<CellDescription> const& cells);
 
     void clear();
     bool isEmpty() const;
