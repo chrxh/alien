@@ -32,7 +32,7 @@ public:
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    LivingStateTransitionTests,
+    CellStateTransitionTests,
     CellStateTransitionTests_New,
     ::testing::Values(CellDeathConsquences_None, CellDeathConsquences_DetachedPartsDie, CellDeathConsquences_CreatureDies));
 
@@ -43,16 +43,16 @@ TEST_P(CellStateTransitionTests_New, ready_ready)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).livingState(CellState_Ready),
-        CellDescription().id(2).pos({11.0f, 10.0f}).livingState(CellState_Ready),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready),
+        CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Ready),
     });
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
-    EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._livingState);
-    EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._livingState);
+    EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._cellState);
+    EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._cellState);
 }
 
 TEST_P(CellStateTransitionTests_New, ready_dying)
@@ -62,16 +62,16 @@ TEST_P(CellStateTransitionTests_New, ready_dying)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).livingState(CellState_Ready),
-        CellDescription().id(2).pos({11.0f, 10.0f}).livingState(CellState_Dying),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready),
+        CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Dying),
     });
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
-    EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._livingState);
-    EXPECT_EQ(CellState_Dying, getCell(actualData, 2)._livingState);
+    EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._cellState);
+    EXPECT_EQ(CellState_Dying, getCell(actualData, 2)._cellState);
 }
 
 TEST_P(CellStateTransitionTests_New, ready_detaching)
@@ -81,8 +81,8 @@ TEST_P(CellStateTransitionTests_New, ready_detaching)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).livingState(CellState_Ready),
-        CellDescription().id(2).pos({11.0f, 10.0f}).livingState(CellState_Detaching),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready),
+        CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Detaching),
     });
     data.addConnection(1, 2);
 
@@ -91,14 +91,14 @@ TEST_P(CellStateTransitionTests_New, ready_detaching)
     auto actualData = _simulationFacade->getSimulationData();
 
     if (GetParam() == CellDeathConsquences_None) {
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._livingState);
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._livingState);
+        EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._cellState);
+        EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._cellState);
     } else if (GetParam() == CellDeathConsquences_CreatureDies) {
-        EXPECT_EQ(CellState_Detaching, getCell(actualData, 1)._livingState);
-        EXPECT_EQ(CellState_Detaching, getCell(actualData, 2)._livingState);
+        EXPECT_EQ(CellState_Detaching, getCell(actualData, 1)._cellState);
+        EXPECT_EQ(CellState_Detaching, getCell(actualData, 2)._cellState);
     } else if (GetParam() == CellDeathConsquences_DetachedPartsDie) {
-        EXPECT_EQ(CellState_Detaching, getCell(actualData, 1)._livingState);
-        EXPECT_EQ(CellState_Detaching, getCell(actualData, 2)._livingState);
+        EXPECT_EQ(CellState_Detaching, getCell(actualData, 1)._cellState);
+        EXPECT_EQ(CellState_Detaching, getCell(actualData, 2)._cellState);
     }
 }
 
@@ -119,11 +119,11 @@ TEST_P(CellStateTransitionTests_New, ready_detaching_onSelfReplicator)
             .id(1)
             .cellTypeData(ConstructorDescription())
             .pos({10.0f, 10.0f})
-            .livingState(CellState_Ready),
+            .cellState(CellState_Ready),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .livingState(CellState_Detaching),
+            .cellState(CellState_Detaching),
     });
     data.addConnection(1, 2);
 
@@ -132,14 +132,14 @@ TEST_P(CellStateTransitionTests_New, ready_detaching_onSelfReplicator)
     auto actualData = _simulationFacade->getSimulationData();
 
     if (GetParam() == CellDeathConsquences_None) {
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._livingState);
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._livingState);
+        EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._cellState);
+        EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._cellState);
     } else if (GetParam() == CellDeathConsquences_CreatureDies) {
-        EXPECT_EQ(CellState_Detaching, getCell(actualData, 1)._livingState);
-        EXPECT_EQ(CellState_Detaching, getCell(actualData, 2)._livingState);
+        EXPECT_EQ(CellState_Detaching, getCell(actualData, 1)._cellState);
+        EXPECT_EQ(CellState_Detaching, getCell(actualData, 2)._cellState);
     } else if (GetParam() == CellDeathConsquences_DetachedPartsDie) {
-        EXPECT_EQ(CellState_Reviving, getCell(actualData, 1)._livingState);
-        EXPECT_EQ(CellState_Detaching, getCell(actualData, 2)._livingState);
+        EXPECT_EQ(CellState_Reviving, getCell(actualData, 1)._cellState);
+        EXPECT_EQ(CellState_Detaching, getCell(actualData, 2)._cellState);
     }
 }
 
@@ -150,8 +150,8 @@ TEST_P(CellStateTransitionTests_New, ready_detaching_differentCreature)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).creatureId(1).livingState(CellState_Ready),
-        CellDescription().id(2).pos({11.0f, 10.0f}).creatureId(2).livingState(CellState_Detaching),
+        CellDescription().id(1).pos({10.0f, 10.0f}).creatureId(1).cellState(CellState_Ready),
+        CellDescription().id(2).pos({11.0f, 10.0f}).creatureId(2).cellState(CellState_Detaching),
     });
     data.addConnection(1, 2);
 
@@ -160,14 +160,14 @@ TEST_P(CellStateTransitionTests_New, ready_detaching_differentCreature)
     auto actualData = _simulationFacade->getSimulationData();
 
     if (GetParam() == CellDeathConsquences_None) {
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._livingState);
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._livingState);
+        EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._cellState);
+        EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._cellState);
     } else if (GetParam() == CellDeathConsquences_CreatureDies) {
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._livingState);
-        EXPECT_EQ(CellState_Detaching, getCell(actualData, 2)._livingState);
+        EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._cellState);
+        EXPECT_EQ(CellState_Detaching, getCell(actualData, 2)._cellState);
     } else if (GetParam() == CellDeathConsquences_DetachedPartsDie) {
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._livingState);
-        EXPECT_EQ(CellState_Detaching, getCell(actualData, 2)._livingState);
+        EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._cellState);
+        EXPECT_EQ(CellState_Detaching, getCell(actualData, 2)._cellState);
     }
 }
 
@@ -178,8 +178,8 @@ TEST_P(CellStateTransitionTests_New, detaching_reviving)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).livingState(CellState_Detaching),
-        CellDescription().id(2).pos({11.0f, 10.0f}).livingState(CellState_Reviving),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Detaching),
+        CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Reviving),
     });
     data.addConnection(1, 2);
 
@@ -188,14 +188,14 @@ TEST_P(CellStateTransitionTests_New, detaching_reviving)
     auto actualData = _simulationFacade->getSimulationData();
 
     if (GetParam() == CellDeathConsquences_None) {
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._livingState);
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._livingState);
+        EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._cellState);
+        EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._cellState);
     } else if (GetParam() == CellDeathConsquences_CreatureDies) {
-        EXPECT_EQ(CellState_Detaching, getCell(actualData, 1)._livingState);
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._livingState);
+        EXPECT_EQ(CellState_Detaching, getCell(actualData, 1)._cellState);
+        EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._cellState);
     } else if (GetParam() == CellDeathConsquences_DetachedPartsDie) {
-        EXPECT_EQ(CellState_Reviving, getCell(actualData, 1)._livingState);
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._livingState);
+        EXPECT_EQ(CellState_Reviving, getCell(actualData, 1)._cellState);
+        EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._cellState);
     }
 }
 
@@ -206,16 +206,16 @@ TEST_P(CellStateTransitionTests_New, underConstruction_activating)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).livingState(CellState_UnderConstruction),
-        CellDescription().id(2).pos({11.0f, 10.0f}).livingState(CellState_Activating),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_UnderConstruction),
+        CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Activating),
     });
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
-    EXPECT_EQ(CellState_Activating, getCell(actualData, 1)._livingState);
-    EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._livingState);
+    EXPECT_EQ(CellState_Activating, getCell(actualData, 1)._cellState);
+    EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._cellState);
 }
 
 TEST_P(CellStateTransitionTests_New, noDyingForBarrierCells)
@@ -225,11 +225,11 @@ TEST_P(CellStateTransitionTests_New, noDyingForBarrierCells)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).barrier(true).pos({10.0f, 10.0f}).livingState(CellState_Dying),
+        CellDescription().id(1).barrier(true).pos({10.0f, 10.0f}).cellState(CellState_Dying),
     });
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
-    EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._livingState);
+    EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._cellState);
 }

@@ -338,7 +338,7 @@ struct CellDescription
     MEMBER(CellDescription, bool, barrier, false);
     MEMBER(CellDescription, bool, sticky, false);
     MEMBER(CellDescription, int, age, 0);
-    MEMBER(CellDescription, CellState, livingState, CellState_Ready);
+    MEMBER(CellDescription, CellState, cellState, CellState_Ready);
 
     // Creature data
     MEMBER(CellDescription, std::optional<uint64_t>, creatureId, std::nullopt);

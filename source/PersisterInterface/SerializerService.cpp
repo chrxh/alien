@@ -644,7 +644,7 @@ namespace
     auto constexpr Id_Cell_Color = 5;
     auto constexpr Id_Cell_Barrier = 6;
     auto constexpr Id_Cell_Age = 7;
-    auto constexpr Id_Cell_LivingState = 8;
+    auto constexpr Id_Cell_CellState = 8;
     auto constexpr Id_Cell_ActivationTime = 9;
     auto constexpr Id_Cell_CellTypeUsed = 12;
     auto constexpr Id_Cell_DetectedByCreatureId = 15;
@@ -1032,7 +1032,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_Barrier, data._barrier, defaultObject._barrier);
         loadSave(task, auxiliaries, Id_Cell_Sticky, data._sticky, defaultObject._sticky);
         loadSave(task, auxiliaries, Id_Cell_Age, data._age, defaultObject._age);
-        loadSave(task, auxiliaries, Id_Cell_LivingState, data._livingState, defaultObject._livingState);
+        loadSave(task, auxiliaries, Id_Cell_CellState, data._cellState, defaultObject._cellState);
         loadSave(task, auxiliaries, Id_Cell_ActivationTime, data._activationTime, defaultObject._activationTime);
         loadSave(task, auxiliaries, Id_Cell_DetectedByCreatureId, data._detectedByCreatureId, defaultObject._detectedByCreatureId);
         loadSave(task, auxiliaries, Id_Cell_CellTypeUsed, data._cellTypeUsed, defaultObject._cellTypeUsed);

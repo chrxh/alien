@@ -316,8 +316,8 @@ void _InspectorWindow::processCellTypeTab(CellDescription& cell)
                         .name("Living state")
                         .textWidth(CellTypeBaseTabTextWidth)
                         .values({"Ready", "Under construction", "Activating", "Detached", "Reviving", "Dying"})
-                        .tooltip(Const::CellLivingStateTooltip),
-                    cell._livingState);
+                        .tooltip(Const::CellCellStateTooltip),
+                    cell._cellState);
                 ImGui::TreePop();
             }
         }

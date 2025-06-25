@@ -19,15 +19,15 @@ __inline__ __device__ bool ConstructorHelper::isSelfReplicator(Constructor const
 
 __inline__ __device__ bool ConstructorHelper::isFinished(Cell* cell)
 {
-    auto const& genome = cell->creature;
-    if (genome == nullptr) {
+    auto const& creature = cell->creature;
+    if (creature == nullptr) {
         return false;
     }
-    if (genome->numGenes == 0) {
+    if (creature->numGenes == 0) {
         return true;
     }
     auto const& constructor = cell->cellTypeData.constructor;
-    auto const& gene = genome->genes[constructor.geneIndex];
+    auto const& gene = creature->genes[constructor.geneIndex];
     if (gene.numBranches == 0) {
         return false;
     }

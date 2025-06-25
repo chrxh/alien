@@ -124,7 +124,7 @@ auto PatternAnalysisDialog::getAnalysisDescription(ClusterDescription const& clu
         if (cellAnalysisDescById.find(cell._id) == cellAnalysisDescById.end()) {
             CellAnalysisDescription result;
             result.numConnections = cell._connections.size();
-            result.constructionState = cell._livingState;
+            result.constructionState = cell._cellState;
             result.color = cell._color;
             result.cellType = cell.getCellType();
 

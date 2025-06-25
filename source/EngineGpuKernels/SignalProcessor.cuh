@@ -36,7 +36,7 @@ __inline__ __device__ void SignalProcessor::collectCellTypeOperations(Simulation
         if (cell->cellType != CellType_Structure && cell->cellType != CellType_Free && cell->cellType != CellType_Base) {
             if (cell->cellType == CellType_Detonator && cell->cellTypeData.detonator.state == DetonatorState_Activated) {
                 data.cellTypeOperations[cell->cellType].tryAddEntry(CellTypeOperation{cell});
-            } else if (cell->livingState != CellState_UnderConstruction && cell->livingState != CellState_Activating && cell->activationTime == 0) {
+            } else if (cell->cellState != CellState_UnderConstruction && cell->cellState != CellState_Activating && cell->activationTime == 0) {
                 data.cellTypeOperations[cell->cellType].tryAddEntry(CellTypeOperation{cell});
             }
 
@@ -66,7 +66,7 @@ __inline__ __device__  void SignalProcessor::calcFutureSignals(SimulationData& d
 
         for (int i = 0, j = cell->numConnections; i < j; ++i) {
             auto connectedCell = cell->connections[i].cell;
-            if (connectedCell->livingState == CellState_UnderConstruction || !connectedCell->signal.active) {
+            if (connectedCell->cellState == CellState_UnderConstruction || !connectedCell->signal.active) {
                 continue;
             }
             int skip = false;

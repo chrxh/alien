@@ -214,7 +214,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
     cell->pos = cellTO.pos;
     _map.correctPosition(cell->pos);
     cell->vel = cellTO.vel;
-    cell->livingState = cellTO.livingState;
+    cell->cellState = cellTO.cellState;
     cell->energy = cellTO.energy;
     cell->stiffness = cellTO.stiffness;
     cell->cellType = cellTO.cellType;
@@ -404,7 +404,7 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->energy = energy;
     cell->stiffness = _data->primaryNumberGen.random();
     cell->numConnections = 0;
-    cell->livingState = CellState_Ready;
+    cell->cellState = CellState_Ready;
     cell->locked = 0;
     cell->selected = 0;
     cell->detached = 0;

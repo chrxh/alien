@@ -353,7 +353,7 @@ namespace Const
         "This value denotes the complexity of the creature's genome. The calculation can be customized in the simulation parameters under the 'Genome "
         "complexity measurement' expert settings. By default, it is the number of encoded cells in the genome.";
 
-    std::string const CellLivingStateTooltip =
+    std::string const CellCellStateTooltip =
         "Cells can exist in various states. When a cell network of the organism is being constructed, its cells are in the 'Under construction' state. Once the cell network "
         "is completed, the cells briefly enter the 'Activating' state before transitioning to the 'Ready' state shortly after. If a cell "
         "network is in the process of dying, its cells are in the 'Dying' state.\n\n"

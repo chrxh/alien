@@ -98,7 +98,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
     //}
     //if (cell->cellTypeData.depot.mode == EnergyDistributionMode_TransmittersAndConstructors) {
     //    auto matchActiveConstructorFunc = [&](Cell* const& otherCell) {
-    //        if (otherCell->livingState != CellState_Ready) {
+    //        if (otherCell->cellState != CellState_Ready) {
     //            return false;
     //        }
     //        if (otherCell->cellType == CellType_Constructor) {
@@ -111,7 +111,7 @@ __device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData
     //        return false;
     //    };
     //    auto matchSecondChoiceFunc = [&](Cell* const& otherCell) {
-    //        if (otherCell->livingState != CellState_Ready) {
+    //        if (otherCell->cellState != CellState_Ready) {
     //            return false;
     //        }
     //        if (!cudaSimulationParameters.transmitterEnergyDistributionSameCreature.value || otherCell->creatureId == cell->creatureId) {

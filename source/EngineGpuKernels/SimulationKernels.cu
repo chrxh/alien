@@ -115,12 +115,12 @@ __global__ void cudaNextTimestep_energyFlow(SimulationData data)
 __global__ void cudaNextTimestep_cellType_prepare_substep1(SimulationData data)
 {
     CellProcessor::aging(data);
-    CellProcessor::livingStateTransition_calcFutureState(data);
+    CellProcessor::cellStateTransition_calcFutureState(data);
 }
 
 __global__ void cudaNextTimestep_cellType_prepare_substep2(SimulationData data)
 {
-    CellProcessor::livingStateTransition_applyNextState(data);
+    CellProcessor::cellStateTransition_applyNextState(data);
     CellProcessor::updateRenderingData(data);
 }
 

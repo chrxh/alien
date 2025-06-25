@@ -169,7 +169,7 @@ namespace
         cellTO.energy = cell->energy;
         cellTO.stiffness = cell->stiffness;
         cellTO.numConnections = cell->numConnections;
-        cellTO.livingState = cell->livingState;
+        cellTO.cellState = cell->cellState;
         cellTO.cellType = cell->cellType;
         cellTO.color = cell->color;
         cellTO.angleToFront = cell->angleToFront;

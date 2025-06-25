@@ -287,7 +287,7 @@ struct Cell
     bool barrier;
     bool sticky;
     uint32_t age;
-    CellState livingState;
+    CellState cellState;
 
     // Creature data
     Creature* creature;

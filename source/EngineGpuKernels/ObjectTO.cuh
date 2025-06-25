@@ -250,7 +250,7 @@ struct CellTO
     bool barrier;
     bool sticky;
     uint32_t age;
-    CellState livingState;
+    CellState cellState;
 
     // Creature data
     bool belongToCreature;

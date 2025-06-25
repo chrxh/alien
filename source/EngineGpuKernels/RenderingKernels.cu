@@ -131,8 +131,8 @@ namespace
             auto rgb = convertHSVtoRGB(toFloat(h), s, 1.0f);
             cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
         }
-        if (cellColoring == CellColoring_LivingState) {
-            switch (cell->livingState) {
+        if (cellColoring == CellColoring_CellState) {
+            switch (cell->cellState) {
             case CellState_Ready:
                 cellColor = 0x1010ff;
                 break;

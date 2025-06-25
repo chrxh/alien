@@ -259,7 +259,7 @@ CellDescription DescriptionConverterService::createCellDescription(
         connections.emplace_back(connection);
     }
     result._connections = connections;
-    result._livingState = cellTO.livingState;
+    result._cellState = cellTO.cellState;
     result._barrier = cellTO.barrier;
     result._sticky = cellTO.sticky;
     result._age = cellTO.age;
@@ -785,7 +785,7 @@ void DescriptionConverterService::convertCellToTO(
     cellTO.energy = cellDesc._energy;
     checkAndCorrectInvalidEnergy(cellTO.energy);
     cellTO.stiffness = cellDesc._stiffness;
-    cellTO.livingState = cellDesc._livingState;
+    cellTO.cellState = cellDesc._cellState;
     cellTO.cellType = cellDesc.getCellType();
     cellTO.detectedByCreatureId = cellDesc._detectedByCreatureId;
     cellTO.cellTypeUsed = cellDesc._cellTypeUsed;

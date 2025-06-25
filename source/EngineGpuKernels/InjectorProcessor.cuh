@@ -45,7 +45,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
     //                if (otherCell->cellType != CellType_Constructor && otherCell->cellType != CellType_Injector) {
     //                    return;
     //                }
-    //                //if (otherCell->livingState == CellState_UnderConstruction) {
+    //                //if (otherCell->cellState == CellState_UnderConstruction) {
     //                //    return;
     //                //}
     //                if (otherCell->cellTypeData.constructor.currentNodeIndex != 0) {

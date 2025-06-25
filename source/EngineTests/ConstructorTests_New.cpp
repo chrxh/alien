@@ -43,8 +43,8 @@ protected:
 //            .pos({10.0f, 10.0f})
 //            .energy(getConstructorEnergy())
 //            .cellTypeData(ConstructorDescription().currentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
-//        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(CellState_UnderConstruction),
-//        CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.5f}).livingState(CellState_UnderConstruction),
+//        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_UnderConstruction),
+//        CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.5f}).cellState(CellState_UnderConstruction),
 //    });
 //    auto cell3_refPos = RealVector2D(10.0f + getOffspringDistance(), 10.0f) + Math::rotateClockwise({-0.5f, 0.0f}, 60.0f);
 //    data.addConnection(1, 2);
@@ -94,8 +94,8 @@ protected:
 //            .pos({10.0f, 10.0f})
 //            .energy(getConstructorEnergy())
 //            .cellTypeData(ConstructorDescription().currentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
-//        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(CellState_UnderConstruction),
-//        CellDescription().id(3).pos({10.0f + getOffspringDistance(), 10.5f}).livingState(CellState_UnderConstruction),
+//        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_UnderConstruction),
+//        CellDescription().id(3).pos({10.0f + getOffspringDistance(), 10.5f}).cellState(CellState_UnderConstruction),
 //    });
 //    auto cell3_refPos = RealVector2D(10.0f + getOffspringDistance(), 10.0f) + Math::rotateClockwise({-0.5f, 0.0f}, -60.0f);
 //    data.addConnection(1, 2);
@@ -144,9 +144,9 @@ protected:
 //            .pos({10.0f, 10.0f})
 //            .energy(getConstructorEnergy())
 //            .cellTypeData(ConstructorDescription().currentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
-//        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(CellState_UnderConstruction),
-//        CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.5f}).livingState(CellState_UnderConstruction),
-//        CellDescription().id(4).pos({10.0f + getOffspringDistance(), 10.5f}).livingState(CellState_UnderConstruction),
+//        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_UnderConstruction),
+//        CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.5f}).cellState(CellState_UnderConstruction),
+//        CellDescription().id(4).pos({10.0f + getOffspringDistance(), 10.5f}).cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(1, 2);
 //    auto cell3_refPos = RealVector2D(10.0f + getOffspringDistance(), 10.0f) + Math::rotateClockwise({-0.5f, 0.0f}, 60.0f);
@@ -205,9 +205,9 @@ protected:
 //            .pos({10.0f, 10.0f})
 //            .energy(getConstructorEnergy())
 //            .cellTypeData(ConstructorDescription().currentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
-//        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(CellState_UnderConstruction),
-//        CellDescription().id(3).pos(RealVector2D(10.0f + getOffspringDistance() + 0.2f, 10.0f) + offset * 0.1f).livingState(CellState_UnderConstruction),
-//        CellDescription().id(4).pos(RealVector2D(10.0f + getOffspringDistance(), 10.0f) + offset * 0.2f).livingState(CellState_UnderConstruction),
+//        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_UnderConstruction),
+//        CellDescription().id(3).pos(RealVector2D(10.0f + getOffspringDistance() + 0.2f, 10.0f) + offset * 0.1f).cellState(CellState_UnderConstruction),
+//        CellDescription().id(4).pos(RealVector2D(10.0f + getOffspringDistance(), 10.0f) + offset * 0.2f).cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(1, 2);
 //    auto cell3_refPos = data._cells.at(1)._pos + Math::rotateClockwise({-0.5f, 0.0f}, 60.0f);
@@ -265,10 +265,10 @@ protected:
 //            .pos({458.20f, 239.23f})
 //            .energy(getConstructorEnergy())
 //            .cellTypeData(ConstructorDescription().currentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
-//        CellDescription().id(2).pos({456.40f, 238.88f}).livingState(CellState_UnderConstruction),
+//        CellDescription().id(2).pos({456.40f, 238.88f}).cellState(CellState_UnderConstruction),
 //        CellDescription().id(3).pos({455.96f, 239.75f})
-//            .livingState(CellState_UnderConstruction),
-//        CellDescription().id(4).pos({456.07f, 240.77f}).livingState(CellState_UnderConstruction),
+//            .cellState(CellState_UnderConstruction),
+//        CellDescription().id(4).pos({456.07f, 240.77f}).cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(1, 2);
 //    auto cell3_refPos = data._cells.at(1)._pos + Math::rotateClockwise(data._cells.at(0)._pos - data._cells.at(1)._pos, 120.0f);
@@ -328,12 +328,12 @@ protected:
 //            .pos({10.0f, 10.0f})
 //            .energy(getConstructorEnergy())
 //            .cellTypeData(ConstructorDescription().currentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
-//        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(CellState_UnderConstruction),
+//        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_UnderConstruction),
 //        CellDescription()
 //            .id(3)
 //            .pos(RealVector2D(10.0f + getOffspringDistance() + 0.2f, 10.0f) + offset * 0.1f)
-//            .livingState(CellState_UnderConstruction),
-//        CellDescription().id(4).pos(RealVector2D(10.0f + getOffspringDistance(), 10.0f) + offset * 0.2f).livingState(CellState_UnderConstruction),
+//            .cellState(CellState_UnderConstruction),
+//        CellDescription().id(4).pos(RealVector2D(10.0f + getOffspringDistance(), 10.0f) + offset * 0.2f).cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(1, 2);
 //    auto cell3_refPos = getCell(data, 2)._pos + Math::rotateClockwise({-0.5f, 0.0f}, 60.0f);
@@ -389,9 +389,9 @@ protected:
 //            .pos({10.0f, 10.0f})
 //            .energy(getConstructorEnergy())
 //            .cellTypeData(ConstructorDescription().currentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
-//        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(CellState_UnderConstruction),
-//        CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).livingState(CellState_UnderConstruction),
-//        CellDescription().id(4).pos({10.0f + getOffspringDistance() - 1.0f, 9.0f - 0.2f}).livingState(CellState_UnderConstruction),
+//        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_UnderConstruction),
+//        CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).cellState(CellState_UnderConstruction),
+//        CellDescription().id(4).pos({10.0f + getOffspringDistance() - 1.0f, 9.0f - 0.2f}).cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(1, 2);
 //    data.addConnection(2, 3);
@@ -446,8 +446,8 @@ protected:
 //            .pos({10.0f, 10.0f})
 //            .energy(getConstructorEnergy())
 //            .cellTypeData(ConstructorDescription().currentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
-//        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(CellState_UnderConstruction),
-//        CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).livingState(CellState_UnderConstruction),
+//        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_UnderConstruction),
+//        CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(1, 2);
 //    data.addConnection(2, 3);
@@ -493,9 +493,9 @@ protected:
 //            .pos({10.0f, 10.0f})
 //            .energy(getConstructorEnergy())
 //            .cellTypeData(ConstructorDescription().currentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
-//        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(CellState_UnderConstruction),
-//        CellDescription().id(3).pos({10.0f + getOffspringDistance(), 10.0f - 0.5f}).livingState(CellState_UnderConstruction),
-//        CellDescription().id(4).pos({10.0f + getOffspringDistance(), 10.0f - 1.0f}).livingState(CellState_UnderConstruction),
+//        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_UnderConstruction),
+//        CellDescription().id(3).pos({10.0f + getOffspringDistance(), 10.0f - 0.5f}).cellState(CellState_UnderConstruction),
+//        CellDescription().id(4).pos({10.0f + getOffspringDistance(), 10.0f - 1.0f}).cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(1, 2);
 //    data.addConnection(2, 3);
@@ -551,7 +551,7 @@ protected:
 //            .pos({11.0f, 10.0f})
 //            .energy(getConstructorEnergy())
 //            .cellTypeData(ConstructorDescription().currentNodeIndex(1).autoTriggerInterval(1).genome(genome).lastConstructedCellId(3)),
-//        CellDescription().id(3).pos({11.0f + getOffspringDistance(), 10.0f}).livingState(CellState_UnderConstruction),
+//        CellDescription().id(3).pos({11.0f + getOffspringDistance(), 10.0f}).cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(1, 2);
 //    data.addConnection(2, 3);
@@ -597,8 +597,8 @@ protected:
 //            .pos({10.0f, 10.0f})
 //            .energy(getConstructorEnergy())
 //            .cellTypeData(ConstructorDescription().currentNodeIndex(2).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
-//        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(CellState_UnderConstruction),
-//        CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).livingState(CellState_UnderConstruction),
+//        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_UnderConstruction),
+//        CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(2, 3);
 //    data.addConnection(1, 2);
@@ -613,13 +613,13 @@ protected:
 //    auto prevConstructedCell = getCell(actualData, 2);
 //    auto prevPrevConstructedCell = getCell(actualData, 3);
 //
-//    EXPECT_EQ(CellState_Ready, actualConstructedCell._livingState);
+//    EXPECT_EQ(CellState_Ready, actualConstructedCell._cellState);
 //    EXPECT_TRUE(approxCompare(45.0f, actualConstructedCell._angleToFront));
 //
-//    EXPECT_EQ(CellState_Ready, prevConstructedCell._livingState);
+//    EXPECT_EQ(CellState_Ready, prevConstructedCell._cellState);
 //    EXPECT_TRUE(approxCompare(135.0f, prevConstructedCell._angleToFront));
 //
-//    EXPECT_EQ(CellState_Ready, prevPrevConstructedCell._livingState);
+//    EXPECT_EQ(CellState_Ready, prevPrevConstructedCell._cellState);
 //    EXPECT_TRUE(approxCompare(-45.0f, prevPrevConstructedCell._angleToFront));
 //}
 //
@@ -637,8 +637,8 @@ protected:
 //            .pos({10.0f, 10.0f})
 //            .energy(getConstructorEnergy())
 //            .cellTypeData(ConstructorDescription().currentNodeIndex(2).autoTriggerInterval(1).genome(genome).lastConstructedCellId(2)),
-//        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).livingState(CellState_UnderConstruction),
-//        CellDescription().id(3).pos({10.0f + getOffspringDistance(), 11.0f}).livingState(CellState_UnderConstruction),
+//        CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_UnderConstruction),
+//        CellDescription().id(3).pos({10.0f + getOffspringDistance(), 11.0f}).cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(2, 3);
 //    data.addConnection(1, 2);
@@ -653,13 +653,13 @@ protected:
 //    auto prevConstructedCell = getCell(actualData, 2);
 //    auto prevPrevConstructedCell = getCell(actualData, 3);
 //
-//    EXPECT_EQ(CellState_Ready, actualConstructedCell._livingState);
+//    EXPECT_EQ(CellState_Ready, actualConstructedCell._cellState);
 //    EXPECT_TRUE(approxCompare(45.0f, actualConstructedCell._angleToFront));
 //
-//    EXPECT_EQ(CellState_Ready, prevConstructedCell._livingState);
+//    EXPECT_EQ(CellState_Ready, prevConstructedCell._cellState);
 //    EXPECT_TRUE(approxCompare(-45.0f, prevConstructedCell._angleToFront));
 //
-//    EXPECT_EQ(CellState_Ready, prevPrevConstructedCell._livingState);
+//    EXPECT_EQ(CellState_Ready, prevPrevConstructedCell._cellState);
 //    EXPECT_TRUE(approxCompare(135.0f, prevPrevConstructedCell._angleToFront));
 //}
 //
@@ -692,7 +692,7 @@ protected:
 //    ASSERT_EQ(4, actualData._cells.size());
 //    auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3});
 //
-//    EXPECT_EQ(CellState_Ready, actualConstructedCell._livingState);
+//    EXPECT_EQ(CellState_Ready, actualConstructedCell._cellState);
 //    EXPECT_TRUE(approxCompare(-90.0f, actualConstructedCell._angleToFront));
 //}
 //
@@ -723,6 +723,6 @@ protected:
 //    ASSERT_EQ(4, actualData._cells.size());
 //    auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3});
 //
-//    EXPECT_EQ(CellState_Ready, actualConstructedCell._livingState);
+//    EXPECT_EQ(CellState_Ready, actualConstructedCell._cellState);
 //    EXPECT_TRUE(approxCompare(90.0f, actualConstructedCell._angleToFront));
 //}

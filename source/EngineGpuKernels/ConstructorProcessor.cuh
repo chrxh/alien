@@ -302,13 +302,13 @@ __inline__ __device__ Cell* ConstructorProcessor::getLastConstructedCell(Cell* h
     else {
         for (int i = 0; i < hostCell->numConnections; ++i) {
             auto const& connectedCell = hostCell->connections[i].cell;
-            if (connectedCell->livingState == CellState_UnderConstruction) {
+            if (connectedCell->cellState == CellState_UnderConstruction) {
                 return connectedCell;
             }
         }
         for (int i = 0; i < hostCell->numConnections; ++i) {
             auto const& connectedCell = hostCell->connections[i].cell;
-            if (connectedCell->livingState == CellState_Dying) {
+            if (connectedCell->cellState == CellState_Dying) {
                 return connectedCell;
             }
         }
@@ -411,8 +411,8 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
     if (!newCell->tryLock()) {
         return nullptr;
     }
-    if (constructionData.lastConstructionCell->livingState == CellState_Dying) {
-        newCell->livingState = CellState_Dying;
+    if (constructionData.lastConstructionCell->cellState == CellState_Dying) {
+        newCell->cellState = CellState_Dying;
     }
 
     float origAngleFromPreviousOnHostCell;
@@ -461,11 +461,11 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
                 origAngleFromPreviousOnHostCell,
                 distance)) {
             CellConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
-            hostCell->livingState = CellState_Dying;
+            hostCell->cellState = CellState_Dying;
             for (int i = 0; i < hostCell->numConnections; ++i) {
                 auto const& connectedCell = hostCell->connections[i].cell;
                 if (connectedCell->creatureId == hostCell->creatureId) {
-                    connectedCell->livingState = CellState_Detaching;
+                    connectedCell->cellState = CellState_Detaching;
                 }
             }
         } else {
@@ -598,7 +598,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
             hostCell->detached,
             [&](Cell* const& otherCell) {
                 if (otherCell == constructionData.lastConstructionCell || otherCell == hostCell
-                    || (otherCell->livingState != CellState_UnderConstruction && otherCell->activationTime == 0)
+                    || (otherCell->cellState != CellState_UnderConstruction && otherCell->activationTime == 0)
                     || otherCell->creatureId != hostCell->cellTypeData.constructor.offspringCreatureId) {
                     return false;
                 }
@@ -628,7 +628,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
             cudaSimulationParameters.constructorConnectingCellDistance.value[hostCell->color],
             hostCell->detached,
             [&](Cell* const& otherCell) {
-                if (otherCell->livingState != CellState_UnderConstruction
+                if (otherCell->cellState != CellState_UnderConstruction
                     || otherCell->creatureId != hostCell->cellTypeData.constructor.offspringCreatureId) {
                     return false;
                 }
@@ -701,7 +701,7 @@ ConstructorProcessor::constructCellIntern(
     result->pos = posOfNewCell;
     data.cellMap.correctPosition(result->pos);
     result->numConnections = 0;
-    result->livingState = CellState_UnderConstruction;
+    result->cellState = CellState_UnderConstruction;
     result->creatureId = constructor.offspringCreatureId;
     result->mutationId = constructor.offspringMutationId;
     result->ancestorMutationId = static_cast<uint8_t>(hostCell->mutationId & 0xff);
@@ -909,7 +909,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
 __inline__ __device__ void ConstructorProcessor::activateNewCell(Cell* newCell, Cell* hostCell, ConstructionData const& constructionData)
 {
     if (constructionData.isLastNodeOfLastRepetition || (constructionData.isLastNode && constructionData.hasInfiniteRepetitions)) {
-        newCell->livingState = CellState_Activating;
+        newCell->cellState = CellState_Activating;
 
         if (constructionData.genomeHeader.separateConstruction || constructionData.containsSelfReplication) {
             newCell->angleToFront = constructionData.genomeHeader.frontAngle;

@@ -187,7 +187,7 @@
 //    auto actualConstructedCell = getOtherCell(actualData, {1});
 //    EXPECT_EQ(0, std::get<ConstructorDescription>(actualHostCell._cellTypeData)._currentRepetition);
 //    EXPECT_EQ(0, std::get<ConstructorDescription>(actualHostCell._cellTypeData)._currentBranch);
-//    EXPECT_EQ(CellState_Activating, actualConstructedCell._livingState);
+//    EXPECT_EQ(CellState_Activating, actualConstructedCell._cellState);
 //}
 //
 //TEST_F(ConstructorTests, constructFirstCell_twoCellGenome_infiniteRepetitions)
@@ -212,7 +212,7 @@
 //    auto actualConstructedCell = getOtherCell(actualData, {1});
 //    EXPECT_EQ(0, std::get<ConstructorDescription>(actualHostCell._cellTypeData)._currentRepetition);
 //    EXPECT_EQ(0, std::get<ConstructorDescription>(actualHostCell._cellTypeData)._currentBranch);
-//    EXPECT_EQ(CellState_UnderConstruction, actualConstructedCell._livingState);
+//    EXPECT_EQ(CellState_UnderConstruction, actualConstructedCell._cellState);
 //}
 //
 //TEST_F(ConstructorTests, constructFirstCell_wrongCycle)
@@ -511,7 +511,7 @@
 //            .id(3)
 //            .pos({12.0f, 10.0f})
 //            .energy(100)
-//            .livingState(CellState_UnderConstruction)
+//            .cellState(CellState_UnderConstruction)
 //            .cellTypeData(ConstructorDescription().genome(otherGenome).currentBranch(0)),
 //    });
 //    data.addConnection(1, 2);
@@ -557,7 +557,7 @@
 //    EXPECT_EQ(1, actualConstructor._currentBranch);
 //    EXPECT_TRUE(approxCompare(_parameters.normalCellEnergy.value[0] * 2, actualHostCell._energy));
 //    EXPECT_TRUE(approxCompare(1.0f, actualHostCell._signal->_channels[0]));
-//    EXPECT_EQ(CellState_Activating, actualConstructedCell._livingState);
+//    EXPECT_EQ(CellState_Activating, actualConstructedCell._cellState);
 //
 //    EXPECT_EQ(1, actualConstructedCell._connections.size());
 //    EXPECT_EQ(2, actualConstructedCell._color);
@@ -594,10 +594,10 @@
 //    EXPECT_EQ(0, actualConstructor._currentBranch);
 //
 //    EXPECT_EQ(1, actualHostCell._connections.size());
-//    EXPECT_EQ(CellState_Ready, actualHostCell._livingState);
+//    EXPECT_EQ(CellState_Ready, actualHostCell._cellState);
 //
 //    EXPECT_EQ(1, actualConstructedCell._connections.size());
-//    EXPECT_EQ(CellState_UnderConstruction, actualConstructedCell._livingState);
+//    EXPECT_EQ(CellState_UnderConstruction, actualConstructedCell._cellState);
 //}
 //
 //TEST_F(ConstructorTests, constructFirstCell_separation)
@@ -627,7 +627,7 @@
 //    EXPECT_EQ(0, actualConstructor._currentBranch);
 //
 //    EXPECT_EQ(0, actualConstructedCell._connections.size());
-//    EXPECT_EQ(CellState_Activating, actualConstructedCell._livingState);
+//    EXPECT_EQ(CellState_Activating, actualConstructedCell._cellState);
 //}
 //
 //TEST_F(ConstructorTests, constructFirstCell_manualConstruction)
@@ -662,7 +662,7 @@
 //    EXPECT_EQ(1, actualHostCell._connections.size());
 //
 //    EXPECT_EQ(0, actualConstructedCell._connections.size());
-//    EXPECT_EQ(CellState_Activating, actualConstructedCell._livingState);
+//    EXPECT_EQ(CellState_Activating, actualConstructedCell._cellState);
 //
 //    EXPECT_TRUE(approxCompare(10.0f - 1.0f, actualConstructedCell._pos.x));
 //    EXPECT_TRUE(approxCompare(10.0f, actualConstructedCell._pos.y));
@@ -1086,7 +1086,7 @@
 //            .pos({10.0f - getOffspringDistance(), 10.0f})
 //            .energy(100)
 //            .cellTypeData(OscillatorDescription())
-//            .livingState(CellState_UnderConstruction),
+//            .cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(1, 2);
 //
@@ -1100,14 +1100,14 @@
 //    auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 //
 //    EXPECT_EQ(0, actualHostCell._connections.size());
-//    EXPECT_EQ(CellState_Ready, actualHostCell._livingState);
+//    EXPECT_EQ(CellState_Ready, actualHostCell._cellState);
 //
 //    ASSERT_EQ(1, actualPrevConstructedCell._connections.size());
-//    EXPECT_EQ(CellState_UnderConstruction, actualPrevConstructedCell._livingState);
+//    EXPECT_EQ(CellState_UnderConstruction, actualPrevConstructedCell._cellState);
 //    EXPECT_TRUE(lowPrecisionCompare(1.0f, actualPrevConstructedCell._connections[0]._distance));
 //
 //    ASSERT_EQ(1, actualConstructedCell._connections.size());
-//    EXPECT_EQ(CellState_Activating, actualConstructedCell._livingState);
+//    EXPECT_EQ(CellState_Activating, actualConstructedCell._cellState);
 //    EXPECT_TRUE(lowPrecisionCompare(1.0f, actualConstructedCell._connections[0]._distance));
 //}
 //
@@ -1128,7 +1128,7 @@
 //            .pos({10.0f - getOffspringDistance(), 10.0f})
 //            .energy(100)
 //            .cellTypeData(OscillatorDescription())
-//            .livingState(CellState_UnderConstruction),
+//            .cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(1, 2);
 //
@@ -1143,9 +1143,9 @@
 //        auto actualPrevConstructedCell = getCell(actualData, 2);
 //        auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 //
-//        EXPECT_EQ(CellState_Ready, actualHostCell._livingState);
-//        EXPECT_EQ(CellState_Activating, actualPrevConstructedCell._livingState);
-//        EXPECT_EQ(CellState_Ready, actualConstructedCell._livingState);
+//        EXPECT_EQ(CellState_Ready, actualHostCell._cellState);
+//        EXPECT_EQ(CellState_Activating, actualPrevConstructedCell._cellState);
+//        EXPECT_EQ(CellState_Ready, actualConstructedCell._cellState);
 //    }
 //    _simulationFacade->calcTimesteps(1);
 //    {
@@ -1156,9 +1156,9 @@
 //        auto actualPrevConstructedCell = getCell(actualData, 2);
 //        auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 //
-//        EXPECT_EQ(CellState_Ready, actualHostCell._livingState);
-//        EXPECT_EQ(CellState_Ready, actualPrevConstructedCell._livingState);
-//        EXPECT_EQ(CellState_Ready, actualConstructedCell._livingState);
+//        EXPECT_EQ(CellState_Ready, actualHostCell._cellState);
+//        EXPECT_EQ(CellState_Ready, actualPrevConstructedCell._cellState);
+//        EXPECT_EQ(CellState_Ready, actualConstructedCell._cellState);
 //    }
 //}
 //
@@ -1179,7 +1179,7 @@
 //            .pos({10.0f - getOffspringDistance(), 10.0f})
 //            .energy(100)
 //            .cellTypeData(OscillatorDescription())
-//            .livingState(CellState_UnderConstruction),
+//            .cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(1, 2);
 //
@@ -1193,11 +1193,11 @@
 //    auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 //
 //    EXPECT_EQ(1, actualHostCell._connections.size());
-//    EXPECT_EQ(CellState_Ready, actualHostCell._livingState);
+//    EXPECT_EQ(CellState_Ready, actualHostCell._cellState);
 //    EXPECT_TRUE(lowPrecisionCompare(1.0f, actualPrevConstructedCell._connections[0]._distance));
 //
 //    ASSERT_EQ(2, actualConstructedCell._connections.size());
-//    EXPECT_EQ(CellState_Activating, actualConstructedCell._livingState);
+//    EXPECT_EQ(CellState_Activating, actualConstructedCell._cellState);
 //    std::map<uint64_t, ConnectionDescription> connectionById;
 //    for (auto const& connection : actualConstructedCell._connections) {
 //        connectionById.emplace(connection._cellId, connection);
@@ -1208,7 +1208,7 @@
 //    EXPECT_TRUE(approxCompare(180.0f, connectionById.at(2)._angleFromPrevious));
 //
 //    ASSERT_EQ(1, actualPrevConstructedCell._connections.size());
-//    EXPECT_EQ(CellState_UnderConstruction, actualPrevConstructedCell._livingState);
+//    EXPECT_EQ(CellState_UnderConstruction, actualPrevConstructedCell._cellState);
 //    EXPECT_TRUE(lowPrecisionCompare(1.0f, actualPrevConstructedCell._connections[0]._distance));
 //}
 //
@@ -1229,7 +1229,7 @@
 //            .pos({10.0f - 1.0f - _parameters.minCellDistance.value / 2, 10.0f})
 //            .energy(100)
 //            .cellTypeData(OscillatorDescription())
-//            .livingState(CellState_UnderConstruction),
+//            .cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(1, 2);
 //
@@ -1266,7 +1266,7 @@
 //            .pos({10.0f - getOffspringDistance(), 10.0f})
 //            .energy(100)
 //            .cellTypeData(OscillatorDescription())
-//            .livingState(CellState_UnderConstruction),
+//            .cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(1, 2);
 //
@@ -1280,13 +1280,13 @@
 //    auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 //
 //    EXPECT_EQ(1, actualHostCell._connections.size());
-//    EXPECT_EQ(CellState_Ready, actualHostCell._livingState);
+//    EXPECT_EQ(CellState_Ready, actualHostCell._cellState);
 //
 //    ASSERT_EQ(2, actualConstructedCell._connections.size());
-//    EXPECT_EQ(CellState_UnderConstruction, actualConstructedCell._livingState);
+//    EXPECT_EQ(CellState_UnderConstruction, actualConstructedCell._cellState);
 //
 //    ASSERT_EQ(1, actualPrevConstructedCell._connections.size());
-//    EXPECT_EQ(CellState_UnderConstruction, actualPrevConstructedCell._livingState);
+//    EXPECT_EQ(CellState_UnderConstruction, actualPrevConstructedCell._cellState);
 //}
 //
 //TEST_F(ConstructorTests, constructSecondCell_differentAngle1)
@@ -1306,7 +1306,7 @@
 //            .pos({10.0f - getOffspringDistance(), 10.0f})
 //            .energy(100)
 //            .cellTypeData(OscillatorDescription())
-//            .livingState(CellState_UnderConstruction),
+//            .cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(1, 2);
 //
@@ -1351,7 +1351,7 @@
 //            .pos({10.0f - getOffspringDistance(), 10.0f})
 //            .energy(100)
 //            .cellTypeData(OscillatorDescription())
-//            .livingState(CellState_UnderConstruction),
+//            .cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(1, 2);
 //
@@ -1391,7 +1391,7 @@
 //            .pos({10.0f - getOffspringDistance(), 10.0f})
 //            .energy(_parameters.normalCellEnergy.value[0] * 3)
 //            .cellTypeData(ConstructorDescription().currentNodeIndex(1).genome(genome)),
-//        CellDescription().id(2).pos({11.0f, 10.0f}).livingState(CellState_UnderConstruction),
+//        CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(1, 2);
 //
@@ -1404,7 +1404,7 @@
 //    auto actualHostCell = getCell(actualData, 1);
 //    auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 //    EXPECT_EQ(0, std::get<ConstructorDescription>(actualHostCell._cellTypeData)._currentBranch);
-//    EXPECT_EQ(CellState_Activating, actualConstructedCell._livingState);
+//    EXPECT_EQ(CellState_Activating, actualConstructedCell._cellState);
 //}
 //
 //TEST_F(ConstructorTests, constructThirdCell_multipleConnections_upperPart)
@@ -1425,13 +1425,13 @@
 //            .pos({10.0f - getOffspringDistance(), 10.0f})
 //            .energy(100)
 //            .cellTypeData(OscillatorDescription())
-//            .livingState(CellState_UnderConstruction),
+//            .cellState(CellState_UnderConstruction),
 //        CellDescription()
 //            .id(3)
 //            .pos({10.0f - getOffspringDistance(), 9.0f})
 //            .energy(100)
 //            .cellTypeData(OscillatorDescription())
-//            .livingState(CellState_UnderConstruction),
+//            .cellState(CellState_UnderConstruction),
 //        CellDescription().id(4).pos({10.0f, 9.5f}).energy(_parameters.normalCellEnergy.value[0] * 3),
 //        CellDescription().id(5).pos({10.0f, 9.0f}).energy(_parameters.normalCellEnergy.value[0] * 3),
 //    });
@@ -1478,13 +1478,13 @@
 //            .pos({10.0f - getOffspringDistance(), 10.0f})
 //            .energy(100)
 //            .cellTypeData(OscillatorDescription())
-//            .livingState(CellState_UnderConstruction),
+//            .cellState(CellState_UnderConstruction),
 //        CellDescription()
 //            .id(3)
 //            .pos({10.0f - getOffspringDistance(), 11.0f})
 //            .energy(100)
 //            .cellTypeData(OscillatorDescription())
-//            .livingState(CellState_UnderConstruction),
+//            .cellState(CellState_UnderConstruction),
 //        CellDescription().id(4).pos({10.0f, 10.5f}).energy(_parameters.normalCellEnergy.value[0] * 3),
 //        CellDescription().id(5).pos({10.0f, 11.0f}).energy(_parameters.normalCellEnergy.value[0] * 3),
 //    });
@@ -1530,7 +1530,7 @@
 //            .pos({10.0f - getOffspringDistance(), 10.0f})
 //            .energy(100)
 //            .cellTypeData(OscillatorDescription())
-//            .livingState(CellState_UnderConstruction),
+//            .cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(1, 2);
 //
@@ -1567,17 +1567,17 @@
 //            .pos({10.0f - getOffspringDistance(), 10.0f})
 //            .energy(100)
 //            .cellTypeData(OscillatorDescription())
-//            .livingState(CellState_UnderConstruction),
+//            .cellState(CellState_UnderConstruction),
 //        CellDescription()
 //            .id(3)
 //            .pos({10.0f - getOffspringDistance(), 11.0f})
 //            .energy(100)
 //            .cellTypeData(OscillatorDescription())
-//            .livingState(CellState_UnderConstruction),
+//            .cellState(CellState_UnderConstruction),
 //        CellDescription()
 //            .id(4)
 //            .pos({10.0f - getOffspringDistance() + 1.0f, 11.0f})
-//            .livingState(CellState_UnderConstruction),
+//            .cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(1, 2);
 //    data.addConnection(2, 3);
@@ -1622,7 +1622,7 @@
 //            .pos({10.0f - getOffspringDistance(), 10.0f})
 //            .energy(100)
 //            .cellTypeData(OscillatorDescription())
-//            .livingState(CellState_UnderConstruction),
+//            .cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(1, 2);
 //
@@ -1633,7 +1633,7 @@
 //    ASSERT_EQ(3, actualData._cells.size());
 //    auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 //
-//    EXPECT_EQ(CellState_UnderConstruction, actualConstructedCell._livingState);
+//    EXPECT_EQ(CellState_UnderConstruction, actualConstructedCell._cellState);
 //}
 //
 //TEST_F(ConstructorTests, constructLastCellLastRepetition)
@@ -1653,13 +1653,13 @@
 //            .pos({10.0f - getOffspringDistance(), 10.0f})
 //            .energy(100)
 //            .cellTypeData(OscillatorDescription())
-//            .livingState(CellState_UnderConstruction),
+//            .cellState(CellState_UnderConstruction),
 //        CellDescription()
 //            .id(3)
 //            .pos({9.0f - getOffspringDistance(), 10.0f})
 //            .energy(100)
 //            .cellTypeData(OscillatorDescription())
-//            .livingState(CellState_UnderConstruction),
+//            .cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(1, 2);
 //    data.addConnection(2, 3);
@@ -1671,7 +1671,7 @@
 //    ASSERT_EQ(4, actualData._cells.size());
 //    auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3});
 //
-//    EXPECT_EQ(CellState_Activating, actualConstructedCell._livingState);
+//    EXPECT_EQ(CellState_Activating, actualConstructedCell._cellState);
 //}
 //
 //TEST_F(ConstructorTests, restartIfNoLastConstructedCellFound)
@@ -1728,7 +1728,7 @@
 //            .pos({10.0f - getOffspringDistance(), 10.0f})
 //            .energy(100)
 //            .cellTypeData(OscillatorDescription())
-//            .livingState(CellState_UnderConstruction),
+//            .cellState(CellState_UnderConstruction),
 //    });
 //    data.addConnection(1, 2);
 //

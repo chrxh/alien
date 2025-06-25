@@ -158,7 +158,7 @@ TEST_P(DataTransferTests_AllCellType_New, singleCell_noGenome)
                     .age(1)
                     .color(2)
                     .barrier(true)
-                    .livingState(false)
+                    .cellState(false)
                     .signalAndRelaxTime({1, 0, -1, 0, 0, 0, 0, 0})
                     .signalRoutingRestriction(SignalRoutingRestrictionDescription().active(true).baseAngle(23.0f).openingAngle(42.0f))
                     .cellTypeData(cellTypeDesc)
@@ -295,7 +295,7 @@ TEST_P(DataTransferTests_AllCellTypeGenome_New, singleCell_genome_oneGene_oneNod
              .age(1)
              .color(2)
              .barrier(true)
-             .livingState(false)
+             .cellState(false)
              .creatureId(3534)
              .signalAndRelaxTime({1, 0, -1, 0, 0, 0, 0, 0})});
 

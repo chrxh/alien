@@ -132,7 +132,7 @@ TEST_F(DetonatorTests, explosionIfDying)
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
-            .livingState(CellState_Dying)
+            .cellState(CellState_Dying)
             .activationTime(100)
             .cellTypeData(DetonatorDescription().state(DetonatorState_Activated).countdown(10)),
     });

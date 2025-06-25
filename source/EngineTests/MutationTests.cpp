@@ -886,7 +886,7 @@
 //    }));
 //
 //    auto data = CollectionDescription().addCells(
-//        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome)).livingState(CellState_Activating)});
+//        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome)).cellState(CellState_Activating)});
 //
 //    _simulationFacade->setSimulationData(data);
 //    for (int i = 0; i < 10; ++i) {
@@ -915,7 +915,7 @@
 //    }));
 //
 //    auto data = CollectionDescription().addCells(
-//        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome)).livingState(CellState_Activating)});
+//        {CellDescription().id(1).cellTypeData(ConstructorDescription().genome(genome)).cellState(CellState_Activating)});
 //
 //    _simulationFacade->setSimulationData(data);
 //    for (int i = 0; i < 10; ++i) {

@@ -30,7 +30,7 @@ TEST_F(DataTransferTests, singleCell)
                      .age(1)
                      .color(2)
                      .barrier(true)
-                     .livingState(false)
+                     .cellState(false)
                      .creatureId(3534)
                      .signalAndRelaxTime({1, 0, -1, 0, 0, 0, 0, 0}));
 
@@ -61,8 +61,8 @@ TEST_F(DataTransferTests, cellCluster)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({2.0f, 4.0f}).vel({0.5f, 1.0f}).age(1).color(2).barrier(false).livingState(false).neuralNetwork(nn1),
-        CellDescription().id(2).pos({3.0f, 4.0f}).vel({0.2f, 1.0f}).age(1).color(4).barrier(true).livingState(false).neuralNetwork(nn2),
+        CellDescription().id(1).pos({2.0f, 4.0f}).vel({0.5f, 1.0f}).age(1).color(2).barrier(false).cellState(false).neuralNetwork(nn1),
+        CellDescription().id(2).pos({3.0f, 4.0f}).vel({0.2f, 1.0f}).age(1).color(4).barrier(true).cellState(false).neuralNetwork(nn2),
     });
     data.addConnection(1, 2);
 
@@ -84,7 +84,7 @@ TEST_F(DataTransferTests, largeData)
                          .age(1)
                          .color(2)
                          .barrier(true)
-                         .livingState(false));
+                         .cellState(false));
         data.addParticle(ParticleDescription()
                              .id(numberGen.createObjectId())
                              .pos({numberGen.getRandomFloat(0.0f, 100.0f), numberGen.getRandomFloat(0.0f, 100.0f)})
