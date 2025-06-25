@@ -14,7 +14,6 @@
 CollectionDescription DescriptionEditService::createRect(CreateRectParameters const& parameters)
 {
     CollectionDescription result;
-    auto creatureId = parameters._randomCreatureId ? toInt(NumberGenerator::get().getRandomInt(std::numeric_limits<int>::max())) : 0;
     for (int i = 0; i < parameters._width; ++i) {
         for (int j = 0; j < parameters._height; ++j) {
             result.addCell(CellDescription()
@@ -25,7 +24,6 @@ CollectionDescription DescriptionEditService::createRect(CreateRectParameters co
                                .color(parameters._color)
                                .barrier(parameters._barrier)
                                .sticky(parameters._sticky)
-                               .creatureId(creatureId)
                                .cellTypeData(parameters._cellType));
         }
     }
@@ -37,7 +35,6 @@ CollectionDescription DescriptionEditService::createRect(CreateRectParameters co
 CollectionDescription DescriptionEditService::createHex(CreateHexParameters const& parameters)
 {
     CollectionDescription result;
-    auto creatureId = parameters._randomCreatureId ? toInt(NumberGenerator::get().getRandomInt(std::numeric_limits<int>::max())) : 0;
     auto incY = sqrt(3.0) * parameters._cellDistance / 2.0;
     for (int j = 0; j < parameters._layers; ++j) {
         for (int i = -(parameters._layers - 1); i < parameters._layers - j; ++i) {
@@ -51,8 +48,7 @@ CollectionDescription DescriptionEditService::createHex(CreateHexParameters cons
                                .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
                                .color(parameters._color)
                                .barrier(parameters._barrier)
-                               .sticky(parameters._sticky)
-                               .creatureId(creatureId));
+                               .sticky(parameters._sticky));
 
             //create cell: under layer (except for 0-layer)
             if (j > 0) {
@@ -63,8 +59,7 @@ CollectionDescription DescriptionEditService::createHex(CreateHexParameters cons
                                    .stiffness(parameters._stiffness)
                                    .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(j * incY)})
                                    .color(parameters._color)
-                                   .barrier(parameters._barrier)
-                                   .creatureId(creatureId));
+                                   .barrier(parameters._barrier));
             }
         }
     }
@@ -78,7 +73,6 @@ CollectionDescription DescriptionEditService::createHex(CreateHexParameters cons
 CollectionDescription DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters)
 {
     CollectionDescription result;
-    auto creatureId = parameters._randomCreatureId ? toInt(NumberGenerator::get().getRandomInt(std::numeric_limits<int>::max())) : 0;
 
     if (parameters._radius <= 1 + NEAR_ZERO) {
         result.addCell(CellDescription()
@@ -89,8 +83,7 @@ CollectionDescription DescriptionEditService::createUnconnectedCircle(CreateUnco
                            .stiffness(parameters._stiffness)
                            .color(parameters._color)
                            .barrier(parameters._barrier)
-                           .sticky(parameters._sticky)
-                           .creatureId(creatureId));
+                           .sticky(parameters._sticky));
         return result;
     }
 
@@ -115,8 +108,7 @@ CollectionDescription DescriptionEditService::createUnconnectedCircle(CreateUnco
                                .pos({parameters._center.x + dxMod, parameters._center.y + dy})
                                .color(parameters._color)
                                .barrier(parameters._barrier)
-                               .sticky(parameters._sticky)
-                               .creatureId(creatureId));
+                               .sticky(parameters._sticky));
 
         }
     }

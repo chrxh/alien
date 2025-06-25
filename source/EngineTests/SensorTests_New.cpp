@@ -331,7 +331,7 @@ TEST_F(SensorTests_New, scanForOtherMutants_notFound_wallInBetween)
                                                           .width(16)
                                                           .height(16)
                                                           .cellDistance(0.5f)
-                                                          .mutationId(7)
+                                                          /*.mutationId(7)*/
                                                           .cellType(BaseDescription())));
 
     _simulationFacade->setSimulationData(data);
@@ -361,7 +361,7 @@ TEST_F(SensorTests_New, scanForOtherMutants_notFound_sameMutationId)
                                                           .width(16)
                                                           .height(16)
                                                           .cellDistance(0.5f)
-                                                          .mutationId(7)
+                                                          /*.mutationId(7)*/
                                                           .cellType(BaseDescription())));
 
     _simulationFacade->setSimulationData(data);
@@ -488,7 +488,7 @@ TEST_F(SensorTests_New, scanForSameMutants_notFound_otherMutationId)
                                                               .width(16)
                                                               .height(16)
                                                               .cellDistance(0.5f)
-                                                              .mutationId(otherMutantId)
+                                                              /*.mutationId(otherMutantId)*/
                                                               .cellType(BaseDescription())));
 
         _simulationFacade->clear();

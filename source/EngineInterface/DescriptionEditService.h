@@ -22,8 +22,6 @@ public:
         MEMBER(CreateRectParameters, bool, sticky, false);
         MEMBER(CreateRectParameters, int, color, 0);
         MEMBER(CreateRectParameters, bool, barrier, false);
-        MEMBER(CreateRectParameters, bool, randomCreatureId, true);
-        MEMBER(CreateRectParameters, int, mutationId, 0);
         MEMBER(CreateRectParameters, float, genomeComplexity, 0);
     };
     CollectionDescription createRect(CreateRectParameters const& parameters);
@@ -38,7 +36,6 @@ public:
         MEMBER(CreateHexParameters, bool, sticky, false);
         MEMBER(CreateHexParameters, int, color, 0);
         MEMBER(CreateHexParameters, bool, barrier, false);
-        MEMBER(CreateHexParameters, bool, randomCreatureId, true);
     };
     CollectionDescription createHex(CreateHexParameters const& parameters);
 
@@ -52,7 +49,6 @@ public:
         MEMBER(CreateUnconnectedCircleParameters, int, color, 0);
         MEMBER(CreateUnconnectedCircleParameters, bool, barrier, false);
         MEMBER(CreateUnconnectedCircleParameters, bool, sticky, false);
-        MEMBER(CreateUnconnectedCircleParameters, bool, randomCreatureId, true);
     };
     CollectionDescription createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters);
 
