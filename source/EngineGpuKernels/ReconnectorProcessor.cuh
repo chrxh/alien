@@ -50,7 +50,7 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
     Cell* closestCell = nullptr;
     float closestDistance = 0;
     data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.reconnectorRadius.value[cell->color], cell->detached, [&](Cell* const& otherCell) {
-        if (cell->creatureId != 0 && otherCell->creatureId == cell->creatureId) {
+        if (otherCell->creature != nullptr && otherCell->creature->id == cell->creature->id) {
             return;
         }
         if (otherCell->barrier) {
@@ -118,7 +118,10 @@ __inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationDat
     if (cell->tryLock()) {
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
-            if (connectedCell->creatureId != cell->creatureId) {
+            if (connectedCell->creature == nullptr) {
+                continue;
+            }
+            if (connectedCell->creature->id != cell->creature->id) {
                 CellConnectionProcessor::scheduleDeleteConnectionPair(data, cell, connectedCell);
                 cell->signal.channels[0] = 1;
                 statistics.incNumReconnectorRemoved(cell->color);

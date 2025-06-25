@@ -594,6 +594,9 @@ __inline__ __device__ void CellProcessor::livingStateTransition_calcFutureState(
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
+        if (cell->creature == nullptr) {
+            continue;
+        }
 
         bool isSameCreatureNeighborDetaching = false;
         bool isOtherCreatureNeighborDetaching = false;
@@ -602,7 +605,10 @@ __inline__ __device__ void CellProcessor::livingStateTransition_calcFutureState(
         int activatingCellConnection = -1;
         for (int i = 0; i < cell->numConnections; ++i) {
             auto const& connectedCell = cell->connections[i].cell;
-            if (connectedCell->creatureId == cell->creatureId) {
+            if (connectedCell->creature == nullptr) {
+                continue;
+            }
+            if (connectedCell->creature->id == cell->creature->id) {
                 auto connectedLivingState = connectedCell->livingState;
                 if (connectedLivingState == LivingState_Detaching) {
                     isSameCreatureNeighborDetaching = true;

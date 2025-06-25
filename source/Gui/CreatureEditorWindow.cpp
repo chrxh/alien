@@ -14,7 +14,7 @@
 #include "GenericMessageDialog.h"
 #include "OverlayController.h"
 
-void CreatureEditorWindow::openTab(CreatureDescription const& genome, uint64_t creatureId, bool openCreatureEditorIfClosed)
+void CreatureEditorWindow::openTab(CreatureDescription const& creature, bool openCreatureEditorIfClosed)
 {
     if (openCreatureEditorIfClosed) {
         setOn(false);
@@ -25,14 +25,14 @@ void CreatureEditorWindow::openTab(CreatureDescription const& genome, uint64_t c
     }
     std::optional<int> tabIndex;
     for (auto const& [index, tab] : _tabs | boost::adaptors::indexed(0)) {
-        if (!tab->isDraft() && tab->getCreatureId() == creatureId) {
+        if (!tab->isDraft() && tab->getCreatureId() == creature._id) {
             tabIndex = toInt(index);
         }
     }
     if (tabIndex) {
         //_tabIndexToSelect = *tabIndex;
     } else {
-        onScheduleAddTab(genome, creatureId);
+        onScheduleAddTab(creature);
     }
 }
 
@@ -174,7 +174,7 @@ void CreatureEditorWindow::onInjectGenome()
     auto const& tab = _tabs.at(_selectedTabIndex);
     auto creatureId = tab->getCreatureId();
     auto const& genome = tab->getGenome();
-    auto success = _simulationFacade->changeGenome(creatureId, genome);
+    auto success = _simulationFacade->changeGenome(genome);
     tab->onGenomeIntoCreatureInjected();
     if (success) {
         printOverlayMessage("Genome injected");
@@ -197,11 +197,11 @@ void CreatureEditorWindow::onCreateSeed()
     auto energy = parameter.normalCellEnergy.value[EditorModel::get().getDefaultColorCode()] * toFloat(numNodes * 2 + 1);
     auto data =
         CollectionDescription()
-            .genomes({
+            .creatures({
                 genome,
             })
             .cells({
-                CellDescription().pos(pos).energy(energy).stiffness(1.0f).color(EditorModel::get().getDefaultColorCode()).cellTypeData(ConstructorDescription()).genomeId(genome._id),
+                CellDescription().pos(pos).energy(energy).stiffness(1.0f).color(EditorModel::get().getDefaultColorCode()).cellTypeData(ConstructorDescription()).creatureId(genome._id),
             });
     _simulationFacade->addAndSelectSimulationData(std::move(data));
     EditorModel::get().update();

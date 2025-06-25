@@ -137,10 +137,11 @@ void _InspectorWindow::processCellGeneralTab(ExtendedCellDescription& extendedCe
     if (ImGui::BeginTabItem("General", nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
             auto& cell = extendedCell.cell;
+            auto& creature = extendedCell.creature;
             if (ImGui::TreeNodeEx("Properties###general", TreeNodeFlags)) {
-                if (extendedCell.genome.has_value()) {
+                if (extendedCell.creature.has_value()) {
                     if (AlienGui::Button("Edit creature")) {
-                        CreatureEditorWindow::get().openTab(extendedCell.genome.value(), cell._creatureId);
+                        CreatureEditorWindow::get().openTab(creature.value());
                     }
                 }
 
@@ -192,17 +193,19 @@ void _InspectorWindow::processCellGeneralTab(ExtendedCellDescription& extendedCe
             }
 
             if (ImGui::TreeNodeEx("Associated creature##Base", TreeNodeFlags)) {
-                std::stringstream ss;
-                ss << "0x" << std::hex << std::uppercase << cell._creatureId;
-                auto creatureId = ss.str();
-                AlienGui::InputText(
-                    AlienGui::InputTextParameters().name("Creature id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true), creatureId);
-                //AlienGui::InputInt(
-                //    AlienGui::InputIntParameters().name("Mutation id").textWidth(BaseTabTextWidth).tooltip(Const::CellMutationIdTooltip), cell._mutationId);
-                //AlienGui::InputFloat(
-                //    AlienGui::InputFloatParameters().name("Genome complexity").textWidth(BaseTabTextWidth).tooltip(Const::GenomeComplexityTooltip),
-                //    cell._genomeComplexity);
-
+                if (creature.has_value()) {
+                    std::stringstream ss;
+                    ss << "0x" << std::hex << std::uppercase << creature->_id;
+                    auto creatureId = ss.str();
+                    AlienGui::InputText(
+                        AlienGui::InputTextParameters().name("Creature id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true),
+                        creatureId);
+                    //AlienGui::InputInt(
+                    //    AlienGui::InputIntParameters().name("Mutation id").textWidth(BaseTabTextWidth).tooltip(Const::CellMutationIdTooltip), cell._mutationId);
+                    //AlienGui::InputFloat(
+                    //    AlienGui::InputFloatParameters().name("Genome complexity").textWidth(BaseTabTextWidth).tooltip(Const::GenomeComplexityTooltip),
+                    //    cell._genomeComplexity);
+                }
                 ImGui::TreePop();
             }
             if (ImGui::TreeNodeEx("Connections to other cells", TreeNodeFlags)) {

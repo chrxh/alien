@@ -147,7 +147,7 @@ __inline__ __device__ float2 SignalProcessor::calcReferenceDirection(SimulationD
 __inline__ __device__ bool SignalProcessor::isAutoTriggered(SimulationData& data, Cell* cell, uint8_t autoTriggerInterval)
 {
     auto triggerInterval = max(MAX_SIGNAL_RELAXATION_TIME + 1, autoTriggerInterval);
-    return (data.timestep + cell->creatureId) % triggerInterval == 0;
+    return (data.timestep + cell->creature->id) % triggerInterval == 0;
 }
 
 __inline__ __device__ bool SignalProcessor::isManuallyTriggered(SimulationData& data, Cell* cell)

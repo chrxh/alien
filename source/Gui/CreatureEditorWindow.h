@@ -12,7 +12,7 @@ class CreatureEditorWindow : public AlienWindow<SimulationFacade>
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(CreatureEditorWindow);
 
 public:
-    void openTab(CreatureDescription const& genome, uint64_t creatureId, bool openCreatureEditorIfClosed = true);
+    void openTab(CreatureDescription const& creature, bool openCreatureEditorIfClosed = true);
 
 private:
     CreatureEditorWindow();

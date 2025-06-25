@@ -16,10 +16,10 @@ struct Particle
     float energy;
     Cell* lastAbsorbedCell;  //could be invalid
 
-    //editing data
+    // Editing data
     uint8_t selected;  //0 = no, 1 = selected
 
-    //auxiliary data
+    // Auxiliary data
     int locked;  //0 = unlocked, 1 = locked
 
     __device__ __inline__ bool tryLock()
@@ -289,9 +289,8 @@ struct Cell
     uint32_t age;
     LivingState livingState;
 
-    // Genome data
-    Genome* genome;
-    uint64_t creatureId;
+    // Creature data
+    Creature* creature;
     uint16_t genomeNodeIndex;
 
     // Cell type data

@@ -646,7 +646,6 @@ namespace
     auto constexpr Id_Cell_Age = 7;
     auto constexpr Id_Cell_LivingState = 8;
     auto constexpr Id_Cell_ActivationTime = 9;
-    auto constexpr Id_Cell_CreatureId = 10;
     auto constexpr Id_Cell_CellTypeUsed = 12;
     auto constexpr Id_Cell_DetectedByCreatureId = 15;
     auto constexpr Id_Cell_GenomeNodeIndex = 20;
@@ -1034,7 +1033,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_Sticky, data._sticky, defaultObject._sticky);
         loadSave(task, auxiliaries, Id_Cell_Age, data._age, defaultObject._age);
         loadSave(task, auxiliaries, Id_Cell_LivingState, data._livingState, defaultObject._livingState);
-        loadSave(task, auxiliaries, Id_Cell_CreatureId, data._creatureId, defaultObject._creatureId);
         loadSave(task, auxiliaries, Id_Cell_ActivationTime, data._activationTime, defaultObject._activationTime);
         loadSave(task, auxiliaries, Id_Cell_DetectedByCreatureId, data._detectedByCreatureId, defaultObject._detectedByCreatureId);
         loadSave(task, auxiliaries, Id_Cell_CellTypeUsed, data._cellTypeUsed, defaultObject._cellTypeUsed);
@@ -1063,7 +1061,7 @@ namespace cereal
     template <class Archive>
     void serialize(Archive& ar, CollectionDescription& data)
     {
-        ar(data._cells, data._particles, data._genomes);
+        ar(data._cells, data._particles, data._creatures);
     }
 }
 

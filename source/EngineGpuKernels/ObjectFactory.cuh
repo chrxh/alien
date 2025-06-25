@@ -17,7 +17,7 @@ class ObjectFactory
 public:
     __inline__ __device__ void init(SimulationData* data);
     __inline__ __device__ Particle* createParticleFromTO(ParticleTO const& particleTO);
-    __inline__ __device__ Genome* createGenomeFromTO(CollectionTO const& collectionTO, int genomeIndex);
+    __inline__ __device__ Creature* createGenomeFromTO(CollectionTO const& collectionTO, int genomeIndex);
     __inline__ __device__ Cell* createCellFromTO(CollectionTO const& collectionTO, int cellIndex, Cell* cellArray);
     __inline__ __device__ void changeCellFromTO(CollectionTO const& collectionTO, CellTO const& cellTO, Cell* cell);
     __inline__ __device__ void changeParticleFromTO(ParticleTO const& particleTO, Particle* particle);
@@ -62,11 +62,11 @@ __inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleTO c
     return particle;
 }
 
-__inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(CollectionTO const& collectionTO, int genomeIndex)
+__inline__ __device__ Creature* ObjectFactory::createGenomeFromTO(CollectionTO const& collectionTO, int genomeIndex)
 {
-    auto& genomeTO = collectionTO.genomes[genomeIndex];
-    auto genome = _data->objects.heap.getTypedSubArray<Genome>(1);
-    genomeTO.genomeIndexOnGpu = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(genome) - _data->objects.heap.getArray());
+    auto& genomeTO = collectionTO.creatures[genomeIndex];
+    auto genome = _data->objects.heap.getTypedSubArray<Creature>(1);
+    genomeTO.creatureIndexOnGpu = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(genome) - _data->objects.heap.getArray());
 
     genome->frontAngle = genomeTO.frontAngle;
     genome->numGenes = genomeTO.numGenes;
@@ -198,11 +198,11 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromTO(CollectionTO const& 
         connectingCell.distance = cellTO.connections[i].distance;
         connectingCell.angleFromPrevious = cellTO.connections[i].angleFromPrevious;
     }
-    if (cellTO.hasGenome) {
-        auto const& genomeTO = collectionTO.genomes[cellTO.genomeIndex];
-        cell->genome = &_data->objects.heap.atType<Genome>(genomeTO.genomeIndexOnGpu);
+    if (cellTO.belongToCreature) {
+        auto const& genomeTO = collectionTO.creatures[cellTO.creatureIndex];
+        cell->creature = &_data->objects.heap.atType<Creature>(genomeTO.creatureIndexOnGpu);
     } else {
-        cell->genome = nullptr;
+        cell->creature = nullptr;
     }
     return cell;
 }
@@ -214,7 +214,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
     _map.correctPosition(cell->pos);
     cell->vel = cellTO.vel;
     cell->livingState = cellTO.livingState;
-    cell->creatureId = cellTO.creatureId;
     cell->energy = cellTO.energy;
     cell->stiffness = cellTO.stiffness;
     cell->cellType = cellTO.cellType;
@@ -421,7 +420,6 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->signalRelaxationTime = 0;
     cell->signal.active = false;
     cell->density = 1.0f;
-    cell->creatureId = 0;
     cell->detectedByCreatureId = 0;
     cell->event = CellEvent_No;
     cell->cellTypeUsed = CellTriggered_No;

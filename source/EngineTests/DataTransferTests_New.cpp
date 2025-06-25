@@ -403,7 +403,7 @@ TEST_F(DataTransferTests_New, createGenomeIds)
     auto actualData = _simulationFacade->getSimulationData();
 
     std::unordered_set<uint64_t> ids;
-    for (auto const& genome : actualData._genomes) {
+    for (auto const& genome : actualData._creatures) {
         ids.insert(genome._id);
     }
 
@@ -451,8 +451,8 @@ TEST_F(DataTransferTests_New, createCreatureIds_differentIdsOnDescription)
     auto actualData = _simulationFacade->getSimulationData();
 
     std::unordered_set<uint64_t> ids;
-    for (auto const& cell : actualData._cells) {
-        ids.insert(cell._creatureId);
+    for (auto const& creature : actualData._creatures) {
+        ids.insert(creature._id);
     }
 
     EXPECT_EQ(4, ids.size());
@@ -468,8 +468,8 @@ TEST_F(DataTransferTests_New, createCreatureIds_sameIdsOnDescription)
     auto actualData = _simulationFacade->getSimulationData();
 
     std::unordered_set<uint64_t> ids;
-    for (auto const& cell : actualData._cells) {
-        ids.insert(cell._creatureId);
+    for (auto const& creature : actualData._creatures) {
+        ids.insert(creature._id);
     }
 
     EXPECT_EQ(2, ids.size());
@@ -483,19 +483,19 @@ TEST_F(DataTransferTests_New, changeGenome_successful)
     _simulationFacade->setSimulationData(data);
 
     auto newGenome = CreatureDescription().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})});
-    auto result = _simulationFacade->changeGenome(creatureId, newGenome);
+    auto result = _simulationFacade->changeGenome(newGenome);
     ASSERT_TRUE(result);
 
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(1, actualData._cells.size());
-    ASSERT_EQ(1, actualData._genomes.size());
+    ASSERT_EQ(1, actualData._creatures.size());
 
     auto cell = actualData._cells.front();
     EXPECT_EQ(creatureId, cell._creatureId);
 
-    auto genome = actualData._genomes.front();
-    EXPECT_EQ(cell._genomeId, genome._id);
+    auto genome = actualData._creatures.front();
+    EXPECT_EQ(cell._creatureId, genome._id);
 
     ASSERT_EQ(1, genome._genes.size());
 
@@ -511,7 +511,7 @@ TEST_F(DataTransferTests_New, changeGenome_failed)
     _simulationFacade->setSimulationData(data);
 
     auto newGenome = CreatureDescription().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})});
-    auto result = _simulationFacade->changeGenome(creatureId + 1, newGenome);
+    auto result = _simulationFacade->changeGenome(newGenome);
     ASSERT_FALSE(result);
 }
 
@@ -529,14 +529,14 @@ TEST_F(DataTransferTests_New, getInspectedSimulationData)
 
     auto inspectedData = _simulationFacade->getInspectedSimulationData({cellId1, cellId2});
     ASSERT_EQ(2, inspectedData._cells.size());
-    ASSERT_EQ(1, inspectedData._genomes.size());
+    ASSERT_EQ(1, inspectedData._creatures.size());
 
-    auto genome = inspectedData._genomes.front();
+    auto genome = inspectedData._creatures.front();
     auto cell1 = getCell(inspectedData, cellId1);
-    EXPECT_EQ(genome._id, cell1._genomeId);
+    EXPECT_EQ(genome._id, cell1._creatureId);
 
     auto cell2 = getCell(inspectedData, cellId2);
-    EXPECT_EQ(genome._id, cell2._genomeId);
+    EXPECT_EQ(genome._id, cell2._creatureId);
 
     ASSERT_EQ(1, genome._genes.size());
 

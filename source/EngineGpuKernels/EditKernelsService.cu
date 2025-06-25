@@ -259,11 +259,11 @@ void _EditKernelsService::changeSimulationData(GpuSettings const& gpuSettings, S
     _garbageCollector->cleanupAfterDataManipulation(gpuSettings, data);
 }
 
-bool _EditKernelsService::changeGenome(GpuSettings const& gpuSettings, SimulationData const& data, uint64_t creatureId, CollectionTO const& dataTO)
+bool _EditKernelsService::changeGenome(GpuSettings const& gpuSettings, SimulationData const& data, CollectionTO const& dataTO)
 {
     setValueToDevice(_result, false);
     KERNEL_CALL_1_1(cudaAddGenome, data, dataTO, _genomePtr);
-    KERNEL_CALL(cudaSetGenome, data, creatureId, _genomePtr, _result);
+    KERNEL_CALL(cudaSetGenome, data, _genomePtr, _result);
     cudaDeviceSynchronize();
 
     return copyToHost(_result);

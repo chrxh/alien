@@ -119,7 +119,7 @@ TEST_F(DescriptionEditTests_New, calcCluster)
         data.add(hex);
     }
     data.addParticle(ParticleDescription());
-    data.addGenome(CreatureDescription());
+    data.addCreature(CreatureDescription());
 
     ClusteredCollectionDescription clusteredData(data);
     
@@ -128,5 +128,5 @@ TEST_F(DescriptionEditTests_New, calcCluster)
         EXPECT_EQ(expectedClusterSize, cluster._cells.size());
     }
     EXPECT_EQ(1, clusteredData._particles.size());
-    EXPECT_EQ(1, clusteredData._genomes.size());
+    EXPECT_EQ(1, clusteredData._creatures.size());
 }

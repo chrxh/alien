@@ -454,12 +454,16 @@ void DescriptionEditService::assignNewObjectAndCreatureIds(CollectionDescription
             oldCreatureId = newCreatureId;
         }
     };
+    for (auto& creature : data._creatures) {
+        replaceCreatureId(creature._id);
+    }
     for (auto& cell : data._cells) {
         auto newObjectId = NumberGenerator::get().createObjectId();
         oldToNewObjectIds.emplace(cell._id, newObjectId);
         cell._id = newObjectId;
-
-        replaceCreatureId(cell._creatureId);
+        if (cell._creatureId.has_value()) {
+            replaceCreatureId(cell._creatureId.value());
+        }
     }
     for (auto& cell : data._cells) {
         for (auto& connection : cell._connections) {
@@ -533,7 +537,7 @@ std::vector<ExtendedCellOrParticleDescription> DescriptionEditService::getObject
     CollectionDescription const& data)
 {
     std::unordered_map<uint64_t, int> genomeIdToIndex;
-    for (auto const& [index, genome] : data._genomes | boost::adaptors::indexed(0)) {
+    for (auto const& [index, genome] : data._creatures | boost::adaptors::indexed(0)) {
         genomeIdToIndex.emplace(genome._id, toInt(index));
     }
 
@@ -544,8 +548,8 @@ std::vector<ExtendedCellOrParticleDescription> DescriptionEditService::getObject
     for (auto const& cell : data._cells) {
         ExtendedCellDescription creatureCell;
         creatureCell.cell = cell;
-        if (cell._genomeId.has_value()) {
-            creatureCell.genome = data._genomes.at(genomeIdToIndex.at(cell._genomeId.value()));
+        if (cell._creatureId.has_value()) {
+            creatureCell.creature = data._creatures.at(genomeIdToIndex.at(cell._creatureId.value()));
         }
         result.emplace_back(creatureCell);
     }

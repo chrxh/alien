@@ -164,14 +164,15 @@ struct Gene
     Node* nodes;
 };
 
-struct Genome
+struct Creature
 {
+    uint64_t id;
     float frontAngle;
 
     int numGenes;
     Gene* genes;
 
     // Temporary data
-    uint64_t genomeIndex;
-    static auto constexpr GenomeIndex_NotSet = 0xffffffffffffffff;
+    uint64_t creatureIndex;
+    static auto constexpr CreatureIndex_NotSet = 0xffffffffffffffff;
 };

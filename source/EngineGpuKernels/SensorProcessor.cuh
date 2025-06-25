@@ -131,8 +131,9 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             numNearCreatureCells,
             cell->pos,
             4.0f,
-            cell->detached,
-            [&](Cell* const& otherCell) { return cell->creatureId == otherCell->creatureId; });
+            cell->detached, [&](Cell* const& otherCell) {
+            return otherCell->creature && cell->creature->id == otherCell->creature->id;
+        });
     }
     auto const angleIndex = threadIdx.x;
 
@@ -250,7 +251,7 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
             //    continue;
             //}
 
-            otherCell->detectedByCreatureId = static_cast<uint16_t>(cell->creatureId & 0xffff);
+            otherCell->detectedByCreatureId = static_cast<uint16_t>(cell->creature->id & 0xffff);
         }
     }
 }

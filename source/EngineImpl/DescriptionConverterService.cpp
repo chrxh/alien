@@ -103,8 +103,8 @@ CollectionDescription DescriptionConverterService::convertTOtoDescription(Collec
     // Genomes
     std::vector<CreatureDescription> genomes;
     std::unordered_map<uint64_t, uint64_t> genomeIdByTOIndex;
-    for (int i = 0; i < *collectionTO.numGenomes; ++i) {
-        result._genomes.emplace_back(createGenomeDescription(collectionTO, i, genomeIdByTOIndex));
+    for (int i = 0; i < *collectionTO.numCreatures; ++i) {
+        result._creatures.emplace_back(createGenomeDescription(collectionTO, i, genomeIdByTOIndex));
     }
 
     // Cells
@@ -163,7 +163,7 @@ CollectionTO DescriptionConverterService::convertDescriptionToTO(CollectionDescr
     std::vector<uint8_t> heap;
 
     std::unordered_map<uint64_t, uint64_t> genomeTOIndexById;
-    for (auto const& genome : description._genomes) {
+    for (auto const& genome : description._creatures) {
         convertGenomeToTO(genomeTOs, geneTOs, nodeTOs, heap, genome, genomeTOIndexById);
     }
 
@@ -238,13 +238,13 @@ namespace
 CellDescription DescriptionConverterService::createCellDescription(
     CollectionTO const& collectionTO,
     int cellIndex,
-    std::unordered_map<uint64_t, uint64_t> const& genomeIdByTOIndex) const
+    std::unordered_map<uint64_t, uint64_t> const& creatureIdByTOIndex) const
 {
     CellDescription result(false);
 
     auto const& cellTO = collectionTO.cells[cellIndex];
-    if (cellTO.hasGenome) {
-        result._genomeId = genomeIdByTOIndex.at(cellTO.genomeIndex);
+    if (cellTO.belongToCreature) {
+        result._creatureId = creatureIdByTOIndex.at(cellTO.creatureIndex);
     }
     result._id = cellTO.id;
     result._pos = RealVector2D(cellTO.pos.x, cellTO.pos.y);
@@ -266,7 +266,6 @@ CellDescription DescriptionConverterService::createCellDescription(
     }
     result._connections = connections;
     result._livingState = cellTO.livingState;
-    result._creatureId = cellTO.creatureId;
     result._barrier = cellTO.barrier;
     result._sticky = cellTO.sticky;
     result._age = cellTO.age;
@@ -457,7 +456,7 @@ CreatureDescription DescriptionConverterService::createGenomeDescription(
 {
     CreatureDescription result;
 
-    auto const& genomeTO = collectionTO.genomes[genomeIndex];
+    auto const& genomeTO = collectionTO.creatures[genomeIndex];
     result._id = NumberGenerator::get().createObjectId();
     genomeIdByTOIndex.emplace(genomeIndex, result._id);
     result._genes.reserve(genomeTO.numGenes);
@@ -771,11 +770,11 @@ void DescriptionConverterService::convertCellToTO(
     cellTO.id = cellDesc._id;
     cellTOIndexById.insert_or_assign(cellTO.id, cellIndex);
 
-    cellTO.hasGenome = cellDesc._genomeId.has_value();
-    if (cellTO.hasGenome) {
-        auto findResult = genomeTOIndexById.find(cellDesc._genomeId.value());
+    cellTO.belongToCreature = cellDesc._creatureId.has_value();
+    if (cellTO.belongToCreature) {
+        auto findResult = genomeTOIndexById.find(cellDesc._creatureId.value());
         if (findResult != genomeTOIndexById.end()) {
-            cellTO.genomeIndex = findResult->second;
+            cellTO.creatureIndex = findResult->second;
         }
     }
     cellTO.pos = {cellDesc._pos.x, cellDesc._pos.y};
@@ -784,7 +783,6 @@ void DescriptionConverterService::convertCellToTO(
     checkAndCorrectInvalidEnergy(cellTO.energy);
     cellTO.stiffness = cellDesc._stiffness;
     cellTO.livingState = cellDesc._livingState;
-    cellTO.creatureId = cellDesc._creatureId;
     cellTO.cellType = cellDesc.getCellType();
     cellTO.detectedByCreatureId = cellDesc._detectedByCreatureId;
     cellTO.cellTypeUsed = cellDesc._cellTypeUsed;
@@ -998,14 +996,14 @@ CollectionTO DescriptionConverterService::provideDataTO(
          .particles = particleTOs.size(),
          .heap = heap.size()});
 
-    *result.numGenomes = genomeTOs.size();
+    *result.numCreatures = genomeTOs.size();
     *result.numGenes = geneTOs.size();
     *result.numNodes = nodeTOs.size();
     *result.numCells = cellTOs.size();
     *result.numParticles = particleTOs.size();
     *result.heapSize = heap.size();
 
-    std::memcpy(result.genomes, genomeTOs.data(), genomeTOs.size() * sizeof(CreatureTO));
+    std::memcpy(result.creatures, genomeTOs.data(), genomeTOs.size() * sizeof(CreatureTO));
     std::memcpy(result.genes, geneTOs.data(), geneTOs.size() * sizeof(GeneTO));
     std::memcpy(result.nodes, nodeTOs.data(), nodeTOs.size() * sizeof(NodeTO));
     std::memcpy(result.cells, cellTOs.data(), cellTOs.size() * sizeof(CellTO));

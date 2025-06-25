@@ -128,8 +128,8 @@ __global__ void cudaCleanupGenomesStep1(Array<Cell*> cells)
 
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        if (cell->genome) {
-            cell->genome->genomeIndex = Genome::GenomeIndex_NotSet;
+        if (cell->creature) {
+            cell->creature->creatureIndex = Creature::CreatureIndex_NotSet;
         }
     }
 }
@@ -141,13 +141,13 @@ __global__ void cudaCleanupGenomesStep2(Array<Cell*> cells, Heap newHeap)
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto& cell = cells.at(index);
         
-        if (cell->genome) {
-            auto origGenomeIndex = atomicExch(&cell->genome->genomeIndex, 0);  // 0 = member is currently initialized
-            if (origGenomeIndex == Genome::GenomeIndex_NotSet) {
-                auto newGenome = newHeap.getTypedSubArray<Genome>(1);
-                *newGenome = *cell->genome;
+        if (cell->creature) {
+            auto origGenomeIndex = atomicExch(&cell->creature->creatureIndex, 0);  // 0 = member is currently initialized
+            if (origGenomeIndex == Creature::CreatureIndex_NotSet) {
+                auto newGenome = newHeap.getTypedSubArray<Creature>(1);
+                *newGenome = *cell->creature;
 
-                auto const& genome = cell->genome;
+                auto const& genome = cell->creature;
                 auto newGenes = newHeap.getTypedSubArray<Gene>(genome->numGenes);
                 newGenome->genes = newGenes;
 
@@ -166,9 +166,9 @@ __global__ void cudaCleanupGenomesStep2(Array<Cell*> cells, Heap newHeap)
                     }
                 }
                 auto newGenomeIndex = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(newGenome) - newHeap.getArray());
-                atomicExch(&cell->genome->genomeIndex, newGenomeIndex);
+                atomicExch(&cell->creature->creatureIndex, newGenomeIndex);
             } else if (origGenomeIndex != 0) {
-                atomicExch(&cell->genome->genomeIndex, origGenomeIndex);
+                atomicExch(&cell->creature->creatureIndex, origGenomeIndex);
             }
         }
     }
@@ -180,8 +180,8 @@ __global__ void cudaCleanupGenomesStep3(Array<Cell*> cells, Heap newHeap)
 
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        if (cell->genome) {
-            cell->genome = &newHeap.atType<Genome>(cell->genome->genomeIndex);
+        if (cell->creature) {
+            cell->creature = &newHeap.atType<Creature>(cell->creature->creatureIndex);
         }
     }
 }

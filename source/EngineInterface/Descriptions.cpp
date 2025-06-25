@@ -141,7 +141,7 @@ ClusteredCollectionDescription::ClusteredCollectionDescription(CollectionDescrip
     }
 
     _particles = data._particles;
-    _genomes = data._genomes;
+    _creatures = data._creatures;
 }
 
 void ClusteredCollectionDescription::setCenter(RealVector2D const& center)
@@ -229,9 +229,9 @@ CollectionDescription& CollectionDescription::addParticle(ParticleDescription co
     return *this;
 }
 
-CollectionDescription& CollectionDescription::addGenome(CreatureDescription const& value)
+CollectionDescription& CollectionDescription::addCreature(CreatureDescription const& value)
 {
-    _genomes.emplace_back(value);
+    _creatures.emplace_back(value);
     return *this;
 }
 
@@ -239,13 +239,13 @@ CollectionDescription& CollectionDescription::addCreature(CreatureDescription co
 {
     auto highestGenomeId = 0ull;
     for (auto const& cell : _cells) {
-        if (cell._genomeId.has_value()) {
-            highestGenomeId = std::max(highestGenomeId, cell._genomeId.value());
+        if (cell._creatureId.has_value()) {
+            highestGenomeId = std::max(highestGenomeId, cell._creatureId.value());
         }
     }
 
     auto newGenomeId = highestGenomeId + 1;
-    auto& newGenome = _genomes.emplace_back(genome);
+    auto& newGenome = _creatures.emplace_back(genome);
     newGenome._id = newGenomeId;
 
     auto originalSize = _cells.size();
@@ -253,7 +253,7 @@ CollectionDescription& CollectionDescription::addCreature(CreatureDescription co
 
     auto newCreatureId = NumberGenerator::get().createObjectId();
     for (auto i = originalSize; i < _cells.size(); ++i) {
-        _cells[i]._genomeId = newGenomeId;
+        _cells[i]._creatureId = newGenomeId;
         _cells[i]._creatureId = newCreatureId;
     }
 

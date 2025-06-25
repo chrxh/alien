@@ -252,10 +252,9 @@ struct CellTO
     uint32_t age;
     LivingState livingState;
 
-    // Genome data
-    bool hasGenome;
-    uint64_t genomeIndex;
-    uint64_t creatureId;
+    // Creature data
+    bool belongToCreature;
+    uint64_t creatureIndex;
     uint16_t genomeNodeIndex;
 
     // Cell type data
@@ -285,8 +284,8 @@ struct CollectionTO
 	CellTO* cells = nullptr;
     uint64_t* numParticles = nullptr;
 	ParticleTO* particles = nullptr;
-    uint64_t* numGenomes = nullptr;
-    CreatureTO* genomes = nullptr;
+    uint64_t* numCreatures = nullptr;
+    CreatureTO* creatures = nullptr;
     uint64_t* numGenes = nullptr;
     GeneTO* genes = nullptr;
     uint64_t* numNodes = nullptr;

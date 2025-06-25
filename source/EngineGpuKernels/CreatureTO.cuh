@@ -168,11 +168,12 @@ struct GeneTO
 
 struct CreatureTO
 {
+    uint64_t id;
     float frontAngle;
 
     int numGenes;
     uint64_t geneArrayIndex;
 
     // Temporary data
-    uint64_t genomeIndexOnGpu;
+    uint64_t creatureIndexOnGpu;
 };

@@ -26,7 +26,7 @@ public:
 private:
     DescriptionConverterService();
 
-    CellDescription createCellDescription(CollectionTO const& collectionTO, int cellIndex, std::unordered_map<uint64_t, uint64_t> const& genomeIdByTOIndex) const;
+    CellDescription createCellDescription(CollectionTO const& collectionTO, int cellIndex, std::unordered_map<uint64_t, uint64_t> const& creatureIdByTOIndex) const;
     CreatureDescription createGenomeDescription(CollectionTO const& collectionTO, int genomeIndex, std::unordered_map<uint64_t, uint64_t>& genomeIdByTOIndex) const;
 
     void convertGenomeToTO(

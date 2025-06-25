@@ -351,12 +351,12 @@ void _SimulationCudaFacade::changeInspectedSimulationData(CollectionTO const& ch
     resizeArraysIfNecessary();
 }
 
-bool _SimulationCudaFacade::changeGenome(uint64_t creatureId, CollectionTO const& dataTO)
+bool _SimulationCudaFacade::changeGenome(CollectionTO const& dataTO)
 {
     auto cudaDataTO = _cudaCollectionTOProvider->provideDataTO(dataTO.capacities);
     copyDataTOtoGpu(cudaDataTO, dataTO);
 
-    auto result = _editKernels->changeGenome(_settings.gpuSettings, getSimulationDataPtrCopy(), creatureId, cudaDataTO);
+    auto result = _editKernels->changeGenome(_settings.gpuSettings, getSimulationDataPtrCopy(), cudaDataTO);
     syncAndCheck();
 
     updateStatistics();
@@ -679,14 +679,14 @@ void _SimulationCudaFacade::copyDataTOtoGpu(CollectionTO const& cudaDataTO, Coll
 {
     copyToDevice(cudaDataTO.numCells, dataTO.numCells);
     copyToDevice(cudaDataTO.numParticles, dataTO.numParticles);
-    copyToDevice(cudaDataTO.numGenomes, dataTO.numGenomes);
+    copyToDevice(cudaDataTO.numCreatures, dataTO.numCreatures);
     copyToDevice(cudaDataTO.numGenes, dataTO.numGenes);
     copyToDevice(cudaDataTO.numNodes, dataTO.numNodes);
     copyToDevice(cudaDataTO.heapSize, dataTO.heapSize);
 
     copyToDevice(cudaDataTO.cells, dataTO.cells, *dataTO.numCells);
     copyToDevice(cudaDataTO.particles, dataTO.particles, *dataTO.numParticles);
-    copyToDevice(cudaDataTO.genomes, dataTO.genomes, *dataTO.numGenomes);
+    copyToDevice(cudaDataTO.creatures, dataTO.creatures, *dataTO.numCreatures);
     copyToDevice(cudaDataTO.genes, dataTO.genes, *dataTO.numGenes);
     copyToDevice(cudaDataTO.nodes, dataTO.nodes, *dataTO.numNodes);
     copyToDevice(cudaDataTO.heap, dataTO.heap, *dataTO.heapSize);
@@ -696,14 +696,14 @@ void _SimulationCudaFacade::copyDataTOtoHost(CollectionTO const& dataTO, Collect
 {
     copyToHost(dataTO.numCells, cudaDataTO.numCells);
     copyToHost(dataTO.numParticles, cudaDataTO.numParticles);
-    copyToHost(dataTO.numGenomes, cudaDataTO.numGenomes);
+    copyToHost(dataTO.numCreatures, cudaDataTO.numCreatures);
     copyToHost(dataTO.numGenes, cudaDataTO.numGenes);
     copyToHost(dataTO.numNodes, cudaDataTO.numNodes);
     copyToHost(dataTO.heapSize, cudaDataTO.heapSize);
 
     copyToHost(dataTO.cells, cudaDataTO.cells, *dataTO.numCells);
     copyToHost(dataTO.particles, cudaDataTO.particles, *dataTO.numParticles);
-    copyToHost(dataTO.genomes, cudaDataTO.genomes, *dataTO.numGenomes);
+    copyToHost(dataTO.creatures, cudaDataTO.creatures, *dataTO.numCreatures);
     copyToHost(dataTO.genes, cudaDataTO.genes, *dataTO.numGenes);
     copyToHost(dataTO.nodes, cudaDataTO.nodes, *dataTO.numNodes);
     copyToHost(dataTO.heap, cudaDataTO.heap, *dataTO.heapSize);

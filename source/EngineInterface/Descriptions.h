@@ -340,9 +340,8 @@ struct CellDescription
     MEMBER(CellDescription, int, age, 0);
     MEMBER(CellDescription, LivingState, livingState, LivingState_Ready);
 
-    // Genome data
-    MEMBER(CellDescription, std::optional<uint64_t>, genomeId, std::nullopt);
-    MEMBER(CellDescription, uint64_t, creatureId, 0);
+    // Creature data
+    MEMBER(CellDescription, std::optional<uint64_t>, creatureId, std::nullopt);
     MEMBER(CellDescription, uint16_t, genomeNodeIndex, 0);
 
     // Cell type-specific data
@@ -425,7 +424,7 @@ struct ClusteredCollectionDescription
 
     MEMBER(ClusteredCollectionDescription, std::vector<ClusterDescription>, clusters, {});
     MEMBER(ClusteredCollectionDescription, std::vector<ParticleDescription>, particles, {});
-    MEMBER(ClusteredCollectionDescription, std::vector<CreatureDescription>, genomes, {});
+    MEMBER(ClusteredCollectionDescription, std::vector<CreatureDescription>, creatures, {});
 
     ClusteredCollectionDescription& addClusters(std::vector<ClusterDescription> const& value)
     {
@@ -478,7 +477,7 @@ struct CollectionDescription
 
     MEMBER(CollectionDescription, std::vector<CellDescription>, cells, {});
     MEMBER(CollectionDescription, std::vector<ParticleDescription>, particles, {});
-    MEMBER(CollectionDescription, std::vector<CreatureDescription>, genomes, {});
+    MEMBER(CollectionDescription, std::vector<CreatureDescription>, creatures, {});
 
     CollectionDescription& add(CollectionDescription const& other);
     CollectionDescription& addCells(std::vector<CellDescription> const& value);
@@ -487,7 +486,7 @@ struct CollectionDescription
     CollectionDescription& addParticles(std::vector<ParticleDescription> const& value);
     CollectionDescription& addParticle(ParticleDescription const& value);
 
-    CollectionDescription& addGenome(CreatureDescription const& value);
+    CollectionDescription& addCreature(CreatureDescription const& value);
 
     CollectionDescription& addCreature(CreatureDescription const& genome, std::vector<CellDescription> const& cells);
 
@@ -513,6 +512,6 @@ private:
 struct ExtendedCellDescription
 {
     CellDescription cell;
-    std::optional<CreatureDescription> genome;
+    std::optional<CreatureDescription> creature;
 };
 using ExtendedCellOrParticleDescription = std::variant<ExtendedCellDescription, ParticleDescription>;

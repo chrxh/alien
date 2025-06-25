@@ -31,7 +31,7 @@ CollectionTO _CudaCollectionTOProvider::provideDataTO(ArraySizesForTO const& req
         if (_collectionTO.has_value()) {
             checkAndExtendCapacity(_collectionTO->cells, *_collectionTO->numCells, _collectionTO->capacities.cells, requiredCapacity.cells);
             checkAndExtendCapacity(_collectionTO->particles, *_collectionTO->numParticles, _collectionTO->capacities.particles, requiredCapacity.particles);
-            checkAndExtendCapacity(_collectionTO->genomes, *_collectionTO->numGenomes, _collectionTO->capacities.genomes, requiredCapacity.genomes);
+            checkAndExtendCapacity(_collectionTO->creatures, *_collectionTO->numCreatures, _collectionTO->capacities.genomes, requiredCapacity.genomes);
             checkAndExtendCapacity(_collectionTO->genes, *_collectionTO->numGenes, _collectionTO->capacities.genes, requiredCapacity.genes);
             checkAndExtendCapacity(_collectionTO->nodes, *_collectionTO->numNodes, _collectionTO->capacities.nodes, requiredCapacity.nodes);
             checkAndExtendCapacity(_collectionTO->heap, *_collectionTO->heapSize, _collectionTO->capacities.heap, requiredCapacity.heap);
@@ -40,19 +40,19 @@ CollectionTO _CudaCollectionTOProvider::provideDataTO(ArraySizesForTO const& req
             result.capacities = requiredCapacity;
             CudaMemoryManager::getInstance().acquireMemory(1, result.numCells);
             CudaMemoryManager::getInstance().acquireMemory(1, result.numParticles);
-            CudaMemoryManager::getInstance().acquireMemory(1, result.numGenomes);
+            CudaMemoryManager::getInstance().acquireMemory(1, result.numCreatures);
             CudaMemoryManager::getInstance().acquireMemory(1, result.numGenes);
             CudaMemoryManager::getInstance().acquireMemory(1, result.numNodes);
             CudaMemoryManager::getInstance().acquireMemory(1, result.heapSize);
             CudaMemoryManager::getInstance().acquireMemory(requiredCapacity.cells, result.cells);
             CudaMemoryManager::getInstance().acquireMemory(requiredCapacity.particles, result.particles);
-            CudaMemoryManager::getInstance().acquireMemory(requiredCapacity.genomes, result.genomes);
+            CudaMemoryManager::getInstance().acquireMemory(requiredCapacity.genomes, result.creatures);
             CudaMemoryManager::getInstance().acquireMemory(requiredCapacity.genes, result.genes);
             CudaMemoryManager::getInstance().acquireMemory(requiredCapacity.nodes, result.nodes);
             CudaMemoryManager::getInstance().acquireMemory(requiredCapacity.heap, result.heap);
             setValueToDevice(result.numCells, 0ull);
             setValueToDevice(result.numParticles, 0ull);
-            setValueToDevice(result.numGenomes, 0ull);
+            setValueToDevice(result.numCreatures, 0ull);
             setValueToDevice(result.numGenes, 0ull);
             setValueToDevice(result.numNodes, 0ull);
             setValueToDevice(result.heapSize, 0ull);
@@ -69,14 +69,14 @@ void _CudaCollectionTOProvider::destroy()
 {
     CudaMemoryManager::getInstance().freeMemory(_collectionTO->cells);
     CudaMemoryManager::getInstance().freeMemory(_collectionTO->particles);
-    CudaMemoryManager::getInstance().freeMemory(_collectionTO->genomes);
+    CudaMemoryManager::getInstance().freeMemory(_collectionTO->creatures);
     CudaMemoryManager::getInstance().freeMemory(_collectionTO->genes);
     CudaMemoryManager::getInstance().freeMemory(_collectionTO->nodes);
     CudaMemoryManager::getInstance().freeMemory(_collectionTO->heap);
 
     CudaMemoryManager::getInstance().freeMemory(_collectionTO->numCells);
     CudaMemoryManager::getInstance().freeMemory(_collectionTO->numParticles);
-    CudaMemoryManager::getInstance().freeMemory(_collectionTO->numGenomes);
+    CudaMemoryManager::getInstance().freeMemory(_collectionTO->numCreatures);
     CudaMemoryManager::getInstance().freeMemory(_collectionTO->numGenes);
     CudaMemoryManager::getInstance().freeMemory(_collectionTO->numNodes);
     CudaMemoryManager::getInstance().freeMemory(_collectionTO->heapSize);

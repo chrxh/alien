@@ -19,7 +19,7 @@ __inline__ __device__ bool ConstructorHelper::isSelfReplicator(Constructor const
 
 __inline__ __device__ bool ConstructorHelper::isFinished(Cell* cell)
 {
-    auto const& genome = cell->genome;
+    auto const& genome = cell->creature;
     if (genome == nullptr) {
         return false;
     }

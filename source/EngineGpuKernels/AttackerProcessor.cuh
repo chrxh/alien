@@ -46,10 +46,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
         Cell* someOtherCell = nullptr;
         data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.attackerRadius.value[cell->color], cell->detached, [&](auto const& otherCell) {
-            if (cell->creatureId != 0 && otherCell->creatureId == cell->creatureId) {
-                return;
-            }
-            if (cell->creatureId == 0 && CellConnectionProcessor::isConnectedConnected(cell, otherCell)) {
+            if (otherCell->creature != nullptr && otherCell->creature->id == cell->creature->id) {
                 return;
             }
             if (otherCell->barrier) {
@@ -66,7 +63,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             auto otherColor = calcMod(otherCell->color, MAX_COLORS);
 
             // Evaluate sensor detection factor
-            if (cudaSimulationParameters.advancedAttackerControlToggle.value && otherCell->detectedByCreatureId != (cell->creatureId & 0xffff)) {
+            if (cudaSimulationParameters.advancedAttackerControlToggle.value && otherCell->detectedByCreatureId != (cell->creature->id & 0xffff)) {
                 energyToTransfer *= (1.0f - cudaSimulationParameters.attackerSensorDetectionFactor.value[color]);
             }
 
