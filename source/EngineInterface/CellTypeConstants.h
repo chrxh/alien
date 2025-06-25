@@ -55,16 +55,16 @@ namespace Const
         {"Base", "Depot", "Constructor", "Sensor", "Oscillator", "Attacker", "Injector", "Muscle", "Defender", "Reconnector", "Detonator"};
 }
 
-using LivingState = int;
-enum LivingState_
+using CellState = int;
+enum CellState_
 {
-    LivingState_Ready,
-    LivingState_UnderConstruction,
-    LivingState_Activating,
-    LivingState_Detaching,
-    LivingState_Reviving,
-    LivingState_Dying,
-    LivingState_Count
+    CellState_Ready,
+    CellState_UnderConstruction,
+    CellState_Activating,
+    CellState_Detaching,
+    CellState_Reviving,
+    CellState_Dying,
+    CellState_Count
 };
 
 using ActivationFunction = uint8_t;

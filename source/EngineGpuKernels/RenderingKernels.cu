@@ -133,22 +133,22 @@ namespace
         }
         if (cellColoring == CellColoring_LivingState) {
             switch (cell->livingState) {
-            case LivingState_Ready:
+            case CellState_Ready:
                 cellColor = 0x1010ff;
                 break;
-            case LivingState_UnderConstruction:
+            case CellState_UnderConstruction:
                 cellColor = 0x10ff10;
                 break;
-            case LivingState_Activating:
+            case CellState_Activating:
                 cellColor = 0xffffff;
                 break;
-            case LivingState_Detaching:
+            case CellState_Detaching:
                 cellColor = 0xbf4040;
                 break;
-            case LivingState_Reviving:
+            case CellState_Reviving:
                 cellColor = 0x4040bf;
                 break;
-            case LivingState_Dying:
+            case CellState_Dying:
                 cellColor = 0xff1010;
                 break;
             default:

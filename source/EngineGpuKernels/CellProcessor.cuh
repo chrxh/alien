@@ -510,7 +510,7 @@ __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
             CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto connectedCell = cell->connections[i].cell;
-                connectedCell->livingState = LivingState_Detaching;
+                connectedCell->livingState = CellState_Detaching;
             }
         }
     }
@@ -580,7 +580,7 @@ __inline__ __device__ void CellProcessor::aging(SimulationData& data)
                 cell->age = 0;
             }
         }
-        if (cell->livingState == LivingState_Ready && cell->activationTime > 0) {
+        if (cell->livingState == CellState_Ready && cell->activationTime > 0) {
             --cell->activationTime;
         }
     }
@@ -605,18 +605,18 @@ __inline__ __device__ void CellProcessor::livingStateTransition_calcFutureState(
             if ((connectedCell->creature != nullptr && cell->creature != nullptr && connectedCell->creature->id == cell->creature->id)
                 || (connectedCell->creature == nullptr && cell->creature == nullptr)) {
                 auto connectedLivingState = connectedCell->livingState;
-                if (connectedLivingState == LivingState_Detaching) {
+                if (connectedLivingState == CellState_Detaching) {
                     isSameCreatureNeighborDetaching = true;
-                } else if (connectedLivingState == LivingState_Reviving) {
+                } else if (connectedLivingState == CellState_Reviving) {
                     isSameCreatureNeighborReviving = true;
-                } else if (connectedLivingState == LivingState_Activating) {
+                } else if (connectedLivingState == CellState_Activating) {
                     if (connectedCell->connections[0].cell == cell) {
                         isNeighborActivating = true;
                         activatingCellConnection = i;
                     }
                 }
             } else {
-                if (connectedCell->livingState == LivingState_Detaching) {
+                if (connectedCell->livingState == CellState_Detaching) {
                     isOtherCreatureNeighborDetaching = true;
                 }
             }
@@ -626,17 +626,17 @@ __inline__ __device__ void CellProcessor::livingStateTransition_calcFutureState(
         auto livingState = origLivingState;
 
         if (cell->barrier) {
-            livingState = LivingState_Ready;
-        } else if (origLivingState == LivingState_Activating) {
-            livingState = LivingState_Ready;
+            livingState = CellState_Ready;
+        } else if (origLivingState == CellState_Activating) {
+            livingState = CellState_Ready;
             if (cudaSimulationParameters.cellAgeLimiterToggle.value && cudaSimulationParameters.resetCellAgeAfterActivation.value) {
                 atomicExch(&cell->age, 0);
             }
-        } else if (origLivingState == LivingState_Reviving) {
-            livingState = LivingState_Ready;
-        } else if (origLivingState == LivingState_UnderConstruction) {
+        } else if (origLivingState == CellState_Reviving) {
+            livingState = CellState_Ready;
+        } else if (origLivingState == CellState_UnderConstruction) {
             if (isNeighborActivating) {
-                livingState = LivingState_Activating;
+                livingState = CellState_Activating;
                 auto prevCell = cell->connections[activatingCellConnection].cell;
                 if (prevCell != cell->connections[0].cell) {
                     cell->angleToFront =
@@ -649,22 +649,22 @@ __inline__ __device__ void CellProcessor::livingStateTransition_calcFutureState(
                 cell->angleToFront = Math::normalizedAngle(cell->angleToFront, -180.0f);
             }
             if (isOtherCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences.value != CellDeathConsquences_None) {
-                livingState = LivingState_Detaching;
+                livingState = CellState_Detaching;
             }
-        } else if (origLivingState == LivingState_Detaching) {
+        } else if (origLivingState == CellState_Detaching) {
             if (isSameCreatureNeighborReviving && cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsquences_DetachedPartsDie) {
-                livingState = LivingState_Reviving;
+                livingState = CellState_Reviving;
             }
             if (cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsquences_None) {
-                livingState = LivingState_Ready;
+                livingState = CellState_Ready;
             }
-        } else if (origLivingState == LivingState_Ready) {
+        } else if (origLivingState == CellState_Ready) {
             if (isSameCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences.value != CellDeathConsquences_None) {
                 if (cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsquences_DetachedPartsDie && cell->cellType == CellType_Constructor
                     && ConstructorHelper::isSelfReplicator(cell->cellTypeData.constructor)) {
-                    livingState = LivingState_Reviving;
+                    livingState = CellState_Reviving;
                 } else {
-                    livingState = LivingState_Detaching;
+                    livingState = CellState_Detaching;
                 }
             }
         }
@@ -793,7 +793,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
 
         auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
 
-        if (cell->livingState == LivingState_Dying || cell->livingState == LivingState_Detaching) {
+        if (cell->livingState == CellState_Dying || cell->livingState == CellState_Detaching) {
             auto cellDeathProbability = ParameterCalculator::calcParameter(cudaSimulationParameters.cellDeathProbability, data, cell->pos, cell->color);
             if (data.primaryNumberGen.random() < cellDeathProbability) {
                 CellConnectionProcessor::scheduleDeleteCell(data, index);
@@ -807,7 +807,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
 
         auto cellMaxAge = cudaSimulationParameters.maxCellAge.value[cell->color];
         if (cudaSimulationParameters.cellAgeLimiterToggle.value && cell->cellType != CellType_Free && cell->cellType != CellType_Structure
-            && cell->cellTypeUsed == CellTriggered_No && cell->livingState == LivingState_Ready && cell->activationTime == 0) {
+            && cell->cellTypeUsed == CellTriggered_No && cell->livingState == CellState_Ready && cell->activationTime == 0) {
             bool adjacentCellsUsed = false;
             for (int i = 0; i < cell->numConnections; ++i) {
                 if (cell->connections[i].cell->cellTypeUsed == CellTriggered_Yes) {
@@ -829,13 +829,13 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         }
 
         if (cellDestruction) {
-            auto orig = atomicExch(&cell->livingState, LivingState_Dying);
-            if (orig != LivingState_Dying) {
+            auto orig = atomicExch(&cell->livingState, CellState_Dying);
+            if (orig != CellState_Dying) {
                 for (int i = 0; i < cell->numConnections; ++i) {
                     auto const& connectedCell = cell->connections[i].cell;
-                    auto origConnected = atomicExch(&connectedCell->livingState, LivingState_Detaching);
-                    if (origConnected == LivingState_Dying) {
-                        atomicExch(&connectedCell->livingState, LivingState_Dying);
+                    auto origConnected = atomicExch(&connectedCell->livingState, CellState_Detaching);
+                    if (origConnected == CellState_Dying) {
+                        atomicExch(&connectedCell->livingState, CellState_Dying);
                     }
                 }
             }

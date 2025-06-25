@@ -2,6 +2,7 @@ target_sources(EngineTests
 PUBLIC
     AttackerTests.cpp
     CellConnectionTests_New.cpp
+    CellStateTransitionTests_New.cpp
     ConstructorTests.cpp
     ConstructorTests_New.cpp
     DataTransferTests.cpp
@@ -16,7 +17,6 @@ PUBLIC
     InjectorTests.cpp
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h
-    LivingStateTransitionTests_New.cpp
     MuscleTests.cpp
     MuscleTests_New.cpp
     MutationTests.cpp

@@ -404,7 +404,7 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->energy = energy;
     cell->stiffness = _data->primaryNumberGen.random();
     cell->numConnections = 0;
-    cell->livingState = LivingState_Ready;
+    cell->livingState = CellState_Ready;
     cell->locked = 0;
     cell->selected = 0;
     cell->detached = 0;
