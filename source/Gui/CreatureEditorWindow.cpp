@@ -174,7 +174,7 @@ void CreatureEditorWindow::onInjectGenome()
     auto const& tab = _tabs.at(_selectedTabIndex);
     auto creatureId = tab->getCreatureId();
     auto const& genome = tab->getGenome();
-    auto success = _simulationFacade->changeGenome(genome);
+    auto success = _simulationFacade->changeCreature(genome);
     tab->onGenomeIntoCreatureInjected();
     if (success) {
         printOverlayMessage("Genome injected");

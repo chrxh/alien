@@ -778,10 +778,7 @@ void DescriptionConverterService::convertCellToTO(
 
     cellTO.belongToCreature = cellDesc._creatureId.has_value();
     if (cellTO.belongToCreature) {
-        auto findResult = creatureTOIndexById.find(cellDesc._creatureId.value());
-        if (findResult != creatureTOIndexById.end()) {
-            cellTO.creatureIndex = findResult->second;
-        }
+        cellTO.creatureIndex = creatureTOIndexById.at(cellDesc._creatureId.value());
     }
     cellTO.pos = {cellDesc._pos.x, cellDesc._pos.y};
     cellTO.vel = {cellDesc._vel.x, cellDesc._vel.y};

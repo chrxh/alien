@@ -234,13 +234,13 @@ void EngineWorker::changeParticle(ParticleDescription const& changedParticle)
     _simulationCudaFacade->changeInspectedSimulationData(dataTO);
 }
 
-bool EngineWorker::changeGenome(CreatureDescription const& genome)
+bool EngineWorker::changeCreature(CreatureDescription const& genome)
 {
     EngineWorkerGuard access(this);
 
     auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(genome);
 
-    return _simulationCudaFacade->changeGenome(dataTO);
+    return _simulationCudaFacade->changeCreature(dataTO);
 }
 
 void EngineWorker::calcTimesteps(uint64_t timesteps)

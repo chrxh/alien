@@ -55,7 +55,7 @@ public:
     virtual void setDetached(bool value) = 0;
     virtual void changeCell(CellDescription const& changedCell) = 0;
     virtual void changeParticle(ParticleDescription const& changedParticle) = 0;
-    virtual bool changeGenome(CreatureDescription const& genome) = 0;
+    virtual bool changeCreature(CreatureDescription const& genome) = 0;
 
     virtual void calcTimesteps(uint64_t timesteps) = 0;
     virtual void runSimulation() = 0;

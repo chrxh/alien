@@ -351,12 +351,12 @@ void _SimulationCudaFacade::changeInspectedSimulationData(CollectionTO const& ch
     resizeArraysIfNecessary();
 }
 
-bool _SimulationCudaFacade::changeGenome(CollectionTO const& dataTO)
+bool _SimulationCudaFacade::changeCreature(CollectionTO const& dataTO)
 {
     auto cudaDataTO = _cudaCollectionTOProvider->provideDataTO(dataTO.capacities);
     copyDataTOtoGpu(cudaDataTO, dataTO);
 
-    auto result = _editKernels->changeGenome(_settings.gpuSettings, getSimulationDataPtrCopy(), cudaDataTO);
+    auto result = _editKernels->changeCreature(_settings.gpuSettings, getSimulationDataPtrCopy(), cudaDataTO);
     syncAndCheck();
 
     updateStatistics();
