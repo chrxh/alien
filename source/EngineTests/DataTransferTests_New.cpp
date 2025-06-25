@@ -147,7 +147,7 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_P(DataTransferTests_AllCellType_New, singleCell_noGenome)
 {
     auto cellParameter = GetParam();
-    auto cellTypeGenomeDesc = createSomeCellTypeDescription(cellParameter);
+    auto cellTypeDesc = createSomeCellTypeDescription(cellParameter);
 
     CollectionDescription data;
     auto cell = CellDescription()
@@ -159,10 +159,9 @@ TEST_P(DataTransferTests_AllCellType_New, singleCell_noGenome)
                     .color(2)
                     .barrier(true)
                     .livingState(false)
-                    .creatureId(3534)
                     .signalAndRelaxTime({1, 0, -1, 0, 0, 0, 0, 0})
                     .signalRoutingRestriction(SignalRoutingRestrictionDescription().active(true).baseAngle(23.0f).openingAngle(42.0f))
-                    .cellTypeData(cellTypeGenomeDesc)
+                    .cellTypeData(cellTypeDesc)
                     .metadata(CellMetadataDescription().name("Test1").description("Test2"));
     if (cellParameter.cellType != CellType_Structure && cellParameter.cellType != CellType_Free) {
         NeuralNetworkDescription nn;

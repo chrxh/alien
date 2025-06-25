@@ -689,8 +689,11 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, Collecti
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& cell = collectionTO.cells[index];
             maxIds.currentObjectId = max(maxIds.currentObjectId, cell.id);
-            auto const& creature = collectionTO.creatures[cell.creatureIndex];
-            maxIds.currentCreatureId = max(maxIds.currentCreatureId, creature.id);
+
+            if (cell.belongToCreature) {
+                auto const& creature = collectionTO.creatures[cell.creatureIndex];
+                maxIds.currentCreatureId = max(maxIds.currentCreatureId, creature.id);
+            }
             //maxIds.currentMutationId = max(maxIds.currentMutationId, cell.mutationId);
         }
     }
