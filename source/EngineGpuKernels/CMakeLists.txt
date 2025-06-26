@@ -30,6 +30,7 @@ add_library(EngineGpuKernels
     Definitions.cuh
     Definitions.h
     DensityMap.cuh
+    DepotProcessor.cuh
     DetonatorProcessor.cuh
     EditKernels.cu
     EditKernels.cuh
@@ -97,7 +98,6 @@ add_library(EngineGpuKernels
     TestKernels.cuh
     TestKernelsService.cu
     TestKernelsService.cuh
-    TransmitterProcessor.cuh
     Util.cuh
     )
 

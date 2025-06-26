@@ -337,6 +337,12 @@ struct Cell
     float clusterAngularMass;
     uint32_t numCellsInCluster;
 
+    __device__ __inline__ bool isSameCreature(Cell* otherCell)
+    {
+        return (otherCell->creature != nullptr && this->creature != nullptr && otherCell->creature->id == this->creature->id)
+            || (otherCell->creature == nullptr && this->creature == nullptr);
+    }
+
     __device__ __inline__ float getRefDistance(Cell* connectedCell)
     {
         for (int i = 0; i < numConnections; i++) {

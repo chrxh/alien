@@ -29,7 +29,7 @@ PUBLIC
     SignalTests_New.cpp
     StatisticsTests.cpp
     Testsuite.cpp
-    TransmitterTests.cpp)
+    DepotTests.cpp)
 
 target_link_libraries(EngineTests Base)
 target_link_libraries(EngineTests EngineGpuKernels)

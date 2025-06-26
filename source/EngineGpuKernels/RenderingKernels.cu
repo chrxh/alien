@@ -136,7 +136,7 @@ namespace
             case CellState_Ready:
                 cellColor = 0x1010ff;
                 break;
-            case CellState_UnderConstruction:
+            case CellState_Constructing:
                 cellColor = 0x10ff10;
                 break;
             case CellState_Activating:

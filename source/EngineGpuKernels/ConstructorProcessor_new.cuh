@@ -305,7 +305,7 @@ __inline__ __device__ Cell* ConstructorProcessor_New::getLastConstructedCell(Cel
     else {
         for (int i = 0; i < hostCell->numConnections; ++i) {
             auto const& connectedCell = hostCell->connections[i].cell;
-            if (connectedCell->cellState == CellState_UnderConstruction) {
+            if (connectedCell->cellState == CellState_Constructing) {
                 return connectedCell;
             }
         }

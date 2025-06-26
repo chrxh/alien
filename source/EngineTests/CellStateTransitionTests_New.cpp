@@ -32,7 +32,7 @@ public:
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    CellStateTransitionTests,
+    CellStateTransitionTests_New,
     CellStateTransitionTests_New,
     ::testing::Values(CellDeathConsquences_None, CellDeathConsquences_DetachedPartsDie, CellDeathConsquences_CreatureDies));
 
@@ -107,17 +107,11 @@ TEST_P(CellStateTransitionTests_New, ready_detaching_onSelfReplicator)
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
-    // TODO
-    //auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
-    //    GenomeDescription()
-    //        .header(GenomeHeaderDescription())
-    //        .cells({CellGenomeDescription().cellType(ConstructorGenomeDescription().makeSelfCopy())}));
-
     CollectionDescription data;
     data.addCells({
         CellDescription()
             .id(1)
-            .cellTypeData(ConstructorDescription())
+            .cellTypeData(ConstructorDescription().geneIndex(0))
             .pos({10.0f, 10.0f})
             .cellState(CellState_Ready),
         CellDescription()
@@ -149,11 +143,12 @@ TEST_P(CellStateTransitionTests_New, ready_detaching_differentCreature)
     _simulationFacade->setSimulationParameters(_parameters);
 
     CollectionDescription data;
-    data.addCells({
+    data.cells({
         CellDescription().id(1).pos({10.0f, 10.0f}).creatureId(1).cellState(CellState_Ready),
         CellDescription().id(2).pos({11.0f, 10.0f}).creatureId(2).cellState(CellState_Detaching),
     });
     data.addConnection(1, 2);
+    data.creatures({CreatureDescription().id(1), CreatureDescription().id(2)});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -206,7 +201,7 @@ TEST_P(CellStateTransitionTests_New, underConstruction_activating)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_UnderConstruction),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Constructing),
         CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Activating),
     });
     data.addConnection(1, 2);

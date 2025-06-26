@@ -7,7 +7,7 @@
 #include "EngineInterface/GenomeDescriptionConverterService.h"
 #include "EngineInterface/CreatureDescription.h"
 
-class TransmitterTests : public IntegrationTestFramework
+class DepotTests : public IntegrationTestFramework
 {
 public:
     static SimulationParameters getParameters()
@@ -22,14 +22,14 @@ public:
         return result;
     }
 
-    TransmitterTests()
+    DepotTests()
         : IntegrationTestFramework(getParameters())
     {}
 
-    ~TransmitterTests() = default;
+    ~DepotTests() = default;
 };
 
-TEST_F(TransmitterTests, distributeToOtherTransmitter)
+TEST_F(DepotTests, distributeToOtherTransmitter)
 {
     CollectionDescription data;
     data.addCells({
@@ -68,7 +68,7 @@ TEST_F(TransmitterTests, distributeToOtherTransmitter)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(TransmitterTests, distributeToOneOtherTransmitter_forwardSignal)
+TEST_F(DepotTests, distributeToOneOtherTransmitter_forwardSignal)
 {
     SignalDescription signal;
     signal.channels({0.5f, -0.7f, 0, 0, 0, 0, 0, 0});
@@ -113,7 +113,7 @@ TEST_F(TransmitterTests, distributeToOneOtherTransmitter_forwardSignal)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(TransmitterTests, distributeToConnectedCells)
+TEST_F(DepotTests, distributeToConnectedCells)
 {
     CollectionDescription data;
     data.addCells({
@@ -151,7 +151,7 @@ TEST_F(TransmitterTests, distributeToConnectedCells)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
+TEST_F(DepotTests, distributeToOtherTransmitterAndConstructor)
 {
     //auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 
@@ -188,7 +188,7 @@ TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(TransmitterTests, distributeOnlyToActiveConstructors)
+TEST_F(DepotTests, distributeOnlyToActiveConstructors)
 {
     //auto genome = GenomeDescription().header(GenomeHeaderDescription().numBranches(1));
     
@@ -228,7 +228,7 @@ TEST_F(TransmitterTests, distributeOnlyToActiveConstructors)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(TransmitterTests, distributeToTwoTransmittersWithDifferentColor)
+TEST_F(DepotTests, distributeToTwoTransmittersWithDifferentColor)
 {
     CollectionDescription data;
     data.addCells({
@@ -263,7 +263,7 @@ TEST_F(TransmitterTests, distributeToTwoTransmittersWithDifferentColor)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(TransmitterTests, distributeNotToNotReadyConstructors)
+TEST_F(DepotTests, distributeNotToNotReadyConstructors)
 {
     _parameters.constructorCompletenessCheck.value = true;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -316,7 +316,7 @@ TEST_F(TransmitterTests, distributeNotToNotReadyConstructors)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(TransmitterTests, distributeToReadyConstructors)
+TEST_F(DepotTests, distributeToReadyConstructors)
 {
     _parameters.constructorCompletenessCheck.value = true;
     _simulationFacade->setSimulationParameters(_parameters);

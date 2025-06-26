@@ -59,7 +59,7 @@ using CellState = int;
 enum CellState_
 {
     CellState_Ready,
-    CellState_UnderConstruction,
+    CellState_Constructing,
     CellState_Activating,
     CellState_Detaching,
     CellState_Reviving,

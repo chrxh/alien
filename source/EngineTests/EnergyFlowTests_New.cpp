@@ -50,7 +50,7 @@ TEST_F(EnergyFlowTests_New, energyFlowsToActiveConstructor)
     for (int i = 0; i < 20; ++i) {
         auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
         if (i == 19) {
-            cell.cellTypeData(ConstructorDescription()/*.genome(genome)*/.autoTriggerInterval(0));  // TODO new genome
+            cell.creatureId(1).cellTypeData(ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(0));
         }
         data.addCell(cell);
         if (i > 0) {
@@ -58,6 +58,7 @@ TEST_F(EnergyFlowTests_New, energyFlowsToActiveConstructor)
         }
     }
     data._cells.at(0)._energy = 10000.0f;
+    data._creatures.emplace_back(CreatureDescription().id(1).genes({GeneDescription().numBranches(1).nodes({NodeDescription()})}));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2000);
@@ -87,7 +88,7 @@ TEST_F(EnergyFlowTests_New, energyFlowsToClosestActiveConstructor)
             auto id = i + j * 20 + 1;
             auto cell = CellDescription().id(id).pos({100.0f + toFloat(i), 100.0f});
             if (id == constructorId1 || id == constructorId2) {
-                cell.cellTypeData(ConstructorDescription()/*.genome(genome)*/.autoTriggerInterval(0));  // TODO new genome
+                cell.creatureId(1).cellTypeData(ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(0));
             }
             data.addCell(cell);
             if (i > 0) {
@@ -99,6 +100,7 @@ TEST_F(EnergyFlowTests_New, energyFlowsToClosestActiveConstructor)
         }
     }
     data._cells.at(0)._energy = 10000.0f;
+    data._creatures.emplace_back(CreatureDescription().id(1).genes({GeneDescription().numBranches(1).nodes({NodeDescription()})}));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1000);
@@ -115,13 +117,13 @@ TEST_F(EnergyFlowTests_New, energyFlowsToClosestActiveConstructor)
     }
 }
 
-TEST_F(EnergyFlowTests_New, energyFlowsNotToActiveConstructor)
+TEST_F(EnergyFlowTests_New, energyFlowsNotToFinishedConstructor)
 {
     CollectionDescription data;
     for (int i = 0; i < 20; ++i) {
         auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
         if (i == 19) {
-            cell.cellTypeData(ConstructorDescription()/*.genome(genome)*/.autoTriggerInterval(0).currentBranch(1)); // TODO new genome
+            cell.creatureId(1).cellTypeData(ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(1));
         }
         data.addCell(cell);
         if (i > 0) {
@@ -129,6 +131,7 @@ TEST_F(EnergyFlowTests_New, energyFlowsNotToActiveConstructor)
         }
     }
     data._cells.at(0)._energy = 10000.0f;
+    data._creatures.emplace_back(CreatureDescription().id(1).genes({GeneDescription().numBranches(1).nodes({NodeDescription()})}));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1000);

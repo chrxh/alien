@@ -132,7 +132,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             cell->pos,
             4.0f,
             cell->detached, [&](Cell* const& otherCell) {
-            return otherCell->creature && cell->creature->id == otherCell->creature->id;
+            return cell->isSameCreature(otherCell);
         });
     }
     auto const angleIndex = threadIdx.x;
@@ -209,6 +209,10 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
 
 __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& data, Cell* cell, float2 const& scanPos)
 {
+    if (cell->creature == nullptr) {
+        return;
+    }
+
     auto const& restrictToColor = cell->cellTypeData.sensor.restrictToColor;
     auto const& restrictToMutants = cell->cellTypeData.sensor.restrictToMutants;
 

@@ -302,7 +302,7 @@ __inline__ __device__ Cell* ConstructorProcessor::getLastConstructedCell(Cell* h
     else {
         for (int i = 0; i < hostCell->numConnections; ++i) {
             auto const& connectedCell = hostCell->connections[i].cell;
-            if (connectedCell->cellState == CellState_UnderConstruction) {
+            if (connectedCell->cellState == CellState_Constructing) {
                 return connectedCell;
             }
         }
@@ -598,7 +598,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
             hostCell->detached,
             [&](Cell* const& otherCell) {
                 if (otherCell == constructionData.lastConstructionCell || otherCell == hostCell
-                    || (otherCell->cellState != CellState_UnderConstruction && otherCell->activationTime == 0)
+                    || (otherCell->cellState != CellState_Constructing && otherCell->activationTime == 0)
                     || otherCell->creatureId != hostCell->cellTypeData.constructor.offspringCreatureId) {
                     return false;
                 }
@@ -628,7 +628,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
             cudaSimulationParameters.constructorConnectingCellDistance.value[hostCell->color],
             hostCell->detached,
             [&](Cell* const& otherCell) {
-                if (otherCell->cellState != CellState_UnderConstruction
+                if (otherCell->cellState != CellState_Constructing
                     || otherCell->creatureId != hostCell->cellTypeData.constructor.offspringCreatureId) {
                     return false;
                 }
@@ -701,7 +701,7 @@ ConstructorProcessor::constructCellIntern(
     result->pos = posOfNewCell;
     data.cellMap.correctPosition(result->pos);
     result->numConnections = 0;
-    result->cellState = CellState_UnderConstruction;
+    result->cellState = CellState_Constructing;
     result->creatureId = constructor.offspringCreatureId;
     result->mutationId = constructor.offspringMutationId;
     result->ancestorMutationId = static_cast<uint8_t>(hostCell->mutationId & 0xff);

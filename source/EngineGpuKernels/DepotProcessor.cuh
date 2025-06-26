@@ -9,7 +9,7 @@
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
 
-class TransmitterProcessor
+class DepotProcessor
 {
 public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
@@ -23,7 +23,7 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__device__ __inline__ void TransmitterProcessor::process(SimulationData& data, SimulationStatistics& statistics)
+__device__ __inline__ void DepotProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
     auto& operations = data.cellTypeOperations[CellType_Depot];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
@@ -33,12 +33,12 @@ __device__ __inline__ void TransmitterProcessor::process(SimulationData& data, S
     }
 }
 
-__device__ __inline__ void TransmitterProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+__device__ __inline__ void DepotProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     distributeEnergy(data, statistics, cell);
 }
 
-__device__ __inline__ void TransmitterProcessor::distributeEnergy(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+__device__ __inline__ void DepotProcessor::distributeEnergy(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     //float energyDelta = 0;
     //auto const& energyDistribution = cudaSimulationParameters.transmitterEnergyDistributionValue.value[cell->color];

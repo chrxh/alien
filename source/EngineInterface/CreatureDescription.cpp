@@ -50,5 +50,5 @@ CellTypeGenome NodeDescription::getCellType() const
 
 CreatureDescription::CreatureDescription()
 {
-    _id = NumberGenerator::get().createObjectId();
+    _id = NumberGenerator::get().createCreatureId();
 }

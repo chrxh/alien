@@ -6,7 +6,7 @@
 #include "NeuronProcessor.cuh"
 #include "AttackerProcessor.cuh"
 #include "InjectorProcessor.cuh"
-#include "TransmitterProcessor.cuh"
+#include "DepotProcessor.cuh"
 #include "MuscleProcessor.cuh"
 #include "SensorProcessor.cuh"
 #include "CellProcessor.cuh"
@@ -151,7 +151,7 @@ __global__ void cudaNextTimestep_cellType_attacker(SimulationData data, Simulati
 
 __global__ void cudaNextTimestep_cellType_transmitter(SimulationData data, SimulationStatistics statistics)
 {
-    TransmitterProcessor::process(data, statistics);
+    DepotProcessor::process(data, statistics);
 }
 
 __global__ void cudaNextTimestep_cellType_muscle(SimulationData data, SimulationStatistics statistics)

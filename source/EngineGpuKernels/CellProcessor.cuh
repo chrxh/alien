@@ -602,8 +602,7 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
         int activatingCellConnection = -1;
         for (int i = 0; i < cell->numConnections; ++i) {
             auto const& connectedCell = cell->connections[i].cell;
-            if ((connectedCell->creature != nullptr && cell->creature != nullptr && connectedCell->creature->id == cell->creature->id)
-                || (connectedCell->creature == nullptr && cell->creature == nullptr)) {
+            if (cell->isSameCreature(connectedCell)) {
                 auto connectedCellState = connectedCell->cellState;
                 if (connectedCellState == CellState_Detaching) {
                     isSameCreatureNeighborDetaching = true;
@@ -634,7 +633,7 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
             }
         } else if (origCellState == CellState_Reviving) {
             cellState = CellState_Ready;
-        } else if (origCellState == CellState_UnderConstruction) {
+        } else if (origCellState == CellState_Constructing) {
             if (isNeighborActivating) {
                 cellState = CellState_Activating;
                 auto prevCell = cell->connections[activatingCellConnection].cell;
