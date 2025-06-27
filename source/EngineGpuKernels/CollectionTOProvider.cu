@@ -32,7 +32,7 @@ CollectionTO _CollectionTOProvider::provideDataTO(ArraySizesForTO const& require
         if (_collectionTO.has_value()) {
             checkAndExtendCapacity(_collectionTO->cells, *_collectionTO->numCells, _collectionTO->capacities.cells, requiredCapacity.cells);
             checkAndExtendCapacity(_collectionTO->particles, *_collectionTO->numParticles, _collectionTO->capacities.particles, requiredCapacity.particles);
-            checkAndExtendCapacity(_collectionTO->creatures, *_collectionTO->numCreatures, _collectionTO->capacities.genomes, requiredCapacity.genomes);
+            checkAndExtendCapacity(_collectionTO->creatures, *_collectionTO->numCreatures, _collectionTO->capacities.creatures, requiredCapacity.creatures);
             checkAndExtendCapacity(_collectionTO->genes, *_collectionTO->numGenes, _collectionTO->capacities.genes, requiredCapacity.genes);
             checkAndExtendCapacity(_collectionTO->nodes, *_collectionTO->numNodes, _collectionTO->capacities.nodes, requiredCapacity.nodes);
             checkAndExtendCapacity(_collectionTO->heap, *_collectionTO->heapSize, _collectionTO->capacities.heap, requiredCapacity.heap);
@@ -68,7 +68,7 @@ CollectionTO _CollectionTOProvider::provideNewUnmanagedDataTO(ArraySizesForTO co
 
         result.cells = new CellTO[requiredCapacity.cells];
         result.particles = new ParticleTO[requiredCapacity.particles];
-        result.creatures = new CreatureTO[requiredCapacity.genomes];
+        result.creatures = new CreatureTO[requiredCapacity.creatures];
         result.genes = new GeneTO[requiredCapacity.genes];
         result.nodes = new NodeTO[requiredCapacity.nodes];
         result.heap = new uint8_t[requiredCapacity.heap];

@@ -4,7 +4,7 @@
 
 struct ArraySizesForTO
 {
-    uint64_t genomes = 0;
+    uint64_t creatures = 0;
     uint64_t genes = 0;
     uint64_t nodes = 0;
     uint64_t cells = 0;

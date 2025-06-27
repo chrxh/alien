@@ -432,7 +432,7 @@ void EngineWorker::newPreview(CollectionDescription const& data)
 
     auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(data);
 
-    _simulationCudaFacade->setSimulationData(dataTO);
+    _simulationCudaFacade->newPreview(dataTO);
 }
 
 void EngineWorker::calcTimestepsForPreview(std::chrono::milliseconds const& duration)

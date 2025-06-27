@@ -27,7 +27,7 @@ namespace
         if (origCreatureIndex == Creature::CreatureIndex_NotSet) {
 
             auto creatureTOIndex = atomicAdd(collectionTO.numCreatures, 1ull);
-            if (creatureTOIndex >= collectionTO.capacities.genomes) {
+            if (creatureTOIndex >= collectionTO.capacities.creatures) {
                 printf("Insufficient genome memory for transfer objects.\n");
                 ABORT();
             }
@@ -764,7 +764,7 @@ __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesF
         }
     }
     heapBytes += numNodes * (sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes);
-    atomicAdd(&arraySizes->genomes, numGenomes);
+    atomicAdd(&arraySizes->creatures, numGenomes);
     atomicAdd(&arraySizes->genes, numGenes);
     atomicAdd(&arraySizes->nodes, numNodes);
     atomicAdd(&arraySizes->heap, heapBytes);

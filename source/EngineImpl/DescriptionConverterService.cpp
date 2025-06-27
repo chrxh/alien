@@ -999,7 +999,7 @@ CollectionTO DescriptionConverterService::provideDataTO(
     std::vector<uint8_t> const& heap) const
 {
     CollectionTO result = _collectionTOProvider->provideDataTO(
-        {.genomes = creatureTOs.size(),
+        {.creatures = creatureTOs.size(),
          .genes = geneTOs.size(),
          .nodes = nodeTOs.size(),
          .cells = cellTOs.size(),

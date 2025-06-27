@@ -56,13 +56,13 @@ __global__ void cudaAddCreature(SimulationData data, CollectionTO dataTO, Creatu
     *newGenome = factory.createGenomeFromTO(dataTO, 0);
 }
 
-__global__ void cudaSetCreature(SimulationData data, Creature** newGenome, bool* result)
+__global__ void cudaSetCreature(SimulationData data, Creature** newCreature, bool* result)
 {
     auto const partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
-        if (cell->creature->id == (*newGenome)->id) {
-            cell->creature = *newGenome;
+        if (cell->creature->id == (*newCreature)->id) {
+            cell->creature = *newCreature;
             *result = true;
         }
     }

@@ -98,7 +98,7 @@ void CreatureEditorWindow::processToolbar()
 
 void CreatureEditorWindow::processTabWidget()
 {
-    if (ImGui::BeginTabBar("##", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown | ImGuiTabBarFlags_Reorderable)) {
+    if (ImGui::BeginTabBar("##CreatureTabWidget", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown | ImGuiTabBarFlags_Reorderable)) {
 
         if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
             onScheduleAddTab(CreatureDescription(), true);
