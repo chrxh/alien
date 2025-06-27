@@ -9,25 +9,23 @@
 class _CreatureTabWidget
 {
 public:
-    static CreatureTabWidget createDraftCreatureTab(SimulationFacade const& simulationFacade, CreatureDescription const& genome, CreatureTabLayoutData const& layoutData = nullptr);
-    static CreatureTabWidget createPinnedCreatureTab(SimulationFacade const& simulationFacade, CreatureDescription const& genome, uint64_t creatureId);
+    static CreatureTabWidget createDraftCreatureTab(SimulationFacade const& simulationFacade, CreatureDescription const& creature, CreatureTabLayoutData const& layoutData = nullptr);
+    static CreatureTabWidget createSimulatedCreatureTab(SimulationFacade const& simulationFacade, CreatureDescription const& creature);
 
     void process();
 
     void onGenomeIntoCreatureInjected();
 
     bool isDraft() const;
-    uint64_t getCreatureId() const;
     int getTabId() const;
     std::string getName() const;
     bool hasCreaturesGenomeBeChanged() const;
-    CreatureDescription const& getGenome();
+    CreatureDescription const& getCreatureDescription();
     bool isEmpty() const;
     void convertToDraftTab();
 
 private:
-    _CreatureTabWidget(SimulationFacade const& simulationFacade, CreatureDescription const& genome, CreatureTabLayoutData const& layoutData);
-    _CreatureTabWidget(SimulationFacade const& simulationFacade, CreatureDescription const& genome, uint64_t creatureId);
+    _CreatureTabWidget(SimulationFacade const& simulationFacade, CreatureDescription const& genome, bool draft, CreatureTabLayoutData const& layoutData = nullptr);
 
     void processEditors();
     void processPreviews();
@@ -47,13 +45,16 @@ private:
 
     // Creature data
     CreatureTabEditData _editData;
-    struct PinnedCreatureData
+    struct DraftCreatureData
     {
-        uint64_t creatureId;
-        CreatureDescription origGenome;
+    };
+    struct SimulatedCreatureData
+    {
+        CreatureDescription origCreature;
         bool changesMade = false;
     };
-    std::optional<PinnedCreatureData> _pinnedCreatureData;
+    using SpecificEditData = std::variant<DraftCreatureData, SimulatedCreatureData>;
+    SpecificEditData _specificEditData;
 
     // Layout data
     CreatureTabLayoutData _origLayoutData;

@@ -6,7 +6,7 @@
 
 #include "Base/StringHelper.h"
 
-#include "EngineInterface/GenomeDescriptionEditService.h"
+#include "EngineInterface/CreatureDescriptionEditService.h"
 
 #include "AlienGui.h"
 #include "CreatureTabEditData.h"
@@ -214,7 +214,7 @@ void _GeneEditorWidget::processNodeListButtons()
         ImVec2(cursorPos.x + ImGui::GetContentRegionAvail().x - buttonGroupSize.x - scale(15.0f), cursorPos.y - buttonGroupSize.y - scale(20.0f)));
     if (ImGui::BeginChild("ButtonGroup", buttonGroupSize)) {
         auto selectedNode = _editData->getSelectedNodeIndex();
-        auto const& gene = _editData->genome._genes.at(_editData->selectedGeneIndex.value());
+        auto const& gene = _editData->creature._genes.at(_editData->selectedGeneIndex.value());
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_PLUS_CIRCLE))) {
             onAddNode();
         }
@@ -250,7 +250,7 @@ void _GeneEditorWidget::onAddNode()
     auto& gene = _editData->getSelectedGeneRef();
     auto selectedNode = _editData->getSelectedNodeIndex();
     if (gene._nodes.empty()) {
-        GenomeDescriptionEditService::get().addEmptyNode(gene, 0);
+        CreatureDescriptionEditService::get().addEmptyNode(gene, 0);
         _editData->setSelectedNodeIndex(0);
     } else {
         int insertIndex;
@@ -260,7 +260,7 @@ void _GeneEditorWidget::onAddNode()
             insertIndex = toInt(gene._nodes.size()) - 1;
         }
 
-        GenomeDescriptionEditService::get().addEmptyNode(gene, insertIndex);
+        CreatureDescriptionEditService::get().addEmptyNode(gene, insertIndex);
 
         _editData->setSelectedNodeIndex(insertIndex + 1);
     }
@@ -271,7 +271,7 @@ void _GeneEditorWidget::onRemoveNode()
     int removeIndex = _editData->getSelectedNodeIndex().value();
     auto& gene = _editData->getSelectedGeneRef();
 
-    GenomeDescriptionEditService::get().removeNode(gene, removeIndex);
+    CreatureDescriptionEditService::get().removeNode(gene, removeIndex);
 
     // Adapt node selection
     auto& nodes = gene._nodes;
@@ -288,7 +288,7 @@ void _GeneEditorWidget::onMoveNodeUpward()
 {
     auto indexToMove = _editData->getSelectedNodeIndex().value();
     auto& gene = _editData->getSelectedGeneRef();
-    GenomeDescriptionEditService::get().swapNodes(gene, indexToMove - 1);
+    CreatureDescriptionEditService::get().swapNodes(gene, indexToMove - 1);
 
     // Adapt gene selection
     _editData->setSelectedNodeIndex(_editData->getSelectedNodeIndex().value() - 1);
@@ -298,7 +298,7 @@ void _GeneEditorWidget::onMoveNodeDownward()
 {
     auto indexToMove = _editData->getSelectedNodeIndex().value();
     auto& gene = _editData->getSelectedGeneRef();
-    GenomeDescriptionEditService::get().swapNodes(gene, indexToMove);
+    CreatureDescriptionEditService::get().swapNodes(gene, indexToMove);
 
     // Adapt gene selection
     _editData->setSelectedNodeIndex(_editData->getSelectedNodeIndex().value() + 1);

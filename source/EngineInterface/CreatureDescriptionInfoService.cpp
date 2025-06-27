@@ -1,6 +1,6 @@
-#include "GenomeDescriptionInfoService.h"
+#include "CreatureDescriptionInfoService.h"
 
-int GenomeDescriptionInfoService::getNumberOfNodes(CreatureDescription const& genome) const
+int CreatureDescriptionInfoService::getNumberOfNodes(CreatureDescription const& genome) const
 {
     int result = 0;
     for (auto const& gene : genome._genes) {
@@ -41,7 +41,7 @@ namespace
     }
 }
 
-int GenomeDescriptionInfoService::getNumberOfResultingCells(CreatureDescription const& genome) const
+int CreatureDescriptionInfoService::getNumberOfResultingCells(CreatureDescription const& genome) const
 {
     if (genome._genes.empty()) {
         return 0;
@@ -50,7 +50,7 @@ int GenomeDescriptionInfoService::getNumberOfResultingCells(CreatureDescription 
     return countNodes(genome, 0, lastGenes);
 }
 
-std::vector<int> GenomeDescriptionInfoService::getReferences(GeneDescription const& gene) const
+std::vector<int> CreatureDescriptionInfoService::getReferences(GeneDescription const& gene) const
 {
     std::vector<int> result;
     for (auto const& node : gene._nodes) {
@@ -62,7 +62,7 @@ std::vector<int> GenomeDescriptionInfoService::getReferences(GeneDescription con
     return result;
 }
 
-std::vector<int> GenomeDescriptionInfoService::getReferencedBy(CreatureDescription const& genome, int geneIndex) const
+std::vector<int> CreatureDescriptionInfoService::getReferencedBy(CreatureDescription const& genome, int geneIndex) const
 {
     std::vector<int> result;
     for (int i = 0; i < genome._genes.size(); ++i) {

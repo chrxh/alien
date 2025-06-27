@@ -16,12 +16,12 @@ add_library(EngineInterface
     GenomeConstants.h
     GenomeDescriptionConverterService.cpp
     GenomeDescriptionConverterService.h
-    GenomeDescriptionEditService.cpp
-    GenomeDescriptionEditService.h
-    GenomeDescriptionInfoService.cpp
-    GenomeDescriptionInfoService.h
-    GenomeDescriptionValidationService.cpp
-    GenomeDescriptionValidationService.h
+    CreatureDescriptionEditService.cpp
+    CreatureDescriptionEditService.h
+    CreatureDescriptionInfoService.cpp
+    CreatureDescriptionInfoService.h
+    CreatureDescriptionValidationService.cpp
+    CreatureDescriptionValidationService.h
     CreatureDescription.cpp
     CreatureDescription.h
     GpuSettings.h

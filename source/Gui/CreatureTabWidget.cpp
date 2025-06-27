@@ -5,7 +5,7 @@
 
 #include "Base/StringHelper.h"
 
-#include "EngineInterface/GenomeDescriptionValidationService.h"
+#include "EngineInterface/CreatureDescriptionValidationService.h"
 
 #include "AlienGui.h"
 #include "CreatureTabEditData.h"
@@ -18,16 +18,16 @@
 
 CreatureTabWidget _CreatureTabWidget::createDraftCreatureTab(
     SimulationFacade const& simulationFacade,
-    CreatureDescription const& genome,
+    CreatureDescription const& creature,
     CreatureTabLayoutData const& layoutData)
 {
-    return CreatureTabWidget(new _CreatureTabWidget(simulationFacade, genome, layoutData));
+    return CreatureTabWidget(new _CreatureTabWidget(simulationFacade, creature, true, layoutData));
 }
 
 CreatureTabWidget
-_CreatureTabWidget::createPinnedCreatureTab(SimulationFacade const& simulationFacade, CreatureDescription const& genome, uint64_t creatureId)
+_CreatureTabWidget::createSimulatedCreatureTab(SimulationFacade const& simulationFacade, CreatureDescription const& creature)
 {
-    return CreatureTabWidget(new _CreatureTabWidget(simulationFacade, genome, creatureId));
+    return CreatureTabWidget(new _CreatureTabWidget(simulationFacade, creature, false));
 }
 
 void _CreatureTabWidget::process()
@@ -53,22 +53,17 @@ void _CreatureTabWidget::process()
     }
     ImGui::EndChild();
 
-    GenomeDescriptionValidationService::get().validateAndCorrect(_editData->genome);
+    CreatureDescriptionValidationService::get().validateAndCorrect(_editData->creature);
 }
 
 void _CreatureTabWidget::onGenomeIntoCreatureInjected()
 {
-    _pinnedCreatureData->origGenome = _editData->genome;
+    std::get<SimulatedCreatureData>(_specificEditData).origCreature = _editData->creature;
 }
 
 bool _CreatureTabWidget::isDraft() const
 {
-    return !_pinnedCreatureData.has_value();
-}
-
-uint64_t _CreatureTabWidget::getCreatureId() const
-{
-    return _pinnedCreatureData->creatureId;
+    return std::holds_alternative<DraftCreatureData>(_specificEditData);
 }
 
 int _CreatureTabWidget::getTabId() const
@@ -81,8 +76,9 @@ std::string _CreatureTabWidget::getName() const
     if (isDraft()) {
         return "Draft " + std::to_string(_id);
     } else {
-        auto result = "Creature " + StringHelper::formatInHex(_pinnedCreatureData->creatureId);
-        if (_pinnedCreatureData->changesMade) {
+        auto const& simulatedCreatureData = std::get<SimulatedCreatureData>(_specificEditData);
+        auto result = "Creature " + StringHelper::formatInHex(_editData->creature._id);
+        if (simulatedCreatureData.changesMade) {
             result = "* " + result;
         }
         return result;
@@ -91,28 +87,33 @@ std::string _CreatureTabWidget::getName() const
 
 bool _CreatureTabWidget::hasCreaturesGenomeBeChanged() const
 {
-    if (!_pinnedCreatureData.has_value()) {
+    if (!std::holds_alternative<SimulatedCreatureData>(_specificEditData)) {
         return false;
     }
-    return _pinnedCreatureData->changesMade;
+    auto const& simulatedCreatureData = std::get<SimulatedCreatureData>(_specificEditData);
+    return simulatedCreatureData.changesMade;
 }
 
-CreatureDescription const& _CreatureTabWidget::getGenome()
+CreatureDescription const& _CreatureTabWidget::getCreatureDescription()
 {
-    return _editData->genome;
+    return _editData->creature;
 }
 
 bool _CreatureTabWidget::isEmpty() const
 {
-    return _editData->genome == CreatureDescription();
+    return _editData->creature == CreatureDescription();
 }
 
 void _CreatureTabWidget::convertToDraftTab()
 {
-    _pinnedCreatureData.reset();
+    _specificEditData = DraftCreatureData{};
 }
 
-_CreatureTabWidget::_CreatureTabWidget(SimulationFacade const& simulationFacade, CreatureDescription const& genome, CreatureTabLayoutData const& layoutData)
+_CreatureTabWidget::_CreatureTabWidget(
+    SimulationFacade const& simulationFacade,
+    CreatureDescription const& genome,
+    bool draft,
+    CreatureTabLayoutData const& layoutData)
 {
     static int _sequence = 0;
     _id = ++_sequence;
@@ -126,12 +127,9 @@ _CreatureTabWidget::_CreatureTabWidget(SimulationFacade const& simulationFacade,
     _geneEditorWidget = _GeneEditorWidget::create(_editData, _layoutData);
     _nodeEditorWidget = _NodeEditorWidget::create(_editData, _layoutData);
     _simulatedPreviewWidget = _SimulatedPreviewWidget::create(simulationFacade, _editData);
-}
-
-_CreatureTabWidget::_CreatureTabWidget(SimulationFacade const& simulationFacade, CreatureDescription const& genome, uint64_t creatureId)
-    : _CreatureTabWidget(simulationFacade, genome, nullptr)
-{
-    _pinnedCreatureData = PinnedCreatureData{.creatureId = creatureId, .origGenome = genome};
+    if (!draft) {
+        _specificEditData = SimulatedCreatureData{.origCreature = genome};
+    }
 }
 
 void _CreatureTabWidget::processEditors()
@@ -154,8 +152,9 @@ void _CreatureTabWidget::processEditors()
     ImGui::SameLine();
     _nodeEditorWidget->process();
 
-    if (_pinnedCreatureData.has_value()) {
-        _pinnedCreatureData->changesMade = _pinnedCreatureData->origGenome != _editData->genome;
+    if (std::holds_alternative<SimulatedCreatureData>(_specificEditData)) {
+        auto& simulatedCreatureData = std::get<SimulatedCreatureData>(_specificEditData);
+        simulatedCreatureData.changesMade = simulatedCreatureData.origCreature != _editData->creature;
     }
 }
 

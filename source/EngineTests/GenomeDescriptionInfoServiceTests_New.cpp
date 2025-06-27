@@ -1,7 +1,7 @@
 
 #include <gtest/gtest.h>
 
-#include "EngineInterface/GenomeDescriptionInfoService.h"
+#include "EngineInterface/CreatureDescriptionInfoService.h"
 #include "EngineInterface/CreatureDescription.h"
 
 class GenomeDescriptionInfoServiceTests_New : public ::testing::Test
@@ -13,7 +13,7 @@ public:
 TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_Empty)
 {
     auto genome = CreatureDescription();
-    auto result = GenomeDescriptionInfoService::get().getNumberOfResultingCells(genome);
+    auto result = CreatureDescriptionInfoService::get().getNumberOfResultingCells(genome);
 
     EXPECT_EQ(0, result);
 }
@@ -32,7 +32,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_oneRefer
             NodeDescription(),
         }),
     });
-    auto result = GenomeDescriptionInfoService::get().getNumberOfResultingCells(genome);
+    auto result = CreatureDescriptionInfoService::get().getNumberOfResultingCells(genome);
 
     EXPECT_EQ(6, result);
 }
@@ -51,7 +51,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_oneRefer
             NodeDescription(),
         }),
     });
-    auto result = GenomeDescriptionInfoService::get().getNumberOfResultingCells(genome);
+    auto result = CreatureDescriptionInfoService::get().getNumberOfResultingCells(genome);
 
     EXPECT_EQ(12, result);
 }
@@ -73,7 +73,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_oneRefer
             NodeDescription(),
         }),
     });
-    auto result = GenomeDescriptionInfoService::get().getNumberOfResultingCells(genome);
+    auto result = CreatureDescriptionInfoService::get().getNumberOfResultingCells(genome);
 
     EXPECT_EQ(7, result);
 }
@@ -114,7 +114,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_oneRefer
             NodeDescription(),
         }),
     });
-    auto result = GenomeDescriptionInfoService::get().getNumberOfResultingCells(genome);
+    auto result = CreatureDescriptionInfoService::get().getNumberOfResultingCells(genome);
 
     EXPECT_EQ(2 + 2 + 3 + 2 + 2 + 3 + 1, result);
 }
@@ -136,7 +136,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_manyRefe
             NodeDescription(),
         }),
     });
-    auto result = GenomeDescriptionInfoService::get().getNumberOfResultingCells(genome);
+    auto result = CreatureDescriptionInfoService::get().getNumberOfResultingCells(genome);
 
     EXPECT_EQ(2 + 2 + 3 + 3, result);
 }
@@ -151,7 +151,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_doNotCou
             NodeDescription(),
         }),
     });
-    auto result = GenomeDescriptionInfoService::get().getNumberOfResultingCells(genome);
+    auto result = CreatureDescriptionInfoService::get().getNumberOfResultingCells(genome);
 
     EXPECT_EQ(1, result);
 }
@@ -165,7 +165,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_doNotCou
             NodeDescription(),
         }),
     });
-    auto result = GenomeDescriptionInfoService::get().getNumberOfResultingCells(genome);
+    auto result = CreatureDescriptionInfoService::get().getNumberOfResultingCells(genome);
 
     EXPECT_EQ(3, result);
 }
@@ -183,7 +183,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_doNotCou
             NodeDescription(),
         }),
     });
-    auto result = GenomeDescriptionInfoService::get().getNumberOfResultingCells(genome);
+    auto result = CreatureDescriptionInfoService::get().getNumberOfResultingCells(genome);
 
     EXPECT_EQ(5, result);
 }
@@ -201,7 +201,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_infinity
             NodeDescription(),
         }),
     });
-    auto result = GenomeDescriptionInfoService::get().getNumberOfResultingCells(genome);
+    auto result = CreatureDescriptionInfoService::get().getNumberOfResultingCells(genome);
 
     EXPECT_EQ(-1, result);
 }
@@ -223,7 +223,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_infinity
             NodeDescription(),
         }),
     });
-    auto result = GenomeDescriptionInfoService::get().getNumberOfResultingCells(genome);
+    auto result = CreatureDescriptionInfoService::get().getNumberOfResultingCells(genome);
 
     EXPECT_EQ(-1, result);
 }
@@ -248,7 +248,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_multiple
             .numBranches(2)
             .numConcatenations(3),
     });
-    auto result = GenomeDescriptionInfoService::get().getNumberOfResultingCells(genome);
+    auto result = CreatureDescriptionInfoService::get().getNumberOfResultingCells(genome);
 
     EXPECT_EQ(2 + 2 + 3 * 2 * 3 + 3 * 2 * 3, result);
 }
@@ -273,7 +273,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_multiple
             .numBranches(std::nullopt)
             .numConcatenations(3),
     });
-    auto result = GenomeDescriptionInfoService::get().getNumberOfResultingCells(genome);
+    auto result = CreatureDescriptionInfoService::get().getNumberOfResultingCells(genome);
 
     EXPECT_EQ(2 + 2 + 3 * 3 + 3 * 3, result);
 }
@@ -293,7 +293,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getReferences)
             NodeDescription(),
         }),
     });
-    auto result = GenomeDescriptionInfoService::get().getReferences(genome._genes.at(0));
+    auto result = CreatureDescriptionInfoService::get().getReferences(genome._genes.at(0));
 
     ASSERT_EQ(3, result.size());
     EXPECT_EQ(1, result.at(0));
@@ -316,7 +316,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getReferencedBy)
             NodeDescription().cellTypeData(ConstructorGenomeDescription_New().geneIndex(0)),
         }),
     });
-    auto result = GenomeDescriptionInfoService::get().getReferencedBy(genome, 0);
+    auto result = CreatureDescriptionInfoService::get().getReferencedBy(genome, 0);
 
     ASSERT_EQ(3, result.size());
     EXPECT_EQ(1, result.at(0));

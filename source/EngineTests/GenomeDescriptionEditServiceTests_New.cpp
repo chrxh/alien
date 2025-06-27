@@ -1,8 +1,8 @@
 
 #include <gtest/gtest.h>
 
-#include "EngineInterface/GenomeDescriptionEditService.h"
-#include "EngineInterface/GenomeDescriptionInfoService.h"
+#include "EngineInterface/CreatureDescriptionEditService.h"
+#include "EngineInterface/CreatureDescriptionInfoService.h"
 #include "EngineInterface/CreatureDescription.h"
 
 class GenomeDescriptionEditServiceTests_New : public ::testing::Test
@@ -39,7 +39,7 @@ protected:
 TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyGene_onEmptyGenome)
 {
     auto genome = CreatureDescription();
-    GenomeDescriptionEditService::get().addGene(genome, 0, GeneDescription());
+    CreatureDescriptionEditService::get().addGene(genome, 0, GeneDescription());
 
     EXPECT_EQ(1, genome._genes.size());
 }
@@ -57,7 +57,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyGene_onNonEmptyGenome_star
             NodeDescription(),
         }),
     });
-    GenomeDescriptionEditService::get().addGene(genome, 0, GeneDescription());
+    CreatureDescriptionEditService::get().addGene(genome, 0, GeneDescription());
 
     EXPECT_EQ(4, genome._genes.size());
     for (int i = 0; i < 4; ++i) {
@@ -78,7 +78,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyGene_onNonEmptyGenome_end)
             NodeDescription(),
         }),
     });
-    GenomeDescriptionEditService::get().addGene(genome, 2, GeneDescription());
+    CreatureDescriptionEditService::get().addGene(genome, 2, GeneDescription());
 
     ASSERT_EQ(4, genome._genes.size());
     for (int i = 0; i < 4; ++i) {
@@ -89,7 +89,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyGene_onNonEmptyGenome_end)
 TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyGene_withReferences)
 {
     auto genome = createGenome_3genes_3_4_5nodes();
-    GenomeDescriptionEditService::get().addGene(genome, 1, GeneDescription());
+    CreatureDescriptionEditService::get().addGene(genome, 1, GeneDescription());
 
     ASSERT_EQ(4, genome._genes.size());
     for (int i = 0; i < 4; ++i) {
@@ -114,7 +114,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyGene_withReferences)
 TEST_F(GenomeDescriptionEditServiceTests_New, removeGene_middle)
 {
     auto genome = createGenome_3genes_3_4_5nodes();
-    GenomeDescriptionEditService::get().removeGene(genome, 1);
+    CreatureDescriptionEditService::get().removeGene(genome, 1);
 
     ASSERT_EQ(2, genome._genes.size());
     EXPECT_EQ(3, genome._genes.at(0)._nodes.size());
@@ -130,7 +130,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, removeGene_middle)
 TEST_F(GenomeDescriptionEditServiceTests_New, removeGene_end)
 {
     auto genome = createGenome_3genes_3_4_5nodes();
-    GenomeDescriptionEditService::get().removeGene(genome, 2);
+    CreatureDescriptionEditService::get().removeGene(genome, 2);
 
     ASSERT_EQ(2, genome._genes.size());
     EXPECT_EQ(3, genome._genes.at(0)._nodes.size());
@@ -146,7 +146,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, removeGene_end)
 TEST_F(GenomeDescriptionEditServiceTests_New, swapGenes)
 {
     auto genome = createGenome_3genes_3_4_5nodes();
-    GenomeDescriptionEditService::get().swapGenes(genome, 1);
+    CreatureDescriptionEditService::get().swapGenes(genome, 1);
 
     ASSERT_EQ(3, genome._genes.size());
     EXPECT_EQ(3, genome._genes.at(0)._nodes.size());
@@ -167,7 +167,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyNode_start)
         NodeDescription().cellTypeData(ConstructorGenomeDescription_New()),
         NodeDescription().cellTypeData(SensorGenomeDescription_New()),
     });
-    GenomeDescriptionEditService::get().addEmptyNode(gene, 0);
+    CreatureDescriptionEditService::get().addEmptyNode(gene, 0);
 
     ASSERT_EQ(4, gene._nodes.size());
     EXPECT_EQ(CellTypeGenome_Depot, gene._nodes.at(0).getCellType());
@@ -183,7 +183,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyNode_middle)
         NodeDescription().cellTypeData(ConstructorGenomeDescription_New()),
         NodeDescription().cellTypeData(SensorGenomeDescription_New()),
     });
-    GenomeDescriptionEditService::get().addEmptyNode(gene, 1);
+    CreatureDescriptionEditService::get().addEmptyNode(gene, 1);
 
     ASSERT_EQ(4, gene._nodes.size());
     EXPECT_EQ(CellTypeGenome_Depot, gene._nodes.at(0).getCellType());
@@ -199,7 +199,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, addEmptyNode_end)
         NodeDescription().cellTypeData(ConstructorGenomeDescription_New()),
         NodeDescription().cellTypeData(SensorGenomeDescription_New()),
     });
-    GenomeDescriptionEditService::get().addEmptyNode(gene, 2);
+    CreatureDescriptionEditService::get().addEmptyNode(gene, 2);
 
     ASSERT_EQ(4, gene._nodes.size());
     EXPECT_EQ(CellTypeGenome_Depot, gene._nodes.at(0).getCellType());
@@ -215,7 +215,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, removeNode_start)
         NodeDescription().cellTypeData(ConstructorGenomeDescription_New()),
         NodeDescription().cellTypeData(SensorGenomeDescription_New()),
     });
-    GenomeDescriptionEditService::get().removeNode(gene, 0);
+    CreatureDescriptionEditService::get().removeNode(gene, 0);
 
     ASSERT_EQ(2, gene._nodes.size());
     EXPECT_EQ(CellTypeGenome_Constructor, gene._nodes.at(0).getCellType());
@@ -229,7 +229,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, removeNode_middle)
         NodeDescription().cellTypeData(ConstructorGenomeDescription_New()),
         NodeDescription().cellTypeData(SensorGenomeDescription_New()),
     });
-    GenomeDescriptionEditService::get().removeNode(gene, 1);
+    CreatureDescriptionEditService::get().removeNode(gene, 1);
 
     ASSERT_EQ(2, gene._nodes.size());
     EXPECT_EQ(CellTypeGenome_Depot, gene._nodes.at(0).getCellType());
@@ -243,7 +243,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, removeNode_end)
         NodeDescription().cellTypeData(ConstructorGenomeDescription_New()),
         NodeDescription().cellTypeData(SensorGenomeDescription_New()),
     });
-    GenomeDescriptionEditService::get().removeNode(gene, 2);
+    CreatureDescriptionEditService::get().removeNode(gene, 2);
 
     ASSERT_EQ(2, gene._nodes.size());
     EXPECT_EQ(CellTypeGenome_Depot, gene._nodes.at(0).getCellType());
@@ -257,7 +257,7 @@ TEST_F(GenomeDescriptionEditServiceTests_New, swapNodes)
         NodeDescription().cellTypeData(ConstructorGenomeDescription_New()),
         NodeDescription().cellTypeData(SensorGenomeDescription_New()),
     });
-    GenomeDescriptionEditService::get().swapNodes(gene, 1);
+    CreatureDescriptionEditService::get().swapNodes(gene, 1);
 
     ASSERT_EQ(3, gene._nodes.size());
     EXPECT_EQ(CellTypeGenome_Depot, gene._nodes.at(0).getCellType());

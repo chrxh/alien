@@ -7,7 +7,7 @@
 
 struct _CreatureTabEditData
 {
-    CreatureDescription genome;
+    CreatureDescription creature;
     std::optional<int> selectedGeneIndex;
     std::map<int, int> selectedNodeByGeneIndex;
 
@@ -39,7 +39,7 @@ struct _CreatureTabEditData
         }
     }
 
-    GeneDescription& getSelectedGeneRef() { return genome._genes.at(selectedGeneIndex.value()); }
+    GeneDescription& getSelectedGeneRef() { return creature._genes.at(selectedGeneIndex.value()); }
 
     NodeDescription& getSelectedNodeRef()
     {

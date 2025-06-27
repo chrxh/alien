@@ -13,7 +13,7 @@ SimulatedPreviewWidget _SimulatedPreviewWidget::create(SimulationFacade const& s
 
 void _SimulatedPreviewWidget::process()
 {
-    if (!_lastGenome.has_value() || _lastGenome.value() != _editData->genome) {
+    if (!_lastGenome.has_value() || _lastGenome.value() != _editData->creature) {
         CollectionDescription preview;
         _simulationFacade->newPreview(preview);
     }
@@ -21,7 +21,7 @@ void _SimulatedPreviewWidget::process()
     auto duration = std::chrono::milliseconds(1000 / fps / 2);
     _simulationFacade->calcTimestepsForPreview(duration);
 
-    _lastGenome = _editData->genome;
+    _lastGenome = _editData->creature;
 }
 
 _SimulatedPreviewWidget::_SimulatedPreviewWidget(SimulationFacade const& simulationFacade, CreatureTabEditData const& editData)

@@ -169,7 +169,7 @@ void _NodeEditorWidget::processNodeAttributes()
             // Gene index
             auto& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
             std::vector<std::string> genes;
-            for (auto const& [index, gene] : _editData->genome._genes | boost::adaptors::indexed(0)) {
+            for (auto const& [index, gene] : _editData->creature._genes | boost::adaptors::indexed(0)) {
                 auto text = "No. " + std::to_string(index + 1);
                 if (index == 0) {
                     text += " (principal)";
