@@ -169,8 +169,11 @@ struct GeneTO
 struct CreatureTO
 {
     uint64_t id;
-    float frontAngle;
 
+    // Genome
+    float frontAngle;
+    uint32_t mutationId;
+    uint32_t genomeComplexity;
     int numGenes;
     uint64_t geneArrayIndex;
 

@@ -453,8 +453,10 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(
     auto const& creatureTO = collectionTO.creatures[creatureIndex];
     result._id = creatureTO.id;
     creatureIdByTOIndex.emplace(creatureIndex, result._id);
-    result._genes.reserve(creatureTO.numGenes);
+    result._mutationId = creatureTO.mutationId;
+    result._genomeComplexity = creatureTO.genomeComplexity;
     result._frontAngle = creatureTO.frontAngle;
+    result._genes.reserve(creatureTO.numGenes);
 
     for (int i = 0; i < creatureTO.numGenes; ++i) {
         auto geneTO = collectionTO.genes + creatureTO.geneArrayIndex + i;
@@ -622,6 +624,9 @@ void DescriptionConverterService::convertCreatureToTO(
     geneTOs.resize(geneArrayStartIndex + creatureDesc._genes.size());
 
     creatureTO.id = creatureDesc._id;
+    creatureTO.mutationId = creatureDesc._mutationId;
+    creatureTO.genomeComplexity = creatureDesc._genomeComplexity;
+    creatureTO.frontAngle = creatureDesc._frontAngle;
     creatureTO.numGenes = toInt(creatureDesc._genes.size());
     creatureTO.geneArrayIndex = geneArrayStartIndex;
 

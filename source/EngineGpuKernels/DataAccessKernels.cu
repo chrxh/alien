@@ -21,26 +21,28 @@ namespace
         }
     }
 
-    __device__ void createGenomeTO(Cell* cell, CollectionTO& collectionTO)
+    __device__ void createCreatureTO(Cell* cell, CollectionTO& collectionTO)
     {
-        auto origGenomeIndex = atomicExch(&cell->creature->creatureIndex, 0);  // 0 = member is currently initialized
-        if (origGenomeIndex == Creature::CreatureIndex_NotSet) {
+        auto origCreatureIndex = atomicExch(&cell->creature->creatureIndex, 0);  // 0 = member is currently initialized
+        if (origCreatureIndex == Creature::CreatureIndex_NotSet) {
 
-            auto genomeTOIndex = atomicAdd(collectionTO.numCreatures, 1ull);
-            if (genomeTOIndex >= collectionTO.capacities.genomes) {
+            auto creatureTOIndex = atomicAdd(collectionTO.numCreatures, 1ull);
+            if (creatureTOIndex >= collectionTO.capacities.genomes) {
                 printf("Insufficient genome memory for transfer objects.\n");
                 ABORT();
             }
-            auto& genomeTO = collectionTO.creatures[genomeTOIndex];
-            auto const& genome = cell->creature;
-            genomeTO.id = genome->id;
-            genomeTO.frontAngle = genome->frontAngle;
-            genomeTO.numGenes = genome->numGenes;
+            auto& creatureTO = collectionTO.creatures[creatureTOIndex];
+            auto const& creature = cell->creature;
+            creatureTO.id = creature->id;
+            creatureTO.mutationId = creature->mutationId;
+            creatureTO.genomeComplexity = creature->genomeComplexity;
+            creatureTO.frontAngle = creature->frontAngle;
+            creatureTO.numGenes = creature->numGenes;
 
-            auto geneTOArrayStartIndex = atomicAdd(collectionTO.numGenes, genome->numGenes);
-            for (int i = 0, j = genome->numGenes; i < j; ++i) {
+            auto geneTOArrayStartIndex = atomicAdd(collectionTO.numGenes, creature->numGenes);
+            for (int i = 0, j = creature->numGenes; i < j; ++i) {
                 auto& geneTO = collectionTO.genes[geneTOArrayStartIndex + i];
-                auto const& gene = genome->genes[i];
+                auto const& gene = creature->genes[i];
                 geneTO.shape = gene.shape;
                 geneTO.numBranches = gene.numBranches;
                 geneTO.angleAlignment = gene.angleAlignment;
@@ -142,9 +144,9 @@ namespace
                 }
             }
 
-            atomicExch(&cell->creature->creatureIndex, genomeTOIndex);
-        } else if (origGenomeIndex != 0) {
-            atomicExch(&cell->creature->creatureIndex, origGenomeIndex);
+            atomicExch(&cell->creature->creatureIndex, creatureTOIndex);
+        } else if (origCreatureIndex != 0) {
+            atomicExch(&cell->creature->creatureIndex, origCreatureIndex);
         }
     }
 
@@ -536,7 +538,7 @@ __global__ void cudaGetGenomeData(int2 rectUpperLeft, int2 rectLowerRight, Simul
             continue;
         }
 
-        createGenomeTO(cell, collectionTO);
+        createCreatureTO(cell, collectionTO);
     }
 }
 
@@ -554,7 +556,7 @@ __global__ void cudaGetSelectedGenomeData(SimulationData data, bool includeClust
             continue;
         }
 
-        createGenomeTO(cell, collectionTO);
+        createCreatureTO(cell, collectionTO);
     }
 }
 
@@ -582,7 +584,7 @@ __global__ void cudaGetGenomeData(InspectedEntityIds ids, SimulationData data, C
             continue;
         }
 
-        createGenomeTO(cell, collectionTO);
+        createCreatureTO(cell, collectionTO);
     }
 }
 

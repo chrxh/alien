@@ -3,6 +3,7 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationFacade.h"
+
 #include "IntegrationTestFramework.h"
 
 
@@ -12,7 +13,6 @@ public:
     DataTransferTests_New()
         : IntegrationTestFramework()
     {}
-
 };
 
 struct CellParameter
@@ -40,12 +40,8 @@ protected:
         case CellType_Depot:
             return DepotDescription();
         case CellType_Constructor:
-            return ConstructorDescription()
-                .autoTriggerInterval(7)
-                .geneIndex(3)
-                .constructionActivationTime(4)
-                .constructionAngle(34.4f)
-                .lastConstructedCellId(45ull);
+            return ConstructorDescription().autoTriggerInterval(7).geneIndex(3).constructionActivationTime(4).constructionAngle(34.4f).lastConstructedCellId(
+                45ull);
         case CellType_Sensor:
             return SensorDescription().autoTriggerInterval(3).restrictToColor(5).minRange(34).maxRange(67).minDensity(0.25f).restrictToMutants(
                 SensorRestrictToMutants_RestrictToLessComplexMutants);
@@ -182,7 +178,7 @@ struct NodeParameter
     MuscleMode muscleMode;
 };
 
-class DataTransferTests_AllCellTypeGenome_New
+class DataTransferTests_AllCellTypeWithCreature_New
     : public DataTransferTests_New
     , public testing::WithParamInterface<NodeParameter>
 {
@@ -247,7 +243,7 @@ protected:
 
 INSTANTIATE_TEST_SUITE_P(
     DataTransferTests_AllCellTypeGenome_New,
-    DataTransferTests_AllCellTypeGenome_New,
+    DataTransferTests_AllCellTypeWithCreature_New,
     ::testing::Values(
         NodeParameter{CellTypeGenome_Base},
         NodeParameter{CellTypeGenome_Depot},
@@ -266,7 +262,7 @@ INSTANTIATE_TEST_SUITE_P(
         NodeParameter{CellTypeGenome_Reconnector},
         NodeParameter{CellTypeGenome_Detonator}));
 
-TEST_P(DataTransferTests_AllCellTypeGenome_New, singleCell_genome_oneGene_oneNode)
+TEST_P(DataTransferTests_AllCellTypeWithCreature_New, singleCell_genome_oneGene_oneNode)
 {
     auto cellParameter = GetParam();
     auto cellTypeGenomeDesc = createSomeCellTypeGenomeDescription(cellParameter);
@@ -277,7 +273,7 @@ TEST_P(DataTransferTests_AllCellTypeGenome_New, singleCell_genome_oneGene_oneNod
     nn2.weight(1, 3, -1.0f);
 
     auto data = CollectionDescription().addCreature(
-        CreatureDescription().genes(
+        CreatureDescription().frontAngle(34.0f).mutationId(42).genomeComplexity(23).genes(
             {GeneDescription()
                  .shape(ConstructionShape_Hexagon)
                  .numBranches(3)
@@ -533,8 +529,7 @@ TEST_F(DataTransferTests_New, getInspectedSimulationData)
 {
     auto data =
         CollectionDescription()
-            .addCreature(
-                CreatureDescription().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})}), {CellDescription(), CellDescription()})
+            .addCreature(CreatureDescription().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})}), {CellDescription(), CellDescription()})
             .addCreature(CreatureDescription(), {CellDescription()});
     auto cellId1 = data._cells.at(0)._id;
     auto cellId2 = data._cells.at(1)._id;
