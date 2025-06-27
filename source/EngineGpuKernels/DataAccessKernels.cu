@@ -34,6 +34,7 @@ namespace
             auto& creatureTO = collectionTO.creatures[creatureTOIndex];
             auto const& creature = cell->creature;
             creatureTO.id = creature->id;
+            creatureTO.ancestorId = creature->ancestorId;
             creatureTO.mutationId = creature->mutationId;
             creatureTO.genomeComplexity = creature->genomeComplexity;
             creatureTO.frontAngle = creature->frontAngle;

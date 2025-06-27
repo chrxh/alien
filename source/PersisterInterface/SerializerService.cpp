@@ -132,9 +132,10 @@ namespace cereal
 namespace
 {
     auto constexpr Id_Creature_Id = 0;
-    auto constexpr Id_Creature_MutationId = 1;
-    auto constexpr Id_Creature_GenomeComplexity = 1;
-    auto constexpr Id_Creature_FrontAngle = 1;
+    auto constexpr Id_Creature_AncestorId = 1;
+    auto constexpr Id_Creature_MutationId = 2;
+    auto constexpr Id_Creature_GenomeComplexity = 3;
+    auto constexpr Id_Creature_FrontAngle = 4;
 
     auto constexpr Id_Gene_Shape = 0;
     auto constexpr Id_Gene_NumBranches = 1;
@@ -459,6 +460,7 @@ namespace cereal
         CreatureDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Creature_Id, data._id, defaultObject._id);
+        loadSave(task, auxiliaries, Id_Creature_AncestorId, data._ancestorId, defaultObject._ancestorId);
         loadSave(task, auxiliaries, Id_Creature_MutationId, data._mutationId, defaultObject._mutationId);
         loadSave(task, auxiliaries, Id_Creature_GenomeComplexity, data._genomeComplexity, defaultObject._genomeComplexity);
         loadSave(task, auxiliaries, Id_Creature_FrontAngle, data._frontAngle, defaultObject._frontAngle);

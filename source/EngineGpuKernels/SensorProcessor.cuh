@@ -81,24 +81,40 @@ __inline__ __device__ uint32_t SensorProcessor::getCellDensity(
             result = densityMap.getColorDensity(scanPos, restrictToColor);
         }
     } else {
-        //if (restrictToMutants == SensorRestrictToMutants_RestrictToSameMutants) {
-        //    result = densityMap.getSameMutantDensity(scanPos, cell->mutationId);
-        //}
-        //if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherMutants) {
-        //    result = densityMap.getOtherMutantDensity(timestep, scanPos, cell->mutationId);
-        //}
+        if (restrictToMutants == SensorRestrictToMutants_RestrictToSameMutants) {
+            if (cell->creature != nullptr) {
+                result = densityMap.getSameMutantDensity(scanPos, cell->creature->mutationId);
+            } else {
+                result = 0;
+            }
+        }
+        if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherMutants) {
+            if (cell->creature != nullptr) {
+                result = densityMap.getOtherMutantDensity(timestep, scanPos, cell->creature->mutationId);
+            } else {
+                result = 0;
+            }
+        }
         if (restrictToMutants == SensorRestrictToMutants_RestrictToFreeCells) {
             result = densityMap.getFreeCellDensity(scanPos);
         }
         if (restrictToMutants == SensorRestrictToMutants_RestrictToStructures) {
             result = densityMap.getStructureDensity(scanPos);
         }
-        //if (restrictToMutants == SensorRestrictToMutants_RestrictToLessComplexMutants) {
-        //    result = densityMap.getLessComplexMutantDensity(scanPos, cell->genomeComplexity);
-        //}
-        //if (restrictToMutants == SensorRestrictToMutants_RestrictToMoreComplexMutants) {
-        //    result = densityMap.getMoreComplexMutantDensity(scanPos, cell->genomeComplexity);
-        //}
+        if (restrictToMutants == SensorRestrictToMutants_RestrictToLessComplexMutants) {
+            if (cell->creature != nullptr) {
+                result = densityMap.getLessComplexMutantDensity(scanPos, cell->creature->genomeComplexity);
+            } else {
+                result = 0;
+            }
+        }
+        if (restrictToMutants == SensorRestrictToMutants_RestrictToMoreComplexMutants) {
+            if (cell->creature != nullptr)
+                result = densityMap.getMoreComplexMutantDensity(scanPos, cell->creature->genomeComplexity);
+            else {
+                result = 0;
+            }
+        }
         if (restrictToColor != 255) {
             result = min(result, densityMap.getColorDensity(scanPos, restrictToColor));
         }
@@ -235,25 +251,29 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
                     continue;
                 }
             }
-            //if (restrictToMutants == SensorRestrictToMutants_RestrictToSameMutants && cell->mutationId != otherCell->mutationId) {
-            //    continue;
-            //}
-            //if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherMutants
-            //    && (cell->mutationId == otherCell->mutationId || static_cast<uint8_t>(cell->mutationId & 0xff) == otherCell->ancestorMutationId)) {
-            //    continue;
-            //}
+            if (restrictToMutants == SensorRestrictToMutants_RestrictToSameMutants
+                && (otherCell->creature == nullptr || cell->creature->mutationId != otherCell->creature->mutationId)) {
+                continue;
+            }
+            if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherMutants
+                && (otherCell->creature == nullptr || cell->creature->mutationId == otherCell->creature->mutationId
+                    || cell->creature->mutationId == otherCell->creature->ancestorId)) {
+                continue;
+            }
             if (restrictToMutants == SensorRestrictToMutants_RestrictToFreeCells && otherCell->cellType != CellType_Free) {
                 continue;
             }
             if (restrictToMutants == SensorRestrictToMutants_RestrictToStructures && otherCell->cellType != CellType_Structure) {
                 continue;
             }
-            //if (restrictToMutants == SensorRestrictToMutants_RestrictToLessComplexMutants && otherCell->genomeComplexity >= cell->genomeComplexity) {
-            //    continue;
-            //}
-            //if (restrictToMutants == SensorRestrictToMutants_RestrictToMoreComplexMutants && otherCell->genomeComplexity <= cell->genomeComplexity) {
-            //    continue;
-            //}
+            if (restrictToMutants == SensorRestrictToMutants_RestrictToLessComplexMutants
+                && (otherCell->creature == nullptr || otherCell->creature->genomeComplexity >= cell->creature->genomeComplexity)) {
+                continue;
+            }
+            if (restrictToMutants == SensorRestrictToMutants_RestrictToMoreComplexMutants
+                && (otherCell->creature == nullptr || otherCell->creature->genomeComplexity <= cell->creature->genomeComplexity)) {
+                continue;
+            }
 
             otherCell->detectedByCreatureId = static_cast<uint16_t>(cell->creature->id & 0xffff);
         }

@@ -69,6 +69,7 @@ __inline__ __device__ Creature* ObjectFactory::createGenomeFromTO(CollectionTO c
     creatureTO.creatureIndexOnGpu = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(creature) - _data->objects.heap.getArray());
 
     creature->id = creatureTO.id;
+    creature->ancestorId = creatureTO.ancestorId;
     creature->mutationId = creatureTO.mutationId;
     creature->genomeComplexity = creatureTO.genomeComplexity;
     creature->frontAngle = creatureTO.frontAngle;

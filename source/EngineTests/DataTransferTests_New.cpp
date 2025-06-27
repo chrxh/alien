@@ -273,7 +273,7 @@ TEST_P(DataTransferTests_AllCellTypeWithCreature_New, singleCell_genome_oneGene_
     nn2.weight(1, 3, -1.0f);
 
     auto data = CollectionDescription().addCreature(
-        CreatureDescription().frontAngle(34.0f).mutationId(42).genomeComplexity(23).genes(
+        CreatureDescription().ancestorId(123).frontAngle(34.0f).mutationId(42).genomeComplexity(23).genes(
             {GeneDescription()
                  .shape(ConstructionShape_Hexagon)
                  .numBranches(3)

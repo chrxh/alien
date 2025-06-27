@@ -24,7 +24,8 @@ CollectionDescription DescriptionEditService::createRect(CreateRectParameters co
                                .color(parameters._color)
                                .barrier(parameters._barrier)
                                .sticky(parameters._sticky)
-                               .cellTypeData(parameters._cellType));
+                               .cellTypeData(parameters._cellType)
+                               .creatureId(parameters._creatureId));
         }
     }
     reconnectCells(result, parameters._cellDistance * 1.1f);

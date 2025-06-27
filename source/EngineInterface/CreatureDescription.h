@@ -234,8 +234,9 @@ struct CreatureDescription
     auto operator<=>(CreatureDescription const&) const = default;
 
     MEMBER(CreatureDescription, uint64_t, id, 0);
+    MEMBER(CreatureDescription, uint64_t, ancestorId, 0);
     MEMBER(CreatureDescription, int, mutationId, 0);
-    MEMBER(CreatureDescription, int, genomeComplexity, 0);
+    MEMBER(CreatureDescription, float, genomeComplexity, 0);
     MEMBER(CreatureDescription, std::vector<GeneDescription>, genes, {})
     MEMBER(CreatureDescription, float, frontAngle, 0.0f);
 };

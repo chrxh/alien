@@ -22,7 +22,7 @@ public:
         MEMBER(CreateRectParameters, bool, sticky, false);
         MEMBER(CreateRectParameters, int, color, 0);
         MEMBER(CreateRectParameters, bool, barrier, false);
-        MEMBER(CreateRectParameters, float, genomeComplexity, 0);
+        MEMBER(CreateRectParameters, std::optional<int>, creatureId, std::nullopt);
     };
     CollectionDescription createRect(CreateRectParameters const& parameters);
 

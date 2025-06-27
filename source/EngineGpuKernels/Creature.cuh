@@ -167,11 +167,12 @@ struct Gene
 struct Creature
 {
     uint64_t id;
+    uint64_t ancestorId;
 
     // Genome
     float frontAngle;
     uint32_t mutationId;
-    uint32_t genomeComplexity;
+    float genomeComplexity;
     int numGenes;
     Gene* genes;
 
