@@ -46,11 +46,7 @@ struct NeuralNetworkDescription
         _weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
         _biases.resize(MAX_CHANNELS, 0);
         _activationFunctions.resize(MAX_CHANNELS, ActivationFunction_Identity);
-        // #TODO GCC incompatibily:
-        // auto md = std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS);
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            // #TODO GCC incompatibily:
-            // md[i, i] = 1.0f;
             _weights[i * MAX_CHANNELS + i] = 1.0f;
         }
     }
@@ -62,15 +58,9 @@ struct NeuralNetworkDescription
 
     NeuralNetworkDescription& weight(int row, int col, float value)
     {
-        // #TODO GCC incompatibily:
-        // auto md = std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS);
-        // md[row, col] = value;
         _weights[row * MAX_CHANNELS + col] = value;
         return *this;
     }
-    // #TODO GCC incompatibily:
-    // auto getWeights() const { return std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
-    // auto getWeights() { return std::mdspan(_weights.data(), MAX_CHANNELS, MAX_CHANNELS); }
 };
 
 struct BaseDescription
@@ -91,7 +81,7 @@ struct ConstructorDescription
     auto operator<=>(ConstructorDescription const&) const = default;
 
     // Properties
-    MEMBER(ConstructorDescription, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering
+    MEMBER(ConstructorDescription, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering, value must be >= 3
     MEMBER(ConstructorDescription, int, constructionActivationTime, 100);
 
     // Genome data
@@ -113,7 +103,7 @@ struct SensorDescription
 {
     auto operator<=>(SensorDescription const&) const = default;
 
-    MEMBER(SensorDescription, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering
+    MEMBER(SensorDescription, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering, value must be >= 3
     MEMBER(SensorDescription, float, minDensity, 0.05f);
     MEMBER(SensorDescription, std::optional<int>, minRange, std::nullopt);
     MEMBER(SensorDescription, std::optional<int>, maxRange, std::nullopt);
@@ -126,7 +116,7 @@ struct OscillatorDescription
     auto operator<=>(OscillatorDescription const&) const = default;
 
     // Fixed data
-    MEMBER(OscillatorDescription, int, autoTriggerInterval, 100);
+    MEMBER(OscillatorDescription, int, autoTriggerInterval, 100);   // Must be >= 3
     MEMBER(OscillatorDescription, OscillatorPulseType, pulseType, OscillatorPulseType_Positive);
     MEMBER(OscillatorDescription, int, alternationInterval, 1);  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
 

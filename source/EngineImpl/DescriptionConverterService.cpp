@@ -1,21 +1,22 @@
 #include "DescriptionConverterService.h"
 
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 
 #include <boost/range/adaptor/indexed.hpp>
 #include <boost/range/adaptor/map.hpp>
 
 #include "Base/Exceptions.h"
 
-#include "EngineInterface/NumberGenerator.h"
 #include "EngineInterface/Descriptions.h"
+#include "EngineInterface/NumberGenerator.h"
+
 #include "EngineGpuKernels/CollectionTOProvider.cuh"
 
 
 namespace
 {
-    template<typename T>
+    template <typename T>
     T* getFromHeap(uint8_t* heap, uint64_t sourceIndex)
     {
         return reinterpret_cast<T*>(&heap[sourceIndex]);
@@ -81,7 +82,7 @@ namespace
         return result;
     }
 
-    template<typename Container, typename SizeType>
+    template <typename Container, typename SizeType>
     void convert(std::vector<uint8_t>& heap, SizeType& targetSize, uint64_t& targetIndex, Container const& source)
     {
         targetSize = source.size();
@@ -480,6 +481,9 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(
             auto neuralNetworkGenomeTO = getFromHeap<NeuralNetworkGenomeTO>(collectionTO.heap, nodeTO->neuralNetworkDataIndex);
             nodeDesc._neuralNetwork = convert(*neuralNetworkGenomeTO);
             nodeDesc._numRequiredAdditionalConnections = nodeTO->numRequiredAdditionalConnections;
+            nodeDesc._signalRoutingRestriction._active = nodeTO->signalRoutingRestriction.active;
+            nodeDesc._signalRoutingRestriction._baseAngle = nodeTO->signalRoutingRestriction.baseAngle;
+            nodeDesc._signalRoutingRestriction._openingAngle = nodeTO->signalRoutingRestriction.openingAngle;
 
             switch (nodeTO->cellType) {
             case CellTypeGenome_Base: {
@@ -651,6 +655,9 @@ void DescriptionConverterService::convertCreatureToTO(
             nodeTO.referenceAngle = nodeDesc._referenceAngle;
             nodeTO.color = nodeDesc._color;
             nodeTO.numRequiredAdditionalConnections = nodeDesc._numRequiredAdditionalConnections;
+            nodeTO.signalRoutingRestriction.active = nodeDesc._signalRoutingRestriction._active;
+            nodeTO.signalRoutingRestriction.baseAngle = nodeDesc._signalRoutingRestriction._baseAngle;
+            nodeTO.signalRoutingRestriction.openingAngle = nodeDesc._signalRoutingRestriction._openingAngle;
 
             nodeTO.neuralNetworkDataIndex = heap.size();
             heap.resize(heap.size() + sizeof(NeuralNetworkGenomeTO));
