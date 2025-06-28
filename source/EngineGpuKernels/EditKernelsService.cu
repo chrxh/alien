@@ -37,19 +37,19 @@ _EditKernelsService::~_EditKernelsService()
     memoryManager.freeMemory(_result);
 }
 
-void _EditKernelsService::removeSelection(GpuSettings const& gpuSettings, SimulationData const& data)
+void _EditKernelsService::removeSelection(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     KERNEL_CALL(cudaRemoveSelection, data, false);
 }
 
-void _EditKernelsService::swapSelection(GpuSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData)
+void _EditKernelsService::swapSelection(CudaSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData)
 {
     KERNEL_CALL(cudaRemoveSelection, data, true);
     KERNEL_CALL(cudaSwapSelection, switchData.pos, switchData.radius, data);
     rolloutSelection(gpuSettings, data);
 }
 
-void _EditKernelsService::switchSelection(GpuSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData)
+void _EditKernelsService::switchSelection(CudaSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData)
 {
     setValueToDevice(_cudaSwitchResult, 0);
 
@@ -62,19 +62,19 @@ void _EditKernelsService::switchSelection(GpuSettings const& gpuSettings, Simula
     }
 }
 
-void _EditKernelsService::setSelection(GpuSettings const& gpuSettings, SimulationData const& data, AreaSelectionData const& setData)
+void _EditKernelsService::setSelection(CudaSettings const& gpuSettings, SimulationData const& data, AreaSelectionData const& setData)
 {
     KERNEL_CALL(cudaSetSelection, setData, data);
     rolloutSelection(gpuSettings, data);
 }
 
-void _EditKernelsService::updateSelection(GpuSettings const& gpuSettings, SimulationData const& data)
+void _EditKernelsService::updateSelection(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     KERNEL_CALL(cudaRemoveSelection, data, true);
     rolloutSelection(gpuSettings, data);
 }
 
-void _EditKernelsService::getSelectionShallowData(GpuSettings const& gpuSettings, SimulationData const& data, SelectionResult const& selectionResult)
+void _EditKernelsService::getSelectionShallowData(CudaSettings const& gpuSettings, SimulationData const& data, SelectionResult const& selectionResult)
 {
     KERNEL_CALL_1_1(cudaResetSelectionResult, selectionResult);
     setValueToDevice(_cudaMinCellPosYAndIndex, 0xffffffffffffffffull);
@@ -86,7 +86,7 @@ void _EditKernelsService::getSelectionShallowData(GpuSettings const& gpuSettings
 }
 
 void _EditKernelsService::shallowUpdateSelectedObjects(
-    GpuSettings const& gpuSettings,
+    CudaSettings const& gpuSettings,
     SimulationData const& data,
     ShallowUpdateSelectionData const& updateData)
 {
@@ -155,7 +155,7 @@ void _EditKernelsService::shallowUpdateSelectedObjects(
     }
 }
 
-void _EditKernelsService::removeSelectedObjects(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
+void _EditKernelsService::removeSelectedObjects(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
 {
     KERNEL_CALL(cudaRemoveSelectedCellConnections, data, includeClusters);
 
@@ -165,12 +165,12 @@ void _EditKernelsService::removeSelectedObjects(GpuSettings const& gpuSettings, 
     _garbageCollector->cleanupAfterDataManipulation(gpuSettings, data);
 }
 
-void _EditKernelsService::relaxSelectedObjects(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
+void _EditKernelsService::relaxSelectedObjects(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
 {
     KERNEL_CALL(cudaRelaxSelectedEntities, data, includeClusters);
 }
 
-void _EditKernelsService::uniformVelocities(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
+void _EditKernelsService::uniformVelocities(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
 {
     setValueToDevice(_cudaVelocity, float2{0, 0});
     setValueToDevice(_cudaNumEntities, 0);
@@ -184,22 +184,22 @@ void _EditKernelsService::uniformVelocities(GpuSettings const& gpuSettings, Simu
     }
 }
 
-void _EditKernelsService::makeSticky(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
+void _EditKernelsService::makeSticky(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
 {
     KERNEL_CALL(cudaMakeSticky, data, includeClusters);
 }
 
-void _EditKernelsService::removeStickiness(GpuSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
+void _EditKernelsService::removeStickiness(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
 {
     KERNEL_CALL(cudaRemoveStickiness, data, includeClusters);
 }
 
-void _EditKernelsService::setBarrier(GpuSettings const& gpuSettings, SimulationData const& data, bool value, bool includeClusters)
+void _EditKernelsService::setBarrier(CudaSettings const& gpuSettings, SimulationData const& data, bool value, bool includeClusters)
 {
     KERNEL_CALL(cudaSetBarrier, data, value, includeClusters);
 }
 
-void _EditKernelsService::reconnect(GpuSettings const& gpuSettings, SimulationData const& data)
+void _EditKernelsService::reconnect(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     int counter = 10;
     do {
@@ -235,7 +235,7 @@ void _EditKernelsService::reconnect(GpuSettings const& gpuSettings, SimulationDa
     updateSelection(gpuSettings, data);
 }
 
-void _EditKernelsService::changeSimulationData(GpuSettings const& gpuSettings, SimulationData const& data, CollectionTO const& changeDataTO)
+void _EditKernelsService::changeSimulationData(CudaSettings const& gpuSettings, SimulationData const& data, CollectionTO const& changeDataTO)
 {
     KERNEL_CALL_1_1(cudaSaveNumEntries, data);
 
@@ -259,7 +259,7 @@ void _EditKernelsService::changeSimulationData(GpuSettings const& gpuSettings, S
     _garbageCollector->cleanupAfterDataManipulation(gpuSettings, data);
 }
 
-bool _EditKernelsService::changeCreature(GpuSettings const& gpuSettings, SimulationData const& data, CollectionTO const& dataTO)
+bool _EditKernelsService::changeCreature(CudaSettings const& gpuSettings, SimulationData const& data, CollectionTO const& dataTO)
 {
     setValueToDevice(_result, false);
     KERNEL_CALL_1_1(cudaAddCreature, data, dataTO, _genomePtr);
@@ -269,22 +269,22 @@ bool _EditKernelsService::changeCreature(GpuSettings const& gpuSettings, Simulat
     return copyToHost(_result);
 }
 
-void _EditKernelsService::colorSelectedCells(GpuSettings const& gpuSettings, SimulationData const& data, unsigned char color, bool includeClusters)
+void _EditKernelsService::colorSelectedCells(CudaSettings const& gpuSettings, SimulationData const& data, unsigned char color, bool includeClusters)
 {
     KERNEL_CALL(cudaColorSelectedCells, data, color, includeClusters);
 }
 
-void _EditKernelsService::setDetached(GpuSettings const& gpuSettings, SimulationData const& data, bool value)
+void _EditKernelsService::setDetached(CudaSettings const& gpuSettings, SimulationData const& data, bool value)
 {
     KERNEL_CALL(cudaSetDetached, data, value);
 }
 
-void _EditKernelsService::applyForce(GpuSettings const& gpuSettings, SimulationData const& data, ApplyForceData const& applyData)
+void _EditKernelsService::applyForce(CudaSettings const& gpuSettings, SimulationData const& data, ApplyForceData const& applyData)
 {
     KERNEL_CALL(cudaApplyForce, data, applyData);
 }
 
-void _EditKernelsService::rolloutSelection(GpuSettings const& gpuSettings, SimulationData const& data)
+void _EditKernelsService::rolloutSelection(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     do {
         setValueToDevice(_cudaRolloutResult, 0);
@@ -294,7 +294,7 @@ void _EditKernelsService::rolloutSelection(GpuSettings const& gpuSettings, Simul
     } while (1 == copyToHost(_cudaRolloutResult));
 }
 
-void _EditKernelsService::applyCataclysm(GpuSettings const& gpuSettings, SimulationData const& data)
+void _EditKernelsService::applyCataclysm(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     KERNEL_CALL(cudaApplyCataclysm, data);
 }

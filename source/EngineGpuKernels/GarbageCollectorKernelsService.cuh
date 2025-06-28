@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "EngineInterface/GpuSettings.h"
+#include "EngineInterface/CudaSettings.h"
 
 #include "Definitions.cuh"
 #include "Macros.cuh"
@@ -13,10 +13,10 @@ public:
     _GarbageCollectorKernelsService();
     ~_GarbageCollectorKernelsService();
 
-    void cleanupAfterTimestep(GpuSettings const& gpuSettings, SimulationData const& simulationData);
-    void cleanupAfterDataManipulation(GpuSettings const& gpuSettings, SimulationData const& simulationData);
-    void copyArrays(GpuSettings const& gpuSettings, SimulationData const& simulationData);
-    void swapArrays(GpuSettings const& gpuSettings, SimulationData const& simulationData);
+    void cleanupAfterTimestep(CudaSettings const& gpuSettings, SimulationData const& simulationData);
+    void cleanupAfterDataManipulation(CudaSettings const& gpuSettings, SimulationData const& simulationData);
+    void copyArrays(CudaSettings const& gpuSettings, SimulationData const& simulationData);
+    void swapArrays(CudaSettings const& gpuSettings, SimulationData const& simulationData);
 
 private:
     //gpu memory

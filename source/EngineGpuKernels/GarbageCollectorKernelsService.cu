@@ -10,7 +10,7 @@ _GarbageCollectorKernelsService::~_GarbageCollectorKernelsService()
     CudaMemoryManager::getInstance().freeMemory(_cudaBool);
 }
 
-void _GarbageCollectorKernelsService::cleanupAfterTimestep(GpuSettings const& gpuSettings, SimulationData const& data)
+void _GarbageCollectorKernelsService::cleanupAfterTimestep(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     KERNEL_CALL(cudaCleanupCellMap, data);
     KERNEL_CALL(cudaCleanupParticleMap, data);
@@ -35,7 +35,7 @@ void _GarbageCollectorKernelsService::cleanupAfterTimestep(GpuSettings const& gp
     }
 }
 
-void _GarbageCollectorKernelsService::cleanupAfterDataManipulation(GpuSettings const& gpuSettings, SimulationData const& data)
+void _GarbageCollectorKernelsService::cleanupAfterDataManipulation(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     KERNEL_CALL_1_1(cudaPreparePointerArraysForCleanup, data);
     KERNEL_CALL(cudaCleanupPointerArray<Particle*>, data.objects.particles, data.tempObjects.particles);
@@ -53,7 +53,7 @@ void _GarbageCollectorKernelsService::cleanupAfterDataManipulation(GpuSettings c
     KERNEL_CALL_1_1(cudaSwapHeaps, data);
 }
 
-void _GarbageCollectorKernelsService::copyArrays(GpuSettings const& gpuSettings, SimulationData const& data)
+void _GarbageCollectorKernelsService::copyArrays(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     KERNEL_CALL_1_1(cudaPreparePointerArraysForCleanup, data);
     KERNEL_CALL(cudaCleanupPointerArray<Particle*>, data.objects.particles, data.tempObjects.particles);
@@ -69,7 +69,7 @@ void _GarbageCollectorKernelsService::copyArrays(GpuSettings const& gpuSettings,
     KERNEL_CALL(cudaCleanupDependentCellData, data.tempObjects.cells, data.tempObjects.heap);
 }
 
-void _GarbageCollectorKernelsService::swapArrays(GpuSettings const& gpuSettings, SimulationData const& data)
+void _GarbageCollectorKernelsService::swapArrays(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     KERNEL_CALL_1_1(cudaSwapPointerArrays, data);
     KERNEL_CALL_1_1(cudaSwapHeaps, data);

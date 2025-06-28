@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "EngineInterface/GpuSettings.h"
+#include "EngineInterface/CudaSettings.h"
 
 #include "Base.cuh"
 #include "Definitions.cuh"
@@ -9,7 +9,7 @@
 class _StatisticsKernelsService
 {
 public:
-    void updateStatistics(GpuSettings const& gpuSettings, SimulationData const& data, SimulationStatistics const& simulationStatistics);
+    void updateStatistics(CudaSettings const& gpuSettings, SimulationData const& data, SimulationStatistics const& simulationStatistics);
 
 private:
 };

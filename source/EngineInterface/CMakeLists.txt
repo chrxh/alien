@@ -5,6 +5,15 @@ add_library(EngineInterface
     CellTypeConstants.h
     CellTypeStrings.h
     Colors.h
+    CreatureDescriptionEditService.cpp
+    CreatureDescriptionEditService.h
+    CreatureDescriptionInfoService.cpp
+    CreatureDescriptionInfoService.h
+    CreatureDescriptionValidationService.cpp
+    CreatureDescriptionValidationService.h
+    CreatureDescription.cpp
+    CreatureDescription.h
+    CudaSettings.h
     DataPointCollection.cpp
     DataPointCollection.h
     Definitions.h
@@ -16,15 +25,6 @@ add_library(EngineInterface
     GenomeConstants.h
     GenomeDescriptionConverterService.cpp
     GenomeDescriptionConverterService.h
-    CreatureDescriptionEditService.cpp
-    CreatureDescriptionEditService.h
-    CreatureDescriptionInfoService.cpp
-    CreatureDescriptionInfoService.h
-    CreatureDescriptionValidationService.cpp
-    CreatureDescriptionValidationService.h
-    CreatureDescription.cpp
-    CreatureDescription.h
-    GpuSettings.h
     Ids.h
     InspectedEntityIds.h
     LocationHelper.cpp

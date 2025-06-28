@@ -21,7 +21,7 @@ struct CellTO;
 struct ClusterAccessTO;
 struct CollectionTO;
 struct SimulationParameters;
-struct GpuSettings;
+struct CudaSettings;
 class SimulationStatistics;
 
 class _SimulationKernelsService;

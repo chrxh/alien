@@ -1,12 +1,12 @@
 #pragma once
 
 #include "SimulationParameters.h"
-#include "GpuSettings.h"
+#include "CudaSettings.h"
 
 struct SettingsForSimulation
 {
     int worldSizeX;
     int worldSizeY;
     SimulationParameters simulationParameters;
-    GpuSettings gpuSettings;
+    CudaSettings cudaSettings;
 };

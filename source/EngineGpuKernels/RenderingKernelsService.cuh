@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "EngineInterface/GpuSettings.h"
+#include "EngineInterface/CudaSettings.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/SettingsForSimulation.h"
 

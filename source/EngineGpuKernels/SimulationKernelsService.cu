@@ -24,7 +24,7 @@ namespace
 
 void _SimulationKernelsService::calcTimestep(SettingsForSimulation const& settings, SimulationData const& data, SimulationStatistics const& statistics)
 {
-    auto const gpuSettings = settings.gpuSettings;
+    auto const gpuSettings = settings.cudaSettings;
     KERNEL_CALL_1_1(cudaNextTimestep_prepare, data);
 
     // Not all kernels need to be executed in each time step for performance reasons
@@ -95,7 +95,7 @@ void _SimulationKernelsService::calcTimestep(SettingsForSimulation const& settin
     KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, data);
     KERNEL_CALL(cudaNextTimestep_structuralOperations_substep5, data);
 
-    _garbageCollector->cleanupAfterTimestep(settings.gpuSettings, data);
+    _garbageCollector->cleanupAfterTimestep(settings.cudaSettings, data);
 }
 
 void _SimulationKernelsService::calcTimestepForPreview(
@@ -103,7 +103,7 @@ void _SimulationKernelsService::calcTimestepForPreview(
     SimulationData const& data,
     SimulationStatistics const& statistics)
 {
-    auto const gpuSettings = settings.gpuSettings;
+    auto const gpuSettings = settings.cudaSettings;
     KERNEL_CALL_1_1(cudaNextTimestep_prepare, data);
 
     // Not all kernels need to be executed in each time step for performance reasons
@@ -141,12 +141,12 @@ void _SimulationKernelsService::calcTimestepForPreview(
     KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, data);
     KERNEL_CALL(cudaNextTimestep_structuralOperations_substep5, data);
 
-    _garbageCollector->cleanupAfterTimestep(settings.gpuSettings, data);
+    _garbageCollector->cleanupAfterTimestep(settings.cudaSettings, data);
 }
 
 void _SimulationKernelsService::prepareForSimulationParametersChanges(SettingsForSimulation const& settings, SimulationData const& data)
 {
-    auto const gpuSettings = settings.gpuSettings;
+    auto const gpuSettings = settings.cudaSettings;
     KERNEL_CALL(cudaResetDensity, data);
 }
 

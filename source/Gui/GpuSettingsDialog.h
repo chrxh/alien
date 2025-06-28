@@ -2,7 +2,7 @@
 
 #include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/GpuSettings.h"
+#include "EngineInterface/CudaSettings.h"
 
 #include "AlienDialog.h"
 #include "Definitions.h"
@@ -19,9 +19,9 @@ private:
     void processIntern() override;
     void openIntern();
 
-    void validateAndCorrect(GpuSettings& settings) const;
+    void validateAndCorrect(CudaSettings& settings) const;
 
     SimulationFacade _simulationFacade;
 
-    GpuSettings _gpuSettings;
+    CudaSettings _gpuSettings;
 };

@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "EngineInterface/GpuSettings.h"
+#include "EngineInterface/CudaSettings.h"
 
 #include "CudaMemoryManager.cuh"
 #include "Definitions.cuh"

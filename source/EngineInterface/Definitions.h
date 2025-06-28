@@ -22,7 +22,7 @@ struct ParticleDescription;
 struct CreatureDescription;
 struct GeneDescription;
 
-struct GpuSettings;
+struct CudaSettings;
 
 struct SettingsForSimulation;
 

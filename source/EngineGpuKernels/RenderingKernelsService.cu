@@ -13,7 +13,7 @@ void _RenderingKernelsService::drawImage(
     RenderingData renderingData)
 {
     uint64_t* targetImage = renderingData.imageData;
-    auto const& gpuSettings = settings.gpuSettings;
+    auto const& gpuSettings = settings.cudaSettings;
 
     KERNEL_CALL(cudaDrawSpotsAndGridlines, targetImage, imageSize, data.worldSize, zoom, rectUpperLeft, rectLowerRight);
     KERNEL_CALL_1_1(cudaPrepareFilteringForRendering, data.tempObjects.cells, data.tempObjects.particles);

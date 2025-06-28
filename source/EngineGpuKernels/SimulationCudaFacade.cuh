@@ -75,7 +75,7 @@ public:
     void reconnectSelectedObjects();
     void setDetached(bool value);
 
-    void setGpuConstants(GpuSettings const& cudaConstants);
+    void setGpuConstants(CudaSettings const& cudaConstants);
     SimulationParameters getSimulationParameters() const;
     void setSimulationParameters(
         SimulationParameters const& parameters,

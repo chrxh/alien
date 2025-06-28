@@ -257,17 +257,17 @@ void _SimulationFacadeImpl::setOriginalSimulationParameters(SimulationParameters
     _origSettings.simulationParameters = parameters;
 }
 
-GpuSettings _SimulationFacadeImpl::getGpuSettings() const
+CudaSettings _SimulationFacadeImpl::getGpuSettings() const
 {
     return _gpuSettings;
 }
 
-GpuSettings _SimulationFacadeImpl::getOriginalGpuSettings() const
+CudaSettings _SimulationFacadeImpl::getOriginalGpuSettings() const
 {
-    return _origSettings.gpuSettings;
+    return _origSettings.cudaSettings;
 }
 
-void _SimulationFacadeImpl::setGpuSettings_async(GpuSettings const& gpuSettings)
+void _SimulationFacadeImpl::setGpuSettings_async(CudaSettings const& gpuSettings)
 {
     _gpuSettings = gpuSettings;
     _worker.setGpuSettings_async(gpuSettings);

@@ -22,7 +22,7 @@ _DataAccessKernelsService::~_DataAccessKernelsService()
     CudaMemoryManager::getInstance().freeMemory(_arraySizesTO);
 }
 
-ArraySizesForTO _DataAccessKernelsService::estimateCapacityNeededForTO(GpuSettings const& gpuSettings, SimulationData const& data)
+ArraySizesForTO _DataAccessKernelsService::estimateCapacityNeededForTO(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     setValueToDevice(_arraySizesTO, ArraySizesForTO{});
     KERNEL_CALL(cudaEstimateCapacityNeededForTO, data, _arraySizesTO);
@@ -32,7 +32,7 @@ ArraySizesForTO _DataAccessKernelsService::estimateCapacityNeededForTO(GpuSettin
 }
 
 void _DataAccessKernelsService::getData(
-    GpuSettings const& gpuSettings,
+    CudaSettings const& gpuSettings,
     SimulationData const& data,
     int2 const& rectUpperLeft,
     int2 const& rectLowerRight,
@@ -47,7 +47,7 @@ void _DataAccessKernelsService::getData(
 }
 
 void _DataAccessKernelsService::getSelectedData(
-    GpuSettings const& gpuSettings,
+    CudaSettings const& gpuSettings,
     SimulationData const& data,
     bool includeClusters,
     CollectionTO const& dataTO)
@@ -61,7 +61,7 @@ void _DataAccessKernelsService::getSelectedData(
 }
 
 void _DataAccessKernelsService::getInspectedData(
-    GpuSettings const& gpuSettings,
+    CudaSettings const& gpuSettings,
     SimulationData const& data,
     InspectedEntityIds entityIds,
     CollectionTO const& dataTO)
@@ -75,7 +75,7 @@ void _DataAccessKernelsService::getInspectedData(
 }
 
 void _DataAccessKernelsService::getOverlayData(
-    GpuSettings const& gpuSettings,
+    CudaSettings const& gpuSettings,
     SimulationData const& data,
     int2 rectUpperLeft,
     int2 rectLowerRight,
@@ -85,7 +85,7 @@ void _DataAccessKernelsService::getOverlayData(
     KERNEL_CALL(cudaGetOverlayData, rectUpperLeft, rectLowerRight, data, dataTO);
 }
 
-ArraySizesForGpu _DataAccessKernelsService::estimateCapacityNeededForGpu(GpuSettings const& gpuSettings, CollectionTO const& dataTO)
+ArraySizesForGpu _DataAccessKernelsService::estimateCapacityNeededForGpu(CudaSettings const& gpuSettings, CollectionTO const& dataTO)
 {
     setValueToDevice(_arraySizesGPU, ArraySizesForGpu{});
     KERNEL_CALL(cudaEstimateCapacityNeededForGpu, dataTO, _arraySizesGPU);
@@ -94,7 +94,7 @@ ArraySizesForGpu _DataAccessKernelsService::estimateCapacityNeededForGpu(GpuSett
     return copyToHost(_arraySizesGPU);
 }
 
-void _DataAccessKernelsService::addData(GpuSettings const& gpuSettings, SimulationData const& data, CollectionTO const& dataTO, bool selectData)
+void _DataAccessKernelsService::addData(CudaSettings const& gpuSettings, SimulationData const& data, CollectionTO const& dataTO, bool selectData)
 {
     KERNEL_CALL_1_1(cudaSaveNumEntries, data);
     KERNEL_CALL(cudaAdaptNumberGenerator, data.primaryNumberGen, dataTO);
@@ -109,7 +109,7 @@ void _DataAccessKernelsService::addData(GpuSettings const& gpuSettings, Simulati
     KERNEL_CALL(cudaAdaptNumberGenerator, data.primaryNumberGen, dataTO);
 }
 
-void _DataAccessKernelsService::clearData(GpuSettings const& gpuSettings, SimulationData const& data)
+void _DataAccessKernelsService::clearData(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     KERNEL_CALL(cudaClearData, data);
 }

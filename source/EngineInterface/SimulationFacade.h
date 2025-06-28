@@ -79,9 +79,9 @@ public:
         SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All) = 0;
     virtual void setOriginalSimulationParameters(SimulationParameters const& parameters) = 0;
 
-    virtual GpuSettings getGpuSettings() const = 0;
-    virtual GpuSettings getOriginalGpuSettings() const = 0;
-    virtual void setGpuSettings_async(GpuSettings const& gpuSettings) = 0;
+    virtual CudaSettings getGpuSettings() const = 0;
+    virtual CudaSettings getOriginalGpuSettings() const = 0;
+    virtual void setGpuSettings_async(CudaSettings const& gpuSettings) = 0;
 
     virtual void applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius) = 0;
 

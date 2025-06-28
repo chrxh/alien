@@ -86,9 +86,9 @@ public:
         SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All) override;
     void setOriginalSimulationParameters(SimulationParameters const& parameters) override;
 
-    GpuSettings getGpuSettings() const override;
-    GpuSettings getOriginalGpuSettings() const override;
-    void setGpuSettings_async(GpuSettings const& gpuSettings) override;
+    CudaSettings getGpuSettings() const override;
+    CudaSettings getOriginalGpuSettings() const override;
+    void setGpuSettings_async(CudaSettings const& gpuSettings) override;
 
     void applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius) override;
 
@@ -129,7 +129,7 @@ private:
     int _sessionId = 0;
 
     IntVector2D _worldSize;
-    GpuSettings _gpuSettings;
+    CudaSettings _gpuSettings;
 
     SettingsForSimulation _origSettings;
 

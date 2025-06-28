@@ -306,7 +306,7 @@ void EngineWorker::setSimulationParameters(SimulationParameters const& parameter
     _simulationCudaFacade->setSimulationParameters(parameters, updateConfig);
 }
 
-void EngineWorker::setGpuSettings_async(GpuSettings const& gpuSettings)
+void EngineWorker::setGpuSettings_async(CudaSettings const& gpuSettings)
 {
     std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
     _updateGpuSettingsJob = gpuSettings;

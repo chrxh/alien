@@ -12,7 +12,7 @@
 #include "Base/Definitions.h"
 
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/GpuSettings.h"
+#include "EngineInterface/CudaSettings.h"
 #include "EngineInterface/MutationType.h"
 #include "EngineInterface/OverlayDescriptions.h"
 #include "EngineInterface/StatisticsRawData.h"
@@ -91,7 +91,7 @@ public:
     void setSimulationParameters(
         SimulationParameters const& parameters,
         SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All);
-    void setGpuSettings_async(GpuSettings const& gpuSettings);
+    void setGpuSettings_async(CudaSettings const& gpuSettings);
 
     void applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);
 
@@ -153,7 +153,7 @@ private:
     //async jobs
     std::mutex _mutexForEngineWorkerGuard;
     mutable std::mutex _mutexForAsyncJobs;
-    std::optional<GpuSettings> _updateGpuSettingsJob;
+    std::optional<CudaSettings> _updateGpuSettingsJob;
 
     struct ApplyForceJob
     {

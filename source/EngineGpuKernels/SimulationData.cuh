@@ -5,7 +5,7 @@
 #include "EngineInterface/ArraySizesForGpu.h"
 #include "EngineInterface/CellTypeConstants.h"
 #include "EngineInterface/Colors.h"
-#include "EngineInterface/GpuSettings.h"
+#include "EngineInterface/CudaSettings.h"
 
 #include "Base.cuh"
 #include "CudaNumberGenerator.cuh"
