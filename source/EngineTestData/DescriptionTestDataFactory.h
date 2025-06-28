@@ -26,6 +26,10 @@ public:
     };
     CreatureDescription createRandomCreatureDescription(NodeParameter nodeParameter) const;
 
+    bool compare(CollectionDescription left, CollectionDescription right) const;
+    bool compare(CellDescription left, CellDescription right) const;
+    bool compare(ParticleDescription left, ParticleDescription right) const;
+
 private:
     CellTypeDescription createRandomCellTypeDescription(CellParameter cellParameter) const;
 

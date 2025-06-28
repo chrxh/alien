@@ -8,6 +8,7 @@ target_link_libraries(PersisterTests EngineGpuKernels)
 target_link_libraries(PersisterTests EngineImpl)
 target_link_libraries(PersisterTests EngineInterface)
 target_link_libraries(PersisterTests EngineTestData)
+target_link_libraries(PersisterTests PersisterInterface)
 
 target_link_libraries(PersisterTests CUDA::cudart_static)
 target_link_libraries(PersisterTests CUDA::cuda_driver)

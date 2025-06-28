@@ -2,9 +2,21 @@
 
 #include "EngineTestData/DescriptionTestDataFactory.h"
 
+#include "PersisterInterface/SerializerService.h"
+
 
 class SerializerServiceTests : public ::testing::Test
 {
+public:
+    SerializerServiceTests()
+    {
+        _descriptionTestDataFactory = &DescriptionTestDataFactory::get();
+        _serializerService = &SerializerService::get();
+    }
+
+protected:
+    DescriptionTestDataFactory* _descriptionTestDataFactory;
+    SerializerService* _serializerService;
 };
 
 using CellParameter = DescriptionTestDataFactory::CellParameter;
@@ -36,5 +48,62 @@ INSTANTIATE_TEST_SUITE_P(
         CellParameter{CellType_Reconnector},
         CellParameter{CellType_Detonator}));
 
-TEST_F(SerializerServiceTests, singleCellWithoutCreature) {
+TEST_P(SerializerServiceTests_AllCellTypes, singleCellWithoutCreature)
+{
+    auto cellParameter = GetParam();
+
+    CollectionDescription data;
+    data.addCell(_descriptionTestDataFactory->createRandomCellDescription(cellParameter));
+
+    DeserializedSimulation deserializedSimulationBefore{.mainData = data};
+    SerializedSimulation serializedSimulation;
+    _serializerService->serializeSimulationToStrings(serializedSimulation, deserializedSimulationBefore);
+
+    DeserializedSimulation deserializedSimulationAfter;
+    _serializerService->deserializeSimulationFromStrings(deserializedSimulationAfter, serializedSimulation);
+
+    EXPECT_TRUE(_descriptionTestDataFactory->compare(deserializedSimulationBefore.mainData, deserializedSimulationAfter.mainData));
+}
+
+using NodeParameter = DescriptionTestDataFactory::NodeParameter;
+class SerializerServiceTests_AllNodeTypes_New
+    : public SerializerServiceTests
+    , public testing::WithParamInterface<NodeParameter>
+{};
+
+INSTANTIATE_TEST_SUITE_P(
+    SerializerServiceTests_AllNodeTypes_New,
+    SerializerServiceTests_AllNodeTypes_New,
+    ::testing::Values(
+        NodeParameter{CellTypeGenome_Base},
+        NodeParameter{CellTypeGenome_Depot},
+        NodeParameter{CellTypeGenome_Constructor},
+        NodeParameter{CellTypeGenome_Sensor},
+        NodeParameter{CellTypeGenome_Oscillator},
+        NodeParameter{CellTypeGenome_Attacker},
+        NodeParameter{CellTypeGenome_Injector},
+        NodeParameter{CellTypeGenome_Muscle, MuscleMode_AutoBending},
+        NodeParameter{CellTypeGenome_Muscle, MuscleMode_ManualBending},
+        NodeParameter{CellTypeGenome_Muscle, MuscleMode_AngleBending},
+        NodeParameter{CellTypeGenome_Muscle, MuscleMode_AutoCrawling},
+        NodeParameter{CellTypeGenome_Muscle, MuscleMode_ManualCrawling},
+        NodeParameter{CellTypeGenome_Muscle, MuscleMode_DirectMovement},
+        NodeParameter{CellTypeGenome_Defender},
+        NodeParameter{CellTypeGenome_Reconnector},
+        NodeParameter{CellTypeGenome_Detonator}));
+
+TEST_P(SerializerServiceTests_AllNodeTypes_New, singleCellWithCreature_oneGene_oneNode)
+{
+    auto nodeParameter = GetParam();
+
+    auto data = CollectionDescription().addCreature(_descriptionTestDataFactory->createRandomCreatureDescription(nodeParameter), {CellDescription()});
+
+    DeserializedSimulation deserializedSimulationBefore{.mainData = data};
+    SerializedSimulation serializedSimulation;
+    _serializerService->serializeSimulationToStrings(serializedSimulation, deserializedSimulationBefore);
+
+    DeserializedSimulation deserializedSimulationAfter;
+    _serializerService->deserializeSimulationFromStrings(deserializedSimulationAfter, serializedSimulation);
+
+    EXPECT_TRUE(_descriptionTestDataFactory->compare(deserializedSimulationBefore.mainData, deserializedSimulationAfter.mainData));
 }

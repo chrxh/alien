@@ -4,6 +4,9 @@
 
 #include "Base/Math.h"
 #include "EngineInterface/SimulationParameters.h"
+
+#include "EngineTestData/DescriptionTestDataFactory.h"
+
 #include "EngineImpl/SimulationFacadeImpl.h"
 
 IntegrationTestFramework::IntegrationTestFramework(std::optional<SimulationParameters> const& parameters_, IntVector2D const& universeSize)
@@ -143,55 +146,15 @@ bool IntegrationTestFramework::approxCompare(std::vector<float> const& expected,
 
 bool IntegrationTestFramework::compare(CollectionDescription left, CollectionDescription right) const
 {
-    std::sort(left._cells.begin(), left._cells.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-    std::sort(right._cells.begin(), right._cells.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-    std::sort(left._particles.begin(), left._particles.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-    std::sort(right._particles.begin(), right._particles.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-
-    //// Equalize genome ids since they are generated during GPU -> CPU transfer
-    //if (left._cells.size() != right._cells.size()) {
-    //    return false;
-    //}
-    //std::unordered_map<uint64_t, uint64_t> leftByRightGenomeId;
-    //for (auto const& [leftCell, rightCell] : boost::combine(left._cells, right._cells)) {
-    //    if (leftCell._creatureId.has_value() != rightCell._creatureId.has_value()) {
-    //        return false;
-    //    }
-    //    if (leftCell._creatureId.has_value()) {
-    //        leftByRightGenomeId.insert_or_assign(rightCell._creatureId.value(), leftCell._creatureId.value());
-    //    }
-    //}
-    //for (auto& genome : right._creatures) {
-    //    if (!leftByRightGenomeId.contains(genome._id)) {
-    //        return false;
-    //    }
-    //    genome._id = leftByRightGenomeId.at(genome._id);
-    //}
-    //for (auto& cells : right._cells) {
-    //    if (cells._creatureId.has_value()) {
-    //        if (!leftByRightGenomeId.contains(cells._creatureId.value())) {
-    //            return false;
-    //        }
-    //        cells._creatureId = leftByRightGenomeId.at(cells._creatureId.value());
-    //    }
-    //}
-
-    std::sort(left._creatures.begin(), left._creatures.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-    std::sort(right._creatures.begin(), right._creatures.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-
-    return left == right;
+    return DescriptionTestDataFactory::get().compare(left, right);
 }
 
 bool IntegrationTestFramework::compare(CellDescription left, CellDescription right) const
 {
-    left._id = 0;
-    right._id = 0;
-    return left == right;
+    return DescriptionTestDataFactory::get().compare(left, right);
 }
 
 bool IntegrationTestFramework::compare(ParticleDescription left, ParticleDescription right) const
 {
-    left._id = 0;
-    right._id = 0;
-    return left == right;
+    return DescriptionTestDataFactory::get().compare(left, right);
 }

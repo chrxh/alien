@@ -95,20 +95,20 @@ IncludeCategories:
   - Regex: '^"EngineTestData/.*"$'
     Priority: 202
 
-  # Persister interface includes
-  - Regex: '^"PersisterInterface/.*"$'
-    Priority: 203
-
-  # Network module includes
-  - Regex: '^"Network/.*"$'
-    Priority: 204
-
   # Engine implementation includes
   - Regex: '^"EngineImpl/.*"$'
-    Priority: 205
+    Priority: 203
+
+  # Persister interface includes
+  - Regex: '^"PersisterInterface/.*"$'
+    Priority: 204
 
   # Persister implementation includes
   - Regex: '^"PersisterImpl/.*"$'
+    Priority: 205
+
+  # Network module includes
+  - Regex: '^"Network/.*"$'
     Priority: 206
 
   # All other local project includes without path (from current directory)

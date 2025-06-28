@@ -567,6 +567,7 @@ namespace
     auto constexpr Id_Oscillator_AutoTriggerInterval = 0;
     auto constexpr Id_Oscillator_PulseType = 1;
     auto constexpr Id_Oscillator_AlternationMode = 2;
+    auto constexpr Id_Oscillator_NumPulses = 3;
 
     auto constexpr Id_Sensor_MinDensity = 0;
     auto constexpr Id_Sensor_RestrictToColor = 4;
@@ -703,6 +704,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Oscillator_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
         loadSave(task, auxiliaries, Id_Oscillator_PulseType, data._pulseType, defaultObject._pulseType);
         loadSave(task, auxiliaries, Id_Oscillator_AlternationMode, data._alternationInterval, defaultObject._alternationInterval);
+        loadSave(task, auxiliaries, Id_Oscillator_NumPulses, data._numPulses, defaultObject._numPulses);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(OscillatorDescription)

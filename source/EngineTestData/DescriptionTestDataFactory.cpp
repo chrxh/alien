@@ -1,5 +1,7 @@
 #include "DescriptionTestDataFactory.h"
 
+#include <algorithm>
+
 CellDescription DescriptionTestDataFactory::createRandomCellDescription(CellParameter cellParameter) const
 {
     auto cellTypeDesc = createRandomCellTypeDescription(cellParameter);
@@ -50,6 +52,33 @@ CreatureDescription DescriptionTestDataFactory::createRandomCreatureDescription(
             }),
     });
 }
+
+bool DescriptionTestDataFactory::compare(CollectionDescription left, CollectionDescription right) const
+{
+    std::sort(left._cells.begin(), left._cells.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+    std::sort(right._cells.begin(), right._cells.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+    std::sort(left._particles.begin(), left._particles.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+    std::sort(right._particles.begin(), right._particles.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+    std::sort(left._creatures.begin(), left._creatures.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+    std::sort(right._creatures.begin(), right._creatures.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+
+    return left == right;
+}
+
+bool DescriptionTestDataFactory::compare(CellDescription left, CellDescription right) const
+{
+    left._id = 0;
+    right._id = 0;
+    return left == right;
+}
+
+bool DescriptionTestDataFactory::compare(ParticleDescription left, ParticleDescription right) const
+{
+    left._id = 0;
+    right._id = 0;
+    return left == right;
+}
+
 
 CellTypeDescription DescriptionTestDataFactory::createRandomCellTypeDescription(CellParameter cellParameter) const
 {
