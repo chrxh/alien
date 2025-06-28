@@ -99,6 +99,11 @@ CreatureDescription const& _CreatureTabWidget::getCreatureDescription()
     return _editData->creature;
 }
 
+CreatureTabEditData const& _CreatureTabWidget::getEditData() const
+{
+    return _editData;
+}
+
 bool _CreatureTabWidget::isEmpty() const
 {
     return _editData->creature == CreatureDescription();

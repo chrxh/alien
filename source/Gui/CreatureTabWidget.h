@@ -21,6 +21,7 @@ public:
     std::string getName() const;
     bool hasCreaturesGenomeBeChanged() const;
     CreatureDescription const& getCreatureDescription();
+    CreatureTabEditData const& getEditData() const;
     bool isEmpty() const;
     void convertToDraftTab();
     void resetChanges();

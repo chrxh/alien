@@ -7,6 +7,7 @@
 #include "EngineInterface/CreatureDescriptionInfoService.h"
 
 #include "AlienGui.h"
+#include "ChangeColorDialog.h"
 #include "CreatureTabLayoutData.h"
 #include "CreatureTabWidget.h"
 #include "EditorController.h"
@@ -48,6 +49,8 @@ CreatureEditorWindow::CreatureEditorWindow()
 
 void CreatureEditorWindow::initIntern(SimulationFacade simulationFacade)
 {
+    ChangeColorDialog::get().setup();
+
     _simulationFacade = simulationFacade;
 
     // Initialize the first tab with a draft creature
@@ -77,6 +80,16 @@ void CreatureEditorWindow::processToolbar()
     }
 
     ImGui::SameLine();
+    if (AlienGui::ToolbarButton(
+            AlienGui::ToolbarButtonParameters()
+                .text(ICON_FA_UPLOAD)
+                .tooltip("Share your creature with other users:\nYour current creature will be uploaded to the server and made visible in the browser."))) {
+    }
+
+    ImGui::SameLine();
+    AlienGui::ToolbarSeparator();
+
+    ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COPY).tooltip("Copy creature"))) {
         printOverlayMessage("Creature copied");
     }
@@ -87,10 +100,8 @@ void CreatureEditorWindow::processToolbar()
     }
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(
-            AlienGui::ToolbarButtonParameters()
-                .text(ICON_FA_UPLOAD)
-                .tooltip("Share your creature with other users:\nYour current creature will be uploaded to the server and made visible in the browser."))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PALETTE).tooltip("Change the color of all nodes with a certain color"))) {
+        ChangeColorDialog::get().open(_tabs.at(_selectedTabIndex)->getEditData());
     }
 
     ImGui::SameLine();
