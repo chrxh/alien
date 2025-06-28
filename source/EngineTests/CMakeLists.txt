@@ -1,32 +1,26 @@
 target_sources(EngineTests
 PUBLIC
-    AttackerTests.cpp
-    CellConnectionTests_New.cpp
-    CellStateTransitionTests_New.cpp
+    CellConnectionTests.cpp
+    CellStateTransitionTests.cpp
     ConstructorTests.cpp
-    ConstructorTests_New.cpp
-    CreatureDescriptionEditServiceTests_New.cpp
-    CreatureDescriptionInfoServiceTests_New.cpp
+    CreatureDescriptionEditServiceTests.cpp
+    CreatureDescriptionInfoServiceTests.cpp
     DataTransferTests.cpp
-    DataTransferTests_New.cpp
     DefenderTests.cpp
-    DescriptionEditTests_New.cpp
+    DescriptionEditTests.cpp
     DetonatorTests.cpp
-    EnergyFlowTests_New.cpp
-    GarbageCollectorTests_New.cpp
+    EnergyFlowTests.cpp
+    GarbageCollectorTests.cpp
     InjectorTests.cpp
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h
     MuscleTests.cpp
-    MuscleTests_New.cpp
-    MutationTests.cpp
     NeuronTests.cpp
-    OscillatorTests_New.cpp
-    ParametersEditServiceTests_New.cpp
+    OscillatorTests.cpp
+    ParametersEditServiceTests.cpp
     ReconnectorTests.cpp
     SensorTests.cpp
-    SensorTests_New.cpp
-    SignalTests_New.cpp
+    SignalTests.cpp
     StatisticsTests.cpp
     Testsuite.cpp
     DepotTests.cpp)
