@@ -26,7 +26,6 @@
 #include "OverlayController.h"
 #include "SimulationView.h"
 #include "FpsController.h"
-#include "GenomeEditorWindow.h"
 #include "GettingStartedWindow.h"
 #include "GpuSettingsDialog.h"
 #include "ImageToPatternDialog.h"
@@ -472,13 +471,6 @@ void MainLoopController::processMenubar()
             .disabled(!SimulationInteractionController::get().isEditMode())
             .closeMenuWhenItemClicked(false),
         [&] { PatternEditorWindow::get().setOn(!PatternEditorWindow::get().isOn()); });
-    AlienGui::MenuItem(
-        AlienGui::MenuItemParameters()
-            .name("Genome editor (deprecated)")
-            .selected(GenomeEditorWindow::get().isOn())
-            .disabled(!SimulationInteractionController::get().isEditMode())
-            .closeMenuWhenItemClicked(false),
-        [&] { GenomeEditorWindow::get().setOn(!GenomeEditorWindow::get().isOn()); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name("Creature editor")

@@ -97,8 +97,6 @@ class NewPasswordDialog;
 
 class ImageToPatternDialog;
 
-class GenomeEditorWindow;
-
 class RadiationSourcesWindow;
 
 class ChangeColorDialog;

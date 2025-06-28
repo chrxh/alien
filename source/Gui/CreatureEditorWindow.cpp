@@ -31,9 +31,15 @@ void CreatureEditorWindow::openTab(CreatureDescription const& creature, bool ope
     }
     if (tabIndex) {
         _tabIndexToSelect = *tabIndex;
+        _tabs.at(*tabIndex)->resetChanges();
     } else {
         onScheduleAddTab(creature, false);
     }
+}
+
+CreatureDescription CreatureEditorWindow::getCurrentCreature() const
+{
+    return CreatureDescription();
 }
 
 CreatureEditorWindow::CreatureEditorWindow()
@@ -68,6 +74,16 @@ void CreatureEditorWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SAVE).tooltip("Save creature to file"))) {
+    }
+
+    ImGui::SameLine();
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COPY).tooltip("Copy creature"))) {
+        printOverlayMessage("Creature copied");
+    }
+
+    ImGui::SameLine();
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PASTE).tooltip("Paste creature"))) {
+        printOverlayMessage("Creature pasted");
     }
 
     ImGui::SameLine();

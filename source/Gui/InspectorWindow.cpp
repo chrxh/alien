@@ -8,14 +8,12 @@
 #include <imgui.h>
 
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/GenomeDescriptionConverterService.h"
 #include "EngineInterface/PreviewDescriptionService.h"
 #include "EngineInterface/SimulationFacade.h"
 
 #include "AlienGui.h"
 #include "EditorModel.h"
 #include "CreatureEditorWindow.h"
-#include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
 #include "OverlayController.h"
 #include "StyleRepository.h"

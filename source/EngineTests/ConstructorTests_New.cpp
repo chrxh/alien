@@ -5,8 +5,6 @@
 
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/GenomeConstants.h"
-#include "EngineInterface/GenomeDescriptionConverterService.h"
 #include "EngineInterface/SimulationFacade.h"
 
 #include "IntegrationTestFramework.h"

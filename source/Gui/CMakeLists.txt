@@ -52,8 +52,6 @@ PUBLIC
     GeneEditorWidget.h
     GenomeEditorWidget.cpp
     GenomeEditorWidget.h
-    GenomeEditorWindow.cpp
-    GenomeEditorWindow.h
     GettingStartedWindow.cpp
     GettingStartedWindow.h
     GpuSettingsDialog.cpp

@@ -3,7 +3,6 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/GenomeDescriptionConverterService.h"
 #include "EngineInterface/CreatureDescription.h"
 
 #include "IntegrationTestFramework.h"
@@ -20,8 +19,6 @@ public:
 
 TEST_F(EnergyFlowTests_New, energyFlowsLeadsEqualDistribution)
 {
-    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
-
     CollectionDescription data;
     for (int i = 0; i < 20; ++i) {
         auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});

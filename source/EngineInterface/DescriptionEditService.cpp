@@ -9,7 +9,6 @@
 
 #include "CreatureDescription.h"
 #include "SpaceCalculator.h"
-#include "GenomeDescriptionConverterService.h"
 
 CollectionDescription DescriptionEditService::createRect(CreateRectParameters const& parameters)
 {
@@ -359,21 +358,6 @@ void DescriptionEditService::randomizeCellColors(ClusteredCollectionDescription&
         for (auto& cell : cluster._cells) {
             cell._color = newColor;
         }
-    }
-}
-
-namespace
-{
-    void colorizeGenomeNodes(std::vector<uint8_t>& genome, int color)
-    {
-        auto desc = GenomeDescriptionConverterService::get().convertBytesToDescription(genome);
-        for (auto& node : desc._cells) {
-            node._color = color;
-            if (node.hasGenome()) {
-                colorizeGenomeNodes(node.getGenomeRef(), color);
-            }
-        }
-        genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(desc);
     }
 }
 

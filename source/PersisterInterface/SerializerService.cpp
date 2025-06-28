@@ -24,9 +24,7 @@
 
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationParameters.h"
-#include "EngineInterface/GenomeConstants.h"
 #include "EngineInterface/CreatureDescription.h"
-#include "EngineInterface/GenomeDescriptionConverterService.h"
 
 #include "SettingsParserService.h"
 
@@ -151,11 +149,6 @@ namespace
     auto constexpr Id_SignalRoutingGenome_Active = 0;
     auto constexpr Id_SignalRoutingGenome_BaseAngle = 1;
     auto constexpr Id_SignalRoutingGenome_OpeneningAngle = 2;
-
-    auto constexpr Id_CellGenome_ReferenceAngle = 0;
-    auto constexpr Id_CellGenome_Energy = 1;
-    auto constexpr Id_CellGenome_Color = 2;
-    auto constexpr Id_CellGenome_NumRequiredAdditionalConnections = 3;
 
     auto constexpr Id_NeuralNetworkGenome_Weights = 0;
     auto constexpr Id_NeuralNetworkGenome_Biases = 1;
@@ -469,166 +462,6 @@ namespace cereal
         ar(data._genes);
     }
     SPLIT_SERIALIZATION(CreatureDescription)
-}
-
-/************************************************************************/
-/* Old genome model                                                     */
-/************************************************************************/
-namespace
-{
-    auto constexpr Id_GenomeHeader_Shape = 0;
-    auto constexpr Id_GenomeHeader_SeparateConstruction = 1;
-    auto constexpr Id_GenomeHeader_AngleAlignment = 2;
-    auto constexpr Id_GenomeHeader_Stiffness = 3;
-    auto constexpr Id_GenomeHeader_ConnectionDistance = 4;
-    auto constexpr Id_GenomeHeader_NumConcatenations = 5;
-    auto constexpr Id_GenomeHeader_ConcatenationAngle1 = 6;
-    auto constexpr Id_GenomeHeader_ConcatenationAngle2 = 7;
-    auto constexpr Id_GenomeHeader_NumBranches = 8;
-    auto constexpr Id_GenomeHeader_FrontAngle = 9;
-
-    auto constexpr Id_ConstructorGenome_Mode = 0;
-    auto constexpr Id_ConstructorGenome_ConstructionActivationTime = 1;
-    auto constexpr Id_ConstructorGenome_ConstructionAngle1 = 2;
-    auto constexpr Id_ConstructorGenome_ConstructionAngle2 = 3;
-
-    auto constexpr Id_InjectorGenome_Mode = 0;
-
-    auto constexpr Id_SensorGenome_MinDensity = 0;
-    auto constexpr Id_SensorGenome_RestrictToColor = 1;
-    auto constexpr Id_SensorGenome_RestrictToMutants = 2;
-    auto constexpr Id_SensorGenome_MinRange = 3;
-    auto constexpr Id_SensorGenome_MaxRange = 4;
-    auto constexpr Id_SensorGenome_AutoTriggerInterval = 5;
-}
-
-namespace cereal
-{
-    template <class Archive>
-    void serialize(Archive& ar, MakeGenomeCopy& data)
-    {}
-
-    template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, ConstructorGenomeDescription& data)
-    {
-        ConstructorGenomeDescription defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_ConstructorGenome_Mode, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
-        loadSave(
-            task, auxiliaries, Id_ConstructorGenome_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
-        loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle1, data._constructionAngle1, defaultObject._constructionAngle1);
-        loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle2, data._constructionAngle2, defaultObject._constructionAngle2);
-        processLoadSaveMap(task, ar, auxiliaries);
-
-        if (task == SerializationTask::Load) {
-            std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
-            ar(genomeData);
-            if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
-                data._genome = MakeGenomeCopy();
-            } else {
-                data._genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
-            }
-        } else {
-            std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
-            if (std::holds_alternative<MakeGenomeCopy>(data._genome)) {
-                genomeData = MakeGenomeCopy();
-            } else {
-                genomeData = GenomeDescriptionConverterService::get().convertBytesToDescription(std::get<std::vector<uint8_t>>(data._genome));
-            }
-            ar(genomeData);
-        }
-    }
-    SPLIT_SERIALIZATION(ConstructorGenomeDescription)
-
-    template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, InjectorGenomeDescription& data)
-    {
-        InjectorGenomeDescription defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_InjectorGenome_Mode, data._mode, defaultObject._mode);
-        processLoadSaveMap(task, ar, auxiliaries);
-
-        if (task == SerializationTask::Load) {
-            std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
-            ar(genomeData);
-            if (std::holds_alternative<MakeGenomeCopy>(genomeData)) {
-                data._genome = MakeGenomeCopy();
-            } else {
-                data._genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(std::get<GenomeDescription>(genomeData));
-            }
-        } else {
-            std::variant<MakeGenomeCopy, GenomeDescription> genomeData;
-            if (std::holds_alternative<MakeGenomeCopy>(data._genome)) {
-                genomeData = MakeGenomeCopy();
-            } else {
-                genomeData = GenomeDescriptionConverterService::get().convertBytesToDescription(std::get<std::vector<uint8_t>>(data._genome));
-            }
-            ar(genomeData);
-        }
-    }
-    SPLIT_SERIALIZATION(InjectorGenomeDescription)
-
-    template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, SensorGenomeDescription& data)
-    {
-        SensorGenomeDescription defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_SensorGenome_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
-        loadSave(task, auxiliaries, Id_SensorGenome_MinDensity, data._minDensity, defaultObject._minDensity);
-        loadSave(task, auxiliaries, Id_SensorGenome_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
-        loadSave(task, auxiliaries, Id_SensorGenome_RestrictToMutants, data._restrictToMutants, defaultObject._restrictToMutants);
-        loadSave(task, auxiliaries, Id_SensorGenome_MinRange, data._minRange, defaultObject._minRange);
-        loadSave(task, auxiliaries, Id_SensorGenome_MaxRange, data._maxRange, defaultObject._maxRange);
-        processLoadSaveMap(task, ar, auxiliaries);
-    }
-    SPLIT_SERIALIZATION(SensorGenomeDescription)
-
-    template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, CellGenomeDescription& data)
-    {
-        CellGenomeDescription defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_CellGenome_ReferenceAngle, data._referenceAngle, defaultObject._referenceAngle);
-        loadSave(task, auxiliaries, Id_CellGenome_Energy, data._energy, defaultObject._energy);
-        loadSave(task, auxiliaries, Id_CellGenome_Color, data._color, defaultObject._color);
-        loadSave(
-            task,
-            auxiliaries,
-            Id_CellGenome_NumRequiredAdditionalConnections,
-            data._numRequiredAdditionalConnections,
-            defaultObject._numRequiredAdditionalConnections);
-        processLoadSaveMap(task, ar, auxiliaries);
-
-        ar(data._signalRoutingRestriction, data._neuralNetwork, data._cellTypeData);
-    }
-    SPLIT_SERIALIZATION(CellGenomeDescription)
-
-    template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, GenomeHeaderDescription& data)
-    {
-        GenomeHeaderDescription defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_GenomeHeader_Shape, data._shape, defaultObject._shape);
-        loadSave(task, auxiliaries, Id_GenomeHeader_NumBranches, data._numBranches, defaultObject._numBranches);
-        loadSave(task, auxiliaries, Id_GenomeHeader_SeparateConstruction, data._separateConstruction, defaultObject._separateConstruction);
-        loadSave(task, auxiliaries, Id_GenomeHeader_AngleAlignment, data._angleAlignment, defaultObject._angleAlignment);
-        loadSave(task, auxiliaries, Id_GenomeHeader_Stiffness, data._stiffness, defaultObject._stiffness);
-        loadSave(task, auxiliaries, Id_GenomeHeader_ConnectionDistance, data._connectionDistance, defaultObject._connectionDistance);
-        loadSave(task, auxiliaries, Id_GenomeHeader_NumConcatenations, data._numRepetitions, defaultObject._numRepetitions);
-        loadSave(task, auxiliaries, Id_GenomeHeader_ConcatenationAngle1, data._concatenationAngle1, defaultObject._concatenationAngle1);
-        loadSave(task, auxiliaries, Id_GenomeHeader_ConcatenationAngle2, data._concatenationAngle2, defaultObject._concatenationAngle2);
-        loadSave(task, auxiliaries, Id_GenomeHeader_FrontAngle, data._frontAngle, defaultObject._frontAngle);
-
-        processLoadSaveMap(task, ar, auxiliaries);
-    }
-    SPLIT_SERIALIZATION(GenomeHeaderDescription)
-
-    template <class Archive>
-    void serialize(Archive& ar, GenomeDescription& data)
-    {
-        ar(data._header, data._cells);
-    }
-
 }
 
 /************************************************************************/

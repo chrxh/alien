@@ -109,6 +109,13 @@ void _CreatureTabWidget::convertToDraftTab()
     _specificEditData = DraftCreatureData{};
 }
 
+void _CreatureTabWidget::resetChanges()
+{
+    auto& simulatedCreatureData = std::get<SimulatedCreatureData>(_specificEditData);
+    simulatedCreatureData.origCreature = _editData->creature;
+    simulatedCreatureData.changesMade = false;
+}
+
 _CreatureTabWidget::_CreatureTabWidget(
     SimulationFacade const& simulationFacade,
     CreatureDescription const& genome,

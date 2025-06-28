@@ -23,6 +23,7 @@ public:
     CreatureDescription const& getCreatureDescription();
     bool isEmpty() const;
     void convertToDraftTab();
+    void resetChanges();
 
 private:
     _CreatureTabWidget(SimulationFacade const& simulationFacade, CreatureDescription const& genome, bool draft, CreatureTabLayoutData const& layoutData = nullptr);
@@ -51,7 +52,7 @@ private:
     struct SimulatedCreatureData
     {
         CreatureDescription origCreature;
-        bool changesMade = false;
+        bool changesMade = false;  // true = origCreature has been changed
     };
     using SpecificEditData = std::variant<DraftCreatureData, SimulatedCreatureData>;
     SpecificEditData _specificEditData;

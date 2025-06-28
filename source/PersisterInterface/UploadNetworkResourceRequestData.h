@@ -19,9 +19,9 @@ struct UploadNetworkResourceRequestData
         float zoom = 1.0f;
         RealVector2D center;
     };
-    struct GenomeData
+    struct CreatureData
     {
-        GenomeDescription description;
+        CreatureDescription description;
     };
-    std::variant<SimulationData, GenomeData> data;
+    std::variant<SimulationData, CreatureData> data;
 };

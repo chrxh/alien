@@ -69,7 +69,6 @@
 #include "ImageToPatternDialog.h"
 #include "GenericFileDialog.h"
 #include "ShaderWindow.h"
-#include "GenomeEditorWindow.h"
 #include "ExitDialog.h"
 #include "AutosaveWindow.h"
 #include "FileTransferController.h"

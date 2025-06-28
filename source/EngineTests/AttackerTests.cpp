@@ -3,7 +3,6 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/GenomeDescriptionConverterService.h"
 #include "EngineInterface/CreatureDescription.h"
 
 #include "IntegrationTestFramework.h"

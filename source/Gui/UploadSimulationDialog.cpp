@@ -11,9 +11,9 @@
 #include "GenericMessageDialog.h"
 #include "StyleRepository.h"
 #include "BrowserWindow.h"
+#include "CreatureEditorWindow.h"
 #include "EditorController.h"
 #include "Viewport.h"
-#include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
 #include "LoginDialog.h"
 #include "NetworkTransferController.h"
@@ -135,11 +135,11 @@ void UploadSimulationDialog::processIntern()
 
 void UploadSimulationDialog::onUpload()
 {
-    auto data = [&]() -> std::variant<UploadNetworkResourceRequestData::SimulationData, UploadNetworkResourceRequestData::GenomeData> {
+    auto data = [&]() -> std::variant<UploadNetworkResourceRequestData::SimulationData, UploadNetworkResourceRequestData::CreatureData> {
         if (_resourceType == NetworkResourceType_Simulation) {
             return UploadNetworkResourceRequestData::SimulationData{.zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos()};
         } else {
-            return UploadNetworkResourceRequestData::GenomeData{.description = GenomeEditorWindow::get().getCurrentGenome()};
+            return UploadNetworkResourceRequestData::CreatureData{.description = CreatureEditorWindow::get().getCurrentCreature()};
         }
     }();
     auto workspaceType = _share ? WorkspaceType_Public : WorkspaceType_Private;

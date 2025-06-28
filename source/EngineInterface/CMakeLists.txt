@@ -22,9 +22,6 @@ add_library(EngineInterface
     Descriptions.cpp
     Descriptions.h
     EngineConstants.h
-    GenomeConstants.h
-    GenomeDescriptionConverterService.cpp
-    GenomeDescriptionConverterService.h
     Ids.h
     InspectedEntityIds.h
     LocationHelper.cpp

@@ -2,7 +2,6 @@
 
 #include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/CellTypeConstants.h"
-#include "EngineInterface/GenomeConstants.h"
 
 #include "Base.cuh"
 #include "ConstantMemory.cuh"

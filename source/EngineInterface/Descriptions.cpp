@@ -5,7 +5,6 @@
 #include "Base/Math.h"
 #include "Base/Physics.h"
 
-#include "GenomeDescriptionConverterService.h"
 #include "NumberGenerator.h"
 
 ConstructorDescription::ConstructorDescription()

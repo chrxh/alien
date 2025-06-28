@@ -13,6 +13,7 @@ class CreatureEditorWindow : public AlienWindow<SimulationFacade>
 
 public:
     void openTab(CreatureDescription const& creature, bool openCreatureEditorIfClosed = true);
+    CreatureDescription getCurrentCreature() const;
 
 private:
     CreatureEditorWindow();

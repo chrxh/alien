@@ -10,7 +10,6 @@
 
 #include "EngineInterface/NumberGenerator.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/GenomeConstants.h"
 #include "EngineGpuKernels/CollectionTOProvider.cuh"
 
 

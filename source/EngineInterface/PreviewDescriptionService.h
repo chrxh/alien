@@ -10,6 +10,6 @@ class PreviewDescriptionService
 {
     MAKE_SINGLETON(PreviewDescriptionService);
 public:
-    PreviewDescription convert(GenomeDescription const& genome, std::optional<int> selectedNode, SimulationParameters const& parameters);
+    PreviewDescription convert(CreatureDescription const& creature, std::optional<int> selectedNode, SimulationParameters const& parameters);
 };
 

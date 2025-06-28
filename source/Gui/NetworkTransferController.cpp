@@ -8,8 +8,8 @@
 #include "TemporalControlWindow.h"
 #include "Viewport.h"
 #include "EditorController.h"
-#include "GenomeEditorWindow.h"
 #include "BrowserWindow.h"
+#include "CreatureEditorWindow.h"
 #include "OverlayController.h"
 
 void NetworkTransferController::init(SimulationFacade simulationFacade, PersisterFacade persisterFacade)
@@ -71,7 +71,7 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                 printOverlayMessage(data.resourceName);
             } else {
                 EditorController::get().setOn(true);
-                GenomeEditorWindow::get().openTab(std::get<GenomeDescription>(data.resourceData));
+                CreatureEditorWindow::get().openTab(std::get<CreatureDescription>(data.resourceData));
             }
             if (VersionParserService::get().isVersionNewer(data.resourceVersion)) {
                 std::string dataTypeString = data.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";

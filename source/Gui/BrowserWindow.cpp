@@ -19,7 +19,6 @@
 #include "Base/StringHelper.h"
 #include "Base/VersionParserService.h"
 
-#include "EngineInterface/GenomeDescriptionConverterService.h"
 #include "EngineInterface/SimulationFacade.h"
 
 #include "PersisterInterface/SerializerService.h"
@@ -31,11 +30,11 @@
 #include "Network/NetworkService.h"
 
 #include "AlienGui.h"
+#include "CreatureEditorWindow.h"
 #include "DelayedExecutionController.h"
 #include "EditSimulationDialog.h"
 #include "EditorController.h"
 #include "GenericMessageDialog.h"
-#include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
 #include "LoginController.h"
 #include "LoginDialog.h"
@@ -1252,12 +1251,12 @@ void BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
 void BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
 {
     auto func = [&] {
-        auto data = [&]() -> std::variant<ReplaceNetworkResourceRequestData::SimulationData, ReplaceNetworkResourceRequestData::GenomeData> {
+        auto data = [&]() -> std::variant<ReplaceNetworkResourceRequestData::SimulationData, ReplaceNetworkResourceRequestData::CreatureData> {
             if (_currentWorkspace.resourceType == NetworkResourceType_Simulation) {
                 return ReplaceNetworkResourceRequestData::SimulationData{
                     .zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos()};
             } else {
-                return ReplaceNetworkResourceRequestData::GenomeData{.description = GenomeEditorWindow::get().getCurrentGenome()};
+                return ReplaceNetworkResourceRequestData::CreatureData{.description = CreatureEditorWindow::get().getCurrentCreature()};
             }
         }();
         NetworkTransferController::get().onReplace(ReplaceNetworkResourceRequestData{
