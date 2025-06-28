@@ -66,6 +66,7 @@ namespace cereal
         int8_t,
         RealVector2D,
         std::optional<bool>,
+        std::optional<uint64_t>,
         std::optional<uint8_t>,
         std::optional<int8_t>,
         std::optional<int>,
@@ -485,12 +486,13 @@ namespace
     auto constexpr Id_Cell_Age = 7;
     auto constexpr Id_Cell_CellState = 8;
     auto constexpr Id_Cell_ActivationTime = 9;
-    auto constexpr Id_Cell_CellTypeUsed = 12;
-    auto constexpr Id_Cell_DetectedByCreatureId = 15;
-    auto constexpr Id_Cell_GenomeNodeIndex = 20;
-    auto constexpr Id_Cell_SignalRelaxationTime = 21;
-    auto constexpr Id_Cell_AngleToFront = 22;
-    auto constexpr Id_Cell_Sticky = 23;
+    auto constexpr Id_Cell_CellTypeUsed = 10;
+    auto constexpr Id_Cell_DetectedByCreatureId = 11;
+    auto constexpr Id_Cell_CreatureId = 12;
+    auto constexpr Id_Cell_GenomeNodeIndex = 13;
+    auto constexpr Id_Cell_SignalRelaxationTime = 14;
+    auto constexpr Id_Cell_AngleToFront = 15;
+    auto constexpr Id_Cell_Sticky = 16;
 
     auto constexpr Id_Signal_Channels = 0;
 
@@ -877,6 +879,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_ActivationTime, data._activationTime, defaultObject._activationTime);
         loadSave(task, auxiliaries, Id_Cell_DetectedByCreatureId, data._detectedByCreatureId, defaultObject._detectedByCreatureId);
         loadSave(task, auxiliaries, Id_Cell_CellTypeUsed, data._cellTypeUsed, defaultObject._cellTypeUsed);
+        loadSave(task, auxiliaries, Id_Cell_CreatureId, data._creatureId, defaultObject._creatureId);
         loadSave(task, auxiliaries, Id_Cell_GenomeNodeIndex, data._genomeNodeIndex, defaultObject._genomeNodeIndex);
         loadSave(task, auxiliaries, Id_Cell_SignalRelaxationTime, data._signalRelaxationTime, defaultObject._signalRelaxationTime);
         processLoadSaveMap(task, ar, auxiliaries);

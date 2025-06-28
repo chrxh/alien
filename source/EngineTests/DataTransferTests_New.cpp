@@ -22,6 +22,17 @@ protected:
     DescriptionTestDataFactory* _descriptionTestDataFactory;
 };
 
+TEST_F(DataTransferTests_New, singleParticle)
+{
+    CollectionDescription data;
+    data.addParticle(_descriptionTestDataFactory->createRandomParticleDescription());
+
+    _simulationFacade->setSimulationData(data);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    EXPECT_TRUE(compare(data, actualData));
+}
+
 using CellParameter = DescriptionTestDataFactory::CellParameter;
 class DataTransferTests_AllCellTypes_New
     : public DataTransferTests_New
@@ -58,17 +69,6 @@ TEST_P(DataTransferTests_AllCellTypes_New, singleCellWithoutCreature)
 
     CollectionDescription data;
     data.addCell(_descriptionTestDataFactory->createRandomCellDescription(cellParameter));
-
-    _simulationFacade->setSimulationData(data);
-    auto actualData = _simulationFacade->getSimulationData();
-
-    EXPECT_TRUE(compare(data, actualData));
-}
-
-TEST_F(DataTransferTests_AllCellTypes_New, singleParticle)
-{
-    CollectionDescription data;
-    data.addParticle(_descriptionTestDataFactory->createRandomParticleDescription());
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();

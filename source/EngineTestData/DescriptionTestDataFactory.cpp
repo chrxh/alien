@@ -22,6 +22,8 @@ CellDescription DescriptionTestDataFactory::createRandomCellDescription(CellPara
     if (cellParameter.cellType != CellType_Structure && cellParameter.cellType != CellType_Free) {
         NeuralNetworkDescription nn;
         nn.weight(2, 1, 1.0f);
+        nn._biases.at(1) = -0.2f;
+        nn._activationFunctions.at(5) = ActivationFunction_Gaussian;
         result._neuralNetwork = nn;
     }
     return result;
@@ -61,7 +63,6 @@ bool DescriptionTestDataFactory::compare(CollectionDescription left, CollectionD
     std::sort(right._particles.begin(), right._particles.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(left._creatures.begin(), left._creatures.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(right._creatures.begin(), right._creatures.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-
     return left == right;
 }
 
@@ -174,8 +175,16 @@ NodeDescription DescriptionTestDataFactory::createRandomNodeDescription(NodePara
 {
     NeuralNetworkGenomeDescription nn;
     nn.weight(4, 3, -0.7f);
+    nn._biases.at(3) = 0.3f;
+    nn._activationFunctions.at(2) = ActivationFunction_Gaussian;
 
-    return NodeDescription().neuralNetwork(nn).cellTypeData(createRandomCellTypeGenomeDescription(nodeParameter)).color(3).numRequiredAdditionalConnections(2);
+    return NodeDescription()
+        .neuralNetwork(nn)
+        .cellTypeData(createRandomCellTypeGenomeDescription(nodeParameter))
+        .color(3)
+        .numRequiredAdditionalConnections(2)
+        .referenceAngle(56.0f)
+        .signalRoutingRestriction(SignalRoutingRestrictionGenomeDescription().active(true).baseAngle(34.0f).openingAngle(67.0f));
 }
 
 CellTypeGenomeDescription_New DescriptionTestDataFactory::createRandomCellTypeGenomeDescription(NodeParameter cellParameter) const

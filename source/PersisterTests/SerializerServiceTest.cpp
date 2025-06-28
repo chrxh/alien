@@ -14,10 +14,30 @@ public:
         _serializerService = &SerializerService::get();
     }
 
+    void testSerializationAndDeserialization(CollectionDescription const& data)
+    {
+        DeserializedSimulation deserializedSimulationBefore{.mainData = data};
+        SerializedSimulation serializedSimulation;
+        _serializerService->serializeSimulationToStrings(serializedSimulation, deserializedSimulationBefore);
+
+        DeserializedSimulation deserializedSimulationAfter;
+        _serializerService->deserializeSimulationFromStrings(deserializedSimulationAfter, serializedSimulation);
+
+        EXPECT_TRUE(_descriptionTestDataFactory->compare(deserializedSimulationBefore.mainData, deserializedSimulationAfter.mainData));
+    }
+
 protected:
     DescriptionTestDataFactory* _descriptionTestDataFactory;
     SerializerService* _serializerService;
 };
+
+TEST_F(SerializerServiceTests, singleParticle)
+{
+    CollectionDescription data;
+    data.addParticle(_descriptionTestDataFactory->createRandomParticleDescription());
+
+    testSerializationAndDeserialization(data);
+}
 
 using CellParameter = DescriptionTestDataFactory::CellParameter;
 class SerializerServiceTests_AllCellTypes
@@ -55,14 +75,7 @@ TEST_P(SerializerServiceTests_AllCellTypes, singleCellWithoutCreature)
     CollectionDescription data;
     data.addCell(_descriptionTestDataFactory->createRandomCellDescription(cellParameter));
 
-    DeserializedSimulation deserializedSimulationBefore{.mainData = data};
-    SerializedSimulation serializedSimulation;
-    _serializerService->serializeSimulationToStrings(serializedSimulation, deserializedSimulationBefore);
-
-    DeserializedSimulation deserializedSimulationAfter;
-    _serializerService->deserializeSimulationFromStrings(deserializedSimulationAfter, serializedSimulation);
-
-    EXPECT_TRUE(_descriptionTestDataFactory->compare(deserializedSimulationBefore.mainData, deserializedSimulationAfter.mainData));
+    testSerializationAndDeserialization(data);
 }
 
 using NodeParameter = DescriptionTestDataFactory::NodeParameter;
@@ -98,12 +111,5 @@ TEST_P(SerializerServiceTests_AllNodeTypes_New, singleCellWithCreature_oneGene_o
 
     auto data = CollectionDescription().addCreature(_descriptionTestDataFactory->createRandomCreatureDescription(nodeParameter), {CellDescription()});
 
-    DeserializedSimulation deserializedSimulationBefore{.mainData = data};
-    SerializedSimulation serializedSimulation;
-    _serializerService->serializeSimulationToStrings(serializedSimulation, deserializedSimulationBefore);
-
-    DeserializedSimulation deserializedSimulationAfter;
-    _serializerService->deserializeSimulationFromStrings(deserializedSimulationAfter, serializedSimulation);
-
-    EXPECT_TRUE(_descriptionTestDataFactory->compare(deserializedSimulationBefore.mainData, deserializedSimulationAfter.mainData));
+    testSerializationAndDeserialization(data);
 }
