@@ -47,6 +47,7 @@ add_executable(alien)
 add_executable(cli)
 add_executable(EngineTests)
 add_executable(NetworkTests)
+add_executable(PersisterTests)
 
 find_package(CUDAToolkit)
 find_package(Boost REQUIRED)
@@ -68,12 +69,14 @@ add_subdirectory(source/Cli)
 add_subdirectory(source/EngineGpuKernels)
 add_subdirectory(source/EngineImpl)
 add_subdirectory(source/EngineInterface)
+add_subdirectory(source/EngineTestData)
 add_subdirectory(source/EngineTests)
 add_subdirectory(source/Gui)
 add_subdirectory(source/Network)
 add_subdirectory(source/NetworkTests)
 add_subdirectory(source/PersisterImpl)
 add_subdirectory(source/PersisterInterface)
+add_subdirectory(source/PersisterTests)
 
 # Copy resources to the build location
 add_custom_command(

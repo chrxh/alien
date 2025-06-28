@@ -4,6 +4,8 @@
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationFacade.h"
 
+#include "EngineTestData/DescriptionTestDataFactory.h"
+
 #include "IntegrationTestFramework.h"
 
 
@@ -12,114 +14,24 @@ class DataTransferTests_New : public IntegrationTestFramework
 public:
     DataTransferTests_New()
         : IntegrationTestFramework()
-    {}
+    {
+        _descriptionTestDataFactory = &DescriptionTestDataFactory::get();
+    }
+
+protected:
+    DescriptionTestDataFactory* _descriptionTestDataFactory;
 };
 
-struct CellParameter
-{
-    CellType cellType;
-    MuscleMode muscleMode;
-};
-
-class DataTransferTests_AllCellType_New
+using CellParameter = DescriptionTestDataFactory::CellParameter;
+class DataTransferTests_AllCellTypes_New
     : public DataTransferTests_New
     , public testing::WithParamInterface<CellParameter>
 {
-protected:
-    CellTypeDescription createSomeCellTypeDescription(CellParameter cellParameter)
-    {
-        auto const& type = cellParameter.cellType;
-        auto const& muscleMode = cellParameter.muscleMode;
-        switch (type) {
-        case CellType_Structure:
-            return StructureCellDescription();
-        case CellType_Free:
-            return FreeCellDescription();
-        case CellType_Base:
-            return BaseDescription();
-        case CellType_Depot:
-            return DepotDescription();
-        case CellType_Constructor:
-            return ConstructorDescription().autoTriggerInterval(7).geneIndex(3).constructionActivationTime(4).constructionAngle(34.4f).lastConstructedCellId(
-                45ull);
-        case CellType_Sensor:
-            return SensorDescription().autoTriggerInterval(3).restrictToColor(5).minRange(34).maxRange(67).minDensity(0.25f).restrictToMutants(
-                SensorRestrictToMutants_RestrictToLessComplexMutants);
-        case CellType_Oscillator:
-            return OscillatorDescription().autoTriggerInterval(27).alternationInterval(45).numPulses(23);
-        case CellType_Attacker:
-            return AttackerDescription();
-        case CellType_Injector:
-            return InjectorDescription().counter(23);
-        case CellType_Muscle: {
-            MuscleModeDescription muscleModeDesc;
-            switch (muscleMode) {
-            case MuscleMode_AutoBending:
-                muscleModeDesc = AutoBendingDescription()
-                                     .maxAngleDeviation(0.45f)
-                                     .frontBackVelRatio(0.3f)
-                                     .initialAngle(23.0f)
-                                     .lastActualAngle(45.0f)
-                                     .forward(false)
-                                     .activation(0.3f)
-                                     .activationCountdown(13)
-                                     .impulseAlreadyApplied(true);
-                break;
-            case MuscleMode_ManualBending:
-                muscleModeDesc = ManualBendingDescription()
-                                     .maxAngleDeviation(0.45f)
-                                     .frontBackVelRatio(0.3f)
-                                     .initialAngle(23.0f)
-                                     .lastActualAngle(45.0f)
-                                     .lastAngleDelta(2.0f)
-                                     .impulseAlreadyApplied(true);
-                break;
-            case MuscleMode_AngleBending:
-                muscleModeDesc = AngleBendingDescription().maxAngleDeviation(0.45f).frontBackVelRatio(0.3f).initialAngle(23.0f);
-                break;
-            case MuscleMode_AutoCrawling:
-                muscleModeDesc = AutoCrawlingDescription()
-                                     .maxDistanceDeviation(0.45f)
-                                     .frontBackVelRatio(0.3f)
-                                     .initialDistance(0.6f)
-                                     .lastActualDistance(0.9f)
-                                     .forward(false)
-                                     .activation(0.3f)
-                                     .activationCountdown(13)
-                                     .impulseAlreadyApplied(true);
-                break;
-            case MuscleMode_ManualCrawling:
-                muscleModeDesc = ManualCrawlingDescription()
-                                     .maxDistanceDeviation(0.45f)
-                                     .frontBackVelRatio(0.3f)
-                                     .initialDistance(0.6f)
-                                     .lastActualDistance(0.9f)
-                                     .lastDistanceDelta(0.4f)
-                                     .impulseAlreadyApplied(true);
-                break;
-            case MuscleMode_DirectMovement:
-                muscleModeDesc = DirectMovementDescription();
-                break;
-            default:
-                muscleModeDesc = MuscleModeDescription();
-            }
-            return MuscleDescription().mode(muscleModeDesc);
-        }
-        case CellType_Defender:
-            return DefenderDescription().mode(DefenderMode_DefendAgainstInjector);
-        case CellType_Reconnector:
-            return ReconnectorDescription().restrictToColor(4).restrictToMutants(ReconnectorRestrictToMutants_RestrictToMoreComplexMutants);
-        case CellType_Detonator:
-            return DetonatorDescription().countdown(23);
-        default:
-            return CellTypeDescription();
-        }
-    }
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    DataTransferTests_AllCellType_New,
-    DataTransferTests_AllCellType_New,
+    DataTransferTests_AllCellTypes_New,
+    DataTransferTests_AllCellTypes_New,
     ::testing::Values(
         CellParameter{CellType_Structure},
         CellParameter{CellType_Free},
@@ -140,31 +52,12 @@ INSTANTIATE_TEST_SUITE_P(
         CellParameter{CellType_Reconnector},
         CellParameter{CellType_Detonator}));
 
-TEST_P(DataTransferTests_AllCellType_New, singleCell_noGenome)
+TEST_P(DataTransferTests_AllCellTypes_New, singleCellWithoutCreature)
 {
     auto cellParameter = GetParam();
-    auto cellTypeDesc = createSomeCellTypeDescription(cellParameter);
 
     CollectionDescription data;
-    auto cell = CellDescription()
-                    .id(1)
-                    .pos({2.0f, 4.0f})
-                    .vel({0.5f, 1.0f})
-                    .energy(100.0f)
-                    .age(1)
-                    .color(2)
-                    .barrier(true)
-                    .cellState(false)
-                    .signalAndRelaxTime({1, 0, -1, 0, 0, 0, 0, 0})
-                    .signalRoutingRestriction(SignalRoutingRestrictionDescription().active(true).baseAngle(23.0f).openingAngle(42.0f))
-                    .cellTypeData(cellTypeDesc)
-                    .metadata(CellMetadataDescription().name("Test1").description("Test2"));
-    if (cellParameter.cellType != CellType_Structure && cellParameter.cellType != CellType_Free) {
-        NeuralNetworkDescription nn;
-        nn.weight(2, 1, 1.0f);
-        cell._neuralNetwork = nn;
-    }
-    data.addCell(cell);
+    data.addCell(_descriptionTestDataFactory->createRandomCellDescription(cellParameter));
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();
@@ -172,78 +65,27 @@ TEST_P(DataTransferTests_AllCellType_New, singleCell_noGenome)
     EXPECT_TRUE(compare(data, actualData));
 }
 
-struct NodeParameter
+TEST_F(DataTransferTests_AllCellTypes_New, singleParticle)
 {
-    CellTypeGenome cellTypeGenome;
-    MuscleMode muscleMode;
-};
+    CollectionDescription data;
+    data.addParticle(_descriptionTestDataFactory->createRandomParticleDescription());
 
-class DataTransferTests_AllCellTypeWithCreature_New
+    _simulationFacade->setSimulationData(data);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    EXPECT_TRUE(compare(data, actualData));
+}
+
+using NodeParameter = DescriptionTestDataFactory::NodeParameter;
+class DataTransferTests_AllNodeTypes_New
     : public DataTransferTests_New
     , public testing::WithParamInterface<NodeParameter>
 {
-protected:
-    CellTypeGenomeDescription_New createSomeCellTypeGenomeDescription(NodeParameter cellParameter)
-    {
-        auto const& type = cellParameter.cellTypeGenome;
-        auto const& muscleMode = cellParameter.muscleMode;
-        switch (type) {
-        case CellTypeGenome_Base:
-            return BaseGenomeDescription();
-        case CellTypeGenome_Depot:
-            return DepotGenomeDescription();
-        case CellTypeGenome_Constructor:
-            return ConstructorGenomeDescription_New().autoTriggerInterval(7).constructionActivationTime(4).constructionAngle(34.4f);
-        case CellTypeGenome_Sensor:
-            return SensorGenomeDescription_New().autoTriggerInterval(3).restrictToColor(5).minRange(34).maxRange(67).minDensity(0.25f).restrictToMutants(
-                SensorRestrictToMutants_RestrictToLessComplexMutants);
-        case CellTypeGenome_Oscillator:
-            return OscillatorGenomeDescription().autoTriggerInterval(27).pulseType(OscillatorPulseType_Alternation).alternationInterval(45);
-        case CellTypeGenome_Attacker:
-            return AttackerGenomeDescription();
-        case CellTypeGenome_Injector:
-            return InjectorGenomeDescription_New();
-        case CellTypeGenome_Muscle: {
-            MuscleModeGenomeDescription muscleModeDesc;
-            switch (muscleMode) {
-            case MuscleMode_AutoBending:
-                muscleModeDesc = AutoBendingGenomeDescription().maxAngleDeviation(0.45f).frontBackVelRatio(0.3f);
-                break;
-            case MuscleMode_ManualBending:
-                muscleModeDesc = ManualBendingGenomeDescription().maxAngleDeviation(0.45f).frontBackVelRatio(0.3f);
-                break;
-            case MuscleMode_AngleBending:
-                muscleModeDesc = AngleBendingGenomeDescription().maxAngleDeviation(0.45f).frontBackVelRatio(0.3f);
-                break;
-            case MuscleMode_AutoCrawling:
-                muscleModeDesc = AutoCrawlingGenomeDescription().maxDistanceDeviation(0.45f).frontBackVelRatio(0.3f);
-                break;
-            case MuscleMode_ManualCrawling:
-                muscleModeDesc = ManualCrawlingGenomeDescription().maxDistanceDeviation(0.45f).frontBackVelRatio(0.3f);
-                break;
-            case MuscleMode_DirectMovement:
-                muscleModeDesc = DirectMovementGenomeDescription();
-                break;
-            default:
-                muscleModeDesc = MuscleModeGenomeDescription();
-            }
-            return MuscleGenomeDescription().mode(muscleModeDesc);
-        }
-        case CellTypeGenome_Defender:
-            return DefenderGenomeDescription().mode(DefenderMode_DefendAgainstInjector);
-        case CellTypeGenome_Reconnector:
-            return ReconnectorGenomeDescription().restrictToColor(4).restrictToMutants(ReconnectorRestrictToMutants_RestrictToMoreComplexMutants);
-        case CellTypeGenome_Detonator:
-            return DetonatorGenomeDescription().countdown(23);
-        default:
-            return CellTypeGenomeDescription_New();
-        }
-    }
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    DataTransferTests_AllCellTypeGenome_New,
-    DataTransferTests_AllCellTypeWithCreature_New,
+    DataTransferTests_AllNodeTypes_New,
+    DataTransferTests_AllNodeTypes_New,
     ::testing::Values(
         NodeParameter{CellTypeGenome_Base},
         NodeParameter{CellTypeGenome_Depot},
@@ -262,38 +104,11 @@ INSTANTIATE_TEST_SUITE_P(
         NodeParameter{CellTypeGenome_Reconnector},
         NodeParameter{CellTypeGenome_Detonator}));
 
-TEST_P(DataTransferTests_AllCellTypeWithCreature_New, singleCell_genome_oneGene_oneNode)
+TEST_P(DataTransferTests_AllNodeTypes_New, singleCellWithCreature_oneGene_oneNode)
 {
-    auto cellParameter = GetParam();
-    auto cellTypeGenomeDesc = createSomeCellTypeGenomeDescription(cellParameter);
+    auto nodeParameter = GetParam();
 
-    NeuralNetworkDescription nn1;
-    nn1.weight(2, 1, 1.0f);
-    NeuralNetworkGenomeDescription nn2;
-    nn2.weight(1, 3, -1.0f);
-
-    auto data = CollectionDescription().addCreature(
-        CreatureDescription().ancestorId(123).frontAngle(34.0f).mutationId(42).genomeComplexity(23).genes(
-            {GeneDescription()
-                 .shape(ConstructionShape_Hexagon)
-                 .numBranches(3)
-                 .numConcatenations(2)
-                 .angleAlignment(ConstructorAngleAlignment_180)
-                 .stiffness(0.4f)
-                 .connectionDistance(0.7f)
-                 .nodes({NodeDescription().neuralNetwork(nn2).cellTypeData(cellTypeGenomeDesc).color(3).numRequiredAdditionalConnections(2)})}),
-        {CellDescription()
-             .neuralNetwork(nn1)
-             .id(1)
-             .pos({2.0f, 4.0f})
-             .vel({0.5f, 1.0f})
-             .energy(100.0f)
-             .age(1)
-             .color(2)
-             .barrier(true)
-             .cellState(false)
-             .creatureId(3534)
-             .signalAndRelaxTime({1, 0, -1, 0, 0, 0, 0, 0})});
+    auto data = CollectionDescription().addCreature(_descriptionTestDataFactory->createRandomCreatureDescription(nodeParameter), {CellDescription()});
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();
