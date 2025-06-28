@@ -26,7 +26,7 @@ namespace
         auto result = gene._nodes.size() * gene._numConcatenations * numBranches;
         for (auto const& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
-                auto const& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
+                auto const& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
                 if (constructor._geneIndex != 0) {  // First gene is for self-replication and should not be counted
                     auto numNodes = countNodes(genome, constructor._geneIndex, lastGenes);
                     if (numNodes == -1) {
@@ -55,7 +55,7 @@ std::vector<int> CreatureDescriptionInfoService::getReferences(GeneDescription c
     std::vector<int> result;
     for (auto const& node : gene._nodes) {
         if (node.getCellType() == CellTypeGenome_Constructor) {
-            auto const& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
+            auto const& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
             result.emplace_back(constructor._geneIndex);
         }
     }
@@ -69,7 +69,7 @@ std::vector<int> CreatureDescriptionInfoService::getReferencedBy(CreatureDescrip
         auto const& gene = genome._genes[i];
         for (auto const& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
-                auto const& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
+                auto const& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
                 if (constructor._geneIndex == geneIndex) {
                     result.emplace_back(i);
                 }

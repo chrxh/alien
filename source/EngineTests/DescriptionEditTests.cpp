@@ -8,14 +8,14 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
-class DescriptionEditTests_New 
+class DescriptionEditTests 
     : public IntegrationTestFramework
 {
 public:
-    DescriptionEditTests_New()
+    DescriptionEditTests()
         : IntegrationTestFramework(std::nullopt, {100, 100})
     {}
-    virtual ~DescriptionEditTests_New() = default;
+    virtual ~DescriptionEditTests() = default;
 
 protected:
     bool areAngelsCorrect(CollectionDescription const& data) const
@@ -36,7 +36,7 @@ protected:
 };
 
 
-TEST_F(DescriptionEditTests_New, correctConnections)
+TEST_F(DescriptionEditTests, correctConnections)
 {
     auto origData = DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters().width(10).height(10).center({50.0f, 99.0f}));
     _simulationFacade->setSimulationData(origData);
@@ -49,7 +49,7 @@ TEST_F(DescriptionEditTests_New, correctConnections)
 }
 
 
-TEST_F(DescriptionEditTests_New, addThirdConnection1)
+TEST_F(DescriptionEditTests, addThirdConnection1)
 {
     auto data = CollectionDescription().addCells({
         CellDescription().id(1).pos({0, 0}),
@@ -79,7 +79,7 @@ TEST_F(DescriptionEditTests_New, addThirdConnection1)
     EXPECT_TRUE(approxCompare(180.0f, connection3._angleFromPrevious));
 }
 
-TEST_F(DescriptionEditTests_New, addThirdConnection2)
+TEST_F(DescriptionEditTests, addThirdConnection2)
 {
     auto data = CollectionDescription().addCells({
         CellDescription().id(1).pos({0, 0}),
@@ -109,7 +109,7 @@ TEST_F(DescriptionEditTests_New, addThirdConnection2)
     EXPECT_TRUE(approxCompare(90.0f, connection3._angleFromPrevious));
 }
 
-TEST_F(DescriptionEditTests_New, calcCluster)
+TEST_F(DescriptionEditTests, calcCluster)
 {
     CollectionDescription data;
     auto expectedClusterSize = 0;

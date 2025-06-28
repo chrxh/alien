@@ -6,17 +6,17 @@
 
 #include "IntegrationTestFramework.h"
 
-class SensorTests_New : public IntegrationTestFramework
+class SensorTests : public IntegrationTestFramework
 {
 public:
-    SensorTests_New()
+    SensorTests()
         : IntegrationTestFramework()
     {}
 
-    ~SensorTests_New() = default;
+    ~SensorTests() = default;
 };
 
-TEST_F(SensorTests_New, autoTriggered)
+TEST_F(SensorTests, autoTriggered)
 {
     CollectionDescription data;
     data.addCells({
@@ -46,7 +46,7 @@ TEST_F(SensorTests_New, autoTriggered)
     }
 }
 
-TEST_F(SensorTests_New, manuallyTriggered_noSignal)
+TEST_F(SensorTests, manuallyTriggered_noSignal)
 {
     CollectionDescription data;
     data.addCells({
@@ -61,7 +61,7 @@ TEST_F(SensorTests_New, manuallyTriggered_noSignal)
     }
 }
 
-TEST_F(SensorTests_New, manuallyTriggered_signal)
+TEST_F(SensorTests, manuallyTriggered_signal)
 {
     CollectionDescription data;
     data.addCells({
@@ -76,7 +76,7 @@ TEST_F(SensorTests_New, manuallyTriggered_signal)
     EXPECT_TRUE(actualSensor._signal.has_value());
 }
 
-TEST_F(SensorTests_New, aboveMinDensity)
+TEST_F(SensorTests, aboveMinDensity)
 {
     CollectionDescription data;
     data.addCells({
@@ -100,7 +100,7 @@ TEST_F(SensorTests_New, aboveMinDensity)
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] < (-90.0f + 15.0f) / 180);
 }
 
-TEST_F(SensorTests_New, belowMinDensity)
+TEST_F(SensorTests, belowMinDensity)
 {
     CollectionDescription data;
     data.addCells({
@@ -119,7 +119,7 @@ TEST_F(SensorTests_New, belowMinDensity)
     EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests_New, targetAbove)
+TEST_F(SensorTests, targetAbove)
 {
     CollectionDescription data;
     data.addCells({
@@ -144,7 +144,7 @@ TEST_F(SensorTests_New, targetAbove)
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] < (-90.0f + 15.0f) / 180);
 }
 
-TEST_F(SensorTests_New, targetBelow)
+TEST_F(SensorTests, targetBelow)
 {
     CollectionDescription data;
     data.addCells({
@@ -169,7 +169,7 @@ TEST_F(SensorTests_New, targetBelow)
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] < (90.0f + 15.0f) / 180);
 }
 
-TEST_F(SensorTests_New, targetConcealed)
+TEST_F(SensorTests, targetConcealed)
 {
     CollectionDescription data;
     data.addCells({
@@ -192,7 +192,7 @@ TEST_F(SensorTests_New, targetConcealed)
     EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests_New, targetNotConcealed)
+TEST_F(SensorTests, targetNotConcealed)
 {
     CollectionDescription data;
     data.addCells({
@@ -215,7 +215,7 @@ TEST_F(SensorTests_New, targetNotConcealed)
     EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests_New, foundMassWithMatchingDensity)
+TEST_F(SensorTests, foundMassWithMatchingDensity)
 {
     CollectionDescription data;
     data.addCells({
@@ -243,7 +243,7 @@ TEST_F(SensorTests_New, foundMassWithMatchingDensity)
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] < (90.0f + 15.0f) / 180);
 }
 
-TEST_F(SensorTests_New, scanForOtherMutants_found)
+TEST_F(SensorTests, scanForOtherMutants_found)
 {
     CollectionDescription data;
     data.addCreature(
@@ -283,7 +283,7 @@ TEST_F(SensorTests_New, scanForOtherMutants_found)
     EXPECT_TRUE(actualSensorCell._signal->_channels[Channels::SensorAngle] < (-90.0f + 15.0f) / 180);
 }
 
-TEST_F(SensorTests_New, scanForOtherMutants_found_wallBehind)
+TEST_F(SensorTests, scanForOtherMutants_found_wallBehind)
 {
     CollectionDescription data;
     data.addCreature(
@@ -313,7 +313,7 @@ TEST_F(SensorTests_New, scanForOtherMutants_found_wallBehind)
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests_New, scanForOtherMutants_notFound_wallInBetween)
+TEST_F(SensorTests, scanForOtherMutants_notFound_wallInBetween)
 {
     CollectionDescription data;
     data.addCreature(
@@ -343,7 +343,7 @@ TEST_F(SensorTests_New, scanForOtherMutants_notFound_wallInBetween)
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests_New, scanForOtherMutants_notFound_sameMutationId)
+TEST_F(SensorTests, scanForOtherMutants_notFound_sameMutationId)
 {
     CollectionDescription data;
     data.addCreature(
@@ -370,7 +370,7 @@ TEST_F(SensorTests_New, scanForOtherMutants_notFound_sameMutationId)
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests_New, scanForOtherMutants_notFound_structure)
+TEST_F(SensorTests, scanForOtherMutants_notFound_structure)
 {
     CollectionDescription data;
     data.addCreature(
@@ -401,7 +401,7 @@ TEST_F(SensorTests_New, scanForOtherMutants_notFound_structure)
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests_New, scanForOtherMutants_notFound_freeCell)
+TEST_F(SensorTests, scanForOtherMutants_notFound_freeCell)
 {
     CollectionDescription data;
     data.addCreature(
@@ -428,7 +428,7 @@ TEST_F(SensorTests_New, scanForOtherMutants_notFound_freeCell)
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests_New, scanForSameMutants_found)
+TEST_F(SensorTests, scanForSameMutants_found)
 {
     CollectionDescription data;
     data.addCreature(
@@ -455,7 +455,7 @@ TEST_F(SensorTests_New, scanForSameMutants_found)
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests_New, scanForSameMutants_notFound_otherMutationId)
+TEST_F(SensorTests, scanForSameMutants_notFound_otherMutationId)
 {
     auto const MutantId = 6;
     for (int otherMutantId = 0; otherMutantId < 100; ++otherMutantId) {
@@ -490,7 +490,7 @@ TEST_F(SensorTests_New, scanForSameMutants_notFound_otherMutationId)
     }
 }
 
-TEST_F(SensorTests_New, scanForSameMutants_notFound_structure)
+TEST_F(SensorTests, scanForSameMutants_notFound_structure)
 {
     auto const MutantId = 6;
     CollectionDescription data;
@@ -524,7 +524,7 @@ TEST_F(SensorTests_New, scanForSameMutants_notFound_structure)
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests_New, scanForSameMutants_notFound_freeCell)
+TEST_F(SensorTests, scanForSameMutants_notFound_freeCell)
 {
     auto const MutantId = 6;
     CollectionDescription data;
@@ -554,7 +554,7 @@ TEST_F(SensorTests_New, scanForSameMutants_notFound_freeCell)
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests_New, scanForStructures_found)
+TEST_F(SensorTests, scanForStructures_found)
 {
     CollectionDescription data;
     data.addCells({
@@ -575,7 +575,7 @@ TEST_F(SensorTests_New, scanForStructures_found)
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests_New, scanForStructures_notFound)
+TEST_F(SensorTests, scanForStructures_notFound)
 {
     CollectionDescription data;
     data.addCells({
@@ -596,7 +596,7 @@ TEST_F(SensorTests_New, scanForStructures_notFound)
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests_New, scanForFreeCells_found)
+TEST_F(SensorTests, scanForFreeCells_found)
 {
     CollectionDescription data;
     data.addCells({
@@ -617,7 +617,7 @@ TEST_F(SensorTests_New, scanForFreeCells_found)
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests_New, scanForFreeCells_notFound)
+TEST_F(SensorTests, scanForFreeCells_notFound)
 {
     CollectionDescription data;
     data.addCells({
@@ -638,7 +638,7 @@ TEST_F(SensorTests_New, scanForFreeCells_notFound)
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests_New, scanForLessComplexMutants_found)
+TEST_F(SensorTests, scanForLessComplexMutants_found)
 {
     for (int otherGenomeComplexity = 0; otherGenomeComplexity < 500; ++otherGenomeComplexity) {
         CollectionDescription data;
@@ -672,7 +672,7 @@ TEST_F(SensorTests_New, scanForLessComplexMutants_found)
     }
 }
 
-TEST_F(SensorTests_New, scanForLessComplexMutants_notFound_otherMoreComplex)
+TEST_F(SensorTests, scanForLessComplexMutants_notFound_otherMoreComplex)
 {
     for (int otherGenomeComplexity = 1000; otherGenomeComplexity < 2001; ++otherGenomeComplexity) {
         CollectionDescription data;
@@ -706,7 +706,7 @@ TEST_F(SensorTests_New, scanForLessComplexMutants_notFound_otherMoreComplex)
     }
 }
 
-TEST_F(SensorTests_New, scanForLessComplexMutants_notFound_structure)
+TEST_F(SensorTests, scanForLessComplexMutants_notFound_structure)
 {
     CollectionDescription data;
     data.addCreature(
@@ -727,7 +727,7 @@ TEST_F(SensorTests_New, scanForLessComplexMutants_notFound_structure)
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests_New, scanForLessComplexMutants_notFound_freeCell)
+TEST_F(SensorTests, scanForLessComplexMutants_notFound_freeCell)
 {
     CollectionDescription data;
     data.addCreature(
@@ -753,7 +753,7 @@ TEST_F(SensorTests_New, scanForLessComplexMutants_notFound_freeCell)
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests_New, scanForMoreComplexMutants_found)
+TEST_F(SensorTests, scanForMoreComplexMutants_found)
 {
     for (int otherGenomeComplexity = 1000; otherGenomeComplexity < 2001; ++otherGenomeComplexity) {
         CollectionDescription data;
@@ -787,7 +787,7 @@ TEST_F(SensorTests_New, scanForMoreComplexMutants_found)
     }
 }
 
-TEST_F(SensorTests_New, scanForMoreComplexMutants_notFound_otherLessComplex)
+TEST_F(SensorTests, scanForMoreComplexMutants_notFound_otherLessComplex)
 {
     for (int otherGenomeComplexity = 0; otherGenomeComplexity < 500; ++otherGenomeComplexity) {
         CollectionDescription data;
@@ -821,7 +821,7 @@ TEST_F(SensorTests_New, scanForMoreComplexMutants_notFound_otherLessComplex)
     }
 }
 
-TEST_F(SensorTests_New, scanForMoreComplexMutants_notFound_structure)
+TEST_F(SensorTests, scanForMoreComplexMutants_notFound_structure)
 {
     CollectionDescription data;
     data.addCreature(
@@ -847,7 +847,7 @@ TEST_F(SensorTests_New, scanForMoreComplexMutants_notFound_structure)
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests_New, scanForMoreComplexMutants_notFound_freeCell)
+TEST_F(SensorTests, scanForMoreComplexMutants_notFound_freeCell)
 {
     _parameters.attackerSensorDetectionFactor.value[0] = 1.0f;
     _simulationFacade->setSimulationParameters(_parameters);
@@ -875,7 +875,7 @@ TEST_F(SensorTests_New, scanForMoreComplexMutants_notFound_freeCell)
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests_New, minRange_found)
+TEST_F(SensorTests, minRange_found)
 {
     CollectionDescription data;
     data.addCells({
@@ -896,7 +896,7 @@ TEST_F(SensorTests_New, minRange_found)
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests_New, minRange_notFound)
+TEST_F(SensorTests, minRange_notFound)
 {
     CollectionDescription data;
     data.addCells({
@@ -917,7 +917,7 @@ TEST_F(SensorTests_New, minRange_notFound)
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests_New, maxRange_found)
+TEST_F(SensorTests, maxRange_found)
 {
     CollectionDescription data;
     data.addCells({
@@ -938,7 +938,7 @@ TEST_F(SensorTests_New, maxRange_found)
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests_New, maxRange_notFound)
+TEST_F(SensorTests, maxRange_notFound)
 {
     CollectionDescription data;
     data.addCells({

@@ -168,7 +168,7 @@ void _GeneEditorWidget::processNodeList()
                         auto nodeType = node.getCellType();
                         auto text = Const::CellTypeGenomeStrings.at(nodeType);
                         if (nodeType == CellTypeGenome_Constructor) {
-                            auto const& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
+                            auto const& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
                             text += " (Gene " + std::to_string(constructor._geneIndex + 1) + ")";
                         }
                         AlienGui::Text(text);

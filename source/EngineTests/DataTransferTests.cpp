@@ -9,10 +9,10 @@
 #include "IntegrationTestFramework.h"
 
 
-class DataTransferTests_New : public IntegrationTestFramework
+class DataTransferTests : public IntegrationTestFramework
 {
 public:
-    DataTransferTests_New()
+    DataTransferTests()
         : IntegrationTestFramework()
     {
         _descriptionTestDataFactory = &DescriptionTestDataFactory::get();
@@ -22,7 +22,7 @@ protected:
     DescriptionTestDataFactory* _descriptionTestDataFactory;
 };
 
-TEST_F(DataTransferTests_New, singleParticle)
+TEST_F(DataTransferTests, singleParticle)
 {
     CollectionDescription data;
     data.addParticle(_descriptionTestDataFactory->createRandomParticleDescription());
@@ -34,15 +34,15 @@ TEST_F(DataTransferTests_New, singleParticle)
 }
 
 using CellParameter = DescriptionTestDataFactory::CellParameter;
-class DataTransferTests_AllCellTypes_New
-    : public DataTransferTests_New
+class DataTransferTests_AllCellTypes
+    : public DataTransferTests
     , public testing::WithParamInterface<CellParameter>
 {
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    DataTransferTests_AllCellTypes_New,
-    DataTransferTests_AllCellTypes_New,
+    DataTransferTests_AllCellTypes,
+    DataTransferTests_AllCellTypes,
     ::testing::Values(
         CellParameter{CellType_Structure},
         CellParameter{CellType_Free},
@@ -63,7 +63,7 @@ INSTANTIATE_TEST_SUITE_P(
         CellParameter{CellType_Reconnector},
         CellParameter{CellType_Detonator}));
 
-TEST_P(DataTransferTests_AllCellTypes_New, singleCellWithoutCreature)
+TEST_P(DataTransferTests_AllCellTypes, singleCellWithoutCreature)
 {
     auto cellParameter = GetParam();
 
@@ -77,15 +77,15 @@ TEST_P(DataTransferTests_AllCellTypes_New, singleCellWithoutCreature)
 }
 
 using NodeParameter = DescriptionTestDataFactory::NodeParameter;
-class DataTransferTests_AllNodeTypes_New
-    : public DataTransferTests_New
+class DataTransferTests_AllNodeTypes
+    : public DataTransferTests
     , public testing::WithParamInterface<NodeParameter>
 {
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    DataTransferTests_AllNodeTypes_New,
-    DataTransferTests_AllNodeTypes_New,
+    DataTransferTests_AllNodeTypes,
+    DataTransferTests_AllNodeTypes,
     ::testing::Values(
         NodeParameter{CellTypeGenome_Base},
         NodeParameter{CellTypeGenome_Depot},
@@ -104,7 +104,7 @@ INSTANTIATE_TEST_SUITE_P(
         NodeParameter{CellTypeGenome_Reconnector},
         NodeParameter{CellTypeGenome_Detonator}));
 
-TEST_P(DataTransferTests_AllNodeTypes_New, singleCellWithCreature_oneGene_oneNode)
+TEST_P(DataTransferTests_AllNodeTypes, singleCellWithCreature_oneGene_oneNode)
 {
     auto nodeParameter = GetParam();
 
@@ -116,7 +116,7 @@ TEST_P(DataTransferTests_AllNodeTypes_New, singleCellWithCreature_oneGene_oneNod
     EXPECT_TRUE(compare(data, actualData));
 }
 
-TEST_F(DataTransferTests_New, multipleCells_genome_multipleGenes_multiple_Nodes)
+TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multiple_Nodes)
 {
     auto hexagon = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().center({100.0f, 100.0f}));
     CollectionDescription data;
@@ -132,7 +132,7 @@ TEST_F(DataTransferTests_New, multipleCells_genome_multipleGenes_multiple_Nodes)
     EXPECT_TRUE(compare(data, actualData));
 }
 
-TEST_F(DataTransferTests_New, createCellIds_differentIdsOnDescription)
+TEST_F(DataTransferTests, createCellIds_differentIdsOnDescription)
 {
     auto data = CollectionDescription().cells({CellDescription().id(0), CellDescription().id(1)});
 
@@ -149,7 +149,7 @@ TEST_F(DataTransferTests_New, createCellIds_differentIdsOnDescription)
     EXPECT_EQ(4, ids.size());
 }
 
-TEST_F(DataTransferTests_New, createCellIds_sameIdsOnDescription)
+TEST_F(DataTransferTests, createCellIds_sameIdsOnDescription)
 {
     auto data1 = CollectionDescription().cells({CellDescription().id(0), CellDescription().id(0)});
     _simulationFacade->addAndSelectSimulationData(std::move(data1));
@@ -166,7 +166,7 @@ TEST_F(DataTransferTests_New, createCellIds_sameIdsOnDescription)
     EXPECT_EQ(4, ids.size());
 }
 
-TEST_F(DataTransferTests_New, createParticleIds_differentIdsOnDescription)
+TEST_F(DataTransferTests, createParticleIds_differentIdsOnDescription)
 {
     auto data = CollectionDescription().particles({ParticleDescription().id(0), ParticleDescription().id(1)});
 
@@ -183,7 +183,7 @@ TEST_F(DataTransferTests_New, createParticleIds_differentIdsOnDescription)
     EXPECT_EQ(4, ids.size());
 }
 
-TEST_F(DataTransferTests_New, createParticleIds_sameIdsOnDescription)
+TEST_F(DataTransferTests, createParticleIds_sameIdsOnDescription)
 {
     auto data1 = CollectionDescription().particles({ParticleDescription().id(0), ParticleDescription().id(0)});
     _simulationFacade->addAndSelectSimulationData(std::move(data1));
@@ -201,7 +201,7 @@ TEST_F(DataTransferTests_New, createParticleIds_sameIdsOnDescription)
     EXPECT_EQ(4, ids.size());
 }
 
-TEST_F(DataTransferTests_New, createGenomeIds)
+TEST_F(DataTransferTests, createGenomeIds)
 {
     CollectionDescription data;
     data.addCreature(CreatureDescription(), {CellDescription()});
@@ -220,7 +220,7 @@ TEST_F(DataTransferTests_New, createGenomeIds)
     EXPECT_EQ(4, ids.size());
 }
 
-TEST_F(DataTransferTests_New, keepObjectIdsStable)
+TEST_F(DataTransferTests, keepObjectIdsStable)
 {
     auto data =
         CollectionDescription().cells({CellDescription().id(0), CellDescription().id(1)}).particles({ParticleDescription().id(2), ParticleDescription().id(3)});
@@ -251,7 +251,7 @@ TEST_F(DataTransferTests_New, keepObjectIdsStable)
     EXPECT_EQ(expectedParticleIds, actualParticleIds);
 }
 
-TEST_F(DataTransferTests_New, createCreatureIds_differentIds)
+TEST_F(DataTransferTests, createCreatureIds_differentIds)
 {
     auto data = CollectionDescription()
                     .cells({
@@ -276,7 +276,7 @@ TEST_F(DataTransferTests_New, createCreatureIds_differentIds)
     EXPECT_EQ(4, ids.size());
 }
 
-TEST_F(DataTransferTests_New, createCreatureIds_sameIds)
+TEST_F(DataTransferTests, createCreatureIds_sameIds)
 {
     auto data = CollectionDescription()
                     .cells({
@@ -300,7 +300,7 @@ TEST_F(DataTransferTests_New, createCreatureIds_sameIds)
     EXPECT_EQ(2, ids.size());
 }
 
-TEST_F(DataTransferTests_New, changeGenome_successful)
+TEST_F(DataTransferTests, changeGenome_successful)
 {
     auto data = CollectionDescription().addCreature(CreatureDescription(), {CellDescription()});
     auto creatureId = data._cells.at(0)._creatureId;
@@ -328,7 +328,7 @@ TEST_F(DataTransferTests_New, changeGenome_successful)
     EXPECT_EQ(2, gene._nodes.size());
 }
 
-TEST_F(DataTransferTests_New, changeGenome_failed)
+TEST_F(DataTransferTests, changeGenome_failed)
 {
     auto data = CollectionDescription().addCreature(CreatureDescription(), {CellDescription()});
     auto creatureId = data._cells.at(0)._creatureId;
@@ -340,7 +340,7 @@ TEST_F(DataTransferTests_New, changeGenome_failed)
     ASSERT_FALSE(result);
 }
 
-TEST_F(DataTransferTests_New, getInspectedSimulationData)
+TEST_F(DataTransferTests, getInspectedSimulationData)
 {
     auto data =
         CollectionDescription()

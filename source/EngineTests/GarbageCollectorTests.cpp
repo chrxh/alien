@@ -6,14 +6,14 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
-class GarbageCollectorTests_New : public IntegrationTestFramework
+class GarbageCollectorTests : public IntegrationTestFramework
 {
 public:
-    GarbageCollectorTests_New()
+    GarbageCollectorTests()
         : IntegrationTestFramework()
     {}
 
-    ~GarbageCollectorTests_New() = default;
+    ~GarbageCollectorTests() = default;
 };
 
 enum class CleanupAction
@@ -23,17 +23,17 @@ enum class CleanupAction
     ResizeArrays,
 };
 
-class GarbageCollectorTests_AllCleanupActions_New
-    : public GarbageCollectorTests_New
+class GarbageCollectorTests_AllCleanupActions
+    : public GarbageCollectorTests
     , public testing::WithParamInterface<CleanupAction>
 {};
 
 INSTANTIATE_TEST_SUITE_P(
-    GarbageCollectorTests_AllCleanupActions_New,
-    GarbageCollectorTests_AllCleanupActions_New,
+    GarbageCollectorTests_AllCleanupActions,
+    GarbageCollectorTests_AllCleanupActions,
     ::testing::Values(CleanupAction::CleanupAfterTimestep, CleanupAction::CleanupAfterDataManipulation, CleanupAction::ResizeArrays));
 
-TEST_P(GarbageCollectorTests_AllCleanupActions_New, cleanupAfterTimestep)
+TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep)
 {
     auto cleanupAction = GetParam();
 

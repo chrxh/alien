@@ -10,7 +10,7 @@
 #include "MuscleProcessor.cuh"
 #include "SensorProcessor.cuh"
 #include "CellProcessor.cuh"
-#include "ConstructorProcessor_New.cuh"
+#include "ConstructorProcessor.cuh"
 #include "RadiationProcessor.cuh"
 #include "ReconnectorProcessor.cuh"
 #include "DetonatorProcessor.cuh"
@@ -131,12 +131,12 @@ __global__ void cudaNextTimestep_cellType_oscillator(SimulationData data, Simula
 
 __global__ void cudaNextTimestep_cellType_constructor_completenessCheck(SimulationData data, SimulationStatistics statistics)
 {
-    ConstructorProcessor_New::preprocess(data);
+    ConstructorProcessor::preprocess(data);
 }
 
 __global__ void cudaNextTimestep_cellType_constructor(SimulationData data, SimulationStatistics statistics)
 {
-    ConstructorProcessor_New::process(data, statistics);
+    ConstructorProcessor::process(data, statistics);
 }
 
 __global__ void cudaNextTimestep_cellType_injector(SimulationData data, SimulationStatistics statistics)

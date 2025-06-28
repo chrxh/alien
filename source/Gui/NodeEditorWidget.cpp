@@ -50,7 +50,7 @@ _NodeEditorWidget::_NodeEditorWidget(CreatureTabEditData const& editData, Creatu
 
 namespace
 {
-    CellTypeGenomeDescription_New createCellTypeGenomeDescription(CellTypeGenome cellType)
+    CellTypeGenomeDescription createCellTypeGenomeDescription(CellTypeGenome cellType)
     {
         switch (cellType) {
         case CellTypeGenome_Base:
@@ -58,15 +58,15 @@ namespace
         case CellTypeGenome_Depot:
             return DepotGenomeDescription();
         case CellTypeGenome_Constructor:
-            return ConstructorGenomeDescription_New();
+            return ConstructorGenomeDescription();
         case CellTypeGenome_Sensor:
-            return SensorGenomeDescription_New();
+            return SensorGenomeDescription();
         case CellTypeGenome_Oscillator:
             return OscillatorGenomeDescription();
         case CellTypeGenome_Attacker:
             return AttackerGenomeDescription();
         case CellTypeGenome_Injector:
-            return InjectorGenomeDescription_New();
+            return InjectorGenomeDescription();
         case CellTypeGenome_Muscle:
             return MuscleGenomeDescription();
         case CellTypeGenome_Defender:
@@ -167,7 +167,7 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::BeginIndent();
 
             // Gene index
-            auto& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
+            auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
             std::vector<std::string> genes;
             for (auto const& [index, gene] : _editData->creature._genes | boost::adaptors::indexed(0)) {
                 auto text = "No. " + std::to_string(index + 1);
@@ -197,7 +197,7 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::BeginIndent();
 
             // Auto activation interval
-            auto& sensor = std::get<SensorGenomeDescription_New>(node._cellTypeData);
+            auto& sensor = std::get<SensorGenomeDescription>(node._cellTypeData);
             AlienGui::InputOptionalInt(
                 AlienGui::InputIntParameters().name("Auto activation interval").textWidth(rightColumnWidth), sensor._autoTriggerInterval);
 
@@ -250,7 +250,7 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::BeginIndent();
 
             // Mode
-            auto& injector = std::get<InjectorGenomeDescription_New>(node._cellTypeData);
+            auto& injector = std::get<InjectorGenomeDescription>(node._cellTypeData);
             AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::InjectorModeStrings).textWidth(rightColumnWidth), injector._mode);
 
             AlienGui::EndIndent();

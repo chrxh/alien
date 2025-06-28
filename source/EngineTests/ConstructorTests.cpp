@@ -9,14 +9,14 @@
 
 #include "IntegrationTestFramework.h"
 
-class ConstructorTests_New : public IntegrationTestFramework
+class ConstructorTests : public IntegrationTestFramework
 {
 public:
-    ConstructorTests_New()
+    ConstructorTests()
         : IntegrationTestFramework()
     {}
 
-    ~ConstructorTests_New() = default;
+    ~ConstructorTests() = default;
 
 protected:
     float getOffspringDistance() const
@@ -27,7 +27,7 @@ protected:
     float getConstructorEnergy() const { return _parameters.normalCellEnergy.value[0] * 2.5f; }
 };
 //
-//TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_upperSide)
+//TEST_F(ConstructorTests, constructFurtherCell_connectToExistingCell_upperSide)
 //{
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
@@ -78,7 +78,7 @@ protected:
 //    EXPECT_TRUE(approxCompare(60.0f, getConnection(actualPrevPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
 //}
 //
-//TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_bottomSide)
+//TEST_F(ConstructorTests, constructFurtherCell_connectToExistingCell_bottomSide)
 //{
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
@@ -128,7 +128,7 @@ protected:
 //    EXPECT_TRUE(approxCompare(300.0f, getConnection(actualPrevPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
 //}
 //
-//TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_bothSidesPresent)
+//TEST_F(ConstructorTests, constructFurtherCell_connectToExistingCell_bothSidesPresent)
 //{
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
@@ -187,7 +187,7 @@ protected:
 //}
 //
 //
-//TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_threeCellsWithSmallAngles)
+//TEST_F(ConstructorTests, constructFurtherCell_connectToExistingCell_threeCellsWithSmallAngles)
 //{
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
@@ -249,7 +249,7 @@ protected:
 //    EXPECT_TRUE(approxCompare(240.0f, getConnection(actualPrevPrevPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
 //}
 //
-//TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_threeCellsWithSmallAngles2)
+//TEST_F(ConstructorTests, constructFurtherCell_connectToExistingCell_threeCellsWithSmallAngles2)
 //{
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
@@ -310,7 +310,7 @@ protected:
 //    EXPECT_TRUE(approxCompare(300.0f, getConnection(actualPrevPrevPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
 //}
 //
-//TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_threeCellsWithSmallAngles_restrictAdditionalConnections)
+//TEST_F(ConstructorTests, constructFurtherCell_connectToExistingCell_threeCellsWithSmallAngles_restrictAdditionalConnections)
 //{
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
@@ -373,7 +373,7 @@ protected:
 //    EXPECT_TRUE(approxCompare(240.0f, getConnection(actualPrevPrevPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
 //}
 //
-//TEST_F(ConstructorTests_New, constructFurtherCell_connectToExistingCell_90degAlignment)
+//TEST_F(ConstructorTests, constructFurtherCell_connectToExistingCell_90degAlignment)
 //{
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
@@ -430,7 +430,7 @@ protected:
 //    EXPECT_TRUE(approxCompare(270.0f, getConnection(actualPrevPrevPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
 //}
 //
-//TEST_F(ConstructorTests_New, constructFurtherCell_connectToNoExistingCells_90degAlignment)
+//TEST_F(ConstructorTests, constructFurtherCell_connectToNoExistingCells_90degAlignment)
 //{
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
@@ -477,7 +477,7 @@ protected:
 //    EXPECT_TRUE(approxCompare(360.0f, getConnection(actualPrevPrevConstructedCell, actualPrevConstructedCell)._angleFromPrevious));
 //}
 //
-//TEST_F(ConstructorTests_New, constructFurtherCell_connectToCellWithAngleSpace_90degAlignment)
+//TEST_F(ConstructorTests, constructFurtherCell_connectToCellWithAngleSpace_90degAlignment)
 //{
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
@@ -534,7 +534,7 @@ protected:
 //    EXPECT_TRUE(approxCompare(270.0f, getConnection(actualPrevPrevPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
 //}
 //
-//TEST_F(ConstructorTests_New, constructFurtherCell_onSpike)
+//TEST_F(ConstructorTests, constructFurtherCell_onSpike)
 //{
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
@@ -581,7 +581,7 @@ protected:
 //    EXPECT_TRUE(approxCompare(360.0f, getConnection(actualPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
 //}
 //
-//TEST_F(ConstructorTests_New, finishCreature_angleToFront_upperSide)
+//TEST_F(ConstructorTests, finishCreature_angleToFront_upperSide)
 //{
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
@@ -621,7 +621,7 @@ protected:
 //    EXPECT_TRUE(approxCompare(-45.0f, prevPrevConstructedCell._angleToFront));
 //}
 //
-//TEST_F(ConstructorTests_New, finishCreature_angleToFront_lowerSide)
+//TEST_F(ConstructorTests, finishCreature_angleToFront_lowerSide)
 //{
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
@@ -661,7 +661,7 @@ protected:
 //    EXPECT_TRUE(approxCompare(135.0f, prevPrevConstructedCell._angleToFront));
 //}
 //
-//TEST_F(ConstructorTests_New, finishBodyPart_angleToFront_leftSide)
+//TEST_F(ConstructorTests, finishBodyPart_angleToFront_leftSide)
 //{
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
@@ -694,7 +694,7 @@ protected:
 //    EXPECT_TRUE(approxCompare(-90.0f, actualConstructedCell._angleToFront));
 //}
 //
-//TEST_F(ConstructorTests_New, finishBodyPart_angleToFront_rightSide)
+//TEST_F(ConstructorTests, finishBodyPart_angleToFront_rightSide)
 //{
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription().header(GenomeHeaderDescription().separateConstruction(false).frontAngle(-45.0f)).cells({CellGenomeDescription()}));

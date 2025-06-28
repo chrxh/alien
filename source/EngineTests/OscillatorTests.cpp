@@ -5,17 +5,17 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
-class OscillatorTests_New : public IntegrationTestFramework
+class OscillatorTests : public IntegrationTestFramework
 {
 public:
-    OscillatorTests_New()
+    OscillatorTests()
         : IntegrationTestFramework()
     {}
 
-    ~OscillatorTests_New() = default;
+    ~OscillatorTests() = default;
 };
 
-TEST_F(OscillatorTests_New, generatePulse_timeBeforeFirstPulse)
+TEST_F(OscillatorTests, generatePulse_timeBeforeFirstPulse)
 {
     auto data = CollectionDescription().addCells({
         CellDescription().id(1).cellTypeData(OscillatorDescription().autoTriggerInterval(97)),
@@ -31,7 +31,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeBeforeFirstPulse)
     EXPECT_FALSE(oscillator._signal.has_value());
 }
 
-TEST_F(OscillatorTests_New, generatePulse_timeAtFirstPulse)
+TEST_F(OscillatorTests, generatePulse_timeAtFirstPulse)
 {
     auto data = CollectionDescription().addCells({
         CellDescription().id(1).cellTypeData(OscillatorDescription().autoTriggerInterval(97)),
@@ -48,7 +48,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeAtFirstPulse)
     EXPECT_EQ(1.0f, oscillator._signal->_channels.at(0));
 }
 
-TEST_F(OscillatorTests_New, generatePulse_timeAtSecondPulse)
+TEST_F(OscillatorTests, generatePulse_timeAtSecondPulse)
 {
     auto data = CollectionDescription().addCells({
         CellDescription().id(1).cellTypeData(OscillatorDescription().autoTriggerInterval(97 * 2)),
@@ -65,7 +65,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeAtSecondPulse)
     EXPECT_EQ(1.0f, oscillator._signal->_channels.at(0));
 }
 
-TEST_F(OscillatorTests_New, generatePulse_timeAfterFirstPulse)
+TEST_F(OscillatorTests, generatePulse_timeAfterFirstPulse)
 {
     auto data = CollectionDescription().addCells({
         CellDescription().id(1).cellTypeData(OscillatorDescription().autoTriggerInterval(97)),
@@ -81,7 +81,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeAfterFirstPulse)
     EXPECT_FALSE(oscillator._signal.has_value());
 }
 
-TEST_F(OscillatorTests_New, generatePulse_timeBeforeFirstPulseAlternation)
+TEST_F(OscillatorTests, generatePulse_timeBeforeFirstPulseAlternation)
 {
     auto data = CollectionDescription().addCells({
         CellDescription().id(1).cellTypeData(OscillatorDescription().autoTriggerInterval(97).pulseType(OscillatorPulseType_Alternation).alternationInterval(3)),
@@ -98,7 +98,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeBeforeFirstPulseAlternation)
     EXPECT_EQ(1.0f, oscillator._signal->_channels.at(0));
 }
 
-TEST_F(OscillatorTests_New, generatePulse_timeAtFirstPulseAlternation)
+TEST_F(OscillatorTests, generatePulse_timeAtFirstPulseAlternation)
 {
     auto data = CollectionDescription().addCells({
         CellDescription().id(1).cellTypeData(OscillatorDescription().autoTriggerInterval(97).pulseType(OscillatorPulseType_Alternation).alternationInterval(3)),
@@ -115,7 +115,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeAtFirstPulseAlternation)
     EXPECT_EQ(-1.0f, oscillator._signal->_channels.at(0));
 }
 
-TEST_F(OscillatorTests_New, generatePulse_timeAtSecondPulseAlternation)
+TEST_F(OscillatorTests, generatePulse_timeAtSecondPulseAlternation)
 {
     auto data = CollectionDescription().addCells({
         CellDescription().id(1).cellTypeData(OscillatorDescription().autoTriggerInterval(97).pulseType(OscillatorPulseType_Alternation).alternationInterval(3)),
@@ -134,7 +134,7 @@ TEST_F(OscillatorTests_New, generatePulse_timeAtSecondPulseAlternation)
     EXPECT_EQ(1.0f, oscillator._signal->_channels.at(0));
 }
 
-TEST_F(OscillatorTests_New, generatePulse_triangularNetwork)
+TEST_F(OscillatorTests, generatePulse_triangularNetwork)
 {
     auto data = CollectionDescription().addCells({
         CellDescription().id(1).pos({0, 0}).cellTypeData(OscillatorDescription().autoTriggerInterval(10)),

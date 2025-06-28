@@ -26,15 +26,15 @@ CellTypeGenome NodeDescription::getCellType() const
         return CellTypeGenome_Base;
     } else if (std::holds_alternative<DepotGenomeDescription>(_cellTypeData)) {
         return CellTypeGenome_Depot;
-    } else if (std::holds_alternative<ConstructorGenomeDescription_New>(_cellTypeData)) {
+    } else if (std::holds_alternative<ConstructorGenomeDescription>(_cellTypeData)) {
         return CellTypeGenome_Constructor;
-    } else if (std::holds_alternative<SensorGenomeDescription_New>(_cellTypeData)) {
+    } else if (std::holds_alternative<SensorGenomeDescription>(_cellTypeData)) {
         return CellTypeGenome_Sensor;
     } else if (std::holds_alternative<OscillatorGenomeDescription>(_cellTypeData)) {
         return CellTypeGenome_Oscillator;
     } else if (std::holds_alternative<AttackerGenomeDescription>(_cellTypeData)) {
         return CellTypeGenome_Attacker;
-    } else if (std::holds_alternative<InjectorGenomeDescription_New>(_cellTypeData)) {
+    } else if (std::holds_alternative<InjectorGenomeDescription>(_cellTypeData)) {
         return CellTypeGenome_Injector;
     } else if (std::holds_alternative<MuscleGenomeDescription>(_cellTypeData)) {
         return CellTypeGenome_Muscle;

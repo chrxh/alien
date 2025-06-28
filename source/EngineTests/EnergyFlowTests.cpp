@@ -7,17 +7,17 @@
 
 #include "IntegrationTestFramework.h"
 
-class EnergyFlowTests_New : public IntegrationTestFramework
+class EnergyFlowTests : public IntegrationTestFramework
 {
 public:
-    EnergyFlowTests_New()
+    EnergyFlowTests()
         : IntegrationTestFramework()
     {}
 
-    ~EnergyFlowTests_New() = default;
+    ~EnergyFlowTests() = default;
 };
 
-TEST_F(EnergyFlowTests_New, energyFlowsLeadsEqualDistribution)
+TEST_F(EnergyFlowTests, energyFlowsLeadsEqualDistribution)
 {
     CollectionDescription data;
     for (int i = 0; i < 20; ++i) {
@@ -41,7 +41,7 @@ TEST_F(EnergyFlowTests_New, energyFlowsLeadsEqualDistribution)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(EnergyFlowTests_New, energyFlowsToActiveConstructor)
+TEST_F(EnergyFlowTests, energyFlowsToActiveConstructor)
 {
     CollectionDescription data;
     for (int i = 0; i < 20; ++i) {
@@ -74,7 +74,7 @@ TEST_F(EnergyFlowTests_New, energyFlowsToActiveConstructor)
     }
 }
 
-TEST_F(EnergyFlowTests_New, energyFlowsToClosestActiveConstructor)
+TEST_F(EnergyFlowTests, energyFlowsToClosestActiveConstructor)
 {
     auto constructorId1 = 10 + 1;
     auto constructorId2 = 20 + 19 + 1;
@@ -114,7 +114,7 @@ TEST_F(EnergyFlowTests_New, energyFlowsToClosestActiveConstructor)
     }
 }
 
-TEST_F(EnergyFlowTests_New, energyFlowsNotToFinishedConstructor)
+TEST_F(EnergyFlowTests, energyFlowsNotToFinishedConstructor)
 {
     CollectionDescription data;
     for (int i = 0; i < 20; ++i) {

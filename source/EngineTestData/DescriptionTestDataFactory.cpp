@@ -187,7 +187,7 @@ NodeDescription DescriptionTestDataFactory::createRandomNodeDescription(NodePara
         .signalRoutingRestriction(SignalRoutingRestrictionGenomeDescription().active(true).baseAngle(34.0f).openingAngle(67.0f));
 }
 
-CellTypeGenomeDescription_New DescriptionTestDataFactory::createRandomCellTypeGenomeDescription(NodeParameter cellParameter) const
+CellTypeGenomeDescription DescriptionTestDataFactory::createRandomCellTypeGenomeDescription(NodeParameter cellParameter) const
 {
     auto const& type = cellParameter.cellTypeGenome;
     auto const& muscleMode = cellParameter.muscleMode;
@@ -197,16 +197,16 @@ CellTypeGenomeDescription_New DescriptionTestDataFactory::createRandomCellTypeGe
     case CellTypeGenome_Depot:
         return DepotGenomeDescription();
     case CellTypeGenome_Constructor:
-        return ConstructorGenomeDescription_New().autoTriggerInterval(7).constructionActivationTime(4).constructionAngle(34.4f);
+        return ConstructorGenomeDescription().autoTriggerInterval(7).constructionActivationTime(4).constructionAngle(34.4f);
     case CellTypeGenome_Sensor:
-        return SensorGenomeDescription_New().autoTriggerInterval(3).restrictToColor(5).minRange(34).maxRange(67).minDensity(0.25f).restrictToMutants(
+        return SensorGenomeDescription().autoTriggerInterval(3).restrictToColor(5).minRange(34).maxRange(67).minDensity(0.25f).restrictToMutants(
             SensorRestrictToMutants_RestrictToLessComplexMutants);
     case CellTypeGenome_Oscillator:
         return OscillatorGenomeDescription().autoTriggerInterval(27).pulseType(OscillatorPulseType_Alternation).alternationInterval(45);
     case CellTypeGenome_Attacker:
         return AttackerGenomeDescription();
     case CellTypeGenome_Injector:
-        return InjectorGenomeDescription_New();
+        return InjectorGenomeDescription();
     case CellTypeGenome_Muscle: {
         MuscleModeGenomeDescription muscleModeDesc;
         switch (muscleMode) {
@@ -240,6 +240,6 @@ CellTypeGenomeDescription_New DescriptionTestDataFactory::createRandomCellTypeGe
     case CellTypeGenome_Detonator:
         return DetonatorGenomeDescription().countdown(23);
     default:
-        return CellTypeGenomeDescription_New();
+        return CellTypeGenomeDescription();
     }
 }

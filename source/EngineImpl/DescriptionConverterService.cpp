@@ -492,7 +492,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(
                 nodeDesc._cellTypeData = depotDesc;
             } break;
             case CellTypeGenome_Constructor: {
-                ConstructorGenomeDescription_New constructorDesc;
+                ConstructorGenomeDescription constructorDesc;
                 constructorDesc._autoTriggerInterval = nodeTO->cellTypeData.constructor.autoTriggerInterval > 0
                     ? std::make_optional(nodeTO->cellTypeData.constructor.autoTriggerInterval)
                     : std::nullopt;
@@ -502,7 +502,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(
                 nodeDesc._cellTypeData = constructorDesc;
             } break;
             case CellTypeGenome_Sensor: {
-                SensorGenomeDescription_New sensorDesc;
+                SensorGenomeDescription sensorDesc;
                 sensorDesc._autoTriggerInterval =
                     nodeTO->cellTypeData.sensor.autoTriggerInterval > 0 ? std::make_optional(nodeTO->cellTypeData.sensor.autoTriggerInterval) : std::nullopt;
                 sensorDesc._minDensity = nodeTO->cellTypeData.sensor.minDensity;
@@ -525,7 +525,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(
                 nodeDesc._cellTypeData = attackerDesc;
             } break;
             case CellTypeGenome_Injector: {
-                InjectorGenomeDescription_New injectorDesc;
+                InjectorGenomeDescription injectorDesc;
                 injectorDesc._mode = nodeTO->cellTypeData.injector.mode;
                 nodeDesc._cellTypeData = injectorDesc;
             } break;
@@ -667,7 +667,7 @@ void DescriptionConverterService::convertCreatureToTO(
                 depotTO.mode = depotDesc._mode;
             } break;
             case CellTypeGenome_Constructor: {
-                auto const& constructorDesc = std::get<ConstructorGenomeDescription_New>(nodeDesc._cellTypeData);
+                auto const& constructorDesc = std::get<ConstructorGenomeDescription>(nodeDesc._cellTypeData);
                 auto& constructorTO = nodeTO.cellTypeData.constructor;
                 constructorTO.autoTriggerInterval = static_cast<uint8_t>(constructorDesc._autoTriggerInterval.value_or(0));
                 constructorTO.geneIndex = constructorDesc._geneIndex;
@@ -675,7 +675,7 @@ void DescriptionConverterService::convertCreatureToTO(
                 constructorTO.constructionAngle = constructorDesc._constructionAngle;
             } break;
             case CellTypeGenome_Sensor: {
-                auto const& sensorDesc = std::get<SensorGenomeDescription_New>(nodeDesc._cellTypeData);
+                auto const& sensorDesc = std::get<SensorGenomeDescription>(nodeDesc._cellTypeData);
                 auto& sensorTO = nodeTO.cellTypeData.sensor;
                 sensorTO.autoTriggerInterval = static_cast<uint8_t>(sensorDesc._autoTriggerInterval.value_or(0));
                 sensorTO.minDensity = sensorDesc._minDensity;
@@ -694,7 +694,7 @@ void DescriptionConverterService::convertCreatureToTO(
             case CellTypeGenome_Attacker: {
             } break;
             case CellTypeGenome_Injector: {
-                auto const& injectorDesc = std::get<InjectorGenomeDescription_New>(nodeDesc._cellTypeData);
+                auto const& injectorDesc = std::get<InjectorGenomeDescription>(nodeDesc._cellTypeData);
                 auto& injectorTO = nodeTO.cellTypeData.injector;
                 injectorTO.mode = injectorDesc._mode;
             } break;

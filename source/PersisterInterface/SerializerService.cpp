@@ -159,17 +159,17 @@ namespace
 
     auto constexpr Id_DefenderGenome_Mode = 0;
 
-    auto constexpr Id_ConstructorGenome_New_AutoTriggerInterval = 0;
-    auto constexpr Id_ConstructorGenome_New_GeneIndex = 1;
-    auto constexpr Id_ConstructorGenome_New_ConstructionActivationTime = 2;
-    auto constexpr Id_ConstructorGenome_New_ConstructionAngle = 3;
+    auto constexpr Id_ConstructorGenome_AutoTriggerInterval = 0;
+    auto constexpr Id_ConstructorGenome_GeneIndex = 1;
+    auto constexpr Id_ConstructorGenome_ConstructionActivationTime = 2;
+    auto constexpr Id_ConstructorGenome_ConstructionAngle = 3;
 
-    auto constexpr Id_SensorGenome_New_MinDensity = 0;
-    auto constexpr Id_SensorGenome_New_RestrictToColor = 1;
-    auto constexpr Id_SensorGenome_New_RestrictToMutants = 2;
-    auto constexpr Id_SensorGenome_New_MinRange = 3;
-    auto constexpr Id_SensorGenome_New_MaxRange = 4;
-    auto constexpr Id_SensorGenome_New_AutoTriggerInterval = 5;
+    auto constexpr Id_SensorGenome_MinDensity = 0;
+    auto constexpr Id_SensorGenome_RestrictToColor = 1;
+    auto constexpr Id_SensorGenome_RestrictToMutants = 2;
+    auto constexpr Id_SensorGenome_MinRange = 3;
+    auto constexpr Id_SensorGenome_MaxRange = 4;
+    auto constexpr Id_SensorGenome_AutoTriggerInterval = 5;
 
     auto constexpr Id_MuscleModeGenome_AutoBending_MaxAngleDeviation = 0;
     auto constexpr Id_MuscleModeGenome_AutoBending_FrontBackVelRatio = 4;
@@ -190,7 +190,7 @@ namespace
     auto constexpr Id_OscillatorGenome_PulseType = 1;
     auto constexpr Id_OscillatorGenome_AlternationInterval = 2;
 
-    auto constexpr Id_InjectorGenome_New_Mode = 0;
+    auto constexpr Id_InjectorGenome_Mode = 0;
 
     auto constexpr Id_ReconnectorGenome_RestrictToColor = 0;
     auto constexpr Id_ReconnectorGenome_RestrictToMutants = 1;
@@ -232,37 +232,37 @@ namespace cereal
     SPLIT_SERIALIZATION(DepotGenomeDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, ConstructorGenomeDescription_New& data)
+    void loadSave(SerializationTask task, Archive& ar, ConstructorGenomeDescription& data)
     {
-        ConstructorGenomeDescription_New defaultObject;
+        ConstructorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_ConstructorGenome_New_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
-        loadSave(task, auxiliaries, Id_ConstructorGenome_New_GeneIndex, data._geneIndex, defaultObject._geneIndex);
+        loadSave(task, auxiliaries, Id_ConstructorGenome_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
+        loadSave(task, auxiliaries, Id_ConstructorGenome_GeneIndex, data._geneIndex, defaultObject._geneIndex);
         loadSave(
             task,
             auxiliaries,
-            Id_ConstructorGenome_New_ConstructionActivationTime,
+            Id_ConstructorGenome_ConstructionActivationTime,
             data._constructionActivationTime,
             defaultObject._constructionActivationTime);
-        loadSave(task, auxiliaries, Id_ConstructorGenome_New_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
+        loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(ConstructorGenomeDescription_New)
+    SPLIT_SERIALIZATION(ConstructorGenomeDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, SensorGenomeDescription_New& data)
+    void loadSave(SerializationTask task, Archive& ar, SensorGenomeDescription& data)
     {
-        SensorGenomeDescription_New defaultObject;
+        SensorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_SensorGenome_New_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
-        loadSave(task, auxiliaries, Id_SensorGenome_New_MinDensity, data._minDensity, defaultObject._minDensity);
-        loadSave(task, auxiliaries, Id_SensorGenome_New_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
-        loadSave(task, auxiliaries, Id_SensorGenome_New_RestrictToMutants, data._restrictToMutants, defaultObject._restrictToMutants);
-        loadSave(task, auxiliaries, Id_SensorGenome_New_MinRange, data._minRange, defaultObject._minRange);
-        loadSave(task, auxiliaries, Id_SensorGenome_New_MaxRange, data._maxRange, defaultObject._maxRange);
+        loadSave(task, auxiliaries, Id_SensorGenome_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
+        loadSave(task, auxiliaries, Id_SensorGenome_MinDensity, data._minDensity, defaultObject._minDensity);
+        loadSave(task, auxiliaries, Id_SensorGenome_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
+        loadSave(task, auxiliaries, Id_SensorGenome_RestrictToMutants, data._restrictToMutants, defaultObject._restrictToMutants);
+        loadSave(task, auxiliaries, Id_SensorGenome_MinRange, data._minRange, defaultObject._minRange);
+        loadSave(task, auxiliaries, Id_SensorGenome_MaxRange, data._maxRange, defaultObject._maxRange);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(SensorGenomeDescription_New)
+    SPLIT_SERIALIZATION(SensorGenomeDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, OscillatorGenomeDescription& data)
@@ -285,14 +285,14 @@ namespace cereal
     SPLIT_SERIALIZATION(AttackerGenomeDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, InjectorGenomeDescription_New& data)
+    void loadSave(SerializationTask task, Archive& ar, InjectorGenomeDescription& data)
     {
-        InjectorGenomeDescription_New defaultObject;
+        InjectorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_InjectorGenome_New_Mode, data._mode, defaultObject._mode);
+        loadSave(task, auxiliaries, Id_InjectorGenome_Mode, data._mode, defaultObject._mode);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(InjectorGenomeDescription_New)
+    SPLIT_SERIALIZATION(InjectorGenomeDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, AutoBendingGenomeDescription& data)

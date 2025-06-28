@@ -5,17 +5,17 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
-class SignalTests_New : public IntegrationTestFramework
+class SignalTests : public IntegrationTestFramework
 {
 public:
-    SignalTests_New()
+    SignalTests()
         : IntegrationTestFramework()
     {}
 
-    ~SignalTests_New() = default;
+    ~SignalTests() = default;
 };
 
-TEST_F(SignalTests_New, noSignal)
+TEST_F(SignalTests, noSignal)
 {
     auto data = CollectionDescription().addCells({
         CellDescription().id(1),
@@ -31,7 +31,7 @@ TEST_F(SignalTests_New, noSignal)
     EXPECT_FALSE(oscillator._signal.has_value());
 }
 
-TEST_F(SignalTests_New, forwardSignal)
+TEST_F(SignalTests, forwardSignal)
 {
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
     auto data = CollectionDescription().addCells({
@@ -56,7 +56,7 @@ TEST_F(SignalTests_New, forwardSignal)
     EXPECT_EQ(2, cell2._signalRelaxationTime);
 }
 
-TEST_F(SignalTests_New, vanishSignal_singleCell)
+TEST_F(SignalTests, vanishSignal_singleCell)
 {
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
     auto data = CollectionDescription().addCells({
@@ -73,7 +73,7 @@ TEST_F(SignalTests_New, vanishSignal_singleCell)
     EXPECT_FALSE(cell1._signal.has_value());
 }
 
-TEST_F(SignalTests_New, vanishSignal_relaxationNeeded)
+TEST_F(SignalTests, vanishSignal_relaxationNeeded)
 {
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
     auto data = CollectionDescription().addCells({
@@ -92,7 +92,7 @@ TEST_F(SignalTests_New, vanishSignal_relaxationNeeded)
     EXPECT_FALSE(cell1._signal.has_value());
 }
 
-TEST_F(SignalTests_New, mergeSignals)
+TEST_F(SignalTests, mergeSignals)
 {
     std::vector<float> signal1 = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 1.0f, -1.0f, 0.0f};
     std::vector<float> signal2 = {-0.5f, -1.0f, 0.5f, 1.0f, 0.7f, -0.7f, 0.5f, -0.5f};
@@ -130,7 +130,7 @@ TEST_F(SignalTests_New, mergeSignals)
     EXPECT_EQ(1, cell3._signalRelaxationTime);
 }
 
-TEST_F(SignalTests_New, forkSignals)
+TEST_F(SignalTests, forkSignals)
 {
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
     auto data = CollectionDescription().addCells({
@@ -167,15 +167,15 @@ enum class AngleRange
     Start, End
 };
 
-class SignalTests_BothSides_New
-    : public SignalTests_New
+class SignalTests_BothSides
+    : public SignalTests
     , public testing::WithParamInterface<AngleRange>
 {
 };
 
-INSTANTIATE_TEST_SUITE_P(SignalTests_BothSides_New, SignalTests_BothSides_New, ::testing::Values(AngleRange::Start, AngleRange::End));
+INSTANTIATE_TEST_SUITE_P(SignalTests_BothSides, SignalTests_BothSides, ::testing::Values(AngleRange::Start, AngleRange::End));
 
-TEST_P(SignalTests_BothSides_New, routeSignalOnRight_sharpMatch)
+TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMatch)
 {
     auto side = GetParam();
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
@@ -207,7 +207,7 @@ TEST_P(SignalTests_BothSides_New, routeSignalOnRight_sharpMatch)
     EXPECT_EQ(2, cell3._signalRelaxationTime);
 }
 
-TEST_P(SignalTests_BothSides_New, routeSignalOnRight_sharpMismatch)
+TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMismatch)
 {
     auto side = GetParam();
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};

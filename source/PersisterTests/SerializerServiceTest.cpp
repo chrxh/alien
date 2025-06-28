@@ -79,14 +79,14 @@ TEST_P(SerializerServiceTests_AllCellTypes, singleCellWithoutCreature)
 }
 
 using NodeParameter = DescriptionTestDataFactory::NodeParameter;
-class SerializerServiceTests_AllNodeTypes_New
+class SerializerServiceTests_AllNodeTypes
     : public SerializerServiceTests
     , public testing::WithParamInterface<NodeParameter>
 {};
 
 INSTANTIATE_TEST_SUITE_P(
-    SerializerServiceTests_AllNodeTypes_New,
-    SerializerServiceTests_AllNodeTypes_New,
+    SerializerServiceTests_AllNodeTypes,
+    SerializerServiceTests_AllNodeTypes,
     ::testing::Values(
         NodeParameter{CellTypeGenome_Base},
         NodeParameter{CellTypeGenome_Depot},
@@ -105,7 +105,7 @@ INSTANTIATE_TEST_SUITE_P(
         NodeParameter{CellTypeGenome_Reconnector},
         NodeParameter{CellTypeGenome_Detonator}));
 
-TEST_P(SerializerServiceTests_AllNodeTypes_New, singleCellWithCreature_oneGene_oneNode)
+TEST_P(SerializerServiceTests_AllNodeTypes, singleCellWithCreature_oneGene_oneNode)
 {
     auto nodeParameter = GetParam();
 

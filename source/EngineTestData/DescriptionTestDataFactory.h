@@ -34,5 +34,5 @@ private:
     CellTypeDescription createRandomCellTypeDescription(CellParameter cellParameter) const;
 
     NodeDescription createRandomNodeDescription(NodeParameter nodeParameter) const;
-    CellTypeGenomeDescription_New createRandomCellTypeGenomeDescription(NodeParameter cellParameter) const;
+    CellTypeGenomeDescription createRandomCellTypeGenomeDescription(NodeParameter cellParameter) const;
 };

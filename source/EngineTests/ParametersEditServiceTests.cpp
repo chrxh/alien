@@ -11,7 +11,7 @@
 
 #include "IntegrationTestFramework.h"
 
-class ParametersEditServiceTests_New : public IntegrationTestFramework
+class ParametersEditServiceTests : public IntegrationTestFramework
 {
 protected:
     SimulationParameters createTestData(std::vector<LocationType> const& locationTypes)
@@ -269,7 +269,7 @@ protected:
     }
 };
 
-TEST_F(ParametersEditServiceTests_New, cloneLayer)
+TEST_F(ParametersEditServiceTests, cloneLayer)
 {
     auto origParameters = createTestData({LocationType::Layer, LocationType::Layer, LocationType::Source, LocationType::Source});
     auto parameters = origParameters;
@@ -278,7 +278,7 @@ TEST_F(ParametersEditServiceTests_New, cloneLayer)
         parameters, origParameters, {LocationType::Layer, LocationType::Layer, LocationType::Layer, LocationType::Source, LocationType::Source}, 2);
 }
 
-TEST_F(ParametersEditServiceTests_New, cloneSource)
+TEST_F(ParametersEditServiceTests, cloneSource)
 {
     auto origParameters = createTestData({LocationType::Layer, LocationType::Layer, LocationType::Source, LocationType::Source});
     auto parameters = origParameters;
@@ -287,7 +287,7 @@ TEST_F(ParametersEditServiceTests_New, cloneSource)
         parameters, origParameters, {LocationType::Layer, LocationType::Layer, LocationType::Source, LocationType::Source, LocationType::Source}, 4);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_empty)
+TEST_F(ParametersEditServiceTests, insertDefaultLayer_empty)
 {
     auto origParameters = createTestData({});
     auto parameters = origParameters;
@@ -295,7 +295,7 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_empty)
     checkParametersAfterDefaultInsertion(parameters, origParameters, {LocationType::Layer}, 1);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_onlySources)
+TEST_F(ParametersEditServiceTests, insertDefaultLayer_onlySources)
 {
     auto origParameters = createTestData({
         LocationType::Source,
@@ -314,7 +314,7 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_onlySources)
         2);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_base)
+TEST_F(ParametersEditServiceTests, insertDefaultLayer_base)
 {
     auto origParameters = createTestData({
         LocationType::Layer,
@@ -339,7 +339,7 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_base)
         1);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_firstLayer1)
+TEST_F(ParametersEditServiceTests, insertDefaultLayer_firstLayer1)
 {
     auto origParameters = createTestData({
         LocationType::Layer,
@@ -364,7 +364,7 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_firstLayer1)
         2);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_firstLayer2)
+TEST_F(ParametersEditServiceTests, insertDefaultLayer_firstLayer2)
 {
     auto origParameters = createTestData({
         LocationType::Source,
@@ -389,7 +389,7 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_firstLayer2)
         3);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_middle1)
+TEST_F(ParametersEditServiceTests, insertDefaultLayer_middle1)
 {
     auto origParameters = createTestData({
         LocationType::Layer,
@@ -414,7 +414,7 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_middle1)
         4);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_middle2)
+TEST_F(ParametersEditServiceTests, insertDefaultLayer_middle2)
 {
     auto origParameters = createTestData({
         LocationType::Layer,
@@ -443,7 +443,7 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_middle2)
         5);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_end)
+TEST_F(ParametersEditServiceTests, insertDefaultLayer_end)
 {
     auto origParameters = createTestData({
         LocationType::Layer,
@@ -468,7 +468,7 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultLayer_end)
         6);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultSource_empty)
+TEST_F(ParametersEditServiceTests, insertDefaultSource_empty)
 {
     auto origParameters = createTestData({});
     auto parameters = origParameters;
@@ -476,7 +476,7 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_empty)
     checkParametersAfterDefaultInsertion(parameters, origParameters, {LocationType::Source}, 1);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultSource_onlyLayers)
+TEST_F(ParametersEditServiceTests, insertDefaultSource_onlyLayers)
 {
     auto origParameters = createTestData({
         LocationType::Layer,
@@ -495,7 +495,7 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_onlyLayers)
         2);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultSource_base)
+TEST_F(ParametersEditServiceTests, insertDefaultSource_base)
 {
     auto origParameters = createTestData({
         LocationType::Source,
@@ -520,7 +520,7 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_base)
         1);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultSource_firstSource1)
+TEST_F(ParametersEditServiceTests, insertDefaultSource_firstSource1)
 {
     auto origParameters = createTestData({
         LocationType::Source,
@@ -545,7 +545,7 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_firstSource1)
         2);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultSource_firstSource2)
+TEST_F(ParametersEditServiceTests, insertDefaultSource_firstSource2)
 {
     auto origParameters = createTestData({
         LocationType::Layer,
@@ -570,7 +570,7 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_firstSource2)
         3);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultSource_middle1)
+TEST_F(ParametersEditServiceTests, insertDefaultSource_middle1)
 {
     auto origParameters = createTestData({
         LocationType::Source,
@@ -595,7 +595,7 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_middle1)
         4);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultSource_middle2)
+TEST_F(ParametersEditServiceTests, insertDefaultSource_middle2)
 {
     auto origParameters = createTestData({
         LocationType::Source,
@@ -624,7 +624,7 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_middle2)
         5);
 }
 
-TEST_F(ParametersEditServiceTests_New, insertDefaultSource_end)
+TEST_F(ParametersEditServiceTests, insertDefaultSource_end)
 {
     auto origParameters = createTestData({
         LocationType::Source,
@@ -649,7 +649,7 @@ TEST_F(ParametersEditServiceTests_New, insertDefaultSource_end)
         6);
 }
 
-TEST_F(ParametersEditServiceTests_New, deleteLayer_afterwardEmpty)
+TEST_F(ParametersEditServiceTests, deleteLayer_afterwardEmpty)
 {
     auto origParameters = createTestData({
         LocationType::Layer,
@@ -659,7 +659,7 @@ TEST_F(ParametersEditServiceTests_New, deleteLayer_afterwardEmpty)
     checkParametersAfterDeletion(parameters, origParameters, {}, 1);
 }
 
-TEST_F(ParametersEditServiceTests_New, deleteLayer_afterwardOnlySources)
+TEST_F(ParametersEditServiceTests, deleteLayer_afterwardOnlySources)
 {
     auto origParameters = createTestData({
         LocationType::Source,
@@ -678,7 +678,7 @@ TEST_F(ParametersEditServiceTests_New, deleteLayer_afterwardOnlySources)
         2);
 }
 
-TEST_F(ParametersEditServiceTests_New, deleteLayer_firstLayer)
+TEST_F(ParametersEditServiceTests, deleteLayer_firstLayer)
 {
     auto origParameters = createTestData({
         LocationType::Layer,
@@ -701,7 +701,7 @@ TEST_F(ParametersEditServiceTests_New, deleteLayer_firstLayer)
         1);
 }
 
-TEST_F(ParametersEditServiceTests_New, deleteLayer_middle)
+TEST_F(ParametersEditServiceTests, deleteLayer_middle)
 {
     auto origParameters = createTestData({
         LocationType::Layer,
@@ -724,7 +724,7 @@ TEST_F(ParametersEditServiceTests_New, deleteLayer_middle)
         3);
 }
 
-TEST_F(ParametersEditServiceTests_New, deleteLayer_end)
+TEST_F(ParametersEditServiceTests, deleteLayer_end)
 {
     auto origParameters = createTestData({
         LocationType::Layer,
@@ -747,7 +747,7 @@ TEST_F(ParametersEditServiceTests_New, deleteLayer_end)
         5);
 }
 
-TEST_F(ParametersEditServiceTests_New, deleteSource_afterwardEmpty)
+TEST_F(ParametersEditServiceTests, deleteSource_afterwardEmpty)
 {
     auto origParameters = createTestData({
         LocationType::Source,
@@ -757,7 +757,7 @@ TEST_F(ParametersEditServiceTests_New, deleteSource_afterwardEmpty)
     checkParametersAfterDeletion(parameters, origParameters, {}, 1);
 }
 
-TEST_F(ParametersEditServiceTests_New, deleteSource_afterwardOnlyLayers)
+TEST_F(ParametersEditServiceTests, deleteSource_afterwardOnlyLayers)
 {
     auto origParameters = createTestData({
         LocationType::Layer,
@@ -776,7 +776,7 @@ TEST_F(ParametersEditServiceTests_New, deleteSource_afterwardOnlyLayers)
         2);
 }
 
-TEST_F(ParametersEditServiceTests_New, deleteSource_firstSource)
+TEST_F(ParametersEditServiceTests, deleteSource_firstSource)
 {
     auto origParameters = createTestData({
         LocationType::Source,
@@ -799,7 +799,7 @@ TEST_F(ParametersEditServiceTests_New, deleteSource_firstSource)
         1);
 }
 
-TEST_F(ParametersEditServiceTests_New, deleteSource_middle)
+TEST_F(ParametersEditServiceTests, deleteSource_middle)
 {
     auto origParameters = createTestData({
         LocationType::Source,
@@ -822,7 +822,7 @@ TEST_F(ParametersEditServiceTests_New, deleteSource_middle)
         3);
 }
 
-TEST_F(ParametersEditServiceTests_New, deleteSource_end)
+TEST_F(ParametersEditServiceTests, deleteSource_end)
 {
     auto origParameters = createTestData({
         LocationType::Source,
@@ -845,7 +845,7 @@ TEST_F(ParametersEditServiceTests_New, deleteSource_end)
         5);
 }
 
-TEST_F(ParametersEditServiceTests_New, moveLayerUpwards_afterOtherSource)
+TEST_F(ParametersEditServiceTests, moveLayerUpwards_afterOtherSource)
 {
     auto origParameters = createTestData({
         LocationType::Source,
@@ -863,7 +863,7 @@ TEST_F(ParametersEditServiceTests_New, moveLayerUpwards_afterOtherSource)
         2);
 }
 
-TEST_F(ParametersEditServiceTests_New, moveLayerUpwards_afterOtherLayer)
+TEST_F(ParametersEditServiceTests, moveLayerUpwards_afterOtherLayer)
 {
     auto origParameters = createTestData({
         LocationType::Source,
@@ -883,7 +883,7 @@ TEST_F(ParametersEditServiceTests_New, moveLayerUpwards_afterOtherLayer)
         3);
 }
 
-TEST_F(ParametersEditServiceTests_New, moveLayerUpwards_afterOtherLayerAndSources)
+TEST_F(ParametersEditServiceTests, moveLayerUpwards_afterOtherLayerAndSources)
 {
     auto origParameters = createTestData({
         LocationType::Layer,
@@ -907,7 +907,7 @@ TEST_F(ParametersEditServiceTests_New, moveLayerUpwards_afterOtherLayerAndSource
         3);
 }
 
-TEST_F(ParametersEditServiceTests_New, moveSourceUpwards_afterOtherLayer)
+TEST_F(ParametersEditServiceTests, moveSourceUpwards_afterOtherLayer)
 {
     auto origParameters = createTestData({
         LocationType::Layer,
@@ -925,7 +925,7 @@ TEST_F(ParametersEditServiceTests_New, moveSourceUpwards_afterOtherLayer)
         2);
 }
 
-TEST_F(ParametersEditServiceTests_New, moveSourceUpwards_afterOtherSource)
+TEST_F(ParametersEditServiceTests, moveSourceUpwards_afterOtherSource)
 {
     auto origParameters = createTestData({
         LocationType::Layer,
@@ -945,7 +945,7 @@ TEST_F(ParametersEditServiceTests_New, moveSourceUpwards_afterOtherSource)
         3);
 }
 
-TEST_F(ParametersEditServiceTests_New, moveSourceUpwards_afterOtherLayerAndSources)
+TEST_F(ParametersEditServiceTests, moveSourceUpwards_afterOtherLayerAndSources)
 {
     auto origParameters = createTestData({
         LocationType::Source,
@@ -969,7 +969,7 @@ TEST_F(ParametersEditServiceTests_New, moveSourceUpwards_afterOtherLayerAndSourc
         3);
 }
 
-TEST_F(ParametersEditServiceTests_New, moveLayerDownwards_beforeOtherSource)
+TEST_F(ParametersEditServiceTests, moveLayerDownwards_beforeOtherSource)
 {
     auto origParameters = createTestData({
         LocationType::Layer,
@@ -987,7 +987,7 @@ TEST_F(ParametersEditServiceTests_New, moveLayerDownwards_beforeOtherSource)
         1);
 }
 
-TEST_F(ParametersEditServiceTests_New, moveLayerDownwards_beforeOtherLayer)
+TEST_F(ParametersEditServiceTests, moveLayerDownwards_beforeOtherLayer)
 {
     auto origParameters = createTestData({
         LocationType::Layer,
@@ -1005,7 +1005,7 @@ TEST_F(ParametersEditServiceTests_New, moveLayerDownwards_beforeOtherLayer)
         1);
 }
 
-TEST_F(ParametersEditServiceTests_New, moveLayerDownwards_beforeOtherLayerAndSources)
+TEST_F(ParametersEditServiceTests, moveLayerDownwards_beforeOtherLayerAndSources)
 {
     auto origParameters = createTestData({
         LocationType::Layer,
@@ -1029,7 +1029,7 @@ TEST_F(ParametersEditServiceTests_New, moveLayerDownwards_beforeOtherLayerAndSou
         3);
 }
 
-TEST_F(ParametersEditServiceTests_New, moveSourceDownwards_beforeOtherLayer)
+TEST_F(ParametersEditServiceTests, moveSourceDownwards_beforeOtherLayer)
 {
     auto origParameters = createTestData({
         LocationType::Source,
@@ -1047,7 +1047,7 @@ TEST_F(ParametersEditServiceTests_New, moveSourceDownwards_beforeOtherLayer)
         1);
 }
 
-TEST_F(ParametersEditServiceTests_New, moveSourceDownwards_beforeOtherSource)
+TEST_F(ParametersEditServiceTests, moveSourceDownwards_beforeOtherSource)
 {
     auto origParameters = createTestData({
         LocationType::Source,
@@ -1065,7 +1065,7 @@ TEST_F(ParametersEditServiceTests_New, moveSourceDownwards_beforeOtherSource)
         1);
 }
 
-TEST_F(ParametersEditServiceTests_New, moveSourceDownwards_beforeOtherLayerAndSources)
+TEST_F(ParametersEditServiceTests, moveSourceDownwards_beforeOtherLayerAndSources)
 {
     auto origParameters = createTestData({
         LocationType::Source,

@@ -11,7 +11,7 @@ void CreatureDescriptionEditService::addGene(CreatureDescription& creature, int 
         auto& gene = creature._genes[i];
         for (auto& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
-                auto& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
+                auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
                 if (constructor._geneIndex > index) {
                     ++constructor._geneIndex;
                 }
@@ -31,7 +31,7 @@ void CreatureDescriptionEditService::removeGene(CreatureDescription& creature, i
         auto& gene = creature._genes[i];
         for (auto& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
-                auto& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
+                auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
                 if (constructor._geneIndex >= index) {
                     --constructor._geneIndex;
                 }
@@ -48,7 +48,7 @@ void CreatureDescriptionEditService::swapGenes(CreatureDescription& creature, in
     for (auto& gene : creature._genes) {
         for (auto& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
-                auto& constructor = std::get<ConstructorGenomeDescription_New>(node._cellTypeData);
+                auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
                 if (constructor._geneIndex == index) {
                     constructor._geneIndex = index + 1;
                 } else if (constructor._geneIndex == index + 1) {

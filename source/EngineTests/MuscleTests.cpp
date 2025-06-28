@@ -8,14 +8,14 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
-class MuscleTests_New : public IntegrationTestFramework
+class MuscleTests : public IntegrationTestFramework
 {
 public:
-    MuscleTests_New()
+    MuscleTests()
         : IntegrationTestFramework()
     {}
 
-    ~MuscleTests_New() = default;
+    ~MuscleTests() = default;
 
 protected:
     template <typename Channel>
@@ -51,15 +51,15 @@ enum class Channel1
     Negative
 };
 
-class MuscleTests_AutoBending_New
-    : public MuscleTests_New
+class MuscleTests_AutoBending
+    : public MuscleTests
     , public testing::WithParamInterface<std::tuple<Side, Channel0, Channel1>>
 {
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    MuscleTests_AutoBending_New,
-    MuscleTests_AutoBending_New,
+    MuscleTests_AutoBending,
+    MuscleTests_AutoBending,
     ::testing::Values(
         std::make_tuple(Side::Left, Channel0::Zero, Channel1::Zero),
         std::make_tuple(Side::Right, Channel0::Zero, Channel1::Zero),
@@ -80,7 +80,7 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple(Side::Left, Channel0::Negative, Channel1::Negative),
         std::make_tuple(Side::Right, Channel0::Negative, Channel1::Negative)));
 
-TEST_P(MuscleTests_AutoBending_New, muscleWithTwoConnections)
+TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
 {
     auto constexpr MaxAngleDeviation = 30.0f;
     auto constexpr AnglePrecision = NEAR_ZERO;
@@ -148,7 +148,7 @@ TEST_P(MuscleTests_AutoBending_New, muscleWithTwoConnections)
     }
 }
 
-TEST_P(MuscleTests_AutoBending_New, muscleWithOneConnection)
+TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
 {
     auto constexpr MaxAngleDeviation = 30.0f;
     auto constexpr AnglePrecision = NEAR_ZERO;
@@ -220,15 +220,15 @@ TEST_P(MuscleTests_AutoBending_New, muscleWithOneConnection)
     }
 }
 
-class MuscleTests_ManualBending_New
-    : public MuscleTests_New
+class MuscleTests_ManualBending
+    : public MuscleTests
     , public testing::WithParamInterface<std::tuple<Side, Channel0>>
 {
 };
 
 INSTANTIATE_TEST_SUITE_P(
-    MuscleTests_ManualBending_New,
-    MuscleTests_ManualBending_New,
+    MuscleTests_ManualBending,
+    MuscleTests_ManualBending,
     ::testing::Values(
         std::make_tuple(Side::Left, Channel0::Zero),
         std::make_tuple(Side::Right, Channel0::Zero),
@@ -237,7 +237,7 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple(Side::Left, Channel0::Negative),
         std::make_tuple(Side::Right, Channel0::Negative)));
 
-TEST_P(MuscleTests_ManualBending_New, muscleWithTwoConnections)
+TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
 {
     auto constexpr MaxAngleDeviation = 30.0f;
     auto constexpr AnglePrecision = NEAR_ZERO;
@@ -328,7 +328,7 @@ TEST_P(MuscleTests_ManualBending_New, muscleWithTwoConnections)
     }
 }
 
-TEST_P(MuscleTests_ManualBending_New, muscleWithOneConnection)
+TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
 {
     auto constexpr MaxAngleDeviation = 30.0f;
     auto constexpr AnglePrecision = NEAR_ZERO;
@@ -422,14 +422,14 @@ TEST_P(MuscleTests_ManualBending_New, muscleWithOneConnection)
     }
 }
 
-class MuscleTests_AngleBending_New
-    : public MuscleTests_New
+class MuscleTests_AngleBending
+    : public MuscleTests
     , public testing::WithParamInterface<std::tuple<Side, float>>
 {};
 
 INSTANTIATE_TEST_SUITE_P(
-    MuscleTests_AngleBending_New,
-    MuscleTests_AngleBending_New,
+    MuscleTests_AngleBending,
+    MuscleTests_AngleBending,
     ::testing::Values(
         std::make_tuple(Side::Left, 0.0f),
         std::make_tuple(Side::Left, -30.0f),
@@ -446,7 +446,7 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple(Side::Right, 150.0f),
         std::make_tuple(Side::Right, 180.0f)));
 
-TEST_P(MuscleTests_AngleBending_New, muscleWithTwoConnections)
+TEST_P(MuscleTests_AngleBending, muscleWithTwoConnections)
 {
     auto constexpr MaxAngleDeviation = 120.0f;
     auto constexpr AnglePrecision = 2.0f;
@@ -491,7 +491,7 @@ TEST_P(MuscleTests_AngleBending_New, muscleWithTwoConnections)
     }
 }
 
-TEST_P(MuscleTests_AngleBending_New, muscleWithOneConnection)
+TEST_P(MuscleTests_AngleBending, muscleWithOneConnection)
 {
     auto constexpr MaxAngleDeviation = 120.0f;
     auto constexpr AngleMinDistance = 30.0f;
@@ -543,20 +543,20 @@ TEST_P(MuscleTests_AngleBending_New, muscleWithOneConnection)
     }
 }
 
-class MuscleTests_AutoCrawling_New
-    : public MuscleTests_New
+class MuscleTests_AutoCrawling
+    : public MuscleTests
     , public testing::WithParamInterface<Channel0>
 {};
 
 INSTANTIATE_TEST_SUITE_P(
-    MuscleTests_AutoCrawling_New,
-    MuscleTests_AutoCrawling_New,
+    MuscleTests_AutoCrawling,
+    MuscleTests_AutoCrawling,
     ::testing::Values(
         Channel0::Positive,
         Channel0::Negative,
         Channel0::Zero));
 
-TEST_P(MuscleTests_AutoCrawling_New, muscleWithTwoConnections)
+TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
 {
     auto constexpr MaxDistanceDeviation = 0.8f;
 
@@ -622,7 +622,7 @@ TEST_P(MuscleTests_AutoCrawling_New, muscleWithTwoConnections)
     }
 }
 
-TEST_P(MuscleTests_AutoCrawling_New, muscleWithOneConnection)
+TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
 {
     auto constexpr MaxDistanceDeviation = 0.8f;
 
@@ -682,17 +682,17 @@ TEST_P(MuscleTests_AutoCrawling_New, muscleWithOneConnection)
     }
 }
 
-class MuscleTests_ManualCrawling_New
-    : public MuscleTests_New
+class MuscleTests_ManualCrawling
+    : public MuscleTests
     , public testing::WithParamInterface<Channel0>
 {};
 
 INSTANTIATE_TEST_SUITE_P(
-    MuscleTests_ManualCrawling_New,
-    MuscleTests_ManualCrawling_New,
+    MuscleTests_ManualCrawling,
+    MuscleTests_ManualCrawling,
     ::testing::Values(Channel0::Positive, Channel0::Negative, Channel0::Zero));
 
-TEST_P(MuscleTests_ManualCrawling_New, muscleWithTwoConnections)
+TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
 {
     auto constexpr MaxDistanceDeviation = 0.8f;
 
@@ -743,7 +743,7 @@ TEST_P(MuscleTests_ManualCrawling_New, muscleWithTwoConnections)
     }
 }
 
-TEST_P(MuscleTests_ManualCrawling_New, muscleWithOneConnection)
+TEST_P(MuscleTests_ManualCrawling, muscleWithOneConnection)
 {
     auto constexpr MaxDistanceDeviation = 0.8f;
 
@@ -792,14 +792,14 @@ TEST_P(MuscleTests_ManualCrawling_New, muscleWithOneConnection)
     }
 }
 
-class MuscleTests_DirectMovement_New
-    : public MuscleTests_New
+class MuscleTests_DirectMovement
+    : public MuscleTests
     , public testing::WithParamInterface<std::tuple<Channel0, Channel1>>
 {};
 
 INSTANTIATE_TEST_SUITE_P(
-    MuscleTests_DirectMovement_New,
-    MuscleTests_DirectMovement_New,
+    MuscleTests_DirectMovement,
+    MuscleTests_DirectMovement,
     ::testing::Values(
         std::make_tuple(Channel0::Positive, Channel1::Zero),
         std::make_tuple(Channel0::Negative, Channel1::Zero),
@@ -811,7 +811,7 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple(Channel0::Negative, Channel1::Negative),
         std::make_tuple(Channel0::Zero, Channel1::Negative)));
 
-TEST_P(MuscleTests_DirectMovement_New, muscleWithTwoConnections)
+TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
 {
     auto constexpr AnglePrecision = 1.0f;
     auto [channel0, channel1] = GetParam();

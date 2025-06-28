@@ -6,17 +6,17 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
-class CellConnectionTests_New : public IntegrationTestFramework
+class CellConnectionTests : public IntegrationTestFramework
 {
 public:
-    CellConnectionTests_New()
+    CellConnectionTests()
         : IntegrationTestFramework()
     {}
 
-    ~CellConnectionTests_New() = default;
+    ~CellConnectionTests() = default;
 };
 
-TEST_F(CellConnectionTests_New, decay)
+TEST_F(CellConnectionTests, decay)
 {
     _parameters.radiationAbsorption.baseValue[0] = 0;
     _parameters.cellDeathConsequences.value = CellDeathConsquences_CreatureDies;
@@ -34,7 +34,7 @@ TEST_F(CellConnectionTests_New, decay)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(origData)));
 }
 
-TEST_F(CellConnectionTests_New, addFirstConnection)
+TEST_F(CellConnectionTests, addFirstConnection)
 {
     auto data = CollectionDescription().addCells({
         CellDescription().id(1).pos({0, 0}),
@@ -60,7 +60,7 @@ TEST_F(CellConnectionTests_New, addFirstConnection)
     EXPECT_TRUE(approxCompare(1.0f, cell2._connections.front()._distance));
 }
 
-TEST_F(CellConnectionTests_New, addSecondConnection)
+TEST_F(CellConnectionTests, addSecondConnection)
 {
     auto data = CollectionDescription().addCells({
         CellDescription().id(1).pos({0, 0}),
@@ -87,7 +87,7 @@ TEST_F(CellConnectionTests_New, addSecondConnection)
     EXPECT_TRUE(approxCompare(90.0f, connection2._angleFromPrevious));
 }
 
-TEST_F(CellConnectionTests_New, addThirdConnection1)
+TEST_F(CellConnectionTests, addThirdConnection1)
 {
     auto data = CollectionDescription().addCells({
         CellDescription().id(1).pos({0, 0}),
@@ -122,7 +122,7 @@ TEST_F(CellConnectionTests_New, addThirdConnection1)
 }
 
 
-TEST_F(CellConnectionTests_New, addThirdConnection2)
+TEST_F(CellConnectionTests, addThirdConnection2)
 {
     auto data = CollectionDescription().addCells({
         CellDescription().id(1).pos({0, 0}),

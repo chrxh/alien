@@ -49,26 +49,26 @@ struct DepotGenomeDescription
     MEMBER(DepotGenomeDescription, EnergyDistributionMode, mode, EnergyDistributionMode_TransmittersAndConstructors);
 };
 
-struct ConstructorGenomeDescription_New
+struct ConstructorGenomeDescription
 {
-    auto operator<=>(ConstructorGenomeDescription_New const&) const = default;
+    auto operator<=>(ConstructorGenomeDescription const&) const = default;
 
-    MEMBER(ConstructorGenomeDescription_New, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering
-    MEMBER(ConstructorGenomeDescription_New, int, geneIndex, 0);
-    MEMBER(ConstructorGenomeDescription_New, int, constructionActivationTime, 100);
-    MEMBER(ConstructorGenomeDescription_New, float, constructionAngle, 0.0f);
+    MEMBER(ConstructorGenomeDescription, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering
+    MEMBER(ConstructorGenomeDescription, int, geneIndex, 0);
+    MEMBER(ConstructorGenomeDescription, int, constructionActivationTime, 100);
+    MEMBER(ConstructorGenomeDescription, float, constructionAngle, 0.0f);
 };
 
-struct SensorGenomeDescription_New
+struct SensorGenomeDescription
 {
-    auto operator<=>(SensorGenomeDescription_New const&) const = default;
+    auto operator<=>(SensorGenomeDescription const&) const = default;
 
-    MEMBER(SensorGenomeDescription_New, std::optional<int>, autoTriggerInterval, 10);  // std::nullopt = manual triggering
-    MEMBER(SensorGenomeDescription_New, float, minDensity, 0.05f);
-    MEMBER(SensorGenomeDescription_New, std::optional<int>, minRange, std::nullopt);
-    MEMBER(SensorGenomeDescription_New, std::optional<int>, maxRange, std::nullopt);
-    MEMBER(SensorGenomeDescription_New, std::optional<int>, restrictToColor, std::nullopt);
-    MEMBER(SensorGenomeDescription_New, SensorRestrictToMutants, restrictToMutants, SensorRestrictToMutants_NoRestriction);
+    MEMBER(SensorGenomeDescription, std::optional<int>, autoTriggerInterval, 10);  // std::nullopt = manual triggering
+    MEMBER(SensorGenomeDescription, float, minDensity, 0.05f);
+    MEMBER(SensorGenomeDescription, std::optional<int>, minRange, std::nullopt);
+    MEMBER(SensorGenomeDescription, std::optional<int>, maxRange, std::nullopt);
+    MEMBER(SensorGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(SensorGenomeDescription, SensorRestrictToMutants, restrictToMutants, SensorRestrictToMutants_NoRestriction);
 };
 
 struct OscillatorGenomeDescription
@@ -85,11 +85,11 @@ struct AttackerGenomeDescription
     auto operator<=>(AttackerGenomeDescription const&) const = default;
 };
 
-struct InjectorGenomeDescription_New
+struct InjectorGenomeDescription
 {
-    auto operator<=>(InjectorGenomeDescription_New const&) const = default;
+    auto operator<=>(InjectorGenomeDescription const&) const = default;
 
-    MEMBER(InjectorGenomeDescription_New, InjectorMode, mode, InjectorMode_InjectAll);
+    MEMBER(InjectorGenomeDescription, InjectorMode, mode, InjectorMode_InjectAll);
 };
 
 
@@ -177,14 +177,14 @@ struct DetonatorGenomeDescription
     MEMBER(DetonatorGenomeDescription, int, countdown, 10);
 };
 
-using CellTypeGenomeDescription_New = std::variant<
+using CellTypeGenomeDescription = std::variant<
     BaseGenomeDescription,
     DepotGenomeDescription,
-    ConstructorGenomeDescription_New,
-    SensorGenomeDescription_New,
+    ConstructorGenomeDescription,
+    SensorGenomeDescription,
     OscillatorGenomeDescription,
     AttackerGenomeDescription,
-    InjectorGenomeDescription_New,
+    InjectorGenomeDescription,
     MuscleGenomeDescription,
     DefenderGenomeDescription,
     ReconnectorGenomeDescription,
@@ -208,7 +208,7 @@ struct NodeDescription
     MEMBER(NodeDescription, int, numRequiredAdditionalConnections, 0);
 
     MEMBER(NodeDescription, NeuralNetworkGenomeDescription, neuralNetwork, NeuralNetworkGenomeDescription());
-    MEMBER(NodeDescription, CellTypeGenomeDescription_New, cellTypeData, BaseGenomeDescription());
+    MEMBER(NodeDescription, CellTypeGenomeDescription, cellTypeData, BaseGenomeDescription());
     MEMBER(NodeDescription, SignalRoutingRestrictionGenomeDescription, signalRoutingRestriction, SignalRoutingRestrictionGenomeDescription());
 
     CellTypeGenome getCellType() const;
