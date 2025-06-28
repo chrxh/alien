@@ -5,6 +5,8 @@ PUBLIC
     CellStateTransitionTests_New.cpp
     ConstructorTests.cpp
     ConstructorTests_New.cpp
+    CreatureDescriptionEditServiceTests_New.cpp
+    CreatureDescriptionInfoServiceTests_New.cpp
     DataTransferTests.cpp
     DataTransferTests_New.cpp
     DefenderTests.cpp
@@ -12,8 +14,6 @@ PUBLIC
     DetonatorTests.cpp
     EnergyFlowTests_New.cpp
     GarbageCollectorTests_New.cpp
-    GenomeDescriptionEditServiceTests_New.cpp
-    GenomeDescriptionInfoServiceTests_New.cpp
     InjectorTests.cpp
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h

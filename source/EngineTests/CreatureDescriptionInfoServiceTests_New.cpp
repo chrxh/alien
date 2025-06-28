@@ -4,13 +4,13 @@
 #include "EngineInterface/CreatureDescriptionInfoService.h"
 #include "EngineInterface/CreatureDescription.h"
 
-class GenomeDescriptionInfoServiceTests_New : public ::testing::Test
+class CreatureDescriptionInfoServiceTests_New : public ::testing::Test
 {
 public:
-    virtual ~GenomeDescriptionInfoServiceTests_New() = default;
+    virtual ~CreatureDescriptionInfoServiceTests_New() = default;
 };
 
-TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_Empty)
+TEST_F(CreatureDescriptionInfoServiceTests_New, getNumberOfResultingCells_Empty)
 {
     auto genome = CreatureDescription();
     auto result = CreatureDescriptionInfoService::get().getNumberOfResultingCells(genome);
@@ -18,7 +18,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_Empty)
     EXPECT_EQ(0, result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_oneReferencesOneSingleTimes)
+TEST_F(CreatureDescriptionInfoServiceTests_New, getNumberOfResultingCells_oneReferencesOneSingleTimes)
 {
     auto genome = CreatureDescription().genes({
         GeneDescription().nodes({
@@ -37,7 +37,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_oneRefer
     EXPECT_EQ(6, result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_oneReferencesOneMultipleTimes)
+TEST_F(CreatureDescriptionInfoServiceTests_New, getNumberOfResultingCells_oneReferencesOneMultipleTimes)
 {
     auto genome = CreatureDescription().genes({
         GeneDescription().nodes({
@@ -56,7 +56,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_oneRefer
     EXPECT_EQ(12, result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_oneReferencesMany_depth1)
+TEST_F(CreatureDescriptionInfoServiceTests_New, getNumberOfResultingCells_oneReferencesMany_depth1)
 {
     auto genome = CreatureDescription().genes({
         GeneDescription().nodes({
@@ -78,7 +78,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_oneRefer
     EXPECT_EQ(7, result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_oneReferencesMany_depth2)
+TEST_F(CreatureDescriptionInfoServiceTests_New, getNumberOfResultingCells_oneReferencesMany_depth2)
 {
     auto genome = CreatureDescription().genes({
         // Level 0
@@ -119,7 +119,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_oneRefer
     EXPECT_EQ(2 + 2 + 3 + 2 + 2 + 3 + 1, result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_manyReferenceOne)
+TEST_F(CreatureDescriptionInfoServiceTests_New, getNumberOfResultingCells_manyReferenceOne)
 {
     auto genome = CreatureDescription().genes({
         GeneDescription().nodes({
@@ -141,7 +141,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_manyRefe
     EXPECT_EQ(2 + 2 + 3 + 3, result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_doNotCountUnreachable)
+TEST_F(CreatureDescriptionInfoServiceTests_New, getNumberOfResultingCells_doNotCountUnreachable)
 {
     auto genome = CreatureDescription().genes({
         GeneDescription().nodes({
@@ -156,7 +156,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_doNotCou
     EXPECT_EQ(1, result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_doNotCountPrincipalReferencesPrincipal)
+TEST_F(CreatureDescriptionInfoServiceTests_New, getNumberOfResultingCells_doNotCountPrincipalReferencesPrincipal)
 {
     auto genome = CreatureDescription().genes({
         GeneDescription().nodes({
@@ -170,7 +170,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_doNotCou
     EXPECT_EQ(3, result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_doNotCountAuxiliaryReferencesPrincipal)
+TEST_F(CreatureDescriptionInfoServiceTests_New, getNumberOfResultingCells_doNotCountAuxiliaryReferencesPrincipal)
 {
     auto genome = CreatureDescription().genes({
         GeneDescription().nodes({
@@ -188,7 +188,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_doNotCou
     EXPECT_EQ(5, result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_infinity_1cycle)
+TEST_F(CreatureDescriptionInfoServiceTests_New, getNumberOfResultingCells_infinity_1cycle)
 {
     auto genome = CreatureDescription().genes({
         GeneDescription().nodes({
@@ -206,7 +206,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_infinity
     EXPECT_EQ(-1, result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_infinity_2cycle)
+TEST_F(CreatureDescriptionInfoServiceTests_New, getNumberOfResultingCells_infinity_2cycle)
 {
     auto genome = CreatureDescription().genes({
         GeneDescription().nodes({
@@ -228,7 +228,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_infinity
     EXPECT_EQ(-1, result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_multipleBranchesAndConcatenations_withoutSeparation)
+TEST_F(CreatureDescriptionInfoServiceTests_New, getNumberOfResultingCells_multipleBranchesAndConcatenations_withoutSeparation)
 {
     auto genome = CreatureDescription().genes({
         GeneDescription().nodes({
@@ -253,7 +253,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_multiple
     EXPECT_EQ(2 + 2 + 3 * 2 * 3 + 3 * 2 * 3, result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_multipleBranchesAndConcatenations_withSeparation)
+TEST_F(CreatureDescriptionInfoServiceTests_New, getNumberOfResultingCells_multipleBranchesAndConcatenations_withSeparation)
 {
     auto genome = CreatureDescription().genes({
         GeneDescription().nodes({
@@ -278,7 +278,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getNumberOfResultingCells_multiple
     EXPECT_EQ(2 + 2 + 3 * 3 + 3 * 3, result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests_New, getReferences)
+TEST_F(CreatureDescriptionInfoServiceTests_New, getReferences)
 {
     auto genome = CreatureDescription().genes({
         GeneDescription().nodes({
@@ -301,7 +301,7 @@ TEST_F(GenomeDescriptionInfoServiceTests_New, getReferences)
     EXPECT_EQ(1, result.at(2));
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests_New, getReferencedBy)
+TEST_F(CreatureDescriptionInfoServiceTests_New, getReferencedBy)
 {
     auto genome = CreatureDescription().genes({
         GeneDescription().nodes({
