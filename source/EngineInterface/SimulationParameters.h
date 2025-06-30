@@ -212,7 +212,7 @@ struct SimulationParameters
 
     // Cell type: Detonator
     BaseParameter<ColorVector<float>> detonatorRadius = {{10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f}};
-    BaseParameter<ColorVector<float>> detonatorChainExplosionProbability = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
+    BaseParameter<ColorVector<float>> detonatorChainExplosionProbability = {{0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f}};
 
     // Expert settings: Advanced absorption control
     ExpertToggle advancedAbsorptionControlToggle = {false};

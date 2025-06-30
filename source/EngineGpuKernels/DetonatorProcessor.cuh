@@ -35,7 +35,7 @@ __device__ __inline__ void DetonatorProcessor::process(SimulationData& data, Sim
 __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     auto& detonator = cell->cellTypeData.detonator;
-    if (abs(cell->signal.channels[0]) >= TRIGGER_THRESHOLD && detonator.state == DetonatorState_Ready) {
+    if (SignalProcessor::isManuallyTriggered(data, cell) && detonator.state == DetonatorState_Ready) {
         detonator.state = DetonatorState_Activated;
     }
     if (detonator.state == DetonatorState_Activated) {

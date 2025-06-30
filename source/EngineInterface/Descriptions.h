@@ -276,7 +276,7 @@ struct DetonatorDescription
     auto operator<=>(DetonatorDescription const&) const = default;
 
     MEMBER(DetonatorDescription, DetonatorState, state, DetonatorState_Ready);
-    MEMBER(DetonatorDescription, int, countdown, 10);
+    MEMBER(DetonatorDescription, int, countdown, 60);
 };
 
 using CellTypeDescription = std::variant<
