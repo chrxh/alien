@@ -252,11 +252,11 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
                 }
             }
             if (restrictToMutants == SensorRestrictToMutants_RestrictToSameMutants
-                && (otherCell->creature == nullptr || cell->creature->mutationId != otherCell->creature->mutationId)) {
+                && (cell->creature == nullptr || otherCell->creature == nullptr || cell->creature->mutationId != otherCell->creature->mutationId)) {
                 continue;
             }
             if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherMutants
-                && (otherCell->creature == nullptr || cell->creature->mutationId == otherCell->creature->mutationId
+                && (cell->creature == nullptr || otherCell->creature == nullptr || cell->creature->mutationId == otherCell->creature->mutationId
                     || cell->creature->mutationId == otherCell->creature->ancestorId)) {
                 continue;
             }
@@ -267,11 +267,11 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
                 continue;
             }
             if (restrictToMutants == SensorRestrictToMutants_RestrictToLessComplexMutants
-                && (otherCell->creature == nullptr || otherCell->creature->genomeComplexity >= cell->creature->genomeComplexity)) {
+                && (cell->creature == nullptr || otherCell->creature == nullptr || otherCell->creature->genomeComplexity >= cell->creature->genomeComplexity)) {
                 continue;
             }
             if (restrictToMutants == SensorRestrictToMutants_RestrictToMoreComplexMutants
-                && (otherCell->creature == nullptr || otherCell->creature->genomeComplexity <= cell->creature->genomeComplexity)) {
+                && (cell->creature == nullptr || otherCell->creature == nullptr || otherCell->creature->genomeComplexity <= cell->creature->genomeComplexity)) {
                 continue;
             }
 

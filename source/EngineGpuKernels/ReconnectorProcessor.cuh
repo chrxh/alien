@@ -67,26 +67,29 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
                 return;
             }
         }
-        //if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToSameMutants && otherCell->mutationId != cell->mutationId) {
-        //    return;
-        //}
-        //if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToOtherMutants && otherCell->mutationId == cell->mutationId) {
-        //    return;
-        //}
+        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToSameMutants
+            && (cell->creature == nullptr || otherCell->creature == nullptr || cell->creature->mutationId != otherCell->creature->mutationId)) {
+            return;
+        }
+        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToOtherMutants
+            && (cell->creature == nullptr || otherCell->creature == nullptr || cell->creature->mutationId == otherCell->creature->mutationId
+                || cell->creature->mutationId == otherCell->creature->ancestorId)) {
+            return;
+        }
         if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToFreeCells && otherCell->cellType != CellType_Free) {
             return;
         }
         if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToStructures && otherCell->cellType != CellType_Structure) {
             return;
         }
-        //if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToLessComplexMutants
-        //    && otherCell->genomeComplexity >= cell->genomeComplexity) {
-        //    return;
-        //}
-        //if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToMoreComplexMutants
-        //    && otherCell->genomeComplexity <= cell->genomeComplexity) {
-        //    return;
-        //}
+        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToLessComplexMutants
+            && (cell->creature == nullptr || otherCell->creature == nullptr || otherCell->creature->genomeComplexity >= cell->creature->genomeComplexity)) {
+            return;
+        }
+        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToMoreComplexMutants
+            && (cell->creature == nullptr || otherCell->creature == nullptr || otherCell->creature->genomeComplexity <= cell->creature->genomeComplexity)) {
+            return;
+        }
         if (CellConnectionProcessor::isConnectedConnected(cell, otherCell)) {
             return;
         }
