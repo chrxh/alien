@@ -222,7 +222,6 @@ private:
     uint64_t* _otherMutantDensityMap;
     uint64_t* _sameMutantDensityMap1;
     uint64_t* _sameMutantDensityMap2;
-    uint32_t* _respawnedMutantDensityMap;
     uint32_t* _specificCellTypeDensityMap;
     uint64_t* _lessGenomeComplexityDensityMap1;
     uint64_t* _lessGenomeComplexityDensityMap2;

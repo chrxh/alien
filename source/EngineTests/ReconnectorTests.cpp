@@ -446,21 +446,18 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_failed
 TEST_F(ReconnectorTests, deleteConnections_success)
 {
     CollectionDescription data;
-    data.addCells({
-        CellDescription()
-            .id(1)
-            .pos({10.0f, 10.0f})
-            .cellTypeData(ReconnectorDescription())
-            .creatureId(1),
-        CellDescription()
-            .id(2)
-            .pos({11.0f, 10.0f})
-            .cellTypeData(OscillatorDescription())
-            .signalAndRelaxTime({-1, 0, 0, 0, 0, 0, 0, 0})
-            .creatureId(1),
-        CellDescription().id(3).pos({9.0f, 10.0f}).creatureId(3),
-        CellDescription().id(4).pos({9.0f, 11.0f}).creatureId(4),
-    });
+    data.addCreature(
+        CreatureDescription().id(0),
+        {
+            CellDescription()
+                .id(1)
+                .pos({10.0f, 10.0f})
+                .cellTypeData(ReconnectorDescription()),
+            CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({-1, 0, 0, 0, 0, 0, 0, 0}),
+        });
+    data.addCreature(CreatureDescription().mutationId(5), {CellDescription().id(3).pos({9.0f, 10.0f})});
+    data.addCreature(CreatureDescription().mutationId(5), {CellDescription().id(4).pos({9.0f, 11.0f})});
+
     data.addConnection(1, 2);
     data.addConnection(1, 3);
     data.addConnection(1, 4);
