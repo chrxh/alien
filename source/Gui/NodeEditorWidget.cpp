@@ -216,7 +216,7 @@ void _NodeEditorWidget::processNodeAttributes()
             // Scan mutants
             AlienGui::Combo(
                 AlienGui::ComboParameters().name("Scan mutants").values(Const::SensorRestrictToMutantStrings).textWidth(rightColumnWidth),
-                sensor._restrictToMutants);
+                sensor._restrictToCreatures);
 
             AlienGui::EndIndent();
 
@@ -372,7 +372,7 @@ void _NodeEditorWidget::processNodeAttributes()
             // Restrict to mutants
             AlienGui::Combo(
                 AlienGui::ComboParameters().name("Restrict to mutants").values(Const::ReconnectorRestrictToMutantStrings).textWidth(rightColumnWidth),
-                reconnector._restrictToMutants);
+                reconnector._restrictToCreatures);
 
             AlienGui::EndIndent();
 

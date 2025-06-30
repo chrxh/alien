@@ -166,7 +166,7 @@ namespace
 
     auto constexpr Id_SensorGenome_MinDensity = 0;
     auto constexpr Id_SensorGenome_RestrictToColor = 1;
-    auto constexpr Id_SensorGenome_RestrictToMutants = 2;
+    auto constexpr Id_SensorGenome_RestrictToCreatures = 2;
     auto constexpr Id_SensorGenome_MinRange = 3;
     auto constexpr Id_SensorGenome_MaxRange = 4;
     auto constexpr Id_SensorGenome_AutoTriggerInterval = 5;
@@ -193,7 +193,7 @@ namespace
     auto constexpr Id_InjectorGenome_Mode = 0;
 
     auto constexpr Id_ReconnectorGenome_RestrictToColor = 0;
-    auto constexpr Id_ReconnectorGenome_RestrictToMutants = 1;
+    auto constexpr Id_ReconnectorGenome_RestrictToCreatures = 1;
 
     auto constexpr Id_DetonatorGenome_Countdown = 0;
 }
@@ -257,7 +257,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_SensorGenome_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
         loadSave(task, auxiliaries, Id_SensorGenome_MinDensity, data._minDensity, defaultObject._minDensity);
         loadSave(task, auxiliaries, Id_SensorGenome_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
-        loadSave(task, auxiliaries, Id_SensorGenome_RestrictToMutants, data._restrictToMutants, defaultObject._restrictToMutants);
+        loadSave(task, auxiliaries, Id_SensorGenome_RestrictToCreatures, data._restrictToCreatures, defaultObject._restrictToCreatures);
         loadSave(task, auxiliaries, Id_SensorGenome_MinRange, data._minRange, defaultObject._minRange);
         loadSave(task, auxiliaries, Id_SensorGenome_MaxRange, data._maxRange, defaultObject._maxRange);
         processLoadSaveMap(task, ar, auxiliaries);
@@ -385,7 +385,7 @@ namespace cereal
         ReconnectorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_ReconnectorGenome_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
-        loadSave(task, auxiliaries, Id_ReconnectorGenome_RestrictToMutants, data._restrictToMutants, defaultObject._restrictToMutants);
+        loadSave(task, auxiliaries, Id_ReconnectorGenome_RestrictToCreatures, data._restrictToCreatures, defaultObject._restrictToCreatures);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ReconnectorGenomeDescription)
@@ -573,7 +573,7 @@ namespace
 
     auto constexpr Id_Sensor_MinDensity = 0;
     auto constexpr Id_Sensor_RestrictToColor = 4;
-    auto constexpr Id_Sensor_RestrictToMutants = 5;
+    auto constexpr Id_Sensor_RestrictToCreatures = 5;
     auto constexpr Id_Sensor_MinRange = 8;
     auto constexpr Id_Sensor_MaxRange = 9;
     auto constexpr Id_Sensor_AutoTriggerInterval = 10;
@@ -581,7 +581,7 @@ namespace
     auto constexpr Id_Transmitter_Mode = 0;
 
     auto constexpr Id_Reconnector_RestrictToColor = 0;
-    auto constexpr Id_Reconnector_RestrictToMutants = 1;
+    auto constexpr Id_Reconnector_RestrictToCreatures = 1;
 
     auto constexpr Id_Detonator_State = 0;
     auto constexpr Id_Detonator_Countdown = 1;
@@ -691,7 +691,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Sensor_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
         loadSave(task, auxiliaries, Id_Sensor_MinDensity, data._minDensity, defaultObject._minDensity);
         loadSave(task, auxiliaries, Id_Sensor_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
-        loadSave(task, auxiliaries, Id_Sensor_RestrictToMutants, data._restrictToMutants, defaultObject._restrictToMutants);
+        loadSave(task, auxiliaries, Id_Sensor_RestrictToCreatures, data._restrictToCreatures, defaultObject._restrictToCreatures);
         loadSave(task, auxiliaries, Id_Sensor_MinRange, data._minRange, defaultObject._minRange);
         loadSave(task, auxiliaries, Id_Sensor_MaxRange, data._maxRange, defaultObject._maxRange);
         processLoadSaveMap(task, ar, auxiliaries);
@@ -844,7 +844,7 @@ namespace cereal
         ReconnectorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Reconnector_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
-        loadSave(task, auxiliaries, Id_Reconnector_RestrictToMutants, data._restrictToMutants, defaultObject._restrictToMutants);
+        loadSave(task, auxiliaries, Id_Reconnector_RestrictToCreatures, data._restrictToCreatures, defaultObject._restrictToCreatures);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ReconnectorDescription)

@@ -16,7 +16,7 @@ private:
         uint64_t const& timestep,
         Cell* const& cell,
         uint8_t const& restrictToColor,
-        SensorRestrictToMutants const& restrictToMutants,
+        SensorRestrictToCreatures const& restrictToCreatures,
         DensityMap const& densityMap,
         float2 const& scanPos);
     __inline__ __device__ static void searchNeighborhood(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
@@ -24,7 +24,7 @@ private:
     __inline__ __device__ static void flagDetectedCells(SimulationData& data, Cell* cell, float2 const& scanPos);
 
     __inline__ __device__ static float
-    calcStartDistanceForScanning(uint8_t const& restrictToColor, SensorRestrictToMutants const& restrictToMutants, int const& color);
+    calcStartDistanceForScanning(uint8_t const& restrictToColor, SensorRestrictToCreatures const& restrictToCreatures, int const& color);
 
     __inline__ __device__ static uint8_t convertAngleToData(float angle);
     __inline__ __device__ static float convertDataToAngle(uint8_t b);
@@ -68,12 +68,12 @@ __inline__ __device__ uint32_t SensorProcessor::getCellDensity(
     uint64_t const& timestep,
     Cell* const& cell,
     uint8_t const& restrictToColor,
-    SensorRestrictToMutants const& restrictToMutants,
+    SensorRestrictToCreatures const& restrictToCreatures,
     DensityMap const& densityMap,
     float2 const& scanPos)
 {
     uint32_t result;
-    if (restrictToMutants == SensorRestrictToMutants_NoRestriction) {
+    if (restrictToCreatures == SensorRestrictToCreatures_NoRestriction) {
         if (restrictToColor == 255) {
             result = densityMap.getCellDensity(scanPos);
         }
@@ -81,34 +81,34 @@ __inline__ __device__ uint32_t SensorProcessor::getCellDensity(
             result = densityMap.getColorDensity(scanPos, restrictToColor);
         }
     } else {
-        if (restrictToMutants == SensorRestrictToMutants_RestrictToSameMutants) {
+        if (restrictToCreatures == SensorRestrictToCreatures_RestrictToSameMutants) {
             if (cell->creature != nullptr) {
                 result = densityMap.getSameMutantDensity(scanPos, cell->creature->mutationId);
             } else {
                 result = 0;
             }
         }
-        if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherMutants) {
+        if (restrictToCreatures == SensorRestrictToCreatures_RestrictToOtherMutants) {
             if (cell->creature != nullptr) {
                 result = densityMap.getOtherMutantDensity(timestep, scanPos, cell->creature->mutationId);
             } else {
                 result = 0;
             }
         }
-        if (restrictToMutants == SensorRestrictToMutants_RestrictToFreeCells) {
+        if (restrictToCreatures == SensorRestrictToCreatures_RestrictToFreeCells) {
             result = densityMap.getFreeCellDensity(scanPos);
         }
-        if (restrictToMutants == SensorRestrictToMutants_RestrictToStructures) {
+        if (restrictToCreatures == SensorRestrictToCreatures_RestrictToStructures) {
             result = densityMap.getStructureDensity(scanPos);
         }
-        if (restrictToMutants == SensorRestrictToMutants_RestrictToLessComplexMutants) {
+        if (restrictToCreatures == SensorRestrictToCreatures_RestrictToLessComplexMutants) {
             if (cell->creature != nullptr) {
                 result = densityMap.getLessComplexMutantDensity(scanPos, cell->creature->genomeComplexity);
             } else {
                 result = 0;
             }
         }
-        if (restrictToMutants == SensorRestrictToMutants_RestrictToMoreComplexMutants) {
+        if (restrictToCreatures == SensorRestrictToCreatures_RestrictToMoreComplexMutants) {
             if (cell->creature != nullptr)
                 result = densityMap.getMoreComplexMutantDensity(scanPos, cell->creature->genomeComplexity);
             else {
@@ -127,7 +127,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
 {
     __shared__ uint32_t minDensity;
     __shared__ uint8_t restrictToColor;
-    __shared__ SensorRestrictToMutants restrictToMutants;
+    __shared__ SensorRestrictToCreatures restrictToCreatures;
     __shared__ float refAngle;
     __shared__ uint64_t lookupResult;
     __shared__ bool rayBlocked[NumScanAngles];
@@ -139,7 +139,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
         refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, cell));
         minDensity = toInt(cell->cellTypeData.sensor.minDensity * 64 + 0.5f);
         restrictToColor = cell->cellTypeData.sensor.restrictToColor;
-        restrictToMutants = cell->cellTypeData.sensor.restrictToMutants;
+        restrictToCreatures = cell->cellTypeData.sensor.restrictToCreatures;
         lookupResult = 0xffffffffffffffff;
 
         data.cellMap.getMatchingCells(
@@ -157,7 +157,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
 
     auto const& densityMap = data.preprocessedSimulationData.densityMap;
 
-    auto const startRadius = max(toFloat(cell->cellTypeData.sensor.minRange), calcStartDistanceForScanning(restrictToColor, restrictToMutants, cell->color));
+    auto const startRadius = max(toFloat(cell->cellTypeData.sensor.minRange), calcStartDistanceForScanning(restrictToColor, restrictToCreatures, cell->color));
     auto endRadius = cudaSimulationParameters.sensorRadius.value[cell->color];
     if (cell->cellTypeData.sensor.maxRange >= 0) {
         endRadius = min(endRadius, toFloat(cell->cellTypeData.sensor.maxRange));
@@ -184,9 +184,9 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
 
             uint32_t density = 0;
 
-            if (restrictToMutants == SensorRestrictToMutants_NoRestriction || restrictToMutants == SensorRestrictToMutants_RestrictToStructures
+            if (restrictToCreatures == SensorRestrictToCreatures_NoRestriction || restrictToCreatures == SensorRestrictToCreatures_RestrictToStructures
                 || densityMap.getStructureDensity(scanPos) == 0) {
-                density = getCellDensity(data.timestep, cell, restrictToColor, restrictToMutants, densityMap, scanPos);
+                density = getCellDensity(data.timestep, cell, restrictToColor, restrictToCreatures, densityMap, scanPos);
             } else {
                 rayBlocked[angleIndex] = true;
             }
@@ -230,7 +230,7 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
     }
 
     auto const& restrictToColor = cell->cellTypeData.sensor.restrictToColor;
-    auto const& restrictToMutants = cell->cellTypeData.sensor.restrictToMutants;
+    auto const& restrictToCreatures = cell->cellTypeData.sensor.restrictToCreatures;
 
     for (float dx = -3.0f; dx < 3.0f + NEAR_ZERO; dx += 1.0f) {
         for (float dy = -3.0f; dy < 3.0f + NEAR_ZERO; dy += 1.0f) {
@@ -244,33 +244,33 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
             if (restrictToColor != 255 && otherCell->color != restrictToColor) {
                 continue;
             }
-            if (restrictToMutants == SensorRestrictToMutants_RestrictToSameMutants || restrictToMutants == SensorRestrictToMutants_RestrictToOtherMutants
-                || restrictToMutants == SensorRestrictToMutants_RestrictToLessComplexMutants
-                || restrictToMutants == SensorRestrictToMutants_RestrictToMoreComplexMutants) {
+            if (restrictToCreatures == SensorRestrictToCreatures_RestrictToSameMutants || restrictToCreatures == SensorRestrictToCreatures_RestrictToOtherMutants
+                || restrictToCreatures == SensorRestrictToCreatures_RestrictToLessComplexMutants
+                || restrictToCreatures == SensorRestrictToCreatures_RestrictToMoreComplexMutants) {
                 if (otherCell->cellType == CellType_Free || otherCell->cellType == CellType_Structure) {
                     continue;
                 }
             }
-            if (restrictToMutants == SensorRestrictToMutants_RestrictToSameMutants
+            if (restrictToCreatures == SensorRestrictToCreatures_RestrictToSameMutants
                 && (cell->creature == nullptr || otherCell->creature == nullptr || cell->creature->mutationId != otherCell->creature->mutationId)) {
                 continue;
             }
-            if (restrictToMutants == SensorRestrictToMutants_RestrictToOtherMutants
+            if (restrictToCreatures == SensorRestrictToCreatures_RestrictToOtherMutants
                 && (cell->creature == nullptr || otherCell->creature == nullptr || cell->creature->mutationId == otherCell->creature->mutationId
                     || cell->creature->mutationId == otherCell->creature->ancestorId)) {
                 continue;
             }
-            if (restrictToMutants == SensorRestrictToMutants_RestrictToFreeCells && otherCell->cellType != CellType_Free) {
+            if (restrictToCreatures == SensorRestrictToCreatures_RestrictToFreeCells && otherCell->cellType != CellType_Free) {
                 continue;
             }
-            if (restrictToMutants == SensorRestrictToMutants_RestrictToStructures && otherCell->cellType != CellType_Structure) {
+            if (restrictToCreatures == SensorRestrictToCreatures_RestrictToStructures && otherCell->cellType != CellType_Structure) {
                 continue;
             }
-            if (restrictToMutants == SensorRestrictToMutants_RestrictToLessComplexMutants
+            if (restrictToCreatures == SensorRestrictToCreatures_RestrictToLessComplexMutants
                 && (cell->creature == nullptr || otherCell->creature == nullptr || otherCell->creature->genomeComplexity >= cell->creature->genomeComplexity)) {
                 continue;
             }
-            if (restrictToMutants == SensorRestrictToMutants_RestrictToMoreComplexMutants
+            if (restrictToCreatures == SensorRestrictToCreatures_RestrictToMoreComplexMutants
                 && (cell->creature == nullptr || otherCell->creature == nullptr || otherCell->creature->genomeComplexity <= cell->creature->genomeComplexity)) {
                 continue;
             }
@@ -281,10 +281,10 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
 }
 
 __inline__ __device__ float
-SensorProcessor::calcStartDistanceForScanning(uint8_t const& restrictToColor, SensorRestrictToMutants const& restrictToMutants, int const& color)
+SensorProcessor::calcStartDistanceForScanning(uint8_t const& restrictToColor, SensorRestrictToCreatures const& restrictToCreatures, int const& color)
 {
     return (restrictToColor == 255 || restrictToColor == color)
-            && (restrictToMutants == SensorRestrictToMutants_NoRestriction || restrictToMutants == SensorRestrictToMutants_RestrictToSameMutants)
+            && (restrictToCreatures == SensorRestrictToCreatures_NoRestriction || restrictToCreatures == SensorRestrictToCreatures_RestrictToSameMutants)
         ? 14.0f
         : 0.0f;
 }

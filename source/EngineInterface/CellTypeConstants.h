@@ -102,17 +102,17 @@ namespace Channels
     auto constexpr SensorDistance = 3;
 }
 
-using SensorRestrictToMutants = int;
-enum SensorRestrictToMutants_
+using SensorRestrictToCreatures = int;
+enum SensorRestrictToCreatures_
 {
-    SensorRestrictToMutants_NoRestriction,
-    SensorRestrictToMutants_RestrictToSameMutants,
-    SensorRestrictToMutants_RestrictToOtherMutants,
-    SensorRestrictToMutants_RestrictToFreeCells,
-    SensorRestrictToMutants_RestrictToStructures,
-    SensorRestrictToMutants_RestrictToLessComplexMutants,
-    SensorRestrictToMutants_RestrictToMoreComplexMutants,
-    SensorRestrictToMutants_Count
+    SensorRestrictToCreatures_NoRestriction,
+    SensorRestrictToCreatures_RestrictToSameMutants,
+    SensorRestrictToCreatures_RestrictToOtherMutants,
+    SensorRestrictToCreatures_RestrictToFreeCells,
+    SensorRestrictToCreatures_RestrictToStructures,
+    SensorRestrictToCreatures_RestrictToLessComplexMutants,
+    SensorRestrictToCreatures_RestrictToMoreComplexMutants,
+    SensorRestrictToCreatures_Count
 };
 
 namespace Const
@@ -250,17 +250,17 @@ enum DetonatorState_
 //*************************
 //* Reconnector constants *
 //*************************
-using ReconnectorRestrictToMutants = int;
-enum ReconnectorRestrictToMutants_
+using ReconnectorRestrictToCreatures = int;
+enum ReconnectorRestrictToCreatures_
 {
-    ReconnectorRestrictToMutants_NoRestriction,
-    ReconnectorRestrictToMutants_RestrictToSameMutants,
-    ReconnectorRestrictToMutants_RestrictToOtherMutants,
-    ReconnectorRestrictToMutants_RestrictToFreeCells,
-    ReconnectorRestrictToMutants_RestrictToStructures,
-    ReconnectorRestrictToMutants_RestrictToLessComplexMutants,
-    ReconnectorRestrictToMutants_RestrictToMoreComplexMutants,
-    ReconnectorRestrictToMutants_Count
+    ReconnectorRestrictToCreatures_NoRestriction,
+    ReconnectorRestrictToCreatures_RestrictToSameMutants,
+    ReconnectorRestrictToCreatures_RestrictToOtherMutants,
+    ReconnectorRestrictToCreatures_RestrictToFreeCells,
+    ReconnectorRestrictToCreatures_RestrictToStructures,
+    ReconnectorRestrictToCreatures_RestrictToLessComplexMutants,
+    ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants,
+    ReconnectorRestrictToCreatures_Count
 };
 
 namespace Const

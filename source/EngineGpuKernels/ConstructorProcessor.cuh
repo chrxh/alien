@@ -760,8 +760,8 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 //        result->cellTypeData.sensor.autoTriggerInterval = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
 //        result->cellTypeData.sensor.minDensity = (GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition) + 1.0f) / 2;
 //        result->cellTypeData.sensor.restrictToColor = GenomeDecoder::readOptionalByte(constructor, genomeCurrentBytePosition, MAX_COLORS);
-//        result->cellTypeData.sensor.restrictToMutants =
-//            GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % SensorRestrictToMutants_Count;
+//        result->cellTypeData.sensor.restrictToCreatures =
+//            GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % SensorRestrictToCreatures_Count;
 //        result->cellTypeData.sensor.minRange = GenomeDecoder::readOptionalByte(constructor, genomeCurrentBytePosition);
 //        result->cellTypeData.sensor.maxRange = GenomeDecoder::readOptionalByte(constructor, genomeCurrentBytePosition);
 //    } break;
@@ -833,8 +833,8 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 //    } break;
 //    case CellType_Reconnector: {
 //        result->cellTypeData.reconnector.restrictToColor = GenomeDecoder::readOptionalByte(constructor, genomeCurrentBytePosition, MAX_COLORS);
-//        result->cellTypeData.reconnector.restrictToMutants =
-//            GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % ReconnectorRestrictToMutants_Count;
+//        result->cellTypeData.reconnector.restrictToCreatures =
+//            GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % ReconnectorRestrictToCreatures_Count;
 //    } break;
 //    case CellType_Detonator: {
 //        result->cellTypeData.detonator.state = DetonatorState_Ready;

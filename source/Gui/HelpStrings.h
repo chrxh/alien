@@ -197,7 +197,7 @@ namespace Const
 
     std::string const GenomeSensorScanColorTooltip = "Restricts the sensor so that it only scans cells with a certain color.";
 
-    std::string const SensorRestrictToMutantsTooltip =
+    std::string const SensorRestrictToCreaturesTooltip =
         "The following options can be used to only detect cells with certain properties:\n\n"
         ICON_FA_CHEVRON_RIGHT" None: No further restriction.\n\n"
         ICON_FA_CHEVRON_RIGHT" Same mutants: Cells that have a related genome.\n\n"
@@ -253,7 +253,7 @@ namespace Const
 
     std::string const GenomeReconnectorRestrictToColorTooltip = "Specifies the color of the cells where connections are to be established or destroyed.";
 
-    std::string const ReconnectorRestrictToMutantsTooltip =
+    std::string const ReconnectorRestrictToCreaturesTooltip =
         "The following options can be used to only bind to cells with certain properties:\n\n"
         ICON_FA_CHEVRON_RIGHT" None: No further restriction.\n\n"
         ICON_FA_CHEVRON_RIGHT" Same mutants: Cells that have a related genome.\n\n"

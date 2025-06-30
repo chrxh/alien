@@ -98,8 +98,8 @@ CellTypeDescription DescriptionTestDataFactory::createRandomCellTypeDescription(
     case CellType_Constructor:
         return ConstructorDescription().autoTriggerInterval(7).geneIndex(3).constructionActivationTime(4).constructionAngle(34.4f).lastConstructedCellId(45ull);
     case CellType_Sensor:
-        return SensorDescription().autoTriggerInterval(3).restrictToColor(5).minRange(34).maxRange(67).minDensity(0.25f).restrictToMutants(
-            SensorRestrictToMutants_RestrictToLessComplexMutants);
+        return SensorDescription().autoTriggerInterval(3).restrictToColor(5).minRange(34).maxRange(67).minDensity(0.25f).restrictToCreatures(
+            SensorRestrictToCreatures_RestrictToLessComplexMutants);
     case CellType_Oscillator:
         return OscillatorDescription().autoTriggerInterval(27).alternationInterval(45).numPulses(23);
     case CellType_Attacker:
@@ -163,7 +163,7 @@ CellTypeDescription DescriptionTestDataFactory::createRandomCellTypeDescription(
     case CellType_Defender:
         return DefenderDescription().mode(DefenderMode_DefendAgainstInjector);
     case CellType_Reconnector:
-        return ReconnectorDescription().restrictToColor(4).restrictToMutants(ReconnectorRestrictToMutants_RestrictToMoreComplexMutants);
+        return ReconnectorDescription().restrictToColor(4).restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants);
     case CellType_Detonator:
         return DetonatorDescription().countdown(23);
     default:
@@ -199,8 +199,8 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createRandomCellTypeGenome
     case CellTypeGenome_Constructor:
         return ConstructorGenomeDescription().autoTriggerInterval(7).constructionActivationTime(4).constructionAngle(34.4f);
     case CellTypeGenome_Sensor:
-        return SensorGenomeDescription().autoTriggerInterval(3).restrictToColor(5).minRange(34).maxRange(67).minDensity(0.25f).restrictToMutants(
-            SensorRestrictToMutants_RestrictToLessComplexMutants);
+        return SensorGenomeDescription().autoTriggerInterval(3).restrictToColor(5).minRange(34).maxRange(67).minDensity(0.25f).restrictToCreatures(
+            SensorRestrictToCreatures_RestrictToLessComplexMutants);
     case CellTypeGenome_Oscillator:
         return OscillatorGenomeDescription().autoTriggerInterval(27).pulseType(OscillatorPulseType_Alternation).alternationInterval(45);
     case CellTypeGenome_Attacker:
@@ -236,7 +236,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createRandomCellTypeGenome
     case CellTypeGenome_Defender:
         return DefenderGenomeDescription().mode(DefenderMode_DefendAgainstInjector);
     case CellTypeGenome_Reconnector:
-        return ReconnectorGenomeDescription().restrictToColor(4).restrictToMutants(ReconnectorRestrictToMutants_RestrictToMoreComplexMutants);
+        return ReconnectorGenomeDescription().restrictToColor(4).restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants);
     case CellTypeGenome_Detonator:
         return DetonatorGenomeDescription().countdown(23);
     default:

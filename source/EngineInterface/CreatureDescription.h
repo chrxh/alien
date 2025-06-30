@@ -68,7 +68,7 @@ struct SensorGenomeDescription
     MEMBER(SensorGenomeDescription, std::optional<int>, minRange, std::nullopt);
     MEMBER(SensorGenomeDescription, std::optional<int>, maxRange, std::nullopt);
     MEMBER(SensorGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
-    MEMBER(SensorGenomeDescription, SensorRestrictToMutants, restrictToMutants, SensorRestrictToMutants_NoRestriction);
+    MEMBER(SensorGenomeDescription, SensorRestrictToCreatures, restrictToCreatures, SensorRestrictToCreatures_NoRestriction);
 };
 
 struct OscillatorGenomeDescription
@@ -167,7 +167,7 @@ struct ReconnectorGenomeDescription
     auto operator<=>(ReconnectorGenomeDescription const&) const = default;
 
     MEMBER(ReconnectorGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
-    MEMBER(ReconnectorGenomeDescription, ReconnectorRestrictToMutants, restrictToMutants, ReconnectorRestrictToMutants_NoRestriction);
+    MEMBER(ReconnectorGenomeDescription, ReconnectorRestrictToCreatures, restrictToCreatures, ReconnectorRestrictToCreatures_NoRestriction);
 };
 
 struct DetonatorGenomeDescription

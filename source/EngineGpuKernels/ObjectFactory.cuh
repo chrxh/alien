@@ -123,7 +123,7 @@ __inline__ __device__ Creature* ObjectFactory::createGenomeFromTO(CollectionTO c
                 node.cellTypeData.sensor.minRange = nodeTO.cellTypeData.sensor.minRange;
                 node.cellTypeData.sensor.maxRange = nodeTO.cellTypeData.sensor.maxRange;
                 node.cellTypeData.sensor.restrictToColor = nodeTO.cellTypeData.sensor.restrictToColor;
-                node.cellTypeData.sensor.restrictToMutants = nodeTO.cellTypeData.sensor.restrictToMutants;
+                node.cellTypeData.sensor.restrictToCreatures = nodeTO.cellTypeData.sensor.restrictToCreatures;
                 break;
             case CellTypeGenome_Oscillator:
                 node.cellTypeData.oscillator.autoTriggerInterval = nodeTO.cellTypeData.oscillator.autoTriggerInterval;
@@ -168,7 +168,7 @@ __inline__ __device__ Creature* ObjectFactory::createGenomeFromTO(CollectionTO c
                 break;
             case CellTypeGenome_Reconnector:
                 node.cellTypeData.reconnector.restrictToColor = nodeTO.cellTypeData.reconnector.restrictToColor;
-                node.cellTypeData.reconnector.restrictToMutants = nodeTO.cellTypeData.reconnector.restrictToMutants;
+                node.cellTypeData.reconnector.restrictToCreatures = nodeTO.cellTypeData.reconnector.restrictToCreatures;
                 break;
             case CellTypeGenome_Detonator:
                 node.cellTypeData.detonator.countdown = nodeTO.cellTypeData.detonator.countdown;
@@ -282,7 +282,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
         cell->cellTypeData.sensor.minRange = cellTO.cellTypeData.sensor.minRange;
         cell->cellTypeData.sensor.maxRange = cellTO.cellTypeData.sensor.maxRange;
         cell->cellTypeData.sensor.restrictToColor = cellTO.cellTypeData.sensor.restrictToColor;
-        cell->cellTypeData.sensor.restrictToMutants = cellTO.cellTypeData.sensor.restrictToMutants;
+        cell->cellTypeData.sensor.restrictToCreatures = cellTO.cellTypeData.sensor.restrictToCreatures;
     } break;
     case CellType_Oscillator: {
         cell->cellTypeData.oscillator.autoTriggerInterval = cellTO.cellTypeData.oscillator.autoTriggerInterval;
@@ -344,7 +344,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
     } break;
     case CellType_Reconnector: {
         cell->cellTypeData.reconnector.restrictToColor = cellTO.cellTypeData.reconnector.restrictToColor;
-        cell->cellTypeData.reconnector.restrictToMutants = cellTO.cellTypeData.reconnector.restrictToMutants;
+        cell->cellTypeData.reconnector.restrictToCreatures = cellTO.cellTypeData.reconnector.restrictToCreatures;
     } break;
     case CellType_Detonator: {
         cell->cellTypeData.detonator.state = cellTO.cellTypeData.detonator.state;

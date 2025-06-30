@@ -108,7 +108,7 @@ struct SensorDescription
     MEMBER(SensorDescription, std::optional<int>, minRange, std::nullopt);
     MEMBER(SensorDescription, std::optional<int>, maxRange, std::nullopt);
     MEMBER(SensorDescription, std::optional<int>, restrictToColor, std::nullopt);
-    MEMBER(SensorDescription, SensorRestrictToMutants, restrictToMutants, SensorRestrictToMutants_NoRestriction);
+    MEMBER(SensorDescription, SensorRestrictToCreatures, restrictToCreatures, SensorRestrictToCreatures_NoRestriction);
 };
 
 struct OscillatorDescription
@@ -268,7 +268,7 @@ struct ReconnectorDescription
     auto operator<=>(ReconnectorDescription const&) const = default;
 
     MEMBER(ReconnectorDescription, std::optional<int>, restrictToColor, std::nullopt);
-    MEMBER(ReconnectorDescription, ReconnectorRestrictToMutants, restrictToMutants, ReconnectorRestrictToMutants_NoRestriction);
+    MEMBER(ReconnectorDescription, ReconnectorRestrictToCreatures, restrictToCreatures, ReconnectorRestrictToCreatures_NoRestriction);
 };
 
 struct DetonatorDescription

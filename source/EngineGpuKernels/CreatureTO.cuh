@@ -27,7 +27,7 @@ struct SensorGenomeTO
     int8_t minRange;          // < 0 = no restriction
     int8_t maxRange;          // < 0 = no restriction
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
-    SensorRestrictToMutants restrictToMutants;
+    SensorRestrictToCreatures restrictToCreatures;
 };
 
 struct ConstructorGenomeTO
@@ -110,7 +110,7 @@ struct DefenderGenomeTO
 struct ReconnectorGenomeTO
 {
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
-    ReconnectorRestrictToMutants restrictToMutants;
+    ReconnectorRestrictToCreatures restrictToCreatures;
 };
 
 struct DetonatorGenomeTO

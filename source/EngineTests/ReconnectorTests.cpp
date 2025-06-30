@@ -135,7 +135,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_success)
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
-                .cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToSameMutants)),
+                .cellTypeData(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToSameMutants)),
             CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
         });
     data.addConnection(1, 2);
@@ -168,7 +168,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_failed)
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
-                .cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToSameMutants)),
+                .cellTypeData(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToSameMutants)),
             CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
         });
     data.addConnection(1, 2);
@@ -198,7 +198,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_success)
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
-                .cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
+                .cellTypeData(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToOtherMutants)),
             CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
         });
     data.addConnection(1, 2);
@@ -230,7 +230,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed)
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
-                .cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToOtherMutants)),
+                .cellTypeData(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToOtherMutants)),
             CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
         });
     data.addConnection(1, 2);
@@ -255,7 +255,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToStructures_success)
 {
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToStructures)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToStructures)),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(StructureCellDescription()),
     });
@@ -281,7 +281,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_failed)
 {
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToStructures)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToStructures)),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(BaseDescription()),
     });
@@ -305,7 +305,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToFreeCells_success)
 {
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToFreeCells)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToFreeCells)),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(FreeCellDescription()),
     });
@@ -331,7 +331,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToFreeCells_failed)
 {
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToFreeCells)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToFreeCells)),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(BaseDescription()),
     });
@@ -360,7 +360,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_succes
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
-                .cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToLessComplexMutants)),
+                .cellTypeData(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToLessComplexMutants)),
             CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
         });
     data.addConnection(1, 2);
@@ -383,7 +383,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_failed
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
-                .cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToLessComplexMutants)),
+                .cellTypeData(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToLessComplexMutants)),
             CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
         });
     data.addConnection(1, 2);
@@ -406,7 +406,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_succes
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
-                .cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToMoreComplexMutants)),
+                .cellTypeData(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants)),
             CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
         });
     data.addConnection(1, 2);
@@ -429,7 +429,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_failed
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
-                .cellTypeData(ReconnectorDescription().restrictToMutants(ReconnectorRestrictToMutants_RestrictToMoreComplexMutants)),
+                .cellTypeData(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants)),
             CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
         });
     data.addConnection(1, 2);

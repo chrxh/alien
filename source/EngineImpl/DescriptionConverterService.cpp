@@ -324,7 +324,7 @@ CellDescription DescriptionConverterService::createCellDescription(
         sensor._maxRange = cellTO.cellTypeData.sensor.maxRange >= 0 ? std::make_optional(cellTO.cellTypeData.sensor.maxRange) : std::nullopt;
         sensor._restrictToColor =
             cellTO.cellTypeData.sensor.restrictToColor != 255 ? std::make_optional(cellTO.cellTypeData.sensor.restrictToColor) : std::nullopt;
-        sensor._restrictToMutants = cellTO.cellTypeData.sensor.restrictToMutants;
+        sensor._restrictToCreatures = cellTO.cellTypeData.sensor.restrictToCreatures;
         result._cellTypeData = sensor;
     } break;
     case CellType_Oscillator: {
@@ -411,7 +411,7 @@ CellDescription DescriptionConverterService::createCellDescription(
         ReconnectorDescription reconnector;
         reconnector._restrictToColor =
             cellTO.cellTypeData.reconnector.restrictToColor != 255 ? std::make_optional(cellTO.cellTypeData.reconnector.restrictToColor) : std::nullopt;
-        reconnector._restrictToMutants = cellTO.cellTypeData.reconnector.restrictToMutants;
+        reconnector._restrictToCreatures = cellTO.cellTypeData.reconnector.restrictToCreatures;
         result._cellTypeData = reconnector;
     } break;
     case CellType_Detonator: {
@@ -514,7 +514,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(
                 sensorDesc._maxRange = nodeTO->cellTypeData.sensor.maxRange >= 0 ? std::make_optional(nodeTO->cellTypeData.sensor.maxRange) : std::nullopt;
                 sensorDesc._restrictToColor =
                     nodeTO->cellTypeData.sensor.restrictToColor != 255 ? std::make_optional(nodeTO->cellTypeData.sensor.restrictToColor) : std::nullopt;
-                sensorDesc._restrictToMutants = nodeTO->cellTypeData.sensor.restrictToMutants;
+                sensorDesc._restrictToCreatures = nodeTO->cellTypeData.sensor.restrictToCreatures;
                 nodeDesc._cellTypeData = sensorDesc;
             } break;
             case CellTypeGenome_Oscillator: {
@@ -581,7 +581,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(
             case CellTypeGenome_Reconnector: {
                 ReconnectorGenomeDescription reconnectorDesc;
                 reconnectorDesc._restrictToColor = nodeTO->cellTypeData.reconnector.restrictToColor;
-                reconnectorDesc._restrictToMutants = nodeTO->cellTypeData.reconnector.restrictToMutants;
+                reconnectorDesc._restrictToCreatures = nodeTO->cellTypeData.reconnector.restrictToCreatures;
                 nodeDesc._cellTypeData = reconnectorDesc;
             } break;
             case CellTypeGenome_Detonator: {
@@ -689,7 +689,7 @@ void DescriptionConverterService::convertCreatureToTO(
                 sensorTO.minRange = static_cast<int8_t>(sensorDesc._minRange.value_or(-1));
                 sensorTO.maxRange = static_cast<int8_t>(sensorDesc._maxRange.value_or(-1));
                 sensorTO.restrictToColor = sensorDesc._restrictToColor.value_or(255);
-                sensorTO.restrictToMutants = sensorDesc._restrictToMutants;
+                sensorTO.restrictToCreatures = sensorDesc._restrictToCreatures;
             } break;
             case CellTypeGenome_Oscillator: {
                 auto const& oscillatorDesc = std::get<OscillatorGenomeDescription>(nodeDesc._cellTypeData);
@@ -753,7 +753,7 @@ void DescriptionConverterService::convertCreatureToTO(
                 auto const& reconnectorDesc = std::get<ReconnectorGenomeDescription>(nodeDesc._cellTypeData);
                 auto& reconnectorTO = nodeTO.cellTypeData.reconnector;
                 reconnectorTO.restrictToColor = reconnectorDesc._restrictToColor.value_or(255);
-                reconnectorTO.restrictToMutants = reconnectorDesc._restrictToMutants;
+                reconnectorTO.restrictToCreatures = reconnectorDesc._restrictToCreatures;
             } break;
             case CellTypeGenome_Detonator: {
                 auto const& detonatorDesc = std::get<DetonatorGenomeDescription>(nodeDesc._cellTypeData);
@@ -843,7 +843,7 @@ void DescriptionConverterService::convertCellToTO(
         SensorTO& sensorTO = cellTO.cellTypeData.sensor;
         sensorTO.autoTriggerInterval = static_cast<uint8_t>(sensorDesc._autoTriggerInterval.value_or(0));
         sensorTO.restrictToColor = sensorDesc._restrictToColor.value_or(255);
-        sensorTO.restrictToMutants = sensorDesc._restrictToMutants;
+        sensorTO.restrictToCreatures = sensorDesc._restrictToCreatures;
         sensorTO.minDensity = sensorDesc._minDensity;
         sensorTO.minRange = static_cast<int8_t>(sensorDesc._minRange.value_or(-1));
         sensorTO.maxRange = static_cast<int8_t>(sensorDesc._maxRange.value_or(-1));
@@ -930,7 +930,7 @@ void DescriptionConverterService::convertCellToTO(
         auto const& reconnectorDesc = std::get<ReconnectorDescription>(cellDesc._cellTypeData);
         ReconnectorTO& reconnectorTO = cellTO.cellTypeData.reconnector;
         reconnectorTO.restrictToColor = toUInt8(reconnectorDesc._restrictToColor.value_or(255));
-        reconnectorTO.restrictToMutants = reconnectorDesc._restrictToMutants;
+        reconnectorTO.restrictToCreatures = reconnectorDesc._restrictToCreatures;
     } break;
     case CellType_Detonator: {
         auto const& detonatorDesc = std::get<DetonatorDescription>(cellDesc._cellTypeData);

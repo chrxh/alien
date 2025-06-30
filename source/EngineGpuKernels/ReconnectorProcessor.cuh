@@ -59,34 +59,34 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
         if (reconnector.restrictToColor != 255 && otherCell->color != reconnector.restrictToColor) {
             return;
         }
-        if (reconnector.restrictToMutants == SensorRestrictToMutants_RestrictToSameMutants
-            || reconnector.restrictToMutants == SensorRestrictToMutants_RestrictToOtherMutants
-            || reconnector.restrictToMutants == SensorRestrictToMutants_RestrictToLessComplexMutants
-            || reconnector.restrictToMutants == SensorRestrictToMutants_RestrictToMoreComplexMutants) {
+        if (reconnector.restrictToCreatures == SensorRestrictToCreatures_RestrictToSameMutants
+            || reconnector.restrictToCreatures == SensorRestrictToCreatures_RestrictToOtherMutants
+            || reconnector.restrictToCreatures == SensorRestrictToCreatures_RestrictToLessComplexMutants
+            || reconnector.restrictToCreatures == SensorRestrictToCreatures_RestrictToMoreComplexMutants) {
             if (otherCell->cellType == CellType_Free || otherCell->cellType == CellType_Structure) {
                 return;
             }
         }
-        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToSameMutants
+        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToSameMutants
             && (cell->creature == nullptr || otherCell->creature == nullptr || cell->creature->mutationId != otherCell->creature->mutationId)) {
             return;
         }
-        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToOtherMutants
+        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToOtherMutants
             && (cell->creature == nullptr || otherCell->creature == nullptr || cell->creature->mutationId == otherCell->creature->mutationId
                 || cell->creature->mutationId == otherCell->creature->ancestorId)) {
             return;
         }
-        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToFreeCells && otherCell->cellType != CellType_Free) {
+        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToFreeCells && otherCell->cellType != CellType_Free) {
             return;
         }
-        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToStructures && otherCell->cellType != CellType_Structure) {
+        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToStructures && otherCell->cellType != CellType_Structure) {
             return;
         }
-        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToLessComplexMutants
+        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToLessComplexMutants
             && (cell->creature == nullptr || otherCell->creature == nullptr || otherCell->creature->genomeComplexity >= cell->creature->genomeComplexity)) {
             return;
         }
-        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToMoreComplexMutants
+        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants
             && (cell->creature == nullptr || otherCell->creature == nullptr || otherCell->creature->genomeComplexity <= cell->creature->genomeComplexity)) {
             return;
         }

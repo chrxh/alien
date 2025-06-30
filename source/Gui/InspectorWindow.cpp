@@ -676,8 +676,8 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
                 .name("Scan mutants")
                 .values({"None", "Same mutants", "Other mutants", "Free cells", "Handcrafted cells", "Less complex mutants", "More complex mutants"})
                 .textWidth(CellTypeTextWidth)
-                .tooltip(Const::SensorRestrictToMutantsTooltip),
-            sensor._restrictToMutants);
+                .tooltip(Const::SensorRestrictToCreaturesTooltip),
+            sensor._restrictToCreatures);
         AlienGui::InputFloat(
             AlienGui::InputFloatParameters()
                 .name("Min density")
@@ -705,8 +705,8 @@ void _InspectorWindow::processReconnectorContent(ReconnectorDescription& reconne
                 .name("Restrict to mutants")
                 .values({"None", "Same mutants", "Other mutants", "Free cells", "Handcrafted cells", "Less complex mutants", "More complex mutants"})
                 .textWidth(CellTypeTextWidth)
-                .tooltip(Const::ReconnectorRestrictToMutantsTooltip),
-            reconnector._restrictToMutants);
+                .tooltip(Const::ReconnectorRestrictToCreaturesTooltip),
+            reconnector._restrictToCreatures);
 
         ImGui::TreePop();
     }

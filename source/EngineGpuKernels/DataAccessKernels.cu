@@ -85,7 +85,7 @@ namespace
                         nodeTO.cellTypeData.sensor.minRange = node.cellTypeData.sensor.minRange;
                         nodeTO.cellTypeData.sensor.maxRange = node.cellTypeData.sensor.maxRange;
                         nodeTO.cellTypeData.sensor.restrictToColor = node.cellTypeData.sensor.restrictToColor;
-                        nodeTO.cellTypeData.sensor.restrictToMutants = node.cellTypeData.sensor.restrictToMutants;
+                        nodeTO.cellTypeData.sensor.restrictToCreatures = node.cellTypeData.sensor.restrictToCreatures;
                         break;
                     case CellTypeGenome_Oscillator:
                         nodeTO.cellTypeData.oscillator.autoTriggerInterval = node.cellTypeData.oscillator.autoTriggerInterval;
@@ -136,7 +136,7 @@ namespace
                         break;
                     case CellTypeGenome_Reconnector:
                         nodeTO.cellTypeData.reconnector.restrictToColor = node.cellTypeData.reconnector.restrictToColor;
-                        nodeTO.cellTypeData.reconnector.restrictToMutants = node.cellTypeData.reconnector.restrictToMutants;
+                        nodeTO.cellTypeData.reconnector.restrictToCreatures = node.cellTypeData.reconnector.restrictToCreatures;
                         break;
                     case CellTypeGenome_Detonator:
                         nodeTO.cellTypeData.detonator.countdown = node.cellTypeData.detonator.countdown;
@@ -246,7 +246,7 @@ namespace
             cellTO.cellTypeData.sensor.minRange = cell->cellTypeData.sensor.minRange;
             cellTO.cellTypeData.sensor.maxRange = cell->cellTypeData.sensor.maxRange;
             cellTO.cellTypeData.sensor.restrictToColor = cell->cellTypeData.sensor.restrictToColor;
-            cellTO.cellTypeData.sensor.restrictToMutants = cell->cellTypeData.sensor.restrictToMutants;
+            cellTO.cellTypeData.sensor.restrictToCreatures = cell->cellTypeData.sensor.restrictToCreatures;
         } break;
         case CellType_Oscillator: {
             cellTO.cellTypeData.oscillator.autoTriggerInterval = cell->cellTypeData.oscillator.autoTriggerInterval;
@@ -311,7 +311,7 @@ namespace
         } break;
         case CellType_Reconnector: {
             cellTO.cellTypeData.reconnector.restrictToColor = cell->cellTypeData.reconnector.restrictToColor;
-            cellTO.cellTypeData.reconnector.restrictToMutants = cell->cellTypeData.reconnector.restrictToMutants;
+            cellTO.cellTypeData.reconnector.restrictToCreatures = cell->cellTypeData.reconnector.restrictToCreatures;
         } break;
         case CellType_Detonator: {
             cellTO.cellTypeData.detonator.state = cell->cellTypeData.detonator.state;
