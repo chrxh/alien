@@ -9,8 +9,8 @@
 #include "EngineInterface/CreatureDescriptionEditService.h"
 
 #include "AlienGui.h"
-#include "CreatureTabEditData.h"
-#include "CreatureTabLayoutData.h"
+#include "GenomeTabEditData.h"
+#include "GenomeTabLayoutData.h"
 #include "StyleRepository.h"
 
 namespace
@@ -20,7 +20,7 @@ namespace
 }
 
 
-GeneEditorWidget _GeneEditorWidget::create(CreatureTabEditData const& editData, CreatureTabLayoutData const& layoutData)
+GeneEditorWidget _GeneEditorWidget::create(GenomeTabEditData const& editData, GenomeTabLayoutData const& layoutData)
 {
     return GeneEditorWidget(new _GeneEditorWidget(editData, layoutData));
 }
@@ -44,8 +44,8 @@ void _GeneEditorWidget::process()
     ImGui::EndChild();
 }
 
-_GeneEditorWidget::_GeneEditorWidget(CreatureTabEditData const& genome, CreatureTabLayoutData const& layoutData)
-    : _editData(genome)
+_GeneEditorWidget::_GeneEditorWidget(GenomeTabEditData const& editData, GenomeTabLayoutData const& layoutData)
+    : _editData(editData)
     , _layoutData(layoutData)
 {}
 
@@ -214,7 +214,7 @@ void _GeneEditorWidget::processNodeListButtons()
         ImVec2(cursorPos.x + ImGui::GetContentRegionAvail().x - buttonGroupSize.x - scale(15.0f), cursorPos.y - buttonGroupSize.y - scale(20.0f)));
     if (ImGui::BeginChild("ButtonGroup", buttonGroupSize)) {
         auto selectedNode = _editData->getSelectedNodeIndex();
-        auto const& gene = _editData->creature._genes.at(_editData->selectedGeneIndex.value());
+        auto const& gene = _editData->genome._genes.at(_editData->selectedGeneIndex.value());
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_PLUS_CIRCLE))) {
             onAddNode();
         }

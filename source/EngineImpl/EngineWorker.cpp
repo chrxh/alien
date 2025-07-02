@@ -234,11 +234,11 @@ void EngineWorker::changeParticle(ParticleDescription const& changedParticle)
     _simulationCudaFacade->changeInspectedSimulationData(dataTO);
 }
 
-bool EngineWorker::changeCreature(CreatureDescription const& genome)
+bool EngineWorker::changeCreature(uint64_t creatureId, GenomeDescription const& genome)
 {
     EngineWorkerGuard access(this);
 
-    auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(genome);
+    auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(creatureId, genome);
 
     return _simulationCudaFacade->changeCreature(dataTO);
 }

@@ -2,7 +2,7 @@
 
 #include "Definitions.h"
 
-struct _CreatureTabLayoutData
+struct _GenomeTabLayoutData
 {
     bool initialized = false;
     float genomeEditorWidth = 0;

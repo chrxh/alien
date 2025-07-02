@@ -62,7 +62,7 @@ public:
     void setDetached(bool value) override;
     void changeCell(CellDescription const& changedCell) override;
     void changeParticle(ParticleDescription const& changedParticle) override;
-    bool changeCreature(CreatureDescription const& genome) override;
+    bool changeCreature(uint64_t creatureId, GenomeDescription const& genome) override;
 
     void calcTimesteps(uint64_t timesteps) override;
     void runSimulation() override;

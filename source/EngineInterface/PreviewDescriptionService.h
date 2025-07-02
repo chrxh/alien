@@ -2,7 +2,7 @@
 
 #include "Base/Singleton.h"
 
-#include "CreatureDescription.h"
+#include "GenomeDescription.h"
 #include "SimulationParameters.h"
 #include "PreviewDescriptions.h"
 
@@ -10,6 +10,6 @@ class PreviewDescriptionService
 {
     MAKE_SINGLETON(PreviewDescriptionService);
 public:
-    PreviewDescription convert(CreatureDescription const& creature, std::optional<int> selectedNode, SimulationParameters const& parameters);
+    PreviewDescription convert(GenomeDescription const& creature, std::optional<int> selectedNode, SimulationParameters const& parameters);
 };
 

@@ -2,12 +2,12 @@
 
 #include "Base/Singleton.h"
 
-#include "CreatureDescription.h"
+#include "GenomeDescription.h"
 
 class CreatureDescriptionValidationService
 {
     MAKE_SINGLETON(CreatureDescriptionValidationService);
 
 public:
-    void validateAndCorrect(CreatureDescription& creature);
+    void validateAndCorrect(GenomeDescription& creature);
 };

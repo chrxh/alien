@@ -227,16 +227,13 @@ CreatorWindow::CreatorWindow()
 
 void CreatorWindow::createCell()
 {
-    auto creatureId = toInt(NumberGenerator::get().getRandomInt(std::numeric_limits<int>::max()));
-
     auto cell = CellDescription()
                     .pos(getRandomPos())
                     .energy(_energy)
                     .stiffness(_stiffness)
                     .color(EditorModel::get().getDefaultColorCode())
                     .barrier(_barrier)
-                    .sticky(_makeSticky)
-                    .creatureId(creatureId);
+                    .sticky(_makeSticky);
     auto data = CollectionDescription().addCell(cell);
     _simulationFacade->addAndSelectSimulationData(std::move(data));
 }
@@ -318,7 +315,7 @@ void CreatorWindow::createDisc()
     }
 
     DescriptionEditService::get().reconnectCells(data, _cellDistance * 1.7f);
-    data.setCenter(getRandomPos());
+    DescriptionEditService::get().setCenter(data, getRandomPos());
     _simulationFacade->addAndSelectSimulationData(std::move(data));
 }
 

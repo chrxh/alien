@@ -24,7 +24,7 @@
 
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationParameters.h"
-#include "EngineInterface/CreatureDescription.h"
+#include "EngineInterface/GenomeDescription.h"
 
 #include "SettingsParserService.h"
 
@@ -126,15 +126,11 @@ namespace cereal
 }
 
 /************************************************************************/
-/* Creature data                                                        */
+/* Genome data                                                          */
 /************************************************************************/
 namespace
 {
-    auto constexpr Id_Creature_Id = 0;
-    auto constexpr Id_Creature_AncestorId = 1;
-    auto constexpr Id_Creature_MutationId = 2;
-    auto constexpr Id_Creature_GenomeComplexity = 3;
-    auto constexpr Id_Creature_FrontAngle = 4;
+    auto constexpr Id_Genome_FrontAngle = 4;
 
     auto constexpr Id_Gene_Shape = 0;
     auto constexpr Id_Gene_NumBranches = 1;
@@ -449,20 +445,16 @@ namespace cereal
     SPLIT_SERIALIZATION(GeneDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, CreatureDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, GenomeDescription& data)
     {
-        CreatureDescription defaultObject;
+        GenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Creature_Id, data._id, defaultObject._id);
-        loadSave(task, auxiliaries, Id_Creature_AncestorId, data._ancestorId, defaultObject._ancestorId);
-        loadSave(task, auxiliaries, Id_Creature_MutationId, data._mutationId, defaultObject._mutationId);
-        loadSave(task, auxiliaries, Id_Creature_GenomeComplexity, data._genomeComplexity, defaultObject._genomeComplexity);
-        loadSave(task, auxiliaries, Id_Creature_FrontAngle, data._frontAngle, defaultObject._frontAngle);
+        loadSave(task, auxiliaries, Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._genes);
     }
-    SPLIT_SERIALIZATION(CreatureDescription)
+    SPLIT_SERIALIZATION(GenomeDescription)
 }
 
 /************************************************************************/
@@ -476,6 +468,11 @@ namespace
     auto constexpr Id_Particle_Energy = 3;
     auto constexpr Id_Particle_Color = 4;
 
+    auto constexpr Id_Creature_Id = 0;
+    auto constexpr Id_Creature_AncestorId = 1;
+    auto constexpr Id_Creature_MutationId = 2;
+    auto constexpr Id_Creature_GenomeComplexity = 3;
+
     auto constexpr Id_Cell_Id = 0;
     auto constexpr Id_Cell_Energy = 1;
     auto constexpr Id_Cell_Pos = 2;
@@ -488,11 +485,10 @@ namespace
     auto constexpr Id_Cell_ActivationTime = 9;
     auto constexpr Id_Cell_CellTypeUsed = 10;
     auto constexpr Id_Cell_DetectedByCreatureId = 11;
-    auto constexpr Id_Cell_CreatureId = 12;
-    auto constexpr Id_Cell_GenomeNodeIndex = 13;
-    auto constexpr Id_Cell_SignalRelaxationTime = 14;
-    auto constexpr Id_Cell_AngleToFront = 15;
-    auto constexpr Id_Cell_Sticky = 16;
+    auto constexpr Id_Cell_GenomeNodeIndex = 12;
+    auto constexpr Id_Cell_SignalRelaxationTime = 13;
+    auto constexpr Id_Cell_AngleToFront = 14;
+    auto constexpr Id_Cell_Sticky = 15;
 
     auto constexpr Id_Signal_Channels = 0;
 
@@ -879,7 +875,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_ActivationTime, data._activationTime, defaultObject._activationTime);
         loadSave(task, auxiliaries, Id_Cell_DetectedByCreatureId, data._detectedByCreatureId, defaultObject._detectedByCreatureId);
         loadSave(task, auxiliaries, Id_Cell_CellTypeUsed, data._cellTypeUsed, defaultObject._cellTypeUsed);
-        loadSave(task, auxiliaries, Id_Cell_CreatureId, data._creatureId, defaultObject._creatureId);
         loadSave(task, auxiliaries, Id_Cell_GenomeNodeIndex, data._genomeNodeIndex, defaultObject._genomeNodeIndex);
         loadSave(task, auxiliaries, Id_Cell_SignalRelaxationTime, data._signalRelaxationTime, defaultObject._signalRelaxationTime);
         processLoadSaveMap(task, ar, auxiliaries);
@@ -887,6 +882,22 @@ namespace cereal
         ar(data._connections, data._cellTypeData, data._signal, data._signalRoutingRestriction, data._neuralNetwork, data._metadata);
     }
     SPLIT_SERIALIZATION(CellDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, CreatureDescription& data)
+    {
+        CreatureDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_Creature_Id, data._id, defaultObject._id);
+        loadSave(task, auxiliaries, Id_Creature_AncestorId, data._ancestorId, defaultObject._ancestorId);
+        loadSave(task, auxiliaries, Id_Creature_MutationId, data._mutationId, defaultObject._mutationId);
+        loadSave(task, auxiliaries, Id_Creature_GenomeComplexity, data._genomeComplexity, defaultObject._genomeComplexity);
+        
+        processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._genome, data._cells);
+    }
+    SPLIT_SERIALIZATION(CreatureDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ParticleDescription& data)

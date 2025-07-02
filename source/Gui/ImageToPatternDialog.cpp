@@ -113,7 +113,7 @@ void ImageToPatternDialog::show()
         }
 
         DescriptionEditService::get().reconnectCells(dataDesc, 1 * 1.5f);
-        dataDesc.setCenter(Viewport::get().getCenterInWorldPos());
+        DescriptionEditService::get().setCenter(dataDesc, Viewport::get().getCenterInWorldPos());
 
         _simulationFacade->addAndSelectSimulationData(std::move(dataDesc));
         //TODO: update pattern editor

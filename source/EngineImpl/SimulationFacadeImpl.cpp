@@ -163,9 +163,9 @@ void _SimulationFacadeImpl::changeParticle(ParticleDescription const& changedPar
     _worker.changeParticle(changedParticle);
 }
 
-bool _SimulationFacadeImpl::changeCreature(CreatureDescription const& genome)
+bool _SimulationFacadeImpl::changeCreature(uint64_t creatureId, GenomeDescription const& genome)
 {
-    return _worker.changeCreature(genome);
+    return _worker.changeCreature(creatureId, genome);
 }
 
 void _SimulationFacadeImpl::calcTimesteps(uint64_t timesteps)

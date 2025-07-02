@@ -69,8 +69,6 @@ class CreatorWindow;
 
 class MultiplierWindow;
 
-class PatternAnalysisDialog;
-
 class FpsController;
 
 class BrowserWindow;
@@ -103,21 +101,21 @@ class ChangeColorDialog;
 
 class AutosaveWindow;
 
-class CreatureEditorWindow;
+class GenomeEditorWindow;
 
 class FileTransferController;
 
 class _LocationWidget;
 using LocationWidget = std::shared_ptr<_LocationWidget>;
 
-class _CreatureTabWidget;
-using CreatureTabWidget = std::shared_ptr<_CreatureTabWidget>;
+class _GenomeTabWidget;
+using GenomeTabWidget = std::shared_ptr<_GenomeTabWidget>;
 
-struct _CreatureTabLayoutData;
-using CreatureTabLayoutData = std::shared_ptr<_CreatureTabLayoutData>;
+struct _GenomeTabLayoutData;
+using GenomeTabLayoutData = std::shared_ptr<_GenomeTabLayoutData>;
 
-struct _CreatureTabEditData;
-using CreatureTabEditData = std::shared_ptr<_CreatureTabEditData>;
+struct _GenomeTabEditData;
+using GenomeTabEditData = std::shared_ptr<_GenomeTabEditData>;
 
 class _GenomeEditorWidget;
 using GenomeEditorWidget = std::shared_ptr<_GenomeEditorWidget>;

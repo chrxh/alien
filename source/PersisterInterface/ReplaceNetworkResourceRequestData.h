@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "EngineInterface/CreatureDescription.h"
+#include "EngineInterface/GenomeDescription.h"
 #include "Network/Definitions.h"
 #include "DownloadCache.h"
 
@@ -19,7 +19,7 @@ struct ReplaceNetworkResourceRequestData
     };
     struct CreatureData
     {
-        CreatureDescription description;
+        GenomeDescription description;
     };
     std::variant<SimulationData, CreatureData> data;
 };

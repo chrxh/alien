@@ -101,9 +101,9 @@ void MassOperationsDialog::processIntern()
     AlienGui::Text("Randomize mutation ids");
 
     AlienGui::Group("Options");
-    ImGui::Checkbox("##restrictToSelectedClusters", &_restrictToSelectedClusters);
+    ImGui::Checkbox("##restrictToSelectedCreatures", &_restrictToSelectedClusters);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
-    AlienGui::Text("Restrict to selected cell networks");
+    AlienGui::Text("Restrict to selected creatures");
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();
@@ -153,7 +153,6 @@ void MassOperationsDialog::onExecute()
             return _simulationFacade->getSimulationData();
         }
     }();
-    auto clusteredContent = ClusteredCollectionDescription(content);
 
     auto getColorVector = [](bool* colors) {
         std::vector<int> result;
@@ -165,31 +164,31 @@ void MassOperationsDialog::onExecute()
         return result;
     };
     if (_randomizeCellColors) {
-        DescriptionEditService::get().randomizeCellColors(clusteredContent, getColorVector(_checkedCellColors));
+        DescriptionEditService::get().randomizeCellColors(content, getColorVector(_checkedCellColors));
     }
     if (_randomizeGenomeColors) {
-        DescriptionEditService::get().randomizeGenomeColors(clusteredContent, getColorVector(_checkedGenomeColors));
+        DescriptionEditService::get().randomizeGenomeColors(content, getColorVector(_checkedGenomeColors));
     }
     if (_randomizeEnergies) {
-        DescriptionEditService::get().randomizeEnergies(clusteredContent, _minEnergy, _maxEnergy);
+        DescriptionEditService::get().randomizeEnergies(content, _minEnergy, _maxEnergy);
     }
     if (_randomizeAges) {
-        DescriptionEditService::get().randomizeAges(clusteredContent, _minAge, _maxAge);
+        DescriptionEditService::get().randomizeAges(content, _minAge, _maxAge);
     }
     if (_randomizeCountdowns) {
-        DescriptionEditService::get().randomizeCountdowns(clusteredContent, _minCountdown, _maxCountdown);
+        DescriptionEditService::get().randomizeCountdowns(content, _minCountdown, _maxCountdown);
     }
     if (_randomizeMutationId) {
-        DescriptionEditService::get().randomizeMutationIds(clusteredContent);
+        DescriptionEditService::get().randomizeMutationIds(content);
     }
 
     if (_restrictToSelectedClusters) {
         _simulationFacade->removeSelectedObjects(true);
-        _simulationFacade->addAndSelectSimulationData(CollectionDescription(clusteredContent));
+        _simulationFacade->addAndSelectSimulationData(std::move(content));
     } else {
         _simulationFacade->closeSimulation();
         _simulationFacade->newSimulation(timestep, worldSize, parameters);
-        _simulationFacade->setSimulationData(CollectionDescription(clusteredContent));       
+        _simulationFacade->setSimulationData(content);
     }
 }
 

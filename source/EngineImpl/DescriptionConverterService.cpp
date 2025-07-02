@@ -101,15 +101,27 @@ CollectionDescription DescriptionConverterService::convertTOtoDescription(Collec
     CollectionDescription result;
 
     // Creatures
-    std::vector<CreatureDescription> genomes;
-    std::unordered_map<uint64_t, uint64_t> creatureIdByTOIndex;
+    std::vector<GenomeDescription> genomes;
+    std::unordered_map<uint64_t, uint64_t> indexByCreatureId;
     for (int i = 0; i < *collectionTO.numCreatures; ++i) {
-        result._creatures.emplace_back(createCreatureDescription(collectionTO, i, creatureIdByTOIndex));
+        auto creature = createCreatureDescription(collectionTO, i);
+        indexByCreatureId.emplace(creature._id, i);
+        result._creatures.emplace_back(creature);
     }
 
     // Cells
     for (int i = 0; i < *collectionTO.numCells; ++i) {
-        result._cells.emplace_back(createCellDescription(collectionTO, i, creatureIdByTOIndex));
+        auto cell = createCellDescription(collectionTO, i);
+
+        if (collectionTO.cells[i].belongToCreature) {
+            auto creatureTOIndex = collectionTO.cells[i].creatureIndex;
+            auto creatureId = collectionTO.creatures[creatureTOIndex].id;
+            auto creatureIndex = indexByCreatureId.at(creatureId);
+            auto& creature = result._creatures.at(creatureIndex);
+            creature._cells.emplace_back(cell);
+        } else {
+            result._cells.emplace_back(cell);
+        }
     }
 
     // Particles
@@ -157,19 +169,18 @@ CollectionTO DescriptionConverterService::convertDescriptionToTO(CollectionDescr
     std::vector<uint8_t> heap;
 
     std::unordered_map<uint64_t, uint64_t> creatureTOIndexById;
-    for (auto const& genome : description._creatures) {
-        convertCreatureToTO(creatureTOs, geneTOs, nodeTOs, heap, genome, creatureTOIndexById);
+    for (auto const& creature : description._creatures) {
+        convertCreatureToTO(creatureTOs, geneTOs, nodeTOs, heap, creature, creatureTOIndexById);
     }
 
     std::unordered_map<uint64_t, uint64_t> cellIndexTOById;
-    for (auto const& cell : description._cells) {
-        convertCellToTO(cellTOs, heap, cellIndexTOById, cell, creatureTOIndexById);
-    }
-    for (auto const& cell : description._cells) {
+
+    description.forEach([&](auto const& cell) { convertCellToTO(cellTOs, heap, cellIndexTOById, cell, std::nullopt, creatureTOIndexById); });
+    description.forEach([&](auto const& cell) {
         if (cell._id != 0) {
             setConnections(cellTOs, cell, cellIndexTOById);
         }
-    }
+    });
     for (auto const& particle : description._particles) {
         addParticle(particleTOs, particle);
     }
@@ -184,7 +195,7 @@ CollectionTO DescriptionConverterService::convertDescriptionToTO(CellDescription
 
     std::unordered_map<uint64_t, uint64_t> cellIndexTOById;
     std::unordered_map<uint64_t, uint64_t> creatureTOIndexById;
-    convertCellToTO(cellTOs, heap, cellIndexTOById, cell, creatureTOIndexById);
+    convertCellToTO(cellTOs, heap, cellIndexTOById, cell, std::nullopt, creatureTOIndexById);
 
     return provideDataTO({}, {}, {}, cellTOs, {}, heap);
 }
@@ -198,7 +209,7 @@ CollectionTO DescriptionConverterService::convertDescriptionToTO(ParticleDescrip
     return provideDataTO({}, {}, {}, {}, particleTOs, heap);
 }
 
-CollectionTO DescriptionConverterService::convertDescriptionToTO(CreatureDescription const& genome) const
+CollectionTO DescriptionConverterService::convertDescriptionToTO(uint64_t creatureId, GenomeDescription const& genome) const
 {
     std::vector<CreatureTO> creatureTOs;
     std::vector<GeneTO> geneTOs;
@@ -208,7 +219,8 @@ CollectionTO DescriptionConverterService::convertDescriptionToTO(CreatureDescrip
     std::vector<uint8_t> heap;
 
     std::unordered_map<uint64_t, uint64_t> creatureTOIndexById;
-    convertCreatureToTO(creatureTOs, geneTOs, nodeTOs, heap, genome, creatureTOIndexById);
+    auto wrapper = CreatureDescription().id(creatureId).genome(genome);
+    convertCreatureToTO(creatureTOs, geneTOs, nodeTOs, heap, wrapper, creatureTOIndexById);
 
     return provideDataTO(creatureTOs, geneTOs, nodeTOs, {}, {}, heap);
 }
@@ -231,15 +243,11 @@ namespace
 
 CellDescription DescriptionConverterService::createCellDescription(
     CollectionTO const& collectionTO,
-    int cellIndex,
-    std::unordered_map<uint64_t, uint64_t> const& creatureIdByTOIndex) const
+    int cellIndex) const
 {
     CellDescription result(false);
 
     auto const& cellTO = collectionTO.cells[cellIndex];
-    if (cellTO.belongToCreature) {
-        result._creatureId = creatureIdByTOIndex.at(cellTO.creatureIndex);
-    }
     result._id = cellTO.id;
     result._pos = RealVector2D(cellTO.pos.x, cellTO.pos.y);
     result._vel = RealVector2D(cellTO.vel.x, cellTO.vel.y);
@@ -443,21 +451,17 @@ CellDescription DescriptionConverterService::createCellDescription(
     return result;
 }
 
-CreatureDescription DescriptionConverterService::createCreatureDescription(
-    CollectionTO const& collectionTO,
-    int creatureIndex,
-    std::unordered_map<uint64_t, uint64_t>& creatureIdByTOIndex) const
+CreatureDescription DescriptionConverterService::createCreatureDescription(CollectionTO const& collectionTO, int creatureIndex) const
 {
     CreatureDescription result;
 
     auto const& creatureTO = collectionTO.creatures[creatureIndex];
     result._id = creatureTO.id;
     result._ancestorId = creatureTO.ancestorId;
-    creatureIdByTOIndex.emplace(creatureIndex, result._id);
     result._mutationId = creatureTO.mutationId;
     result._genomeComplexity = creatureTO.genomeComplexity;
-    result._frontAngle = creatureTO.frontAngle;
-    result._genes.reserve(creatureTO.numGenes);
+    result._genome._frontAngle = creatureTO.frontAngle;
+    result._genome._genes.reserve(creatureTO.numGenes);
 
     for (int i = 0; i < creatureTO.numGenes; ++i) {
         auto geneTO = collectionTO.genes + creatureTO.geneArrayIndex + i;
@@ -593,7 +597,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(
             geneDesc._nodes.emplace_back(nodeDesc);
         }
 
-        result._genes.emplace_back(geneDesc);
+        result._genome._genes.emplace_back(geneDesc);
     }
 
     return result;
@@ -625,17 +629,17 @@ void DescriptionConverterService::convertCreatureToTO(
     creatureTOIndexById.insert_or_assign(creatureDesc._id, creatureIndex);
 
     auto geneArrayStartIndex = geneTOs.size();
-    geneTOs.resize(geneArrayStartIndex + creatureDesc._genes.size());
+    geneTOs.resize(geneArrayStartIndex + creatureDesc._genome._genes.size());
 
     creatureTO.id = creatureDesc._id;
     creatureTO.ancestorId = creatureDesc._ancestorId;
     creatureTO.mutationId = creatureDesc._mutationId;
     creatureTO.genomeComplexity = creatureDesc._genomeComplexity;
-    creatureTO.frontAngle = creatureDesc._frontAngle;
-    creatureTO.numGenes = toInt(creatureDesc._genes.size());
+    creatureTO.frontAngle = creatureDesc._genome._frontAngle;
+    creatureTO.numGenes = toInt(creatureDesc._genome._genes.size());
     creatureTO.geneArrayIndex = geneArrayStartIndex;
 
-    for (auto const& [geneIndex, geneDesc] : creatureDesc._genes | boost::adaptors::indexed(0)) {
+    for (auto const& [geneIndex, geneDesc] : creatureDesc._genome._genes | boost::adaptors::indexed(0)) {
         GeneTO& geneTO = geneTOs.at(geneArrayStartIndex + geneIndex);
 
         geneTO.shape = geneDesc._shape;
@@ -780,6 +784,7 @@ void DescriptionConverterService::convertCellToTO(
     std::vector<uint8_t>& heap,
     std::unordered_map<uint64_t, uint64_t>& cellTOIndexById,
     CellDescription const& cellDesc,
+    std::optional<uint64_t> const& creatureId,
     std::unordered_map<uint64_t, uint64_t> const& creatureTOIndexById) const
 {
     auto cellIndex = cellTOs.size();
@@ -789,9 +794,9 @@ void DescriptionConverterService::convertCellToTO(
     cellTO.id = cellDesc._id;
     cellTOIndexById.insert_or_assign(cellTO.id, cellIndex);
 
-    cellTO.belongToCreature = cellDesc._creatureId.has_value();
+    cellTO.belongToCreature = creatureId.has_value();
     if (cellTO.belongToCreature) {
-        cellTO.creatureIndex = creatureTOIndexById.at(cellDesc._creatureId.value());
+        cellTO.creatureIndex = creatureTOIndexById.at(creatureId.value());
     }
     cellTO.pos = {cellDesc._pos.x, cellDesc._pos.y};
     cellTO.vel = {cellDesc._vel.x, cellDesc._vel.y};

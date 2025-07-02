@@ -4,7 +4,7 @@
 
 #include "Base/Singleton.h"
 #include "EngineInterface/Descriptions.h"
-#include "EngineInterface/CreatureDescription.h"
+#include "EngineInterface/GenomeDescription.h"
 
 class DescriptionTestDataFactory
 {

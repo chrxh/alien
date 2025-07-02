@@ -3,8 +3,8 @@
 #include <boost/range/adaptors.hpp>
 
 #include "AlienGui.h"
-#include "CreatureTabEditData.h"
-#include "CreatureTabLayoutData.h"
+#include "GenomeTabEditData.h"
+#include "GenomeTabLayoutData.h"
 #include "LoginDialog.h"
 #include "NeuralNetEditorWidget.h"
 
@@ -15,7 +15,7 @@ namespace
 }
 
 
-NodeEditorWidget _NodeEditorWidget::create(CreatureTabEditData const& editData, CreatureTabLayoutData const& layoutData)
+NodeEditorWidget _NodeEditorWidget::create(GenomeTabEditData const& editData, GenomeTabLayoutData const& layoutData)
 {
     return NodeEditorWidget(new _NodeEditorWidget(editData, layoutData));
 }
@@ -41,7 +41,7 @@ void _NodeEditorWidget::process()
     ImGui::EndChild();
 }
 
-_NodeEditorWidget::_NodeEditorWidget(CreatureTabEditData const& editData, CreatureTabLayoutData const& layoutData)
+_NodeEditorWidget::_NodeEditorWidget(GenomeTabEditData const& editData, GenomeTabLayoutData const& layoutData)
     : _editData(editData)
     , _layoutData(layoutData)
 {
@@ -169,7 +169,7 @@ void _NodeEditorWidget::processNodeAttributes()
             // Gene index
             auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
             std::vector<std::string> genes;
-            for (auto const& [index, gene] : _editData->creature._genes | boost::adaptors::indexed(0)) {
+            for (auto const& [index, gene] : _editData->genome._genes | boost::adaptors::indexed(0)) {
                 auto text = "No. " + std::to_string(index + 1);
                 if (index == 0) {
                     text += " (principal)";

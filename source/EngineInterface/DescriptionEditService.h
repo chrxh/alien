@@ -22,7 +22,6 @@ public:
         MEMBER(CreateRectParameters, bool, sticky, false);
         MEMBER(CreateRectParameters, int, color, 0);
         MEMBER(CreateRectParameters, bool, barrier, false);
-        MEMBER(CreateRectParameters, std::optional<int>, creatureId, std::nullopt);
     };
     CollectionDescription createRect(CreateRectParameters const& parameters);
 
@@ -95,15 +94,14 @@ public:
     void
     addIfSpaceAvailable(CollectionDescription& result, Occupancy& cellOccupancy, CollectionDescription const& toAdd, float distance, IntVector2D const& worldSize);
 
-    void reconnectCells(CollectionDescription& data, float maxDistance);
-    void correctConnections(CollectionDescription& data, IntVector2D const& worldSize);
+    void reconnectCells(CollectionDescription& data, float maxDistance);    // For non-creatures
 
-    void randomizeCellColors(ClusteredCollectionDescription& data, std::vector<int> const& colorCodes);
-    void randomizeGenomeColors(ClusteredCollectionDescription& data, std::vector<int> const& colorCodes);
-    void randomizeEnergies(ClusteredCollectionDescription& data, float minEnergy, float maxEnergy);
-    void randomizeAges(ClusteredCollectionDescription& data, int minAge, int maxAge);
-    void randomizeCountdowns(ClusteredCollectionDescription& data, int minValue, int maxValue);
-    void randomizeMutationIds(ClusteredCollectionDescription& data);
+    void randomizeCellColors(CollectionDescription& data, std::vector<int> const& colorCodes);
+    void randomizeGenomeColors(CollectionDescription& data, std::vector<int> const& colorCodes);
+    void randomizeEnergies(CollectionDescription& data, float minEnergy, float maxEnergy);
+    void randomizeAges(CollectionDescription& data, int minAge, int maxAge);
+    void randomizeCountdowns(CollectionDescription& data, int minValue, int maxValue);
+    void randomizeMutationIds(CollectionDescription& data);
 
     uint64_t getId(ExtendedCellOrParticleDescription const& entity);
     RealVector2D getPos(ExtendedCellOrParticleDescription const& entity);
@@ -113,6 +111,13 @@ public:
     void removeMetadata(CollectionDescription& data);
 
     void assignNewObjectAndCreatureIds(CollectionDescription& data);
+
+    void setCenter(CollectionDescription& collection, RealVector2D const& center);
+    RealVector2D calcCenter(CollectionDescription const& collection) const;
+    RealVector2D calcCenter(CreatureDescription const& creature) const;
+    void shift(CollectionDescription& collection, RealVector2D const& delta);
+    void rotate(CollectionDescription& collection, float angle);
+    void accelerate(CollectionDescription& collection, RealVector2D const& velDelta, float angularVelDelta);
 
 private:
     void removeMetadata(CellDescription& cell);

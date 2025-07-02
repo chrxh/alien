@@ -11,7 +11,7 @@
 #include "GenericMessageDialog.h"
 #include "StyleRepository.h"
 #include "BrowserWindow.h"
-#include "CreatureEditorWindow.h"
+#include "GenomeEditorWindow.h"
 #include "EditorController.h"
 #include "Viewport.h"
 #include "HelpStrings.h"
@@ -139,7 +139,7 @@ void UploadSimulationDialog::onUpload()
         if (_resourceType == NetworkResourceType_Simulation) {
             return UploadNetworkResourceRequestData::SimulationData{.zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos()};
         } else {
-            return UploadNetworkResourceRequestData::CreatureData{.description = CreatureEditorWindow::get().getCurrentCreature()};
+            return UploadNetworkResourceRequestData::CreatureData{.description = GenomeEditorWindow::get().getCurrentCreature()};
         }
     }();
     auto workspaceType = _share ? WorkspaceType_Public : WorkspaceType_Private;

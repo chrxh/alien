@@ -30,7 +30,7 @@
 #include "Network/NetworkService.h"
 
 #include "AlienGui.h"
-#include "CreatureEditorWindow.h"
+#include "GenomeEditorWindow.h"
 #include "DelayedExecutionController.h"
 #include "EditSimulationDialog.h"
 #include "EditorController.h"
@@ -1256,7 +1256,7 @@ void BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
                 return ReplaceNetworkResourceRequestData::SimulationData{
                     .zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos()};
             } else {
-                return ReplaceNetworkResourceRequestData::CreatureData{.description = CreatureEditorWindow::get().getCurrentCreature()};
+                return ReplaceNetworkResourceRequestData::CreatureData{.description = GenomeEditorWindow::get().getCurrentCreature()};
             }
         }();
         NetworkTransferController::get().onReplace(ReplaceNetworkResourceRequestData{

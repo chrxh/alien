@@ -2,7 +2,7 @@
 #include <gtest/gtest.h>
 
 #include "EngineInterface/CreatureDescriptionInfoService.h"
-#include "EngineInterface/CreatureDescription.h"
+#include "EngineInterface/GenomeDescription.h"
 
 class CreatureDescriptionInfoServiceTests : public ::testing::Test
 {
@@ -12,7 +12,7 @@ public:
 
 TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_Empty)
 {
-    auto genome = CreatureDescription();
+    auto genome = GenomeDescription();
     auto result = CreatureDescriptionInfoService::get().getNumberOfResultingCells(genome);
 
     EXPECT_EQ(0, result);
@@ -20,7 +20,7 @@ TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_Empty)
 
 TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_oneReferencesOneSingleTimes)
 {
-    auto genome = CreatureDescription().genes({
+    auto genome = GenomeDescription().genes({
         GeneDescription().nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription(),
@@ -39,7 +39,7 @@ TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_oneReferen
 
 TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_oneReferencesOneMultipleTimes)
 {
-    auto genome = CreatureDescription().genes({
+    auto genome = GenomeDescription().genes({
         GeneDescription().nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
@@ -58,7 +58,7 @@ TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_oneReferen
 
 TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_oneReferencesMany_depth1)
 {
-    auto genome = CreatureDescription().genes({
+    auto genome = GenomeDescription().genes({
         GeneDescription().nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
@@ -80,7 +80,7 @@ TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_oneReferen
 
 TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_oneReferencesMany_depth2)
 {
-    auto genome = CreatureDescription().genes({
+    auto genome = GenomeDescription().genes({
         // Level 0
         GeneDescription().nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
@@ -121,7 +121,7 @@ TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_oneReferen
 
 TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_manyReferenceOne)
 {
-    auto genome = CreatureDescription().genes({
+    auto genome = GenomeDescription().genes({
         GeneDescription().nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
@@ -143,7 +143,7 @@ TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_manyRefere
 
 TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_doNotCountUnreachable)
 {
-    auto genome = CreatureDescription().genes({
+    auto genome = GenomeDescription().genes({
         GeneDescription().nodes({
             NodeDescription(),
         }),
@@ -158,7 +158,7 @@ TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_doNotCount
 
 TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_doNotCountPrincipalReferencesPrincipal)
 {
-    auto genome = CreatureDescription().genes({
+    auto genome = GenomeDescription().genes({
         GeneDescription().nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
             NodeDescription(),
@@ -172,7 +172,7 @@ TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_doNotCount
 
 TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_doNotCountAuxiliaryReferencesPrincipal)
 {
-    auto genome = CreatureDescription().genes({
+    auto genome = GenomeDescription().genes({
         GeneDescription().nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription(),
@@ -190,7 +190,7 @@ TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_doNotCount
 
 TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_infinity_1cycle)
 {
-    auto genome = CreatureDescription().genes({
+    auto genome = GenomeDescription().genes({
         GeneDescription().nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription(),
@@ -208,7 +208,7 @@ TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_infinity_1
 
 TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_infinity_2cycle)
 {
-    auto genome = CreatureDescription().genes({
+    auto genome = GenomeDescription().genes({
         GeneDescription().nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription(),
@@ -230,7 +230,7 @@ TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_infinity_2
 
 TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_multipleBranchesAndConcatenations_withoutSeparation)
 {
-    auto genome = CreatureDescription().genes({
+    auto genome = GenomeDescription().genes({
         GeneDescription().nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
@@ -255,7 +255,7 @@ TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_multipleBr
 
 TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_multipleBranchesAndConcatenations_withSeparation)
 {
-    auto genome = CreatureDescription().genes({
+    auto genome = GenomeDescription().genes({
         GeneDescription().nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
@@ -280,7 +280,7 @@ TEST_F(CreatureDescriptionInfoServiceTests, getNumberOfResultingCells_multipleBr
 
 TEST_F(CreatureDescriptionInfoServiceTests, getReferences)
 {
-    auto genome = CreatureDescription().genes({
+    auto genome = GenomeDescription().genes({
         GeneDescription().nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
@@ -303,7 +303,7 @@ TEST_F(CreatureDescriptionInfoServiceTests, getReferences)
 
 TEST_F(CreatureDescriptionInfoServiceTests, getReferencedBy)
 {
-    auto genome = CreatureDescription().genes({
+    auto genome = GenomeDescription().genes({
         GeneDescription().nodes({
             NodeDescription(),
             NodeDescription(),

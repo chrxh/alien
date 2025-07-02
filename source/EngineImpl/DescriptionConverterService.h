@@ -21,13 +21,13 @@ public:
     CollectionTO convertDescriptionToTO(CollectionDescription const& description) const;
     CollectionTO convertDescriptionToTO(CellDescription const& cell) const;
     CollectionTO convertDescriptionToTO(ParticleDescription const& particle) const;
-    CollectionTO convertDescriptionToTO(CreatureDescription const& genome) const;
+    CollectionTO convertDescriptionToTO(uint64_t creatureId, GenomeDescription const& genome) const;
 
 private:
     DescriptionConverterService();
 
-    CellDescription createCellDescription(CollectionTO const& collectionTO, int cellIndex, std::unordered_map<uint64_t, uint64_t> const& creatureIdByTOIndex) const;
-    CreatureDescription createCreatureDescription(CollectionTO const& collectionTO, int creatureIndex, std::unordered_map<uint64_t, uint64_t>& genomeIdByTOIndex) const;
+    CellDescription createCellDescription(CollectionTO const& collectionTO, int cellIndex) const;
+    CreatureDescription createCreatureDescription(CollectionTO const& collectionTO, int creatureIndex) const;
     ParticleDescription createParticleDescription(CollectionTO const& collectionTO, int particleIndex) const;
 
     void convertCreatureToTO(
@@ -35,14 +35,15 @@ private:
         std::vector<GeneTO>& geneTOs,
         std::vector<NodeTO>& nodeTOs,
         std::vector<uint8_t>& heap,
-        CreatureDescription const& genomeDesc,
-        std::unordered_map<uint64_t, uint64_t>& genomeTOIndexById) const;
+        CreatureDescription const& creatureDesc,
+        std::unordered_map<uint64_t, uint64_t>& creatureTOIndexById) const;
     void convertCellToTO(
         std::vector<CellTO>& cellTOs,
         std::vector<uint8_t>& heap,
         std::unordered_map<uint64_t, uint64_t>& cellTOIndexById,
         CellDescription const& cellToAdd,
-        std::unordered_map<uint64_t, uint64_t> const& genomeTOIndexById) const;
+        std::optional<uint64_t> const& creatureId,
+        std::unordered_map<uint64_t, uint64_t> const& creatureTOIndexById) const;
     void addParticle(std::vector<ParticleTO>& particleTOs, ParticleDescription const& particleDesc) const;
 
 	void setConnections(std::vector<CellTO>& cellTOs, CellDescription const& cellToAdd, std::unordered_map<uint64_t, uint64_t> const& cellIndexByIds) const;

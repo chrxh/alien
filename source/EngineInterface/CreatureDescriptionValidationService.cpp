@@ -1,6 +1,6 @@
 #include "CreatureDescriptionValidationService.h"
 
-void CreatureDescriptionValidationService::validateAndCorrect(CreatureDescription& creature)
+void CreatureDescriptionValidationService::validateAndCorrect(GenomeDescription& creature)
 {
     for (auto& gene : creature._genes) {
         for (auto& node : gene._nodes) {

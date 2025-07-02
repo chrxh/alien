@@ -52,7 +52,6 @@
 #include "WindowController.h"
 #include "CreatorWindow.h"
 #include "MultiplierWindow.h"
-#include "PatternAnalysisDialog.h"
 #include "GenericMessageDialog.h"
 #include "FpsController.h"
 #include "BrowserWindow.h"
@@ -132,7 +131,6 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     LogWindow::get().setup(_logger);
     GettingStartedWindow::get().setup();
     NewSimulationDialog::get().setup(_simulationFacade);
-    PatternAnalysisDialog::get().setup(_simulationFacade);
     BrowserWindow::get().setup(_simulationFacade, _persisterFacade);
     ActivateUserDialog::get().setup(_simulationFacade);
     NewPasswordDialog::get().setup(_simulationFacade);

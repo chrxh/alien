@@ -5,9 +5,10 @@
 #include <boost/range/adaptor/map.hpp>
 
 #include "Base/Math.h"
+#include "Base/Physics.h"
 #include "EngineInterface/NumberGenerator.h"
 
-#include "CreatureDescription.h"
+#include "GenomeDescription.h"
 #include "SpaceCalculator.h"
 
 CollectionDescription DescriptionEditService::createRect(CreateRectParameters const& parameters)
@@ -23,12 +24,11 @@ CollectionDescription DescriptionEditService::createRect(CreateRectParameters co
                                .color(parameters._color)
                                .barrier(parameters._barrier)
                                .sticky(parameters._sticky)
-                               .cellTypeData(parameters._cellType)
-                               .creatureId(parameters._creatureId));
+                               .cellTypeData(parameters._cellType));
         }
     }
     reconnectCells(result, parameters._cellDistance * 1.1f);
-    result.setCenter(parameters._center);
+    setCenter(result, parameters._center);
     return result;
 }
 
@@ -65,7 +65,7 @@ CollectionDescription DescriptionEditService::createHex(CreateHexParameters cons
     }
 
     reconnectCells(result, parameters._cellDistance * 1.5f);
-    result.setCenter(parameters._center);
+    setCenter(result, parameters._center);
 
     return result;
 }
@@ -115,24 +115,79 @@ CollectionDescription DescriptionEditService::createUnconnectedCircle(CreateUnco
     return result;
 }
 
+namespace
+{
+    void topologyCorrection(SpaceCalculator const& spaceCalc, CreatureDescription& creature)
+    {
+        CHECK(!creature._cells.empty());
+        auto refCell = creature._cells.front();
+        RealVector2D result;
+        for (auto & cell : creature._cells) {
+            auto topologyCorrection = spaceCalc.getCorrectionIncrement(refCell._pos, cell._pos);
+            cell._pos = cell._pos + topologyCorrection;
+        }
+    }
+
+    void correctConnectionsForNonCreatures(CollectionDescription& data, IntVector2D const& worldSize)
+    {
+        auto threshold = std::min(worldSize.x, worldSize.y) / 3;
+        auto cache = data.createCache();
+
+        for (auto& cell : data._cells) {
+            std::vector<ConnectionDescription> newConnections;
+            float angleToAdd = 0;
+            for (auto connection : cell._connections) {
+                auto const& connectingCell = data.getCellRef(connection._cellId);
+                if (/*spaceCalculator.distance*/ Math::length(cell._pos - connectingCell._pos) > threshold) {
+                    angleToAdd += connection._angleFromPrevious;
+                } else {
+                    connection._angleFromPrevious += angleToAdd;
+                    angleToAdd = 0;
+                    newConnections.emplace_back(connection);
+                }
+            }
+            if (angleToAdd > NEAR_ZERO && !newConnections.empty()) {
+                newConnections.front()._angleFromPrevious += angleToAdd;
+            }
+            cell._connections = newConnections;
+        }
+    }
+
+}
+
 void DescriptionEditService::duplicate(CollectionDescription& data, IntVector2D const& origSize, IntVector2D const& size)
 {
-    auto clusteredData = ClusteredCollectionDescription(data);
+    correctConnectionsForNonCreatures(data, origSize);
 
-    ClusteredCollectionDescription result;
+    auto clone = CollectionDescription(data);
+
+    SpaceCalculator spaceCalc(origSize);
+
+    CollectionDescription result;
     for (int incX = 0; incX < size.x; incX += origSize.x) {
         for (int incY = 0; incY < size.y; incY += origSize.y) {
-            for (auto cluster : clusteredData._clusters) {
-                auto origPos = cluster.getClusterPosFromCells();
-                RealVector2D clusterPos = {origPos.x + incX, origPos.y + incY};
-                if (clusterPos.x < size.x && clusterPos.y < size.y) {
-                    for (auto& cell : cluster._cells) {
+            for (auto creature : clone._creatures) {
+                topologyCorrection(spaceCalc, creature);
+                auto origPos = calcCenter(creature);
+                RealVector2D newPos = {origPos.x + incX, origPos.y + incY};
+                if (newPos.x < size.x && newPos.y < size.y) {
+                    for (auto& cell : creature._cells) {
                         cell._pos = RealVector2D{cell._pos.x + incX, cell._pos.y + incY};
                         if (incX > 0 || incY > 0) {
                             removeMetadata(cell);
                         }
                     }
-                    result.addCluster(cluster);
+                    result._creatures.emplace_back(creature);
+                }
+            }
+            for (auto cell : clone._cells) {
+                RealVector2D newPos = {cell._pos.x + incX, cell._pos.y + incY};
+                cell._pos = RealVector2D{cell._pos.x + incX, cell._pos.y + incY};
+                if (newPos.x < size.x && newPos.y < size.y) {
+                    if (incX > 0 || incY > 0) {
+                        removeMetadata(cell);
+                    }
+                    result._cells.emplace_back(cell);
                 }
             }
             for (auto particle : data._particles) {
@@ -197,9 +252,10 @@ CollectionDescription DescriptionEditService::gridMultiply(CollectionDescription
                 }
                 return cloneWithoutMetadata;
             }();
-            templateData.shift({i * parameters._horizontalDistance, j * parameters._verticalDistance});
-            templateData.rotate(i * parameters._horizontalAngleInc + j * parameters._verticalAngleInc);
-            templateData.accelerate(
+            shift(templateData, {i * parameters._horizontalDistance, j * parameters._verticalDistance});
+            rotate(templateData, i * parameters._horizontalAngleInc + j * parameters._verticalAngleInc);
+            accelerate(
+                templateData,
                 {i * parameters._horizontalVelXinc + j * parameters._verticalVelXinc, i * parameters._horizontalVelYinc + j * parameters._verticalVelYinc},
                 i * parameters._horizontalAngularVelInc + j * parameters._verticalAngularVelInc);
 
@@ -223,12 +279,10 @@ CollectionDescription DescriptionEditService::randomMultiply(
 
     //create map for overlapping check
     if (parameters._overlappingCheck) {
-        int index = 0;
-        for (auto const& cell : existentData._cells) {
+        input.forEach([&](CellDescription const& cell) {
             auto intPos = toIntVector2D(spaceCalculator.getCorrectedPosition(cell._pos));
             cellPosBySlot[intPos].emplace_back(cell._pos);
-            ++index;
-        }
+        });
     }
 
     //do multiplication
@@ -241,9 +295,9 @@ CollectionDescription DescriptionEditService::randomMultiply(
         do {
             copy = input;
             removeMetadata(copy);
-            copy.shift({toFloat(numberGen.getRandomReal(0, toInt(worldSize.x))), toFloat(numberGen.getRandomReal(0, toInt(worldSize.y)))});
-            copy.rotate(toInt(numberGen.getRandomReal(parameters._minAngle, parameters._maxAngle)));
-            copy.accelerate(
+            shift(copy, {toFloat(numberGen.getRandomReal(0, toInt(worldSize.x))), toFloat(numberGen.getRandomReal(0, toInt(worldSize.y)))});
+            rotate(copy, toInt(numberGen.getRandomReal(parameters._minAngle, parameters._maxAngle)));
+            accelerate(copy,
                 {toFloat(numberGen.getRandomReal(parameters._minVelX, parameters._maxVelX)),
                  toFloat(numberGen.getRandomReal(parameters._minVelY, parameters._maxVelY))},
                 toFloat(numberGen.getRandomReal(parameters._minAngularVel, parameters._maxAngularVel)));
@@ -251,12 +305,12 @@ CollectionDescription DescriptionEditService::randomMultiply(
             //overlapping check
             overlapping = false;
             if (parameters._overlappingCheck) {
-                for (auto const& cell : copy._cells) {
+                copy.forEach([&](CellDescription const& cell) {
                     auto pos = spaceCalculator.getCorrectedPosition(cell._pos);
                     if (isCellPresent(cellPosBySlot, spaceCalculator, pos, 2.0f)) {
                         overlapping = true;
                     }
-                }
+                });
             }
             ++attempts;
         } while (overlapping && attempts < 200 && overlappingCheckSuccessful);
@@ -268,12 +322,11 @@ CollectionDescription DescriptionEditService::randomMultiply(
 
         //add copy to existentData for overlapping check
         if (parameters._overlappingCheck) {
-            for (auto const& cell : copy._cells) {
-                auto index = toInt(existentData._cells.size());
+            copy.forEach([&](CellDescription const& cell) {
                 existentData._cells.emplace_back(cell);
                 auto intPos = toIntVector2D(spaceCalculator.getCorrectedPosition(cell._pos));
                 cellPosBySlot[intPos].emplace_back(cell._pos);
-            }
+            });
         }
     }
 
@@ -308,96 +361,93 @@ void DescriptionEditService::reconnectCells(CollectionDescription& data, float m
         ++index;
     }
 
-    std::unordered_map<uint64_t, int> cache;
-    for (auto const& [index, cell] : data._cells | boost::adaptors::indexed(0)) {
-        cache.emplace(cell._id, static_cast<int>(index));
-    }
+    std::unordered_map<uint64_t, int> cellIdToIndex;
+    auto cache = data.createCache();
     for (auto& cell : data._cells) {
         auto nearbyCellIndices = getCellIndicesWithinRadius(data, cellIndicesBySlot, cell._pos, maxDistance);
         for (auto const& nearbyCellIndex : nearbyCellIndices) {
             auto const& nearbyCell = data._cells.at(nearbyCellIndex);
             if (cell._id != nearbyCell._id && cell._connections.size() < MAX_CELL_BONDS && nearbyCell._connections.size() < MAX_CELL_BONDS
                 && !cell.isConnectedTo(nearbyCell._id)) {
-                data.addConnection(cell._id, nearbyCell._id, &cache);
+                data.addConnection(cell._id, nearbyCell._id, cache);
             }
         }
     }
 }
 
-void DescriptionEditService::correctConnections(CollectionDescription& data, IntVector2D const& worldSize)
+void DescriptionEditService::randomizeCellColors(CollectionDescription& data, std::vector<int> const& colorCodes)
 {
-    auto threshold = std::min(worldSize.x, worldSize.y) /3;
-    std::unordered_map<uint64_t, CellDescription&> cellById;
-    for (auto& cell : data._cells) {
-        cellById.emplace(cell._id, cell);
-    }
-    for (auto& cell: data._cells) {
-        std::vector<ConnectionDescription> newConnections;
-        float angleToAdd = 0;
-        for (auto connection : cell._connections) {
-            auto& connectingCell = cellById.at(connection._cellId);
-            if (/*spaceCalculator.distance*/Math::length(cell._pos - connectingCell._pos) > threshold) {
-                angleToAdd += connection._angleFromPrevious;
-            } else {
-                connection._angleFromPrevious += angleToAdd;
-                angleToAdd = 0;
-                newConnections.emplace_back(connection);
-            }
-        }
-        if (angleToAdd > NEAR_ZERO && !newConnections.empty()) {
-            newConnections.front()._angleFromPrevious += angleToAdd;
-        }
-        cell._connections = newConnections;
-    }
-}
-
-void DescriptionEditService::randomizeCellColors(ClusteredCollectionDescription& data, std::vector<int> const& colorCodes)
-{
-    for (auto& cluster : data._clusters) {
+    for (auto& creature : data._creatures) {
         auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
-        for (auto& cell : cluster._cells) {
+        for (auto& cell : creature._cells) {
+            cell._color = newColor;
+        }
+    }
+    {
+        auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
+        for (auto& cell : data._cells) {
             cell._color = newColor;
         }
     }
 }
 
-void DescriptionEditService::randomizeGenomeColors(ClusteredCollectionDescription& data, std::vector<int> const& colorCodes)
+void DescriptionEditService::randomizeGenomeColors(CollectionDescription& data, std::vector<int> const& colorCodes)
 {
-    //for (auto& cluster : data._clusters) {
-    //    auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
-    //    for (auto& cell : cluster._cells) {
-    //        if (cell.DEPRECATED_hasGenome()) {
-    //            colorizeGenomeNodes(cell.getGenomeRef(), newColor);
-    //        }
-    //    }
-    //}
+    for (auto& creature : data._creatures) {
+        auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
+        for (auto& gene : creature._genome._genes) {
+            for (auto& node : gene._nodes) {
+                node._color = newColor;
+            }
+        }
+    }
 }
 
-void DescriptionEditService::randomizeEnergies(ClusteredCollectionDescription& data, float minEnergy, float maxEnergy)
+void DescriptionEditService::randomizeEnergies(CollectionDescription& data, float minEnergy, float maxEnergy)
 {
-    for (auto& cluster : data._clusters) {
+    for (auto& creature : data._creatures) {
         auto energy = NumberGenerator::get().getRandomReal(toDouble(minEnergy), toDouble(maxEnergy));
-        for (auto& cell : cluster._cells) {
+        for (auto& cell : creature._cells) {
+            cell._energy = energy;
+        }
+    }
+    {
+        auto energy = NumberGenerator::get().getRandomReal(toDouble(minEnergy), toDouble(maxEnergy));
+        for (auto& cell : data._cells) {
             cell._energy = energy;
         }
     }
 }
 
-void DescriptionEditService::randomizeAges(ClusteredCollectionDescription& data, int minAge, int maxAge)
+void DescriptionEditService::randomizeAges(CollectionDescription& data, int minAge, int maxAge)
 {
-    for (auto& cluster : data._clusters) {
+    for (auto& creature : data._creatures) {
         auto age = NumberGenerator::get().getRandomReal(toDouble(minAge), toDouble(maxAge));
-        for (auto& cell : cluster._cells) {
+        for (auto& cell : creature._cells) {
+            cell._age = age;
+        }
+    }
+    {
+        auto age = NumberGenerator::get().getRandomReal(toDouble(minAge), toDouble(maxAge));
+        for (auto& cell : data._cells) {
             cell._age = age;
         }
     }
 }
 
-void DescriptionEditService::randomizeCountdowns(ClusteredCollectionDescription& data, int minValue, int maxValue)
+void DescriptionEditService::randomizeCountdowns(CollectionDescription& data, int minValue, int maxValue)
 {
-    for (auto& cluster : data._clusters) {
+    for (auto& creature : data._creatures) {
         auto countdown = NumberGenerator::get().getRandomReal(toDouble(minValue), toDouble(maxValue));
-        for (auto& cell : cluster._cells) {
+        for (auto& cell : creature._cells) {
+            if (cell.getCellType() == CellType_Detonator) {
+                std::get<DetonatorDescription>(cell._cellTypeData)._countdown = countdown;
+            }
+        }
+    }
+    {
+        auto countdown = NumberGenerator::get().getRandomReal(toDouble(minValue), toDouble(maxValue));
+        for (auto& cell : data._cells) {
             if (cell.getCellType() == CellType_Detonator) {
                 std::get<DetonatorDescription>(cell._cellTypeData)._countdown = countdown;
             }
@@ -405,15 +455,16 @@ void DescriptionEditService::randomizeCountdowns(ClusteredCollectionDescription&
     }
 }
 
-void DescriptionEditService::randomizeMutationIds(ClusteredCollectionDescription& data)
+void DescriptionEditService::randomizeMutationIds(CollectionDescription& data)
 {
+    for (auto& creature : data._creatures) {
+        creature._mutationId = NumberGenerator::get().getRandomInt() % 0xffff;
+    }
 }
 
 void DescriptionEditService::removeMetadata(CollectionDescription& data)
 {
-    for(auto& cell : data._cells) {
-        removeMetadata(cell);
-    }
+    data.forEach([&](CellDescription& cell) { removeMetadata(cell); });
 }
 
 void DescriptionEditService::assignNewObjectAndCreatureIds(CollectionDescription& data)
@@ -434,24 +485,97 @@ void DescriptionEditService::assignNewObjectAndCreatureIds(CollectionDescription
     for (auto& creature : data._creatures) {
         replaceCreatureId(creature._id);
     }
-    for (auto& cell : data._cells) {
+    data.forEach([&](CellDescription& cell) {
         auto newObjectId = NumberGenerator::get().createObjectId();
         oldToNewObjectIds.emplace(cell._id, newObjectId);
         cell._id = newObjectId;
-        if (cell._creatureId.has_value()) {
-            replaceCreatureId(cell._creatureId.value());
-        }
-    }
-    for (auto& cell : data._cells) {
+    });
+
+    data.forEach([&](CellDescription& cell) {
         for (auto& connection : cell._connections) {
             auto findResult = oldToNewObjectIds.find(connection._cellId);
             if (findResult != oldToNewObjectIds.end()) {
                 connection._cellId = findResult->second;
             }
         }
-    }
+    });
+
     for (auto& particle : data._particles) {
         particle._id = NumberGenerator::get().createObjectId();
+    }
+}
+
+void DescriptionEditService::setCenter(CollectionDescription& collection, RealVector2D const& center)
+{
+    auto origCenter = calcCenter(collection);
+    auto delta = center - origCenter;
+    shift(collection, delta);
+}
+
+RealVector2D DescriptionEditService::calcCenter(CollectionDescription const& collection) const
+{
+    RealVector2D result;
+    auto numEntities = collection._cells.size() + collection._particles.size();
+    for (auto const& creatures : collection._creatures) {
+        numEntities += creatures._cells.size();
+    }
+    collection.forEach([&](CellDescription const& cell) { result += cell._pos; });
+
+    for (auto const& particle : collection._particles) {
+        result += particle._pos;
+    }
+    result /= numEntities;
+    return result;
+}
+
+RealVector2D DescriptionEditService::calcCenter(CreatureDescription const& creature) const
+{
+    CHECK(!creature._cells.empty());
+
+    RealVector2D result;
+    for (auto const& cell : creature._cells) {
+        result += cell._pos;
+    }
+    result /= creature._cells.size();
+    return result;
+}
+
+void DescriptionEditService::shift(CollectionDescription& collection, RealVector2D const& delta)
+{
+    collection.forEach([&](CellDescription& cell) { cell._pos += delta; });
+
+    for (auto& particle : collection._particles) {
+        particle._pos += delta;
+    }
+}
+
+void DescriptionEditService::rotate(CollectionDescription& collection, float angle)
+{
+    auto rotationMatrix = Math::calcRotationMatrix(angle);
+    auto center = calcCenter(collection);
+
+    auto rotate = [&](RealVector2D& pos) {
+        auto relPos = pos - center;
+        auto rotatedRelPos = rotationMatrix * relPos;
+        pos = center + rotatedRelPos;
+    };
+    collection.forEach([&](CellDescription& cell) { rotate(cell._pos); });
+    for (auto& particle : collection._particles) {
+        rotate(particle._pos);
+    }
+}
+
+void DescriptionEditService::accelerate(CollectionDescription& collection, RealVector2D const& velDelta, float angularVelDelta)
+{
+    auto center = calcCenter(collection);
+
+    auto accelerate = [&](RealVector2D const& pos, RealVector2D& vel) {
+        auto relPos = pos - center;
+        vel += Physics::tangentialVelocity(relPos, velDelta, angularVelDelta);
+    };
+    collection.forEach([&](CellDescription& cell) { accelerate(cell._pos, cell._vel); });
+    for (auto& particle : collection._particles) {
+        accelerate(particle._pos, particle._vel);
     }
 }
 
@@ -513,22 +637,23 @@ RealVector2D DescriptionEditService::getPos(ExtendedCellOrParticleDescription co
 std::vector<ExtendedCellOrParticleDescription> DescriptionEditService::getObjects(
     CollectionDescription const& data)
 {
-    std::unordered_map<uint64_t, int> genomeIdToIndex;
-    for (auto const& [index, genome] : data._creatures | boost::adaptors::indexed(0)) {
-        genomeIdToIndex.emplace(genome._id, toInt(index));
-    }
-
     std::vector<ExtendedCellOrParticleDescription> result;
     for (auto const& particle : data._particles) {
         result.emplace_back(particle);
     }
     for (auto const& cell : data._cells) {
-        ExtendedCellDescription creatureCell;
-        creatureCell.cell = cell;
-        if (cell._creatureId.has_value()) {
-            creatureCell.creature = data._creatures.at(genomeIdToIndex.at(cell._creatureId.value()));
+        ExtendedCellDescription extCell;
+        extCell.cell = cell;
+        result.emplace_back(extCell);
+    }
+    for (auto const& creature : data._creatures) {
+        for (auto const& cell : creature._cells) {
+            ExtendedCellDescription extCell;
+            extCell.cell = cell;
+            extCell.creatureId = creature._id;
+            extCell.genome = creature._genome;
+            result.emplace_back(extCell);
         }
-        result.emplace_back(creatureCell);
     }
     return result;
 }

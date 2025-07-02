@@ -7,12 +7,12 @@
 class _GeneEditorWidget
 {
 public:
-    static GeneEditorWidget create(CreatureTabEditData const& editData, CreatureTabLayoutData const& layoutData);
+    static GeneEditorWidget create(GenomeTabEditData const& editData, GenomeTabLayoutData const& layoutData);
 
     void process();
 
 private:
-    _GeneEditorWidget(CreatureTabEditData const& genome, CreatureTabLayoutData const& layoutData);
+    _GeneEditorWidget(GenomeTabEditData const& editData, GenomeTabLayoutData const& layoutData);
 
     void processNoSelection();
     void processHeaderData();
@@ -24,6 +24,6 @@ private:
     void onMoveNodeUpward();
     void onMoveNodeDownward();
 
-    CreatureTabEditData _editData;
-    CreatureTabLayoutData _layoutData;
+    GenomeTabEditData _editData;
+    GenomeTabLayoutData _layoutData;
 };

@@ -10,7 +10,7 @@
 #include "EngineInterface/EngineConstants.h"
 
 #include "Definitions.h"
-#include "CreatureDescription.h"
+#include "GenomeDescription.h"
 
 struct CellMetadataDescription
 {
@@ -331,7 +331,6 @@ struct CellDescription
     MEMBER(CellDescription, CellState, cellState, CellState_Ready);
 
     // Creature data
-    MEMBER(CellDescription, std::optional<uint64_t>, creatureId, std::nullopt);
     MEMBER(CellDescription, uint16_t, genomeNodeIndex, 0);
 
     // Cell type-specific data
@@ -405,69 +404,40 @@ struct ParticleDescription
     MEMBER(ParticleDescription, int, color, 0);
 };
 
-struct ClusteredCollectionDescription
+struct CreatureDescription
 {
-    ClusteredCollectionDescription() = default;
-    explicit ClusteredCollectionDescription(CollectionDescription const& data);
+    CreatureDescription();
+    auto operator<=>(CreatureDescription const&) const = default;
 
-    auto operator<=>(ClusteredCollectionDescription const&) const = default;
-
-    MEMBER(ClusteredCollectionDescription, std::vector<ClusterDescription>, clusters, {});
-    MEMBER(ClusteredCollectionDescription, std::vector<ParticleDescription>, particles, {});
-    MEMBER(ClusteredCollectionDescription, std::vector<CreatureDescription>, creatures, {});
-
-    ClusteredCollectionDescription& addClusters(std::vector<ClusterDescription> const& value)
-    {
-        _clusters.insert(_clusters.end(), value.begin(), value.end());
-        return *this;
-    }
-    ClusteredCollectionDescription& addCluster(ClusterDescription const& value)
-    {
-        addClusters({value});
-        return *this;
-    }
-
-    ClusteredCollectionDescription& addParticles(std::vector<ParticleDescription> const& value)
-    {
-        _particles.insert(_particles.end(), value.begin(), value.end());
-        return *this;
-    }
-    ClusteredCollectionDescription& addParticle(ParticleDescription const& value)
-    {
-        addParticles({value});
-        return *this;
-    }
-    void clear()
-    {
-        _clusters.clear();
-        _particles.clear();
-    }
-    bool isEmpty() const
-    {
-        if (!_clusters.empty()) {
-            return false;
-        }
-        if (!_particles.empty()) {
-            return false;
-        }
-        return true;
-    }
-    void setCenter(RealVector2D const& center);
-
-    RealVector2D calcCenter() const;
-    void shift(RealVector2D const& delta);
-    int getNumberOfCellAndParticles() const;
+    MEMBER(CreatureDescription, uint64_t, id, 0);
+    MEMBER(CreatureDescription, uint64_t, ancestorId, 0);
+    MEMBER(CreatureDescription, int, mutationId, 0);
+    MEMBER(CreatureDescription, float, genomeComplexity, 0);
+    MEMBER(CreatureDescription, GenomeDescription, genome, {});
+    MEMBER(CreatureDescription, std::vector<CellDescription>, cells, {});
 };
+
+struct _CollectionCache
+{
+    struct Index
+    {
+        std::optional<int> creatureIndex;
+        int cellIndex;
+    };
+    std::unordered_map<uint64_t, Index> cellIdToIndex;
+};
+using CollectionCache = std::shared_ptr<_CollectionCache>;
 
 struct CollectionDescription
 {
-    CollectionDescription() = default;
-    explicit CollectionDescription(ClusteredCollectionDescription const& clusteredData);
     auto operator<=>(CollectionDescription const&) const = default;
 
     MEMBER(CollectionDescription, std::vector<CellDescription>, cells, {});
     MEMBER(CollectionDescription, std::vector<ParticleDescription>, particles, {});
     MEMBER(CollectionDescription, std::vector<CreatureDescription>, creatures, {});
+
+    void forEach(std::function<void(CellDescription const&)> const& applyFunc) const;
+    void forEach(std::function<void(CellDescription&)> const& applyFunc);
 
     CollectionDescription& add(CollectionDescription const& other);
     CollectionDescription& addCells(std::vector<CellDescription> const& value);
@@ -476,32 +446,21 @@ struct CollectionDescription
     CollectionDescription& addParticles(std::vector<ParticleDescription> const& value);
     CollectionDescription& addParticle(ParticleDescription const& value);
 
-    CollectionDescription& addCreature(CreatureDescription const& value);
-
-    CollectionDescription& addCreature(CreatureDescription const& creature, std::vector<CellDescription> const& cells);
-
     void clear();
     bool isEmpty() const;
-    void setCenter(RealVector2D const& center);
-
-    RealVector2D calcCenter() const;
-    void shift(RealVector2D const& delta);
-    void rotate(float angle);
-    void accelerate(RealVector2D const& velDelta, float angularVelDelta);
 
     std::unordered_set<uint64_t> getCellIds() const;
 
-    CollectionDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>* cache = nullptr);
-    CollectionDescription&
-    addConnection(uint64_t const& cellId1, uint64_t const& cellId2, RealVector2D const& refPosCell2, std::unordered_map<uint64_t, int>* cache = nullptr);
-
-private:
-    CellDescription& getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>* cache = nullptr);
+    CollectionCache createCache() const;
+    CollectionDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, CollectionCache const& cache = nullptr);
+    CollectionDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, RealVector2D const& refPosCell2, CollectionCache const& cache = nullptr);
+    CellDescription& getCellRef(uint64_t const& cellId, CollectionCache const& cache = nullptr);
 };
 
 struct ExtendedCellDescription
 {
     CellDescription cell;
-    std::optional<CreatureDescription> creature;
+    std::optional<uint64_t> creatureId;
+    std::optional<GenomeDescription> genome;
 };
 using ExtendedCellOrParticleDescription = std::variant<ExtendedCellDescription, ParticleDescription>;

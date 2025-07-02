@@ -89,7 +89,6 @@ void ResizeWorldDialog::onResizing()
 
     _simulationFacade->newSimulation(timestep, worldSize, parameters);
 
-    DescriptionEditService::get().correctConnections(content, {_width, _height});
     if (_scaleContent) {
         DescriptionEditService::get().duplicate(content, origWorldSize, {_width, _height});
     }

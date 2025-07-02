@@ -19,12 +19,12 @@ PUBLIC
     CreateUserDialog.h
     CreatorWindow.cpp
     CreatorWindow.h
-    CreatureEditorWindow.cpp
-    CreatureEditorWindow.h
-    CreatureTabEditData.h
-    CreatureTabLayoutData.h
-    CreatureTabWidget.cpp
-    CreatureTabWidget.h
+    GenomeEditorWindow.cpp
+    GenomeEditorWindow.h
+    GenomeTabEditData.h
+    GenomeTabLayoutData.h
+    GenomeTabWidget.cpp
+    GenomeTabWidget.h
     Definitions.h
     DelayedExecutionController.cpp
     DelayedExecutionController.h
@@ -109,8 +109,6 @@ PUBLIC
     OpenGLHelper.h
     OverlayController.cpp
     OverlayController.h
-    PatternAnalysisDialog.cpp
-    PatternAnalysisDialog.h
     PatternEditorWindow.cpp
     PatternEditorWindow.h
     ResetPasswordDialog.cpp

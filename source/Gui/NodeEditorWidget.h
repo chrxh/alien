@@ -5,20 +5,20 @@
 class _NodeEditorWidget
 {
 public:
-    static NodeEditorWidget create(CreatureTabEditData const& editData, CreatureTabLayoutData const& layoutData);
+    static NodeEditorWidget create(GenomeTabEditData const& editData, GenomeTabLayoutData const& layoutData);
 
     void process();
 
 private:
-    _NodeEditorWidget(CreatureTabEditData const& editData, CreatureTabLayoutData const& layoutData);
+    _NodeEditorWidget(GenomeTabEditData const& editData, GenomeTabLayoutData const& layoutData);
 
     void processNodeAttributes();
     void processNoSelection();
 
     void processNeuralNetEditor();
 
-    CreatureTabEditData _editData;
-    CreatureTabLayoutData _layoutData;
+    GenomeTabEditData _editData;
+    GenomeTabLayoutData _layoutData;
 
     NeuralNetEditorWidget _neuralNetWidget;
 };

@@ -14,12 +14,11 @@ struct ExpertToggles;
 struct ColorTransitionRule;
 struct ParameterSpec;
 
-struct ClusteredCollectionDescription;
 struct CollectionDescription;
 struct ClusterDescription;
 struct CellDescription;
 struct ParticleDescription;
-struct CreatureDescription;
+struct GenomeDescription;
 struct GeneDescription;
 
 struct CudaSettings;

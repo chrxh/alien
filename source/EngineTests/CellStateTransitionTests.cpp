@@ -147,7 +147,7 @@ TEST_P(CellStateTransitionTests, ready_detaching_differentCreature)
         CellDescription().id(2).pos({11.0f, 10.0f}).creatureId(2).cellState(CellState_Detaching),
     });
     data.addConnection(1, 2);
-    data.creatures({CreatureDescription().id(1), CreatureDescription().id(2)});
+    data.creatures({GenomeDescription().id(1), GenomeDescription().id(2)});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);

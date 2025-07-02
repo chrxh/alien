@@ -1,4 +1,4 @@
-#include "CreatureEditorWindow.h"
+#include "GenomeEditorWindow.h"
 
 #include <boost/range/adaptor/indexed.hpp>
 
@@ -8,16 +8,16 @@
 
 #include "AlienGui.h"
 #include "ChangeColorDialog.h"
-#include "CreatureTabLayoutData.h"
-#include "CreatureTabWidget.h"
+#include "GenomeTabLayoutData.h"
+#include "GenomeTabWidget.h"
 #include "EditorController.h"
 #include "EditorModel.h"
 #include "GenericMessageDialog.h"
 #include "OverlayController.h"
 
-void CreatureEditorWindow::openTab(CreatureDescription const& creature, bool openCreatureEditorIfClosed)
+void GenomeEditorWindow::openTab(std::optional<uint64_t> const& creatureId, GenomeDescription const& genome, bool openEditorIfClosed)
 {
-    if (openCreatureEditorIfClosed) {
+    if (openEditorIfClosed) {
         setOn(false);
         delayedExecution([this] { setOn(true); });
     }
@@ -25,52 +25,58 @@ void CreatureEditorWindow::openTab(CreatureDescription const& creature, bool ope
         _tabs.clear();
     }
     std::optional<int> tabIndex;
-    for (auto const& [index, tab] : _tabs | boost::adaptors::indexed(0)) {
-        if (!tab->isDraft() && tab->getCreatureDescription()._id == creature._id) {
-            tabIndex = toInt(index);
+    if (creatureId.has_value()) {
+        for (auto const& [index, tab] : _tabs | boost::adaptors::indexed(0)) {
+            if (!tab->isDraft() && tab->getCreatureId() == creatureId) {
+                tabIndex = toInt(index);
+            }
         }
     }
     if (tabIndex) {
         _tabIndexToSelect = *tabIndex;
         _tabs.at(*tabIndex)->resetChanges();
     } else {
-        onScheduleAddTab(creature, false);
+        if (creatureId.has_value()) {
+            onScheduleAddCreatureTab(creatureId.value(), genome);
+        } else {
+            onScheduleAddDraftTab(genome);
+        }
     }
 }
 
-CreatureDescription CreatureEditorWindow::getCurrentCreature() const
+GenomeDescription GenomeEditorWindow::getCurrentCreature() const
 {
-    return CreatureDescription();
+    return GenomeDescription();
 }
 
-CreatureEditorWindow::CreatureEditorWindow()
+GenomeEditorWindow::GenomeEditorWindow()
     : AlienWindow("Creature editor", "windows.creature editor", false, true, {500.0f, 300.0f})
 {}
 
-void CreatureEditorWindow::initIntern(SimulationFacade simulationFacade)
+void GenomeEditorWindow::initIntern(SimulationFacade simulationFacade)
 {
     ChangeColorDialog::get().setup();
 
     _simulationFacade = simulationFacade;
 
     // Initialize the first tab with a draft creature
-    _tabs.emplace_back(_CreatureTabWidget::createDraftCreatureTab(_simulationFacade, CreatureDescription()));
+    _tabs.emplace_back(_GenomeTabWidget::createDraftTab(_simulationFacade, GenomeDescription()));
 }
 
-void CreatureEditorWindow::shutdownIntern() {}
+void GenomeEditorWindow::shutdownIntern() {}
 
-void CreatureEditorWindow::processIntern()
+void GenomeEditorWindow::processIntern()
 {
     processToolbar();
     processTabWidget();
 }
 
-bool CreatureEditorWindow::isShown()
+bool GenomeEditorWindow::isShown()
 {
     return _on && EditorController::get().isOn();
 }
 
-void CreatureEditorWindow::processToolbar()
+void GenomeEditorWindow::processToolbar()
 {
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN).tooltip("Open creature from file"))) {
     }
@@ -123,12 +129,12 @@ void CreatureEditorWindow::processToolbar()
     AlienGui::Separator();
 }
 
-void CreatureEditorWindow::processTabWidget()
+void GenomeEditorWindow::processTabWidget()
 {
     if (ImGui::BeginTabBar("##CreatureTabWidget", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown | ImGuiTabBarFlags_Reorderable)) {
 
         if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
-            onScheduleAddTab(CreatureDescription(), true);
+            onScheduleAddDraftTab(GenomeDescription());
         }
         AlienGui::Tooltip("New creature");
 
@@ -177,11 +183,10 @@ void CreatureEditorWindow::processTabWidget()
     }
 }
 
-void CreatureEditorWindow::onInjectGenome()
+void GenomeEditorWindow::onInjectGenome()
 {
     auto const& tab = _tabs.at(_selectedTabIndex);
-    auto const& genome = tab->getCreatureDescription();
-    auto success = _simulationFacade->changeCreature(genome);
+    auto success = _simulationFacade->changeCreature(tab->getCreatureId(), tab->getGenomeDescription());
     tab->onGenomeIntoCreatureInjected();
     if (success) {
         printOverlayMessage("Genome injected");
@@ -191,41 +196,49 @@ void CreatureEditorWindow::onInjectGenome()
     }
 }
 
-void CreatureEditorWindow::onCreateSeed()
+void GenomeEditorWindow::onCreateSeed()
 {
     auto pos = Viewport::get().getCenterInWorldPos();
     pos.x += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
     pos.y += (toFloat(std::rand()) / RAND_MAX - 0.5f) * 8;
 
-    auto creature = _tabs.at(_selectedTabIndex)->getCreatureDescription();
+    auto tab = _tabs.at(_selectedTabIndex);
+    auto genome = tab->getGenomeDescription();
+    auto creatureId = tab->getCreatureId();
 
     auto parameter = _simulationFacade->getSimulationParameters();
-    auto numNodes = CreatureDescriptionInfoService::get().getNumberOfNodes(creature);
+    auto numNodes = CreatureDescriptionInfoService::get().getNumberOfNodes(genome);
     auto energy = parameter.normalCellEnergy.value[EditorModel::get().getDefaultColorCode()] * toFloat(numNodes * 2 + 1);
-    auto data =
-        CollectionDescription()
-            .creatures({
-                creature,
-            })
+    auto data = CollectionDescription().creatures({
+        CreatureDescription()
+            .id(creatureId)
             .cells({
-                CellDescription().pos(pos).energy(energy).stiffness(1.0f).color(EditorModel::get().getDefaultColorCode()).cellTypeData(ConstructorDescription()).creatureId(creature._id),
-            });
+                CellDescription()
+                    .pos(pos)
+                    .energy(energy)
+                    .stiffness(1.0f)
+                    .color(EditorModel::get().getDefaultColorCode())
+                    .cellTypeData(ConstructorDescription().geneIndex(0)),
+            })
+            .genome(genome),
+    });
     _simulationFacade->addAndSelectSimulationData(std::move(data));
     EditorModel::get().update();
 
     printOverlayMessage("Seed created");
 }
 
-void CreatureEditorWindow::onScheduleAddTab(CreatureDescription const& creature, bool draft)
+void GenomeEditorWindow::onScheduleAddCreatureTab(uint64_t creatureId, GenomeDescription const& genome)
 {
-    if (draft) {
-        _tabToAdd = _CreatureTabWidget::createDraftCreatureTab(_simulationFacade, creature);
-    } else {
-        _tabToAdd = _CreatureTabWidget::createSimulatedCreatureTab(_simulationFacade, creature);
-    }
+    _tabToAdd = _GenomeTabWidget::createCreatureTab(_simulationFacade, creatureId, genome);
 }
 
-void CreatureEditorWindow::pushStyleColorForTab(CreatureTabWidget const& creatureTab)
+void GenomeEditorWindow::onScheduleAddDraftTab(GenomeDescription const& genome)
+{
+    _tabToAdd = _GenomeTabWidget::createDraftTab(_simulationFacade, genome);
+}
+
+void GenomeEditorWindow::pushStyleColorForTab(GenomeTabWidget const& creatureTab)
 {
     if (creatureTab->isDraft()) {
 

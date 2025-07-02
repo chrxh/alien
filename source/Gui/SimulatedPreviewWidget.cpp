@@ -3,17 +3,17 @@
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationFacade.h"
 
-#include "CreatureTabEditData.h"
+#include "GenomeTabEditData.h"
 #include "WindowController.h"
 
-SimulatedPreviewWidget _SimulatedPreviewWidget::create(SimulationFacade const& simulationFacade, CreatureTabEditData const& editData)
+SimulatedPreviewWidget _SimulatedPreviewWidget::create(SimulationFacade const& simulationFacade, GenomeTabEditData const& editData)
 {
     return SimulatedPreviewWidget(new _SimulatedPreviewWidget(simulationFacade, editData));
 }
 
 void _SimulatedPreviewWidget::process()
 {
-    if (!_lastGenome.has_value() || _lastGenome.value() != _editData->creature) {
+    if (!_lastGenome.has_value() || _lastGenome.value() != _editData->genome) {
         CollectionDescription preview;
         _simulationFacade->newPreview(preview);
     }
@@ -21,10 +21,10 @@ void _SimulatedPreviewWidget::process()
     auto duration = std::chrono::milliseconds(1000 / fps / 2);
     _simulationFacade->calcTimestepsForPreview(duration);
 
-    _lastGenome = _editData->creature;
+    _lastGenome = _editData->genome;
 }
 
-_SimulatedPreviewWidget::_SimulatedPreviewWidget(SimulationFacade const& simulationFacade, CreatureTabEditData const& editData)
+_SimulatedPreviewWidget::_SimulatedPreviewWidget(SimulationFacade const& simulationFacade, GenomeTabEditData const& editData)
     : _simulationFacade(simulationFacade), _editData(editData)
 {
 }

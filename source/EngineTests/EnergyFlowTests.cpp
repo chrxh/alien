@@ -3,7 +3,7 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/CreatureDescription.h"
+#include "EngineInterface/GenomeDescription.h"
 
 #include "IntegrationTestFramework.h"
 
@@ -55,7 +55,7 @@ TEST_F(EnergyFlowTests, energyFlowsToActiveConstructor)
         }
     }
     data._cells.at(0)._energy = 10000.0f;
-    data._creatures.emplace_back(CreatureDescription().id(1).genes({GeneDescription().numBranches(1).nodes({NodeDescription()})}));
+    data._creatures.emplace_back(GenomeDescription().id(1).genes({GeneDescription().numBranches(1).nodes({NodeDescription()})}));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2000);
@@ -97,7 +97,7 @@ TEST_F(EnergyFlowTests, energyFlowsToClosestActiveConstructor)
         }
     }
     data._cells.at(0)._energy = 10000.0f;
-    data._creatures.emplace_back(CreatureDescription().id(1).genes({GeneDescription().numBranches(1).nodes({NodeDescription()})}));
+    data._creatures.emplace_back(GenomeDescription().id(1).genes({GeneDescription().numBranches(1).nodes({NodeDescription()})}));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1000);
@@ -128,7 +128,7 @@ TEST_F(EnergyFlowTests, energyFlowsNotToFinishedConstructor)
         }
     }
     data._cells.at(0)._energy = 10000.0f;
-    data._creatures.emplace_back(CreatureDescription().id(1).genes({GeneDescription().numBranches(1).nodes({NodeDescription()})}));
+    data._creatures.emplace_back(GenomeDescription().id(1).genes({GeneDescription().numBranches(1).nodes({NodeDescription()})}));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1000);

@@ -121,7 +121,7 @@ TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multiple_Nodes)
     auto hexagon = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().center({100.0f, 100.0f}));
     CollectionDescription data;
     data.addCreature(
-        CreatureDescription().genes(
+        GenomeDescription().genes(
             {GeneDescription().nodes({NodeDescription(), NodeDescription()}),
              GeneDescription().nodes({NodeDescription(), NodeDescription(), NodeDescription()})}),
         hexagon._cells);
@@ -204,8 +204,8 @@ TEST_F(DataTransferTests, createParticleIds_sameIdsOnDescription)
 TEST_F(DataTransferTests, createGenomeIds)
 {
     CollectionDescription data;
-    data.addCreature(CreatureDescription(), {CellDescription()});
-    data.addCreature(CreatureDescription(), {CellDescription()});
+    data.addCreature(GenomeDescription(), {CellDescription()});
+    data.addCreature(GenomeDescription(), {CellDescription()});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->addAndSelectSimulationData(std::move(data));
@@ -259,8 +259,8 @@ TEST_F(DataTransferTests, createCreatureIds_differentIds)
                         CellDescription().creatureId(1),
                     })
                     .creatures({
-                        CreatureDescription().id(0),
-                        CreatureDescription().id(1),
+                        GenomeDescription().id(0),
+                        GenomeDescription().id(1),
                     });
 
     _simulationFacade->setSimulationData(data);
@@ -284,7 +284,7 @@ TEST_F(DataTransferTests, createCreatureIds_sameIds)
                         CellDescription().creatureId(0),
                     })
                     .creatures({
-                        CreatureDescription().id(0),
+                        GenomeDescription().id(0),
                     });
 
     _simulationFacade->setSimulationData(data);
@@ -302,12 +302,12 @@ TEST_F(DataTransferTests, createCreatureIds_sameIds)
 
 TEST_F(DataTransferTests, changeGenome_successful)
 {
-    auto data = CollectionDescription().addCreature(CreatureDescription(), {CellDescription()});
+    auto data = CollectionDescription().addCreature(GenomeDescription(), {CellDescription()});
     auto creatureId = data._cells.at(0)._creatureId;
 
     _simulationFacade->setSimulationData(data);
 
-    auto newCreature = CreatureDescription().id(creatureId.value()).genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})});
+    auto newCreature = GenomeDescription().id(creatureId.value()).genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})});
     auto result = _simulationFacade->changeCreature(newCreature);
     ASSERT_TRUE(result);
 
@@ -330,12 +330,12 @@ TEST_F(DataTransferTests, changeGenome_successful)
 
 TEST_F(DataTransferTests, changeGenome_failed)
 {
-    auto data = CollectionDescription().addCreature(CreatureDescription(), {CellDescription()});
+    auto data = CollectionDescription().addCreature(GenomeDescription(), {CellDescription()});
     auto creatureId = data._cells.at(0)._creatureId;
 
     _simulationFacade->setSimulationData(data);
 
-    auto newGenome = CreatureDescription().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})});
+    auto newGenome = GenomeDescription().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})});
     auto result = _simulationFacade->changeCreature(newGenome);
     ASSERT_FALSE(result);
 }
@@ -344,8 +344,8 @@ TEST_F(DataTransferTests, getInspectedSimulationData)
 {
     auto data =
         CollectionDescription()
-            .addCreature(CreatureDescription().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})}), {CellDescription(), CellDescription()})
-            .addCreature(CreatureDescription(), {CellDescription()});
+            .addCreature(GenomeDescription().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})}), {CellDescription(), CellDescription()})
+            .addCreature(GenomeDescription(), {CellDescription()});
     auto cellId1 = data._cells.at(0)._id;
     auto cellId2 = data._cells.at(1)._id;
 

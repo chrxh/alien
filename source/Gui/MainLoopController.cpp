@@ -35,7 +35,6 @@
 #include "MultiplierWindow.h"
 #include "NetworkSettingsDialog.h"
 #include "NewSimulationDialog.h"
-#include "PatternAnalysisDialog.h"
 #include "PatternEditorWindow.h"
 #include "SelectionWindow.h"
 #include "ShaderWindow.h"
@@ -49,7 +48,7 @@
 #include "AutosaveWindow.h"
 #include "BrowserWindow.h"
 #include "CreatorWindow.h"
-#include "CreatureEditorWindow.h"
+#include "GenomeEditorWindow.h"
 #include "DeleteUserDialog.h"
 #include "DisplaySettingsDialog.h"
 #include "EditorController.h"
@@ -473,13 +472,13 @@ void MainLoopController::processMenubar()
         [&] { PatternEditorWindow::get().setOn(!PatternEditorWindow::get().isOn()); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
-            .name("Creature editor")
+            .name("Genome editor")
             .keyAlt(true)
             .key(ImGuiKey_B)
-            .selected(CreatureEditorWindow::get().isOn())
+            .selected(GenomeEditorWindow::get().isOn())
             .disabled(!SimulationInteractionController::get().isEditMode())
             .closeMenuWhenItemClicked(false),
-        [&] { CreatureEditorWindow::get().setOn(!CreatureEditorWindow::get().isOn()); });
+        [&] { GenomeEditorWindow::get().setOn(!GenomeEditorWindow::get().isOn()); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()
             .name("Multiplier")
@@ -565,7 +564,6 @@ void MainLoopController::processMenubar()
 
     AlienGui::BeginMenu(" " ICON_FA_TOOLS "  Tools ", _toolsMenuOpened);
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Mass operations").keyAlt(true).key(ImGuiKey_H), [&] { MassOperationsDialog::get().open(); });
-    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Pattern analysis").keyAlt(true).key(ImGuiKey_P), [&] { PatternAnalysisDialog::get().show(); });
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Image converter").keyAlt(true).key(ImGuiKey_G), [&] { ImageToPatternDialog::get().show(); });
     AlienGui::EndMenu();
 

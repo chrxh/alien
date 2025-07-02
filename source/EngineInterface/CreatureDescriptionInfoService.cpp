@@ -1,6 +1,6 @@
 #include "CreatureDescriptionInfoService.h"
 
-int CreatureDescriptionInfoService::getNumberOfNodes(CreatureDescription const& genome) const
+int CreatureDescriptionInfoService::getNumberOfNodes(GenomeDescription const& genome) const
 {
     int result = 0;
     for (auto const& gene : genome._genes) {
@@ -11,7 +11,7 @@ int CreatureDescriptionInfoService::getNumberOfNodes(CreatureDescription const& 
 
 namespace 
 {
-    int countNodes(CreatureDescription const& genome, int geneIndex, std::vector<int>& lastGenes)
+    int countNodes(GenomeDescription const& genome, int geneIndex, std::vector<int>& lastGenes)
     {
         if (std::ranges::find(lastGenes, geneIndex) != lastGenes.end()) {
             return -1;
@@ -41,7 +41,7 @@ namespace
     }
 }
 
-int CreatureDescriptionInfoService::getNumberOfResultingCells(CreatureDescription const& genome) const
+int CreatureDescriptionInfoService::getNumberOfResultingCells(GenomeDescription const& genome) const
 {
     if (genome._genes.empty()) {
         return 0;
@@ -62,7 +62,7 @@ std::vector<int> CreatureDescriptionInfoService::getReferences(GeneDescription c
     return result;
 }
 
-std::vector<int> CreatureDescriptionInfoService::getReferencedBy(CreatureDescription const& genome, int geneIndex) const
+std::vector<int> CreatureDescriptionInfoService::getReferencedBy(GenomeDescription const& genome, int geneIndex) const
 {
     std::vector<int> result;
     for (int i = 0; i < genome._genes.size(); ++i) {

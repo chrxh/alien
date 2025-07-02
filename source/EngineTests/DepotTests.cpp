@@ -4,7 +4,7 @@
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
-#include "EngineInterface/CreatureDescription.h"
+#include "EngineInterface/GenomeDescription.h"
 
 class DepotTests : public IntegrationTestFramework
 {

@@ -10,8 +10,9 @@ public:
 
     RealVector2D getCorrectedPosition(RealVector2D const& pos) const;
     RealVector2D getCorrectedDirection(RealVector2D const& pos) const;
+    RealVector2D getCorrectionIncrement(RealVector2D const& pos1, RealVector2D const& pos2) const;
 
-private:
+    private:
     void correctDisplacement(RealVector2D& displacement) const;
     void correctPosition(RealVector2D& pos) const;
 

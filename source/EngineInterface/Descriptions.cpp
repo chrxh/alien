@@ -83,124 +83,40 @@ ParticleDescription::ParticleDescription()
     _id = NumberGenerator::get().createObjectId();
 }
 
-ClusteredCollectionDescription::ClusteredCollectionDescription(CollectionDescription const& data)
+CreatureDescription::CreatureDescription()
 {
-    std::unordered_map<uint64_t, int> idToIndex;
-    for (int i = 0, j = data._cells.size(); i < j; ++i) {
-        auto const& cell = data._cells[i];
-        idToIndex.emplace(cell._id, i);
-    }
-
-    while (!idToIndex.empty()) {
-        auto currentCell = data._cells.at(idToIndex.begin()->second);
-        auto currentCellId = currentCell._id;
-
-        ClusterDescription cluster;
-
-        auto clusterCompleted = false;
-        auto startConnectionIndex = 0;
-        std::unordered_set<uint64_t> allVisitedCellIds;
-        std::vector<uint64_t> lastVisitedCellIds;
-        std::vector<int> lastVisitedConnectionIndices;
-        do {
-            currentCell = data._cells.at(idToIndex.at(currentCellId));
-            if (!allVisitedCellIds.contains(currentCellId)) {
-                cluster.addCell(currentCell);
-                allVisitedCellIds.insert(currentCellId);
-            }
-
-            auto newCellFound = false;
-            for (int connectionIndex = startConnectionIndex, j = toInt(currentCell._connections.size()); connectionIndex < j; ++connectionIndex) {
-                auto const& connection = currentCell._connections[connectionIndex];
-                if (allVisitedCellIds.contains(connection._cellId)) {
-                    continue;
-                }
-
-                newCellFound = true;
-                lastVisitedCellIds.emplace_back(currentCellId);
-                lastVisitedConnectionIndices.emplace_back(connectionIndex);
-                currentCellId = connection._cellId;
-                startConnectionIndex = 0;
-                break;
-            }
-            if (!newCellFound) {
-                if (!lastVisitedCellIds.empty()) {
-                    currentCellId = lastVisitedCellIds.back();
-                    startConnectionIndex = lastVisitedConnectionIndices.back() + 1;
-                    lastVisitedCellIds.pop_back();
-                    lastVisitedConnectionIndices.pop_back();
-                } else {
-                    clusterCompleted = true;
-                }
-            }
-        } while (!clusterCompleted);
-
-        std::erase_if(idToIndex, [&allVisitedCellIds](const auto& item) { return allVisitedCellIds.contains(item.first); });
-        _clusters.emplace_back(cluster);
-    }
-
-    _particles = data._particles;
-    _creatures = data._creatures;
+    _id = NumberGenerator::get().createCreatureId();
 }
 
-void ClusteredCollectionDescription::setCenter(RealVector2D const& center)
+void CollectionDescription::forEach(std::function<void(CellDescription const&)> const& applyFunc) const
 {
-    auto origCenter = calcCenter();
-    auto delta = center - origCenter;
-    shift(delta);
-}
-
-RealVector2D ClusteredCollectionDescription::calcCenter() const
-{
-    RealVector2D result;
-    int numEntities = 0;
-    for (auto const& cluster : _clusters) {
-        for (auto const& cell : cluster._cells) {
-            result += cell._pos;
-            ++numEntities;
+    for (auto& cell : _cells) {
+        applyFunc(cell);
+    }
+    for (auto& creature : _creatures) {
+        for (auto& cell : creature._cells) {
+            applyFunc(cell);
         }
     }
-    for (auto const& particle : _particles) {
-        result += particle._pos;
-        ++numEntities;
-    }
-    result /= numEntities;
-    return result;
 }
 
-void ClusteredCollectionDescription::shift(RealVector2D const& delta)
+void CollectionDescription::forEach(std::function<void(CellDescription&)> const& applyFunc)
 {
-    for (auto& cluster : _clusters) {
-        for (auto& cell : cluster._cells) {
-            cell._pos += delta;
+    for (auto& cell : _cells) {
+        applyFunc(cell);
+    }
+    for (auto& creature : _creatures) {
+        for (auto& cell : creature._cells) {
+            applyFunc(cell);
         }
     }
-    for (auto& particle : _particles) {
-        particle._pos += delta;
-    }
-}
-
-int ClusteredCollectionDescription::getNumberOfCellAndParticles() const
-{
-    int result = static_cast<int>(_particles.size());
-    for (auto const& cluster : _clusters) {
-        result += static_cast<int>(cluster._cells.size());
-    }
-    return result;
-}
-
-CollectionDescription::CollectionDescription(ClusteredCollectionDescription const& clusteredData)
-{
-    for (auto const& cluster : clusteredData._clusters) {
-        addCells(cluster._cells);
-    }
-    _particles = clusteredData._particles;
 }
 
 CollectionDescription& CollectionDescription::add(CollectionDescription const& other)
 {
     _cells.insert(_cells.end(), other._cells.begin(), other._cells.end());
     _particles.insert(_particles.end(), other._particles.begin(), other._particles.end());
+    _creatures.insert(_creatures.end(), other._creatures.begin(), other._creatures.end());
     return *this;
 }
 
@@ -228,25 +144,6 @@ CollectionDescription& CollectionDescription::addParticle(ParticleDescription co
     return *this;
 }
 
-CollectionDescription& CollectionDescription::addCreature(CreatureDescription const& value)
-{
-    _creatures.emplace_back(value);
-    return *this;
-}
-
-CollectionDescription& CollectionDescription::addCreature(CreatureDescription const& creature, std::vector<CellDescription> const& cells)
-{
-    _creatures.emplace_back(creature);
-    
-    auto originalSize = _cells.size();
-    _cells.insert(_cells.end(), cells.begin(), cells.end());
-    for (auto i = originalSize, j = _cells.size(); i < j; ++i) {
-        _cells[i]._creatureId = creature._id;
-    }
-
-    return *this;
-}
-
 void CollectionDescription::clear()
 {
     _cells.clear();
@@ -264,71 +161,6 @@ bool CollectionDescription::isEmpty() const
     return true;
 }
 
-void CollectionDescription::setCenter(RealVector2D const& center)
-{
-    auto origCenter = calcCenter();
-    auto delta = center - origCenter;
-    shift(delta);
-}
-
-RealVector2D CollectionDescription::calcCenter() const
-{
-    RealVector2D result;
-    auto numEntities = _cells.size() + _particles.size();
-    for (auto const& cell : _cells) {
-        result += cell._pos;
-    }
-    for (auto const& particle : _particles) {
-        result += particle._pos;
-    }
-    result /= numEntities;
-    return result;
-}
-
-void CollectionDescription::shift(RealVector2D const& delta)
-{
-    for (auto& cell : _cells) {
-        cell._pos += delta;
-    }
-    for (auto& particle : _particles) {
-        particle._pos += delta;
-    }
-}
-
-void CollectionDescription::rotate(float angle)
-{
-    auto rotationMatrix = Math::calcRotationMatrix(angle);
-    auto center = calcCenter();
-
-    auto rotate = [&](RealVector2D& pos) {
-        auto relPos = pos - center;
-        auto rotatedRelPos = rotationMatrix * relPos;
-        pos = center + rotatedRelPos;
-    };
-    for (auto& cell : _cells) {
-        rotate(cell._pos);
-    }
-    for (auto& particle : _particles) {
-        rotate(particle._pos);
-    }
-}
-
-void CollectionDescription::accelerate(RealVector2D const& velDelta, float angularVelDelta)
-{
-    auto center = calcCenter();
-
-    auto accelerate = [&](RealVector2D const& pos, RealVector2D& vel) {
-        auto relPos = pos - center;
-        vel += Physics::tangentialVelocity(relPos, velDelta, angularVelDelta);
-    };
-    for (auto& cell : _cells) {
-        accelerate(cell._pos, cell._vel);
-    }
-    for (auto& particle : _particles) {
-        accelerate(particle._pos, particle._vel);
-    }
-}
-
 std::unordered_set<uint64_t> CollectionDescription::getCellIds() const
 {
     std::unordered_set<uint64_t> result;
@@ -338,18 +170,28 @@ std::unordered_set<uint64_t> CollectionDescription::getCellIds() const
     return result;
 }
 
-CollectionDescription&
-CollectionDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, std::unordered_map<uint64_t, int>* cache)
+CollectionCache CollectionDescription::createCache() const
+{
+    CollectionCache result = std::make_shared<_CollectionCache>();
+    for (auto const& [creatureIndex, creature] : _creatures | boost::adaptors::indexed(0)) {
+        for (auto const& [cellIndex, cell] : creature._cells | boost::adaptors::indexed(0)) {
+            result->cellIdToIndex.emplace(cell._id, _CollectionCache::Index{.creatureIndex = toInt(creatureIndex), .cellIndex = toInt(cellIndex)});
+        }
+    }
+    for (auto const& [cellIndex, cell] : _cells | boost::adaptors::indexed(0)) {
+        result->cellIdToIndex.emplace(cell._id, _CollectionCache::Index{.creatureIndex = std::nullopt, .cellIndex = toInt(cellIndex)});
+    }
+    return result;
+}
+
+CollectionDescription& CollectionDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, CollectionCache const& cache)
 {
     auto& cell2 = getCellRef(cellId2, cache);
     return addConnection(cellId1, cellId2, cell2._pos, cache);
 }
 
-CollectionDescription& CollectionDescription::addConnection(
-    uint64_t const& cellId1,
-    uint64_t const& cellId2,
-    RealVector2D const& refPosCell2,
-    std::unordered_map<uint64_t, int>* cache /*= nullptr*/)
+CollectionDescription&
+CollectionDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, RealVector2D const& refPosCell2, CollectionCache const& cache)
 {
     auto& cell1 = getCellRef(cellId1, cache);
     auto& cell2 = getCellRef(cellId2, cache);
@@ -438,22 +280,28 @@ CollectionDescription& CollectionDescription::addConnection(
     return *this;
 }
 
-CellDescription& CollectionDescription::getCellRef(uint64_t const& cellId, std::unordered_map<uint64_t, int>* cache)
+CellDescription& CollectionDescription::getCellRef(uint64_t const& cellId, CollectionCache const& cache)
 {
-    if (cache) {
-        auto findResult = cache->find(cellId);
-        if (findResult != cache->end()) {
-            return _cells.at(findResult->second);
+    if (cache != nullptr) {
+        auto index = cache->cellIdToIndex.at(cellId);
+        if (index.creatureIndex.has_value()) {
+            return _creatures.at(index.creatureIndex.value())._cells.at(index.cellIndex);
+        } else {
+            return _cells.at(index.cellIndex);
         }
-    }
-    for (int i = 0; i < _cells.size(); ++i) {
-        auto& cell = _cells.at(i);
-        if (cell._id == cellId) {
-            if (cache) {
-                cache->emplace(cellId, i);
+    } else {
+        static CellDescription dummy;
+        CellDescription& result = dummy;
+        auto found = false;
+        forEach([&](auto& cell) {
+            if (cell._id == cellId) {
+                result = cell;
+                found = true;
             }
-            return cell;
+        });
+        if (!found) {
+            CHECK(false);
         }
+        return result;
     }
-    THROW_NOT_IMPLEMENTED();
 }

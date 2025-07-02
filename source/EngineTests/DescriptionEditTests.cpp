@@ -43,7 +43,7 @@ TEST_F(DescriptionEditTests, correctConnections)
 
     auto data = _simulationFacade->getSimulationData();
 
-    DescriptionEditService::get().correctConnections(data, {100, 100});
+    DescriptionEditService::get().correctConnectionsForNonCreatures(data, {100, 100});
 
     EXPECT_TRUE(areAngelsCorrect(data));
 }
@@ -119,7 +119,7 @@ TEST_F(DescriptionEditTests, calcCluster)
         data.add(hex);
     }
     data.addParticle(ParticleDescription());
-    data.addCreature(CreatureDescription());
+    data.addCreature(GenomeDescription());
 
     ClusteredCollectionDescription clusteredData(data);
     

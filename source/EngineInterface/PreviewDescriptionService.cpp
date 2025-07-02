@@ -374,7 +374,7 @@
 //}
 //
 PreviewDescription
-PreviewDescriptionService::convert(CreatureDescription const& creature, std::optional<int> selectedNode, SimulationParameters const& parameters)
+PreviewDescriptionService::convert(GenomeDescription const& creature, std::optional<int> selectedNode, SimulationParameters const& parameters)
 {
     return PreviewDescription();
     //    auto cellInternDescriptions = convertToPreviewDescriptionIntern(creature, std::nullopt, std::nullopt, std::nullopt, std::nullopt, parameters);

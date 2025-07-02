@@ -323,7 +323,7 @@ void PatternEditorWindow::onOpenPattern()
             CollectionDescription content;
             if (SerializerService::get().deserializeContentFromFile(content, firstFilename.string())) {
                 auto center = Viewport::get().getCenterInWorldPos();
-                content.setCenter(center);
+                DescriptionEditService::get().setCenter(content, center);
                 _simulationFacade->addAndSelectSimulationData(CollectionDescription(content));
                 EditorModel::get().update();
             } else {
@@ -376,7 +376,7 @@ void PatternEditorWindow::onPaste()
 {
     auto data = *_copiedSelection;
     auto center = Viewport::get().getCenterInWorldPos();
-    data.setCenter(center);
+    DescriptionEditService::get().setCenter(data, center);
     _simulationFacade->addAndSelectSimulationData(std::move(data));
     EditorModel::get().update();
 }

@@ -13,7 +13,7 @@
 
 #include "AlienGui.h"
 #include "EditorModel.h"
-#include "CreatureEditorWindow.h"
+#include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
 #include "OverlayController.h"
 #include "StyleRepository.h"
@@ -135,11 +135,11 @@ void _InspectorWindow::processCellGeneralTab(ExtendedCellDescription& extendedCe
     if (ImGui::BeginTabItem("General", nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
             auto& cell = extendedCell.cell;
-            auto& creature = extendedCell.creature;
+            auto& genome = extendedCell.genome;
             if (ImGui::TreeNodeEx("Properties###general", TreeNodeFlags)) {
-                if (extendedCell.creature.has_value()) {
+                if (extendedCell.genome.has_value()) {
                     if (AlienGui::Button("Edit creature")) {
-                        CreatureEditorWindow::get().openTab(creature.value());
+                        GenomeEditorWindow::get().openTab(extendedCell.creatureId.value(), genome.value());
                     }
                 }
 
@@ -191,9 +191,9 @@ void _InspectorWindow::processCellGeneralTab(ExtendedCellDescription& extendedCe
             }
 
             if (ImGui::TreeNodeEx("Associated creature##Base", TreeNodeFlags)) {
-                if (creature.has_value()) {
+                if (genome.has_value()) {
                     std::stringstream ss;
-                    ss << "0x" << std::hex << std::uppercase << creature->_id;
+                    ss << "0x" << std::hex << std::uppercase << extendedCell.creatureId.value();
                     auto creatureId = ss.str();
                     AlienGui::InputText(
                         AlienGui::InputTextParameters().name("Creature id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true),

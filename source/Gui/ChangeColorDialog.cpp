@@ -5,10 +5,10 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include "AlienGui.h"
-#include "CreatureTabEditData.h"
+#include "GenomeTabEditData.h"
 #include "StyleRepository.h"
 
-void ChangeColorDialog::open(CreatureTabEditData const& editData)
+void ChangeColorDialog::open(GenomeTabEditData const& editData)
 {
     _editData = editData;
     AlienDialog::open();
@@ -72,7 +72,7 @@ void ChangeColorDialog::onChangeColor()
         }
     }
     if (!_restrictToSelectedGene) {
-        for (auto& gene : _editData->creature._genes) {
+        for (auto& gene : _editData->genome._genes) {
             for (auto& node : gene._nodes) {
                 if (node._color == _sourceColor) {
                     node._color = _targetColor;

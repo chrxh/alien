@@ -11,8 +11,8 @@ add_library(EngineInterface
     CreatureDescriptionInfoService.h
     CreatureDescriptionValidationService.cpp
     CreatureDescriptionValidationService.h
-    CreatureDescription.cpp
-    CreatureDescription.h
+    GenomeDescription.cpp
+    GenomeDescription.h
     CudaSettings.h
     DataPointCollection.cpp
     DataPointCollection.h

@@ -3,7 +3,7 @@
 
 #include "EngineInterface/CreatureDescriptionEditService.h"
 #include "EngineInterface/CreatureDescriptionInfoService.h"
-#include "EngineInterface/CreatureDescription.h"
+#include "EngineInterface/GenomeDescription.h"
 
 class CreatureDescriptionEditServiceTests : public ::testing::Test
 {
@@ -11,9 +11,9 @@ public:
     virtual ~CreatureDescriptionEditServiceTests() = default;
 
 protected:
-    CreatureDescription createGenome_3genes_3_4_5nodes()
+    GenomeDescription createGenome_3genes_3_4_5nodes()
     {
-        return CreatureDescription().genes({
+        return GenomeDescription().genes({
             GeneDescription().nodes({
                 NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
                 NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
@@ -38,7 +38,7 @@ protected:
 
 TEST_F(CreatureDescriptionEditServiceTests, addEmptyGene_onEmptyGenome)
 {
-    auto genome = CreatureDescription();
+    auto genome = GenomeDescription();
     CreatureDescriptionEditService::get().addGene(genome, 0, GeneDescription());
 
     EXPECT_EQ(1, genome._genes.size());
@@ -46,7 +46,7 @@ TEST_F(CreatureDescriptionEditServiceTests, addEmptyGene_onEmptyGenome)
 
 TEST_F(CreatureDescriptionEditServiceTests, addEmptyGene_onNonEmptyGenome_start)
 {
-    auto genome = CreatureDescription().genes({
+    auto genome = GenomeDescription().genes({
         GeneDescription().nodes({
             NodeDescription(),
         }),
@@ -67,7 +67,7 @@ TEST_F(CreatureDescriptionEditServiceTests, addEmptyGene_onNonEmptyGenome_start)
 
 TEST_F(CreatureDescriptionEditServiceTests, addEmptyGene_onNonEmptyGenome_end)
 {
-    auto genome = CreatureDescription().genes({
+    auto genome = GenomeDescription().genes({
         GeneDescription().nodes({
             NodeDescription(),
         }),

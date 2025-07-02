@@ -13,8 +13,8 @@
 #include "EngineInterface/CreatureDescriptionInfoService.h"
 
 #include "AlienGui.h"
-#include "CreatureTabEditData.h"
-#include "CreatureTabLayoutData.h"
+#include "GenomeTabEditData.h"
+#include "GenomeTabLayoutData.h"
 #include "GenericMessageDialog.h"
 #include "StyleRepository.h"
 
@@ -25,7 +25,7 @@ namespace
 }
 
 
-GenomeEditorWidget _GenomeEditorWidget::create(CreatureTabEditData const& editData, CreatureTabLayoutData const& layoutData)
+GenomeEditorWidget _GenomeEditorWidget::create(GenomeTabEditData const& editData, GenomeTabLayoutData const& layoutData)
 {
     return GenomeEditorWidget(new _GenomeEditorWidget(editData, layoutData));
 }
@@ -43,7 +43,7 @@ void _GenomeEditorWidget::process()
     ImGui::EndChild();
 }
 
-_GenomeEditorWidget::_GenomeEditorWidget(CreatureTabEditData const& genome, CreatureTabLayoutData const& layoutData)
+_GenomeEditorWidget::_GenomeEditorWidget(GenomeTabEditData const& genome, GenomeTabLayoutData const& layoutData)
     : _editData(genome)
     , _layoutData(layoutData)
 {}
@@ -55,15 +55,15 @@ void _GenomeEditorWidget::processHeaderData()
     auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
     if (ImGui::BeginChild("GenomeHeader", ImVec2(0, -_layoutData->geneListHeight), 0)) {
 
-        auto numNodesString = std::to_string(CreatureDescriptionInfoService::get().getNumberOfNodes(_editData->creature));
+        auto numNodesString = std::to_string(CreatureDescriptionInfoService::get().getNumberOfNodes(_editData->genome));
         AlienGui::InputText(AlienGui::InputTextParameters().name("Node count").readOnly(true).textWidth(rightColumnWidth), numNodesString);
 
-        auto numCells = CreatureDescriptionInfoService::get().getNumberOfResultingCells(_editData->creature);
+        auto numCells = CreatureDescriptionInfoService::get().getNumberOfResultingCells(_editData->genome);
         auto numCellsString = numCells != -1 ? std::to_string(numCells) : std::string("Infinity");
         AlienGui::InputText(AlienGui::InputTextParameters().name("Resulting cells").readOnly(true).textWidth(rightColumnWidth), numCellsString);
 
         AlienGui::InputFloat(
-            AlienGui::InputFloatParameters().name("Front angle").format("%.1f").textWidth(rightColumnWidth), _editData->creature._frontAngle);
+            AlienGui::InputFloatParameters().name("Front angle").format("%.1f").textWidth(rightColumnWidth), _editData->genome._frontAngle);
     }
     ImGui::EndChild();
 }
@@ -86,7 +86,7 @@ void _GenomeEditorWidget::processGeneList()
             ImGui::TableHeadersRow();
             ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
 
-            auto const& genome = _editData->creature;
+            auto const& genome = _editData->genome;
 
             ImGuiListClipper clipper;
             clipper.Begin(genome._genes.size());
@@ -205,7 +205,7 @@ void _GenomeEditorWidget::processGeneListButtons()
 
         ImGui::SameLine();
         AlienGui::MoveTickLeft();
-        ImGui::BeginDisabled(!_editData->selectedGeneIndex.has_value() || _editData->selectedGeneIndex.value() == _editData->creature._genes.size() - 1);
+        ImGui::BeginDisabled(!_editData->selectedGeneIndex.has_value() || _editData->selectedGeneIndex.value() == _editData->genome._genes.size() - 1);
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_DOWN))) {
             onMoveGeneDownward();
         }
@@ -216,7 +216,7 @@ void _GenomeEditorWidget::processGeneListButtons()
 
 void _GenomeEditorWidget::onAddGene()
 {
-    auto& genome = _editData->creature;
+    auto& genome = _editData->genome;
     if (genome._genes.empty()) {
         CreatureDescriptionEditService::get().addGene(genome, 0, GeneDescription().numBranches(std::nullopt));
         _editData->selectedGeneIndex = 0;
@@ -248,7 +248,7 @@ void _GenomeEditorWidget::onAddGene()
 
 void _GenomeEditorWidget::onRemoveGene()
 {
-    auto referencedBy = CreatureDescriptionInfoService::get().getReferencedBy(_editData->creature, _editData->selectedGeneIndex.value());
+    auto referencedBy = CreatureDescriptionInfoService::get().getReferencedBy(_editData->genome, _editData->selectedGeneIndex.value());
     if (!referencedBy.empty()) {
         auto referencedByStrings = referencedBy | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex + 1); });
         auto referencedByString = boost::algorithm::join(std::vector(referencedByStrings.begin(), referencedByStrings.end()), ", ");
@@ -289,10 +289,10 @@ void _GenomeEditorWidget::removeGeneIntern()
 {
     int removeIndex = _editData->selectedGeneIndex.value();
 
-    CreatureDescriptionEditService::get().removeGene(_editData->creature, removeIndex);
+    CreatureDescriptionEditService::get().removeGene(_editData->genome, removeIndex);
 
     // Adapt gene selection
-    auto& genes = _editData->creature._genes;
+    auto& genes = _editData->genome._genes;
     if (genes.empty()) {
         _editData->selectedGeneIndex.reset();
     } else if (removeIndex >= toInt(genes.size())) {
@@ -316,7 +316,7 @@ void _GenomeEditorWidget::removeGeneIntern()
 void _GenomeEditorWidget::moveGeneUpwardIntern()
 {
     int indexToMove = _editData->selectedGeneIndex.value();
-    CreatureDescriptionEditService::get().swapGenes(_editData->creature, indexToMove - 1);
+    CreatureDescriptionEditService::get().swapGenes(_editData->genome, indexToMove - 1);
 
     // Adapt gene selection
     --_editData->selectedGeneIndex.value();
@@ -338,7 +338,7 @@ void _GenomeEditorWidget::moveGeneUpwardIntern()
 void _GenomeEditorWidget::moveGeneDownwardIntern()
 {
     int indexToMove = _editData->selectedGeneIndex.value();
-    CreatureDescriptionEditService::get().swapGenes(_editData->creature, indexToMove);
+    CreatureDescriptionEditService::get().swapGenes(_editData->genome, indexToMove);
 
     // Adapt gene selection
     ++_editData->selectedGeneIndex.value();

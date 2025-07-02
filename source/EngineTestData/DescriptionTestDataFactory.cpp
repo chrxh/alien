@@ -41,7 +41,7 @@ CreatureDescription DescriptionTestDataFactory::createRandomCreatureDescription(
     NeuralNetworkGenomeDescription nn2;
     nn2.weight(1, 3, -1.0f);
 
-    return CreatureDescription().ancestorId(123).frontAngle(34.0f).mutationId(42).genomeComplexity(23).genes({
+    return CreatureDescription().ancestorId(123).mutationId(42).genomeComplexity(23).genome(GenomeDescription().frontAngle(34.0f).genes({
         GeneDescription()
             .shape(ConstructionShape_Hexagon)
             .numBranches(3)
@@ -52,7 +52,7 @@ CreatureDescription DescriptionTestDataFactory::createRandomCreatureDescription(
             .nodes({
                 createRandomNodeDescription(nodeParameter),
             }),
-    });
+    }));
 }
 
 bool DescriptionTestDataFactory::compare(CollectionDescription left, CollectionDescription right) const

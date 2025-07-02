@@ -1,5 +1,5 @@
-#include "CreatureTabWidget.h"
-#include "CreatureTabWidget.h"
+#include "GenomeTabWidget.h"
+#include "GenomeTabWidget.h"
 
 #include <imgui.h>
 
@@ -8,29 +8,28 @@
 #include "EngineInterface/CreatureDescriptionValidationService.h"
 
 #include "AlienGui.h"
-#include "CreatureTabEditData.h"
-#include "CreatureTabLayoutData.h"
+#include "GenomeTabEditData.h"
+#include "GenomeTabLayoutData.h"
 #include "GeneEditorWidget.h"
 #include "GenomeEditorWidget.h"
 #include "NodeEditorWidget.h"
 #include "SimulatedPreviewWidget.h"
 #include "StyleRepository.h"
 
-CreatureTabWidget _CreatureTabWidget::createDraftCreatureTab(
+GenomeTabWidget _GenomeTabWidget::createDraftTab(
     SimulationFacade const& simulationFacade,
-    CreatureDescription const& creature,
-    CreatureTabLayoutData const& layoutData)
+    GenomeDescription const& creature,
+    GenomeTabLayoutData const& layoutData)
 {
-    return CreatureTabWidget(new _CreatureTabWidget(simulationFacade, creature, true, layoutData));
+    return GenomeTabWidget(new _GenomeTabWidget(simulationFacade, creature, DraftData(), layoutData));
 }
 
-CreatureTabWidget
-_CreatureTabWidget::createSimulatedCreatureTab(SimulationFacade const& simulationFacade, CreatureDescription const& creature)
+GenomeTabWidget _GenomeTabWidget::createCreatureTab(SimulationFacade const& simulationFacade, uint64_t creatureId, GenomeDescription const& genome)
 {
-    return CreatureTabWidget(new _CreatureTabWidget(simulationFacade, creature, false));
+    return GenomeTabWidget(new _GenomeTabWidget(simulationFacade, genome, CreatureData{.creatureId = creatureId, .origGenome = genome}));
 }
 
-void _CreatureTabWidget::process()
+void _GenomeTabWidget::process()
 {
     doLayout();
 
@@ -53,31 +52,31 @@ void _CreatureTabWidget::process()
     }
     ImGui::EndChild();
 
-    CreatureDescriptionValidationService::get().validateAndCorrect(_editData->creature);
+    CreatureDescriptionValidationService::get().validateAndCorrect(_editData->genome);
 }
 
-void _CreatureTabWidget::onGenomeIntoCreatureInjected()
+void _GenomeTabWidget::onGenomeIntoCreatureInjected()
 {
-    std::get<SimulatedCreatureData>(_specificEditData).origCreature = _editData->creature;
+    std::get<CreatureData>(_specificEditData).origGenome = _editData->genome;
 }
 
-bool _CreatureTabWidget::isDraft() const
+bool _GenomeTabWidget::isDraft() const
 {
-    return std::holds_alternative<DraftCreatureData>(_specificEditData);
+    return std::holds_alternative<DraftData>(_specificEditData);
 }
 
-int _CreatureTabWidget::getTabId() const
+int _GenomeTabWidget::getTabId() const
 {
     return _id;
 }
 
-std::string _CreatureTabWidget::getName() const
+std::string _GenomeTabWidget::getName() const
 {
     if (isDraft()) {
         return "Draft " + std::to_string(_id);
     } else {
-        auto const& simulatedCreatureData = std::get<SimulatedCreatureData>(_specificEditData);
-        auto result = "Creature " + StringHelper::formatInHex(_editData->creature._id);
+        auto const& simulatedCreatureData = std::get<CreatureData>(_specificEditData);
+        auto result = "Creature " + StringHelper::formatInHex(simulatedCreatureData.creatureId);
         if (simulatedCreatureData.changesMade) {
             result = "* " + result;
         }
@@ -85,66 +84,71 @@ std::string _CreatureTabWidget::getName() const
     }
 }
 
-bool _CreatureTabWidget::hasCreaturesGenomeBeChanged() const
-{
-    if (!std::holds_alternative<SimulatedCreatureData>(_specificEditData)) {
-        return false;
-    }
-    auto const& simulatedCreatureData = std::get<SimulatedCreatureData>(_specificEditData);
-    return simulatedCreatureData.changesMade;
-}
-
-CreatureDescription const& _CreatureTabWidget::getCreatureDescription()
-{
-    return _editData->creature;
-}
-
-CreatureTabEditData const& _CreatureTabWidget::getEditData() const
+GenomeTabEditData const& _GenomeTabWidget::getEditData() const
 {
     return _editData;
 }
 
-bool _CreatureTabWidget::isEmpty() const
+GenomeDescription const& _GenomeTabWidget::getGenomeDescription()
 {
-    return _editData->creature == CreatureDescription();
+    return _editData->genome;
 }
 
-void _CreatureTabWidget::convertToDraftTab()
+
+bool _GenomeTabWidget::hasCreaturesGenomeBeChanged() const
 {
-    _specificEditData = DraftCreatureData{};
+    if (!std::holds_alternative<CreatureData>(_specificEditData)) {
+        return false;
+    }
+    auto const& simulatedCreatureData = std::get<CreatureData>(_specificEditData);
+    return simulatedCreatureData.changesMade;
 }
 
-void _CreatureTabWidget::resetChanges()
+uint64_t _GenomeTabWidget::getCreatureId()
 {
-    auto& simulatedCreatureData = std::get<SimulatedCreatureData>(_specificEditData);
-    simulatedCreatureData.origCreature = _editData->creature;
+    auto const& simulatedCreatureData = std::get<CreatureData>(_specificEditData);
+    return simulatedCreatureData.creatureId;
+}
+
+bool _GenomeTabWidget::isEmpty() const
+{
+    return _editData->genome == GenomeDescription();
+}
+
+void _GenomeTabWidget::convertToDraftTab()
+{
+    _specificEditData = DraftData{};
+}
+
+void _GenomeTabWidget::resetChanges()
+{
+    auto& simulatedCreatureData = std::get<CreatureData>(_specificEditData);
+    simulatedCreatureData.origGenome = _editData->genome;
     simulatedCreatureData.changesMade = false;
 }
 
-_CreatureTabWidget::_CreatureTabWidget(
+_GenomeTabWidget::_GenomeTabWidget(
     SimulationFacade const& simulationFacade,
-    CreatureDescription const& genome,
-    bool draft,
-    CreatureTabLayoutData const& layoutData)
+    GenomeDescription const& genome,
+    SpecificEditData const& specificEditData,
+    GenomeTabLayoutData const& layoutData)
 {
     static int _sequence = 0;
     _id = ++_sequence;
 
-    _editData = std::make_shared<_CreatureTabEditData>(genome);
+    _editData = std::make_shared<_GenomeTabEditData>(genome);
     _layoutData = layoutData;
     if (!_layoutData) {
-        _layoutData = std::make_shared<_CreatureTabLayoutData>();
+        _layoutData = std::make_shared<_GenomeTabLayoutData>();
     }
     _genomeEditorWidget = _GenomeEditorWidget::create(_editData, _layoutData);
     _geneEditorWidget = _GeneEditorWidget::create(_editData, _layoutData);
     _nodeEditorWidget = _NodeEditorWidget::create(_editData, _layoutData);
     _simulatedPreviewWidget = _SimulatedPreviewWidget::create(simulationFacade, _editData);
-    if (!draft) {
-        _specificEditData = SimulatedCreatureData{.origCreature = genome};
-    }
+    _specificEditData = specificEditData;
 }
 
-void _CreatureTabWidget::processEditors()
+void _GenomeTabWidget::processEditors()
 {
     _genomeEditorWidget->process();
 
@@ -164,13 +168,13 @@ void _CreatureTabWidget::processEditors()
     ImGui::SameLine();
     _nodeEditorWidget->process();
 
-    if (std::holds_alternative<SimulatedCreatureData>(_specificEditData)) {
-        auto& simulatedCreatureData = std::get<SimulatedCreatureData>(_specificEditData);
-        simulatedCreatureData.changesMade = simulatedCreatureData.origCreature != _editData->creature;
+    if (std::holds_alternative<CreatureData>(_specificEditData)) {
+        auto& simulatedCreatureData = std::get<CreatureData>(_specificEditData);
+        simulatedCreatureData.changesMade = simulatedCreatureData.origGenome != _editData->genome;
     }
 }
 
-void _CreatureTabWidget::processPreviews()
+void _GenomeTabWidget::processPreviews()
 {
     if (ImGui::BeginChild("DesiredConfigurationPreview", ImVec2(_layoutData->desiredConfigurationPreviewWidth, 0))) {
         processPredictedPreview();
@@ -188,18 +192,18 @@ void _CreatureTabWidget::processPreviews()
     ImGui::EndChild();
 }
 
-void _CreatureTabWidget::processPredictedPreview()
+void _GenomeTabWidget::processPredictedPreview()
 {
     AlienGui::Group("Preview (predicted)");
 }
 
-void _CreatureTabWidget::processSimulatedPreview()
+void _GenomeTabWidget::processSimulatedPreview()
 {
     AlienGui::Group("Preview (simulated)");
     _simulatedPreviewWidget->process();
 }
 
-void _CreatureTabWidget::doLayout()
+void _GenomeTabWidget::doLayout()
 {
     // Initial layout setup
     if (!_layoutData->initialized) {
@@ -213,7 +217,7 @@ void _CreatureTabWidget::doLayout()
         _layoutData->nodeListHeight = height / 4;
         _layoutData->neuralNetEditorHeight = height / 4;
         _layoutData->initialized = true;
-        _origLayoutData = std::make_shared<_CreatureTabLayoutData>();
+        _origLayoutData = std::make_shared<_GenomeTabLayoutData>();
         *_origLayoutData = *_layoutData;
         return;
     }
