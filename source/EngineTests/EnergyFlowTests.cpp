@@ -33,10 +33,9 @@ TEST_F(EnergyFlowTests, energyFlowsLeadsEqualDistribution)
     _simulationFacade->calcTimesteps(1000);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
     for (int i = 0; i < 20; ++i) {
-        EXPECT_TRUE(actualCellById.at(i + 1)._energy < 600.0f);
+        EXPECT_TRUE(actualData.getCellRef(i + 1)._energy < 600.0f);
     }
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
@@ -66,15 +65,14 @@ TEST_F(EnergyFlowTests, energyFlowsToActiveConstructor)
     _simulationFacade->calcTimesteps(2000);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
     ASSERT_EQ(20, actualData._cells.size());
 
     for (int i = 1; i < 21; ++i) {
         if (i == 20) {
-            EXPECT_TRUE(actualCellById.at(i)._energy > 10000.0f - 400.0f);
+            EXPECT_TRUE(actualData.getCellRef(i)._energy > 10000.0f - 400.0f);
         } else {
-            EXPECT_TRUE(actualCellById.at(i)._energy < 200.0f);
+            EXPECT_TRUE(actualData.getCellRef(i)._energy < 200.0f);
         }
     }
 }
@@ -113,13 +111,12 @@ TEST_F(EnergyFlowTests, energyFlowsToClosestActiveConstructor)
     _simulationFacade->calcTimesteps(1000);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
     for (int i = 1; i < 41; ++i) {
         if (i == constructorId1) {
-            EXPECT_TRUE(actualCellById.at(i)._energy > 10000.0f - 400.0f);
+            EXPECT_TRUE(actualData.getCellRef(i)._energy > 10000.0f - 400.0f);
         } else {
-            EXPECT_TRUE(actualCellById.at(i)._energy < 200.0f);
+            EXPECT_TRUE(actualData.getCellRef(i)._energy < 200.0f);
         }
     }
 }
@@ -149,10 +146,9 @@ TEST_F(EnergyFlowTests, energyFlowsNotToFinishedConstructor)
     _simulationFacade->calcTimesteps(1000);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
     for (int i = 0; i < 20; ++i) {
-        EXPECT_TRUE(actualCellById.at(i + 1)._energy < 600.0f);
+        EXPECT_TRUE(actualData.getCellRef(i + 1)._energy < 600.0f);
     }
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }

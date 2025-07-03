@@ -109,9 +109,9 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
         _simulationFacade->calcTimesteps(10);
 
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualMuscleCell = getCell(actualData, 2);
-        auto actualCell1 = getCell(actualData, 1);
-        auto actualCell3 = getCell(actualData, 3);
+        auto actualMuscleCell = actualData.getCellRef(2);
+        auto actualCell1 = actualData.getCellRef(1);
+        auto actualCell3 = actualData.getCellRef(3);
 
         ASSERT_EQ(3, actualData._cells.size());
 
@@ -179,10 +179,10 @@ TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
         _simulationFacade->calcTimesteps(10);
 
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualMuscleCell = getCell(actualData, 4);
-        auto actualCell1 = getCell(actualData, 1);
-        auto actualCell2 = getCell(actualData, 2);
-        auto actualCell3 = getCell(actualData, 3);
+        auto actualMuscleCell = actualData.getCellRef(4);
+        auto actualCell1 = actualData.getCellRef(1);
+        auto actualCell2 = actualData.getCellRef(2);
+        auto actualCell3 = actualData.getCellRef(3);
 
         ASSERT_EQ(4, actualData._cells.size());
 
@@ -269,9 +269,9 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
         _simulationFacade->calcTimesteps(10);
 
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualMuscleCell = getCell(actualData, 2);
-        auto actualCell1 = getCell(actualData, 1);
-        auto actualCell3 = getCell(actualData, 3);
+        auto actualMuscleCell = actualData.getCellRef(2);
+        auto actualCell1 = actualData.getCellRef(1);
+        auto actualCell3 = actualData.getCellRef(3);
 
         ASSERT_EQ(3, actualData._cells.size());
 
@@ -362,10 +362,10 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
         _simulationFacade->calcTimesteps(10);
 
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualMuscleCell = getCell(actualData, 4);
-        auto actualCell1 = getCell(actualData, 1);
-        auto actualCell2 = getCell(actualData, 2);
-        auto actualCell3 = getCell(actualData, 3);
+        auto actualMuscleCell = actualData.getCellRef(4);
+        auto actualCell1 = actualData.getCellRef(1);
+        auto actualCell2 = actualData.getCellRef(2);
+        auto actualCell3 = actualData.getCellRef(3);
 
         ASSERT_EQ(4, actualData._cells.size());
 
@@ -472,9 +472,9 @@ TEST_P(MuscleTests_AngleBending, muscleWithTwoConnections)
     _simulationFacade->calcTimesteps(1000);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualMuscleCell = getCell(actualData, 2);
-    auto actualCell1 = getCell(actualData, 1);
-    auto actualCell3 = getCell(actualData, 3);
+    auto actualMuscleCell = actualData.getCellRef(2);
+    auto actualCell1 = actualData.getCellRef(1);
+    auto actualCell3 = actualData.getCellRef(3);
 
     ASSERT_EQ(3, actualData._cells.size());
 
@@ -520,10 +520,10 @@ TEST_P(MuscleTests_AngleBending, muscleWithOneConnection)
     _simulationFacade->calcTimesteps(1000);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualMuscleCell = getCell(actualData, 4);
-    auto actualCell1 = getCell(actualData, 1);
-    auto actualCell2 = getCell(actualData, 2);
-    auto actualCell3 = getCell(actualData, 3);
+    auto actualMuscleCell = actualData.getCellRef(4);
+    auto actualCell1 = actualData.getCellRef(1);
+    auto actualCell2 = actualData.getCellRef(2);
+    auto actualCell3 = actualData.getCellRef(3);
 
     ASSERT_EQ(4, actualData._cells.size());
 
@@ -583,9 +583,9 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
         _simulationFacade->calcTimesteps(10);
 
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualMuscleCell = getCell(actualData, 2);
-        auto actualCell1 = getCell(actualData, 1);
-        auto actualCell3 = getCell(actualData, 3);
+        auto actualMuscleCell = actualData.getCellRef(2);
+        auto actualCell1 = actualData.getCellRef(1);
+        auto actualCell3 = actualData.getCellRef(3);
 
         ASSERT_EQ(3, actualData._cells.size());
 
@@ -647,8 +647,8 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
         _simulationFacade->calcTimesteps(10);
 
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualMuscleCell = getCell(actualData, 2);
-        auto actualCell1 = getCell(actualData, 1);
+        auto actualMuscleCell = actualData.getCellRef(2);
+        auto actualCell1 = actualData.getCellRef(1);
 
         ASSERT_EQ(2, actualData._cells.size());
 
@@ -719,8 +719,8 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
         _simulationFacade->calcTimesteps(10);
 
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualMuscleCell = getCell(actualData, 2);
-        auto actualCell1 = getCell(actualData, 1);
+        auto actualMuscleCell = actualData.getCellRef(2);
+        auto actualCell1 = actualData.getCellRef(1);
 
         ASSERT_EQ(3, actualData._cells.size());
 
@@ -768,8 +768,8 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithOneConnection)
         _simulationFacade->calcTimesteps(10);
 
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualMuscleCell = getCell(actualData, 2);
-        auto actualCell1 = getCell(actualData, 1);
+        auto actualMuscleCell = actualData.getCellRef(2);
+        auto actualCell1 = actualData.getCellRef(1);
 
         ASSERT_EQ(2, actualData._cells.size());
 
@@ -836,9 +836,9 @@ TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData._cells.size());
 
-    auto actualCell1 = getCell(actualData, 1);
-    auto actualCell2 = getCell(actualData, 2);
-    auto actualCell3 = getCell(actualData, 3);
+    auto actualCell1 = actualData.getCellRef(1);
+    auto actualCell2 = actualData.getCellRef(2);
+    auto actualCell3 = actualData.getCellRef(3);
 
     ASSERT_EQ(1, actualCell1._connections.size());
     ASSERT_EQ(2, actualCell2._connections.size());

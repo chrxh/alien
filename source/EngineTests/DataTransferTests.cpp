@@ -360,8 +360,8 @@ TEST_F(DataTransferTests, getInspectedSimulationData)
     auto creature = inspectedData._creatures.front();
     EXPECT_EQ(2, creature._cells.size());
 
-    auto cell1 = getCell(inspectedData, cellId1);
-    auto cell2 = getCell(inspectedData, cellId2);
+    auto cell1 = inspectedData.getCellRef(cellId1);
+    auto cell2 = inspectedData.getCellRef(cellId2);
 
     ASSERT_EQ(1, creature._genome._genes.size());
 

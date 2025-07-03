@@ -25,9 +25,8 @@ TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulse)
     _simulationFacade->calcTimesteps(97);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto generator = actualCellById.at(1);
+    auto generator = actualData.getCellRef(1);
     EXPECT_FALSE(generator._signal.has_value());
 }
 
@@ -41,9 +40,8 @@ TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse)
     _simulationFacade->calcTimesteps(98);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto generator = actualCellById.at(1);
+    auto generator = actualData.getCellRef(1);
     ASSERT_TRUE(generator._signal.has_value());
     EXPECT_EQ(1.0f, generator._signal->_channels.at(0));
 }
@@ -58,9 +56,8 @@ TEST_F(GeneratorTests, generatePulse_timeAtSecondPulse)
     _simulationFacade->calcTimesteps(97 * 2 + 1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto generator = actualCellById.at(1);
+    auto generator = actualData.getCellRef(1);
     EXPECT_TRUE(generator._signal.has_value());
     EXPECT_EQ(1.0f, generator._signal->_channels.at(0));
 }
@@ -75,9 +72,8 @@ TEST_F(GeneratorTests, generatePulse_timeAfterFirstPulse)
     _simulationFacade->calcTimesteps(99);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto generator = actualCellById.at(1);
+    auto generator = actualData.getCellRef(1);
     EXPECT_FALSE(generator._signal.has_value());
 }
 
@@ -91,9 +87,8 @@ TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulseAlternation)
     _simulationFacade->calcTimesteps(97 * 2 + 1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto generator = actualCellById.at(1);
+    auto generator = actualData.getCellRef(1);
     EXPECT_TRUE(generator._signal.has_value());
     EXPECT_EQ(1.0f, generator._signal->_channels.at(0));
 }
@@ -108,9 +103,8 @@ TEST_F(GeneratorTests, generatePulse_timeAtFirstPulseAlternation)
     _simulationFacade->calcTimesteps(97 * 3 + 1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto generator = actualCellById.at(1);
+    auto generator = actualData.getCellRef(1);
     EXPECT_TRUE(generator._signal.has_value());
     EXPECT_EQ(-1.0f, generator._signal->_channels.at(0));
 }
@@ -127,9 +121,8 @@ TEST_F(GeneratorTests, generatePulse_timeAtSecondPulseAlternation)
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto generator = actualCellById.at(1);
+    auto generator = actualData.getCellRef(1);
     EXPECT_TRUE(generator._signal.has_value());
     EXPECT_EQ(1.0f, generator._signal->_channels.at(0));
 }
@@ -150,18 +143,17 @@ TEST_F(GeneratorTests, generatePulse_triangularNetwork)
 
     {
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualCellById = getCellById(actualData);
 
-        auto generator = actualCellById.at(1);
+        auto generator = actualData.getCellRef(1);
         EXPECT_TRUE(generator._signal.has_value());
         EXPECT_TRUE(approxCompare(1.0f, generator._signal->_channels.at(0)));
         EXPECT_EQ(2, generator._signalRelaxationTime);
 
-        auto base1 = actualCellById.at(2);
+        auto base1 = actualData.getCellRef(2);
         EXPECT_FALSE(base1._signal.has_value());
         EXPECT_EQ(0, base1._signalRelaxationTime);
 
-        auto base2 = actualCellById.at(3);
+        auto base2 = actualData.getCellRef(3);
         EXPECT_FALSE(base2._signal.has_value());
         EXPECT_EQ(0, base2._signalRelaxationTime);
     }

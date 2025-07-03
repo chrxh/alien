@@ -25,9 +25,8 @@ TEST_F(SignalTests, noSignal)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto generator = actualCellById.at(1);
+    auto generator = actualData.getCellRef(1);
     EXPECT_FALSE(generator._signal.has_value());
 }
 
@@ -44,12 +43,10 @@ TEST_F(SignalTests, forwardSignal)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
-
-    auto cell1 = actualCellById.at(1);
+    auto cell1 = actualData.getCellRef(1);
     EXPECT_FALSE(cell1._signal.has_value());
 
-    auto cell2 = actualCellById.at(2);
+    auto cell2 = actualData.getCellRef(2);
     EXPECT_TRUE(cell2._signal.has_value());
     EXPECT_EQ(signal, cell2._signal->_channels);
     EXPECT_EQ(1, cell1._signalRelaxationTime);
@@ -67,9 +64,7 @@ TEST_F(SignalTests, vanishSignal_singleCell)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
-
-    auto cell1 = actualCellById.at(1);
+    auto cell1 = actualData.getCellRef(1);
     EXPECT_FALSE(cell1._signal.has_value());
 }
 
@@ -86,9 +81,7 @@ TEST_F(SignalTests, vanishSignal_relaxationNeeded)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
-
-    auto cell1 = actualCellById.at(1);
+    auto cell1 = actualData.getCellRef(1);
     EXPECT_FALSE(cell1._signal.has_value());
 }
 
@@ -109,15 +102,13 @@ TEST_F(SignalTests, mergeSignals)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
-
-    auto cell1 = actualCellById.at(1);
+    auto cell1 = actualData.getCellRef(1);
     EXPECT_FALSE(cell1._signal.has_value());
 
-    auto cell2 = actualCellById.at(2);
+    auto cell2 = actualData.getCellRef(2);
     EXPECT_TRUE(cell2._signal.has_value());
 
-    auto cell3 = actualCellById.at(3);
+    auto cell3 = actualData.getCellRef(3);
     EXPECT_FALSE(cell3._signal.has_value());
 
     std::vector<float> sumSignal(signal1.size());
@@ -145,18 +136,16 @@ TEST_F(SignalTests, forkSignals)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
-
-    auto cell1 = actualCellById.at(1);
+    auto cell1 = actualData.getCellRef(1);
     EXPECT_TRUE(cell1._signal.has_value());
     EXPECT_TRUE(approxCompare(signal, cell1._signal->_channels));
     EXPECT_EQ(2, cell1._signalRelaxationTime);
 
-    auto cell2 = actualCellById.at(2);
+    auto cell2 = actualData.getCellRef(2);
     EXPECT_FALSE(cell2._signal.has_value());
     EXPECT_EQ(1, cell2._signalRelaxationTime);
 
-    auto cell3 = actualCellById.at(3);
+    auto cell3 = actualData.getCellRef(3);
     EXPECT_TRUE(cell3._signal.has_value());
     EXPECT_TRUE(approxCompare(signal, cell3._signal->_channels));
     EXPECT_EQ(2, cell3._signalRelaxationTime);
@@ -191,17 +180,15 @@ TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMatch)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
-
-    auto cell1 = actualCellById.at(1);
+    auto cell1 = actualData.getCellRef(1);
     EXPECT_FALSE(cell1._signal.has_value());
     EXPECT_EQ(0, cell1._signalRelaxationTime);
 
-    auto cell2 = actualCellById.at(2);
+    auto cell2 = actualData.getCellRef(2);
     EXPECT_FALSE(cell2._signal.has_value());
     EXPECT_EQ(1, cell2._signalRelaxationTime);
 
-    auto cell3 = actualCellById.at(3);
+    auto cell3 = actualData.getCellRef(3);
     EXPECT_TRUE(cell3._signal.has_value());
     EXPECT_TRUE(approxCompare(signal, cell3._signal->_channels));
     EXPECT_EQ(2, cell3._signalRelaxationTime);
@@ -223,14 +210,12 @@ TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMismatch)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
-
-    auto cell1 = actualCellById.at(1);
+    auto cell1 = actualData.getCellRef(1);
     EXPECT_FALSE(cell1._signal.has_value());
 
-    auto cell2 = actualCellById.at(2);
+    auto cell2 = actualData.getCellRef(2);
     EXPECT_FALSE(cell2._signal.has_value());
 
-    auto cell3 = actualCellById.at(3);
+    auto cell3 = actualData.getCellRef(3);
     EXPECT_FALSE(cell3._signal.has_value());
 }

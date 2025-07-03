@@ -61,8 +61,7 @@ TEST_F(DescriptionEditTests, addThirdConnection1)
     data.addConnection(1, 3);
     data.addConnection(1, 4);
 
-    auto cellById = getCellById(data);
-    auto cell = cellById.at(1);
+    auto cell = data.getCellRef(1);
 
     EXPECT_EQ(3, cell._connections.size());
 
@@ -91,8 +90,7 @@ TEST_F(DescriptionEditTests, addThirdConnection2)
     data.addConnection(1, 3);
     data.addConnection(1, 4);
 
-    auto cellById = getCellById(data);
-    auto cell = cellById.at(1);
+    auto cell = data.getCellRef(1);
 
     EXPECT_EQ(3, cell._connections.size());
 

@@ -50,8 +50,8 @@ TEST_P(CellStateTransitionTests, ready_ready)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
-    EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._cellState);
-    EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._cellState);
+    EXPECT_EQ(CellState_Ready, actualData.getCellRef(1)._cellState);
+    EXPECT_EQ(CellState_Ready, actualData.getCellRef(2)._cellState);
 }
 
 TEST_P(CellStateTransitionTests, ready_dying)
@@ -69,8 +69,8 @@ TEST_P(CellStateTransitionTests, ready_dying)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
-    EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._cellState);
-    EXPECT_EQ(CellState_Dying, getCell(actualData, 2)._cellState);
+    EXPECT_EQ(CellState_Ready, actualData.getCellRef(1)._cellState);
+    EXPECT_EQ(CellState_Dying, actualData.getCellRef(2)._cellState);
 }
 
 TEST_P(CellStateTransitionTests, ready_detaching)
@@ -90,14 +90,14 @@ TEST_P(CellStateTransitionTests, ready_detaching)
     auto actualData = _simulationFacade->getSimulationData();
 
     if (GetParam() == CellDeathConsquences_None) {
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._cellState);
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getCellRef(1)._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getCellRef(2)._cellState);
     } else if (GetParam() == CellDeathConsquences_CreatureDies) {
-        EXPECT_EQ(CellState_Detaching, getCell(actualData, 1)._cellState);
-        EXPECT_EQ(CellState_Detaching, getCell(actualData, 2)._cellState);
+        EXPECT_EQ(CellState_Detaching, actualData.getCellRef(1)._cellState);
+        EXPECT_EQ(CellState_Detaching, actualData.getCellRef(2)._cellState);
     } else if (GetParam() == CellDeathConsquences_DetachedPartsDie) {
-        EXPECT_EQ(CellState_Detaching, getCell(actualData, 1)._cellState);
-        EXPECT_EQ(CellState_Detaching, getCell(actualData, 2)._cellState);
+        EXPECT_EQ(CellState_Detaching, actualData.getCellRef(1)._cellState);
+        EXPECT_EQ(CellState_Detaching, actualData.getCellRef(2)._cellState);
     }
 }
 
@@ -125,14 +125,14 @@ TEST_P(CellStateTransitionTests, ready_detaching_onSelfReplicator)
     auto actualData = _simulationFacade->getSimulationData();
 
     if (GetParam() == CellDeathConsquences_None) {
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._cellState);
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getCellRef(1)._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getCellRef(2)._cellState);
     } else if (GetParam() == CellDeathConsquences_CreatureDies) {
-        EXPECT_EQ(CellState_Detaching, getCell(actualData, 1)._cellState);
-        EXPECT_EQ(CellState_Detaching, getCell(actualData, 2)._cellState);
+        EXPECT_EQ(CellState_Detaching, actualData.getCellRef(1)._cellState);
+        EXPECT_EQ(CellState_Detaching, actualData.getCellRef(2)._cellState);
     } else if (GetParam() == CellDeathConsquences_DetachedPartsDie) {
-        EXPECT_EQ(CellState_Reviving, getCell(actualData, 1)._cellState);
-        EXPECT_EQ(CellState_Detaching, getCell(actualData, 2)._cellState);
+        EXPECT_EQ(CellState_Reviving, actualData.getCellRef(1)._cellState);
+        EXPECT_EQ(CellState_Detaching, actualData.getCellRef(2)._cellState);
     }
 }
 
@@ -153,14 +153,14 @@ TEST_P(CellStateTransitionTests, ready_detaching_differentCreature)
     auto actualData = _simulationFacade->getSimulationData();
 
     if (GetParam() == CellDeathConsquences_None) {
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._cellState);
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getCellRef(1)._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getCellRef(2)._cellState);
     } else if (GetParam() == CellDeathConsquences_CreatureDies) {
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._cellState);
-        EXPECT_EQ(CellState_Detaching, getCell(actualData, 2)._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getCellRef(1)._cellState);
+        EXPECT_EQ(CellState_Detaching, actualData.getCellRef(2)._cellState);
     } else if (GetParam() == CellDeathConsquences_DetachedPartsDie) {
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._cellState);
-        EXPECT_EQ(CellState_Detaching, getCell(actualData, 2)._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getCellRef(1)._cellState);
+        EXPECT_EQ(CellState_Detaching, actualData.getCellRef(2)._cellState);
     }
 }
 
@@ -181,14 +181,14 @@ TEST_P(CellStateTransitionTests, detaching_reviving)
     auto actualData = _simulationFacade->getSimulationData();
 
     if (GetParam() == CellDeathConsquences_None) {
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._cellState);
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getCellRef(1)._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getCellRef(2)._cellState);
     } else if (GetParam() == CellDeathConsquences_CreatureDies) {
-        EXPECT_EQ(CellState_Detaching, getCell(actualData, 1)._cellState);
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._cellState);
+        EXPECT_EQ(CellState_Detaching, actualData.getCellRef(1)._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getCellRef(2)._cellState);
     } else if (GetParam() == CellDeathConsquences_DetachedPartsDie) {
-        EXPECT_EQ(CellState_Reviving, getCell(actualData, 1)._cellState);
-        EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._cellState);
+        EXPECT_EQ(CellState_Reviving, actualData.getCellRef(1)._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getCellRef(2)._cellState);
     }
 }
 
@@ -207,8 +207,8 @@ TEST_P(CellStateTransitionTests, underConstruction_activating)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
-    EXPECT_EQ(CellState_Activating, getCell(actualData, 1)._cellState);
-    EXPECT_EQ(CellState_Ready, getCell(actualData, 2)._cellState);
+    EXPECT_EQ(CellState_Activating, actualData.getCellRef(1)._cellState);
+    EXPECT_EQ(CellState_Ready, actualData.getCellRef(2)._cellState);
 }
 
 TEST_P(CellStateTransitionTests, noDyingForBarrierCells)
@@ -224,5 +224,5 @@ TEST_P(CellStateTransitionTests, noDyingForBarrierCells)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
-    EXPECT_EQ(CellState_Ready, getCell(actualData, 1)._cellState);
+    EXPECT_EQ(CellState_Ready, actualData.getCellRef(1)._cellState);
 }

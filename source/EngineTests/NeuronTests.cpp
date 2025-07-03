@@ -86,9 +86,8 @@ TEST_P(NeuronTests_AllActivationFunctions, weights)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    EXPECT_TRUE(approxCompare(applyActivationFunction(activationFunction, {0, 0, 1.0f + 0.5f * 0.5f, 0, 0, -1.5f, 0, 0}), actualCellById.at(1)._signal->_channels));
+    EXPECT_TRUE(approxCompare(applyActivationFunction(activationFunction, {0, 0, 1.0f + 0.5f * 0.5f, 0, 0, -1.5f, 0, 0}), actualData.getCellRef(1)._signal->_channels));
 }
 
 TEST_P(NeuronTests_AllActivationFunctions, bias)
@@ -114,7 +113,6 @@ TEST_P(NeuronTests_AllActivationFunctions, bias)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    EXPECT_TRUE(approxCompare(applyActivationFunction(activationFunction, {0, 0, 1, 0, 0, 0, 0, -1}), actualCellById.at(1)._signal->_channels));
+    EXPECT_TRUE(approxCompare(applyActivationFunction(activationFunction, {0, 0, 1, 0, 0, 0, 0, -1}), actualData.getCellRef(1)._signal->_channels));
 }

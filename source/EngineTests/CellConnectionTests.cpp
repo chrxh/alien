@@ -45,16 +45,15 @@ TEST_F(CellConnectionTests, addFirstConnection)
     _simulationFacade->testOnly_createConnection(1, 2);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
     EXPECT_EQ(2, actualData._cells.size());
 
-    auto cell1 = actualCellById.at(1);
+    auto cell1 = actualData.getCellRef(1);
     EXPECT_EQ(1, cell1._connections.size());
     EXPECT_TRUE(approxCompare(360.0f, cell1._connections.front()._angleFromPrevious));
     EXPECT_TRUE(approxCompare(1.0f, cell1._connections.front()._distance));
 
-    auto cell2 = actualCellById.at(2);
+    auto cell2 = actualData.getCellRef(2);
     EXPECT_EQ(1, cell2._connections.size());
     EXPECT_TRUE(approxCompare(360.0f, cell2._connections.front()._angleFromPrevious));
     EXPECT_TRUE(approxCompare(1.0f, cell2._connections.front()._distance));
@@ -74,8 +73,7 @@ TEST_F(CellConnectionTests, addSecondConnection)
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData._cells.size());
 
-    auto actualCellById = getCellById(actualData);
-    auto cell = actualCellById.at(1);
+    auto cell = actualData.getCellRef(1);
     ASSERT_EQ(2, cell._connections.size());
 
     auto connection1 = cell._connections.at(0);
@@ -103,9 +101,7 @@ TEST_F(CellConnectionTests, addThirdConnection1)
     auto actualData = _simulationFacade->getSimulationData();
     EXPECT_EQ(4, actualData._cells.size());
 
-    auto actualCellById = getCellById(actualData);
-
-    auto cell = actualCellById.at(1);
+    auto cell = actualData.getCellRef(1);
     EXPECT_EQ(3, cell._connections.size());
 
     auto connection1 = cell._connections.at(0);
@@ -138,9 +134,7 @@ TEST_F(CellConnectionTests, addThirdConnection2)
     auto actualData = _simulationFacade->getSimulationData();
     EXPECT_EQ(4, actualData._cells.size());
 
-    auto actualCellById = getCellById(actualData);
-
-    auto cell = actualCellById.at(1);
+    auto cell = actualData.getCellRef(1);
     EXPECT_EQ(3, cell._connections.size());
 
     auto connection1 = cell._connections.at(0);

@@ -41,23 +41,9 @@ double IntegrationTestFramework::getEnergy(CollectionDescription const& data) co
     return result;
 }
 
-std::unordered_map<uint64_t, CellDescription> IntegrationTestFramework::getCellById(CollectionDescription const& data) const
-{
-    std::unordered_map<uint64_t, CellDescription> result;
-    for(auto const& cell : data._cells) {
-        result.emplace(cell._id, cell);
-    }
-    return result;
-}
-
-CellDescription IntegrationTestFramework::getCell(CollectionDescription const& data, uint64_t id) const
-{
-    return data.getCellRef(id);
-}
-
 ConnectionDescription IntegrationTestFramework::getConnection(CollectionDescription const& data, uint64_t id, uint64_t otherId) const
 {
-    auto cell = getCell(data, id);
+    auto cell = data.getCellRef(id);
     for (auto const& connection : cell._connections) {
         if (connection._cellId == otherId) {
             return connection;
@@ -78,7 +64,7 @@ ConnectionDescription IntegrationTestFramework::getConnection(CellDescription co
 
 bool IntegrationTestFramework::hasConnection(CollectionDescription const& data, uint64_t id, uint64_t otherId) const
 {
-    auto cell = getCell(data, id);
+    auto cell = data.getCellRef(id);
     for (auto const& connection : cell._connections) {
         if (connection._cellId == otherId) {
             return true;

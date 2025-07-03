@@ -30,9 +30,6 @@ public:
 protected:
     double getEnergy(CollectionDescription const& data) const;
 
-    std::unordered_map<uint64_t, CellDescription> getCellById(CollectionDescription const& data) const;
-    CellDescription getCell(CollectionDescription const& data, uint64_t id) const;
-
     ConnectionDescription getConnection(CollectionDescription const& data, uint64_t id, uint64_t otherId) const;
     ConnectionDescription getConnection(CellDescription const& cell1, CellDescription const& cell2) const;
     bool hasConnection(CollectionDescription const& data, uint64_t id, uint64_t otherId) const;
