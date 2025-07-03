@@ -69,10 +69,10 @@ TEST_F(DefenderTests, attackerVsAntiAttacker)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttacker = getCell(actualData, 1);
+    auto actualAttacker = actualData.getCellRef(1);
 
-    auto origTarget = getCell(data, 3);
-    auto actualTarget = getCell(actualData, 3);
+    auto origTarget = data.getCellRef(3);
+    auto actualTarget = actualData.getCellRef(3);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     EXPECT_TRUE(actualAttacker.signal.channels[0] > NEAR_ZERO);
@@ -112,10 +112,10 @@ TEST_F(DefenderTests, attackerVsAntiInjector)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttacker = getCell(actualData, 1);
+    auto actualAttacker = actualData.getCellRef(1);
 
-    auto origTarget = getCell(data, 3);
-    auto actualTarget = getCell(actualData, 3);
+    auto origTarget = data.getCellRef(3);
+    auto actualTarget = actualData.getCellRef(3);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     EXPECT_TRUE(actualAttacker.signal.channels[0] > NEAR_ZERO);
@@ -160,13 +160,13 @@ TEST_F(DefenderTests, injectorVsAntiAttacker)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    auto actualInjector = getCell(actualData, 1);
+    auto actualInjector = actualData.getCellRef(1);
     auto actualInjectorFunc = std::get<InjectorDescription>(*actualInjector.cellFunction);
 
-    auto actualTarget = getCell(actualData, 3);
+    auto actualTarget = actualData.getCellRef(3);
     auto actualTargetFunc = std::get<ConstructorDescription>(*actualTarget.cellFunction);
 
-    auto origInjector = getCell(data, 1);
+    auto origInjector = data.getCellRef(1);
     auto origInjectorFunc = std::get<InjectorDescription>(*origInjector.cellFunction);
 
     EXPECT_TRUE(approxCompare(1.0f, actualInjector.signal.channels[0]));
@@ -212,16 +212,16 @@ TEST_F(DefenderTests, injectorVsAntiInjector)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    auto actualInjector = getCell(actualData, 1);
+    auto actualInjector = actualData.getCellRef(1);
     auto actualInjectorFunc = std::get<InjectorDescription>(*actualInjector.cellFunction);
 
-    auto origTarget = getCell(data, 3);
+    auto origTarget = data.getCellRef(3);
     auto origTargetFunc = std::get<ConstructorDescription>(*origTarget.cellFunction);
 
-    auto actualTarget = getCell(actualData, 3);
+    auto actualTarget = actualData.getCellRef(3);
     auto actualTargetFunc = std::get<ConstructorDescription>(*actualTarget.cellFunction);
 
-    auto origInjector = getCell(data, 1);
+    auto origInjector = data.getCellRef(1);
     auto origInjectorFunc = std::get<InjectorDescription>(*origInjector.cellFunction);
 
     EXPECT_TRUE(approxCompare(1.0f, actualInjector.signal.channels[0]));

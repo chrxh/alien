@@ -57,14 +57,14 @@ TEST_F(TransmitterTests, distributeToOtherTransmitter)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    auto origTransmitterCell1 = getCell(data, 1);
-    auto actualTransmitterCell1 = getCell(actualData, 1);
+    auto origTransmitterCell1 = data.getCellRef(1);
+    auto actualTransmitterCell1 = actualData.getCellRef(1);
 
-    auto origTransmitterCell2 = getCell(data, 3);
-    auto actualTransmitterCell2 = getCell(actualData, 3);
+    auto origTransmitterCell2 = data.getCellRef(3);
+    auto actualTransmitterCell2 = actualData.getCellRef(3);
 
-    auto origNerveCell = getCell(data, 2);
-    auto actualNerveCell = getCell(actualData, 2);
+    auto origNerveCell = data.getCellRef(2);
+    auto actualNerveCell = actualData.getCellRef(2);
 
     EXPECT_TRUE(approxCompare(0.0f, actualTransmitterCell1.signal.channels[0]));
     EXPECT_TRUE(actualTransmitterCell1.energy < origTransmitterCell1.energy - NEAR_ZERO);
@@ -105,14 +105,14 @@ TEST_F(TransmitterTests, distributeToOneOtherTransmitter_forwardSignal)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    auto origTransmitterCell1 = getCell(data, 1);
-    auto actualTransmitterCell1 = getCell(actualData, 1);
+    auto origTransmitterCell1 = data.getCellRef(1);
+    auto actualTransmitterCell1 = actualData.getCellRef(1);
 
-    auto origTransmitterCell2 = getCell(data, 3);
-    auto actualTransmitterCell2 = getCell(actualData, 3);
+    auto origTransmitterCell2 = data.getCellRef(3);
+    auto actualTransmitterCell2 = actualData.getCellRef(3);
 
-    auto origNerveCell = getCell(data, 2);
-    auto actualNerveCell = getCell(actualData, 2);
+    auto origNerveCell = data.getCellRef(2);
+    auto actualNerveCell = actualData.getCellRef(2);
 
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         EXPECT_TRUE(approxCompare(signal.channels[i], actualTransmitterCell1.signal.channels[i]));
@@ -151,14 +151,14 @@ TEST_F(TransmitterTests, distributeToConnectedCells)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    auto origTransmitterCell1 = getCell(data, 1);
-    auto actualTransmitterCell1 = getCell(actualData, 1);
+    auto origTransmitterCell1 = data.getCellRef(1);
+    auto actualTransmitterCell1 = actualData.getCellRef(1);
 
-    auto origTransmitterCell2 = getCell(data, 3);
-    auto actualTransmitterCell2 = getCell(actualData, 3);
+    auto origTransmitterCell2 = data.getCellRef(3);
+    auto actualTransmitterCell2 = actualData.getCellRef(3);
 
-    auto origNerveCell = getCell(data, 2);
-    auto actualNerveCell = getCell(actualData, 2);
+    auto origNerveCell = data.getCellRef(2);
+    auto actualNerveCell = actualData.getCellRef(2);
 
     EXPECT_TRUE(actualTransmitterCell1.energy < origTransmitterCell1.energy - NEAR_ZERO);
     EXPECT_TRUE(actualTransmitterCell2.energy > origTransmitterCell2.energy + NEAR_ZERO);
@@ -191,14 +191,14 @@ TEST_F(TransmitterTests, distributeToOtherTransmitterAndConstructor)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    auto origTransmitterCell = getCell(data, 1);
-    auto actualTransmitterCell = getCell(actualData, 1);
+    auto origTransmitterCell = data.getCellRef(1);
+    auto actualTransmitterCell = actualData.getCellRef(1);
 
-    auto origConstructorCell = getCell(data, 2);
-    auto actualConstructorCell = getCell(actualData, 2);
+    auto origConstructorCell = data.getCellRef(2);
+    auto actualConstructorCell = actualData.getCellRef(2);
 
-    auto origOtherTransmitterCell = getCell(data, 3);
-    auto actualOtherTransmitterCell = getCell(actualData, 3);
+    auto origOtherTransmitterCell = data.getCellRef(3);
+    auto actualOtherTransmitterCell = actualData.getCellRef(3);
 
     EXPECT_TRUE(actualTransmitterCell.energy < origTransmitterCell.energy - NEAR_ZERO);
     EXPECT_TRUE(actualConstructorCell.energy > origConstructorCell.energy + NEAR_ZERO);
@@ -236,14 +236,14 @@ TEST_F(TransmitterTests, distributeOnlyToActiveConstructors)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    auto origTransmitterCell = getCell(data, 1);
-    auto actualTransmitterCell = getCell(actualData, 1);
+    auto origTransmitterCell = data.getCellRef(1);
+    auto actualTransmitterCell = actualData.getCellRef(1);
 
-    auto origConstructorCell = getCell(data, 2);
-    auto actualConstructorCell = getCell(actualData, 2);
+    auto origConstructorCell = data.getCellRef(2);
+    auto actualConstructorCell = actualData.getCellRef(2);
 
-    auto origOtherTransmitterCell = getCell(data, 3);
-    auto actualOtherTransmitterCell = getCell(actualData, 3);
+    auto origOtherTransmitterCell = data.getCellRef(3);
+    auto actualOtherTransmitterCell = actualData.getCellRef(3);
 
     EXPECT_TRUE(actualTransmitterCell.energy < origTransmitterCell.energy - NEAR_ZERO);
     EXPECT_TRUE(approxCompare(actualConstructorCell.energy, origConstructorCell.energy));
@@ -274,14 +274,14 @@ TEST_F(TransmitterTests, distributeToTwoTransmittersWithDifferentColor)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    auto origTransmitterCell = getCell(data, 1);
-    auto actualTransmitterCell = getCell(actualData, 1);
+    auto origTransmitterCell = data.getCellRef(1);
+    auto actualTransmitterCell = actualData.getCellRef(1);
 
-    auto origOtherTransmitterCell1 = getCell(data, 2);
-    auto actualOtherTransmitterCell1 = getCell(actualData, 2);
+    auto origOtherTransmitterCell1 = data.getCellRef(2);
+    auto actualOtherTransmitterCell1 = actualData.getCellRef(2);
 
-    auto origOtherTransmitterCell2 = getCell(data, 3);
-    auto actualOtherTransmitterCell2 = getCell(actualData, 3);
+    auto origOtherTransmitterCell2 = data.getCellRef(3);
+    auto actualOtherTransmitterCell2 = actualData.getCellRef(3);
 
     EXPECT_TRUE(actualTransmitterCell.energy < origTransmitterCell.energy - NEAR_ZERO);
     EXPECT_TRUE(actualOtherTransmitterCell1.energy > origOtherTransmitterCell2.energy + NEAR_ZERO);
@@ -332,14 +332,14 @@ TEST_F(TransmitterTests, distributeNotToNotReadyConstructors)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    auto origReplicator = getCell(data, 1);
-    auto actualReplicator = getCell(actualData, 1);
+    auto origReplicator = data.getCellRef(1);
+    auto actualReplicator = actualData.getCellRef(1);
 
-    auto origTransmitter = getCell(data, 2);
-    auto actualTransmitter = getCell(actualData, 2);
+    auto origTransmitter = data.getCellRef(2);
+    auto actualTransmitter = actualData.getCellRef(2);
 
-    auto origConstructor = getCell(data, 3);
-    auto actualConstructor = getCell(actualData, 3);
+    auto origConstructor = data.getCellRef(3);
+    auto actualConstructor = actualData.getCellRef(3);
 
     EXPECT_TRUE(actualTransmitter.energy < origTransmitter.energy - NEAR_ZERO);
     EXPECT_TRUE(approxCompare(actualReplicator.energy, origReplicator.energy));
@@ -397,14 +397,14 @@ TEST_F(TransmitterTests, distributeToReadyConstructors)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    auto origReplicator = getCell(data, 1);
-    auto actualReplicator = getCell(actualData, 1);
+    auto origReplicator = data.getCellRef(1);
+    auto actualReplicator = actualData.getCellRef(1);
 
-    auto origTransmitter = getCell(data, 2);
-    auto actualTransmitter = getCell(actualData, 2);
+    auto origTransmitter = data.getCellRef(2);
+    auto actualTransmitter = actualData.getCellRef(2);
 
-    auto origConstructor = getCell(data, 3);
-    auto actualConstructor = getCell(actualData, 3);
+    auto origConstructor = data.getCellRef(3);
+    auto actualConstructor = actualData.getCellRef(3);
 
     EXPECT_TRUE(actualTransmitter.energy < origTransmitter.energy - NEAR_ZERO);
     EXPECT_TRUE(actualReplicator.energy > origReplicator.energy + NEAR_ZERO);

@@ -45,7 +45,7 @@ TEST_F(DetonatorTests, doNothing)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualDetonatorCell = getCell(actualData, 1);
+    auto actualDetonatorCell = actualData.getCellRef(1);
 
     EXPECT_EQ(1, actualData.cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -78,7 +78,7 @@ TEST_F(DetonatorTests, activateDetonator)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualDetonatorCell = getCell(actualData, 1);
+    auto actualDetonatorCell = actualData.getCellRef(1);
 
     EXPECT_EQ(2, actualData.cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -99,8 +99,8 @@ TEST_F(DetonatorTests, explosion)
     _simulationFacade->calcTimesteps(6 * 10 + 1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualDetonatorCell = getCell(actualData, 1);
-    auto actualOtherCell = getCell(actualData, 2);
+    auto actualDetonatorCell = actualData.getCellRef(1);
+    auto actualOtherCell = actualData.getCellRef(2);
 
     EXPECT_EQ(2, actualData.cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -128,8 +128,8 @@ TEST_F(DetonatorTests, chainExplosion)
     _simulationFacade->calcTimesteps(6 * 11 + 1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualDetonatorCell = getCell(actualData, 1);
-    auto actualOtherCell = getCell(actualData, 2);
+    auto actualDetonatorCell = actualData.getCellRef(1);
+    auto actualOtherCell = actualData.getCellRef(2);
 
     EXPECT_EQ(DetonatorState_Exploded, std::get<DetonatorDescription>(*actualDetonatorCell.cellFunction).state);
     EXPECT_EQ(DetonatorState_Activated, std::get<DetonatorDescription>(*actualOtherCell.cellFunction).state);
@@ -152,7 +152,7 @@ TEST_F(DetonatorTests, explosionIfDying)
     _simulationFacade->calcTimesteps(6 * 10 + 1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualDetonatorCell = getCell(actualData, 1);
+    auto actualDetonatorCell = actualData.getCellRef(1);
 
     EXPECT_EQ(1, actualData.cells.size());
     EXPECT_EQ(DetonatorState_Exploded, std::get<DetonatorDescription>(*actualDetonatorCell.cellFunction).state);

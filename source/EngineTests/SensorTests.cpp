@@ -49,7 +49,7 @@ TEST_F(SensorTests, scanNeighborhood_noSignal)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttackCell = getCell(actualData, 1);
+    auto actualAttackCell = actualData.getCellRef(1);
 
     EXPECT_EQ(2, actualData.cells.size());
     EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.signal.channels[0]));
@@ -79,7 +79,7 @@ TEST_F(SensorTests, scanNeighborhood_noOtherCell)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttackCell = getCell(actualData, 1);
+    auto actualAttackCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.signal.channels[0]));
 }
@@ -111,7 +111,7 @@ TEST_F(SensorTests, scanNeighborhood_densityTooLow)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttackCell = getCell(actualData, 1);
+    auto actualAttackCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.signal.channels[0]));
 }
@@ -142,7 +142,7 @@ TEST_F(SensorTests, scanNeighborhood_wrongColor)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttackCell = getCell(actualData, 1);
+    auto actualAttackCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualAttackCell.signal.channels[0]));
 }
@@ -173,7 +173,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtFront)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensorCell = getCell(actualData, 1);
+    auto actualSensorCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
     EXPECT_TRUE(actualSensorCell.signal.channels[1] > 0.3f);
@@ -212,7 +212,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtRightHandSide)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttackCell = getCell(actualData, 1);
+    auto actualAttackCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.signal.channels[0]));
     EXPECT_TRUE(actualAttackCell.signal.channels[1] > 0.3f);
@@ -251,7 +251,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtLeftHandSide)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttackCell = getCell(actualData, 1);
+    auto actualAttackCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.signal.channels[0]));
     EXPECT_TRUE(actualAttackCell.signal.channels[1] > 0.3f);
@@ -290,7 +290,7 @@ TEST_F(SensorTests, scanNeighborhood_foundAtBack)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttackCell = getCell(actualData, 1);
+    auto actualAttackCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualAttackCell.signal.channels[0]));
     EXPECT_TRUE(actualAttackCell.signal.channels[1] > 0.3f);
@@ -330,7 +330,7 @@ TEST_F(SensorTests, scanNeighborhood_twoMasses)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensorCell = getCell(actualData, 1);
+    auto actualSensorCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
     EXPECT_TRUE(actualSensorCell.signal.channels[1] > 0.7f);
@@ -371,7 +371,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensorCell = getCell(actualData, 1);
+    auto actualSensorCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
     EXPECT_TRUE(actualSensorCell.signal.channels[1] > 0.3f);
@@ -415,7 +415,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_found_wallBehi
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensorCell = getCell(actualData, 1);
+    auto actualSensorCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
 }
@@ -451,7 +451,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensorCell = getCell(actualData, 1);
+    auto actualSensorCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
 }
@@ -490,7 +490,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_otherMutant_notFound_wallI
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensorCell = getCell(actualData, 1);
+    auto actualSensorCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
 }
@@ -526,7 +526,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_found)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensorCell = getCell(actualData, 1);
+    auto actualSensorCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
 }
@@ -570,7 +570,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_sameMutant_notFound)
         _simulationFacade->calcTimesteps(1);
 
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualSensorCell = getCell(actualData, 1);
+        auto actualSensorCell = actualData.getCellRef(1);
 
         EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
     }
@@ -607,7 +607,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_found)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensorCell = getCell(actualData, 1);
+    auto actualSensorCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
 }
@@ -643,7 +643,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_zeroMutant_notFound)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensorCell = getCell(actualData, 1);
+    auto actualSensorCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
 }
@@ -679,7 +679,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_found)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensorCell = getCell(actualData, 1);
+    auto actualSensorCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
 }
@@ -715,7 +715,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_respawnedMutant_notFound)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensorCell = getCell(actualData, 1);
+    auto actualSensorCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
 }
@@ -761,7 +761,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_found)
         _simulationFacade->calcTimesteps(1);
 
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualSensorCell = getCell(actualData, 1);
+        auto actualSensorCell = actualData.getCellRef(1);
 
         EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
     }
@@ -808,7 +808,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
         _simulationFacade->calcTimesteps(1);
 
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualSensorCell = getCell(actualData, 1);
+        auto actualSensorCell = actualData.getCellRef(1);
 
         EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
     }
@@ -846,7 +846,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensorCell = getCell(actualData, 1);
+    auto actualSensorCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
 }
@@ -883,7 +883,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_lessComplexMutant_notFound
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensorCell = getCell(actualData, 1);
+    auto actualSensorCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
 }
@@ -929,7 +929,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_found)
         _simulationFacade->calcTimesteps(1);
 
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualSensorCell = getCell(actualData, 1);
+        auto actualSensorCell = actualData.getCellRef(1);
 
         EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
     }
@@ -976,7 +976,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
         _simulationFacade->calcTimesteps(1);
 
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualSensorCell = getCell(actualData, 1);
+        auto actualSensorCell = actualData.getCellRef(1);
 
         EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
     }
@@ -1014,7 +1014,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensorCell = getCell(actualData, 1);
+    auto actualSensorCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
 }
@@ -1051,7 +1051,7 @@ TEST_F(SensorTests, scanNeighborhood_targetedCreature_moreComplexMutant_notFound
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensorCell = getCell(actualData, 1);
+    auto actualSensorCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
 }
@@ -1083,7 +1083,7 @@ TEST_F(SensorTests, scanNeighborhood_minRange_found)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensorCell = getCell(actualData, 1);
+    auto actualSensorCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
 }
@@ -1115,7 +1115,7 @@ TEST_F(SensorTests, scanNeighborhood_minRange_notFound)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensorCell = getCell(actualData, 1);
+    auto actualSensorCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
 }
@@ -1147,7 +1147,7 @@ TEST_F(SensorTests, scanNeighborhood_maxRange_found)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensorCell = getCell(actualData, 1);
+    auto actualSensorCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell.signal.channels[0]));
 }
@@ -1179,7 +1179,7 @@ TEST_F(SensorTests, scanNeighborhood_maxRange_notFound)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensorCell = getCell(actualData, 1);
+    auto actualSensorCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell.signal.channels[0]));
 }

@@ -52,7 +52,7 @@ TEST_F(AttackerTests, nothingFound)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttackCell = getCell(actualData, 1);
+    auto actualAttackCell = actualData.getCellRef(1);
 
     EXPECT_EQ(2, actualData.cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -88,11 +88,11 @@ TEST_F(AttackerTests, successNoTransmitter)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    auto origAttackCell = getCell(data, 1);
-    auto actualAttackCell = getCell(actualData, 1);
+    auto origAttackCell = data.getCellRef(1);
+    auto actualAttackCell = actualData.getCellRef(1);
 
-    auto origTargetCell = getCell(data, 3);
-    auto actualTargetCell = getCell(actualData, 3);
+    auto origTargetCell = data.getCellRef(3);
+    auto actualTargetCell = actualData.getCellRef(3);
 
     EXPECT_TRUE(actualAttackCell.signal.channels[0] > NEAR_ZERO);
     EXPECT_TRUE(actualAttackCell.energy > origAttackCell.energy + NEAR_ZERO);
@@ -128,13 +128,13 @@ TEST_F(AttackerTests, successDistributeToOneTransmitter)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttackCell = getCell(actualData, 1);
+    auto actualAttackCell = actualData.getCellRef(1);
 
-    auto origNerveCell = getCell(data, 2);
-    auto actualNerveCell = getCell(actualData, 2);
+    auto origNerveCell = data.getCellRef(2);
+    auto actualNerveCell = actualData.getCellRef(2);
 
-    auto origTransmitterCell = getCell(data, 3);
-    auto actualTransmitterCell = getCell(actualData, 3);
+    auto origTransmitterCell = data.getCellRef(3);
+    auto actualTransmitterCell = actualData.getCellRef(3);
 
     EXPECT_TRUE(actualAttackCell.signal.channels[0] > NEAR_ZERO);
     EXPECT_TRUE(approxCompare(origNerveCell.energy, actualNerveCell.energy));
@@ -172,11 +172,11 @@ TEST_F(AttackerTests, successDistributeToTwoTransmitters)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttackCell = getCell(actualData, 1);
-    auto origTransmitterCell1 = getCell(data, 3);
-    auto actualTransmitterCell1 = getCell(actualData, 3);
-    auto origTransmitterCell2 = getCell(data, 4);
-    auto actualTransmitterCell2 = getCell(actualData, 4);
+    auto actualAttackCell = actualData.getCellRef(1);
+    auto origTransmitterCell1 = data.getCellRef(3);
+    auto actualTransmitterCell1 = actualData.getCellRef(3);
+    auto origTransmitterCell2 = data.getCellRef(4);
+    auto actualTransmitterCell2 = actualData.getCellRef(4);
 
     EXPECT_TRUE(actualAttackCell.signal.channels[0] > NEAR_ZERO);
     EXPECT_TRUE(actualTransmitterCell1.energy > origTransmitterCell1.energy + NEAR_ZERO);
@@ -214,11 +214,11 @@ TEST_F(AttackerTests, successDistributeToTwoTransmittersWithDifferentColor)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttackCell = getCell(actualData, 1);
-    auto origTransmitterCell1 = getCell(data, 3);
-    auto actualTransmitterCell1 = getCell(actualData, 3);
-    auto origTransmitterCell2 = getCell(data, 4);
-    auto actualTransmitterCell2 = getCell(actualData, 4);
+    auto actualAttackCell = actualData.getCellRef(1);
+    auto origTransmitterCell1 = data.getCellRef(3);
+    auto actualTransmitterCell1 = actualData.getCellRef(3);
+    auto origTransmitterCell2 = data.getCellRef(4);
+    auto actualTransmitterCell2 = actualData.getCellRef(4);
 
     EXPECT_TRUE(actualAttackCell.signal.channels[0] > NEAR_ZERO);
     EXPECT_TRUE(actualTransmitterCell1.energy > origTransmitterCell1.energy + NEAR_ZERO);
@@ -264,11 +264,11 @@ TEST_F(AttackerTests, successDistributeToTransmitterAndConstructor)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttackCell = getCell(actualData, 1);
-    auto origTransmitterCell = getCell(data, 3);
-    auto actualTransmitterCell = getCell(actualData, 3);
-    auto origConstructorCell = getCell(data, 4);
-    auto actualConstructorCell = getCell(actualData, 4);
+    auto actualAttackCell = actualData.getCellRef(1);
+    auto origTransmitterCell = data.getCellRef(3);
+    auto actualTransmitterCell = actualData.getCellRef(3);
+    auto origConstructorCell = data.getCellRef(4);
+    auto actualConstructorCell = actualData.getCellRef(4);
 
     EXPECT_TRUE(actualAttackCell.signal.channels[0] > NEAR_ZERO);
     EXPECT_TRUE(approxCompare(actualTransmitterCell.energy, origTransmitterCell.energy));
@@ -304,13 +304,13 @@ TEST_F(AttackerTests, successDistributeToConnectedCells)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttackCell = getCell(actualData, 1);
+    auto actualAttackCell = actualData.getCellRef(1);
 
-    auto origNerveCell1 = getCell(data, 2);
-    auto actualNerveCell1 = getCell(actualData, 2);
+    auto origNerveCell1 = data.getCellRef(2);
+    auto actualNerveCell1 = actualData.getCellRef(2);
 
-    auto origNerveCell2 = getCell(data, 3);
-    auto actualNerveCell2 = getCell(actualData, 3);
+    auto origNerveCell2 = data.getCellRef(3);
+    auto actualNerveCell2 = actualData.getCellRef(3);
 
     EXPECT_TRUE(actualAttackCell.signal.channels[0] > NEAR_ZERO);
     EXPECT_TRUE(actualNerveCell1.energy > origNerveCell1.energy + NEAR_ZERO);
@@ -346,14 +346,14 @@ TEST_F(AttackerTests, successTwoTargets)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    auto origAttackCell = getCell(data, 1);
-    auto actualAttackCell = getCell(actualData, 1);
+    auto origAttackCell = data.getCellRef(1);
+    auto actualAttackCell = actualData.getCellRef(1);
 
-    auto origTargetCell1 = getCell(data, 3);
-    auto actualTargetCell1 = getCell(actualData, 3);
+    auto origTargetCell1 = data.getCellRef(3);
+    auto actualTargetCell1 = actualData.getCellRef(3);
 
-    auto origTargetCell2 = getCell(data, 4);
-    auto actualTargetCell2 = getCell(actualData, 4);
+    auto origTargetCell2 = data.getCellRef(4);
+    auto actualTargetCell2 = actualData.getCellRef(4);
 
     EXPECT_TRUE(actualAttackCell.signal.channels[0] > NEAR_ZERO);
     EXPECT_TRUE(actualAttackCell.energy > origAttackCell.energy + NEAR_ZERO);

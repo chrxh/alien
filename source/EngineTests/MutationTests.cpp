@@ -664,9 +664,8 @@ TEST_F(MutationTests, propertiesMutation)
     }
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualData.getCellRef(1).cellFunction);
     EXPECT_TRUE(comparePropertiesMutation(genome, actualConstructor.genome));
     EXPECT_EQ(byteIndex, actualConstructor.genomeCurrentNodeIndex);
 }
@@ -685,9 +684,8 @@ TEST_F(MutationTests, neuronDataMutation)
     }
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualData.getCellRef(1).cellFunction);
     EXPECT_TRUE(compareNeuronDataMutation(genome, actualConstructor.genome));
     EXPECT_EQ(byteIndex, actualConstructor.genomeCurrentNodeIndex);
 }
@@ -706,9 +704,8 @@ TEST_F(MutationTests, geometryMutation)
     }
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualData.getCellRef(1).cellFunction);
     EXPECT_TRUE(compareGeometryMutation(genome, actualConstructor.genome));
     EXPECT_EQ(byteIndex, actualConstructor.genomeCurrentNodeIndex);
 }
@@ -727,9 +724,8 @@ TEST_F(MutationTests, individualGeometryMutation)
     }
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualData.getCellRef(1).cellFunction);
     EXPECT_TRUE(compareIndividualGeometryMutation(genome, actualConstructor.genome));
     EXPECT_EQ(byteIndex, actualConstructor.genomeCurrentNodeIndex);
 }
@@ -747,9 +743,8 @@ TEST_F(MutationTests, cellFunctionMutation)
     }
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualData.getCellRef(1).cellFunction);
     EXPECT_TRUE(compareCellFunctionMutation(genome, actualConstructor.genome));
     EXPECT_EQ(3, actualConstructor.genomeCurrentNodeIndex);
 }
@@ -764,9 +759,8 @@ TEST_F(MutationTests, insertMutation_emptyGenome)
     _simulationFacade->testOnly_mutate(1, MutationType::Insertion);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualData.getCellRef(1).cellFunction);
 
     auto actualGenomeDescription = GenomeDescriptionService::get().convertBytesToDescription(actualConstructor.genome);
     EXPECT_EQ(1, actualGenomeDescription.cells.size());
@@ -789,9 +783,8 @@ TEST_F(MutationTests, insertMutation)
     }
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualData.getCellRef(1).cellFunction);
     EXPECT_TRUE(compareInsertMutation(genome, actualConstructor.genome));
     EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
 }
@@ -809,9 +802,8 @@ TEST_F(MutationTests, deleteMutation_eraseSmallGenome)
     _simulationFacade->testOnly_mutate(1, MutationType::Deletion);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualData.getCellRef(1).cellFunction);
     EXPECT_EQ(GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription()).size(), actualConstructor.genome.size());
     EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
 }
@@ -829,9 +821,8 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_preserveSelfReplication)
     }
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualData.getCellRef(1).cellFunction);
     auto afterGenome = GenomeDescriptionService::get().convertBytesToDescription(actualConstructor.genome);
 
     std::set<CellGenomeDescription> afterGenomeRollout;
@@ -859,9 +850,8 @@ TEST_F(MutationTests, deleteMutation_eraseLargeGenome_changeSelfReplication)
     }
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualData.getCellRef(1).cellFunction);
 
     EXPECT_EQ(GenomeDescriptionService::get().convertDescriptionToBytes(GenomeDescription()).size(), actualConstructor.genome.size());
     EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
@@ -880,9 +870,8 @@ TEST_F(MutationTests, deleteMutation_partiallyEraseGenome)
     }
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualData.getCellRef(1).cellFunction);
     EXPECT_TRUE(compareDeleteMutation(genome, actualConstructor.genome));
     EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
 }
@@ -908,9 +897,8 @@ TEST_F(MutationTests, deleteMutation_selfReplicatorWithGenomeBelowMinSize)
     }
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualData.getCellRef(1).cellFunction);
     auto actualGenome = GenomeDescriptionService::get().convertBytesToDescription(actualConstructor.genome);
     
     EXPECT_EQ(3, actualGenome.cells.size());
@@ -937,9 +925,8 @@ TEST_F(MutationTests, deleteMutation_selfReplicatorWithGenomeAboveMinSize)
     }
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualData.getCellRef(1).cellFunction);
     auto actualGenome = GenomeDescriptionService::get().convertBytesToDescription(actualConstructor.genome);
 
     EXPECT_EQ(1, actualGenome.cells.size());
@@ -958,9 +945,8 @@ TEST_F(MutationTests, duplicateMutation)
     }
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualData.getCellRef(1).cellFunction);
     EXPECT_TRUE(compareInsertMutation(genome, actualConstructor.genome));
     EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
 }
@@ -977,8 +963,7 @@ TEST_F(MutationTests, translateMutation)
         _simulationFacade->testOnly_mutate(1, MutationType::Translation);
     }
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualData.getCellRef(1).cellFunction);
     EXPECT_TRUE(compareTranslateMutation(genome, actualConstructor.genome));
 }
 
@@ -1006,9 +991,8 @@ TEST_F(MutationTests, cellColorMutation)
     }
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualData.getCellRef(1).cellFunction);
     EXPECT_TRUE(compareCellColorMutation(genome, actualConstructor.genome, {1, 2, 4, 5}));
 }
 
@@ -1036,9 +1020,8 @@ TEST_F(MutationTests, subgenomeColorMutation)
     }
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualData.getCellRef(1).cellFunction);
     EXPECT_TRUE(compareSubgenomeColorMutation(genome, actualConstructor.genome, {1, 2, 4, 5}));
 }
 
@@ -1066,8 +1049,7 @@ TEST_F(MutationTests, genomeColorMutation)
     }
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    auto actualConstructor = std::get<ConstructorDescription>(*actualCellById.at(1).cellFunction);
+    auto actualConstructor = std::get<ConstructorDescription>(*actualData.getCellRef(1).cellFunction);
     EXPECT_TRUE(compareGenomeColorMutation(genome, actualConstructor.genome, std::nullopt));
 }

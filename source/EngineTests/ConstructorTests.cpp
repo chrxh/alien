@@ -65,7 +65,7 @@ TEST_F(ConstructorTests, noEnergy)
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(1, actualData.cells.size());
-    auto actualHostCell = getCell(actualData, 1);
+    auto actualHostCell = actualData.getCellRef(1);
 
     EXPECT_EQ(0, actualHostCell.connections.size());
     EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).genomeCurrentNodeIndex);
@@ -95,7 +95,7 @@ TEST_F(ConstructorTests, alreadyFinished)
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(1, actualData.cells.size());
-    auto actualHostCell = getCell(actualData, 1);
+    auto actualHostCell = actualData.getCellRef(1);
     auto actualConstructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
     EXPECT_EQ(0, actualHostCell.connections.size());
     EXPECT_EQ(0, actualConstructor.genomeCurrentNodeIndex);
@@ -123,7 +123,7 @@ TEST_F(ConstructorTests, notActivated)
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(1, actualData.cells.size());
-    auto actualHostCell = getCell(actualData, 1);
+    auto actualHostCell = actualData.getCellRef(1);
     auto actualConstructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
     EXPECT_TRUE(approxCompare(0.0f, actualHostCell.signal.channels[0]));
 }
@@ -147,7 +147,7 @@ TEST_F(ConstructorTests, manualConstruction_noInputSignal)
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(1, actualData.cells.size());
-    auto actualHostCell = getCell(actualData, 1);
+    auto actualHostCell = actualData.getCellRef(1);
 
     EXPECT_EQ(0, actualHostCell.connections.size());
     EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).genomeCurrentNodeIndex);
@@ -200,7 +200,7 @@ TEST_F(ConstructorTests, constructFirstCell_oneCellGenome_infiniteRepetitions)
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(2, actualData.cells.size());
 
-    auto actualHostCell = getCell(actualData, 1);
+    auto actualHostCell = actualData.getCellRef(1);
     auto actualConstructedCell = getOtherCell(actualData, {1});
     EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).genomeCurrentRepetition);
     EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).currentBranch);
@@ -229,7 +229,7 @@ TEST_F(ConstructorTests, constructFirstCell_twoCellGenome_infiniteRepetitions)
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(2, actualData.cells.size());
 
-    auto actualHostCell = getCell(actualData, 1);
+    auto actualHostCell = actualData.getCellRef(1);
     auto actualConstructedCell = getOtherCell(actualData, {1});
     EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).genomeCurrentRepetition);
     EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).currentBranch);
@@ -613,7 +613,7 @@ TEST_F(ConstructorTests, constructFirstCell_noSeparation)
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
-    auto actualHostCell = getCell(actualData, 1);
+    auto actualHostCell = actualData.getCellRef(1);
     auto actualConstructedCell = getOtherCell(actualData, 1);
 
     EXPECT_EQ(1, actualHostCell.connections.size());
@@ -659,7 +659,7 @@ TEST_F(ConstructorTests, constructFirstCell_notFinished)
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
-    auto actualHostCell = getCell(actualData, 1);
+    auto actualHostCell = actualData.getCellRef(1);
     auto actualConstructedCell = getOtherCell(actualData, 1);
     auto const& actualConstructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
     EXPECT_EQ(1, actualConstructor.genomeCurrentNodeIndex);
@@ -692,7 +692,7 @@ TEST_F(ConstructorTests, constructFirstCell_separation)
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
-    auto actualHostCell = getCell(actualData, 1);
+    auto actualHostCell = actualData.getCellRef(1);
     auto actualConstructedCell = getOtherCell(actualData, 1);
 
     EXPECT_EQ(0, actualHostCell.connections.size());
@@ -738,7 +738,7 @@ TEST_F(ConstructorTests, constructFirstCell_manualConstruction)
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
-    auto actualHostCell = getCell(actualData, 1);
+    auto actualHostCell = actualData.getCellRef(1);
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 
     EXPECT_EQ(1, actualHostCell.connections.size());
@@ -779,7 +779,7 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle1)
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
-    auto actualHostCell = getCell(actualData, 1);
+    auto actualHostCell = actualData.getCellRef(1);
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 
     EXPECT_TRUE(approxCompare(10.0f, actualConstructedCell.pos.x));
@@ -815,7 +815,7 @@ TEST_F(ConstructorTests, constructFirstCell_differentAngle2)
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
-    auto actualHostCell = getCell(actualData, 1);
+    auto actualHostCell = actualData.getCellRef(1);
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 
     EXPECT_TRUE(approxCompare(10.0f, actualConstructedCell.pos.x));
@@ -1223,8 +1223,8 @@ TEST_F(ConstructorTests, constructSecondCell_separation)
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
-    auto actualHostCell = getCell(actualData, 1);
-    auto actualPrevConstructedCell = getCell(actualData, 2);
+    auto actualHostCell = actualData.getCellRef(1);
+    auto actualPrevConstructedCell = actualData.getCellRef(2);
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 
     EXPECT_EQ(0, actualHostCell.connections.size());
@@ -1271,8 +1271,8 @@ TEST_F(ConstructorTests, constructSecondCell_constructionStateTransitions)
         auto actualData = _simulationFacade->getSimulationData();
 
         ASSERT_EQ(3, actualData.cells.size());
-        auto actualHostCell = getCell(actualData, 1);
-        auto actualPrevConstructedCell = getCell(actualData, 2);
+        auto actualHostCell = actualData.getCellRef(1);
+        auto actualPrevConstructedCell = actualData.getCellRef(2);
         auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 
         EXPECT_EQ(LivingState_Ready, actualHostCell.livingState);
@@ -1284,8 +1284,8 @@ TEST_F(ConstructorTests, constructSecondCell_constructionStateTransitions)
         auto actualData = _simulationFacade->getSimulationData();
 
         ASSERT_EQ(3, actualData.cells.size());
-        auto actualHostCell = getCell(actualData, 1);
-        auto actualPrevConstructedCell = getCell(actualData, 2);
+        auto actualHostCell = actualData.getCellRef(1);
+        auto actualPrevConstructedCell = actualData.getCellRef(2);
         auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 
         EXPECT_EQ(LivingState_Ready, actualHostCell.livingState);
@@ -1324,8 +1324,8 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation)
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
-    auto actualHostCell = getCell(actualData, 1);
-    auto actualPrevConstructedCell = getCell(actualData, 2);
+    auto actualHostCell = actualData.getCellRef(1);
+    auto actualPrevConstructedCell = actualData.getCellRef(2);
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 
     EXPECT_EQ(1, actualHostCell.connections.size());
@@ -1378,8 +1378,8 @@ TEST_F(ConstructorTests, constructSecondCell_noSpace)
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(2, actualData.cells.size());
-    auto actualHostCell = getCell(actualData, 1);
-    auto actualPrevConstructedCell = getCell(actualData, 2);
+    auto actualHostCell = actualData.getCellRef(1);
+    auto actualPrevConstructedCell = actualData.getCellRef(2);
 
     EXPECT_EQ(1, actualHostCell.connections.size());
     EXPECT_TRUE(approxCompare(0.0f, actualHostCell.signal.channels[0]));
@@ -1419,8 +1419,8 @@ TEST_F(ConstructorTests, constructSecondCell_notFinished)
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
-    auto actualHostCell = getCell(actualData, 1);
-    auto actualPrevConstructedCell = getCell(actualData, 2);
+    auto actualHostCell = actualData.getCellRef(1);
+    auto actualPrevConstructedCell = actualData.getCellRef(2);
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 
     EXPECT_EQ(1, actualHostCell.connections.size());
@@ -1463,8 +1463,8 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle1)
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
-    auto actualHostCell = getCell(actualData, 1);
-    auto actualPrevConstructedCell = getCell(actualData, 2);
+    auto actualHostCell = actualData.getCellRef(1);
+    auto actualPrevConstructedCell = actualData.getCellRef(2);
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 
     EXPECT_EQ(1, actualHostCell.connections.size());
@@ -1512,8 +1512,8 @@ TEST_F(ConstructorTests, constructSecondCell_differentAngle2)
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
-    auto actualHostCell = getCell(actualData, 1);
-    auto actualPrevConstructedCell = getCell(actualData, 2);
+    auto actualHostCell = actualData.getCellRef(1);
+    auto actualPrevConstructedCell = actualData.getCellRef(2);
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
 
     EXPECT_EQ(1, actualHostCell.connections.size());
@@ -1555,7 +1555,7 @@ TEST_F(ConstructorTests, constructSecondCell_twoCellGenome_infiniteRepetitions)
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
-    auto actualHostCell = getCell(actualData, 1);
+    auto actualHostCell = actualData.getCellRef(1);
     auto actualConstructedCell = getOtherCell(actualData, {1, 2});
     EXPECT_EQ(0, std::get<ConstructorDescription>(*actualHostCell.cellFunction).currentBranch);
     EXPECT_EQ(LivingState_Activating, actualConstructedCell.livingState);
@@ -1605,11 +1605,11 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_upperPart)
     auto actualData = _simulationFacade->getSimulationData();
 
     EXPECT_EQ(6, actualData.cells.size());
-    auto actualHostCell = getCell(actualData, 1);
-    auto uninvolvedCell1 = getCell(actualData, 4);
-    auto uninvolvedCell2 = getCell(actualData, 5);
-    auto actualPrevConstructedCell = getCell(actualData, 2);
-    auto actualPrevPrevConstructedCell = getCell(actualData, 3);
+    auto actualHostCell = actualData.getCellRef(1);
+    auto uninvolvedCell1 = actualData.getCellRef(4);
+    auto uninvolvedCell2 = actualData.getCellRef(5);
+    auto actualPrevConstructedCell = actualData.getCellRef(2);
+    auto actualPrevPrevConstructedCell = actualData.getCellRef(3);
     auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3, 4, 5});
 
     EXPECT_EQ(2, uninvolvedCell1.connections.size());
@@ -1664,11 +1664,11 @@ TEST_F(ConstructorTests, constructThirdCell_multipleConnections_bottomPart)
     auto actualData = _simulationFacade->getSimulationData();
 
     EXPECT_EQ(6, actualData.cells.size());
-    auto actualHostCell = getCell(actualData, 1);
-    auto uninvolvedCell1 = getCell(actualData, 4);
-    auto uninvolvedCell2 = getCell(actualData, 5);
-    auto actualPrevConstructedCell = getCell(actualData, 2);
-    auto actualPrevPrevConstructedCell = getCell(actualData, 3);
+    auto actualHostCell = actualData.getCellRef(1);
+    auto uninvolvedCell1 = actualData.getCellRef(4);
+    auto uninvolvedCell2 = actualData.getCellRef(5);
+    auto actualPrevConstructedCell = actualData.getCellRef(2);
+    auto actualPrevPrevConstructedCell = actualData.getCellRef(3);
     auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3, 4, 5});
 
     EXPECT_EQ(2, uninvolvedCell1.connections.size());
@@ -1707,7 +1707,7 @@ TEST_F(ConstructorTests, constructSecondCell_noSeparation_singleConstruction)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualHostCell = getCell(actualData, 1);
+    auto actualHostCell = actualData.getCellRef(1);
 
     bool found = false;
     for (auto const& connection : actualHostCell.connections) {
@@ -1767,10 +1767,10 @@ TEST_F(ConstructorTests, constructFourthCell_noOverlappingConnection)
     auto actualData = _simulationFacade->getSimulationData();
 
     EXPECT_EQ(5, actualData.cells.size());
-    auto actualHostCell = getCell(actualData, 1);
-    auto actualPrevConstructedCell = getCell(actualData, 2);
-    auto actualPrevPrevConstructedCell = getCell(actualData, 3);
-    auto actualPrevPrevPrevConstructedCell = getCell(actualData, 4);
+    auto actualHostCell = actualData.getCellRef(1);
+    auto actualPrevConstructedCell = actualData.getCellRef(2);
+    auto actualPrevPrevConstructedCell = actualData.getCellRef(3);
+    auto actualPrevPrevPrevConstructedCell = actualData.getCellRef(4);
     auto actualConstructedCell = getOtherCell(actualData, {1, 2, 3, 4});
 
     EXPECT_EQ(1, actualHostCell.connections.size());
@@ -1898,7 +1898,7 @@ TEST_F(ConstructorTests, restartIfNoLastConstructedCellFound)
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
-    auto actualHostCell = getCell(actualData, 1);
+    auto actualHostCell = actualData.getCellRef(1);
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
     EXPECT_EQ(1, actualConstructor.genomeCurrentNodeIndex);
@@ -1937,7 +1937,7 @@ TEST_F(ConstructorTests, restartIfLastConstructedCellHasLowNumConnections)
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
-    auto actualHostCell = getCell(actualData, 1);
+    auto actualHostCell = actualData.getCellRef(1);
 
     auto actualConstructor = std::get<ConstructorDescription>(*actualHostCell.cellFunction);
     EXPECT_EQ(1, actualConstructor.genomeCurrentNodeIndex);
@@ -2029,7 +2029,7 @@ TEST_F(ConstructorTests, repetitionsAndBranches)
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(1 + 3 * 4 * 3, actualData.cells.size());
-    auto actualConstructor = getCell(actualData, 1);
+    auto actualConstructor = actualData.getCellRef(1);
 
     EXPECT_EQ(3, actualConstructor.connections.size());
 }
@@ -2057,10 +2057,10 @@ TEST_F(ConstructorTests, severalRepetitionsOfSingleCell)
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(3, actualData.cells.size());
-    auto actualConstructor = getCell(actualData, 1);
+    auto actualConstructor = actualData.getCellRef(1);
 
     EXPECT_EQ(1, actualConstructor.connections.size());
-    auto lastContructedCell = getCell(actualData, actualConstructor.connections.at(0).cellId);
+    auto lastContructedCell = actualData.getCellRef(actualConstructor.connections.at(0).cellId);
     EXPECT_EQ(2, lastContructedCell.connections.size());
 }
 
@@ -2087,11 +2087,11 @@ TEST_F(ConstructorTests, severalRepetitionsAndBranchesOfSingleCell)
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(7, actualData.cells.size());
-    auto actualConstructor = getCell(actualData, 1);
+    auto actualConstructor = actualData.getCellRef(1);
 
     EXPECT_EQ(3, actualConstructor.connections.size());
     for (auto const& connection : actualConstructor.connections) {
-        auto lastContructedCell = getCell(actualData, connection.cellId);
+        auto lastContructedCell = actualData.getCellRef(connection.cellId);
         EXPECT_EQ(2, lastContructedCell.connections.size());
     }
 }
@@ -2119,11 +2119,11 @@ TEST_F(ConstructorTests, severalRepetitionsOfSingleCell_ignoreNumRequiredConnect
     auto actualData = _simulationFacade->getSimulationData();
 
     ASSERT_EQ(4, actualData.cells.size());
-    auto actualConstructor = getCell(actualData, 1);
+    auto actualConstructor = actualData.getCellRef(1);
 
     EXPECT_EQ(1, actualConstructor.connections.size());
     for (auto const& connection : actualConstructor.connections) {
-        auto lastContructedCell = getCell(actualData, connection.cellId);
+        auto lastContructedCell = actualData.getCellRef(connection.cellId);
         EXPECT_EQ(2, lastContructedCell.connections.size());
     }
 }

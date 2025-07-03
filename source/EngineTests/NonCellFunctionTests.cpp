@@ -48,7 +48,7 @@ TEST_F(NonCellFunctionTests, distributeToOtherTransmitter)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    auto actualCell = getCell(actualData, 1);
+    auto actualCell = actualData.getCellRef(1);
 
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         EXPECT_EQ(0, actualCell.activity.channels[i]);

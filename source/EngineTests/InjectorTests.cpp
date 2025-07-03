@@ -57,7 +57,7 @@ TEST_F(InjectorTests, nothingFound)
     }
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCell = getCell(actualData, 1);
+    auto actualCell = actualData.getCellRef(1);
     auto actualInjector = std::get<InjectorDescription>(*actualCell.cellFunction);
 
     EXPECT_EQ(2, actualData.cells.size());
@@ -98,11 +98,11 @@ TEST_F(InjectorTests, matchButNoInjection)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCell = getCell(actualData, 1);
+    auto actualCell = actualData.getCellRef(1);
     auto actualInjector = std::get<InjectorDescription>(*actualCell.cellFunction);
-    auto actualTargetCell = getCell(actualData, 3);
+    auto actualTargetCell = actualData.getCellRef(3);
     auto actualTargetConstructor = std::get<ConstructorDescription>(*actualTargetCell.cellFunction);
-    auto origTargetCell = getCell(data, 3);
+    auto origTargetCell = data.getCellRef(3);
     auto origTargetConstructor = std::get<ConstructorDescription>(*origTargetCell.cellFunction);
 
     EXPECT_EQ(3, actualData.cells.size());
@@ -142,11 +142,11 @@ TEST_F(InjectorTests, injection)
     }
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCell = getCell(actualData, 1);
+    auto actualCell = actualData.getCellRef(1);
     auto actualInjector = std::get<InjectorDescription>(*actualCell.cellFunction);
-    auto actualTargetCell = getCell(actualData, 3);
+    auto actualTargetCell = actualData.getCellRef(3);
     auto actualTargetConstructor = std::get<ConstructorDescription>(*actualTargetCell.cellFunction);
-    auto origCell = getCell(data, 1);
+    auto origCell = data.getCellRef(1);
     auto origInjector = std::get<InjectorDescription>(*origCell.cellFunction);
 
     EXPECT_EQ(3, actualData.cells.size());
@@ -192,11 +192,11 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_failed)
     }
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCell = getCell(actualData, 1);
+    auto actualCell = actualData.getCellRef(1);
     auto actualInjector = std::get<InjectorDescription>(*actualCell.cellFunction);
-    auto actualTargetCell = getCell(actualData, 3);
+    auto actualTargetCell = actualData.getCellRef(3);
     auto actualTargetConstructor = std::get<ConstructorDescription>(*actualTargetCell.cellFunction);
-    auto origTargetCell = getCell(data, 3);
+    auto origTargetCell = data.getCellRef(3);
     auto origTargetConstructor = std::get<ConstructorDescription>(*origTargetCell.cellFunction);
 
     EXPECT_EQ(3, actualData.cells.size());
@@ -250,13 +250,13 @@ TEST_F(InjectorTests, injectOnlyEmptyCells_success)
     }
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCell = getCell(actualData, 1);
+    auto actualCell = actualData.getCellRef(1);
     auto actualInjector = std::get<InjectorDescription>(*actualCell.cellFunction);
 
-    auto actualTargetConstructor = std::get<ConstructorDescription>(*getCell(actualData, 4).cellFunction);
+    auto actualTargetConstructor = std::get<ConstructorDescription>(*actualData.getCellRef(4).cellFunction);
 
-    auto origOtherConstructor = std::get<ConstructorDescription>(*getCell(data, 3).cellFunction);
-    auto actualOtherConstructor = std::get<ConstructorDescription>(*getCell(actualData, 3).cellFunction);
+    auto origOtherConstructor = std::get<ConstructorDescription>(*data.getCellRef(3).cellFunction);
+    auto actualOtherConstructor = std::get<ConstructorDescription>(*actualData.getCellRef(3).cellFunction);
 
 
     EXPECT_EQ(4, actualData.cells.size());

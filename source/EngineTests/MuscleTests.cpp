@@ -52,8 +52,8 @@ TEST_F(MuscleTests, doNothing)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualMuscleCell = getCell(actualData, 1);
-    auto actualNerveCell = getCell(actualData, 2);
+    auto actualMuscleCell = actualData.getCellRef(1);
+    auto actualNerveCell = actualData.getCellRef(2);
 
     EXPECT_EQ(2, actualData.cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -91,8 +91,8 @@ TEST_F(MuscleTests, moveForward)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualMuscleCell = getCell(actualData, 1);
-    auto actualNerveCell = getCell(actualData, 2);
+    auto actualMuscleCell = actualData.getCellRef(1);
+    auto actualNerveCell = actualData.getCellRef(2);
 
     EXPECT_EQ(2, actualData.cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -130,8 +130,8 @@ TEST_F(MuscleTests, moveBackward)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualMuscleCell = getCell(actualData, 1);
-    auto actualNerveCell = getCell(actualData, 2);
+    auto actualMuscleCell = actualData.getCellRef(1);
+    auto actualNerveCell = actualData.getCellRef(2);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     EXPECT_TRUE(approxCompare(-1.0f, actualMuscleCell.signal.channels[0]));
@@ -177,7 +177,7 @@ TEST_F(MuscleTests, multipleMovementDirections)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualMuscleCell = getCell(actualData, 1);
+    auto actualMuscleCell = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(2.0f, actualMuscleCell.signal.channels[0]));
     EXPECT_TRUE(actualMuscleCell.vel.x < -NEAR_ZERO);
@@ -210,8 +210,8 @@ TEST_F(MuscleTests, expansion)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualMuscleCell = getCell(actualData, 1);
-    auto actualNerveCell = getCell(actualData, 2);
+    auto actualMuscleCell = actualData.getCellRef(1);
+    auto actualNerveCell = actualData.getCellRef(2);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.signal.channels[0]));
@@ -247,8 +247,8 @@ TEST_F(MuscleTests, expansionNotPossible)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualMuscleCell = getCell(actualData, 1);
-    auto actualNerveCell = getCell(actualData, 2);
+    auto actualMuscleCell = actualData.getCellRef(1);
+    auto actualNerveCell = actualData.getCellRef(2);
 
     EXPECT_TRUE(approxCompare(1.0f, actualMuscleCell.signal.channels[0]));
     EXPECT_TRUE(approxCompare(largeDistance, actualMuscleCell.connections.at(0).distance));
@@ -280,8 +280,8 @@ TEST_F(MuscleTests, contraction)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualMuscleCell = getCell(actualData, 1);
-    auto actualNerveCell = getCell(actualData, 2);
+    auto actualMuscleCell = actualData.getCellRef(1);
+    auto actualNerveCell = actualData.getCellRef(2);
 
     EXPECT_TRUE(approxCompare(-1.0f, actualMuscleCell.signal.channels[0]));
     EXPECT_TRUE(approxCompare(actualNerveCell.connections.at(0).distance, actualMuscleCell.connections.at(0).distance));
@@ -323,7 +323,7 @@ TEST_F(MuscleTests, multipleContraction)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualMuscleCell = getCell(actualData, 1);
+    auto actualMuscleCell = actualData.getCellRef(1);
     auto muscleToNerveConnection1 = getConnection(actualData, 1, 2);
     auto muscleToNerveConnection2 = getConnection(actualData, 1, 3);
 
@@ -358,8 +358,8 @@ TEST_F(MuscleTests, contractionNotPossible)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualMuscleCell = getCell(actualData, 1);
-    auto actualNerveCell = getCell(actualData, 2);
+    auto actualMuscleCell = actualData.getCellRef(1);
+    auto actualNerveCell = actualData.getCellRef(2);
 
     EXPECT_TRUE(approxCompare(-1.0f, actualMuscleCell.signal.channels[0]));
     EXPECT_TRUE(approxCompare(smallDistance, actualMuscleCell.connections.at(0).distance));
@@ -392,8 +392,8 @@ TEST_F(MuscleTests, bendClockwise)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualMuscleCell = getCell(actualData, 2);
-    auto actualNerveCell = getCell(actualData, 3);
+    auto actualMuscleCell = actualData.getCellRef(2);
+    auto actualNerveCell = actualData.getCellRef(3);
     auto connection1 = getConnection(actualData, 2, 3);
     auto connection2 = getConnection(actualData, 3, 2);
 
@@ -433,8 +433,8 @@ TEST_F(MuscleTests, bendCounterClockwise)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualMuscleCell = getCell(actualData, 2);
-    auto actualNerveCell = getCell(actualData, 3);
+    auto actualMuscleCell = actualData.getCellRef(2);
+    auto actualNerveCell = actualData.getCellRef(3);
     auto connection1 = getConnection(actualData, 2, 3);
     auto connection2 = getConnection(actualData, 3, 2);
 

@@ -33,9 +33,8 @@ TEST_F(NerveTests, noInput_execution)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
+    EXPECT_EQ(SignalDescription(), actualData.getCellRef(1).signal);
 }
 
 TEST_F(NerveTests, noInput_noExecution)
@@ -56,9 +55,8 @@ TEST_F(NerveTests, noInput_noExecution)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    EXPECT_EQ(signal, actualCellById.at(1).signal);
+    EXPECT_EQ(signal, actualData.getCellRef(1).signal);
 }
 
 TEST_F(NerveTests, inputBlocked)
@@ -88,10 +86,9 @@ TEST_F(NerveTests, inputBlocked)
 
     {
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(1).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(2).signal);
     }
 }
 
@@ -124,10 +121,9 @@ TEST_F(NerveTests, outputBlocked)
 
     {
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(1).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(2).signal);
     }
 }
 
@@ -160,10 +156,9 @@ TEST_F(NerveTests, underConstruction1)
 
     {
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(1).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(2).signal);
     }
 }
 
@@ -196,10 +191,9 @@ TEST_F(NerveTests, underConstruction2)
 
     {
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(1).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(2).signal);
     }
 }
 
@@ -239,30 +233,27 @@ TEST_F(NerveTests, transfer)
 
     {
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
-        EXPECT_EQ(signal, actualCellById.at(2).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(3).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(1).signal);
+        EXPECT_EQ(signal, actualData.getCellRef(2).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(3).signal);
     }
 
     _simulationFacade->calcTimesteps(1);
     {
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
-        EXPECT_EQ(signal, actualCellById.at(3).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(1).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(2).signal);
+        EXPECT_EQ(signal, actualData.getCellRef(3).signal);
     }
     _simulationFacade->calcTimesteps(1);
     {
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(3).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(1).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(2).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(3).signal);
     }
 }
 
@@ -312,34 +303,31 @@ TEST_F(NerveTests, cycle)
     _simulationFacade->calcTimesteps(1);
     {
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(signal, actualCellById.at(1).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(3).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(4).signal);
+        EXPECT_EQ(signal, actualData.getCellRef(1).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(2).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(3).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(4).signal);
     }
 
     _simulationFacade->calcTimesteps(1);
     {
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
-        EXPECT_EQ(signal, actualCellById.at(2).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(3).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(4).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(1).signal);
+        EXPECT_EQ(signal, actualData.getCellRef(2).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(3).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(4).signal);
     }
 
     _simulationFacade->calcTimesteps(1);
     {
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
-        EXPECT_EQ(signal, actualCellById.at(3).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(4).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(1).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(2).signal);
+        EXPECT_EQ(signal, actualData.getCellRef(3).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(4).signal);
     }
 
     for (int i = 0; i < 3; ++i) {
@@ -347,23 +335,21 @@ TEST_F(NerveTests, cycle)
     }
     {
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(3).signal);
-        EXPECT_EQ(signal, actualCellById.at(4).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(1).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(2).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(3).signal);
+        EXPECT_EQ(signal, actualData.getCellRef(4).signal);
     }
 
     _simulationFacade->calcTimesteps(1);
     {
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(signal, actualCellById.at(1).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(3).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(4).signal);
+        EXPECT_EQ(signal, actualData.getCellRef(1).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(2).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(3).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(4).signal);
     }
 }
 
@@ -403,11 +389,10 @@ TEST_F(NerveTests, fork)
 
     {
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(signal, actualCellById.at(1).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
-        EXPECT_EQ(signal, actualCellById.at(3).signal);
+        EXPECT_EQ(signal, actualData.getCellRef(1).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(2).signal);
+        EXPECT_EQ(signal, actualData.getCellRef(3).signal);
     }
 }
 
@@ -441,11 +426,10 @@ TEST_F(NerveTests, noFork)
 
     {
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
-        EXPECT_EQ(signal, actualCellById.at(3).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(1).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(2).signal);
+        EXPECT_EQ(signal, actualData.getCellRef(3).signal);
     }
 }
 
@@ -487,11 +471,10 @@ TEST_F(NerveTests, merge)
 
     {
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
-        EXPECT_EQ(sumSignals, actualCellById.at(2).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(3).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(1).signal);
+        EXPECT_EQ(sumSignals, actualData.getCellRef(2).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(3).signal);
     }
 }
 
@@ -523,10 +506,9 @@ TEST_F(NerveTests, sameExecutionOrderNumber)
 
     {
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualCellById = getCellById(actualData);
 
-        EXPECT_EQ(SignalDescription(), actualCellById.at(1).signal);
-        EXPECT_EQ(SignalDescription(), actualCellById.at(2).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(1).signal);
+        EXPECT_EQ(SignalDescription(), actualData.getCellRef(2).signal);
     }
 }
 
@@ -556,13 +538,12 @@ TEST_F(NerveTests, constantPulse)
         _simulationFacade->calcTimesteps(1);
 
         auto actualData = _simulationFacade->getSimulationData();
-        auto actualCellById = getCellById(actualData);
 
         SignalDescription signal;
         if (i % 18 == 0) {
             signal.channels = {1, 0, 0, 0, 0, 0, 0, 0};
         }
-        EXPECT_EQ(signal, actualCellById.at(1).signal);
+        EXPECT_EQ(signal, actualData.getCellRef(1).signal);
     }
 }
 
@@ -588,30 +569,26 @@ TEST_F(NerveTests, alternatingPulse)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
     {
-        auto actualCellById = getCellById(_simulationFacade->getSimulationData());
-        EXPECT_EQ(SignalDescription().setChannels({1, 0, 0, 0, 0, 0, 0, 0}), actualCellById.at(1).signal);
+        EXPECT_EQ(SignalDescription().setChannels({1, 0, 0, 0, 0, 0, 0, 0}), _simulationFacade->getSimulationData().getCellRef(1).signal);
     }
 
     for (int pulse = 0; pulse < 3; ++pulse) {
         for (int i = 0; i < 6*3; ++i) {
             _simulationFacade->calcTimesteps(1);
         }
-        auto actualCellById = getCellById(_simulationFacade->getSimulationData());
-        EXPECT_EQ(SignalDescription().setChannels({1, 0, 0, 0, 0, 0, 0, 0}), actualCellById.at(1).signal);
+        EXPECT_EQ(SignalDescription().setChannels({1, 0, 0, 0, 0, 0, 0, 0}), _simulationFacade->getSimulationData().getCellRef(1).signal);
     }
 
     for (int pulse = 0; pulse < 4; ++pulse) {
         for (int i = 0; i < 6*3; ++i) {
             _simulationFacade->calcTimesteps(1);
         }
-        auto actualCellById = getCellById(_simulationFacade->getSimulationData());
-        EXPECT_EQ(SignalDescription().setChannels({-1, 0, 0, 0, 0, 0, 0, 0}), actualCellById.at(1).signal);
+        EXPECT_EQ(SignalDescription().setChannels({-1, 0, 0, 0, 0, 0, 0, 0}), _simulationFacade->getSimulationData().getCellRef(1).signal);
     }
     for (int pulse = 0; pulse < 4; ++pulse) {
         for (int i = 0; i < 6*3; ++i) {
             _simulationFacade->calcTimesteps(1);
         }
-        auto actualCellById = getCellById(_simulationFacade->getSimulationData());
-        EXPECT_EQ(SignalDescription().setChannels({1, 0, 0, 0, 0, 0, 0, 0}), actualCellById.at(1).signal);
+        EXPECT_EQ(SignalDescription().setChannels({1, 0, 0, 0, 0, 0, 0, 0}), _simulationFacade->getSimulationData().getCellRef(1).signal);
     }
 }

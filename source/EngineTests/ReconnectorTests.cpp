@@ -50,7 +50,7 @@ TEST_F(ReconnectorTests, establishConnection_noRestriction_nothingFound)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualReconnectorCell = getCell(actualData, 1);
+    auto actualReconnectorCell = actualData.getCellRef(1);
 
     EXPECT_EQ(2, actualData.cells.size());
     EXPECT_TRUE(std::abs(actualReconnectorCell.signal.channels[0]) < NEAR_ZERO);
@@ -87,9 +87,9 @@ TEST_F(ReconnectorTests, establishConnection_noRestriction_success)
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
-    auto actualReconnectorCell = getCell(actualData, 1);
+    auto actualReconnectorCell = actualData.getCellRef(1);
 
-    auto actualTargetCell = getCell(actualData, 3);
+    auto actualTargetCell = actualData.getCellRef(3);
 
     EXPECT_TRUE(actualReconnectorCell.signal.channels[0] > NEAR_ZERO);
     EXPECT_EQ(2, actualReconnectorCell.connections.size());
@@ -126,8 +126,8 @@ TEST_F(ReconnectorTests, establishConnection_restrictToColor_failed)
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
-    auto actualReconnectorCell = getCell(actualData, 1);
-    auto actualTargetCell = getCell(actualData, 3);
+    auto actualReconnectorCell = actualData.getCellRef(1);
+    auto actualTargetCell = actualData.getCellRef(3);
 
     EXPECT_TRUE(std::abs(actualReconnectorCell.signal.channels[0]) < NEAR_ZERO);
     EXPECT_EQ(1, actualReconnectorCell.connections.size());
@@ -163,9 +163,9 @@ TEST_F(ReconnectorTests, establishConnection_restrictToColor_success)
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
-    auto actualReconnectorCell = getCell(actualData, 1);
+    auto actualReconnectorCell = actualData.getCellRef(1);
 
-    auto actualTargetCell = getCell(actualData, 3);
+    auto actualTargetCell = actualData.getCellRef(3);
 
     EXPECT_TRUE(actualReconnectorCell.signal.channels[0] > NEAR_ZERO);
     EXPECT_EQ(2, actualReconnectorCell.connections.size());
@@ -203,9 +203,9 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_success)
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
-    auto actualReconnectorCell = getCell(actualData, 1);
+    auto actualReconnectorCell = actualData.getCellRef(1);
 
-    auto actualTargetCell = getCell(actualData, 3);
+    auto actualTargetCell = actualData.getCellRef(3);
 
     EXPECT_TRUE(actualReconnectorCell.signal.channels[0] > NEAR_ZERO);
     EXPECT_EQ(2, actualReconnectorCell.connections.size());
@@ -243,8 +243,8 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_failed)
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
-    auto actualReconnectorCell = getCell(actualData, 1);
-    auto actualTargetCell = getCell(actualData, 3);
+    auto actualReconnectorCell = actualData.getCellRef(1);
+    auto actualTargetCell = actualData.getCellRef(3);
 
     EXPECT_TRUE(std::abs(actualReconnectorCell.signal.channels[0]) < NEAR_ZERO);
     EXPECT_EQ(1, actualReconnectorCell.connections.size());
@@ -280,8 +280,8 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_success)
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
-    auto actualReconnectorCell = getCell(actualData, 1);
-    auto actualTargetCell = getCell(actualData, 3);
+    auto actualReconnectorCell = actualData.getCellRef(1);
+    auto actualTargetCell = actualData.getCellRef(3);
 
     EXPECT_TRUE(actualReconnectorCell.signal.channels[0] > NEAR_ZERO);
     EXPECT_EQ(2, actualReconnectorCell.connections.size());
@@ -319,8 +319,8 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_zeroM
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
-    auto actualReconnectorCell = getCell(actualData, 1);
-    auto actualTargetCell = getCell(actualData, 3);
+    auto actualReconnectorCell = actualData.getCellRef(1);
+    auto actualTargetCell = actualData.getCellRef(3);
 
     EXPECT_TRUE(std::abs(actualReconnectorCell.signal.channels[0]) < NEAR_ZERO);
     EXPECT_EQ(1, actualReconnectorCell.connections.size());
@@ -356,8 +356,8 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_respa
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
-    auto actualReconnectorCell = getCell(actualData, 1);
-    auto actualTargetCell = getCell(actualData, 3);
+    auto actualReconnectorCell = actualData.getCellRef(1);
+    auto actualTargetCell = actualData.getCellRef(3);
 
     EXPECT_TRUE(std::abs(actualReconnectorCell.signal.channels[0]) < NEAR_ZERO);
     EXPECT_EQ(1, actualReconnectorCell.connections.size());
@@ -393,8 +393,8 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed_sameM
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
-    auto actualReconnectorCell = getCell(actualData, 1);
-    auto actualTargetCell = getCell(actualData, 3);
+    auto actualReconnectorCell = actualData.getCellRef(1);
+    auto actualTargetCell = actualData.getCellRef(3);
 
     EXPECT_TRUE(std::abs(actualReconnectorCell.signal.channels[0]) < NEAR_ZERO);
     EXPECT_EQ(1, actualReconnectorCell.connections.size());
@@ -430,8 +430,8 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_success)
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
-    auto actualReconnectorCell = getCell(actualData, 1);
-    auto actualTargetCell = getCell(actualData, 3);
+    auto actualReconnectorCell = actualData.getCellRef(1);
+    auto actualTargetCell = actualData.getCellRef(3);
 
     EXPECT_TRUE(actualReconnectorCell.signal.channels[0] > NEAR_ZERO);
     EXPECT_EQ(2, actualReconnectorCell.connections.size());
@@ -469,8 +469,8 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_failed)
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
-    auto actualReconnectorCell = getCell(actualData, 1);
-    auto actualTargetCell = getCell(actualData, 3);
+    auto actualReconnectorCell = actualData.getCellRef(1);
+    auto actualTargetCell = actualData.getCellRef(3);
 
     EXPECT_TRUE(std::abs(actualReconnectorCell.signal.channels[0]) < NEAR_ZERO);
     EXPECT_EQ(1, actualReconnectorCell.connections.size());
@@ -506,8 +506,8 @@ TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_success)
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
-    auto actualReconnectorCell = getCell(actualData, 1);
-    auto actualTargetCell = getCell(actualData, 3);
+    auto actualReconnectorCell = actualData.getCellRef(1);
+    auto actualTargetCell = actualData.getCellRef(3);
 
     EXPECT_TRUE(actualReconnectorCell.signal.channels[0] > NEAR_ZERO);
     EXPECT_EQ(2, actualReconnectorCell.connections.size());
@@ -545,8 +545,8 @@ TEST_F(ReconnectorTests, establishConnection_restrictToRespawned_failed)
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(3, actualData.cells.size());
 
-    auto actualReconnectorCell = getCell(actualData, 1);
-    auto actualTargetCell = getCell(actualData, 3);
+    auto actualReconnectorCell = actualData.getCellRef(1);
+    auto actualTargetCell = actualData.getCellRef(3);
 
     EXPECT_TRUE(std::abs(actualReconnectorCell.signal.channels[0]) < NEAR_ZERO);
     EXPECT_EQ(1, actualReconnectorCell.connections.size());
@@ -710,10 +710,10 @@ TEST_F(ReconnectorTests, deleteConnections_success)
     auto actualData = _simulationFacade->getSimulationData();
     ASSERT_EQ(4, actualData.cells.size());
 
-    auto actualReconnectorCell = getCell(actualData, 1);
+    auto actualReconnectorCell = actualData.getCellRef(1);
 
-    auto actualTargetCell1 = getCell(actualData, 3);
-    auto actualTargetCell2 = getCell(actualData, 4);
+    auto actualTargetCell1 = actualData.getCellRef(3);
+    auto actualTargetCell2 = actualData.getCellRef(4);
 
     EXPECT_TRUE(actualReconnectorCell.signal.channels[0] > NEAR_ZERO);
     EXPECT_EQ(1, actualReconnectorCell.connections.size());
