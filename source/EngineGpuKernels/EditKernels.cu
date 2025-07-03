@@ -49,11 +49,11 @@ __global__ void cudaChangeParticle(SimulationData data, CollectionTO changeDataT
     }
 }
 
-__global__ void cudaAddCreature(SimulationData data, CollectionTO dataTO, Creature** newGenome)
+__global__ void cudaAddCreature(SimulationData data, CollectionTO dataTO, Creature** newCreature)
 {
     ObjectFactory factory;
     factory.init(&data);
-    *newGenome = factory.createGenomeFromTO(dataTO, 0);
+    *newCreature = factory.createCreatureFromTO(dataTO, 0);
 }
 
 __global__ void cudaSetCreature(SimulationData data, Creature** newCreature, bool* result)

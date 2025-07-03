@@ -655,7 +655,7 @@ __global__ void cudaSetGenomeDataFromTO(SimulationData data, CollectionTO collec
 
     auto cellPartition = calcAllThreadsPartition(*collectionTO.numCreatures);
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
-        factory.createGenomeFromTO(collectionTO, index);
+        factory.createCreatureFromTO(collectionTO, index);
     }
 }
 
