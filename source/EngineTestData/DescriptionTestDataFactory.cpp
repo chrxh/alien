@@ -63,6 +63,12 @@ bool DescriptionTestDataFactory::compare(CollectionDescription left, CollectionD
     std::sort(right._particles.begin(), right._particles.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(left._creatures.begin(), left._creatures.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(right._creatures.begin(), right._creatures.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+    for (auto& creature : left._creatures) {
+        std::sort(creature._cells.begin(), creature._cells.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+    }
+    for (auto& creature : right._creatures) {
+        std::sort(creature._cells.begin(), creature._cells.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+    }
     return left == right;
 }
 
