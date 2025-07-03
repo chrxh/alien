@@ -52,12 +52,7 @@ std::unordered_map<uint64_t, CellDescription> IntegrationTestFramework::getCellB
 
 CellDescription IntegrationTestFramework::getCell(CollectionDescription const& data, uint64_t id) const
 {
-    for (auto const& cell : data._cells) {
-        if (cell._id == id) {
-            return cell;
-        }
-    }
-    THROW_NOT_IMPLEMENTED();
+    return data.getCellRef(id);
 }
 
 ConnectionDescription IntegrationTestFramework::getConnection(CollectionDescription const& data, uint64_t id, uint64_t otherId) const

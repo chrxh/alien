@@ -7,8 +7,52 @@
 
 #include "NumberGenerator.h"
 
+NeuralNetworkDescription::NeuralNetworkDescription()
+{
+    _weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
+    _biases.resize(MAX_CHANNELS, 0);
+    _activationFunctions.resize(MAX_CHANNELS, ActivationFunction_Identity);
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        _weights[i * MAX_CHANNELS + i] = 1.0f;
+    }
+}
+
+NeuralNetworkDescription& NeuralNetworkDescription::weight(int row, int col, float value)
+{
+    _weights[row * MAX_CHANNELS + col] = value;
+    return *this;
+}
+
 ConstructorDescription::ConstructorDescription()
 {
+}
+
+bool ConstructorDescription::isGenomeInherited() const
+{
+    return _numExpectedCells != 0;
+}
+
+SignalDescription::SignalDescription()
+{
+    _channels.resize(MAX_CHANNELS, 0);
+}
+
+MuscleMode MuscleDescription::getMode() const
+{
+    if (std::holds_alternative<AutoBendingDescription>(_mode)) {
+        return MuscleMode_AutoBending;
+    } else if (std::holds_alternative<ManualBendingDescription>(_mode)) {
+        return MuscleMode_ManualBending;
+    } else if (std::holds_alternative<AngleBendingDescription>(_mode)) {
+        return MuscleMode_AngleBending;
+    } else if (std::holds_alternative<AutoCrawlingDescription>(_mode)) {
+        return MuscleMode_AutoCrawling;
+    } else if (std::holds_alternative<ManualCrawlingDescription>(_mode)) {
+        return MuscleMode_ManualCrawling;
+    } else if (std::holds_alternative<DirectMovementDescription>(_mode)) {
+        return MuscleMode_DirectMovement;
+    }
+    THROW_NOT_IMPLEMENTED();
 }
 
 InjectorDescription::InjectorDescription()
@@ -57,6 +101,39 @@ CellType CellDescription::getCellType() const
 bool CellDescription::isConnectedTo(uint64_t id) const
 {
     return std::find_if(_connections.begin(), _connections.end(), [&id](auto const& connection) { return connection._cellId == id; }) != _connections.end();
+}
+
+CellDescription& CellDescription::signalAndRelaxTime(std::vector<float> const& value)
+{
+    CHECK(value.size() == MAX_CHANNELS);
+
+    SignalDescription newSignal;
+    newSignal._channels = value;
+    _signal = newSignal;
+    _signalRelaxationTime = MAX_SIGNAL_RELAXATION_TIME;
+    return *this;
+}
+
+CellDescription& CellDescription::signalRoutingRestriction(float baseAngle, float openingAngle)
+{
+    SignalRoutingRestrictionDescription routingRestriction;
+    routingRestriction._active = true;
+    routingRestriction._baseAngle = baseAngle;
+    routingRestriction._openingAngle = openingAngle;
+    _signalRoutingRestriction = routingRestriction;
+    return *this;
+}
+
+ClusterDescription& ClusterDescription::addCells(std::vector<CellDescription> const& value)
+{
+    _cells.insert(_cells.end(), value.begin(), value.end());
+    return *this;
+}
+
+ClusterDescription& ClusterDescription::addCell(CellDescription const& value)
+{
+    addCells({value});
+    return *this;
 }
 
 RealVector2D ClusterDescription::getClusterPosFromCells() const
@@ -271,34 +348,10 @@ CollectionDescription::addConnection(uint64_t const& cellId1, uint64_t const& ce
     return *this;
 }
 
-CellDescription& CollectionDescription::getCellRef(uint64_t const& cellId, CollectionCache const& cache)
+CellDescription const& CollectionDescription::getCellRef(uint64_t const& cellId, CollectionCache const& cache) const
 {
     if (cache != nullptr) {
-        _CollectionCache::Index index;
-        auto findResult = cache->cellIdToIndex.find(cellId);
-        if (findResult != cache->cellIdToIndex.end()) {
-            index = findResult->second;
-        } else {
-            auto found = false;
-            for (auto const& [creatureIndex, creature] : _creatures | boost::adaptors::indexed(0)) {
-                for (auto const& [cellIndex, cell] : creature._cells | boost::adaptors::indexed(0)) {
-                    index = _CollectionCache::Index{.creatureIndex = toInt(creatureIndex), .cellIndex = toInt(cellIndex)};
-                    found = true;
-                    break;
-                }
-                if (found) {
-                    break;
-                }
-            }
-            for (auto const& [cellIndex, cell] : _cells | boost::adaptors::indexed(0)) {
-                index = _CollectionCache::Index{.creatureIndex = std::nullopt, .cellIndex = toInt(cellIndex)};
-                found = true;
-                break;
-            }
-            if (!found) {
-                CHECK(false);
-            }
-        }
+        auto index = getCellIndex(cellId, cache);
         if (index.creatureIndex.has_value()) {
             return _creatures.at(index.creatureIndex.value())._cells.at(index.cellIndex);
         } else {
@@ -319,4 +372,60 @@ CellDescription& CollectionDescription::getCellRef(uint64_t const& cellId, Colle
         }
         return result;
     }
+}
+
+CellDescription& CollectionDescription::getCellRef(uint64_t const& cellId, CollectionCache const& cache)
+{
+    if (cache != nullptr) {
+        auto index = getCellIndex(cellId, cache);
+        if (index.creatureIndex.has_value()) {
+            return _creatures.at(index.creatureIndex.value())._cells.at(index.cellIndex);
+        } else {
+            return _cells.at(index.cellIndex);
+        }
+    } else {
+        static CellDescription dummy;
+        CellDescription& result = dummy;
+        auto found = false;
+        forEach([&](auto& cell) {
+            if (cell._id == cellId) {
+                result = cell;
+                found = true;
+            }
+        });
+        if (!found) {
+            CHECK(false);
+        }
+        return result;
+    }
+}
+
+_CollectionCache::Index CollectionDescription::getCellIndex(uint64_t const& cellId, CollectionCache const& cache) const
+{
+    _CollectionCache::Index result;
+    auto findResult = cache->cellIdToIndex.find(cellId);
+    if (findResult != cache->cellIdToIndex.end()) {
+        result = findResult->second;
+    } else {
+        auto found = false;
+        for (auto const& [creatureIndex, creature] : _creatures | boost::adaptors::indexed(0)) {
+            for (auto const& [cellIndex, cell] : creature._cells | boost::adaptors::indexed(0)) {
+                result = _CollectionCache::Index{.creatureIndex = toInt(creatureIndex), .cellIndex = toInt(cellIndex)};
+                found = true;
+                break;
+            }
+            if (found) {
+                break;
+            }
+        }
+        for (auto const& [cellIndex, cell] : _cells | boost::adaptors::indexed(0)) {
+            result = _CollectionCache::Index{.creatureIndex = std::nullopt, .cellIndex = toInt(cellIndex)};
+            found = true;
+            break;
+        }
+        if (!found) {
+            CHECK(false);
+        }
+    }
+    return result;
 }

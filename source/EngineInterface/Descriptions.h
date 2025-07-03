@@ -7,7 +7,6 @@
 
 #include "Base/Macros.h"
 #include "Base/Vector2D.h"
-#include "EngineInterface/EngineConstants.h"
 
 #include "Definitions.h"
 #include "GenomeDescription.h"
@@ -41,26 +40,14 @@ struct FreeCellDescription
 
 struct NeuralNetworkDescription
 {
-    NeuralNetworkDescription()
-    {
-        _weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
-        _biases.resize(MAX_CHANNELS, 0);
-        _activationFunctions.resize(MAX_CHANNELS, ActivationFunction_Identity);
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
-            _weights[i * MAX_CHANNELS + i] = 1.0f;
-        }
-    }
+    NeuralNetworkDescription();
     auto operator<=>(NeuralNetworkDescription const&) const = default;
 
     MEMBER(NeuralNetworkDescription, std::vector<float>, weights, {});
     MEMBER(NeuralNetworkDescription, std::vector<float>, biases, {});
     MEMBER(NeuralNetworkDescription, std::vector<ActivationFunction>, activationFunctions, {});
 
-    NeuralNetworkDescription& weight(int row, int col, float value)
-    {
-        _weights[row * MAX_CHANNELS + col] = value;
-        return *this;
-    }
+    NeuralNetworkDescription& weight(int row, int col, float value);
 };
 
 struct BaseDescription
@@ -96,7 +83,7 @@ struct ConstructorDescription
     MEMBER(ConstructorDescription, int, currentRepetition, 0);
     MEMBER(ConstructorDescription, int, currentBranch, 0);
 
-    bool isGenomeInherited() const { return _numExpectedCells != 0; }
+    bool isGenomeInherited() const;
 };
 
 struct SensorDescription
@@ -237,23 +224,7 @@ struct MuscleDescription
     MEMBER(MuscleDescription, float, lastMovementX, 0.0f);
     MEMBER(MuscleDescription, float, lastMovementY, 0.0f);
 
-    MuscleMode getMode() const
-    {
-        if (std::holds_alternative<AutoBendingDescription>(_mode)) {
-            return MuscleMode_AutoBending;
-        } else if (std::holds_alternative<ManualBendingDescription>(_mode)) {
-            return MuscleMode_ManualBending;
-        } else if (std::holds_alternative<AngleBendingDescription>(_mode)) {
-            return MuscleMode_AngleBending;
-        } else if (std::holds_alternative<AutoCrawlingDescription>(_mode)) {
-            return MuscleMode_AutoCrawling;
-        } else if (std::holds_alternative<ManualCrawlingDescription>(_mode)) {
-            return MuscleMode_ManualCrawling;
-        } else if (std::holds_alternative<DirectMovementDescription>(_mode)) {
-            return MuscleMode_DirectMovement;
-        }
-        THROW_NOT_IMPLEMENTED();
-    }
+    MuscleMode getMode() const;
 };
 
 struct DefenderDescription
@@ -305,7 +276,7 @@ struct SignalRoutingRestrictionDescription
 
 struct SignalDescription
 {
-    SignalDescription() { _channels.resize(MAX_CHANNELS, 0); }
+    SignalDescription();
     auto operator<=>(SignalDescription const&) const = default;
 
     MEMBER(SignalDescription, std::vector<float>, channels, {});
@@ -347,25 +318,8 @@ struct CellDescription
     MEMBER(CellDescription, CellMetadataDescription, metadata, CellMetadataDescription());
 
     CellType getCellType() const;
-    CellDescription& signalAndRelaxTime(std::vector<float> const& value)
-    {
-        CHECK(value.size() == MAX_CHANNELS);
-
-        SignalDescription newSignal;
-        newSignal._channels = value;
-        _signal = newSignal;
-        _signalRelaxationTime = MAX_SIGNAL_RELAXATION_TIME;
-        return *this;
-    }
-    CellDescription& signalRoutingRestriction(float baseAngle, float openingAngle)
-    {
-        SignalRoutingRestrictionDescription routingRestriction;
-        routingRestriction._active = true;
-        routingRestriction._baseAngle = baseAngle;
-        routingRestriction._openingAngle = openingAngle;
-        _signalRoutingRestriction = routingRestriction;
-        return *this;
-    }
+    CellDescription& signalAndRelaxTime(std::vector<float> const& value);
+    CellDescription& signalRoutingRestriction(float baseAngle, float openingAngle);
 
     bool isConnectedTo(uint64_t id) const;
 };
@@ -377,16 +331,8 @@ struct ClusterDescription
 
     MEMBER(ClusterDescription, std::vector<CellDescription>, cells, {});
 
-    ClusterDescription& addCells(std::vector<CellDescription> const& value)
-    {
-        _cells.insert(_cells.end(), value.begin(), value.end());
-        return *this;
-    }
-    ClusterDescription& addCell(CellDescription const& value)
-    {
-        addCells({value});
-        return *this;
-    }
+    ClusterDescription& addCells(std::vector<CellDescription> const& value);
+    ClusterDescription& addCell(CellDescription const& value);
 
     RealVector2D getClusterPosFromCells() const;
 };
@@ -453,7 +399,11 @@ struct CollectionDescription
     CollectionCache createCache() const;
     CollectionDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, CollectionCache const& cache = nullptr);
     CollectionDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, RealVector2D const& refPosCell2, CollectionCache const& cache = nullptr);
+    CellDescription const& getCellRef(uint64_t const& cellId, CollectionCache const& cache = nullptr) const;
     CellDescription& getCellRef(uint64_t const& cellId, CollectionCache const& cache = nullptr);
+
+private:
+    _CollectionCache::Index getCellIndex(uint64_t const& cellId, CollectionCache const& cache) const;
 };
 
 struct ExtendedCellDescription

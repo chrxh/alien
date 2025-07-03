@@ -28,6 +28,7 @@ public:
     struct CreateHexParameters
     {
         MEMBER(CreateHexParameters, int, layers, 10);
+        MEMBER(CreateHexParameters, CellTypeDescription, cellType, StructureCellDescription());
         MEMBER(CreateHexParameters, float, cellDistance, 1.0f);
         MEMBER(CreateHexParameters, float, energy, 100.0f);
         MEMBER(CreateHexParameters, float, stiffness, 1.0f);

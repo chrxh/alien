@@ -2,6 +2,22 @@
 
 #include "NumberGenerator.h"
 
+NeuralNetworkGenomeDescription::NeuralNetworkGenomeDescription()
+{
+    _weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
+    _biases.resize(MAX_CHANNELS, 0);
+    _activationFunctions.resize(MAX_CHANNELS, ActivationFunction_Identity);
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        _weights[i * MAX_CHANNELS + i] = 1.0f;
+    }
+}
+
+NeuralNetworkGenomeDescription& NeuralNetworkGenomeDescription::weight(int row, int col, float value)
+{
+    _weights[row * MAX_CHANNELS + col] = value;
+    return *this;
+}
+
 MuscleMode MuscleGenomeDescription::getMode() const
 {
     if (std::holds_alternative<AutoBendingGenomeDescription>(_mode)) {

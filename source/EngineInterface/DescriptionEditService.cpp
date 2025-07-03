@@ -46,7 +46,8 @@ CollectionDescription DescriptionEditService::createHex(CreateHexParameters cons
                                .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
                                .color(parameters._color)
                                .barrier(parameters._barrier)
-                               .sticky(parameters._sticky));
+                               .sticky(parameters._sticky)
+                               .cellTypeData(parameters._cellType));
 
             //create cell: under layer (except for 0-layer)
             if (j > 0) {

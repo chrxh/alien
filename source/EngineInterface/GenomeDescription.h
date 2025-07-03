@@ -15,22 +15,10 @@ struct BaseGenomeDescription;
 
 struct NeuralNetworkGenomeDescription
 {
-    NeuralNetworkGenomeDescription()
-    {
-        _weights.resize(MAX_CHANNELS * MAX_CHANNELS, 0);
-        _biases.resize(MAX_CHANNELS, 0);
-        _activationFunctions.resize(MAX_CHANNELS, ActivationFunction_Identity);
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
-            _weights[i * MAX_CHANNELS + i] = 1.0f;
-        }
-    }
+    NeuralNetworkGenomeDescription();
     auto operator<=>(NeuralNetworkGenomeDescription const&) const = default;
 
-    NeuralNetworkGenomeDescription& weight(int row, int col, float value)
-    {
-        _weights[row * MAX_CHANNELS + col] = value;
-        return *this;
-    }
+    NeuralNetworkGenomeDescription& weight(int row, int col, float value);
 
     MEMBER(NeuralNetworkGenomeDescription, std::vector<float>, weights, {});
     MEMBER(NeuralNetworkGenomeDescription, std::vector<float>, biases, {});

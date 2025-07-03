@@ -43,7 +43,7 @@ TEST_F(DescriptionEditTests, correctConnections)
 
     auto data = _simulationFacade->getSimulationData();
 
-    DescriptionEditService::get().correctConnectionsForNonCreatures(data, {100, 100});
+    DescriptionEditService::get().duplicate(data, {100, 100}, {100, 100});
 
     EXPECT_TRUE(areAngelsCorrect(data));
 }
@@ -107,26 +107,4 @@ TEST_F(DescriptionEditTests, addThirdConnection2)
     auto connection3 = cell._connections.at(2);
     EXPECT_TRUE(approxCompare(1.0f, connection3._distance));
     EXPECT_TRUE(approxCompare(90.0f, connection3._angleFromPrevious));
-}
-
-TEST_F(DescriptionEditTests, calcCluster)
-{
-    CollectionDescription data;
-    auto expectedClusterSize = 0;
-    for (int i = 0; i < 1000; ++i) {
-        auto hex = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().layers(10));
-        expectedClusterSize = hex._cells.size();
-        data.add(hex);
-    }
-    data.addParticle(ParticleDescription());
-    data.addCreature(GenomeDescription());
-
-    ClusteredCollectionDescription clusteredData(data);
-    
-    EXPECT_EQ(1000, clusteredData._clusters.size());
-    for (auto const& cluster : clusteredData._clusters) {
-        EXPECT_EQ(expectedClusterSize, cluster._cells.size());
-    }
-    EXPECT_EQ(1, clusteredData._particles.size());
-    EXPECT_EQ(1, clusteredData._creatures.size());
 }
